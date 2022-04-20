@@ -20,6 +20,18 @@ To package apps for the local platform:
 npm run package
 ```
 
+## Core services
+
+### Context
+
+### Voice
+
+### Video
+
+### Spaces
+
+### Apps
+
 ## Links
 
 - https://github.com/minbrowser
