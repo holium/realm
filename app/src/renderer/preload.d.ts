@@ -1,3 +1,6 @@
+import { ShipManagerType } from '../core/ship/manager';
+import { AuthManagerType } from '../core/auth/manager';
+
 export interface IElectronAPI {
   auth: (ship: string, url: string, code: string) => Promise<any>;
 }
@@ -5,11 +8,8 @@ export interface IElectronAPI {
 declare global {
   interface Window {
     electron: {
-      auth: {
-        addShip: (ship: string, url: string, code: string) => Promise<any>;
-        removeShip: (ship: string) => Promise<any>;
-        getShips: () => Promise<any>;
-      };
+      auth: AuthManagerType;
+      ship: ShipManagerType;
       ipcRenderer: {
         myPing(): void;
         on(

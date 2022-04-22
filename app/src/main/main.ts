@@ -101,6 +101,9 @@ const createWindow = async () => {
     },
   });
 
+  // Start core services
+  authStart(mainWindow!);
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.maximize();
   mainWindow.on('ready-to-show', () => {
@@ -132,8 +135,6 @@ const createWindow = async () => {
   new AppUpdater();
 };
 
-// Start core services
-authStart();
 // start();
 
 /**

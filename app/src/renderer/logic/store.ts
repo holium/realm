@@ -2,11 +2,12 @@ import { createContext, useContext } from 'react';
 import { Instance, onSnapshot, types } from 'mobx-state-tree';
 import { ShipStore } from './stores/ship';
 import { ConfigStore } from './stores/config';
-// import { toJS } from 'mobx';
+import { AuthStore } from './stores/auth';
 
 const OSStore = types.model('OSStore', {
   shipStore: ShipStore,
   configStore: ConfigStore,
+  authStore: AuthStore,
   contextStore: types.map(
     types.model({
       path: types.string,
@@ -15,19 +16,35 @@ const OSStore = types.model('OSStore', {
   ),
 });
 
+window.electron.ship.onEffect((_event: any, value: any) => {
+  if (value.response === 'diff') {
+    console.log('got effect data => ', value.json);
+  }
+});
+
 function loadStoreSnapshot(storeName: string) {
   const rootState = localStorage.getItem('osState');
   if (rootState) {
     const storeData = JSON.parse(rootState)[storeName];
-    console.log(storeData);
     return storeData;
   }
   return null;
 }
 
 const initialState = OSStore.create({
+  authStore: {
+    currentStep: 'add-ship',
+    newShip: {
+      patp: '~labdex-dillyx-lomder-librun',
+      url: 'https://test-moon-1.holium.network',
+      loader: { state: 'initial' },
+      status: { state: 'authenticated' },
+    },
+    loader: { state: 'initial' },
+    installer: { state: 'initial' },
+  },
   configStore: loadStoreSnapshot('configStore') || {
-    firstTime: false,
+    firstTime: true,
     theme: 'light',
   },
   shipStore: loadStoreSnapshot('shipStore') || {},

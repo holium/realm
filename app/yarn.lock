@@ -1070,6 +1070,11 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.51.tgz#cfd70924a25a3fd32b218e5e420e6897e1ac4f40"
   integrity sha512-CuPgU6f3eT/XgKKPqKd/gLZV1Xmvf1a2R5POBOGQa6uv82xpls89HU5zKeVoyR8XzHd1RGNOlQlvUe3CFkjWNQ==
 
+"@types/eventsource@^1.1.8":
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@types/eventsource/-/eventsource-1.1.8.tgz#48ae1f3aaf9bb84c713038f354112cc7ceaad519"
+  integrity sha512-fJQNt9LijJCZwYvM6O30uLzdpAK9zs52Uc9iUW9M2Zsg0HQM6DLf6QysjC/wuFX+0798B8AppVMvgdO6IftPKQ==
+
 "@types/express-serve-static-core@*", "@types/express-serve-static-core@^4.17.18":
   version "4.17.28"
   resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.17.28.tgz#c47def9f34ec81dc6328d0b1b5303d1ec98d86b8"
@@ -4294,6 +4299,11 @@ events@^3.2.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
+eventsource@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-2.0.0.tgz#c2255b7ff8ed237ca5e08f8b48fc6abff83daed9"
+  integrity sha512-U9TI2qLWwedwiDLCbSUoSAPHGK2P7nT6/f25wBzMy9tWOKgFoNY4n+GYCPCYg3sGKrIoCmpChJoO3KKymcLo8A==
 
 execa@^5.0.0, execa@^5.1.1:
   version "5.1.1"

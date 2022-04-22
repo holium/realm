@@ -19,7 +19,9 @@ import {
 import { AddShip } from './add-ship';
 import { ConnectingShip } from './connecting';
 import { useMst } from '../../../../logic/store';
-import UrbitSVG from '../../../../../../assets/urbit.svg';
+import ProfileSetup from './step-profile';
+import StepPassword from './step-password';
+import StepInstall from './step-install';
 
 export const createShipForm = (
   defaults: any = {
@@ -87,8 +89,10 @@ type LoginProps = {
 
 export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
   const { goToLogin } = props;
-  const { shipStore } = useMst();
-  const [step, setStep] = useState(0);
+  const { shipStore, authStore } = useMst();
+  const [step, setStep] = useState(
+    authStore.steps.indexOf(authStore.currentStep)
+  );
 
   const { shipForm, urbitId, shipUrl, accessKey } = useMemo(
     () => createShipForm(),
@@ -104,14 +108,39 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
     }
   };
   const isNextDisabled =
-    (step === 0 && !shipForm.computed.isValid) || step === 2;
+    (step === 0 && !shipForm.computed.isValid) ||
+    step === authStore.steps.length;
   const next = () => {
     if (!isNextDisabled) {
-      goToLogin(); // TODO remove this when I finish the flow
-      // setStep(step + 1);
+      // goToLogin(); // TODO remove this when I finish the flow
+      if (step !== authStore.steps.length - 1) setStep(step + 1);
+    } else {
     }
   };
-
+  const cardSizes = {
+    '0': {
+      width: 560,
+      height: 300,
+    },
+    '1': {
+      width: 560,
+      height: 300,
+    },
+    '2': {
+      width: 560,
+      height: 360,
+    },
+    '3': {
+      width: 560,
+      height: 280,
+    },
+    '4': {
+      width: 560,
+      height: 340,
+    },
+  };
+  // @ts-expect-error why
+  const { width, height } = cardSizes[step.toString()!];
   return (
     <AnimatePresence>
       <motion.div
@@ -126,43 +155,24 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
           pl={12}
           pr={24}
           pb={50}
-          width={560}
-          height={300}
-          // height="inherit"
+          width={width}
+          height={height}
           position="relative"
         >
-          <Grid.Row expand noGutter>
-            <Grid.Column
-              noGutter
-              expand
-              mt={2}
-              lg={5}
-              xl={5}
-              align="center"
-              justify="center"
-            >
-              <img src={UrbitSVG} alt="urbit logo" />
-              <ActionButton
-                tabIndex={-1}
-                mt={5}
-                height={32}
-                rightContent={<Icons ml={2} size={1} name="ArrowRightLine" />}
-              >
-                Get Urbit ID
-              </ActionButton>
-            </Grid.Column>
-            {step === 0 && (
-              // eslint-disable-next-line jsx-a11y/no-access-key
-              <AddShip
-                hasShips={shipStore.hasShips}
-                urbitId={urbitId}
-                shipUrl={shipUrl}
-                accessKey={accessKey}
-              />
-            )}
-            {step === 1 && <ConnectingShip />}
-            {step === 2 && <div>Step 2</div>}
-          </Grid.Row>
+          {step === 0 && (
+            // eslint-disable-next-line jsx-a11y/no-access-key
+            <AddShip
+              hasShips={shipStore.hasShips}
+              urbitId={urbitId}
+              shipUrl={shipUrl}
+              accessKey={accessKey}
+            />
+          )}
+          {step === 1 && <ConnectingShip />}
+          {step === 2 && <ProfileSetup />}
+          {step === 3 && <StepPassword />}
+          {step === 4 && <StepInstall />}
+
           <Box position="absolute" height={40} bottom={20} left={20} right={24}>
             <Flex
               mt={5}

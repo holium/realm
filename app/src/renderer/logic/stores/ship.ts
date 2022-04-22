@@ -76,6 +76,7 @@ export const ShipModel = types
   .actions((self) => ({
     login(password: string) {
       console.log('use password to decrypt all stores and load context state');
+      // window.electron
       self.loggedIn = true;
     },
     logout() {
@@ -134,21 +135,31 @@ export const ShipStore = types
     setOrder(newOrder: any) {
       self.order = newOrder;
     },
-    // login: flow(function* (ship: string, password: string) {
-    //   const loggedIn = yield () => true;
-    //   self.loggedIn = loggedIn;
+    login: flow(function* (ship: string, password: string) {
+      try {
+        const [response, error] = yield Urbit.login(ship, password);
+        if (error) throw error;
+        console.log('login', response);
+        self.loader.set('loaded');
+        const session = self.ships.get(ship);
+        if (session?.patp !== ship) {
+          self.session = session;
+        }
+        self.session!.login(password);
+        setFirstTime();
+      } catch (err: any) {
+        self.loader.error(err);
+      }
+    }),
+    // login: (ship: string, password: string) => {
+    // const session = self.ships.get(ship);
+    // if (session?.patp !== ship) {
+    //   self.session = session;
+    // }
+    // self.session!.login(password);
     //   //
     //   // return null;
-    // }),
-    login: (ship: string, password: string) => {
-      const session = self.ships.get(ship);
-      if (session?.patp !== ship) {
-        self.session = session;
-      }
-      self.session!.login(password);
-      //
-      // return null;
-    },
+    // },
     logout: () => {
       self.session!.logout();
       // self.session = undefined;

@@ -15,6 +15,7 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
   const { configStore } = useMst();
   const { textTheme, hasWallpaper } = props;
   const [signup, setSignup] = useState(configStore.firstTime);
+  // const [signup, setSignup] = useState(true);
 
   return (
     <Flex height="100vh" alignItems="center" justifyContent="center">

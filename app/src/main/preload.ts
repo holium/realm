@@ -1,9 +1,12 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { preload as authPreload } from '../core/auth/manager/auth-helper';
+import { preload as authPreload } from '../core/auth/manager';
+import { preload as shipPreload } from '../core/ship/manager';
+
 // import AuthManager from '../core/auth/manager';
 
 contextBridge.exposeInMainWorld('electron', {
   auth: authPreload,
+  ship: shipPreload,
   ipcRenderer: {
     myPing() {
       ipcRenderer.send('ipc-example', 'ping');
