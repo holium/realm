@@ -13,12 +13,8 @@ export const HomeButton: FC<HomeButton> = (props: HomeButton) => {
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
-  const rotateX = useTransform(y, [0, 400], [45, -45]);
-  const rotateY = useTransform(x, [0, 400], [-45, 45]);
-
   function handleMouse(event: any) {
     const rect = event.currentTarget.getBoundingClientRect();
-
     x.set(event.clientX - rect.left);
     y.set(event.clientY - rect.top);
   }

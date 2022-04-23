@@ -5,6 +5,7 @@ import { Flex, Icons, Sigil } from '../../../../../components';
 import { SystemBarStyle } from './SystemBar.styles';
 import { HomeButton } from './components/HomeButton';
 import { ShipTray } from './components/ShipBar';
+import { CommunityBar } from './components/CommunityBar';
 
 export const SystemBar: FC = () => {
   const { shipStore } = useMst();
@@ -19,10 +20,7 @@ export const SystemBar: FC = () => {
   return (
     <Flex gap={8} margin="8px" flexDirection="row">
       <HomeButton theme={theme} />
-      <SystemBarStyle
-        width="100%"
-        customBg={theme.backgroundColor}
-      ></SystemBarStyle>
+      <CommunityBar theme={theme} />
       <ShipTray theme={theme} ship={ship} />
     </Flex>
   );

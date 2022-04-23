@@ -41,35 +41,17 @@ export const TrayMenu = (props: TrayMenuProps) => {
   const [isVisible, setIsVisible] = useState(false);
   let body = content;
 
-  const menuAnimate = {
-    enter: {
-      opacity: 1,
-      y: 0,
-      width: dimensions.width,
-      height: dimensions.height,
-      transition: {
-        duration: 0.2,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: 8,
-      height: dimensions.height,
-      width: dimensions.width,
-      transition: {
-        duration: 0.2,
-      },
-    },
-  };
-
   const handleClickOutside = (event: any) => {
-    const trayNode = ReactDOM.findDOMNode(trayMenuRef.current);
-    // if we clicked the button
     if (`${id}-icon` === event.target.id) {
-      // if(trayNode.get)
-      setIsVisible(true);
+      // if we clicked the button
+      const trayNode = document.getElementById(id);
+      const isVisible = trayNode
+        ? trayNode!.getAttribute('data-visible') === 'true'
+        : false; // get if the tray is visible currently
+      setIsVisible(!isVisible);
     } else {
       // if we are clicking in the app area
+      const trayNode = ReactDOM.findDOMNode(trayMenuRef.current);
       if (`${id}-app` === event.target.id) {
         return;
       }
@@ -109,7 +91,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
   return (
     <TrayMenuWrapper
       id={`${id}`}
-      data-is-visible={isVisible}
+      data-visible={isVisible}
       ref={trayMenuRef}
       style={style}
     >
@@ -119,11 +101,31 @@ export const TrayMenu = (props: TrayMenuProps) => {
             <Wrapper
               key={`${id}-trayMenu`}
               style={coords}
-              {...props}
-              initial="exit"
-              animate={isVisible ? 'enter' : 'exit'}
-              exit="exit"
-              variants={menuAnimate}
+              initial={{
+                opacity: 0,
+                y: 8,
+                width: dimensions.width,
+                height: dimensions.height,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                width: dimensions.width,
+                height: dimensions.height,
+                transition: {
+                  duration: 0.2,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                y: 0,
+                height: dimensions.height / 2,
+                width: dimensions.width,
+                transition: {
+                  duration: 0.2,
+                },
+              }}
+              // variants={menuAnimate}
             >
               <motion.div style={coords}>{body}</motion.div>
             </Wrapper>

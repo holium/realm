@@ -49,8 +49,8 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   }, [bgImage]);
 
   const hasWallpaper = bgImage ? true : false;
-  // const loggedIn = true; // shipStore.session?.loggedIn;
-  const loggedIn = shipStore.session?.loggedIn;
+  const loggedIn = true; // shipStore.session?.loggedIn;
+  // const loggedIn = shipStore.session?.loggedIn;
 
   return (
     <ViewPort>

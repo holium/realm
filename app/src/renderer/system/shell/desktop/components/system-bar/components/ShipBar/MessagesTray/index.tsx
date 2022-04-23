@@ -38,6 +38,7 @@ export const MessagesTray: FC<MessagesTrayProps> = (
         ref={messagesButtonRef}
         size={28}
         customBg={backgroundColor}
+        // data-selected
         color={textColor}
         whileTap={{ scale: 0.9 }}
         transition={{ scale: 0.1 }}
