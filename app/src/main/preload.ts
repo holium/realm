@@ -1,12 +1,13 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { preload as authPreload } from '../core/auth/manager';
-import { preload as shipPreload } from '../core/ship/manager';
-
+import { AuthManager } from '../core/auth/manager';
+import { ShipManager } from '../core/ship/manager';
+import { RealmCore } from '../core';
 // import AuthManager from '../core/auth/manager';
 
 contextBridge.exposeInMainWorld('electron', {
-  auth: authPreload,
-  ship: shipPreload,
+  auth: AuthManager.preload,
+  ship: ShipManager.preload,
+  core: RealmCore.preload,
   ipcRenderer: {
     myPing() {
       ipcRenderer.send('ipc-example', 'ping');

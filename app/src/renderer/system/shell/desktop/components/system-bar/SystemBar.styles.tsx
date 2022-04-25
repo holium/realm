@@ -37,7 +37,9 @@ export const SystemBarStyle = styled(styled(motion.div)<SystemBarStyleProps>`
   z-index: 3;
   height: 42px;
   backdrop-filter: blur(12px);
-
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   border-radius: 6px;
 `)<SystemBarStyleProps>(
   {

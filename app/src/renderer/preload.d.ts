@@ -1,15 +1,12 @@
-import { ShipManagerType } from '../core/ship/manager';
-import { AuthManagerType } from '../core/auth/manager';
-
-export interface IElectronAPI {
-  auth: (ship: string, url: string, code: string) => Promise<any>;
-}
-
+import { RealmCorePreloadType } from './../core';
+import { ShipPreloadType } from '../core/ship/manager';
+import { AuthPreloadType } from '../core/auth/manager';
 declare global {
   interface Window {
     electron: {
-      auth: AuthManagerType;
-      ship: ShipManagerType;
+      auth: AuthPreloadType;
+      ship: ShipPreloadType;
+      core: RealmCorePreloadType;
       ipcRenderer: {
         myPing(): void;
         on(

@@ -141,7 +141,7 @@ export const theme = {
         blendedBg: rgba('#FFFFFF', 0.4),
         inset: '#f6f8fa',
         toolbar: '#F1F3F4',
-        divider: '#E6E6E6',
+        divider: '#DBDBDB',
       },
       icon: {
         app: '#85898E',

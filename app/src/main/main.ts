@@ -15,7 +15,8 @@ import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { start as authStart } from '../core/auth/manager';
+// import { start as authStart } from '.,./core/auth/manager';
+import { RealmCore } from '../core';
 // import { start as authStart } from '../core/auth/manager/auth-helper';
 
 export default class AppUpdater {
@@ -101,8 +102,10 @@ const createWindow = async () => {
     },
   });
 
-  // Start core services
-  authStart(mainWindow!);
+  // ---------------------------------------------------------------------
+  // ----------------------- Start Realm services ------------------------
+  // ---------------------------------------------------------------------
+  RealmCore.boot(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.maximize();

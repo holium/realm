@@ -5,6 +5,7 @@ import { setFirstTime } from '../store';
 import { WindowThemeModel, WindowThemeType } from './config';
 
 import Urbit from '../api/urbit';
+import { getApps } from '../app/api';
 
 type ShipInfoType = {
   url: string;
@@ -139,7 +140,6 @@ export const ShipStore = types
       try {
         const [response, error] = yield Urbit.login(ship, password);
         if (error) throw error;
-        console.log('login', response);
         self.loader.set('loaded');
         const session = self.ships.get(ship);
         if (session?.patp !== ship) {
@@ -151,6 +151,7 @@ export const ShipStore = types
         self.loader.error(err);
       }
     }),
+
     // login: (ship: string, password: string) => {
     // const session = self.ships.get(ship);
     // if (session?.patp !== ship) {
@@ -160,10 +161,12 @@ export const ShipStore = types
     //   //
     //   // return null;
     // },
-    logout: () => {
+    logout: flow(function* () {
+      const [response, error] = yield Urbit.logout();
+      if (error) throw error;
       self.session!.logout();
       // self.session = undefined;
-    },
+    }),
     addShip: flow(function* (payload: {
       ship: string;
       url: string;

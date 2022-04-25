@@ -35,7 +35,6 @@ export const AuthStore = types
     ]),
     currentStep: StepList,
     newShip: ShipModel,
-
     // profile: t
     installer: LoaderModel,
     loader: LoaderModel,

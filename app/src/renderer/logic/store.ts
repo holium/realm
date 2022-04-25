@@ -3,22 +3,26 @@ import { Instance, onSnapshot, types } from 'mobx-state-tree';
 import { ShipStore } from './stores/ship';
 import { ConfigStore } from './stores/config';
 import { AuthStore } from './stores/auth';
+import { SpaceStore } from './space/store';
 
 const OSStore = types.model('OSStore', {
   shipStore: ShipStore,
   configStore: ConfigStore,
   authStore: AuthStore,
-  contextStore: types.map(
-    types.model({
-      path: types.string,
-      name: types.string,
-    })
-  ),
+  spaceStore: SpaceStore,
 });
 
 window.electron.ship.onEffect((_event: any, value: any) => {
   if (value.response === 'diff') {
     console.log('got effect data => ', value.json);
+  }
+  if (value.response === 'scry') {
+    // if(value.app)
+    const { json } = value;
+    if (json.app === 'docket') {
+      osStore.spaceStore.onScry(json);
+    }
+    console.log('got scry response => ', value);
   }
 });
 
@@ -48,6 +52,7 @@ const initialState = OSStore.create({
     theme: 'light',
   },
   shipStore: loadStoreSnapshot('shipStore') || {},
+  spaceStore: loadStoreSnapshot('spaceStore') || { apps: [], pinned: [] },
 });
 
 export const osStore = initialState;

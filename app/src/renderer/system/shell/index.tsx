@@ -19,7 +19,7 @@ type ShellProps = {
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   const { isFullscreen } = props;
-  const { shipStore } = useMst();
+  const { shipStore, spaceStore } = useMst();
 
   const bgImage = useMemo(
     () => shipStore.session?.wallpaper || 'https://source.unsplash.com/random',
@@ -28,6 +28,7 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 
   useEffect(() => {
     shipStore.getShips();
+    spaceStore.initialize();
   }, []);
 
   useEffect(() => {
@@ -49,8 +50,8 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   }, [bgImage]);
 
   const hasWallpaper = bgImage ? true : false;
-  const loggedIn = true; // shipStore.session?.loggedIn;
-  // const loggedIn = shipStore.session?.loggedIn;
+  // const loggedIn = true; // shipStore.session?.loggedIn;
+  const loggedIn = shipStore.session?.loggedIn;
 
   return (
     <ViewPort>
