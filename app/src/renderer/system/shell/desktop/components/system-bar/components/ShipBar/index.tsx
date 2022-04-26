@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { SystemBarStyle } from '../../SystemBar.styles';
 import { Flex, IconButton, Icons } from '../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../logic/stores/config';
-import { ShipModelType } from '../../../../../../../logic/stores/ship';
+import { ShipModelType } from '../../../../../../../logic/ship/store';
 import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';

@@ -28,7 +28,6 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 
   useEffect(() => {
     shipStore.getShips();
-    spaceStore.initialize();
   }, []);
 
   useEffect(() => {
@@ -51,7 +50,8 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 
   const hasWallpaper = bgImage ? true : false;
   // const loggedIn = true; // shipStore.session?.loggedIn;
-  const loggedIn = shipStore.session?.loggedIn;
+
+  const loggedIn = shipStore.session?.loggedIn && !shipStore.isLoading;
 
   return (
     <ViewPort>

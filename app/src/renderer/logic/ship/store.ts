@@ -1,11 +1,13 @@
+import { osStore } from '../store';
 /* eslint-disable func-names */
 import { types, flow, Instance, tryReference } from 'mobx-state-tree';
-import { LoaderModel } from './common/loader';
+import { LoaderModel } from '../stores/common/loader';
 import { setFirstTime } from '../store';
-import { WindowThemeModel, WindowThemeType } from './config';
+import { WindowThemeModel, WindowThemeType } from '../stores/config';
 
 import Urbit from '../api/urbit';
-import { getApps } from '../app/api';
+import { getApps } from '../space/app/api';
+import { ChatStore } from './chat/store';
 
 type ShipInfoType = {
   url: string;
@@ -73,6 +75,7 @@ export const ShipModel = types
     }),
     loggedIn: types.optional(types.boolean, false),
     wallpaper: types.maybeNull(types.string),
+    chat: types.optional(ChatStore, { loader: { state: 'initial' } }),
   })
   .actions((self) => ({
     login(password: string) {

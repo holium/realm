@@ -11,10 +11,21 @@ import { Portal } from '../../../../../modals/Portal';
 export type TrayMenuProps = {
   id: string;
   buttonRef: any;
+  appRef: any;
   style?: any;
   content?: React.ReactNode | string;
   children: React.ReactNode;
-  position?: any;
+  buttonOffset?: {
+    x?: number;
+    y?: number;
+  };
+  position?:
+    | 'top-right'
+    | 'top-left'
+    | 'top'
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'bottom';
   dimensions: {
     height: number;
     width: number;
@@ -32,13 +43,25 @@ export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
 `)(compose(space, color, typography));
 
 export const TrayMenu = (props: TrayMenuProps) => {
-  const { id, buttonRef, style, content, dimensions, children } = props;
+  const {
+    id,
+    appRef,
+    buttonRef,
+    buttonOffset,
+    style,
+    content,
+    position,
+    dimensions,
+    children,
+  } = props;
   let trayMenuRef = useRef<HTMLDivElement>(null);
   const [coords, setCoords] = useState<{
     left: number;
     bottom: number;
   }>({ left: 0, bottom: 48 });
   const [isVisible, setIsVisible] = useState(false);
+
+  const anchorOffset = { x: 8, y: 14, ...buttonOffset };
   let body = content;
 
   const handleClickOutside = (event: any) => {
@@ -51,13 +74,17 @@ export const TrayMenu = (props: TrayMenuProps) => {
       setIsVisible(!isVisible);
     } else {
       // if we are clicking in the app area
-      const trayNode = ReactDOM.findDOMNode(trayMenuRef.current);
+      if (appRef && appRef.current && appRef.current.contains(event.target)) {
+        return;
+      }
       if (`${id}-app` === event.target.id) {
         return;
       }
-      if (trayNode && !trayNode?.contains(event.target)) {
-        setIsVisible(false);
-      }
+      setIsVisible(false);
+      // const trayNode = ReactDOM.findDOMNode(trayMenuRef.current);
+      // if (trayNode && !trayNode?.contains(event.target)) {
+      //   setIsVisible(false);
+      // }
     }
   };
 
@@ -70,18 +97,27 @@ export const TrayMenu = (props: TrayMenuProps) => {
 
   const calculateAnchorPoint = (event: any) => {
     const buttonEvent = event.nativeEvent;
-    let left =
-      event.clientX -
-      dimensions.width -
-      buttonEvent.offsetX +
-      buttonEvent.srcElement.offsetWidth +
-      8;
+    let style = {};
 
-    let bottom = event.screenY - event.clientY + 15;
-    return {
-      left,
-      bottom,
-    };
+    let left = null;
+    if (position?.includes('-left')) {
+      left =
+        event.clientX -
+        dimensions.width -
+        buttonEvent.offsetX +
+        buttonEvent.srcElement.offsetWidth +
+        anchorOffset.x;
+      style = { ...style, left };
+    }
+    // let right = null;
+    if (position?.includes('-right')) {
+      left = event.clientX - buttonEvent.offsetX - anchorOffset.x;
+      style = { ...style, left };
+    }
+
+    let bottom = event.screenY - event.clientY + anchorOffset.y;
+    style = { ...style, bottom };
+    return style;
   };
 
   const setAnchor = ({ left, bottom }: any) => {
@@ -147,4 +183,6 @@ export const TrayMenu = (props: TrayMenuProps) => {
   );
 };
 
-TrayMenu.defaultProps = {};
+TrayMenu.defaultProps = {
+  position: 'top-left',
+};

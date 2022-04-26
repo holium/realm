@@ -2,7 +2,6 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { AuthManager } from '../core/auth/manager';
 import { ShipManager } from '../core/ship/manager';
 import { RealmCore } from '../core';
-// import AuthManager from '../core/auth/manager';
 
 contextBridge.exposeInMainWorld('electron', {
   auth: AuthManager.preload,

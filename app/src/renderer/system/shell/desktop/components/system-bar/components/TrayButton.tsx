@@ -16,6 +16,7 @@ import { darken } from 'polished';
 import { ThemeType } from '../../../../../../theme';
 
 type IProps = {
+  ref?: unknown;
   customBg?: string;
   theme: ThemeType;
 } & SizeProps &
@@ -36,6 +37,7 @@ export const TrayButton = styled(styled(motion.div)`
   user-select: none;
   gap: 8px;
   cursor: pointer;
+  pointer-events: auto;
   transition: ${(props: IProps) => props.theme.transition};
   ${(props: IProps) =>
     props.customBg &&

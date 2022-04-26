@@ -2,7 +2,7 @@ import { FC, createRef } from 'react';
 import { motion } from 'framer-motion';
 import { Icons, MenuItem, Sigil } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
-import { ShipModelType } from '../../../../../../../../logic/stores/ship';
+import { ShipModelType } from '../../../../../../../../logic/ship/store';
 
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
@@ -18,6 +18,8 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
   const { shipStore } = useMst();
   const { backgroundColor, textColor } = props.theme;
   const accountButtonRef = createRef<HTMLButtonElement>();
+  const appRef = createRef<HTMLDivElement>();
+
   const dimensions = {
     height: 56,
     width: 230,
@@ -26,11 +28,13 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
   return (
     <TrayMenu
       id="account-tray"
+      appRef={appRef}
       buttonRef={accountButtonRef}
       dimensions={dimensions}
       content={
         <MiniApp
           id="account-tray-app"
+          ref={appRef}
           dimensions={dimensions}
           backgroundColor={backgroundColor}
           textColor={textColor}

@@ -1,5 +1,5 @@
 import { types, Instance, flow } from 'mobx-state-tree';
-import { getApps } from '../../renderer/logic/app/api';
+import { getApps } from '../../renderer/logic/space/app/api';
 import { AppModel } from './apps/model';
 
 export const SpaceStore = types
@@ -10,11 +10,11 @@ export const SpaceStore = types
   .views((self) => ({}))
   .actions((self) => ({
     initialize: flow(function* () {
-      const [response, error] = yield getApps((_event: any, value: any) =>
-        console.log(value)
-      );
-      if (error) throw error;
-      console.log(response);
+      // const [response, error] = yield getApps((_event: any, value: any) =>
+      //   console.log(value)
+      // );
+      // if (error) throw error;
+      // console.log(response);
     }),
   }));
 

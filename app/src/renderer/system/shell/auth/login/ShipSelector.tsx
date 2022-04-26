@@ -6,7 +6,7 @@ import { observer } from 'mobx-react';
 import { useMst } from '../../../../logic/store';
 
 import { Flex, Sigil, Tooltip } from '../../../../components';
-import { ShipModelType } from '../../../../logic/stores/ship';
+import { ShipModelType } from '../../../../logic/ship/store';
 
 // ----------------------------------------
 // -------- Local style components --------

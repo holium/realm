@@ -1,9 +1,11 @@
-import { FC } from 'react';
+import { FC, createRef } from 'react';
 import { motion } from 'framer-motion';
 import { useMst } from '../../../../../../../../logic/store';
 import { Flex, Text } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
 import { TrayButton } from '../../TrayButton';
+import { TrayMenu } from '../../TrayMenu';
+import { MiniApp } from '../../MiniAppWindow';
 
 type SpaceSelectorProps = {
   theme: Partial<WindowThemeType>;
@@ -14,35 +16,75 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
 ) => {
   const { theme } = props;
   const { shipStore } = useMst();
+  const selectorRef = createRef<HTMLDivElement>();
+  const appRef = createRef<HTMLDivElement>();
+
+  const { backgroundColor, textColor } = theme;
+  const dimensions = {
+    height: 500,
+    width: 400,
+  };
 
   return (
-    <TrayButton
-      whileTap={{ scale: 0.975 }}
-      transition={{ scale: 0.2 }}
-      customBg={theme.backgroundColor}
+    <TrayMenu
+      id="spaces-tray"
+      appRef={appRef}
+      buttonRef={selectorRef}
+      dimensions={dimensions}
+      position="top-right"
+      buttonOffset={{ x: 2 }}
+      content={
+        <MiniApp
+          id="spaces-tray-app"
+          ref={appRef}
+          dimensions={dimensions}
+          backgroundColor={backgroundColor}
+          textColor={textColor}
+        />
+      }
     >
-      <Flex
-        style={{
-          height: 28,
-          width: 28,
-          background: 'black',
-          borderRadius: 4,
-        }}
-      />
-      <Flex mt="2px" flexDirection="column" justifyContent="center">
-        <Text
-          color={theme.textColor}
-          lineHeight="12px"
-          fontSize={1}
-          opacity={0.5}
+      <TrayButton
+        id="spaces-tray-icon"
+        ref={selectorRef}
+        whileTap={{ scale: 0.975 }}
+        transition={{ scale: 0.2 }}
+        customBg={theme.backgroundColor}
+      >
+        <Flex
+          style={{
+            height: 28,
+            width: 28,
+            background: 'black',
+            borderRadius: 4,
+            pointerEvents: 'none',
+          }}
+        />
+        <Flex
+          style={{ pointerEvents: 'none' }}
+          mt="2px"
+          flexDirection="column"
+          justifyContent="center"
         >
-          DAO
-        </Text>
-        <Text color={theme.textColor} fontSize={2} fontWeight={500}>
-          Swolesome Fund
-        </Text>
-      </Flex>
-    </TrayButton>
+          <Text
+            style={{ pointerEvents: 'none' }}
+            color={theme.textColor}
+            lineHeight="12px"
+            fontSize={1}
+            opacity={0.5}
+          >
+            DAO
+          </Text>
+          <Text
+            style={{ pointerEvents: 'none' }}
+            color={theme.textColor}
+            fontSize={2}
+            fontWeight={500}
+          >
+            Swolesome Fund
+          </Text>
+        </Flex>
+      </TrayButton>
+    </TrayMenu>
   );
 };
 

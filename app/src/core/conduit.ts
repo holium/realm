@@ -1,4 +1,3 @@
-import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { generateChannelId } from './ship/util';
 import axios from 'axios';
 import EventEmitter from 'events';

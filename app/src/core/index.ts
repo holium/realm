@@ -4,6 +4,14 @@ import { ShipManager } from './ship/manager';
 import { Conduit } from './conduit';
 import { SpaceStore, SpaceStoreType } from './context/model';
 
+export type RealmCorePreloadType = {
+  login: (ship: string, password: string) => Promise<any>;
+  logout: () => Promise<any>;
+  installRealm: () => Promise<any>;
+  onEffect: (callback: any) => Promise<any>;
+  onReady: (callback: any) => Promise<any>;
+};
+
 /**
  * RealmCore
  *
@@ -36,24 +44,22 @@ export class RealmCore {
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
     this.installRealm = this.installRealm.bind(this);
-    this.onConduitReady = this.onConduitReady.bind(this);
+    this.onReady = this.onReady.bind(this);
+    // Capture all on-effect events and push through the core on-effect
     this.shipManager.on('on-effect', this.onEffect);
   }
 
   static boot(mainWindow: BrowserWindow) {
     const realmCore = new RealmCore(mainWindow);
-    ipcMain.handle('auth:add-ship', realmCore.authManager.addShip);
-    ipcMain.handle('auth:remove-ship', realmCore.authManager.removeShip);
-    ipcMain.handle('auth:get-ships', realmCore.authManager.getShips);
+    realmCore.authManager.initialize();
+    realmCore.shipManager.initialize();
     ipcMain.handle('core:login', realmCore.login);
     ipcMain.handle('core:logout', realmCore.logout);
     ipcMain.handle('core:install-realm', realmCore.installRealm);
-    console.log('booting...');
     return realmCore;
   }
 
   login(_event: any, ship: string, password: string) {
-    // console.log(this.);
     const { url, cookie } = this.authManager.getCredentials(ship, password);
     // TODO decrypt stored snapshot
     this.ship = ship.substring(1);
@@ -61,11 +67,12 @@ export class RealmCore {
     this.cookie = cookie;
     // Initialize conduit
     this.conduit = new Conduit(url, ship, cookie);
-    this.conduit.on('ready', this.onConduitReady);
+    this.conduit.on('ready', this.onReady);
   }
 
-  onConduitReady() {
-    this.shipManager.initialize(this.conduit!, `~${this.ship}`);
+  onReady() {
+    this.mainWindow.webContents.send('core:on-ready');
+    this.shipManager.subscribe(this.conduit!, `~${this.ship}`);
   }
 
   logout(_event: any) {
@@ -90,27 +97,11 @@ export class RealmCore {
     installRealm: () => {
       return ipcRenderer.invoke('core:install-realm');
     },
+    onEffect: (callback: any) => ipcRenderer.on('on-effect', callback),
+    onReady: (callback: any) => ipcRenderer.on('core:on-ready', callback),
   };
 }
 
 export default {
   RealmCore,
-};
-
-export const preload = {
-  login: (ship: string, password: string) => {
-    return ipcRenderer.invoke('core:login', ship, password);
-  },
-  logout: () => {
-    return ipcRenderer.invoke('core:logout');
-  },
-  installRealm: () => {
-    return ipcRenderer.invoke('core:install-realm');
-  },
-};
-
-export type RealmCorePreloadType = {
-  login: (ship: string, password: string) => Promise<any>;
-  logout: () => Promise<any>;
-  installRealm: () => Promise<any>;
 };

@@ -14,6 +14,7 @@ type RowType = {
 const Row = styled.div<RowType>`
   box-sizing: border-box;
   display: flex;
+  flex-direction: row;
   flex: 1 1 auto;
   flex-wrap: wrap;
 

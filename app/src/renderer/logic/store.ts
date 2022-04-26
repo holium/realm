@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react';
 import { Instance, onSnapshot, types } from 'mobx-state-tree';
-import { ShipStore } from './stores/ship';
+import { ShipStore } from './ship/store';
 import { ConfigStore } from './stores/config';
-import { AuthStore } from './stores/auth';
+import { AuthStore } from './auth/store';
 import { SpaceStore } from './space/store';
 
 const OSStore = types.model('OSStore', {
@@ -12,18 +12,14 @@ const OSStore = types.model('OSStore', {
   spaceStore: SpaceStore,
 });
 
-window.electron.ship.onEffect((_event: any, value: any) => {
+window.electron.core.onEffect((_event: any, value: any) => {
   if (value.response === 'diff') {
     console.log('got effect data => ', value.json);
   }
-  if (value.response === 'scry') {
-    // if(value.app)
-    const { json } = value;
-    if (json.app === 'docket') {
-      osStore.spaceStore.onScry(json);
-    }
-    console.log('got scry response => ', value);
-  }
+});
+
+window.electron.core.onReady((_event: any) => {
+  osStore.spaceStore.getApps();
 });
 
 function loadStoreSnapshot(storeName: string) {
@@ -52,7 +48,7 @@ const initialState = OSStore.create({
     theme: 'light',
   },
   shipStore: loadStoreSnapshot('shipStore') || {},
-  spaceStore: loadStoreSnapshot('spaceStore') || { apps: [], pinned: [] },
+  spaceStore: loadStoreSnapshot('spaceStore') || { pinned: [] },
 });
 
 export const osStore = initialState;

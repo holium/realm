@@ -1,6 +1,6 @@
-export async function getApps(callback: any) {
+export async function getApps() {
   try {
-    const response = await window.electron.ship.getApps(callback);
+    const response = await window.electron.ship.getApps();
     return [response, null];
   } catch (err) {
     return [null, err];

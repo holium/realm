@@ -1,7 +1,7 @@
 /* Mainbar */
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { rgba } from 'polished';
+import { rgba, lighten } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../../../theme';
@@ -20,12 +20,15 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   min-height: 300px;
 `)<MiniAppStyleProps>({
   // @ts-expect-error annoying
+  // backgroundColor: (props: SystemBarStyleProps) =>
+  //   props.customBg ? rgba(props.customBg!, 0.8) : 'initial',
   backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? rgba(props.customBg!, 0.8) : 'initial',
+    props.customBg ? rgba(lighten(0.15, props.customBg!), 0.8) : 'initial',
 });
 
 type MiniAppProps = {
   id: string;
+  ref?: any;
   onClose?: () => void;
   backgroundColor?: string;
   dimensions: {
@@ -45,22 +48,25 @@ const DEFAULT_PROPS = {
   },
 };
 
-export const MiniApp: FC<MiniAppProps> = (props: MiniAppProps) => {
-  const { id, dimensions, backgroundColor, textColor, onClose, children } =
-    props;
+export const MiniApp: FC<MiniAppProps> = forwardRef(
+  (props: MiniAppProps, ref: any) => {
+    const { id, dimensions, backgroundColor, textColor, onClose, children } =
+      props;
 
-  return (
-    <MiniAppWindow
-      id={id}
-      style={{ height: dimensions.height, width: dimensions.width }}
-      color={textColor}
-      // variants={menuAnimate}
-      customBg={backgroundColor}
-    >
-      {children}
-    </MiniAppWindow>
-  );
-};
+    return (
+      <MiniAppWindow
+        id={id}
+        ref={ref}
+        style={{ height: dimensions.height, width: dimensions.width }}
+        color={textColor}
+        // variants={menuAnimate}
+        customBg={backgroundColor}
+      >
+        {children}
+      </MiniAppWindow>
+    );
+  }
+);
 
 MiniApp.defaultProps = DEFAULT_PROPS;
 

@@ -12,18 +12,23 @@ type WalletTrayProps = {
 export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {
   const { backgroundColor, textColor } = props.theme;
   const walletButtonRef = createRef<HTMLButtonElement>();
+  const appRef = createRef<HTMLDivElement>();
+
   const dimensions = {
     height: 330,
     width: 330,
   };
+
   return (
     <TrayMenu
       id="wallet-tray"
+      appRef={appRef}
       buttonRef={walletButtonRef}
       dimensions={dimensions}
       content={
         <MiniApp
           id="wallet-tray-app"
+          ref={appRef}
           dimensions={dimensions}
           backgroundColor={backgroundColor}
           textColor={textColor}

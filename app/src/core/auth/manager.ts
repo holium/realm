@@ -35,6 +35,12 @@ export class AuthManager {
   // ------------- Actions --------------
   // ------------------------------------
 
+  initialize() {
+    ipcMain.handle('auth:add-ship', this.addShip);
+    ipcMain.handle('auth:remove-ship', this.removeShip);
+    ipcMain.handle('auth:get-ships', this.getShips);
+  }
+
   getCredentials(ship: string, password: string) {
     const path: string = `ships.${ship}`;
     const { url, cookie } = this.authStore.get<any, any>(path);

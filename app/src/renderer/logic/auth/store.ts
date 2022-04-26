@@ -1,6 +1,6 @@
 import { types, flow, Instance, tryReference } from 'mobx-state-tree';
-import { LoaderModel } from './common/loader';
-import { ShipModel } from './ship';
+import { LoaderModel } from '../stores/common/loader';
+import { ShipModel } from '../ship/store';
 import Urbit from '../api/urbit';
 import { timeout } from '../utils/dev';
 
@@ -34,7 +34,7 @@ export const AuthStore = types
       'completed',
     ]),
     currentStep: StepList,
-    newShip: ShipModel,
+    newShip: types.maybeNull(ShipModel),
     // profile: t
     installer: LoaderModel,
     loader: LoaderModel,
