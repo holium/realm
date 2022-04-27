@@ -80,7 +80,11 @@ export const TrayMenu = (props: TrayMenuProps) => {
       if (`${id}-app` === event.target.id) {
         return;
       }
-      setIsVisible(false);
+      const appNode = document.getElementById(`${id}-app`);
+      console.log(appNode);
+      if (appNode && !appNode.contains(event.target)) {
+        setIsVisible(false);
+      }
       // const trayNode = ReactDOM.findDOMNode(trayMenuRef.current);
       // if (trayNode && !trayNode?.contains(event.target)) {
       //   setIsVisible(false);

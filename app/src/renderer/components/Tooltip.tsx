@@ -96,7 +96,6 @@ const Wrapper = styled(motion.div)<{ coords: any }>`
     top: ${coords.top}px;
   `}
   box-sizing: border-box;
-  max-width: 20rem;
   position: absolute;
 `;
 // // Parent wrapper

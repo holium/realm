@@ -23,13 +23,14 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   // backgroundColor: (props: SystemBarStyleProps) =>
   //   props.customBg ? rgba(props.customBg!, 0.8) : 'initial',
   backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? rgba(lighten(0.15, props.customBg!), 0.8) : 'initial',
+    props.customBg ? rgba(lighten(0.2, props.customBg!), 0.8) : 'initial',
 });
 
 type MiniAppProps = {
   id: string;
   ref?: any;
   onClose?: () => void;
+  canScroll?: boolean;
   backgroundColor?: string;
   dimensions: {
     height: number;
@@ -50,14 +51,25 @@ const DEFAULT_PROPS = {
 
 export const MiniApp: FC<MiniAppProps> = forwardRef(
   (props: MiniAppProps, ref: any) => {
-    const { id, dimensions, backgroundColor, textColor, onClose, children } =
-      props;
+    const {
+      id,
+      dimensions,
+      canScroll,
+      backgroundColor,
+      textColor,
+      onClose,
+      children,
+    } = props;
 
     return (
       <MiniAppWindow
         id={id}
         ref={ref}
-        style={{ height: dimensions.height, width: dimensions.width }}
+        style={{
+          height: dimensions.height,
+          width: dimensions.width,
+          overflowY: 'hidden',
+        }}
         color={textColor}
         // variants={menuAnimate}
         customBg={backgroundColor}

@@ -18,7 +18,7 @@ export const MessagesTray: FC<MessagesTrayProps> = (
   const appRef = createRef<HTMLDivElement>();
 
   const dimensions = {
-    height: 500,
+    height: 550,
     width: 370,
   };
 
@@ -37,7 +37,7 @@ export const MessagesTray: FC<MessagesTrayProps> = (
           backgroundColor={backgroundColor}
           textColor={textColor}
         >
-          <Chat theme={props.theme} />
+          <Chat theme={props.theme} dimensions={dimensions} />
         </MiniApp>
       }
     >

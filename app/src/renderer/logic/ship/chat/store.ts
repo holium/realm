@@ -83,6 +83,8 @@ const Chat = types.model({
   messages: types.optional(types.array(ChatMessage), []),
 });
 
+export type ChatType = Instance<typeof Chat>;
+
 export const ChatStore = types
   .model({
     loader: LoaderModel,
