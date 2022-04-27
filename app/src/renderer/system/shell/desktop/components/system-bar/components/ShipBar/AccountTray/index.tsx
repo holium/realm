@@ -66,7 +66,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
           size={28}
           avatar={ship.avatar}
           patp={ship.patp}
-          color={[ship.color, 'white']}
+          color={[ship.color || '#000000', 'white']}
         />
       </motion.div>
     </TrayMenu>

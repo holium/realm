@@ -1,6 +1,8 @@
+import { ShipInfoType } from './../ship/types';
 import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import axios from 'axios';
+import { Action } from '..';
 // import { SecureStore } from '../../lib/secure-store';
 
 export interface AuthManagerActions {}
@@ -22,10 +24,13 @@ export type AuthPreloadType = {
 };
 
 export class AuthManager {
-  private authStore: Store;
+  private authStore: Store<{ [ship: string]: ShipInfoType }>;
 
   constructor() {
-    this.authStore = new Store({ name: 'ships' });
+    this.authStore = new Store({
+      name: 'auth',
+      accessPropertiesByDotNotation: true,
+    });
     this.getShips = this.getShips.bind(this);
     this.addShip = this.addShip.bind(this);
     this.removeShip = this.removeShip.bind(this);
@@ -34,6 +39,13 @@ export class AuthManager {
   // ------------------------------------
   // ------------- Actions --------------
   // ------------------------------------
+
+  onAction(action: Action) {
+    this.authStore.set(
+      `ships.${action.context.ship}.${action.data.key}`,
+      action.data.value
+    );
+  }
 
   initialize() {
     ipcMain.handle('auth:add-ship', this.addShip);
@@ -49,6 +61,10 @@ export class AuthManager {
 
   getShips() {
     return this.authStore.get('ships');
+  }
+
+  getShip(ship: string): ShipInfoType {
+    return this.authStore.get(`ships.${ship}`);
   }
 
   async addShip(_event: any, ship: string, url: string, code: string) {

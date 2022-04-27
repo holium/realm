@@ -14,6 +14,7 @@ import {
   useMenu,
   Menu,
   MenuItem,
+  Spinner,
 } from '../../../../components';
 import { useMst } from '../../../../logic/store';
 import { ShipSelector } from './ShipSelector';
@@ -148,15 +149,19 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   onKeyDown={submitPassword}
                   rightIcon={
                     <Flex justifyContent="center" alignItems="center">
-                      <IconButton
-                        ref={submitRef}
-                        luminosity={textTheme}
-                        size={24}
-                        canFocus
-                        onKeyDown={submitPassword}
-                      >
-                        <Icons opacity={0.5} name="ArrowRightLine" />
-                      </IconButton>
+                      {shipStore.loader.isLoading ? (
+                        <Spinner size={0} />
+                      ) : (
+                        <IconButton
+                          ref={submitRef}
+                          luminosity={textTheme}
+                          size={24}
+                          canFocus
+                          onKeyDown={submitPassword}
+                        >
+                          <Icons opacity={0.5} name="ArrowRightLine" />
+                        </IconButton>
+                      )}
                     </Flex>
                   }
                 />

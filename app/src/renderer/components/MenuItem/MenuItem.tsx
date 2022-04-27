@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { SpaceProps } from 'styled-system';
 import { Box } from '../Box';
 import { ChildrenBox, MenuItemStyle } from './MenuItem.styles';
 
@@ -20,7 +21,8 @@ export type MenuItemProps = {
   customBg?: string;
   onClick: (...args: any) => void;
   subMenu?: any[];
-} & IntentProps;
+} & IntentProps &
+  SpaceProps;
 
 export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
   const {

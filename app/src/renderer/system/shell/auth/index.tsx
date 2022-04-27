@@ -12,9 +12,9 @@ type LoginProps = {
 };
 
 export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
-  const { configStore } = useMst();
+  const { authStore } = useMst();
   const { textTheme, hasWallpaper } = props;
-  const [signup, setSignup] = useState(configStore.firstTime);
+  const [signup, setSignup] = useState(authStore.firstTime);
   // const [signup, setSignup] = useState(true);
 
   return (

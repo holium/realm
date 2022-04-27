@@ -1,13 +1,19 @@
-import { osStore } from '../store';
 /* eslint-disable func-names */
-import { types, flow, Instance, tryReference } from 'mobx-state-tree';
+import {
+  types,
+  flow,
+  Instance,
+  tryReference,
+  applyPatch,
+  applySnapshot,
+} from 'mobx-state-tree';
 import { LoaderModel } from '../stores/common/loader';
 import { setFirstTime } from '../store';
 import { WindowThemeModel, WindowThemeType } from '../stores/config';
-
+import { sendAction } from '../api/realm.core';
 import Urbit from '../api/urbit';
-import { getApps } from '../space/app/api';
 import { ChatStore } from './chat/store';
+import { init } from './api';
 
 type ShipInfoType = {
   url: string;
@@ -17,6 +23,7 @@ type ShipInfoType = {
   color?: string;
   nickname?: string;
   avatar?: string;
+  loggedIn?: boolean;
 };
 
 export const ShipStatusModel = types
@@ -64,7 +71,7 @@ export const ShipModel = types
     url: types.string,
     patp: types.identifier,
     nickname: types.maybeNull(types.string),
-    color: types.optional(types.string, '#000000'),
+    color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     loader: LoaderModel,
     status: ShipStatusModel,
@@ -78,16 +85,51 @@ export const ShipModel = types
     chat: types.optional(ChatStore, { loader: { state: 'initial' } }),
   })
   .actions((self) => ({
-    login(password: string) {
+    login() {
       console.log('use password to decrypt all stores and load context state');
       // window.electron
       self.loggedIn = true;
+      const action = {
+        action: 'set-session',
+        resource: 'auth.manager',
+        context: {
+          ship: self.patp,
+        },
+        data: {
+          key: 'loggedIn',
+          value: true,
+        },
+      };
+      sendAction(action);
     },
     logout() {
       self.loggedIn = false;
+      const action = {
+        action: 'set-session',
+        resource: 'auth.manager',
+        context: {
+          ship: self.patp,
+        },
+        data: {
+          key: 'loggedIn',
+          value: false,
+        },
+      };
+      sendAction(action);
     },
     setTheme(windowTheme: WindowThemeType) {
-      self.theme = windowTheme;
+      const action = {
+        action: 'set-ship-theme',
+        resource: 'ship.manager',
+        context: {
+          ship: self.patp,
+        },
+        data: {
+          key: 'theme',
+          value: windowTheme,
+        },
+      };
+      sendAction(action);
     },
   }));
 
@@ -129,6 +171,22 @@ export const ShipStore = types
     },
   }))
   .actions((self) => ({
+    initialSync: (syncEffect: any) => {
+      const syncingShip = self.ships.get(syncEffect.key)!;
+      applySnapshot(syncingShip, {
+        ...syncEffect.model,
+        chat: { loader: { state: 'initial' } },
+        loader: { state: 'initial' },
+        status: { state: 'authenticated' },
+      });
+      self.session = syncingShip;
+      self.loader.set('loaded');
+      self.session!.login();
+    },
+    syncPatches: (patchEffect: any) => {
+      const patchingShip = self.ships.get(patchEffect.key);
+      applyPatch(patchingShip, patchEffect.patch);
+    },
     setSession: (shipRef: any) => {
       self.session = shipRef;
       self.last = shipRef;
@@ -141,29 +199,14 @@ export const ShipStore = types
     },
     login: flow(function* (ship: string, password: string) {
       try {
+        self.loader.set('loading');
         const [response, error] = yield Urbit.login(ship, password);
         if (error) throw error;
-        self.loader.set('loaded');
-        const session = self.ships.get(ship);
-        if (session?.patp !== ship) {
-          self.session = session;
-        }
-        self.session!.login(password);
         setFirstTime();
       } catch (err: any) {
         self.loader.error(err);
       }
     }),
-
-    // login: (ship: string, password: string) => {
-    // const session = self.ships.get(ship);
-    // if (session?.patp !== ship) {
-    //   self.session = session;
-    // }
-    // self.session!.login(password);
-    //   //
-    //   // return null;
-    // },
     logout: flow(function* () {
       const [response, error] = yield Urbit.logout();
       if (error) throw error;
@@ -220,7 +263,6 @@ export const ShipStore = types
           yield Urbit.getShips();
         if (error) throw error;
 
-        self.loader.set('loaded');
         Object.keys(response).forEach((patp: string) => {
           const shipInfo: ShipInfoType = response[patp];
           const newShip = ShipModel.create({
@@ -231,10 +273,16 @@ export const ShipStore = types
             nickname: shipInfo.nickname,
             avatar: shipInfo.avatar,
             theme: WindowThemeModel.create(shipInfo.theme),
+            loggedIn: shipInfo.loggedIn,
             loader: { state: 'initial' },
             status: { state: 'authenticated' },
           });
           self.ships.set(patp, newShip);
+          if (shipInfo.loggedIn) {
+            console.log('reconnect');
+            self.session = newShip;
+            init(patp);
+          }
           if (
             self.order.findIndex(
               (orderedShip: ShipModelType) => orderedShip.patp === patp
@@ -251,6 +299,7 @@ export const ShipStore = types
             self.ships.get(Array.from(self.order.values())[0].patp)
           );
         }
+        self.loader.set('loaded');
       } catch (err: any) {
         self.loader.error(err);
       }

@@ -1,7 +1,5 @@
 import { toJS } from 'mobx';
 import { flow, Instance, types } from 'mobx-state-tree';
-import { LoaderModel } from '../../stores/common/loader';
-import { getDMs } from './api';
 
 // const Reactions = types.model({
 //   likes: types.number,
@@ -85,7 +83,6 @@ const Chat = types.model({
 
 export const ChatStore = types
   .model({
-    loader: LoaderModel,
     dms: types.map(Chat),
   })
   .views((self) => ({
@@ -96,58 +93,71 @@ export const ChatStore = types
     },
   }))
   .actions((self) => ({
-    getDMs: flow(function* (ship: string) {
-      self.loader.set('loading');
-      // const [response, error] = yield getDMs();
-      // if (error) throw error;
-      // const strippedShip = ship.substring(1);
-      // // console.log(response);
+    setDMs: (ship: string, dmGraph: any) => {
+      const strippedShip = ship.substring(1);
+      // console.log(response);
       // const dmGraph = response['graph-update']['add-graph']['graph'];
-      // // console.log(dmGraph);
-      // Object.values(dmGraph).forEach((chat: any) => {
-      //   let lastSent = 0;
-      //   const dmContacts: string[] = [];
-      //   // const dm
-      //   const messages: ChatMessageType[] = [];
-      //   Object.values(chat.children).forEach(({ post }: any) => {
-      //     if (!post.author) {
-      //       // handles cases of no author?
-      //       return;
-      //     }
-      //     if (
-      //       post.author !== strippedShip &&
-      //       !dmContacts.includes(post.author)
-      //     ) {
-      //       dmContacts.push(post.author);
-      //     }
-      //     if (post['time-sent'] > lastSent) {
-      //       lastSent = post['time-sent'];
-      //     }
-      //     post.contents.forEach((content: any) => {
-      //       const type = Object.keys(content)[0];
-      //       let string: any = content[type];
-      //       if (type === 'code') {
-      //         string = string;
-      //       }
-      //       messages.push(
-      //         ChatMessage.create({
-      //           type,
-      //           author: post.author,
-      //           timeSent: post['time-sent'],
-      //           // @ts-expect-error suck it
-      //           content: { [type]: string },
-      //           position: post.author !== strippedShip ? 'left' : 'right',
-      //         })
-      //       );
-      //     });
-      //   });
-      //   const contact = dmContacts.join(',');
-      //   messages.sort((a, b) => b.timeSent - a.timeSent);
-      //   if (contact) {
-      //     // TODO get the name of an non-responsive user another way
-      //     self.dms.set(contact, Chat.create({ contact, lastSent, messages }));
-      //   }
-      // });
-      self.loader.set('loaded');
-    }),
+      // console.log(dmGraph);
+      Object.values(dmGraph).forEach((chat: any) => {
+        let lastSent = 0;
+        const dmContacts: string[] = [];
+        // const dm
+        const messages: ChatMessageType[] = [];
+        Object.values(chat.children).forEach(({ post }: any) => {
+          if (!post.author) {
+            // handles cases of no author?
+            return;
+          }
+          if (
+            post.author !== strippedShip &&
+            !dmContacts.includes(post.author)
+          ) {
+            dmContacts.push(post.author);
+          }
+          if (post['time-sent'] > lastSent) {
+            lastSent = post['time-sent'];
+          }
+          post.contents.forEach((content: any) => {
+            const type = Object.keys(content)[0];
+            let string: any = content[type];
+            if (type === 'code') {
+              string = string;
+            }
+            messages.push(
+              ChatMessage.create({
+                type,
+                author: post.author,
+                timeSent: post['time-sent'],
+                // @ts-expect-error suck it
+                content: { [type]: string },
+                position: post.author !== strippedShip ? 'left' : 'right',
+              })
+            );
+          });
+        });
+        const contact = dmContacts.join(',');
+        messages.sort((a, b) => b.timeSent - a.timeSent);
+        if (contact) {
+          // TODO get the name of an non-responsive user another way
+          self.dms.set(contact, Chat.create({ contact, lastSent, messages }));
+        }
+      });
+    },
   }));
+
+export const ShipModel = types.model('ShipModel', {
+  url: types.string,
+  patp: types.identifier,
+  nickname: types.maybeNull(types.string),
+  color: types.maybeNull(types.string),
+  avatar: types.maybeNull(types.string),
+  cookie: types.maybeNull(types.string),
+  theme: types.model({
+    textColor: types.string,
+    backgroundColor: types.string,
+  }),
+  wallpaper: types.maybeNull(types.string),
+  chat: types.optional(ChatStore, {}),
+});
+
+export type ShipModelType = Instance<typeof ShipModel>;
