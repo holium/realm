@@ -1,4 +1,11 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import {
+  compose,
+  color,
+  backgroundColor,
+  BackgroundColorProps,
+  ColorProps,
+} from 'styled-system';
 import { rgba, lighten } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../../theme';
@@ -6,37 +13,45 @@ import { ThemeType } from '../../../../theme';
 type BubbleProps = {
   theme: ThemeType;
   customBg?: string;
-};
+  primary: boolean;
+} & BackgroundColorProps &
+  ColorProps;
 
-export const Bubble = styled(motion.div)`
+export const Bubble = styled(motion.div)<BubbleProps>`
   max-width: calc(100% - 40px);
   background: ${(props: BubbleProps) =>
-    props.customBg
-      ? rgba(lighten(0.13, props.customBg), 0.5)
-      : props.theme.colors.bg.blendedBg};
-  border-radius: 9px;
+    props.customBg || props.theme.colors.bg.blendedBg};
+  border-radius: 12px;
+  ${(props: BubbleProps) =>
+    props.primary
+      ? css`
+          border-bottom-right-radius: 0px;
+        `
+      : css`
+          border-bottom-left-radius: 0px;
+        `}
 
-  &.text {
-    padding: 8px;
-    line-height: 16px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    user-select: text;
+  padding: 8px;
+  line-height: 16px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  user-select: text;
+
+  img {
+    display: block;
+    margin-bottom: 8px;
+    // max-width: calc(100% - 12px);
+    // max-height: calc(100% - 12px);
+    height: auto;
+    border-radius: inherit;
   }
-  &.image {
-    img {
-      display: block;
-      max-width: calc(100% - 12px);
-      max-height: calc(100% - 12px);
-      height: auto;
-      border-radius: inherit;
-    }
-  }
+
   &.typing {
     padding: 8px;
   }
   p {
     margin: 0;
   }
+  ${compose(color, backgroundColor)}
 `;

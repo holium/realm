@@ -135,7 +135,7 @@ export const ShipModel = types
 
 export type ShipModelType = Instance<typeof ShipModel>;
 
-export const ShipStore = types
+export const ShipStore: any = types
   .model({
     loader: types.optional(LoaderModel, { state: 'initial' }),
     last: types.safeReference(ShipModel),

@@ -15,6 +15,7 @@ import {
 } from '../../../components';
 import { useMst } from '../../..//logic/store';
 import { DMs } from './DMs';
+import { ChatView } from './ChatView';
 
 type ChatProps = {
   theme: WindowThemeType;
@@ -29,6 +30,8 @@ export const Chat: FC<any> = (props: ChatProps) => {
   const { backgroundColor, textColor } = props.theme;
 
   const [selectedChat, setSelectedChat] = useState<any>(null);
+  const iconColor = darken(0.5, textColor);
+
   return (
     <>
       {selectedChat ? (
@@ -64,7 +67,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
               </Text>
             </Flex>
             <Flex pl={2} pr={2}>
-              <IconButton size={28}>
+              <IconButton size={28} color={iconColor}>
                 <Icons name="Plus" />
               </IconButton>
               {/* <IconButton size={28}>
@@ -72,7 +75,17 @@ export const Chat: FC<any> = (props: ChatProps) => {
           </IconButton> */}
             </Flex>
           </Grid.Row>
-          <Flex overflowY="hidden">DM ChatView</Flex>
+          <Flex overflowY="hidden">
+            <ChatView
+              dimensions={dimensions}
+              theme={props.theme}
+              contact={selectedChat.contact}
+              height={dimensions.height - 61}
+              onSend={(message: any) => {
+                console.log('dm message', message);
+              }}
+            />
+          </Flex>
         </Grid.Column>
       ) : (
         <Grid.Column expand noGutter overflowY="hidden">
@@ -99,7 +112,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
               />
             </Flex>
             <Flex pl={2} pr={2}>
-              <IconButton size={28}>
+              <IconButton size={28} color={iconColor}>
                 <Icons name="Plus" />
               </IconButton>
               {/* <IconButton size={28}>

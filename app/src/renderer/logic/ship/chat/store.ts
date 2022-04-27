@@ -77,11 +77,17 @@ const ChatMessage = types.union(
 );
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
-const Chat = types.model({
-  contact: types.string,
-  lastSent: types.number,
-  messages: types.optional(types.array(ChatMessage), []),
-});
+const Chat = types
+  .model({
+    contact: types.string,
+    lastSent: types.number,
+    messages: types.optional(types.array(ChatMessage), []),
+  })
+  .views((self) => ({
+    get list() {
+      return self.messages.slice().reverse();
+    },
+  }));
 
 export type ChatType = Instance<typeof Chat>;
 

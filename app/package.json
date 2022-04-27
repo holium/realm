@@ -230,6 +230,7 @@
     "polished": "^4.2.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-inverted-scrollview": "^1.0.7",
     "react-router-dom": "^6.3.0",
     "react-spaces": "^0.3.2",
     "secure-electron-store": "^3.0.3",
