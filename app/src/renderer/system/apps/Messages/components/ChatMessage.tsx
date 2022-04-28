@@ -35,7 +35,7 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
       <Bubble
         primary={primaryBubble}
         customBg={
-          primaryBubble ? ourColor : lighten(0.3, theme!.backgroundColor)
+          primaryBubble ? ourColor : lighten(0.28, theme!.backgroundColor)
         }
       >
         <Message type={message.type} color={color} content={message.content} />

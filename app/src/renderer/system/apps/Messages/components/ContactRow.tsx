@@ -27,6 +27,7 @@ export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;
   width: 100%;
   padding: 8px;
+  margin: 0 4px;
   gap: 10px;
   display: flex;
   flex-direction: row;
@@ -36,7 +37,7 @@ export const Row = styled(motion.div)<RowProps>`
   &:hover {
     transition: ${(props: RowProps) => props.theme.transition};
     background-color: ${(props: RowProps) =>
-      props.customBg ? lighten(0.22, props.customBg) : 'initial'};
+      props.customBg ? lighten(0.25, props.customBg) : 'initial'};
   }
 `;
 

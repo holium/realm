@@ -33,7 +33,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
         </Flex>
       ) : (
         <>
-          <Grid.Row noGutter expand style={{ minHeight: headerOffset }} />
+          <Grid.Row noGutter expand style={{ minHeight: headerOffset + 4 }} />
           {chat!.list.map((dm: any) => (
             <Grid.Row noGutter expand key={dm.contact}>
               <ContactRow

@@ -51,7 +51,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
               left: 0,
               right: 0,
               height: headerSize,
-              background: rgba(lighten(0.22, backgroundColor), 0.9),
+              background: rgba(lighten(0.23, backgroundColor), 0.9),
               backdropFilter: 'blur(8px)',
               borderBottom: `1px solid ${rgba(backgroundColor, 0.7)}`,
             }}
@@ -143,7 +143,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
             <Flex
               pl={3}
               pr={4}
-              mr={4}
+              mr={3}
               justifyContent="center"
               alignItems="center"
             >

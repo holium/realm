@@ -45,7 +45,7 @@ export const SystemBarStyle = styled(styled(motion.div)<SystemBarStyleProps>`
   {
     // @ts-expect-error annoying
     backgroundColor: (props: SystemBarStyleProps) =>
-      props.customBg ? rgba(props.customBg!, 0.5) : 'initial',
+      props.customBg ? rgba(props.customBg!, 0.55) : 'initial',
   },
   compose(space, layout, flexbox, border, position, color, backgroundColor)
 );

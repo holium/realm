@@ -1,7 +1,7 @@
 import { FC, createRef } from 'react';
 import { motion } from 'framer-motion';
 import { useMst } from '../../../../../../../../logic/store';
-import { Flex, Text } from '../../../../../../../../components';
+import { Flex, Text, Sigil } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
 import { TrayButton } from '../../TrayButton';
 import { TrayMenu } from '../../TrayMenu';
@@ -50,7 +50,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
         transition={{ scale: 0.2 }}
         customBg={theme.backgroundColor}
       >
-        <Flex
+        {/* <Flex
           style={{
             height: 28,
             width: 28,
@@ -58,6 +58,13 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
             borderRadius: 4,
             pointerEvents: 'none',
           }}
+        /> */}
+        <Sigil
+          simple
+          size={28}
+          avatar={null}
+          patp={shipStore.session.patp}
+          color={[shipStore.session.color || '#000000', 'white']}
         />
         <Flex
           style={{ pointerEvents: 'none' }}
@@ -72,7 +79,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
             fontSize={1}
             opacity={0.5}
           >
-            DAO
+            You
           </Text>
           <Text
             style={{ pointerEvents: 'none' }}
@@ -80,7 +87,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
             fontSize={2}
             fontWeight={500}
           >
-            Swolesome Fund
+            {shipStore.session.patp.substring(1)}
           </Text>
         </Flex>
       </TrayButton>

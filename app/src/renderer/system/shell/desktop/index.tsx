@@ -1,35 +1,41 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill, Top } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
 import { AppGrid } from './components/AppGrid';
 import { useMst } from '../../../logic/store';
+import AppWindow from './components/AppWindow';
+import { clone } from 'mobx-state-tree';
+import { Browser } from '../../apps/Browser';
 
 type OSFrameProps = {
-  isFullscreen: boolean;
+  isFullscreen?: boolean;
   hasWallpaper?: boolean;
 };
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
-  const { isFullscreen } = props;
-  // const { shipStore } = useMst();
-  useEffect(() => {
-    // !shipStore.isLoading && spaceStore.getApps();
-  }, []);
+  const { shipStore } = useMst();
+  const [showDesktop, setShowDesktop] = useState(true);
 
+  const ship = useMemo(() => clone(shipStore.session!), [shipStore.session]);
+
+  const theme = {
+    backgroundColor: ship.theme.backgroundColor,
+    textColor: '#EDE6E1',
+  };
+  // {
+  //   showDesktop && (
+  //     <AppWindow theme={theme}>
+  //       {/* @ts-expect-error */}
+  //       <Browser theme={theme} />
+  //     </AppWindow>
+  //   );
+  // }
   return (
     <Fill>
-      {!isFullscreen && (
-        <Top
-          size={30}
-          // @ts-expect-error this error should be disabled
-          style={{ WebkitAppRegion: 'drag', appRegion: 'drag' }}
-        />
-      )}
-      <Fill></Fill>
       <Layer zIndex={1}>
         <Bottom size={58}>
-          <SystemBar />
+          <SystemBar onHome={() => setShowDesktop(false)} />
         </Bottom>
       </Layer>
     </Fill>

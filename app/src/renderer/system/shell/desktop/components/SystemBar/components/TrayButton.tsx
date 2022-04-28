@@ -12,7 +12,7 @@ import {
   LayoutProps,
 } from 'styled-system';
 import { motion } from 'framer-motion';
-import { darken } from 'polished';
+import { darken, lighten } from 'polished';
 import { ThemeType } from '../../../../../../theme';
 
 type IProps = {
@@ -45,7 +45,7 @@ export const TrayButton = styled(styled(motion.div)`
       &:hover {
         transition: ${(props: IProps) => props.theme.transition};
         background-color: ${props.customBg
-          ? darken(0.22, props.customBg)
+          ? darken(0.18, props.customBg)
           : 'inherit'};
       }
     `}

@@ -6,9 +6,11 @@ import { WindowThemeType } from 'renderer/logic/stores/config';
 
 type HomeButton = {
   theme: Partial<WindowThemeType>;
+  onHome: () => void;
 };
 
 export const HomeButton: FC<HomeButton> = (props: HomeButton) => {
+  const { onHome } = props;
   const { backgroundColor, textColor } = props.theme;
   const x = useMotionValue(200);
   const y = useMotionValue(200);
@@ -29,6 +31,7 @@ export const HomeButton: FC<HomeButton> = (props: HomeButton) => {
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
         perspective: 400,
       }}
+      onClick={() => onHome()}
       onMouseMove={handleMouse}
     >
       <SystemBarStyle

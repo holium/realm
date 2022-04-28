@@ -7,10 +7,11 @@ import { ShipModelType } from '../../../../../../../../logic/ship/store';
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { useMst } from '../../../../../../../../logic/store';
+import { Profile } from '../../../../../../../apps/Profile';
 
 type AccountTrayProps = {
   ship: ShipModelType;
-  theme: Partial<WindowThemeType>;
+  theme: WindowThemeType;
 };
 
 export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
@@ -21,7 +22,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
   const appRef = createRef<HTMLDivElement>();
 
   const dimensions = {
-    height: 56,
+    height: 156,
     width: 230,
   };
 
@@ -39,15 +40,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
           backgroundColor={backgroundColor}
           textColor={textColor}
         >
-          {/* <Text variant="body">{ship.patp}</Text> */}
-          <MenuItem
-            label="Logout"
-            icon={<Icons size={1} name="Logout" />}
-            customBg={backgroundColor}
-            onClick={() => {
-              shipStore.logout();
-            }}
-          />
+          <Profile theme={props.theme} dimensions={dimensions} />
         </MiniApp>
       }
     >

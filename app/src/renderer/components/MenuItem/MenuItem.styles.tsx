@@ -36,7 +36,7 @@ export type StyleProps = SpaceProps &
 // TODO make variants
 export const MenuItemStyle: any = styled(styled.li`
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   height: 40px;
   display: flex;
   align-items: flex-start;

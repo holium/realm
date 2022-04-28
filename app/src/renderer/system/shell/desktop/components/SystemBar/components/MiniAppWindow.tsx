@@ -1,7 +1,7 @@
 /* Mainbar */
 import { FC, forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, lighten } from 'polished';
+import { rgba, lighten, darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../../../theme';
@@ -12,17 +12,15 @@ type MiniAppStyleProps = {
 };
 
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
-  border-radius: 6px;
+  border-radius: 9px;
   backdrop-filter: blur(16px);
-  width: 270px; 
-  box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.one}
-  min-height: 300px;
+  width: 270px;
+  box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};
+  border: 1px solid ${(props: MiniAppStyleProps) => rgba(props.customBg!, 0.7)};
 `)<MiniAppStyleProps>({
   // @ts-expect-error annoying
-  // backgroundColor: (props: SystemBarStyleProps) =>
-  //   props.customBg ? rgba(props.customBg!, 0.8) : 'initial',
   backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? rgba(lighten(0.2, props.customBg!), 0.8) : 'initial',
+    props.customBg ? rgba(lighten(0.22, props.customBg!), 0.8) : 'initial',
 });
 
 type MiniAppProps = {

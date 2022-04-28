@@ -6,8 +6,13 @@ import { HomeButton } from './components/HomeButton';
 import { ShipTray } from './components/ShipBar';
 import { CommunityBar } from './components/CommunityBar';
 
-export const SystemBar: FC = () => {
+type SystemBarProps = {
+  onHome: () => void;
+};
+
+export const SystemBar: FC<SystemBarProps> = (props: SystemBarProps) => {
   const { shipStore } = useMst();
+  const { onHome } = props;
 
   const ship = useMemo(() => clone(shipStore.session!), [shipStore.session]);
 
@@ -18,7 +23,7 @@ export const SystemBar: FC = () => {
 
   return (
     <Flex gap={8} margin="8px" flexDirection="row">
-      <HomeButton theme={theme} />
+      <HomeButton theme={theme} onHome={onHome} />
       <CommunityBar theme={theme} />
       <ShipTray theme={theme} ship={ship} />
     </Flex>

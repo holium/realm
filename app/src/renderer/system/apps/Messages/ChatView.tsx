@@ -99,7 +99,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         left={0}
         right={0}
         style={{
-          background: rgba(lighten(0.2, backgroundColor), 0.9),
+          background: rgba(lighten(0.23, backgroundColor), 0.9),
           backdropFilter: 'blur(8px)',
           borderTop: `1px solid ${rgba(backgroundColor, 0.7)}`,
         }}

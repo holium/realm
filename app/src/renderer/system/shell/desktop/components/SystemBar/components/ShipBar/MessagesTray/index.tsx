@@ -19,7 +19,7 @@ export const MessagesTray: FC<MessagesTrayProps> = (
 
   const dimensions = {
     height: 570,
-    width: 390,
+    width: 400,
   };
 
   // messagesButtonRef.current && messagesButtonRef.current.click();
