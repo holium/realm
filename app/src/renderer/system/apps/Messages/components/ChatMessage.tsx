@@ -26,7 +26,12 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
   const primaryBubble = our === `~${message.author}`;
   const color = primaryBubble ? 'white' : undefined;
   return (
-    <Flex justifyContent={primaryBubble ? 'flex-end' : 'flex-start'} mb={2}>
+    <Flex
+      justifyContent={primaryBubble ? 'flex-end' : 'flex-start'}
+      mb={2}
+      pl={2}
+      pr={2}
+    >
       <Bubble
         primary={primaryBubble}
         customBg={

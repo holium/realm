@@ -12,6 +12,7 @@ type IProps = {
   theme: WindowThemeType;
   height: number;
   contact: string;
+  headerOffset: number;
   dimensions: {
     height: number;
     width: number;
@@ -21,7 +22,9 @@ type IProps = {
 
 export const ChatView: FC<IProps> = observer((props: IProps) => {
   let scrollView = createRef();
-  const { dimensions, contact, height, theme, onSend } = props;
+  const { dimensions, contact, height, theme, headerOffset, onSend } = props;
+  const { backgroundColor, textColor } = props.theme;
+
   const [showJumpBtn, setShowJumpBtn] = useState(false);
 
   const { shipStore } = useMst();
@@ -56,13 +59,21 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
 
   const chatLog = shipStore.session?.chat.dms.get(contact);
   return (
-    <Flex gap={2} mb={3} height={height} position="relative" overflowY="scroll">
+    <Flex
+      gap={2}
+      mb={2}
+      height={height}
+      position="relative"
+      overflowY="scroll"
+      alignContent="center"
+    >
       <ScrollView
-        width={dimensions.width - padding * 2}
-        height={dimensions.height - inputHeight - titleBarHeight}
+        width={dimensions.width}
+        height={dimensions.height}
         ref={scrollView}
         onScroll={handleScroll}
       >
+        <Flex style={{ minHeight: headerOffset }} />
         {chatLog.list.map((message: MessageType, index: number) => (
           <ChatMessage
             key={`${message.timeSent}-${message.author}-${message.type}-${index}`}
@@ -72,6 +83,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             message={message}
           />
         ))}
+        <Flex style={{ minHeight: inputHeight }} />
       </ScrollView>
       {showJumpBtn && (
         <Flex position="absolute" bottom={inputHeight + 4} right={12}>
@@ -86,6 +98,11 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         bottom={0}
         left={0}
         right={0}
+        style={{
+          background: rgba(lighten(0.2, backgroundColor), 0.9),
+          backdropFilter: 'blur(8px)',
+          borderTop: `1px solid ${rgba(backgroundColor, 0.7)}`,
+        }}
         height={inputHeight}
       >
         <Flex flex={1} pl={2} pr={2} alignItems="center">
@@ -107,11 +124,11 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
               placeholder="Write a message"
               wrapperStyle={{
                 borderRadius: 18,
-                backgroundColor: lighten(0.24, theme.backgroundColor),
+                backgroundColor: lighten(0.3, backgroundColor),
                 '&:hover': {
-                  borderColor: theme.backgroundColor,
+                  borderColor: backgroundColor,
                 },
-                borderColor: rgba(theme.backgroundColor, 0.6),
+                borderColor: rgba(backgroundColor, 0.7),
               }}
             />
           </Flex>

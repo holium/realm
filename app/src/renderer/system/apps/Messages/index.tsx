@@ -13,7 +13,7 @@ import {
   Sigil,
   Text,
 } from '../../../components';
-import { useMst } from '../../..//logic/store';
+import { useMst } from '../../../logic/store';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 
@@ -32,12 +32,29 @@ export const Chat: FC<any> = (props: ChatProps) => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const iconColor = darken(0.5, textColor);
 
+  const headerSize = 50;
+
   return (
     <>
       {selectedChat ? (
-        <Grid.Column expand noGutter overflowY="hidden">
+        <Grid.Column
+          style={{ position: 'relative' }}
+          expand
+          noGutter
+          overflowY="hidden"
+        >
           <Grid.Row
-            style={{ marginTop: 6, marginBottom: 12 }}
+            style={{
+              position: 'absolute',
+              zIndex: 5,
+              top: 0,
+              left: 0,
+              right: 0,
+              height: headerSize,
+              background: rgba(lighten(0.22, backgroundColor), 0.9),
+              backdropFilter: 'blur(8px)',
+              borderBottom: `1px solid ${rgba(backgroundColor, 0.7)}`,
+            }}
             expand
             noGutter
             align="center"
@@ -62,25 +79,38 @@ export const Chat: FC<any> = (props: ChatProps) => {
                   color={['#000000', 'white']}
                 />
               </Box>
-              <Text fontSize={3} fontWeight={500}>
+              <Text opacity={0.7} fontSize={3} fontWeight={500}>
                 {selectedChat.contact}
               </Text>
             </Flex>
-            <Flex pl={2} pr={2}>
-              <IconButton size={28} color={iconColor}>
-                <Icons name="Plus" />
+            <Flex pl={2} pr={2} mr={3}>
+              <IconButton size={26} color={iconColor}>
+                <Icons name="Phone" />
               </IconButton>
+              {/* <IconButton size={28} color={iconColor}>
+                <Icons name="More" />
+              </IconButton> */}
               {/* <IconButton size={28}>
             <Icons name="OneThirdLayout" />
           </IconButton> */}
             </Flex>
           </Grid.Row>
-          <Flex overflowY="hidden">
+          <Flex
+            style={{
+              zIndex: 4,
+              position: 'relative',
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
+            overflowY="hidden"
+          >
             <ChatView
+              headerOffset={headerSize}
               dimensions={dimensions}
               theme={props.theme}
               contact={selectedChat.contact}
-              height={dimensions.height - 61}
+              height={dimensions.height}
               onSend={(message: any) => {
                 console.log('dm message', message);
               }}
@@ -88,30 +118,67 @@ export const Chat: FC<any> = (props: ChatProps) => {
           </Flex>
         </Grid.Column>
       ) : (
-        <Grid.Column expand noGutter overflowY="hidden">
+        <Grid.Column
+          style={{ position: 'relative' }}
+          expand
+          noGutter
+          overflowY="hidden"
+        >
           <Grid.Row
-            style={{ marginTop: 6, marginBottom: 12 }}
+            style={{
+              position: 'absolute',
+              zIndex: 5,
+              top: 0,
+              left: 0,
+              right: 0,
+              height: headerSize,
+              background: rgba(lighten(0.22, backgroundColor), 0.9),
+              backdropFilter: 'blur(8px)',
+              borderBottom: `1px solid ${rgba(backgroundColor, 0.7)}`,
+            }}
             expand
             noGutter
             align="center"
           >
-            <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
-              <Icons name="Messages" size={20} mr={1} />
+            <Flex
+              pl={3}
+              pr={4}
+              mr={4}
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Icons opacity={0.8} name="Messages" size={24} mr={2} />
+              <Text
+                opacity={0.7}
+                style={{ textTransform: 'uppercase' }}
+                fontWeight={600}
+              >
+                DMs
+              </Text>
             </Flex>
+            {/* <Flex
+              ml={2}
+              pl={3}
+              pr={4}
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Icons name="Messages" size={20} mr={1} />
+            </Flex> */}
             <Flex flex={1}>
               <Input
                 placeholder="Search"
                 wrapperStyle={{
                   borderRadius: 18,
-                  backgroundColor: lighten(0.24, backgroundColor),
+                  backgroundColor: lighten(0.3, backgroundColor),
                   '&:hover': {
                     borderColor: backgroundColor,
                   },
-                  borderColor: rgba(backgroundColor, 0.6),
+                  borderColor: rgba(backgroundColor, 0.7),
                 }}
               />
             </Flex>
-            <Flex pl={2} pr={2}>
+            <Flex mr={2} pl={2} pr={2}>
               <IconButton size={28} color={iconColor}>
                 <Icons name="Plus" />
               </IconButton>
@@ -120,10 +187,23 @@ export const Chat: FC<any> = (props: ChatProps) => {
           </IconButton> */}
             </Flex>
           </Grid.Row>
-          <Flex overflowY="hidden">
+          <Flex
+            style={{
+              zIndex: 4,
+              position: 'relative',
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}
+            pl={1}
+            pr={1}
+            mb={headerSize}
+            overflowY="hidden"
+          >
             <DMs
               theme={props.theme}
-              height={dimensions.height - 61}
+              headerOffset={headerSize}
+              height={dimensions.height}
               onSelectDm={(dm: any) => {
                 setSelectedChat(dm);
                 console.log('selecting dm', dm);

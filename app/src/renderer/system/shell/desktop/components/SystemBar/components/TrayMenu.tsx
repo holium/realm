@@ -35,7 +35,7 @@ export type TrayMenuProps = {
 const Wrapper = styled(motion.div)`
   position: absolute;
   box-sizing: border-box;
-  max-width: 20rem;
+  /* max-width: 20rem; */
 `;
 
 export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`

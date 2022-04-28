@@ -1,8 +1,8 @@
 import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill, Top } from 'react-spaces';
-import { SystemBar } from './components/system-bar';
-import { AppGrid } from './components/app-grid';
+import { SystemBar } from './components/SystemBar';
+import { AppGrid } from './components/AppGrid';
 import { useMst } from '../../../logic/store';
 
 type OSFrameProps = {

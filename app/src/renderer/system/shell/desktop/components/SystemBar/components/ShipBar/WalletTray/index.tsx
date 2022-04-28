@@ -4,9 +4,10 @@ import { IconButton, Icons } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
+import { Wallet } from '../../../../../../../apps/Wallet';
 
 type WalletTrayProps = {
-  theme: Partial<WindowThemeType>;
+  theme: WindowThemeType;
 };
 
 export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {
@@ -15,7 +16,7 @@ export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {
   const appRef = createRef<HTMLDivElement>();
 
   const dimensions = {
-    height: 330,
+    height: 360,
     width: 330,
   };
 
@@ -32,7 +33,9 @@ export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {
           dimensions={dimensions}
           backgroundColor={backgroundColor}
           textColor={textColor}
-        />
+        >
+          <Wallet theme={props.theme} dimensions={dimensions} />
+        </MiniApp>
       }
     >
       <IconButton

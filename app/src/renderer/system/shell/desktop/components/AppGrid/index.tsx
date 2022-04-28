@@ -25,7 +25,7 @@ export const AppGrid: FC<any> = observer(() => {
   return useMemo(
     () => (
       <Flex gap={16} flexDirection="row">
-        {spaceStore.appGrid.map((app) =>
+        {spaceStore.appGrid.map((app: any) =>
           app.image ? (
             <Box
               minWidth={sizes[tileSize]}

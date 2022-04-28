@@ -79,9 +79,9 @@ export const Message: FC<DMContact> = (props: DMContact) => {
       if (isImage(message)) {
         message = (
           <img
-            style={{ borderRadius: 8, minHeight: 250 }}
-            height={250}
-            width={'100%'}
+            style={{ borderRadius: 8 }}
+            height="auto"
+            width={250}
             src={message}
           />
         );

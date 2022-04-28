@@ -42,7 +42,7 @@ export const Bubble = styled(motion.div)<BubbleProps>`
     display: block;
     margin-bottom: 8px;
     // max-width: calc(100% - 12px);
-    // max-height: calc(100% - 12px);
+    // max-height: 300px;
     height: auto;
     border-radius: inherit;
   }

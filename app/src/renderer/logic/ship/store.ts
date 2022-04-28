@@ -87,6 +87,7 @@ export const ShipModel = types
   .actions((self) => ({
     login() {
       console.log('use password to decrypt all stores and load context state');
+      self.chat.loader.set('loading');
       // window.electron
       self.loggedIn = true;
       const action = {
@@ -185,6 +186,9 @@ export const ShipStore: any = types
     },
     syncPatches: (patchEffect: any) => {
       const patchingShip = self.ships.get(patchEffect.key);
+      if (patchingShip?.chat.loader.isLoading) {
+        patchingShip?.chat.loader.set('loaded');
+      }
       applyPatch(patchingShip, patchEffect.patch);
     },
     setSession: (shipRef: any) => {
