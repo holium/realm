@@ -12,7 +12,7 @@ export default function App() {
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle />
           {/* Modal provider */}
-          <Shell isFullscreen={true} />
+          <Shell isFullscreen={false} />
           <div id="portal-root" />
         </MotionConfig>
       </ThemeProvider>

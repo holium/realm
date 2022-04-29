@@ -6,9 +6,10 @@ import { WindowThemeType } from '../../../../../../../../logic/stores/config';
 import { TrayButton } from '../../TrayButton';
 import { TrayMenu } from '../../TrayMenu';
 import { MiniApp } from '../../MiniAppWindow';
+import { Spaces } from '../../../../../../../apps/Spaces';
 
 type SpaceSelectorProps = {
-  theme: Partial<WindowThemeType>;
+  theme: WindowThemeType;
 };
 
 export const SpaceSelector: FC<SpaceSelectorProps> = (
@@ -32,7 +33,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
       buttonRef={selectorRef}
       dimensions={dimensions}
       position="top-right"
-      buttonOffset={{ x: 2 }}
+      buttonOffset={{ x: 4 }}
       content={
         <MiniApp
           id="spaces-tray-app"
@@ -40,7 +41,9 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
           dimensions={dimensions}
           backgroundColor={backgroundColor}
           textColor={textColor}
-        />
+        >
+          <Spaces theme={props.theme} dimensions={dimensions} />
+        </MiniApp>
       }
     >
       <TrayButton
@@ -87,7 +90,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
             fontSize={2}
             fontWeight={500}
           >
-            {shipStore.session.patp.substring(1)}
+            {shipStore.session.nickname || shipStore.session.patp.substring(1)}
           </Text>
         </Flex>
       </TrayButton>

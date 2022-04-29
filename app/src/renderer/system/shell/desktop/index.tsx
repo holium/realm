@@ -7,6 +7,7 @@ import { useMst } from '../../../logic/store';
 import AppWindow from './components/AppWindow';
 import { clone } from 'mobx-state-tree';
 import { Browser } from '../../apps/Browser';
+import { AnimatePresence } from 'framer-motion';
 
 type OSFrameProps = {
   isFullscreen?: boolean;
@@ -15,7 +16,7 @@ type OSFrameProps = {
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
   const { shipStore } = useMst();
-  const [showDesktop, setShowDesktop] = useState(true);
+  const [showDesktop, setShowDesktop] = useState(false);
 
   const ship = useMemo(() => clone(shipStore.session!), [shipStore.session]);
 
@@ -33,9 +34,18 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
   // }
   return (
     <Fill>
+      <AnimatePresence>
+        {showDesktop && (
+          <AppWindow theme={theme}>
+            {/* @ts-expect-error */}
+            <Browser theme={theme} />
+          </AppWindow>
+        )}
+      </AnimatePresence>
+
       <Layer zIndex={1}>
         <Bottom size={58}>
-          <SystemBar onHome={() => setShowDesktop(false)} />
+          <SystemBar onHome={() => setShowDesktop(!showDesktop)} />
         </Bottom>
       </Layer>
     </Fill>

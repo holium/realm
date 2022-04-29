@@ -12,7 +12,7 @@ type MiniAppStyleProps = {
 };
 
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
-  border-radius: 9px;
+  border-radius: 16px;
   backdrop-filter: blur(16px);
   width: 270px;
   box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};

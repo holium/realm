@@ -58,7 +58,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
       >
         <Flex pl={4} pr={4} justifyContent="center" alignItems="center">
           {/* <Icons opacity={0.8} name="Wallet" size={24} mr={2} /> */}
-          <Text opacity={0.7} fontWeight={600}>
+          <Text opacity={0.8} fontWeight={600}>
             {shipStore.session.patp}
           </Text>
         </Flex>

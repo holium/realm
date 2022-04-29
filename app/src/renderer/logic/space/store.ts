@@ -2,6 +2,15 @@ import { LoaderModel } from './../stores/common/loader';
 import { types, Instance, flow } from 'mobx-state-tree';
 import { getApps } from './app/api';
 
+export const GroupMetadataModel = types.model({
+  color: types.string,
+  description: types.maybeNull(types.string),
+  picture: types.maybeNull(types.string),
+  title: types.maybeNull(types.string),
+});
+
+export type GroupModelType = Instance<typeof GroupMetadataModel>;
+
 export const AppModel = types.model({
   title: types.string,
   info: types.string,

@@ -79,7 +79,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
                   color={['#000000', 'white']}
                 />
               </Box>
-              <Text opacity={0.7} fontSize={3} fontWeight={500}>
+              <Text fontSize={3} fontWeight={500}>
                 {selectedChat.contact}
               </Text>
             </Flex>
@@ -149,7 +149,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
             >
               <Icons opacity={0.8} name="Messages" size={24} mr={2} />
               <Text
-                opacity={0.7}
+                opacity={0.8}
                 style={{ textTransform: 'uppercase' }}
                 fontWeight={600}
               >

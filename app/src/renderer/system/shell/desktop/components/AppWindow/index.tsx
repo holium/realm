@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { ThemeType } from '../../../../../theme';
 import { WindowThemeType } from '../../../../../logic/stores/config';
 import { Fill } from 'react-spaces';
+import { Titlebar } from './components/Titlebar';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -28,6 +29,7 @@ export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
 
 type AppWindowProps = {
   theme: Partial<WindowThemeType>;
+  hideTitlebar?: boolean;
   children: React.ReactNode;
 };
 
@@ -37,16 +39,39 @@ export const AppWindow: FC<AppWindowProps> = (props: AppWindowProps) => {
   return (
     <Fill style={{ bottom: 50, padding: '8px' }}>
       <AppWindowStyle
+        initial={{
+          opacity: 0,
+          y: 8,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: 0.15,
+          },
+        }}
+        exit={{
+          opacity: 0,
+          y: 8,
+          transition: {
+            duration: 0.15,
+          },
+        }}
         style={{
           overflowY: 'hidden',
         }}
         color={textColor}
         customBg={backgroundColor}
       >
+        <Titlebar theme={theme} app={{ title: 'Browser' }} />
         {children}
       </AppWindowStyle>
     </Fill>
   );
+};
+
+AppWindow.defaultProps = {
+  hideTitlebar: false,
 };
 
 export default AppWindow;

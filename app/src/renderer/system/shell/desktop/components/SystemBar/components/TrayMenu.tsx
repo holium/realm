@@ -137,7 +137,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
     >
       <Portal>
         <AnimatePresence>
-          {isVisible && coords && (
+          {isVisible && (
             <Wrapper
               key={`${id}-trayMenu`}
               style={coords}
@@ -149,7 +149,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
               }}
               animate={{
                 opacity: 1,
-                y: 0,
+                y: 4,
                 width: dimensions.width,
                 height: dimensions.height,
                 transition: {
@@ -158,7 +158,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
               }}
               exit={{
                 opacity: 0,
-                y: 0,
+                y: 8,
                 height: dimensions.height / 2,
                 width: dimensions.width,
                 transition: {
