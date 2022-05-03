@@ -1,72 +1,46 @@
-import { FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, lighten, darken } from 'polished';
+import { FC } from 'react';
 
-import { WindowThemeType } from '../../../logic/stores/config';
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  Sigil,
-  MenuItem,
-  TextButton,
-  Text,
-} from '../../../components';
-import styled from 'styled-components';
-import { Space } from './SpacesList';
-import { ShipModelType } from '~realm/ship/store';
+import { Flex, Sigil, Text } from '../../../components';
+import { useMst, useShip } from '../../../logic/store';
 
-const EmptyGroup = styled.div`
-  height: 32px;
-  width: 32px;
-  background: ${(p) => p.color || '#000'};
-  border-radius: 4px;
-`;
+import { ShipModelType } from '~realm/ship/stores/ship';
+import { SpaceRowStyle } from './SpaceRow';
 
-const SpaceRowStyle = styled.div`
-  height: 48px;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  cursor: pointer;
-  /* &:hover {
-
-  } */
-`;
-
-type SpaceRowProps = { ship: ShipModelType };
+type SpaceRowProps = { ship: ShipModelType; selected?: boolean };
 
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
-  const { ship } = props;
+  const { selected } = props;
+  const { ship } = useShip();
+  const currentShip = ship!;
+  const theme = currentShip!.theme;
   return (
-    <SpaceRowStyle>
-      <Flex alignItems="center">
-        <Sigil
-          simple
-          borderRadiusOverride="6px"
-          size={32}
-          avatar={ship.avatar}
-          patp={ship.patp}
-          color={[ship.color || '#000000', 'white']}
-        />
-        <Flex ml={2} flexDirection="column">
-          <Text
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}
-            fontSize={3}
-            fontWeight={500}
-            variant="body"
-          >
-            {ship.nickname || ship.patp}
-          </Text>
-        </Flex>
+    <SpaceRowStyle
+      style={{ width: '100%' }}
+      selected={selected}
+      customBg={theme.dockColor}
+    >
+      <Sigil
+        simple
+        borderRadiusOverride="6px"
+        size={32}
+        avatar={currentShip.avatar}
+        patp={currentShip.patp}
+        color={[currentShip.color || '#000000', 'white']}
+      />
+      <Flex ml={2} flexDirection="column">
+        <Text
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+          // color={selected ? 'initial' : 'initial'}
+          fontSize={3}
+          fontWeight={500}
+          variant="body"
+        >
+          {currentShip.nickname || currentShip.patp}
+        </Text>
       </Flex>
     </SpaceRowStyle>
   );

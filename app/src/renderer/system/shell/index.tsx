@@ -1,12 +1,10 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ViewPort, Top } from 'react-spaces';
-import { average, prominent } from 'color.js';
 import { AnimatePresence } from 'framer-motion';
-import { useMst } from '../../logic/store';
+import { useAuth, useMst, useShip } from '../../logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import { detectTextTheme, bgIsLightOrDark } from '../../logic/utils/color';
 import {
   BackgroundDarken,
   BackgroundImage,
@@ -19,39 +17,18 @@ type ShellProps = {
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   const { isFullscreen } = props;
-  const { shipStore, spaceStore } = useMst();
+  const { themeStore } = useMst();
+  const { authStore } = useAuth();
+  const { ship } = useShip();
 
-  const bgImage = useMemo(
-    () => shipStore.session?.wallpaper || 'https://source.unsplash.com/random',
-    [shipStore.session?.wallpaper]
-  );
-
-  useEffect(() => {
-    shipStore.getShips();
-  }, []);
-
-  useEffect(() => {
-    average(bgImage, { group: 15, format: 'hex' }).then((color) => {
-      // console.log(color);
-      // if (!shipStore.session?.theme.backgroundColor) {
-      let bgLuminosity = shipStore.session?.theme.textTheme;
-      if (!bgLuminosity) {
-        bgLuminosity = bgIsLightOrDark(color.toString());
-      }
-      // configStore
-      shipStore.session?.setTheme({
-        backgroundColor: color.toString(),
-        textColor: 'text.primary',
-        textTheme: bgLuminosity,
-      });
-      // }
-    });
-  }, [bgImage]);
+  const wallpaper = themeStore.wallpaper;
+  const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
   // const loggedIn = true; // shipStore.session?.loggedIn;
 
-  const loggedIn = shipStore.session?.loggedIn && !shipStore.isLoading;
+  const loggedIn = authStore.selected?.loggedIn && !authStore.isLoading;
+  const shipLoaded = ship && ship.isLoaded;
 
   return (
     <ViewPort>
@@ -65,12 +42,13 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
           />
         )}
         {loggedIn ? (
-          <Desktop hasWallpaper={hasWallpaper} isFullscreen={isFullscreen} />
-        ) : (
-          <Auth
-            hasWallpaper={hasWallpaper}
-            textTheme={shipStore.session?.theme.textTheme!}
+          <Desktop
+            hasLoaded={shipLoaded}
+            hasWallpaper={true}
+            isFullscreen={false}
           />
+        ) : (
+          <Auth hasWallpaper={hasWallpaper} />
         )}
       </BackgroundFill>
     </ViewPort>
@@ -114,3 +92,20 @@ const BgImage = ({
     </BackgroundDarken>
   );
 };
+
+// const ShipDesktop = observer(() => {
+//   const { ship } = useShip();
+//   useEffect(() => {
+//     // ship.ini
+//   }, []);
+//   console.log('ship', ship);
+//   return (
+//     <ShipProvider value={shipState}>
+//       {ship && ship.isLoaded ? (
+//         <Desktop hasWallpaper={true} isFullscreen={false} />
+//       ) : (
+//         <Splash />
+//       )}
+//     </ShipProvider>
+//   );
+// });

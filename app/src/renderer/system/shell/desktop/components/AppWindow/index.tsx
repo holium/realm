@@ -21,6 +21,7 @@ export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
   box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
   border: 1px solid
     ${(props: AppWindowStyleProps) => rgba(props.customBg!, 0.7)};
+  --webkit-transform: translate3d(0, 0, 0);
 `)<AppWindowStyleProps>({
   // @ts-expect-error annoying
   backgroundColor: (props: SystemBarStyleProps) =>

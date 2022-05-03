@@ -1,20 +1,9 @@
-import { FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
+import { FC } from 'react';
 import { rgba, lighten, darken } from 'polished';
-
 import { WindowThemeType } from '../../../logic/stores/config';
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  Sigil,
-  Text,
-} from '../../../components';
-import { useMst } from '../../../logic/store';
+import { Grid, Flex, IconButton, Icons, Text } from '../../../components';
 import { WalletMain } from './components/WalletMain';
+import { Titlebar } from 'renderer/system/shell/desktop/components/AppWindow/components/Titlebar';
 
 type WalletProps = {
   theme: WindowThemeType;
@@ -26,9 +15,9 @@ type WalletProps = {
 
 export const Wallet: FC<WalletProps> = (props: WalletProps) => {
   const { dimensions } = props;
-  const { backgroundColor, textColor } = props.theme;
+  const { windowColor, dockColor, backgroundColor, textColor } = props.theme;
 
-  const iconColor = darken(0.5, textColor);
+  const iconColor = darken(0.5, textColor!);
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -36,23 +25,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
       noGutter
       overflowY="hidden"
     >
-      <Grid.Row
-        style={{
-          position: 'absolute',
-          zIndex: 5,
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 50,
-          background: rgba(lighten(0.2, backgroundColor), 0.9),
-          // backdropFilter: 'blur(8px)',
-          borderBottom: `1px solid ${rgba(backgroundColor, 0.7)}`,
-        }}
-        expand
-        noGutter
-        justify="space-between"
-        align="center"
-      >
+      <Titlebar hasBorder theme={props.theme}>
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
           <Icons opacity={0.8} name="Wallet" size={24} mr={2} />
           <Text
@@ -67,7 +40,14 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
         <Flex
           minHeight={22}
           // minWidth={150}
-          style={{ borderRadius: 5, minWidth: 120, cursor: 'pointer' }}
+          style={{
+            borderRadius: 5,
+            borderWidth: 1,
+            borderStyle: 'solid',
+            borderColor: rgba(windowColor!, 0.4),
+            minWidth: 120,
+            cursor: 'pointer',
+          }}
           pt={1}
           pl={2}
           pb={1}
@@ -76,7 +56,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
           flexDirection="row"
           justifyContent="space-between"
           alignItems="space-between"
-          background={rgba(lighten(0.27, backgroundColor), 0.9)}
+          background={rgba(dockColor, 1)}
         >
           <Text
             display="flex"
@@ -121,7 +101,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
           </Text>
           <Icons name="ArrowDown" opacity={0.4} />
         </Flex>
-      </Grid.Row>
+      </Titlebar>
 
       <Flex
         position="absolute"
@@ -136,9 +116,9 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
         justify="space-between"
         align="center"
         style={{
-          background: rgba(lighten(0.2, backgroundColor), 0.9),
+          background: rgba(lighten(0.225, windowColor!), 0.9),
           // backdropFilter: 'blur(8px)',
-          borderTop: `1px solid ${rgba(backgroundColor, 0.7)}`,
+          borderTop: `1px solid ${rgba(windowColor!, 0.7)}`,
           position: 'absolute',
           padding: '0 8px',
           bottom: 0,

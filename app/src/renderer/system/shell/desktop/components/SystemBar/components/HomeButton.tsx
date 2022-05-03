@@ -1,17 +1,20 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { SystemBarStyle } from '../SystemBar.styles';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import HoliumAnimated from '../../../../../../components/Icons/holium';
 import { WindowThemeType } from 'renderer/logic/stores/config';
+import { useMst } from '../../../../../../logic/store';
+import { observer } from 'mobx-react';
 
 type HomeButton = {
-  theme: Partial<WindowThemeType>;
   onHome: () => void;
+  theme: WindowThemeType;
 };
 
-export const HomeButton: FC<HomeButton> = (props: HomeButton) => {
-  const { onHome } = props;
-  const { backgroundColor, textColor } = props.theme;
+export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
+  const { onHome, theme } = props;
+
+  const { dockColor, textColor } = theme;
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
@@ -47,12 +50,12 @@ export const HomeButton: FC<HomeButton> = (props: HomeButton) => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        customBg={backgroundColor}
+        customBg={dockColor}
       >
         <HoliumAnimated width="22px" height="22px" fill={textColor} />
       </SystemBarStyle>
     </motion.div>
   );
-};
+});
 
 export default { HomeButton };

@@ -7,6 +7,16 @@ export async function sendAction(action: any) {
   }
 }
 
+export async function onStart() {
+  try {
+    const response = await window.electron.core.onStart();
+    return [response, null];
+  } catch (err) {
+    return [null, err];
+  }
+}
+
 export default {
   sendAction,
+  onStart,
 };

@@ -16,7 +16,7 @@ export const BackgroundImage = styled(motion.img)`
       bottom: -22px; */
       width: calc(100% + 40px);
       height: calc(100vh + 42px);
-      opacity: 0.5;
+      object-fit: cover;
       background-repeat: no-repeat;
       background-size: cover;
       background-position: center;

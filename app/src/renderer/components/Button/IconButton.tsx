@@ -13,7 +13,7 @@ import {
   TypographyProps,
 } from 'styled-system';
 import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
+import { rgba, darken, lighten } from 'polished';
 import type { ThemeType } from '../../theme';
 
 type IProps = {
@@ -97,16 +97,18 @@ export const IconButton = styled(styled(motion.button)<IProps>`
         }
       }
     `}
-
   ${(props: IProps) =>
     props.customBg &&
     css`
       &:hover {
+        transition: ${(props: IProps) => props.theme.transition};
         background-color: ${props.customBg
-          ? darken(0.22, props.customBg)
+          ? rgba(lighten(0.1, props.customBg), 0.5)
           : 'inherit'};
       }
     `}
+
+  
 
   &:disabled {
     color: ${(props) => props.theme.colors.ui.disabled};
@@ -126,11 +128,11 @@ export const IconButton = styled(styled(motion.button)<IProps>`
 `)<IProps>(
   {
     cursor: 'pointer',
-    '&:hover': {
-      // @ts-expect-error stupid
-      backgroundColor: (props: IProps) =>
-        props.customBg ? darken(0.22, props.customBg) : 'initial',
-    },
+    // '&:hover': {
+    //   // @ts-expect-error stupid
+    //   backgroundColor: (props: IProps) =>
+    //     props.customBg ? darken(0.22, props.customBg) : 'initial',
+    // },
   },
   compose(space, size, color, layout, typography)
 );

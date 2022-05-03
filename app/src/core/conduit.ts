@@ -39,6 +39,9 @@ type WireHandlerType = {
   onQuit?: (data: any) => void;
 };
 
+// TODO catch Promise rejections on subcription cancelled
+// eyre: no subscription for request-id 2
+// http: %cancel not handled yet
 export class Conduit extends EventEmitter {
   url: string;
   ship: string;
@@ -51,6 +54,7 @@ export class Conduit extends EventEmitter {
     { id: number; app: string; path: string; handlers: WireHandlerType }
   >;
   isConnected: boolean = false;
+  controller = new AbortController();
   private channelUrl: string = '';
   private channelId: string = '';
 
@@ -77,7 +81,7 @@ export class Conduit extends EventEmitter {
 
   initialize() {
     this.channelId = `${generateChannelId()}`;
-    this.action('hood', 'opening airlock', 'helm-hi')
+    this.action('hood', 'opening Realm airlock', 'helm-hi')
       .then((actionResponse: any) => {
         const { response, msgId } = actionResponse;
         this.cookie = response.headers['set-cookie']![0];
@@ -141,6 +145,7 @@ export class Conduit extends EventEmitter {
       url: this.channelUrl,
       method: 'PUT',
       headers: this.headers,
+      signal: this.controller.signal,
       data: [
         {
           action: 'ack',
@@ -181,6 +186,7 @@ export class Conduit extends EventEmitter {
       url: this.channelUrl,
       method: 'PUT',
       headers: this.headers,
+      signal: this.controller.signal,
       data: [
         {
           id: msgId,
@@ -201,6 +207,7 @@ export class Conduit extends EventEmitter {
       url: this.channelUrl,
       method: 'PUT',
       headers: this.headers,
+      signal: this.controller.signal,
       data: [
         {
           id: msgId,
@@ -220,6 +227,7 @@ export class Conduit extends EventEmitter {
       const response = await axios.request({
         url: `${this.url}/~/scry/${app}${path}.json`,
         headers: this.headers,
+        signal: this.controller.signal,
       });
       if (response.status === 200) {
         return { response: 'scry', json: { app, path, data: response.data } };
@@ -232,12 +240,59 @@ export class Conduit extends EventEmitter {
     }
   }
 
+  static async scryFetch(
+    url: string,
+    cookie: string,
+    app: string,
+    path: string
+  ) {
+    const headers = {
+      'Content-Type': 'application/json',
+      Cookie: cookie,
+    };
+    try {
+      const response = await axios.request({
+        url: `${url}/~/scry/${app}${path}.json`,
+        headers: headers,
+      });
+      if (response.status === 200) {
+        return { response: 'scry', json: { app, path, data: response.data } };
+      }
+      return { response: 'scry', json: null };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  static async poke(url: string, cookie: string, app: string, data: any) {
+    const headers = {
+      'Content-Type': 'application/json',
+      Cookie: cookie,
+    };
+    // TODO
+    // try {
+    //   const response = await axios.request({
+    //     url: `${url}/~/scry/${app}${path}.json`,
+    //     headers: headers,
+    //   });
+    //   if (response.status === 200) {
+    //     return { response: 'scry', json: { app, path, data: response.data } };
+    //   }
+    //   return { response: 'scry', json: null };
+    // } catch (err) {
+    //   console.log(err);
+    //   throw err;
+    // }
+  }
+
   async unsubscribe(id: number) {
     return axios
       .request({
         url: this.channelUrl,
         method: 'PUT',
         headers: this.headers,
+        signal: this.controller.signal,
         data: [
           {
             id: id,
@@ -262,8 +317,12 @@ export class Conduit extends EventEmitter {
 
   async close() {
     this.isConnected = false;
-    this.wires = new Map();
+    await Promise.all(
+      Array.from(this.wires.keys()).map((id: number) => this.unsubscribe(id))
+    );
     this.sse?.close();
+    this.controller.abort(); // cancels all requests
+    this.wires = new Map();
   }
 }
 

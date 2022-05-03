@@ -1,3 +1,4 @@
+import { ContactModel, ContactStore } from './stores/contacts';
 import { toJS } from 'mobx';
 
 import { ipcRenderer, ipcMain } from 'electron';
@@ -5,8 +6,15 @@ import Store from 'electron-store';
 import EventEmitter from 'events';
 import { Conduit } from '../conduit';
 import { ShipInfoType } from './types';
-import { ShipModel, ShipModelType } from './store';
-import { onSnapshot, onPatch } from 'mobx-state-tree';
+import { ShipModel, ShipModelType } from './stores/ship';
+import { ChatStore } from './stores/dms';
+import {
+  onSnapshot,
+  onPatch,
+  castToSnapshot,
+  getSnapshot,
+  destroy,
+} from 'mobx-state-tree';
 
 export type ShipPreloadType = {
   getApps: () => Promise<any>;
@@ -22,13 +30,14 @@ export class ShipManager extends EventEmitter {
   constructor() {
     super();
     // TODO password protect data
-    this.store = new Store({
+    this.store = new Store<Record<string, ShipModelType>>({
       name: 'ship.manager',
       accessPropertiesByDotNotation: true,
     });
     this.getApps = this.getApps.bind(this);
     this.getDMs = this.getDMs.bind(this);
     this.onEffect = this.onEffect.bind(this);
+    this.init = this.init.bind(this);
   }
   //
   initialize() {
@@ -37,14 +46,12 @@ export class ShipManager extends EventEmitter {
   }
   //
   subscribe(conduit: Conduit, ship: string, shipInfo: any) {
+    console.log('SUBSCRIBING');
     this.ship = ship;
     this.conduit = conduit;
     const shipPath: string = `ship.manager.${this.ship}`;
     let persistedState: ShipModelType = this.store.get(shipPath);
-    if (!persistedState) {
-      persistedState = shipInfo;
-    }
-
+    console.log(persistedState.patp);
     this.stateTree = ShipModel.create({
       patp: this.ship,
       url: persistedState.url,
@@ -52,15 +59,20 @@ export class ShipManager extends EventEmitter {
       color: persistedState.color || null,
       nickname: persistedState.nickname || null,
       avatar: persistedState.avatar || null,
-      theme: {
-        textColor: persistedState.theme.textColor || 'light',
-        backgroundColor: persistedState.theme.backgroundColor || '#FFFFFF50',
-      },
+      theme: castToSnapshot(persistedState.theme),
+      chat: persistedState.chat
+        ? castToSnapshot(persistedState.chat)
+        : { loader: { state: 'initial' } },
+      contacts: persistedState.contacts
+        ? castToSnapshot(persistedState.contacts)
+        : { ourPatp: this.ship },
     });
+
     onSnapshot(this.stateTree, (snapshot: any) => {
       // console.log('snapshotting, sync with UI', snapshot);
       this.store.set(shipPath, snapshot);
     });
+
     onPatch(this.stateTree, (patch) => {
       // send patches to UI store
       const patchEffect = {
@@ -73,28 +85,30 @@ export class ShipManager extends EventEmitter {
     });
 
     const syncEffect = {
-      model: toJS(this.stateTree),
+      model: getSnapshot(this.stateTree),
       resource: 'ship',
       key: this.ship,
       response: 'initial',
     };
     this.onEffect(syncEffect);
-    // conduit.subscribe('contact-store', '/all', { onEvent: this.onEffect });
+    conduit.subscribe('contact-store', '/all', {
+      onEvent: (data: any) => this.stateTree?.contacts.setInitial(data.json),
+    });
     // conduit.subscribe('metadata-store', '/app-name/groups', {
     //   onEvent: this.onEffect,
     // });
     // load initial dms
     this.getDMs().then((response) => {
-      this.stateTree!.chat.setDMs(
+      this.stateTree?.chat.setDMs(
         this.ship,
         response['graph-update']['add-graph']['graph']
       );
     });
   }
 
-  async init(_event: any, ship: string) {
+  async init(ship: string) {
     const syncEffect = {
-      model: toJS(this.stateTree),
+      model: getSnapshot(this.stateTree!),
       resource: 'ship',
       key: ship,
       response: 'initial',
@@ -124,7 +138,10 @@ export class ShipManager extends EventEmitter {
     return json!.data;
   }
 
-  lock() {}
+  lock() {
+    destroy(this.stateTree);
+    // TODO verify data is encrypted on lock
+  }
   // -------------------------------------------------------
   // ----------------------- ACTIONS -----------------------
   // -------------------------------------------------------
@@ -137,7 +154,6 @@ export class ShipManager extends EventEmitter {
       value: any;
     };
   }) {
-    console.log(this.store);
     this.store.set(
       `${action.resource}.${action.context.ship}.${action.data.key}`,
       action.data.value

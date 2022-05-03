@@ -1,26 +1,31 @@
-import React, { FC, useRef, createRef } from 'react';
+import React, { FC, useMemo, useRef, createRef } from 'react';
 import { motion } from 'framer-motion';
-import { IconButton, Icons } from '../../../../../../../../components';
+import { observer, useObserver } from 'mobx-react';
+import { useMst } from '../../../../../../../../logic/store';
+import { IconButton, Icons, Badge } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { Chat } from '../../../../../../../apps/Messages';
 
 type MessagesTrayProps = {
-  theme: Partial<WindowThemeType>;
+  theme: WindowThemeType;
+};
+
+const iconSize = 28;
+const dimensions = {
+  height: 600,
+  width: 390,
 };
 
 export const MessagesTray: FC<MessagesTrayProps> = (
   props: MessagesTrayProps
 ) => {
-  const { backgroundColor, textColor } = props.theme;
-  const messagesButtonRef = createRef<HTMLButtonElement>();
-  const appRef = createRef<HTMLDivElement>();
+  const { theme } = props;
+  const messagesButtonRef = useRef<HTMLButtonElement>(null);
+  const { dockColor, windowColor, textColor } = theme;
 
-  const dimensions = {
-    height: 600,
-    width: 390,
-  };
+  const appRef = createRef<HTMLDivElement>();
 
   // messagesButtonRef.current && messagesButtonRef.current.click();
   return (
@@ -34,25 +39,34 @@ export const MessagesTray: FC<MessagesTrayProps> = (
           id="messages-tray-app"
           ref={appRef}
           dimensions={dimensions}
-          backgroundColor={backgroundColor}
+          backgroundColor={windowColor}
           textColor={textColor}
         >
-          <Chat theme={props.theme} dimensions={dimensions} />
+          <Chat theme={theme} dimensions={dimensions} />
         </MiniApp>
       }
     >
-      <IconButton
-        id="messages-tray-icon"
-        ref={messagesButtonRef}
-        size={28}
-        customBg={backgroundColor}
-        // data-selected
-        color={textColor}
-        whileTap={{ scale: 0.9 }}
-        transition={{ scale: 0.1 }}
+      <Badge
+        wrapperHeight={iconSize}
+        wrapperWidth={iconSize}
+        top={1}
+        right={1}
+        minimal
+        count={0}
       >
-        <Icons name="Messages" pointerEvents="none" />
-      </IconButton>
+        <IconButton
+          id="messages-tray-icon"
+          ref={messagesButtonRef}
+          size={iconSize}
+          customBg={dockColor}
+          // data-selected
+          color={textColor}
+          whileTap={{ scale: 0.9 }}
+          transition={{ scale: 0.1 }}
+        >
+          <Icons name="Messages" pointerEvents="none" />
+        </IconButton>
+      </Badge>
     </TrayMenu>
   );
 };

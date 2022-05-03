@@ -1,30 +1,32 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
-import { WindowThemeType } from '../../../logic/stores/config';
-import { useMst } from '../../../logic/store';
+import { ThemeStoreType } from '../../../logic/theme/store';
+import { useMst, useShip } from '../../../logic/store';
 
 import { Grid, Flex, IconButton, Icons, Text } from '../../../components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 
-type ProfileProps = {
-  theme: WindowThemeType;
+type SpacesProps = {
+  theme: ThemeStoreType;
   dimensions: {
     height: number;
     width: number;
   };
 };
 
-export const Spaces: FC<ProfileProps> = (props: ProfileProps) => {
-  const { shipStore } = useMst();
+export const Spaces: FC<SpacesProps> = (props: SpacesProps) => {
+  const { ship } = useShip();
   const { dimensions } = props;
-  const { backgroundColor, textColor } = props.theme;
 
-  const iconColor = darken(0.5, textColor);
+  const spaceTheme = useMemo(() => ship!.theme, [ship!.theme]);
+  const { backgroundColor, textColor, dockColor, iconColor } = spaceTheme;
+
+  // const iconColor = darken(0.5, textColor);
   const bgHover = lighten(0.1, backgroundColor);
-  const bottomHeight = 54;
+  const bottomHeight = 58;
 
   return (
     <Grid.Column
@@ -43,9 +45,6 @@ export const Spaces: FC<ProfileProps> = (props: ProfileProps) => {
           height: 50,
           paddingLeft: 16,
           paddingRight: 16,
-          // background: rgba(lighten(0.2, backgroundColor), 0.9),
-          // backdropFilter: 'blur(8px)',
-          // borderBottom: `1px solid ${rgba(backgroundColor, 0.7)}`,
         }}
         expand
         noGutter
@@ -59,14 +58,12 @@ export const Spaces: FC<ProfileProps> = (props: ProfileProps) => {
         >
           Spaces
         </Text>
-        <IconButton size={28} color={iconColor}>
+        <IconButton customBg={dockColor} size={28} color={iconColor}>
           <Icons name="Plus" />
         </IconButton>
       </Grid.Row>
       <Flex
         position="absolute"
-        pl={12}
-        pr={12}
         width="100%"
         style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
         overflowY="hidden"
@@ -79,11 +76,13 @@ export const Spaces: FC<ProfileProps> = (props: ProfileProps) => {
         bottom={0}
         left={0}
         right={0}
+        pl={4}
+        pr={4}
+        mb={2}
+        flex={1}
         height={bottomHeight}
       >
-        <Flex pl={12} pr={12}>
-          <YouRow ship={shipStore.session!} />
-        </Flex>
+        <YouRow selected={true} ship={ship!} />
       </Flex>
     </Grid.Column>
   );

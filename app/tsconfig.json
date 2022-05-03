@@ -4,7 +4,6 @@
     "module": "commonjs",
     "lib": ["dom", "es2021"],
     "declaration": true,
-    "declarationMap": true,
     "jsx": "react-jsx",
     "strict": true,
     "pretty": true,
@@ -15,14 +14,18 @@
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "outDir": "release/app/dist"
+    "outDir": "release/app/dist",
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true
   },
   "include": ["./src"],
   "exclude": ["test", "release/build", "release/app/dist", ".holium/dll"]

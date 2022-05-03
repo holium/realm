@@ -1,8 +1,9 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
+import { useMst, useShip } from '../../../logic/store';
 
-import { WindowThemeType } from '../../../logic/stores/config';
 import {
   Grid,
   Flex,
@@ -15,7 +16,8 @@ import {
   TextButton,
   Text,
 } from '../../../components';
-import styled from 'styled-components';
+import { ThemeType } from '../../../theme';
+import styled, { css } from 'styled-components';
 import { Space } from './SpacesList';
 
 const EmptyGroup = styled.div`
@@ -25,25 +27,45 @@ const EmptyGroup = styled.div`
   border-radius: 4px;
 `;
 
-const SpaceRowStyle = styled.div`
+type RowProps = {
+  theme: ThemeType;
+  selected?: boolean;
+  customBg: string;
+};
+
+export const SpaceRowStyle = styled(motion.div)<RowProps>`
   height: 48px;
-  border-radius: 6px;
+  border-radius: 8px;
+  padding: 0 8px;
   display: flex;
   flex-direction: row;
   align-items: center;
   cursor: pointer;
-  /* &:hover {
-
-  } */
+  transition: ${(props: RowProps) => props.theme.transition};
+  ${(props: RowProps) =>
+    props.selected
+      ? css`
+          color: ${props.theme.colors.brand.primary};
+          background-color: ${rgba(props.customBg, 0.3)};
+        `
+      : css`
+          &:hover {
+            transition: ${(props: RowProps) => props.theme.transition};
+            background-color: ${props.customBg
+              ? rgba(lighten(0.1, props.customBg), 0.4)
+              : 'inherit'};
+          }
+        `}
 `;
 
 type SpaceRowProps = { space: Space };
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { space } = props;
-  const [isExpanded, setIsExpanded] = useState(false);
+  const { ship } = useShip();
+  const theme = useMemo(() => ship!.theme, [ship!.theme]);
   return (
-    <SpaceRowStyle>
+    <SpaceRowStyle customBg={theme.backgroundColor}>
       <Flex
         alignItems="center"
         // style={{ flex: 1, opacity: space.status !== 'active' ? 0.3 : 1 }}

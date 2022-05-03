@@ -1,21 +1,25 @@
-import { FC, createRef, useRef, useState } from 'react';
+import { FC, createRef, useRef, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { SystemBarStyle } from '../../SystemBar.styles';
 import { Flex, IconButton, Icons } from '../../../../../../../components';
-import { WindowThemeType } from '../../../../../../../logic/stores/config';
 import { ShipModelType } from '../../../../../../../logic/ship/store';
+import { useMst } from '../../../../../../../logic/store';
+import { ThemeStoreType } from '../../../../../../../logic/theme/store';
+
 import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
+import { useObserver } from 'mobx-react';
 
 type ShipTrayProps = {
   ship: ShipModelType;
-  theme: Partial<WindowThemeType>;
+  theme: ThemeStoreType;
 };
 
 export const ShipTray: FC<ShipTrayProps> = (props: ShipTrayProps) => {
   const { ship, theme } = props;
-  const { backgroundColor, textColor } = theme;
+  const { dockColor, textColor } = theme;
+
   const [voiceOn, setVoiceOn] = useState(false);
 
   return (
@@ -24,7 +28,7 @@ export const ShipTray: FC<ShipTrayProps> = (props: ShipTrayProps) => {
       transition={{ scale: 0.5 }}
       pl={2}
       pr={2}
-      customBg={backgroundColor}
+      customBg={dockColor}
       display="flex"
       justifyContent="center"
       alignItems="center"
@@ -33,7 +37,7 @@ export const ShipTray: FC<ShipTrayProps> = (props: ShipTrayProps) => {
         {/* Toggles voice on/off for voice subsystem */}
         <IconButton
           size={28}
-          customBg={backgroundColor}
+          customBg={dockColor}
           color={textColor}
           onClick={() => setVoiceOn(!voiceOn)}
         >

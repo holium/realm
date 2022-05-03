@@ -40,6 +40,7 @@ const Wrapper = styled(motion.div)`
 
 export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
   z-index: 4;
+  --webkit-transform: translate3d(0, 0, 0);
 `)(compose(space, color, typography));
 
 export const TrayMenu = (props: TrayMenuProps) => {
@@ -61,7 +62,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
   }>({ left: 0, bottom: 48 });
   const [isVisible, setIsVisible] = useState(false);
 
-  const anchorOffset = { x: 8, y: 14, ...buttonOffset };
+  const anchorOffset = { x: 8, y: 26, ...buttonOffset };
   let body = content;
 
   const handleClickOutside = (event: any) => {
@@ -119,7 +120,10 @@ export const TrayMenu = (props: TrayMenuProps) => {
       style = { ...style, left };
     }
 
-    let bottom = event.screenY - event.clientY + anchorOffset.y;
+    let bottom =
+      // event.clientY -
+      // buttonEvent.offsetY +
+      buttonEvent.srcElement.offsetHeight + anchorOffset.y;
     style = { ...style, bottom };
     return style;
   };
@@ -149,7 +153,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
               }}
               animate={{
                 opacity: 1,
-                y: 4,
+                y: 0,
                 width: dimensions.width,
                 height: dimensions.height,
                 transition: {

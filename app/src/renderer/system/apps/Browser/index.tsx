@@ -15,14 +15,14 @@ import {
   Text,
   Menu,
 } from '../../../components';
-import { useMst } from '../../../logic/store';
+import { useMst, useShip } from '../../../logic/store';
 
 type BrowserProps = {
   theme: WindowThemeType;
 };
 
 export const Browser: FC<BrowserProps> = (props: BrowserProps) => {
-  const { shipStore } = useMst();
+  const { ship } = useShip();
   const ref = useRef();
   const { backgroundColor, textColor } = props.theme;
 
@@ -61,39 +61,10 @@ export const Browser: FC<BrowserProps> = (props: BrowserProps) => {
         <Flex pl={4} pr={4} justifyContent="center" alignItems="center">
           {/* <Icons opacity={0.8} name="Wallet" size={24} mr={2} /> */}
           <Text opacity={0.7} fontWeight={600}>
-            {shipStore.session.patp}
+            {ship!.patp}
           </Text>
         </Flex>
       </Grid.Row>
-
-      <Flex
-        position="absolute"
-        flexDirection="column"
-        gap={2}
-        pt={2}
-        pr={2}
-        pl={2}
-        pb={2}
-        style={{ bottom: 0, top: 50, left: 0, right: 0 }}
-        overflowY="hidden"
-      >
-        <MenuItem
-          label="Preferences"
-          icon={<Icons size={1} name="UserSettings" />}
-          customBg={bgHover}
-          onClick={() => {
-            console.log('open preferences');
-          }}
-        />
-        <MenuItem
-          label="Logout"
-          icon={<Icons size={1} name="Logout" />}
-          customBg={bgHover}
-          onClick={() => {
-            shipStore.logout();
-          }}
-        />
-      </Flex>
     </Grid.Column>
   );
 };

@@ -1,14 +1,17 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types } from 'mobx-state-tree';
-
-// const Reactions = types.model({
-//   likes: types.number,
-//   replies: types.reference()
-// });
+import {
+  applySnapshot,
+  castToSnapshot,
+  flow,
+  Instance,
+  types,
+} from 'mobx-state-tree';
+import { LoaderModel } from '../../../renderer/logic/stores/common/loader';
+import { ContactStore } from './contacts';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
-const ChatMessage = types.union(
+export const ChatMessage = types.union(
   { eager: false },
   types.model({
     type: 'text',
@@ -75,15 +78,24 @@ const ChatMessage = types.union(
 );
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
-const Chat = types.model({
-  contact: types.string,
-  lastSent: types.number,
-  messages: types.optional(types.array(ChatMessage), []),
-});
+export const Chat = types
+  .model({
+    contact: types.string,
+    lastSent: types.number,
+    messages: types.optional(types.array(ChatMessage), []),
+  })
+  .views((self) => ({
+    get list() {
+      return self.messages.slice().reverse();
+    },
+  }));
+
+export type ChatType = Instance<typeof Chat>;
 
 export const ChatStore = types
   .model({
     dms: types.map(Chat),
+    loader: types.optional(LoaderModel, { state: 'initial' }),
   })
   .views((self) => ({
     get list() {
@@ -98,6 +110,7 @@ export const ChatStore = types
       // console.log(response);
       // const dmGraph = response['graph-update']['add-graph']['graph'];
       // console.log(dmGraph);
+      const dmMap: { [key: string]: ChatType } = {};
       Object.values(dmGraph).forEach((chat: any) => {
         let lastSent = 0;
         const dmContacts: string[] = [];
@@ -139,25 +152,11 @@ export const ChatStore = types
         messages.sort((a, b) => b.timeSent - a.timeSent);
         if (contact) {
           // TODO get the name of an non-responsive user another way
-          self.dms.set(contact, Chat.create({ contact, lastSent, messages }));
+          dmMap[contact] = Chat.create({ contact, lastSent, messages });
+          // self.dms.set(contact, Chat.create({ contact, lastSent, messages }));
         }
       });
+
+      applySnapshot(self.dms, dmMap);
     },
   }));
-
-export const ShipModel = types.model('ShipModel', {
-  url: types.string,
-  patp: types.identifier,
-  nickname: types.maybeNull(types.string),
-  color: types.maybeNull(types.string),
-  avatar: types.maybeNull(types.string),
-  cookie: types.maybeNull(types.string),
-  theme: types.model({
-    textColor: types.string,
-    backgroundColor: types.string,
-  }),
-  wallpaper: types.maybeNull(types.string),
-  chat: types.optional(ChatStore, {}),
-});
-
-export type ShipModelType = Instance<typeof ShipModel>;

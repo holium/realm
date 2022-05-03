@@ -20,3 +20,5 @@ export * from './Menu';
 export * from './MenuItem';
 export * from './Divider';
 export * from './AppIcon';
+export * from './Pulser';
+export * from './Badge';

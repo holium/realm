@@ -136,14 +136,14 @@ const buttonVariants = variant({
       },
       '&:hover': {
         transition: '0.2s ease',
-        backgroundColor: 'highlights.bgSoftHighlight',
+        backgroundColor: 'none',
       },
       '&:focus': {
         borderColor: 'transparent !important',
         outline: 'none',
       },
       '&:active, &:focus': {
-        backgroundColor: 'highlights.bgSoftHighlight',
+        backgroundColor: 'hone',
         borderColor: 'transparent',
       },
       '&:disabled': {

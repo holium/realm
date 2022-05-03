@@ -1,20 +1,27 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import { Flex } from '../../../components';
 import { Signup } from './signup';
 import { Login } from './login';
-import { useMst } from '../../../logic/store';
+import { AuthProvider, authState, useAuth } from '../../../logic/store';
+import { AuthShipType } from '../../../../core/auth/store';
 
 type LoginProps = {
-  textTheme: 'light' | 'dark';
   hasWallpaper?: boolean;
   isFullscreen?: boolean;
 };
 
 export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
-  const { authStore } = useMst();
-  const { textTheme, hasWallpaper } = props;
+  const { authStore, signupStore } = useAuth();
+  const { hasWallpaper } = props;
+
   const [signup, setSignup] = useState(authStore.firstTime);
+  const continueSignup = (ship: AuthShipType) => {
+    console.log(ship);
+    signupStore.setSignupShip(ship);
+    setSignup(true);
+  };
   // const [signup, setSignup] = useState(true);
 
   return (
@@ -23,8 +30,8 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
         <Signup goToLogin={() => setSignup(false)} />
       ) : (
         <Login
-          textTheme={textTheme}
           hasWallpaper={hasWallpaper}
+          continueSignup={(ship: any) => continueSignup(ship)}
           addShip={() => setSignup(true)}
         />
       )}

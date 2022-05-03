@@ -1,7 +1,7 @@
 import { FC, useMemo } from 'react';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
-import { useMst } from 'renderer/logic/store';
+import { useAuth } from 'renderer/logic/store';
 
 import {
   Grid,
@@ -70,10 +70,16 @@ type ProfileSetupProps = {
 export const ProfileSetup: FC<ProfileSetupProps> = (
   props: ProfileSetupProps
 ) => {
-  const { shipStore } = useMst();
-  const shipName = '~lomder-librun';
+  const { signupStore } = useAuth();
+  const shipName = signupStore.signupShip!.patp;
+  const shipInfo = {
+    nickname: signupStore.signupShip!.nickname,
+    sigilColor: signupStore.signupShip!.color,
+    avatar: signupStore.signupShip!.avatar,
+  };
+  console.log(shipInfo);
   const { profileForm, nickname, sigilColor, avatar } = useMemo(
-    () => createProfileForm(),
+    () => createProfileForm(shipInfo),
     []
   );
 

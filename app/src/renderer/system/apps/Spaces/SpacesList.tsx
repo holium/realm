@@ -51,7 +51,7 @@ export const SpacesList: FC<SpacesListProps> = (props: SpacesListProps) => {
   return (
     <Grid.Column expand gap={4}>
       {sampleSpaces.map((space: Space) => {
-        return <SpaceRow space={space} />;
+        return <SpaceRow key={space.title} space={space} />;
       })}
     </Grid.Column>
   );

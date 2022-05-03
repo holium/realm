@@ -16,15 +16,6 @@ async function login(ship: string, password: string) {
   }
 }
 
-async function logout() {
-  try {
-    const response = await window.electron.core.logout();
-    return [response, null];
-  } catch (err) {
-    return [null, err];
-  }
-}
-
 async function getShips() {
   try {
     const response = await window.electron.auth.getShips();
@@ -44,7 +35,6 @@ async function removeShip(ship: string) {
 
 export default {
   login,
-  logout,
   authenticate,
   getShips,
   removeShip,

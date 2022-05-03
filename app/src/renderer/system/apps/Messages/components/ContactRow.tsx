@@ -25,9 +25,9 @@ type RowProps = {
 // `;
 export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;
-  width: 100%;
+  width: calc(100% - 16px);
   padding: 8px;
-  margin: 0 4px;
+  margin: 0 8px;
   gap: 10px;
   display: flex;
   flex-direction: row;

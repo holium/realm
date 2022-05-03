@@ -25,8 +25,8 @@ export const TextButton = styled(styled.button`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 26px;
-  border-radius: 3px;
+  min-height: 26px;
+  border-radius: 4px;
   text-decoration: none;
   cursor: pointer;
   padding: 0px 7px;

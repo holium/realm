@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HTMLAttributes } from 'react';
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import {
   background,
@@ -84,7 +85,7 @@ const boxStyles = compose(
   })
 );
 
-export const Box = styled.div<BoxProps>(
+export const Box = styled(motion.div)<BoxProps>(
   {
     boxSizing: 'border-box',
   },

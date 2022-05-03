@@ -1,4 +1,4 @@
-import { useRef, FC } from 'react';
+import { useRef, FC, useEffect } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 
@@ -8,6 +8,7 @@ import {
   Sigil,
   Text,
   Input,
+  Button,
   IconButton,
   Icons,
   TextButton,
@@ -16,19 +17,20 @@ import {
   MenuItem,
   Spinner,
 } from '../../../../components';
-import { useMst } from '../../../../logic/store';
+import { useAuth, useMst } from '../../../../logic/store';
 import { ShipSelector } from './ShipSelector';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 type LoginProps = {
   addShip: () => void;
+  continueSignup: (ship: any) => void;
   hasWallpaper?: boolean;
-  textTheme: 'light' | 'dark';
 };
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
-  const { addShip, textTheme, hasWallpaper } = props;
-  const { shipStore } = useMst();
+  const { addShip, continueSignup, hasWallpaper } = props;
+  const { authStore } = useAuth();
+  const { themeStore } = useMst();
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -42,7 +44,15 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     menuWidth,
   });
   const { anchorPoint, show, setShow } = config;
-  const pendingShip = shipStore.session;
+
+  const pendingShip = authStore.selected!;
+  const theme = pendingShip.theme;
+  const shipName = pendingShip?.nickname || pendingShip?.patp;
+
+  useEffect(() => {
+    // Set the wallpaper on load
+    themeStore.setWallpaper(pendingShip.wallpaper!);
+  }, [authStore.selected !== null]);
 
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
@@ -54,20 +64,19 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       passwordRef.current.blur();
       // @ts-expect-error typescript...
       wrapperRef.current.blur();
-      shipStore.login(pendingShip!.patp, event.target.value);
+      authStore.login(pendingShip!.patp, event.target.value);
     }
   };
 
   let colorProps = null;
-  if (textTheme) {
-    colorProps = {
-      color: textTheme === 'light' ? 'text.white' : 'text.primary',
-      textShadow: textTheme === 'light' ? '0 1px black' : 'text.primary',
-    };
-  }
+  // if (theme) {
+  colorProps = {
+    color: theme.textColor,
+    textShadow: theme.textTheme === 'dark' ? '0 1px black' : 'none',
+  };
+  // }
 
-  const shipName = pendingShip?.nickname || pendingShip?.patp;
-
+  const inProgressShips = authStore.inProgressList;
   return (
     <Fill>
       <Centered>
@@ -82,7 +91,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                 borderRadiusOverride="8px"
                 avatar={pendingShip.avatar}
                 patp={pendingShip.patp}
-                color={[pendingShip.color, 'white']}
+                color={[pendingShip.color || '#000000', 'white']}
               />
             </Box>
             <Flex flexDirection="column" gap={10}>
@@ -149,12 +158,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   onKeyDown={submitPassword}
                   rightIcon={
                     <Flex justifyContent="center" alignItems="center">
-                      {shipStore.loader.isLoading ? (
+                      {authStore.loader.isLoading ? (
                         <Spinner size={0} />
                       ) : (
                         <IconButton
                           ref={submitRef}
-                          luminosity={textTheme}
+                          luminosity={theme.textTheme}
                           size={24}
                           canFocus
                           onKeyDown={submitPassword}
@@ -168,7 +177,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                 <IconButton
                   size={26}
                   ref={optionsRef}
-                  luminosity={textTheme}
+                  luminosity={theme.textTheme}
                   opacity={1}
                   onClick={(evt: any) => {
                     evt.preventDefault();
@@ -202,8 +211,8 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     label="Remove ship"
                     mt={1}
                     onClick={() => {
-                      shipStore.removeShip(pendingShip.patp);
-                      shipStore.clearSession();
+                      authStore.removeShip(pendingShip.patp);
+                      authStore.clearSession();
                     }}
                   />
                 </Menu>
@@ -222,16 +231,30 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
           alignItems="center"
         >
           <ShipSelector />
-          <TextButton {...colorProps} onClick={() => addShip()}>
-            <Flex
-              gap={8}
-              flexDirection="row"
-              justifyContent="space-between"
-              alignItems="center"
+          <Flex gap={12}>
+            {inProgressShips.map((ship: any, index: number) => (
+              <ContinueButton
+                onClick={continueSignup}
+                key={`continue-${ship.patp}`}
+                ship={ship}
+                theme={theme}
+              />
+            ))}
+            <TextButton
+              {...colorProps}
+              style={{ padding: '0 16px' }}
+              onClick={() => addShip()}
             >
-              Add Ship <Icons size={22} name="AddCircleLine" />
-            </Flex>
-          </TextButton>
+              <Flex
+                gap={8}
+                flexDirection="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                Add Ship <Icons size={22} name="AddCircleLine" />
+              </Flex>
+            </TextButton>
+          </Flex>
         </Flex>
       </Bottom>
     </Fill>
@@ -239,3 +262,53 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 });
 
 export default Login;
+
+const ContinueButton = (props: any) => {
+  const { ship, theme, onClick } = props;
+  return (
+    <Flex
+      style={{ cursor: 'pointer' }}
+      p={1}
+      pr={3}
+      onClick={() => props.onClick(ship)}
+    >
+      <Flex
+        display="flex"
+        gap={12}
+        flexDirection="row"
+        alignItems="center"
+        style={{ x: 0, cursor: 'pointer' }}
+        // whileHover={{ scale: 1.1 }}
+        // transition={{ scale: 0.2 }}
+        // whileTap={{ scale: 1.0 }}
+      >
+        <Sigil
+          simple
+          isLogin
+          size={28}
+          avatar={ship.avatar}
+          patp={ship.patp}
+          color={[ship.color || '#000000', 'white']}
+        />
+        <Flex
+          style={{ pointerEvents: 'none' }}
+          mt="2px"
+          flexDirection="column"
+          justifyContent="center"
+        >
+          <Text color={theme.textColor} fontWeight={500} fontSize={2}>
+            Continue setup
+          </Text>
+          <Text
+            style={{ pointerEvents: 'none' }}
+            color={theme.textColor}
+            fontSize={2}
+            fontWeight={400}
+          >
+            {ship!.nickname || ship!.patp}
+          </Text>
+        </Flex>
+      </Flex>
+    </Flex>
+  );
+};

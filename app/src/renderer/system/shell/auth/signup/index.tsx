@@ -18,7 +18,7 @@ import {
 
 import { AddShip } from './add-ship';
 import { ConnectingShip } from './connecting';
-import { useMst } from '../../../../logic/store';
+import { useAuth, useMst } from '../../../../logic/store';
 import ProfileSetup from './step-profile';
 import StepPassword from './step-password';
 import StepInstall from './step-install';
@@ -89,9 +89,9 @@ type LoginProps = {
 
 export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
   const { goToLogin } = props;
-  const { shipStore, authStore } = useMst();
+  const { authStore, signupStore } = useAuth();
   const [step, setStep] = useState(
-    authStore.steps.indexOf(authStore.currentStep)
+    signupStore.steps.indexOf(signupStore.currentStep)
   );
 
   const { shipForm, urbitId, shipUrl, accessKey } = useMemo(
@@ -103,17 +103,19 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
   const goBack = () => {
     if (step === 0) {
       goToLogin();
+    } else if (step === 2) {
+      goToLogin();
     } else {
       setStep(step - 1);
     }
   };
   const isNextDisabled =
     (step === 0 && !shipForm.computed.isValid) ||
-    step === authStore.steps.length;
+    step === signupStore.steps.length;
   const next = () => {
     if (!isNextDisabled) {
       // goToLogin(); // TODO remove this when I finish the flow
-      if (step !== authStore.steps.length - 1) setStep(step + 1);
+      if (step !== signupStore.steps.length - 1) setStep(step + 1);
     } else {
     }
   };
@@ -162,57 +164,70 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
           {step === 0 && (
             // eslint-disable-next-line jsx-a11y/no-access-key
             <AddShip
-              hasShips={shipStore.hasShips}
+              hasShips={authStore.hasShips}
               urbitId={urbitId}
               shipUrl={shipUrl}
               accessKey={accessKey}
             />
           )}
-          {step === 1 && <ConnectingShip />}
+          {step === 1 && <ConnectingShip next={() => next()} />}
           {step === 2 && <ProfileSetup />}
           {step === 3 && <StepPassword />}
           {step === 4 && <StepInstall />}
 
           <Box position="absolute" height={40} bottom={20} left={20} right={24}>
-            <Flex
-              mt={5}
-              width="100%"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <IconButton onClick={() => goBack()}>
-                <Icons name="ArrowLeftLine" />
-              </IconButton>
-              <TextButton
-                disabled={isNextDisabled}
-                // loading={shipStore.isLoading}
-                onClick={(evt: any) => {
-                  if (step === 0) {
-                    const formData = shipForm.actions.submit();
-                    console.log(formData);
-                    shipStore
-                      .addShip({
-                        ship: formData['urbit-id'],
-                        url: formData['ship-id'],
-                        code: formData['access-key'],
-                      })
-                      .then((value: any) => {
-                        // eslint-disable-next-line promise/no-callback-in-promise
-                        next();
-                        evt.target.blur();
-                        return null;
-                      })
-                      .catch((reason: any) => {
-                        console.log(reason);
-                      });
-                  } else {
-                    next();
-                  }
-                }}
+            {step !== 1 ? (
+              <Flex
+                mt={5}
+                width="100%"
+                alignItems="center"
+                justifyContent="space-between"
               >
-                {shipStore.isLoading ? <Spinner size={0} /> : 'Next'}
-              </TextButton>
-            </Flex>
+                <IconButton onClick={() => goBack()}>
+                  <Icons name="ArrowLeftLine" />
+                </IconButton>
+                <TextButton
+                  disabled={isNextDisabled}
+                  // loading={authStore.isLoading}
+                  onClick={(evt: any) => {
+                    if (step === 0) {
+                      const formData = shipForm.actions.submit();
+                      console.log(formData);
+                      signupStore
+                        .addShip({
+                          ship: formData['urbit-id'],
+                          url: formData['ship-id'],
+                          code: formData['access-key'],
+                        })
+                        .then((value: any) => {
+                          // eslint-disable-next-line promise/no-callback-in-promise
+                          next();
+                          evt.target.blur();
+                          return null;
+                        })
+                        .catch((reason: any) => {
+                          console.log(reason);
+                        });
+                    } else {
+                      next();
+                    }
+                  }}
+                >
+                  {authStore.isLoading ? <Spinner size={0} /> : 'Next'}
+                </TextButton>
+              </Flex>
+            ) : (
+              <Flex
+                mt={5}
+                width="100%"
+                alignItems="center"
+                justifyContent="flex-start"
+              >
+                <IconButton onClick={() => goToLogin()}>
+                  <Icons name="ArrowLeftLine" />
+                </IconButton>
+              </Flex>
+            )}
           </Box>
         </Card>
       </motion.div>

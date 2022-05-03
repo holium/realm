@@ -1,29 +1,35 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Bottom, Layer, Fill, Top } from 'react-spaces';
+import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
-import { AppGrid } from './components/AppGrid';
-import { useMst } from '../../../logic/store';
+import { useShip, useAuth } from '../../../logic/store';
 import AppWindow from './components/AppWindow';
-import { clone } from 'mobx-state-tree';
 import { Browser } from '../../apps/Browser';
 import { AnimatePresence } from 'framer-motion';
 
 type OSFrameProps = {
+  hasLoaded?: boolean;
   isFullscreen?: boolean;
   hasWallpaper?: boolean;
 };
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
-  const { shipStore } = useMst();
+  const { hasLoaded } = props;
+  const { authStore } = useAuth();
+  const { ship } = useShip();
   const [showDesktop, setShowDesktop] = useState(false);
 
-  const ship = useMemo(() => clone(shipStore.session!), [shipStore.session]);
-
-  const theme = {
-    backgroundColor: ship.theme.backgroundColor,
-    textColor: '#EDE6E1',
-  };
+  // const ship = useMemo(() => clone(shipStore.session!), [shipStore.session]);
+  let theme;
+  if (!hasLoaded) {
+    theme = authStore.selected!.theme;
+  } else {
+    theme = ship!.theme;
+  }
+  const onHome = useMemo(
+    () => () => setShowDesktop(!showDesktop),
+    [showDesktop]
+  );
   // {
   //   showDesktop && (
   //     <AppWindow theme={theme}>
@@ -37,15 +43,13 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
       <AnimatePresence>
         {showDesktop && (
           <AppWindow theme={theme}>
-            {/* @ts-expect-error */}
             <Browser theme={theme} />
           </AppWindow>
         )}
       </AnimatePresence>
-
       <Layer zIndex={1}>
         <Bottom size={58}>
-          <SystemBar onHome={() => setShowDesktop(!showDesktop)} />
+          <SystemBar onHome={onHome} />
         </Bottom>
       </Layer>
     </Fill>

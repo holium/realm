@@ -1,15 +1,22 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Grid, Spinner, Text } from '../../../../components';
+import { useAuth } from '../../../../logic/store';
 
 type AddShipProps = {
-  hasShips?: boolean;
+  next: () => any;
 };
 
 export const ConnectingShip: FC<AddShipProps> = observer(
   (props: AddShipProps) => {
-    // const { shipStore } = useMst();
-    const { hasShips } = props;
+    const { signupStore } = useAuth();
+    useEffect(() => {
+      signupStore.getProfile().then(() => {
+        console.log('got profile');
+        props.next();
+      });
+    }, []);
+    // authStore.
     return (
       <Grid.Row expand noGutter>
         <Grid.Column mt={3} noGutter>

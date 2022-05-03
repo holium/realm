@@ -1,7 +1,9 @@
-import { FC, createRef } from 'react';
-import { motion } from 'framer-motion';
+import { FC, useMemo, createRef } from 'react';
+import { observer } from 'mobx-react';
+import { useMst } from '../../../../../../../../logic/store';
 import { IconButton, Icons } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
+
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { Wallet } from '../../../../../../../apps/Wallet';
@@ -11,7 +13,8 @@ type WalletTrayProps = {
 };
 
 export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {
-  const { backgroundColor, textColor } = props.theme;
+  const { theme } = props;
+  const { dockColor, windowColor, textColor } = theme;
   const walletButtonRef = createRef<HTMLButtonElement>();
   const appRef = createRef<HTMLDivElement>();
 
@@ -31,10 +34,10 @@ export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {
           id="wallet-tray-app"
           ref={appRef}
           dimensions={dimensions}
-          backgroundColor={backgroundColor}
+          backgroundColor={windowColor}
           textColor={textColor}
         >
-          <Wallet theme={props.theme} dimensions={dimensions} />
+          <Wallet theme={theme} dimensions={dimensions} />
         </MiniApp>
       }
     >
@@ -42,7 +45,7 @@ export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {
         id="wallet-tray-icon"
         ref={walletButtonRef}
         size={28}
-        customBg={backgroundColor}
+        customBg={dockColor}
         color={textColor}
         whileTap={{ scale: 0.9 }}
         transition={{ scale: 0.1 }}
