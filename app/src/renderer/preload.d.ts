@@ -7,13 +7,9 @@ declare global {
       auth: AuthPreloadType;
       ship: ShipPreloadType;
       core: RealmCorePreloadType;
-      ipcRenderer: {
-        myPing(): void;
-        on(
-          channel: string,
-          func: (...args: unknown[]) => void
-        ): (() => void) | undefined;
-        once(channel: string, func: (...args: unknown[]) => void): void;
+      app: {
+        openApp(config: any, data: any): void;
+        closeApp(app: any): void;
       };
     };
   }

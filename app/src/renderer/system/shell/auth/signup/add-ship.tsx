@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
@@ -9,16 +9,26 @@ import {
   FormControl,
   ActionButton,
   Icons,
+  Box,
+  Spinner,
+  Flex,
+  TextButton,
 } from '../../../../components';
 // @ts-expect-error its there...
 import UrbitSVG from '../../../../../../assets/urbit.svg';
+import { observer } from 'mobx-react';
+import { useAuth } from '../../../../logic/store';
 
 export const createShipForm = (
   defaults: any = {
-    urbitId: '~labruc-dillyx-lomder-librun',
-    shipUrl: 'https://test-moon-1.holium.network',
-    accessKey: 'mapfel-dalmec-halfen-sorhes',
-  }
+    urbitId: '',
+    shipUrl: '',
+    accessKey: '',
+    // urbitId: '~labruc-dillyx-lomder-librun',
+    // shipUrl: 'https://test-moon-1.holium.network',
+    // accessKey: 'mapfel-dalmec-halfen-sorhes',
+  },
+  addedShips: string[]
 ) => {
   const shipForm = createForm({
     onSubmit({ values }) {
@@ -32,6 +42,10 @@ export const createShipForm = (
     initialValue: defaults.urbitId || '',
     // validationSchema: yup.string().required('Name is required'),
     validate: (patp: string) => {
+      // if (addedShips.includes(patp)) {
+      //   return { error: 'Already added', parsed: undefined };
+      // }
+
       if (patp.length > 1 && isValidPatp(patp)) {
         return { error: undefined, parsed: patp };
       }
@@ -47,7 +61,7 @@ export const createShipForm = (
       .string()
       .matches(
         /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-        'Enter correct url!'
+        'Enter correct url'
       )
       .required('Please enter url'),
   });
@@ -73,16 +87,28 @@ export const createShipForm = (
 
 type AddShipProps = {
   hasShips?: boolean;
-  urbitId: any;
-  shipUrl: any;
-  accessKey: any;
+  // urbitId: any;
+  // shipUrl: any;
+  // accessKey: any;
+  next: () => void;
   // isValid: boolean;
   // setValid: (isValid: boolean) => void;
 };
 
-export const AddShip: FC<AddShipProps> = (props: AddShipProps) => {
+export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
+  const { next } = props;
+  const { signupStore, authStore } = useAuth();
+  const { shipForm, urbitId, shipUrl, accessKey } = useMemo(
+    () =>
+      createShipForm(
+        undefined,
+        Array.from(authStore.ships.values()).map((ship: any) => ship.patp)
+      ),
+    []
+  );
   // const { shipStore } = useMst();
-  const { urbitId, shipUrl, accessKey } = props;
+  // const { urbitId, shipUrl, accessKey } = props;
+  const isNextDisabled = !shipForm.computed.isValid;
   return (
     <Grid.Row expand noGutter>
       <Grid.Column
@@ -123,6 +149,12 @@ export const AddShip: FC<AddShipProps> = (props: AddShipProps) => {
                   onFocus={() => urbitId.actions.onFocus()}
                   onBlur={() => urbitId.actions.onBlur()}
                 />
+                {urbitId.computed.ifWasEverBlurredThenError &&
+                  urbitId.computed.isDirty && (
+                    <FormControl.Error>
+                      {urbitId.computed.error}
+                    </FormControl.Error>
+                  )}
               </FormControl.Field>
               <FormControl.Field>
                 <Label>URL</Label>
@@ -138,6 +170,12 @@ export const AddShip: FC<AddShipProps> = (props: AddShipProps) => {
                   onFocus={() => shipUrl.actions.onFocus()}
                   onBlur={() => shipUrl.actions.onBlur()}
                 />
+                {shipUrl.computed.ifWasEverBlurredThenError &&
+                  shipUrl.computed.isDirty && (
+                    <FormControl.Error>
+                      {shipUrl.computed.error}
+                    </FormControl.Error>
+                  )}
               </FormControl.Field>
               <FormControl.Field>
                 <Label>Access key</Label>
@@ -155,13 +193,57 @@ export const AddShip: FC<AddShipProps> = (props: AddShipProps) => {
                   onFocus={() => accessKey.actions.onFocus()}
                   onBlur={() => accessKey.actions.onBlur()}
                 />
+                {accessKey.computed.ifWasEverBlurredThenError &&
+                  accessKey.computed.isDirty && (
+                    <FormControl.Error>
+                      {accessKey.computed.error}
+                    </FormControl.Error>
+                  )}
               </FormControl.Field>
             </FormControl.FieldSet>
           </Grid.Column>
         </Grid.Column>
       </Grid.Column>
+      <Box position="absolute" height={40} bottom={20} right={24}>
+        <Flex
+          mt={5}
+          width="100%"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <TextButton
+            disabled={isNextDisabled}
+            // loading={authStore.isLoading}
+            onClick={(evt: any) => {
+              const formData = shipForm.actions.submit();
+              signupStore
+                .addShip({
+                  ship: formData['urbit-id'],
+                  url: formData['ship-id'],
+                  code: formData['access-key'],
+                })
+                .then((value: any) => {
+                  console.log('before next');
+                  // eslint-disable-next-line promise/no-callback-in-promise
+                  next();
+                  evt.target.blur();
+                  return null;
+                })
+                .catch((reason: any) => {
+                  console.log(reason);
+                });
+            }}
+          >
+            {authStore.isLoading || signupStore.isLoading ? (
+              <Spinner size={0} />
+            ) : (
+              'Next'
+            )}
+          </TextButton>
+        </Flex>
+      </Box>
     </Grid.Row>
   );
-};
+});
 
 export default AddShip;

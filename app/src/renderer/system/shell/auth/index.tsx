@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { Flex } from '../../../components';
@@ -18,10 +18,20 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
 
   const [signup, setSignup] = useState(authStore.firstTime);
   const continueSignup = (ship: AuthShipType) => {
-    console.log(ship);
     signupStore.setSignupShip(ship);
     setSignup(true);
   };
+
+  const addShip = () => {
+    signupStore.clearSignupShip();
+    setSignup(true);
+  };
+
+  // useEffect(() => {
+  //   if (!authStore.hasShips && authStore.hasInProgressShips()) {
+
+  //   }
+  // }, []);
   // const [signup, setSignup] = useState(true);
 
   return (
@@ -32,7 +42,7 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
         <Login
           hasWallpaper={hasWallpaper}
           continueSignup={(ship: any) => continueSignup(ship)}
-          addShip={() => setSignup(true)}
+          addShip={() => addShip()}
         />
       )}
     </Flex>

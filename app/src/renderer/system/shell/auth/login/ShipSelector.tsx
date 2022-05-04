@@ -11,7 +11,7 @@ import { Flex, Sigil, Tooltip } from '../../../../components';
 // -------- Local style components --------
 // ----------------------------------------
 
-const SelectedLine = styled(motion.div)`
+export const SelectedLine = styled(motion.div)`
   left: 11px;
   bottom: -12px;
   width: 10px;

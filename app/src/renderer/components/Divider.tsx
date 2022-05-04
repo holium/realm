@@ -2,13 +2,14 @@ import styled from 'styled-components';
 import { compose, space, SpaceProps } from 'styled-system';
 import { rgba } from 'polished';
 import { ThemeType } from 'renderer/theme';
+import { motion } from 'framer-motion';
 
 type IProps = {
   theme: ThemeType;
   customBg?: string;
 } & SpaceProps;
 
-export const Divider = styled.div<IProps>`
+export const Divider = styled(motion.div)<IProps>`
   display: inline-block;
   width: 2px;
   background-color: ${(props: IProps) =>

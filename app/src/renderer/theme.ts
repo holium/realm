@@ -125,7 +125,7 @@ export const theme = {
         borderHover: '#DADADA',
         input: {
           background: '#FFFFFF',
-          secondary: '#FDFDFD',
+          secondary: '#FAFAFA',
           borderColor: 'rgba(0, 0, 0, 0.1)',
           borderHover: 'rgba(0, 0, 0, 0.2)',
         },

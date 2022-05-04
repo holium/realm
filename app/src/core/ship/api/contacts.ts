@@ -23,4 +23,25 @@ export const ContactApi = {
       console.log(err);
     }
   },
+  saveContact: async (
+    ship: string,
+    credentials: { url: string; cookie: string },
+    data: any
+  ) => {
+    // console.log('poking ship', ship, data);
+    // try {
+    //   const response = await Conduit.quickPoke(
+    //     ship,
+    //     credentials.url,
+    //     credentials.cookie,
+    //     'contact-store',
+    //     'contact-update-0',
+    //     '/updates',
+    //     data
+    //   );
+    //   return response;
+    // } catch (err: any) {
+    //   throw err;
+    // }
+  },
 };

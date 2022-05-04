@@ -136,7 +136,7 @@ InputWrapper.defaultProps = {
   borderStyle: 'solid',
   borderRadius: 4,
   color: 'text.primary',
-  bg: 'ui.tertiary',
+  bg: 'bg.tertiary',
   mb: 0,
 };
 

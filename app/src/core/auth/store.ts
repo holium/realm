@@ -36,6 +36,9 @@ export const AuthShip = types
     setLoggedIn(loggedIn: boolean) {
       self.loggedIn = loggedIn;
     },
+    setStatus(status: Instance<typeof StepList>) {
+      self.status = status;
+    },
     setContactMetadata: (contactMetadata: {
       color?: string;
       nickname?: string;

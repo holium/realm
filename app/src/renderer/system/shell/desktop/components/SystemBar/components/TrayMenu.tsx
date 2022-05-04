@@ -40,7 +40,9 @@ const Wrapper = styled(motion.div)`
 
 export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
   z-index: 4;
+  --webkit-backface-visibility: hidden;
   --webkit-transform: translate3d(0, 0, 0);
+  --webkit-perspective: 1000;
 `)(compose(space, color, typography));
 
 export const TrayMenu = (props: TrayMenuProps) => {

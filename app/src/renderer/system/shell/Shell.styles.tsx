@@ -21,10 +21,10 @@ export const BackgroundImage = styled(motion.img)`
       background-size: cover;
       background-position: center;
       background-image: url(${props.src});
-      -webkit-filter: blur(${props.blur ? '20px' : '0px'});
-      -moz-filter: blur(${props.blur ? '20px' : '0px'});
-      -o-filter: blur(${props.blur ? '20px' : '0px'});
-      -ms-filter: blur(${props.blur ? '20px' : '0px'});
+      --webkit-filter: blur(${props.blur ? '20px' : '0px'});
+      --moz-filter: blur(${props.blur ? '20px' : '0px'});
+      --o-filter: blur(${props.blur ? '20px' : '0px'});
+      --ms-filter: blur(${props.blur ? '20px' : '0px'});
       filter: blur(${props.blur ? '20px' : '0px'});
     `}
 `;

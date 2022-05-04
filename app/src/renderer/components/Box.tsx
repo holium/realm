@@ -5,6 +5,8 @@ import styled from 'styled-components';
 import {
   background,
   BackgroundProps,
+  border,
+  BorderProps,
   ButtonStyleProps,
   color,
   ColorProps,
@@ -39,6 +41,7 @@ export type BoxProps = {
   ColorProps &
   ColorStyleProps &
   FlexboxProps &
+  BorderProps &
   LayoutProps &
   OpacityProps &
   PositionProps &
@@ -76,6 +79,7 @@ const boxStyles = compose(
   textDecoration,
   textTransform,
   typography,
+  border,
   variant({
     prop: 'variant',
     scale: 'buttons',

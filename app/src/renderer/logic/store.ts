@@ -15,6 +15,7 @@ import { SpaceStore, SpaceStoreType } from './space/store';
 import { SignupStore } from './auth/store';
 import { onStart } from './api/realm.core';
 import { ThemeStore } from './theme/store';
+import { DesktopStore } from './desktop/store';
 
 // type OSStoreType = {
 //   shipStore: ShipStoreType;
@@ -36,6 +37,7 @@ const OSStore = types.model('OSStore', {
   // shipStore: ShipStore,
   configStore: ConfigStore,
   themeStore: ThemeStore,
+  desktopStore: DesktopStore,
   // authStore: AuthStore,
   // signupStore: SignupStore,
   // spaceStore: SpaceStore,
@@ -59,6 +61,7 @@ const initialOSState = OSStore.create({
     wallpaper:
       'https://images.unsplash.com/photo-1554147090-e1221a04a025?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=4096&q=80',
   },
+  desktopStore: {},
   // shipStore: loadStoreSnapshot('osState', 'shipStore') || {},
   // spaceStore: loadStoreSnapshot('osState', 'spaceStore') || { pinned: [] },
 });

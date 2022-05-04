@@ -4,6 +4,16 @@ import { darken, lighten, rgba } from 'polished';
 import { average } from 'color.js';
 import { bgIsLightOrDark } from '../utils/color';
 
+// https://unsplash.com/@pawel_czerwinski
+// export const DEFAULT_WALLPAPER =
+//   'https://images.unsplash.com/photo-1650361072639-e2d0d4f7f3e6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=100';
+
+export const DEFAULT_WALLPAPER =
+  'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
+
+// export const DEFAULT_WALLPAPER =
+//   'https://images.unsplash.com/photo-1643916861364-02e63ce3e52f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2870&q=100';
+
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
   return {
     backgroundColor: baseColor,

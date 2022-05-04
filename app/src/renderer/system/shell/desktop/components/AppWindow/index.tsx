@@ -7,6 +7,9 @@ import { ThemeType } from '../../../../../theme';
 import { WindowThemeType } from '../../../../../logic/stores/config';
 import { Fill } from 'react-spaces';
 import { Titlebar } from './components/Titlebar';
+import { AppView } from './components/AppView';
+import { useMst } from '../../../../../logic/store';
+import { observer } from 'mobx-react';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -34,42 +37,46 @@ type AppWindowProps = {
   children: React.ReactNode;
 };
 
-export const AppWindow: FC<AppWindowProps> = (props: AppWindowProps) => {
-  const { theme, children } = props;
-  const { textColor, backgroundColor } = theme;
-  return (
-    <Fill style={{ bottom: 50, padding: '8px' }}>
-      <AppWindowStyle
-        initial={{
-          opacity: 0,
-          y: 8,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: 0.15,
-          },
-        }}
-        exit={{
-          opacity: 0,
-          y: 8,
-          transition: {
-            duration: 0.15,
-          },
-        }}
-        style={{
-          overflowY: 'hidden',
-        }}
-        color={textColor}
-        customBg={backgroundColor}
-      >
-        <Titlebar theme={theme} app={{ title: 'Browser' }} />
-        {children}
-      </AppWindowStyle>
-    </Fill>
-  );
-};
+export const AppWindow: FC<AppWindowProps> = observer(
+  (props: AppWindowProps) => {
+    const { theme, children } = props;
+    const { textColor, windowColor } = theme;
+    const { desktopStore } = useMst();
+
+    return (
+      <Fill style={{ bottom: 50, padding: '8px' }}>
+        <AppWindowStyle
+          initial={{
+            opacity: 0,
+            y: 8,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            transition: {
+              duration: 0.15,
+            },
+          }}
+          exit={{
+            opacity: 0,
+            y: 8,
+            transition: {
+              duration: 0.15,
+            },
+          }}
+          style={{
+            overflowY: 'hidden',
+          }}
+          color={textColor}
+          customBg={windowColor}
+        >
+          {/* <Titlebar theme={theme} app={desktopStore.activeApp} /> */}
+          <AppView app={desktopStore.activeApp!} />
+        </AppWindowStyle>
+      </Fill>
+    );
+  }
+);
 
 AppWindow.defaultProps = {
   hideTitlebar: false,

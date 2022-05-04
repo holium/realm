@@ -9,6 +9,7 @@ export type RealmCorePreloadType = {
   init: (ship: string) => Promise<any>;
   login: (ship: string, password: string) => Promise<any>;
   logout: (ship: string) => Promise<any>;
+  setNewShip: (ship: any) => Promise<any>;
   onStart: () => Promise<any>;
   installRealm: () => Promise<any>;
   onEffect: (callback: any) => Promise<any>;
@@ -61,6 +62,7 @@ export class RealmCore {
     this.onAction = this.onAction.bind(this);
     this.onStart = this.onStart.bind(this);
     this.init = this.init.bind(this);
+    this.setNewShip = this.setNewShip.bind(this);
     this.authManager = new AuthManager();
     this.shipManager = new ShipManager();
     // Capture all on-effect events and push through the core on-effect
@@ -78,6 +80,7 @@ export class RealmCore {
     ipcMain.handle('core:install-realm', realmCore.installRealm);
     ipcMain.handle('core:action', realmCore.onAction);
     ipcMain.handle('core:on-start', realmCore.onStart);
+    ipcMain.handle('core:set-new-ship', realmCore.setNewShip);
     return realmCore;
   }
 
@@ -131,6 +134,11 @@ export class RealmCore {
 
   installRealm() {}
 
+  async setNewShip(_event: any, ship: any) {
+    console.log('setting ship from signup', ship);
+    return ship;
+  }
+
   onAction(_event: any, action: any) {
     console.log('core: ', action);
     switch (action.resource) {
@@ -156,6 +164,10 @@ export class RealmCore {
     init: (ship: string) => {
       return ipcRenderer.invoke('core:init', ship);
     },
+    setNewShip: (ship: any) => {
+      console.log('setting new ship');
+      return ipcRenderer.invoke('core:set-new-ship', ship);
+    },
     action: (action: any) => {
       return ipcRenderer.invoke('core:action', action);
     },
@@ -169,7 +181,9 @@ export class RealmCore {
       return ipcRenderer.invoke('core:install-realm');
     },
     onEffect: (callback: any) => ipcRenderer.on('on-effect', callback),
-    onReady: (callback: any) => ipcRenderer.on('core:on-ready', callback),
+    onReady: (callback: any) => {
+      ipcRenderer.on('core:on-ready', callback);
+    },
   };
 }
 

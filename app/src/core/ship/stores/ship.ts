@@ -9,6 +9,7 @@ import { WindowThemeModel } from '../../../renderer/logic/stores/config';
 import { LoaderModel } from '../../../renderer/logic/stores/common/loader';
 import { Chat, ChatMessage, ChatMessageType, ChatStore, ChatType } from './dms';
 import { ContactStore } from './contacts';
+import { DocketStore } from './docket';
 
 export const ShipModel = types
   .model('ShipModel', {
@@ -24,6 +25,7 @@ export const ShipModel = types
     loader: types.optional(LoaderModel, { state: 'initial' }),
     chat: ChatStore,
     contacts: ContactStore,
+    docket: DocketStore,
   })
   .actions((self) => ({
     setDMs: (ship: string, dmGraph: any) => {

@@ -94,11 +94,6 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
     signupStore.steps.indexOf(signupStore.currentStep)
   );
 
-  const { shipForm, urbitId, shipUrl, accessKey } = useMemo(
-    () => createShipForm(),
-    []
-  );
-
   // const isBackDisabled = step === 0;
   const goBack = () => {
     if (step === 0) {
@@ -109,15 +104,10 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
       setStep(step - 1);
     }
   };
-  const isNextDisabled =
-    (step === 0 && !shipForm.computed.isValid) ||
-    step === signupStore.steps.length;
+  // const isNextDisabled = step === signupStore.steps.length;
   const next = () => {
-    if (!isNextDisabled) {
-      // goToLogin(); // TODO remove this when I finish the flow
-      if (step !== signupStore.steps.length - 1) setStep(step + 1);
-    } else {
-    }
+    // goToLogin(); // TODO remove this when I finish the flow
+    if (step !== signupStore.steps.length - 1) setStep(step + 1);
   };
   const cardSizes = {
     '0': {
@@ -134,11 +124,11 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
     },
     '3': {
       width: 560,
-      height: 280,
+      height: 360,
     },
     '4': {
       width: 560,
-      height: 340,
+      height: 360,
     },
   };
   // @ts-expect-error why
@@ -163,71 +153,24 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
         >
           {step === 0 && (
             // eslint-disable-next-line jsx-a11y/no-access-key
-            <AddShip
-              hasShips={authStore.hasShips}
-              urbitId={urbitId}
-              shipUrl={shipUrl}
-              accessKey={accessKey}
-            />
+            <AddShip hasShips={authStore.hasShips} next={() => next()} />
           )}
           {step === 1 && <ConnectingShip next={() => next()} />}
-          {step === 2 && <ProfileSetup />}
-          {step === 3 && <StepPassword />}
-          {step === 4 && <StepInstall />}
+          {step === 2 && <ProfileSetup next={() => next()} />}
+          {step === 3 && <StepPassword next={() => next()} />}
+          {step === 4 && <StepInstall next={() => goToLogin()} />}
 
-          <Box position="absolute" height={40} bottom={20} left={20} right={24}>
-            {step !== 1 ? (
-              <Flex
-                mt={5}
-                width="100%"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <IconButton onClick={() => goBack()}>
-                  <Icons name="ArrowLeftLine" />
-                </IconButton>
-                <TextButton
-                  disabled={isNextDisabled}
-                  // loading={authStore.isLoading}
-                  onClick={(evt: any) => {
-                    if (step === 0) {
-                      const formData = shipForm.actions.submit();
-                      console.log(formData);
-                      signupStore
-                        .addShip({
-                          ship: formData['urbit-id'],
-                          url: formData['ship-id'],
-                          code: formData['access-key'],
-                        })
-                        .then((value: any) => {
-                          // eslint-disable-next-line promise/no-callback-in-promise
-                          next();
-                          evt.target.blur();
-                          return null;
-                        })
-                        .catch((reason: any) => {
-                          console.log(reason);
-                        });
-                    } else {
-                      next();
-                    }
-                  }}
-                >
-                  {authStore.isLoading ? <Spinner size={0} /> : 'Next'}
-                </TextButton>
-              </Flex>
-            ) : (
-              <Flex
-                mt={5}
-                width="100%"
-                alignItems="center"
-                justifyContent="flex-start"
-              >
-                <IconButton onClick={() => goToLogin()}>
-                  <Icons name="ArrowLeftLine" />
-                </IconButton>
-              </Flex>
-            )}
+          <Box position="absolute" height={40} bottom={20} left={20}>
+            <Flex
+              mt={5}
+              width="100%"
+              alignItems="center"
+              justifyContent="flex-start"
+            >
+              <IconButton onClick={() => goBack()}>
+                <Icons name="ArrowLeftLine" />
+              </IconButton>
+            </Flex>
           </Box>
         </Card>
       </motion.div>

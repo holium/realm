@@ -4,7 +4,7 @@ import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import axios from 'axios';
 import { Action } from '..';
-import { ContactApi } from '../ship/modules/contact';
+import { ContactApi } from '../ship/api/contacts';
 import { AuthStore, AuthShip, AuthStoreType, AuthShipType } from './store';
 import {
   onPatch,
@@ -14,6 +14,7 @@ import {
   ReferenceIdentifier,
   destroy,
 } from 'mobx-state-tree';
+import { Conduit } from '../conduit';
 
 export interface AuthManagerActions {}
 
@@ -23,6 +24,9 @@ export type AuthPreloadType = {
   getShips: () => Promise<any>;
   onOpen: () => Promise<any>;
   getProfile: (ship: string) => Promise<any>;
+  saveProfile: (ship: string, data: any) => Promise<any>;
+  completeSignup: (ship: any) => Promise<any>;
+  setSelected: (ship: string) => Promise<any>;
 };
 
 export class AuthManager extends EventEmitter {
@@ -43,11 +47,17 @@ export class AuthManager extends EventEmitter {
     this.removeShip = this.removeShip.bind(this);
     this.onAction = this.onAction.bind(this);
     this.getProfile = this.getProfile.bind(this);
+    this.saveProfile = this.saveProfile.bind(this);
+    this.completeSignup = this.completeSignup.bind(this);
+    this.setSelected = this.setSelected.bind(this);
 
     ipcMain.handle('auth:add-ship', this.addShip);
     ipcMain.handle('auth:remove-ship', this.removeShip);
     ipcMain.handle('auth:get-ships', this.getShips);
+    ipcMain.handle('auth:set-selected', this.setSelected);
     ipcMain.handle('signup:get-profile', this.getProfile);
+    ipcMain.handle('signup:save-profile', this.saveProfile);
+    ipcMain.handle('signup:complete', this.completeSignup);
 
     let persistedState: AuthStoreType = this.authStore.store;
 
@@ -75,6 +85,16 @@ export class AuthManager extends EventEmitter {
   // ------------------------------------
   // ------------- Actions --------------
   // ------------------------------------
+
+  completeSignup(_event: any, patp: string) {
+    const ship = this.stateTree.ships.get(`auth${patp}`);
+    ship?.setStatus('completed');
+  }
+
+  setSelected(_event: any, patp: string) {
+    const ship = this.stateTree.ships.get(`auth${patp}`);
+    this.stateTree.setSelected(ship!);
+  }
 
   setLoggedIn(patp: string) {
     const ship = this.stateTree.ships.get(`auth${patp}`);
@@ -155,7 +175,7 @@ export class AuthManager extends EventEmitter {
       url,
       patp: ship,
       wallpaper:
-        'https://images.unsplash.com/photo-1554147090-e1221a04a025?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=4096&q=80',
+        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
     });
     this.authStore.set(`ships.${id}`, {
       url,
@@ -183,9 +203,94 @@ export class AuthManager extends EventEmitter {
 
   getProfile = async (_event: any, ship: string) => {
     const credentials = this.getCredentials(ship, '');
-    return await ContactApi.getContact(ship, credentials);
+    const ourProfile = await ContactApi.getContact(ship, credentials);
+    this.stateTree.ships.get(`auth${ship}`)?.setContactMetadata({
+      nickname: ourProfile.nickname,
+      color: ourProfile.color,
+      avatar: ourProfile.avatar,
+    });
+    return ourProfile;
   };
 
+  saveProfile = async (
+    _event: any,
+    ship: string,
+    data: {
+      nickname: string;
+      color: string;
+      avatar: string | null;
+    }
+  ) => {
+    const credentials = this.getCredentials(ship, '');
+    // Get current contact data
+    // const ourProfile = await ContactApi.getContact(ship, credentials);
+    // ourProfile['last-updated'] = Date.now();
+    return new Promise((resolve, reject) => {
+      const conduit = new Conduit(credentials.url, ship, credentials.cookie);
+      conduit.on('ready', () => {
+        console.log('on ready', data);
+        const json1 = [
+          {
+            edit: {
+              ship,
+              'edit-field': {
+                nickname: data.nickname,
+              },
+              timestamp: Date.now(),
+            },
+          },
+        ];
+        // const json2 = {
+        //   edit: {
+        //     ship,
+        //     'edit-field': {
+        //       color: data.color,
+        //     },
+        //     timestamp: Date.now(),
+        //   },
+        // };
+        // const json3 = {
+        //   edit: {
+        //     ship,
+        //     'edit-field': {
+        //       avatar: data.avatar,
+        //     },
+        //     timestamp: Date.now(),
+        //   },
+        // };
+        const msgId = conduit.counter + 4;
+        console.log('msgId', msgId);
+        conduit
+          .subscribe('contact-store', '/all', {
+            onError: (err: any) => {
+              console.log('in onError');
+              reject(err);
+              conduit.close();
+            },
+            onEvent: (event: any) => {
+              console.log('in onEvent', event.id);
+              if (event.id === msgId) {
+                resolve(data);
+                conduit.close();
+              }
+            },
+          })
+          .then(() => {
+            conduit.bulkAction('contact-store', json1, 'contact-update-0');
+          });
+        // Send the action
+      });
+    });
+
+    // return await ContactApi.saveContact(ship, credentials, {
+    //   edit: {
+    //     ship,
+    //     'edit-field': data,
+    //     timestamp: Date.now(),
+    //   },
+    //   // add: { ship, contact: { ...ourProfile, ...data } },
+    // });
+  };
   // ------------------------------------
   // ------------- Handlers -------------
   // ------------------------------------
@@ -196,22 +301,20 @@ export class AuthManager extends EventEmitter {
     removeShip: (ship: string) => {
       return ipcRenderer.invoke('auth:remove-ship', ship);
     },
+    setSelected: (ship: string) => {
+      return ipcRenderer.invoke('auth:set-selected', ship);
+    },
     getProfile: async (ship: string) => {
       return ipcRenderer.invoke('signup:get-profile', ship);
     },
-    setProfile: (
+    saveProfile: (
       ship: string,
-      nickname?: string,
-      color?: string,
-      avatar?: string
+      data: { nickname: string; color: string; avatar: string }
     ) => {
-      return ipcRenderer.invoke(
-        'signup:set-profile',
-        ship,
-        nickname,
-        color,
-        avatar
-      );
+      return ipcRenderer.invoke('signup:save-profile', ship, data);
+    },
+    completeSignup: (ship: any) => {
+      return ipcRenderer.invoke('signup:complete', ship);
     },
     getShips: () => {
       return ipcRenderer.invoke('auth:get-ships');

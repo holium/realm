@@ -8,6 +8,8 @@ import { Conduit } from '../conduit';
 import { ShipInfoType } from './types';
 import { ShipModel, ShipModelType } from './stores/ship';
 import { ChatStore } from './stores/dms';
+import { cleanNounColor } from '../../renderer/logic/utils/color';
+
 import {
   onSnapshot,
   onPatch,
@@ -51,7 +53,7 @@ export class ShipManager extends EventEmitter {
     this.conduit = conduit;
     const shipPath: string = `ship.manager.${this.ship}`;
     let persistedState: ShipModelType = this.store.get(shipPath);
-    console.log(persistedState.patp);
+    // console.log(persistedState.patp);
     this.stateTree = ShipModel.create({
       patp: this.ship,
       url: persistedState.url,
@@ -59,6 +61,7 @@ export class ShipManager extends EventEmitter {
       color: persistedState.color || null,
       nickname: persistedState.nickname || null,
       avatar: persistedState.avatar || null,
+      cookie: persistedState.cookie || shipInfo.cookie,
       theme: castToSnapshot(persistedState.theme),
       chat: persistedState.chat
         ? castToSnapshot(persistedState.chat)
@@ -66,6 +69,9 @@ export class ShipManager extends EventEmitter {
       contacts: persistedState.contacts
         ? castToSnapshot(persistedState.contacts)
         : { ourPatp: this.ship },
+      docket: persistedState.docket
+        ? castToSnapshot(persistedState.docket)
+        : {},
     });
 
     onSnapshot(this.stateTree, (snapshot: any) => {
@@ -104,6 +110,9 @@ export class ShipManager extends EventEmitter {
         response['graph-update']['add-graph']['graph']
       );
     });
+    this.getApps().then((apps) => {
+      this.stateTree?.docket.setInitial(apps);
+    });
   }
 
   async init(ship: string) {
@@ -113,7 +122,6 @@ export class ShipManager extends EventEmitter {
       key: ship,
       response: 'initial',
     };
-    console.log(syncEffect);
     this.onEffect(syncEffect);
   }
 
@@ -122,8 +130,12 @@ export class ShipManager extends EventEmitter {
       return;
     }
     const response = await this.conduit.scry('docket', '/charges');
-    const { json } = response;
-    return json!.data;
+    const appMap = response.json?.data.initial;
+    Object.keys(appMap).forEach((appKey: string) => {
+      const appColor = appMap[appKey].color;
+      appMap[appKey].color = appColor && cleanNounColor(appColor);
+    });
+    return appMap;
   }
   //
   async getDMs() {
@@ -181,6 +193,7 @@ export class ShipManager extends EventEmitter {
     getDMs: () => {
       return ipcRenderer.invoke('ship:get-dms');
     },
+
     // getApps: (callback: any) => ipcRenderer.on('get-apps', callback),
     // getDMs: (callback: any) => ipcRenderer.on('get-dms', callback),
   };

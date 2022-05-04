@@ -20,6 +20,7 @@ import {
 import { useAuth, useMst } from '../../../../logic/store';
 import { ShipSelector } from './ShipSelector';
 import { AnimatePresence, motion } from 'framer-motion';
+import { DEFAULT_WALLPAPER } from 'renderer/logic/theme/store';
 
 type LoginProps = {
   addShip: () => void;
@@ -45,13 +46,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   });
   const { anchorPoint, show, setShow } = config;
 
-  const pendingShip = authStore.selected!;
-  const theme = pendingShip.theme;
+  const pendingShip = authStore.selected;
   const shipName = pendingShip?.nickname || pendingShip?.patp;
 
   useEffect(() => {
     // Set the wallpaper on load
-    themeStore.setWallpaper(pendingShip.wallpaper!);
+    themeStore.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER);
   }, [authStore.selected !== null]);
 
   const submitPassword = (event: any) => {
@@ -71,8 +71,8 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   let colorProps = null;
   // if (theme) {
   colorProps = {
-    color: theme.textColor,
-    textShadow: theme.textTheme === 'dark' ? '0 1px black' : 'none',
+    color: themeStore.textColor,
+    textShadow: themeStore.textTheme === 'dark' ? '0 1px black' : 'none',
   };
   // }
 
@@ -163,7 +163,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                       ) : (
                         <IconButton
                           ref={submitRef}
-                          luminosity={theme.textTheme}
+                          luminosity={themeStore.textTheme}
                           size={24}
                           canFocus
                           onKeyDown={submitPassword}
@@ -177,7 +177,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                 <IconButton
                   size={26}
                   ref={optionsRef}
-                  luminosity={theme.textTheme}
+                  luminosity={themeStore.textTheme}
                   opacity={1}
                   onClick={(evt: any) => {
                     evt.preventDefault();
@@ -237,7 +237,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                 onClick={continueSignup}
                 key={`continue-${ship.patp}`}
                 ship={ship}
-                theme={theme}
+                theme={themeStore}
               />
             ))}
             <TextButton

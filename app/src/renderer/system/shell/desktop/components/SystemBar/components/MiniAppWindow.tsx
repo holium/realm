@@ -14,6 +14,9 @@ type MiniAppStyleProps = {
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
   backdrop-filter: blur(16px);
+  --webkit-backface-visibility: hidden;
+  --webkit-transform: translate3d(0, 0, 0);
+  --webkit-perspective: 1000;
   width: 270px;
   box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};
   border: 1px solid ${(props: MiniAppStyleProps) => rgba(props.customBg!, 0.7)};

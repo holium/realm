@@ -24,6 +24,7 @@ import { authState, osState } from '../store';
 import { init } from './api';
 import { darken, lighten } from 'polished';
 import { ContactStore } from '../../../core/ship/stores/contacts';
+import { AuthShipType } from '../../../core/auth/store';
 
 type ShipInfoType = {
   url: string;
@@ -158,6 +159,9 @@ export const ShipStore = types
     shipLoader: types.optional(LoaderModel, { state: 'initial' }),
   })
   .actions((self) => ({
+    addNewShip: flow(function* (authShip: AuthShipType) {
+      console.log('should add', authShip);
+    }),
     initialSync: (syncEffect: {
       key: string;
       model: Instance<typeof ShipModel>;

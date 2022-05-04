@@ -8,6 +8,7 @@ import {
   castToReferenceSnapshot,
   applyPatch,
   cast,
+  clone,
 } from 'mobx-state-tree';
 import { LoaderModel } from '../stores/common/loader';
 // import { ShipModel } from '../ship/store';
@@ -20,7 +21,10 @@ import AuthIPC from './api';
 import { WindowThemeModel } from '../stores/config';
 import { sendAction } from '../api/realm.core';
 import { toJS } from 'mobx';
-import { authState, osState } from '../store';
+import { authState, osState, shipState } from '../store';
+import { timeout } from '../utils/dev';
+import { ShipModel } from '../ship/store';
+import { DEFAULT_WALLPAPER } from '../theme/store';
 
 const StepList = types.enumeration([
   'add-ship',
@@ -50,17 +54,41 @@ export const SignupStore = types
     get isLoaded() {
       return self.loader.isLoaded;
     },
+    get isLoading() {
+      return self.loader.isLoading;
+    },
   }))
   .actions((self) => ({
     getProfile: flow(function* () {
       const [response, error] = yield AuthIPC.getProfile(self.signupShip!.patp);
-      console.log(response);
       if (error) throw error;
       self.currentStep = 'profile-setup';
       self.signupShip!.setContactMetadata(response);
       return response;
     }),
-    setSignupShip: (ship: AuthShipType) => {
+    saveProfile: flow(function* (form: {
+      nickname: string;
+      color: string;
+      avatar: string;
+    }) {
+      self.loader.set('loading');
+      const [response, error] = yield AuthIPC.saveProfile(
+        self.signupShip!.patp,
+        form
+      );
+      self.loader.set('loaded');
+      console.log(response);
+      if (error) throw error;
+
+      self.currentStep = 'set-password';
+      self.signupShip!.setContactMetadata(response);
+      return response;
+    }),
+    clearSignupShip: () => {
+      self.currentStep = 'add-ship';
+      self.signupShip = undefined;
+    },
+    setSignupShip: (ship: any) => {
       self.currentStep = ship.status;
       self.signupShip = authState.authStore.ships.get(ship.id);
     },
@@ -70,7 +98,6 @@ export const SignupStore = types
       code: string;
     }) {
       self.loader.set('loading');
-
       try {
         const [_response, error] = yield AuthIPC.addShip(
           payload.ship,
@@ -79,17 +106,44 @@ export const SignupStore = types
         );
         // if (error) throw error;
         const signupShip = AuthShip.create({
-          id: `auth~${payload.ship}`,
+          id: `auth${payload.ship}`,
           url: payload.url,
           patp: payload.ship,
           status: 'initial',
         });
-        self.signupShip = signupShip;
+        // Add signup ship to ship list and set as signupShip
+        self.signupShip = authState.authStore.addShip(signupShip);
         self.loader.set('loaded');
         authState.authStore.setFirstTime();
       } catch (err: any) {
         self.loader.error(err);
       }
+    }),
+    installRealm: flow(function* () {
+      self.installer.set('loading');
+      yield timeout(5000);
+      self.installer.set('loaded');
+    }),
+    completeSignup: flow(function* () {
+      self.loader.set('loading');
+      // yield timeout(2000);
+      // TODO push AuthShip to ShipManager
+      // const newShip = ShipModel.create({
+      //   url: self.signupShip!.url,
+      //   cookie: self.signupShip!.cookie,
+      //   patp: self.signupShip!.patp,
+      //   wallpaper: DEFAULT_WALLPAPER,
+      //   color: self.signupShip!.color,
+      //   nickname: self.signupShip!.nickname,
+      //   avatar: self.signupShip!.avatar,
+      //   theme: clone(self.signupShip!.theme),
+      //   chat: { loader: { state: 'initial' } },
+      //   contacts: { ourPatp: self.signupShip!.patp },
+      //   docket: {},
+      // });
+      yield AuthIPC.completeSignup(self.signupShip!.patp);
+      // yield authState.authStore.addAuthShip(self.signupShip!);
+      self.loader.set('loaded');
     }),
   }));
 
@@ -107,7 +161,18 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
       return self.loader.isLoading;
     },
     get hasShips() {
-      return self.ships.size > 0;
+      return (
+        Array.from(self.ships.entries()).filter(
+          (value: any) => value.status === 'completed'
+        ).length > 0
+      );
+    },
+    hasInProgressShips() {
+      return (
+        Array.from(self.ships.entries()).filter(
+          (value: any) => value.status !== 'completed'
+        ).length > 0
+      );
     },
     get inProgressList(): any {
       return Array.from(self.ships.entries())
@@ -155,13 +220,13 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
     setSession: (shipRef: any) => {
       self.selected = shipRef;
       osState.themeStore.setWallpaper(self.selected?.wallpaper!);
+      AuthIPC.setSelected(self.selected!.patp);
     },
     clearSession() {
       self.selected = undefined;
     },
     setOrder(newOrder: any) {
       self.order = newOrder;
-
       const action = {
         action: 'set-order',
         resource: 'auth.manager',
@@ -191,6 +256,16 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
         self.loader.error(err);
       }
     }),
+    addAuthShip: flow(function* (ship: AuthShipType) {
+      self.ships.set(ship.id, castToSnapshot(ship));
+      // TODO
+      console.log(self.ships.get(ship.id));
+      return self.ships.get(ship.id);
+    }),
+    addShip: (ship: AuthShipType) => {
+      self.ships.set(ship.id, ship);
+      return self.ships.get(ship.id);
+    },
     getShips: flow(function* () {
       self.loader.set('loading');
       try {
@@ -258,3 +333,24 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
   }));
 
 export type AuthStoreType = Instance<typeof AuthStore>;
+
+// "url": "https://test-moon-2.holium.network",
+// 			"patp": "~wacrel-ripdet-lomder-librun",
+// 			"nickname": null,
+// 			"color": null,
+// 			"avatar": "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/d5/d5fd6d6976cf75a133f115eb3114523f6c460133_full.jpg",
+// 			"cookie": "urbauth-~wacrel-ripdet-lomder-librun=0v3.e94nq.u6k94.dd6g9.epeaj.bgrqo; Path=/; Max-Age=604800",
+// 			"theme": {
+// 				"backgroundColor": "#727367",
+// 				"dockColor": "#757669",
+// 				"windowColor": "#8c8d80",
+// 				"textTheme": "dark",
+// 				"textColor": "#fff",
+// 				"iconColor": "#333333"
+// 			},
+// 			"loggedIn": false,
+// 			"wallpaper": "https://lomder-librun.sfo3.digitaloceanspaces.com/media/18okOoNv-E7K_2400x2400.jpeg",
+// "loader": {
+// 	"errorMessage": "",
+// 	"state": "initial"
+// },

@@ -2,7 +2,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
-import { useShip, useAuth } from '../../../logic/store';
+import { useShip, useAuth, useMst } from '../../../logic/store';
 import AppWindow from './components/AppWindow';
 import { Browser } from '../../apps/Browser';
 import { AnimatePresence } from 'framer-motion';
@@ -15,33 +15,21 @@ type OSFrameProps = {
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
   const { hasLoaded } = props;
+  const { desktopStore } = useMst();
   const { authStore } = useAuth();
   const { ship } = useShip();
-  const [showDesktop, setShowDesktop] = useState(false);
 
-  // const ship = useMemo(() => clone(shipStore.session!), [shipStore.session]);
   let theme;
   if (!hasLoaded) {
     theme = authStore.selected!.theme;
   } else {
     theme = ship!.theme;
   }
-  const onHome = useMemo(
-    () => () => setShowDesktop(!showDesktop),
-    [showDesktop]
-  );
-  // {
-  //   showDesktop && (
-  //     <AppWindow theme={theme}>
-  //       {/* @ts-expect-error */}
-  //       <Browser theme={theme} />
-  //     </AppWindow>
-  //   );
-  // }
+
   return (
     <Fill>
       <AnimatePresence>
-        {showDesktop && (
+        {desktopStore.hasOpenWindow && (
           <AppWindow theme={theme}>
             <Browser theme={theme} />
           </AppWindow>
@@ -49,7 +37,13 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
       </AnimatePresence>
       <Layer zIndex={1}>
         <Bottom size={58}>
-          <SystemBar onHome={onHome} />
+          <SystemBar
+            onHome={() =>
+              desktopStore.activeApp
+                ? desktopStore.closeApp(desktopStore.activeApp?.id)
+                : {}
+            }
+          />
         </Bottom>
       </Layer>
     </Fill>

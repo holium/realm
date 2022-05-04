@@ -81,7 +81,7 @@ export class Conduit extends EventEmitter {
 
   initialize() {
     this.channelId = `${generateChannelId()}`;
-    this.action('hood', 'opening Realm airlock', 'helm-hi')
+    this.action('hood', 'opening airlock', 'helm-hi')
       .then((actionResponse: any) => {
         const { response, msgId } = actionResponse;
         this.cookie = response.headers['set-cookie']![0];
@@ -115,7 +115,9 @@ export class Conduit extends EventEmitter {
         if (event.response === 'subscribe') {
           console.log('subscribed to ', event.id);
         }
+
         // 2. Get wire handlers
+        console.log(this.wires);
         const wire = this.wires.get(event.id);
         // console.log(wire?.app, wire?.path, event.json);
         if (!wire) {
@@ -124,6 +126,10 @@ export class Conduit extends EventEmitter {
           return;
         }
         const { app, path, handlers } = wire;
+        if (event.err) {
+          handlers.onError && handlers.onError(event);
+          return;
+        }
         // 3. Handle onEvent
         if (event.response === 'diff') {
           handlers.onEvent(event);
@@ -219,6 +225,26 @@ export class Conduit extends EventEmitter {
         },
       ],
     });
+    console.log('action, ', msgId, app, mark);
+    return { msgId, response };
+  }
+
+  async bulkAction(app: string, data: any[], mark?: string) {
+    const msgId: number = ++this.counter;
+    const response = await axios.request({
+      url: this.channelUrl,
+      method: 'PUT',
+      headers: this.headers,
+      signal: this.controller.signal,
+      data: data.map((action) => ({
+        id: msgId,
+        action: 'poke',
+        ship: this.ship,
+        app: app,
+        mark,
+        json: action,
+      })),
+    });
     return { msgId, response };
   }
 
@@ -265,26 +291,129 @@ export class Conduit extends EventEmitter {
     }
   }
 
-  static async poke(url: string, cookie: string, app: string, data: any) {
-    const headers = {
-      'Content-Type': 'application/json',
-      Cookie: cookie,
-    };
-    // TODO
-    // try {
-    //   const response = await axios.request({
-    //     url: `${url}/~/scry/${app}${path}.json`,
-    //     headers: headers,
-    //   });
-    //   if (response.status === 200) {
-    //     return { response: 'scry', json: { app, path, data: response.data } };
-    //   }
-    //   return { response: 'scry', json: null };
-    // } catch (err) {
-    //   console.log(err);
-    //   throw err;
-    // }
-  }
+  // static quickAction(app: string, data: any, mark?: string) {
+  //   const msgId: number = ++this.counter;
+  //   const response = await axios.request({
+  //     url: this.channelUrl,
+  //     method: 'PUT',
+  //     headers: this.headers,
+  //     signal: this.controller.signal,
+  //     data: [
+  //       {
+  //         id: msgId,
+  //         action: 'poke',
+  //         ship: this.ship,
+  //         app: app,
+  //         mark,
+  //         json: data,
+  //       },
+  //     ],
+  //   });
+  //   return { msgId, response };
+  // }
+
+  // static async quickPoke(
+  //   ship: string,
+  //   url: string,
+  //   cookie: string,
+  //   app: string,
+  //   mark: string,
+  //   responsePath: string,
+  //   data: any
+  // ) {
+  //   const headers = {
+  //     Cookie: cookie,
+  //   };
+  //   const msgId: number = 1;
+  //   const channelUrl = `${url}/~/channel/${generateChannelId()}`;
+  //   console.log({
+  //     url: channelUrl,
+  //     method: 'PUT',
+  //     headers: headers,
+  //     data: [
+  //       {
+  //         id: msgId,
+  //         action: 'subscribe',
+  //         ship: ship,
+  //         app,
+  //         path: responsePath,
+  //       },
+  //     ],
+  //   });
+  //   const response = await axios.request({
+  //     url: channelUrl,
+  //     method: 'PUT',
+  //     headers,
+  //     data: [
+  //       {
+  //         id: msgId,
+  //         action: 'subscribe',
+  //         ship,
+  //         app,
+  //         path: responsePath,
+  //       },
+  //     ],
+  //   });
+  //   console.log('sub response', response);
+  //   const sse = new EventSource(channelUrl, {
+  //     headers: { Cookie: cookie },
+  //   });
+  //   console.log(channelUrl, data);
+  //   try {
+  //     const response = await axios.request({
+  //       url: channelUrl,
+  //       method: 'PUT',
+  //       headers,
+  //       data: [
+  //         {
+  //           id: msgId + 1,
+  //           action: 'poke',
+  //           ship,
+  //           app,
+  //           mark,
+  //           json: data,
+  //         },
+  //       ],
+  //     });
+  //     console.log('response', response);
+  //     return new Promise((resolve, reject) => {
+  //       sse.addEventListener('message', (e) => {
+  //         let event = JSON.parse(e.data);
+  //         console.log('in quick poke listener');
+  //         if (event.response === 'diff') {
+  //           resolve(event);
+  //           sse.close();
+  //         } else {
+  //           console.log(event);
+  //           sse.close();
+  //         }
+  //       });
+  //       sse.addEventListener('error', (e: any) => {
+  //         console.log('An error occurred while attempting to connect.', e);
+  //         reject(e);
+  //         sse.close();
+  //       });
+  //     });
+  //   } catch (err: any) {
+  //     // console.log(err);
+  //     throw err;
+  //   }
+  //   // TODO
+  //   // try {
+  //   //   const response = await axios.request({
+  //   //     url: `${url}/~/scry/${app}${path}.json`,
+  //   //     headers: headers,
+  //   //   });
+  //   //   if (response.status === 200) {
+  //   //     return { response: 'scry', json: { app, path, data: response.data } };
+  //   //   }
+  //   //   return { response: 'scry', json: null };
+  //   // } catch (err) {
+  //   //   console.log(err);
+  //   //   throw err;
+  //   // }
+  //   return;
+  // }
 
   async unsubscribe(id: number) {
     return axios

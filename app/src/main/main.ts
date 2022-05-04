@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  BrowserView,
+  session,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
@@ -38,12 +45,6 @@ if (process.defaultApp) {
 } else {
   app.setAsDefaultProtocolClient('holium-realm');
 }
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -93,6 +94,7 @@ const createWindow = async () => {
     title: 'Realm',
     webPreferences: {
       nodeIntegration: false,
+      webviewTag: true,
       // nodeIntegrationInWorker: true,
       contextIsolation: true,
       // additionalArguments: [`storePath:${app.getPath('userData')}`],
@@ -131,6 +133,53 @@ const createWindow = async () => {
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
+  });
+
+  ipcMain.on(
+    'open-app',
+    async (
+      event,
+      location: { url: string; cookies: any },
+      windowConfig: any
+    ) => {
+      // console.log(location, windowConfig);
+      // let view = new BrowserView({
+      //   webPreferences: {
+      //     preload: `${__dirname}/preload.js`, // needs full path
+      //   },
+      // });
+      // mainWindow?.removeBrowserView();
+      // mainWindow && mainWindow.setBrowserView(view);
+      // view.setBounds(windowConfig);
+      // mainWindow.
+      // console.log(appUrl);
+      // session.defaultSession.cookies.set(cookie).then(
+      //   () => {
+      //     // success
+      //   },
+      //   (error) => {
+      //     console.error(error);
+      //   }
+      // );
+      // session.defaultSession.cookies.set(location.cookies).then(
+      //   () => {
+      //     // success
+      //     event.reply('open-app', { status: 'success' });
+      //   },
+      //   (error) => {
+      //     console.error(error);
+      //   }
+      // );
+      session.fromPartition('app-view').cookies.set(location.cookies);
+      // await view.webContents.session.cookies.set(location.cookies);
+      // view.webContents.loadURL(location.url);
+    }
+  );
+
+  ipcMain.on('close-app', async (event, location: any) => {
+    console.log(location);
+    const views = mainWindow!.getBrowserViews();
+    console.log(location, views);
   });
 
   // Remove this if your app does not use auto updates
