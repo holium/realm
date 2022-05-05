@@ -1,10 +1,16 @@
 import styled, { css } from 'styled-components';
 import { FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
 import { WindowThemeType } from '../../../../../../logic/stores/config';
-import { Grid, Flex, Text } from '../../../../../../components';
+import {
+  Grid,
+  Flex,
+  Text,
+  IconButton,
+  Icons,
+} from '../../../../../../components';
+import { useMst } from 'renderer/logic/store';
 
 type TitlebarStyleProps = {
   customBg: string;
@@ -13,19 +19,19 @@ type TitlebarStyleProps = {
 };
 
 const TitlebarStyle = styled(Grid.Row)<TitlebarStyleProps>`
-  position: absolute;
-  z-ndex: 5;
+  // position: absolute;
+  z-index: 5;
   top: 0;
   left: 0;
   right: 0;
-  height: 50px;
-  backdrop-filter: blur(8px);
+  height: 30px;
+  padding: 0 4px 0 12px;
   --webkit-transform: translate3d(0, 0, 0);
   ${(props: TitlebarStyleProps) => css`
-    background: ${rgba(lighten(0.225, props.customBg!), 0.9)};
+    background: ${rgba(props.customBg, 0.5)};
     z-index: ${props.zIndex};
     border-bottom: ${props.hasBorder
-      ? `1px solid ${rgba(props.customBg!, 0.7)}`
+      ? `1px solid ${rgba(darken(0.06, props.customBg), 0.9)}`
       : 'none'};
   `}
 `;
@@ -44,18 +50,26 @@ type TitlebarProps = {
 
 export const Titlebar = (props: TitlebarProps) => {
   const { children, hasBorder, zIndex } = props;
-  const { windowColor } = props.theme;
+  const { windowColor, iconColor, dockColor } = props.theme;
+  const { desktopStore } = useMst();
+
+  const onClose = () => {
+    desktopStore.activeApp
+      ? desktopStore.closeApp(desktopStore.activeApp?.id)
+      : {};
+  };
 
   let titleSection: any;
   if (props.app) {
     const { title, icon, color } = props.app!;
     titleSection = (
-      <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
+      <Flex pr={4} justifyContent="center" alignItems="center">
         {icon && <img height={24} width={24} src={icon} />}
         <Text
           opacity={0.7}
           style={{ textTransform: 'uppercase' }}
-          fontWeight={600}
+          fontSize={2}
+          fontWeight={500}
         >
           {title}
         </Text>
@@ -73,8 +87,31 @@ export const Titlebar = (props: TitlebarProps) => {
       customBg={windowColor!}
       hasBorder={hasBorder!}
     >
-      {titleSection}
+      <Flex gap={4} alignItems="center">
+        {/* <IconButton
+          size={20}
+          customBg={windowColor}
+          // hoverFill="#FF6240"
+          onClick={() => {}}
+        >
+          <Icons name="ArrowLeftLine" color={iconColor} />
+        </IconButton>
+        <IconButton size={20} customBg={windowColor} onClick={() => {}}>
+          <Icons name="ArrowRightLine" color={iconColor} />
+        </IconButton> */}
+        {titleSection}
+      </Flex>
+
       {children}
+      <Flex alignItems="center">
+        <IconButton
+          customBg="#FF6240"
+          hoverFill="#FF6240"
+          onClick={() => onClose()}
+        >
+          <Icons name="Close" />
+        </IconButton>
+      </Flex>
     </TitlebarStyle>
   );
 };

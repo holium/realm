@@ -36,7 +36,7 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
       <BackgroundFill hasWallpaper={hasWallpaper}>
         {!isFullscreen && (
           <Top
-            size={30}
+            size={22}
             // @ts-expect-error this error should be disabled
             style={{ WebkitAppRegion: 'drag', appRegion: 'drag' }}
           />

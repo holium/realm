@@ -59,9 +59,9 @@ export const AppWindow: FC<AppWindowProps> = observer(
           }}
           exit={{
             opacity: 0,
-            y: 8,
+            y: 4,
             transition: {
-              duration: 0.15,
+              duration: 0.1,
             },
           }}
           style={{
@@ -70,8 +70,8 @@ export const AppWindow: FC<AppWindowProps> = observer(
           color={textColor}
           customBg={windowColor}
         >
-          {/* <Titlebar theme={theme} app={desktopStore.activeApp} /> */}
-          <AppView app={desktopStore.activeApp!} />
+          <Titlebar hasBorder theme={theme} app={desktopStore.activeApp} />
+          <AppView hasTitlebar app={desktopStore.activeApp!} />
         </AppWindowStyle>
       </Fill>
     );

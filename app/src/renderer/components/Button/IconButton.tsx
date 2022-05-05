@@ -20,6 +20,7 @@ type IProps = {
   ref?: unknown;
   disabled?: boolean;
   customBg?: string;
+  hoverFill?: string;
   hoverReveal?: boolean;
   canFocus?: boolean;
   size?: number;
@@ -66,7 +67,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     props.hoverReveal
       ? css`
           opacity: 0;
-          transition: 0.2s ease;
+          transition: ${props.theme.transitionFast};
           padding: 3px;
           background: transparent;
           &:hover {
@@ -75,7 +76,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
           }
         `
       : css`
-          transition: 0.2s ease;
+          transition: ${props.theme.transitionFast};
           &:hover {
             background: ${props.luminosity
               ? props.theme.colors.highlights.bgClearHighlight
@@ -90,7 +91,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     css`
       &:focus,
       &:active {
-        transition: ${props.theme.transition};
+        transition: ${props.theme.transitionFast};
         outline: none;
         svg {
           fill: ${darken('10%', props.theme.colors.brand.primary)};
@@ -101,12 +102,25 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     props.customBg &&
     css`
       &:hover {
-        transition: ${(props: IProps) => props.theme.transition};
+        transition: ${(props: IProps) => props.theme.transitionFast};
         background-color: ${props.customBg
           ? rgba(lighten(0.1, props.customBg), 0.5)
           : 'inherit'};
       }
     `}
+
+    ${(props: IProps) =>
+    props.hoverFill &&
+    css`
+      &:hover {
+        color: ${props.hoverFill};
+        svg {
+          fill: ${props.hoverFill};
+        }
+      }
+    `}
+
+  
 
   
 
