@@ -42,6 +42,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
   justify-content: center;
   position: relative;
   pointer-events: auto;
+  will-change: transform;
   height: ${(props: IProps) => `${props.size}px`};
   width: ${(props: IProps) => `${props.size}px`};
   svg {
@@ -71,6 +72,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
           padding: 3px;
           background: transparent;
           &:hover {
+            transform: translateZ(0);
             opacity: 0.5;
             background: ${props.theme.colors.highlights.bgHighlight};
           }
@@ -78,6 +80,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
       : css`
           transition: ${props.theme.transitionFast};
           &:hover {
+            transform: translateZ(0);
             background: ${props.luminosity
               ? props.theme.colors.highlights.bgClearHighlight
               : props.theme.colors.highlights.bgHighlight};
@@ -91,6 +94,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     css`
       &:focus,
       &:active {
+        transform: translateZ(0);
         transition: ${props.theme.transitionFast};
         outline: none;
         svg {
@@ -102,6 +106,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     props.customBg &&
     css`
       &:hover {
+        transform: translateZ(0);
         transition: ${(props: IProps) => props.theme.transitionFast};
         background-color: ${props.customBg
           ? rgba(lighten(0.1, props.customBg), 0.5)
@@ -113,6 +118,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     props.hoverFill &&
     css`
       &:hover {
+        transform: translateZ(0);
         color: ${props.hoverFill};
         svg {
           fill: ${props.hoverFill};
@@ -133,6 +139,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
       fill: ${(props) => props.theme.colors.ui.disabled};
     }
     &:hover {
+      transform: translateZ(0);
       cursor: default;
       color: ${(props) => props.theme.colors.ui.disabled};
       background-color: transparent;

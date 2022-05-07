@@ -4,7 +4,6 @@ import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
 import { useShip, useAuth, useMst } from '../../../logic/store';
 import AppWindow from './components/AppWindow';
-import { Browser } from '../../apps/Browser';
 import { AnimatePresence } from 'framer-motion';
 
 type OSFrameProps = {
@@ -14,12 +13,12 @@ type OSFrameProps = {
 };
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
-  const { hasLoaded } = props;
+  const { hasLoaded, isFullscreen } = props;
   const { desktopStore } = useMst();
   const { authStore } = useAuth();
   const { ship } = useShip();
 
-  let theme;
+  let theme: any;
   if (!hasLoaded) {
     theme = authStore.selected!.theme;
   } else {
@@ -28,14 +27,37 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
 
   return (
     <Fill>
-      <AnimatePresence>
-        {desktopStore.hasOpenWindow && (
-          <AppWindow theme={theme}>
-            <Browser theme={theme} />
-          </AppWindow>
-        )}
-      </AnimatePresence>
       <Layer zIndex={1}>
+        <AnimatePresence>
+          {desktopStore.hasOpenWindow && <AppWindow theme={theme} />}
+          {/* <WinManager render={windowRenderer}> */}
+          {/* {loading && <Loading />} */}
+          {/* {statuses && (
+            <Grid
+              container
+              spacing={3}
+              direction="column"
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                p: 2,
+                width: 'auto',
+                maxWidth: '100%',
+              }}
+            >
+              {statuses.map((status) => (
+                <Grid item key={status.system}>
+                  <System systemId={status.system} />
+                </Grid>
+              ))}
+            </Grid>
+          )} */}
+          {/* </WinManager> */}
+        </AnimatePresence>
+      </Layer>
+      <Layer zIndex={2}>
         <Bottom size={58}>
           <SystemBar
             onHome={() =>

@@ -47,8 +47,7 @@ export const DocketStore = types
           return 0;
         })
         .filter(
-          (app: AppModelType) =>
-            app.title !== 'System' && app.title !== 'Terminal'
+          (app: AppModelType) => app.title !== 'System' // && app.title !== 'Terminal'
         );
     },
   }))

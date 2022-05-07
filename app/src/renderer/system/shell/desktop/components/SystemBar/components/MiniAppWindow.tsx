@@ -17,6 +17,7 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   --webkit-backface-visibility: hidden;
   --webkit-transform: translate3d(0, 0, 0);
   --webkit-perspective: 1000;
+  transform: translateZ(0);
   width: 270px;
   box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};
   border: 1px solid ${(props: MiniAppStyleProps) => rgba(props.customBg!, 0.7)};

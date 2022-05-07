@@ -80,7 +80,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
             <Sigil
               simple
               size={28}
-              avatar={null}
+              avatar={ship!.avatar}
               patp={ship!.patp}
               color={[ship!.color || '#000000', 'white']}
             />

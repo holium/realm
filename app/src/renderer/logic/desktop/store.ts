@@ -24,6 +24,7 @@ const Window = types.model({
 
 export const DesktopStore = types
   .model({
+    isFullscreen: types.optional(types.boolean, false),
     activeApp: types.maybe(Window),
     windows: types.map(Window),
   })
@@ -33,8 +34,11 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
-    openBrowserWindow(app: any, config: any) {
-      openAppWindow(toJS(app), config);
+    setFullscreen(isFullscreen: boolean) {
+      self.isFullscreen = isFullscreen;
+    },
+    openBrowserWindow(app: any) {
+      openAppWindow(app);
     },
     closeBrowserWindow(app: any) {
       closeAppWindow(toJS(app));

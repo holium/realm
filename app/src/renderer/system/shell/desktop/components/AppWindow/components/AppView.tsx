@@ -1,44 +1,43 @@
 import { FC, useRef, useEffect, useState, createRef } from 'react';
 import styled, { css } from 'styled-components';
 import { useMst, useShip } from '../../../../../../logic/store';
-
-import { AppModelType } from '../../../../../../../core/ship/stores/docket';
-import electron from 'electron';
 import { Spinner, Flex } from '../../../../../../components';
-import { useRefDimensions } from '../../../../../../logic/utils/useRefDimensions';
+import { WebTermCSS } from '../../../../../../system/apps/WebTerm/WebTerm.styles';
+import { inherits } from 'util';
 
 interface AppViewProps {
   app: any;
+  isResizing: boolean;
   hasTitlebar: boolean;
+  windowDimensions: {
+    x: any;
+    y: any;
+    height: any;
+    width: any;
+  };
 }
 // height: ${(props: any) =>
 //   props.hasTitleBar ? 'calc(100% - 50px)' : 'inherit'};
 // height: ${(props: any) =>
 //   props.hasTitleBar ? 'calc(100% - 30px)' : 'inherit'};
 const View = styled.div<{ hasTitleBar?: boolean }>`
-  width: inherit;
-  height: inherit;
+  transform: translateZ(0);
 `;
 
 export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
-  const { app } = props;
+  const { windowDimensions, isResizing } = props;
   const { ship } = useShip();
   const { desktopStore } = useMst();
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
-  // const eldimensions = useRefDimensions(elementRef);
-  // console.log(eldimensions);
+
   const activeApp = desktopStore.activeApp;
 
   const [appConfig, setAppConfig] = useState<any>({
+    name: null,
     url: null,
+    customCSS: WebTermCSS,
     cookies: { url: null, name: null, value: null },
-  });
-  const [dimensions, setDimensions] = useState({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
   });
 
   const [loading, setLoading] = useState(false);
@@ -51,62 +50,48 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
     setLoading(false);
   };
 
-  const handleResize = () => {
-    const divElement: any = elementRef.current;
-    if (divElement) {
-      const config = divElement?.getBoundingClientRect();
-      setDimensions({
-        x: config.x,
-        y: config.y - 8,
-        width: config.width,
-        height: config.height - 30,
-      });
-    }
-  };
-
   useEffect(() => {
-    const divElement: any = elementRef.current;
-    const webviewEl: any = webViewRef.current;
     const webview = document.getElementById('app-webview');
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
-    window.addEventListener('resize', handleResize);
-    // webview?.addEventListener('dom-ready', function () {
-    //   webview?.openDevTools();
-    // });
 
     if (activeApp) {
-      const config = divElement!.getBoundingClientRect();
+      // const config = divElement!.getBoundingClientRect();
       const formAppUrl = `${ship!.url}/apps/${activeApp!.id}`;
       const location = {
+        name: activeApp.id,
         url: formAppUrl,
+        customCSS: {},
         cookies: {
           url: formAppUrl,
           name: `urbauth-${ship!.patp}`,
           value: ship!.cookie!.split('=')[1].split('; ')[0],
         },
       };
-
+      webview?.addEventListener('dom-ready', () => {
+        // @ts-ignore
+        // webview!.isDevToolsOpened() && webview!.closeDevTools();
+        // @ts-ignore
+        // webview!.openDevTools();
+      });
+      webview?.addEventListener('close', () => {
+        // @ts-ignore
+        // webview!.closeDevTools();
+      });
       setAppConfig(location);
-      const windowDimensions = {
-        x: config.x,
-        // y: config.y + 42,
-        y: config.y - 8,
-        width: config.width,
-        height: config.height - 30,
-        // height: config.height - 50,
-      };
-
-      desktopStore.openBrowserWindow(location, windowDimensions);
-      setDimensions(windowDimensions);
-      () => {
-        window.removeEventListener('resize', handleResize);
-      };
+      desktopStore.openBrowserWindow(location);
     }
-  }, [activeApp && activeApp.id]);
+  }, [activeApp]);
 
   return (
-    <View ref={elementRef}>
+    <View
+      style={{
+        overflow: 'hidden',
+        width: 'inherit',
+        height: 'inherit',
+      }}
+      ref={elementRef}
+    >
       {loading && (
         <Flex position="absolute" left="calc(50% - 4px)" top="calc(50% - 4px)">
           <Spinner size={1} />
@@ -115,10 +100,25 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
       <webview
         ref={webViewRef}
         id="app-webview"
-        partition="app-view"
+        partition="app-webview"
         src={appConfig.url}
-        style={dimensions}
-      ></webview>
+        style={{
+          width: 'inherit',
+          height: '100%',
+          pointerEvents: isResizing ? 'none' : 'auto',
+        }}
+      />
+      {/* <webview
+        ref={webViewRef}
+        id="app-webview"
+        partition="app-webview"
+        src={appConfig.url}
+        style={{
+          width: 'inherit',
+          height: '100%',
+          pointerEvents: isResizing ? 'none' : 'auto',
+        }}
+      /> */}
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import styled from 'styled-components';
 import { lighten } from 'polished';
 import { Flex, Box } from '../../../../../../../../components';
@@ -35,6 +35,7 @@ interface TileStyleProps {}
 const TileStyle = styled(Box)<TileStyleProps>`
   cursor: pointer;
   user-select: none;
+  transform: translateZ(0);
   img {
     --webkit-user-select: none;
     --khtml-user-select: none;
@@ -54,6 +55,7 @@ interface AppTileProps {
 export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
   const { app, selected, tileSize, onAppClick } = props;
   const { desktopStore } = useMst();
+  // const { openNewWindow } = useContext(WinManagerContext);
 
   return (
     <Flex position="relative">

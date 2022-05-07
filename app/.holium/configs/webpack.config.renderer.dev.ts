@@ -146,7 +146,7 @@ const configuration: webpack.Configuration = {
   ],
 
   node: {
-    __dirname: false,
+    __dirname: true,
     __filename: false,
   },
 

@@ -32,7 +32,7 @@ export const App = () => {
           {/* Modal provider */}
           <AuthProvider value={authState}>
             <ShipProvider value={shipState}>
-              <Shell isFullscreen={false} />
+              <Shell />
               <div id="portal-root" />
             </ShipProvider>
           </AuthProvider>

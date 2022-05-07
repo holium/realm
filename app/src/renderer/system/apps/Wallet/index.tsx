@@ -25,7 +25,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
       noGutter
       overflowY="hidden"
     >
-      <Titlebar hasBorder theme={props.theme}>
+      <Titlebar closeButton={false} hasBorder theme={props.theme}>
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
           <Icons opacity={0.8} name="Wallet" size={24} mr={2} />
           <Text

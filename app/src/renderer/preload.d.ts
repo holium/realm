@@ -8,7 +8,8 @@ declare global {
       ship: ShipPreloadType;
       core: RealmCorePreloadType;
       app: {
-        openApp(config: any, data: any): void;
+        setFullscreen(callback: any): void;
+        openApp(app: any): void;
         closeApp(app: any): void;
       };
     };

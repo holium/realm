@@ -212,6 +212,7 @@
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",
+    "@react-hook/mouse-position": "^4.1.3",
     "@tlon/sigil-js": "^1.4.5",
     "@urbit/http-api": "^2.1.0",
     "axios": "^0.26.1",
@@ -230,6 +231,7 @@
     "mst-middlewares": "^5.1.3",
     "polished": "^4.2.2",
     "react": "^18.0.0",
+    "react-animated-cursor": "^2.4.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.0.0",
     "react-inverted-scrollview": "^1.0.7",

@@ -60,7 +60,12 @@ export const Chat: FC<any> = (props: ChatProps) => {
             noGutter
             align="center"
           > */}
-          <Titlebar hasBorder zIndex={5} theme={props.theme}>
+          <Titlebar
+            closeButton={false}
+            hasBorder
+            zIndex={5}
+            theme={props.theme}
+          >
             <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
               <IconButton
                 size={26}

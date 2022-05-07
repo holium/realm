@@ -1,26 +1,39 @@
-import { FC, useMemo, useState } from 'react';
+import React, { FC, useRef, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { ViewPort, Top } from 'react-spaces';
-import { AnimatePresence } from 'framer-motion';
+import { ViewPort, Top, Fill, Layer } from 'react-spaces';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth, useMst, useShip } from '../../logic/store';
+import { Mouse } from './desktop/components/Mouse';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
 import {
-  BackgroundDarken,
   BackgroundImage,
   BackgroundFill,
+  BackgroundDarken,
 } from './Shell.styles';
 
-type ShellProps = {
-  isFullscreen: boolean;
-};
+type ShellProps = {};
+
+const DragBar = styled.div`
+  position: absolute;
+  height: 22px;
+  left: 0;
+  top: 0;
+  right: 0;
+  --webkit-app-region: drag;
+  app-region: drag;
+  &:active {
+    cursor: grabbing;
+  }
+`;
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
-  const { isFullscreen } = props;
-  const { themeStore } = useMst();
+  const { themeStore, desktopStore } = useMst();
   const { authStore } = useAuth();
   const { ship } = useShip();
 
+  const isFullscreen = desktopStore.isFullscreen;
   const wallpaper = themeStore.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
@@ -29,23 +42,18 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 
   const loggedIn = authStore.selected?.loggedIn && !authStore.isLoading;
   const shipLoaded = ship && ship.isLoaded;
-
+  console.log('rerendering shell');
   return (
     <ViewPort>
+      {/* <Mouse /> */}
+      <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <BgImage blurred={!loggedIn} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {!isFullscreen && (
-          <Top
-            size={22}
-            // @ts-expect-error this error should be disabled
-            style={{ WebkitAppRegion: 'drag', appRegion: 'drag' }}
-          />
-        )}
         {loggedIn ? (
           <Desktop
             hasLoaded={shipLoaded}
             hasWallpaper={true}
-            isFullscreen={false}
+            isFullscreen={isFullscreen}
           />
         ) : (
           <Auth hasWallpaper={hasWallpaper} />
@@ -70,26 +78,26 @@ const BgImage = ({
     setImageLoading(false);
   };
   return (
-    <BackgroundDarken hasWallpaper>
-      <AnimatePresence>
-        <BackgroundImage
-          key={wallpaper}
-          src={wallpaper}
-          // width="auto"
-          initial={{ opacity: 0 }}
-          exit={{ opacity: 0 }}
-          animate={{
-            opacity: imageLoading ? 0 : 1,
-            filter: blurred ? 'blur(20px)' : 'blur(0px)',
-          }}
-          transition={{
-            opacity: { duration: 1 },
-            blur: { duration: 2, ease: true },
-          }}
-          onLoad={imageLoaded}
-        />
-      </AnimatePresence>
-    </BackgroundDarken>
+    // <BackgroundDarken hasWallpaper>
+    <AnimatePresence>
+      <BackgroundImage
+        key={wallpaper}
+        src={wallpaper}
+        // width="auto"
+        initial={{ opacity: 0 }}
+        exit={{ opacity: 0 }}
+        animate={{
+          opacity: imageLoading ? 0 : 1,
+          filter: blurred ? 'blur(20px)' : 'blur(0px)',
+        }}
+        transition={{
+          opacity: { duration: 1 },
+          blur: { duration: 2, ease: true },
+        }}
+        onLoad={imageLoaded}
+      />
+    </AnimatePresence>
+    // </BackgroundDarken>
   );
 };
 

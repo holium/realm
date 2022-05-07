@@ -9,11 +9,11 @@ export const BackgroundImage = styled(motion.img)`
     props.src &&
     css`
       position: fixed;
-      /* right: -20px;
-      left: -20px; */
+      right: -22px;
+      left: -22px;
       z-index: 0;
-      /* top: -22px;
-      bottom: -22px; */
+      top: -22px;
+      bottom: -22px;
       width: calc(100% + 40px);
       height: calc(100vh + 42px);
       object-fit: cover;
@@ -37,8 +37,17 @@ export const BackgroundFill = styled(Fill)`
   background: ${(props: BackgroundStyleProps) =>
     props.hasWallpaper ? 'transparent' : props.theme.colors.bg.primary};
 `;
-
-export const BackgroundDarken = styled(Fill)`
-  background: ${(props: BackgroundStyleProps) =>
-    props.hasWallpaper ? '#333333' : 'transparent'};
+//
+//   background: ${(props: BackgroundStyleProps) =>
+//    props.hasWallpaper ? '#333333' : 'transparent'};
+//
+export const BackgroundDarken = styled(Fill)<BackgroundStyleProps>`
+  ${(props: BackgroundStyleProps) =>
+    css`
+      --webkit-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
+      --moz-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
+      --o-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
+      --ms-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
+      filter: blur(${props.hasWallpaper ? '20px' : '0px'});
+    `}
 `;

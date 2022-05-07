@@ -106,6 +106,10 @@ window.electron.core.onReady((_event: any, data: any) => {
   // onStart();
 });
 
+window.electron.app.setFullscreen((_event: any, data: any) => {
+  osState.desktopStore.setFullscreen(data);
+});
+
 onSnapshot(osState, (snapshot) => {
   localStorage.setItem('osState', JSON.stringify(snapshot));
 });

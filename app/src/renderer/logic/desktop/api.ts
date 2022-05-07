@@ -1,6 +1,6 @@
-export async function openAppWindow(app: any, config: any) {
+export async function openAppWindow(app: any) {
   try {
-    const response = await window.electron.app.openApp(app, config);
+    const response = await window.electron.app.openApp(app);
     return [response, null];
   } catch (err) {
     return [null, err];

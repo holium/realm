@@ -165,7 +165,6 @@ export class RealmCore {
       return ipcRenderer.invoke('core:init', ship);
     },
     setNewShip: (ship: any) => {
-      console.log('setting new ship');
       return ipcRenderer.invoke('core:set-new-ship', ship);
     },
     action: (action: any) => {

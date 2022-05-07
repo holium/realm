@@ -8,11 +8,14 @@ contextBridge.exposeInMainWorld('electron', {
   ship: ShipManager.preload,
   core: RealmCore.preload,
   app: {
-    openApp(app: any, config: any) {
-      ipcRenderer.send('open-app', app, config);
+    setFullscreen(callback: any) {
+      ipcRenderer.on('set-fullscreen', callback);
+    },
+    openApp(app: any) {
+      ipcRenderer.invoke('open-app', app);
     },
     closeApp(app: any) {
-      ipcRenderer.send('close-app', app);
+      ipcRenderer.invoke('close-app', app);
     },
   },
   // ipcRenderer: {
