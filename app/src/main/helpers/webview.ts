@@ -3,8 +3,8 @@ import { BrowserWindow, ipcMain, session } from 'electron';
 export const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.handle(
     'open-app',
-    (event, location: { url: string; cookies: any }) => {
-      console.log('cookies', location.cookies);
+    async (_event, location: { url: string; cookies: any }) => {
+      // console.log('cookies', location.cookies);
       // session.defaultSession.cookies.set(location.cookies);
       session.fromPartition('app-webview').cookies.set(location.cookies);
     }

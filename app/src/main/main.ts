@@ -95,6 +95,7 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
+      allowRunningInsecureContent: false,
       // nodeIntegrationInWorker: true,
       contextIsolation: true,
       // additionalArguments: [`storePath:${app.getPath('userData')}`],
@@ -108,6 +109,8 @@ const createWindow = async () => {
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
   RealmCore.boot(mainWindow);
+  FullscreenHelper.registerListeners(mainWindow);
+  WebviewHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.maximize();
@@ -115,6 +118,12 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+    mainWindow.webContents.send('set-fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send(
+      'set-appview-preload',
+      path.join(app.getAppPath(), 'appview.preload.js')
+    );
+
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
@@ -135,8 +144,6 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
-  FullscreenHelper.registerListeners(mainWindow);
-  WebviewHelper.registerListeners(mainWindow);
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();

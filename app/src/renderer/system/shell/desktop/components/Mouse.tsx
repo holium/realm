@@ -1,40 +1,49 @@
-import { FC, useRef, useCallback, useState } from 'react';
+import { FC } from 'react';
 import styled from 'styled-components';
-import useMouse from '@react-hook/mouse-position';
 import { motion } from 'framer-motion';
-import AnimatedCursor from 'react-animated-cursor';
+import AnimatedCursor from './Cursor';
+import { hexToRgb } from 'renderer/logic/utils/color';
 
-const MouseArea = styled.div`
+export const MouseArea = styled(motion.div)`
   cursor: none;
 `;
 const MouseStyle = styled(motion.div)`
   height: 10px;
   width: 10px;
   border-radius: 50%;
+  z-index: 10;
   background-color: #1e91d6;
 `;
 
-export const Mouse: FC<any> = (props: any) => {
-  const ref: any = useRef(null);
-  // const mouse = useMouse(ref);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+interface MouseProps {
+  cursorColor?: string | null;
+  animateOut?: boolean;
+  hide?: boolean;
+}
 
-  const onMouseMove = useCallback((e: any) => {
-    const { left, top } = ref.current.getBoundingClientRect();
-    const newX = e.clientX - left;
-    const newY = e.clientY - top;
+export const Mouse: FC<MouseProps> = (props: MouseProps) => {
+  const { cursorColor, hide, animateOut } = props;
 
-    setMousePosition({ x: newX, y: newY });
-  }, []);
+  const rgb: any = cursorColor && hexToRgb(cursorColor);
   return (
-    <MouseArea>
+    <MouseArea
+      animate={{ display: hide ? 'none' : 'inherit' }}
+      // transition={{ delay: 0.01 }}
+      style={{
+        zIndex: 10,
+      }}
+    >
       <AnimatedCursor
-        innerSize={8}
-        outerSize={8}
-        color="193, 11, 111"
+        animateOut={animateOut}
+        innerSize={10}
+        outerSize={12}
+        trailingSpeed={1}
+        color={
+          (cursorColor && `${rgb.r}, ${rgb.g}, ${rgb.b}`) || '193, 11, 111'
+        }
         outerAlpha={0.2}
-        innerScale={0.7}
-        outerScale={5}
+        innerScale={0.9}
+        outerScale={2.25}
         clickables={[
           'a',
           'input[type="text"]',
@@ -47,32 +56,12 @@ export const Mouse: FC<any> = (props: any) => {
           'textarea',
           'button',
           '.link',
+          '.app-dock-icon',
+          '.dynamic-mouse-hover',
         ]}
       />
     </MouseArea>
-    // <MouseArea ref={ref} onMouseMove={onMouseMove}>
-    //   <MouseStyle
-    //     // animate={{}}
-    //     transition={{
-    //       type: 'just',
-    //       // stiffness: 1000,
-    //       // damping: 100,
-    //     }}
-    //     // style={{ x: mousePosition.x, y: mousePosition.y }}
-    //     variants={{
-    //       default: {
-    //         x: mousePosition.x,
-    //         y: mousePosition.y,
-    //         // translateX: hoveringIcon ? -30 : -16,
-    //         // translateY: hoveringIcon ? -30 : -16,
-    //         // rotateX,
-    //         // rotateY,
-    //         // scaleX,
-    //         // scaleY,
-    //       },
-    //     }}
-    //     animate={'default'}
-    //   ></MouseStyle>
-    // </MouseArea>
   );
 };
+
+export default Mouse;

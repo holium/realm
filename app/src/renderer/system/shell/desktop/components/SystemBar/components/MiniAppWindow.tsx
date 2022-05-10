@@ -13,7 +13,7 @@ type MiniAppStyleProps = {
 
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
-  backdrop-filter: blur(16px);
+  backdrop-filter: var(--blur-enabled);
   --webkit-backface-visibility: hidden;
   --webkit-transform: translate3d(0, 0, 0);
   --webkit-perspective: 1000;
@@ -24,7 +24,7 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
 `)<MiniAppStyleProps>({
   // @ts-expect-error annoying
   backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? rgba(lighten(0.22, props.customBg!), 0.8) : 'initial',
+    props.customBg ? darken(0.025, props.customBg!) : 'initial',
 });
 
 type MiniAppProps = {

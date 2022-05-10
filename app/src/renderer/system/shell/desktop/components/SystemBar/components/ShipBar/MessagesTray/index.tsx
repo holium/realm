@@ -1,7 +1,4 @@
-import React, { FC, useMemo, useRef, createRef } from 'react';
-import { motion } from 'framer-motion';
-import { observer, useObserver } from 'mobx-react';
-import { useMst } from '../../../../../../../../logic/store';
+import { FC, useRef, createRef } from 'react';
 import { IconButton, Icons, Badge } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
 import { MiniApp } from '../../MiniAppWindow';
@@ -22,12 +19,10 @@ export const MessagesTray: FC<MessagesTrayProps> = (
   props: MessagesTrayProps
 ) => {
   const { theme } = props;
+  const appRef = createRef<HTMLDivElement>();
   const messagesButtonRef = useRef<HTMLButtonElement>(null);
   const { dockColor, windowColor, textColor } = theme;
 
-  const appRef = createRef<HTMLDivElement>();
-
-  // messagesButtonRef.current && messagesButtonRef.current.click();
   return (
     <TrayMenu
       id="messages-tray"
@@ -39,7 +34,7 @@ export const MessagesTray: FC<MessagesTrayProps> = (
           id="messages-tray-app"
           ref={appRef}
           dimensions={dimensions}
-          backgroundColor={windowColor}
+          backgroundColor={dockColor}
           textColor={textColor}
         >
           <Chat theme={theme} dimensions={dimensions} />

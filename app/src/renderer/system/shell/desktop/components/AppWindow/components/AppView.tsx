@@ -9,12 +9,6 @@ interface AppViewProps {
   app: any;
   isResizing: boolean;
   hasTitlebar: boolean;
-  windowDimensions: {
-    x: any;
-    y: any;
-    height: any;
-    width: any;
-  };
 }
 // height: ${(props: any) =>
 //   props.hasTitleBar ? 'calc(100% - 50px)' : 'inherit'};
@@ -25,9 +19,9 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 `;
 
 export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
-  const { windowDimensions, isResizing } = props;
+  const { isResizing } = props;
   const { ship } = useShip();
-  const { desktopStore } = useMst();
+  const { desktopStore, themeStore } = useMst();
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 
@@ -51,7 +45,7 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
   };
 
   useEffect(() => {
-    const webview = document.getElementById('app-webview');
+    const webview: any = document.getElementById('app-webview');
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
 
@@ -59,7 +53,8 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
       // const config = divElement!.getBoundingClientRect();
       const formAppUrl = `${ship!.url}/apps/${activeApp!.id}`;
       const location = {
-        name: activeApp.id,
+        title: activeApp.title,
+        id: activeApp.id,
         url: formAppUrl,
         customCSS: {},
         cookies: {
@@ -68,20 +63,26 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
           value: ship!.cookie!.split('=')[1].split('; ')[0],
         },
       };
+
       webview?.addEventListener('dom-ready', () => {
+        webview!.send('mouse-color', themeStore.mouseColor);
+
         // @ts-ignore
         // webview!.isDevToolsOpened() && webview!.closeDevTools();
         // @ts-ignore
         // webview!.openDevTools();
+        // webview.executre
+        let css = '* { cursor: none !important; }';
+        webview!.insertCSS(css);
       });
       webview?.addEventListener('close', () => {
         // @ts-ignore
         // webview!.closeDevTools();
       });
+      desktopStore.openBrowserWindow(activeApp, location);
       setAppConfig(location);
-      desktopStore.openBrowserWindow(location);
     }
-  }, [activeApp]);
+  }, [activeApp?.id]);
 
   return (
     <View
@@ -101,24 +102,18 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
         ref={webViewRef}
         id="app-webview"
         partition="app-webview"
+        preload={`file://${desktopStore.appviewPreload}`}
+        disablewebsecurity={false}
+        nodeintegration={false}
         src={appConfig.url}
+        onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}
+        onMouseLeave={() => desktopStore.setIsMouseInWebview(false)}
         style={{
           width: 'inherit',
           height: '100%',
           pointerEvents: isResizing ? 'none' : 'auto',
         }}
       />
-      {/* <webview
-        ref={webViewRef}
-        id="app-webview"
-        partition="app-webview"
-        src={appConfig.url}
-        style={{
-          width: 'inherit',
-          height: '100%',
-          pointerEvents: isResizing ? 'none' : 'auto',
-        }}
-      /> */}
     </View>
   );
 };

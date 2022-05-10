@@ -5,9 +5,7 @@ import { ipcRenderer, ipcMain } from 'electron';
 import Store from 'electron-store';
 import EventEmitter from 'events';
 import { Conduit } from '../conduit';
-import { ShipInfoType } from './types';
 import { ShipModel, ShipModelType } from './stores/ship';
-import { ChatStore } from './stores/dms';
 import { cleanNounColor } from '../../renderer/logic/utils/color';
 
 import {
@@ -48,7 +46,6 @@ export class ShipManager extends EventEmitter {
   }
   //
   subscribe(conduit: Conduit, ship: string, shipInfo: any) {
-    console.log('SUBSCRIBING');
     this.ship = ship;
     this.conduit = conduit;
     const shipPath: string = `ship.manager.${this.ship}`;

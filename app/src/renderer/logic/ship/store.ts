@@ -167,8 +167,8 @@ export const ShipStore = types
       model: Instance<typeof ShipModel>;
     }) => {
       // Apply persisted snapshot
-      console.log(syncEffect.model);
       applySnapshot(self, castToSnapshot({ ship: syncEffect.model }));
+      osState.themeStore.setMouseColor(syncEffect.model.color || '#4E9EFD');
       // TODO clean up authstore
       authState.authStore.loader.set('loaded');
       self.ship!.loader.set('loaded');

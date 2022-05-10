@@ -33,7 +33,6 @@ export const TileHighlight = styled(Box)`
 
 interface TileStyleProps {}
 const TileStyle = styled(Box)<TileStyleProps>`
-  cursor: pointer;
   user-select: none;
   transform: translateZ(0);
   img {
@@ -58,7 +57,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
   // const { openNewWindow } = useContext(WinManagerContext);
 
   return (
-    <Flex position="relative">
+    <Flex className="app-dock-icon" position="relative">
       {app.image ? (
         <TileStyle
           whileTap={{ scale: 0.9 }}

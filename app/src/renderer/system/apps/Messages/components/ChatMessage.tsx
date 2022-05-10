@@ -34,7 +34,7 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
     >
       <Bubble
         primary={primaryBubble}
-        customBg={primaryBubble ? ourColor : lighten(0.28, theme!.windowColor)}
+        customBg={primaryBubble ? ourColor : lighten(0.1, theme!.windowColor)}
       >
         <Message type={message.type} color={color} content={message.content} />
         {/* TODO detect if time is today, yesterday or full */}

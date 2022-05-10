@@ -77,7 +77,7 @@ export class AuthManager extends EventEmitter {
         resource: 'auth',
         response: 'patch',
       };
-      console.log(patchEffect);
+      // console.log(patchEffect);
       this.onEffect(patchEffect);
     });
   }
@@ -108,7 +108,7 @@ export class AuthManager extends EventEmitter {
   }
 
   onAction(action: Action) {
-    console.log(action);
+    // console.log(action);
     this.authStore.set(
       `ships.auth${action.context.ship}.${action.data.key}`,
       action.data.value
@@ -228,7 +228,7 @@ export class AuthManager extends EventEmitter {
     return new Promise((resolve, reject) => {
       const conduit = new Conduit(credentials.url, ship, credentials.cookie);
       conduit.on('ready', () => {
-        console.log('on ready', data);
+        // console.log('on ready', data);
         const json1 = [
           {
             edit: {
@@ -259,7 +259,7 @@ export class AuthManager extends EventEmitter {
         //   },
         // };
         const msgId = conduit.counter + 4;
-        console.log('msgId', msgId);
+        // console.log('msgId', msgId);
         conduit
           .subscribe('contact-store', '/all', {
             onError: (err: any) => {

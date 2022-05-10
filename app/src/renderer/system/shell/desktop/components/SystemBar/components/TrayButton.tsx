@@ -36,7 +36,7 @@ export const TrayButton = styled(styled(motion.div)`
   align-items: center;
   user-select: none;
   gap: 8px;
-  cursor: pointer;
+  /* cursor: pointer; */
   pointer-events: auto;
   transition: ${(props: IProps) => props.theme.transition};
   ${(props: IProps) =>

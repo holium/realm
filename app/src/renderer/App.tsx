@@ -10,11 +10,18 @@ import {
   OSProvider,
   osState,
   ShipProvider,
+  useMst,
+  useShip,
 } from './logic/store';
 import { onStart } from './logic/api/realm.core';
 import { useEffect } from 'react';
+// import { Mouse } from './system/shell/desktop/components/Mouse';
+import { Mouse } from './system/shell/desktop/components/Mouse';
+
+import { Observer } from 'mobx-react';
 
 export const App = () => {
+  const { desktopStore, themeStore } = useMst();
   useEffect(() => {
     onStart();
   }, []);
@@ -28,10 +35,21 @@ export const App = () => {
     <OSProvider value={osState}>
       <ThemeProvider theme={theme.light}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
-          <GlobalStyle />
+          <GlobalStyle blur={false} />
           {/* Modal provider */}
           <AuthProvider value={authState}>
             <ShipProvider value={shipState}>
+              <Observer>
+                {() => {
+                  return desktopStore.dynamicMouse ? (
+                    <Mouse
+                      animateOut={false}
+                      hide={desktopStore.isMouseInWebview}
+                      cursorColor={themeStore.mouseColor}
+                    />
+                  ) : null;
+                }}
+              </Observer>
               <Shell />
               <div id="portal-root" />
             </ShipProvider>

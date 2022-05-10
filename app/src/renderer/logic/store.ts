@@ -110,6 +110,10 @@ window.electron.app.setFullscreen((_event: any, data: any) => {
   osState.desktopStore.setFullscreen(data);
 });
 
+window.electron.app.setAppviewPreload((_event: any, data: any) => {
+  osState.desktopStore.setAppviewPreload(data);
+});
+
 onSnapshot(osState, (snapshot) => {
   localStorage.setItem('osState', JSON.stringify(snapshot));
 });

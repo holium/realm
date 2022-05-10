@@ -1,3 +1,4 @@
+import { PathsType } from './Icons/icons';
 export * from './Box';
 export * from './Card';
 export * from './Column';
@@ -12,6 +13,7 @@ export * from './Grid/index';
 export * from './Spinner';
 export * from './ActionButton';
 export * from './Icons';
+export { PathsType as IconTypes } from './Icons/icons';
 export * from './Input';
 export * from './Button';
 export * from './Sigil';

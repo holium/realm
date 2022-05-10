@@ -11,7 +11,8 @@ import {
   IconButton,
   Icons,
 } from '../../../../../../components';
-import { useMst } from 'renderer/logic/store';
+import { WindowIcon } from './WindowIcon';
+import { SharedAvatars } from './SharedAvatars';
 
 type TitlebarStyleProps = {
   customBg: string;
@@ -35,7 +36,7 @@ const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   right: 0;
   height: ${(props: TitlebarStyleProps) => (props.isAppWindow ? 30 : 50)}px;
   padding: 0 4px 0
-    ${(props: TitlebarStyleProps) => (props.isAppWindow ? 12 : 0)}px;
+    ${(props: TitlebarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
   --webkit-transform: translate3d(0, 0, 0);
   transform: translateZ(0);
   will-change: transform;
@@ -48,13 +49,27 @@ const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   `}
 `;
 
+const TitleCentered = styled(Flex)`
+  position: absolute;
+  height: 30px;
+  left: 0;
+  right: 0;
+  text-align: 'center';
+`;
+
 type TitlebarProps = {
   theme: Partial<WindowThemeType>;
   zIndex: number;
   hasBorder?: boolean;
   dragControls?: any;
-  isAppWindow?: boolean;
+  onDragStop?: (e: any) => void;
+  navigationButtons?: boolean;
   closeButton?: boolean;
+  onClose?: () => void;
+  maximizeButton?: boolean;
+  onMaximize?: () => void;
+  isAppWindow?: boolean;
+  shareable?: boolean;
   app?: {
     title?: string;
     icon?: string;
@@ -71,15 +86,14 @@ export const Titlebar = (props: TitlebarProps) => {
     zIndex,
     isAppWindow,
     dragControls,
+    onDragStop,
+    onClose,
+    maximizeButton,
+    onMaximize,
+    navigationButtons,
+    shareable,
   } = props;
   const { windowColor, iconColor, dockColor } = props.theme;
-  const { desktopStore } = useMst();
-
-  const onClose = () => {
-    desktopStore.activeApp
-      ? desktopStore.closeApp(desktopStore.activeApp?.id)
-      : {};
-  };
 
   let titleSection: any;
   if (props.app) {
@@ -110,7 +124,10 @@ export const Titlebar = (props: TitlebarProps) => {
             onPointerDown: (e) => {
               dragControls.start(e);
             },
-            whileTap: { cursor: 'grabbing' },
+            onPointerUp: (e) => {
+              onDragStop && onDragStop(e);
+            },
+            // whileTap: { cursor: 'grabbing' },
           }
         : {})}
       zIndex={zIndex}
@@ -118,33 +135,79 @@ export const Titlebar = (props: TitlebarProps) => {
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >
-      {/* <Flex gap={4} alignItems="center"> */}
-      {/* <IconButton
-          size={20}
-          customBg={windowColor}
-          // hoverFill="#FF6240"
-          onClick={() => {}}
-        >
-          <Icons name="ArrowLeftLine" color={iconColor} />
-        </IconButton>
-        <IconButton size={20} customBg={windowColor} onClick={() => {}}>
-          <Icons name="ArrowRightLine" color={iconColor} />
-        </IconButton> */}
-      {titleSection}
-      {/* </Flex> */}
+      <TitleCentered justifyContent="center" flex={1}>
+        {titleSection}
+      </TitleCentered>
+      <Flex zIndex={zIndex + 1} gap={4} alignItems="center">
+        {shareable && (
+          <SharedAvatars iconColor={iconColor!} backgroundColor={windowColor} />
+        )}
+        {navigationButtons && (
+          <>
+            <WindowIcon
+              icon="ArrowLeftLine"
+              iconColor={iconColor!}
+              bg="#97A3B2"
+              onClick={() => {}}
+            />
+            <WindowIcon
+              icon="ArrowRightLine"
+              iconColor={iconColor!}
+              bg="#97A3B2"
+              onClick={() => {}}
+            />
+          </>
+        )}
+      </Flex>
 
       {children}
-      {closeButton && (
-        <Flex alignItems="center">
-          <IconButton
-            customBg="#FF6240"
-            hoverFill="#FF6240"
-            onClick={() => onClose()}
-          >
-            <Icons name="Close" />
-          </IconButton>
-        </Flex>
-      )}
+      <Flex gap={4} alignItems="center">
+        {maximizeButton && (
+          <WindowIcon
+            icon="Expand"
+            iconColor={iconColor!}
+            bg="#97A3B2"
+            onClick={() => onMaximize && onMaximize()}
+          />
+          // <Flex alignItems="center">
+          //   <IconButton
+          //     initial={{ background: 'transparent' }}
+          //     whileHover={{ background: rgba('#97A3B2', 0.3) }}
+          //     animate={{
+          //       background: 'transparent',
+          //       transition: { background: 0.2, fill: 0.2 },
+          //     }}
+          //     hoverFill={iconColor}
+          //     onClick={() => onMaximize && onMaximize()}
+          //   >
+          //     <Icons name="Expand" />
+          //   </IconButton>
+          // </Flex>
+        )}
+        {closeButton && (
+          <WindowIcon
+            icon="Close"
+            iconColor={iconColor!}
+            bg="#FF6240"
+            fillWithBg
+            onClick={() => onClose && onClose()}
+          />
+          // <Flex alignItems="center">
+          //   <IconButton
+          //     initial={{ background: 'transparent' }}
+          //     whileHover={{ background: rgba('#FF6240', 0.3) }}
+          //     animate={{
+          //       background: 'transparent',
+          //       transition: { background: 0.2, fill: 0.2 },
+          //     }}
+          //     hoverFill="#FF6240"
+          //     onClick={() => onClose && onClose()}
+          //   >
+          //     <Icons name="Close" />
+          //   </IconButton>
+          // </Flex>
+        )}
+      </Flex>
     </TitlebarStyle>
   );
 };

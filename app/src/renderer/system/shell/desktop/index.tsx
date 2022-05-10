@@ -59,13 +59,7 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
       </Layer>
       <Layer zIndex={2}>
         <Bottom size={58}>
-          <SystemBar
-            onHome={() =>
-              desktopStore.activeApp
-                ? desktopStore.closeApp(desktopStore.activeApp?.id)
-                : {}
-            }
-          />
+          <SystemBar onHome={() => {}} />
         </Bottom>
       </Layer>
     </Fill>

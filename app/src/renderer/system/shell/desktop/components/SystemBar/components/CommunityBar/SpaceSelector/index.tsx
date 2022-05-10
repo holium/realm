@@ -15,7 +15,6 @@ import { TrayButton } from '../../TrayButton';
 import { TrayMenu } from '../../TrayMenu';
 import { MiniApp } from '../../MiniAppWindow';
 import { Spaces } from '../../../../../../../apps/Spaces';
-import { clone } from 'mobx-state-tree';
 import { rgba, lighten } from 'polished';
 import { ThemeStoreType } from '../../../../../../../../logic/theme/store';
 
@@ -49,7 +48,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = (
   };
 
   return (
-    <Flex alignItems="center">
+    <Flex className="dynamic-mouse-hover" alignItems="center">
       <TrayMenu
         id="spaces-tray"
         appRef={appRef}

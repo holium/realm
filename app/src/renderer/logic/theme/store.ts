@@ -43,6 +43,7 @@ export const ThemeStore = types
     textTheme: types.optional(types.enumeration(['light', 'dark']), 'dark'),
     textColor: types.optional(types.string, '#333333'),
     iconColor: types.optional(types.string, '#333333'),
+    mouseColor: types.optional(types.string, '#4E9EFD'),
   })
   .actions((self) => ({
     setWallpaper: flow(function* (wallpaper: string) {
@@ -58,6 +59,9 @@ export const ThemeStore = types
       self.textTheme = windowTheme.textTheme;
       self.iconColor = windowTheme.iconColor;
     }),
+    setMouseColor(color: string) {
+      self.mouseColor = color;
+    },
     setTheme(ship: string, baseColor: string, bgLuminosity: 'light' | 'dark') {
       const windowTheme: any = generateColors(baseColor, bgLuminosity);
       const action = {

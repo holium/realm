@@ -45,7 +45,6 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   console.log('rerendering shell');
   return (
     <ViewPort>
-      {/* <Mouse /> */}
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <BgImage blurred={!loggedIn} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>

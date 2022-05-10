@@ -11,7 +11,7 @@ import {
   IconButton,
 } from '../../../components';
 import { ContactRow } from './components/ContactRow';
-import { useMst, useShip } from '../../../logic/store';
+import { useShip } from '../../../logic/store';
 import { toJS } from 'mobx';
 import { WindowThemeType } from '../../../logic/stores/config';
 import { Titlebar } from '../../shell/desktop/components/AppWindow/components/Titlebar';

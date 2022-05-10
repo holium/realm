@@ -100,29 +100,29 @@ export class Conduit extends EventEmitter {
         headers: { Cookie: this.cookie },
       });
       this.sse.addEventListener('open', () => {
-        console.log('conduit opened');
+        // console.log('conduit opened');
         this.isConnected = true;
         resolve();
       });
       this.sse.addEventListener('message', (e) => {
         let event = JSON.parse(e.data);
-        console.log('event', event);
+        // console.log('event', event);
         // 1. Acknowledge event
         this.ack(event.id).catch((e: any) => {
           console.log(`error acking ${event.id}`);
           console.error(e);
         });
         if (event.response === 'subscribe') {
-          console.log('subscribed to ', event.id);
+          // console.log('subscribed to ', event.id);
         }
 
         // 2. Get wire handlers
-        console.log(this.wires);
+        // console.log(this.wires);
         const wire = this.wires.get(event.id);
         // console.log(wire?.app, wire?.path, event.json);
         if (!wire) {
           // TODO first poke to hood has no handler, give a stubbed one?
-          console.log(`no handler for event ${event.id}`, event);
+          // console.log(`no handler for event ${event.id}`, event);
           return;
         }
         const { app, path, handlers } = wire;

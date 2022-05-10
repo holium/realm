@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState, useCallback, useRef } from 'react';
 import {
   motion,
   useMotionValue,
@@ -10,19 +10,16 @@ import styled from 'styled-components';
 
 import { ThemeType } from '../../../../../theme';
 import { WindowThemeType } from '../../../../../logic/stores/config';
-import { Fill } from 'react-spaces';
 import { Titlebar } from './components/Titlebar';
 import { AppView } from './components/AppView';
 import { useMst } from '../../../../../logic/store';
 import { observer } from 'mobx-react';
 import {
   DragHandleWrapper,
-  LeftDragHandleStyle,
   RightDragHandleStyle,
 } from './components/DragHandles';
 import { Flex } from 'renderer/components';
-import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../../../../../logic/space/app/dimensions';
-
+import { toJS } from 'mobx';
 type AppWindowStyleProps = {
   theme: ThemeType;
   customBg?: string;
@@ -30,8 +27,8 @@ type AppWindowStyleProps = {
 
 export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
   border-radius: 9px;
-  --webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  --webkit-backdrop-filter: var(--blur-enabled);
+  backdrop-filter: var(--blur-enabled);
   -webkit-user-select: none;
   user-select: none;
   box-sizing: content-box;
@@ -58,22 +55,19 @@ export const AppWindow: FC<AppWindowProps> = observer(
     const { desktopStore } = useMst();
     const dragControls = useDragControls();
     const [isResizing, setIsResizing] = useState(false);
+    const desktopRef = useRef<any>(null);
 
     const activeApp = desktopStore.activeApp;
-    const appId: any = activeApp?.id;
 
-    const mX = useMotionValue(120);
-    const mY = useMotionValue(16);
+    const mX = useMotionValue(activeApp ? activeApp.dimensions.x : 20);
+    const mY = useMotionValue(activeApp ? activeApp.dimensions.y : 20);
     const mHeight = useMotionValue(
-      appId ? DEFAULT_APP_WINDOW_DIMENSIONS[appId].height : 600
+      activeApp ? activeApp.dimensions.height : 600
     );
-    const mWidth = useMotionValue(
-      appId ? DEFAULT_APP_WINDOW_DIMENSIONS[appId].width : 600
-    );
+    const mWidth = useMotionValue(activeApp ? activeApp.dimensions.width : 600);
     const resizeRightX = useMotionValue(0);
     const resizeRightY = useMotionValue(0);
 
-    // TODO make this more efficient when resizing smaller
     const handleResize = useCallback((event, info) => {
       event.stopPropagation();
       event.preventDefault();
@@ -88,37 +82,63 @@ export const AppWindow: FC<AppWindowProps> = observer(
       }
     }, []);
 
+    const maximize = useCallback(() => {
+      // @ts-ignore
+      const desktopDims = desktopRef.current!.getBoundingClientRect();
+      activeApp &&
+        desktopStore.setDimensions(activeApp.id, {
+          x: 8,
+          y: 8,
+          height: desktopDims.height - 16,
+          width: desktopDims.width - 32,
+        });
+    }, [activeApp]);
+
+    const onDragStop = (e: any) => {
+      activeApp &&
+        desktopStore.setDimensions(activeApp.id, {
+          x: mX.get(),
+          y: mY.get(),
+          height: mHeight.get(),
+          width: mWidth.get(),
+        });
+    };
+
+    const onClose = () => {
+      desktopStore.activeApp
+        ? desktopStore.closeBrowserWindow(desktopStore.activeApp?.id)
+        : {};
+    };
+
+    const windowId = `app-window-${activeApp?.id}`;
+
     return (
-      <Fill
+      <div
+        ref={desktopRef}
         style={{
-          bottom: 50,
+          bottom: 0,
           padding: '8px',
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          right: 0,
           paddingTop: desktopStore.isFullscreen ? 0 : 30,
         }}
       >
         <AppWindowStyle
-          // drag
-          id={`app-window-${activeApp?.id}`}
+          id={windowId}
           dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
           dragElastic={0}
           dragMomentum={false}
-          // TODO do math to get edge distance
-          // dragConstraints={{
-          //   top: 0,
-          //   left: 0,
-          //   right: 0,
-          //   bottom: 0,
-          // }}
+          // dragConstraints={desktopRef}
           dragListener={false}
           drag={!isResizing}
           dragControls={dragControls}
           initial={{
             opacity: 0,
-            y: 8,
           }}
           animate={{
             opacity: 1,
-            y: 0,
             transition: {
               duration: 0.15,
             },
@@ -130,7 +150,8 @@ export const AppWindow: FC<AppWindowProps> = observer(
             },
           }}
           style={{
-            // overflow: 'hidden',
+            x: mX,
+            y: mY,
             width: mWidth,
             height: mHeight,
           }}
@@ -148,21 +169,20 @@ export const AppWindow: FC<AppWindowProps> = observer(
           >
             <Titlebar
               isAppWindow
+              maximizeButton
               closeButton
               hasBorder
+              shareable
               dragControls={dragControls}
+              onDragStop={(e: any) => onDragStop(e)}
+              onClose={() => onClose()}
+              onMaximize={() => maximize()}
               theme={theme}
               app={desktopStore.activeApp}
             />
             <AppView
-              isResizing={isResizing}
-              windowDimensions={{
-                x: mX,
-                y: mY,
-                height: mHeight,
-                width: mWidth,
-              }}
               hasTitlebar
+              isResizing={isResizing}
               app={desktopStore.activeApp}
             />
             <DragHandleWrapper>
@@ -177,7 +197,16 @@ export const AppWindow: FC<AppWindowProps> = observer(
                 onPointerDown={(e: any) => {
                   setIsResizing(true);
                 }}
-                onPointerUp={() => setIsResizing(false)}
+                onPointerUp={() => {
+                  setIsResizing(false);
+                  activeApp &&
+                    desktopStore.setDimensions(activeApp.id, {
+                      x: mX.get(),
+                      y: mY.get(),
+                      height: mHeight.get(),
+                      width: mWidth.get(),
+                    });
+                }}
                 onPanEnd={() => setIsResizing(false)}
                 onTap={() => setIsResizing(false)}
                 whileDrag={{}}
@@ -186,7 +215,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             </DragHandleWrapper>
           </Flex>
         </AppWindowStyle>
-      </Fill>
+      </div>
     );
   }
 );

@@ -9,9 +9,9 @@
     "pretty": true,
     "sourceMap": true,
     "baseUrl": "./src/",
-    "paths": {
-      "~realm/*": ["core/*"]
-    },
+    // "paths": {
+    //   "~realm/*": ["core/*"]
+    // },
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,

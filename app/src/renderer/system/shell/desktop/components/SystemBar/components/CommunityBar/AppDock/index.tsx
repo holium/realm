@@ -22,7 +22,6 @@ export const AppDock: FC<AppTileProps> = observer((props: AppTileProps) => {
 
   const onAppClick = (app: AppModelType) => {
     // console.log(toJS(app));
-    desktopStore.setActiveApp(app);
     const formAppUrl = `${ship!.url}/apps/${app.id!}`;
     const windowPayload = {
       name: app.id!,
@@ -36,6 +35,8 @@ export const AppDock: FC<AppTileProps> = observer((props: AppTileProps) => {
       },
     };
     console.log('open new window', windowPayload);
+    desktopStore.openBrowserWindow(app, windowPayload);
+
     // openNewWindow(windowPayload);
   };
 

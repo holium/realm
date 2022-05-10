@@ -140,7 +140,7 @@ export class RealmCore {
   }
 
   onAction(_event: any, action: any) {
-    console.log('core: ', action);
+    // console.log('core: ', action);
     switch (action.resource) {
       case 'ship.manager':
         this.shipManager.onAction(action);

@@ -40,7 +40,6 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  cursor: pointer;
   transition: ${(props: RowProps) => props.theme.transition};
   ${(props: RowProps) =>
     props.selected

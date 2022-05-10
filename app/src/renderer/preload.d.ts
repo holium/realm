@@ -9,7 +9,9 @@ declare global {
       core: RealmCorePreloadType;
       app: {
         setFullscreen(callback: any): void;
-        openApp(app: any): void;
+        setAppviewPreload(callback: any): void;
+        setMouseColor(callback: any): void;
+        openApp(app: any): Promise<any>;
         closeApp(app: any): void;
       };
     };
