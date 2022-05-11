@@ -88,7 +88,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           <IconButton
             color={iconColor}
             customBg={dockColor}
-            style={{ borderRadius: 14 }}
+            style={{ borderRadius: 14, cursor: 'none' }}
             size={28}
           >
             <Icons name="ArrowDown" />
@@ -109,6 +109,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
       >
         <Flex flex={1} pl={2} pr={2} mb={1} alignItems="center">
           <IconButton
+            style={{ cursor: 'none' }}
             color={iconColor}
             customBg={dockColor}
             ml={2}
@@ -136,6 +137,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             />
           </Flex>
           <IconButton
+            style={{ cursor: 'none' }}
             color={iconColor}
             customBg={dockColor}
             ml={2}

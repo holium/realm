@@ -8,6 +8,7 @@ export const BackgroundImage = styled(motion.img)`
   ${(props: { blur?: boolean; src?: string }) =>
     props.src &&
     css`
+      user-select: none;
       position: fixed;
       right: -22px;
       left: -22px;
@@ -33,6 +34,7 @@ type BackgroundStyleProps = { hasWallpaper: boolean; theme: ThemeType };
 
 export const BackgroundFill = styled(Fill)`
   position: relative;
+  user-select: none;
   z-index: 1;
   background: ${(props: BackgroundStyleProps) =>
     props.hasWallpaper ? 'transparent' : props.theme.colors.bg.primary};

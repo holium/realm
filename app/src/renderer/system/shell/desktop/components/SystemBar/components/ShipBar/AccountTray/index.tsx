@@ -49,11 +49,12 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
     >
       <motion.div
         id="account-tray-icon"
+        className="dynamic-mouse-hover"
         // @ts-expect-error -
         ref={accountButtonRef}
-        style={{
-          cursor: 'pointer',
-        }}
+        // style={{
+        //   cursor: 'pointer',
+        // }}
         whileTap={{ scale: 0.9 }}
         transition={{ scale: 0.2 }}
       >

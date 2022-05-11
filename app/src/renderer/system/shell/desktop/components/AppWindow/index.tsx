@@ -20,6 +20,7 @@ import {
 } from './components/DragHandles';
 import { Flex } from 'renderer/components';
 import { toJS } from 'mobx';
+import { number } from 'yup';
 type AppWindowStyleProps = {
   theme: ThemeType;
   customBg?: string;
@@ -30,12 +31,15 @@ export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
   --webkit-backdrop-filter: var(--blur-enabled);
   backdrop-filter: var(--blur-enabled);
   -webkit-user-select: none;
+  --webkit-backface-visibility: hidden;
+  --webkit-transform: translate3d(0, 0, 0);
+  --webkit-perspective: 1000;
+  transform: translateZ(0);
   user-select: none;
   box-sizing: content-box;
   box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
   border: 1px solid
     ${(props: AppWindowStyleProps) => rgba(props.customBg!, 0.7)};
-  --webkit-transform: translate3d(0, 0, 0);
 `)<AppWindowStyleProps>({
   // @ts-expect-error annoying
   backgroundColor: (props: SystemBarStyleProps) =>
@@ -53,6 +57,15 @@ export const AppWindow: FC<AppWindowProps> = observer(
     const { theme } = props;
     const { textColor, windowColor } = theme;
     const { desktopStore } = useMst();
+    const [unmaximize, setUnmaximize] = useState<
+      | {
+          x: number;
+          y: number;
+          height: number;
+          width: number;
+        }
+      | undefined
+    >();
     const dragControls = useDragControls();
     const [isResizing, setIsResizing] = useState(false);
     const desktopRef = useRef<any>(null);
@@ -82,17 +95,37 @@ export const AppWindow: FC<AppWindowProps> = observer(
       }
     }, []);
 
+    // Toggles maximize or not
     const maximize = useCallback(() => {
-      // @ts-ignore
-      const desktopDims = desktopRef.current!.getBoundingClientRect();
+      if (!unmaximize) {
+        setUnmaximize({
+          x: mX.get(),
+          y: mY.get(),
+          height: mHeight.get(),
+          width: mWidth.get(),
+        });
+        const offset = desktopStore.isFullscreen ? 0 : 30;
+        // @ts-ignore
+        const desktopDims = desktopRef.current!.getBoundingClientRect();
+        mX.set(0);
+        mY.set(8);
+        mHeight.set(desktopDims.height - (16 + offset) - 50);
+        mWidth.set(desktopDims.width - 16);
+      } else {
+        mX.set(unmaximize.x);
+        mY.set(unmaximize.y);
+        mHeight.set(unmaximize.height);
+        mWidth.set(unmaximize.width);
+        setUnmaximize(undefined);
+      }
       activeApp &&
         desktopStore.setDimensions(activeApp.id, {
-          x: 8,
-          y: 8,
-          height: desktopDims.height - 16,
-          width: desktopDims.width - 32,
+          x: mX.get(),
+          y: mY.get(),
+          height: mHeight.get(),
+          width: mWidth.get(),
         });
-    }, [activeApp]);
+    }, [desktopStore.isFullscreen, activeApp, unmaximize, setUnmaximize]);
 
     const onDragStop = (e: any) => {
       activeApp &&
@@ -122,6 +155,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           left: 0,
           top: 0,
           right: 0,
+          height: `calc(100vh - ${desktopStore.isFullscreen ? 0 : 30}px)`,
           paddingTop: desktopStore.isFullscreen ? 0 : 30,
         }}
       >

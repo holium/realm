@@ -17,12 +17,13 @@ export const WindowIcon: FC<WindowIconProps> = (props: WindowIconProps) => {
   const { icon, bg, iconColor, onClick, fillWithBg } = props;
   return (
     <IconButton
-      initial={{ background: 'transparent' }}
+      initial={{ background: rgba(bg, 0) }}
       whileHover={{ background: rgba(bg, 0.2), fill: bg }}
-      animate={{
-        background: 'transparent',
-        transition: { background: 0.2, fill: 0.2 },
-      }}
+      transition={{ background: 0.2, fill: 0.2 }}
+      // animate={{
+      //   // background: rgba(bg, 0),
+      //   transition: { background: 0.2, fill: 0.2 },
+      // }}
       hoverFill={fillWithBg ? bg : iconColor}
       onPointerDown={(evt: any) => {
         evt.stopPropagation();

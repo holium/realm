@@ -43,14 +43,9 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
         }
         outerAlpha={0.2}
         innerScale={0.9}
-        outerScale={2.25}
+        outerScale={2}
         clickables={[
           'a',
-          'input[type="text"]',
-          'input[type="email"]',
-          'input[type="number"]',
-          'input[type="submit"]',
-          'input[type="image"]',
           'label[for]',
           'select',
           'textarea',

@@ -27,12 +27,12 @@ type IProps = {
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm } = props;
   const { ship } = useShip();
-  const { backgroundColor, windowColor, iconColor, dockColor } = theme;
+  const { backgroundColor, textColor, iconColor, dockColor } = theme;
 
   const chat = ship!.chat;
   return (
     <Grid.Column
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', color: textColor }}
       expand
       noGutter
       overflowY="hidden"
@@ -50,8 +50,10 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
         </Flex>
         <Flex flex={1}>
           <Input
+            type="text"
             placeholder="Search"
             wrapperStyle={{
+              cursor: 'none',
               borderRadius: 18,
               backgroundColor: rgba(backgroundColor, 0.2),
               '&:hover': {
@@ -62,7 +64,12 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           />
         </Flex>
         <Flex ml={2} mr={2} pl={2} pr={2}>
-          <IconButton customBg={dockColor} size={28} color={iconColor}>
+          <IconButton
+            customBg={dockColor}
+            className="dynamic-mouse-hover"
+            size={28}
+            color={iconColor}
+          >
             <Icons name="Plus" />
           </IconButton>
         </Flex>

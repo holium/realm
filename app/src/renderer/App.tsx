@@ -35,7 +35,7 @@ export const App = () => {
     <OSProvider value={osState}>
       <ThemeProvider theme={theme.light}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
-          <GlobalStyle blur={false} />
+          <GlobalStyle blur={true} />
           {/* Modal provider */}
           <AuthProvider value={authState}>
             <ShipProvider value={shipState}>

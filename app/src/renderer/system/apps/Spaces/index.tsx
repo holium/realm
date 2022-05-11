@@ -58,7 +58,13 @@ export const Spaces: FC<SpacesProps> = (props: SpacesProps) => {
         >
           Spaces
         </Text>
-        <IconButton customBg={dockColor} size={28} color={iconColor}>
+        <IconButton
+          className="dynamic-mouse-hover"
+          style={{ cursor: 'none' }}
+          customBg={dockColor}
+          size={28}
+          color={iconColor}
+        >
           <Icons name="Plus" />
         </IconButton>
       </Grid.Row>

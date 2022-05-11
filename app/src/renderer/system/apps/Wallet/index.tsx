@@ -56,7 +56,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
           flexDirection="row"
           justifyContent="space-between"
           alignItems="space-between"
-          background={rgba(dockColor, 1)}
+          background={lighten(0.1, windowColor)}
         >
           <Text
             display="flex"

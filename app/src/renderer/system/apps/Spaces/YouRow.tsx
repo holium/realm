@@ -16,6 +16,7 @@ export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   return (
     <SpaceRowStyle
       style={{ width: '100%' }}
+      className="dynamic-mouse-hover"
       selected={selected}
       customBg={theme.dockColor}
     >

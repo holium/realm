@@ -39,7 +39,7 @@ export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
     >
       <SystemBarStyle
         style={{
-          cursor: 'pointer',
+          // cursor: 'pointer',
           zIndex: 3,
           minWidth: 42,
         }}

@@ -65,9 +65,10 @@ export const ShipSelector: FC = observer(() => {
                   content={ship.patp || ship.nickname}
                 >
                   <motion.div
+                    className="dynamic-mouse-hover"
                     style={{
                       x: 0,
-                      cursor: 'pointer',
+                      // cursor: 'pointer',
                       // zIndex: isDragging ? 2 : 1,
                     }}
                     whileHover={{ scale: 1.1 }}

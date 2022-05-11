@@ -61,6 +61,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   const requestRef = useRef();
   const previousTimeRef = useRef();
   const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [isTextCursor, setTextCursor] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isActiveClickable, setIsActiveClickable] = useState(false);
@@ -119,7 +120,9 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Mouse Events State updates
   const onMouseDown = useCallback(() => setIsActive(true), []);
   const onMouseUp = useCallback(() => setIsActive(false), []);
-  const onMouseEnterViewport = useCallback(() => setIsVisible(true), []);
+  const onMouseEnterViewport = useCallback(() => {
+    setIsVisible(true);
+  }, []);
   const onMouseLeaveViewport = useCallback(() => {
     setIsVisible(false);
     setIsActiveClickable(false);
@@ -167,11 +170,36 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
 
   useEffect(() => {
     const clickableEls = document.querySelectorAll(clickables.join(','));
+    const inputs = document.querySelectorAll(
+      [
+        'input[type="text"]',
+        'input[type="email"]',
+        'input[type="number"]',
+        'input[type="submit"]',
+        'input[type="image"]',
+        'input[type="password"]',
+        'input[type="date"]',
+        'input',
+      ].join(',')
+    );
+    inputs.forEach((input) => {
+      input.style.cursor = 'none';
+      input.addEventListener('mouseover', () => {
+        setTextCursor(true);
+      });
+      input.addEventListener('mouseout', () => {
+        setTextCursor(false);
+      });
+      input.addEventListener('mousedown', () => {
+        setTextCursor(true);
+      });
+    });
 
     clickableEls.forEach((el) => {
       el.style.cursor = 'none';
 
       el.addEventListener('mouseover', () => {
+        setTextCursor(false);
         setIsActive(true);
       });
       el.addEventListener('click', () => {
@@ -195,6 +223,18 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     });
 
     return () => {
+      inputs.forEach((input) => {
+        input.style.cursor = 'none';
+        input.removeEventListener('mouseover', () => {
+          setTextCursor(true);
+        });
+        input.removeEventListener('mouseout', () => {
+          setTextCursor(false);
+        });
+        input.removeEventListener('mousedown', () => {
+          setTextCursor(true);
+        });
+      });
       clickableEls.forEach((el) => {
         el.removeEventListener('mouseover', () => {
           setIsActive(true);
@@ -223,7 +263,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       zIndex: 999,
       display: 'block',
       position: 'fixed',
-      borderRadius: '50%',
+      // borderRadius: '50%',
       width: innerSize,
       height: innerSize,
       pointerEvents: 'none',
@@ -234,7 +274,6 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     },
     cursorOuter: {
       boxSizing: 'content-box',
-
       zIndex: 999,
       display: 'block',
       position: 'fixed',
@@ -256,12 +295,21 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       <motion.div
         ref={cursorOuterRef}
         layoutId="cursor-outer-1"
+        animate={{ opacity: isTextCursor ? 0 : 1 }}
+        transition={{ opacity: 0.15 }}
         style={styles.cursorOuter}
       />
       <motion.div
         layoutId="cursor-1"
         ref={cursorInnerRef}
-        style={styles.cursorInner}
+        animate={{
+          width: isTextCursor ? 2.5 : innerSize,
+          height: isTextCursor ? 18 : innerSize,
+          borderWidth: isTextCursor ? 0 : 1,
+          borderRadius: isTextCursor ? '2%' : '50%',
+        }}
+        transition={{ width: 0.15, height: 0.15, borderRadius: 0.15 }}
+        style={{ ...styles.cursorInner }}
         whileTap={{ scale: 0.975 }}
       />
     </React.Fragment>

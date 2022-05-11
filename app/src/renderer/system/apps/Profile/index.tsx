@@ -95,16 +95,24 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
         </Flex>
         <Flex gap={16} alignItems="center">
           <IconButton
+            className="dynamic-mouse-hover"
             customBg={backgroundColor}
             size={26}
             color={iconColor}
+            style={{ cursor: 'none' }}
             onClick={() => {
               authStore.logout(currentShip.patp);
             }}
           >
             <Icons name="Lock" />
           </IconButton>
-          <IconButton customBg={backgroundColor} size={26} color={iconColor}>
+          <IconButton
+            className="dynamic-mouse-hover"
+            style={{ cursor: 'none' }}
+            customBg={backgroundColor}
+            size={26}
+            color={iconColor}
+          >
             <Icons name="Settings" />
           </IconButton>
         </Flex>

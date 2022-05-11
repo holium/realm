@@ -79,7 +79,8 @@ export const Message: FC<DMContact> = (props: DMContact) => {
       if (isImage(message)) {
         message = (
           <img
-            style={{ borderRadius: 8, cursor: 'pointer' }}
+            className="dynamic-mouse-hover"
+            style={{ borderRadius: 8 }}
             height="auto"
             width={250}
             src={message}

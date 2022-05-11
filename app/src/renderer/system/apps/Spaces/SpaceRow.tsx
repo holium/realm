@@ -64,7 +64,10 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { ship } = useShip();
   const theme = useMemo(() => ship!.theme, [ship!.theme]);
   return (
-    <SpaceRowStyle customBg={theme.backgroundColor}>
+    <SpaceRowStyle
+      className="dynamic-mouse-hover"
+      customBg={theme.backgroundColor}
+    >
       <Flex
         alignItems="center"
         // style={{ flex: 1, opacity: space.status !== 'active' ? 0.3 : 1 }}

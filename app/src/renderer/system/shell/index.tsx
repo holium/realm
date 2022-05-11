@@ -86,12 +86,14 @@ const BgImage = ({
         initial={{ opacity: 0 }}
         exit={{ opacity: 0 }}
         animate={{
-          opacity: imageLoading ? 0 : 1,
+          opacity: 1,
+
+          // opacity: imageLoading ? 0.5 : 1,
           filter: blurred ? 'blur(20px)' : 'blur(0px)',
         }}
         transition={{
           opacity: { duration: 1 },
-          blur: { duration: 2, ease: true },
+          // blur: { duration: 2, ease: true },
         }}
         onLoad={imageLoaded}
       />

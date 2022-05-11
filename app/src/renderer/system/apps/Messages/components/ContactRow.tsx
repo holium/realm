@@ -32,12 +32,12 @@ export const Row = styled(motion.div)<RowProps>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  cursor: pointer;
+  // cursor: pointer;
   transition: ${(props: RowProps) => props.theme.transition};
   &:hover {
     transition: ${(props: RowProps) => props.theme.transition};
     background-color: ${(props: RowProps) =>
-      props.customBg ? lighten(0.175, props.customBg) : 'initial'};
+      props.customBg ? darken(0.05, props.customBg) : 'initial'};
   }
 `;
 
@@ -54,7 +54,11 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
   const lastMessage = dm.messages[0];
   return (
-    <Row customBg={theme.backgroundColor} onClick={(evt: any) => onClick(evt)}>
+    <Row
+      className="dynamic-mouse-hover"
+      customBg={theme.windowColor}
+      onClick={(evt: any) => onClick(evt)}
+    >
       <Box>
         <Sigil
           simple

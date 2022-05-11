@@ -138,76 +138,83 @@ export const Titlebar = (props: TitlebarProps) => {
       <TitleCentered justifyContent="center" flex={1}>
         {titleSection}
       </TitleCentered>
-      <Flex zIndex={zIndex + 1} gap={4} alignItems="center">
-        {shareable && (
-          <SharedAvatars iconColor={iconColor!} backgroundColor={windowColor} />
-        )}
-        {navigationButtons && (
-          <>
-            <WindowIcon
-              icon="ArrowLeftLine"
+      {(shareable || navigationButtons) && (
+        <Flex zIndex={zIndex + 1} gap={4} alignItems="center">
+          {shareable && (
+            <SharedAvatars
               iconColor={iconColor!}
-              bg="#97A3B2"
-              onClick={() => {}}
+              backgroundColor={windowColor}
             />
-            <WindowIcon
-              icon="ArrowRightLine"
-              iconColor={iconColor!}
-              bg="#97A3B2"
-              onClick={() => {}}
-            />
-          </>
-        )}
-      </Flex>
+          )}
+          {navigationButtons && (
+            <>
+              <WindowIcon
+                icon="ArrowLeftLine"
+                iconColor={iconColor!}
+                bg="#97A3B2"
+                onClick={() => {}}
+              />
+              <WindowIcon
+                icon="ArrowRightLine"
+                iconColor={iconColor!}
+                bg="#97A3B2"
+                onClick={() => {}}
+              />
+            </>
+          )}
+        </Flex>
+      )}
 
       {children}
-      <Flex gap={4} alignItems="center">
-        {maximizeButton && (
-          <WindowIcon
-            icon="Expand"
-            iconColor={iconColor!}
-            bg="#97A3B2"
-            onClick={() => onMaximize && onMaximize()}
-          />
-          // <Flex alignItems="center">
-          //   <IconButton
-          //     initial={{ background: 'transparent' }}
-          //     whileHover={{ background: rgba('#97A3B2', 0.3) }}
-          //     animate={{
-          //       background: 'transparent',
-          //       transition: { background: 0.2, fill: 0.2 },
-          //     }}
-          //     hoverFill={iconColor}
-          //     onClick={() => onMaximize && onMaximize()}
-          //   >
-          //     <Icons name="Expand" />
-          //   </IconButton>
-          // </Flex>
-        )}
-        {closeButton && (
-          <WindowIcon
-            icon="Close"
-            iconColor={iconColor!}
-            bg="#FF6240"
-            fillWithBg
-            onClick={() => onClose && onClose()}
-          />
-          // <Flex alignItems="center">
-          //   <IconButton
-          //     initial={{ background: 'transparent' }}
-          //     whileHover={{ background: rgba('#FF6240', 0.3) }}
-          //     animate={{
-          //       background: 'transparent',
-          //       transition: { background: 0.2, fill: 0.2 },
-          //     }}
-          //     hoverFill="#FF6240"
-          //     onClick={() => onClose && onClose()}
-          //   >
-          //     <Icons name="Close" />
-          //   </IconButton>
-          // </Flex>
-        )}
-      </Flex>
+      {(maximizeButton || closeButton) && (
+        <Flex gap={4} alignItems="center">
+          {maximizeButton && (
+            <WindowIcon
+              icon="Expand"
+              iconColor={iconColor!}
+              bg="#97A3B2"
+              onClick={() => onMaximize && onMaximize()}
+            />
+            // <Flex alignItems="center">
+            //   <IconButton
+            //     initial={{ background: 'transparent' }}
+            //     whileHover={{ background: rgba('#97A3B2', 0.3) }}
+            //     animate={{
+            //       background: 'transparent',
+            //       transition: { background: 0.2, fill: 0.2 },
+            //     }}
+            //     hoverFill={iconColor}
+            //     onClick={() => onMaximize && onMaximize()}
+            //   >
+            //     <Icons name="Expand" />
+            //   </IconButton>
+            // </Flex>
+          )}
+          {closeButton && (
+            <WindowIcon
+              icon="Close"
+              iconColor={iconColor!}
+              bg="#FF6240"
+              fillWithBg
+              onClick={() => onClose && onClose()}
+            />
+            // <Flex alignItems="center">
+            //   <IconButton
+            //     initial={{ background: 'transparent' }}
+            //     whileHover={{ background: rgba('#FF6240', 0.3) }}
+            //     animate={{
+            //       background: 'transparent',
+            //       transition: { background: 0.2, fill: 0.2 },
+            //     }}
+            //     hoverFill="#FF6240"
+            //     onClick={() => onClose && onClose()}
+            //   >
+            //     <Icons name="Close" />
+            //   </IconButton>
+            // </Flex>
+          )}
+        </Flex>
+      )}
     </TitlebarStyle>
   );
 };

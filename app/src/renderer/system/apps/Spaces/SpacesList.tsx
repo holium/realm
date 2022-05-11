@@ -1,19 +1,6 @@
 import { FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, lighten, darken } from 'polished';
 
-import { WindowThemeType } from '../../../logic/stores/config';
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  Sigil,
-  Text,
-} from '../../../components';
-import { useMst } from '../../../logic/store';
+import { Grid } from '../../../components';
 import { SpaceRow } from './SpaceRow';
 
 const sampleSpaces: Space[] = [

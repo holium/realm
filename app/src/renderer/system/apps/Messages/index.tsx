@@ -39,7 +39,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
     <>
       {selectedChat ? (
         <Grid.Column
-          style={{ position: 'relative' }}
+          style={{ position: 'relative', color: textColor }}
           expand
           noGutter
           overflowY="hidden"
@@ -68,7 +68,9 @@ export const Chat: FC<any> = (props: ChatProps) => {
           >
             <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
               <IconButton
+                className="dynamic-mouse-hover"
                 size={26}
+                style={{ cursor: 'none' }}
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
@@ -93,7 +95,13 @@ export const Chat: FC<any> = (props: ChatProps) => {
               </Text>
             </Flex>
             <Flex pl={2} pr={2} mr={3}>
-              <IconButton customBg={dockColor} size={26} color={iconColor}>
+              <IconButton
+                className="dynamic-mouse-hover"
+                customBg={dockColor}
+                style={{ cursor: 'none' }}
+                size={26}
+                color={iconColor}
+              >
                 <Icons name="Phone" />
               </IconButton>
             </Flex>

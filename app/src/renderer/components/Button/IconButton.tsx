@@ -134,13 +134,13 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     color: ${(props) => props.theme.colors.ui.disabled};
     background-color: transparent;
     border-color: transparent;
-    cursor: default;
+    // cursor: default;
     svg {
       fill: ${(props) => props.theme.colors.ui.disabled};
     }
     &:hover {
       transform: translateZ(0);
-      cursor: default;
+      // cursor: default;
       color: ${(props) => props.theme.colors.ui.disabled};
       background-color: transparent;
       border-color: transparent;
@@ -148,7 +148,6 @@ export const IconButton = styled(styled(motion.button)<IProps>`
   }
 `)<IProps>(
   {
-    cursor: 'pointer',
     // '&:hover': {
     //   // @ts-expect-error stupid
     //   backgroundColor: (props: IProps) =>
