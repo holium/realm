@@ -13,6 +13,7 @@ window.onload = function () {
 
 function renderMouse(color) {
   const body = document.getElementsByTagName('body')[0];
+  // body.setAttribute('style', 'position: relative;');
   var currentContainer = document.getElementById('realm-mouse-container');
   if (currentContainer) {
     body.removeChild(currentContainer);

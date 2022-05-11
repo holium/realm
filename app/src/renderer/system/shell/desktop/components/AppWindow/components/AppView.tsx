@@ -3,10 +3,10 @@ import styled, { css } from 'styled-components';
 import { useMst, useShip } from '../../../../../../logic/store';
 import { Spinner, Flex } from '../../../../../../components';
 import { WebTermCSS } from '../../../../../../system/apps/WebTerm/WebTerm.styles';
-import { inherits } from 'util';
+import { WindowModelType } from 'renderer/logic/desktop/store';
 
 interface AppViewProps {
-  app: any;
+  window: WindowModelType;
   isResizing: boolean;
   hasTitlebar: boolean;
 }
@@ -19,13 +19,13 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 `;
 
 export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
-  const { isResizing } = props;
+  const { isResizing, window } = props;
   const { ship } = useShip();
   const { desktopStore, themeStore } = useMst();
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 
-  const activeApp = desktopStore.activeApp;
+  const activeWindow = window;
 
   const [appConfig, setAppConfig] = useState<any>({
     name: null,
@@ -49,12 +49,12 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
 
-    if (activeApp) {
+    if (activeWindow) {
       // const config = divElement!.getBoundingClientRect();
-      const formAppUrl = `${ship!.url}/apps/${activeApp!.id}`;
+      const formAppUrl = `${ship!.url}/apps/${activeWindow!.id}`;
       const location = {
-        title: activeApp.title,
-        id: activeApp.id,
+        title: activeWindow.title,
+        id: activeWindow.id,
         url: formAppUrl,
         customCSS: {},
         cookies: {
@@ -79,10 +79,10 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
         // @ts-ignore
         // webview!.closeDevTools();
       });
-      desktopStore.openBrowserWindow(activeApp, location);
+      desktopStore.openBrowserWindow(activeWindow, location);
       setAppConfig(location);
     }
-  }, [activeApp?.id]);
+  }, [activeWindow?.id]);
 
   return (
     <View
@@ -100,17 +100,16 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
       )}
       <webview
         ref={webViewRef}
-        id="app-webview"
+        id={`${activeWindow.id}-app-webview`}
         partition="app-webview"
         preload={`file://${desktopStore.appviewPreload}`}
-        disablewebsecurity={false}
-        nodeintegration={false}
         src={appConfig.url}
         onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}
         onMouseLeave={() => desktopStore.setIsMouseInWebview(false)}
         style={{
           width: 'inherit',
           height: '100%',
+          position: 'relative',
           pointerEvents: isResizing ? 'none' : 'auto',
         }}
       />

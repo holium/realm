@@ -1,4 +1,11 @@
-import { types, applySnapshot, Instance } from 'mobx-state-tree';
+import {
+  types,
+  applySnapshot,
+  Instance,
+  tryReference,
+  detach,
+  destroy,
+} from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { AppModel, AppModelType } from '../../../core/ship/stores/docket';
 import { closeAppWindow, openAppWindow } from './api';
@@ -18,14 +25,22 @@ const DimensionsModel = types.model({
 
 type DimensionModelType = Instance<typeof DimensionsModel>;
 
-const Window = types.model({
-  // order: types.number,
-  id: types.identifier,
-  title: types.optional(types.string, ''),
-  zIndex: types.number,
-  // app: types.safeReference(AppModel),
-  dimensions: DimensionsModel,
-});
+const Window = types
+  .model({
+    // order: types.number,
+    id: types.identifier,
+    title: types.optional(types.string, ''),
+    zIndex: types.number,
+    // app: types.safeReference(AppModel),
+    dimensions: DimensionsModel,
+  })
+  .actions((self) => ({
+    setZIndex(newZ: number) {
+      self.zIndex = newZ;
+    },
+  }));
+
+export type WindowModelType = Instance<typeof Window>;
 
 export const DesktopStore = types
   .model({
@@ -34,7 +49,7 @@ export const DesktopStore = types
     dynamicMouse: types.optional(types.boolean, true),
     isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),
-    activeApp: types.safeReference(Window),
+    activeWindow: types.safeReference(Window),
     windows: types.map(Window),
   })
   .views((self) => ({
@@ -42,10 +57,15 @@ export const DesktopStore = types
       return self.windows.size + 1;
     },
     get hasOpenWindow() {
-      return self.activeApp !== undefined;
+      return self.activeWindow !== undefined;
     },
   }))
   .actions((self) => ({
+    setActive(window: WindowModelType) {
+      self.activeWindow = window;
+      const depth = self.windows.size;
+      self.windows.get(window.id)?.setZIndex(depth + 1);
+    },
     setFullscreen(isFullscreen: boolean) {
       self.isFullscreen = isFullscreen;
     },
@@ -77,15 +97,18 @@ export const DesktopStore = types
         },
       });
       self.windows.set(newWindow.id, newWindow);
-      self.activeApp = self.windows.get(newWindow.id);
+      self.activeWindow = self.windows.get(newWindow.id);
       openAppWindow(toJS(location));
     },
     closeBrowserWindow(appId: any) {
-      if (self.activeApp?.id === appId) {
-        self.activeApp = undefined;
+      // console.log(self.activeWindow);
+      // detach(self.activeWindow);
+      if (self.activeWindow?.id === appId) {
+        const nextWindow = Array.from(self.windows.values())[0].id;
+        if (nextWindow) {
+          self.activeWindow = tryReference(() => self.windows.get(nextWindow));
+        }
       }
       self.windows.delete(appId);
-      self.activeApp = undefined;
-      // closeAppWindow(toJS(app));
     },
   }));

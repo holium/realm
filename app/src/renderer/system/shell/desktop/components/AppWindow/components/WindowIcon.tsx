@@ -1,7 +1,5 @@
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
 import { FC } from 'react';
-import { rgba, lighten, darken } from 'polished';
+import { rgba } from 'polished';
 
 import { IconButton, Icons, IconTypes } from '../../../../../../components';
 
@@ -20,10 +18,6 @@ export const WindowIcon: FC<WindowIconProps> = (props: WindowIconProps) => {
       initial={{ background: rgba(bg, 0) }}
       whileHover={{ background: rgba(bg, 0.2), fill: bg }}
       transition={{ background: 0.2, fill: 0.2 }}
-      // animate={{
-      //   // background: rgba(bg, 0),
-      //   transition: { background: 0.2, fill: 0.2 },
-      // }}
       hoverFill={fillWithBg ? bg : iconColor}
       onPointerDown={(evt: any) => {
         evt.stopPropagation();

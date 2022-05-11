@@ -15,8 +15,6 @@ export const SystemBar: FC<SystemBarProps> = (props: SystemBarProps) => {
   const { themeStore } = useMst();
   const { onHome } = props;
 
-  console.log(toJS(themeStore));
-
   return (
     <Flex gap={8} margin="8px" flexDirection="row">
       <HomeButton theme={themeStore} onHome={onHome} />

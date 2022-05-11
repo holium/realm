@@ -4,7 +4,6 @@ import { AppModelType } from '../../../../../../../../../core/ship/stores/docket
 import { AppTile } from '../AppTile';
 import { useMst, useShip } from '../../../../../../../../logic/store';
 
-import { compose } from 'styled-system';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
@@ -18,7 +17,9 @@ export const AppDock: FC<AppTileProps> = observer((props: AppTileProps) => {
   const { desktopStore, themeStore } = useMst();
   const { ship } = useShip();
 
-  const activeAppId = desktopStore.activeApp?.id;
+  const activeWindowId = desktopStore.activeWindow
+    ? desktopStore.activeWindow.id
+    : null;
 
   const onAppClick = (app: AppModelType) => {
     // console.log(toJS(app));
@@ -34,28 +35,28 @@ export const AppDock: FC<AppTileProps> = observer((props: AppTileProps) => {
         value: ship!.cookie!.split('=')[1].split('; ')[0],
       },
     };
-    console.log('open new window', windowPayload);
+    // console.log('open new window', windowPayload);
     desktopStore.openBrowserWindow(app, windowPayload);
 
     // openNewWindow(windowPayload);
   };
 
-  // console.log('activeAppId', activeAppId);
+  // console.log('activeWindowId', activeWindowId);
 
   return (
     <Flex gap={8} flexDirection="row" alignItems="center">
       {apps.map((app: AppModelType, index: number) => {
-        console.log(
-          'selected',
-          app.href.glob.base,
-          app.href.glob.base === activeAppId
-        );
+        // console.log(
+        //   'selected',
+        //   app.href.glob.base,
+        //   app.href.glob.base === activeWindowId
+        // );
         return (
           <AppTile
             key={app.title + index}
             tileSize="sm"
             app={app}
-            selected={app.href.glob.base === activeAppId}
+            selected={app.href.glob.base === activeWindowId}
             onAppClick={(selectedApp: AppModelType) => onAppClick(selectedApp)}
           />
         );

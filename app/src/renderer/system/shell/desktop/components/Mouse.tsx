@@ -7,13 +7,6 @@ import { hexToRgb } from 'renderer/logic/utils/color';
 export const MouseArea = styled(motion.div)`
   cursor: none;
 `;
-const MouseStyle = styled(motion.div)`
-  height: 10px;
-  width: 10px;
-  border-radius: 50%;
-  z-index: 10;
-  background-color: #1e91d6;
-`;
 
 interface MouseProps {
   cursorColor?: string | null;

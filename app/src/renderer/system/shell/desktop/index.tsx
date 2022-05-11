@@ -5,6 +5,7 @@ import { SystemBar } from './components/SystemBar';
 import { useShip, useAuth, useMst } from '../../../logic/store';
 import AppWindow from './components/AppWindow';
 import { AnimatePresence } from 'framer-motion';
+import { WindowManager } from './WindowManager';
 
 type OSFrameProps = {
   hasLoaded?: boolean;
@@ -29,7 +30,7 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
     <Fill>
       <Layer zIndex={1}>
         <AnimatePresence>
-          {desktopStore.hasOpenWindow && <AppWindow theme={theme} />}
+          <WindowManager />
           {/* <WinManager render={windowRenderer}> */}
           {/* {loading && <Loading />} */}
           {/* {statuses && (

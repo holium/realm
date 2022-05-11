@@ -93,7 +93,7 @@ export const Titlebar = (props: TitlebarProps) => {
     navigationButtons,
     shareable,
   } = props;
-  const { windowColor, iconColor, dockColor } = props.theme;
+  const { windowColor, iconColor } = props.theme;
 
   let titleSection: any;
   if (props.app) {
@@ -117,8 +117,6 @@ export const Titlebar = (props: TitlebarProps) => {
 
   return (
     <TitlebarStyle
-      // expand
-      // noGutter
       {...(dragControls
         ? {
             onPointerDown: (e) => {
@@ -127,7 +125,6 @@ export const Titlebar = (props: TitlebarProps) => {
             onPointerUp: (e) => {
               onDragStop && onDragStop(e);
             },
-            // whileTap: { cursor: 'grabbing' },
           }
         : {})}
       zIndex={zIndex}
@@ -173,22 +170,11 @@ export const Titlebar = (props: TitlebarProps) => {
               icon="Expand"
               iconColor={iconColor!}
               bg="#97A3B2"
-              onClick={() => onMaximize && onMaximize()}
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                onMaximize && onMaximize();
+              }}
             />
-            // <Flex alignItems="center">
-            //   <IconButton
-            //     initial={{ background: 'transparent' }}
-            //     whileHover={{ background: rgba('#97A3B2', 0.3) }}
-            //     animate={{
-            //       background: 'transparent',
-            //       transition: { background: 0.2, fill: 0.2 },
-            //     }}
-            //     hoverFill={iconColor}
-            //     onClick={() => onMaximize && onMaximize()}
-            //   >
-            //     <Icons name="Expand" />
-            //   </IconButton>
-            // </Flex>
           )}
           {closeButton && (
             <WindowIcon
@@ -196,22 +182,11 @@ export const Titlebar = (props: TitlebarProps) => {
               iconColor={iconColor!}
               bg="#FF6240"
               fillWithBg
-              onClick={() => onClose && onClose()}
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                onClose && onClose();
+              }}
             />
-            // <Flex alignItems="center">
-            //   <IconButton
-            //     initial={{ background: 'transparent' }}
-            //     whileHover={{ background: rgba('#FF6240', 0.3) }}
-            //     animate={{
-            //       background: 'transparent',
-            //       transition: { background: 0.2, fill: 0.2 },
-            //     }}
-            //     hoverFill="#FF6240"
-            //     onClick={() => onClose && onClose()}
-            //   >
-            //     <Icons name="Close" />
-            //   </IconButton>
-            // </Flex>
           )}
         </Flex>
       )}
