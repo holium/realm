@@ -31,6 +31,10 @@ const Window = types
     id: types.identifier,
     title: types.optional(types.string, ''),
     zIndex: types.number,
+    type: types.optional(
+      types.enumeration(['urbit', 'web', 'native']),
+      'urbit'
+    ),
     // app: types.safeReference(AppModel),
     dimensions: DimensionsModel,
   })
@@ -61,10 +65,16 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
-    setActive(window: WindowModelType) {
-      self.activeWindow = window;
+    setActive(activeWindow: WindowModelType) {
+      self.activeWindow = activeWindow;
       const depth = self.windows.size;
-      self.windows.get(window.id)?.setZIndex(depth + 1);
+      self.windows.forEach((win: WindowModelType) => {
+        if (activeWindow.id === win.id) {
+          win.setZIndex(depth + 1);
+        } else {
+          win.setZIndex(win.zIndex - 1);
+        }
+      });
     },
     setFullscreen(isFullscreen: boolean) {
       self.isFullscreen = isFullscreen;

@@ -1,13 +1,14 @@
 import { FC, useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import { rgba, lighten, darken } from 'polished';
 
 import { ThemeStoreType } from '../../../logic/theme/store';
-import { useMst, useShip } from '../../../logic/store';
+import { useSpaces, useShip } from '../../../logic/store';
 
 import { Grid, Flex, IconButton, Icons, Text } from '../../../components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
+import { observer } from 'mobx-react';
 
 type SpacesProps = {
   theme: ThemeStoreType;
@@ -17,15 +18,15 @@ type SpacesProps = {
   };
 };
 
-export const Spaces: FC<SpacesProps> = (props: SpacesProps) => {
+export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
   const { ship } = useShip();
+  const spacesStore = useSpaces();
   const { dimensions } = props;
 
   const spaceTheme = useMemo(() => ship!.theme, [ship!.theme]);
   const { backgroundColor, textColor, dockColor, iconColor } = spaceTheme;
-
+  // console.log(toJS(spacesStore.spacesList));
   // const iconColor = darken(0.5, textColor);
-  const bgHover = lighten(0.1, backgroundColor);
   const bottomHeight = 58;
 
   return (
@@ -74,7 +75,11 @@ export const Spaces: FC<SpacesProps> = (props: SpacesProps) => {
         style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
         overflowY="hidden"
       >
-        <SpacesList spaces={[]} />
+        <SpacesList
+          selected={spacesStore.selected}
+          spaces={spacesStore.spacesList}
+          onSelect={spacesStore.selectSpace}
+        />
       </Flex>
       <Grid.Row expand noGutter></Grid.Row>
       <Flex
@@ -88,8 +93,12 @@ export const Spaces: FC<SpacesProps> = (props: SpacesProps) => {
         flex={1}
         height={bottomHeight}
       >
-        <YouRow selected={true} ship={ship!} />
+        <YouRow
+          selected={ship?.patp === spacesStore.selected?.id}
+          ship={ship!}
+          onSelect={spacesStore.selectSpace}
+        />
       </Flex>
     </Grid.Column>
   );
-};
+});

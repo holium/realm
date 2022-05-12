@@ -2,7 +2,7 @@ import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import { AuthManager } from './auth/manager';
 import { ShipManager } from './ship/manager';
 import { Conduit } from './conduit';
-import { SpaceStore, SpaceStoreType } from './context/model';
+import { SpaceStore, SpaceStoreType } from './spaces/model';
 import { ShipInfoType } from './ship/types';
 
 export type RealmCorePreloadType = {

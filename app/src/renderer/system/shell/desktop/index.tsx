@@ -1,9 +1,8 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
-import { useShip, useAuth, useMst } from '../../../logic/store';
-import AppWindow from './components/AppWindow';
+import { useShip, useAuth } from '../../../logic/store';
 import { AnimatePresence } from 'framer-motion';
 import { WindowManager } from './WindowManager';
 
@@ -14,8 +13,7 @@ type OSFrameProps = {
 };
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
-  const { hasLoaded, isFullscreen } = props;
-  const { desktopStore } = useMst();
+  const { hasLoaded } = props;
   const { authStore } = useAuth();
   const { ship } = useShip();
 
@@ -31,31 +29,6 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
       <Layer zIndex={1}>
         <AnimatePresence>
           <WindowManager />
-          {/* <WinManager render={windowRenderer}> */}
-          {/* {loading && <Loading />} */}
-          {/* {statuses && (
-            <Grid
-              container
-              spacing={3}
-              direction="column"
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                bottom: 0,
-                p: 2,
-                width: 'auto',
-                maxWidth: '100%',
-              }}
-            >
-              {statuses.map((status) => (
-                <Grid item key={status.system}>
-                  <System systemId={status.system} />
-                </Grid>
-              ))}
-            </Grid>
-          )} */}
-          {/* </WinManager> */}
         </AnimatePresence>
       </Layer>
       <Layer zIndex={2}>

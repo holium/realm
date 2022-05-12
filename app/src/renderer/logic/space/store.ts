@@ -1,87 +1,127 @@
 import { LoaderModel } from './../stores/common/loader';
-import { types, Instance, flow } from 'mobx-state-tree';
-import { getApps } from './app/api';
+import {
+  types,
+  Instance,
+  flow,
+  applySnapshot,
+  getSnapshot,
+  clone,
+} from 'mobx-state-tree';
+import { toJS } from 'mobx';
+import { ThemeStore } from './../theme/store';
+import MockData from './mock';
+import { DocketApp, WebApp } from '../../../core/ship/stores/docket';
+import { ShipModelType } from '../ship/store';
+import { osState } from '../store';
 
-export const GroupMetadataModel = types.model({
-  color: types.string,
-  description: types.maybeNull(types.string),
-  picture: types.maybeNull(types.string),
-  title: types.maybeNull(types.string),
-});
-
-export type GroupModelType = Instance<typeof GroupMetadataModel>;
-
-export const AppModel = types.model({
-  title: types.string,
-  info: types.string,
-  color: types.string,
-  image: types.maybeNull(types.string),
-  href: types.maybeNull(types.string),
-  version: types.string,
-  website: types.string,
-  license: types.string,
-});
-export type AppModelType = Instance<typeof AppModel>;
+const DocketMap = types.map(types.union({ eager: false }, DocketApp, WebApp));
+export const Space = types
+  .model({
+    loader: types.optional(LoaderModel, { state: 'initial' }),
+    id: types.identifier,
+    name: types.string,
+    color: types.string,
+    type: types.enumeration(['our', 'group', 'dao', 'colony']),
+    picture: types.maybeNull(types.string),
+    members: types.maybeNull(
+      types.model({
+        count: types.number,
+        list: types.array(
+          types.model({
+            patp: types.string,
+            role: types.string,
+          })
+        ),
+      })
+    ),
+    theme: ThemeStore,
+    apps: types.model({
+      pinned: types.array(types.string),
+      docket: DocketMap,
+    }),
+    token: types.maybeNull(
+      types.model({
+        chain: types.string,
+        network: types.string,
+        contract: types.string,
+        symbol: types.string,
+      })
+    ),
+  })
+  .views((self) => ({
+    get pinnedApps() {
+      return Array.from(self.apps.docket!.values()).filter((app: any) =>
+        self.apps.pinned.includes(app.id)
+      );
+    },
+  }))
+  .actions((self) => ({
+    load(spaceId: string) {
+      applySnapshot(self, MockData[spaceId]);
+    },
+  }));
+export type SpaceModelType = Instance<typeof Space>;
 
 export const SpaceStore = types
   .model({
     loader: types.optional(LoaderModel, { state: 'initial' }),
-    apps: types.map(AppModel),
-    pinned: types.array(types.reference(AppModel)),
+    selected: types.safeReference(Space),
+    spaces: types.map(Space),
   })
   .views((self) => ({
-    get appGrid() {
-      return Array.from(self.apps.values());
+    get spacesList() {
+      return Array.from(self.spaces.values()).filter(
+        (space: SpaceModelType) => space.type !== 'our'
+      );
     },
   }))
   .actions((self) => ({
-    // TODO make scrys happen from UI only
-    initialize: flow(function* () {
-      // window.electron.core.;
-      // const [response, error] = yield getApps((_event: any, value: any) =>
-      //   console.log(value)
-      // );
-      // console.log('got apps');
-      // if (error) throw error;
-      // console.log(response);
-    }),
-    getApps: flow(function* () {
-      self.loader.set('loading');
-      self.apps.clear(); //
-      const [response, error] = yield getApps();
-      if (error) throw error;
-      Object.values<any>(response.initial).forEach((app: AppModelType) => {
-        const appTile = AppModel.create({
-          title: app.title,
-          info: app.info,
-          color: app.color,
-          image: app.image,
-          version: app.version,
-          website: app.website,
-          license: app.license,
-        });
-        self.apps.set(app.title, appTile);
+    setShipSpace(ship: ShipModelType) {
+      self.spaces.set(
+        ship.patp,
+        Space.create({
+          id: ship.patp,
+          name: ship.patp,
+          color: ship.color || '#000000',
+          type: 'our',
+          // @ts-ignore FIX
+          apps: {
+            pinned: ['escape', 'webterm', 'bitcoin', 'landscape'],
+            // TODO fix
+            ...(ship.docket.apps
+              ? {
+                  docket: DocketMap.create(getSnapshot(ship.docket.apps)),
+                }
+              : { docket: {} }),
+          },
+          picture: ship.avatar,
+          theme: clone(ship.theme),
+        })
+      );
+      if (!self.selected) {
+        self.selected = self.spaces.get(ship.patp)!;
+        if (self.selected.theme.wallpaper) {
+          osState.themeStore.setWallpaper(self.selected.theme.wallpaper);
+        }
+      }
+    },
+    selectSpace(spaceKey: string) {
+      self.selected = self.spaces.get(spaceKey)!;
+      if (self.selected.theme.wallpaper) {
+        osState.themeStore.setWallpaper(self.selected.theme.wallpaper);
+      }
+    },
+    load(selectedKey: string, themeStore: any) {
+      Object.keys(MockData).forEach((spaceKey: string) => {
+        self.spaces.set(spaceKey, Space.create(MockData[spaceKey]));
       });
-      self.loader.set('loaded');
-      // console.log(response.initial);
-    }),
-    // onScry: (scry: { app: string; path: string; data: any }) => {
-    //   // console.log('in space store effect', scry.data);
-    //   if (scry.app === 'docket') {
-    //     Object.values<any>(scry.data.initial).forEach((app: AppModelType) => {
-    //       const appTile = AppModel.create({
-    //         title: app.title,
-    //         info: app.info,
-    //         color: app.color,
-    //         image: app.image,
-    //         version: app.version,
-    //         website: app.website,
-    //         license: app.license,
-    //       });
-    //       self.apps.set(appTile);
-    //     });
-    //   }
-    // },
+      if (selectedKey) {
+        self.selected = self.spaces.get(selectedKey);
+        if (self.selected!.theme.wallpaper) {
+          themeStore.setWallpaper(self.selected!.theme.wallpaper);
+        }
+      }
+    },
   }));
 
 export type SpaceStoreType = Instance<typeof SpaceStore>;

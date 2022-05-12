@@ -1,20 +1,19 @@
 import { FC, useMemo } from 'react';
 import { SystemBarStyle } from '../SystemBar.styles';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 import HoliumAnimated from '../../../../../../components/Icons/holium';
-import { WindowThemeType } from 'renderer/logic/stores/config';
 import { useMst } from '../../../../../../logic/store';
 import { observer } from 'mobx-react';
 
 type HomeButton = {
   onHome: () => void;
-  theme: WindowThemeType;
 };
 
 export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
-  const { onHome, theme } = props;
+  const { onHome } = props;
+  const { themeStore } = useMst();
 
-  const { dockColor, textColor } = theme;
+  const { dockColor, textColor } = themeStore;
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
@@ -24,37 +23,39 @@ export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
     y.set(event.clientY - rect.top);
   }
 
-  return (
-    <motion.div
-      style={{
-        display: 'flex',
-        placeItems: 'center',
-        placeContent: 'center',
-        borderRadius: 30,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        perspective: 400,
-      }}
-      onClick={() => onHome()}
-      onMouseMove={handleMouse}
-    >
-      <SystemBarStyle
+  return useMemo(
+    () => (
+      <motion.div
         style={{
-          // cursor: 'pointer',
-          zIndex: 3,
-          minWidth: 42,
+          display: 'flex',
+          placeItems: 'center',
+          placeContent: 'center',
+          borderRadius: 30,
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          perspective: 400,
         }}
-        animate={{ scale: 1 }}
-        transition={{ scale: 0.5 }}
-        whileTap={{ scale: 0.95 }}
-        width={42}
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        customBg={dockColor}
+        onClick={() => onHome()}
+        onMouseMove={handleMouse}
       >
-        <HoliumAnimated width="22px" height="22px" fill={textColor} />
-      </SystemBarStyle>
-    </motion.div>
+        <SystemBarStyle
+          style={{
+            zIndex: 3,
+            minWidth: 42,
+          }}
+          animate={{ scale: 1 }}
+          transition={{ scale: 0.5 }}
+          whileTap={{ scale: 0.95 }}
+          width={42}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          customBg={dockColor}
+        >
+          <HoliumAnimated width="22px" height="22px" fill={textColor} />
+        </SystemBarStyle>
+      </motion.div>
+    ),
+    [themeStore.textColor, themeStore.dockColor]
   );
 });
 

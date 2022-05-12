@@ -24,9 +24,6 @@ export const createShipForm = (
     urbitId: '',
     shipUrl: '',
     accessKey: '',
-    // urbitId: '~labruc-dillyx-lomder-librun',
-    // shipUrl: 'https://test-moon-1.holium.network',
-    // accessKey: 'mapfel-dalmec-halfen-sorhes',
   },
   addedShips: string[]
 ) => {
@@ -42,9 +39,9 @@ export const createShipForm = (
     initialValue: defaults.urbitId || '',
     // validationSchema: yup.string().required('Name is required'),
     validate: (patp: string) => {
-      // if (addedShips.includes(patp)) {
-      //   return { error: 'Already added', parsed: undefined };
-      // }
+      if (addedShips.includes(patp)) {
+        return { error: 'Already added', parsed: undefined };
+      }
 
       if (patp.length > 1 && isValidPatp(patp)) {
         return { error: undefined, parsed: patp };
@@ -223,7 +220,7 @@ export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
                   url: formData['ship-id'],
                   code: formData['access-key'],
                 })
-                .then((value: any) => {
+                .then(() => {
                   console.log('before next');
                   // eslint-disable-next-line promise/no-callback-in-promise
                   next();

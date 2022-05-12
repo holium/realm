@@ -1,16 +1,9 @@
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { FC, useEffect, useState } from 'react';
-import { rgba, lighten, darken } from 'polished';
+import { rgba, darken } from 'polished';
 
 import { WindowThemeType } from '../../../../../../logic/stores/config';
-import {
-  Grid,
-  Flex,
-  Text,
-  IconButton,
-  Icons,
-} from '../../../../../../components';
+import { Flex, Text } from '../../../../../../components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
 
@@ -97,7 +90,7 @@ export const Titlebar = (props: TitlebarProps) => {
 
   let titleSection: any;
   if (props.app) {
-    const { title, icon, color } = props.app!;
+    const { title, icon } = props.app!;
     titleSection = (
       <Flex gap={4} alignItems="center">
         <Flex pr={4} justifyContent="center" alignItems="center">
@@ -132,10 +125,12 @@ export const Titlebar = (props: TitlebarProps) => {
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >
-      <TitleCentered justifyContent="center" flex={1}>
-        {titleSection}
-      </TitleCentered>
-      {(shareable || navigationButtons) && (
+      {titleSection && (
+        <TitleCentered justifyContent="center" flex={1}>
+          {titleSection}
+        </TitleCentered>
+      )}
+      {shareable || navigationButtons ? (
         <Flex zIndex={zIndex + 1} gap={4} alignItems="center">
           {shareable && (
             <SharedAvatars
@@ -160,6 +155,8 @@ export const Titlebar = (props: TitlebarProps) => {
             </>
           )}
         </Flex>
+      ) : (
+        isAppWindow && <Flex></Flex>
       )}
 
       {children}

@@ -299,7 +299,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
           opacity: isTextCursor ? 0 : 1,
           visibility: isVisible ? 'visible' : 'hidden',
         }}
-        transition={{ opacity: 0.15, visibility: { delay: 0.1 } }}
+        transition={{ opacity: 0.05 }}
         style={styles.cursorOuter}
       />
       <motion.div

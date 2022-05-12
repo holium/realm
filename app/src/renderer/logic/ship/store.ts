@@ -18,12 +18,8 @@ import Urbit from '../api/urbit';
 // import { ChatStore } from './chat/store';
 import { ChatStore } from '../../../core/ship/stores/dms';
 import { ShipModel as BaseShipModel } from '../../../core/ship/stores/ship';
-// import { ChatStore } from '../../../core/ship/chat/store';
 
-import { authState, osState } from '../store';
-import { init } from './api';
-import { darken, lighten } from 'polished';
-import { ContactStore } from '../../../core/ship/stores/contacts';
+import { authState, osState, spacesState } from '../store';
 import { AuthShipType } from '../../../core/auth/store';
 
 type ShipInfoType = {
@@ -169,6 +165,9 @@ export const ShipStore = types
       // Apply persisted snapshot
       applySnapshot(self, castToSnapshot({ ship: syncEffect.model }));
       osState.themeStore.setMouseColor(syncEffect.model.color || '#4E9EFD');
+
+      spacesState.setShipSpace(self.ship!);
+
       // TODO clean up authstore
       authState.authStore.loader.set('loaded');
       self.ship!.loader.set('loaded');

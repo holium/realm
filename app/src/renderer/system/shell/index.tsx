@@ -4,14 +4,9 @@ import { observer } from 'mobx-react';
 import { ViewPort, Top, Fill, Layer } from 'react-spaces';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth, useMst, useShip } from '../../logic/store';
-import { Mouse } from './desktop/components/Mouse';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import {
-  BackgroundImage,
-  BackgroundFill,
-  BackgroundDarken,
-} from './Shell.styles';
+import { BackgroundImage, BackgroundFill } from './Shell.styles';
 
 type ShellProps = {};
 
@@ -23,9 +18,10 @@ const DragBar = styled.div`
   right: 0;
   --webkit-app-region: drag;
   app-region: drag;
-  &:active {
+  cursor: none !important;
+  /* &:active {
     cursor: grabbing;
-  }
+  } */
 `;
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {

@@ -8,7 +8,6 @@ import {
   Sigil,
   Text,
   Input,
-  Button,
   IconButton,
   Icons,
   TextButton,
@@ -19,7 +18,6 @@ import {
 } from '../../../../components';
 import { useAuth, useMst } from '../../../../logic/store';
 import { ShipSelector } from './ShipSelector';
-import { AnimatePresence, motion } from 'framer-motion';
 import { DEFAULT_WALLPAPER } from 'renderer/logic/theme/store';
 
 type LoginProps = {
@@ -234,7 +232,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
         >
           <ShipSelector />
           <Flex gap={12}>
-            {inProgressShips.map((ship: any, index: number) => (
+            {inProgressShips.map((ship: any) => (
               <ContinueButton
                 onClick={continueSignup}
                 key={`continue-${ship.patp}`}
@@ -266,10 +264,9 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 export default Login;
 
 const ContinueButton = (props: any) => {
-  const { ship, theme, onClick } = props;
+  const { ship, theme } = props;
   return (
     <Flex
-      // style={{ cursor: 'pointer' }}
       className="dynamic-mouse-hover"
       p={1}
       pr={3}
@@ -281,9 +278,6 @@ const ContinueButton = (props: any) => {
         flexDirection="row"
         alignItems="center"
         style={{ x: 0 }}
-        // whileHover={{ scale: 1.1 }}
-        // transition={{ scale: 0.2 }}
-        // whileTap={{ scale: 1.0 }}
       >
         <Sigil
           simple

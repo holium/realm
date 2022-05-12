@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { useMst } from 'renderer/logic/store';
 import AppWindow from './components/AppWindow';
 
-export const WindowManager: FC<any> = observer((props: any) => {
+export const WindowManager: FC<any> = observer(() => {
   const { desktopStore, themeStore } = useMst();
   const desktopRef = useRef<any>(null);
 
@@ -21,7 +21,7 @@ export const WindowManager: FC<any> = observer((props: any) => {
         left: 0,
         top: 0,
         right: 0,
-        height: `calc(100vh - ${desktopStore.isFullscreen ? 0 : 30}px)`,
+        height: `calc(100vh - ${0}px)`,
         paddingTop: desktopStore.isFullscreen ? 0 : 30,
       }}
     >

@@ -34,13 +34,9 @@ function loadStoreSnapshot(stateName: string, storeName: string) {
 }
 
 const OSStore = types.model('OSStore', {
-  // shipStore: ShipStore,
   configStore: ConfigStore,
   themeStore: ThemeStore,
   desktopStore: DesktopStore,
-  // authStore: AuthStore,
-  // signupStore: SignupStore,
-  // spaceStore: SpaceStore,
 });
 
 const AuthState = types.model('AuthState', {
@@ -74,8 +70,19 @@ export const osState = initialOSState;
 export const authState = initialAuthState;
 export const shipState = initialShipState;
 
+const initialSpacesState = SpaceStore.create({
+  loader: { state: 'initial' },
+  spaces: loadStoreSnapshot('spacesState', 'spaces') || {},
+});
+initialSpacesState.load(
+  loadStoreSnapshot('spacesState', 'selected'),
+  osState.themeStore
+);
+
+export const spacesState = initialSpacesState;
+
 window.electron.core.onEffect((_event: any, value: any) => {
-  console.log(value);
+  // console.log(value);
 
   if (value.response === 'diff') {
     console.log('got effect data => ', value.json);
@@ -126,6 +133,10 @@ onSnapshot(shipState, (snapshot) => {
   localStorage.setItem('shipState', JSON.stringify(snapshot));
 });
 
+onSnapshot(spacesState, (snapshot) => {
+  localStorage.setItem('spacesState', JSON.stringify(snapshot));
+});
+
 // -------------------------------
 // Create OS context
 // -------------------------------
@@ -164,6 +175,21 @@ const ShipStateContext = createContext<null | ShipInstance>(shipState);
 export const ShipProvider = ShipStateContext.Provider;
 export function useShip() {
   const store = useContext(ShipStateContext);
+  if (store === null) {
+    throw new Error('Store cannot be null, please add a context provider');
+  }
+  return store;
+}
+
+// -------------------------------
+// Create spaces context
+// -------------------------------
+export type SpaceInstance = Instance<typeof SpaceStore>;
+const SpacesStateContext = createContext<null | SpaceInstance>(spacesState);
+
+export const SpaceProvider = SpacesStateContext.Provider;
+export function useSpaces() {
+  const store = useContext(SpacesStateContext);
   if (store === null) {
     throw new Error('Store cannot be null, please add a context provider');
   }

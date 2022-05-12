@@ -13,31 +13,44 @@ export const Glob = types.model({
   }),
 });
 
-export const AppModel = types.model({
+export const DocketApp = types.model({
   id: types.identifier,
   title: types.string,
   info: types.string,
   color: types.string,
+  type: types.optional(types.string, 'native'),
   image: types.maybeNull(types.string),
   href: Glob,
-  // href: types.maybeNull(types.string),
-  // chad: types.maybeNull(types.string),
   version: types.string,
   website: types.string,
   license: types.string,
 });
+
+export type DocketAppType = Instance<typeof DocketApp>;
+
+export const WebApp = types.model({
+  id: types.identifier,
+  title: types.string,
+  type: types.optional(types.string, 'web'),
+  icon: types.maybeNull(types.string),
+  href: types.string,
+});
+
+export type WebAppType = Instance<typeof WebApp>;
+
+export const AppModel = types.union({ eager: false }, DocketApp, WebApp);
 
 export type AppModelType = Instance<typeof AppModel>;
 
 export const DocketStore = types
   .model({
     // loader: Loader
-    apps: types.map(AppModel),
+    apps: types.map(DocketApp),
   })
   .views((self) => ({
     get list() {
       return Array.from(self.apps.values())
-        .sort((a: AppModelType, b: AppModelType) => {
+        .sort((a: DocketAppType, b: DocketAppType) => {
           if (a.title < b.title) {
             return -1;
           }
@@ -47,20 +60,21 @@ export const DocketStore = types
           return 0;
         })
         .filter(
-          (app: AppModelType) => app.title !== 'System' // && app.title !== 'Terminal'
+          (app: DocketAppType) => app.title !== 'System' // && app.title !== 'Terminal'
         );
     },
   }))
   .actions((self) => ({
-    setInitial(appMap: { [key: string]: AppModelType }) {
-      const preparedApps: { [key: string]: AppModelType } = {};
-      Object.values(appMap).forEach((app: AppModelType) => {
-        const appTile = AppModel.create({
+    setInitial(appMap: { [key: string]: DocketAppType }) {
+      const preparedApps: { [key: string]: DocketAppType } = {};
+      Object.values(appMap).forEach((app: DocketAppType) => {
+        const appTile = DocketApp.create({
           id: app.href.glob.base,
           title: app.title,
           info: app.info,
           color: app.color,
           image: app.image,
+          type: 'native',
           href: Glob.create(app.href),
           version: app.version,
           website: app.website,

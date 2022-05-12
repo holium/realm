@@ -20,6 +20,7 @@ const StyledLabel = styled(Text)`
   display: flex;
   width: 100%;
   align-items: center;
+  cursor: none;
   color: ${(props) => props.theme.colors.text.primary};
   ${(props: StyledLabelProps) =>
     props.required &&

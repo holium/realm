@@ -1,5 +1,5 @@
-import { FC, useRef, useEffect, useState, createRef } from 'react';
-import styled, { css } from 'styled-components';
+import { FC, useRef, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { useMst, useShip } from '../../../../../../logic/store';
 import { Spinner, Flex } from '../../../../../../components';
 import { WebTermCSS } from '../../../../../../system/apps/WebTerm/WebTerm.styles';
@@ -10,10 +10,7 @@ interface AppViewProps {
   isResizing: boolean;
   hasTitlebar: boolean;
 }
-// height: ${(props: any) =>
-//   props.hasTitleBar ? 'calc(100% - 50px)' : 'inherit'};
-// height: ${(props: any) =>
-//   props.hasTitleBar ? 'calc(100% - 30px)' : 'inherit'};
+
 const View = styled.div<{ hasTitleBar?: boolean }>`
   transform: translateZ(0);
 `;
@@ -45,12 +42,13 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
   };
 
   useEffect(() => {
-    const webview: any = document.getElementById('app-webview');
+    const webview: any = document.getElementById(
+      `${activeWindow.id}-app-webview`
+    );
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
 
     if (activeWindow) {
-      // const config = divElement!.getBoundingClientRect();
       const formAppUrl = `${ship!.url}/apps/${activeWindow!.id}`;
       const location = {
         title: activeWindow.title,
@@ -63,18 +61,13 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
           value: ship!.cookie!.split('=')[1].split('; ')[0],
         },
       };
-
-      webview?.addEventListener('dom-ready', () => {
+      webview?.addEventListener('did-finish-load', () => {
         webview!.send('mouse-color', themeStore.mouseColor);
-
-        // @ts-ignore
-        // webview!.isDevToolsOpened() && webview!.closeDevTools();
-        // @ts-ignore
-        // webview!.openDevTools();
-        // webview.executre
         let css = '* { cursor: none !important; }';
         webview!.insertCSS(css);
+        // webview!.openDevTools();
       });
+
       webview?.addEventListener('close', () => {
         // @ts-ignore
         // webview!.closeDevTools();
@@ -110,7 +103,7 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
           width: 'inherit',
           height: '100%',
           position: 'relative',
-          pointerEvents: isResizing ? 'none' : 'auto',
+          pointerEvents: isResizing || loading ? 'none' : 'auto',
         }}
       />
     </View>

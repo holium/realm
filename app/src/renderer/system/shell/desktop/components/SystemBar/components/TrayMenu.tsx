@@ -77,10 +77,17 @@ export const TrayMenu = (props: TrayMenuProps) => {
         : false; // get if the tray is visible currently
       setIsVisible(!isVisible);
     } else {
+      // we are clicking on an element that should close the tray
+      if (event.target.getAttribute('data-close-tray') === 'true') {
+        setIsVisible(false);
+        event.stopPropagation();
+        return;
+      }
       // if we are clicking in the app area
       if (appRef && appRef.current && appRef.current.contains(event.target)) {
         return;
       }
+
       if (`${id}-app` === event.target.id) {
         return;
       }

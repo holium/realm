@@ -36,7 +36,7 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 
 export const ThemeStore = types
   .model({
-    wallpaper: types.string,
+    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     backgroundColor: types.optional(types.string, '#FFFFFF'),
     dockColor: types.optional(types.string, '#FFFFFF'),
     windowColor: types.optional(types.string, '#FFFFFF'),

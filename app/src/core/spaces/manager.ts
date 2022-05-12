@@ -3,7 +3,7 @@ import { EventEmitter } from 'stream';
 import isDev from 'electron-is-dev';
 import { types, Instance, flow } from 'mobx-state-tree';
 import { SpaceStore, SpaceStoreType } from './model';
-import { Conduit } from './../conduit';
+import { Conduit } from '../conduit';
 
 /**
  * SpaceManager: Realm has the concept of spaces. A space is a context in which

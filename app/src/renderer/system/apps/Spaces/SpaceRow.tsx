@@ -1,24 +1,11 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { observer } from 'mobx-react';
-import { rgba, lighten, darken } from 'polished';
-import { useMst, useShip } from '../../../logic/store';
-
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  Sigil,
-  MenuItem,
-  TextButton,
-  Text,
-} from '../../../components';
-import { ThemeType } from '../../../theme';
+import { rgba, lighten } from 'polished';
 import styled, { css } from 'styled-components';
-import { Space } from './SpacesList';
+import { useShip } from '../../../logic/store';
+import { Flex, Icons, Text } from '../../../components';
+import { SpaceModelType } from 'renderer/logic/space/store';
+import { ThemeType } from '../../../theme';
 
 const EmptyGroup = styled.div`
   height: 32px;
@@ -44,8 +31,7 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
   ${(props: RowProps) =>
     props.selected
       ? css`
-          color: ${props.theme.colors.brand.primary};
-          background-color: ${rgba(props.customBg, 0.3)};
+          background-color: ${lighten(0.05, props.customBg)};
         `
       : css`
           &:hover {
@@ -57,21 +43,27 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
         `}
 `;
 
-type SpaceRowProps = { space: Space };
+type SpaceRowProps = {
+  selected: boolean;
+  space: SpaceModelType;
+  onSelect: (spaceKey: string) => void;
+};
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
-  const { space } = props;
+  const { selected, space, onSelect } = props;
   const { ship } = useShip();
   const theme = useMemo(() => ship!.theme, [ship!.theme]);
   return (
     <SpaceRowStyle
+      data-close-tray="true"
+      selected={selected}
       className="dynamic-mouse-hover"
-      customBg={theme.backgroundColor}
+      customBg={theme.dockColor}
+      onClick={() => {
+        onSelect(space.id);
+      }}
     >
-      <Flex
-        alignItems="center"
-        // style={{ flex: 1, opacity: space.status !== 'active' ? 0.3 : 1 }}
-      >
+      <Flex style={{ pointerEvents: 'none' }} alignItems="center">
         {space.picture ? (
           <img
             style={{ borderRadius: 6 }}
@@ -93,7 +85,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
             fontWeight={500}
             variant="body"
           >
-            {space.title}
+            {space.name}
 
             {/* TODO add notification */}
             {/* <Icons.ExpandMore ml="6px" /> */}
@@ -101,9 +93,17 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
           <Flex flexDirection="row" gap={12}>
             <Flex gap={4} flexDirection="row" alignItems="center">
               <Icons name="Members" size={16} opacity={0.6} />
-              <Text fontWeight={400} mt="1px" mr={1} opacity={0.6} fontSize={2}>
-                {space.memberCount} members
-              </Text>
+              {space.members && (
+                <Text
+                  fontWeight={400}
+                  mt="1px"
+                  mr={1}
+                  opacity={0.6}
+                  fontSize={2}
+                >
+                  {space.members.count} members
+                </Text>
+              )}
             </Flex>
             {space.token && (
               <Flex gap={4} flexDirection="row" alignItems="center">
@@ -115,7 +115,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
                   opacity={0.6}
                   fontSize={2}
                 >
-                  {space.token}
+                  {space.token.symbol}
                 </Text>
               </Flex>
             )}

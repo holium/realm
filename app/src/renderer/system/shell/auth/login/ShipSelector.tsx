@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { lighten } from 'polished';
 import { motion, Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { useAuth, useMst } from '../../../../logic/store';
+import { useAuth } from '../../../../logic/store';
 
 import { Flex, Sigil, Tooltip } from '../../../../components';
 

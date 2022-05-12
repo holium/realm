@@ -2,19 +2,23 @@ import { FC, useCallback, useContext } from 'react';
 import { Flex, Box, Grid } from '../../../../../../../../components';
 import { AppModelType } from '../../../../../../../../../core/ship/stores/docket';
 import { AppTile } from '../AppTile';
-import { useMst, useShip } from '../../../../../../../../logic/store';
+import {
+  useMst,
+  useShip,
+  useSpaces,
+} from '../../../../../../../../logic/store';
 
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
 interface AppTileProps {
   selected?: AppModelType;
-  apps: AppModelType[];
 }
 
-export const AppDock: FC<AppTileProps> = observer((props: AppTileProps) => {
-  const { apps, selected } = props;
+export const AppDock: FC<AppTileProps> = observer(() => {
   const { desktopStore, themeStore } = useMst();
+  const spacesStore = useSpaces();
+
   const { ship } = useShip();
 
   const activeWindowId = desktopStore.activeWindow
@@ -45,22 +49,28 @@ export const AppDock: FC<AppTileProps> = observer((props: AppTileProps) => {
 
   return (
     <Flex gap={8} flexDirection="row" alignItems="center">
-      {apps.map((app: AppModelType, index: number) => {
-        // console.log(
-        //   'selected',
-        //   app.href.glob.base,
-        //   app.href.glob.base === activeWindowId
-        // );
-        return (
-          <AppTile
-            key={app.title + index}
-            tileSize="sm"
-            app={app}
-            selected={app.href.glob.base === activeWindowId}
-            onAppClick={(selectedApp: AppModelType) => onAppClick(selectedApp)}
-          />
-        );
-      })}
+      {spacesStore.selected
+        ? spacesStore.selected.pinnedApps.map(
+            (app: AppModelType, index: number) => {
+              // console.log(
+              //   'selected',
+              //   app.href.glob.base,
+              //   app.href.glob.base === activeWindowId
+              // );
+              return (
+                <AppTile
+                  key={app.title + index}
+                  tileSize="sm"
+                  app={app}
+                  selected={app.id === activeWindowId}
+                  onAppClick={(selectedApp: AppModelType) =>
+                    onAppClick(selectedApp)
+                  }
+                />
+              );
+            }
+          )
+        : []}
     </Flex>
   );
 });

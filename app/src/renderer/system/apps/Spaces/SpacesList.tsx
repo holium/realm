@@ -1,24 +1,8 @@
 import { FC, useEffect, useState } from 'react';
+import { SpaceModelType } from 'renderer/logic/space/store';
 
 import { Grid } from '../../../components';
 import { SpaceRow } from './SpaceRow';
-
-const sampleSpaces: Space[] = [
-  {
-    title: 'Other Life',
-    picture:
-      'https://dl.airtable.com/.attachmentThumbnails/85973e6c8ac12bef0ce4fbc046a2fb7c/8c21d303',
-    memberCount: 1261,
-    token: '$LIFE',
-  },
-  {
-    title: 'The Swolesome Fund',
-    picture:
-      'https://archiv.nyc3.digitaloceanspaces.com/littel-wolfur/2022.2.13..05.27.08-jacked.png',
-    memberCount: 60,
-    token: '$SWOL',
-  },
-];
 
 export type Space = {
   color?: string;
@@ -30,15 +14,24 @@ export type Space = {
 };
 
 type SpacesListProps = {
-  spaces: Space[];
+  selected?: SpaceModelType;
+  spaces: SpaceModelType[];
+  onSelect: (spaceKey: string) => void;
 };
 
 export const SpacesList: FC<SpacesListProps> = (props: SpacesListProps) => {
-  const { spaces } = props;
+  const { selected, spaces, onSelect } = props;
   return (
     <Grid.Column expand gap={4}>
-      {sampleSpaces.map((space: Space) => {
-        return <SpaceRow key={space.title} space={space} />;
+      {spaces.map((space: SpaceModelType) => {
+        return (
+          <SpaceRow
+            key={space.name}
+            space={space}
+            selected={selected?.id === space.id}
+            onSelect={onSelect}
+          />
+        );
       })}
     </Grid.Column>
   );

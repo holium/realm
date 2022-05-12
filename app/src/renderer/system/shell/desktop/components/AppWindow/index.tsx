@@ -1,26 +1,20 @@
-import React, { FC, useState, useCallback, useRef } from 'react';
-import {
-  motion,
-  useMotionValue,
-  useDragControls,
-  DragControls,
-} from 'framer-motion';
+import React, { FC, useState, useCallback } from 'react';
+import { motion, useMotionValue, useDragControls } from 'framer-motion';
+import { observer } from 'mobx-react';
 import { rgba, lighten } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../../theme';
 import { WindowThemeType } from '../../../../../logic/stores/config';
 import { WindowModelType } from '../../../../../logic/desktop/store';
+import { useMst } from '../../../../../logic/store';
 import { Titlebar } from './components/Titlebar';
 import { AppView } from './components/AppView';
-import { useMst } from '../../../../../logic/store';
-import { observer } from 'mobx-react';
 import {
   DragHandleWrapper,
   RightDragHandleStyle,
 } from './components/DragHandles';
 import { Flex } from 'renderer/components';
-import { toJS } from 'mobx';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -30,8 +24,8 @@ type AppWindowStyleProps = {
 export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
   border-radius: 9px;
-  --webkit-backdrop-filter: var(--blur-enabled);
-  backdrop-filter: var(--blur-enabled);
+  // --webkit-backdrop-filter: var(--blur-enabled);
+  // backdrop-filter: var(--blur-enabled);
   -webkit-user-select: none;
   --webkit-backface-visibility: hidden;
   --webkit-transform: translate3d(0, 0, 0);
@@ -58,7 +52,7 @@ type AppWindowProps = {
 
 export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
-    const { theme, window } = props;
+    const { theme, window, desktopRef } = props;
     const { textColor, windowColor } = theme;
     const { desktopStore } = useMst();
     const [unmaximize, setUnmaximize] = useState<
@@ -132,7 +126,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         });
     }, [desktopStore.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
 
-    const onDragStop = (e: any) => {
+    const onDragStop = () => {
       activeWindow &&
         desktopStore.setDimensions(activeWindow.id, {
           x: mX.get(),
@@ -180,10 +174,11 @@ export const AppWindow: FC<AppWindowProps> = observer(
           y: mY,
           width: mWidth,
           height: mHeight,
+          zIndex: window.zIndex,
         }}
         color={textColor}
         customBg={windowColor}
-        onClick={(evt: any) => {
+        onMouseDown={(evt: any) => {
           evt.stopPropagation();
           desktopStore.setActive(window);
         }}
@@ -202,9 +197,9 @@ export const AppWindow: FC<AppWindowProps> = observer(
             maximizeButton
             closeButton
             hasBorder
-            shareable
+            shareable={false}
             dragControls={dragControls}
-            onDragStop={(e: any) => onDragStop(e)}
+            onDragStop={() => onDragStop()}
             onClose={() => onClose()}
             onMaximize={() => maximize()}
             theme={theme}
@@ -220,7 +215,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
                 y: resizeRightY,
               }}
               onDrag={handleResize}
-              onPointerDown={(e: any) => {
+              onPointerDown={() => {
                 setIsResizing(true);
               }}
               onPointerUp={() => {
@@ -235,7 +230,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
               }}
               onPanEnd={() => setIsResizing(false)}
               onTap={() => setIsResizing(false)}
-              whileDrag={{}}
               dragMomentum={false}
             />
           </DragHandleWrapper>

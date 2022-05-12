@@ -1,9 +1,7 @@
-import { FC, useMemo, createRef } from 'react';
-import { observer } from 'mobx-react';
-import { useMst } from '../../../../../../../../logic/store';
+import { FC, createRef } from 'react';
+
 import { IconButton, Icons } from '../../../../../../../../components';
 import { WindowThemeType } from '../../../../../../../../logic/stores/config';
-
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { Wallet } from '../../../../../../../apps/Wallet';

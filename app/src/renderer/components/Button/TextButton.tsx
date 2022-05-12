@@ -28,17 +28,11 @@ export const TextButton = styled(styled.button`
   min-height: 26px;
   border-radius: 4px;
   text-decoration: none;
-  cursor: pointer;
+  /* cursor: pointer; */
   padding: 0px 7px;
   border: none;
   background-color: transparent;
   /* padding-top: 3px; */
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Old versions of Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none;
 
   ${(props: IProps) =>
     css`
@@ -66,7 +60,7 @@ export const TextButton = styled(styled.button`
       &:disabled {
         background-color: transparent;
         opacity: .3;
-        cursor: default;
+        cursor: none;
         /* pointer-events: none; */
       }
     `};

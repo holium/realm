@@ -10,6 +10,7 @@ import { LoaderModel } from '../../../renderer/logic/stores/common/loader';
 import { Chat, ChatMessage, ChatMessageType, ChatStore, ChatType } from './dms';
 import { ContactStore } from './contacts';
 import { DocketStore } from './docket';
+import { ThemeStore } from '../../../renderer/logic/theme/store';
 
 export const ShipModel = types
   .model('ShipModel', {
@@ -19,7 +20,7 @@ export const ShipModel = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
-    theme: WindowThemeModel,
+    theme: ThemeStore,
     loggedIn: types.optional(types.boolean, false),
     wallpaper: types.maybeNull(types.string),
     loader: types.optional(LoaderModel, { state: 'initial' }),

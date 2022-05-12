@@ -1,24 +1,23 @@
-import { FC, createRef, useRef, useState, useMemo } from 'react';
+import { FC, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { observer } from 'mobx-react';
+
 import { SystemBarStyle } from '../../SystemBar.styles';
 import { Flex, IconButton, Icons } from '../../../../../../../components';
 import { ShipModelType } from '../../../../../../../logic/ship/store';
 import { useMst } from '../../../../../../../logic/store';
-import { ThemeStoreType } from '../../../../../../../logic/theme/store';
-
 import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
-import { useObserver } from 'mobx-react';
 
 type ShipTrayProps = {
   ship: ShipModelType;
-  theme: ThemeStoreType;
 };
 
-export const ShipTray: FC<ShipTrayProps> = (props: ShipTrayProps) => {
-  const { ship, theme } = props;
-  const { dockColor, textColor } = theme;
+export const ShipTray: FC<ShipTrayProps> = observer((props: ShipTrayProps) => {
+  const { themeStore } = useMst();
+
+  const { dockColor, textColor } = useMemo(() => themeStore, [themeStore]);
 
   const [voiceOn, setVoiceOn] = useState(false);
 
@@ -49,14 +48,14 @@ export const ShipTray: FC<ShipTrayProps> = (props: ShipTrayProps) => {
           </motion.div>
         </IconButton>
         {/* Holds the wallet interface */}
-        <WalletTray theme={theme} />
+        <WalletTray theme={themeStore} />
         {/* Holds the DM interface */}
-        <MessagesTray theme={theme} />
+        <MessagesTray theme={themeStore} />
         {/* Allows logging out */}
-        <AccountTray theme={theme} ship={ship} />
+        <AccountTray theme={themeStore} ship={props.ship} />
       </Flex>
     </SystemBarStyle>
   );
-};
+});
 
 export default { ShipTray };
