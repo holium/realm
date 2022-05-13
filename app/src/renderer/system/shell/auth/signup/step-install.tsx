@@ -62,6 +62,7 @@ export const StepInstall: FC<InstallStepProps> = observer(
             color={[shipColor, 'white']}
           />
           <Flex
+            style={{ width: 210 }}
             transition={{ duration: 0.15 }}
             animate={{ marginBottom: shipNick ? 24 : 0 }}
             position="relative"

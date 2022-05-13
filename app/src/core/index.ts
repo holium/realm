@@ -1,4 +1,6 @@
 import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
+import { Urbit } from './urbit/api';
+
 import { AuthManager } from './auth/manager';
 import { ShipManager } from './ship/manager';
 import { Conduit } from './conduit';
@@ -39,7 +41,7 @@ export class RealmCore {
   private url?: string;
   private ship?: string;
   private cookie?: string;
-  private conduit?: Conduit;
+  private conduit?: Urbit;
   private mainWindow: BrowserWindow;
   private authManager: AuthManager;
   private shipManager: ShipManager;
@@ -84,6 +86,18 @@ export class RealmCore {
     return realmCore;
   }
 
+  connect(url: string, ship: string, cookie: string) {
+    this.conduit = new Urbit(url, ship, cookie);
+    this.conduit.open();
+    // this.conduit.on('ready', this.onReady);
+    this.conduit.onOpen = () => {
+      console.log('on open');
+      this.onReady();
+    };
+    this.conduit.onRetry = () => console.log('on retry');
+    this.conduit.onError = (err) => console.log('on err', err);
+  }
+
   login(_event: any, ship: string, password: string) {
     const { url, cookie } = this.authManager.getCredentials(ship, password);
     // TODO decrypt stored snapshot
@@ -91,8 +105,7 @@ export class RealmCore {
     this.url = url;
     this.cookie = cookie;
     // Initialize conduit
-    this.conduit = new Conduit(url, ship, cookie);
-    this.conduit.on('ready', this.onReady);
+    this.connect(url, ship, cookie);
     this.authManager.setLoggedIn(ship);
   }
 
@@ -115,8 +128,7 @@ export class RealmCore {
     }
 
     // else we have already decrypted the shipInfo
-    this.conduit = new Conduit(shipInfo.url, ship, shipInfo.cookie);
-    this.conduit.on('ready', this.onReady);
+    this.connect(shipInfo.url, ship, shipInfo.cookie);
   }
 
   onReady() {
@@ -127,7 +139,7 @@ export class RealmCore {
 
   async logout(_event: any, ship: string) {
     // Clean up and encrypt current snapshot
-    await this.conduit?.close(); // clean up subscriptions and close conduit
+    await this.conduit?.reset(); // clean up subscriptions and close conduit
     this.authManager.setLoggedOut(ship); // log out
     this.shipManager.lock(); // lock and encryp ship data
   }

@@ -44,7 +44,7 @@ export const AuthShip = types
       nickname?: string;
       avatar?: string;
     }) => {
-      if (contactMetadata.color) self.color = contactMetadata.color;
+      self.color = contactMetadata.color || '#000000';
       if (contactMetadata.nickname) self.nickname = contactMetadata.nickname;
       if (contactMetadata.avatar) self.avatar = contactMetadata.avatar;
     },

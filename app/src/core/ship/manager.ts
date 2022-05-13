@@ -1,5 +1,4 @@
-import { ContactModel, ContactStore } from './stores/contacts';
-import { toJS } from 'mobx';
+import { Urbit } from './../urbit/api';
 
 import { ipcRenderer, ipcMain } from 'electron';
 import Store from 'electron-store';
@@ -23,7 +22,7 @@ export type ShipPreloadType = {
 
 export class ShipManager extends EventEmitter {
   ship: string = '';
-  private conduit?: Conduit;
+  private conduit?: Urbit;
   private stateTree?: ShipModelType;
   private store: Store<{ [ship: string]: ShipModelType }>;
 
@@ -45,7 +44,7 @@ export class ShipManager extends EventEmitter {
     ipcMain.handle('ship:get-dms', this.getDMs);
   }
   //
-  subscribe(conduit: Conduit, ship: string, shipInfo: any) {
+  subscribe(conduit: Urbit, ship: string, shipInfo: any) {
     this.ship = ship;
     this.conduit = conduit;
     const shipPath: string = `ship.manager.${this.ship}`;
@@ -94,9 +93,18 @@ export class ShipManager extends EventEmitter {
       response: 'initial',
     };
     this.onEffect(syncEffect);
-    conduit.subscribe('contact-store', '/all', {
-      onEvent: (data: any) => this.stateTree?.contacts.setInitial(data.json),
-    });
+    try {
+      conduit.subscribe({
+        app: 'contact-store',
+        path: '/all',
+        event: (data: any) => this.stateTree?.contacts.setInitial(data.json),
+        err: () => console.log('Subscription rejected'),
+        quit: () => console.log('Kicked from subscription'),
+      });
+    } catch {
+      console.log('Subscription failed');
+    }
+
     // conduit.subscribe('metadata-store', '/app-name/groups', {
     //   onEvent: this.onEffect,
     // });
@@ -126,7 +134,10 @@ export class ShipManager extends EventEmitter {
     if (!this.conduit) {
       return;
     }
-    const response = await this.conduit.scry('docket', '/charges');
+    const response = await this.conduit.scry({
+      app: 'docket',
+      path: '/charges',
+    });
     const appMap = response.json?.data.initial;
     Object.keys(appMap).forEach((appKey: string) => {
       const appColor = appMap[appKey].color;
@@ -139,10 +150,10 @@ export class ShipManager extends EventEmitter {
     if (!this.conduit) {
       return;
     }
-    const response = await this.conduit.scry(
-      'graph-store',
-      `/graph/${this.ship}/dm-inbox`
-    );
+    const response = await this.conduit.scry({
+      app: 'graph-store',
+      path: `/graph/${this.ship}/dm-inbox`,
+    });
     const { json } = response;
     return json!.data;
   }

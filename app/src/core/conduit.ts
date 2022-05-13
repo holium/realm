@@ -75,10 +75,6 @@ export class Conduit extends EventEmitter {
     };
   }
 
-  // private get nextId() {
-  //   return this.counter + 1;
-  // }
-
   initialize() {
     this.channelId = `${generateChannelId()}`;
     this.action('hood', 'opening airlock', 'helm-hi')
@@ -291,6 +287,108 @@ export class Conduit extends EventEmitter {
     }
   }
 
+  static async ackOnce(channelUrl: string, headers: any, msgId: any) {
+    await axios.request({
+      url: channelUrl,
+      method: 'PUT',
+      headers,
+      data: [
+        {
+          action: 'ack',
+          'event-id': msgId,
+        },
+      ],
+    });
+  }
+
+  static async pokeOnce(
+    ship: string,
+    url: string,
+    cookie: string,
+    app: string,
+    mark: string,
+    responsePath: string,
+    data: any
+  ) {
+    const headers = {
+      Cookie: cookie,
+      'Content-Type': 'application/json',
+    };
+    const msgId: number = 1;
+    const channelUrl = `${url}/~/channel/${generateChannelId()}`;
+    const hoodResponse = await axios.request({
+      url: channelUrl,
+      method: 'PUT',
+      headers,
+      data: [
+        {
+          id: msgId,
+          action: 'poke',
+          ship: ship,
+          app: 'hood',
+          mark: 'helm-hi',
+          data: 'opening airlock',
+        },
+      ],
+    });
+    headers.Cookie = hoodResponse.headers['set-cookie']![0];
+    Conduit.ackOnce(channelUrl, headers, msgId);
+    const requestConfig: any = {
+      url: channelUrl,
+      method: 'PUT',
+      headers,
+      data: [
+        {
+          id: msgId + 1,
+          action: 'subscribe',
+          ship,
+          app,
+          path: responsePath,
+        },
+      ],
+    };
+    console.log(requestConfig);
+    const subResponse = await axios.request(requestConfig);
+    console.log('sub response', subResponse.data);
+    const sse = new EventSource(channelUrl, {
+      headers: { Cookie: cookie },
+    });
+    const pokeResponse = await axios.request({
+      url: channelUrl,
+      method: 'PUT',
+      headers,
+      data: [
+        {
+          id: msgId + 2,
+          action: 'poke',
+          ship,
+          app,
+          mark,
+          json: data,
+        },
+      ],
+    });
+    console.log('response', pokeResponse.data);
+    return new Promise((resolve, reject) => {
+      sse.addEventListener('message', (e) => {
+        let event = JSON.parse(e.data);
+        console.log('in quick poke listener', event);
+        if (event.response === 'diff') {
+          resolve(event);
+          sse.close();
+        } else {
+          console.log(event);
+          sse.close();
+        }
+      });
+      sse.addEventListener('error', (e: any) => {
+        console.log('An error occurred while attempting to connect.', e);
+        reject(e);
+        sse.close();
+      });
+    });
+  }
+
   // static quickAction(app: string, data: any, mark?: string) {
   //   const msgId: number = ++this.counter;
   //   const response = await axios.request({
@@ -312,108 +410,108 @@ export class Conduit extends EventEmitter {
   //   return { msgId, response };
   // }
 
-  // static async quickPoke(
-  //   ship: string,
-  //   url: string,
-  //   cookie: string,
-  //   app: string,
-  //   mark: string,
-  //   responsePath: string,
-  //   data: any
-  // ) {
-  //   const headers = {
-  //     Cookie: cookie,
-  //   };
-  //   const msgId: number = 1;
-  //   const channelUrl = `${url}/~/channel/${generateChannelId()}`;
-  //   console.log({
-  //     url: channelUrl,
-  //     method: 'PUT',
-  //     headers: headers,
-  //     data: [
-  //       {
-  //         id: msgId,
-  //         action: 'subscribe',
-  //         ship: ship,
-  //         app,
-  //         path: responsePath,
-  //       },
-  //     ],
-  //   });
-  //   const response = await axios.request({
-  //     url: channelUrl,
-  //     method: 'PUT',
-  //     headers,
-  //     data: [
-  //       {
-  //         id: msgId,
-  //         action: 'subscribe',
-  //         ship,
-  //         app,
-  //         path: responsePath,
-  //       },
-  //     ],
-  //   });
-  //   console.log('sub response', response);
-  //   const sse = new EventSource(channelUrl, {
-  //     headers: { Cookie: cookie },
-  //   });
-  //   console.log(channelUrl, data);
-  //   try {
-  //     const response = await axios.request({
-  //       url: channelUrl,
-  //       method: 'PUT',
-  //       headers,
-  //       data: [
-  //         {
-  //           id: msgId + 1,
-  //           action: 'poke',
-  //           ship,
-  //           app,
-  //           mark,
-  //           json: data,
-  //         },
-  //       ],
-  //     });
-  //     console.log('response', response);
-  //     return new Promise((resolve, reject) => {
-  //       sse.addEventListener('message', (e) => {
-  //         let event = JSON.parse(e.data);
-  //         console.log('in quick poke listener');
-  //         if (event.response === 'diff') {
-  //           resolve(event);
-  //           sse.close();
-  //         } else {
-  //           console.log(event);
-  //           sse.close();
-  //         }
-  //       });
-  //       sse.addEventListener('error', (e: any) => {
-  //         console.log('An error occurred while attempting to connect.', e);
-  //         reject(e);
-  //         sse.close();
-  //       });
-  //     });
-  //   } catch (err: any) {
-  //     // console.log(err);
-  //     throw err;
-  //   }
-  //   // TODO
-  //   // try {
-  //   //   const response = await axios.request({
-  //   //     url: `${url}/~/scry/${app}${path}.json`,
-  //   //     headers: headers,
-  //   //   });
-  //   //   if (response.status === 200) {
-  //   //     return { response: 'scry', json: { app, path, data: response.data } };
-  //   //   }
-  //   //   return { response: 'scry', json: null };
-  //   // } catch (err) {
-  //   //   console.log(err);
-  //   //   throw err;
-  //   // }
-  //   return;
-  // }
+  static async quickPoke(
+    ship: string,
+    url: string,
+    cookie: string,
+    app: string,
+    mark: string,
+    responsePath: string,
+    data: any
+  ) {
+    const headers = {
+      Cookie: cookie,
+    };
+    const msgId: number = 1;
+    const channelUrl = `${url}/~/channel/${generateChannelId()}`;
+    console.log({
+      url: channelUrl,
+      method: 'PUT',
+      headers: headers,
+      data: [
+        {
+          id: msgId,
+          action: 'subscribe',
+          ship: ship,
+          app,
+          path: responsePath,
+        },
+      ],
+    });
+    const response = await axios.request({
+      url: channelUrl,
+      method: 'PUT',
+      headers,
+      data: [
+        {
+          id: msgId,
+          action: 'subscribe',
+          ship,
+          app,
+          path: responsePath,
+        },
+      ],
+    });
+    console.log('sub response', response);
+    const sse = new EventSource(channelUrl, {
+      headers: { Cookie: cookie },
+    });
+    console.log(channelUrl, data);
+    try {
+      const response = await axios.request({
+        url: channelUrl,
+        method: 'PUT',
+        headers,
+        data: [
+          {
+            id: msgId + 1,
+            action: 'poke',
+            ship,
+            app,
+            mark,
+            json: data,
+          },
+        ],
+      });
+      console.log('response', response);
+      return new Promise((resolve, reject) => {
+        sse.addEventListener('message', (e) => {
+          let event = JSON.parse(e.data);
+          console.log('in quick poke listener');
+          if (event.response === 'diff') {
+            resolve(event);
+            sse.close();
+          } else {
+            console.log(event);
+            sse.close();
+          }
+        });
+        sse.addEventListener('error', (e: any) => {
+          console.log('An error occurred while attempting to connect.', e);
+          reject(e);
+          sse.close();
+        });
+      });
+    } catch (err: any) {
+      // console.log(err);
+      throw err;
+    }
+    // TODO
+    // try {
+    //   const response = await axios.request({
+    //     url: `${url}/~/scry/${app}${path}.json`,
+    //     headers: headers,
+    //   });
+    //   if (response.status === 200) {
+    //     return { response: 'scry', json: { app, path, data: response.data } };
+    //   }
+    //   return { response: 'scry', json: null };
+    // } catch (err) {
+    //   console.log(err);
+    //   throw err;
+    // }
+    return;
+  }
 
   async unsubscribe(id: number) {
     return axios

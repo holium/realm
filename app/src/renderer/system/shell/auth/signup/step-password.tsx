@@ -103,6 +103,7 @@ export const StepPassword: FC<StepPasswordProps> = observer(
               color={[shipColor || '#000000', 'white']}
             />
             <Flex
+              style={{ width: 210 }}
               transition={{ duration: 0 }}
               animate={{ marginBottom: shipNick ? 24 : 0 }}
               position="relative"

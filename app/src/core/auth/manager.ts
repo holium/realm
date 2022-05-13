@@ -219,68 +219,77 @@ export class AuthManager extends EventEmitter {
       nickname: string;
       color: string;
       avatar: string | null;
+      [key: string]: any;
     }
   ) => {
     const credentials = this.getCredentials(ship, '');
+
+    const updatedProfile = await ContactApi.saveContact(
+      ship,
+      credentials,
+      data
+    );
+    console.log(updatedProfile);
+    return updatedProfile;
     // Get current contact data
     // const ourProfile = await ContactApi.getContact(ship, credentials);
     // ourProfile['last-updated'] = Date.now();
-    return new Promise((resolve, reject) => {
-      const conduit = new Conduit(credentials.url, ship, credentials.cookie);
-      conduit.on('ready', () => {
-        // console.log('on ready', data);
-        const json1 = [
-          {
-            edit: {
-              ship,
-              'edit-field': {
-                nickname: data.nickname,
-              },
-              timestamp: Date.now(),
-            },
-          },
-        ];
-        // const json2 = {
-        //   edit: {
-        //     ship,
-        //     'edit-field': {
-        //       color: data.color,
-        //     },
-        //     timestamp: Date.now(),
-        //   },
-        // };
-        // const json3 = {
-        //   edit: {
-        //     ship,
-        //     'edit-field': {
-        //       avatar: data.avatar,
-        //     },
-        //     timestamp: Date.now(),
-        //   },
-        // };
-        const msgId = conduit.counter + 4;
-        // console.log('msgId', msgId);
-        conduit
-          .subscribe('contact-store', '/all', {
-            onError: (err: any) => {
-              console.log('in onError');
-              reject(err);
-              conduit.close();
-            },
-            onEvent: (event: any) => {
-              console.log('in onEvent', event.id);
-              if (event.id === msgId) {
-                resolve(data);
-                conduit.close();
-              }
-            },
-          })
-          .then(() => {
-            conduit.bulkAction('contact-store', json1, 'contact-update-0');
-          });
-        // Send the action
-      });
-    });
+    // return new Promise((resolve, reject) => {
+    //   const conduit = new Conduit(credentials.url, ship, credentials.cookie);
+    //   conduit.on('ready', () => {
+    //     // console.log('on ready', data);
+    //     const json1 = [
+    // {
+    //   edit: {
+    //     ship,
+    //     'edit-field': {
+    //       nickname: data.nickname,
+    //     },
+    //     timestamp: Date.now(),
+    //   },
+    // },
+    //     ];
+    //     // const json2 = {
+    //     //   edit: {
+    //     //     ship,
+    //     //     'edit-field': {
+    //     //       color: data.color,
+    //     //     },
+    //     //     timestamp: Date.now(),
+    //     //   },
+    //     // };
+    //     // const json3 = {
+    //     //   edit: {
+    //     //     ship,
+    //     //     'edit-field': {
+    //     //       avatar: data.avatar,
+    //     //     },
+    //     //     timestamp: Date.now(),
+    //     //   },
+    //     // };
+    //     const msgId = conduit.counter + 4;
+    //     // console.log('msgId', msgId);
+    //     conduit
+    //       .subscribe('contact-store', '/all', {
+    //         onError: (err: any) => {
+    //           console.log('in onError');
+    //           reject(err);
+    //           conduit.close();
+    //         },
+    //         onEvent: (event: any) => {
+    //           console.log('in onEvent', event.id);
+    //           if (event.id === msgId) {
+    //             resolve(data);
+    //             conduit.close();
+    //           }
+    //         },
+    //       })
+    //       .then(() => {
+    //         conduit.bulkAction('contact-store', json1, 'contact-update-0');
+    //       });
+    //     // Send the action
+    //   });
+    // });
 
     // return await ContactApi.saveContact(ship, credentials, {
     //   edit: {

@@ -297,10 +297,12 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
         layoutId="cursor-outer-1"
         animate={{
           opacity: isTextCursor ? 0 : 1,
-          visibility: isVisible ? 'visible' : 'hidden',
         }}
         transition={{ opacity: 0.05 }}
-        style={styles.cursorOuter}
+        style={{
+          ...styles.cursorOuter,
+          visibility: isVisible ? 'visible' : 'hidden',
+        }}
       />
       <motion.div
         layoutId="cursor-1"
@@ -308,7 +310,6 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
         animate={{
           width: isTextCursor ? 2.5 : innerSize,
           height: isTextCursor ? 18 : innerSize,
-          borderWidth: isTextCursor ? 0 : 1,
           borderRadius: isTextCursor ? '2%' : '50%',
           visibility: isVisible ? 'visible' : 'hidden',
         }}
@@ -318,7 +319,9 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
           borderRadius: 0.15,
           visibility: 0.1,
         }}
-        style={{ ...styles.cursorInner }}
+        style={{
+          ...styles.cursorInner,
+        }}
         whileTap={{ scale: 0.975 }}
       />
     </React.Fragment>

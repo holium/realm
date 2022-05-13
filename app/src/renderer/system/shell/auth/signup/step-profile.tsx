@@ -195,6 +195,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
             <Observer>
               {() => (
                 <Flex
+                  style={{ width: 210 }}
                   transition={{
                     duration: nickname.computed.isDirty ? 0.15 : 0,
                   }}

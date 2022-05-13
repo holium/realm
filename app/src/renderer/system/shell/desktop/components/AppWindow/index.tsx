@@ -197,7 +197,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             maximizeButton
             closeButton
             hasBorder
-            shareable={false}
+            shareable
             dragControls={dragControls}
             onDragStop={() => onDragStop()}
             onClose={() => onClose()}
