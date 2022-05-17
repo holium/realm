@@ -2,7 +2,6 @@ import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
-import { useShip, useAuth } from '../../../logic/store';
 import { AnimatePresence } from 'framer-motion';
 import { WindowManager } from './WindowManager';
 
@@ -12,17 +11,8 @@ type OSFrameProps = {
   hasWallpaper?: boolean;
 };
 
-export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
+export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
   const { hasLoaded } = props;
-  const { authStore } = useAuth();
-  const { ship } = useShip();
-
-  let theme: any;
-  if (!hasLoaded) {
-    theme = authStore.selected!.theme;
-  } else {
-    theme = ship!.theme;
-  }
 
   return (
     <Fill>
@@ -38,6 +28,6 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
       </Layer>
     </Fill>
   );
-});
+};
 
 export default Desktop;

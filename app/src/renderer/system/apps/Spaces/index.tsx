@@ -2,8 +2,7 @@ import { FC, useMemo, useState } from 'react';
 import { toJS } from 'mobx';
 import { rgba, lighten, darken } from 'polished';
 
-import { ThemeStoreType } from '../../../logic/theme/store';
-import { useSpaces, useShip } from '../../../logic/store';
+import { useSpaces, useShip, useMst } from '../../../logic/store';
 
 import { Grid, Flex, IconButton, Icons, Text } from '../../../components';
 import { SpacesList } from './SpacesList';
@@ -11,7 +10,7 @@ import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
 
 type SpacesProps = {
-  theme: ThemeStoreType;
+  theme: any;
   dimensions: {
     height: number;
     width: number;
@@ -20,10 +19,12 @@ type SpacesProps = {
 
 export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
   const { ship } = useShip();
+  const { themeStore } = useMst();
   const spacesStore = useSpaces();
+
   const { dimensions } = props;
 
-  const spaceTheme = useMemo(() => ship!.theme, [ship!.theme]);
+  const spaceTheme = useMemo(() => themeStore.theme, [themeStore.theme]);
   const { backgroundColor, textColor, dockColor, iconColor } = spaceTheme;
   // console.log(toJS(spacesStore.spacesList));
   // const iconColor = darken(0.5, textColor);

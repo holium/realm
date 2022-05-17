@@ -7,24 +7,25 @@ import {
   applySnapshot,
   castToReferenceSnapshot,
   applyPatch,
-  cast,
-  clone,
+  getSnapshot,
 } from 'mobx-state-tree';
 import { LoaderModel } from '../stores/common/loader';
-// import { ShipModel } from '../ship/store';
 import {
   AuthStore as BaseAuthStore,
   AuthShip,
   AuthShipType,
 } from '../../../core/auth/store';
 import AuthIPC from './api';
-import { WindowThemeModel } from '../stores/config';
 import { sendAction } from '../api/realm.core';
-import { toJS } from 'mobx';
-import { authState, osState, shipState } from '../store';
+import { authState, osState } from '../store';
 import { timeout } from '../utils/dev';
-import { ShipModel } from '../ship/store';
-import { DEFAULT_WALLPAPER } from '../theme/store';
+import { ThemeModel } from '../theme/store';
+
+const handleError = (error: any) => {
+  if (error.includes('ECONNREFUSED')) {
+    return { status: 'connection' };
+  }
+};
 
 const StepList = types.enumeration([
   'add-ship',
@@ -46,7 +47,7 @@ export const SignupStore = types
       'realm-install',
       'completed',
     ]),
-    currentStep: types.optional(StepList, 'initial'),
+    currentStep: types.optional(StepList, 'add-ship'),
     signupShip: types.safeReference(AuthShip), // base ship model
     installer: types.optional(LoaderModel, { state: 'initial' }),
   })
@@ -77,7 +78,7 @@ export const SignupStore = types
         form
       );
       self.loader.set('loaded');
-      console.log(response);
+      // console.log(handleError(error));
       if (error) throw error;
 
       self.currentStep = 'set-password';
@@ -114,7 +115,7 @@ export const SignupStore = types
         // Add signup ship to ship list and set as signupShip
         self.signupShip = authState.authStore.addShip(signupShip);
         self.loader.set('loaded');
-        authState.authStore.setFirstTime();
+        // authState.authStore.setFirstTime();
       } catch (err: any) {
         self.loader.error(err);
       }
@@ -126,23 +127,8 @@ export const SignupStore = types
     }),
     completeSignup: flow(function* () {
       self.loader.set('loading');
-      // yield timeout(2000);
-      // TODO push AuthShip to ShipManager
-      // const newShip = ShipModel.create({
-      //   url: self.signupShip!.url,
-      //   cookie: self.signupShip!.cookie,
-      //   patp: self.signupShip!.patp,
-      //   wallpaper: DEFAULT_WALLPAPER,
-      //   color: self.signupShip!.color,
-      //   nickname: self.signupShip!.nickname,
-      //   avatar: self.signupShip!.avatar,
-      //   theme: clone(self.signupShip!.theme),
-      //   chat: { loader: { state: 'initial' } },
-      //   contacts: { ourPatp: self.signupShip!.patp },
-      //   docket: {},
-      // });
-      yield AuthIPC.completeSignup(self.signupShip!.patp);
-      // yield authState.authStore.addAuthShip(self.signupShip!);
+      yield AuthIPC.storeNewShip(self.signupShip!.patp);
+      authState.authStore.setFirstTime();
       self.loader.set('loaded');
     }),
   }));
@@ -151,6 +137,15 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
   .views((self) => ({
     get isLoaded() {
       return self.loader.isLoaded;
+    },
+    get currentShip() {
+      let selectedShip = self.selected;
+      // console.log('current', getSnapshot(selectedShip));
+      if (!selectedShip) {
+        selectedShip = self.order[0];
+        // console.log('in ordered', getSnapshot(selectedShip));
+      }
+      return selectedShip;
     },
   }))
   .views((self) => ({
@@ -205,22 +200,19 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
       model: Instance<typeof self>;
     }) => {
       // Apply persisted snapshot
-      console.log(syncEffect);
       applySnapshot(self, castToSnapshot(syncEffect.model));
-      // if (!self.selected) {
-      //   self.selected = Array.from(self.ships.values())[0];
-      // }
       self.loader.set('loaded');
     },
     syncPatches: (patchEffect: any) => {
-      console.log('patching in auth');
       // apply background patches
       applyPatch(self, patchEffect.patch);
     },
     setSession: (shipRef: any) => {
       self.selected = shipRef;
-      osState.themeStore.setWallpaper(self.selected?.wallpaper!);
-      AuthIPC.setSelected(self.selected!.patp);
+      osState.themeStore.setWallpaper(self.currentShip!.wallpaper!, {
+        patp: self.currentShip!.patp!,
+      });
+      AuthIPC.setSelected(self.currentShip!.patp);
     },
     clearSession() {
       self.selected = undefined;
@@ -283,7 +275,7 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
             color: shipInfo.color,
             nickname: shipInfo.nickname,
             avatar: shipInfo.avatar,
-            theme: WindowThemeModel.create(shipInfo.theme),
+            theme: ThemeModel.create(shipInfo.theme),
             loggedIn: shipInfo.loggedIn,
           });
           self.ships.set(newShip.id, newShip);

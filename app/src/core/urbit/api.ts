@@ -451,7 +451,6 @@ export class Urbit extends EventEmitter {
         this.outstandingPokes.set(message.id!, {
           onSuccess: () => {
             onSuccess();
-            console.log('on succecsssss s ');
             resolve(message.id!);
           },
           onError: (event) => {

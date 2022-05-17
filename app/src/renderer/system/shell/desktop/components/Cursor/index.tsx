@@ -110,6 +110,11 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     },
     [requestRef] // eslint-disable-line
   );
+  // Set is visible initially
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   // RAF for animateOuterCursor
   useEffect(() => {
@@ -125,14 +130,15 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   }, []);
   const onMouseLeaveViewport = useCallback(() => {
     setIsVisible(false);
+    console.log('leave viewport?');
     setIsActiveClickable(false);
   }, []);
 
   useEventListener('mousemove', onMouseMove);
   useEventListener('mousedown', onMouseDown);
   useEventListener('mouseup', onMouseUp);
-  useEventListener('mouseover', onMouseEnterViewport);
-  useEventListener('mouseout', onMouseLeaveViewport);
+  // useEventListener('mouseover', onMouseEnterViewport);
+  // useEventListener('mouseout', onMouseLeaveViewport);
 
   // Cursors Hover/Active State
   useEffect(() => {

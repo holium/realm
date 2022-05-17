@@ -29,7 +29,7 @@ const ColorTile = styled.div<ColorTileProps>`
   background: ${(props: ColorTileProps) => props.tileColor};
   height: 30px;
   width: 30px;
-  cursor: pointer;
+  cursor: none;
   position: relative;
   outline: none;
   float: left;
@@ -45,6 +45,11 @@ const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
   top: 40px;
   left: -6px;
   width: 170px;
+  .cursor-style {
+    div {
+      cursor: none !important;
+    }
+  }
   display: ${(props: ColorPopoverProps) => (props.isOpen ? 'block' : 'none')};
 `;
 
@@ -249,6 +254,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                   >
                     <TwitterPicker
                       width="inherit"
+                      className="cursor-style"
                       color={color}
                       onChange={(color: { hex: string }) => {
                         setColor(color.hex);

@@ -681,11 +681,6 @@
   resolved "https://registry.yarnpkg.com/@mdn/browser-compat-data/-/browser-compat-data-4.1.15.tgz#79ea28eecbf4e32a9e7ffdbfe8ea68de539b022f"
   integrity sha512-OZx2PxHtJDc9NOHGR3T0ZtX1WYl5qH/xmiH3sKSmcd3o+vPMG1kVUYbZrMxH3fVKpkkkrQpwETCIDRXcMXAWTw==
 
-"@microsoft/fetch-event-source@^2.0.0", "@microsoft/fetch-event-source@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/fetch-event-source/-/fetch-event-source-2.0.1.tgz#9ceecc94b49fbaa15666e38ae8587f64acce007d"
-  integrity sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==
-
 "@msgpack/msgpack@^2.7.1":
   version "2.7.2"
   resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-2.7.2.tgz#f34b8aa0c49f0dd55eb7eba577081299cbf3f90b"
@@ -1640,16 +1635,6 @@
     "@typescript-eslint/types" "5.20.0"
     eslint-visitor-keys "^3.0.0"
 
-"@urbit/http-api@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@urbit/http-api/-/http-api-2.1.1.tgz#e12280f787b0011ff025d6d38bde5b164e06f2fe"
-  integrity sha512-0ZXbBkSqCqFQAYeyjz/2uYlwp6H2UqwPsDS3SUfOa/M/nDCB++7xIWEf1+lR3gwpNyZfEnxrI20IGS5jELIapw==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
-    "@microsoft/fetch-event-source" "^2.0.0"
-    browser-or-node "^1.3.0"
-    core-js "^3.19.1"
-
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.1.tgz#2bfd767eae1a6996f432ff7e8d7fc75679c0b6a7"
@@ -2394,11 +2379,6 @@ braces@^3.0.2, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-browser-or-node@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/browser-or-node/-/browser-or-node-1.3.0.tgz#f2a4e8568f60263050a6714b2cc236bb976647a7"
-  integrity sha512-0F2z/VSnLbmEeBcUrSuDH5l0HxTXdQQzLjkmBR4cYfvg1zJrKSlmIZFqyFR8oX0NrwPhy3c3HQ6i3OxMbew4Tg==
-
 browser-process-hrtime@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/browser-process-hrtime/-/browser-process-hrtime-1.0.0.tgz#3c9b4b7d782c8121e56f10106d84c0d0ffc94626"
@@ -2660,7 +2640,7 @@ char-regex@^1.0.2:
   resolved "https://registry.yarnpkg.com/char-regex/-/char-regex-1.0.2.tgz#d744358226217f981ed58f479b1d6bcc29545dcf"
   integrity sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==
 
-"chokidar@>=3.0.0 <4.0.0", chokidar@^3.5.3:
+"chokidar@>=3.0.0 <4.0.0", chokidar@^3.0.2, chokidar@^3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==
@@ -3025,7 +3005,7 @@ core-js-pure@^3.20.2, core-js-pure@^3.8.1:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.21.1.tgz#8c4d1e78839f5f46208de7230cebfb72bc3bdb51"
   integrity sha512-12VZfFIu+wyVbBebyHmRTuEE/tZrB4tJToWcwAMcsp3h4+sHR+fMJWbKpYiCRWlhFBq+KNyO8rIV9rTkeVmznQ==
 
-core-js@^3.16.2, core-js@^3.19.1, core-js@^3.21.1:
+core-js@^3.16.2, core-js@^3.21.1:
   version "3.21.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.21.1.tgz#f2e0ddc1fc43da6f904706e8e955bc19d06a0d94"
   integrity sha512-FRq5b/VMrWlrmCzwRrpDYNxyHP9BcAZC+xHJaqTgIE5091ZV1NTmyh0sGOg5XqpnHvR0svdy0sv1gWA1zmhxig==
@@ -3646,6 +3626,13 @@ electron-devtools-installer@^3.2.0:
     semver "^7.2.1"
     tslib "^2.1.0"
     unzip-crx-3 "^0.2.0"
+
+electron-hot-reload@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/electron-hot-reload/-/electron-hot-reload-0.1.4.tgz#3270b1d1c2ef03a07c4260406a713acea6de6cc7"
+  integrity sha512-D1BFhNgLgpHl7lPHMKr+0BGF0X1DFzQAxz/5uZRY7xo0NxB2PxzjdUaGtCmIITV8oR1GxKN+o3DzVCUEQ53b+w==
+  dependencies:
+    chokidar "^3.0.2"
 
 electron-is-accelerator@^0.1.0:
   version "0.1.2"

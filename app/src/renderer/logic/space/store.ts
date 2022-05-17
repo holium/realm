@@ -8,7 +8,7 @@ import {
   clone,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { ThemeStore } from './../theme/store';
+import { ThemeModel } from './../theme/store';
 import MockData from './mock';
 import { DocketApp, WebApp } from '../../../core/ship/stores/docket';
 import { ShipModelType } from '../ship/store';
@@ -16,7 +16,7 @@ import { osState } from '../store';
 
 const DocketMap = types.map(types.union({ eager: false }, DocketApp, WebApp));
 export const Space = types
-  .model({
+  .model('SpaceModel', {
     loader: types.optional(LoaderModel, { state: 'initial' }),
     id: types.identifier,
     name: types.string,
@@ -34,7 +34,7 @@ export const Space = types
         ),
       })
     ),
-    theme: ThemeStore,
+    theme: ThemeModel,
     apps: types.model({
       pinned: types.array(types.string),
       docket: DocketMap,
@@ -63,7 +63,7 @@ export const Space = types
 export type SpaceModelType = Instance<typeof Space>;
 
 export const SpaceStore = types
-  .model({
+  .model('SpaceStore', {
     loader: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(Space),
     spaces: types.map(Space),
@@ -77,6 +77,9 @@ export const SpaceStore = types
   }))
   .actions((self) => ({
     setShipSpace(ship: ShipModelType) {
+      console.log(getSnapshot(ship));
+      const theme =
+        osState.themeStore.ships.get(ship.patp) || osState.themeStore.os;
       self.spaces.set(
         ship.patp,
         Space.create({
@@ -95,20 +98,37 @@ export const SpaceStore = types
               : { docket: {} }),
           },
           picture: ship.avatar,
-          theme: clone(ship.theme),
+          theme: ThemeModel.create({
+            themeId: ship.patp,
+            wallpaper: theme.wallpaper,
+            backgroundColor: theme.backgroundColor,
+            dockColor: theme.dockColor,
+            windowColor: theme.windowColor,
+            textTheme: theme.textTheme,
+            textColor: theme.textColor,
+            iconColor: theme.iconColor,
+            mouseColor: theme.mouseColor,
+          }),
         })
       );
       if (!self.selected) {
         self.selected = self.spaces.get(ship.patp)!;
         if (self.selected.theme.wallpaper) {
-          osState.themeStore.setWallpaper(self.selected.theme.wallpaper);
+          osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
+            patp: ship.patp,
+          });
         }
       }
     },
     selectSpace(spaceKey: string) {
       self.selected = self.spaces.get(spaceKey)!;
-      if (self.selected.theme.wallpaper) {
-        osState.themeStore.setWallpaper(self.selected.theme.wallpaper);
+      if (
+        self.selected.theme.wallpaper !== osState.themeStore.theme.wallpaper
+      ) {
+        console.log(self.selected.theme.wallpaper);
+        osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
+          spaceId: spaceKey,
+        });
       }
     },
     load(selectedKey: string, themeStore: any) {
@@ -118,7 +138,9 @@ export const SpaceStore = types
       if (selectedKey) {
         self.selected = self.spaces.get(selectedKey);
         if (self.selected!.theme.wallpaper) {
-          themeStore.setWallpaper(self.selected!.theme.wallpaper);
+          themeStore.setWallpaper(self.selected!.theme.wallpaper, {
+            spaceId: selectedKey,
+          });
         }
       }
     },

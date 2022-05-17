@@ -1,6 +1,6 @@
 import { toJS } from 'mobx';
-import { detach, Instance, types } from 'mobx-state-tree';
-import { WindowThemeModel } from '../../renderer/logic/stores/config';
+import { detach, Instance, types, destroy } from 'mobx-state-tree';
+import { ThemeModel } from '../../renderer/logic/theme/store';
 import { LoaderModel } from '../../renderer/logic/stores/common/loader';
 
 const StepList = types.enumeration([
@@ -21,7 +21,8 @@ export const AuthShip = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
-    theme: types.optional(WindowThemeModel, {
+    theme: types.optional(ThemeModel, {
+      themeId: 'base',
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
       windowColor: '#f0ecec',
@@ -61,11 +62,23 @@ export const AuthStore = types
     order: types.optional(types.array(types.safeReference(AuthShip)), []), // patp string
   })
   .actions((self) => ({
+    setFirstTime() {
+      self.firstTime = false;
+    },
+    completeSignup(id: string) {
+      self.selected = self.ships.get(id);
+      if (!self.order.find((orderedShip: any) => orderedShip.id === id)) {
+        self.order.push(self.ships.get(id));
+      }
+    },
     setShip(newShip: AuthShipType) {
-      self.ships.set(newShip.patp, newShip);
+      self.ships.set(newShip.id, newShip);
     },
     setSelected(newShip: AuthShipType) {
       self.selected = newShip;
+    },
+    deleteShip(patp: string) {
+      destroy(self.ships.get(`auth${patp}`));
     },
     clearSelected() {
       detach(self.selected);

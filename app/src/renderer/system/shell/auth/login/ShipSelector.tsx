@@ -26,7 +26,10 @@ export const ShipSelector: FC = observer(() => {
   // TODO optimize
   const { authStore } = useAuth();
 
-  const selectedShip = useMemo(() => authStore.selected, [authStore.selected]);
+  const selectedShip = useMemo(
+    () => authStore.currentShip,
+    [authStore.currentShip]
+  );
   const orderedList = useMemo(() => authStore.order, [authStore.order]);
 
   return (

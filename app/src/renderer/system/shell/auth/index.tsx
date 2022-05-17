@@ -1,10 +1,10 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import { Flex } from '../../../components';
 import { Signup } from './signup';
 import { Login } from './login';
-import { AuthProvider, authState, useAuth } from '../../../logic/store';
+import { useAuth } from '../../../logic/store';
 import { AuthShipType } from '../../../../core/auth/store';
 
 type LoginProps = {
@@ -27,17 +27,13 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
     setSignup(true);
   };
 
-  // useEffect(() => {
-  //   if (!authStore.hasShips && authStore.hasInProgressShips()) {
-
-  //   }
-  // }, []);
-  // const [signup, setSignup] = useState(true);
-
   return (
     <Flex height="100vh" alignItems="center" justifyContent="center">
       {signup ? (
-        <Signup goToLogin={() => setSignup(false)} />
+        <Signup
+          firstTime={authStore.firstTime}
+          goToLogin={() => setSignup(false)}
+        />
       ) : (
         <Login
           hasWallpaper={hasWallpaper}

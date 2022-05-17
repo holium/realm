@@ -6,12 +6,14 @@ import {
   Grid,
   Input,
   Label,
+  Sigil,
   FormControl,
   ActionButton,
   Icons,
   Box,
   Spinner,
   Flex,
+  Text,
   TextButton,
 } from '../../../../components';
 // @ts-expect-error its there...
@@ -39,9 +41,9 @@ export const createShipForm = (
     initialValue: defaults.urbitId || '',
     // validationSchema: yup.string().required('Name is required'),
     validate: (patp: string) => {
-      if (addedShips.includes(patp)) {
-        return { error: 'Already added', parsed: undefined };
-      }
+      // if (addedShips.includes(patp)) {
+      //   return { error: 'Already added', parsed: undefined };
+      // }
 
       if (patp.length > 1 && isValidPatp(patp)) {
         return { error: undefined, parsed: patp };
@@ -85,6 +87,7 @@ export const createShipForm = (
 
 type AddShipProps = {
   hasShips?: boolean;
+  firstTime: boolean;
   // urbitId: any;
   // shipUrl: any;
   // accessKey: any;
@@ -94,13 +97,13 @@ type AddShipProps = {
 };
 
 export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
-  const { next } = props;
+  const { firstTime, next } = props;
   const { signupStore, authStore } = useAuth();
   const { shipForm, urbitId, shipUrl, accessKey } = useMemo(
     () =>
       createShipForm(
         undefined,
-        Array.from(authStore.ships.values()).map((ship: any) => ship.patp)
+        [...authStore.shipList].map((ship: any) => ship.patp)
       ),
     []
   );
@@ -119,14 +122,16 @@ export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
         justify="center"
       >
         <img src={UrbitSVG} alt="urbit logo" />
-        <ActionButton
-          tabIndex={-1}
-          mt={5}
-          height={32}
-          rightContent={<Icons ml={2} size={1} name="ArrowRightLine" />}
-        >
-          Get Urbit ID
-        </ActionButton>
+        <a target="_blank" href="https://urbit.live/">
+          <ActionButton
+            tabIndex={-1}
+            mt={5}
+            height={32}
+            rightContent={<Icons ml={2} size={1} name="ArrowRightLine" />}
+          >
+            Get Urbit ID
+          </ActionButton>
+        </a>
       </Grid.Column>
 
       <Grid.Column noGutter lg={7} xl={7}>
@@ -209,35 +214,37 @@ export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
           alignItems="center"
           justifyContent="space-between"
         >
-          <TextButton
-            disabled={isNextDisabled}
-            // loading={authStore.isLoading}
-            onClick={(evt: any) => {
-              const formData = shipForm.actions.submit();
-              signupStore
-                .addShip({
-                  ship: formData['urbit-id'],
-                  url: formData['ship-id'],
-                  code: formData['access-key'],
-                })
-                .then(() => {
-                  console.log('before next');
-                  // eslint-disable-next-line promise/no-callback-in-promise
-                  next();
-                  evt.target.blur();
-                  return null;
-                })
-                .catch((reason: any) => {
-                  console.log(reason);
-                });
-            }}
-          >
-            {authStore.isLoading || signupStore.isLoading ? (
-              <Spinner size={0} />
-            ) : (
-              'Next'
-            )}
-          </TextButton>
+          <div>
+            <TextButton
+              disabled={isNextDisabled}
+              // loading={authStore.isLoading}
+              onClick={(evt: any) => {
+                const formData = shipForm.actions.submit();
+                signupStore
+                  .addShip({
+                    ship: formData['urbit-id'],
+                    url: formData['ship-id'],
+                    code: formData['access-key'],
+                  })
+                  .then(() => {
+                    console.log('before next');
+                    // eslint-disable-next-line promise/no-callback-in-promise
+                    next();
+                    evt.target.blur();
+                    return null;
+                  })
+                  .catch((reason: any) => {
+                    console.log(reason);
+                  });
+              }}
+            >
+              {authStore.isLoading || signupStore.isLoading ? (
+                <Spinner size={0} />
+              ) : (
+                'Next'
+              )}
+            </TextButton>
+          </div>
         </Flex>
       </Box>
     </Grid.Row>
@@ -245,3 +252,50 @@ export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
 });
 
 export default AddShip;
+
+export const ContinueButton = (props: any) => {
+  const { ship, theme } = props;
+  return (
+    <Flex
+      className="dynamic-mouse-hover"
+      p={1}
+      pr={3}
+      onClick={() => props.onClick(ship)}
+    >
+      <Flex
+        display="flex"
+        gap={12}
+        flexDirection="row"
+        alignItems="center"
+        style={{ x: 0 }}
+      >
+        <Sigil
+          simple
+          isLogin
+          size={28}
+          avatar={ship.avatar}
+          patp={ship.patp}
+          color={[ship.color || '#000000', 'white']}
+        />
+        <Flex
+          style={{ pointerEvents: 'none' }}
+          mt="2px"
+          flexDirection="column"
+          justifyContent="center"
+        >
+          <Text color={theme.textColor} fontWeight={500} fontSize={2}>
+            Continue setup
+          </Text>
+          <Text
+            style={{ pointerEvents: 'none' }}
+            color={theme.textColor}
+            fontSize={2}
+            fontWeight={400}
+          >
+            {ship!.nickname || ship!.patp}
+          </Text>
+        </Flex>
+      </Flex>
+    </Flex>
+  );
+};

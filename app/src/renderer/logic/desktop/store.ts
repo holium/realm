@@ -26,7 +26,7 @@ const DimensionsModel = types.model({
 type DimensionModelType = Instance<typeof DimensionsModel>;
 
 const Window = types
-  .model({
+  .model('WindowModel', {
     // order: types.number,
     id: types.identifier,
     title: types.optional(types.string, ''),
@@ -47,7 +47,7 @@ const Window = types
 export type WindowModelType = Instance<typeof Window>;
 
 export const DesktopStore = types
-  .model({
+  .model('DesktopStore', {
     appviewPreload: types.maybe(types.string),
     isFullscreen: types.optional(types.boolean, false),
     dynamicMouse: types.optional(types.boolean, true),
@@ -113,12 +113,13 @@ export const DesktopStore = types
     closeBrowserWindow(appId: any) {
       // console.log(self.activeWindow);
       // detach(self.activeWindow);
+      self.windows.delete(appId);
+
       if (self.activeWindow?.id === appId) {
         const nextWindow = Array.from(self.windows.values())[0].id;
         if (nextWindow) {
           self.activeWindow = tryReference(() => self.windows.get(nextWindow));
         }
       }
-      self.windows.delete(appId);
     },
   }));

@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 
 import { Flex, Sigil, Text } from '../../../components';
-import { useShip } from '../../../logic/store';
-import { ShipModelType } from '~realm/ship/stores/ship';
+import { useShip, useMst } from '../../../logic/store';
+import { ShipModelType } from 'core/ship/stores/ship';
 import { SpaceRowStyle } from './SpaceRow';
 
 type SpaceRowProps = {
@@ -14,8 +14,9 @@ type SpaceRowProps = {
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, onSelect } = props;
   const { ship } = useShip();
+  const { themeStore } = useMst();
   const currentShip = ship!;
-  const theme = currentShip!.theme;
+  const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
   return (
     <SpaceRowStyle
       data-close-tray="true"

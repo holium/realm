@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import {
   compose,
@@ -8,6 +9,7 @@ import {
   opacity,
   OpacityProps,
   typography,
+  ButtonStyleProps,
 } from 'styled-system';
 import { ThemeType } from '../../theme';
 
@@ -15,9 +17,11 @@ type IProps = {
   highlightColor?: string;
   fontSize?: string;
   theme: ThemeType;
-} & OpacityProps;
+  disabled?: boolean;
+} & OpacityProps &
+  ButtonStyleProps;
 
-export const TextButton = styled(styled.button`
+export const TextButtonStyle = styled(styled.div`
   font-family: ${(props: any) => props.theme.fonts.body};
   font-style: normal;
   font-weight: 500;
@@ -33,6 +37,9 @@ export const TextButton = styled(styled.button`
   border: none;
   background-color: transparent;
   /* padding-top: 3px; */
+  /* button[disabled] {
+    pointer-events: all;
+  } */
 
   ${(props: IProps) =>
     css`
@@ -57,16 +64,39 @@ export const TextButton = styled(styled.button`
         outline: none;
         border-color: ${props.theme.colors.brand.primary} ;
       }
-      &:disabled {
-        background-color: transparent;
-        opacity: .3;
-        cursor: none;
-        /* pointer-events: none; */
+      ${
+        props.disabled &&
+        css`
+          pointer-events: none;
+          background-color: transparent;
+          opacity: 0.3;
+        `
       }
+     
     `};
 `)<IProps>(
   {},
   compose(space, color, layout, backgroundColor, typography, opacity)
 );
+
+type TextButtonProps = {
+  highlightColor?: string;
+  fontSize?: string;
+  disabled?: boolean;
+  style?: any;
+  onClick?: (evt: any) => void;
+};
+
+export const TextButton: FC<TextButtonProps> = (props: TextButtonProps) => {
+  return (
+    <div
+      className={
+        props.disabled ? 'dynamic-mouse-disabled' : 'dynamic-mouse-hover'
+      }
+    >
+      <TextButtonStyle {...props}></TextButtonStyle>
+    </div>
+  );
+};
 
 TextButton.displayName = 'TextButton';

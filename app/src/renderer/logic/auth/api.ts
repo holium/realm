@@ -1,5 +1,3 @@
-import { AuthShipType } from '../../../core/auth/store';
-
 async function addShip(ship: string, url: string, code: string) {
   try {
     const response = await window.electron.auth.addShip(ship, url, code);
@@ -20,7 +18,7 @@ async function getShips() {
 
 async function removeShip(ship: string) {
   try {
-    const response = await window.electron.auth.removeShip(ship);
+    const response = await window.electron.core.removeShip(ship);
     return [response, null];
   } catch (err) {
     return [null, err];
@@ -47,9 +45,9 @@ async function saveProfile(
   }
 }
 
-async function completeSignup(ship: string) {
+async function storeNewShip(ship: string) {
   try {
-    const response = await window.electron.auth.completeSignup(ship);
+    const response = await window.electron.core.storeNewShip(ship);
     return [response, null];
   } catch (err) {
     return [null, err];
@@ -91,6 +89,6 @@ export default {
   removeShip,
   getProfile,
   saveProfile,
-  completeSignup,
+  storeNewShip,
   setSelected,
 };

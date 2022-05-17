@@ -11,16 +11,12 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
-  ReferenceIdentifier,
-  destroy,
 } from 'mobx-state-tree';
-import { Conduit } from '../conduit';
 
 export interface AuthManagerActions {}
 
 export type AuthPreloadType = {
   addShip: (ship: string, url: string, code: string) => Promise<any>;
-  removeShip: (ship: string) => Promise<any>;
   getShips: () => Promise<any>;
   onOpen: () => Promise<any>;
   getProfile: (ship: string) => Promise<any>;
@@ -38,13 +34,13 @@ export class AuthManager extends EventEmitter {
     this.authStore = new Store({
       name: 'auth.manager',
       accessPropertiesByDotNotation: true,
+      defaults: AuthStore.create({ firstTime: true }),
     });
 
     this.onEffect = this.onEffect.bind(this);
     this.initialize = this.initialize.bind(this);
     this.getShips = this.getShips.bind(this);
     this.addShip = this.addShip.bind(this);
-    this.removeShip = this.removeShip.bind(this);
     this.onAction = this.onAction.bind(this);
     this.getProfile = this.getProfile.bind(this);
     this.saveProfile = this.saveProfile.bind(this);
@@ -52,22 +48,20 @@ export class AuthManager extends EventEmitter {
     this.setSelected = this.setSelected.bind(this);
 
     ipcMain.handle('auth:add-ship', this.addShip);
-    ipcMain.handle('auth:remove-ship', this.removeShip);
     ipcMain.handle('auth:get-ships', this.getShips);
     ipcMain.handle('auth:set-selected', this.setSelected);
     ipcMain.handle('signup:get-profile', this.getProfile);
     ipcMain.handle('signup:save-profile', this.saveProfile);
-    ipcMain.handle('signup:complete', this.completeSignup);
 
     let persistedState: AuthStoreType = this.authStore.store;
 
     this.stateTree = AuthStore.create(castToSnapshot(persistedState));
 
     onSnapshot(this.stateTree, (snapshot) => {
-      this.authStore.set('ships', snapshot.ships);
-      this.authStore.set('order', snapshot.order);
-      this.authStore.set('firstTime', snapshot.firstTime);
-      this.authStore.set('selected', snapshot.selected);
+      this.authStore.store = castToSnapshot(snapshot);
+      // this.authStore.set('ships', snapshot.ships);
+      // this.authStore.set('order', snapshot.order);
+      // this.authStore.set('firstTime', snapshot.firstTime);
     });
 
     onPatch(this.stateTree, (patch) => {
@@ -86,9 +80,14 @@ export class AuthManager extends EventEmitter {
   // ------------- Actions --------------
   // ------------------------------------
 
-  completeSignup(_event: any, patp: string) {
-    const ship = this.stateTree.ships.get(`auth${patp}`);
+  completeSignup(patp: string) {
+    const ship: AuthShipType = this.stateTree.ships.get(`auth${patp}`)!;
     ship?.setStatus('completed');
+    if (this.stateTree.firstTime) {
+      this.stateTree.setFirstTime();
+    }
+    this.stateTree.completeSignup(ship.id);
+    return ship;
   }
 
   setSelected(_event: any, patp: string) {
@@ -170,19 +169,16 @@ export class AuthManager extends EventEmitter {
     const parts = new RegExp(/(urbauth-~[\w-]+)=(.*); Path=\/;/).exec(
       cookie!.toString()
     )!;
-    AuthShip.create({
+    const newAuthShip = AuthShip.create({
       id,
       url,
+      cookie,
       patp: ship,
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
     });
-    this.authStore.set(`ships.${id}`, {
-      url,
-      cookie,
-      patp: ship,
-      id: `auth${ship}`,
-    });
+    this.authStore.set(`ships.${id}`, getSnapshot(newAuthShip));
+    this.stateTree.setShip(newAuthShip);
     // this.stateTree.
     return {
       url,
@@ -192,9 +188,8 @@ export class AuthManager extends EventEmitter {
     };
   }
 
-  removeShip(_event: any, ship: string) {
-    // @ts-ignore
-    this.authStore.delete(`ships.${ship}`);
+  removeShip(ship: string) {
+    this.stateTree.deleteShip(ship);
   }
 
   // ------------------------------------
@@ -307,9 +302,6 @@ export class AuthManager extends EventEmitter {
     addShip: (ship: string, url: string, code: string) => {
       return ipcRenderer.invoke('auth:add-ship', ship, url, code);
     },
-    removeShip: (ship: string) => {
-      return ipcRenderer.invoke('auth:remove-ship', ship);
-    },
     setSelected: (ship: string) => {
       return ipcRenderer.invoke('auth:set-selected', ship);
     },
@@ -321,9 +313,6 @@ export class AuthManager extends EventEmitter {
       data: { nickname: string; color: string; avatar: string }
     ) => {
       return ipcRenderer.invoke('signup:save-profile', ship, data);
-    },
-    completeSignup: (ship: any) => {
-      return ipcRenderer.invoke('signup:complete', ship);
     },
     getShips: () => {
       return ipcRenderer.invoke('auth:get-ships');

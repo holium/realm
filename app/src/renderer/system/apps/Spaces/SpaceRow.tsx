@@ -2,7 +2,7 @@ import { FC, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { rgba, lighten } from 'polished';
 import styled, { css } from 'styled-components';
-import { useShip } from '../../../logic/store';
+import { useShip, useMst } from '../../../logic/store';
 import { Flex, Icons, Text } from '../../../components';
 import { SpaceModelType } from 'renderer/logic/space/store';
 import { ThemeType } from '../../../theme';
@@ -51,8 +51,9 @@ type SpaceRowProps = {
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { ship } = useShip();
-  const theme = useMemo(() => ship!.theme, [ship!.theme]);
+  const { themeStore } = useMst();
+
+  const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
   return (
     <SpaceRowStyle
       data-close-tray="true"

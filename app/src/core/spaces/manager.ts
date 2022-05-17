@@ -31,7 +31,7 @@ export class SpaceManager extends EventEmitter {
   }
 
   onEffect(data: any) {
-    console.log(data);
+    // console.log(data);
     this.emit('on-effect', data);
   }
 }

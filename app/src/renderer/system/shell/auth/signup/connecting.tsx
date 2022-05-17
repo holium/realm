@@ -11,10 +11,11 @@ export const ConnectingShip: FC<AddShipProps> = observer(
   (props: AddShipProps) => {
     const { signupStore } = useAuth();
     useEffect(() => {
-      signupStore.getProfile().then(() => {
-        console.log('got profile');
-        props.next();
-      });
+      signupStore.signupShip &&
+        signupStore.getProfile().then(() => {
+          console.log('got profile');
+          props.next();
+        });
     }, []);
     // authStore.
     return (

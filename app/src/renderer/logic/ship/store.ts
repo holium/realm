@@ -150,7 +150,7 @@ export const ShipModel = BaseShipModel.named('ShipModel')
 
 export type ShipModelType = Instance<typeof ShipModel>;
 export const ShipStore = types
-  .model({
+  .model('ShipStore', {
     ship: types.maybe(ShipModel),
     shipLoader: types.optional(LoaderModel, { state: 'initial' }),
   })
@@ -164,7 +164,9 @@ export const ShipStore = types
     }) => {
       // Apply persisted snapshot
       applySnapshot(self, castToSnapshot({ ship: syncEffect.model }));
-      osState.themeStore.setMouseColor(syncEffect.model.color || '#4E9EFD');
+      osState.themeStore.theme.setMouseColor(
+        syncEffect.model.color || '#4E9EFD'
+      );
 
       spacesState.setShipSpace(self.ship!);
 

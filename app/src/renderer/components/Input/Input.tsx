@@ -153,6 +153,7 @@ const ContentArea: any = styled(Text)<
   appearance: none;
   outline: none;
   border: none;
+  cursor: none;
 
   :invalid::-webkit-datetime-edit {
     color: ${(props) => props.theme.colors.text.placeholder};

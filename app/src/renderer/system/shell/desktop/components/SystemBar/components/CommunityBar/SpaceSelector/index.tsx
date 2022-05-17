@@ -2,23 +2,21 @@ import { FC, createRef, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten } from 'polished';
 
-import { useShip } from '../../../../../../../../logic/store';
+import { useShip, useMst } from '../../../../../../../../logic/store';
 import { Flex, Pulser, Divider } from '../../../../../../../../components';
 import { TrayButton } from '../../TrayButton';
 import { TrayMenu } from '../../TrayMenu';
 import { MiniApp } from '../../MiniAppWindow';
 import { Spaces } from '../../../../../../../apps/Spaces';
-import { ThemeStoreType } from '../../../../../../../../logic/theme/store';
 import { SelectedSpace } from './SelectedSpace';
 
-type SpaceSelectorProps = {
-  theme: ThemeStoreType;
-};
+type SpaceSelectorProps = {};
 
 export const SpaceSelector: FC<SpaceSelectorProps> = observer(
   (props: SpaceSelectorProps) => {
     const { shipLoader } = useShip();
-    const { theme } = props;
+    const { themeStore } = useMst();
+    const theme = themeStore.theme;
     const selectorRef = createRef<HTMLDivElement>();
     const appRef = createRef<HTMLDivElement>();
 

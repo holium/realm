@@ -11,14 +11,20 @@ type CommunityBarProps = {};
 export const CommunityBar: FC<CommunityBarProps> = observer(() => {
   const { themeStore } = useMst();
 
-  const dockColor = useMemo(() => themeStore.dockColor, [themeStore.dockColor]);
-  const textColor = useMemo(() => themeStore.textColor, [themeStore.textColor]);
+  const dockColor = useMemo(
+    () => themeStore.theme.dockColor,
+    [themeStore.theme.dockColor]
+  );
+  const textColor = useMemo(
+    () => themeStore.theme.textColor,
+    [themeStore.theme.textColor]
+  );
 
   const iconColor = textColor;
 
   return (
     <SystemBarStyle pr={3} width="100%" customBg={dockColor}>
-      <SpaceSelector theme={themeStore} />
+      <SpaceSelector />
       <Flex flex={1}>
         <AppDock />
       </Flex>

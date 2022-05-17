@@ -31,7 +31,7 @@ export const WindowManager: FC<any> = observer(() => {
             desktopRef={desktopRef}
             key={`${window.id}-${index}`}
             window={window}
-            theme={themeStore}
+            theme={themeStore.theme}
           />
         ))}
     </div>

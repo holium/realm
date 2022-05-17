@@ -17,7 +17,10 @@ type ShipTrayProps = {
 export const ShipTray: FC<ShipTrayProps> = observer((props: ShipTrayProps) => {
   const { themeStore } = useMst();
 
-  const { dockColor, textColor } = useMemo(() => themeStore, [themeStore]);
+  const { dockColor, textColor } = useMemo(
+    () => themeStore.theme,
+    [themeStore.theme]
+  );
 
   const [voiceOn, setVoiceOn] = useState(false);
 
@@ -48,11 +51,11 @@ export const ShipTray: FC<ShipTrayProps> = observer((props: ShipTrayProps) => {
           </motion.div>
         </IconButton>
         {/* Holds the wallet interface */}
-        <WalletTray theme={themeStore} />
+        <WalletTray theme={themeStore.theme} />
         {/* Holds the DM interface */}
-        <MessagesTray theme={themeStore} />
+        <MessagesTray theme={themeStore.theme} />
         {/* Allows logging out */}
-        <AccountTray theme={themeStore} ship={props.ship} />
+        <AccountTray theme={themeStore.theme} ship={props.ship} />
       </Flex>
     </SystemBarStyle>
   );

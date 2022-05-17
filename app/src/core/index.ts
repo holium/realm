@@ -1,9 +1,9 @@
 import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
+import { getSnapshot } from 'mobx-state-tree';
 import { Urbit } from './urbit/api';
-
+import { ThemeManager } from './theme/manager';
 import { AuthManager } from './auth/manager';
 import { ShipManager } from './ship/manager';
-import { Conduit } from './conduit';
 import { SpaceStore, SpaceStoreType } from './spaces/model';
 import { ShipInfoType } from './ship/types';
 
@@ -11,7 +11,8 @@ export type RealmCorePreloadType = {
   init: (ship: string) => Promise<any>;
   login: (ship: string, password: string) => Promise<any>;
   logout: (ship: string) => Promise<any>;
-  setNewShip: (ship: any) => Promise<any>;
+  storeNewShip: (ship: any) => Promise<any>;
+  removeShip: (ship: string) => Promise<any>;
   onStart: () => Promise<any>;
   installRealm: () => Promise<any>;
   onEffect: (callback: any) => Promise<any>;
@@ -45,6 +46,7 @@ export class RealmCore {
   private mainWindow: BrowserWindow;
   private authManager: AuthManager;
   private shipManager: ShipManager;
+  private themeManager: ThemeManager;
   private stores: {
     spaces: SpaceStoreType;
   };
@@ -65,17 +67,23 @@ export class RealmCore {
     this.onStart = this.onStart.bind(this);
     this.init = this.init.bind(this);
     this.setNewShip = this.setNewShip.bind(this);
+    this.removeShip = this.removeShip.bind(this);
+
+    // Create an instance of all managers
     this.authManager = new AuthManager();
     this.shipManager = new ShipManager();
+    this.themeManager = new ThemeManager();
     // Capture all on-effect events and push through the core on-effect
     this.shipManager.on('on-effect', this.onEffect);
     this.authManager.on('on-effect', this.onEffect);
+    this.themeManager.on('on-effect', this.onEffect);
   }
 
   static boot(mainWindow: BrowserWindow) {
     const realmCore = new RealmCore(mainWindow);
-    realmCore.authManager.initialize();
-    realmCore.shipManager.initialize();
+    // realmCore.authManager.initialize();
+    // realmCore.shipManager.initialize();
+    // realmCore.themeManager.initialize();
     ipcMain.handle('core:init', realmCore.init);
     ipcMain.handle('core:login', realmCore.login);
     ipcMain.handle('core:logout', realmCore.logout);
@@ -83,15 +91,15 @@ export class RealmCore {
     ipcMain.handle('core:action', realmCore.onAction);
     ipcMain.handle('core:on-start', realmCore.onStart);
     ipcMain.handle('core:set-new-ship', realmCore.setNewShip);
+    ipcMain.handle('core:remove-ship', realmCore.removeShip);
+
     return realmCore;
   }
 
   connect(url: string, ship: string, cookie: string) {
     this.conduit = new Urbit(url, ship, cookie);
     this.conduit.open();
-    // this.conduit.on('ready', this.onReady);
     this.conduit.onOpen = () => {
-      console.log('on open');
       this.onReady();
     };
     this.conduit.onRetry = () => console.log('on retry');
@@ -109,14 +117,6 @@ export class RealmCore {
     this.authManager.setLoggedIn(ship);
   }
 
-  onStart(_event: any) {
-    const credentials = this.authManager.currentSession();
-    this.authManager.initialize();
-    if (credentials) {
-      this.init(null, credentials.patp);
-    }
-  }
-
   init(_event: any, ship: string) {
     this.ship = ship.substring(1);
     const shipInfo = this.authManager.getShip(ship);
@@ -131,34 +131,52 @@ export class RealmCore {
     this.connect(shipInfo.url, ship, shipInfo.cookie);
   }
 
-  onReady() {
-    this.mainWindow.webContents.send('core:on-ready');
-    const shipInfo: ShipInfoType = this.authManager.getShip(`~${this.ship}`);
-    this.shipManager.subscribe(this.conduit!, `~${this.ship}`, shipInfo);
-  }
-
   async logout(_event: any, ship: string) {
     // Clean up and encrypt current snapshot
-    await this.conduit?.reset(); // clean up subscriptions and close conduit
+    this.conduit?.reset(); // clean up subscriptions and close conduit
     this.authManager.setLoggedOut(ship); // log out
     this.shipManager.lock(); // lock and encryp ship data
   }
 
   installRealm() {}
 
-  async setNewShip(_event: any, ship: any) {
-    console.log('setting ship from signup', ship);
-    return ship;
+  async setNewShip(_event: any, patp: string) {
+    const authShip = this.authManager.completeSignup(patp);
+    const newShip = this.shipManager.storeNewShip(authShip);
+    return getSnapshot(newShip);
+  }
+
+  async removeShip(_event: any, patp: string) {
+    this.shipManager.removeShip(patp);
+    this.authManager.removeShip(patp);
+  }
+
+  onStart(_event: any) {
+    const credentials = this.authManager.currentSession();
+    this.authManager.initialize();
+    this.themeManager.initialize();
+    if (credentials) {
+      this.init(null, credentials.patp);
+    }
+  }
+
+  onReady() {
+    this.mainWindow.webContents.send('core:on-ready');
+    const shipInfo: ShipInfoType = this.authManager.getShip(`~${this.ship}`);
+    this.shipManager.subscribe(this.conduit!, `~${this.ship}`, shipInfo);
   }
 
   onAction(_event: any, action: any) {
-    // console.log('core: ', action);
+    console.log('core: ', action);
     switch (action.resource) {
       case 'ship.manager':
         this.shipManager.onAction(action);
         break;
       case 'auth.manager':
         this.authManager.onAction(action);
+        break;
+      case 'theme.manager':
+        this.themeManager.onAction(action);
         break;
       default:
         break;
@@ -176,8 +194,11 @@ export class RealmCore {
     init: (ship: string) => {
       return ipcRenderer.invoke('core:init', ship);
     },
-    setNewShip: (ship: any) => {
+    storeNewShip: (ship: any) => {
       return ipcRenderer.invoke('core:set-new-ship', ship);
+    },
+    removeShip: (ship: string) => {
+      return ipcRenderer.invoke('core:remove-ship', ship);
     },
     action: (action: any) => {
       return ipcRenderer.invoke('core:action', action);

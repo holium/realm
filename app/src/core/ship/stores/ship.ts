@@ -1,16 +1,9 @@
 import { toJS } from 'mobx';
-import {
-  applySnapshot,
-  castToSnapshot,
-  Instance,
-  types,
-} from 'mobx-state-tree';
-import { WindowThemeModel } from '../../../renderer/logic/stores/config';
+import { castToSnapshot, Instance, types, destroy } from 'mobx-state-tree';
 import { LoaderModel } from '../../../renderer/logic/stores/common/loader';
 import { Chat, ChatMessage, ChatMessageType, ChatStore, ChatType } from './dms';
 import { ContactStore } from './contacts';
 import { DocketStore } from './docket';
-import { ThemeStore } from '../../../renderer/logic/theme/store';
 
 export const ShipModel = types
   .model('ShipModel', {
@@ -20,7 +13,6 @@ export const ShipModel = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
-    theme: ThemeStore,
     loggedIn: types.optional(types.boolean, false),
     wallpaper: types.maybeNull(types.string),
     loader: types.optional(LoaderModel, { state: 'initial' }),
@@ -88,3 +80,19 @@ export const ShipModel = types
   }));
 
 export type ShipModelType = Instance<typeof ShipModel>;
+
+export const ShipStore = types
+  .model({
+    current: types.safeReference(ShipModel),
+    ships: types.map(ShipModel),
+  })
+  .actions((self) => ({
+    setNewShip(newShip: ShipModelType) {
+      self.ships.set(newShip.patp, newShip);
+    },
+    deleteShip(patp: string) {
+      destroy(self.ships.get(patp));
+    },
+  }));
+
+export type ShipStoreType = Instance<typeof ShipStore>;

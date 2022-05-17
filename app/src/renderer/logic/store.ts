@@ -98,11 +98,14 @@ window.electron.core.onEffect((_event: any, value: any) => {
   }
   if (value.response === 'initial') {
     if (value.resource === 'ship') {
-      console.log('initial ship sync');
       shipState.initialSync(value);
     }
     if (value.resource === 'auth') {
       authState.authStore.initialSync(value);
+    }
+    if (value.resource === 'theme') {
+      console.log('initial theme sync', value);
+      osState.themeStore.initialSync(value);
     }
   }
 });

@@ -13,7 +13,7 @@ export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
   const { onHome } = props;
   const { themeStore } = useMst();
 
-  const { dockColor, textColor } = themeStore;
+  const { dockColor, textColor } = themeStore.theme;
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
@@ -55,7 +55,7 @@ export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
         </SystemBarStyle>
       </motion.div>
     ),
-    [themeStore.textColor, themeStore.dockColor]
+    [themeStore.theme.textColor, themeStore.theme.dockColor]
   );
 });
 

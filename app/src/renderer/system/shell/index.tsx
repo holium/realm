@@ -30,13 +30,13 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   const { ship } = useShip();
 
   const isFullscreen = desktopStore.isFullscreen;
-  const wallpaper = themeStore.wallpaper;
+  const wallpaper = themeStore.theme.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
   // const loggedIn = true; // shipStore.session?.loggedIn;
 
-  const loggedIn = authStore.selected?.loggedIn && !authStore.isLoading;
+  const loggedIn = authStore.currentShip?.loggedIn && !authStore.isLoading;
   const shipLoaded = ship && ship.isLoaded;
   console.log('rerendering shell');
   return (

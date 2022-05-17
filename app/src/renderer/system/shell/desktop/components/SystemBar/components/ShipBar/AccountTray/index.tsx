@@ -1,7 +1,6 @@
 import { FC, createRef } from 'react';
 import { motion } from 'framer-motion';
 import { Flex, Icons, Pulser, Sigil } from '../../../../../../../../components';
-import { ThemeStoreType } from '../../../../../../../../logic/theme/store';
 import { ShipModelType } from '../../../../../../../../logic/ship/store';
 
 import { MiniApp } from '../../MiniAppWindow';
@@ -10,10 +9,11 @@ import { useShip } from '../../../../../../../../logic/store';
 import { Profile } from '../../../../../../../apps/Profile';
 import { useObserver } from 'mobx-react';
 import { rgba } from 'polished';
+import { ThemeModelType } from 'core/theme/store';
 
 type AccountTrayProps = {
   ship: ShipModelType;
-  theme: ThemeStoreType;
+  theme: ThemeModelType;
 };
 
 export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {

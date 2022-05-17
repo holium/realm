@@ -11,6 +11,7 @@ export const spaces: { [key: string]: any } = {
       list: [{ patp: '~lomder-librun', role: 'admin' }],
     },
     theme: {
+      themeId: 'the-swolesome-fund',
       backgroundColor: '#c4c3bf',
       dockColor: '#f5f5f4',
       iconColor: 'rgba(95,94,88,0.5)',
@@ -42,6 +43,7 @@ export const spaces: { [key: string]: any } = {
       list: [{ patp: '~lomder-librun', role: 'admin' }],
     },
     theme: {
+      themeId: 'other-life',
       backgroundColor: '#c4c3bf',
       dockColor: '#f5f5f4',
       iconColor: 'rgba(95,94,88,0.5)',

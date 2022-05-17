@@ -18,7 +18,7 @@ import {
 } from '../../../../components';
 import { useAuth, useMst } from '../../../../logic/store';
 import { ShipSelector } from './ShipSelector';
-import { DEFAULT_WALLPAPER } from 'renderer/logic/theme/store';
+import { DEFAULT_WALLPAPER } from 'core/theme/store';
 
 type LoginProps = {
   addShip: () => void;
@@ -27,7 +27,7 @@ type LoginProps = {
 };
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
-  const { addShip, continueSignup, hasWallpaper } = props;
+  const { addShip, hasWallpaper } = props;
   const { authStore } = useAuth();
   const { themeStore } = useMst();
   const passwordRef = useRef(null);
@@ -44,13 +44,18 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   });
   const { anchorPoint, show, setShow } = config;
 
-  const pendingShip = authStore.selected;
+  const pendingShip = authStore.currentShip;
   const shipName = pendingShip?.nickname || pendingShip?.patp;
 
   useEffect(() => {
+    console.log(pendingShip);
     // Set the wallpaper on load
-    themeStore.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER);
-  }, [authStore.selected !== null]);
+    !themeStore.theme &&
+      pendingShip &&
+      themeStore.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER, {
+        patp: pendingShip?.patp!,
+      });
+  }, [pendingShip !== null]);
 
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
@@ -69,12 +74,11 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   let colorProps = null;
   // if (theme) {
   colorProps = {
-    color: themeStore.textColor,
-    textShadow: themeStore.textTheme === 'dark' ? '0 1px black' : 'none',
+    color: themeStore.theme?.textColor,
+    textShadow: themeStore.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
   };
   // }
 
-  const inProgressShips = authStore.inProgressList;
   return (
     <Fill>
       <Centered>
@@ -162,7 +166,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                         ) : (
                           <IconButton
                             ref={submitRef}
-                            luminosity={themeStore.textTheme}
+                            luminosity={themeStore.theme?.textTheme}
                             size={24}
                             canFocus
                             onKeyDown={submitPassword}
@@ -176,7 +180,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   <IconButton
                     size={26}
                     ref={optionsRef}
-                    luminosity={themeStore.textTheme}
+                    luminosity={themeStore.theme?.textTheme}
                     opacity={1}
                     onClick={(evt: any) => {
                       evt.preventDefault();
@@ -232,14 +236,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
         >
           <ShipSelector />
           <Flex gap={12}>
-            {inProgressShips.map((ship: any) => (
-              <ContinueButton
-                onClick={continueSignup}
-                key={`continue-${ship.patp}`}
-                ship={ship}
-                theme={themeStore}
-              />
-            ))}
             <TextButton
               {...colorProps}
               style={{ padding: '0 16px' }}
@@ -262,50 +258,3 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 });
 
 export default Login;
-
-const ContinueButton = (props: any) => {
-  const { ship, theme } = props;
-  return (
-    <Flex
-      className="dynamic-mouse-hover"
-      p={1}
-      pr={3}
-      onClick={() => props.onClick(ship)}
-    >
-      <Flex
-        display="flex"
-        gap={12}
-        flexDirection="row"
-        alignItems="center"
-        style={{ x: 0 }}
-      >
-        <Sigil
-          simple
-          isLogin
-          size={28}
-          avatar={ship.avatar}
-          patp={ship.patp}
-          color={[ship.color || '#000000', 'white']}
-        />
-        <Flex
-          style={{ pointerEvents: 'none' }}
-          mt="2px"
-          flexDirection="column"
-          justifyContent="center"
-        >
-          <Text color={theme.textColor} fontWeight={500} fontSize={2}>
-            Continue setup
-          </Text>
-          <Text
-            style={{ pointerEvents: 'none' }}
-            color={theme.textColor}
-            fontSize={2}
-            fontWeight={400}
-          >
-            {ship!.nickname || ship!.patp}
-          </Text>
-        </Flex>
-      </Flex>
-    </Flex>
-  );
-};

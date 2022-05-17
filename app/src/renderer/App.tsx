@@ -45,7 +45,7 @@ export const App = () => {
                     <Mouse
                       animateOut={false}
                       hide={desktopStore.isMouseInWebview}
-                      cursorColor={themeStore.mouseColor}
+                      cursorColor={themeStore.theme.mouseColor}
                     />
                   ) : null;
                 }}
