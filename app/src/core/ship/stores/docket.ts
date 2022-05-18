@@ -1,5 +1,4 @@
 import { types, Instance, flow, applySnapshot } from 'mobx-state-tree';
-import { string } from 'yup';
 
 export const Glob = types.model({
   glob: types.model({

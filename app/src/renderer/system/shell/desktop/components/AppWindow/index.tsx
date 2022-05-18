@@ -26,11 +26,11 @@ export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
   border-radius: 9px;
   // --webkit-backdrop-filter: var(--blur-enabled);
   // backdrop-filter: var(--blur-enabled);
-  -webkit-user-select: none;
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
-  transform: translateZ(0);
+  // -webkit-user-select: none;
+  // --webkit-backface-visibility: hidden;
+  // --webkit-transform: translate3d(0, 0, 0);
+  // --webkit-perspective: 1000;
+  // transform: translateZ(0);
   user-select: none;
   box-sizing: content-box;
   box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
@@ -197,7 +197,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             maximizeButton
             closeButton
             hasBorder
-            shareable
+            // shareable
             dragControls={dragControls}
             onDragStop={() => onDragStop()}
             onClose={() => onClose()}

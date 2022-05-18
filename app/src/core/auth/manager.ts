@@ -59,9 +59,6 @@ export class AuthManager extends EventEmitter {
 
     onSnapshot(this.stateTree, (snapshot) => {
       this.authStore.store = castToSnapshot(snapshot);
-      // this.authStore.set('ships', snapshot.ships);
-      // this.authStore.set('order', snapshot.order);
-      // this.authStore.set('firstTime', snapshot.firstTime);
     });
 
     onPatch(this.stateTree, (patch) => {
@@ -71,7 +68,6 @@ export class AuthManager extends EventEmitter {
         resource: 'auth',
         response: 'patch',
       };
-      // console.log(patchEffect);
       this.onEffect(patchEffect);
     });
   }
@@ -141,8 +137,10 @@ export class AuthManager extends EventEmitter {
   }
 
   getCredentials(ship: string, password: string) {
-    const path: string = `ships.auth${ship}`;
-    const { url, cookie } = this.authStore.get<any, any>(path);
+    // const path: string = `auth${ship}`;
+    const authShip = this.stateTree.ships.get(`auth${ship}`)!;
+    let url = authShip.url;
+    let cookie = authShip.cookie || '';
     return { url, cookie };
   }
 
@@ -224,7 +222,11 @@ export class AuthManager extends EventEmitter {
       credentials,
       data
     );
-    console.log(updatedProfile);
+    this.stateTree.ships.get(`auth${ship}`)?.setContactMetadata({
+      nickname: updatedProfile.nickname,
+      color: updatedProfile.color,
+      avatar: updatedProfile.avatar,
+    });
     return updatedProfile;
     // Get current contact data
     // const ourProfile = await ContactApi.getContact(ship, credentials);

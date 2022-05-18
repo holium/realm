@@ -1,13 +1,6 @@
-import {
-  types,
-  applySnapshot,
-  Instance,
-  tryReference,
-  detach,
-  destroy,
-} from 'mobx-state-tree';
+import { osState } from './../store';
+import { types, applySnapshot, Instance, tryReference } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { AppModel, AppModelType } from '../../../core/ship/stores/docket';
 import { closeAppWindow, openAppWindow } from './api';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../space/app/dimensions';
 
@@ -48,6 +41,8 @@ export type WindowModelType = Instance<typeof Window>;
 
 export const DesktopStore = types
   .model('DesktopStore', {
+    showHomePane: types.optional(types.boolean, false),
+    isBlurred: types.optional(types.boolean, true),
     appviewPreload: types.maybe(types.string),
     isFullscreen: types.optional(types.boolean, false),
     dynamicMouse: types.optional(types.boolean, true),
@@ -65,6 +60,20 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
+    setMouseColor(newMouseColor: string) {
+      self.mouseColor = newMouseColor;
+    },
+    setHomePane(isHome: boolean) {
+      self.showHomePane = isHome;
+      if (isHome) {
+        self.isBlurred = true;
+      } else {
+        self.isBlurred = false;
+      }
+    },
+    setIsBlurred(isBlurred: boolean) {
+      self.isBlurred = isBlurred;
+    },
     setActive(activeWindow: WindowModelType) {
       self.activeWindow = activeWindow;
       const depth = self.windows.size;
@@ -108,6 +117,10 @@ export const DesktopStore = types
       });
       self.windows.set(newWindow.id, newWindow);
       self.activeWindow = self.windows.get(newWindow.id);
+      if (self.showHomePane) {
+        self.showHomePane = false;
+        self.isBlurred = false;
+      }
       openAppWindow(toJS(location));
     },
     closeBrowserWindow(appId: any) {

@@ -1,6 +1,5 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 import { Flex } from '../../../components';
 import { Signup } from './signup';
 import { Login } from './login';

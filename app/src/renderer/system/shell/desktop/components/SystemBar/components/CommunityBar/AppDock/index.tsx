@@ -1,7 +1,7 @@
-import { FC, useCallback, useContext } from 'react';
-import { Flex, Box, Grid } from '../../../../../../../../components';
+import { FC } from 'react';
+import { Flex } from '../../../../../../../../components';
 import { AppModelType } from '../../../../../../../../../core/ship/stores/docket';
-import { AppTile } from '../AppTile';
+import { AppTile } from '../../../../../../../../components/AppTile';
 import {
   useMst,
   useShip,
@@ -26,7 +26,6 @@ export const AppDock: FC<AppTileProps> = observer(() => {
     : null;
 
   const onAppClick = (app: AppModelType) => {
-    // console.log(toJS(app));
     const formAppUrl = `${ship!.url}/apps/${app.id!}`;
     const windowPayload = {
       name: app.id!,
@@ -39,10 +38,8 @@ export const AppDock: FC<AppTileProps> = observer(() => {
         value: ship!.cookie!.split('=')[1].split('; ')[0],
       },
     };
-    // console.log('open new window', windowPayload);
-    desktopStore.openBrowserWindow(app, windowPayload);
 
-    // openNewWindow(windowPayload);
+    desktopStore.openBrowserWindow(app, windowPayload);
   };
 
   // console.log('activeWindowId', activeWindowId);

@@ -61,6 +61,7 @@ export const Chat: FC<any> = (props: ChatProps) => {
             align="center"
           > */}
           <Titlebar
+            hasBlur
             closeButton={false}
             hasBorder
             zIndex={5}
@@ -113,6 +114,8 @@ export const Chat: FC<any> = (props: ChatProps) => {
               bottom: 0,
               left: 0,
               right: 0,
+              backfaceVisibility: 'hidden',
+              transform: 'translate3d(0, 0, 0)',
             }}
             overflowY="hidden"
           >

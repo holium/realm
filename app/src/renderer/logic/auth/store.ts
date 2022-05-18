@@ -81,8 +81,9 @@ export const SignupStore = types
       // console.log(handleError(error));
       if (error) throw error;
 
-      self.currentStep = 'set-password';
+      osState.desktopStore.setMouseColor(response.color);
       self.signupShip!.setContactMetadata(response);
+      self.currentStep = 'set-password';
       return response;
     }),
     clearSignupShip: () => {
@@ -100,7 +101,7 @@ export const SignupStore = types
     }) {
       self.loader.set('loading');
       try {
-        const [_response, error] = yield AuthIPC.addShip(
+        const [response, error] = yield AuthIPC.addShip(
           payload.ship,
           payload.url,
           payload.code
@@ -109,6 +110,7 @@ export const SignupStore = types
         const signupShip = AuthShip.create({
           id: `auth${payload.ship}`,
           url: payload.url,
+          // cookie: payload.cookie,
           patp: payload.ship,
           status: 'initial',
         });
@@ -201,6 +203,11 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
     }) => {
       // Apply persisted snapshot
       applySnapshot(self, castToSnapshot(syncEffect.model));
+      console.log('initial sync in auth');
+      // on initial sync we should set themes and various other variables
+      self.selected?.loggedIn && osState.desktopStore.setIsBlurred(false);
+      self.selected?.loggedIn &&
+        osState.desktopStore.setMouseColor(self.selected?.color!);
       self.loader.set('loaded');
     },
     syncPatches: (patchEffect: any) => {
@@ -234,6 +241,7 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
         self.loader.set('loading');
         const [response, error] = yield AuthIPC.login(ship, password);
         self.selected!.setLoggedIn(true);
+        osState.desktopStore.setIsBlurred(false);
         if (error) throw error;
       } catch (err: any) {
         self.loader.error(err);
@@ -244,6 +252,7 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
         const [response, error] = yield AuthIPC.logout(ship);
         if (error) throw error;
         self.selected!.setLoggedIn(false);
+        osState.desktopStore.setIsBlurred(true);
       } catch (err: any) {
         self.loader.error(err);
       }

@@ -12,6 +12,7 @@ interface IProps {
   style?: any;
   isOpen: boolean;
   clickableRef?: any;
+  customBg?: string;
   children: any;
   onClose: (...args: any) => any;
 }
@@ -70,10 +71,11 @@ export class Menu extends React.PureComponent<IProps, IState> {
   };
 
   render() {
-    const { children, style, isOpen, id } = this.props;
+    const { customBg, children, style, isOpen, id } = this.props;
     return (
       <MenuWrapper
         id={id}
+        customBg={customBg}
         ref={(node) => (this.menuRef.current = node)}
         style={{ display: isOpen ? 'flex' : 'none', ...style }}
         role="list"

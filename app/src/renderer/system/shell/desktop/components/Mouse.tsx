@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import AnimatedCursor from './Cursor';
@@ -22,9 +22,12 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
     <MouseArea
       animate={{ display: hide ? 'none' : 'inherit' }}
       // transition={{ delay: 0.01 }}
-      style={{
-        zIndex: 10,
-      }}
+      style={
+        {
+          // zIndex: 10,
+          // display: hide ? 'none' : 'inherit',
+        }
+      }
     >
       <AnimatedCursor
         animateOut={animateOut}
@@ -43,6 +46,7 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
           'select',
           'textarea',
           'button',
+          'li',
           '.link',
           '.app-dock-icon',
           '.dynamic-mouse-hover',

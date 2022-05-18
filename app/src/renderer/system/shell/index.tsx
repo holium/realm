@@ -1,12 +1,15 @@
 import React, { FC, useRef, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { ViewPort, Top, Fill, Layer } from 'react-spaces';
-import { AnimatePresence, motion } from 'framer-motion';
+import { ViewPort, Layer } from 'react-spaces';
 import { useAuth, useMst, useShip } from '../../logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import { BackgroundImage, BackgroundFill } from './Shell.styles';
+import {
+  BackgroundImage,
+  BackgroundFill,
+  BackgroundWrap,
+} from './Shell.styles';
 
 type ShellProps = {};
 
@@ -37,12 +40,19 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   // const loggedIn = true; // shipStore.session?.loggedIn;
 
   const loggedIn = authStore.currentShip?.loggedIn && !authStore.isLoading;
+  const isBlurred = useMemo(
+    () => !loggedIn || desktopStore.isBlurred,
+    [loggedIn, desktopStore.isBlurred]
+  );
+  // const blurBg = desktopStore.
   const shipLoaded = ship && ship.isLoaded;
   console.log('rerendering shell');
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
-      <BgImage blurred={!loggedIn} wallpaper={bgImage} />
+
+      <BgImage blurred={isBlurred} wallpaper={bgImage} />
+
       <BackgroundFill hasWallpaper={hasWallpaper}>
         {loggedIn ? (
           <Desktop
@@ -67,34 +77,42 @@ const BgImage = ({
   blurred: boolean;
   wallpaper: string;
 }) => {
-  const [imageLoading, setImageLoading] = useState(true);
+  // const [imageLoading, setImageLoading] = useState(true);
 
-  const imageLoaded = () => {
-    setImageLoading(false);
-  };
-  return (
-    // <BackgroundDarken hasWallpaper>
-    <AnimatePresence>
-      <BackgroundImage
+  // const imageLoaded = () => {
+  //   setImageLoading(false);
+  // };
+  return useMemo(() => {
+    console.log('background render', blurred);
+    return (
+      // <BackgroundDarken hasWallpaper>
+      // <AnimatePresence>
+      <BackgroundWrap
         key={wallpaper}
-        src={wallpaper}
-        // width="auto"
-        initial={{ opacity: 0 }}
-        exit={{ opacity: 0 }}
-        animate={{
-          opacity: 1,
-          // opacity: imageLoading ? 0.5 : 1,
-          filter: blurred ? 'blur(20px)' : 'blur(0px)',
-        }}
-        transition={{
-          opacity: { duration: 1 },
-          // blur: { duration: 2, ease: true },
-        }}
-        onLoad={imageLoaded}
-      />
-    </AnimatePresence>
-    // </BackgroundDarken>
-  );
+        animate={{ filter: blurred ? 'blur(20px)' : 'blur(0px)' }}
+      >
+        <BackgroundImage
+          // key={wallpaper}
+          src={wallpaper}
+          // width="auto"
+          initial={{ opacity: 0 }}
+          exit={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            // opacity: imageLoading ? 0.5 : 1,
+            // backdropFilter: blurred ? 'blur(20px)' : 'blur(0px)',
+          }}
+          transition={{
+            opacity: { duration: 1 },
+            // blur: { duration: 2, ease: true },
+          }}
+          // onLoad={imageLoaded}
+        />
+      </BackgroundWrap>
+      // </AnimatePresence>
+      // </BackgroundDarken>
+    );
+  }, [blurred, wallpaper]);
 };
 
 // const ShipDesktop = observer(() => {

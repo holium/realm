@@ -3,35 +3,16 @@ import {
   types,
   flow,
   Instance,
-  tryReference,
   applyPatch,
   applySnapshot,
   castToSnapshot,
-  IMaybe,
-  IModelType,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { LoaderModel } from '../stores/common/loader';
-import { WindowThemeModel, WindowThemeType } from '../stores/config';
-import { sendAction } from '../api/realm.core';
-import Urbit from '../api/urbit';
-// import { ChatStore } from './chat/store';
-import { ChatStore } from '../../../core/ship/stores/dms';
+import { WindowThemeType } from '../stores/config';
 import { ShipModel as BaseShipModel } from '../../../core/ship/stores/ship';
-
 import { authState, osState, spacesState } from '../store';
 import { AuthShipType } from '../../../core/auth/store';
-
-type ShipInfoType = {
-  url: string;
-  cookie: string;
-  theme?: WindowThemeType;
-  wallpaper?: string;
-  color?: string;
-  nickname?: string;
-  avatar?: string;
-  loggedIn?: boolean;
-};
 
 export const ShipStatusModel = types
   .model({
@@ -82,6 +63,9 @@ export const ShipModel = BaseShipModel.named('ShipModel')
     },
     get isLoading() {
       return self.loader.isLoading;
+    },
+    get apps() {
+      return Array.from(self.docket.apps.values());
     },
   }))
   .actions((self) => ({

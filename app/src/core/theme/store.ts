@@ -35,15 +35,16 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
     iconColor: rgba(darken(0.4, baseColor), 0.5),
   };
 };
+
 export const ThemeModel = types
   .model({
     themeId: types.identifier,
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
-    backgroundColor: types.optional(types.string, '#c2b4b4'),
-    dockColor: types.optional(types.string, '#f0ecec'),
-    windowColor: types.optional(types.string, '#f0ecec'),
+    backgroundColor: types.optional(types.string, '#c4c3bf'),
+    dockColor: types.optional(types.string, '#f5f5f4'),
+    windowColor: types.optional(types.string, '#f5f5f4'),
     textTheme: types.optional(types.enumeration(['light', 'dark']), 'light'),
-    textColor: types.optional(types.string, '#261f1f'),
+    textColor: types.optional(types.string, '#2a2927'),
     iconColor: types.optional(types.string, '#333333'),
     mouseColor: types.optional(types.string, '#4E9EFD'),
   })

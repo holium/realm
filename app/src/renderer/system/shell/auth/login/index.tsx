@@ -48,7 +48,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const shipName = pendingShip?.nickname || pendingShip?.patp;
 
   useEffect(() => {
-    console.log(pendingShip);
     // Set the wallpaper on load
     !themeStore.theme &&
       pendingShip &&
@@ -192,10 +191,10 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   </IconButton>
                   <Menu
                     id={`${pendingShip.patp}-user-menu`}
+                    customBg={themeStore.theme.windowColor}
                     style={{
                       top: anchorPoint && anchorPoint.y + 8,
                       left: anchorPoint && anchorPoint.x + 10,
-                      padding: '8px 4px',
                       visibility: show ? 'visible' : 'hidden',
                       width: menuWidth,
                     }}
@@ -206,12 +205,14 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   >
                     <MenuItem
                       label="Reset password"
+                      customBg={themeStore.theme.windowColor}
                       onClick={() => {
                         console.log('do reset form');
                       }}
                     />
                     <MenuItem
                       label="Remove ship"
+                      customBg={themeStore.theme.windowColor}
                       mt={1}
                       onClick={() => {
                         authStore.removeShip(pendingShip.patp);

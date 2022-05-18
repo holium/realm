@@ -12,6 +12,7 @@ type TitlebarStyleProps = {
   hasBorder: boolean;
   zIndex: number;
   isAppWindow?: boolean;
+  hasBlur?: boolean;
 };
 
 const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
@@ -24,6 +25,8 @@ const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   align-items: center;
   position: ${(props: TitlebarStyleProps) =>
     props.isAppWindow ? 'relative' : 'absolute'};
+  backdrop-filter: ${(props: TitlebarStyleProps) =>
+    props.hasBlur ? 'blur(16px)' : 'none'};
   top: 0;
   left: 0;
   right: 0;
@@ -68,6 +71,7 @@ type TitlebarProps = {
     icon?: string;
     color?: string;
   };
+  hasBlur?: boolean;
   children?: React.ReactNode;
 };
 
@@ -85,6 +89,7 @@ export const Titlebar = (props: TitlebarProps) => {
     onMaximize,
     navigationButtons,
     shareable,
+    hasBlur,
   } = props;
   const { windowColor, iconColor } = props.theme;
 
@@ -110,6 +115,7 @@ export const Titlebar = (props: TitlebarProps) => {
 
   return (
     <TitlebarStyle
+      hasBlur={hasBlur}
       {...(dragControls
         ? {
             onPointerDown: (e) => {

@@ -45,12 +45,12 @@ export const App = () => {
                     <Mouse
                       animateOut={false}
                       hide={desktopStore.isMouseInWebview}
-                      cursorColor={themeStore.theme.mouseColor}
+                      cursorColor={desktopStore.mouseColor}
                     />
                   ) : null;
                 }}
               </Observer>
-              <Shell />
+              {themeStore.loader.isLoaded && <Shell />}
               <div id="portal-root" />
             </ShipProvider>
           </AuthProvider>

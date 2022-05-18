@@ -1,59 +1,130 @@
 import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { useMst } from '../../../../../logic/store';
-import { Flex, Box } from '../../../../../components';
-import { cleanNounColor } from '../../../../../logic/utils/color';
+import styled from 'styled-components';
+import { AnimatePresence, motion } from 'framer-motion';
+import { rgba } from 'polished';
+import { useMst, useShip } from '../../../../../logic/store';
+import { Flex } from '../../../../../components';
+import { AppTile } from '../../../../../components/AppTile';
+import { AppModelType } from 'core/ship/stores/docket';
 
-export const AppGrid: FC<any> = observer(() => {
-  const { spaceStore } = useMst();
+type HomeWindowProps = {
+  customBg: string;
+};
 
-  const tileSize = 'xl';
+const HomeWindow = styled(motion.div)<HomeWindowProps>`
+  background: ${(props: HomeWindowProps) => rgba(props.customBg, 0.1)};
+  height: 100%;
+`;
 
-  const sizes = {
-    sm: 48,
-    md: 88,
-    lg: 148,
-    xl: 200,
-  };
-  const radius = {
-    sm: 6,
-    md: 12,
-    lg: 20,
-    xl: 24,
-  };
+type AppGridProps = {
+  isOpen?: boolean;
+};
 
-  return useMemo(
-    () => (
-      <Flex gap={16} flexDirection="row">
-        {spaceStore.appGrid.map((app: any) =>
-          app.image ? (
-            <Box
-              minWidth={sizes[tileSize]}
-              style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-              height={sizes[tileSize]}
-              width={sizes[tileSize]}
-              backgroundColor="#F2F3EF"
-            >
-              <img
-                height={sizes[tileSize]}
-                width={sizes[tileSize]}
-                key={app.title}
-                src={app.image}
+export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
+  const { isOpen } = props;
+  const { ship } = useShip();
+  const { desktopStore, themeStore } = useMst();
+
+  const apps = ship ? ship!.apps : [];
+
+  return (
+    <AnimatePresence>
+      <HomeWindow
+        key="home-window"
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: isOpen ? 1 : 0,
+          display: isOpen ? 'block' : 'none',
+        }}
+        exit={{ opacity: 0 }}
+        customBg={themeStore.theme.dockColor}
+      >
+        <Flex
+          flex={1}
+          height="100%"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Flex
+            variants={{
+              hidden: {
+                opacity: 0,
+                transition: {
+                  opacity: 0.3,
+                  staggerChildren: 0,
+                  delayChildren: 0,
+                },
+              },
+              show: {
+                opacity: 1,
+                transition: {
+                  opacity: 0.3,
+                  staggerChildren: 0.1,
+                  delayChildren: 0.1,
+                },
+              },
+              exit: {
+                opacity: 0,
+                transition: {
+                  opacity: 0.3,
+                  staggerChildren: 0,
+                  delayChildren: 0,
+                },
+              },
+            }}
+            initial="hidden"
+            animate={isOpen ? 'show' : 'exit'}
+            exit="hidden"
+            gap={16}
+            width="888px"
+            flexWrap="wrap"
+            flexDirection="row"
+          >
+            {apps.map((app: any, index: number) => (
+              <AppTile
+                key={app.title + index}
+                isVisible={isOpen}
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                    top: 30,
+                    transition: { top: 3, opacity: 1 },
+                  },
+                  show: {
+                    opacity: 1,
+                    top: 0,
+                    transition: { top: 3, opacity: 1 },
+                  },
+                  exit: { opacity: 0, top: 100 },
+                }}
+                tileSize="xxl"
+                app={app}
+                // selected={app.id === activeWindowId}
+                onAppClick={
+                  (selectedApp: AppModelType) => {
+                    const formAppUrl = `${ship!.url}/apps/${app.id!}`;
+                    const windowPayload = {
+                      name: app.id!,
+                      url: formAppUrl,
+                      customCSS: {},
+                      theme: themeStore,
+                      cookies: {
+                        url: formAppUrl,
+                        name: `urbauth-${ship!.patp}`,
+                        value: ship!.cookie!.split('=')[1].split('; ')[0],
+                      },
+                    };
+                    desktopStore.openBrowserWindow(selectedApp, windowPayload);
+                  }
+                  // desktopStore.o
+                }
               />
-            </Box>
-          ) : (
-            <Box
-              minWidth={sizes[tileSize]}
-              style={{ borderRadius: radius[tileSize] }}
-              key={app.title}
-              backgroundColor={cleanNounColor(app.color)}
-              height={sizes[tileSize]}
-              width={sizes[tileSize]}
-            ></Box>
-          )
-        )}
-      </Flex>
-    ),
-    [spaceStore.apps]
+            ))}
+          </Flex>
+        </Flex>
+      </HomeWindow>
+    </AnimatePresence>
   );
 });

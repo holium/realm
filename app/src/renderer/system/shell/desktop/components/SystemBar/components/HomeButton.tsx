@@ -1,17 +1,14 @@
-import { FC, useMemo } from 'react';
+import { FC, useCallback, useMemo } from 'react';
 import { SystemBarStyle } from '../SystemBar.styles';
 import { motion, useMotionValue } from 'framer-motion';
 import HoliumAnimated from '../../../../../../components/Icons/holium';
 import { useMst } from '../../../../../../logic/store';
 import { observer } from 'mobx-react';
 
-type HomeButton = {
-  onHome: () => void;
-};
+type HomeButton = {};
 
-export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
-  const { onHome } = props;
-  const { themeStore } = useMst();
+export const HomeButton: FC<HomeButton> = observer(() => {
+  const { themeStore, desktopStore } = useMst();
 
   const { dockColor, textColor } = themeStore.theme;
   const x = useMotionValue(200);
@@ -22,6 +19,9 @@ export const HomeButton: FC<HomeButton> = observer((props: HomeButton) => {
     x.set(event.clientX - rect.left);
     y.set(event.clientY - rect.top);
   }
+  const onHome = () => {
+    desktopStore.setHomePane(!desktopStore.showHomePane);
+  };
 
   return useMemo(
     () => (

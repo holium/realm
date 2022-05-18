@@ -160,7 +160,7 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
           </Box>
         </Card>
       </motion.div>
-      {step === 0 && (
+      {/* {step === 0 && (
         <Flex
           mt={4}
           top={`calc(50% + ${height / 2}px)`}
@@ -180,7 +180,7 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
             />
           ))}
         </Flex>
-      )}
+      )} */}
     </AnimatePresence>
   );
 });

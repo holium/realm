@@ -72,7 +72,7 @@ export const elevations = {
 };
 
 export const containers = {
-  rounderBorderRadius: 8,
+  rounderBorderRadius: 9,
   outerBorderRadius: 6,
   innerBorderRadius: 4,
 };

@@ -72,15 +72,15 @@ export const createProfileForm = (
     initialValue: defaults.nickname || '',
     // validationSchema: yup.string().required('Name is required'),
   });
-  // const sigilColor = createField({
-  //   id: 'sigil-color',
-  //   form: profileForm,
-  //   initialValue: defaults.sigilColor || '',
-  //   validationSchema: yup
-  //     .string()
-  //     .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
-  //     .required('Enter a hex value'),
-  // });
+  const sigilColor = createField({
+    id: 'sigil-color',
+    form: profileForm,
+    initialValue: defaults.sigilColor || '',
+    validationSchema: yup
+      .string()
+      .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
+      .required('Enter a hex value'),
+  });
   const avatar = createField({
     id: 'avatar',
     form: profileForm,
@@ -96,7 +96,7 @@ export const createProfileForm = (
   return {
     profileForm,
     nickname,
-    // sigilColor,
+    sigilColor,
     avatar,
   };
 };
@@ -139,6 +139,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
 
     useEffect(() => {
       document.addEventListener('click', handleClickOutside, true);
+      sigilColor.actions.onChange(signupStore.signupShip!.color || '#000000');
       () => {
         document.removeEventListener('click', handleClickOutside, true);
       };
@@ -150,7 +151,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
       avatar: signupStore.signupShip!.avatar || '',
     };
 
-    const { profileForm, nickname, avatar } = useMemo(
+    const { profileForm, nickname, avatar, sigilColor } = useMemo(
       () => createProfileForm(shipInfo),
       []
     );
@@ -195,7 +196,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
               }
               patp={shipName}
               borderRadiusOverride="6px"
-              color={[color, 'white']}
+              color={[sigilColor.state.value, 'white']}
             />
             <Observer>
               {() => (
@@ -240,7 +241,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                 <Flex flex={1} alignItems="flex-start" position="relative">
                   <ColorTile
                     id="signup-color-tile"
-                    tileColor={color}
+                    tileColor={sigilColor.state.value}
                     onClick={(evt: any) => {
                       console.log('clicking tile', colorPickerOpen);
                       setColorPickerOpen(!colorPickerOpen);
@@ -255,9 +256,10 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                     <TwitterPicker
                       width="inherit"
                       className="cursor-style"
-                      color={color}
+                      color={sigilColor.state.value}
                       onChange={(color: { hex: string }) => {
-                        setColor(color.hex);
+                        sigilColor.actions.onChange(color.hex);
+                        // setColor(color.hex);
                       }}
                       triangle="top-left"
                       colors={[
@@ -369,13 +371,11 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                   const formData = profileForm.actions.submit();
                   signupStore
                     .saveProfile({
-                      color,
+                      color: formData['sigil-color'],
                       nickname: formData['nickname'],
                       avatar: formData['avatar'],
                     })
                     .then((value: any) => {
-                      console.log('before next');
-                      // eslint-disable-next-line promise/no-callback-in-promise
                       next();
                       evt.target.blur();
                       return null;

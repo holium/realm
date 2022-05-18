@@ -56,6 +56,13 @@ export function uxToHex(ux: string) {
 
 //   return `0x${ux}`;
 // };
+export const removeHash = (hex: string) => {
+  if (hex.includes('#')) {
+    hex = hex.substring(1);
+  }
+  return hex;
+};
+
 export const hexToUx = (hex: string) => {
   if (hex.includes('#')) {
     hex = hex.substring(1);

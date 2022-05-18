@@ -74,7 +74,7 @@ export const ShipSelector: FC = observer(() => {
                       // cursor: 'pointer',
                       // zIndex: isDragging ? 2 : 1,
                     }}
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{ scale: 1.05 }}
                     transition={{ scale: 0.2 }}
                     whileTap={{ scale: 1.0 }}
                   >

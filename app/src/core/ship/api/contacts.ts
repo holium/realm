@@ -1,4 +1,4 @@
-import { hexToUx } from '../../lib/color';
+import { removeHash, hexToUx } from '../../lib/color';
 import { cleanNounColor } from '../../../renderer/logic/utils/color';
 import { Urbit } from '../../urbit/api';
 
@@ -40,7 +40,7 @@ export const ContactApi = {
     const { url, cookie } = credentials;
     const preparedData: any = {
       nickname: data.nickname,
-      color: hexToUx(data.color),
+      color: removeHash(data.color),
       avatar: data.avatar || '',
     };
     console.log(preparedData, data.color);
@@ -80,6 +80,11 @@ export const ContactApi = {
     );
     console.log(res1, res2);
     conduit.delete();
+    return {
+      nickname: preparedData.nickname,
+      color: `#${preparedData.color}`,
+      avatar: preparedData.avatar,
+    };
 
     // console.log({
     //   ['edit']: {

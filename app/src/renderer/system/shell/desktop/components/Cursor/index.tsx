@@ -266,7 +266,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Cursor Styles
   const styles = {
     cursorInner: {
-      zIndex: 999,
+      zIndex: 1100,
       display: 'block',
       position: 'fixed',
       // borderRadius: '50%',
@@ -280,7 +280,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     },
     cursorOuter: {
       boxSizing: 'content-box',
-      zIndex: 999,
+      zIndex: 1100,
       display: 'block',
       position: 'fixed',
       borderRadius: '50%',

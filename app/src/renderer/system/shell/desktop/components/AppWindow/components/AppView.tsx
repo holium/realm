@@ -62,7 +62,7 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
         },
       };
       webview?.addEventListener('did-finish-load', () => {
-        webview!.send('mouse-color', themeStore.theme.mouseColor);
+        webview!.send('mouse-color', desktopStore.mouseColor);
         let css = '* { cursor: none !important; }';
         webview!.insertCSS(css);
         // webview!.openDevTools();

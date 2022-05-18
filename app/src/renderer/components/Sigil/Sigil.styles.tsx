@@ -84,6 +84,9 @@ export const SigilStyle = styled(
 
     svg {
       pointer-events: ${(props) => (props.clickable ? 'none' : 'inherit')};
+      rect {
+        transition: ${(props) => props.theme.transition};
+      }
     }
 
     ${(props: SigilStyleProps) =>

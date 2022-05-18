@@ -3,8 +3,8 @@ import {
   castToSnapshot,
   Instance,
   types,
-  destroy,
   detach,
+  destroy,
 } from 'mobx-state-tree';
 import { LoaderModel } from '../../../renderer/logic/stores/common/loader';
 import { Chat, ChatMessage, ChatMessageType, ChatStore, ChatType } from './dms';
@@ -97,7 +97,7 @@ export const ShipStore = types
       self.ships.set(newShip.patp, newShip);
     },
     deleteShip(patp: string) {
-      detach(self.ships.get(patp));
+      destroy(self.ships.get(patp));
     },
   }));
 
