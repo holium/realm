@@ -18,7 +18,7 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     height: 900,
   },
   ['webterm']: {
-    width: 600,
+    width: 780,
     height: 600,
   },
 };

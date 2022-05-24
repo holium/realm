@@ -5,7 +5,8 @@ export const Glob = types.model({
     base: types.string,
     'glob-reference': types.model({
       location: types.model({
-        http: types.string,
+        http: types.maybe(types.string),
+        ames: types.maybe(types.string),
       }),
       hash: types.string,
     }),

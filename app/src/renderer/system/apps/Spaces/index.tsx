@@ -61,7 +61,7 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
           Spaces
         </Text>
         <IconButton
-          className="dynamic-mouse-hover"
+          className="realm-cursor-hover"
           style={{ cursor: 'none' }}
           customBg={dockColor}
           size={28}

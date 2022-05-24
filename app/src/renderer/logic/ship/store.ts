@@ -148,9 +148,9 @@ export const ShipStore = types
     }) => {
       // Apply persisted snapshot
       applySnapshot(self, castToSnapshot({ ship: syncEffect.model }));
-      osState.themeStore.theme.setMouseColor(
-        syncEffect.model.color || '#4E9EFD'
-      );
+      // osState.themeStore.theme.setMouseColor(
+      //   syncEffect.model.color || '#4E9EFD'
+      // );
 
       spacesState.setShipSpace(self.ship!);
 

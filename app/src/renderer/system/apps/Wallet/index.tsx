@@ -25,7 +25,14 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
       noGutter
       overflowY="hidden"
     >
-      <Titlebar closeButton={false} hasBorder theme={props.theme}>
+      <Titlebar
+        closeButton={false}
+        hasBorder
+        theme={{
+          ...props.theme,
+          windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.9),
+        }}
+      >
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
           <Icons opacity={0.8} name="Wallet" size={24} mr={2} />
           <Text
@@ -44,9 +51,8 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
             borderRadius: 5,
             borderWidth: 1,
             borderStyle: 'solid',
-            borderColor: rgba(windowColor!, 0.4),
+            borderColor: darken(0.025, windowColor!),
             minWidth: 120,
-            cursor: 'pointer',
           }}
           pt={1}
           pl={2}
@@ -56,7 +62,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
           flexDirection="row"
           justifyContent="space-between"
           alignItems="space-between"
-          background={lighten(0.1, windowColor)}
+          background={darken(0.01, windowColor!)}
         >
           <Text
             display="flex"

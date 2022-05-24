@@ -15,7 +15,7 @@ import { useShip } from '../../../logic/store';
 import { toJS } from 'mobx';
 import { WindowThemeType } from '../../../logic/stores/config';
 import { Titlebar } from '../../shell/desktop/components/AppWindow/components/Titlebar';
-import { rgba } from 'polished';
+import { lighten, rgba } from 'polished';
 
 type IProps = {
   theme: WindowThemeType;
@@ -37,7 +37,14 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       noGutter
       overflowY="hidden"
     >
-      <Titlebar hasBorder zIndex={5} theme={props.theme}>
+      <Titlebar
+        hasBorder
+        zIndex={5}
+        theme={{
+          ...props.theme,
+          windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.8),
+        }}
+      >
         <Flex pl={3} pr={4} mr={2} justifyContent="center" alignItems="center">
           <Icons opacity={0.8} name="Messages" size={24} mr={2} />
           <Text
@@ -50,6 +57,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
         </Flex>
         <Flex flex={1}>
           <Input
+            className="realm-cursor-text-cursor"
             type="text"
             placeholder="Search"
             wrapperStyle={{
@@ -66,7 +74,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
         <Flex ml={2} mr={2} pl={2} pr={2}>
           <IconButton
             customBg={dockColor}
-            className="dynamic-mouse-hover"
+            className="realm-cursor-hover"
             size={28}
             color={iconColor}
           >

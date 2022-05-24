@@ -49,7 +49,7 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
           'li',
           '.link',
           '.app-dock-icon',
-          '.dynamic-mouse-hover',
+          '.realm-cursor-hover',
         ]}
       />
     </MouseArea>

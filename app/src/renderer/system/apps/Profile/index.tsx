@@ -95,7 +95,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
         </Flex>
         <Flex gap={16} alignItems="center">
           <IconButton
-            className="dynamic-mouse-hover"
+            className="realm-cursor-hover"
             customBg={backgroundColor}
             size={26}
             color={iconColor}
@@ -107,7 +107,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
             <Icons name="Lock" />
           </IconButton>
           <IconButton
-            className="dynamic-mouse-hover"
+            className="realm-cursor-hover"
             style={{ cursor: 'none' }}
             customBg={backgroundColor}
             size={26}

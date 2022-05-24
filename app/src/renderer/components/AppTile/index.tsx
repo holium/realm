@@ -1,10 +1,11 @@
 import { FC, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { lighten } from 'polished';
+import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, Menu, MenuItem, useMenu } from '..';
 import { AppModelType } from '../../../core/ship/stores/docket';
 import { useMst } from '../../logic/store';
 import { toJS } from 'mobx';
+import { bgIsLightOrDark } from 'core/theme/lib';
 
 const sizes = {
   sm: 32,
@@ -23,8 +24,8 @@ const radius = {
 };
 
 const scales = {
-  sm: 0.1,
-  md: 0.1,
+  sm: 0.05,
+  md: 0.05,
   lg: 0.07,
   xl: 0.05,
   xxl: 0.02,
@@ -64,32 +65,27 @@ interface AppTileProps {
 }
 
 export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
-  const { app, variants, selected, tileSize, onAppClick, isVisible } = props;
-  const { desktopStore } = useMst();
+  const { app, variants, selected, tileSize, onAppClick } = props;
   const tileRef = useRef(null);
 
-  // Setting up options menu
-  const menuWidth = 180;
-  const config = useMenu(tileRef, {
-    orientation: 'bottom-left',
-    padding: 6,
-    menuWidth,
-  });
-  const { anchorPoint, show, setShow } = config;
-
-  const shouldShowTitle = tileSize === 'xxl';
-  // const { openNewWindow } = useContext(WinManagerContext);
+  const isAppGrid = tileSize === 'xxl';
+  const boxShadowStyle =
+    isAppGrid === 'xxl' ? '0px 0px 4px rgba(0, 0, 0, 0.06)' : 'none';
+  // TODO fix app types
   let title;
-  if (shouldShowTitle) {
+  if (isAppGrid) {
+    // @ts-ignore
+    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
+    const isLight = lightOrDark === 'light';
     title = (
       <Text
         position="absolute"
-        opacity={0.9}
         style={{ mixBlendMode: 'hard-light' }}
         left="1.7rem"
         bottom="1.7rem"
         fontWeight={500}
         fontSize={2}
+        color={isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8)}
       >
         {app.title}
       </Text>
@@ -114,11 +110,11 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
         <TileStyle
           whileHover={{
             scale: 1 + scales[tileSize] / 2,
-            boxShadow: '0px 0px 4px rgba(0, 0, 0, 0.06)',
+            boxShadow: boxShadowStyle,
           }}
           whileTap={{
             scale: 1 - scales[tileSize],
-            boxShadow: '0px 0px 4px rgba(0, 0, 0, 0.03)',
+            boxShadow: boxShadowStyle,
           }}
           transition={{ scale: 0.5 }}
           minWidth={sizes[tileSize]}
@@ -155,36 +151,6 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
       {selected && (
         <TileHighlight layoutId="active-app" transition={{ duration: 0.2 }} />
       )}
-      <Menu
-        customBg={app.color!}
-        style={{
-          top: anchorPoint && anchorPoint.y + 8,
-          left: anchorPoint && anchorPoint.x + 10,
-          visibility: show ? 'visible' : 'hidden',
-          width: menuWidth,
-        }}
-        isOpen={show}
-        onClose={() => {
-          setShow(false);
-        }}
-      >
-        <MenuItem
-          label="Pin app"
-          customBg={app.color}
-          onClick={() => {
-            // console.log('do reset form');
-          }}
-        />
-        <MenuItem
-          label="Remove ship"
-          customBg={app.color}
-          mt={1}
-          onClick={() => {
-            // authStore.removeShip(pendingShip.patp);
-            // authStore.clearSession();
-          }}
-        />
-      </Menu>
     </Flex>
   );
 };

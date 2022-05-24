@@ -37,7 +37,7 @@ export const Row = styled(motion.div)<RowProps>`
   &:hover {
     transition: ${(props: RowProps) => props.theme.transition};
     background-color: ${(props: RowProps) =>
-      props.customBg ? darken(0.05, props.customBg) : 'initial'};
+      props.customBg ? lighten(0.02, props.customBg) : 'initial'};
   }
 `;
 
@@ -55,7 +55,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const lastMessage = dm.messages[0];
   return (
     <Row
-      className="dynamic-mouse-hover"
+      className="realm-cursor-hover"
       customBg={theme.windowColor}
       onClick={(evt: any) => onClick(evt)}
     >

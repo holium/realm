@@ -28,26 +28,12 @@ export type ShipPreloadType = {
 export class ShipManager extends EventEmitter {
   ship: string = '';
   private conduit?: Urbit;
-  private stateTree: ShipStoreType;
-  private currentShip?: ShipModelType;
-  private store: Store<ShipStoreType>;
+  private stateTree?: ShipModelType;
+  private store?: Store<ShipModelType>;
+  private hash?: string;
 
   constructor() {
     super();
-    // TODO password protect data
-    this.store = new Store<ShipStoreType>({
-      name: 'ship.manager',
-      accessPropertiesByDotNotation: true,
-      defaults: ShipStore.create(),
-    });
-    let persistedState: ShipStoreType = this.store.store;
-    // console.log(persistedState.patp);
-    this.stateTree = ShipStore.create(castToSnapshot(persistedState));
-
-    onSnapshot(this.stateTree, (snapshot: any) => {
-      this.store.store = snapshot;
-    });
-
     this.getApps = this.getApps.bind(this);
     this.getDMs = this.getDMs.bind(this);
     this.onEffect = this.onEffect.bind(this);
@@ -64,30 +50,44 @@ export class ShipManager extends EventEmitter {
   subscribe(conduit: Urbit, ship: string, shipInfo: any) {
     this.ship = ship;
     this.conduit = conduit;
+    // TODO password protect data
+    this.store = new Store<ShipModelType>({
+      name: `ship.manager.${ship}`,
+      accessPropertiesByDotNotation: true,
+    });
+    let persistedState: ShipModelType = this.store.store;
+    // console.log(persistedState.patp);
+    // this.stateTree = ShipModel.create(castToSnapshot(persistedState));
 
-    this.currentShip = this.stateTree.ships.get(ship);
+    // TODO set up multiple ships properly
+    // this is the error
+    // (Object type: 'map<string, AnonymousModel>', Path upon death: '/ships/~0bus/docket/apps', Subpath: 'ballot', Action: '/ships/~0bus/docket/apps.@APPLY_SNAPSHOT()')
     // console.log(this.currentShip);
-    // this.shipState = ShipModel.create({
-    //   patp: this.ship,
-    //   url: persistedState.url,
-    //   wallpaper: persistedState.wallpaper || null,
-    //   color: persistedState.color || null,
-    //   nickname: persistedState.nickname || null,
-    //   avatar: persistedState.avatar || null,
-    //   cookie: persistedState.cookie || shipInfo.cookie,
-    //   // theme: castToSnapshot(persistedState.theme),
-    //   chat: persistedState.chat
-    //     ? castToSnapshot(persistedState.chat)
-    //     : { loader: { state: 'initial' } },
-    //   contacts: persistedState.contacts
-    //     ? castToSnapshot(persistedState.contacts)
-    //     : { ourPatp: this.ship },
-    //   docket: persistedState.docket
-    //     ? castToSnapshot(persistedState.docket)
-    //     : {},
-    // });
+    this.stateTree = ShipModel.create({
+      patp: this.ship,
+      url: persistedState.url,
+      wallpaper: persistedState.wallpaper || null,
+      color: persistedState.color || null,
+      nickname: persistedState.nickname || null,
+      avatar: persistedState.avatar || null,
+      cookie: persistedState.cookie || shipInfo.cookie,
+      // theme: castToSnapshot(persistedState.theme),
+      chat: persistedState.chat
+        ? castToSnapshot(persistedState.chat)
+        : { loader: { state: 'initial' } },
+      contacts: persistedState.contacts
+        ? castToSnapshot(persistedState.contacts)
+        : { ourPatp: this.ship },
+      docket: persistedState.docket
+        ? castToSnapshot(persistedState.docket)
+        : {},
+    });
 
-    onPatch(this.currentShip, (patch) => {
+    onSnapshot(this.stateTree, (snapshot: any) => {
+      this.store!.store = snapshot;
+    });
+
+    onPatch(this.stateTree, (patch) => {
       // send patches to UI store
       const patchEffect = {
         patch,
@@ -99,7 +99,7 @@ export class ShipManager extends EventEmitter {
     });
 
     const syncEffect = {
-      model: getSnapshot(this.currentShip!),
+      model: getSnapshot(this.stateTree!),
       resource: 'ship',
       key: this.ship,
       response: 'initial',
@@ -110,8 +110,7 @@ export class ShipManager extends EventEmitter {
         app: 'contact-store',
         path: '/all',
         event: (data: any) => {
-          console.log('contact store test');
-          this.currentShip?.contacts.setInitial(data);
+          this.stateTree?.contacts.setInitial(data);
         },
         err: () => console.log('Subscription rejected'),
         quit: () => console.log('Kicked from subscription'),
@@ -125,13 +124,13 @@ export class ShipManager extends EventEmitter {
     // });
     // load initial dms
     this.getDMs().then((response) => {
-      this.currentShip?.chat.setDMs(
+      this.stateTree?.chat.setDMs(
         this.ship,
         response['graph-update']['add-graph']['graph']
       );
     });
     this.getApps().then((apps) => {
-      this.currentShip?.docket.setInitial(apps);
+      this.stateTree?.docket.setInitial(apps);
     });
   }
 
@@ -188,10 +187,10 @@ export class ShipManager extends EventEmitter {
       value: any;
     };
   }) {
-    this.store.set(
-      `${action.resource}.${action.context.ship}.${action.data.key}`,
-      action.data.value
-    );
+    // this.store.set(
+    //   `${action.resource}.${action.context.ship}.${action.data.key}`,
+    //   action.data.value
+    // );
     // const patchEffect = {
     //   patch,
     //   resource: 'ship',
@@ -205,20 +204,31 @@ export class ShipManager extends EventEmitter {
     const newShip = ShipModel.create({
       patp: ship.patp,
       url: ship.url,
+      cookie: ship.cookie,
       wallpaper: ship.wallpaper || null,
       color: ship.color || null,
       nickname: ship.nickname || null,
       avatar: ship.avatar || null,
-      cookie: ship.cookie,
       chat: { loader: { state: 'initial' } },
       contacts: { ourPatp: this.ship },
       docket: {},
     });
-    this.stateTree?.setNewShip(newShip);
+    this.store = new Store<ShipModelType>({
+      name: `ship.manager.${ship.patp}`,
+      accessPropertiesByDotNotation: true,
+    });
+
+    this.store.store = newShip;
+    // this.stateTree?.setNewShip(newShip);
     return newShip;
   }
   removeShip(patp: string) {
-    this.stateTree.deleteShip(patp);
+    const deletedShip = new Store<ShipModelType>({
+      name: `ship.manager.${patp}`,
+      accessPropertiesByDotNotation: true,
+    });
+    deletedShip.clear();
+    // this.stateTree.deleteShip(patp);
   }
   // -------------------------------------------------------
   // ----------------------- ACTIONS -----------------------

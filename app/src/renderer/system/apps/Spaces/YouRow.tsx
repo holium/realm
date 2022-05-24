@@ -21,7 +21,7 @@ export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
     <SpaceRowStyle
       data-close-tray="true"
       style={{ width: '100%' }}
-      className="dynamic-mouse-hover"
+      className="realm-cursor-hover"
       selected={selected}
       customBg={theme.dockColor}
       onClick={() => {

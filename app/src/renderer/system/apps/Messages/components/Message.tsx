@@ -79,7 +79,7 @@ export const Message: FC<DMContact> = (props: DMContact) => {
       if (isImage(message)) {
         message = (
           <img
-            className="dynamic-mouse-hover"
+            className="realm-cursor-hover"
             style={{ borderRadius: 8 }}
             height="auto"
             width={250}

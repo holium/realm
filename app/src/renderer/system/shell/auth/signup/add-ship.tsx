@@ -257,7 +257,7 @@ export const ContinueButton = (props: any) => {
   const { ship, theme } = props;
   return (
     <Flex
-      className="dynamic-mouse-hover"
+      className="realm-cursor-hover"
       p={1}
       pr={3}
       onClick={() => props.onClick(ship)}

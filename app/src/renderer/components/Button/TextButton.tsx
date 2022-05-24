@@ -91,7 +91,7 @@ export const TextButton: FC<TextButtonProps> = (props: TextButtonProps) => {
   return (
     <div
       className={
-        props.disabled ? 'dynamic-mouse-disabled' : 'dynamic-mouse-hover'
+        props.disabled ? 'dynamic-mouse-disabled' : 'realm-cursor-hover'
       }
     >
       <TextButtonStyle {...props}></TextButtonStyle>

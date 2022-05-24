@@ -37,7 +37,7 @@ const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   transform: translateZ(0);
   will-change: transform;
   ${(props: TitlebarStyleProps) => css`
-    background: ${rgba(props.customBg, 0.5)};
+    background: ${props.customBg};
     z-index: ${props.zIndex};
     border-bottom: ${props.hasBorder
       ? `1px solid ${rgba(darken(0.06, props.customBg), 0.9)}`
@@ -50,7 +50,7 @@ const TitleCentered = styled(Flex)`
   height: 30px;
   left: 0;
   right: 0;
-  text-align: 'center';
+  text-align: center;
 `;
 
 type TitlebarProps = {

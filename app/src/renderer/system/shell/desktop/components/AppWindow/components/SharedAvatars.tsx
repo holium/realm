@@ -36,7 +36,7 @@ export const SharedAvatars: FC<SharedSessionProps> = (
       {sessionMembers.map((member: any, index: number) => (
         <motion.div
           key={member.patp}
-          className="dynamic-mouse-hover"
+          className="realm-cursor-hover"
           style={{
             display: 'flex',
             cursor: 'pointer',

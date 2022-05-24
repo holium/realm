@@ -1,7 +1,7 @@
 import React, { FC, useState, useCallback } from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { rgba, lighten } from 'polished';
+import { rgba, lighten, darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../../theme';
@@ -197,12 +197,12 @@ export const AppWindow: FC<AppWindowProps> = observer(
             maximizeButton
             closeButton
             hasBorder
-            // shareable
+            shareable
             dragControls={dragControls}
             onDragStop={() => onDragStop()}
             onClose={() => onClose()}
             onMaximize={() => maximize()}
-            theme={theme}
+            theme={{ ...theme, windowColor: darken(0.002, theme.windowColor!) }}
             app={window}
           />
           <AppView hasTitlebar isResizing={isResizing} window={window} />

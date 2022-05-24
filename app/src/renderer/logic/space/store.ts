@@ -5,14 +5,15 @@ import {
   flow,
   applySnapshot,
   getSnapshot,
+  castToSnapshot,
   clone,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { ThemeModel } from './../theme/store';
 import MockData from './mock';
 import { DocketApp, WebApp } from '../../../core/ship/stores/docket';
 import { ShipModelType } from '../ship/store';
 import { osState } from '../store';
+import { ThemeModel } from 'core/theme/store';
 
 const DocketMap = types.map(types.union({ eager: false }, DocketApp, WebApp));
 export const Space = types
@@ -88,7 +89,7 @@ export const SpaceStore = types
           type: 'our',
           // @ts-ignore FIX
           apps: {
-            // pinned: ['ballot', 'escape', 'webterm', 'bitcoin', 'landscape'],
+            pinned: ['ballot', 'escape', 'webterm', 'bitcoin', 'landscape'],
             // TODO fix
             ...(ship.docket.apps
               ? {
@@ -118,23 +119,30 @@ export const SpaceStore = types
           });
         }
       }
+      // Set temp other spaces
+      // self.spaces.set(
+      //   'other-life',
+      //   ThemeModel.create(castToSnapshot(MockData['other-life'].theme!))
+      // );
     },
     selectSpace(spaceKey: string) {
       self.selected = self.spaces.get(spaceKey)!;
-      const theme =
-        osState.themeStore.spaces.get(spaceKey) || osState.themeStore.os;
-      self.selected.theme = ThemeModel.create({
-        themeId: `${spaceKey}`,
-        wallpaper: theme.wallpaper,
-        backgroundColor: theme.backgroundColor,
-        dockColor: theme.dockColor,
-        windowColor: theme.windowColor,
-        textTheme: theme.textTheme,
-        textColor: theme.textColor,
-        iconColor: theme.iconColor,
-        mouseColor: theme.mouseColor,
-      });
       // TODO make the theme system better
+      console.log(toJS(self.selected.theme));
+      // const theme =
+      //   osState.themeStore.spaces.get(spaceKey) || osState.themeStore.os;
+      // self.selected.theme = ThemeModel.create({
+      //   themeId: `${spaceKey}`,
+      //   wallpaper: self.selected.theme.wallpaper,
+      //   backgroundColor: theme.backgroundColor,
+      //   dockColor: theme.dockColor,
+      //   windowColor: theme.windowColor,
+      //   textTheme: theme.textTheme,
+      //   textColor: theme.textColor,
+      //   iconColor: theme.iconColor,
+      //   mouseColor: theme.mouseColor,
+      // });
+      osState.themeStore.setCurrentSpaceTheme(spaceKey);
       // if (
       //   self.selected.theme.wallpaper !== osState.themeStore.theme.wallpaper
       // ) {

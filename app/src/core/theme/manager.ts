@@ -62,11 +62,13 @@ export class ThemeManager extends EventEmitter {
   // ------------------------------------
 
   initialize() {
+    this.stateTree.loader.set('loaded');
     const syncEffect = {
       model: getSnapshot(this.stateTree),
       resource: 'theme',
       response: 'initial',
     };
+
     this.onEffect(syncEffect);
   }
 
@@ -75,6 +77,7 @@ export class ThemeManager extends EventEmitter {
   }
   setSpaceTheme(_event: any, spaceId: string, theme: ThemeModelType) {
     console.log('set space theme', spaceId);
+    this.stateTree.setCurrentSpaceTheme(spaceId, theme);
   }
 
   // -------------------------------------------------------

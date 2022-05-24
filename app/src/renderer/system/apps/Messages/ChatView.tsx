@@ -124,6 +124,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           </IconButton>
           <Flex flex={1}>
             <Input
+              className="realm-cursor-text-cursor"
               height={32}
               placeholder="Write a message"
               wrapperStyle={{

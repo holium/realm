@@ -126,11 +126,11 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   const onMouseDown = useCallback(() => setIsActive(true), []);
   const onMouseUp = useCallback(() => setIsActive(false), []);
   const onMouseEnterViewport = useCallback(() => {
+    console.log('eneter viewport');
     setIsVisible(true);
   }, []);
   const onMouseLeaveViewport = useCallback(() => {
     setIsVisible(false);
-    console.log('leave viewport?');
     setIsActiveClickable(false);
   }, []);
 
@@ -186,12 +186,17 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
         'input[type="password"]',
         'input[type="date"]',
         'input',
+        '.realm-cursor-text-cursor',
       ].join(',')
     );
     inputs.forEach((input) => {
       input.style.cursor = 'none';
       input.addEventListener('mouseover', () => {
         setTextCursor(true);
+      });
+
+      input.addEventListener('blur', () => {
+        setTextCursor(false);
       });
       input.addEventListener('mouseout', () => {
         setTextCursor(false);
@@ -203,7 +208,6 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
 
     clickableEls.forEach((el) => {
       el.style.cursor = 'none';
-
       el.addEventListener('mouseover', () => {
         setTextCursor(false);
         setIsActive(true);

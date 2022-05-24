@@ -3,12 +3,17 @@ import { darken, lighten, rgba } from 'polished';
 import { average } from 'color.js';
 import { bgIsLightOrDark } from './lib';
 import { LoaderModel } from '../../renderer/logic/stores/common/loader';
+// import Wallpaper from '../../../assets/sample-wallpaper.png';
+// import { Flex } from '~ui/components';
+// import Image from '/Users/drunkplato/Documents/Holium/Design/Assets/os-wallpaper/The_Course_of_Empire_Desolation.jpeg';
 
 // import { bgIsLightOrDark } from '../utils/color';
 
 // https://unsplash.com/@pawel_czerwinski
 // export const DEFAULT_WALLPAPER =
 //   'https://images.unsplash.com/photo-1650361072639-e2d0d4f7f3e6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=100';
+
+// export const DEFAULT_WALLPAPER = Image;
 
 export const DEFAULT_WALLPAPER =
   'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
@@ -37,7 +42,7 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 };
 
 export const ThemeModel = types
-  .model({
+  .model('ThemeModel', {
     themeId: types.identifier,
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     backgroundColor: types.optional(types.string, '#c4c3bf'),
@@ -62,6 +67,7 @@ export const ThemeStore = types
     currentTheme: types.safeReference(ThemeModel),
     os: types.optional(ThemeModel, {
       themeId: 'os',
+      // wallpaper: DEFAULT_WALLPAPER,
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
       backgroundColor: '#c2b4b4',
@@ -103,7 +109,9 @@ export const ThemeStore = types
       config: { patp?: string; spaceId?: string }
     ) {
       const themeId = (config.patp && `ship${config.patp}`) || config.spaceId;
-      const color = yield average(wallpaper, { group: 15, format: 'hex' });
+      console.log(themeId);
+      // const color = yield average(wallpaper, { group: 15, format: 'hex' });
+      const color = '#c4c3bf';
       const bgLuminosity = bgIsLightOrDark(color.toString());
       const windowTheme = generateColors(color, bgLuminosity);
       const theme = ThemeModel.create({

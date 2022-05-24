@@ -32,7 +32,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
     };
 
     return (
-      <Flex className="dynamic-mouse-hover" alignItems="center">
+      <Flex className="realm-cursor-hover" alignItems="center">
         <TrayMenu
           id="spaces-tray"
           appRef={appRef}

@@ -65,11 +65,14 @@ export const Chat: FC<any> = (props: ChatProps) => {
             closeButton={false}
             hasBorder
             zIndex={5}
-            theme={props.theme}
+            theme={{
+              ...props.theme,
+              windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.8),
+            }}
           >
             <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
               <IconButton
-                className="dynamic-mouse-hover"
+                className="realm-cursor-hover"
                 size={26}
                 style={{ cursor: 'none' }}
                 customBg={dockColor}
@@ -97,11 +100,10 @@ export const Chat: FC<any> = (props: ChatProps) => {
             </Flex>
             <Flex pl={2} pr={2} mr={3}>
               <IconButton
-                className="dynamic-mouse-hover"
+                className="realm-cursor-hover"
                 customBg={dockColor}
                 style={{ cursor: 'none' }}
                 size={26}
-                color={iconColor}
               >
                 <Icons name="Phone" />
               </IconButton>

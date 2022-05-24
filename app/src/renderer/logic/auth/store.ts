@@ -203,7 +203,6 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
     }) => {
       // Apply persisted snapshot
       applySnapshot(self, castToSnapshot(syncEffect.model));
-      console.log('initial sync in auth');
       // on initial sync we should set themes and various other variables
       self.selected?.loggedIn && osState.desktopStore.setIsBlurred(false);
       self.selected?.loggedIn &&
@@ -242,6 +241,7 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
         const [response, error] = yield AuthIPC.login(ship, password);
         self.selected!.setLoggedIn(true);
         osState.desktopStore.setIsBlurred(false);
+        osState.desktopStore.setMouseColor(self.selected?.color!);
         if (error) throw error;
       } catch (err: any) {
         self.loader.error(err);

@@ -68,7 +68,7 @@ export const ShipSelector: FC = observer(() => {
                   content={ship.patp || ship.nickname}
                 >
                   <motion.div
-                    className="dynamic-mouse-hover"
+                    className="realm-cursor-hover"
                     style={{
                       x: 0,
                       // cursor: 'pointer',

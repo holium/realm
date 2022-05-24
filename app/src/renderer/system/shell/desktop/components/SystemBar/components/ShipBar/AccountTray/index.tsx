@@ -49,7 +49,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
     >
       <motion.div
         id="account-tray-icon"
-        className="dynamic-mouse-hover"
+        className="realm-cursor-hover"
         // @ts-expect-error -
         ref={accountButtonRef}
         // style={{

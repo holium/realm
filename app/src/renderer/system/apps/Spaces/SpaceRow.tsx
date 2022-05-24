@@ -58,7 +58,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
     <SpaceRowStyle
       data-close-tray="true"
       selected={selected}
-      className="dynamic-mouse-hover"
+      className="realm-cursor-hover"
       customBg={theme.dockColor}
       onClick={() => {
         onSelect(space.id);
