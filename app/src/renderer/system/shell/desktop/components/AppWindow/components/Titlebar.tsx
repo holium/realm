@@ -99,15 +99,22 @@ export const Titlebar = (props: TitlebarProps) => {
     const webview: any = document.getElementById(
       `${props.app!.id}-app-webview`
     );
+    // const devtoolsView = document.getElementById('DevTools');
+    // const browser = webview.getWebContents();
+    // // browser.setDevToolsWebContents(devtoolsView.getWebContents());
+    // browser.openDevTools();
+    webview.isDevToolsOpened()
+      ? webview.closeDevTools()
+      : webview.openDevTools();
 
-    webview?.addEventListener('did-finish-load', () => {
-      // webview.
+    // webview?.addEventListener('did-finish-load', () => {
+    //   // webview.
 
-      webview.isDevToolsOpened()
-        ? webview.closeDevTools()
-        : webview.openDevTools();
-      // webview!.openDevTools();
-    });
+    //   webview.isDevToolsOpened()
+    //     ? webview.closeDevTools()
+    //     : webview.openDevTools();
+    //   // webview!.openDevTools();
+    // });
   };
 
   let titleSection: any;
@@ -185,6 +192,15 @@ export const Titlebar = (props: TitlebarProps) => {
       {children}
       {(maximizeButton || closeButton) && (
         <Flex gap={4} alignItems="center">
+          <WindowIcon
+            icon="DevBox"
+            iconColor={iconColor!}
+            bg="#97A3B2"
+            onClick={(evt: any) => {
+              evt.stopPropagation();
+              onDevTools();
+            }}
+          />
           {maximizeButton && (
             <WindowIcon
               icon="Expand"
