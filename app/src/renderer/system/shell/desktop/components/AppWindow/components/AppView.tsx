@@ -70,7 +70,7 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
 
       webview?.addEventListener('close', () => {
         // @ts-ignore
-        // webview!.closeDevTools();
+        webview!.closeDevTools();
       });
       desktopStore.openBrowserWindow(activeWindow, location);
       setAppConfig(location);

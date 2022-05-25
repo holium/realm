@@ -6,6 +6,7 @@ import { WindowThemeType } from '../../../../../../logic/stores/config';
 import { Flex, Text } from '../../../../../../components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
+import { useEffect } from 'react';
 
 type TitlebarStyleProps = {
   customBg: string;
@@ -67,6 +68,7 @@ type TitlebarProps = {
   isAppWindow?: boolean;
   shareable?: boolean;
   app?: {
+    id?: string;
     title?: string;
     icon?: string;
     color?: string;
@@ -92,6 +94,21 @@ export const Titlebar = (props: TitlebarProps) => {
     hasBlur,
   } = props;
   const { windowColor, iconColor } = props.theme;
+
+  const onDevTools = () => {
+    const webview: any = document.getElementById(
+      `${props.app!.id}-app-webview`
+    );
+
+    webview?.addEventListener('did-finish-load', () => {
+      // webview.
+
+      webview.isDevToolsOpened()
+        ? webview.closeDevTools()
+        : webview.openDevTools();
+      // webview!.openDevTools();
+    });
+  };
 
   let titleSection: any;
   if (props.app) {
