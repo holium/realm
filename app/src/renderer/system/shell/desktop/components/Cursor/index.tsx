@@ -75,23 +75,17 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
    */
   const onMouseMove = useCallback((evt: MouseEvent) => {
     const { clientX, clientY } = evt;
-    // console.log(evt);
-    // TODO trying to get the edge transition to work well
-    // if (clientX >= window.innerWidth - 1 || clientX === 1) {
-    //   setIsVisible(false);
-    // }
-    // if (clientY >= window.innerHeight - 1 || clientY === 1) {
-    //   setIsVisible(false);
-    // }
-    // if (clientX >= window.innerWidth - 2 || clientX === 2) {
-    //   setIsVisible(true);
-    // }
-    // if (clientY >= window.innerHeight - 2 || clientY === 2) {
-    //   setIsVisible(true);
-    // }
+
     setCoords({ x: clientX, y: clientY });
     cursorInnerRef.current.style.top = `${clientY}px`;
     cursorInnerRef.current.style.left = `${clientX}px`;
+    if (cursorInnerRef.current.style.transform === 'none') {
+      // if for some reason the transform isnt set yet.
+      cursorInnerRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+      cursorOuterRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+    }
     endX.current = clientX;
     endY.current = clientY;
   }, []);
@@ -123,22 +117,23 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   }, [animateOuterCursor]);
 
   // Mouse Events State updates
-  const onMouseDown = useCallback(() => setIsActive(true), []);
+  const onMouseDown = useCallback(() => {
+    setIsActive(true);
+    document.body.style.cursor = 'none';
+  }, []);
   const onMouseUp = useCallback(() => setIsActive(false), []);
   const onMouseEnterViewport = useCallback(() => {
-    console.log('eneter viewport');
     setIsVisible(true);
   }, []);
   const onMouseLeaveViewport = useCallback(() => {
     setIsVisible(false);
-    setIsActiveClickable(false);
   }, []);
 
   useEventListener('mousemove', onMouseMove);
   useEventListener('mousedown', onMouseDown);
   useEventListener('mouseup', onMouseUp);
-  // useEventListener('mouseover', onMouseEnterViewport);
-  // useEventListener('mouseout', onMouseLeaveViewport);
+  useEventListener('mouseover', onMouseEnterViewport);
+  useEventListener('mouseout', onMouseLeaveViewport);
 
   // Cursors Hover/Active State
   useEffect(() => {
@@ -146,8 +141,10 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       cursorInnerRef.current.style.transform = `translate(-50%, -50%) scale(${innerScale})`;
       cursorOuterRef.current.style.transform = `translate(-50%, -50%) scale(${outerScale})`;
     } else {
-      cursorInnerRef.current.style.transform = 'translate(-50%, -50%) scale(1)';
-      cursorOuterRef.current.style.transform = 'translate(-50%, -50%) scale(1)';
+      cursorInnerRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+      cursorOuterRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
     }
   }, [innerScale, outerScale, isActive]);
 
@@ -280,6 +277,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       border: '1px solid white',
       boxSizing: 'content-box',
       backgroundColor: `rgba(${color}, 1)`,
+
       // transition: 'opacity 0.15s ease-in-out, transform 0.25s ease-in-out',
     },
     cursorOuter: {
