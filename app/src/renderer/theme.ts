@@ -72,7 +72,7 @@ export const elevations = {
 };
 
 export const containers = {
-  rounderBorderRadius: 8,
+  rounderBorderRadius: 9,
   outerBorderRadius: 6,
   innerBorderRadius: 4,
 };
@@ -125,7 +125,7 @@ export const theme = {
         borderHover: '#DADADA',
         input: {
           background: '#FFFFFF',
-          secondary: '#FDFDFD',
+          secondary: '#FAFAFA',
           borderColor: 'rgba(0, 0, 0, 0.1)',
           borderHover: 'rgba(0, 0, 0, 0.2)',
         },
@@ -141,7 +141,7 @@ export const theme = {
         blendedBg: rgba('#FFFFFF', 0.4),
         inset: '#f6f8fa',
         toolbar: '#F1F3F4',
-        divider: '#E6E6E6',
+        divider: '#DBDBDB',
       },
       icon: {
         app: '#85898E',

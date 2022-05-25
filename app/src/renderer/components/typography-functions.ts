@@ -7,6 +7,7 @@ import {
   position,
   color,
   typography,
+  textStyle,
   textShadow,
   SpaceProps,
   ColorProps,
@@ -15,6 +16,7 @@ import {
   BorderProps,
   PositionProps,
   TypographyProps,
+  TextStyleProps,
   TextShadowProps,
 } from 'styled-system';
 
@@ -25,7 +27,8 @@ export type TypographyFunctionsProps = SpaceProps &
   BorderProps &
   PositionProps &
   TypographyProps &
-  TextShadowProps;
+  TextShadowProps &
+  TextStyleProps;
 
 export const typographyFunctions = compose(
   space,
@@ -35,5 +38,6 @@ export const typographyFunctions = compose(
   border,
   position,
   typography,
-  textShadow
+  textShadow,
+  textStyle
 );

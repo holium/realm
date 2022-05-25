@@ -1,7 +1,7 @@
 import { FC, useMemo } from 'react';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
-import { useMst } from 'renderer/logic/store';
+import { useAuth } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 
 import {
@@ -12,19 +12,25 @@ import {
   ActionButton,
   Icons,
   Spinner,
+  Box,
+  TextButton,
 } from '../../../../components';
 
 type InstallStepProps = {
+  next: () => void;
   // isValid: boolean;
   // setValid: (isValid: boolean) => void;
 };
 
 export const StepInstall: FC<InstallStepProps> = observer(
   (props: InstallStepProps) => {
-    const { authStore } = useMst();
-    const shipName = '~lomder-librun';
-    const shipColor = '#F08735';
-    const avatar = null;
+    const { signupStore } = useAuth();
+    const { next } = props;
+
+    const shipName = signupStore.signupShip!.patp;
+    const shipNick = signupStore.signupShip!.nickname;
+    const shipColor = signupStore.signupShip!.color!;
+    const avatar = signupStore.signupShip!.avatar;
 
     return (
       <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
@@ -55,7 +61,30 @@ export const StepInstall: FC<InstallStepProps> = observer(
             borderRadiusOverride="6px"
             color={[shipColor, 'white']}
           />
-          <Text mt={3}>{shipName}</Text>
+          <Flex
+            style={{ width: 210 }}
+            transition={{ duration: 0.15 }}
+            animate={{ marginBottom: shipNick ? 24 : 0 }}
+            position="relative"
+            mt={3}
+            alignItems="center"
+            flexDirection="column"
+          >
+            {shipNick && (
+              <Text position="absolute" fontWeight={500}>
+                {shipNick}
+              </Text>
+            )}
+            <Text
+              transition={{ duration: 0, y: { duration: 0 } }}
+              animate={{
+                opacity: shipNick ? 0.5 : 1,
+                y: shipNick ? 22 : 0,
+              }}
+            >
+              {shipName}
+            </Text>
+          </Flex>
           <Flex flexDirection="column" alignItems="center">
             <ActionButton
               tabIndex={-1}
@@ -63,15 +92,15 @@ export const StepInstall: FC<InstallStepProps> = observer(
               height={32}
               style={{ width: 200 }}
               rightContent={
-                authStore.installer.isLoading ? (
+                signupStore.installer.isLoading ? (
                   <Spinner size={0} />
-                ) : authStore.installer.isLoaded ? (
+                ) : signupStore.installer.isLoaded ? (
                   <Icons ml={2} size={1} name="CheckCircle" />
                 ) : (
                   <Icons ml={2} size={1} name="DownloadCircle" />
                 )
               }
-              onClick={() => authStore.installRealm()}
+              onClick={() => signupStore.installRealm()}
             >
               Install Realm
             </ActionButton>
@@ -83,12 +112,31 @@ export const StepInstall: FC<InstallStepProps> = observer(
               opacity={0.6}
               mt={3}
             >
-              {!authStore.installer.isLoaded
+              {!signupStore.installer.isLoaded
                 ? 'This will just take a minute'
                 : 'Congrats! You are ready to enter a new world.'}
             </Text>
           </Flex>
         </Flex>
+        <Box position="absolute" height={40} bottom={20} right={24}>
+          <Flex
+            mt={5}
+            width="100%"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <TextButton
+              disabled={!signupStore.installer.isLoaded}
+              onClick={(evt: any) => {
+                signupStore.completeSignup().then(() => {
+                  next();
+                });
+              }}
+            >
+              {signupStore.isLoading ? <Spinner size={0} /> : 'Next'}
+            </TextButton>
+          </Flex>
+        </Box>
       </Grid.Column>
     );
   }

@@ -37,10 +37,32 @@ export function bgIsLightOrDark(hexColor: string) {
   const hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
 
   // Using the HSP value, determine whether the color is light or dark
+  // console.log(hsp);
   if (hsp > 127.5) {
     // the background image is too light
     return 'light';
   } else {
     return 'dark';
   }
+}
+
+export function cleanNounColor(ux: string) {
+  if (ux.length > 2 && ux.substring(0, 2) === '0x') {
+    const value = ux.substring(2).replace('.', '').padStart(6, '0');
+    return `#${value}`;
+  }
+
+  const value = ux.replace('.', '').padStart(6, '0');
+  return `#${value}`;
+}
+
+export function hexToRgb(hex: string) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 }

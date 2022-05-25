@@ -107,9 +107,9 @@ const StyledButton = styled.button`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
     border-radius: 4px;
     border-color: transparent;
+    cursor: none;
     box-shadow: none;
     text-align: left;
     font-size: 14px;

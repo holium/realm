@@ -1,4 +1,4 @@
-import { useRef, FC } from 'react';
+import { useRef, FC, useEffect } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 
@@ -14,20 +14,22 @@ import {
   useMenu,
   Menu,
   MenuItem,
+  Spinner,
 } from '../../../../components';
-import { useMst } from '../../../../logic/store';
+import { useAuth, useMst } from '../../../../logic/store';
 import { ShipSelector } from './ShipSelector';
-import { AnimatePresence } from 'framer-motion';
+import { DEFAULT_WALLPAPER } from 'core/theme/store';
 
 type LoginProps = {
   addShip: () => void;
+  continueSignup: (ship: any) => void;
   hasWallpaper?: boolean;
-  textTheme: 'light' | 'dark';
 };
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
-  const { addShip, textTheme, hasWallpaper } = props;
-  const { shipStore } = useMst();
+  const { addShip, hasWallpaper } = props;
+  const { authStore } = useAuth();
+  const { themeStore } = useMst();
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -41,7 +43,18 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     menuWidth,
   });
   const { anchorPoint, show, setShow } = config;
-  const pendingShip = shipStore.session;
+
+  const pendingShip = authStore.currentShip;
+  const shipName = pendingShip?.nickname || pendingShip?.patp;
+
+  useEffect(() => {
+    // Set the wallpaper on load
+    !themeStore.theme &&
+      pendingShip &&
+      themeStore.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER, {
+        patp: pendingShip?.patp!,
+      });
+  }, [pendingShip !== null]);
 
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
@@ -53,155 +66,161 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       passwordRef.current.blur();
       // @ts-expect-error typescript...
       wrapperRef.current.blur();
-      shipStore.login(pendingShip!.patp, event.target.value);
+      authStore.login(pendingShip!.patp, event.target.value);
     }
   };
 
   let colorProps = null;
-  if (textTheme) {
-    colorProps = {
-      color: textTheme === 'light' ? 'text.white' : 'text.primary',
-      textShadow: textTheme === 'light' ? '0 1px black' : 'text.primary',
-    };
-  }
-
-  const shipName = pendingShip?.nickname || pendingShip?.patp;
+  // if (theme) {
+  colorProps = {
+    color: themeStore.theme?.textColor,
+    textShadow: themeStore.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
+  };
+  // }
 
   return (
     <Fill>
       <Centered>
         {pendingShip && (
-          <Flex gap={24} alignItems="center" justifyContent="center">
-            <Box>
-              <Sigil
-                // key={pendingShip.patp}
-                isLogin
-                size={72}
-                simple={false}
-                borderRadiusOverride="8px"
-                avatar={pendingShip.avatar}
-                patp={pendingShip.patp}
-                color={[pendingShip.color, 'white']}
-              />
-            </Box>
-            <Flex flexDirection="column" gap={10}>
-              <Flex
-                gap={12}
-                flexDirection="row"
-                alignItems="center"
-                justifyContent="flex-start"
-              >
-                <Text
-                  key={`${pendingShip.patp}`}
-                  initial={{ opacity: 0 }}
-                  exit={{ opacity: 0.75 }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  transition={{ opacity: { duration: 1, ease: 'easeOut' } }}
-                  {...colorProps}
-                  fontWeight={500}
-                  fontSize={20}
+          <Flex alignItems="center" justifyContent="center">
+            <Flex gap={24} width={460}>
+              <Box>
+                <Sigil
+                  // key={pendingShip.patp}
+                  isLogin
+                  size={72}
+                  simple={false}
+                  borderRadiusOverride="8px"
+                  avatar={pendingShip.avatar}
+                  patp={pendingShip.patp}
+                  color={[pendingShip.color || '#000000', 'white']}
+                />
+              </Box>
+              <Flex flexDirection="column" gap={10}>
+                <Flex
+                  gap={12}
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="flex-start"
                 >
-                  {shipName}
-                </Text>
-                {pendingShip.nickname && (
                   <Text
-                    mt="1px"
+                    key={`${pendingShip.patp}`}
                     initial={{ opacity: 0 }}
-                    exit={{ opacity: 0.35 }}
+                    exit={{ opacity: 0.75 }}
                     animate={{
-                      opacity: 0.4,
+                      opacity: 1,
                     }}
                     transition={{ opacity: { duration: 1, ease: 'easeOut' } }}
                     {...colorProps}
-                    fontWeight={400}
-                    fontSize={16}
-                    opacity={0.35}
+                    fontWeight={500}
+                    fontSize={20}
                   >
-                    {pendingShip.patp}
+                    {shipName}
                   </Text>
-                )}
-              </Flex>
-              <Flex gap={12} alignItems="center">
-                <Input
-                  ref={passwordRef}
-                  wrapperRef={wrapperRef}
-                  {...(hasWallpaper
-                    ? { bg: 'bg.blendedBg' }
-                    : { bg: 'bg.secondary' })}
-                  autoFocus
-                  autoCorrect="false"
-                  bgOpacity={hasWallpaper ? 0.3 : 1}
-                  borderColor={
-                    hasWallpaper ? 'inpurt.borderHover' : 'input.borderColor'
-                  }
-                  wrapperStyle={{
-                    borderRadius: 8,
-                    width: 260,
-                  }}
-                  placeholder="Password"
-                  fontSize={16}
-                  name="password"
-                  type="password"
-                  rightInteractive
-                  onKeyDown={submitPassword}
-                  rightIcon={
-                    <Flex justifyContent="center" alignItems="center">
-                      <IconButton
-                        ref={submitRef}
-                        luminosity={textTheme}
-                        size={24}
-                        canFocus
-                        onKeyDown={submitPassword}
-                      >
-                        <Icons opacity={0.5} name="ArrowRightLine" />
-                      </IconButton>
-                    </Flex>
-                  }
-                />
-                <IconButton
-                  size={26}
-                  ref={optionsRef}
-                  luminosity={textTheme}
-                  opacity={1}
-                  onClick={(evt: any) => {
-                    evt.preventDefault();
-                    evt.currentTarget.blur();
-                    !show && setShow && setShow(true);
-                  }}
-                >
-                  <Icons name="Settings5Line" />
-                </IconButton>
-                <Menu
-                  id={`${pendingShip.patp}-user-menu`}
-                  style={{
-                    top: anchorPoint && anchorPoint.y + 8,
-                    left: anchorPoint && anchorPoint.x + 10,
-                    padding: '8px 4px',
-                    visibility: show ? 'visible' : 'hidden',
-                    width: menuWidth,
-                  }}
-                  isOpen={show}
-                  onClose={() => {
-                    setShow(false);
-                  }}
-                >
-                  <MenuItem
-                    label="Reset password"
-                    onClick={() => {
-                      console.log('do reset form');
+                  {pendingShip.nickname && (
+                    <Text
+                      mt="1px"
+                      initial={{ opacity: 0 }}
+                      exit={{ opacity: 0.35 }}
+                      animate={{
+                        opacity: 0.4,
+                      }}
+                      transition={{ opacity: { duration: 1, ease: 'easeOut' } }}
+                      {...colorProps}
+                      fontWeight={400}
+                      fontSize={16}
+                      opacity={0.35}
+                    >
+                      {pendingShip.patp}
+                    </Text>
+                  )}
+                </Flex>
+                <Flex gap={12} alignItems="center">
+                  <Input
+                    ref={passwordRef}
+                    wrapperRef={wrapperRef}
+                    {...(hasWallpaper
+                      ? { bg: 'bg.blendedBg' }
+                      : { bg: 'bg.secondary' })}
+                    autoFocus
+                    autoCorrect="false"
+                    bgOpacity={hasWallpaper ? 0.3 : 1}
+                    borderColor={
+                      hasWallpaper ? 'inpurt.borderHover' : 'input.borderColor'
+                    }
+                    wrapperStyle={{
+                      borderRadius: 8,
+                      width: 260,
                     }}
+                    placeholder="Password"
+                    fontSize={16}
+                    name="password"
+                    type="password"
+                    rightInteractive
+                    onKeyDown={submitPassword}
+                    rightIcon={
+                      <Flex justifyContent="center" alignItems="center">
+                        {authStore.loader.isLoading ? (
+                          <Spinner size={0} />
+                        ) : (
+                          <IconButton
+                            ref={submitRef}
+                            luminosity={themeStore.theme?.textTheme}
+                            size={24}
+                            canFocus
+                            onKeyDown={submitPassword}
+                          >
+                            <Icons opacity={0.5} name="ArrowRightLine" />
+                          </IconButton>
+                        )}
+                      </Flex>
+                    }
                   />
-                  <MenuItem
-                    label="Remove ship"
-                    mt={1}
-                    onClick={() => {
-                      shipStore.removeShip(pendingShip.patp);
-                      shipStore.clearSession();
+                  <IconButton
+                    size={26}
+                    ref={optionsRef}
+                    luminosity={themeStore.theme?.textTheme}
+                    opacity={1}
+                    onClick={(evt: any) => {
+                      evt.preventDefault();
+                      evt.currentTarget.blur();
+                      !show && setShow && setShow(true);
                     }}
-                  />
-                </Menu>
+                  >
+                    <Icons name="Settings5Line" />
+                  </IconButton>
+                  <Menu
+                    id={`${pendingShip.patp}-user-menu`}
+                    customBg={themeStore.theme.windowColor}
+                    style={{
+                      top: anchorPoint && anchorPoint.y + 8,
+                      left: anchorPoint && anchorPoint.x + 10,
+                      visibility: show ? 'visible' : 'hidden',
+                      width: menuWidth,
+                    }}
+                    isOpen={show}
+                    onClose={() => {
+                      setShow(false);
+                    }}
+                  >
+                    <MenuItem
+                      label="Reset password"
+                      customBg={themeStore.theme.windowColor}
+                      onClick={() => {
+                        console.log('do reset form');
+                      }}
+                    />
+                    <MenuItem
+                      label="Remove ship"
+                      customBg={themeStore.theme.windowColor}
+                      mt={1}
+                      onClick={() => {
+                        authStore.removeShip(pendingShip.patp);
+                        authStore.clearSession();
+                      }}
+                    />
+                  </Menu>
+                </Flex>
               </Flex>
             </Flex>
           </Flex>
@@ -217,16 +236,22 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
           alignItems="center"
         >
           <ShipSelector />
-          <TextButton {...colorProps} onClick={() => addShip()}>
-            <Flex
-              gap={8}
-              flexDirection="row"
-              justifyContent="space-between"
-              alignItems="center"
+          <Flex gap={12}>
+            <TextButton
+              {...colorProps}
+              style={{ padding: '0 16px' }}
+              onClick={() => addShip()}
             >
-              Add Ship <Icons size={22} name="AddCircleLine" />
-            </Flex>
-          </TextButton>
+              <Flex
+                gap={8}
+                flexDirection="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                Add Ship <Icons size={22} name="AddCircleLine" />
+              </Flex>
+            </TextButton>
+          </Flex>
         </Flex>
       </Bottom>
     </Fill>

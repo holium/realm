@@ -12,14 +12,15 @@ import {
   LayoutProps,
   TypographyProps,
 } from 'styled-system';
-import { rgba, darken } from 'polished';
-import type { ThemeType } from '../../theme';
 import { motion } from 'framer-motion';
+import { rgba, darken, lighten } from 'polished';
+import type { ThemeType } from '../../theme';
 
 type IProps = {
   ref?: unknown;
   disabled?: boolean;
   customBg?: string;
+  hoverFill?: string;
   hoverReveal?: boolean;
   canFocus?: boolean;
   size?: number;
@@ -41,6 +42,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
   justify-content: center;
   position: relative;
   pointer-events: auto;
+  will-change: transform;
   height: ${(props: IProps) => `${props.size}px`};
   width: ${(props: IProps) => `${props.size}px`};
   svg {
@@ -66,17 +68,19 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     props.hoverReveal
       ? css`
           opacity: 0;
-          transition: 0.2s ease;
+          transition: ${props.theme.transitionFast};
           padding: 3px;
           background: transparent;
           &:hover {
+            transform: translateZ(0);
             opacity: 0.5;
             background: ${props.theme.colors.highlights.bgHighlight};
           }
         `
       : css`
-          transition: 0.2s ease;
+          transition: ${props.theme.transitionFast};
           &:hover {
+            transform: translateZ(0);
             background: ${props.luminosity
               ? props.theme.colors.highlights.bgClearHighlight
               : props.theme.colors.highlights.bgHighlight};
@@ -90,34 +94,53 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     css`
       &:focus,
       &:active {
-        transition: ${props.theme.transition};
+        transform: translateZ(0);
+        transition: ${props.theme.transitionFast};
         outline: none;
         svg {
           fill: ${darken('10%', props.theme.colors.brand.primary)};
         }
       }
     `}
-
   ${(props: IProps) =>
     props.customBg &&
     css`
       &:hover {
+        transform: translateZ(0);
+        transition: ${(props: IProps) => props.theme.transitionFast};
         background-color: ${props.customBg
-          ? darken(0.22, props.customBg)
+          ? rgba(lighten(0.1, props.customBg), 0.3)
           : 'inherit'};
       }
     `}
+
+    ${(props: IProps) =>
+    props.hoverFill &&
+    css`
+      &:hover {
+        transform: translateZ(0);
+        color: ${props.hoverFill};
+        svg {
+          fill: ${props.hoverFill};
+        }
+      }
+    `}
+
+  
+
+  
 
   &:disabled {
     color: ${(props) => props.theme.colors.ui.disabled};
     background-color: transparent;
     border-color: transparent;
-    cursor: default;
+    // cursor: default;
     svg {
       fill: ${(props) => props.theme.colors.ui.disabled};
     }
     &:hover {
-      cursor: default;
+      transform: translateZ(0);
+      // cursor: default;
       color: ${(props) => props.theme.colors.ui.disabled};
       background-color: transparent;
       border-color: transparent;
@@ -125,12 +148,11 @@ export const IconButton = styled(styled(motion.button)<IProps>`
   }
 `)<IProps>(
   {
-    cursor: 'pointer',
-    '&:hover': {
-      // @ts-expect-error stupid
-      backgroundColor: (props: IProps) =>
-        props.customBg ? darken(0.22, props.customBg) : 'initial',
-    },
+    // '&:hover': {
+    //   // @ts-expect-error stupid
+    //   backgroundColor: (props: IProps) =>
+    //     props.customBg ? darken(0.22, props.customBg) : 'initial',
+    // },
   },
   compose(space, size, color, layout, typography)
 );

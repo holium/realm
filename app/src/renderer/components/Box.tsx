@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HTMLAttributes } from 'react';
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import {
   background,
   BackgroundProps,
+  border,
+  BorderProps,
   ButtonStyleProps,
   color,
   ColorProps,
@@ -38,6 +41,7 @@ export type BoxProps = {
   ColorProps &
   ColorStyleProps &
   FlexboxProps &
+  BorderProps &
   LayoutProps &
   OpacityProps &
   PositionProps &
@@ -75,6 +79,7 @@ const boxStyles = compose(
   textDecoration,
   textTransform,
   typography,
+  border,
   variant({
     prop: 'variant',
     scale: 'buttons',
@@ -84,7 +89,7 @@ const boxStyles = compose(
   })
 );
 
-export const Box = styled.div<BoxProps>(
+export const Box = styled(motion.div)<BoxProps>(
   {
     boxSizing: 'border-box',
   },

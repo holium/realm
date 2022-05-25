@@ -1,34 +1,46 @@
-import { FC } from 'react';
-import { observer } from 'mobx-react';
-import { Bottom, Layer, Fill, Top } from 'react-spaces';
-import { SystemBar } from './components/system-bar';
+import { FC, useState } from 'react';
+import { Bottom, Layer, Fill } from 'react-spaces';
+import { SystemBar } from './components/SystemBar';
+import { AnimatePresence } from 'framer-motion';
+import { WindowManager } from './WindowManager';
+import { AppGrid } from './components/AppGrid';
+import { useMst } from 'renderer/logic/store';
+import { Observer } from 'mobx-react';
 
 type OSFrameProps = {
-  isFullscreen: boolean;
+  hasLoaded?: boolean;
+  isFullscreen?: boolean;
   hasWallpaper?: boolean;
 };
 
-export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
-  const { isFullscreen } = props;
-  // const { shipStore, configStore } = useMst();
+export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
+  const { hasLoaded } = props;
+  const { desktopStore } = useMst();
 
   return (
     <Fill>
-      {!isFullscreen && (
-        <Top
-          size={30}
-          // @ts-expect-error this error should be disabled
-          style={{ WebkitAppRegion: 'drag', appRegion: 'drag' }}
-        />
-      )}
-      <Fill></Fill>
       <Layer zIndex={1}>
+        <Observer>
+          {() => (
+            <Layer zIndex={1}>
+              <Layer zIndex={0}>
+                <WindowManager isOpen={!desktopStore.showHomePane} />
+              </Layer>
+              <Layer zIndex={1}>
+                <AppGrid isOpen={desktopStore.showHomePane} />
+              </Layer>
+            </Layer>
+          )}
+        </Observer>
+        {/* {desktopStore.showHomePane ? <AppGrid /> : <WindowManager />} */}
+      </Layer>
+      <Layer zIndex={2}>
         <Bottom size={58}>
           <SystemBar />
         </Bottom>
       </Layer>
     </Fill>
   );
-});
+};
 
 export default Desktop;

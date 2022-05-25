@@ -136,7 +136,7 @@ InputWrapper.defaultProps = {
   borderStyle: 'solid',
   borderRadius: 4,
   color: 'text.primary',
-  bg: 'ui.tertiary',
+  bg: 'bg.tertiary',
   mb: 0,
 };
 
@@ -153,6 +153,7 @@ const ContentArea: any = styled(Text)<
   appearance: none;
   outline: none;
   border: none;
+  cursor: none;
 
   :invalid::-webkit-datetime-edit {
     color: ${(props) => props.theme.colors.text.placeholder};

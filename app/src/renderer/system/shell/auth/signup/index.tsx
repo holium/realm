@@ -1,122 +1,64 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { isValidPatp } from 'urbit-ob';
-import { createField, createForm } from 'mobx-easy-form';
-import * as yup from 'yup';
+
 import {
   Icons,
   Card,
   Flex,
-  Grid,
   Box,
-  ActionButton,
   IconButton,
+  Text,
   TextButton,
-  Spinner,
 } from '../../../../components';
-
-import { AddShip } from './add-ship';
+import { AddShip, ContinueButton } from './add-ship';
 import { ConnectingShip } from './connecting';
-import { useMst } from '../../../../logic/store';
+import { useAuth, useMst } from '../../../../logic/store';
 import ProfileSetup from './step-profile';
 import StepPassword from './step-password';
 import StepInstall from './step-install';
+import HoliumAnimated, {
+  SplashWordMark,
+} from 'renderer/components/Icons/holium';
+import { useCallback } from 'react';
 
-export const createShipForm = (
-  defaults: any = {
-    urbitId: '~labruc-dillyx-lomder-librun',
-    shipUrl: 'https://test-moon-1.holium.network',
-    accessKey: 'mapfel-dalmec-halfen-sorhes',
-  }
-) => {
-  const shipForm = createForm({
-    onSubmit({ values }) {
-      return values;
-    },
-  });
-
-  const urbitId = createField({
-    id: 'urbit-id',
-    form: shipForm,
-    initialValue: defaults.urbitId || '',
-    // validationSchema: yup.string().required('Name is required'),
-    validate: (patp: string) => {
-      if (patp.length > 1 && isValidPatp(patp)) {
-        return { error: undefined, parsed: patp };
-      }
-
-      return { error: 'Invalid patp', parsed: undefined };
-    },
-  });
-  const shipUrl = createField({
-    id: 'ship-id',
-    form: shipForm,
-    initialValue: defaults.shipUrl || '',
-    validationSchema: yup
-      .string()
-      .matches(
-        /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-        'Enter correct url!'
-      )
-      .required('Please enter url'),
-  });
-  const accessKey = createField({
-    id: 'access-key',
-    form: shipForm,
-    initialValue: defaults.accessKey || '',
-    validationSchema: yup
-      .string()
-      .matches(
-        /[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}$/,
-        'Enter correct access key'
-      )
-      .required('Please enter access key required'),
-  });
-  return {
-    shipForm,
-    urbitId,
-    shipUrl,
-    accessKey,
-  };
-};
-
-// TODO add memory router
 type LoginProps = {
   isFullscreen?: boolean;
+  firstTime: boolean;
   goToLogin: () => void;
 };
 
 export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
-  const { goToLogin } = props;
-  const { shipStore, authStore } = useMst();
+  const { firstTime, goToLogin } = props;
+  const { themeStore } = useMst();
+  const { authStore, signupStore } = useAuth();
   const [step, setStep] = useState(
-    authStore.steps.indexOf(authStore.currentStep)
+    signupStore.steps.indexOf(signupStore.currentStep)
   );
+  const inProgressShips = authStore.inProgressList;
 
-  const { shipForm, urbitId, shipUrl, accessKey } = useMemo(
-    () => createShipForm(),
-    []
-  );
-
-  // const isBackDisabled = step === 0;
   const goBack = () => {
     if (step === 0) {
+      goToLogin();
+    } else if (step === 2) {
       goToLogin();
     } else {
       setStep(step - 1);
     }
   };
-  const isNextDisabled =
-    (step === 0 && !shipForm.computed.isValid) ||
-    step === authStore.steps.length;
+
+  const continueSignup = useCallback(
+    (id: string) => {
+      setStep(1);
+      signupStore.setSignupShip(authStore.ships.get(id));
+    },
+    [authStore.setSession, setStep]
+  );
+
   const next = () => {
-    if (!isNextDisabled) {
-      // goToLogin(); // TODO remove this when I finish the flow
-      if (step !== authStore.steps.length - 1) setStep(step + 1);
-    } else {
-    }
+    if (step !== signupStore.steps.length - 1) setStep(step + 1);
   };
+
   const cardSizes = {
     '0': {
       width: 560,
@@ -132,22 +74,52 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
     },
     '3': {
       width: 560,
-      height: 280,
+      height: 360,
     },
     '4': {
       width: 560,
-      height: 340,
+      height: 360,
     },
   };
+
   // @ts-expect-error why
   const { width, height } = cardSizes[step.toString()!];
+
   return (
     <AnimatePresence>
+      <Flex
+        key="brand-splash"
+        position="absolute"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <motion.div
+          key="holium-intro"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 20,
+          }}
+          initial={{ scale: 0.9, opacity: firstTime ? 1 : 0 }}
+          animate={{ scale: 1, opacity: 0 }}
+          transition={{ duration: 0.4, opacity: { delay: firstTime ? 5 : 0 } }}
+          exit={{ opacity: 0 }}
+        >
+          <HoliumAnimated width="100px" height="100px" fill={'#FFFFFF'} />
+          <SplashWordMark
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, opacity: { delay: 2 } }}
+          />
+        </motion.div>
+      </Flex>
       <motion.div
         key="signup-card"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.2, delay: firstTime ? 5 : 0 }}
         exit={{ scale: 0 }}
       >
         <Card
@@ -162,60 +134,53 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
           {step === 0 && (
             // eslint-disable-next-line jsx-a11y/no-access-key
             <AddShip
-              hasShips={shipStore.hasShips}
-              urbitId={urbitId}
-              shipUrl={shipUrl}
-              accessKey={accessKey}
+              firstTime={firstTime}
+              hasShips={authStore.hasShips}
+              next={() => next()}
             />
           )}
-          {step === 1 && <ConnectingShip />}
-          {step === 2 && <ProfileSetup />}
-          {step === 3 && <StepPassword />}
-          {step === 4 && <StepInstall />}
+          {step === 1 && <ConnectingShip next={() => next()} />}
+          {step === 2 && <ProfileSetup next={() => next()} />}
+          {step === 3 && <StepPassword next={() => next()} />}
+          {step === 4 && <StepInstall next={() => goToLogin()} />}
 
-          <Box position="absolute" height={40} bottom={20} left={20} right={24}>
+          <Box position="absolute" height={40} bottom={20} left={20}>
             <Flex
               mt={5}
               width="100%"
               alignItems="center"
-              justifyContent="space-between"
+              justifyContent="flex-start"
             >
-              <IconButton onClick={() => goBack()}>
-                <Icons name="ArrowLeftLine" />
-              </IconButton>
-              <TextButton
-                disabled={isNextDisabled}
-                // loading={shipStore.isLoading}
-                onClick={(evt: any) => {
-                  if (step === 0) {
-                    const formData = shipForm.actions.submit();
-                    console.log(formData);
-                    shipStore
-                      .addShip({
-                        ship: formData['urbit-id'],
-                        url: formData['ship-id'],
-                        code: formData['access-key'],
-                      })
-                      .then((value: any) => {
-                        // eslint-disable-next-line promise/no-callback-in-promise
-                        next();
-                        evt.target.blur();
-                        return null;
-                      })
-                      .catch((reason: any) => {
-                        console.log(reason);
-                      });
-                  } else {
-                    next();
-                  }
-                }}
-              >
-                {shipStore.isLoading ? <Spinner size={0} /> : 'Next'}
-              </TextButton>
+              {!firstTime && (
+                <IconButton onClick={() => goBack()}>
+                  <Icons name="ArrowLeftLine" />
+                </IconButton>
+              )}
             </Flex>
           </Box>
         </Card>
       </motion.div>
+      {/* {step === 0 && (
+        <Flex
+          mt={4}
+          top={`calc(50% + ${height / 2}px)`}
+          key="continue-section"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: firstTime ? 5 : 0 }}
+          position="absolute"
+          gap={12}
+        >
+          {inProgressShips.map((ship: any) => (
+            <ContinueButton
+              onClick={() => continueSignup(ship.id)}
+              key={`continue-${ship.patp}`}
+              ship={ship}
+              theme={themeStore.theme}
+            />
+          ))}
+        </Flex>
+      )} */}
     </AnimatePresence>
   );
 });

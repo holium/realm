@@ -1,75 +1,68 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useRef, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { ViewPort, Top } from 'react-spaces';
-import { average, prominent } from 'color.js';
-import { AnimatePresence } from 'framer-motion';
-import { useMst } from '../../logic/store';
+import { ViewPort, Layer, Fill } from 'react-spaces';
+import { useAuth, useMst, useShip } from '../../logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import { detectTextTheme, bgIsLightOrDark } from '../../logic/utils/color';
 import {
-  BackgroundDarken,
   BackgroundImage,
   BackgroundFill,
+  BackgroundWrap,
 } from './Shell.styles';
+import { AnimatePresence } from 'framer-motion';
 
-type ShellProps = {
-  isFullscreen: boolean;
-};
+type ShellProps = {};
+
+const DragBar = styled.div`
+  position: absolute;
+  height: 22px;
+  left: 0;
+  top: 0;
+  right: 0;
+  --webkit-app-region: drag;
+  app-region: drag;
+  cursor: none !important;
+  /* &:active {
+    cursor: grabbing;
+  } */
+`;
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
-  const { isFullscreen } = props;
-  const { shipStore } = useMst();
+  const { themeStore, desktopStore } = useMst();
+  const { authStore } = useAuth();
+  const { ship } = useShip();
 
-  const bgImage = useMemo(
-    () => shipStore.session?.wallpaper || 'https://source.unsplash.com/random',
-    [shipStore.session?.wallpaper]
-  );
-
-  useEffect(() => {
-    shipStore.getShips();
-  }, []);
-
-  useEffect(() => {
-    average(bgImage, { group: 15, format: 'hex' }).then((color) => {
-      // console.log(color);
-      // if (!shipStore.session?.theme.backgroundColor) {
-      let bgLuminosity = shipStore.session?.theme.textTheme;
-      if (!bgLuminosity) {
-        bgLuminosity = bgIsLightOrDark(color.toString());
-      }
-      // configStore
-      shipStore.session?.setTheme({
-        backgroundColor: color.toString(),
-        textColor: 'text.primary',
-        textTheme: bgLuminosity,
-      });
-      // }
-    });
-  }, [bgImage]);
+  const isFullscreen = desktopStore.isFullscreen;
+  const wallpaper = themeStore.theme.wallpaper;
+  const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
-  const loggedIn = true; // shipStore.session?.loggedIn;
-  // const loggedIn = shipStore.session?.loggedIn;
+  // const loggedIn = true; // shipStore.session?.loggedIn;
 
+  const loggedIn = authStore.currentShip?.loggedIn && !authStore.isLoading;
+  const isBlurred = useMemo(
+    () => !loggedIn || desktopStore.isBlurred,
+    [loggedIn, desktopStore.isBlurred]
+  );
+  // const blurBg = desktopStore.
+  const shipLoaded = ship && ship.isLoaded;
+  console.log('rerendering shell');
   return (
     <ViewPort>
-      <BgImage blurred={!loggedIn} wallpaper={bgImage} />
+      <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
+
+      <BgImage blurred={isBlurred} wallpaper={bgImage} />
+
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {!isFullscreen && (
-          <Top
-            size={30}
-            // @ts-expect-error this error should be disabled
-            style={{ WebkitAppRegion: 'drag', appRegion: 'drag' }}
-          />
-        )}
         {loggedIn ? (
-          <Desktop hasWallpaper={hasWallpaper} isFullscreen={isFullscreen} />
-        ) : (
-          <Auth
-            hasWallpaper={hasWallpaper}
-            textTheme={shipStore.session?.theme.textTheme!}
+          <Desktop
+            hasLoaded={shipLoaded}
+            hasWallpaper={true}
+            isFullscreen={isFullscreen}
           />
+        ) : (
+          <Auth hasWallpaper={hasWallpaper} />
         )}
       </BackgroundFill>
     </ViewPort>
@@ -78,6 +71,54 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 
 export default Shell;
 
+// const BgImage = ({
+//   blurred,
+//   wallpaper,
+// }: {
+//   blurred: boolean;
+//   wallpaper: string;
+// }) => {
+//   // console.log('wallpaper', wallpaper);
+//   const [imageLoading, setImageLoading] = useState(true);
+//   //
+//   // return <Fill style={{ background: 'lightgray' }} />;
+
+//   const imageLoaded = () => {
+//     setImageLoading(false);
+//   };
+//   return useMemo(() => {
+//     // console.log('background render', blurred);
+//     return (
+//       // <BackgroundDarken hasWallpaper>
+//       <BackgroundWrap
+//         key={wallpaper}
+//         animate={{ filter: blurred ? 'blur(20px)' : 'blur(0px)' }}
+//       >
+//         <AnimatePresence exitBeforeEnter>
+//           <BackgroundImage
+//             key={wallpaper}
+//             src={wallpaper}
+//             // width="auto"
+//             initial={{ opacity: 0 }}
+//             exit={{ opacity: 0, transition: { opacity: { delay: 1 } } }}
+//             animate={{
+//               opacity: 1,
+//               // opacity: imageLoading ? 0.5 : 1,
+//               // backdropFilter: blurred ? 'blur(20px)' : 'blur(0px)',
+//             }}
+//             transition={{
+//               opacity: { duration: 1 },
+//               // blur: { duration: 2, ease: true },
+//             }}
+//             onLoad={imageLoaded}
+//           />
+//         </AnimatePresence>
+//       </BackgroundWrap>
+//       // </BackgroundDarken>
+//     );
+//   }, [blurred, wallpaper, imageLoading]);
+// };
+
 const BgImage = ({
   blurred,
   wallpaper,
@@ -85,31 +126,48 @@ const BgImage = ({
   blurred: boolean;
   wallpaper: string;
 }) => {
-  const [imageLoading, setImageLoading] = useState(true);
+  // const [imageLoading, setImageLoading] = useState(true);
 
-  const imageLoaded = () => {
-    setImageLoading(false);
-  };
+  // const imageLoaded = () => {
+  //   setImageLoading(false);
+  // };
   return (
-    <BackgroundDarken hasWallpaper>
-      <AnimatePresence>
-        <BackgroundImage
-          key={wallpaper}
-          src={wallpaper}
-          // width="auto"
-          initial={{ opacity: 0 }}
-          exit={{ opacity: 0 }}
-          animate={{
-            opacity: imageLoading ? 0 : 1,
-            filter: blurred ? 'blur(20px)' : 'blur(0px)',
-          }}
-          transition={{
-            opacity: { duration: 1 },
-            blur: { duration: 2, ease: true },
-          }}
-          onLoad={imageLoaded}
-        />
-      </AnimatePresence>
-    </BackgroundDarken>
+    // <BackgroundDarken hasWallpaper>
+    <AnimatePresence>
+      <BackgroundImage
+        key={wallpaper}
+        src={wallpaper}
+        // width="auto"
+        initial={{ opacity: 0 }}
+        exit={{ opacity: 0 }}
+        animate={{
+          opacity: 1,
+          // opacity: imageLoading ? 0.5 : 1,
+          filter: blurred ? 'blur(20px)' : 'blur(0px)',
+        }}
+        transition={{
+          opacity: { duration: 1 },
+          // blur: { duration: 2, ease: true },
+        }}
+        // onLoad={imageLoaded}
+      />
+    </AnimatePresence>
+    // </BackgroundDarken>
   );
 };
+// const ShipDesktop = observer(() => {
+//   const { ship } = useShip();
+//   useEffect(() => {
+//     // ship.ini
+//   }, []);
+//   console.log('ship', ship);
+//   return (
+//     <ShipProvider value={shipState}>
+//       {ship && ship.isLoaded ? (
+//         <Desktop hasWallpaper={true} isFullscreen={false} />
+//       ) : (
+//         <Splash />
+//       )}
+//     </ShipProvider>
+//   );
+// });

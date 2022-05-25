@@ -36,7 +36,7 @@ export type StyleProps = SpaceProps &
 // TODO make variants
 export const MenuItemStyle: any = styled(styled.li`
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   height: 40px;
   display: flex;
   align-items: flex-start;
@@ -58,7 +58,6 @@ export const MenuItemStyle: any = styled(styled.li`
   svg {
     fill: currentcolor;
   }
-  cursor: pointer;
   pointer-events: auto;
 
   /* Not disabled */
@@ -96,11 +95,9 @@ export const MenuItemStyle: any = styled(styled.li`
   ${(props: StyleProps) =>
     props.customBg &&
     css`
-      /* background-color: ${lighten(0.15, props.customBg)}; */
       background-color: transparent;
-
       &:hover {
-        background-color: ${rgba(lighten(0.12, props.customBg), 0.7)};
+        background-color: ${darken(0.05, props.customBg)};
       }
     `}
 `)<StyleProps>(compose(space, color, layout, flexbox, border, position));
@@ -113,13 +110,3 @@ export const ChildrenBox = styled(styled.div`
 `)<StyleProps>(compose(space, color, layout, flexbox, border, position));
 
 export default MenuItemStyle;
-
-// &:disabled {
-//   -webkit-text-fill-color: currentColor; /* set text fill to current color for safari */
-//   opacity: 0.3; /* correct opacity on iOS */
-//   color: ${(props) => props.theme.colors.text.disabled};
-//   /* background-color: ${(props) => props.theme.colors.ui.disabled}; */
-//   border-color: ${(props) => props.theme.colors.ui.disabled};
-//   cursor: default;
-//   pointer-events: auto;
-// }

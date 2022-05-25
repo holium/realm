@@ -66,12 +66,21 @@ import { ThemeType } from './theme';
 
 type StyleProps = {
   theme: ThemeType;
+  blur: boolean;
 };
 
 export const GlobalStyle = createGlobalStyle<StyleProps>`
   * {
     box-sizing: border-box;
     font-family: "Rubik", sans-serif;
+      // --webkit-backface-visibility: hidden;
+      // --webkit-transform: translate3d(0, 0, 0);
+      // --webkit-perspective: 1000;
+  }
+  
+  :root {
+    --blur-enabled: ${(props: StyleProps) =>
+      props.blur ? 'blur(16px)' : 'none'};
   }
   
   body {

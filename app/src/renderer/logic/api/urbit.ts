@@ -9,7 +9,7 @@ async function authenticate(ship: string, url: string, code: string) {
 
 async function login(ship: string, password: string) {
   try {
-    const response = await window.electron.auth.login(ship, password);
+    const response = await window.electron.core.login(ship, password);
     return [response, null];
   } catch (err) {
     return [null, err];

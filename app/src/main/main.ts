@@ -9,14 +9,15 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { start as authStart } from '../core/auth/manager';
-// import { start as authStart } from '../core/auth/manager/auth-helper';
+import { RealmCore } from '../core';
+import FullscreenHelper from './helpers/fullscreen';
+import WebviewHelper from './helpers/webview';
 
 export default class AppUpdater {
   constructor() {
@@ -37,12 +38,6 @@ if (process.defaultApp) {
 } else {
   app.setAsDefaultProtocolClient('holium-realm');
 }
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -92,6 +87,8 @@ const createWindow = async () => {
     title: 'Realm',
     webPreferences: {
       nodeIntegration: false,
+      webviewTag: true,
+      allowRunningInsecureContent: false,
       // nodeIntegrationInWorker: true,
       contextIsolation: true,
       // additionalArguments: [`storePath:${app.getPath('userData')}`],
@@ -101,8 +98,12 @@ const createWindow = async () => {
     },
   });
 
-  // Start core services
-  authStart(mainWindow!);
+  // ---------------------------------------------------------------------
+  // ----------------------- Start Realm services ------------------------
+  // ---------------------------------------------------------------------
+  RealmCore.boot(mainWindow);
+  FullscreenHelper.registerListeners(mainWindow);
+  WebviewHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.maximize();
@@ -110,6 +111,12 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+    mainWindow.webContents.send('set-fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send(
+      'set-appview-preload',
+      path.join(app.getAppPath(), 'appview.preload.js')
+    );
+
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
