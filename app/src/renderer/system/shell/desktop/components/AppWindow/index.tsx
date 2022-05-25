@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState, useCallback, useEffect } from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
@@ -15,6 +15,9 @@ import {
   RightDragHandleStyle,
 } from './components/DragHandles';
 import { Flex } from 'renderer/components';
+import { toJS } from 'mobx';
+import { NativeView } from './components/NativeView';
+import { nativeApps } from 'renderer/system/apps';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -24,22 +27,14 @@ type AppWindowStyleProps = {
 export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
   border-radius: 9px;
-  // --webkit-backdrop-filter: var(--blur-enabled);
-  // backdrop-filter: var(--blur-enabled);
-  // -webkit-user-select: none;
-  // --webkit-backface-visibility: hidden;
-  // --webkit-transform: translate3d(0, 0, 0);
-  // --webkit-perspective: 1000;
-  // transform: translateZ(0);
-  user-select: none;
   box-sizing: content-box;
   box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
   border: 1px solid
-    ${(props: AppWindowStyleProps) => rgba(props.customBg!, 0.7)};
+    ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
 `)<AppWindowStyleProps>({
   // @ts-expect-error annoying
   backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? rgba(lighten(0.22, props.customBg!), 0.8) : 'initial',
+    props.customBg ? darken(0.002, props.customBg!) : 'initial',
 });
 
 type AppWindowProps = {
@@ -136,6 +131,11 @@ export const AppWindow: FC<AppWindowProps> = observer(
         });
     };
 
+    // useEffect(() => {
+    //   const desktopDims = desktopRef.current!.getBoundingClientRect();
+
+    // }, []);
+
     const onClose = () => {
       desktopStore.activeWindow
         ? desktopStore.closeBrowserWindow(desktopStore.activeWindow?.id)
@@ -143,6 +143,14 @@ export const AppWindow: FC<AppWindowProps> = observer(
     };
 
     const windowId = `app-window-${activeWindow?.id}`;
+    let hideTitlebar = false;
+    let showDevToolsToggle = true;
+    let preventClickEvents = true;
+    if (window.type === 'native') {
+      hideTitlebar = nativeApps[window.id].native!.hideTitlebar!;
+      showDevToolsToggle = false;
+      preventClickEvents = false;
+    }
 
     return (
       <AppWindowStyle
@@ -179,7 +187,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         color={textColor}
         customBg={windowColor}
         onMouseDown={(evt: any) => {
-          evt.stopPropagation();
+          // preventClickEvents && evt.stopPropagation();
           desktopStore.setActive(window);
         }}
       >
@@ -196,8 +204,9 @@ export const AppWindow: FC<AppWindowProps> = observer(
             isAppWindow
             maximizeButton
             closeButton
-            hasBorder
-            shareable
+            hasBorder={!hideTitlebar}
+            showDevToolsToggle={showDevToolsToggle}
+            // shareable
             dragControls={dragControls}
             onDragStop={() => onDragStop()}
             onClose={() => onClose()}
@@ -205,7 +214,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             theme={{ ...theme, windowColor: darken(0.002, theme.windowColor!) }}
             app={window}
           />
-          <AppView hasTitlebar isResizing={isResizing} window={window} />
+          <WindowType hasTitlebar isResizing={isResizing} window={window} />
           <DragHandleWrapper>
             {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
             <RightDragHandleStyle
@@ -244,3 +253,35 @@ AppWindow.defaultProps = {
 };
 
 export default AppWindow;
+
+type WindowTypeProps = {
+  hasTitlebar: boolean;
+  isResizing: boolean;
+  window: WindowModelType;
+};
+
+export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
+  const { hasTitlebar, isResizing, window } = props;
+  let appWindow;
+  switch (window.type) {
+    case 'native':
+      return (
+        <NativeView
+          hasTitlebar={nativeApps[window.id].native?.hideTitlebar}
+          window={window}
+        />
+      );
+    case 'urbit':
+      return (
+        <AppView
+          hasTitlebar={hasTitlebar}
+          isResizing={isResizing}
+          window={window}
+        />
+      );
+
+    default:
+      return;
+  }
+  return appWindow;
+};

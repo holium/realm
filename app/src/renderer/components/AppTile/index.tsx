@@ -1,11 +1,11 @@
 import { FC, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { lighten, rgba } from 'polished';
-import { Flex, Box, Text, Menu, MenuItem, useMenu } from '..';
+import { Flex, Box, Text } from '..';
 import { AppModelType } from '../../../core/ship/stores/docket';
-import { useMst } from '../../logic/store';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'core/theme/lib';
+import Icons from '../Icons';
 
 const sizes = {
   sm: 32,
@@ -45,6 +45,10 @@ export const TileHighlight = styled(Box)`
 interface TileStyleProps {}
 const TileStyle = styled(Box)<TileStyleProps>`
   position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
   user-select: none;
   img {
     --webkit-user-select: none;
@@ -69,8 +73,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
   const tileRef = useRef(null);
 
   const isAppGrid = tileSize === 'xxl';
-  const boxShadowStyle =
-    isAppGrid === 'xxl' ? '0px 0px 4px rgba(0, 0, 0, 0.06)' : 'none';
+  const boxShadowStyle = isAppGrid ? '0px 0px 4px rgba(0, 0, 0, 0.06)' : 'none';
   // TODO fix app types
   let title;
   if (isAppGrid) {
@@ -92,6 +95,81 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     );
   }
 
+  // set image or icon
+  let graphic;
+  if (app.image) {
+    graphic = (
+      <TileStyle
+        whileHover={{
+          scale: 1 + scales[tileSize] / 2,
+          boxShadow: boxShadowStyle,
+        }}
+        whileTap={{
+          scale: 1 - scales[tileSize],
+          boxShadow: boxShadowStyle,
+        }}
+        transition={{ scale: 0.5 }}
+        minWidth={sizes[tileSize]}
+        style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+        height={sizes[tileSize]}
+        width={sizes[tileSize]}
+        backgroundColor={app.color || '#F2F3EF'}
+      >
+        <img
+          draggable="false"
+          height={sizes[tileSize]}
+          width={sizes[tileSize]}
+          key={app.title}
+          src={app.image}
+        />
+        {title}
+      </TileStyle>
+    );
+  } else if (app.icon) {
+    graphic = (
+      <TileStyle
+        whileHover={{
+          scale: 1 + scales[tileSize] / 2,
+          boxShadow: boxShadowStyle,
+        }}
+        whileTap={{
+          scale: 1 - scales[tileSize],
+          boxShadow: boxShadowStyle,
+        }}
+        transition={{ scale: 0.5 }}
+        minWidth={sizes[tileSize]}
+        style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+        height={sizes[tileSize]}
+        width={sizes[tileSize]}
+        backgroundColor={app.color || '#F2F3EF'}
+      >
+        <Icons
+          name={app.icon}
+          height={sizes[tileSize] / 3}
+          width={sizes[tileSize] / 3}
+        />
+        {title}
+      </TileStyle>
+    );
+  } else {
+    graphic = (
+      <TileStyle
+        whileHover={{ scale: 1 + scales[tileSize] / 2 }}
+        whileTap={{ scale: 1 - scales[tileSize] }}
+        transition={{ scale: 0.5 }}
+        minWidth={sizes[tileSize]}
+        style={{ borderRadius: radius[tileSize] }}
+        key={app.title}
+        backgroundColor={app.color}
+        height={sizes[tileSize]}
+        width={sizes[tileSize]}
+        // onClick={() => onAppClick(app)}
+      >
+        {title}
+      </TileStyle>
+    );
+  }
+
   return (
     <Flex
       ref={tileRef}
@@ -106,7 +184,8 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
         setShow(true);
       }}
     >
-      {app.image ? (
+      {graphic}
+      {/* {app.image ? (
         <TileStyle
           whileHover={{
             scale: 1 + scales[tileSize] / 2,
@@ -147,7 +226,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
         >
           {title}
         </TileStyle>
-      )}
+      )} */}
       {selected && (
         <TileHighlight layoutId="active-app" transition={{ duration: 0.2 }} />
       )}
@@ -158,48 +237,3 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
 AppTile.defaultProps = {
   tileSize: 'md',
 };
-
-// <IconButton
-//   size={26}
-//   ref={optionsRef}
-//   luminosity={themeStore.theme?.textTheme}
-//   opacity={1}
-//   onClick={(evt: any) => {
-//     evt.preventDefault();
-//     evt.currentTarget.blur();
-//     !show && setShow && setShow(true);
-//   }}
-// >
-//   <Icons name="Settings5Line" />
-// </IconButton>
-// <Menu
-//   id={`${pendingShip.patp}-user-menu`}
-//   customBg={themeStore.theme.windowColor}
-//   style={{
-//     top: anchorPoint && anchorPoint.y + 8,
-//     left: anchorPoint && anchorPoint.x + 10,
-//     visibility: show ? 'visible' : 'hidden',
-//     width: menuWidth,
-//   }}
-//   isOpen={show}
-//   onClose={() => {
-//     setShow(false);
-//   }}
-// >
-//   <MenuItem
-//     label="Reset password"
-//     customBg={themeStore.theme.windowColor}
-//     onClick={() => {
-//       console.log('do reset form');
-//     }}
-//   />
-//   <MenuItem
-//     label="Remove ship"
-//     customBg={themeStore.theme.windowColor}
-//     mt={1}
-//     onClick={() => {
-//       authStore.removeShip(pendingShip.patp);
-//       authStore.clearSession();
-//     }}
-//   />
-// </Menu>

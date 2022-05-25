@@ -24,6 +24,8 @@ export const App = () => {
   const { desktopStore, themeStore } = useMst();
   useEffect(() => {
     onStart();
+
+    // desktopStore.setDesktopDimensions()
   }, []);
 
   // const isInitialLoaded = useMemo(

@@ -3,6 +3,7 @@ import { types, applySnapshot, Instance, tryReference } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { closeAppWindow, openAppWindow } from './api';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../space/app/dimensions';
+import { getCenteredXY } from '../utils/window-manager';
 
 const Grid = types.model({
   width: types.enumeration(['1', '2', '3']),
@@ -20,7 +21,6 @@ type DimensionModelType = Instance<typeof DimensionsModel>;
 
 const Window = types
   .model('WindowModel', {
-    // order: types.number,
     id: types.identifier,
     title: types.optional(types.string, ''),
     zIndex: types.number,
@@ -28,7 +28,6 @@ const Window = types
       types.enumeration(['urbit', 'web', 'native']),
       'urbit'
     ),
-    // app: types.safeReference(AppModel),
     dimensions: DimensionsModel,
   })
   .actions((self) => ({
@@ -48,6 +47,13 @@ export const DesktopStore = types
     dynamicMouse: types.optional(types.boolean, true),
     isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),
+    desktopDimensions: types.optional(
+      types.model({
+        width: types.number,
+        height: types.number,
+      }),
+      { width: 0, height: 0 }
+    ),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
   })
@@ -60,6 +66,12 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
+    setDesktopDimensions(width: number, height: number) {
+      self.desktopDimensions = {
+        width,
+        height,
+      };
+    },
     setMouseColor(newMouseColor: string) {
       self.mouseColor = newMouseColor;
     },
@@ -81,7 +93,9 @@ export const DesktopStore = types
         if (activeWindow.id === win.id) {
           win.setZIndex(depth + 1);
         } else {
-          win.setZIndex(win.zIndex - 1);
+          if (win.zIndex > 1) {
+            win.setZIndex(win.zIndex - 1);
+          }
         }
       });
     },
@@ -99,14 +113,18 @@ export const DesktopStore = types
       applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(app: any, location?: any) {
+      const defaultXY = getCenteredXY(
+        DEFAULT_APP_WINDOW_DIMENSIONS[app.id],
+        self.desktopDimensions
+      );
       const newWindow = Window.create({
-        // order: app.activeApp.order,
         id: app.id,
         title: app.title,
-        zIndex: 1,
+        zIndex: 2,
+        type: app.type,
         dimensions: {
-          x: app.dimensions ? app.dimensions.x : 20,
-          y: app.dimensions ? app.dimensions.y : 16,
+          x: app.dimensions ? app.dimensions.x : defaultXY.x,
+          y: app.dimensions ? app.dimensions.y : defaultXY.y,
           width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
             ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
             : 600,
@@ -124,10 +142,7 @@ export const DesktopStore = types
       openAppWindow(toJS(location));
     },
     closeBrowserWindow(appId: any) {
-      // console.log(self.activeWindow);
-      // detach(self.activeWindow);
       self.windows.delete(appId);
-
       if (self.activeWindow?.id === appId) {
         const nextWindow = Array.from(self.windows.values())[0].id;
         if (nextWindow) {

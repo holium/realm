@@ -1,4 +1,4 @@
-import { FC, useRef, useEffect, useState } from 'react';
+import { FC, useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useMst, useShip } from '../../../../../../logic/store';
 import { Spinner, Flex } from '../../../../../../components';
@@ -77,35 +77,42 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
     }
   }, [activeWindow?.id]);
 
-  return (
-    <View
-      style={{
-        overflow: 'hidden',
-        width: 'inherit',
-        height: 'inherit',
-      }}
-      ref={elementRef}
-    >
-      {loading && (
-        <Flex position="absolute" left="calc(50% - 4px)" top="calc(50% - 4px)">
-          <Spinner size={1} />
-        </Flex>
-      )}
-      <webview
-        ref={webViewRef}
-        id={`${activeWindow.id}-app-webview`}
-        partition="app-webview"
-        preload={`file://${desktopStore.appviewPreload}`}
-        src={appConfig.url}
-        onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}
-        onMouseLeave={() => desktopStore.setIsMouseInWebview(false)}
+  return useMemo(
+    () => (
+      <View
         style={{
+          overflow: 'hidden',
           width: 'inherit',
-          height: '100%',
-          position: 'relative',
-          pointerEvents: isResizing || loading ? 'none' : 'auto',
+          height: 'inherit',
         }}
-      />
-    </View>
+        ref={elementRef}
+      >
+        {loading && (
+          <Flex
+            position="absolute"
+            left="calc(50% - 4px)"
+            top="calc(50% - 4px)"
+          >
+            <Spinner size={1} />
+          </Flex>
+        )}
+        <webview
+          ref={webViewRef}
+          id={`${activeWindow.id}-app-webview`}
+          partition="app-webview"
+          preload={`file://${desktopStore.appviewPreload}`}
+          src={appConfig.url}
+          onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}
+          onMouseLeave={() => desktopStore.setIsMouseInWebview(false)}
+          style={{
+            width: 'inherit',
+            height: '100%',
+            position: 'relative',
+            pointerEvents: isResizing || loading ? 'none' : 'auto',
+          }}
+        />
+      </View>
+    ),
+    [loading, activeWindow.id, appConfig.url, isResizing]
   );
 };

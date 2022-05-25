@@ -107,7 +107,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Set is visible initially
 
   useEffect(() => {
-    setIsVisible(true);
+    // setIsVisible(true);
   }, []);
 
   // RAF for animateOuterCursor
@@ -119,7 +119,6 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Mouse Events State updates
   const onMouseDown = useCallback(() => {
     setIsActive(true);
-    document.body.style.cursor = 'none';
   }, []);
   const onMouseUp = useCallback(() => setIsActive(false), []);
   const onMouseEnterViewport = useCallback(() => {

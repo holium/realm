@@ -6,7 +6,6 @@ import { WindowThemeType } from '../../../../../../logic/stores/config';
 import { Flex, Text } from '../../../../../../components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
-import { useEffect } from 'react';
 
 type TitlebarStyleProps = {
   customBg: string;
@@ -57,6 +56,7 @@ const TitleCentered = styled(Flex)`
 type TitlebarProps = {
   theme: Partial<WindowThemeType>;
   zIndex: number;
+  showDevToolsToggle?: boolean;
   hasBorder?: boolean;
   dragControls?: any;
   onDragStop?: (e: any) => void;
@@ -80,6 +80,7 @@ type TitlebarProps = {
 export const Titlebar = (props: TitlebarProps) => {
   const {
     children,
+    showDevToolsToggle,
     closeButton,
     hasBorder,
     zIndex,
@@ -99,22 +100,16 @@ export const Titlebar = (props: TitlebarProps) => {
     const webview: any = document.getElementById(
       `${props.app!.id}-app-webview`
     );
-    // const devtoolsView = document.getElementById('DevTools');
-    // const browser = webview.getWebContents();
-    // // browser.setDevToolsWebContents(devtoolsView.getWebContents());
-    // browser.openDevTools();
     webview.isDevToolsOpened()
       ? webview.closeDevTools()
       : webview.openDevTools();
+  };
 
-    // webview?.addEventListener('did-finish-load', () => {
-    //   // webview.
-
-    //   webview.isDevToolsOpened()
-    //     ? webview.closeDevTools()
-    //     : webview.openDevTools();
-    //   // webview!.openDevTools();
-    // });
+  const closeDevTools = () => {
+    const webview: any = document.getElementById(
+      `${props.app!.id}-app-webview`
+    );
+    webview?.closeDevTools();
   };
 
   let titleSection: any;
@@ -122,7 +117,7 @@ export const Titlebar = (props: TitlebarProps) => {
     const { title, icon } = props.app!;
     titleSection = (
       <Flex gap={4} alignItems="center">
-        <Flex pr={4} justifyContent="center" alignItems="center">
+        <Flex justifyContent="center" alignItems="center">
           {icon && <img height={24} width={24} src={icon} />}
           <Text
             opacity={0.7}
@@ -192,15 +187,17 @@ export const Titlebar = (props: TitlebarProps) => {
       {children}
       {(maximizeButton || closeButton) && (
         <Flex gap={4} alignItems="center">
-          <WindowIcon
-            icon="DevBox"
-            iconColor={iconColor!}
-            bg="#97A3B2"
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              onDevTools();
-            }}
-          />
+          {showDevToolsToggle && (
+            <WindowIcon
+              icon="DevBox"
+              iconColor={iconColor!}
+              bg="#97A3B2"
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                onDevTools();
+              }}
+            />
+          )}
           {maximizeButton && (
             <WindowIcon
               icon="Expand"
@@ -220,6 +217,7 @@ export const Titlebar = (props: TitlebarProps) => {
               fillWithBg
               onClick={(evt: any) => {
                 evt.stopPropagation();
+                closeDevTools();
                 onClose && onClose();
               }}
             />
@@ -233,4 +231,5 @@ export const Titlebar = (props: TitlebarProps) => {
 Titlebar.defaultProps = {
   zIndex: 2,
   hasBorder: true,
+  showDevToolsToggle: true,
 };

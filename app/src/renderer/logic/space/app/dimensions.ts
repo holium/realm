@@ -10,7 +10,7 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     height: 900,
   },
   ['bitcoin']: {
-    width: 1200,
+    width: 800,
     height: 900,
   },
   ['landscape']: {
@@ -20,5 +20,9 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
   ['webterm']: {
     width: 780,
     height: 600,
+  },
+  ['os-settings']: {
+    width: 800,
+    height: 800,
   },
 };
