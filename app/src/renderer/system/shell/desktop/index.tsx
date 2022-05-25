@@ -1,7 +1,6 @@
 import { FC, useState } from 'react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
-import { AnimatePresence } from 'framer-motion';
 import { WindowManager } from './WindowManager';
 import { AppGrid } from './components/AppGrid';
 import { useMst } from 'renderer/logic/store';
@@ -14,7 +13,6 @@ type OSFrameProps = {
 };
 
 export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
-  const { hasLoaded } = props;
   const { desktopStore } = useMst();
 
   return (
@@ -32,9 +30,8 @@ export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
             </Layer>
           )}
         </Observer>
-        {/* {desktopStore.showHomePane ? <AppGrid /> : <WindowManager />} */}
       </Layer>
-      <Layer zIndex={2}>
+      <Layer zIndex={12}>
         <Bottom size={58}>
           <SystemBar />
         </Bottom>

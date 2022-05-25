@@ -1,9 +1,12 @@
 import { WindowThemeType } from '../../logic/stores/config';
+import { SystemApp } from './System';
 
 export type AppManifestType = {
+  id: string;
   title: string;
-  icon?: string;
   type: 'native' | 'web';
+  color: string;
+  icon?: string;
   native?: {
     hideTitlebar?: boolean;
     component: React.ReactNode;
@@ -14,22 +17,40 @@ export type AppManifestType = {
   };
 };
 
-export const apps: AppManifestType[] = [
-  {
-    title: 'Browser',
-    icon: '',
+type AppManifestMap = {
+  [key: string]: AppManifestType;
+};
+
+export const nativeApps: AppManifestMap = {
+  // browser: {
+  //   title: 'Browser',
+  //   icon: {
+  //     color: '',
+  //     image: '',
+  //   },
+  //   type: 'native',
+  //   native: {
+  //     hideTitlebar: true,
+  //     component: () => <div></div>,
+  //   },
+  // },
+  'os-settings': {
+    id: 'os-settings',
+    title: 'Settings',
+    color: '#ACBCCB',
+    icon: 'AppIconSettings',
     type: 'native',
     native: {
       hideTitlebar: true,
-      component: () => <div></div>,
+      component: <SystemApp />,
     },
   },
-  {
-    title: 'System Preferences',
-    icon: '',
-    type: 'native',
-    native: {
-      component: () => <div></div>,
-    },
-  },
-];
+};
+
+export const NativeAppList = Object.values(nativeApps);
+
+// id: types.identifier,
+// title: types.string,
+// type: types.optional(types.string, 'web'),
+// icon: types.maybeNull(types.string),
+// href: types.string,

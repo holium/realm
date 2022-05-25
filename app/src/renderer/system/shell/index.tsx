@@ -22,9 +22,9 @@ const DragBar = styled.div`
   right: 0;
   --webkit-app-region: drag;
   app-region: drag;
-  cursor: none !important;
-  /* &:active {
-    cursor: grabbing;
+  /* cursor: grab;
+  &:active {
+    cursor: move;
   } */
 `;
 
@@ -51,9 +51,7 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
-
       <BgImage blurred={isBlurred} wallpaper={bgImage} />
-
       <BackgroundFill hasWallpaper={hasWallpaper}>
         {loggedIn ? (
           <Desktop
@@ -70,54 +68,6 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 });
 
 export default Shell;
-
-// const BgImage = ({
-//   blurred,
-//   wallpaper,
-// }: {
-//   blurred: boolean;
-//   wallpaper: string;
-// }) => {
-//   // console.log('wallpaper', wallpaper);
-//   const [imageLoading, setImageLoading] = useState(true);
-//   //
-//   // return <Fill style={{ background: 'lightgray' }} />;
-
-//   const imageLoaded = () => {
-//     setImageLoading(false);
-//   };
-//   return useMemo(() => {
-//     // console.log('background render', blurred);
-//     return (
-//       // <BackgroundDarken hasWallpaper>
-//       <BackgroundWrap
-//         key={wallpaper}
-//         animate={{ filter: blurred ? 'blur(20px)' : 'blur(0px)' }}
-//       >
-//         <AnimatePresence exitBeforeEnter>
-//           <BackgroundImage
-//             key={wallpaper}
-//             src={wallpaper}
-//             // width="auto"
-//             initial={{ opacity: 0 }}
-//             exit={{ opacity: 0, transition: { opacity: { delay: 1 } } }}
-//             animate={{
-//               opacity: 1,
-//               // opacity: imageLoading ? 0.5 : 1,
-//               // backdropFilter: blurred ? 'blur(20px)' : 'blur(0px)',
-//             }}
-//             transition={{
-//               opacity: { duration: 1 },
-//               // blur: { duration: 2, ease: true },
-//             }}
-//             onLoad={imageLoaded}
-//           />
-//         </AnimatePresence>
-//       </BackgroundWrap>
-//       // </BackgroundDarken>
-//     );
-//   }, [blurred, wallpaper, imageLoading]);
-// };
 
 const BgImage = ({
   blurred,

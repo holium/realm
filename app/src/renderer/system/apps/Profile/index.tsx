@@ -13,10 +13,11 @@ import {
 } from '../../../components';
 import { useMst, useShip, useAuth } from '../../../logic/store';
 import { displayDate } from '../../../logic/utils/time';
-import { ThemeStoreType } from '../../../logic/theme/store';
+import { ThemeModelType } from '~realm/theme/store';
+import { nativeApps } from '../';
 
 type ProfileProps = {
-  theme: ThemeStoreType;
+  theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;
@@ -26,6 +27,7 @@ type ProfileProps = {
 export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
   const { ship } = useShip();
   const { authStore } = useAuth();
+  const { desktopStore, themeStore } = useMst();
   let [batteryLevel, setBatteryLevel] = useState(0);
   const { dimensions } = props;
   const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
@@ -43,6 +45,22 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
       setBatteryLevel(level);
     });
   }, []);
+
+  const openSettingsApp = () => {
+    const formAppUrl = `${ship!.url}/apps/os-settings`;
+    const windowPayload = {
+      name: 'os-settings',
+      url: formAppUrl,
+      customCSS: {},
+      theme: themeStore,
+      cookies: {
+        url: formAppUrl,
+        name: `urbauth-${ship!.patp}`,
+        value: ship!.cookie!.split('=')[1].split('; ')[0],
+      },
+    };
+    desktopStore.openBrowserWindow(nativeApps['os-settings'], windowPayload);
+  };
 
   const currentShip = ship!;
 
@@ -108,10 +126,12 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
           </IconButton>
           <IconButton
             className="realm-cursor-hover"
+            data-close-tray="true"
             style={{ cursor: 'none' }}
             customBg={backgroundColor}
             size={26}
             color={iconColor}
+            onClick={() => openSettingsApp()}
           >
             <Icons name="Settings" />
           </IconButton>

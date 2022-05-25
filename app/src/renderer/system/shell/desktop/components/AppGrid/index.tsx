@@ -7,6 +7,7 @@ import { useMst, useShip } from '../../../../../logic/store';
 import { Flex } from '../../../../../components';
 import { AppTile } from '../../../../../components/AppTile';
 import { AppModelType } from 'core/ship/stores/docket';
+import { NativeAppList } from '../../../../apps';
 
 type HomeWindowProps = {
   customBg: string;
@@ -26,7 +27,9 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { ship } = useShip();
   const { desktopStore, themeStore } = useMst();
 
-  const apps = ship ? ship!.apps : [];
+  const apps: any = ship
+    ? [...ship!.apps, ...NativeAppList]
+    : [...NativeAppList];
 
   return (
     <AnimatePresence>
