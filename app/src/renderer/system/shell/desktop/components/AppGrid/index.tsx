@@ -88,6 +88,31 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             {apps.map((app: any, index: number) => (
               <AppTile
                 key={app.title + index}
+                allowContextMenu
+                contextMenu={[
+                  {
+                    label: 'Pin to taskbar',
+                    onClick: (evt: any) => {
+                      evt.stopPropagation();
+                      console.log('add to pins');
+                    },
+                  },
+                  {
+                    label: 'App info',
+                    onClick: (evt: any) => {
+                      evt.stopPropagation();
+                      console.log('open app info');
+                    },
+                  },
+                  {
+                    label: 'Uninstall app',
+                    section: 2,
+                    onClick: (evt: any) => {
+                      evt.stopPropagation();
+                      console.log('start uninstall');
+                    },
+                  },
+                ]}
                 isVisible={isOpen}
                 variants={{
                   hidden: {
@@ -104,25 +129,21 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 }}
                 tileSize="xxl"
                 app={app}
-                // selected={app.id === activeWindowId}
-                onAppClick={
-                  (selectedApp: AppModelType) => {
-                    const formAppUrl = `${ship!.url}/apps/${app.id!}`;
-                    const windowPayload = {
-                      name: app.id!,
+                onAppClick={(selectedApp: AppModelType) => {
+                  const formAppUrl = `${ship!.url}/apps/${app.id!}`;
+                  const windowPayload = {
+                    name: app.id!,
+                    url: formAppUrl,
+                    customCSS: {},
+                    theme: themeStore,
+                    cookies: {
                       url: formAppUrl,
-                      customCSS: {},
-                      theme: themeStore,
-                      cookies: {
-                        url: formAppUrl,
-                        name: `urbauth-${ship!.patp}`,
-                        value: ship!.cookie!.split('=')[1].split('; ')[0],
-                      },
-                    };
-                    desktopStore.openBrowserWindow(selectedApp, windowPayload);
-                  }
-                  // desktopStore.o
-                }
+                      name: `urbauth-${ship!.patp}`,
+                      value: ship!.cookie!.split('=')[1].split('; ')[0],
+                    },
+                  };
+                  desktopStore.openBrowserWindow(selectedApp, windowPayload);
+                }}
               />
             ))}
           </Flex>

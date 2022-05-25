@@ -10,7 +10,14 @@ type SystemBarProps = {};
 export const SystemBar: FC<SystemBarProps> = (props: SystemBarProps) => {
   const { ship } = useShip();
   return (
-    <Flex gap={8} margin="8px" flexDirection="row">
+    <Flex
+      onContextMenu={(evt: any) => {
+        evt.stopPropagation();
+      }}
+      gap={8}
+      margin="8px"
+      flexDirection="row"
+    >
       <HomeButton />
       <CommunityBar />
       <ShipTray ship={ship!} />

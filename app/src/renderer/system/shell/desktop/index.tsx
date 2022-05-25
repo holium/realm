@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useRef } from 'react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
 import { WindowManager } from './WindowManager';

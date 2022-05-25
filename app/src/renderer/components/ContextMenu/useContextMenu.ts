@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { calculateAnchorPoint } from './useMenu';
+import { calculateAnchorPoint } from '../Menu/useMenu';
 
 const useContextMenu = (containerId: string, ref: any, menuRef: any) => {
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });

@@ -56,6 +56,26 @@ export const AppDock: FC<AppTileProps> = observer(() => {
               // );
               return (
                 <AppTile
+                  // allowContextMenu
+                  // contextPosition="above"
+                  // contextMenu={[
+                  //   {
+                  //     label: 'Unpin',
+                  //     onClick: (evt: any) => {
+                  //       evt.stopPropagation();
+                  //       console.log('add to pins');
+                  //     },
+                  //   },
+
+                  //   {
+                  //     label: 'Uninstall app',
+                  //     section: 2,
+                  //     onClick: (evt: any) => {
+                  //       evt.stopPropagation();
+                  //       console.log('start uninstall');
+                  //     },
+                  //   },
+                  // ]}
                   key={app.title + index}
                   tileSize="sm"
                   app={app}

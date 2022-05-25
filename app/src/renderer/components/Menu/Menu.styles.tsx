@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
+import { rgba, darken } from 'polished';
 import { compose, space, color, typography } from 'styled-system';
 import { ThemeType } from 'renderer/theme';
 
@@ -22,11 +23,22 @@ export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
     padding: 8px;
     box-shadow: ${props.theme.elevations.one};
     box-sizing: border-box;
-    border-radius: ${props.theme.containers.rounderBorderRadius}px;
+    border-radius: 12px;
     color: ${props.theme.colors.text.primary};
     &:hover {
       transition: ${props.theme.transition};
-      /* border-color: ${props.theme.colors.ui.input.borderHover}; */
+    }
+    hr {
+      height: 1px;
+      background-color: ${(props: MenuWrapperStyleProps) =>
+        props.customBg
+          ? darken(0.05, props.customBg)
+          : rgba(props.theme.colors.bg.divider, 0.5)};
+      border: none;
+      width: 80%;
+      border-radius: 50%;
+      margin-block-end: 0.35em;
+      margin-block-start: 0.35em;
     }
   `}
   ${compose(space, color, typography)}

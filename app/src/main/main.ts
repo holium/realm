@@ -18,6 +18,7 @@ import { resolveHtmlPath } from './util';
 import { RealmCore } from '../core';
 import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
+import DevHelper from './helpers/dev';
 
 export default class AppUpdater {
   constructor() {
@@ -104,6 +105,7 @@ const createWindow = async () => {
   RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
+  DevHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.maximize();
