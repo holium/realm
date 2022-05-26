@@ -1,12 +1,8 @@
 import { FC } from 'react';
-import { Flex } from '../../../../../../../../components';
-import { AppModelType } from '../../../../../../../../../core/ship/stores/docket';
-import { AppTile } from '../../../../../../../../components/AppTile';
-import {
-  useMst,
-  useShip,
-  useSpaces,
-} from '../../../../../../../../logic/store';
+import { Flex } from 'renderer/components';
+import { AppModelType } from 'core/ship/stores/docket';
+import { AppTile } from 'renderer/components/AppTile';
+import { useMst, useShip, useSpaces } from 'renderer/logic/store';
 
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -45,10 +41,10 @@ export const AppDock: FC<AppTileProps> = observer(() => {
   // console.log('activeWindowId', activeWindowId);
 
   return (
-    <Flex gap={8} flexDirection="row" alignItems="center">
+    <Flex position="relative" gap={8} flexDirection="row" alignItems="center">
       {spacesStore.selected
         ? spacesStore.selected.pinnedApps.map(
-            (app: AppModelType, index: number) => {
+            (app: AppModelType | any, index: number) => {
               // console.log(
               //   'selected',
               //   app.href.glob.base,
@@ -56,26 +52,26 @@ export const AppDock: FC<AppTileProps> = observer(() => {
               // );
               return (
                 <AppTile
-                  // allowContextMenu
-                  // contextPosition="above"
-                  // contextMenu={[
-                  //   {
-                  //     label: 'Unpin',
-                  //     onClick: (evt: any) => {
-                  //       evt.stopPropagation();
-                  //       console.log('add to pins');
-                  //     },
-                  //   },
+                  allowContextMenu
+                  contextPosition="above"
+                  contextMenu={[
+                    {
+                      label: 'Unpin',
+                      onClick: (evt: any) => {
+                        evt.stopPropagation();
+                        spacesStore.selected?.unpinApp(app.id);
+                      },
+                    },
 
-                  //   {
-                  //     label: 'Uninstall app',
-                  //     section: 2,
-                  //     onClick: (evt: any) => {
-                  //       evt.stopPropagation();
-                  //       console.log('start uninstall');
-                  //     },
-                  //   },
-                  // ]}
+                    {
+                      label: 'Uninstall app',
+                      section: 2,
+                      onClick: (evt: any) => {
+                        evt.stopPropagation();
+                        console.log('start uninstall');
+                      },
+                    },
+                  ]}
                   key={app.title + index}
                   tileSize="sm"
                   app={app}

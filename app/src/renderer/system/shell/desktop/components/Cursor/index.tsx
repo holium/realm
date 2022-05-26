@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 
 import { useEventListener } from './useEventListener';
 import IsDevice from './IsDevice';
@@ -17,6 +18,30 @@ type AnimatedCursorProps = {
   clickables: string[];
 };
 
+const resizeMask = styled.div`
+  .mask {
+    border-style: solid;
+    border-width: 0 0 3px 3px;
+    position: relative;
+    float: right;
+    clear: none;
+    right: -3px;
+    top: -3px;
+    background-color: white;
+    width: 50%;
+    height: 4em;
+  }
+`;
+
+const getCurrentCursor = (isTextCursor, isResizeCursor) => {
+  if (isTextCursor) {
+    return 'text';
+  }
+  if (isResizeCursor) {
+    return 'resize';
+  }
+  return 'pointer';
+};
 /**
  * Cursor Core
  * Replaces the native cursor with a custom animated cursor, consisting
@@ -62,6 +87,8 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   const previousTimeRef = useRef();
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [isTextCursor, setTextCursor] = useState(false);
+  const [isResizeCursor, setResizeCursor] = useState(false);
+
   const [isVisible, setIsVisible] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isActiveClickable, setIsActiveClickable] = useState(false);
@@ -164,6 +191,10 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     if (isVisible) {
       cursorInnerRef.current.style.opacity = 1;
       cursorOuterRef.current.style.opacity = 1;
+      cursorInnerRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+      cursorOuterRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
     } else {
       cursorInnerRef.current.style.opacity = 0;
       cursorOuterRef.current.style.opacity = 0;
@@ -185,6 +216,30 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
         '.realm-cursor-text-cursor',
       ].join(',')
     );
+
+    const resizeHandlers = document.querySelectorAll(
+      [
+        '.app-window-resize',
+        '.app-window-resize-br',
+        '.app-window-resize-lr',
+      ].join(',')
+    );
+    resizeHandlers.forEach((resizer) => {
+      resizer.style.cursor = 'none';
+      resizer.addEventListener('mouseover', () => {
+        setResizeCursor(true);
+      });
+      resizer.addEventListener('mouseout', () => {
+        setResizeCursor(false);
+      });
+      resizer.addEventListener('mouseup', () => {
+        setResizeCursor(false);
+      });
+      resizer.addEventListener('mousedown', () => {
+        setResizeCursor(true);
+      });
+    });
+
     inputs.forEach((input) => {
       input.style.cursor = 'none';
       input.addEventListener('mouseover', () => {
@@ -229,6 +284,20 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     });
 
     return () => {
+      resizeHandlers.forEach((resizer) => {
+        resizer.addEventListener('mouseover', () => {
+          setResizeCursor(true);
+        });
+        resizer.addEventListener('mouseout', () => {
+          setResizeCursor(false);
+        });
+        resizer.addEventListener('mouseup', () => {
+          setResizeCursor(false);
+        });
+        resizer.addEventListener('mousedown', () => {
+          setResizeCursor(true);
+        });
+      });
       inputs.forEach((input) => {
         input.style.cursor = 'none';
         input.removeEventListener('mouseover', () => {
@@ -297,6 +366,27 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Hide / Show global cursor
   document.body.style.cursor = 'none';
 
+  const cursorVariants = {
+    text: {
+      width: 2.5,
+      height: 18,
+      borderRadius: '2%',
+      visibility: isVisible ? 'visible' : 'hidden',
+    },
+    pointer: {
+      width: innerSize,
+      height: innerSize,
+      borderRadius: '50%',
+      visibility: isVisible ? 'visible' : 'hidden',
+    },
+    resize: {
+      width: innerSize,
+      height: innerSize,
+      borderRadius: '2%',
+      visibility: isVisible ? 'visible' : 'hidden',
+    },
+  };
+
   return (
     <React.Fragment>
       <motion.div
@@ -314,12 +404,14 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       <motion.div
         layoutId="cursor-1"
         ref={cursorInnerRef}
-        animate={{
-          width: isTextCursor ? 2.5 : innerSize,
-          height: isTextCursor ? 18 : innerSize,
-          borderRadius: isTextCursor ? '2%' : '50%',
-          visibility: isVisible ? 'visible' : 'hidden',
-        }}
+        variants={cursorVariants}
+        animate={getCurrentCursor(isTextCursor, isResizeCursor)}
+        // animate={{
+        //   width: isTextCursor ? 2.5 : innerSize,
+        //   height: isTextCursor ? 18 : innerSize,
+        //   borderRadius: isTextCursor ? '2%' : '50%',
+        //   visibility: isVisible ? 'visible' : 'hidden',
+        // }}
         transition={{
           width: 0.15,
           height: 0.15,

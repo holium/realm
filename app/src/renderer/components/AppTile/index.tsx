@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, ContextMenu } from '..';
@@ -7,7 +7,8 @@ import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'core/theme/lib';
 import Icons from '../Icons';
 import { useMst } from 'renderer/logic/store';
-import Portal from 'renderer/system/modals/Portal';
+import { Portal } from 'renderer/system/modals/Portal';
+import { AnimatePresence } from 'framer-motion';
 
 const sizes = {
   sm: 32,
@@ -84,135 +85,45 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     allowContextMenu,
     onAppClick,
   } = props;
-  const { themeStore } = useMst();
+  // const { themeStore } = useMst();
   const tileRef = useRef(null);
 
-  const isAppGrid = tileSize === 'xxl';
-  const boxShadowStyle = isAppGrid ? '0px 0px 4px rgba(0, 0, 0, 0.06)' : 'none';
-  // TODO fix app types
-  let title;
-  const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
-  const isLight = lightOrDark === 'light';
-  const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
-  if (isAppGrid) {
-    // @ts-ignore
-    title = (
-      <Text
-        position="absolute"
-        style={{ mixBlendMode: 'hard-light' }}
-        left="1.7rem"
-        bottom="1.7rem"
-        fontWeight={500}
-        fontSize={2}
-        color={textColor}
-      >
-        {app.title}
-      </Text>
-    );
-  }
-  const tileId = `app-tile-grid-${app.id}`;
+  return useMemo(() => {
+    let title;
+    const isAppGrid = tileSize === 'xxl';
+    const boxShadowStyle = isAppGrid
+      ? '0px 0px 4px rgba(0, 0, 0, 0.06)'
+      : 'none';
+    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
+    const isLight = lightOrDark === 'light';
+    const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
+    if (isAppGrid) {
+      // @ts-ignore
+      title = (
+        <Text
+          position="absolute"
+          style={{ mixBlendMode: 'hard-light' }}
+          left="1.7rem"
+          bottom="1.7rem"
+          fontWeight={500}
+          fontSize={2}
+          color={textColor}
+        >
+          {app.title}
+        </Text>
+      );
+    }
+    const tileId = `app-tile-grid-${app.id}`;
 
-  // set image or icon
-  let graphic;
-  if (app.image) {
-    graphic = (
-      <TileStyle
-        id={tileId}
-        whileHover={{
-          scale: 1 + scales[tileSize] / 2,
-          boxShadow: boxShadowStyle,
-        }}
-        whileTap={{
-          scale: 1 - scales[tileSize],
-          boxShadow: boxShadowStyle,
-        }}
-        transition={{ scale: 0.5 }}
-        minWidth={sizes[tileSize]}
-        style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-        height={sizes[tileSize]}
-        width={sizes[tileSize]}
-        backgroundColor={app.color || '#F2F3EF'}
-      >
-        <img
-          style={{ pointerEvents: 'none' }}
-          draggable="false"
-          height={sizes[tileSize]}
-          width={sizes[tileSize]}
-          key={app.title}
-          src={app.image}
-        />
-        {title}
-      </TileStyle>
-    );
-  } else if (app.icon) {
-    graphic = (
-      <TileStyle
-        id={tileId}
-        whileHover={{
-          scale: 1 + scales[tileSize] / 2,
-          boxShadow: boxShadowStyle,
-        }}
-        whileTap={{
-          scale: 1 - scales[tileSize],
-          boxShadow: boxShadowStyle,
-        }}
-        transition={{ scale: 0.5 }}
-        minWidth={sizes[tileSize]}
-        style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
-        height={sizes[tileSize]}
-        width={sizes[tileSize]}
-        backgroundColor={app.color || '#F2F3EF'}
-      >
-        <Icons
-          name={app.icon}
-          height={sizes[tileSize] / 3}
-          width={sizes[tileSize] / 3}
-        />
-        {title}
-      </TileStyle>
-    );
-  } else {
-    graphic = (
-      <TileStyle
-        id={tileId}
-        whileHover={{ scale: 1 + scales[tileSize] / 2 }}
-        whileTap={{ scale: 1 - scales[tileSize] }}
-        transition={{ scale: 0.5 }}
-        minWidth={sizes[tileSize]}
-        style={{ borderRadius: radius[tileSize] }}
-        key={app.title}
-        backgroundColor={app.color}
-        height={sizes[tileSize]}
-        width={sizes[tileSize]}
-      >
-        {title}
-      </TileStyle>
-    );
-  }
-  return (
-    <Flex
-      ref={tileRef}
-      variants={variants}
-      onClick={() => onAppClick(app)}
-      className="app-dock-icon"
-    >
-      {allowContextMenu && (
-        <Portal>
-          <ContextMenu
-            position={contextPosition!}
-            isComponentContext
-            textColor={textColor}
-            customBg={app.color}
-            containerId={tileId}
-            parentRef={tileRef}
-            style={{ minWidth: 180 }}
-            menu={contextMenu || []}
-          />
-        </Portal>
-      )}
-      {graphic}
-      {/* {app.image ? (
+    // set image or icon
+    let graphic;
+    if (app.image) {
+      graphic = (
         <TileStyle
+          id={tileId}
+          onContextMenu={(evt: any) => {
+            evt.stopPropagation();
+          }}
           whileHover={{
             scale: 1 + scales[tileSize] / 2,
             boxShadow: boxShadowStyle,
@@ -229,6 +140,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           backgroundColor={app.color || '#F2F3EF'}
         >
           <img
+            style={{ pointerEvents: 'none' }}
             draggable="false"
             height={sizes[tileSize]}
             width={sizes[tileSize]}
@@ -237,8 +149,44 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           />
           {title}
         </TileStyle>
-      ) : (
+      );
+    } else if (app.icon) {
+      const iconTileSize = sizes[tileSize];
+      const iconSize =
+        iconTileSize < 88 ? sizes[tileSize] / 1.8 : sizes[tileSize] / 3;
+
+      graphic = (
         <TileStyle
+          id={tileId}
+          onContextMenu={(evt: any) => {
+            evt.stopPropagation();
+          }}
+          whileHover={{
+            scale: 1 + scales[tileSize] / 2,
+            boxShadow: boxShadowStyle,
+          }}
+          whileTap={{
+            scale: 1 - scales[tileSize],
+            boxShadow: boxShadowStyle,
+          }}
+          transition={{ scale: 0.5 }}
+          minWidth={sizes[tileSize]}
+          style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+          height={sizes[tileSize]}
+          width={sizes[tileSize]}
+          backgroundColor={app.color || '#F2F3EF'}
+        >
+          <Icons name={app.icon} height={iconSize} width={iconSize} />
+          {title}
+        </TileStyle>
+      );
+    } else {
+      graphic = (
+        <TileStyle
+          id={tileId}
+          onContextMenu={(evt: any) => {
+            evt.stopPropagation();
+          }}
           whileHover={{ scale: 1 + scales[tileSize] / 2 }}
           whileTap={{ scale: 1 - scales[tileSize] }}
           transition={{ scale: 0.5 }}
@@ -248,16 +196,42 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           backgroundColor={app.color}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
-          // onClick={() => onAppClick(app)}
         >
           {title}
         </TileStyle>
-      )} */}
-      {selected && (
-        <TileHighlight layoutId="active-app" transition={{ duration: 0.2 }} />
-      )}
-    </Flex>
-  );
+      );
+    }
+    return (
+      <Flex
+        position="relative"
+        ref={tileRef}
+        variants={variants}
+        onClick={() => onAppClick(app)}
+        className="app-dock-icon"
+      >
+        {allowContextMenu && (
+          <Portal>
+            <AnimatePresence>
+              <ContextMenu
+                position={contextPosition!}
+                isComponentContext
+                textColor={textColor}
+                customBg={app.color}
+                containerId={tileId}
+                parentRef={tileRef}
+                style={{ minWidth: 180 }}
+                menu={contextMenu || []}
+              />
+            </AnimatePresence>
+          </Portal>
+        )}
+        {graphic}
+        {selected && (
+          <TileHighlight layoutId="active-app" transition={{ duration: 0.2 }} />
+        )}
+      </Flex>
+    );
+  }, [app]);
 };
 
 AppTile.defaultProps = {

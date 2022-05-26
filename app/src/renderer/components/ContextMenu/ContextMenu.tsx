@@ -4,7 +4,6 @@ import useSystemContextMenu from './useSystemContextMenu';
 
 import { MenuItem } from '../MenuItem';
 import { MenuWrapper } from '../Menu';
-import { AnimatePresence } from 'framer-motion';
 
 export type ContextMenuProps = {
   isComponentContext?: boolean;
@@ -35,7 +34,13 @@ export const ContextMenu = (props: ContextMenuProps) => {
   let show;
   if (isComponentContext) {
     // todo orientation
-    const context = useContextMenu(containerId, parentRef, contextMenuRef);
+    const context = useContextMenu(
+      containerId,
+      parentRef,
+      contextMenuRef,
+      (menu.length + 1) * 32 + 16, // the padding plus each element,
+      position
+    );
     anchorPoint = context.anchorPoint;
     show = context.show;
   } else {
@@ -72,56 +77,52 @@ export const ContextMenu = (props: ContextMenuProps) => {
 
   // if (show) {
   return (
-    <AnimatePresence>
-      <MenuWrapper
-        key={containerId}
-        id={`${containerId}-context-menu`}
-        className="menu"
-        customBg={customBg}
-        initial={{
-          opacity: 0,
-          y: 8,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: 0.2,
-          },
-        }}
-        exit={{
-          opacity: 0,
-          y: 8,
-          transition: {
-            duration: 0.2,
-          },
-        }}
-        // @ts-ignore
-        ref={contextMenuRef}
-        style={{
-          ...(position === 'above'
-            ? { bottom: anchorPoint.y }
-            : { top: anchorPoint.y }),
-          left: anchorPoint.x,
-          display: show ? 'block' : 'none',
-          ...style,
-        }}
-      >
-        {sectionsArray.map((menuSection: any[], index: number) => {
-          let divider = <hr />;
-          if (index === sectionsArray.length - 1) {
-            // @ts-ignore
-            divider = undefined;
-          }
-          return (
-            <section key={`section-${index}`}>
-              {menuSection}
-              {divider}
-            </section>
-          );
-        })}
-      </MenuWrapper>
-    </AnimatePresence>
+    <MenuWrapper
+      key={containerId}
+      id={`${containerId}-context-menu`}
+      className="menu"
+      customBg={customBg}
+      initial={{
+        opacity: 0,
+        // x: anchorPoint.x,
+        // y: anchorPoint.y,
+      }}
+      animate={{
+        opacity: 1,
+        transition: {
+          duration: 0.2,
+        },
+      }}
+      exit={{
+        opacity: 0,
+        y: 8,
+        transition: {
+          duration: 0.2,
+        },
+      }}
+      // @ts-ignore
+      ref={contextMenuRef}
+      style={{
+        top: anchorPoint.y,
+        left: anchorPoint.x,
+        display: show ? 'block' : 'none',
+        ...style,
+      }}
+    >
+      {sectionsArray.map((menuSection: any[], index: number) => {
+        let divider = <hr />;
+        if (index === sectionsArray.length - 1) {
+          // @ts-ignore
+          divider = undefined;
+        }
+        return (
+          <section key={`section-${index}`}>
+            {menuSection}
+            {divider}
+          </section>
+        );
+      })}
+    </MenuWrapper>
   );
   // }
   // return <></>;

@@ -25,7 +25,9 @@ export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
                 <WindowManager isOpen={!desktopStore.showHomePane} />
               </Layer>
               <Layer zIndex={1}>
-                <AppGrid isOpen={desktopStore.showHomePane} />
+                {desktopStore.showHomePane && (
+                  <AppGrid isOpen={desktopStore.showHomePane} />
+                )}
               </Layer>
             </Layer>
           )}

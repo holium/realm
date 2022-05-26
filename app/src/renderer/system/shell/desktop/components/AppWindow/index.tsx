@@ -218,6 +218,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           <DragHandleWrapper>
             {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
             <RightDragHandleStyle
+              className="app-window-resize app-window-resize-br"
               drag
               style={{
                 x: resizeRightX,

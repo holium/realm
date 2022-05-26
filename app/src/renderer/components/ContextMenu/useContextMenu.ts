@@ -1,8 +1,14 @@
 import { useEffect, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { calculateAnchorPoint } from '../Menu/useMenu';
+import { calculateAnchorPoint } from '../../logic/utils/anchor-point';
 
-const useContextMenu = (containerId: string, ref: any, menuRef: any) => {
+const useContextMenu = (
+  containerId: string,
+  ref: any,
+  menuRef: any,
+  height: number,
+  position?: any
+) => {
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
   const [show, setShow] = useState(false);
 
@@ -10,9 +16,18 @@ const useContextMenu = (containerId: string, ref: any, menuRef: any) => {
     (event) => {
       // If the id of the context menu matches the parent of the click, show the context menu
       if (event.target.id === containerId) {
+        console.log('context click');
         event.preventDefault();
+        event.stopPropagation();
         setAnchorPoint(
-          calculateAnchorPoint(event, 'pointer', 2, event.target.clientWidth)
+          calculateAnchorPoint(
+            event,
+            'pointer',
+            2,
+            event.target.clientWidth,
+            height,
+            position
+          )
         );
         setShow(true);
       } else {

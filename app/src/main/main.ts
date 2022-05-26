@@ -19,6 +19,7 @@ import { RealmCore } from '../core';
 import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
+import { trimEnd } from 'lodash';
 
 export default class AppUpdater {
   constructor() {
@@ -86,6 +87,7 @@ const createWindow = async () => {
     vibrancy: 'under-window',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
+    acceptFirstMouse: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,

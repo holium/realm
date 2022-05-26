@@ -14,6 +14,5 @@ export const getCenteredXY = (
 
   const x = desktopWidth / 2 - appWidth / 2;
   const y = desktopHeight / 2 - appHeight / 2 - 58;
-  console.log({ x, y });
   return { x, y };
 };

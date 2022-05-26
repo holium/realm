@@ -6,6 +6,7 @@ import { useMst } from 'renderer/logic/store';
 import AppWindow from './components/AppWindow';
 import { ContextMenu } from 'renderer/components';
 import { toggleDevTools } from 'renderer/logic/desktop/api';
+import { rgba } from 'polished';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -48,7 +49,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
         <ContextMenu
           isComponentContext={false}
           textColor={themeStore.theme.textColor}
-          customBg={themeStore.theme.windowColor}
+          customBg={rgba(themeStore.theme.windowColor, 0.9)}
           containerId="desktop-fill"
           parentRef={desktopRef}
           style={{ minWidth: 180 }}
@@ -62,7 +63,6 @@ export const WindowManager: FC<WindowManagerProps> = observer(
             },
             {
               label: 'Toggle DevTools',
-              section: 2,
               onClick: (evt: any) => {
                 toggleDevTools();
                 // window.openDevTools();
