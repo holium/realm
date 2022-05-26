@@ -72,6 +72,7 @@ type StyleProps = {
 export const GlobalStyle = createGlobalStyle<StyleProps>`
   * {
     box-sizing: border-box;
+    cursor: none !important;
     font-family: "Rubik", sans-serif;
       // --webkit-backface-visibility: hidden;
       // --webkit-transform: translate3d(0, 0, 0);

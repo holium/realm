@@ -15,6 +15,7 @@ export const WindowIcon: FC<WindowIconProps> = (props: WindowIconProps) => {
   const { icon, bg, iconColor, onClick, fillWithBg } = props;
   return (
     <IconButton
+      className="realm-cursor-hover"
       initial={{ background: rgba(bg, 0) }}
       whileHover={{ background: rgba(bg, 0.2), fill: bg }}
       transition={{ background: 0.2, fill: 0.2 }}

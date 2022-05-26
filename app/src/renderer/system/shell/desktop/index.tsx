@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useRef } from 'react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
 import { WindowManager } from './WindowManager';
@@ -25,7 +25,9 @@ export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
                 <WindowManager isOpen={!desktopStore.showHomePane} />
               </Layer>
               <Layer zIndex={1}>
-                <AppGrid isOpen={desktopStore.showHomePane} />
+                {desktopStore.showHomePane && (
+                  <AppGrid isOpen={desktopStore.showHomePane} />
+                )}
               </Layer>
             </Layer>
           )}

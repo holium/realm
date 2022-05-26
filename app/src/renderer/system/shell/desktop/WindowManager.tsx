@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 
 import { useMst } from 'renderer/logic/store';
 import AppWindow from './components/AppWindow';
+import { ContextMenu } from 'renderer/components';
+import { toggleDevTools } from 'renderer/logic/desktop/api';
+import { rgba } from 'polished';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -16,7 +19,6 @@ export const WindowManager: FC<WindowManagerProps> = observer(
     const desktopRef = useRef<any>(null);
 
     useEffect(() => {
-      // console.log(desktopRef.current?.getBoundingClientRect());
       const dims = desktopRef.current?.getBoundingClientRect();
       desktopStore.setDesktopDimensions(dims.width, dims.height);
     }, [desktopRef.current]);
@@ -27,6 +29,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
 
     return (
       <motion.div
+        id="desktop-fill"
         ref={desktopRef}
         animate={{
           display: isOpen ? 'block' : 'none',
@@ -43,6 +46,31 @@ export const WindowManager: FC<WindowManagerProps> = observer(
           paddingTop: desktopStore.isFullscreen ? 0 : 30,
         }}
       >
+        <ContextMenu
+          isComponentContext={false}
+          textColor={themeStore.theme.textColor}
+          customBg={rgba(themeStore.theme.windowColor, 0.9)}
+          containerId="desktop-fill"
+          parentRef={desktopRef}
+          style={{ minWidth: 180 }}
+          menu={[
+            {
+              label: 'Change wallpaper',
+              onClick: (evt: any) => {
+                evt.stopPropagation();
+                console.log('changing wallpaper');
+              },
+            },
+            {
+              label: 'Toggle DevTools',
+              onClick: (evt: any) => {
+                toggleDevTools();
+                // window.openDevTools();
+                // console.log('open app info');
+              },
+            },
+          ]}
+        />
         {hasOpenWindows &&
           windows.map((window: any, index: number) => (
             <AppWindow

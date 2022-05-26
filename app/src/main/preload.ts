@@ -1,3 +1,4 @@
+import { toggleDevTools } from 'renderer/logic/desktop/api';
 import { contextBridge, ipcRenderer } from 'electron';
 import { AuthManager } from '../core/auth/manager';
 import { ShipManager } from '../core/ship/manager';
@@ -22,6 +23,9 @@ contextBridge.exposeInMainWorld('electron', {
     },
     closeApp(app: any) {
       ipcRenderer.invoke('close-app', app);
+    },
+    toggleDevTools() {
+      ipcRenderer.invoke('toggle-devtools');
     },
   },
 });

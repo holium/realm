@@ -67,21 +67,25 @@ export const DocketStore = types
   .actions((self) => ({
     setInitial(appMap: { [key: string]: DocketAppType }) {
       const preparedApps: { [key: string]: DocketAppType } = {};
-      Object.values(appMap).forEach((app: DocketAppType) => {
-        const appTile = DocketApp.create({
-          id: app.href.glob.base,
-          title: app.title,
-          info: app.info,
-          color: app.color,
-          image: app.image,
-          type: 'urbit',
-          href: Glob.create(app.href),
-          version: app.version,
-          website: app.website,
-          license: app.license,
+      Object.values(appMap)
+        .filter(
+          (app: DocketAppType) => app.title !== 'System' // && app.title !== 'Terminal'
+        )
+        .forEach((app: DocketAppType) => {
+          const appTile = DocketApp.create({
+            id: app.href.glob.base,
+            title: app.title,
+            info: app.info,
+            color: app.color,
+            image: app.image,
+            type: 'urbit',
+            href: Glob.create(app.href),
+            version: app.version,
+            website: app.website,
+            license: app.license,
+          });
+          preparedApps[app.href.glob.base] = appTile;
         });
-        preparedApps[app.href.glob.base] = appTile;
-      });
       applySnapshot(self.apps, preparedApps);
     },
   }));

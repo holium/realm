@@ -1,15 +1,11 @@
-import React, { FC, useRef, useMemo, useState } from 'react';
+import { FC, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { ViewPort, Layer, Fill } from 'react-spaces';
+import { ViewPort, Layer } from 'react-spaces';
 import { useAuth, useMst, useShip } from '../../logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import {
-  BackgroundImage,
-  BackgroundFill,
-  BackgroundWrap,
-} from './Shell.styles';
+import { BackgroundImage, BackgroundFill } from './Shell.styles';
 import { AnimatePresence } from 'framer-motion';
 
 type ShellProps = {};
@@ -22,10 +18,6 @@ const DragBar = styled.div`
   right: 0;
   --webkit-app-region: drag;
   app-region: drag;
-  /* cursor: grab;
-  &:active {
-    cursor: move;
-  } */
 `;
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
@@ -45,7 +37,7 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
     () => !loggedIn || desktopStore.isBlurred,
     [loggedIn, desktopStore.isBlurred]
   );
-  // const blurBg = desktopStore.
+
   const shipLoaded = ship && ship.isLoaded;
   console.log('rerendering shell');
   return (
@@ -76,48 +68,21 @@ const BgImage = ({
   blurred: boolean;
   wallpaper: string;
 }) => {
-  // const [imageLoading, setImageLoading] = useState(true);
-
-  // const imageLoaded = () => {
-  //   setImageLoading(false);
-  // };
   return (
-    // <BackgroundDarken hasWallpaper>
     <AnimatePresence>
       <BackgroundImage
         key={wallpaper}
         src={wallpaper}
-        // width="auto"
         initial={{ opacity: 0 }}
         exit={{ opacity: 0 }}
         animate={{
           opacity: 1,
-          // opacity: imageLoading ? 0.5 : 1,
           filter: blurred ? 'blur(20px)' : 'blur(0px)',
         }}
         transition={{
           opacity: { duration: 1 },
-          // blur: { duration: 2, ease: true },
         }}
-        // onLoad={imageLoaded}
       />
     </AnimatePresence>
-    // </BackgroundDarken>
   );
 };
-// const ShipDesktop = observer(() => {
-//   const { ship } = useShip();
-//   useEffect(() => {
-//     // ship.ini
-//   }, []);
-//   console.log('ship', ship);
-//   return (
-//     <ShipProvider value={shipState}>
-//       {ship && ship.isLoaded ? (
-//         <Desktop hasWallpaper={true} isFullscreen={false} />
-//       ) : (
-//         <Splash />
-//       )}
-//     </ShipProvider>
-//   );
-// });

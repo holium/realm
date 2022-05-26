@@ -16,6 +16,7 @@ declare global {
         setMouseColor(callback: any): void;
         openApp(app: any): Promise<any>;
         closeApp(app: any): void;
+        toggleDevTools(): void;
       };
     };
   }

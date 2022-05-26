@@ -20,6 +20,7 @@ export * from './Sigil';
 export * from './Tooltip';
 export * from './Menu';
 export * from './MenuItem';
+export * from './ContextMenu';
 export * from './Divider';
 export * from './AppIcon';
 export * from './Pulser';

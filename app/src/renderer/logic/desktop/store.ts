@@ -87,17 +87,19 @@ export const DesktopStore = types
       self.isBlurred = isBlurred;
     },
     setActive(activeWindow: WindowModelType) {
-      self.activeWindow = activeWindow;
-      const depth = self.windows.size;
-      self.windows.forEach((win: WindowModelType) => {
-        if (activeWindow.id === win.id) {
-          win.setZIndex(depth + 1);
-        } else {
-          if (win.zIndex > 1) {
-            win.setZIndex(win.zIndex - 1);
+      if (self.activeWindow !== activeWindow) {
+        self.activeWindow = activeWindow;
+        const depth = self.windows.size;
+        self.windows.forEach((win: WindowModelType) => {
+          if (activeWindow.id === win.id) {
+            win.setZIndex(depth + 1);
+          } else {
+            if (win.zIndex > 1) {
+              win.setZIndex(win.zIndex - 1);
+            }
           }
-        }
-      });
+        });
+      }
     },
     setFullscreen(isFullscreen: boolean) {
       self.isFullscreen = isFullscreen;
@@ -113,10 +115,20 @@ export const DesktopStore = types
       applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(app: any, location?: any) {
+      const defaultAppDimensions = {
+        width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
+          ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
+          : 600,
+        height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
+          ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
+          : 600,
+      };
+
       const defaultXY = getCenteredXY(
-        DEFAULT_APP_WINDOW_DIMENSIONS[app.id],
+        defaultAppDimensions,
         self.desktopDimensions
       );
+
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
@@ -125,12 +137,12 @@ export const DesktopStore = types
         dimensions: {
           x: app.dimensions ? app.dimensions.x : defaultXY.x,
           y: app.dimensions ? app.dimensions.y : defaultXY.y,
-          width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-            ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
-            : 600,
-          height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-            ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
-            : 600,
+          width: app.dimensions
+            ? app.dimensions.width
+            : defaultAppDimensions.width,
+          height: app.dimensions
+            ? app.dimensions.height
+            : defaultAppDimensions.height,
         },
       });
       self.windows.set(newWindow.id, newWindow);

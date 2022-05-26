@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
-import { useMst, useShip } from '../../../../../logic/store';
+import { useMst, useShip, useSpaces } from '../../../../../logic/store';
 import { Flex } from '../../../../../components';
 import { AppTile } from '../../../../../components/AppTile';
 import { AppModelType } from 'core/ship/stores/docket';
@@ -26,6 +26,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
   const { ship } = useShip();
   const { desktopStore, themeStore } = useMst();
+  const spacesStore = useSpaces();
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
@@ -77,6 +78,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 },
               },
             }}
+            style={{ position: 'relative' }}
             initial="hidden"
             animate={isOpen ? 'show' : 'exit'}
             exit="hidden"
@@ -85,28 +87,58 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             flexWrap="wrap"
             flexDirection="row"
           >
-            {apps.map((app: any, index: number) => (
-              <AppTile
-                key={app.title + index}
-                isVisible={isOpen}
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                    top: 30,
-                    transition: { top: 3, opacity: 1 },
-                  },
-                  show: {
-                    opacity: 1,
-                    top: 0,
-                    transition: { top: 3, opacity: 1 },
-                  },
-                  exit: { opacity: 0, top: 100 },
-                }}
-                tileSize="xxl"
-                app={app}
-                // selected={app.id === activeWindowId}
-                onAppClick={
-                  (selectedApp: AppModelType) => {
+            {apps.map((app: any, index: number) => {
+              const isAppPinned = spacesStore.selected?.isAppPinned(app.id);
+
+              return (
+                <AppTile
+                  key={app.title + index}
+                  allowContextMenu
+                  contextMenu={[
+                    {
+                      label: isAppPinned ? 'Unpin app' : 'Pin to taskbar',
+                      onClick: (evt: any) => {
+                        evt.stopPropagation();
+                        isAppPinned
+                          ? spacesStore.selected?.unpinApp(app.id)
+                          : spacesStore.selected?.pinApp(app.id);
+                      },
+                    },
+                    {
+                      label: 'App info',
+                      disabled: true,
+                      onClick: (evt: any) => {
+                        // evt.stopPropagation();
+                        console.log('open app info');
+                      },
+                    },
+                    {
+                      label: 'Uninstall app',
+                      section: 2,
+                      disabled: true,
+                      onClick: (evt: any) => {
+                        // evt.stopPropagation();
+                        console.log('start uninstall');
+                      },
+                    },
+                  ]}
+                  isVisible={isOpen}
+                  variants={{
+                    hidden: {
+                      opacity: 0,
+                      top: 30,
+                      transition: { top: 3, opacity: 1 },
+                    },
+                    show: {
+                      opacity: 1,
+                      top: 0,
+                      transition: { top: 3, opacity: 1 },
+                    },
+                    exit: { opacity: 0, top: 100 },
+                  }}
+                  tileSize="xxl"
+                  app={app}
+                  onAppClick={(selectedApp: AppModelType) => {
                     const formAppUrl = `${ship!.url}/apps/${app.id!}`;
                     const windowPayload = {
                       name: app.id!,
@@ -120,11 +152,10 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                       },
                     };
                     desktopStore.openBrowserWindow(selectedApp, windowPayload);
-                  }
-                  // desktopStore.o
-                }
-              />
-            ))}
+                  }}
+                />
+              );
+            })}
           </Flex>
         </Flex>
       </HomeWindow>

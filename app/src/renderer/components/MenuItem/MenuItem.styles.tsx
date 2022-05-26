@@ -35,25 +35,22 @@ export type StyleProps = SpaceProps &
 
 // TODO make variants
 export const MenuItemStyle: any = styled(styled.li`
-  font-style: normal;
-  font-weight: 500;
-  height: 40px;
+  height: 32px;
   display: flex;
   align-items: flex-start;
   background: inherit;
   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
   -moz-box-sizing: border-box; /* Firefox, other Gecko */
   box-sizing: border-box; /* Opera/IE 8+ */
-  font-size: ${(props) => props.theme.fontSizes[2]};
-  padding: 8px 12px;
+  padding: 12px;
   /* margin: 0px 4px; */
   border-radius: ${(props) => props.theme.containers.outerBorderRadius}px;
-  color: ${(props: StyleProps) =>
+  /* color: ${(props: StyleProps) =>
     props.intent
       ? (props.intent === 'primary' && props.theme.colors.brand.primary) ||
         // @ts-expect-error stop
         props.theme.colors.ui.intent[props.intent]
-      : props.theme.colors.text.secondary};
+      : props.theme.colors.text.secondary}; */
   transition: ${(props: StyleProps) => props.theme.transition};
   svg {
     fill: currentcolor;
@@ -68,11 +65,11 @@ export const MenuItemStyle: any = styled(styled.li`
         transition: ${props.theme.transition};
         background: ${props.highlightType === 'brand' &&
         props.theme.colors.brand.primary};
-        color: ${props.intent
+        /* color: ${props.intent
           ? (props.intent === 'primary' && props.theme.colors.brand.primary) ||
             // @ts-expect-error stop
             props.theme.colors.ui.intent[props.intent]
-          : props.theme.colors.text.secondary};
+          : props.theme.colors.text.secondary}; */
       }
     `}
 
@@ -97,7 +94,7 @@ export const MenuItemStyle: any = styled(styled.li`
     css`
       background-color: transparent;
       &:hover {
-        background-color: ${darken(0.05, props.customBg)};
+        background-color: ${darken(0.035, props.customBg)};
       }
     `}
 `)<StyleProps>(compose(space, color, layout, flexbox, border, position));

@@ -5,11 +5,12 @@ export const calculateAnchorPoint = (
   orientation: MenuOrientation,
   padding = 12,
   menuWidth: number,
-  menuHeight: number
+  menuHeight: number,
+  position: 'above' | 'below'
 ) => {
   let x: number;
   let y: number;
-  console.log('node', event, event.clientX, event.clientY, event.target);
+  // console.log('node', event, event.clientX, event.clientY, event.target);
   switch (orientation) {
     case 'right':
       return {
@@ -70,7 +71,11 @@ export const calculateAnchorPoint = (
       };
 
     default:
+      let pointerY = event.clientY;
+      if (position === 'above') {
+        pointerY = pointerY - menuHeight;
+      }
       // pointer or default
-      return { x: event.layerX + padding, y: event.layerY + padding };
+      return { x: event.clientX + padding, y: pointerY + padding };
   }
 };
