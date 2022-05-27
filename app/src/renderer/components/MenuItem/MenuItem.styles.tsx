@@ -78,7 +78,7 @@ export const MenuItemStyle: any = styled(styled.li`
     props.disabled &&
     css`
       -webkit-text-fill-color: currentColor; /* set text fill to current color for safari */
-      color: ${props.theme.colors.text.disabled};
+      color: ${rgba(props.theme.colors.text.disabled, 0.7)};
       border-color: ${props.theme.colors.ui.disabled};
       opacity: 0.7;
       cursor: default;

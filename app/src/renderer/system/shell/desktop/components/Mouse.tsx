@@ -19,7 +19,7 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
 
   const rgb: any = cursorColor && hexToRgb(cursorColor);
   return (
-    <MouseArea animate={{ display: hide ? 'none' : 'inherit' }}>
+    <MouseArea animate={{ zIndex: 1100, display: hide ? 'none' : 'inherit' }}>
       <AnimatedCursor
         animateOut={animateOut}
         innerSize={10}

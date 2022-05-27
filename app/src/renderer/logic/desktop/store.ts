@@ -3,7 +3,10 @@ import { types, applySnapshot, Instance, tryReference } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { closeAppWindow, openAppWindow } from './api';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../space/app/dimensions';
-import { getCenteredXY } from '../utils/window-manager';
+import {
+  getCenteredXY,
+  getInitialWindowDimensions,
+} from '../utils/window-manager';
 
 const Grid = types.model({
   width: types.enumeration(['1', '2', '3']),
@@ -115,35 +118,43 @@ export const DesktopStore = types
       applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(app: any, location?: any) {
-      const defaultAppDimensions = {
-        width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-          ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
-          : 600,
-        height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-          ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
-          : 600,
-      };
+      // const defaultAppDimensions = {
+      //   width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
+      //     ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
+      //     : 600,
+      //   height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
+      //     ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
+      //     : 600,
+      // };
+      // console.log(toJS(getInitialWindowDimensions(app)));
+      // // if()
+      // const defaultXY = getCenteredXY(
+      //   defaultAppDimensions,
+      //   self.desktopDimensions
+      // );
 
-      const defaultXY = getCenteredXY(
-        defaultAppDimensions,
-        self.desktopDimensions
-      );
-
+      // const newWindow = Window.create({
+      //   id: app.id,
+      //   title: app.title,
+      //   zIndex: 2,
+      //   type: app.type,
+      //   dimensions: {
+      //     x: app.dimensions ? app.dimensions.x : defaultXY.x,
+      //     y: app.dimensions ? app.dimensions.y : defaultXY.y,
+      //     width: app.dimensions
+      //       ? app.dimensions.width
+      //       : defaultAppDimensions.width,
+      //     height: app.dimensions
+      //       ? app.dimensions.height
+      //       : defaultAppDimensions.height,
+      //   },
+      // });
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
         zIndex: 2,
         type: app.type,
-        dimensions: {
-          x: app.dimensions ? app.dimensions.x : defaultXY.x,
-          y: app.dimensions ? app.dimensions.y : defaultXY.y,
-          width: app.dimensions
-            ? app.dimensions.width
-            : defaultAppDimensions.width,
-          height: app.dimensions
-            ? app.dimensions.height
-            : defaultAppDimensions.height,
-        },
+        dimensions: getInitialWindowDimensions(app, self.isFullscreen),
       });
       self.windows.set(newWindow.id, newWindow);
       self.activeWindow = self.windows.get(newWindow.id);

@@ -48,7 +48,7 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
 
-    if (activeWindow) {
+    if (activeWindow && ship) {
       const formAppUrl = `${ship!.url}/apps/${activeWindow!.id}`;
       const location = {
         title: activeWindow.title,
@@ -75,7 +75,7 @@ export const AppView: FC<AppViewProps> = (props: AppViewProps) => {
       desktopStore.openBrowserWindow(activeWindow, location);
       setAppConfig(location);
     }
-  }, [activeWindow?.id]);
+  }, [activeWindow?.id, ship]);
 
   return useMemo(
     () => (

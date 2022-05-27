@@ -7,14 +7,16 @@ interface WindowIconProps {
   icon: IconTypes;
   bg: string;
   iconColor: string;
+  disabled?: boolean;
   onClick: (...params: any) => void;
   fillWithBg?: boolean;
 }
 
 export const WindowIcon: FC<WindowIconProps> = (props: WindowIconProps) => {
-  const { icon, bg, iconColor, onClick, fillWithBg } = props;
+  const { disabled, icon, bg, iconColor, onClick, fillWithBg } = props;
   return (
     <IconButton
+      isDisabled={disabled}
       className="realm-cursor-hover"
       initial={{ background: rgba(bg, 0) }}
       whileHover={{ background: rgba(bg, 0.2), fill: bg }}

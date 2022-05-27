@@ -18,6 +18,7 @@ import { Flex } from 'renderer/components';
 import { toJS } from 'mobx';
 import { NativeView } from './components/NativeView';
 import { nativeApps } from 'renderer/system/apps';
+import { BrowserToolbarProps } from 'renderer/system/apps/Browser/Toolbar';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -143,14 +144,34 @@ export const AppWindow: FC<AppWindowProps> = observer(
     };
 
     const windowId = `app-window-${activeWindow?.id}`;
-    let hideTitlebar = false;
+    let hideTitlebarBorder = false;
+    let noTitlebar = false;
+    let CustomTitlebar: React.FC<BrowserToolbarProps> | undefined = undefined; // todo fix typings
     let showDevToolsToggle = true;
     let preventClickEvents = true;
     if (window.type === 'native') {
-      hideTitlebar = nativeApps[window.id].native!.hideTitlebar!;
+      hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
+      noTitlebar = nativeApps[window.id].native!.noTitlebar!;
+      CustomTitlebar = nativeApps[window.id].native!.titlebar!;
       showDevToolsToggle = false;
       preventClickEvents = false;
     }
+
+    // useEffect(() => {
+    //   if (
+    //     window.type === 'native' &&
+    //     nativeApps[window.id].native!.openFullscreen!
+    //   ) {
+    //     // Set fullscreen by default
+    //     const offset = desktopStore.isFullscreen ? 0 : 30;
+    //     // @ts-ignore
+    //     const desktopDims = desktopRef.current!.getBoundingClientRect();
+    //     mX.set(0);
+    //     mY.set(8);
+    //     mHeight.set(desktopDims.height - (16 + offset) - 50);
+    //     mWidth.set(desktopDims.width - 16);
+    //   }
+    // }, [desktopRef.current]);
 
     return (
       <AppWindowStyle
@@ -200,20 +221,37 @@ export const AppWindow: FC<AppWindowProps> = observer(
             width: 'inherit',
           }}
         >
-          <Titlebar
-            isAppWindow
-            maximizeButton
-            closeButton
-            hasBorder={!hideTitlebar}
-            showDevToolsToggle={showDevToolsToggle}
-            // shareable
-            dragControls={dragControls}
-            onDragStop={() => onDragStop()}
-            onClose={() => onClose()}
-            onMaximize={() => maximize()}
-            theme={{ ...theme, windowColor: darken(0.002, theme.windowColor!) }}
-            app={window}
-          />
+          {(typeof CustomTitlebar !== 'undefined' && (
+            <CustomTitlebar
+              zIndex={window.zIndex}
+              windowColor={darken(0.002, theme.windowColor!)}
+              showDevToolsToggle
+              dragControls={dragControls}
+              onDragStop={() => onDragStop()}
+              onClose={() => onClose()}
+              onMaximize={() => maximize()}
+            />
+          )) || (
+            <Titlebar
+              isAppWindow
+              maximizeButton
+              closeButton
+              noTitlebar={noTitlebar}
+              hasBorder={!hideTitlebarBorder}
+              showDevToolsToggle={showDevToolsToggle}
+              // shareable
+              dragControls={dragControls}
+              onDragStop={() => onDragStop()}
+              onClose={() => onClose()}
+              onMaximize={() => maximize()}
+              theme={{
+                ...theme,
+                windowColor: darken(0.002, theme.windowColor!),
+              }}
+              app={window}
+            />
+          )}
+
           <WindowType hasTitlebar isResizing={isResizing} window={window} />
           <DragHandleWrapper>
             {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
@@ -268,7 +306,8 @@ export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
     case 'native':
       return (
         <NativeView
-          hasTitlebar={nativeApps[window.id].native?.hideTitlebar}
+          isResizing={isResizing}
+          hasTitlebar={nativeApps[window.id].native?.hideTitlebarBorder}
           window={window}
         />
       );

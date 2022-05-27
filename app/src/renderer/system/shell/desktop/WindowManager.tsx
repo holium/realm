@@ -56,13 +56,22 @@ export const WindowManager: FC<WindowManagerProps> = observer(
           menu={[
             {
               label: 'Change wallpaper',
+              disabled: true,
               onClick: (evt: any) => {
                 evt.stopPropagation();
                 console.log('changing wallpaper');
               },
             },
             {
-              label: 'Toggle DevTools',
+              label: 'Show dashboard',
+              disabled: true,
+              onClick: (evt: any) => {
+                evt.stopPropagation();
+                console.log('changing wallpaper');
+              },
+            },
+            {
+              label: 'Toggle devtools',
               onClick: (evt: any) => {
                 toggleDevTools();
                 // window.openDevTools();

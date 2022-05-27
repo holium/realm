@@ -1,15 +1,20 @@
 import { WindowThemeType } from '../../logic/stores/config';
 import { SystemApp } from './System';
+import { Browser, BrowserProps } from './Browser';
+import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';
 
-export type AppManifestType = {
+export type NativeAppType = {
   id: string;
   title: string;
-  type: 'native' | 'web';
+  type: 'native' | 'web' | 'urbit';
   color: string;
   icon?: string;
   native?: {
-    hideTitlebar?: boolean;
-    component: React.ReactNode;
+    hideTitlebarBorder?: boolean;
+    noTitlebar?: boolean;
+    openFullscreen?: boolean;
+    titlebar?: React.FC<any>;
+    component: React.FC<any>;
   };
   web?: {
     url: string;
@@ -18,22 +23,24 @@ export type AppManifestType = {
 };
 
 type AppManifestMap = {
-  [key: string]: AppManifestType;
+  [key: string]: NativeAppType;
 };
 
 export const nativeApps: AppManifestMap = {
-  // browser: {
-  //   title: 'Browser',
-  //   icon: {
-  //     color: '',
-  //     image: '',
-  //   },
-  //   type: 'native',
-  //   native: {
-  //     hideTitlebar: true,
-  //     component: () => <div></div>,
-  //   },
-  // },
+  'os-browser': {
+    id: 'os-browser',
+    title: 'Relic Browser',
+    color: '#92D4F9',
+    icon: 'AppIconCompass',
+    type: 'native',
+    native: {
+      hideTitlebarBorder: false,
+      noTitlebar: true,
+      openFullscreen: true,
+      titlebar: (props: BrowserToolbarProps) => <BrowserToolbar {...props} />,
+      component: (props: BrowserProps) => <Browser {...props} />,
+    },
+  },
   'os-settings': {
     id: 'os-settings',
     title: 'Settings',
@@ -41,8 +48,8 @@ export const nativeApps: AppManifestMap = {
     icon: 'AppIconSettings',
     type: 'native',
     native: {
-      hideTitlebar: true,
-      component: <SystemApp />,
+      hideTitlebarBorder: true,
+      component: (props: any) => <SystemApp {...props} />,
     },
   },
 };

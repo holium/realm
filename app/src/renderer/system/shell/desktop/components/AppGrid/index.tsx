@@ -93,6 +93,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               return (
                 <AppTile
                   key={app.title + index}
+                  isPinned={isAppPinned}
                   allowContextMenu
                   contextMenu={[
                     {

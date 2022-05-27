@@ -3,17 +3,20 @@ import styled from 'styled-components';
 import { WindowModelType } from 'renderer/logic/desktop/store';
 import { nativeApps } from 'renderer/system/apps';
 
-interface AppViewProps {
+export interface NativeViewProps {
   window: WindowModelType | any;
+  isResizing?: boolean;
   hasTitlebar: boolean | undefined;
 }
 
 const View = styled.div<{ hasTitleBar?: boolean }>``;
 
-export const NativeView: FC<AppViewProps> = (props: AppViewProps) => {
-  const { window } = props;
+export const NativeView: FC<NativeViewProps> = (props: NativeViewProps) => {
+  const { window, isResizing } = props;
 
   const elementRef = useRef(null);
+  const ViewComponent: FC<any> | undefined =
+    nativeApps[window.id].native?.component!;
 
   return (
     <View
@@ -25,7 +28,9 @@ export const NativeView: FC<AppViewProps> = (props: AppViewProps) => {
       }}
       ref={elementRef}
     >
-      {nativeApps[window.id].native?.component}
+      {nativeApps[window.id].native?.component && (
+        <ViewComponent isResizing={isResizing} />
+      )}
     </View>
   );
 };

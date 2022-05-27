@@ -1,70 +1,58 @@
-import { FC, useEffect, useState, useRef } from 'react';
+import { FC, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
-
-import { WindowThemeType } from '../../../logic/stores/config';
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  MenuItem,
-  Sigil,
-  Text,
-  Menu,
-} from '../../../components';
+import { Grid, Flex, Text } from '../../../components';
+import { useBrowser } from './store';
 import { useMst, useShip } from '../../../logic/store';
+import { TabView } from './TabView';
 
-type BrowserProps = {
-  theme: WindowThemeType;
+export type BrowserProps = {
+  isResizing: boolean;
 };
 
-export const Browser: FC<BrowserProps> = (props: BrowserProps) => {
-  const { ship } = useShip();
+export const Browser: FC<BrowserProps> = observer((props: BrowserProps) => {
+  const { isResizing } = props;
+  const browserStore = useBrowser();
+  const { themeStore } = useMst();
+  // const { ship } = useShip();
   const ref = useRef();
-  const { backgroundColor, textColor } = props.theme;
-
-  // useEffect(() => {
-  //   const webview = document.createElement('webview');
-  //   webview.setAttribute('url', 'google.com');
-  //   ref.current!.appendChild(webview);
-  // }, []);
+  const { backgroundColor, textColor } = themeStore.theme;
 
   const iconColor = darken(0.5, textColor);
   const bgHover = lighten(0.1, backgroundColor);
   return (
-    <Grid.Column
-      style={{ position: 'relative' }}
-      expand
-      noGutter
-      overflowY="hidden"
-    >
-      <Grid.Row
-        style={{
-          position: 'absolute',
-          zIndex: 5,
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 50,
-          background: rgba(lighten(0.2, backgroundColor), 0.9),
-          // backdropFilter: 'blur(8px)',
-          borderBottom: `1px solid ${rgba(backgroundColor, 0.7)}`,
-        }}
-        expand
-        noGutter
-        justify="space-between"
-        align="center"
-      >
-        <Flex pl={4} pr={4} justifyContent="center" alignItems="center">
-          {/* <Icons opacity={0.8} name="Wallet" size={24} mr={2} /> */}
-          <Text opacity={0.7} fontWeight={600}>
-            {ship!.patp}
-          </Text>
-        </Flex>
-      </Grid.Row>
-    </Grid.Column>
+    // <Grid.Column
+    //   style={{ position: 'relative', width: 'inherit', height: 'inherit' }}
+    //   expand
+    //   noGutter
+    // >
+    browserStore.currentTab && (
+      <TabView isResizing={isResizing} tab={browserStore.currentTab} />
+    )
+    // </Grid.Column>
   );
-};
+});
+
+{
+  /* <React.Fragment>
+  <Box overflowY="scroll">
+    <Flex gap={12} flexDirection="column" p="12px">
+      <Card p="12px" width="100%" minHeight="240px" elevation="none">
+        <Text opacity={0.7} fontSize={2} fontWeight={500}>
+          Desktop
+        </Text>
+      </Card>
+      <Card p="12px" width="100%" minHeight="182px" elevation="none">
+        <Text opacity={0.7} fontSize={2} fontWeight={500}>
+          Mouse
+        </Text>
+      </Card>
+      <Card p="12px" width="100%" minHeight="300px" elevation="none">
+        <Text opacity={0.7} fontSize={2} fontWeight={500}>
+          Privacy
+        </Text>
+      </Card>
+    </Flex>
+  </Box>
+</React.Fragment>; */
+}

@@ -1,5 +1,7 @@
 import { types, Instance, flow, applySnapshot } from 'mobx-state-tree';
 
+const AppTypes = types.enumeration(['urbit', 'web', 'native']);
+
 export const Glob = types.model({
   glob: types.model({
     base: types.string,
@@ -18,7 +20,7 @@ export const DocketApp = types.model({
   title: types.string,
   info: types.string,
   color: types.string,
-  type: types.optional(types.string, 'urbit'),
+  type: types.optional(AppTypes, 'urbit'),
   image: types.maybeNull(types.string),
   href: Glob,
   version: types.string,

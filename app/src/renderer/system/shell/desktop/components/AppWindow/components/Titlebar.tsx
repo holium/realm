@@ -15,7 +15,7 @@ type TitlebarStyleProps = {
   hasBlur?: boolean;
 };
 
-const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
+export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -66,6 +66,7 @@ type TitlebarProps = {
   maximizeButton?: boolean;
   onMaximize?: () => void;
   isAppWindow?: boolean;
+  noTitlebar?: boolean;
   shareable?: boolean;
   app?: {
     id?: string;
@@ -84,6 +85,7 @@ export const Titlebar = (props: TitlebarProps) => {
     closeButton,
     hasBorder,
     zIndex,
+    noTitlebar,
     isAppWindow,
     dragControls,
     onDragStop,
@@ -150,7 +152,7 @@ export const Titlebar = (props: TitlebarProps) => {
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >
-      {titleSection && (
+      {titleSection && !noTitlebar && (
         <TitleCentered justifyContent="center" flex={1}>
           {titleSection}
         </TitleCentered>
@@ -183,7 +185,6 @@ export const Titlebar = (props: TitlebarProps) => {
       ) : (
         isAppWindow && <Flex></Flex>
       )}
-
       {children}
       {(maximizeButton || closeButton) && (
         <Flex gap={4} alignItems="center">

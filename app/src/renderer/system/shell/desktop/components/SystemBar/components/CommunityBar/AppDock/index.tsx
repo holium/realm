@@ -66,6 +66,7 @@ export const AppDock: FC<AppTileProps> = observer(() => {
                     {
                       label: 'Uninstall app',
                       section: 2,
+                      disabled: true,
                       onClick: (evt: any) => {
                         evt.stopPropagation();
                         console.log('start uninstall');

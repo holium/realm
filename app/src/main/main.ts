@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, session } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
@@ -19,7 +19,13 @@ import { RealmCore } from '../core';
 import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
-import { trimEnd } from 'lodash';
+// Ad block
+import { ElectronBlocker } from '@cliqz/adblocker-electron';
+import fetch from 'cross-fetch'; // required 'fetch'
+
+ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+  blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
+});
 
 export default class AppUpdater {
   constructor() {
@@ -92,6 +98,7 @@ const createWindow = async () => {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
+      // sandbox: true,
       // nodeIntegrationInWorker: true,
       contextIsolation: true,
       // additionalArguments: [`storePath:${app.getPath('userData')}`],
