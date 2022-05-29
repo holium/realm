@@ -9,9 +9,8 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { LoaderModel } from '../stores/common/loader';
-import { WindowThemeType } from '../stores/config';
 import { ShipModel as BaseShipModel } from '../../../core/ship/stores/ship';
-import { authState, osState, spacesState } from '../store';
+import { authState, spacesState } from '../store';
 import { AuthShipType } from '../../../core/auth/store';
 
 export const ShipStatusModel = types

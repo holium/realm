@@ -1,5 +1,11 @@
-import { osState } from './../store';
-import { types, applySnapshot, Instance, tryReference } from 'mobx-state-tree';
+import { osState, shipState } from './../store';
+import {
+  types,
+  applySnapshot,
+  Instance,
+  tryReference,
+  detach,
+} from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { closeAppWindow, openAppWindow } from './api';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../space/app/dimensions';
@@ -117,38 +123,7 @@ export const DesktopStore = types
       const windowDimensions = self.windows.get(windowId)!.dimensions;
       applySnapshot(windowDimensions, dimensions);
     },
-    openBrowserWindow(app: any, location?: any) {
-      // const defaultAppDimensions = {
-      //   width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-      //     ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
-      //     : 600,
-      //   height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-      //     ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
-      //     : 600,
-      // };
-      // console.log(toJS(getInitialWindowDimensions(app)));
-      // // if()
-      // const defaultXY = getCenteredXY(
-      //   defaultAppDimensions,
-      //   self.desktopDimensions
-      // );
-
-      // const newWindow = Window.create({
-      //   id: app.id,
-      //   title: app.title,
-      //   zIndex: 2,
-      //   type: app.type,
-      //   dimensions: {
-      //     x: app.dimensions ? app.dimensions.x : defaultXY.x,
-      //     y: app.dimensions ? app.dimensions.y : defaultXY.y,
-      //     width: app.dimensions
-      //       ? app.dimensions.width
-      //       : defaultAppDimensions.width,
-      //     height: app.dimensions
-      //       ? app.dimensions.height
-      //       : defaultAppDimensions.height,
-      //   },
-      // });
+    openBrowserWindow(app: any) {
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
@@ -162,7 +137,21 @@ export const DesktopStore = types
         self.showHomePane = false;
         self.isBlurred = false;
       }
-      openAppWindow(toJS(location));
+      const ship = shipState.ship!;
+      const formAppUrl = `${ship.url}/apps/${app.id!}`;
+      const windowPayload = {
+        name: app.id!,
+        url: formAppUrl,
+        customCSS: {},
+        theme: osState.themeStore,
+        cookies: {
+          url: formAppUrl,
+          name: `urbauth-${ship.patp}`,
+          value: ship.cookie!.split('=')[1].split('; ')[0],
+        },
+      };
+      openAppWindow(windowPayload);
+      return windowPayload;
     },
     closeBrowserWindow(appId: any) {
       self.windows.delete(appId);

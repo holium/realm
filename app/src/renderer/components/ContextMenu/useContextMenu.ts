@@ -19,6 +19,7 @@ const useContextMenu = (
         console.log('context click');
         event.preventDefault();
         event.stopPropagation();
+
         setAnchorPoint(
           calculateAnchorPoint(
             event,

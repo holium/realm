@@ -1,6 +1,6 @@
 import { toJS } from 'mobx';
-import { AppModelType, WebAppType } from 'core/ship/stores/docket';
-import { NativeAppType } from 'renderer/system/apps';
+import { AppModelType } from 'core/ship/stores/docket';
+import { NativeAppType } from 'renderer/apps';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../space/app/dimensions';
 
 /**
@@ -103,9 +103,14 @@ export const getInitialWindowDimensions = (
       const urbitApp: AppModelType = app;
       dimensions = getCenteredDimensions(urbitApp);
       break;
-    // case 'web':
-    //   const webApp: AppModelType = app;
-    //   break;
+    case 'web':
+      const webApp: NativeAppType = app;
+      if (webApp.web?.openFullscreen) {
+        dimensions = getFullscreenDimensions(isFullscreen);
+        break;
+      }
+      dimensions = getCenteredDimensions(webApp);
+      break;
     case 'native':
       const nativeApp: NativeAppType = app;
       if (nativeApp.native?.openFullscreen) {
