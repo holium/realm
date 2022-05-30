@@ -115,13 +115,12 @@ export const SpaceStore = types
           }),
         })
       );
-      if (!self.selected) {
-        self.selected = self.spaces.get(ship.patp)!;
-        if (self.selected.theme.wallpaper) {
-          osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
-            patp: ship.patp,
-          });
-        }
+      self.selected = self.spaces.get(ship.patp)!;
+
+      if (self.selected && self.selected.theme.wallpaper) {
+        osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
+          patp: ship.patp,
+        });
       }
     },
     selectSpace(spaceKey: string) {

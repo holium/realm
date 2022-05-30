@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-
+import { toJS } from 'mobx';
 import { Flex, Text, Sigil } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';
 import { useShip, useSpaces } from 'renderer/logic/store';
@@ -34,6 +34,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
     const { dockColor, textColor } = selectedSpace.theme;
     let innerContent: any;
     if (selectedSpace.type === 'our') {
+      console.log(toJS(spaceStore.spaces));
       innerContent = (
         <Flex
           style={{ pointerEvents: 'none' }}
