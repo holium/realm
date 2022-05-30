@@ -63,6 +63,7 @@ const TileStyle = styled(Box)<TileStyleProps>`
 `;
 
 interface AppTileProps {
+  isPinned?: boolean;
   contextPosition?: 'above' | 'below';
   allowContextMenu?: boolean;
   contextMenu?: any[]; // todo types
@@ -83,6 +84,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     selected,
     tileSize,
     allowContextMenu,
+    isPinned,
     onAppClick,
   } = props;
   // const { themeStore } = useMst();
@@ -153,7 +155,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     } else if (app.icon) {
       const iconTileSize = sizes[tileSize];
       const iconSize =
-        iconTileSize < 88 ? sizes[tileSize] / 1.8 : sizes[tileSize] / 3;
+        iconTileSize < 88 ? sizes[tileSize] / 1.6 : sizes[tileSize] / 2.5;
 
       graphic = (
         <TileStyle
@@ -231,7 +233,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
         )}
       </Flex>
     );
-  }, [app]);
+  }, [app, isPinned]);
 };
 
 AppTile.defaultProps = {

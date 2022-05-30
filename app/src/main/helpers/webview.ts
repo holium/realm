@@ -10,6 +10,16 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
     }
   );
 
+  // TODO make a better structure for partition sessions
+  ipcMain.handle(
+    'set-partition-cookie',
+    async (_event, data: { partition: string; cookies: any }) => {
+      // console.log('cookies', location.cookies);
+      // session.defaultSession.cookies.set(location.cookies);
+      session.fromPartition(data.partition).cookies.set(data.cookies);
+    }
+  );
+
   ipcMain.handle('close-app', async (event, location: any) => {
     const views = mainWindow!.getBrowserViews();
   });

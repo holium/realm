@@ -4,6 +4,7 @@ import useSystemContextMenu from './useSystemContextMenu';
 
 import { MenuItem } from '../MenuItem';
 import { MenuWrapper } from '../Menu';
+import { rgba } from 'polished';
 
 export type ContextMenuProps = {
   isComponentContext?: boolean;
@@ -54,7 +55,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
       return arr.concat([
         [
           <MenuItem
-            color={textColor}
+            color={obj.disabled ? rgba(textColor, 0.7) : textColor}
             customBg={customBg}
             type={menuItemtype}
             key={index}
@@ -65,7 +66,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
     }
     arr[arr.length - 1].push(
       <MenuItem
-        color={textColor}
+        color={obj.disabled ? rgba(textColor, 0.7) : textColor}
         customBg={customBg}
         type={menuItemtype}
         key={index}

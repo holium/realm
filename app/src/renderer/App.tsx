@@ -1,7 +1,7 @@
 import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
-import { Shell } from './system/shell';
+import { Shell } from './system';
 import { theme } from './theme';
 import {
   AuthProvider,
@@ -15,8 +15,7 @@ import {
 } from './logic/store';
 import { onStart } from './logic/api/realm.core';
 import { useEffect } from 'react';
-// import { Mouse } from './system/shell/desktop/components/Mouse';
-import { Mouse } from './system/shell/desktop/components/Mouse';
+import { Mouse } from './system/desktop/components/Mouse';
 
 import { Observer } from 'mobx-react';
 
@@ -52,7 +51,9 @@ export const App = () => {
                   ) : null;
                 }}
               </Observer>
-              {themeStore.loader.isLoaded && <Shell />}
+              <Observer>
+                {() => (themeStore.loader.isLoaded ? <Shell /> : null)}
+              </Observer>
               <div id="portal-root" />
             </ShipProvider>
           </AuthProvider>

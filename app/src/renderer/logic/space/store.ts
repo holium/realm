@@ -6,7 +6,7 @@ import { DocketApp, WebApp } from '../../../core/ship/stores/docket';
 import { ShipModelType } from '../ship/store';
 import { osState } from '../store';
 import { ThemeModel } from 'core/theme/store';
-import { NativeAppList } from 'renderer/system/apps';
+import { NativeAppList } from 'renderer/apps';
 
 const DocketMap = types.map(types.union({ eager: false }, DocketApp, WebApp));
 export const Space = types

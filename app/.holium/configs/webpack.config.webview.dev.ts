@@ -21,7 +21,7 @@ const configuration: webpack.Configuration = {
 
   entry: path.join(
     webpackPaths.srcMainPath,
-    '../renderer/system/shell/desktop/components/Mouse.tsx'
+    '../renderer/system/desktop/components/Mouse.tsx'
   ),
 
   output: {

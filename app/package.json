@@ -210,10 +210,12 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@cliqz/adblocker-electron": "^1.23.8",
     "@react-hook/mouse-position": "^4.1.3",
     "@tlon/sigil-js": "^1.4.5",
     "axios": "^0.26.1",
     "color.js": "^1.2.0",
+    "cross-fetch": "^3.1.5",
     "electron-debug": "^3.2.0",
     "electron-hot-reload": "^0.1.4",
     "electron-log": "^4.4.6",
@@ -229,6 +231,7 @@
     "mobx-state-tree": "^5.1.3",
     "mst-middlewares": "^5.1.3",
     "node-fetch": "^2.6.1",
+    "normalize-url": "^7.0.3",
     "polished": "^4.2.2",
     "react": "^18.0.0",
     "react-animated-cursor": "^2.4.0",

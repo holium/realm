@@ -5,7 +5,7 @@ import * as React from 'react';
 import styled, { css } from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
 import { Card, Box, MenuOrientation } from '.';
-import { Portal } from '../system/modals/Portal';
+import { Portal } from 'renderer/system/modals/Portal';
 
 // type Placement =
 //   | 'bottom-right'
