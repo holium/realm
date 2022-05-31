@@ -162,22 +162,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
       preventClickEvents = false;
     }
 
-    // useEffect(() => {
-    //   if (
-    //     window.type === 'native' &&
-    //     nativeApps[window.id].native!.openFullscreen!
-    //   ) {
-    //     // Set fullscreen by default
-    //     const offset = desktopStore.isFullscreen ? 0 : 30;
-    //     // @ts-ignore
-    //     const desktopDims = desktopRef.current!.getBoundingClientRect();
-    //     mX.set(0);
-    //     mY.set(8);
-    //     mHeight.set(desktopDims.height - (16 + offset) - 50);
-    //     mWidth.set(desktopDims.width - 16);
-    //   }
-    // }, [desktopRef.current]);
-
     return (
       <AppWindowStyle
         id={windowId}

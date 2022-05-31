@@ -40,12 +40,12 @@ export const App = () => {
           {/* Modal provider */}
           <AuthProvider value={authState}>
             <ShipProvider value={shipState}>
-              <Mouse
+              {/* <Mouse
                 animateOut={false}
                 // hide={desktopStore.isMouseInWebview}
                 cursorColor={desktopStore.mouseColor}
-              />
-              {/* <Observer>
+              /> */}
+              <Observer>
                 {() => {
                   return (
                     <Mouse
@@ -62,7 +62,7 @@ export const App = () => {
                   //   />
                   // ) : null;
                 }}
-              </Observer> */}
+              </Observer>
               <Observer>
                 {() => (themeStore.loader.isLoaded ? <Shell /> : null)}
               </Observer>

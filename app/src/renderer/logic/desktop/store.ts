@@ -5,6 +5,7 @@ import {
   Instance,
   tryReference,
   detach,
+  flow,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { closeAppWindow, openAppWindow } from './api';
@@ -138,12 +139,13 @@ export const DesktopStore = types
         self.isBlurred = false;
       }
       const ship = shipState.ship!;
+
       const formAppUrl = `${ship.url}/apps/${app.id!}`;
-      const windowPayload = {
+      const windowPayload: any = {
         name: app.id!,
         url: formAppUrl,
         customCSS: {},
-        theme: osState.themeStore,
+        theme: toJS(osState.themeStore),
         cookies: {
           url: formAppUrl,
           name: `urbauth-${ship.patp}`,
@@ -151,7 +153,6 @@ export const DesktopStore = types
         },
       };
       openAppWindow(windowPayload);
-      return windowPayload;
     },
     closeBrowserWindow(appId: any) {
       self.windows.delete(appId);

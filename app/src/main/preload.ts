@@ -17,14 +17,14 @@ contextBridge.exposeInMainWorld('electron', {
     setMouseColor(callback: any) {
       ipcRenderer.on('mouse-color', callback);
     },
-    openApp(app: any) {
-      ipcRenderer.invoke('open-app', app);
+    openApp: (app: any) => {
+      return ipcRenderer.invoke('open-app', app);
     },
-    closeApp(app: any) {
-      ipcRenderer.invoke('close-app', app);
+    closeApp: (app: any) => {
+      return ipcRenderer.invoke('close-app', app);
     },
-    toggleDevTools() {
-      ipcRenderer.invoke('toggle-devtools');
+    toggleDevTools: () => {
+      return ipcRenderer.invoke('toggle-devtools');
     },
   },
 });
