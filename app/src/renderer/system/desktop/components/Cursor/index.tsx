@@ -134,7 +134,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Set is visible initially
 
   useEffect(() => {
-    // setIsVisible(true);
+    setIsVisible(true);
   }, []);
 
   // RAF for animateOuterCursor
