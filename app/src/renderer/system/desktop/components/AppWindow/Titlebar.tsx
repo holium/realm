@@ -6,6 +6,7 @@ import { WindowThemeType } from 'renderer/logic/stores/config';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
+import { useCallback } from 'react';
 
 type TitlebarStyleProps = {
   customBg: string;
@@ -60,6 +61,7 @@ type TitlebarProps = {
   hasBorder?: boolean;
   dragControls?: any;
   onDragStop?: (e: any) => void;
+  onDragStart?: (e: any) => void;
   navigationButtons?: boolean;
   closeButton?: boolean;
   onClose?: () => void;
@@ -90,6 +92,7 @@ export const Titlebar = (props: TitlebarProps) => {
     isAppWindow,
     dragControls,
     onDragStop,
+    onDragStart,
     onClose,
     onDevTools,
     maximizeButton,
@@ -136,6 +139,15 @@ export const Titlebar = (props: TitlebarProps) => {
     );
   }
 
+  const onCloseButton = useCallback(
+    (evt: any) => {
+      evt.stopPropagation();
+      // closeDevTools();
+      onClose && onClose();
+    },
+    [onClose]
+  );
+
   return (
     <TitlebarStyle
       hasBlur={hasBlur}
@@ -143,6 +155,7 @@ export const Titlebar = (props: TitlebarProps) => {
         ? {
             onPointerDown: (e) => {
               dragControls.start(e);
+              onDragStart && onDragStart(e);
             },
             onPointerUp: (e) => {
               onDragStop && onDragStop(e);
@@ -218,11 +231,7 @@ export const Titlebar = (props: TitlebarProps) => {
               iconColor={iconColor!}
               bg="#FF6240"
               fillWithBg
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                // closeDevTools();
-                onClose && onClose();
-              }}
+              onClick={onCloseButton}
             />
           )}
         </Flex>

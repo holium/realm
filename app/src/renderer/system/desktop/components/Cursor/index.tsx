@@ -123,8 +123,8 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   //     if (previousTimeRef.current !== undefined) {
   //       coords.x += (endX.current - coords.x) / trailingSpeed;
   //       coords.y += (endY.current - coords.y) / trailingSpeed;
-  //       cursorOuterRef.current.style.top = `${coords.y}px`;
-  //       cursorOuterRef.current.style.left = `${coords.x}px`;
+  //       // cursorOuterRef.current.style.top = `${coords.y}px`;
+  //       // cursorOuterRef.current.style.left = `${coords.x}px`;
   //     }
   //     previousTimeRef.current = time;
   //     requestRef.current = requestAnimationFrame(animateOuterCursor);
@@ -143,16 +143,42 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   //   return () => cancelAnimationFrame(requestRef.current);
   // }, [animateOuterCursor]);
 
+  const setMouseCoords = (evt: any) => {
+    const { clientX, clientY } = evt;
+
+    setCoords({ x: clientX, y: clientY });
+    cursorInnerRef.current.style.top = `${clientY}px`;
+    cursorInnerRef.current.style.left = `${clientX}px`;
+    if (cursorInnerRef.current.style.transform === 'none') {
+      // if for some reason the transform isnt set yet.
+      cursorInnerRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+      // cursorOuterRef.current.style.transform =
+      //   'translate(-50%, -50%) scale(1.0)';
+    }
+    endX.current = clientX;
+    endY.current = clientY;
+  };
+
   // Mouse Events State updates
-  const onMouseDown = useCallback(() => {
+  const onMouseDown = useCallback((evt: any) => {
+    // if (!isVisible) {
+    setIsVisible(true);
+    //   setMouseCoords(evt);
+    // }
     setIsActive(true);
   }, []);
+
   const onMouseUp = useCallback(() => setIsActive(false), []);
-  const onMouseEnterViewport = useCallback(() => {
+  const onMouseEnterViewport = useCallback((evt: any) => {
+    setMouseCoords(evt);
     setIsVisible(true);
+    setIsActive(true);
   }, []);
   const onMouseLeaveViewport = useCallback(() => {
     setIsVisible(false);
+    setIsActive(false);
+    // cursorInnerRef.current.style.delay = '.2s ease';
   }, []);
 
   useEventListener('mousemove', onMouseMove);

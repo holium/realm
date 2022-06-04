@@ -1,5 +1,5 @@
 import { FC, useRef, useMemo } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, ContextMenu } from '..';
 import { AppModelType } from '../../../core/ship/stores/docket';
@@ -9,6 +9,7 @@ import Icons from '../Icons';
 import { useMst } from 'renderer/logic/store';
 import { Portal } from 'renderer/system/modals/Portal';
 import { AnimatePresence } from 'framer-motion';
+import { ThemeType } from 'renderer/theme';
 
 const sizes = {
   sm: 32,
@@ -34,15 +35,28 @@ const scales = {
   xxl: 0.02,
 };
 
-export const TileHighlight = styled(Box)`
+interface TileHighlightProps {
+  isSelected?: boolean;
+  isOpen?: boolean;
+  theme: ThemeType;
+}
+export const TileHighlight = styled(Box)<TileHighlightProps>`
   left: 11px;
   bottom: -8px;
   width: 10px;
   height: 5px;
   border-radius: 4px;
   position: absolute;
-  background-color: ${(props: any) =>
-    lighten(0.05, props.theme.colors.brand.primary)};
+  ${(props: TileHighlightProps) =>
+    props.isSelected &&
+    css`
+      background-color: ${lighten(0.05, props.theme.colors.brand.primary)};
+    `}
+  ${(props: TileHighlightProps) =>
+    props.isOpen &&
+    css`
+      background-color: ${lighten(0.05, props.theme.colors.icon.app)};
+    `}
 `;
 
 interface TileStyleProps {}
@@ -69,6 +83,7 @@ interface AppTileProps {
   contextMenu?: any[]; // todo types
   onAppClick: (app: AppModelType) => void;
   selected?: boolean;
+  open?: boolean;
   app: AppModelType | any;
   variants?: any;
   isVisible?: boolean;
@@ -85,6 +100,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     tileSize,
     allowContextMenu,
     isPinned,
+    open,
     onAppClick,
   } = props;
   // const { themeStore } = useMst();
@@ -228,12 +244,16 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           </Portal>
         )}
         {graphic}
-        {selected && (
-          <TileHighlight layoutId="active-app" transition={{ duration: 0.2 }} />
-        )}
+
+        <TileHighlight
+          layoutId="active-app"
+          isSelected={selected}
+          isOpen={open}
+          transition={{ duration: 0.2 }}
+        />
       </Flex>
     );
-  }, [app, isPinned]);
+  }, [app, isPinned, selected, open]);
 };
 
 AppTile.defaultProps = {
