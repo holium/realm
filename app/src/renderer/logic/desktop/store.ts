@@ -10,6 +10,7 @@ import {
 import { toJS } from 'mobx';
 import { closeAppWindow, openAppWindow } from './api';
 import { getInitialWindowDimensions } from '../utils/window-manager';
+import { NativeAppList } from 'renderer/apps';
 
 const Grid = types.model({
   width: types.enumeration(['1', '2', '3']),

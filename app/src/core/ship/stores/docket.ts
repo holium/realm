@@ -15,7 +15,7 @@ export const Glob = types.model({
   }),
 });
 
-export const DocketApp = types.model({
+export const DocketApp = types.model('DocketApp', {
   id: types.identifier,
   title: types.string,
   info: types.string,
@@ -30,9 +30,10 @@ export const DocketApp = types.model({
 
 export type DocketAppType = Instance<typeof DocketApp>;
 
-export const WebApp = types.model({
+export const WebApp = types.model('WebApp', {
   id: types.identifier,
   title: types.string,
+  color: types.string,
   type: types.optional(types.string, 'web'),
   icon: types.maybeNull(types.string),
   href: types.string,

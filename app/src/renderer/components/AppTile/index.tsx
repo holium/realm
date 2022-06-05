@@ -28,7 +28,7 @@ const radius = {
 };
 
 const scales = {
-  sm: 0.05,
+  sm: 0.07,
   md: 0.05,
   lg: 0.07,
   xl: 0.05,
@@ -81,7 +81,7 @@ interface AppTileProps {
   contextPosition?: 'above' | 'below';
   allowContextMenu?: boolean;
   contextMenu?: any[]; // todo types
-  onAppClick: (app: AppModelType) => void;
+  onAppClick?: (app: AppModelType) => void;
   selected?: boolean;
   open?: boolean;
   app: AppModelType | any;
@@ -224,7 +224,10 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
         position="relative"
         ref={tileRef}
         variants={variants}
-        onClick={() => onAppClick(app)}
+        onClick={(evt: any) => {
+          // evt.stopPropagation();
+          onAppClick && onAppClick(app);
+        }}
         className="app-dock-icon"
       >
         {allowContextMenu && (
