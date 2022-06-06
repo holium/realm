@@ -159,7 +159,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   const onMouseEnterViewport = useCallback((evt: any) => {
     setMouseCoords(evt);
     setIsVisible(true);
-    // setIsActive(false);
+    setIsActive(false);
   }, []);
   const onMouseLeaveViewport = useCallback(() => {
     setIsVisible(false);
