@@ -105,7 +105,7 @@ export const Titlebar = (props: TitlebarProps) => {
 
   // const onDevTools = () => {
   //   const webview: any = document.getElementById(
-  //     `${props.app!.id}-app-webview`
+  //     `${props.app!.id}-urbit-webview`
   //   );
   //   webview.isDevToolsOpened()
   //     ? webview.closeDevTools()
@@ -114,7 +114,7 @@ export const Titlebar = (props: TitlebarProps) => {
 
   // const closeDevTools = () => {
   //   const webview: any = document.getElementById(
-  //     `${props.app!.id}-app-webview`
+  //     `${props.app!.id}-urbit-webview`
   //   );
   //   webview && webview.isReady() && webview.closeDevTools();
   // };

@@ -1,19 +1,18 @@
 import { FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, lighten, darken } from 'polished';
+// import { observer } from 'mobx-react';
+// import { darken } from 'polished';
 
 import {
   Grid,
   Flex,
   Icons,
-  Box,
   Sigil,
   Text,
   IconButton,
-} from '../../components';
-import { useMst, useShip, useAuth } from '../../logic/store';
-import { displayDate } from '../../logic/utils/time';
-import { ThemeModelType } from '~realm/theme/store';
+} from 'renderer/components';
+import { useMst, useShip, useAuth } from 'renderer/logic/store';
+import { displayDate } from 'renderer/logic/utils/time';
+import { ThemeModelType } from 'core/theme/store';
 import { nativeApps } from '..';
 
 type ProfileProps = {
@@ -35,31 +34,19 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
   // const iconColor = darken(0.5, textColor);
   // const dividerBg = useMemo(() => rgba(lighten(0.2, dockColor), 0.4), [theme]);
 
-  const bgHover = darken(0.05, backgroundColor);
+  // const bgHover = darken(0.05, backgroundColor);
 
   useEffect(() => {
     // @ts-ignore
     navigator.getBattery().then((battery: any) => {
       const level = battery.level;
-      console.log(battery);
+      // console.log(battery);
       setBatteryLevel(level);
     });
   }, []);
 
   const openSettingsApp = () => {
-    const formAppUrl = `${ship!.url}/apps/os-settings`;
-    const windowPayload = {
-      name: 'os-settings',
-      url: formAppUrl,
-      customCSS: {},
-      theme: themeStore,
-      cookies: {
-        url: formAppUrl,
-        name: `urbauth-${ship!.patp}`,
-        value: ship!.cookie!.split('=')[1].split('; ')[0],
-      },
-    };
-    desktopStore.openBrowserWindow(nativeApps['os-settings'], windowPayload);
+    desktopStore.openBrowserWindow(nativeApps['os-settings']);
   };
 
   const currentShip = ship!;

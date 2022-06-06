@@ -104,15 +104,15 @@ window.electron.core.onEffect((_event: any, value: any) => {
       authState.authStore.initialSync(value);
     }
     if (value.resource === 'theme') {
-      console.log('initial theme sync', value);
       osState.themeStore.initialSync(value);
     }
   }
 });
 
 window.electron.core.onReady((_event: any, data: any) => {
+  // TODO on ready status handling
   // osStore.spaceStore.getApps();
-  console.log('logged in a ready', data);
+  // console.log('logged in a ready', data);
   // onStart();
 });
 

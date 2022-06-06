@@ -39,7 +39,7 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   );
 
   const shipLoaded = ship && ship.isLoaded;
-  console.log('rerendering shell');
+  // console.log('rerendering shell');
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
@@ -68,21 +68,24 @@ const BgImage = ({
   blurred: boolean;
   wallpaper: string;
 }) => {
-  return (
-    <AnimatePresence>
-      <BackgroundImage
-        key={wallpaper}
-        src={wallpaper}
-        initial={{ opacity: 0 }}
-        exit={{ opacity: 0 }}
-        animate={{
-          opacity: 1,
-          filter: blurred ? 'blur(20px)' : 'blur(0px)',
-        }}
-        transition={{
-          opacity: { duration: 1 },
-        }}
-      />
-    </AnimatePresence>
+  return useMemo(
+    () => (
+      <AnimatePresence>
+        <BackgroundImage
+          key={wallpaper}
+          src={wallpaper}
+          initial={{ opacity: 0 }}
+          exit={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            filter: blurred ? 'blur(20px)' : 'blur(0px)',
+          }}
+          transition={{
+            opacity: { duration: 1 },
+          }}
+        />
+      </AnimatePresence>
+    ),
+    [blurred, wallpaper]
   );
 };

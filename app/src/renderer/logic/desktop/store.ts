@@ -1,21 +1,14 @@
 import { osState, shipState } from './../store';
-import {
-  types,
-  applySnapshot,
-  Instance,
-  tryReference,
-  detach,
-  flow,
-} from 'mobx-state-tree';
+import { types, applySnapshot, Instance } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { closeAppWindow, openAppWindow } from './api';
+import { setPartitionCookies } from './api';
 import { getInitialWindowDimensions } from '../utils/window-manager';
 import { NativeAppList } from 'renderer/apps';
 
-const Grid = types.model({
-  width: types.enumeration(['1', '2', '3']),
-  height: types.enumeration(['1', '2']),
-});
+// const Grid = types.model({
+//   width: types.enumeration(['1', '2', '3']),
+//   height: types.enumeration(['1', '2']),
+// });
 
 const DimensionsModel = types.model({
   x: types.number,
@@ -151,18 +144,28 @@ export const DesktopStore = types
       const ship = shipState.ship!;
 
       const formAppUrl = `${ship.url}/apps/${app.id!}`;
-      const windowPayload: any = {
-        name: app.id!,
-        url: formAppUrl,
-        customCSS: {},
-        theme: toJS(osState.themeStore),
-        cookies: {
+      // const windowPayload: any = {
+      //   name: app.id!,
+      //   url: formAppUrl,
+      //   customCSS: {},
+      //   theme: toJS(osState.themeStore),
+      //   cookies: {
+      //     url: formAppUrl,
+      //     name: `urbauth-${ship.patp}`,
+      //     value: ship.cookie!.split('=')[1].split('; ')[0],
+      //   },
+      // };
+      if (
+        app.type === 'urbit' ||
+        (app.type === 'web' && !app.web.development)
+      ) {
+        // openAppWindow(windowPayload, PartitionMap[app.type]);
+        setPartitionCookies(`${app.type}-webview`, {
           url: formAppUrl,
           name: `urbauth-${ship.patp}`,
           value: ship.cookie!.split('=')[1].split('; ')[0],
-        },
-      };
-      openAppWindow(windowPayload);
+        });
+      }
     },
     closeBrowserWindow(appId: any) {
       if (self.activeWindow?.id === appId) {

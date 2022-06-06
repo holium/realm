@@ -6,35 +6,10 @@ An electron app that serves as a GUI for the Realm experience and Urbit. The int
 
 Install all dependencies with `yarn` or `npm install`.
 
-**Note**: Run `yarn start:webview` one time to build the `mouse.js` preload.
+**Note**: Run `yarn start:webview` one time to build the `mouse.js` preload. Need to refactor the default build
+process to include this step.
 
 Start the app in dev mode with `yarn start` or `npm run start`.
-
-## Architecture
-
-The project is structured with the goal of having a seperate process syncing data from your Urbit server and being an offline cache of your
-Urbit ship state.
-
-```
-
-    ____________          _____________          _________________
-   |            |        |             |        |                |
-   |  Renderer  | ------ |    Main     | ------ |   Background   |
-   |____________|        |_____________|        |________________|
-                                |
-                                |
-                          ____________
-                         |            |
-                         |    Core    |
-                         |____________|
-```
-
-- `/renderer` is the GUI layer.
-- `/main` is the main electron process
-- `/core` is the core background process libs for syncing state and managing data.
-- `/background` is the background process logic, starts a tray icon for Realm.
-
-## Layers of the UI
 
 ## Developing apps within Realm
 
@@ -57,3 +32,34 @@ You can add a record for your development application in the following format:
   }
 }
 ```
+
+## Architecture
+
+The project is structured with the goal of having a seperate process sync data from your Urbit server and being an offline cache of your Urbit ship state.
+
+```
+
+    ____________          _____________          _________________
+   |            |        |             |        |                |
+   |  Renderer  | ------ |    Main     | ------ |   Background   |
+   |____________|        |_____________|        |________________|
+                                |
+                                |
+                          ____________
+                         |            |
+                         |    Core    |
+                         |____________|
+```
+
+- `/renderer` is the GUI layer.
+- `/main` is the main electron process
+- `/core` is the core background process libs for syncing state and managing data.
+- `/background` is the background process logic, starts a tray icon for Realm.
+
+## Layers of the UI
+
+Layer 0: Background
+Layer 1: WindowManager
+Layer 2: SystemBar
+Layer 3: TrayMenus
+Layer 4: Modals, ContextMenu, Tooltips, Popovers

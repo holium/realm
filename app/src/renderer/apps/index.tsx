@@ -22,6 +22,7 @@ export type NativeAppType = {
     url: string;
     openFullscreen?: boolean;
     theme?: WindowThemeType;
+    development?: boolean;
   };
 };
 

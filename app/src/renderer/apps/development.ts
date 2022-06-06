@@ -12,6 +12,7 @@ export const devApps: {
     web: {
       openFullscreen: true,
       url: 'http://localhost:3000/apps/ballot/',
+      development: true,
     },
   },
 };

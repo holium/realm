@@ -33,12 +33,10 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     const webview: any = document.getElementById(`${window.id}-web-webview`);
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
-
     webview?.addEventListener('did-finish-load', () => {
       webview!.send('mouse-color', desktopStore.mouseColor);
       let css = '* { cursor: none !important; }';
       webview!.insertCSS(css);
-      // webview!.openDevTools();
     });
 
     webview?.addEventListener('close', () => {
@@ -60,7 +58,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
       <webview
         ref={webViewRef}
         id={`${window.id}-web-webview`}
-        partition="web-webview"
+        partition={webData.development ? 'persist:dev-webview' : 'web-webview'}
         preload={`file://${desktopStore.appviewPreload}`}
         src={webData.url}
         onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}

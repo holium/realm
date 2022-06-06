@@ -16,7 +16,7 @@ const useContextMenu = (
     (event) => {
       // If the id of the context menu matches the parent of the click, show the context menu
       if (event.target.id === containerId) {
-        console.log('context click');
+        // console.log('context click');
         event.preventDefault();
         event.stopPropagation();
 

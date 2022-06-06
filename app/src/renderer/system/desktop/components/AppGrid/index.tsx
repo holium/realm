@@ -89,7 +89,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           >
             {apps.map((app: any, index: number) => {
               const isAppPinned = spacesStore.selected?.isAppPinned(app.id);
-
               return (
                 <AppTile
                   key={app.title + index + 'grid'}

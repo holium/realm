@@ -142,7 +142,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         : {};
     };
 
-    let webviewId = `${desktopStore.activeWindow?.id}-app-webview`;
+    let webviewId = `${desktopStore.activeWindow?.id}-urbit-webview`;
     if (window.type === 'web') {
       webviewId = `${desktopStore.activeWindow?.id}-web-webview`;
     }

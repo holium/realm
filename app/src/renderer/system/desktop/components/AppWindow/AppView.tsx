@@ -45,7 +45,7 @@
 
 //   useEffect(() => {
 //     const webview: any = document.getElementById(
-//       `${window.id}-app-webview`
+//       `${window.id}-urbit-webview`
 //     );
 //     webview?.addEventListener('did-start-loading', onStartLoading);
 //     webview?.addEventListener('did-stop-loading', onStopLoading);
@@ -88,8 +88,8 @@
 //         )}
 //         <webview
 //           ref={webViewRef}
-//           id={`${window.id}-app-webview`}
-//           partition="app-webview"
+//           id={`${window.id}-urbit-webview`}
+//           partition="urbit-webview"
 //           preload={`file://${desktopStore.appviewPreload}`}
 //           src={appConfig.url}
 //           onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}
@@ -157,7 +157,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   );
 
   useEffect(() => {
-    const webview: any = document.getElementById(`${window.id}-app-webview`);
+    const webview: any = document.getElementById(`${window.id}-urbit-webview`);
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
 
@@ -166,7 +166,6 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         webview!.send('mouse-color', desktopStore.mouseColor);
         let css = '* { cursor: none !important; }';
         webview!.insertCSS(css);
-        // webview!.openDevTools();
       });
 
       webview?.addEventListener('close', () => {
@@ -187,7 +186,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   }, [desktopStore]);
 
   return useMemo(() => {
-    console.log('render app window');
+    // console.log('render app window');
     return (
       <View
         style={{
@@ -208,8 +207,8 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         )}
         <webview
           ref={webViewRef}
-          id={`${window.id}-app-webview`}
-          partition="app-webview"
+          id={`${window.id}-urbit-webview`}
+          partition="urbit-webview"
           preload={`file://${desktopStore.appviewPreload}`}
           src={appConfig.url}
           onMouseEnter={onMouseEnter}
