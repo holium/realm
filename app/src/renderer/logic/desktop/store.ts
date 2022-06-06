@@ -5,14 +5,12 @@ import {
   Instance,
   tryReference,
   detach,
+  flow,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { closeAppWindow, openAppWindow } from './api';
-import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../space/app/dimensions';
-import {
-  getCenteredXY,
-  getInitialWindowDimensions,
-} from '../utils/window-manager';
+import { getInitialWindowDimensions } from '../utils/window-manager';
+import { NativeAppList } from 'renderer/apps';
 
 const Grid = types.model({
   width: types.enumeration(['1', '2', '3']),
@@ -73,6 +71,22 @@ export const DesktopStore = types
     get hasOpenWindow() {
       return self.activeWindow !== undefined;
     },
+    get openApps() {
+      return Array.from(self.windows.values());
+    },
+    get openAppIds() {
+      return Array.from(self.windows.values()).map((window: any) => window.id);
+    },
+    isOpenWindow(appId: string) {
+      return (
+        Array.from(self.windows.values()).findIndex(
+          (appWindow: any) => appWindow.id === appId
+        ) > -1
+      );
+    },
+    isActiveWindow(appId: string) {
+      return self.activeWindow?.id === appId;
+    },
   }))
   .actions((self) => ({
     setDesktopDimensions(width: number, height: number) {
@@ -95,20 +109,17 @@ export const DesktopStore = types
     setIsBlurred(isBlurred: boolean) {
       self.isBlurred = isBlurred;
     },
-    setActive(activeWindow: WindowModelType) {
-      if (self.activeWindow !== activeWindow) {
-        self.activeWindow = activeWindow;
-        const depth = self.windows.size;
-        self.windows.forEach((win: WindowModelType) => {
-          if (activeWindow.id === win.id) {
-            win.setZIndex(depth + 1);
-          } else {
-            if (win.zIndex > 1) {
-              win.setZIndex(win.zIndex - 1);
-            }
+    setActive(activeWindowId: string) {
+      self.windows.forEach((win: WindowModelType) => {
+        if (activeWindowId === win.id) {
+          win.setZIndex(self.windows.size + 1);
+        } else {
+          if (win.zIndex > 1) {
+            win.setZIndex(win.zIndex - 1);
           }
-        });
-      }
+        }
+      });
+      self.activeWindow = self.windows.get(activeWindowId);
     },
     setFullscreen(isFullscreen: boolean) {
       self.isFullscreen = isFullscreen;
@@ -127,7 +138,7 @@ export const DesktopStore = types
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
-        zIndex: 2,
+        zIndex: self.windows.size + 1,
         type: app.type,
         dimensions: getInitialWindowDimensions(app, self.isFullscreen),
       });
@@ -138,12 +149,13 @@ export const DesktopStore = types
         self.isBlurred = false;
       }
       const ship = shipState.ship!;
+
       const formAppUrl = `${ship.url}/apps/${app.id!}`;
-      const windowPayload = {
+      const windowPayload: any = {
         name: app.id!,
         url: formAppUrl,
         customCSS: {},
-        theme: osState.themeStore,
+        theme: toJS(osState.themeStore),
         cookies: {
           url: formAppUrl,
           name: `urbauth-${ship.patp}`,
@@ -151,15 +163,14 @@ export const DesktopStore = types
         },
       };
       openAppWindow(windowPayload);
-      return windowPayload;
     },
     closeBrowserWindow(appId: any) {
-      self.windows.delete(appId);
       if (self.activeWindow?.id === appId) {
         const nextWindow = Array.from(self.windows.values())[0].id;
         if (nextWindow) {
-          self.activeWindow = tryReference(() => self.windows.get(nextWindow));
+          self.activeWindow = self.windows.get(nextWindow);
         }
       }
+      self.windows.delete(appId);
     },
   }));

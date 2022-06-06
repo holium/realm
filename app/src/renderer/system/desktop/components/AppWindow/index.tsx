@@ -60,6 +60,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     >();
     const dragControls = useDragControls();
     const [isResizing, setIsResizing] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     const activeWindow = window;
 
@@ -121,6 +122,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     }, [desktopStore.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
 
     const onDragStop = () => {
+      setIsDragging(false);
       activeWindow &&
         desktopStore.setDimensions(activeWindow.id, {
           x: mX.get(),
@@ -130,15 +132,19 @@ export const AppWindow: FC<AppWindowProps> = observer(
         });
     };
 
+    const onDragStart = () => {
+      setIsDragging(true);
+    };
+
     const onClose = () => {
       desktopStore.activeWindow
         ? desktopStore.closeBrowserWindow(desktopStore.activeWindow?.id)
         : {};
     };
 
-    let webviewId = `${desktopStore.activeWindow!.id}-app-webview`;
+    let webviewId = `${desktopStore.activeWindow?.id}-app-webview`;
     if (window.type === 'web') {
-      webviewId = `${desktopStore.activeWindow!.id}-web-webview`;
+      webviewId = `${desktopStore.activeWindow?.id}-web-webview`;
     }
 
     const onDevTools = () => {
@@ -146,6 +152,10 @@ export const AppWindow: FC<AppWindowProps> = observer(
       webview.isDevToolsOpened()
         ? webview.closeDevTools()
         : webview.openDevTools();
+    };
+
+    const onMouseDown = () => {
+      desktopStore.setActive(window.id);
     };
 
     const windowId = `app-window-${activeWindow?.id}`;
@@ -161,22 +171,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
       showDevToolsToggle = false;
       preventClickEvents = false;
     }
-
-    // useEffect(() => {
-    //   if (
-    //     window.type === 'native' &&
-    //     nativeApps[window.id].native!.openFullscreen!
-    //   ) {
-    //     // Set fullscreen by default
-    //     const offset = desktopStore.isFullscreen ? 0 : 30;
-    //     // @ts-ignore
-    //     const desktopDims = desktopRef.current!.getBoundingClientRect();
-    //     mX.set(0);
-    //     mY.set(8);
-    //     mHeight.set(desktopDims.height - (16 + offset) - 50);
-    //     mWidth.set(desktopDims.width - 16);
-    //   }
-    // }, [desktopRef.current]);
 
     return (
       <AppWindowStyle
@@ -212,10 +206,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         }}
         color={textColor}
         customBg={windowColor}
-        onMouseDown={(evt: any) => {
-          // preventClickEvents && evt.stopPropagation();
-          desktopStore.setActive(window);
-        }}
+        onMouseDown={onMouseDown}
       >
         <Flex
           flexDirection="column"
@@ -232,6 +223,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
               windowColor={darken(0.002, theme.windowColor!)}
               showDevToolsToggle
               dragControls={dragControls}
+              onDragStart={() => onDragStart()}
               onDragStop={() => onDragStop()}
               onClose={() => onClose()}
               onMaximize={() => maximize()}
@@ -247,6 +239,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
               // shareable
               dragControls={dragControls}
               onDevTools={onDevTools}
+              onDragStart={() => onDragStart()}
               onDragStop={() => onDragStop()}
               onClose={() => onClose()}
               onMaximize={() => maximize()}
@@ -258,7 +251,12 @@ export const AppWindow: FC<AppWindowProps> = observer(
             />
           )}
 
-          <WindowType hasTitlebar isResizing={isResizing} window={window} />
+          <WindowType
+            hasTitlebar
+            isResizing={isResizing}
+            isDragging={isDragging}
+            window={window}
+          />
           <DragHandleWrapper>
             {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
             <RightDragHandleStyle
@@ -302,11 +300,12 @@ export default AppWindow;
 type WindowTypeProps = {
   hasTitlebar: boolean;
   isResizing: boolean;
+  isDragging: boolean;
   window: WindowModelType;
 };
 
 export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
-  const { hasTitlebar, isResizing, window } = props;
+  const { hasTitlebar, isResizing, isDragging, window } = props;
   switch (window.type) {
     case 'native':
       return (
@@ -319,6 +318,7 @@ export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
     case 'urbit':
       return (
         <AppView
+          isDragging={isDragging}
           hasTitlebar={hasTitlebar}
           isResizing={isResizing}
           window={window}

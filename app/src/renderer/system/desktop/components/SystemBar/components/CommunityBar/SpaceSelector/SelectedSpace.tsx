@@ -34,7 +34,6 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
     const { dockColor, textColor } = selectedSpace.theme;
     let innerContent: any;
     if (selectedSpace.type === 'our') {
-      console.log(toJS(spaceStore.spaces));
       innerContent = (
         <Flex
           style={{ pointerEvents: 'none' }}

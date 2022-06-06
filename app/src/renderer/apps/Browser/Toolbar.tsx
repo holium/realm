@@ -18,6 +18,7 @@ const ToolbarStyle = styled(TitlebarStyle)`
 
 export type BrowserToolbarProps = {
   dragControls: any;
+  onDragStart: any;
   onDragStop: any;
   zIndex: number;
   windowColor: string;
@@ -33,6 +34,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
     showDevToolsToggle,
     dragControls,
     onDragStop,
+    onDragStart,
     zIndex,
     windowColor,
     onClose,
@@ -171,6 +173,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
           ? {
               onPointerDown: (e) => {
                 dragControls.start(e);
+                onDragStart && onDragStart(e);
               },
               onPointerUp: (e) => {
                 onDragStop && onDragStop(e);

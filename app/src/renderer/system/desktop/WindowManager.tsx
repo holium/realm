@@ -80,15 +80,17 @@ export const WindowManager: FC<WindowManagerProps> = observer(
             },
           ]}
         />
-        {hasOpenWindows &&
-          windows.map((window: any, index: number) => (
+        {windows.map((window: any, index: number) => {
+          const key = `${window.id}-${index}`;
+          return (
             <AppWindow
               desktopRef={desktopRef}
-              key={`${window.id}-${index}`}
+              key={key}
               window={window}
               theme={themeStore.theme}
             />
-          ))}
+          );
+        })}
       </motion.div>
     );
   }

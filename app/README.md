@@ -33,3 +33,27 @@ Urbit ship state.
 - `/main` is the main electron process
 - `/core` is the core background process libs for syncing state and managing data.
 - `/background` is the background process logic, starts a tray icon for Realm.
+
+## Layers of the UI
+
+## Developing apps within Realm
+
+You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/renderer/apps/development.ts`.
+
+You can add a record for your development application in the following format:
+
+```jsonc
+{
+  "ballot-dev": {
+    "id": "ballot-dev",
+    "title": "Ballot - Dev",
+    "type": "web",
+    "color": "#cebef0",
+    "icon": "https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg",
+    "web": {
+      "openFullscreen": true,
+      "url": "http://localhost:3000/apps/ballot/" # the port for your dev server
+    }
+  }
+}
+```

@@ -7,6 +7,7 @@ import { ShipModelType } from '../ship/store';
 import { osState } from '../store';
 import { ThemeModel } from 'core/theme/store';
 import { NativeAppList } from 'renderer/apps';
+import { shipState } from 'renderer/logic/store';
 
 const DocketMap = types.map(types.union({ eager: false }, DocketApp, WebApp));
 export const Space = types
@@ -44,25 +45,39 @@ export const Space = types
   })
   .views((self) => ({
     get pinnedApps() {
-      return [
-        ...Array.from(self.apps.docket!.values()),
-        ...NativeAppList,
-      ].filter((app: any) => self.apps.pinned.includes(app.id));
+      const pins = self.apps.pinned;
+      return [...Array.from(self.apps.docket!.values()), ...NativeAppList]
+        .filter((app: any) => self.apps.pinned.includes(app.id))
+        .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
     },
     isAppPinned(appId: string) {
       return self.apps.pinned.includes(appId);
+    },
+    getAppData(appId: string) {
+      const apps = shipState.ship
+        ? [...shipState.ship!.apps, ...NativeAppList]
+        : [...NativeAppList];
+      return apps.find((app: any) => app.id === appId);
+    },
+
+    get spaceApps() {
+      return shipState.ship
+        ? [...shipState.ship!.apps, ...NativeAppList]
+        : [...NativeAppList];
     },
   }))
   .actions((self) => ({
     load(spaceId: string) {
       applySnapshot(self, MockData[spaceId]);
     },
-
     pinApp(appId: string) {
       self.apps.pinned.push(appId);
     },
     unpinApp(appId: string) {
       self.apps.pinned.remove(appId);
+    },
+    setPinnedOrder(newOrder: any) {
+      self.apps.pinned = newOrder;
     },
   }));
 export type SpaceModelType = Instance<typeof Space>;

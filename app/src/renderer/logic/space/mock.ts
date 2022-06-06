@@ -56,17 +56,17 @@ export const spaces: { [key: string]: any } = {
     apps: {
       pinned: ['ballot'],
       docket: {
-        ['gnosis-safe']: {
-          id: 'gnosis-safe',
-          title: 'Gnosis Safe',
-          type: 'web',
-          icon: '',
-          href: '<link_to_gnosis>',
-        },
+        // ['gnosis-safe']: {
+        //   id: 'gnosis-safe',
+        //   title: 'Gnosis Safe',
+        //   type: 'web',
+        //   icon: '',
+        //   href: '<link_to_gnosis>',
+        // },
         ['ballot']: {
           id: 'ballot',
           title: 'Ballot (alpha)',
-          type: 'native',
+          type: 'urbit',
           info: 'An app that allows you to vote with other ships. Built by Holium.',
           color: '#cebef0',
           image:

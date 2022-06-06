@@ -47,8 +47,6 @@ export const ShipSelector: FC = observer(() => {
       {orderedList.length > 0 &&
         orderedList.map((ship: any) => {
           const selected = selectedShip && ship.id === selectedShip.id;
-          // console.log(toJS(ship));
-          // const isDragging = draggingPatp === ship.patp;
           return (
             <Reorder.Item
               key={ship.patp}
