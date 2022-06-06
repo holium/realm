@@ -108,7 +108,7 @@ export const SpaceStore = types
           type: 'our',
           // @ts-ignore FIX
           apps: {
-            pinned: ['ballot', 'escape', 'webterm', 'bitcoin', 'landscape'],
+            pinned: ['ballot', 'escape', 'webterm', 'landscape'],
             // TODO fix
             ...(ship.docket.apps
               ? {
