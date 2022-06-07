@@ -8,27 +8,45 @@ import styled from 'styled-components';
 import AnimatedCursor, { Vec2 } from './Cursor';
 import { useEventListener } from './Cursor/useEventListener';
 
+const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
+
 interface JoinPayload {
   event: 'join';
   id: string; // ID of the current app session
 }
 
-interface CursorPayload
+enum CursorEvent {
+  Move = 'mousemove',
+  Click = 'click',
+}
+
+interface BaseCursorPayload
   extends Pick<ShipModelType, 'color' | 'nickname' | 'patp'> {
-  event: 'move-cursor';
+  event: CursorEvent;
   id: string; // ID of the current app session
+}
+
+interface CursorMovePayload extends BaseCursorPayload {
+  event: CursorEvent.Move;
   position: Vec2;
 }
 
-type AnyPayload = JoinPayload | CursorPayload;
+interface CursorClickPayload extends BaseCursorPayload {
+  event: CursorEvent.Click;
+  target: string; // some UUID on a button
+}
+
+type AnyPayload = JoinPayload | CursorMovePayload | CursorClickPayload;
+
+interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
+  isClicking?: boolean;
+}
 
 const UUID = String(Date.now());
 
 // Manage websocket connection within realm or an individual app
 export const Presences = () => {
-  const [cursors, setCursors] = useState<
-    Record<string, Omit<CursorPayload, 'event' | 'id'>>
-  >({});
+  const [cursors, setCursors] = useState<Record<string, CursorState>>({});
   const socket = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -44,12 +62,39 @@ export const Presences = () => {
     socket.current.addEventListener('message', (e) => {
       try {
         const payload: AnyPayload = JSON.parse(e.data);
-        if (payload.event === 'move-cursor') {
-          console.log(payload.position.x, payload.position.y);
-          setCursors((prev) => {
-            const { event, id, ...rest } = payload;
-            return { ...prev, [payload.id]: rest };
-          });
+        switch (payload.event) {
+          case CursorEvent.Move: {
+            // console.log(payload.position.x, payload.position.y);
+            setCursors((prev) => {
+              const { event, id, ...rest } = payload;
+              return { ...prev, [payload.id]: rest };
+            });
+            break;
+          }
+          case CursorEvent.Click: {
+            const clickedElement = document.querySelector(
+              `[${MULTI_CLICK_ID_ATTRIB}="${payload.target}"]`
+            );
+            if (!clickedElement) return;
+            (clickedElement as HTMLElement).click();
+            setCursors((prev) => ({
+              ...prev,
+              [payload.id]: {
+                ...prev[payload.id],
+                isClicking: true,
+              },
+            }));
+
+            setTimeout(() => {
+              setCursors((prev) => ({
+                ...prev,
+                [payload.id]: {
+                  ...prev[payload.id],
+                  isClicking: false,
+                },
+              }));
+            }, 200);
+          }
         }
       } catch (error) {
         console.error('Could not parse message from websockets', e, error);
@@ -58,14 +103,14 @@ export const Presences = () => {
     return () => socket.current?.close();
   }, []);
 
-  const onMouseMove = useCallback((e) => {
+  const onMouseMove = useCallback((e: MouseEvent) => {
     try {
       // TODO: move ship info to a presence object that isn't updated with move-cursor, reduce payload size
       const ship = getShip();
 
       if (socket.current?.readyState !== WebSocket.OPEN || !ship) return;
-      const payload: CursorPayload = {
-        event: 'move-cursor',
+      const payload: CursorMovePayload = {
+        event: CursorEvent.Move,
         id: UUID,
         position: { x: e.clientX, y: e.clientY },
         color: ship.color,
@@ -76,7 +121,39 @@ export const Presences = () => {
       // FIXME: faking multiplayer with delay
       setTimeout(() => {
         socket.current?.send(JSON.stringify(payload));
-      }, 1000);
+      }, 1500);
+    } catch (e) {
+      console.error(
+        'no ship info found in sessionStorage, not sending cursor movement',
+        e
+      );
+    }
+  }, []);
+  const onClick = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    try {
+      // TODO: move ship info to a presence object that isn't updated with move-cursor, reduce payload size
+      const ship = getShip();
+      const targetId = (e.target as HTMLElement | null)?.getAttribute(
+        'data-multi-click-id'
+      ); // element user clicked on
+      console.log('target ID? ', targetId);
+      if (socket.current?.readyState !== WebSocket.OPEN || !ship || !targetId)
+        return;
+      const payload: CursorClickPayload = {
+        event: CursorEvent.Click,
+        id: UUID,
+        target: targetId,
+        color: ship.color,
+        nickname: ship.nickname,
+        patp: ship.patp,
+      };
+
+      // FIXME: faking multiplayer with delay
+      setTimeout(() => {
+        socket.current?.send(JSON.stringify(payload));
+      }, 1500);
     } catch (e) {
       console.error(
         'no ship info found in sessionStorage, not sending cursor movement',
@@ -86,16 +163,19 @@ export const Presences = () => {
   }, []);
 
   useEventListener('mousemove', onMouseMove);
+  useEventListener('click', onClick);
 
   return (
     <>
       {Object.entries(cursors).map(
-        ([id, { color, nickname, patp, position }]) => (
+        ([id, { color, nickname, patp, position, isClicking }]) => (
           <div key={id}>
             <AnimatedCursor
-              id={'test' + id}
+              id={patp}
               color={(color && rgbToString(hexToRgb(color))) || undefined}
               coords={position}
+              isActive={isClicking}
+              isActiveClickable={isClicking}
             />
             <CursorName
               style={{
