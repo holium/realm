@@ -19,6 +19,11 @@ type AnimatedCursorProps = {
   innerScale?: number;
   trailingSpeed?: number;
   coords?: Vec2;
+  isActive?: boolean;
+  isActiveClickable?: boolean;
+  isVisible?: boolean;
+  isTextCursor?: boolean;
+  isResizeCursor?: boolean;
   // clickables: string[];
 };
 
@@ -72,55 +77,35 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   outerScale = 2,
   innerScale = 0.9,
   trailingSpeed = 1,
-  coords,
+  coords = { x: 0, y: 0 },
+  isActive,
+  isActiveClickable,
+  isVisible = true,
+  isTextCursor,
+  isResizeCursor,
   children,
 }) => {
   const cursorOuterRef = useRef();
   const cursorInnerRef = useRef();
   const requestRef = useRef();
   const previousTimeRef = useRef();
-  const [innerCoords, setInnerCoords] = useState(coords || { x: 0, y: 0 });
-  // mirror controlled coords
-  useEffect(() => {
-    if (coords) setInnerCoords(coords);
-  }, [coords]);
-  const [isTextCursor, setTextCursor] = useState(false);
-  const [isResizeCursor, setResizeCursor] = useState(false);
-
-  const [isVisible, setIsVisible] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const [isActiveClickable, setIsActiveClickable] = useState(false);
   let endX = useRef(0);
   let endY = useRef(0);
-
-  /**
-   * Primary Mouse move event
-   * @param {number} clientX - MouseEvent.clientx
-   * @param {number} clientY - MouseEvent.clienty
-   */
-  const onMouseMove = useCallback((evt: MouseEvent) => {
-    setMouseCoords(evt);
-  }, []);
 
   // Outer Cursor Animation Delay
   const animateOuterCursor = useCallback(
     (time) => {
       if (previousTimeRef.current !== undefined) {
-        innerCoords.x += (endX.current - innerCoords.x) / trailingSpeed;
-        innerCoords.y += (endY.current - innerCoords.y) / trailingSpeed;
-        cursorOuterRef.current.style.top = `${innerCoords.y}px`;
-        cursorOuterRef.current.style.left = `${innerCoords.x}px`;
+        coords.x += (endX.current - coords.x) / trailingSpeed;
+        coords.y += (endY.current - coords.y) / trailingSpeed;
+        cursorOuterRef.current.style.top = `${coords.y}px`;
+        cursorOuterRef.current.style.left = `${coords.x}px`;
       }
       previousTimeRef.current = time;
       requestRef.current = requestAnimationFrame(animateOuterCursor);
     },
     [requestRef] // eslint-disable-line
   );
-  // Set is visible initially
-
-  // useEffect(() => {
-  //   setIsVisible(true);
-  // }, []);
 
   // RAF for animateOuterCursor
   useEffect(() => {
@@ -128,39 +113,36 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     return () => cancelAnimationFrame(requestRef.current);
   }, [animateOuterCursor]);
 
-  const setMouseCoords = useCallback(
-    (evt: any) => {
-      if (coords) return;
-      const { clientX, clientY } = evt;
-      setInnerCoords({ x: clientX, y: clientY });
-    },
-    [coords]
-  );
+  // Cursor Visibility State
+  useEffect(() => {
+    if (isVisible) {
+      cursorInnerRef.current.style.opacity = 1;
+      cursorOuterRef.current.style.opacity = 1;
+      cursorInnerRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+      cursorOuterRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+    } else {
+      cursorInnerRef.current.style.opacity = 0;
+      cursorOuterRef.current.style.opacity = 0;
+    }
+  }, [isVisible]);
 
-  // Mouse Events State updates
-  const onMouseDown = useCallback((evt: any) => {
-    setIsActive(true);
-  }, []);
+  // Update cursor coordinates
+  useEffect(() => {
+    cursorInnerRef.current.style.top = `${coords.y}px`;
+    cursorInnerRef.current.style.left = `${coords.x}px`;
+    if (cursorInnerRef.current.style.transform === 'none') {
+      // if for some reason the transform isnt set yet.
+      cursorInnerRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+      cursorOuterRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+    }
+    endX.current = coords.x;
+    endY.current = coords.y;
+  }, [coords]);
 
-  const onMouseUp = useCallback(() => {
-    setIsActive(false);
-  }, []);
-
-  const onMouseEnterViewport = useCallback((evt: any) => {
-    setMouseCoords(evt);
-    setIsVisible(true);
-    setIsActive(false);
-  }, []);
-  const onMouseLeaveViewport = useCallback(() => {
-    setIsVisible(false);
-    // setIsActive(false);
-  }, []);
-
-  useEventListener('mousemove', onMouseMove);
-  useEventListener('mousedown', onMouseDown);
-  useEventListener('mouseup', onMouseUp);
-  useEventListener('mouseover', onMouseEnterViewport);
-  useEventListener('mouseout', onMouseLeaveViewport);
   // Cursors Hover/Active State
   useEffect(() => {
     if (isActive) {
@@ -186,35 +168,169 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     }
   }, [innerScale, outerScale, isActiveClickable]);
 
-  // Cursor Visibility State
-  useEffect(() => {
-    if (isVisible) {
-      cursorInnerRef.current.style.opacity = 1;
-      cursorOuterRef.current.style.opacity = 1;
-      cursorInnerRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-      cursorOuterRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-    } else {
-      cursorInnerRef.current.style.opacity = 0;
-      cursorOuterRef.current.style.opacity = 0;
-    }
-  }, [isVisible]);
+  // Cursor Styles
+  const styles = {
+    cursorInner: {
+      zIndex: 100000,
+      display: 'block',
+      position: 'fixed',
+      // borderRadius: '50%',
+      width: innerSize,
+      height: innerSize,
+      pointerEvents: 'none',
+      border: '1px solid white',
+      boxSizing: 'content-box',
+      backgroundColor: `rgba(${color}, 1)`,
+      pointerEvents: 'none',
+      transition: 'opacity 0.15s ease-in-out, transform 0.25s ease-in-out',
+    },
+    cursorOuter: {
+      boxSizing: 'content-box',
+      zIndex: 100000,
+      display: 'block',
+      position: 'fixed',
+      borderRadius: '50%',
+      pointerEvents: 'none',
+      width: outerSize,
+      height: outerSize,
+      backgroundColor: `rgba(${color}, ${outerAlpha})`,
+      transition: 'transform 0.15s ease-in-out',
+      willChange: 'transform',
+      pointerEvents: 'none',
+    },
+  };
 
-  // Update cursor coordinates
+  const cursorVariants = {
+    text: {
+      width: 2.5,
+      height: 18,
+      borderRadius: '2%',
+      visibility: isVisible ? 'visible' : 'hidden',
+    },
+    pointer: {
+      width: innerSize,
+      height: innerSize,
+      borderRadius: '50%',
+      visibility: isVisible ? 'visible' : 'hidden',
+    },
+    resize: {
+      width: innerSize,
+      height: innerSize,
+      borderRadius: '2%',
+      visibility: isVisible ? 'visible' : 'hidden',
+    },
+  };
+
+  return (
+    <React.Fragment>
+      <motion.div
+        ref={cursorOuterRef}
+        layoutId={`${id}-outer`}
+        id={`${id}-outer`}
+        animate={{
+          opacity: isTextCursor ? 0 : 1,
+        }}
+        transition={{ opacity: 0.05 }}
+        style={{
+          ...styles.cursorOuter,
+          visibility: isVisible ? 'visible' : 'hidden',
+        }}
+      />
+      <motion.div
+        layoutId={`${id}`}
+        id={`${id}`}
+        ref={cursorInnerRef}
+        variants={cursorVariants}
+        animate={getCurrentCursor(isTextCursor, isResizeCursor)}
+        // animate={{
+        //   width: isTextCursor ? 2.5 : innerSize,
+        //   height: isTextCursor ? 18 : innerSize,
+        //   borderRadius: isTextCursor ? '2%' : '50%',
+        //   visibility: isVisible ? 'visible' : 'hidden',
+        // }}
+        transition={{
+          width: 0.15,
+          height: 0.15,
+          borderRadius: 0.15,
+          visibility: 0.1,
+        }}
+        style={{
+          ...styles.cursorInner,
+        }}
+        // whileTap={{ scale: 0.975 }}
+      >
+        {children}
+      </motion.div>
+    </React.Fragment>
+  );
+};
+
+/**
+ * AnimatedCursor
+ * Calls and passes props to CursorCore if not a touch/mobile device.
+ */
+function AnimatedCursor({
+  children,
+  ...props
+}: React.PropsWithChildren<AnimatedCursorProps>) {
+  if (typeof navigator !== 'undefined' && IsDevice.any()) {
+    return <React.Fragment></React.Fragment>;
+  }
+  return <CursorCore {...props}>{children}</CursorCore>;
+}
+
+/**
+ * CurrentUserCursor
+ * Manages cursor states based on events in current user's window
+ */
+export function CurrentUserCursor({
+  children,
+  ...props
+}: React.PropsWithChildren<AnimatedCursorProps>) {
+  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [isTextCursor, setTextCursor] = useState(false);
+  const [isResizeCursor, setResizeCursor] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [isActiveClickable, setIsActiveClickable] = useState(false);
+
   useEffect(() => {
-    cursorInnerRef.current.style.top = `${innerCoords.y}px`;
-    cursorInnerRef.current.style.left = `${innerCoords.x}px`;
-    if (cursorInnerRef.current.style.transform === 'none') {
-      // if for some reason the transform isnt set yet.
-      cursorInnerRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-      cursorOuterRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-    }
-    endX.current = innerCoords.x;
-    endY.current = innerCoords.y;
-  }, [innerCoords]);
+    // Hide / Show global cursor
+    document.body.style.cursor = 'none';
+  }, []);
+
+  const setMouseCoords = useCallback((evt: any) => {
+    const { clientX, clientY } = evt;
+    setCoords({ x: clientX, y: clientY });
+  }, []);
+
+  const onMouseMove = useCallback((evt: MouseEvent) => {
+    setMouseCoords(evt);
+  }, []);
+
+  const onMouseDown = useCallback((evt: any) => {
+    setIsActive(true);
+  }, []);
+
+  const onMouseUp = useCallback(() => {
+    setIsActive(false);
+  }, []);
+
+  const onMouseEnterViewport = useCallback((evt: any) => {
+    setMouseCoords(evt);
+    setIsVisible(true);
+    setIsActive(false);
+  }, []);
+  const onMouseLeaveViewport = useCallback(() => {
+    setIsVisible(false);
+    // setIsActive(false);
+  }, []);
+
+  useEventListener('mousemove', onMouseMove);
+  useEventListener('mousedown', onMouseDown);
+  useEventListener('mouseup', onMouseUp);
+  useEventListener('mouseover', onMouseEnterViewport);
+  useEventListener('mouseout', onMouseLeaveViewport);
 
   useEffect(() => {
     const clickableEls = document.querySelectorAll(
@@ -293,7 +409,8 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       el.addEventListener('mouseover', () => {
         setIsActive(true);
       });
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
+        if (!e.isTrusted) return;
         setIsActive(true);
         setIsActiveClickable(false);
       });
@@ -344,6 +461,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
           setIsActive(true);
         });
         el.addEventListener('click', () => {
+          if (!e.isTrusted) return;
           setIsActive(true);
           setIsActiveClickable(false);
         });
@@ -364,115 +482,19 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     };
   }, [isActive]);
 
-  // Cursor Styles
-  const styles = {
-    cursorInner: {
-      zIndex: 100000,
-      display: 'block',
-      position: 'fixed',
-      // borderRadius: '50%',
-      width: innerSize,
-      height: innerSize,
-      pointerEvents: 'none',
-      border: '1px solid white',
-      boxSizing: 'content-box',
-      backgroundColor: `rgba(${color}, 1)`,
-
-      // transition: 'opacity 0.15s ease-in-out, transform 0.25s ease-in-out',
-    },
-    cursorOuter: {
-      boxSizing: 'content-box',
-      zIndex: 100000,
-      display: 'block',
-      position: 'fixed',
-      borderRadius: '50%',
-      pointerEvents: 'none',
-      width: outerSize,
-      height: outerSize,
-      backgroundColor: `rgba(${color}, ${outerAlpha})`,
-      transition: 'transform 0.15s ease-in-out',
-      willChange: 'transform',
-    },
-  };
-
-  // Hide / Show global cursor
-  document.body.style.cursor = 'none';
-
-  const cursorVariants = {
-    text: {
-      width: 2.5,
-      height: 18,
-      borderRadius: '2%',
-      visibility: isVisible ? 'visible' : 'hidden',
-    },
-    pointer: {
-      width: innerSize,
-      height: innerSize,
-      borderRadius: '50%',
-      visibility: isVisible ? 'visible' : 'hidden',
-    },
-    resize: {
-      width: innerSize,
-      height: innerSize,
-      borderRadius: '2%',
-      visibility: isVisible ? 'visible' : 'hidden',
-    },
-  };
-
   return (
-    <React.Fragment>
-      <motion.div
-        ref={cursorOuterRef}
-        layoutId={`${id}-outer`}
-        animate={{
-          opacity: isTextCursor ? 0 : 1,
-        }}
-        transition={{ opacity: 0.05 }}
-        style={{
-          ...styles.cursorOuter,
-          visibility: isVisible ? 'visible' : 'hidden',
-        }}
-      />
-      <motion.div
-        layoutId={`${id}`}
-        ref={cursorInnerRef}
-        variants={cursorVariants}
-        animate={getCurrentCursor(isTextCursor, isResizeCursor)}
-        // animate={{
-        //   width: isTextCursor ? 2.5 : innerSize,
-        //   height: isTextCursor ? 18 : innerSize,
-        //   borderRadius: isTextCursor ? '2%' : '50%',
-        //   visibility: isVisible ? 'visible' : 'hidden',
-        // }}
-        transition={{
-          width: 0.15,
-          height: 0.15,
-          borderRadius: 0.15,
-          visibility: 0.1,
-        }}
-        style={{
-          ...styles.cursorInner,
-        }}
-        whileTap={{ scale: 0.975 }}
-      >
-        {children}
-      </motion.div>
-    </React.Fragment>
+    <AnimatedCursor
+      coords={coords}
+      isActive={isActive}
+      isVisible={isVisible}
+      isResizeCursor={isResizeCursor}
+      isTextCursor={isTextCursor}
+      isActiveClickable={isActiveClickable}
+      {...props}
+    >
+      {children}
+    </AnimatedCursor>
   );
-};
-
-/**
- * AnimatedCursor
- * Calls and passes props to CursorCore if not a touch/mobile device.
- */
-function AnimatedCursor({
-  children,
-  ...props
-}: React.PropsWithChildren<AnimatedCursorProps>) {
-  if (typeof navigator !== 'undefined' && IsDevice.any()) {
-    return <React.Fragment></React.Fragment>;
-  }
-  return <CursorCore {...props}>{children}</CursorCore>;
 }
 
 export default AnimatedCursor;
