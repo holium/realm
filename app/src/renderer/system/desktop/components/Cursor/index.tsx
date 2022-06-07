@@ -1,20 +1,24 @@
 // @ts-nocheck
 import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { m, motion } from 'framer-motion';
 import styled from 'styled-components';
 
 import { useEventListener } from './useEventListener';
 import IsDevice from './IsDevice';
 
+export type Vec2 = { x: number; y: number };
+
 type AnimatedCursorProps = {
-  color: string;
+  id?: string;
+  color?: string;
   animateOut?: boolean;
-  outerAlpha: number;
-  innerSize: number;
-  outerSize: number;
-  outerScale: number;
-  innerScale: number;
-  trailingSpeed: number;
+  outerAlpha?: number;
+  innerSize?: number;
+  outerSize?: number;
+  outerScale?: number;
+  innerScale?: number;
+  trailingSpeed?: number;
+  coords?: Vec2;
   // clickables: string[];
 };
 
@@ -59,20 +63,27 @@ const getCurrentCursor = (isTextCursor, isResizeCursor) => {
  *
  */
 export const CursorCore: FC<AnimatedCursorProps> = ({
+  id = 'default-cursor',
   animateOut,
-  color = '220, 90, 90',
-  outerAlpha = 0.3,
-  innerSize = 8,
-  outerSize = 8,
-  outerScale = 6,
-  innerScale = 0.6,
-  trailingSpeed = 8,
+  color = '193, 11, 111',
+  outerAlpha = 0.2,
+  innerSize = 10,
+  outerSize = 12,
+  outerScale = 2,
+  innerScale = 0.9,
+  trailingSpeed = 1,
+  coords,
+  children,
 }) => {
   const cursorOuterRef = useRef();
   const cursorInnerRef = useRef();
   const requestRef = useRef();
   const previousTimeRef = useRef();
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [innerCoords, setInnerCoords] = useState(coords || { x: 0, y: 0 });
+  // mirror controlled coords
+  useEffect(() => {
+    if (coords) setInnerCoords(coords);
+  }, [coords]);
   const [isTextCursor, setTextCursor] = useState(false);
   const [isResizeCursor, setResizeCursor] = useState(false);
 
@@ -88,30 +99,17 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
    * @param {number} clientY - MouseEvent.clienty
    */
   const onMouseMove = useCallback((evt: MouseEvent) => {
-    const { clientX, clientY } = evt;
-
-    setCoords({ x: clientX, y: clientY });
-    cursorInnerRef.current.style.top = `${clientY}px`;
-    cursorInnerRef.current.style.left = `${clientX}px`;
-    if (cursorInnerRef.current.style.transform === 'none') {
-      // if for some reason the transform isnt set yet.
-      cursorInnerRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-      cursorOuterRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-    }
-    endX.current = clientX;
-    endY.current = clientY;
+    setMouseCoords(evt);
   }, []);
 
   // Outer Cursor Animation Delay
   const animateOuterCursor = useCallback(
     (time) => {
       if (previousTimeRef.current !== undefined) {
-        coords.x += (endX.current - coords.x) / trailingSpeed;
-        coords.y += (endY.current - coords.y) / trailingSpeed;
-        cursorOuterRef.current.style.top = `${coords.y}px`;
-        cursorOuterRef.current.style.left = `${coords.x}px`;
+        innerCoords.x += (endX.current - innerCoords.x) / trailingSpeed;
+        innerCoords.y += (endY.current - innerCoords.y) / trailingSpeed;
+        cursorOuterRef.current.style.top = `${innerCoords.y}px`;
+        cursorOuterRef.current.style.left = `${innerCoords.x}px`;
       }
       previousTimeRef.current = time;
       requestRef.current = requestAnimationFrame(animateOuterCursor);
@@ -130,22 +128,14 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     return () => cancelAnimationFrame(requestRef.current);
   }, [animateOuterCursor]);
 
-  const setMouseCoords = (evt: any) => {
-    const { clientX, clientY } = evt;
-
-    setCoords({ x: clientX, y: clientY });
-    cursorInnerRef.current.style.top = `${clientY}px`;
-    cursorInnerRef.current.style.left = `${clientX}px`;
-    if (cursorInnerRef.current.style.transform === 'none') {
-      // if for some reason the transform isnt set yet.
-      cursorInnerRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-      cursorOuterRef.current.style.transform =
-        'translate(-50%, -50%) scale(1.0)';
-    }
-    endX.current = clientX;
-    endY.current = clientY;
-  };
+  const setMouseCoords = useCallback(
+    (evt: any) => {
+      if (coords) return;
+      const { clientX, clientY } = evt;
+      setInnerCoords({ x: clientX, y: clientY });
+    },
+    [coords]
+  );
 
   // Mouse Events State updates
   const onMouseDown = useCallback((evt: any) => {
@@ -210,6 +200,21 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       cursorOuterRef.current.style.opacity = 0;
     }
   }, [isVisible]);
+
+  // Update cursor coordinates
+  useEffect(() => {
+    cursorInnerRef.current.style.top = `${innerCoords.y}px`;
+    cursorInnerRef.current.style.left = `${innerCoords.x}px`;
+    if (cursorInnerRef.current.style.transform === 'none') {
+      // if for some reason the transform isnt set yet.
+      cursorInnerRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+      cursorOuterRef.current.style.transform =
+        'translate(-50%, -50%) scale(1.0)';
+    }
+    endX.current = innerCoords.x;
+    endY.current = innerCoords.y;
+  }, [innerCoords]);
 
   useEffect(() => {
     const clickableEls = document.querySelectorAll(
@@ -418,7 +423,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     <React.Fragment>
       <motion.div
         ref={cursorOuterRef}
-        layoutId="cursor-outer-1"
+        layoutId={`${id}-outer`}
         animate={{
           opacity: isTextCursor ? 0 : 1,
         }}
@@ -429,7 +434,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
         }}
       />
       <motion.div
-        layoutId="cursor-1"
+        layoutId={`${id}`}
         ref={cursorInnerRef}
         variants={cursorVariants}
         animate={getCurrentCursor(isTextCursor, isResizeCursor)}
@@ -449,7 +454,9 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
           ...styles.cursorInner,
         }}
         whileTap={{ scale: 0.975 }}
-      />
+      >
+        {children}
+      </motion.div>
     </React.Fragment>
   );
 };
@@ -459,30 +466,13 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
  * Calls and passes props to CursorCore if not a touch/mobile device.
  */
 function AnimatedCursor({
-  animateOut,
-  color,
-  outerAlpha,
-  innerSize,
-  innerScale,
-  outerSize,
-  outerScale,
-  trailingSpeed,
-}) {
+  children,
+  ...props
+}: React.PropsWithChildren<AnimatedCursorProps>) {
   if (typeof navigator !== 'undefined' && IsDevice.any()) {
     return <React.Fragment></React.Fragment>;
   }
-  return (
-    <CursorCore
-      animateOut={animateOut}
-      color={color}
-      outerAlpha={outerAlpha}
-      innerSize={innerSize}
-      innerScale={innerScale}
-      outerSize={outerSize}
-      outerScale={outerScale}
-      trailingSpeed={trailingSpeed}
-    />
-  );
+  return <CursorCore {...props}>{children}</CursorCore>;
 }
 
 export default AnimatedCursor;

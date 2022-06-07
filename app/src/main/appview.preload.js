@@ -2,31 +2,46 @@ const { ipcRenderer: ipc, remote } = require('electron');
 const path = require('path');
 const React = require('react');
 const ReactDOM = require('react-dom/client');
-const { Mouse } = require(path.join(__dirname, '../../.holium/dll/mouse.js'));
+const { Presences, Mouse } = require(path.join(
+  __dirname,
+  '../../.holium/dll/mouse.js'
+));
 
 window.onload = function () {
   ipc.on('mouse-color', (event, color) => {
     renderMouse(color);
   });
   renderMouse();
+  renderPresences();
 };
 
 function renderMouse(color) {
-  const body = document.getElementsByTagName('body')[0];
-  // body.setAttribute('style', 'position: relative;');
-  // console.log('rendering mouse');
-  var currentContainer = document.getElementById('realm-mouse-container');
-  if (currentContainer) {
-    body.removeChild(currentContainer);
-  }
-  var mouseContainer = document.createElement('div');
-  mouseContainer.setAttribute('id', 'realm-mouse-container');
-  body.appendChild(mouseContainer);
-  const root = ReactDOM.createRoot(mouseContainer);
+  const container = createContainer('realm-mouse-container');
+  const root = ReactDOM.createRoot(container);
   root.render(
     React.createElement(Mouse, {
       animateOut: true,
       cursorColor: color,
     })
   );
+}
+
+function renderPresences() {
+  const container = createContainer('realm-presence-container');
+  const root = ReactDOM.createRoot(container);
+  root.render(React.createElement(Presences));
+}
+
+function createContainer(id) {
+  const body = document.getElementsByTagName('body')[0];
+  // body.setAttribute('style', 'position: relative;');
+  // console.log('rendering mouse');
+  const currentContainer = document.getElementById(id);
+  if (currentContainer) {
+    body.removeChild(currentContainer);
+  }
+  const container = document.createElement('div');
+  container.setAttribute('id', id);
+  body.appendChild(container);
+  return container;
 }

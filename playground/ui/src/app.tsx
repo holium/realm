@@ -12,7 +12,14 @@ export const App: FC<IProps> = observer((props: IProps) => {
 
   return (
     <div>
-      <div>Playground - </div>
+      <h1>Multiplayer Cursor Playground</h1>
+      <main>
+        <ul>
+          <li>
+            <button>This is a button</button>
+          </li>
+        </ul>
+      </main>
     </div>
   );
 });
