@@ -297,7 +297,7 @@ export function CurrentUserCursor({
   useEffect(() => {
     // Hide / Show global cursor
     document.body.style.cursor = 'none';
-  }, []);
+  });
 
   const setMouseCoords = useCallback((evt: any) => {
     const { clientX, clientY } = evt;
