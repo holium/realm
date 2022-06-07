@@ -9,6 +9,7 @@ type IProps = {
 
 export const App: FC<IProps> = observer((props: IProps) => {
   const location = useLocation();
+  const [count, setCount] = useState(0);
 
   return (
     <div>
@@ -16,7 +17,22 @@ export const App: FC<IProps> = observer((props: IProps) => {
       <main>
         <ul>
           <li>
-            <button>This is a button</button>
+            <button
+              data-multi-click-id={"button-1"}
+              onClick={() => setCount((c) => c + 1)}
+            >
+              This is a button
+            </button>
+            <br />
+            It's been clicked {count} times!
+          </li>
+          <li>
+            <details>
+              <summary data-multi-click-id={"details-1"}>
+                Click to expand
+              </summary>
+              Hello!
+            </details>
           </li>
         </ul>
       </main>
