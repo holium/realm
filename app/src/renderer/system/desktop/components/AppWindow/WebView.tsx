@@ -49,10 +49,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   // Sync ship model info into app window
   useEffect(() => {
     webViewRef.current?.addEventListener('dom-ready', () => {
-      webViewRef.current?.executeJavaScript(`
-        const str = JSON.stringify(${JSON.stringify(ship)});
-        window.sessionStorage.setItem('ship', str);
-      `);
+      webViewRef.current?.send('load-ship', JSON.stringify(ship));
     });
   }, [ship]);
 

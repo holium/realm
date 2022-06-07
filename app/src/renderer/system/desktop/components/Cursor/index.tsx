@@ -410,7 +410,7 @@ export function CurrentUserCursor({
         setIsActive(true);
       });
       el.addEventListener('click', (e) => {
-        if (!e.isTrusted) return;
+        if (!e?.isTrusted) return;
         setIsActive(true);
         setIsActiveClickable(false);
       });
@@ -460,8 +460,8 @@ export function CurrentUserCursor({
         el.addEventListener('mouseover', () => {
           setIsActive(true);
         });
-        el.addEventListener('click', () => {
-          if (!e.isTrusted) return;
+        el.addEventListener('click', (e) => {
+          if (!e?.isTrusted) return;
           setIsActive(true);
           setIsActiveClickable(false);
         });

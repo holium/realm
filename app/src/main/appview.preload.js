@@ -7,6 +7,15 @@ const { Presences, Mouse } = require(path.join(
   '../../.holium/dll/mouse.js'
 ));
 
+// Load current ship into window
+ipc.on('load-ship', (e, shipString) => {
+  try {
+    window.ship = JSON.parse(shipString);
+  } catch (e) {
+    console.error('Error parsing ship', e);
+  }
+});
+
 window.onload = function () {
   ipc.on('mouse-color', (event, color) => {
     renderMouse(color);

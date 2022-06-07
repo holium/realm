@@ -7,8 +7,16 @@ import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
 import styled from 'styled-components';
 import AnimatedCursor, { Vec2 } from './Cursor';
 import { useEventListener } from './Cursor/useEventListener';
+import { ipcRenderer } from 'electron';
+import { ShipStoreType } from 'core/ship/stores/ship';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
+
+declare global {
+  interface Window {
+    ship?: ShipModelType;
+  }
+}
 
 interface JoinPayload {
   event: 'join';
@@ -106,7 +114,7 @@ export const Presences = () => {
   const onMouseMove = useCallback((e: MouseEvent) => {
     try {
       // TODO: move ship info to a presence object that isn't updated with move-cursor, reduce payload size
-      const ship = getShip();
+      const ship = window.ship;
 
       if (socket.current?.readyState !== WebSocket.OPEN || !ship) return;
       const payload: CursorMovePayload = {
@@ -134,7 +142,7 @@ export const Presences = () => {
     if (!e.isTrusted) return;
     try {
       // TODO: move ship info to a presence object that isn't updated with move-cursor, reduce payload size
-      const ship = getShip();
+      const ship = window.ship;
       const targetId = (e.target as HTMLElement | null)?.getAttribute(
         'data-multi-click-id'
       ); // element user clicked on
@@ -202,9 +210,3 @@ const CursorName = styled(motion.div)`
   padding: 2px 4px;
   font-family: 'Rubik', sans-serif;
 `;
-
-// Gets ship info injected when webview is loaded by Realm
-function getShip() {
-  const shipString = window.sessionStorage.getItem('ship');
-  return shipString && JSON.parse(shipString);
-}
