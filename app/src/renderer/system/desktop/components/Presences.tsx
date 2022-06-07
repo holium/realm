@@ -7,14 +7,13 @@ import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
 import styled from 'styled-components';
 import AnimatedCursor, { Vec2 } from './Cursor';
 import { useEventListener } from './Cursor/useEventListener';
-import { ipcRenderer } from 'electron';
-import { ShipStoreType } from 'core/ship/stores/ship';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
 declare global {
   interface Window {
-    ship?: ShipModelType;
+    ship: ShipModelType;
+    id: string;
   }
 }
 
@@ -50,7 +49,9 @@ interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
   isClicking?: boolean;
 }
 
-const UUID = String(Date.now());
+function getSessionID() {
+  return window.id + window.ship.patp;
+}
 
 // Manage websocket connection within realm or an individual app
 export const Presences = () => {
@@ -63,7 +64,7 @@ export const Presences = () => {
       socket.current?.send(
         JSON.stringify({
           event: 'join',
-          id: UUID,
+          id: getSessionID(),
         })
       );
     });
@@ -119,7 +120,7 @@ export const Presences = () => {
       if (socket.current?.readyState !== WebSocket.OPEN || !ship) return;
       const payload: CursorMovePayload = {
         event: CursorEvent.Move,
-        id: UUID,
+        id: getSessionID(),
         position: { x: e.clientX, y: e.clientY },
         color: ship.color,
         nickname: ship.nickname,
@@ -151,7 +152,7 @@ export const Presences = () => {
         return;
       const payload: CursorClickPayload = {
         event: CursorEvent.Click,
-        id: UUID,
+        id: getSessionID(),
         target: targetId,
         color: ship.color,
         nickname: ship.nickname,

@@ -15,6 +15,9 @@ ipc.on('load-ship', (e, shipString) => {
     console.error('Error parsing ship', e);
   }
 });
+ipc.on('load-window-id', (e, windowId) => {
+  window.id = windowId;
+});
 
 window.onload = function () {
   ipc.on('mouse-color', (event, color) => {

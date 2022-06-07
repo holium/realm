@@ -50,8 +50,9 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   useEffect(() => {
     webViewRef.current?.addEventListener('dom-ready', () => {
       webViewRef.current?.send('load-ship', JSON.stringify(ship));
+      webViewRef.current?.send('load-window-id', window.id);
     });
-  }, [ship]);
+  }, [ship, window.id]);
 
   return (
     <View
