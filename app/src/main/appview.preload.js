@@ -1,4 +1,4 @@
-const { ipcRenderer: ipc, remote } = require('electron');
+const { ipcRenderer: ipc, remote, contextBridge } = require('electron');
 const path = require('path');
 const React = require('react');
 const ReactDOM = require('react-dom/client');
@@ -7,16 +7,21 @@ const { Presences, Mouse } = require(path.join(
   '../../.holium/dll/mouse.js'
 ));
 
-// Load current ship into window
+// Load current ship into preload context and webview contents context
 ipc.on('load-ship', (e, shipString) => {
   try {
-    window.ship = JSON.parse(shipString);
+    const ship = JSON.parse(shipString);
+    // webview preload (this file and its imports)
+    globalThis.ship = ship;
+    // webview contents
+    contextBridge.exposeInMainWorld('ship', ship);
   } catch (e) {
     console.error('Error parsing ship', e);
   }
 });
 ipc.on('load-window-id', (e, windowId) => {
-  window.id = windowId;
+  globalThis.id = windowId;
+  contextBridge.exposeInMainWorld('id', windowId);
 });
 
 window.onload = function () {

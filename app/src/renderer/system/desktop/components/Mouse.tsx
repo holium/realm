@@ -1,10 +1,9 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import AnimatedCursor, { CurrentUserCursor, Vec2 } from './Cursor';
+import { CurrentUserCursor } from './Cursor';
 import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
 import { useMemo } from 'react';
-import { Presences } from './Presences';
 
 export const MouseArea = styled(motion.div)`
   cursor: none;
@@ -31,4 +30,3 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
 };
 
 export default Mouse;
-export { Presences };
