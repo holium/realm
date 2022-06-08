@@ -59,7 +59,7 @@ export function Presences() {
   const onMouseMove = useCallback((e: MouseEvent) => {
     const payload: SendPartial<CursorMovePayload> = {
       event: CursorEvent.Move,
-      position: { x: e.clientX, y: e.clientY },
+      position: { x: e.pageX, y: e.pageY },
     };
 
     // FIXME: faking multiplayer with delay

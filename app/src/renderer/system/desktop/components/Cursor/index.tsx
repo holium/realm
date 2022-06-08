@@ -173,7 +173,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     cursorInner: {
       zIndex: 100000,
       display: 'block',
-      position: 'fixed',
+      position: 'absolute',
       // borderRadius: '50%',
       width: innerSize,
       height: innerSize,
@@ -188,7 +188,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       boxSizing: 'content-box',
       zIndex: 100000,
       display: 'block',
-      position: 'fixed',
+      position: 'absolute',
       borderRadius: '50%',
       pointerEvents: 'none',
       width: outerSize,
@@ -300,8 +300,8 @@ export function CurrentUserCursor({
   });
 
   const setMouseCoords = useCallback((evt: any) => {
-    const { clientX, clientY } = evt;
-    setCoords({ x: clientX, y: clientY });
+    const { pageX, pageY } = evt;
+    setCoords({ x: pageX, y: pageY });
   }, []);
 
   const onMouseMove = useCallback((evt: MouseEvent) => {
