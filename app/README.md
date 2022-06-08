@@ -11,6 +11,20 @@ process to include this step.
 
 Start the app in dev mode with `yarn start` or `npm run start`.
 
+### Starting two instances
+
+You can start two instances of Realm by placing the `PORT` environment variable in front of the `yarn start` command.
+
+```bash
+PORT=1212 yarn start
+```
+
+```bash
+PORT=1213 yarn start
+```
+
+I would not try to log in on the same account for now. This is not supported currently. Sign into separate accounts.
+
 ## Developing apps within Realm
 
 You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/renderer/apps/development.ts`.
