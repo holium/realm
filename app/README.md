@@ -21,17 +21,14 @@ You can start two instances of Realm by placing the `PORT` environment variable 
 PORT=1212 PLAYGROUND_PORT=3010 yarn start
 ```
 
-Login with `~zod` with this instance as port `3010` defaults to `.env.zod` in the playground ui.
+Make sure to logout of any current session once the window opens. Login with the accounts after both instances and the playground app ui is running for each.
+I would not try to log in on the same account for now. This is not supported currently. Sign into separate accounts.
 
 #### Start bus
 
 ```bash
 PORT=1213 PLAYGROUND_PORT=3011 yarn start
 ```
-
-Login with `~bus` with this instance as port `3011` defaults to `.env.bus` in the playground ui.
-
-I would not try to log in on the same account for now. This is not supported currently. Sign into separate accounts.
 
 #### Start playground dev servers
 
