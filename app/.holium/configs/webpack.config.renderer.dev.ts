@@ -16,7 +16,7 @@ import checkNodeEnv from '../scripts/check-node-env';
 if (process.env.NODE_ENV === 'production') {
   checkNodeEnv('development');
 }
-
+const playgroundPort = process.env.PLAYGROUND_PORT || 3010;
 const port = process.env.PORT || 1212;
 const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -122,6 +122,7 @@ const configuration: webpack.Configuration = {
      */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
+      PLAYGROUND_PORT: playgroundPort,
     }),
 
     new webpack.LoaderOptionsPlugin({
