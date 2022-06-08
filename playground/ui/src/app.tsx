@@ -19,26 +19,42 @@ export const App: FC<IProps> = observer((props: IProps) => {
       <div>
         <h1>Multiplayer Cursor Playground</h1>
         <main>
-          <ul>
+          <ul style={{ display: "grid", gap: "10px" }}>
             <li>
               <RealmMultiplayer.Clickable
                 id="button-0"
                 onClick={() => setCount1((c) => c + 1)}
               >
-                This is Clickable wrapped
+                This is just some text using Clickable default button
               </RealmMultiplayer.Clickable>
               <br />
               It's been clicked {count1} times!
+              <pre>
+                {`<RealmMultiplayer.Clickable
+  id="button-0"
+  onClick={() => setCount1((c) => c + 1)}
+>
+  This is just some text using Clickable default button
+</RealmMultiplayer.Clickable>`}
+              </pre>
             </li>
             <li>
               <RealmMultiplayer.Clickable
                 id="button-2"
                 onClick={() => setCount2((c) => c + 1)}
               >
-                <button>This is Clickable wrapped</button>
+                <a href="#">This is a link wrapped by Clickable</a>
               </RealmMultiplayer.Clickable>
               <br />
               It's been clicked {count2} times!
+              <pre>
+                {`<RealmMultiplayer.Clickable
+  id="button-2"
+  onClick={() => setCount2((c) => c + 1)}
+>
+  <a href="#">This is a link wrapped by Clickable</a>
+</RealmMultiplayer.Clickable>`}
+              </pre>
             </li>
             <li>
               <button
@@ -49,6 +65,14 @@ export const App: FC<IProps> = observer((props: IProps) => {
               </button>
               <br />
               It's been clicked {count} times!
+              <pre>
+                {`<button
+  data-multi-click-id={"button-1"}
+  onClick={() => setCount((c) => c + 1)}
+>
+  This is a button
+</button>`}
+              </pre>
             </li>
             <li>
               <details>
@@ -57,6 +81,18 @@ export const App: FC<IProps> = observer((props: IProps) => {
                 </summary>
                 Hello!
               </details>
+            </li>
+
+            <li>
+              <select data-multi-click-id={"select-1"}>
+                <option>Test</option>
+                <option>Test 2</option>
+                <option>Test 3</option>
+              </select>
+              <br />
+              Because select is an os level primitive multiclick doesn't work
+              well, but if you do a custom select implementation like radix, it
+              should be fine
             </li>
           </ul>
         </main>
