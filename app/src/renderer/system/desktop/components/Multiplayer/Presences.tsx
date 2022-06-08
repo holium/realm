@@ -17,7 +17,7 @@ interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
 }
 
 // Manage websocket connection within realm or an individual app
-export const Presences = () => {
+export function Presences() {
   const [cursors, setCursors] = useState<Record<string, CursorState>>({});
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export const Presences = () => {
       )}
     </>
   );
-};
+}
 
 const CursorName = styled(motion.div)`
   position: absolute;

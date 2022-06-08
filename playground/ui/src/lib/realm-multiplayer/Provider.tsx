@@ -1,24 +1,18 @@
 import React, { useEffect } from "react";
-import type { RealmMultiplayerInterface } from "../../../../../app/src/renderer/system/desktop/components/Multiplayer/types";
-
-declare global {
-  var realmMultiplayer: RealmMultiplayerInterface;
-}
 
 interface RealmMultiplayerContextState {
   channel: string;
 }
+
 const RealmMultiplayerContext =
   React.createContext<RealmMultiplayerContextState>({
     channel: "/",
   });
-interface RealmMultiplayerProviderProps {
-  channel: string;
-}
+
 export function RealmMultiplayerProvider({
   channel,
   children,
-}: React.PropsWithChildren<RealmMultiplayerProviderProps>) {
+}: React.PropsWithChildren<RealmMultiplayerContextState>) {
   useEffect(() => {
     globalThis.realmMultiplayer.init(channel);
   }, []);
