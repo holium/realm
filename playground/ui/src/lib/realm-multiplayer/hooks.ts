@@ -11,12 +11,13 @@ export function useChannel<T extends BaseRealmPayload>(
   event: string,
   handler: (payload: T) => void
 ) {
+  const { api } = useContext(RealmMultiplayerContext);
   const send = useCallback((payload: T) => {
-    globalThis.realmMultiplayer?.send<SendPartial<T>>(payload);
+    api?.send<SendPartial<T>>(payload);
   }, []);
 
   useEffect(() => {
-    const unsub = globalThis.realmMultiplayer?.subscribe<T>(event, handler);
+    const unsub = api?.subscribe<T>(event, handler);
 
     return () => {
       unsub?.();
