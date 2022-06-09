@@ -26,7 +26,7 @@
 +$  versioned-state
     $%  state-0
     ==
-+$  state-0  [%0 store=(map @t json)]
++$  state-0  [%0 spaces=(map @t json)]
 --
 %-  agent:dbug
 =|  state-0
@@ -172,6 +172,9 @@
         [%space %create-space]
           (create-space-api req act)
 
+        [%space %edit-space]
+          (edit-space-api req act)
+
       ==
 
     ::  ARM: ++  handle-channel-poke
@@ -243,20 +246,97 @@
       |=  [req=(pair @ta inbound-request:eyre) act=base-action]
       ^-  (quip card _state)
 
+      =/  timestamp  (en-json:html (time:enjs:format now.bowl))
+      ::  ~lodlev-migdev
+      ::  generate a key based on timestamp. since this is a demo agent,
+      ::  this should suffice; but future production spaces agent will need
+      ::  more robust mechanism for guarantee'ing uniqueness of space ids
+      =/  space-id  (crip (weld "space-" timestamp))
+
+      =/  space  (~(get by spaces.state) space-id)
+
+      ::  if the space already exists (by id), respond with error
+      ?.  =(space ~)
+        =/  err  (crip "{<dap.bowl>}: error. space [{<space-id>}] exists")
+        (send-api-error req (to-json act) (some err))
+
+      ::  declare new space instance (defaults to null)
+      =|  space=(map @t json)
+
+      ::  convert payload data element to json object
+      =/  space-data  ?:(?=([%o *] data.act) p.data.act ~)
+
+      ::  merge action data with data in store
+      =/  space  (~(gas by space) ~(tap by space-data))
+
       ::  create the response
       =/  =response-header:http
         :-  200
         :~  ['Content-Type' 'application/json']
         ==
 
-      ::  encode the proposal as a json string
-      =/  body  (crip (en-json:html ~))
+      ::  encode the response as a json string
+      =/  body  (crip (en-json:html o+space))
 
       ::  convert the string to a form that arvo will understand
       =/  data=octs
             (as-octs:mimes:html body)
 
-      :_  state
+      :_  state(spaces (~(put by spaces.state) space-id [%o space]))
+
+      :~
+        [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
+        [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
+        [%give %kick [/http-response/[p.req]]~ ~]
+      ==
+
+    ++  edit-space-api
+      |=  [req=(pair @ta inbound-request:eyre) act=base-action]
+      ^-  (quip card _state)
+
+      =/  timestamp  (en-json:html (time:enjs:format now.bowl))
+
+      :: =/  context  ?:(?=([%o *] context.act) p.context.act ~)
+
+      =/  space-id  (~(get by context.act) 'spaceId')
+      ?~  space-id
+        =/  err  (crip "{<dap.bowl>}: error. spaceId missing")
+        (send-api-error req (to-json act) (some err))
+      =/  space-id  (so:dejs:format (need space-id))
+
+      ::  locate the space in the spaces store by id
+      =/  space  (~(get by spaces.state) space-id)
+      ::  if the space does not exists (by id), respond with error
+      ?:  =(space ~)
+        =/  err  (crip "{<dap.bowl>}: error. space [{<space-id>}] does not exists")
+        (send-api-error req (to-json act) (some err))
+
+      ::  grab json from unit (nullable type)
+      =/  space  (need space)
+
+      ::  convert space in store to json object
+      =/  space  ?:(?=([%o *] space) p.space ~)
+
+      ::  convert payload data element to json object
+      =/  space-data  ?:(?=([%o *] data.act) p.data.act ~)
+
+      ::  merge action data with data in store
+      =/  space  (~(gas by space) ~(tap by space-data))
+
+      ::  create the response
+      =/  =response-header:http
+        :-  200
+        :~  ['Content-Type' 'application/json']
+        ==
+
+      ::  encode the response as a json string
+      =/  body  (crip (en-json:html [%o space]))
+
+      ::  convert the string to a form that arvo will understand
+      =/  data=octs
+            (as-octs:mimes:html body)
+
+      :_  state(spaces (~(put by spaces.state) space-id [%o space]))
 
       :~
         [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
