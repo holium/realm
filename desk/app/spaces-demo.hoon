@@ -35,7 +35,16 @@
 |_  =bowl:gall
 +*  this  .
     def   ~(. (default-agent this %.n) bowl)
-++  on-init  on-init:def
+++  on-init
+  ^-  (quip card _this)
+
+  %-  (slog leaf+"{<dap.bowl>}: on-init" ~)
+
+  :_  this
+
+      ::   setup route for direct http request/response handling
+  :~  [%pass /bind-route %arvo %e %connect `/'realm'/'spaces'/'api'/'actions' %spaces-demo]
+  ==
 ::
 ++  on-save
     ^-  vase
@@ -83,15 +92,15 @@
       =/  payload  ?:(?=([%o *] data) p.data ~)
 
       =/  action  (~(get by payload) 'action')
-      ?~  action  `base-result`[%.n (some 'invalid payload. missing action.') (some !>(payload))]
+      ?~  action  `base-result`[%.n (some 'invalid payload. missing action.') (some !>(o+payload))]
       =/  action  (need action)
 
       =/  resource  (~(get by payload) 'resource')
-      ?~  resource  `base-result`[%.n (some 'invalid payload. missing resource.') (some !>(payload))]
+      ?~  resource  `base-result`[%.n (some 'invalid payload. missing resource.') (some !>(o+payload))]
       =/  resource  (need resource)
 
       =/  context  (~(get by payload) 'context')
-      ?~  context  `base-result`[%.n (some 'invalid payload. missing context.') (some !>(payload))]
+      ?~  context  `base-result`[%.n (some 'invalid payload. missing context.') (some !>(o+payload))]
       =/  context  (need context)
 
       =/  data  (~(get by payload) 'data')
@@ -103,7 +112,7 @@
       =.  context.result  ?:(?=([%o *] context) p.context ~)
       =.  data.result  data
 
-      `base-result`[%.y ~ (some !>(action))]
+      `base-result`[%.y ~ (some !>(result))]
 
     ++  to-json
       |=  [act=base-action]
@@ -123,9 +132,11 @@
     ++  handle-http-request
       |=  [req=(pair @ta inbound-request:eyre)]
 
+      ::  parse query string arguments into key/value pair (map)
       =/  req-args
             (my q:(need `(unit (pair pork:eyre quay:eyre))`(rush url.request.q.req ;~(plug apat:de-purl:html yque:de-purl:html))))
 
+      ::
       =/  path  (stab url.request.q.req)
 
       =/  til=octs  (tail body.request.q.req)
@@ -135,19 +146,19 @@
       ::  convert http request POST body to action object instance
       =/  result=base-result  (to-action content)
 
-      =/  payload=json  ?~(data.result ~ !<(json (need data.result)))
-
       ::  bail on error and make sure to send back error message
-      ?.  success.result  (send-api-error req payload msg.result)
+      ?.  success.result
+        =/  payload=json  ?~(data.result ~ !<(json (need data.result)))
+        (send-api-error req payload msg.result)
 
       =/  act  !<(base-action (need data.result))
 
-      ?+    method.request.q.req  (send-api-error req payload (some 'unsupported'))
+      ?+    method.request.q.req  (send-api-error req (to-json act) (some 'unsupported'))
 
             %'POST'
-              ?+  path  (send-api-error req payload (some 'route not found'))
+              ?+  path  (send-api-error req (to-json act) (some 'route not found'))
 
-                [%realm %api %act ~]
+                [%realm %spaces %api %actions ~]
                   (handle-resource-action req req-args act)
 
               ==
@@ -169,12 +180,14 @@
       ?+  [resource.act action.act]
         (send-api-error req (to-json act) (some (crip "{<dap.bowl>}: error. unrecognized action {<[resource.act action.act]>}")))
 
-        [%space %create-space]
+        [%spaces %create-space]
           (create-space-api req act)
 
-        [%space %edit-space]
+        [%spaces %edit-space]
           (edit-space-api req act)
 
+        [%spaces %delete-space]
+          (delete-space-api req act)
       ==
 
     ::  ARM: ++  handle-channel-poke
@@ -270,6 +283,13 @@
 
       ::  merge action data with data in store
       =/  space  (~(gas by space) ~(tap by space-data))
+
+      ::  grab parent space id from context. if it's null or doesn't exist
+      ::  assume this is a root space (top-level)
+      =/  parent-space-id  (~(get by context.act) 'parentSpaceId')
+
+      ::  associate the parent space with this new space
+      =/  space  (~(put by space) 'parentSpaceId' ?~(parent-space-id ~ (need parent-space-id)))
 
       ::  create the response
       =/  =response-header:http
@@ -392,13 +412,39 @@
 ::
 ++  on-leave  on-leave:def
 ::
-++  on-watch  on-watch:def
+++  on-watch
+  |=  =path
+  ^-  (quip card _this)
+
+  ?+  path  (on-watch:def path)
+
+      [%http-response *]
+        %-  (slog leaf+"{<dap.bowl>}: client subscribed to {(spud path)}." ~)
+        `this
+
+  ==
 ::
 ++  on-peek  on-peek:def
 ::
 ++  on-agent  on-agent:def
 ::
-++  on-arvo  on-arvo:def
+++  on-arvo
+  |=  [=wire =sign-arvo]
+  ^-  (quip card _this)
+
+  %-  (slog leaf+"{<dap.bowl>}: on-arvo called {<wire>}, {<sign-arvo>}..." ~)
+
+  ?+  wire  (on-arvo:def wire sign-arvo)
+
+    [%bind-route ~]
+      ?>  ?=([%eyre %bound *] sign-arvo)
+      ?:  accepted.sign-arvo
+        %-  (slog leaf+"{<dap.bowl>}: {<[wire sign-arvo]>}" ~)
+        `this
+        %-  (slog leaf+"{<dap.bowl>}: binding route failed" ~)
+      `this
+
+  ==
 ::
 ++  on-fail   on-fail:def
 --
