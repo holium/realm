@@ -1,5 +1,6 @@
 // Loaded in the webview/appview preload script, connects to websocket directly
 // and renders cursor based on presence
+import { Ship } from '@holium/playground/src/lib/realm-multiplayer/hooks';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
@@ -12,6 +13,8 @@ import {
   CursorEvent,
   CursorClickPayload,
   CursorLeavePayload,
+  PresenceStatePayload,
+  RealmEvent,
 } from './types';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
@@ -23,6 +26,7 @@ interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
 // Manage websocket connection within realm or an individual app
 export function Presences() {
   const [cursors, setCursors] = useState<Record<string, CursorState>>({});
+  const [ships, setShips] = useState<Record<string, Ship>>({});
 
   // Update cursors for other cursors
   useEffect(() => {
@@ -69,6 +73,18 @@ export function Presences() {
         return rest;
       });
     });
+
+    subscribe<PresenceStatePayload>(
+      RealmEvent.UpdatePresenceState,
+      (payload) => {
+        if (payload.key === 'ship') {
+          setShips((prev) => ({
+            ...prev,
+            [payload.id]: payload.value as Ship,
+          }));
+        }
+      }
+    );
 
     return () => close();
   }, []);
@@ -121,8 +137,11 @@ export function Presences() {
 
   return (
     <>
-      {Object.entries(cursors).map(
-        ([id, { color, nickname, patp, position, isClicking }]) => (
+      {Object.entries(cursors).map(([id, { position, isClicking }]) => {
+        const ship = ships[id];
+        if (!ship) return null;
+        const { patp, color } = ship;
+        return (
           <div key={id}>
             <AnimatedCursor
               id={patp}
@@ -139,11 +158,11 @@ export function Presences() {
                 color: 'white',
               }}
             >
-              {nickname || patp}
+              {patp}
             </CursorName>
           </div>
-        )
-      )}
+        );
+      })}
     </>
   );
 }

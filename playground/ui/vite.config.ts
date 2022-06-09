@@ -13,7 +13,7 @@ export default ({ mode }) => {
   return defineConfig({
     server: {
       fs: {
-        allow: ["../"],
+        allow: ["../../"],
       },
       port: 3010,
     },

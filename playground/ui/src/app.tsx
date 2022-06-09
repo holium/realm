@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Outlet, Link } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./logic/store";
 import * as RealmMultiplayer from "./lib/realm-multiplayer";
+import { useShips } from "./lib/realm-multiplayer";
 
 type IProps = {
   history?: History;
@@ -18,6 +19,7 @@ export const App: FC<IProps> = observer((props: IProps) => {
     <RealmMultiplayer.Provider channel="/test">
       <div>
         <h1>Multiplayer Cursor Playground</h1>
+        <ShipList />
         <main>
           <ul style={{ display: "grid", gap: "10px" }}>
             <li>
@@ -100,3 +102,17 @@ export const App: FC<IProps> = observer((props: IProps) => {
     </RealmMultiplayer.Provider>
   );
 });
+
+function ShipList() {
+  const ships = useShips();
+  return (
+    <aside>
+      <ul>
+        Ships online:
+        {Object.entries(ships).map(([id, ship]) => (
+          <li key={id}>{ship.patp}</li>
+        ))}
+      </ul>
+    </aside>
+  );
+}

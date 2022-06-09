@@ -1,21 +1,40 @@
 import { ShipModelType } from 'renderer/logic/ship/store';
 import { Vec2 } from '../Cursor';
 import { SendPartial } from './multiplayer';
-export interface JoinPayload {
-  event: 'join';
+
+export enum RealmEvent {
+  Join = 'join',
+  UpdatePresenceState = 'update-presence-state',
+  SyncPresenceState = 'sync-presence-state',
+}
+
+export interface BaseRealmPayload {
+  event: string;
   id: string; // ID of the current app session
+}
+
+export interface JoinPayload extends BaseRealmPayload {
+  event: RealmEvent.Join;
+}
+
+export interface PresenceStatePayload extends BaseRealmPayload {
+  event: RealmEvent.UpdatePresenceState;
+  key: string;
+  value: any;
+}
+
+export interface PresenceStateSyncPayload extends BaseRealmPayload {
+  event: RealmEvent.SyncPresenceState;
+  state: Record<string, any>;
 }
 
 export enum CursorEvent {
-  Move = 'mousemove',
-  Click = 'click',
-  Leave = 'mouseleave',
+  Move = 'cursor-move',
+  Click = 'cursor-click',
+  Leave = 'cursor-leave',
 }
-
-export interface BaseCursorPayload
-  extends Pick<ShipModelType, 'color' | 'nickname' | 'patp'> {
+export interface BaseCursorPayload extends BaseRealmPayload {
   event: CursorEvent;
-  id: string; // ID of the current app session
 }
 
 export interface CursorMovePayload extends BaseCursorPayload {
@@ -36,14 +55,17 @@ export type AnyPayload =
   | JoinPayload
   | CursorMovePayload
   | CursorClickPayload
-  | CursorLeavePayload;
+  | CursorLeavePayload
+  | PresenceStatePayload
+  | PresenceStateSyncPayload;
 
 export interface RealmMultiplayerInterface {
   init: ({ roomId, ship }: { roomId: string; ship: ShipModelType }) => void;
   join: (roomId: string) => void;
   leave: (roomId: string) => void;
-  send: (payload: SendPartial<AnyPayload>) => void;
-  subscribe: <T extends AnyPayload>(
+  send: <T extends SendPartial<BaseRealmPayload>>(payload: T) => void;
+  getPresenceState: (key: string) => any;
+  subscribe: <T extends BaseRealmPayload>(
     event: string,
     handler: (payload: T) => void
   ) => () => void;

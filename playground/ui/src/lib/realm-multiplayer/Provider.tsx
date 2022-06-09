@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { RealmMultiplayerInterface } from "../../../../../app/src/renderer/system/desktop/components/Multiplayer/types";
 
 interface RealmMultiplayerContextState {
@@ -16,9 +16,11 @@ export function RealmMultiplayerProvider({
   ship,
   children,
 }: React.PropsWithChildren<RealmMultiplayerContextState>) {
+  const [_api, setApi] = useState<RealmMultiplayerInterface | undefined>(api);
   useEffect(() => {
     if (!channel || channel == "") return;
     const _api = api || globalThis.realmMultiplayer;
+    setApi(_api);
     try {
       if (!_api) throw new Error("realmMultiplayer api not preloaded");
       _api.init({ roomId: channel, ship });
@@ -31,7 +33,7 @@ export function RealmMultiplayerProvider({
     };
   }, [channel]);
   return (
-    <RealmMultiplayerContext.Provider value={{ channel, ship, api }}>
+    <RealmMultiplayerContext.Provider value={{ channel, ship, api: _api }}>
       {children}
     </RealmMultiplayerContext.Provider>
   );
