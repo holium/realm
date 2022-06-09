@@ -91,12 +91,9 @@ function Cursors() {
   );
   const { desktopStore } = useMst();
   useEffect(() => {
-    // FIXME: faking multiplayer with delay
-    setTimeout(() => {
-      api?.send({
-        event: CursorEvent.Leave,
-      });
-    }, 1500);
+    api?.send({
+      event: CursorEvent.Leave,
+    });
   }, [desktopStore.isMouseInWebview]);
   return <Presences />;
 }
