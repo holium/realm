@@ -7,7 +7,22 @@
 :: ***********************************************************
 /+  default-agent, dbug
 |%
+::  helper to allow for card shorthand when referencing card's in this agent
 +$  card  card:agent:gall
+
++$  base-result  [success=? msg=(unit @t) data=(unit vase)]
+:: +$  space  [key=@t name=@t type=@t data=json]
+:: +$  action
+::   $%  [%create-space space]
+::       [%open diff:open]
+::       [%replace =policy]
+::   ==
++$  base-action
+  $:  action=@t
+      resource=@t
+      context=(map @t json)
+      data=json
+  ==
 +$  versioned-state
     $%  state-0
     ==
@@ -34,7 +49,221 @@
       %0  `this(state old)
     ==
 ::
-++  on-poke  on-poke:def
+::
+++  on-poke
+  |=  [=mark =vase]
+  ^-  (quip card _this)
+  |^
+
+  ?+    mark  (on-poke:def mark vase)
+
+      %json
+        =^  cards  state
+
+        =/  jon  !<(json vase)
+
+          (handle-channel-poke jon)
+
+        [cards this]
+
+      %handle-http-request
+        =^  cards  state
+
+        =/  req  !<((pair @ta inbound-request:eyre) vase)
+
+          (handle-http-request req)
+
+        [cards this]
+    ==
+
+    ++  to-action
+      |=  [data=json]
+      ^-  base-result
+
+      =/  payload  ?:(?=([%o *] data) p.data ~)
+
+      =/  action  (~(get by payload) 'action')
+      ?~  action  `base-result`[%.n (some 'invalid payload. missing action.') (some !>(payload))]
+      =/  action  (need action)
+
+      =/  resource  (~(get by payload) 'resource')
+      ?~  resource  `base-result`[%.n (some 'invalid payload. missing resource.') (some !>(payload))]
+      =/  resource  (need resource)
+
+      =/  context  (~(get by payload) 'context')
+      ?~  context  `base-result`[%.n (some 'invalid payload. missing context.') (some !>(payload))]
+      =/  context  (need context)
+
+      =/  data  (~(get by payload) 'data')
+      =/  data  ?~(data ~ (need data))
+
+      =|  result=base-action
+      =.  action.result  (so:dejs:format action)
+      =.  resource.result  (so:dejs:format resource)
+      =.  context.result  ?:(?=([%o *] context) p.context ~)
+      =.  data.result  data
+
+      `base-result`[%.y ~ (some !>(action))]
+
+    ++  to-json
+      |=  [act=base-action]
+      ^-  json
+
+      =/  result
+      %-  pairs:enjs:format
+      :~
+        ['action' s+action.act]
+        ['resource' s+resource.act]
+        ['context' o+context.act]
+        ['data' data.act]
+      ==
+
+      result
+
+    ++  handle-http-request
+      |=  [req=(pair @ta inbound-request:eyre)]
+
+      =/  req-args
+            (my q:(need `(unit (pair pork:eyre quay:eyre))`(rush url.request.q.req ;~(plug apat:de-purl:html yque:de-purl:html))))
+
+      =/  path  (stab url.request.q.req)
+
+      =/  til=octs  (tail body.request.q.req)
+
+      =/  content  (need (de-json:html q.til))
+
+      ::  convert http request POST body to action object instance
+      =/  result=base-result  (to-action content)
+
+      =/  payload=json  ?~(data.result ~ !<(json (need data.result)))
+
+      ::  bail on error and make sure to send back error message
+      ?.  success.result  (send-api-error req payload msg.result)
+
+      =/  act  !<(base-action (need data.result))
+
+      ?+    method.request.q.req  (send-api-error req payload (some 'unsupported'))
+
+            %'POST'
+              ?+  path  (send-api-error req payload (some 'route not found'))
+
+                [%realm %api %act ~]
+                  (handle-resource-action req req-args act)
+
+              ==
+
+      ==
+
+    ::*****************************************************
+    ::  ARM
+    ::  ++  handle-resource-action
+    ::  @parms
+    ::    req - eyre http request
+    ::    args - query string arguments as string/string key/value pairs
+    ::    act - action object instance parsed from incoming POST body
+    ::
+    ++  handle-resource-action
+      |=  [req=(pair @ta inbound-request:eyre) args=(map @t @t) act=base-action]
+      ^-  (quip card _state)
+
+      ?+  [resource.act action.act]
+        (send-api-error req (to-json act) (some (crip "{<dap.bowl>}: error. unrecognized action {<[resource.act action.act]>}")))
+
+        [%space %create-space]
+          (create-space-api req act)
+
+      ==
+
+    ::  ARM: ++  handle-channel-poke
+    ::  ~lodlev-migdev - handle actions coming in from eyre channeling mechanism
+    ::
+    ::   @see: https://urbit-org-j1prh9inz-urbit.vercel.app/docs/arvo/eyre/external-api-ref
+    ::    for more information
+    ++  handle-channel-poke
+      |=  [jon=json]
+
+      `state
+
+    ::*******************************************
+    ::  ARM
+    ::  ++  send-api-error
+    ::  Send an http 500 error response that returns the incoming action payload
+    ::   along with an error effect describing the nature of the error.
+    ::  This method also logs to the ship's console for debugging purposes.
+    ::
+    ::  Note: 2nd parameter must be payload and not `action`. why? because
+    ::   it is possible that the error was caused trying to parse the payload
+    ::   into an action object. if this fails, there will be no action object
+    ::   instance available.
+    ++  send-api-error
+      |=  [req=(pair @ta inbound-request:eyre) data=json msg=(unit @t)]
+
+      ~&  >>>  msg
+
+      =/  payload  ?:(?=([%o *] data) p.data ~)
+      =/  res  (~(get by payload) 'resource')
+      =/  res  ?~(res '?' (so:dejs:format (need res)))
+      =/  action  (~(get by payload) 'action')
+      =/  action  ?~(action '?' (so:dejs:format (need action)))
+      =/  payload  (~(put by payload) 'action' s+(crip (weld (trip action) "-reaction")))
+
+      =/  error-data=json
+      %-  pairs:enjs:format
+      :~
+        ['error' s+?~(msg '?' (need msg))]
+      ==
+
+      =/  error-effect=json
+      %-  pairs:enjs:format
+      :~
+        ['resource' s+res]
+        ['effect' s+'error']
+        ['data' error-data]
+      ==
+
+      =/  payload  (~(put by payload) 'effects' [%a [error-effect]~])
+
+      =/  =response-header:http
+        :-  500
+        :~  ['Content-Type' 'application/json']
+        ==
+
+      ::  convert the string to a form that arvo will understand
+      =/  data=octs
+            (as-octs:mimes:html (crip (en-json:html [%o payload])))
+
+      :_  state
+      :~
+        [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
+        [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
+        [%give %kick [/http-response/[p.req]]~ ~]
+      ==
+
+    ++  create-space-api
+      |=  [req=(pair @ta inbound-request:eyre) act=base-action]
+      ^-  (quip card _state)
+
+      ::  create the response
+      =/  =response-header:http
+        :-  200
+        :~  ['Content-Type' 'application/json']
+        ==
+
+      ::  encode the proposal as a json string
+      =/  body  (crip (en-json:html ~))
+
+      ::  convert the string to a form that arvo will understand
+      =/  data=octs
+            (as-octs:mimes:html body)
+
+      :_  state
+
+      :~
+        [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
+        [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
+        [%give %kick [/http-response/[p.req]]~ ~]
+      ==
+    --
 ::
 ++  on-leave  on-leave:def
 ::
