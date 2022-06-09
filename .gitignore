@@ -106,3 +106,15 @@ dist
 .tern-port
 
 .DS_Store
+
+# Hide developer ships
+/comets
+/ships
+
+# Hide urbit repo
+/urbit
+
+.env
+.env.moon1
+.env.moon2
+!.env.local-example
