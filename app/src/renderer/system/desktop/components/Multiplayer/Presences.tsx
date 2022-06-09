@@ -38,14 +38,6 @@ export function Presences() {
     });
 
     subscribe<CursorClickPayload>(CursorEvent.Click, (payload) => {
-      const clickedElement = document.querySelector(
-        `[${MULTI_CLICK_ID_ATTRIB}="${payload.target}"]`
-      );
-      if (!clickedElement) return;
-
-      // Trigger fake click
-      (clickedElement as HTMLElement).click();
-
       // Add clicking state to render cursor click state
       setCursors((prev) => ({
         ...prev,

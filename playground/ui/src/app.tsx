@@ -58,6 +58,7 @@ function AppInProvider() {
           <li>
             <RealmMultiplayer.Clickable
               id="button-0"
+              onOtherClick={(patp) => console.log("someone clicked", patp)}
               onClick={() => setCount1((c) => c + 1)}
             >
               This is just some text using Clickable default button
@@ -92,38 +93,24 @@ function AppInProvider() {
             </pre>
           </li>
           <li>
-            <button
-              data-multi-click-id={"button-1"}
-              onClick={() => setCount((c) => c + 1)}
-            >
-              This is a button
-            </button>
-            <br />
-            It's been clicked {count} times!
-            <pre>
-              {`<button
-  data-multi-click-id={"button-1"}
-  onClick={() => setCount((c) => c + 1)}
->
-  This is a button
-</button>`}
-            </pre>
-          </li>
-          <li>
             <details>
-              <summary data-multi-click-id={"details-1"}>
-                Click to expand
-              </summary>
+              <RealmMultiplayer.Clickable
+                id="details-1"
+                onClick={() => setCount2((c) => c + 1)}
+              >
+                <summary>Click to expand</summary>
+              </RealmMultiplayer.Clickable>
               Hello!
             </details>
           </li>
 
           <li>
-            <select data-multi-click-id={"select-1"}>
-              <option>Test</option>
-              <option>Test 2</option>
-              <option>Test 3</option>
-            </select>
+            <RealmMultiplayer.Clickable
+              id="input-1"
+              onClick={() => setCount2((c) => c + 1)}
+            >
+              <input type="text" />
+            </RealmMultiplayer.Clickable>
             <br />
             Because select is an os level primitive multiclick doesn't work
             well, but if you do a custom select implementation like radix, it
