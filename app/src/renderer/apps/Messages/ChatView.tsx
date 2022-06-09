@@ -1,12 +1,21 @@
-import { createRef, FC, useEffect, useState } from 'react';
+import { createRef, FC, useEffect, useState, useMemo, useRef } from 'react';
 import { toJS } from 'mobx';
 import { lighten, rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
 import ScrollView from 'react-inverted-scrollview';
 import { useMst, useShip } from 'renderer/logic/store';
-import { Flex, IconButton, Icons, Input } from 'renderer/components';
+import {
+  Flex,
+  IconButton,
+  Icons,
+  Input,
+  FormControl,
+  FormField,
+} from 'renderer/components';
 import { WindowThemeType } from 'renderer/logic/stores/config';
 import { MessageType, ChatMessage } from './components/ChatMessage';
+import { createDmForm } from './chatForm';
+import { sendDm } from 'renderer/logic/ship/chat/api';
 
 type IProps = {
   theme: WindowThemeType;
@@ -21,17 +30,47 @@ type IProps = {
 };
 
 export const ChatView: FC<IProps> = observer((props: IProps) => {
+  const submitRef = useRef(null);
   let scrollView = createRef();
   const { dimensions, contact, height, theme, headerOffset, onSend } = props;
-  const { backgroundColor, windowColor, iconColor, dockColor } = props.theme;
-
+  const { backgroundColor, windowColor, iconColor, dockColor, textTheme } =
+    props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
+  const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
 
   const { ship } = useShip();
 
   useEffect(() => {
     // shipStore.session?.chat.getDMs();
   }, []);
+
+  const submitDm = (event: any) => {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      // @ts-ignore 2
+      submitRef.current.focus();
+      // @ts-ignore
+      submitRef.current.click();
+      // passwordRef.current.blur();
+      // wrapperRef.current.blur();
+      const formData = dmForm.actions.submit();
+      const dmMessage = formData['dm-message'];
+      // console.log(dmMessage);
+      sendDm(contact, dmMessage).then((response: any) => {
+        console.log('end of promise ', response);
+      });
+      // console.log(dmForm.actions.submit());
+      // (evt: any) => {
+      //   if (evt.key === 'Enter') {
+      //     // Cancel the default action, if needed
+      //     evt.preventDefault();
+      //     // Trigger the button element with a click
+      //     console.log(dmForm.actions.submit());
+      //   }
+      // };
+      // authStore.login(pendingShip!.patp, event.target.value);
+    }
+  };
 
   const handleScroll = ({
     scrollTop,
@@ -53,7 +92,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     scrollView.scrollToBottom();
   };
   const inputHeight = 58;
-
   const chatLog = ship!.chat.dms.get(contact)!;
   return (
     <Flex
@@ -117,27 +155,47 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             size={28}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              scrollToBottom();
+              // scrollToBottom();
             }}
           >
             <Icons name="Attachment" />
           </IconButton>
-          <Flex flex={1}>
-            <Input
-              className="realm-cursor-text-cursor"
-              height={32}
-              placeholder="Write a message"
-              wrapperStyle={{
-                borderRadius: 18,
-                backgroundColor: rgba(backgroundColor, 0.2),
-                '&:hover': {
-                  borderColor: backgroundColor,
-                },
-                borderColor: rgba(backgroundColor, 0.7),
-              }}
-            />
-          </Flex>
-          <IconButton
+
+          <Input
+            tabIndex={1}
+            name="dm-message"
+            className="realm-cursor-text-cursor"
+            height={32}
+            placeholder="Write a message"
+            rightInteractive
+            onKeyDown={submitDm}
+            rightIcon={
+              <Flex justifyContent="center" alignItems="center">
+                <IconButton
+                  ref={submitRef}
+                  luminosity={textTheme}
+                  size={24}
+                  canFocus
+                  onKeyDown={submitDm}
+                >
+                  <Icons opacity={0.5} name="ArrowRightLine" />
+                </IconButton>
+              </Flex>
+            }
+            onChange={(e: any) => dmMessage.actions.onChange(e.target.value)}
+            onFocus={() => dmMessage.actions.onFocus()}
+            onBlur={() => dmMessage.actions.onBlur()}
+            wrapperStyle={{
+              borderRadius: 18,
+              backgroundColor: rgba(backgroundColor, 0.2),
+              '&:hover': {
+                borderColor: backgroundColor,
+              },
+              borderColor: rgba(backgroundColor, 0.7),
+            }}
+          />
+
+          {/* <IconButton
             style={{ cursor: 'none' }}
             color={iconColor}
             customBg={dockColor}
@@ -146,7 +204,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             size={28}
           >
             <Icons name="Emoji" />
-          </IconButton>
+          </IconButton> */}
         </Flex>
       </Flex>
       {/* {chatLog} */}

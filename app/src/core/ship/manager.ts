@@ -1,14 +1,10 @@
+import { DmApi } from './api/dms';
 import { Urbit } from './../urbit/api';
 
 import { ipcRenderer, ipcMain } from 'electron';
 import Store from 'electron-store';
 import EventEmitter from 'events';
-import {
-  ShipModel,
-  ShipModelType,
-  ShipStore,
-  ShipStoreType,
-} from './stores/ship';
+import { ShipModel, ShipModelType } from './stores/ship';
 import { cleanNounColor } from '../../renderer/logic/utils/color';
 
 import {
@@ -22,7 +18,12 @@ import { AuthShipType } from 'core/auth/store';
 
 export type ShipPreloadType = {
   getApps: () => Promise<any>;
+  // Direct message controls
   getDMs: () => Promise<any>;
+  acceptDm: (ship: string) => Promise<any>;
+  rejectDm: (ship: string) => Promise<any>;
+  sendDm: (toShip: string, content: any) => Promise<any>;
+  removeDm: (ship: string, index: any) => Promise<any>;
 };
 
 export class ShipManager extends EventEmitter {
@@ -41,6 +42,18 @@ export class ShipManager extends EventEmitter {
 
     ipcMain.handle('ship:get-apps', this.getApps);
     ipcMain.handle('ship:get-dms', this.getDMs);
+    ipcMain.handle('ship:send-dm', this.sendDm);
+    // ship:remove-dm
+    // ship:accept-dm-request
+    // ship:reject-dm-request
+  }
+
+  private get credentials() {
+    // const path: string = `auth${ship}`;
+    return {
+      cookie: this.stateTree!.cookie!,
+      url: this.stateTree!.url!,
+    };
   }
 
   public getStorePath(patp: string) {
@@ -105,6 +118,7 @@ export class ShipManager extends EventEmitter {
       response: 'initial',
     };
     this.onEffect(syncEffect);
+
     try {
       conduit.subscribe({
         app: 'contact-store',
@@ -119,6 +133,7 @@ export class ShipManager extends EventEmitter {
       console.log('Subscription failed');
     }
 
+    DmApi.updates(this.conduit, this.stateTree);
     // conduit.subscribe('metadata-store', '/app-name/groups', {
     //   onEvent: this.onEffect,
     // });
@@ -164,10 +179,7 @@ export class ShipManager extends EventEmitter {
     if (!this.conduit) {
       return;
     }
-    const response = await this.conduit.scry({
-      app: 'graph-store',
-      path: `/graph/${this.ship}/dm-inbox`,
-    });
+    const response = await DmApi.getDMs(this.stateTree?.patp!, this.conduit);
     return response;
   }
 
@@ -178,6 +190,25 @@ export class ShipManager extends EventEmitter {
   // -------------------------------------------------------
   // ----------------------- ACTIONS -----------------------
   // -------------------------------------------------------
+  acceptDm = async (_event: any, ship: string) => {
+    const credentials = this.credentials;
+    console.log('acceptingDM', ship);
+  };
+
+  rejectDm = async (_event: any, ship: string, removeIndex: any) => {
+    const credentials = this.credentials;
+    console.log('rejectingDM', ship, removeIndex);
+  };
+
+  sendDm = async (_event: any, toShip: string, contents: any) => {
+    const credentials = this.credentials;
+    const ourShip = this.stateTree?.patp!;
+
+    const response = await DmApi.sendDM(ourShip, toShip, contents, credentials);
+
+    console.log(response, contents);
+  };
+
   onAction(action: {
     action: string;
     resource: string;
@@ -243,6 +274,18 @@ export class ShipManager extends EventEmitter {
     },
     getDMs: () => {
       return ipcRenderer.invoke('ship:get-dms');
+    },
+    acceptDm: (ship: string) => {
+      return ipcRenderer.invoke('ship:accept-dm-request', ship);
+    },
+    rejectDm: (ship: string) => {
+      return ipcRenderer.invoke('ship:reject-dm-request', ship);
+    },
+    sendDm: (toShip: string, content: any) => {
+      return ipcRenderer.invoke('ship:send-dm', toShip, content);
+    },
+    removeDm: (ship: string, index: any) => {
+      return ipcRenderer.invoke('ship:remove-dm', ship, index);
     },
 
     // getApps: (callback: any) => ipcRenderer.on('get-apps', callback),

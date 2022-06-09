@@ -15,6 +15,7 @@ import { ThemeType } from '../../theme';
 
 type IProps = {
   highlightColor?: string;
+  textColor?: string;
   fontSize?: string;
   theme: ThemeType;
   disabled?: boolean;
@@ -36,15 +37,11 @@ export const TextButtonStyle = styled(styled.div`
   padding: 0px 7px;
   border: none;
   background-color: transparent;
-  /* padding-top: 3px; */
-  /* button[disabled] {
-    pointer-events: all;
-  } */
 
   ${(props: IProps) =>
     css`
       font-size: ${props.fontSize ? `${props.fontSize}px` : '14px'};
-      color: ${props.theme.colors.brand.primary};
+      color: ${props.textColor || props.theme.colors.brand.primary};
       transition: .1s;
       :hover {
         transition: .1s
@@ -81,6 +78,7 @@ export const TextButtonStyle = styled(styled.div`
 
 type TextButtonProps = {
   highlightColor?: string;
+  textColor?: string;
   fontSize?: string;
   disabled?: boolean;
   style?: any;

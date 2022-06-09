@@ -7,6 +7,16 @@ export async function getDMs() {
   }
 }
 
+export async function sendDm(toShip: string, content: any) {
+  try {
+    const response = await window.electron.ship.sendDm(toShip, content);
+    return [response, null];
+  } catch (err) {
+    return [null, err];
+  }
+}
+
 export default {
   getDMs,
+  sendDm,
 };
