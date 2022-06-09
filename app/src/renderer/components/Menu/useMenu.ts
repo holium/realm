@@ -5,7 +5,8 @@ export const calculateAnchorPoint = (
   event: any,
   orientation: MenuOrientation,
   padding = 12,
-  menuWidth: number
+  menuWidth: number,
+  position?: 'above' | 'below'
 ) => {
   let x: number;
   // TODO cleanup
@@ -70,6 +71,11 @@ export const calculateAnchorPoint = (
 
     default:
       // pointer or default
+      console.log(position);
+      let y = event.layerY + padding;
+      if (position === 'above') {
+        y = event.srcElement.clientHeight;
+      }
       return { x: event.layerX + padding, y: event.layerY + padding };
   }
 };

@@ -18,7 +18,7 @@ import type { ThemeType } from '../../theme';
 
 type IProps = {
   ref?: unknown;
-  disabled?: boolean;
+  isDisabled?: boolean;
   customBg?: string;
   hoverFill?: string;
   hoverReveal?: boolean;
@@ -104,6 +104,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     `}
   ${(props: IProps) =>
     props.customBg &&
+    !props.isDisabled &&
     css`
       &:hover {
         transform: translateZ(0);
@@ -126,26 +127,22 @@ export const IconButton = styled(styled(motion.button)<IProps>`
       }
     `}
 
-  
-
-  
-
-  &:disabled {
-    color: ${(props) => props.theme.colors.ui.disabled};
-    background-color: transparent;
-    border-color: transparent;
-    // cursor: default;
-    svg {
-      fill: ${(props) => props.theme.colors.ui.disabled};
-    }
-    &:hover {
-      transform: translateZ(0);
-      // cursor: default;
+   ${(props: IProps) =>
+    props.isDisabled &&
+    css`
       color: ${(props) => props.theme.colors.ui.disabled};
       background-color: transparent;
       border-color: transparent;
-    }
-  }
+      svg {
+        fill: ${(props) => props.theme.colors.ui.disabled};
+      }
+      &:hover {
+        transform: translateZ(0);
+        color: ${(props) => props.theme.colors.ui.disabled};
+        background-color: none;
+        border-color: none;
+      }
+    `}
 `)<IProps>(
   {
     // '&:hover': {
@@ -160,4 +157,5 @@ export const IconButton = styled(styled(motion.button)<IProps>`
 IconButton.defaultProps = {
   size: 24,
   canFocus: false,
+  isDisabled: false,
 };

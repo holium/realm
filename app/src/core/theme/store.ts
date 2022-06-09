@@ -4,7 +4,6 @@ import { average } from 'color.js';
 import { bgIsLightOrDark } from './lib';
 import { LoaderModel } from '../../renderer/logic/stores/common/loader';
 // import Wallpaper from '../../../assets/sample-wallpaper.png';
-// import { Flex } from '~ui/components';
 // import Image from '/Users/drunkplato/Documents/Holium/Design/Assets/os-wallpaper/The_Course_of_Empire_Desolation.jpeg';
 
 // import { bgIsLightOrDark } from '../utils/color';
@@ -109,7 +108,7 @@ export const ThemeStore = types
       config: { patp?: string; spaceId?: string }
     ) {
       const themeId = (config.patp && `ship${config.patp}`) || config.spaceId;
-      console.log(themeId);
+      // console.log(themeId);
       // const color = yield average(wallpaper, { group: 15, format: 'hex' });
       const color = '#c4c3bf';
       const bgLuminosity = bgIsLightOrDark(color.toString());

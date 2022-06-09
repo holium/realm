@@ -20,8 +20,8 @@ const configuration: webpack.Configuration = {
   target: 'electron-preload',
 
   entry: path.join(
-    webpackPaths.srcMainPath,
-    '../renderer/system/shell/desktop/components/Mouse.tsx'
+    webpackPaths.srcRendererPath,
+    './system/desktop/components/Mouse.tsx'
   ),
 
   output: {

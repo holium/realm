@@ -1,19 +1,13 @@
 import { LoaderModel } from './../stores/common/loader';
-import {
-  types,
-  Instance,
-  flow,
-  applySnapshot,
-  getSnapshot,
-  castToSnapshot,
-  clone,
-} from 'mobx-state-tree';
+import { types, Instance, applySnapshot, getSnapshot } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import MockData from './mock';
 import { DocketApp, WebApp } from '../../../core/ship/stores/docket';
 import { ShipModelType } from '../ship/store';
 import { osState } from '../store';
 import { ThemeModel } from 'core/theme/store';
+import { NativeAppList } from 'renderer/apps';
+import { shipState } from 'renderer/logic/store';
 
 const DocketMap = types.map(types.union({ eager: false }, DocketApp, WebApp));
 export const Space = types
@@ -51,14 +45,39 @@ export const Space = types
   })
   .views((self) => ({
     get pinnedApps() {
-      return Array.from(self.apps.docket!.values()).filter((app: any) =>
-        self.apps.pinned.includes(app.id)
-      );
+      const pins = self.apps.pinned;
+      return [...Array.from(self.apps.docket!.values()), ...NativeAppList]
+        .filter((app: any) => self.apps.pinned.includes(app.id))
+        .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
+    },
+    isAppPinned(appId: string) {
+      return self.apps.pinned.includes(appId);
+    },
+    getAppData(appId: string) {
+      const apps = shipState.ship
+        ? [...shipState.ship!.apps, ...NativeAppList]
+        : [...NativeAppList];
+      return apps.find((app: any) => app.id === appId);
+    },
+
+    get spaceApps() {
+      return shipState.ship
+        ? [...shipState.ship!.apps, ...NativeAppList]
+        : [...NativeAppList];
     },
   }))
   .actions((self) => ({
     load(spaceId: string) {
       applySnapshot(self, MockData[spaceId]);
+    },
+    pinApp(appId: string) {
+      self.apps.pinned.push(appId);
+    },
+    unpinApp(appId: string) {
+      self.apps.pinned.remove(appId);
+    },
+    setPinnedOrder(newOrder: any) {
+      self.apps.pinned = newOrder;
     },
   }));
 export type SpaceModelType = Instance<typeof Space>;
@@ -111,37 +130,16 @@ export const SpaceStore = types
           }),
         })
       );
-      if (!self.selected) {
-        self.selected = self.spaces.get(ship.patp)!;
-        if (self.selected.theme.wallpaper) {
-          osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
-            patp: ship.patp,
-          });
-        }
+      self.selected = self.spaces.get(ship.patp)!;
+
+      if (self.selected && self.selected.theme.wallpaper) {
+        osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
+          patp: ship.patp,
+        });
       }
-      // Set temp other spaces
-      // self.spaces.set(
-      //   'other-life',
-      //   ThemeModel.create(castToSnapshot(MockData['other-life'].theme!))
-      // );
     },
     selectSpace(spaceKey: string) {
       self.selected = self.spaces.get(spaceKey)!;
-      // TODO make the theme system better
-      console.log(toJS(self.selected.theme));
-      // const theme =
-      //   osState.themeStore.spaces.get(spaceKey) || osState.themeStore.os;
-      // self.selected.theme = ThemeModel.create({
-      //   themeId: `${spaceKey}`,
-      //   wallpaper: self.selected.theme.wallpaper,
-      //   backgroundColor: theme.backgroundColor,
-      //   dockColor: theme.dockColor,
-      //   windowColor: theme.windowColor,
-      //   textTheme: theme.textTheme,
-      //   textColor: theme.textColor,
-      //   iconColor: theme.iconColor,
-      //   mouseColor: theme.mouseColor,
-      // });
       osState.themeStore.setCurrentSpaceTheme(spaceKey);
       // if (
       //   self.selected.theme.wallpaper !== osState.themeStore.theme.wallpaper

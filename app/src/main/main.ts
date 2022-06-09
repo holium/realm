@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, session } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
@@ -18,6 +18,14 @@ import { resolveHtmlPath } from './util';
 import { RealmCore } from '../core';
 import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
+import DevHelper from './helpers/dev';
+// Ad block
+import { ElectronBlocker } from '@cliqz/adblocker-electron';
+import fetch from 'cross-fetch'; // required 'fetch'
+
+ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+  blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
+});
 
 export default class AppUpdater {
   constructor() {
@@ -85,10 +93,12 @@ const createWindow = async () => {
     vibrancy: 'under-window',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
+    acceptFirstMouse: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
+      // sandbox: true,
       // nodeIntegrationInWorker: true,
       contextIsolation: true,
       // additionalArguments: [`storePath:${app.getPath('userData')}`],
@@ -104,6 +114,7 @@ const createWindow = async () => {
   RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
+  DevHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.maximize();

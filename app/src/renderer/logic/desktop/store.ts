@@ -1,13 +1,14 @@
-import { osState } from './../store';
-import { types, applySnapshot, Instance, tryReference } from 'mobx-state-tree';
+import { osState, shipState } from './../store';
+import { types, applySnapshot, Instance } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { closeAppWindow, openAppWindow } from './api';
-import { DEFAULT_APP_WINDOW_DIMENSIONS } from '../space/app/dimensions';
+import { setPartitionCookies } from './api';
+import { getInitialWindowDimensions } from '../utils/window-manager';
+import { NativeAppList } from 'renderer/apps';
 
-const Grid = types.model({
-  width: types.enumeration(['1', '2', '3']),
-  height: types.enumeration(['1', '2']),
-});
+// const Grid = types.model({
+//   width: types.enumeration(['1', '2', '3']),
+//   height: types.enumeration(['1', '2']),
+// });
 
 const DimensionsModel = types.model({
   x: types.number,
@@ -20,7 +21,6 @@ type DimensionModelType = Instance<typeof DimensionsModel>;
 
 const Window = types
   .model('WindowModel', {
-    // order: types.number,
     id: types.identifier,
     title: types.optional(types.string, ''),
     zIndex: types.number,
@@ -28,7 +28,6 @@ const Window = types
       types.enumeration(['urbit', 'web', 'native']),
       'urbit'
     ),
-    // app: types.safeReference(AppModel),
     dimensions: DimensionsModel,
   })
   .actions((self) => ({
@@ -48,6 +47,13 @@ export const DesktopStore = types
     dynamicMouse: types.optional(types.boolean, true),
     isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),
+    desktopDimensions: types.optional(
+      types.model({
+        width: types.number,
+        height: types.number,
+      }),
+      { width: 0, height: 0 }
+    ),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
   })
@@ -58,8 +64,30 @@ export const DesktopStore = types
     get hasOpenWindow() {
       return self.activeWindow !== undefined;
     },
+    get openApps() {
+      return Array.from(self.windows.values());
+    },
+    get openAppIds() {
+      return Array.from(self.windows.values()).map((window: any) => window.id);
+    },
+    isOpenWindow(appId: string) {
+      return (
+        Array.from(self.windows.values()).findIndex(
+          (appWindow: any) => appWindow.id === appId
+        ) > -1
+      );
+    },
+    isActiveWindow(appId: string) {
+      return self.activeWindow?.id === appId;
+    },
   }))
   .actions((self) => ({
+    setDesktopDimensions(width: number, height: number) {
+      self.desktopDimensions = {
+        width,
+        height,
+      };
+    },
     setMouseColor(newMouseColor: string) {
       self.mouseColor = newMouseColor;
     },
@@ -74,16 +102,17 @@ export const DesktopStore = types
     setIsBlurred(isBlurred: boolean) {
       self.isBlurred = isBlurred;
     },
-    setActive(activeWindow: WindowModelType) {
-      self.activeWindow = activeWindow;
-      const depth = self.windows.size;
+    setActive(activeWindowId: string) {
       self.windows.forEach((win: WindowModelType) => {
-        if (activeWindow.id === win.id) {
-          win.setZIndex(depth + 1);
+        if (activeWindowId === win.id) {
+          win.setZIndex(self.windows.size + 1);
         } else {
-          win.setZIndex(win.zIndex - 1);
+          if (win.zIndex > 1) {
+            win.setZIndex(win.zIndex - 1);
+          }
         }
       });
+      self.activeWindow = self.windows.get(activeWindowId);
     },
     setFullscreen(isFullscreen: boolean) {
       self.isFullscreen = isFullscreen;
@@ -98,22 +127,13 @@ export const DesktopStore = types
       const windowDimensions = self.windows.get(windowId)!.dimensions;
       applySnapshot(windowDimensions, dimensions);
     },
-    openBrowserWindow(app: any, location?: any) {
+    openBrowserWindow(app: any) {
       const newWindow = Window.create({
-        // order: app.activeApp.order,
         id: app.id,
         title: app.title,
-        zIndex: 1,
-        dimensions: {
-          x: app.dimensions ? app.dimensions.x : 20,
-          y: app.dimensions ? app.dimensions.y : 16,
-          width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-            ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
-            : 600,
-          height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-            ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
-            : 600,
-        },
+        zIndex: self.windows.size + 1,
+        type: app.type,
+        dimensions: getInitialWindowDimensions(app, self.isFullscreen),
       });
       self.windows.set(newWindow.id, newWindow);
       self.activeWindow = self.windows.get(newWindow.id);
@@ -121,18 +141,39 @@ export const DesktopStore = types
         self.showHomePane = false;
         self.isBlurred = false;
       }
-      openAppWindow(toJS(location));
+      const ship = shipState.ship!;
+
+      const formAppUrl = `${ship.url}/apps/${app.id!}`;
+      // const windowPayload: any = {
+      //   name: app.id!,
+      //   url: formAppUrl,
+      //   customCSS: {},
+      //   theme: toJS(osState.themeStore),
+      //   cookies: {
+      //     url: formAppUrl,
+      //     name: `urbauth-${ship.patp}`,
+      //     value: ship.cookie!.split('=')[1].split('; ')[0],
+      //   },
+      // };
+      if (
+        app.type === 'urbit' ||
+        (app.type === 'web' && !app.web.development)
+      ) {
+        // openAppWindow(windowPayload, PartitionMap[app.type]);
+        setPartitionCookies(`${app.type}-webview`, {
+          url: formAppUrl,
+          name: `urbauth-${ship.patp}`,
+          value: ship.cookie!.split('=')[1].split('; ')[0],
+        });
+      }
     },
     closeBrowserWindow(appId: any) {
-      // console.log(self.activeWindow);
-      // detach(self.activeWindow);
-      self.windows.delete(appId);
-
       if (self.activeWindow?.id === appId) {
         const nextWindow = Array.from(self.windows.values())[0].id;
         if (nextWindow) {
-          self.activeWindow = tryReference(() => self.windows.get(nextWindow));
+          self.activeWindow = self.windows.get(nextWindow);
         }
       }
+      self.windows.delete(appId);
     },
   }));

@@ -17,11 +17,17 @@ contextBridge.exposeInMainWorld('electron', {
     setMouseColor(callback: any) {
       ipcRenderer.on('mouse-color', callback);
     },
-    openApp(app: any) {
-      ipcRenderer.invoke('open-app', app);
+    openApp: (app: any, partition: string) => {
+      return ipcRenderer.invoke('open-app', app, partition);
     },
-    closeApp(app: any) {
-      ipcRenderer.invoke('close-app', app);
+    setPartitionCookies: (partition: any, cookies: any) => {
+      return ipcRenderer.invoke('set-partition-cookies', partition, cookies);
+    },
+    closeApp: (app: any) => {
+      return ipcRenderer.invoke('close-app', app);
+    },
+    toggleDevTools: () => {
+      return ipcRenderer.invoke('toggle-devtools');
     },
   },
 });

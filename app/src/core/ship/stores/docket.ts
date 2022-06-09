@@ -1,5 +1,7 @@
 import { types, Instance, flow, applySnapshot } from 'mobx-state-tree';
 
+const AppTypes = types.enumeration(['urbit', 'web', 'native']);
+
 export const Glob = types.model({
   glob: types.model({
     base: types.string,
@@ -13,12 +15,12 @@ export const Glob = types.model({
   }),
 });
 
-export const DocketApp = types.model({
+export const DocketApp = types.model('DocketApp', {
   id: types.identifier,
   title: types.string,
   info: types.string,
   color: types.string,
-  type: types.optional(types.string, 'native'),
+  type: types.optional(AppTypes, 'urbit'),
   image: types.maybeNull(types.string),
   href: Glob,
   version: types.string,
@@ -28,9 +30,10 @@ export const DocketApp = types.model({
 
 export type DocketAppType = Instance<typeof DocketApp>;
 
-export const WebApp = types.model({
+export const WebApp = types.model('WebApp', {
   id: types.identifier,
   title: types.string,
+  color: types.string,
   type: types.optional(types.string, 'web'),
   icon: types.maybeNull(types.string),
   href: types.string,
@@ -67,21 +70,25 @@ export const DocketStore = types
   .actions((self) => ({
     setInitial(appMap: { [key: string]: DocketAppType }) {
       const preparedApps: { [key: string]: DocketAppType } = {};
-      Object.values(appMap).forEach((app: DocketAppType) => {
-        const appTile = DocketApp.create({
-          id: app.href.glob.base,
-          title: app.title,
-          info: app.info,
-          color: app.color,
-          image: app.image,
-          type: 'native',
-          href: Glob.create(app.href),
-          version: app.version,
-          website: app.website,
-          license: app.license,
+      Object.values(appMap)
+        .filter(
+          (app: DocketAppType) => app.title !== 'System' // && app.title !== 'Terminal'
+        )
+        .forEach((app: DocketAppType) => {
+          const appTile = DocketApp.create({
+            id: app.href.glob.base,
+            title: app.title,
+            info: app.info,
+            color: app.color,
+            image: app.image,
+            type: 'urbit',
+            href: Glob.create(app.href),
+            version: app.version,
+            website: app.website,
+            license: app.license,
+          });
+          preparedApps[app.href.glob.base] = appTile;
         });
-        preparedApps[app.href.glob.base] = appTile;
-      });
       applySnapshot(self.apps, preparedApps);
     },
   }));

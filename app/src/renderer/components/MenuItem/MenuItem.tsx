@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { SpaceProps } from 'styled-system';
-import { Box } from '../Box';
+import { Box, Text } from '../';
 import { ChildrenBox, MenuItemStyle } from './MenuItem.styles';
 
 export type IntentProps = {
@@ -50,6 +50,7 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
       flexDirection="row"
       alignItems="center"
       justifyContent="flex-start"
+      className="realm-cursor-hover"
       intent={intent}
       color={color}
       data-prevent-context-close={disabled}
@@ -81,7 +82,9 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
           {icon}
         </Box>
       )}
-      {label}
+      <Text fontSize={2} fontWeight={500}>
+        {label}
+      </Text>
       {children && <ChildrenBox interaction={disabled}>{children}</ChildrenBox>}
     </MenuItemStyle>
   );

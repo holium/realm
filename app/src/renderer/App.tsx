@@ -1,7 +1,7 @@
 import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
-import { Shell } from './system/shell';
+import { Shell } from './system';
 import { theme } from './theme';
 import {
   AuthProvider,
@@ -14,22 +14,31 @@ import {
   useShip,
 } from './logic/store';
 import { onStart } from './logic/api/realm.core';
-import { useEffect } from 'react';
-// import { Mouse } from './system/shell/desktop/components/Mouse';
-import { Mouse } from './system/shell/desktop/components/Mouse';
+import { useEffect, useMemo } from 'react';
+import { Mouse } from './system/desktop/components/Mouse';
 
-import { Observer } from 'mobx-react';
+import { observer, Observer } from 'mobx-react';
 
-export const App = () => {
-  const { desktopStore, themeStore } = useMst();
+export const App = observer(() => {
+  const { themeStore, desktopStore } = useMst();
   useEffect(() => {
     onStart();
   }, []);
 
-  // const isInitialLoaded = useMemo(
-  //   () => authStore.isLoaded,
-  //   [authStore.isLoaded]
-  // );
+  const shellMemo = useMemo(
+    () => (themeStore.loader.isLoaded ? <Shell /> : <div />),
+    [themeStore.loader.isLoaded]
+  );
+
+  const mouseMemo = useMemo(() => {
+    return (
+      <Mouse
+        hide={desktopStore.isMouseInWebview}
+        cursorColor={desktopStore.mouseColor}
+        animateOut={false}
+      />
+    );
+  }, [desktopStore.mouseColor, desktopStore.isMouseInWebview]);
 
   return (
     <OSProvider value={osState}>
@@ -39,18 +48,8 @@ export const App = () => {
           {/* Modal provider */}
           <AuthProvider value={authState}>
             <ShipProvider value={shipState}>
-              <Observer>
-                {() => {
-                  return desktopStore.dynamicMouse ? (
-                    <Mouse
-                      animateOut={false}
-                      hide={desktopStore.isMouseInWebview}
-                      cursorColor={desktopStore.mouseColor}
-                    />
-                  ) : null;
-                }}
-              </Observer>
-              {themeStore.loader.isLoaded && <Shell />}
+              {mouseMemo}
+              {shellMemo}
               <div id="portal-root" />
             </ShipProvider>
           </AuthProvider>
@@ -58,6 +57,6 @@ export const App = () => {
       </ThemeProvider>
     </OSProvider>
   );
-};
+});
 
 export default App;
