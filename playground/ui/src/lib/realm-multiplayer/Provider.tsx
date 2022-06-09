@@ -14,7 +14,13 @@ export function RealmMultiplayerProvider({
   children,
 }: React.PropsWithChildren<RealmMultiplayerContextState>) {
   useEffect(() => {
-    globalThis.realmMultiplayer.init(channel);
+    try {
+      if (!globalThis.realmMultiplayer)
+        throw new Error("realmMultiplayer api not preloaded");
+      globalThis.realmMultiplayer.init(channel);
+    } catch (e) {
+      console.error(e);
+    }
   }, []);
   return (
     <RealmMultiplayerContext.Provider value={{ channel }}>

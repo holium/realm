@@ -3,7 +3,7 @@ import type { RealmMultiplayerInterface } from "../../../../../app/src/renderer/
 import { Clickable } from "./Clickable";
 
 declare global {
-  var realmMultiplayer: RealmMultiplayerInterface;
+  var realmMultiplayer: RealmMultiplayerInterface | undefined;
 }
 
 const realmMultiplayer = globalThis.realmMultiplayer;

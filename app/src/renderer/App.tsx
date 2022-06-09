@@ -12,12 +12,15 @@ import {
   ShipProvider,
   useMst,
   useShip,
+  useSpaces,
 } from './logic/store';
+import * as RealmMultiplayer from '../../../playground/ui/src/lib/realm-multiplayer';
 import { onStart } from './logic/api/realm.core';
 import { useEffect, useMemo } from 'react';
 import { Mouse } from './system/desktop/components/Mouse';
 
 import { observer, Observer } from 'mobx-react';
+import { Presences } from './system/desktop/components/Multiplayer/Presences';
 
 export const App = observer(() => {
   const { themeStore, desktopStore } = useMst();
@@ -40,6 +43,8 @@ export const App = observer(() => {
     );
   }, [desktopStore.mouseColor, desktopStore.isMouseInWebview]);
 
+  // const spacesStore = useSpaces();
+
   return (
     <OSProvider value={osState}>
       <ThemeProvider theme={theme.light}>
@@ -50,6 +55,9 @@ export const App = observer(() => {
             <ShipProvider value={shipState}>
               {mouseMemo}
               {shellMemo}
+              {/* <RealmMultiplayer.Provider channel={''}>
+                <Presences />
+              </RealmMultiplayer.Provider> */}
               <div id="portal-root" />
             </ShipProvider>
           </AuthProvider>

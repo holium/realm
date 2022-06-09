@@ -6,7 +6,6 @@ import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
 import styled from 'styled-components';
 import AnimatedCursor from '../Cursor';
 import { useEventListener } from '../Cursor/useEventListener';
-import Mouse from '../Mouse';
 import { subscribe, close, send, SendPartial } from './multiplayer';
 import { CursorMovePayload, CursorEvent, CursorClickPayload } from './types';
 
@@ -126,5 +125,3 @@ const CursorName = styled(motion.div)`
   padding: 2px 4px;
   font-family: 'Rubik', sans-serif;
 `;
-
-export { Mouse };

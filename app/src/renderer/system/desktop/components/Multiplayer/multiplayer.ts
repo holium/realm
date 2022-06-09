@@ -1,7 +1,4 @@
-// Functions that manage multiplayer in the preload script
-
-// import { contextBridge } from 'electron';
-import { contextBridge } from 'electron';
+// Functions that manage multiplayer
 
 import { RealmMultiplayerInterface, AnyPayload } from './types';
 
@@ -78,7 +75,7 @@ export const leave: RealmMultiplayerInterface['leave'] = (roomId) => {
 };
 
 // Create bindings to globalThis to manage multiplayer through websockets
-const rmi: RealmMultiplayerInterface = {
+export const api: RealmMultiplayerInterface = {
   init,
   join,
   leave,
@@ -86,7 +83,6 @@ const rmi: RealmMultiplayerInterface = {
   subscribe,
   close,
 };
-contextBridge.exposeInMainWorld('realmMultiplayer', rmi);
 
 function getSessionID() {
   return globalThis.id + globalThis.ship.patp;
