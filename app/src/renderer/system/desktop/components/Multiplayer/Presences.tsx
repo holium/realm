@@ -15,6 +15,10 @@ import {
   CursorLeavePayload,
   PresenceStatePayload,
   RealmEvent,
+  CursorOverPayload,
+  CursorDownPayload,
+  CursorUpPayload,
+  CursorOutPayload,
 } from './types';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
@@ -98,11 +102,83 @@ export function Presences() {
     // prevent multiplayer clicks from creating infinite loop
     if (!e.isTrusted) return;
     const targetId = (e.target as HTMLElement | null)?.getAttribute(
-      'data-multi-click-id'
+      MULTI_CLICK_ID_ATTRIB
     ); // element user clicked on
     if (!targetId) return;
     const payload: SendPartial<CursorClickPayload> = {
       event: CursorEvent.Click,
+      target: targetId,
+    };
+
+    // FIXME: faking multiplayer with delay
+    setTimeout(() => {
+      send(payload);
+    }, 1500);
+  }, []);
+
+  const onMouseOver = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorOverPayload> = {
+      event: CursorEvent.Over,
+      target: targetId,
+    };
+
+    // FIXME: faking multiplayer with delay
+    setTimeout(() => {
+      send(payload);
+    }, 1500);
+  }, []);
+
+  const onMouseDown = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorDownPayload> = {
+      event: CursorEvent.Down,
+      target: targetId,
+    };
+
+    // FIXME: faking multiplayer with delay
+    setTimeout(() => {
+      send(payload);
+    }, 1500);
+  }, []);
+
+  const onMouseUp = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorUpPayload> = {
+      event: CursorEvent.Up,
+      target: targetId,
+    };
+
+    // FIXME: faking multiplayer with delay
+    setTimeout(() => {
+      send(payload);
+    }, 1500);
+  }, []);
+
+  const onMouseOut = useCallback((e: MouseEvent) => {
+    // prevent multiplayer clicks from creating infinite loop
+    if (!e.isTrusted) return;
+    const targetId = (e.target as HTMLElement | null)?.getAttribute(
+      MULTI_CLICK_ID_ATTRIB
+    ); // element user clicked on
+    if (!targetId) return;
+    const payload: SendPartial<CursorOutPayload> = {
+      event: CursorEvent.Out,
       target: targetId,
     };
 
@@ -125,7 +201,12 @@ export function Presences() {
 
   useEventListener('mousemove', onMouseMove);
   useEventListener('mouseleave', onMouseLeave, document);
+  useEventListener('blur', onMouseLeave);
   useEventListener('click', onClick);
+  useEventListener('mouseover', onMouseOver);
+  useEventListener('mousedown', onMouseDown);
+  useEventListener('mouseup', onMouseUp);
+  useEventListener('mouseout', onMouseOut);
 
   return (
     <>
@@ -165,5 +246,6 @@ const CursorName = styled(motion.div)`
   left: 0;
   border-radius: 6px;
   padding: 2px 4px;
+  pointer-events: none;
   font-family: 'Rubik', sans-serif;
 `;

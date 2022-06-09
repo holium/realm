@@ -30,6 +30,10 @@ export interface PresenceStateSyncPayload extends BaseRealmPayload {
 
 export enum CursorEvent {
   Move = 'cursor-move',
+  Over = 'cursor-over',
+  Down = 'cursor-down',
+  Up = 'cursor-up',
+  Out = 'cursor-out',
   Click = 'cursor-click',
   Leave = 'cursor-leave',
 }
@@ -42,9 +46,29 @@ export interface CursorMovePayload extends BaseCursorPayload {
   position: Vec2;
 }
 
+export interface CursorOverPayload extends BaseCursorPayload {
+  event: CursorEvent.Over;
+  target: string; // unique data-multi-click id
+}
+
+export interface CursorDownPayload extends BaseCursorPayload {
+  event: CursorEvent.Down;
+  target: string; // unique data-multi-click id
+}
+
+export interface CursorUpPayload extends BaseCursorPayload {
+  event: CursorEvent.Up;
+  target: string; // unique data-multi-click id
+}
+
 export interface CursorClickPayload extends BaseCursorPayload {
   event: CursorEvent.Click;
-  target: string; // some UUID on a button
+  target: string; // unique data-multi-click id
+}
+
+export interface CursorOutPayload extends BaseCursorPayload {
+  event: CursorEvent.Out;
+  target: string; // unique data-multi-click id
 }
 
 export interface CursorLeavePayload extends BaseCursorPayload {
@@ -56,6 +80,10 @@ export type AnyPayload =
   | CursorMovePayload
   | CursorClickPayload
   | CursorLeavePayload
+  | CursorOverPayload
+  | CursorDownPayload
+  | CursorUpPayload
+  | CursorOutPayload
   | PresenceStatePayload
   | PresenceStateSyncPayload;
 
@@ -64,7 +92,7 @@ export interface RealmMultiplayerInterface {
   join: (roomId: string) => void;
   leave: (roomId: string) => void;
   send: <T extends SendPartial<BaseRealmPayload>>(payload: T) => void;
-  getPresenceState: (key: string) => any;
+  getPresenceState: (key: string) => Record<string, any>;
   subscribe: <T extends BaseRealmPayload>(
     event: string,
     handler: (payload: T) => void

@@ -85,9 +85,13 @@ export const init: RealmMultiplayerInterface['init'] = ({
             presenceStates[key] = state[key];
           });
         }
-        subscriptions[payload.event]?.forEach((handler) => handler(payload));
+        try {
+          subscriptions[payload.event]?.forEach((handler) => {
+            handler(payload);
+          });
+        } catch (e) {}
       } catch (error) {
-        console.error('Could not parse message from websockets', e, error);
+        console.error('Error handling websocket message', e, error);
       }
     });
   }

@@ -27,9 +27,9 @@ interface TestPayload extends BaseRealmPayload {
 let testCt = 0;
 
 function AppInProvider() {
-  const [count, setCount] = useState(0);
   const [count1, setCount1] = useState(0);
   const [count2, setCount2] = useState(0);
+  const [hover, setIsHover] = useState(false);
   const [testResult, setTestResult] = useState("");
   const send = useChannel<TestPayload>("test", (payload) => {
     setTestResult(
@@ -58,7 +58,6 @@ function AppInProvider() {
           <li>
             <RealmMultiplayer.Clickable
               id="button-0"
-              onOtherClick={(patp) => console.log("someone clicked", patp)}
               onClick={() => setCount1((c) => c + 1)}
             >
               This is just some text using Clickable default button
@@ -77,9 +76,31 @@ function AppInProvider() {
           <li>
             <RealmMultiplayer.Clickable
               id="button-2"
+              onOtherClick={(patp) => console.log("someone clicked", patp)}
+              onOtherOver={(patp) => {
+                console.log("someone over", patp);
+                setIsHover(true);
+              }}
+              onMouseOver={() => setIsHover(true)}
+              onOtherOut={(patp) => {
+                console.log("someone out", patp);
+                setIsHover(false);
+              }}
+              onMouseOut={() => setIsHover(false)}
+              onOtherUp={(patp) => console.log("someone up", patp)}
+              onOtherDown={(patp) => console.log("someone down", patp)}
               onClick={() => setCount2((c) => c + 1)}
             >
-              <a href="#">This is a link wrapped by Clickable</a>
+              <a
+                href="#"
+                style={{
+                  color: hover ? "red" : "black",
+                  boxShadow: hover ? "0 0 10px red" : "none",
+                }}
+              >
+                This is a link wrapped by Clickable with a multiplayer hover
+                state
+              </a>
             </RealmMultiplayer.Clickable>
             <br />
             It's been clicked {count2} times!
