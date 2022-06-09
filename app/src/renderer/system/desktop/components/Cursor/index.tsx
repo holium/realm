@@ -85,8 +85,8 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   isResizeCursor,
   children,
 }) => {
-  const cursorOuterRef = useRef();
-  const cursorInnerRef = useRef();
+  const cursorOuterRef = useRef<HTMLDivElement>(null);
+  const cursorInnerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef();
   const previousTimeRef = useRef();
   let endX = useRef(0);
@@ -95,6 +95,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Outer Cursor Animation Delay
   const animateOuterCursor = useCallback(
     (time) => {
+      if (!cursorOuterRef.current) return;
       if (previousTimeRef.current !== undefined) {
         coords.x += (endX.current - coords.x) / trailingSpeed;
         coords.y += (endY.current - coords.y) / trailingSpeed;

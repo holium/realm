@@ -9,6 +9,7 @@ export interface JoinPayload {
 export enum CursorEvent {
   Move = 'mousemove',
   Click = 'click',
+  Leave = 'mouseleave',
 }
 
 export interface BaseCursorPayload
@@ -27,10 +28,18 @@ export interface CursorClickPayload extends BaseCursorPayload {
   target: string; // some UUID on a button
 }
 
-export type AnyPayload = JoinPayload | CursorMovePayload | CursorClickPayload;
+export interface CursorLeavePayload extends BaseCursorPayload {
+  event: CursorEvent.Leave;
+}
+
+export type AnyPayload =
+  | JoinPayload
+  | CursorMovePayload
+  | CursorClickPayload
+  | CursorLeavePayload;
 
 export interface RealmMultiplayerInterface {
-  init: (roomId: string) => void;
+  init: ({ roomId, ship }: { roomId: string; ship: ShipModelType }) => void;
   join: (roomId: string) => void;
   leave: (roomId: string) => void;
   send: (payload: SendPartial<AnyPayload>) => void;

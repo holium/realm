@@ -1,5 +1,6 @@
 {
   "name": "@holium/realm",
+  "version": "0.0.1",
   "description": "A desktop environment for Urbit",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
@@ -244,7 +245,8 @@
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5",
     "urbit-ob": "^5.0.1",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "@holium/playground": "0.0.1"
   },
   "devEngines": {
     "node": ">=14.x",

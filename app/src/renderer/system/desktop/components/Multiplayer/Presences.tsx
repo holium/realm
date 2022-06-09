@@ -7,7 +7,12 @@ import styled from 'styled-components';
 import AnimatedCursor from '../Cursor';
 import { useEventListener } from '../Cursor/useEventListener';
 import { subscribe, close, send, SendPartial } from './multiplayer';
-import { CursorMovePayload, CursorEvent, CursorClickPayload } from './types';
+import {
+  CursorMovePayload,
+  CursorEvent,
+  CursorClickPayload,
+  CursorLeavePayload,
+} from './types';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
@@ -19,6 +24,7 @@ interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
 export function Presences() {
   const [cursors, setCursors] = useState<Record<string, CursorState>>({});
 
+  // Update cursors for other cursors
   useEffect(() => {
     subscribe<CursorMovePayload>(CursorEvent.Move, (payload) => {
       setCursors((prev) => {
@@ -32,7 +38,11 @@ export function Presences() {
         `[${MULTI_CLICK_ID_ATTRIB}="${payload.target}"]`
       );
       if (!clickedElement) return;
+
+      // Trigger fake click
       (clickedElement as HTMLElement).click();
+
+      // Add clicking state to render cursor click state
       setCursors((prev) => ({
         ...prev,
         [payload.id]: {
@@ -41,6 +51,7 @@ export function Presences() {
         },
       }));
 
+      // show click state for 200ms
       setTimeout(() => {
         setCursors((prev) => ({
           ...prev,
@@ -52,9 +63,17 @@ export function Presences() {
       }, 200);
     });
 
+    subscribe<CursorLeavePayload>(CursorEvent.Leave, (payload) => {
+      setCursors((prev) => {
+        const { [payload.id]: _, ...rest } = prev;
+        return rest;
+      });
+    });
+
     return () => close();
   }, []);
 
+  // Send information about current user cursor
   const onMouseMove = useCallback((e: MouseEvent) => {
     const payload: SendPartial<CursorMovePayload> = {
       event: CursorEvent.Move,
@@ -85,7 +104,19 @@ export function Presences() {
     }, 1500);
   }, []);
 
+  const onMouseLeave = useCallback(() => {
+    const payload: SendPartial<CursorLeavePayload> = {
+      event: CursorEvent.Leave,
+    };
+
+    // FIXME: faking multiplayer with delay
+    setTimeout(() => {
+      send(payload);
+    }, 1500);
+  }, []);
+
   useEventListener('mousemove', onMouseMove);
+  useEventListener('mouseleave', onMouseLeave, document);
   useEventListener('click', onClick);
 
   return (
