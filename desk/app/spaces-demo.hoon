@@ -246,7 +246,9 @@
       |=  [req=(pair @ta inbound-request:eyre) act=base-action]
       ^-  (quip card _state)
 
+      ::  timestamp as unique key helper. should be good enough for demo purposes
       =/  timestamp  (en-json:html (time:enjs:format now.bowl))
+
       ::  ~lodlev-migdev
       ::  generate a key based on timestamp. since this is a demo agent,
       ::  this should suffice; but future production spaces agent will need
@@ -294,9 +296,8 @@
       |=  [req=(pair @ta inbound-request:eyre) act=base-action]
       ^-  (quip card _state)
 
+      ::  timestamp as unique key helper. should be good enough for demo purposes
       =/  timestamp  (en-json:html (time:enjs:format now.bowl))
-
-      :: =/  context  ?:(?=([%o *] context.act) p.context.act ~)
 
       =/  space-id  (~(get by context.act) 'spaceId')
       ?~  space-id
@@ -337,6 +338,50 @@
             (as-octs:mimes:html body)
 
       :_  state(spaces (~(put by spaces.state) space-id [%o space]))
+
+      :~
+        [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
+        [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
+        [%give %kick [/http-response/[p.req]]~ ~]
+      ==
+
+    ++  delete-space-api
+      |=  [req=(pair @ta inbound-request:eyre) act=base-action]
+      ^-  (quip card _state)
+
+      ::  timestamp as unique key helper. should be good enough for demo purposes
+      =/  timestamp  (en-json:html (time:enjs:format now.bowl))
+
+      =/  space-id  (~(get by context.act) 'spaceId')
+      ?~  space-id
+        =/  err  (crip "{<dap.bowl>}: error. spaceId missing")
+        (send-api-error req (to-json act) (some err))
+      =/  space-id  (so:dejs:format (need space-id))
+
+      ::  locate the space in the spaces store by id
+      =/  space  (~(get by spaces.state) space-id)
+      ::  if the space does not exists (by id), respond with error
+      ?:  =(space ~)
+        =/  err  (crip "{<dap.bowl>}: error. space [{<space-id>}] does not exists")
+        (send-api-error req (to-json act) (some err))
+
+      ::  grab json from unit (nullable type)
+      =/  space  (need space)
+
+      ::  create the response
+      =/  =response-header:http
+        :-  200
+        :~  ['Content-Type' 'application/json']
+        ==
+
+      ::  encode the response as a json string
+      =/  body  (crip (en-json:html space))
+
+      ::  convert the string to a form that arvo will understand
+      =/  data=octs
+            (as-octs:mimes:html body)
+
+      :_  state(spaces (~(del by spaces.state) space-id))
 
       :~
         [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
