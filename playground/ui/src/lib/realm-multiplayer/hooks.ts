@@ -3,6 +3,7 @@ import { SendPartial } from "../../../../../app/src/renderer/system/desktop/comp
 import {
   BaseRealmPayload,
   PresenceStatePayload,
+  PresenceStateSyncPayload,
   RealmEvent,
 } from "../../../../../app/src/renderer/system/desktop/components/Multiplayer/types";
 import { RealmMultiplayerContext } from "./Provider";
@@ -36,25 +37,39 @@ export interface Ship {
 }
 
 export function useShips() {
+  return usePresence("ship");
+}
+
+export function usePresence(key: string) {
   const { api } = useContext(RealmMultiplayerContext);
   const [ships, setShips] = useState<Record<string, Ship>>({});
 
   useEffect(() => {
     if (!api) return;
 
-    const unsub = api.subscribe<PresenceStatePayload>(
-      RealmEvent.UpdatePresenceState,
-      (payload) => {
-        console.log("update payload got", payload);
-        if (payload.key === "ship") {
-          setShips((prev) => ({ ...prev, [payload.id]: payload.value }));
+    const unsub = [
+      api.subscribe<PresenceStatePayload>(
+        RealmEvent.UpdatePresenceState,
+        (payload) => {
+          if (payload.key === key) {
+            setShips((prev) => ({ ...prev, [payload.id]: payload.value }));
+          }
         }
-      }
-    );
+      ),
+      api.subscribe<PresenceStateSyncPayload>(
+        RealmEvent.SyncPresenceState,
+        (payload) => {
+          if (payload.states.hasOwnProperty(key)) {
+            setShips(payload.states[key]);
+          }
+        }
+      ),
+    ];
+
     return () => {
-      unsub();
+      unsub.forEach((u) => u());
     };
-  }, [api]);
+  }, [api, key]);
 
   return ships;
 }

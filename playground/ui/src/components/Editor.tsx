@@ -34,7 +34,7 @@ function Editor({ id }: Props) {
           changes: Y.encodeStateAsUpdate(ydoc),
         });
       },
-      1000,
+      100,
       { leading: true, trailing: true }
     ),
     [send]

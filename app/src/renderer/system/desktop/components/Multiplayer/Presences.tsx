@@ -19,6 +19,7 @@ import {
   CursorDownPayload,
   CursorUpPayload,
   CursorOutPayload,
+  PresenceStateSyncPayload,
 } from './types';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
@@ -78,6 +79,15 @@ export function Presences() {
             ...prev,
             [payload.id]: payload.value as Ship,
           }));
+        }
+      }
+    );
+
+    subscribe<PresenceStateSyncPayload>(
+      RealmEvent.SyncPresenceState,
+      (payload) => {
+        if (payload.states.hasOwnProperty('ship')) {
+          setShips(payload.states['ship']);
         }
       }
     );

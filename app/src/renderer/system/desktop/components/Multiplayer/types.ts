@@ -25,7 +25,7 @@ export interface PresenceStatePayload extends BaseRealmPayload {
 
 export interface PresenceStateSyncPayload extends BaseRealmPayload {
   event: RealmEvent.SyncPresenceState;
-  state: Record<string, any>;
+  states: Record<string, any>;
 }
 
 export enum CursorEvent {

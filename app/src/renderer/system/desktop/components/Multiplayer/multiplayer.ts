@@ -69,21 +69,39 @@ export const init: RealmMultiplayerInterface['init'] = ({
         }
         // someone else has joined, sync over our presence state
         if (payload.event === RealmEvent.Join) {
-          console.log('syncing state over');
+          // TODO: currently everyone will sync over their states
+          // we should only have one person sync over
+          console.log('syncing state over to new client that joined');
           const fullSyncPayload: PresenceStateSyncPayload = {
             id: getSessionID(),
             event: RealmEvent.SyncPresenceState,
-            state: presenceStates,
+            states: presenceStates,
           };
           socket?.send(JSON.stringify(fullSyncPayload));
         }
         // someone else has synced their entire presence state
         if (payload.event === RealmEvent.SyncPresenceState) {
-          console.log('syncing state from someone else');
-          const { state } = payload;
-          Object.keys(state).forEach((key) => {
-            presenceStates[key] = state[key];
+          // TODO: currently you get a full sync from EVERYONE in the room
+          // eventually we should only pick one person to sync from
+          console.log('syncing states from someone else', payload.states);
+          const { states } = payload;
+          Object.entries(states).forEach(([key, state]) => {
+            presenceStates[key] = {
+              ...presenceStates[key],
+              ...state,
+            };
           });
+          // fake presence state sync for self with newly merged states
+          subscriptions[RealmEvent.SyncPresenceState]?.forEach((handler) => {
+            const syncPayload: PresenceStateSyncPayload = {
+              id: getSessionID(),
+              event: RealmEvent.SyncPresenceState,
+              states: presenceStates,
+            };
+            handler(syncPayload);
+          });
+          // dont send the normal payload through with the subscription handler below
+          return;
         }
         try {
           subscriptions[payload.event]?.forEach((handler) => {
