@@ -262,6 +262,19 @@
       ::  timestamp as unique key helper. should be good enough for demo purposes
       =/  timestamp  (en-json:html (time:enjs:format now.bowl))
 
+      ::  grab parent space id from context. if it's null or doesn't exist
+      ::  assume this is a root space (top-level)
+      =/  parent-space-id  (~(get by context.act) 'parentSpaceId')
+      =/  parent-space-id=(unit @t)  ?~(parent-space-id ~ (some (so:dejs:format (need parent-space-id))))
+
+      ::  if a parent space id was provided, validate its existence in the spaces store
+      ?:  ?&  !=(parent-space-id ~)
+              !(~(has by spaces.state) (need parent-space-id))
+          ==
+          =/  parent-space-id  (need parent-space-id)
+          =/  err  (crip "{<dap.bowl>}: error. parent space [{<parent-space-id>}] does not exist")
+          (send-api-error req (to-json act) (some err))
+
       ::  ~lodlev-migdev
       ::  generate a key based on timestamp. since this is a demo agent,
       ::  this should suffice; but future production spaces agent will need
@@ -284,12 +297,11 @@
       ::  merge action data with data in store
       =/  space  (~(gas by space) ~(tap by space-data))
 
-      ::  grab parent space id from context. if it's null or doesn't exist
-      ::  assume this is a root space (top-level)
-      =/  parent-space-id  (~(get by context.act) 'parentSpaceId')
+      ::  add spaceId to the space
+      =/  space  (~(put by space) 'spaceId' s+space-id)
 
       ::  associate the parent space with this new space
-      =/  space  (~(put by space) 'parentSpaceId' ?~(parent-space-id ~ (need parent-space-id)))
+      =/  space  (~(put by space) 'parentSpaceId' ?~(parent-space-id ~ s+(need parent-space-id)))
 
       ::  create the response
       =/  =response-header:http
@@ -424,7 +436,38 @@
 
   ==
 ::
-++  on-peek  on-peek:def
+++  on-peek
+  |=  =path
+  ^-  (unit (unit cage))
+
+  |^
+  ?+    path  (on-peek:def path)
+
+      [%x %spaces @ ~]
+        =/  space-id  `@t`i.t.t.path
+        =/  space  (~(get by spaces.state) space-id)
+        ?~  space
+          ``json+!>((generate-error 'spaces' (crip "space {<space-id>} not found")))
+        ``json+!>((need space))
+
+  ==
+  ++  generate-error
+    |=  [res=@t err=@t]
+    ^-  json
+    =/  error-data=json
+    %-  pairs:enjs:format
+    :~
+      ['error' s+err]
+    ==
+    =/  result
+    %-  pairs:enjs:format
+    :~
+      ['resource' s+res]
+      ['effect' s+'error']
+      ['data' error-data]
+    ==
+    result
+  --
 ::
 ++  on-agent  on-agent:def
 ::
