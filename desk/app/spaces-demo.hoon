@@ -413,6 +413,27 @@
 
       ::  grab json from unit (nullable type)
       =/  space  (need space)
+      =/  space  ?:(?=([%o *] space) p.space ~)
+
+      ::  if this space has a parent, remove this space from the parent's child list
+      =/  parent-space-id  (~(get by space) 'parentSpaceId')
+      =/  hierarchy
+      ?.  =(parent-space-id ~)
+        =/  parent-space-id  (so:dejs:format (need parent-space-id))
+        =/  children  (~(get by hier.state) parent-space-id)
+        ?~  children  hier.state  :: no changes to state
+        =/  children  (need children)
+        =/  children  ?:(?=([%a *] children) p.children ~)
+        =/  children
+        %-  skim
+        :-  children
+        |=  [child=json]
+          =/  child-id=(unit @t)  ?:(?=([%s *] child) (some p.child) ~)
+          ?~  child-id  %.n
+          =/  child-id  (need child-id)
+          ?:  =(child-id space-id)  %.n  %.y
+        (~(put by hier.state) parent-space-id [%a children])
+      hier.state
 
       ::  create the response
       =/  =response-header:http
@@ -421,13 +442,13 @@
         ==
 
       ::  encode the response as a json string
-      =/  body  (crip (en-json:html space))
+      =/  body  (crip (en-json:html [%o space]))
 
       ::  convert the string to a form that arvo will understand
       =/  data=octs
             (as-octs:mimes:html body)
 
-      :_  state(spaces (~(del by spaces.state) space-id))
+      :_  state(spaces (~(del by spaces.state) space-id), hier hierarchy)
 
       :~
         [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
