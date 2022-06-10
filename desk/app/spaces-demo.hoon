@@ -26,7 +26,7 @@
 +$  versioned-state
     $%  state-0
     ==
-+$  state-0  [%0 spaces=(map @t json)]
++$  state-0  [%0 spaces=(map @t json) hier=(map @t json)]
 --
 %-  agent:dbug
 =|  state-0
@@ -303,6 +303,20 @@
       ::  associate the parent space with this new space
       =/  space  (~(put by space) 'parentSpaceId' ?~(parent-space-id ~ s+(need parent-space-id)))
 
+      ::  add this space to the parent space's child list
+      =/  hierarchy=(map @t json)
+      ?.  =(~ parent-space-id)
+        =/  parent-space-id  (need parent-space-id)
+        =/  parent  (~(get by hier.state) parent-space-id)
+        =/  children=(list json)
+        ?~  parent  ~
+          =/  parent  (need parent)
+          ?:(?=([%a *] parent) p.parent ~)
+        =/  children  (snoc children [%s space-id])
+        (~(put by hier.state) parent-space-id [%a children])
+      hier.state
+
+
       ::  create the response
       =/  =response-header:http
         :-  200
@@ -316,7 +330,7 @@
       =/  data=octs
             (as-octs:mimes:html body)
 
-      :_  state(spaces (~(put by spaces.state) space-id [%o space]))
+      :_  state(spaces (~(put by spaces.state) space-id [%o space]), hier hierarchy)
 
       :~
         [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
@@ -449,6 +463,25 @@
         ?~  space
           ``json+!>((generate-error 'spaces' (crip "space {<space-id>} not found")))
         ``json+!>((need space))
+
+      [%x %spaces @ %subspaces ~]
+        =/  space-id  `@t`i.t.t.path
+        =/  children  (~(get by hier.state) space-id)
+        ?~  children
+          ``json+!>((generate-error 'spaces' (crip "space {<space-id>} not found")))
+        =/  children  (need children)
+        =/  children  ?:(?=([%a *] children) p.children ~)
+        =/  response=(map @t json)
+        %-  roll
+        :-  children
+        |=  [child=json results=(map @t json)]
+          =/  child-id=(unit @t)  ?:(?=([%s *] child) (some p.child) ~)
+          ?~  child-id  results
+          =/  child-id  (need child-id)
+          =/  space  (~(get by spaces.state) child-id)
+          ?~  space  results
+          (~(put by results) child-id (need space))
+        ``json+!>([%o response])
 
   ==
   ++  generate-error
