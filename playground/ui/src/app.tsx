@@ -5,6 +5,7 @@ import { useStore } from "./logic/store";
 import * as RealmMultiplayer from "./lib/realm-multiplayer";
 import { useShips, useChannel } from "./lib/realm-multiplayer";
 import { BaseRealmPayload } from "../../../app/src/renderer/system/desktop/components/Multiplayer/types";
+import { Editor } from "./components/Editor";
 
 type IProps = {
   history?: History;
@@ -46,6 +47,9 @@ function AppInProvider() {
       <ShipList />
       <main>
         <ul style={{ display: "grid", gap: "10px" }}>
+          <li>
+            <Editor id="editor-0" />
+          </li>
           <li>
             <button
               data-multi-click-id={"button-test"}
