@@ -132,10 +132,7 @@ export function Presences() {
       target: targetId,
     };
 
-    // FIXME: faking multiplayer with delay
-    setTimeout(() => {
-      send(payload);
-    }, 1500);
+    send(payload);
   }, []);
 
   const onMouseDown = useCallback((e: MouseEvent) => {
@@ -150,10 +147,7 @@ export function Presences() {
       target: targetId,
     };
 
-    // FIXME: faking multiplayer with delay
-    setTimeout(() => {
-      send(payload);
-    }, 1500);
+    send(payload);
   }, []);
 
   const onMouseUp = useCallback((e: MouseEvent) => {
@@ -168,10 +162,7 @@ export function Presences() {
       target: targetId,
     };
 
-    // FIXME: faking multiplayer with delay
-    setTimeout(() => {
-      send(payload);
-    }, 1500);
+    send(payload);
   }, []);
 
   const onMouseOut = useCallback((e: MouseEvent) => {
@@ -186,10 +177,7 @@ export function Presences() {
       target: targetId,
     };
 
-    // FIXME: faking multiplayer with delay
-    setTimeout(() => {
-      send(payload);
-    }, 1500);
+    send(payload);
   }, []);
 
   const onMouseLeave = useCallback(() => {
