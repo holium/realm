@@ -9,14 +9,20 @@
 |%
 ::  helper to allow for card shorthand when referencing card's in this agent
 +$  card  card:agent:gall
-
+::  mainly used to handle errors from conversions, etc...
+::  if success %.y, msg will be null and data will contain result of operation
+::  if success %.n, msg will contain a cord with the specific error indicated
 +$  base-result  [success=? msg=(unit @t) data=(unit vase)]
-:: +$  space  [key=@t name=@t type=@t data=json]
-:: +$  action
-::   $%  [%create-space space]
-::       [%open diff:open]
-::       [%replace =policy]
-::   ==
+::  all actions used in the action/reaction/effect framework follow this standard:
+::    action - specific to the app (in the case of spaces it would be create-space, edit-space, and delete-space)
+::    resource - the name of the resource (app specific). for spaces, the resource is spaces
+::    context - call context. these are like function arguments thru data rather than query string
+::      an example is setting up a parent -> child space relationship. context would contain
+::      parentSpaceId when the space being created is a child; otherwise leave parentSpaceId out
+::      of the context to create a 'root' space.
+::    data - inputs to the action. app specific and action specific.
+::      in the case of create-space, data contains the raw space JSON data as an object
+::
 +$  base-action
   $:  action=@t
       resource=@t
@@ -26,6 +32,8 @@
 +$  versioned-state
     $%  state-0
     ==
+::  spaces is the main spaces store. hier is minimal data maintained to
+::    support a hierarchy of spaces.
 +$  state-0  [%0 spaces=(map @t json) hier=(map @t json)]
 --
 %-  agent:dbug
@@ -85,6 +93,12 @@
         [cards this]
     ==
 
+    :: ********************************************************
+    :: ARM
+    ::  ++  to-action
+    ::  one and only arm for converting raw JSON to a base-action object
+    ::    returns a base-result indicating success or failure.
+    ::    if success, the actual base-action object will be in the data portion of the result
     ++  to-action
       |=  [data=json]
       ^-  base-result
@@ -114,6 +128,10 @@
 
       `base-result`[%.y ~ (some !>(result))]
 
+    ::********************************************************
+    :: ARM
+    ::  ++  to-json
+    ::  convert base-action object to json object
     ++  to-json
       |=  [act=base-action]
       ^-  json
@@ -129,6 +147,12 @@
 
       result
 
+    ::********************************************************
+    :: ARM
+    ::  ++  handle-http-request
+    ::  eyre http requests funnel thru this method. basically the main entry point
+    ::   to executing one of the spaces actions.
+    ::
     ++  handle-http-request
       |=  [req=(pair @ta inbound-request:eyre)]
 
@@ -255,6 +279,15 @@
         [%give %kick [/http-response/[p.req]]~ ~]
       ==
 
+    ::********************************************************
+    :: ARM
+    ::  ++  create-space-api
+    ::  create a new space and add it to the spaces store
+    ::   space ids are generated using the timestamp of the current request.
+    ::   this should be sufficient for a demo.
+    ::  this method will also setup a hierarchy if there is a parentSpaceId
+    ::   in the context. this is managed thru the hier.state structure.
+    ::
     ++  create-space-api
       |=  [req=(pair @ta inbound-request:eyre) act=base-action]
       ^-  (quip card _state)
@@ -338,6 +371,13 @@
         [%give %kick [/http-response/[p.req]]~ ~]
       ==
 
+    ::********************************************************
+    :: ARM
+    ::  ++  edit-space-api
+    ::  update a given space (by id) with the new data. this method
+    ::   will merge the elements in the data.action with the elements
+    ::   that currently exist in the store.
+    ::
     ++  edit-space-api
       |=  [req=(pair @ta inbound-request:eyre) act=base-action]
       ^-  (quip card _state)
@@ -391,6 +431,14 @@
         [%give %kick [/http-response/[p.req]]~ ~]
       ==
 
+    ::********************************************************
+    :: ARM
+    ::  ++  delete-space-api
+    ::  delete a space (by id). if the space is a child space (has
+    ::    a parentSpaceId element), the parent is retrieved from
+    ::    the hierarchy structure and this child space removed from
+    ::    the parent list.
+    ::
     ++  delete-space-api
       |=  [req=(pair @ta inbound-request:eyre) act=base-action]
       ^-  (quip card _state)
@@ -470,7 +518,13 @@
         `this
 
   ==
-::
+::*******************************************
+::  ARM - gall
+::  ++  on-peek
+::  handles:
+::   <ship>/~/scry/spaces-demo/spaces
+::   <ship>/~/scry/spaces-demo/spaces/<space-id>
+::   <ship>/~/scry/spaces-demo/spaces/<space-id>/subspaces
 ++  on-peek
   |=  =path
   ^-  (unit (unit cage))
@@ -478,6 +532,11 @@
   |^
   ?+    path  (on-peek:def path)
 
+      ::  return all root spaces
+      [%x %spaces ~]
+      ``json+!>([%o spaces.state])
+
+      ::  return a specific space
       [%x %spaces @ ~]
         =/  space-id  `@t`i.t.t.path
         =/  space  (~(get by spaces.state) space-id)
@@ -485,6 +544,7 @@
           ``json+!>((generate-error 'spaces' (crip "space {<space-id>} not found")))
         ``json+!>((need space))
 
+      ::  return a space's subspaces
       [%x %spaces @ %subspaces ~]
         =/  space-id  `@t`i.t.t.path
         =/  children  (~(get by hier.state) space-id)
