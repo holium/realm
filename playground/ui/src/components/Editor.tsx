@@ -60,10 +60,7 @@ function Editor({ id }: Props) {
       ],
       content: "<p>This is a text editor!</p>",
       onUpdate: () => {
-        // FIXME: fake delay
-        setTimeout(() => {
-          debouncedSend();
-        }, 1000);
+        debouncedSend();
       },
     },
     [debouncedSend]
