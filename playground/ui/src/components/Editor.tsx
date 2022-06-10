@@ -20,6 +20,7 @@ interface EditorChangesPayload extends BaseRealmPayload {
 
 function Editor({ id }: Props) {
   const send = useChannel<EditorChangesPayload>("update-text", (payload) => {
+    if (payload.target !== id) return;
     const updates = new Uint8Array(Object.values(payload.changes));
     console.log("received updates", updates);
     Y.applyUpdate(ydoc, updates);

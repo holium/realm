@@ -51,12 +51,14 @@ function AppInProvider() {
             <Editor id="editor-0" />
           </li>
           <li>
-            <button
-              data-multi-click-id={"button-test"}
-              onClick={() => send({ event: "test", hello: "123" })}
+            <RealmMultiplayer.Clickable
+              id="button-test"
+              onClick={() => setCount1((c) => c + 1)}
             >
-              Send test useChannel payload
-            </button>
+              <button onClick={() => send({ event: "test", hello: "123" })}>
+                Send test useChannel payload
+              </button>
+            </RealmMultiplayer.Clickable>
             <br />
             <pre>{testResult}</pre>
           </li>
@@ -141,19 +143,6 @@ function AppInProvider() {
               </RealmMultiplayer.Clickable>
               Hello!
             </details>
-          </li>
-
-          <li>
-            <RealmMultiplayer.Clickable
-              id="input-1"
-              onClick={() => setCount2((c) => c + 1)}
-            >
-              <input type="text" />
-            </RealmMultiplayer.Clickable>
-            <br />
-            Because select is an os level primitive multiclick doesn't work
-            well, but if you do a custom select implementation like radix, it
-            should be fine
           </li>
         </ul>
       </main>
