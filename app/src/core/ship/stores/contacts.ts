@@ -12,8 +12,8 @@ export const ContactModel = types.model('ContactModel', {
   bio: types.maybeNull(types.string),
   color: types.maybeNull(types.string),
   cover: types.maybeNull(types.string),
-  groups: types.array(types.string),
-  'last-updated': types.number,
+  groups: types.maybeNull(types.array(types.string)),
+  'last-updated': types.maybeNull(types.number),
   nickname: types.maybeNull(types.string),
   status: types.maybeNull(types.string),
 });
@@ -28,6 +28,10 @@ export const ContactStore = types
   .views((self) => ({
     get our() {
       return self.rolodex.get(self.ourPatp);
+    },
+    getContactAvatarMetadata(patp: string) {
+      const contact = self.rolodex.get(patp);
+      return { color: contact?.color, avatar: contact?.avatar };
     },
   }))
   .actions((self) => ({
@@ -69,6 +73,8 @@ export const ContactStore = types
       }
     },
   }));
+
+export type ContactStoreType = Instance<typeof ContactStore>;
 
 // avatar: null
 // bio: ""

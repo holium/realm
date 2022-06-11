@@ -1,36 +1,46 @@
+import { Urbit } from './../../urbit/api';
 import { cleanNounColor } from '../../../renderer/logic/utils/color';
-import { Conduit } from '../../conduit';
+import { ShipModelType } from '../stores/ship';
 
 export const DocketApi = {
-  getShipApps: async (
-    ship: string,
-    credentials: { url: string; cookie: string }
-  ) => {
-    try {
-      const response = await Conduit.scryFetch(
-        credentials.url,
-        credentials.cookie,
-        'docket',
-        `/charges`
-      );
-      const apps = response.json?.data['charge-update']?.initial;
-      console.log(apps);
-      Object.values(apps).map((app: any) => {
-        return {
-          ...app,
-          color: app.color && cleanNounColor(app.color),
-        };
-      });
-      return apps;
-    } catch (err: any) {
-      console.log(err);
-    }
+  getApps: async (conduit: Urbit) => {
+    const response = await conduit.scry({
+      app: 'docket',
+      path: '/charges',
+    });
+    const appMap = response.initial;
+    Object.keys(appMap).forEach((appKey: string) => {
+      const appColor = appMap[appKey].color;
+      appMap[appKey].color = appColor && cleanNounColor(appColor);
+    });
+    return appMap;
   },
-  // saveContact: async (
-  //   ship: string,
-  //   credentials: { url: string; cookie: string },
-  //   data: any
-  // ) => {
-  //   console.log('poking ship', ship, data);
+  // updates: (conduit: Urbit, shipState: ShipModelType) => {
+  //   conduit.subscribe({
+  //     app: 'docket',
+  //     path: '/updates',
+  //     event: (data: any) => {
+  //       console.log('incoming-data', data);
+  //       if (data['dm-hook-action']) {
+  //         const [action, payload] = Object.entries<any>(
+  //           data['dm-hook-action']
+  //         )[0];
+  //         switch (action) {
+  //           case 'pendings':
+  //             const pendings: string[] = payload;
+  //             shipState.chat.setPendingDms(pendings);
+  //             break;
+  //           case 'screen':
+  //             console.log('screen set');
+  //             break;
+  //           default:
+  //             console.log('action', action);
+  //             break;
+  //         }
+  //       }
+  //     },
+  //     err: () => console.log('Subscription rejected'),
+  //     quit: () => console.log('Kicked from subscription'),
+  //   });
   // },
 };

@@ -8,3 +8,12 @@ export type ShipInfoType = {
   avatar?: string;
   loggedIn?: boolean;
 };
+
+export type PostType = {
+  index: string;
+  author: string;
+  'time-sent': number;
+  signatures: any[];
+  contents: any[];
+  hash: string;
+};

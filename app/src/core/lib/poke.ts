@@ -4,10 +4,13 @@ export const quickPoke = async (
   ship: string,
   data: { app: string; mark: string; json: any },
   credentials: { url: string; cookie: string },
-  response: { path?: string }
+  response?: { path?: string }
 ) => {
   const { url, cookie } = credentials;
-  const { path } = response;
+  let path: string | undefined = undefined;
+  if (response) {
+    path = response.path;
+  }
   const conduit = new Urbit(url, ship, cookie);
   conduit.open();
   const res1 = await new Promise(async (resolve, reject) => {

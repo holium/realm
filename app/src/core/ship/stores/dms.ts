@@ -1,14 +1,22 @@
+import { createPost } from '@urbit/api';
 import { toJS } from 'mobx';
 import {
-  applySnapshot,
-  getSnapshot,
-  castToSnapshot,
+  getParent,
   flow,
   Instance,
   types,
+  getParentOfType,
 } from 'mobx-state-tree';
+import {
+  acceptDm,
+  declineDm,
+  sendDm,
+  setScreen,
+} from '../../../renderer/logic/ship/chat/api';
 import { LoaderModel } from '../../../renderer/logic/stores/common/loader';
-import { ContactStore } from './contacts';
+import { ShipModelType, ShipModel } from './ship';
+import { patp2dec } from 'urbit-ob';
+import { PostType } from '../types';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -16,6 +24,8 @@ export const ChatMessage = types.union(
   { eager: false },
   types.model({
     type: 'text',
+    // index: types.maybe(types.string),
+    pending: types.optional(types.boolean, false),
     position: MessagePosition,
     timeSent: types.number,
     author: types.string,
@@ -23,6 +33,8 @@ export const ChatMessage = types.union(
   }),
   types.model({
     type: 'url',
+    // index: types.maybe(types.string),
+    pending: types.optional(types.boolean, false),
     position: MessagePosition,
     timeSent: types.number,
     author: types.string,
@@ -30,6 +42,8 @@ export const ChatMessage = types.union(
   }),
   types.model({
     type: 'mention',
+    // index: types.maybe(types.string),
+    pending: types.optional(types.boolean, false),
     position: MessagePosition,
     author: types.string,
     timeSent: types.number,
@@ -37,6 +51,8 @@ export const ChatMessage = types.union(
   }),
   types.model({
     type: 'code',
+    // index: types.maybe(types.string),
+    pending: types.optional(types.boolean, false),
     position: MessagePosition,
     author: types.string,
     timeSent: types.number,
@@ -44,6 +60,8 @@ export const ChatMessage = types.union(
   }),
   types.model({
     type: 'reference',
+    // index: types.maybe(types.string),
+    pending: types.optional(types.boolean, false),
     position: MessagePosition,
     author: types.string,
     timeSent: types.number,
@@ -82,6 +100,8 @@ export type ChatMessageType = Instance<typeof ChatMessage>;
 export const Chat = types
   .model({
     contact: types.string,
+    sigilColor: types.maybeNull(types.string),
+    avatar: types.maybeNull(types.string),
     lastSent: types.optional(types.number, 0),
     pending: types.optional(types.boolean, false),
     messages: types.optional(types.array(ChatMessage), []),
@@ -91,6 +111,103 @@ export const Chat = types
     get list() {
       return self.messages.slice().reverse();
     },
+  }))
+  .actions((self) => ({
+    setDm: (post: PostType) => {
+      const ship: ShipModelType = getParent(self, 3);
+      let lastSent = 0;
+      const strippedShip = ship.patp.substring(1);
+      const dmContacts: string[] = [];
+
+      if (!post.author) {
+        // handles cases of no author?
+        return;
+      }
+      if (post.author !== strippedShip && !dmContacts.includes(post.author)) {
+        dmContacts.push(post.author);
+      }
+      if (post['time-sent'] > lastSent) {
+        lastSent = post['time-sent'];
+      }
+      post.contents.forEach((content: any) => {
+        const type = Object.keys(content)[0];
+        let string: any = content[type];
+        if (type === 'code') {
+          string = string;
+        }
+        self.messages.unshift(
+          ChatMessage.create({
+            type,
+            author: post.author,
+            timeSent: post['time-sent'],
+            // @ts-expect-error
+            content: { [type]: string },
+            position: post.author !== strippedShip ? 'left' : 'right',
+          })
+        );
+      });
+    },
+    sendDm: flow(function* (content: any) {
+      self.loader.set('loading');
+      const ship: ShipModelType = getParent(self, 3);
+      const author = ship.patp.substring(1);
+      const post = createPost(
+        author,
+        content,
+        `/${patp2dec(`~${self.contact}`)}`
+      );
+      console.log('sending dm from ', author, post.author);
+      // const type: string = Object(content[0]).keys()[0];
+      // Insert pending dm
+      // TODO consolidate this
+      post.contents.forEach((content: any) => {
+        const type = Object.keys(content)[0];
+        let string: any = content[type];
+        if (type === 'code') {
+          string = string;
+        }
+        self.messages.unshift(
+          ChatMessage.create({
+            type,
+            author: author,
+            pending: true,
+            timeSent: post['time-sent'],
+            // @ts-expect-error
+            content: { [type]: string },
+            position: 'right',
+          })
+        );
+      });
+      const [response, error] = yield sendDm(self.contact, content);
+      if (error) self.loader.set('error');
+      self.loader.set('loaded');
+      console.log('response in client dm store', response);
+      return response;
+    }),
+    acceptDm: flow(function* () {
+      self.loader.set('loading');
+      const [response, error] = yield acceptDm(self.contact);
+      if (error) self.loader.set('error');
+      self.loader.set('loaded');
+      console.log('response in client dm store', response);
+      return response;
+    }),
+    declineDm: flow(function* () {
+      self.loader.set('loading');
+      const [response, error] = yield declineDm(self.contact);
+      if (error) self.loader.set('error');
+      self.loader.set('loaded');
+      console.log('response in client dm store', response);
+      return response;
+    }),
+    setScreen: flow(function* (screen: boolean) {
+      self.loader.set('loading');
+      const [response, error] = yield setScreen(screen);
+      if (error) self.loader.set('error');
+      self.loader.set('loaded');
+      console.log('response in client dm store', response);
+      return response;
+    }),
   }));
 
 export type ChatType = Instance<typeof Chat>;
@@ -102,7 +219,6 @@ export const ChatStore = types
   })
   .views((self) => ({
     get list() {
-      // return Array.from(self.dms.values());
       return Array.from(self.dms.values()).sort((a, b) => {
         // @ts-ignore
         return b.pending - a.pending || b.lastSent - a.lastSent;
@@ -120,12 +236,9 @@ export const ChatStore = types
     },
     setDMs: (ship: string, dmGraph: any) => {
       const strippedShip = ship.substring(1);
-      // const dmMap: { [key: string]: ChatType } = {};
-
       Object.values(dmGraph).forEach((chat: any) => {
         let lastSent = 0;
         const dmContacts: string[] = [];
-        // const dm
         const messages: ChatMessageType[] = [];
         Object.values(chat.children).forEach(({ post }: any) => {
           if (!post.author) {
@@ -147,12 +260,13 @@ export const ChatStore = types
             if (type === 'code') {
               string = string;
             }
+
             messages.push(
               ChatMessage.create({
                 type,
                 author: post.author,
                 timeSent: post['time-sent'],
-                // @ts-expect-error suck it
+                // @ts-expect-error
                 content: { [type]: string },
                 position: post.author !== strippedShip ? 'left' : 'right',
               })
@@ -162,13 +276,30 @@ export const ChatStore = types
         const contact = dmContacts.join(',');
         messages.sort((a, b) => b.timeSent - a.timeSent);
         if (contact) {
-          // TODO get the name of an non-responsive user another way
-          // dmMap[contact] = Chat.create({ contact, lastSent, messages });
-          self.dms.set(contact, Chat.create({ contact, lastSent, messages }));
+          if (dmContacts.length === 1) {
+            // get contact avatar info
+            const avatarMetadata = getParentOfType(
+              self,
+              ShipModel
+            ).contacts.getContactAvatarMetadata(`~${contact}`);
+            // Set chat data
+            self.dms.set(
+              contact,
+              Chat.create({
+                contact,
+                sigilColor: avatarMetadata.color,
+                avatar: avatarMetadata.avatar,
+                lastSent,
+                messages,
+              })
+            );
+          } else {
+            // TODO handle group dms here
+            // TODO get the name of an non-responsive user another way
+            self.dms.set(contact, Chat.create({ contact, lastSent, messages }));
+          }
         }
       });
-
-      // applySnapshot(self.dms, dmMap);
     },
   }));
 
@@ -222,7 +353,7 @@ const sendDM = {
     },
   },
 };
-export const setScreen = {
+export const setScreenType = {
   app: 'dm-hook',
   mark: 'dm-hook-action',
   json: { screen: false },

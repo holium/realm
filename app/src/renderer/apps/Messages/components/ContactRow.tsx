@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled, { css } from 'styled-components';
-// import { As} from 'styled-system'
+import { useShip } from 'renderer/logic/store';
 import { rgba, lighten, darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
@@ -18,12 +18,9 @@ type DMContact = {
 type RowProps = {
   theme: ThemeType;
   customBg?: string;
-  disabled?: boolean;
+  pending?: boolean;
 };
 
-// export const Bubble = styled(motion.div)`
-
-// `;
 export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;
   width: calc(100% - 16px);
@@ -33,11 +30,9 @@ export const Row = styled(motion.div)<RowProps>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  // cursor: pointer;
-  list-style-type: none;
   transition: ${(props: RowProps) => props.theme.transition};
   ${(props: RowProps) =>
-    !props.disabled &&
+    !props.pending &&
     css`
       &:hover {
         transition: ${props.theme.transition};
@@ -59,18 +54,27 @@ export const MessagePreview = styled(motion.div)`
 
 export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
+  // const { ship } = useShip();
   let subTitle;
   if (dm.pending) {
-    const onReject = (evt: any) => {
-      evt.stopPropagation();
-      console.log('rejecting');
-    };
     const onAccept = (evt: any) => {
       evt.stopPropagation();
+      dm.acceptDm().then((response: any) => {
+        console.log('accept ContactRow response', response);
+      });
       console.log('accepting');
     };
+    const onDecline = (evt: any) => {
+      evt.stopPropagation();
+      dm.declineDm().then((response: any) => {
+        console.log('response', response);
+      });
+      console.log('rejecting');
+    };
+
     subTitle = (
       <Flex
+        flex={1}
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
@@ -78,13 +82,13 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
         <Message
           preview
           type={'text'}
-          content={{ text: `${dm.contact} has invited you to a DM` }}
+          content={{ text: 'has invited you to a DM' }}
         />
-        <Flex gap={1} ml={2} flexDirection="row" alignItems="center">
+        <Flex gap={4} flexDirection="row" alignItems="center">
           <TextButton
-            highlightColor="#D0384E"
-            textColor="#D0384E"
-            onClick={onReject}
+            highlightColor="#EC415A"
+            textColor="#EC415A"
+            onClick={onDecline}
           >
             Reject
           </TextButton>
@@ -98,24 +102,25 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       <Message preview type={lastMessage.type} content={lastMessage.content} />
     );
   }
+  // TODO find contact color
   return (
     <Row
-      disabled={dm.pending}
+      pending={dm.pending}
       className={dm.pending ? '' : 'realm-cursor-hover'}
       customBg={theme.windowColor}
       onClick={(evt: any) => !dm.pending && onClick(evt)}
     >
-      <Box>
+      <Box opacity={dm.pending ? 0.5 : 1}>
         <Sigil
           simple
           size={28}
-          avatar={null}
+          avatar={dm.avatar}
           patp={dm.contact}
-          color={['#000000', 'white']}
+          color={[dm.sigilColor || '#000000', 'white']}
         />
       </Box>
-      <Flex flexDirection="column">
-        <Text fontSize={3} fontWeight={500} mb="2px">
+      <Flex flexDirection="column" flex={1}>
+        <Text opacity={dm.pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
           {dm.contact}
         </Text>
         {subTitle}

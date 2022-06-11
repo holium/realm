@@ -116,7 +116,9 @@ export const theme = {
         quaternary: '#FFFFFF',
         disabled: '#DEDEDE',
         intent: {
-          info: '#97A3B2',
+          default: '#F1F3F4',
+          // info: '#97A3B2',
+          info: '#83909F',
           success: '#0FC383',
           caution: '#FFBC32',
           alert: '#FF6240',
