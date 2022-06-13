@@ -1,4 +1,4 @@
-import { FC, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -18,20 +18,20 @@ import { toJS } from 'mobx';
 import { WindowThemeType } from 'renderer/logic/stores/config';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { darken, lighten, rgba } from 'polished';
-import { createNewChatForm } from './forms/newChat';
 import { ShipSearch } from 'renderer/components/ShipSearch';
-import { ContactModelType } from 'core/ship/stores/contacts';
 
 type IProps = {
   theme: WindowThemeType;
   headerOffset: number;
   height: number;
   onBack: () => void;
+  onCreateNewDm: (newDmKey: any) => void;
 };
 
-export const NewChat: FC<IProps> = (props: IProps) => {
-  const { height, headerOffset, theme, onBack } = props;
-  const { backgroundColor, textColor, iconColor, dockColor, textTheme } = theme;
+export const NewChat: FC<IProps> = observer((props: IProps) => {
+  const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
+  const { ship } = useShip();
+  const { backgroundColor, textColor, iconColor, dockColor } = theme;
   const windowColor = useMemo(
     () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
     [props.theme.windowColor]
@@ -41,19 +41,24 @@ export const NewChat: FC<IProps> = (props: IProps) => {
 
   const [patp, setPatp] = useState<string>('');
 
-  const submitNewChat = (event: any) => {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      console.log('creating new chat', patp);
-      // chatData.sendDm(dmMessage).then((response: any) => {
-      //   console.log('end of promise ', response);
-      // });
-    }
-  };
-
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
+  );
+
+  const submitNewChat = useCallback(
+    (event: any) => {
+      // if (event.keyCode === 13) {
+      event.preventDefault();
+      const contacts = Array.from(selectedPatp.values());
+      let metadata: any;
+      if (ship?.contacts.getContactAvatarMetadata(contacts[0])) {
+        metadata = ship?.contacts.getContactAvatarMetadata(contacts[0]);
+      }
+      const newDm = ship?.chat.sendNewDm(contacts, metadata)!;
+      onCreateNewDm(newDm);
+    },
+    [selectedPatp]
   );
 
   const onShipSelected = (contact: [string, string?]) => {
@@ -169,7 +174,7 @@ export const NewChat: FC<IProps> = (props: IProps) => {
               disabled={selectedPatp.size === 0}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                console.log('create new chat');
+                submitNewChat(evt);
               }}
             >
               Create
@@ -195,9 +200,9 @@ export const NewChat: FC<IProps> = (props: IProps) => {
             tabIndex={1}
             name="new-contact"
             className="realm-cursor-text-cursor"
-            height={36}
+            height={32}
             placeholder="Who would you like to add?"
-            onKeyDown={submitNewChat}
+            // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
             value={patp}
             onChange={(e: any) => setPatp(e.target.value)}
             // onFocus={() => urbitId.actions.onFocus()}
@@ -217,7 +222,7 @@ export const NewChat: FC<IProps> = (props: IProps) => {
         </FormControl.Field>
         {contactArray}
         <ShipSearch
-          heightOffset={100}
+          heightOffset={90}
           search={patp}
           selected={selectedPatp}
           customBg={windowColor}
@@ -226,4 +231,4 @@ export const NewChat: FC<IProps> = (props: IProps) => {
       </Grid.Column>
     </Grid.Column>
   );
-};
+});

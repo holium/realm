@@ -132,13 +132,12 @@ export class ShipManager extends EventEmitter {
     // conduit.subscribe('metadata-store', '/app-name/groups', {
     //   onEvent: this.onEffect,
     // });
+
     // load initial dms
     this.getDMs().then((response) => {
-      this.stateTree?.chat.setDMs(
-        this.ship,
-        response['graph-update']['add-graph']['graph']
-      );
+      this.stateTree?.chat.setDMs(this.ship, response);
     });
+
     DocketApi.getApps(this.conduit).then((apps) => {
       this.stateTree?.docket.setInitial(apps);
     });
@@ -169,6 +168,12 @@ export class ShipManager extends EventEmitter {
     }
     return await DmApi.getDMs(this.stateTree?.patp!, this.conduit);
   };
+  // getGroupDMs = async () => {
+  //   if (!this.conduit) {
+  //     return;
+  //   }
+  //   return await DmApi.getGroupDMs(this.stateTree?.patp!, this.conduit);
+  // };
   acceptDm = async (_event: any, toShip: string) => {
     const ourShip = this.stateTree?.patp!;
     const credentials = this.credentials;
@@ -183,7 +188,7 @@ export class ShipManager extends EventEmitter {
     const response = await DmApi.acceptDm(ourShip, toShip, credentials);
     return response;
   };
-  sendDm = async (_event: any, toShip: string, contents: any) => {
+  sendDm = async (_event: any, toShip: string, contents: any[]) => {
     const ourShip = this.stateTree?.patp!;
     const credentials = this.credentials;
 
@@ -288,6 +293,6 @@ export type ShipPreloadType = {
   acceptDm: (ship: string) => Promise<any>;
   declineDm: (ship: string) => Promise<any>;
   setScreen: (screen: boolean) => Promise<any>;
-  sendDm: (toShip: string, content: any) => Promise<any>;
+  sendDm: (toShip: string, content: any[]) => Promise<any>;
   removeDm: (ship: string, index: any) => Promise<any>;
 };

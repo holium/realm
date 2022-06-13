@@ -56,6 +56,10 @@ export const Chat: FC<any> = observer((props: ChatProps) => {
           onBack={() => {
             setCurrentView('dm-list');
           }}
+          onCreateNewDm={(newDm: any) => {
+            setSelectedChat(newDm);
+            setCurrentView('dm-chat');
+          }}
         />
       );
       break;

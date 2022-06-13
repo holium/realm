@@ -97,12 +97,10 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       </Flex>
     );
   } else {
-    const lastMessage = dm.messages[0];
-    subTitle = (
-      <Message preview type={lastMessage.type} content={lastMessage.content} />
-    );
+    const lastMessage = dm.messages[0].contents[0];
+    const type = Object.keys(lastMessage)[0];
+    subTitle = <Message preview type={type} content={lastMessage} />;
   }
-  // TODO find contact color
   return (
     <Row
       pending={dm.pending}

@@ -101,6 +101,7 @@ const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 500000;
 
 const convertNestedObjectToArray = (nestedObj: any) =>
   Object.keys(nestedObj).map((key) => nestedObj[key]);
+
 const convertBytesToKB = (bytes: number) =>
   Math.round(bytes / KILO_BYTES_PER_BYTE);
 
@@ -119,7 +120,7 @@ export const FileUpload: FC<IProps> = ({
   multiple = false,
 }: IProps) => {
   const fileInputField = useRef(null);
-  const [files, setFiles] = useState({});
+  const [files, setFiles] = useState<any>({});
 
   const handleUploadBtnClick = () => {
     // @ts-ignore
@@ -132,34 +133,37 @@ export const FileUpload: FC<IProps> = ({
         if (!multiple) {
           return { file };
         }
+        // @ts-ignore
         files[file.name] = file;
       }
     }
     return { ...files };
   };
 
-  const callUpdateFilesCb = (files) => {
+  const callUpdateFilesCb = (files: any) => {
     const filesAsArray = convertNestedObjectToArray(files);
     onNewFile(filesAsArray);
   };
 
-  const handleNewFileUpload = (e) => {
-    const { files: newFiles } = e.target;
+  const handleNewFileUpload = (evt: any) => {
+    const { files: newFiles } = evt.target;
     if (newFiles.length) {
       let updatedFiles = addNewFiles(newFiles);
       setFiles(updatedFiles);
       callUpdateFilesCb(updatedFiles);
-      onChange(e);
+      onChange(evt);
     }
   };
 
-  const removeFile = (fileName) => {
+  const removeFile = (fileName: string) => {
     delete files[fileName];
+    // @ts-ignore
     fileInputField.current.value = '';
     setFiles({ ...files });
     callUpdateFilesCb({ ...files });
   };
 
+  // @ts-ignore
   let file = files['file'];
 
   let isImageFile = file && file.type.split('/')[0] === 'image';
@@ -174,9 +178,11 @@ export const FileUpload: FC<IProps> = ({
         }}
         color={'color'}
       >
-        <Label mb={1} htmlFor="avatar">
-          Avatar
-        </Label>
+        {label && (
+          <Label mb={1} htmlFor="avatar">
+            {label}
+          </Label>
+        )}
         <FileUploadContainer size={width} theme={theme}>
           {!file && <div className="file-upload-icon">{icon && icon}</div>}
           {file && isImageFile && (

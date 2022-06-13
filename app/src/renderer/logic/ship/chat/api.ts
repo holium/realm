@@ -7,7 +7,7 @@ export async function getDMs() {
   }
 }
 
-export async function sendDm(toShip: string, content: any) {
+export async function sendDm(toShip: string, content: any[]) {
   try {
     const response = await window.electron.ship.sendDm(toShip, content);
     return [response, null];

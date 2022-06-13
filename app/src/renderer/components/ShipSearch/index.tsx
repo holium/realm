@@ -26,6 +26,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
     const { textTheme } = themeStore.theme;
     const { ship } = useShip();
     const contacts = ship ? Array.from(ship?.contacts.rolodex.entries()) : [];
+    const isAddingDisabled = selected.size > 0;
 
     const results = useMemo<Array<[string, ContactModelType]>>(
       () => searchPatpOrNickname(search, contacts, selected),
@@ -77,6 +78,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
                 customBg={customBg ? darken(0.15, customBg) : undefined}
                 size={24}
                 canFocus
+                isDisabled={isAddingDisabled}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
                   onSelected([contact[0], nickname]);
@@ -88,11 +90,6 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
           </Row>
         </div>
       );
-      // return (
-      //   <div className={index % 2 ? 'ListItemOdd' : 'ListItemEven'} style={style}>
-      //     Row {index}
-      //   </div>
-      // )
     };
 
     return (

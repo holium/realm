@@ -6,17 +6,8 @@ export const searchPatpOrNickname = (
   contacts: Array<[string, ContactModelType]>,
   selected: Set<string>
 ): Array<[string, ContactModelType]> => {
-  // Results from rolodex
-  const results = contacts.filter((el: [string, ContactModelType]) => {
-    const patp = el[0].toLocaleLowerCase();
-    const nickname = el[1].nickname?.toLocaleLowerCase();
-    const searchTerm = search.toLocaleLowerCase();
-    if (Array.from(selected.values()).includes(patp)) {
-      return;
-    }
-    return patp.includes(searchTerm) || nickname?.includes(searchTerm);
-  });
-  // TODO Results from urbit-ob
+  let results: Array<[string, ContactModelType]> = contacts;
+  // results from urbit-ob
   if (isValidPatp(search)) {
     results.push([
       search,
@@ -32,6 +23,18 @@ export const searchPatpOrNickname = (
       },
     ]);
   }
+  // Results from rolodex
+  const filtered: Array<[string, ContactModelType]> = results.filter(
+    (el: [string, ContactModelType]) => {
+      const patp = el[0].toLocaleLowerCase();
+      const nickname = el[1].nickname?.toLocaleLowerCase();
+      const searchTerm = search.toLocaleLowerCase();
+      if (Array.from(selected.values()).includes(patp)) {
+        return;
+      }
+      return patp.includes(searchTerm) || nickname?.includes(searchTerm);
+    }
+  );
 
-  return results;
+  return filtered;
 };

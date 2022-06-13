@@ -5,7 +5,6 @@ import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { ShipModelType } from '../stores/ship';
 import { PostType } from '../types';
-import { ChatMessage } from '../stores/dms';
 
 export const DmApi = {
   getDMs: async (ship: string, conduit: Urbit) => {
@@ -13,14 +12,13 @@ export const DmApi = {
       app: 'graph-store',
       path: `/graph/${ship}/dm-inbox`,
     });
-    return response;
+    return response['graph-update']['add-graph']['graph'];
   },
   updates: (conduit: Urbit, shipState: ShipModelType) => {
     conduit.subscribe({
       app: 'dm-hook',
       path: '/updates',
       event: async (data: any) => {
-        console.log('incoming-data', data);
         if (data['dm-hook-action']) {
           const [action, payload] = Object.entries<any>(
             data['dm-hook-action']
@@ -65,42 +63,12 @@ export const DmApi = {
         if (data['graph-update']) {
           const { resource, nodes } = data['graph-update']['add-nodes'];
           if (resource.name === 'dm-inbox') {
-            console.log(nodes);
             const { post } = Object.values<{ post: PostType }>(nodes)[0];
             const chatModel = shipState.chat.dms.get(post.author);
             chatModel?.setDm(post);
+            return;
           }
         }
-        // if (data['dm-hook-action']) {
-        // const [action, payload] = Object.entries<any>(
-        //   data['dm-hook-action']
-        // )[0];
-        //   switch (action) {
-        //     case 'pendings':
-        //       const pendings: string[] = payload;
-        //       shipState.chat.setPendingDms(pendings);
-        //       break;
-        //     case 'screen':
-        //       console.log('screen set');
-        //       break;
-        //     case 'accept':
-        //       const acceptedContact = `~${payload.accept}`;
-        //       const response = await conduit.scry({
-        //         app: 'graph-store',
-        //         path: `/graph/${shipState.patp}/dm-inbox/${acceptedContact}`,
-        //       });
-        //       const chat = shipState.chat.dms.get(acceptedContact);
-        //       chat?.setDms(response['graph-update']['add-graph']['graph']);
-        //       break;
-        //     case 'decline':
-        //       const declinedContact = `~${payload.decline}`;
-        //       shipState.chat.dms.delete(declinedContact);
-        //       break;
-        //     default:
-        //       console.log('action', action);
-        //       break;
-        //   }
-        // }
       },
       err: () => console.log('Subscription rejected'),
       quit: () => console.log('Kicked from subscription'),
@@ -109,7 +77,7 @@ export const DmApi = {
   sendDM: async (
     ourShip: string,
     toShip: string, // how do you define the to ship?
-    contents: any,
+    contents: any[],
     credentials: { url: string; cookie: string }
   ) => {
     const post = createPost(
@@ -133,9 +101,7 @@ export const DmApi = {
         },
       },
     };
-    const response = await quickPoke(ourShip, payload, credentials);
-    console.log('sendDM response', response);
-    return response;
+    return await quickPoke(ourShip, payload, credentials);
   },
   acceptDm: async (
     ourShip: string,
@@ -150,9 +116,7 @@ export const DmApi = {
         accept: `~${toShip}`,
       },
     };
-    console.log('acceptDm response', payload);
-    const response = await quickPoke(ourShip, payload, credentials);
-    return response;
+    return await quickPoke(ourShip, payload, credentials);
   },
   declineDm: async (
     ourShip: string,
@@ -166,9 +130,7 @@ export const DmApi = {
         decline: `~${toShip}`,
       },
     };
-    const response = await quickPoke(ourShip, payload, credentials);
-    console.log('acceptDm response', response);
-    return response;
+    return await quickPoke(ourShip, payload, credentials);
   },
   setScreen: async (
     ourShip: string,
@@ -182,9 +144,7 @@ export const DmApi = {
         screen,
       },
     };
-    const response = await quickPoke(ourShip, payload, credentials);
-    console.log('acceptDm response', response);
-    return response;
+    return await quickPoke(ourShip, payload, credentials);
   },
   // getNewest(`~${window.ship}`, 'dm-inbox', 100, `/${patp2dec(ship)}`);
   // const aUpdated = a.startsWith('~')
@@ -192,4 +152,31 @@ export const DmApi = {
   // const bUpdated = b.startsWith('~')
   //   ?  (unreads?.[`/graph/~${window.ship}/dm-inbox/${patp2dec(b)}`]?.last || 0)
   //  getShallowChildren(`~${window.ship}`, 'dm-inbox');
+  //
+  //
+  // getGroupDMs: async (ship: string, conduit: Urbit) => {
+  //   // const response = await conduit.scry({
+  //   //   app: 'graph-store',
+  //   //   path: `/graph/${ship}/dm-inbox`,
+  //   // });
+
+  //   const keys = await conduit.scry({
+  //     app: 'graph-store',
+  //     path: `/keys`,
+  //   });
+
+  //   // const metadata = await conduit.scry({
+  //   //   app: 'metadata-store',
+  //   //   path: `/metadata`,
+  //   // });
+
+  //   // const response = await conduit.scry({
+  //   //   app: 'graph-store',
+  //   //   path: `/graph/${ship}/~2022.6.13..15.34.51`,
+  //   // });
+  //   // console.log(response['graph-update']['add-graph']);
+  //   // const keys = responseKeys['graph-update']['keys'];
+  //   // console.log('graph', metadata);
+  //   return keys;
+  // },
 };

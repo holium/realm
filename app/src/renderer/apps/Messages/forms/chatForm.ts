@@ -1,17 +1,5 @@
 import { createField, createForm } from 'mobx-easy-form';
-import { isValidPatp } from 'urbit-ob';
-import * as yup from 'yup';
-
-const detectContent = (content: string) => {
-  // TODO determine if url or text
-  // [{ text }]
-  // [{ url }]
-  // [{ code: {
-  //  expression: string;
-  //  output: string[] | undefined;
-  // }}]
-  return [{ text: content }];
-};
+import { tokenizeMessage } from 'renderer/logic/utils/dms';
 
 export const createDmForm = (
   defaults: any = {
@@ -39,7 +27,10 @@ export const createDmForm = (
     form: dmForm,
     initialValue: defaults.message || '',
     validate: (message: string) => {
-      const parsed = detectContent(message);
+      if (message.length === 0) {
+        return { error: 'empty', parsed: undefined };
+      }
+      const parsed = tokenizeMessage(message);
       // TODO parse out patp, links, etc here
       return { error: undefined, parsed };
     },

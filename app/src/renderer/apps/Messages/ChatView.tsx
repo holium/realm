@@ -1,8 +1,17 @@
-import { createRef, FC, useEffect, useState, useMemo, useRef } from 'react';
+import {
+  createRef,
+  FC,
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
 import { toJS } from 'mobx';
 import { lighten, rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
 import ScrollView from 'react-inverted-scrollview';
+
 import { useMst, useShip } from 'renderer/logic/store';
 import {
   Flex,
@@ -18,6 +27,8 @@ import { WindowThemeType } from 'renderer/logic/stores/config';
 import { MessageType, ChatMessage } from './components/ChatMessage';
 import { createDmForm } from './forms/chatForm';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import styled from 'styled-components';
+import { ChatInput } from './components/ChatInput';
 
 type IProps = {
   theme: WindowThemeType;
@@ -36,6 +47,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   const submitRef = useRef(null);
   const chatInputRef = useRef(null);
   let scrollView = createRef();
+  const attachmentRef = useRef(null);
   const {
     dimensions,
     selectedChat,
@@ -56,23 +68,33 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     [props.theme.windowColor]
   );
 
-  const submitDm = (event: any) => {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      // @ts-ignore 2
-      submitRef.current.focus();
-      // @ts-ignore
-      submitRef.current.click();
-      // chatInputRef.current.value = '';
+  const [rows, setRows] = useState(1);
 
-      const formData = dmForm.actions.submit();
-      const dmMessageContent = formData['dm-message'];
-      // console.log(dmMessage);
-      chatData.sendDm(dmMessageContent).then((response: any) => {
-        console.log('end of promise ', response);
-      });
-      dmMessage.actions.onChange('');
+  const submitDm = (event: any) => {
+    if (event.keyCode === 13 && !event.shiftKey) {
+      event.preventDefault();
+      if (dmForm.computed.isValid) {
+        // @ts-ignore 2
+        submitRef.current.focus();
+        // @ts-ignore
+        submitRef.current.click();
+        const formData = dmForm.actions.submit();
+        if (formData) console.log(formData);
+        const dmMessageContent = formData['dm-message'];
+        // console.log(dmMessage);
+        chatData.sendDm(dmMessageContent).then((response: any) => {
+          console.log('end of promise ', response);
+        });
+        // @ts-ignore
+        chatInputRef.current.value = '';
+      }
+    } else if (event.keyCode === 13 && event.shiftKey) {
+      // @ts-ignore
+      // chatInputRef.current.rows = chatInputRef.current.rows + 1;
     }
+    // else {
+
+    // }
   };
 
   const handleScroll = ({
@@ -91,9 +113,10 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   };
   const scrollToBottom = () => {
     if (!scrollView) return;
-    // @ts-expect-error i know
-    scrollView.scrollToBottom();
+    // @ts-expect-error
+    scrollView.current.scrollToBottom();
   };
+
   const inputHeight = 58;
   return (
     <Grid.Column
@@ -184,7 +207,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             <Flex style={{ minHeight: headerOffset }} />
             {chatData.list.map((message: MessageType, index: number) => (
               <ChatMessage
-                key={`${message.timeSent}-${message.author}-${message.type}-${index}`}
+                key={`${message.index}-${message.timeSent}-${index}`}
                 theme={theme}
                 our={ship!.patp}
                 ourColor={ship!.color || '#569BE2'}
@@ -199,8 +222,13 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
               <IconButton
                 color={iconColor}
                 customBg={dockColor}
-                style={{ borderRadius: 14, cursor: 'none' }}
+                style={{
+                  borderRadius: 14,
+                  cursor: 'none',
+                  backdropFilter: 'blur(4px)',
+                }}
                 size={28}
+                onClick={scrollToBottom}
               >
                 <Icons name="ArrowDown" />
               </IconButton>
@@ -228,18 +256,23 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 size={28}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
+                  // TODO add file uploading
                   // scrollToBottom();
                 }}
               >
                 <Icons name="Attachment" />
               </IconButton>
+              {/* <ChatInput /> */}
 
               <Input
+                as="textarea"
                 ref={chatInputRef}
                 tabIndex={1}
+                rows={rows}
                 name="dm-message"
                 className="realm-cursor-text-cursor"
-                height={32}
+                // height={34}
+                width={300}
                 placeholder="Write a message"
                 rightInteractive
                 onKeyDown={submitDm}
@@ -262,6 +295,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onFocus={() => dmMessage.actions.onFocus()}
                 onBlur={() => dmMessage.actions.onBlur()}
                 wrapperStyle={{
+                  height: 'max-content',
                   borderRadius: 12,
                   backgroundColor: darken(0.05, windowColor),
                   '&:hover': {
