@@ -32,10 +32,10 @@ export const init: RealmMultiplayerInterface['init'] = ({
   function tryInit() {
     ship = initShip ? JSON.parse(JSON.stringify(initShip)) : globalThis.ship;
     if (!ship) {
-      console.error('no ship info, trying again in 100ms');
+      console.error('no ship info, trying again in 10ms');
       setTimeout(() => {
         tryInit();
-      }, 100);
+      }, 10);
     } else {
       _init();
     }

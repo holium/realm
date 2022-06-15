@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:env": "vite --mode ",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "test": "tsc --noEmit",
