@@ -177,32 +177,12 @@ export const Chat = types
       if (post['time-sent'] > lastSent) {
         lastSent = post['time-sent'];
       }
-      // console.log(post.contents);
-      const contentArray = post.contents.map((content: any) => {
-        const type = Object.keys(content)[0];
-        let string: any = content[type];
-        if (type === 'code') {
-          string = string;
-        }
-        return { [type]: string };
-        // if (string.length > 0) {
-        //   self.messages.unshift(
-        //     ChatMessage.create({
-        //       type,
-        //       author: post.author,
-        //       timeSent: post['time-sent'],
-        //       // @ts-expect-error
-        //       content: { [type]: string },
-        //       position: post.author !== strippedShip ? 'left' : 'right',
-        //     })
-        //   );
-        // }
-      });
       ChatMessage.create({
+        index: post.index,
         author: post.author,
         timeSent: post['time-sent'],
         // @ts-expect-error
-        contents: contentArray,
+        contents: post.contents,
         position: post.author !== strippedShip ? 'left' : 'right',
       });
     },

@@ -98,7 +98,7 @@ export const Message: FC<DMContact> = (props: DMContact) => {
               height={180}
               showLoader={true}
               // fallback={<div></div>}
-              url={content[type]}
+              url={message}
               margin={'4px 4px 8px 4px'}
               width={'calc(100% - 8px)'}
             />
@@ -106,7 +106,7 @@ export const Message: FC<DMContact> = (props: DMContact) => {
         );
       }
     } else {
-      message = <Text fontSize={2}> {message}</Text>;
+      message = <Text fontSize={2}>{message}</Text>;
     }
   }
   return (
