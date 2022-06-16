@@ -14,7 +14,8 @@ import {
   useShip,
   useSpaces,
 } from './logic/store';
-import * as RealmMultiplayer from '@holium/playground/src/lib/realm-multiplayer';
+
+import * as RealmMultiplayer from '../../../playground/ui/src/lib/realm-multiplayer';
 import { onStart } from './logic/api/realm.core';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { Mouse } from './system/desktop/components/Mouse';
@@ -22,6 +23,7 @@ import { Mouse } from './system/desktop/components/Mouse';
 import { observer, Observer } from 'mobx-react';
 import { Presences } from './system/desktop/components/Multiplayer/Presences';
 import { api } from './system/desktop/components/Multiplayer/multiplayer';
+
 import {
   CursorEvent,
   RealmMultiplayerInterface,
@@ -83,6 +85,7 @@ function MultiplayerMouse() {
     </RealmMultiplayer.Provider>
   );
 }
+
 function Cursors() {
   const { api } = useContext(
     RealmMultiplayer.Context as React.Context<{

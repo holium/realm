@@ -245,8 +245,7 @@
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5",
     "urbit-ob": "^5.0.1",
-    "yup": "^0.32.11",
-    "@holium/playground": "0.0.1"
+    "yup": "^0.32.11"
   },
   "devEngines": {
     "node": ">=14.x",
