@@ -40,15 +40,15 @@ export const App = observer(() => {
     [themeStore.loader.isLoaded]
   );
 
-  const mouseMemo = useMemo(() => {
-    return (
-      <Mouse
-        hide={desktopStore.isMouseInWebview}
-        cursorColor={desktopStore.mouseColor}
-        animateOut={false}
-      />
-    );
-  }, [desktopStore.mouseColor, desktopStore.isMouseInWebview]);
+  // const mouseMemo = useMemo(() => {
+  //   return (
+  //     <Mouse
+  //       hide={desktopStore.isMouseInWebview}
+  //       cursorColor={desktopStore.mouseColor}
+  //       animateOut={false}
+  //     />
+  //   );
+  // }, [desktopStore.mouseColor, desktopStore.isMouseInWebview]);
 
   return (
     <OSProvider value={osState}>
@@ -58,7 +58,11 @@ export const App = observer(() => {
           {/* Modal provider */}
           <AuthProvider value={authState}>
             <ShipProvider value={shipState}>
-              {mouseMemo}
+              <Mouse
+                hide={desktopStore.isMouseInWebview}
+                cursorColor={desktopStore.mouseColor}
+                animateOut={false}
+              />
               {shellMemo}
               <MultiplayerMouse />
               <div id="portal-root" />

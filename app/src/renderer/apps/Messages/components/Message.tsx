@@ -14,6 +14,9 @@ import {
   opacity,
 } from 'styled-system';
 import { motion } from 'framer-motion';
+import { Flex, Text } from 'renderer/components';
+import { LinkPreview } from '@dhaiwat10/react-link-preview';
+
 import { toJS } from 'mobx';
 
 type DMContact = {
@@ -73,6 +76,7 @@ export const Message: FC<DMContact> = (props: DMContact) => {
     message = content[type];
   }
   if (preview) {
+    message = message.split(/(\r\n|\n|\r)/gm)[0]; // takes only the first line of a multi-line message
     message = message.length > 39 ? message.substring(0, 40) + '...' : message;
   } else {
     if (type === 'url') {
@@ -87,9 +91,22 @@ export const Message: FC<DMContact> = (props: DMContact) => {
           />
         );
       } else {
-        message = content[type];
+        message = (
+          <Flex flexDirection="row" minWidth={250}>
+            <LinkPreview
+              imageHeight={180}
+              height={180}
+              showLoader={true}
+              // fallback={<div></div>}
+              url={message}
+              margin={'4px 4px 8px 4px'}
+              width={'calc(100% - 8px)'}
+            />
+          </Flex>
+        );
       }
-      // console.log(toJS(content));
+    } else {
+      message = <Text fontSize={2}>{message}</Text>;
     }
   }
   return (
