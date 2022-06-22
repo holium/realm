@@ -43,6 +43,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       overflowY="hidden"
     >
       <Titlebar
+        hasBlur
         hasBorder
         zIndex={5}
         theme={{
@@ -104,6 +105,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           gap={2}
           mt={1}
           mb={3}
+          pb={4}
           noGutter
           expand
           height={height}

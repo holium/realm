@@ -37,7 +37,7 @@ export const Row = styled(motion.div)<RowProps>`
       &:hover {
         transition: ${props.theme.transition};
         background-color: ${props.customBg
-          ? lighten(0.02, props.customBg)
+          ? darken(0.02, props.customBg)
           : 'initial'};
       }
     `}

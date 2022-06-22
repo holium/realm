@@ -117,6 +117,10 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     scrollView.current.scrollToBottom();
   };
 
+  useEffect(() => {
+    // scrollView.current?.scrollToBottom();
+  }, [scrollView.current]);
+
   const inputHeight = 58;
   return (
     <Grid.Column

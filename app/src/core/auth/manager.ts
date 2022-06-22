@@ -17,6 +17,7 @@ export interface AuthManagerActions {}
 
 export type AuthPreloadType = {
   addShip: (ship: string, url: string, code: string) => Promise<any>;
+  removeShip: (ship: string) => any;
   getShips: () => Promise<any>;
   onOpen: () => Promise<any>;
   getProfile: (ship: string) => Promise<any>;
@@ -41,6 +42,7 @@ export class AuthManager extends EventEmitter {
     this.initialize = this.initialize.bind(this);
     this.getShips = this.getShips.bind(this);
     this.addShip = this.addShip.bind(this);
+    this.removeShip = this.removeShip.bind(this);
     this.onAction = this.onAction.bind(this);
     this.getProfile = this.getProfile.bind(this);
     this.saveProfile = this.saveProfile.bind(this);
@@ -48,6 +50,7 @@ export class AuthManager extends EventEmitter {
     this.setSelected = this.setSelected.bind(this);
 
     ipcMain.handle('auth:add-ship', this.addShip);
+    ipcMain.handle('auth:remove-ship', this.removeShip);
     ipcMain.handle('auth:get-ships', this.getShips);
     ipcMain.handle('auth:set-selected', this.setSelected);
     ipcMain.handle('signup:get-profile', this.getProfile);
@@ -186,7 +189,7 @@ export class AuthManager extends EventEmitter {
     };
   }
 
-  removeShip(ship: string) {
+  removeShip(_event: any, ship: string) {
     this.stateTree.deleteShip(ship);
   }
 

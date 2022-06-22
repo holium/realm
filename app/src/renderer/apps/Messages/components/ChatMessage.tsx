@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useMemo } from 'react';
 import { lighten } from 'polished';
 import { Flex, Text } from 'renderer/components';
 import { WindowThemeType } from 'renderer/logic/stores/config';
@@ -38,6 +38,15 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
     return <div></div>;
   }
 
+  const messageTypes = useMemo(
+    () =>
+      message.contents.map((content: any) => {
+        return Object.keys(content)[0];
+      }),
+    [message.index]
+  );
+
+  const isMention = messageTypes.includes('mention');
   return (
     <Flex
       justifyContent={primaryBubble ? 'flex-end' : 'flex-start'}
@@ -49,7 +58,13 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
         primary={primaryBubble}
         customBg={primaryBubble ? ourColor : lighten(0.1, theme!.windowColor)}
       >
-        <Flex flexDirection="column" gap={4}>
+        <Flex
+          flexDirection={isMention ? 'row' : 'column'}
+          gap={isMention ? 1 : 4}
+          style={{
+            flexFlow: isMention ? 'wrap' : 'column',
+          }}
+        >
           {message.contents.map(
             (content: { [type: string]: any }, index: number) => {
               const type = Object.keys(content)[0];
@@ -58,7 +73,6 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
               }
               return (
                 <Message
-                  // preview
                   key={`${index}-message-${index}`}
                   type={type}
                   color={color}

@@ -141,7 +141,7 @@ export const theme = {
         secondary: '#FFFFFF',
         tertiary: '#f1f1f2',
         blendedBg: rgba('#FFFFFF', 0.4),
-        inset: '#f6f8fa',
+        inset: '#F5F5F5',
         toolbar: '#F1F3F4',
         divider: '#DBDBDB',
       },
@@ -161,8 +161,6 @@ export const theme = {
         error: '#D0421B',
         success: '#138000',
       },
-      // primaryHighlight: rgba('#4E9EFD', 0.05),
-      // primaryExtraHighlight: rgba('#4E9EFD', 0.1),
       highlights: {
         primaryHighlight: darken(0.05, '#4E9EFD'),
         primaryExtraHighlight: darken(0.1, '#4E9EFD'),

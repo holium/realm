@@ -29,7 +29,9 @@ export const DmApi = {
               shipState.chat.setPendingDms(pendings);
               break;
             case 'screen':
-              console.log('screen set');
+              // console.log('screen set');
+              // TODO handle screens setting
+              // console.log(data);
               break;
             case 'accept':
               const acceptedContact = `~${payload.accept}`;
@@ -59,7 +61,6 @@ export const DmApi = {
       app: 'graph-store',
       path: `/updates`,
       event: async (data: any) => {
-        // console.log('incoming-data', data);
         if (data['graph-update']) {
           const { resource, nodes } = data['graph-update']['add-nodes'];
           if (resource.name === 'dm-inbox') {

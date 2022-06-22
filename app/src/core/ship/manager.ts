@@ -15,11 +15,13 @@ import {
 } from 'mobx-state-tree';
 import { AuthShipType } from 'core/auth/store';
 import { DocketApi } from './api/docket';
+import { MetadataApi } from './api/metadata';
 
 export class ShipManager extends EventEmitter {
   ship: string = '';
   private conduit?: Urbit;
   private stateTree?: ShipModelType;
+  private metadataStore: { [key: string]: any } = {};
   private store?: Store<ShipModelType>;
   private hash?: string;
 
@@ -28,13 +30,17 @@ export class ShipManager extends EventEmitter {
     this.getDMs = this.getDMs.bind(this);
     this.sendDm = this.sendDm.bind(this);
     this.onEffect = this.onEffect.bind(this);
+    this.getMetadata = this.getMetadata.bind(this);
+    this.getAppPreview = this.getAppPreview.bind(this);
     this.init = this.init.bind(this);
 
     // ipcMain.handle('ship:get-apps', this.getApps);
     ipcMain.handle('ship:get-dms', this.getDMs);
     ipcMain.handle('ship:send-dm', this.sendDm);
+    ipcMain.handle('ship:get-metadata', this.getMetadata);
     ipcMain.handle('ship:accept-dm-request', this.acceptDm);
     ipcMain.handle('ship:decline-dm-request', this.declineDm);
+    ipcMain.handle('ship:get-app-preview', this.getAppPreview);
 
     // ship:remove-dm
     // ship:accept-dm-request
@@ -126,12 +132,12 @@ export class ShipManager extends EventEmitter {
       console.log('Subscription failed');
     }
 
+    MetadataApi.syncGroupMetadata(this.conduit, this.metadataStore);
+    MetadataApi.syncGraphMetadata(this.conduit, this.metadataStore);
+
     // register dm update handler
     DmApi.updates(this.conduit, this.stateTree);
     DmApi.graphUpdates(this.conduit, this.stateTree);
-    // conduit.subscribe('metadata-store', '/app-name/groups', {
-    //   onEvent: this.onEffect,
-    // });
 
     // load initial dms
     this.getDMs().then((response) => {
@@ -159,6 +165,21 @@ export class ShipManager extends EventEmitter {
     destroy(this.stateTree);
     // TODO verify data is encrypted on lock
   }
+
+  getMetadata = (_event: any, path: string) => {
+    return this.metadataStore[path];
+  };
+
+  getAppPreview = async (_event: any, ship: string, desk: string) => {
+    return await DocketApi.requestTreaty(
+      ship,
+      desk,
+      this.stateTree?.docket,
+      this.conduit!,
+      this.metadataStore
+    );
+  };
+
   // -------------------------------------------------------
   // --------------------- DM handlers ---------------------
   // -------------------------------------------------------
@@ -265,8 +286,14 @@ export class ShipManager extends EventEmitter {
     getApps: () => {
       return ipcRenderer.invoke('ship:get-apps');
     },
+    getAppPreview: (ship: string, desk: string) => {
+      return ipcRenderer.invoke('ship:get-app-preview', ship, desk);
+    },
     getDMs: () => {
       return ipcRenderer.invoke('ship:get-dms');
+    },
+    getMetadata: (path: string) => {
+      return ipcRenderer.invoke('ship:get-metadata', path);
     },
     acceptDm: (toShip: string) => {
       return ipcRenderer.invoke('ship:accept-dm-request', toShip);
@@ -288,8 +315,10 @@ export class ShipManager extends EventEmitter {
 
 export type ShipPreloadType = {
   getApps: () => Promise<any>;
+  getAppPreview: (ship: string, desk: string) => Promise<any>;
   // Direct message controls
   getDMs: () => Promise<any>;
+  getMetadata: (path: string) => any;
   acceptDm: (ship: string) => Promise<any>;
   declineDm: (ship: string) => Promise<any>;
   setScreen: (screen: boolean) => Promise<any>;

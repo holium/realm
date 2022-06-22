@@ -177,14 +177,16 @@ export const Chat = types
       if (post['time-sent'] > lastSent) {
         lastSent = post['time-sent'];
       }
-      ChatMessage.create({
-        index: post.index,
-        author: post.author,
-        timeSent: post['time-sent'],
-        // @ts-expect-error
-        contents: post.contents,
-        position: post.author !== strippedShip ? 'left' : 'right',
-      });
+      self.messages.unshift(
+        NewChatMessage.create({
+          index: post.index,
+          pending: false,
+          author: post.author,
+          timeSent: post['time-sent'],
+          contents: post.contents,
+          position: post.author !== strippedShip ? 'left' : 'right',
+        })
+      );
     },
     sendDm: flow(function* (contents: any) {
       self.loader.set('loading');
@@ -314,25 +316,6 @@ export const ChatStore = types
                 position: post.author !== strippedShip ? 'left' : 'right',
               })
             );
-            // post.contents.forEach((content: any) => {
-            //   const type = Object.keys(content)[0];
-            //   let string: any = content[type];
-            //   if (type === 'code') {
-            //     string = string;
-            //   }
-
-            //   messages.push(
-            //     ChatMessage.create({
-            //       index,
-            //       type,
-            //       author: post.author,
-            //       timeSent: post['time-sent'],
-            //       // @ts-expect-error
-            //       content: { [type]: string },
-            //       position: post.author !== strippedShip ? 'left' : 'right',
-            //     })
-            //   );
-            // });
           }
         );
         const contact = dmContacts.join(',');
