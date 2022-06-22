@@ -1,15 +1,10 @@
+import { DmApi } from './api/dms';
 import { Urbit } from './../urbit/api';
 
 import { ipcRenderer, ipcMain } from 'electron';
 import Store from 'electron-store';
 import EventEmitter from 'events';
-import {
-  ShipModel,
-  ShipModelType,
-  ShipStore,
-  ShipStoreType,
-} from './stores/ship';
-import { cleanNounColor } from '../../renderer/logic/utils/color';
+import { ShipModel, ShipModelType } from './stores/ship';
 
 import {
   onSnapshot,
@@ -19,28 +14,45 @@ import {
   destroy,
 } from 'mobx-state-tree';
 import { AuthShipType } from 'core/auth/store';
-
-export type ShipPreloadType = {
-  getApps: () => Promise<any>;
-  getDMs: () => Promise<any>;
-};
+import { DocketApi } from './api/docket';
+import { MetadataApi } from './api/metadata';
 
 export class ShipManager extends EventEmitter {
   ship: string = '';
   private conduit?: Urbit;
   private stateTree?: ShipModelType;
+  private metadataStore: { [key: string]: any } = {};
   private store?: Store<ShipModelType>;
   private hash?: string;
 
   constructor() {
     super();
-    this.getApps = this.getApps.bind(this);
     this.getDMs = this.getDMs.bind(this);
+    this.sendDm = this.sendDm.bind(this);
     this.onEffect = this.onEffect.bind(this);
+    this.getMetadata = this.getMetadata.bind(this);
+    this.getAppPreview = this.getAppPreview.bind(this);
     this.init = this.init.bind(this);
 
-    ipcMain.handle('ship:get-apps', this.getApps);
+    // ipcMain.handle('ship:get-apps', this.getApps);
     ipcMain.handle('ship:get-dms', this.getDMs);
+    ipcMain.handle('ship:send-dm', this.sendDm);
+    ipcMain.handle('ship:get-metadata', this.getMetadata);
+    ipcMain.handle('ship:accept-dm-request', this.acceptDm);
+    ipcMain.handle('ship:decline-dm-request', this.declineDm);
+    ipcMain.handle('ship:get-app-preview', this.getAppPreview);
+
+    // ship:remove-dm
+    // ship:accept-dm-request
+    // ship:reject-dm-request
+  }
+
+  private get credentials() {
+    // const path: string = `auth${ship}`;
+    return {
+      cookie: this.stateTree!.cookie!,
+      url: this.stateTree!.url!,
+    };
   }
 
   public getStorePath(patp: string) {
@@ -105,6 +117,7 @@ export class ShipManager extends EventEmitter {
       response: 'initial',
     };
     this.onEffect(syncEffect);
+
     try {
       conduit.subscribe({
         app: 'contact-store',
@@ -119,17 +132,19 @@ export class ShipManager extends EventEmitter {
       console.log('Subscription failed');
     }
 
-    // conduit.subscribe('metadata-store', '/app-name/groups', {
-    //   onEvent: this.onEffect,
-    // });
+    MetadataApi.syncGroupMetadata(this.conduit, this.metadataStore);
+    MetadataApi.syncGraphMetadata(this.conduit, this.metadataStore);
+
+    // register dm update handler
+    DmApi.updates(this.conduit, this.stateTree);
+    DmApi.graphUpdates(this.conduit, this.stateTree);
+
     // load initial dms
     this.getDMs().then((response) => {
-      this.stateTree?.chat.setDMs(
-        this.ship,
-        response['graph-update']['add-graph']['graph']
-      );
+      this.stateTree?.chat.setDMs(this.ship, response);
     });
-    this.getApps().then((apps) => {
+
+    DocketApi.getApps(this.conduit).then((apps) => {
       this.stateTree?.docket.setInitial(apps);
     });
   }
@@ -144,61 +159,91 @@ export class ShipManager extends EventEmitter {
     this.onEffect(syncEffect);
   }
 
-  async getApps() {
-    if (!this.conduit) {
-      return;
-    }
-    const response = await this.conduit.scry({
-      app: 'docket',
-      path: '/charges',
-    });
-    const appMap = response.initial;
-    Object.keys(appMap).forEach((appKey: string) => {
-      const appColor = appMap[appKey].color;
-      appMap[appKey].color = appColor && cleanNounColor(appColor);
-    });
-    return appMap;
-  }
   //
-  async getDMs() {
-    if (!this.conduit) {
-      return;
-    }
-    const response = await this.conduit.scry({
-      app: 'graph-store',
-      path: `/graph/${this.ship}/dm-inbox`,
-    });
-    return response;
-  }
 
   lock() {
     destroy(this.stateTree);
     // TODO verify data is encrypted on lock
   }
+
+  getMetadata = (_event: any, path: string) => {
+    return this.metadataStore[path];
+  };
+
+  getAppPreview = async (_event: any, ship: string, desk: string) => {
+    return await DocketApi.requestTreaty(
+      ship,
+      desk,
+      this.stateTree?.docket,
+      this.conduit!,
+      this.metadataStore
+    );
+  };
+
   // -------------------------------------------------------
-  // ----------------------- ACTIONS -----------------------
+  // --------------------- DM handlers ---------------------
   // -------------------------------------------------------
-  onAction(action: {
-    action: string;
-    resource: string;
-    context: { [resource: string]: string };
-    data: {
-      key: string;
-      value: any;
-    };
-  }) {
-    // this.store.set(
-    //   `${action.resource}.${action.context.ship}.${action.data.key}`,
-    //   action.data.value
-    // );
-    // const patchEffect = {
-    //   patch,
-    //   resource: 'ship',
-    //   key: this.ship,
-    //   response: 'patch',
-    // };
-    // this.onEffect();
-  }
+  getDMs = async () => {
+    if (!this.conduit) {
+      return;
+    }
+    return await DmApi.getDMs(this.stateTree?.patp!, this.conduit);
+  };
+  // getGroupDMs = async () => {
+  //   if (!this.conduit) {
+  //     return;
+  //   }
+  //   return await DmApi.getGroupDMs(this.stateTree?.patp!, this.conduit);
+  // };
+  acceptDm = async (_event: any, toShip: string) => {
+    const ourShip = this.stateTree?.patp!;
+    const credentials = this.credentials;
+    console.log('acceptingDM', toShip);
+    const response = await DmApi.acceptDm(ourShip, toShip, credentials);
+    return response;
+  };
+  declineDm = async (_event: any, toShip: string) => {
+    const ourShip = this.stateTree?.patp!;
+    const credentials = this.credentials;
+    console.log('acceptingDM', toShip);
+    const response = await DmApi.acceptDm(ourShip, toShip, credentials);
+    return response;
+  };
+  sendDm = async (_event: any, toShip: string, contents: any[]) => {
+    const ourShip = this.stateTree?.patp!;
+    const credentials = this.credentials;
+
+    const response = await DmApi.sendDM(ourShip, toShip, contents, credentials);
+    // console.log(response, contents);
+    return response;
+  };
+  removeDm = async (_event: any, toShip: string, removeIndex: any) => {
+    const ourShip = this.stateTree?.patp!;
+    const credentials = this.credentials;
+    console.log('removingDM', toShip, removeIndex);
+  };
+
+  // onAction(action: {
+  //   action: string;
+  //   resource: string;
+  //   context: { [resource: string]: string };
+  //   data: {
+  //     key: string;
+  //     value: any;
+  //   };
+  // }) {
+  //   // this.store.set(
+  //   //   `${action.resource}.${action.context.ship}.${action.data.key}`,
+  //   //   action.data.value
+  //   // );
+  //   // const patchEffect = {
+  //   //   patch,
+  //   //   resource: 'ship',
+  //   //   key: this.ship,
+  //   //   response: 'patch',
+  //   // };
+  //   // this.onEffect();
+  // }
   setTheme() {}
   storeNewShip(ship: AuthShipType): ShipModelType {
     const newShip = ShipModel.create({
@@ -241,11 +286,42 @@ export class ShipManager extends EventEmitter {
     getApps: () => {
       return ipcRenderer.invoke('ship:get-apps');
     },
+    getAppPreview: (ship: string, desk: string) => {
+      return ipcRenderer.invoke('ship:get-app-preview', ship, desk);
+    },
     getDMs: () => {
       return ipcRenderer.invoke('ship:get-dms');
     },
-
-    // getApps: (callback: any) => ipcRenderer.on('get-apps', callback),
-    // getDMs: (callback: any) => ipcRenderer.on('get-dms', callback),
+    getMetadata: (path: string) => {
+      return ipcRenderer.invoke('ship:get-metadata', path);
+    },
+    acceptDm: (toShip: string) => {
+      return ipcRenderer.invoke('ship:accept-dm-request', toShip);
+    },
+    declineDm: (toShip: string) => {
+      return ipcRenderer.invoke('ship:decline-dm-request', toShip);
+    },
+    setScreen: (screen: boolean) => {
+      return ipcRenderer.invoke('ship:set-dm-screen', screen);
+    },
+    sendDm: (toShip: string, content: any) => {
+      return ipcRenderer.invoke('ship:send-dm', toShip, content);
+    },
+    removeDm: (ship: string, index: any) => {
+      return ipcRenderer.invoke('ship:remove-dm', ship, index);
+    },
   };
 }
+
+export type ShipPreloadType = {
+  getApps: () => Promise<any>;
+  getAppPreview: (ship: string, desk: string) => Promise<any>;
+  // Direct message controls
+  getDMs: () => Promise<any>;
+  getMetadata: (path: string) => any;
+  acceptDm: (ship: string) => Promise<any>;
+  declineDm: (ship: string) => Promise<any>;
+  setScreen: (screen: boolean) => Promise<any>;
+  sendDm: (toShip: string, content: any[]) => Promise<any>;
+  removeDm: (ship: string, index: any) => Promise<any>;
+};

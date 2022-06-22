@@ -552,7 +552,7 @@ export class Urbit extends EventEmitter {
    * @returns The scry result
    */
   async scry<T = any>(params: Scry): Promise<T> {
-    const { app, path } = params;
+    const { app, path, dotJson } = params;
     // const response = await axios.request({
     //   url: `${this.url}/~/scry/${app}${path}.json`,
     //   headers: this.headers,

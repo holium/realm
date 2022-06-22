@@ -23,7 +23,6 @@ export const SelectedLine = styled(motion.div)`
 `;
 
 export const ShipSelector: FC = observer(() => {
-  // TODO optimize
   const { authStore } = useAuth();
 
   const selectedShip = useMemo(

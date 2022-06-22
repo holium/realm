@@ -29,14 +29,10 @@ export const ShipModel = types
   .actions((self) => ({
     setDMs: (ship: string, dmGraph: any) => {
       const strippedShip = ship.substring(1);
-      // console.log(response);
-      // const dmGraph = response['graph-update']['add-graph']['graph'];
-      // console.log(dmGraph);
       const dmMap = new Map<string, ChatType>();
       Object.values(dmGraph).forEach((chat: any) => {
         let lastSent = 0;
         const dmContacts: string[] = [];
-        // const dm
         const messages: ChatMessageType[] = [];
         Object.values(chat.children).forEach(({ post }: any) => {
           if (!post.author) {

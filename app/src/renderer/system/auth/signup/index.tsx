@@ -139,6 +139,7 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
               next={() => next()}
             />
           )}
+
           {step === 1 && <ConnectingShip next={() => next()} />}
           {step === 2 && <ProfileSetup next={() => next()} />}
           {step === 3 && <StepPassword next={() => next()} />}

@@ -2,7 +2,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { WindowModelType } from 'renderer/logic/desktop/store';
 import { nativeApps } from 'renderer/apps';
-import { useMst } from 'renderer/logic/store';
+import { useMst, useShip } from 'renderer/logic/store';
 
 export interface WebviewProps {
   window: WindowModelType | any;
@@ -14,6 +14,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>``;
 
 export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   const { window, isResizing } = props;
+  const { ship } = useShip();
   const { desktopStore, themeStore } = useMst();
   const webViewRef = useRef<any>(null);
   const elementRef = useRef(null);
@@ -44,6 +45,14 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
       webview!.closeDevTools();
     });
   }, []);
+
+  // Sync ship model info into app window
+  useEffect(() => {
+    webViewRef.current?.addEventListener('dom-ready', () => {
+      webViewRef.current?.send('load-ship', JSON.stringify(ship));
+      webViewRef.current?.send('load-window-id', window.id);
+    });
+  }, [ship, window.id]);
 
   return (
     <View

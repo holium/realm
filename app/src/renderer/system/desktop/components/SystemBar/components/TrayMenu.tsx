@@ -14,6 +14,7 @@ export type TrayMenuProps = {
   style?: any;
   content?: React.ReactNode | string;
   children: React.ReactNode;
+  defaultIsVisible?: boolean;
   buttonOffset?: {
     x?: number;
     y?: number;
@@ -49,6 +50,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
   const {
     id,
     appRef,
+    defaultIsVisible,
     buttonRef,
     buttonOffset,
     style,
@@ -62,7 +64,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
     left: number;
     bottom: number;
   }>({ left: 0, bottom: 48 });
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(defaultIsVisible);
 
   const anchorOffset = { x: 8, y: 26, ...buttonOffset };
   let body = content;
@@ -202,4 +204,5 @@ export const TrayMenu = (props: TrayMenuProps) => {
 
 TrayMenu.defaultProps = {
   position: 'top-left',
+  defaultIsVisible: false,
 };

@@ -170,7 +170,7 @@ export class RealmCore {
     console.log('core: ', action);
     switch (action.resource) {
       case 'ship.manager':
-        this.shipManager.onAction(action);
+        // this.shipManager.onAction(action);
         break;
       case 'auth.manager':
         this.authManager.onAction(action);

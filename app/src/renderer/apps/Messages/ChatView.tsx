@@ -1,37 +1,101 @@
-import { createRef, FC, useEffect, useState } from 'react';
+import {
+  createRef,
+  FC,
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
 import { toJS } from 'mobx';
 import { lighten, rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
 import ScrollView from 'react-inverted-scrollview';
+
 import { useMst, useShip } from 'renderer/logic/store';
-import { Flex, IconButton, Icons, Input } from 'renderer/components';
+import {
+  Flex,
+  IconButton,
+  Icons,
+  Input,
+  Sigil,
+  Text,
+  Grid,
+  Box,
+} from 'renderer/components';
 import { WindowThemeType } from 'renderer/logic/stores/config';
 import { MessageType, ChatMessage } from './components/ChatMessage';
+import { createDmForm } from './forms/chatForm';
+import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import styled from 'styled-components';
+import { ChatInput } from './components/ChatInput';
 
 type IProps = {
   theme: WindowThemeType;
   height: number;
-  contact: string;
+  selectedChat: any;
   headerOffset: number;
   dimensions: {
     height: number;
     width: number;
   };
   onSend: (message: any) => void;
+  setSelectedChat: (chat: any) => void;
 };
 
 export const ChatView: FC<IProps> = observer((props: IProps) => {
+  const submitRef = useRef(null);
+  const chatInputRef = useRef(null);
   let scrollView = createRef();
-  const { dimensions, contact, height, theme, headerOffset, onSend } = props;
-  const { backgroundColor, windowColor, iconColor, dockColor } = props.theme;
-
+  const attachmentRef = useRef(null);
+  const {
+    dimensions,
+    selectedChat,
+    setSelectedChat,
+    height,
+    theme,
+    headerOffset,
+    onSend,
+  } = props;
+  const { backgroundColor, iconColor, dockColor, textTheme, textColor } =
+    props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
-
+  const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
   const { ship } = useShip();
+  const chatData = ship?.chat.dms.get(selectedChat.contact)!;
+  const windowColor = useMemo(
+    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
+    [props.theme.windowColor]
+  );
 
-  useEffect(() => {
-    // shipStore.session?.chat.getDMs();
-  }, []);
+  const [rows, setRows] = useState(1);
+
+  const submitDm = (event: any) => {
+    if (event.keyCode === 13 && !event.shiftKey) {
+      event.preventDefault();
+      if (dmForm.computed.isValid) {
+        // @ts-ignore 2
+        submitRef.current.focus();
+        // @ts-ignore
+        submitRef.current.click();
+        const formData = dmForm.actions.submit();
+        if (formData) console.log(formData);
+        const dmMessageContent = formData['dm-message'];
+        // console.log(dmMessage);
+        chatData.sendDm(dmMessageContent).then((response: any) => {
+          console.log('end of promise ', response);
+        });
+        // @ts-ignore
+        chatInputRef.current.value = '';
+      }
+    } else if (event.keyCode === 13 && event.shiftKey) {
+      // @ts-ignore
+      // chatInputRef.current.rows = chatInputRef.current.rows + 1;
+    }
+    // else {
+
+    // }
+  };
 
   const handleScroll = ({
     scrollTop,
@@ -49,107 +113,205 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   };
   const scrollToBottom = () => {
     if (!scrollView) return;
-    // @ts-expect-error i know
-    scrollView.scrollToBottom();
+    // @ts-expect-error
+    scrollView.current.scrollToBottom();
   };
-  const inputHeight = 58;
 
-  const chatLog = ship!.chat.dms.get(contact)!;
+  useEffect(() => {
+    // scrollView.current?.scrollToBottom();
+  }, [scrollView.current]);
+
+  const inputHeight = 58;
   return (
-    <Flex
-      gap={2}
-      mb={2}
-      height={height}
-      position="relative"
-      overflowY="scroll"
-      alignContent="center"
+    <Grid.Column
+      style={{ position: 'relative', color: textColor }}
+      expand
+      noGutter
+      overflowY="hidden"
     >
-      <ScrollView
-        width={dimensions.width}
-        height={dimensions.height}
-        ref={scrollView}
-        onScroll={handleScroll}
-      >
-        <Flex style={{ minHeight: headerOffset }} />
-        {chatLog.list.map((message: MessageType, index: number) => (
-          <ChatMessage
-            key={`${message.timeSent}-${message.author}-${message.type}-${index}`}
-            theme={theme}
-            our={ship!.patp}
-            ourColor={ship!.color || '#569BE2'}
-            message={message}
-          />
-        ))}
-        <Flex style={{ minHeight: inputHeight }} />
-      </ScrollView>
-      {showJumpBtn && (
-        <Flex position="absolute" bottom={inputHeight + 4} right={12}>
-          {/* TODO make a circle bg for this */}
-          <IconButton
-            color={iconColor}
-            customBg={dockColor}
-            style={{ borderRadius: 14, cursor: 'none' }}
-            size={28}
-          >
-            <Icons name="ArrowDown" />
-          </IconButton>
-        </Flex>
-      )}
-      <Flex
-        position="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-        style={{
-          background: rgba(lighten(0.225, windowColor!), 0.9),
-          backdropFilter: 'blur(8px)',
-          borderTop: `1px solid ${rgba(windowColor!, 0.7)}`,
-          minHeight: inputHeight,
+      <Titlebar
+        hasBlur
+        closeButton={false}
+        hasBorder
+        zIndex={5}
+        theme={{
+          ...props.theme,
+          windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.8),
         }}
       >
-        <Flex flex={1} pl={2} pr={2} mb={1} alignItems="center">
+        <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
           <IconButton
+            className="realm-cursor-hover"
+            size={26}
             style={{ cursor: 'none' }}
-            color={iconColor}
             customBg={dockColor}
-            ml={2}
-            mr={2}
-            size={28}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              scrollToBottom();
+              setSelectedChat(null);
             }}
           >
-            <Icons name="Attachment" />
-          </IconButton>
-          <Flex flex={1}>
-            <Input
-              className="realm-cursor-text-cursor"
-              height={32}
-              placeholder="Write a message"
-              wrapperStyle={{
-                borderRadius: 18,
-                backgroundColor: rgba(backgroundColor, 0.2),
-                '&:hover': {
-                  borderColor: backgroundColor,
-                },
-                borderColor: rgba(backgroundColor, 0.7),
-              }}
-            />
-          </Flex>
-          <IconButton
-            style={{ cursor: 'none' }}
-            color={iconColor}
-            customBg={dockColor}
-            ml={2}
-            mr={2}
-            size={28}
-          >
-            <Icons name="Emoji" />
+            <Icons name="ArrowLeftLine" />
           </IconButton>
         </Flex>
+        <Flex flex={1} gap={10} alignItems="center" flexDirection="row">
+          <Box>
+            <Sigil
+              simple
+              size={28}
+              avatar={selectedChat.avatar}
+              patp={selectedChat.contact}
+              color={[selectedChat.sigilColor || '#000000', 'white']}
+            />
+          </Box>
+          <Text fontSize={3} fontWeight={500}>
+            {selectedChat.contact}
+          </Text>
+        </Flex>
+        <Flex pl={2} pr={2}>
+          <IconButton
+            className="realm-cursor-hover"
+            customBg={dockColor}
+            style={{ cursor: 'none' }}
+            size={26}
+            onClick={(evt: any) => {
+              console.log('initiate call');
+            }}
+          >
+            <Icons name="Phone" />
+          </IconButton>
+        </Flex>
+      </Titlebar>
+      <Flex
+        style={{
+          zIndex: 4,
+          position: 'relative',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backfaceVisibility: 'hidden',
+          backgroundColor: props.theme.windowColor,
+          transform: 'translate3d(0, 0, 0)',
+        }}
+        overflowY="hidden"
+      >
+        <Flex
+          gap={2}
+          mb={2}
+          height={height}
+          position="relative"
+          overflowY="scroll"
+          alignContent="center"
+        >
+          <ScrollView
+            width={dimensions.width}
+            height={dimensions.height}
+            ref={scrollView}
+            onScroll={handleScroll}
+          >
+            <Flex style={{ minHeight: headerOffset }} />
+            {chatData.list.map((message: MessageType, index: number) => (
+              <ChatMessage
+                key={`${message.index}-${message.timeSent}-${index}`}
+                theme={theme}
+                our={ship!.patp}
+                ourColor={ship!.color || '#569BE2'}
+                message={message}
+              />
+            ))}
+            <Flex style={{ minHeight: inputHeight }} />
+          </ScrollView>
+          {showJumpBtn && (
+            <Flex position="absolute" bottom={inputHeight + 4} right={12}>
+              {/* TODO make a circle bg for this */}
+              <IconButton
+                color={iconColor}
+                customBg={dockColor}
+                style={{
+                  borderRadius: 14,
+                  cursor: 'none',
+                  backdropFilter: 'blur(4px)',
+                }}
+                size={28}
+                onClick={scrollToBottom}
+              >
+                <Icons name="ArrowDown" />
+              </IconButton>
+            </Flex>
+          )}
+          <Flex
+            position="absolute"
+            bottom={0}
+            left={0}
+            right={0}
+            style={{
+              background: windowColor,
+              backdropFilter: 'blur(8px)',
+              borderTop: `1px solid ${rgba(darken(0.15, windowColor), 0.9)}`,
+              minHeight: inputHeight,
+            }}
+          >
+            <Flex flex={1} pr={3} alignItems="center">
+              <IconButton
+                style={{ cursor: 'none' }}
+                color={iconColor}
+                customBg={dockColor}
+                ml={3}
+                mr={3}
+                size={28}
+                onClick={(evt: any) => {
+                  evt.stopPropagation();
+                  // TODO add file uploading
+                  // scrollToBottom();
+                }}
+              >
+                <Icons name="Attachment" />
+              </IconButton>
+              {/* <ChatInput /> */}
+
+              <Input
+                as="textarea"
+                ref={chatInputRef}
+                tabIndex={1}
+                rows={rows}
+                name="dm-message"
+                className="realm-cursor-text-cursor"
+                // height={34}
+                width={300}
+                placeholder="Write a message"
+                rightInteractive
+                onKeyDown={submitDm}
+                rightIcon={
+                  <Flex justifyContent="center" alignItems="center">
+                    <IconButton
+                      ref={submitRef}
+                      luminosity={textTheme}
+                      size={24}
+                      canFocus
+                      onKeyDown={submitDm}
+                    >
+                      <Icons opacity={0.5} name="ArrowRightLine" />
+                    </IconButton>
+                  </Flex>
+                }
+                onChange={(e: any) =>
+                  dmMessage.actions.onChange(e.target.value)
+                }
+                onFocus={() => dmMessage.actions.onFocus()}
+                onBlur={() => dmMessage.actions.onBlur()}
+                wrapperStyle={{
+                  height: 'max-content',
+                  borderRadius: 12,
+                  backgroundColor: darken(0.05, windowColor),
+                  '&:hover': {
+                    borderColor: backgroundColor,
+                  },
+                  borderColor: rgba(backgroundColor, 0.7),
+                }}
+              />
+            </Flex>
+          </Flex>
+        </Flex>
       </Flex>
-      {/* {chatLog} */}
-    </Flex>
+    </Grid.Column>
   );
 });

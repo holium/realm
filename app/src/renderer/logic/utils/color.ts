@@ -66,3 +66,7 @@ export function hexToRgb(hex: string) {
       }
     : null;
 }
+
+export function rgbToString(rgb: { r: number; g: number; b: number } | null) {
+  return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : rgb;
+}

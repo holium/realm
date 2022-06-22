@@ -1,36 +1,61 @@
+import { Urbit } from './../../urbit/api';
 import { cleanNounColor } from '../../../renderer/logic/utils/color';
-import { Conduit } from '../../conduit';
+import { ShipModelType } from '../stores/ship';
 
 export const DocketApi = {
-  getShipApps: async (
-    ship: string,
-    credentials: { url: string; cookie: string }
-  ) => {
-    try {
-      const response = await Conduit.scryFetch(
-        credentials.url,
-        credentials.cookie,
-        'docket',
-        `/charges`
-      );
-      const apps = response.json?.data['charge-update']?.initial;
-      console.log(apps);
-      Object.values(apps).map((app: any) => {
-        return {
-          ...app,
-          color: app.color && cleanNounColor(app.color),
-        };
-      });
-      return apps;
-    } catch (err: any) {
-      console.log(err);
-    }
+  getApps: async (conduit: Urbit) => {
+    const response = await conduit.scry({
+      app: 'docket',
+      path: '/charges',
+    });
+    const appMap = response.initial;
+    Object.keys(appMap).forEach((appKey: string) => {
+      const appColor = appMap[appKey].color;
+      appMap[appKey].color = appColor && cleanNounColor(appColor);
+    });
+    return appMap;
   },
-  // saveContact: async (
-  //   ship: string,
-  //   credentials: { url: string; cookie: string },
-  //   data: any
-  // ) => {
-  //   console.log('poking ship', ship, data);
-  // },
+  requestTreaty: async (
+    ship: string,
+    desk: string,
+    stateTree: any,
+    conduit: Urbit,
+    metadataStore: any
+  ) => {
+    const { apps } = stateTree;
+
+    const key = `${ship}/${desk}`;
+    if (key in apps) {
+      return apps[key];
+    }
+    return new Promise((resolve, reject) => {
+      conduit.subscribe({
+        app: 'treaty',
+        path: `/treaty/${key}`,
+        event: (data: any) => {
+          resolve(data);
+          metadataStore[key] = data;
+        },
+        err: () => {
+          reject('Subscription rejected');
+        },
+        quit: () => console.log('Kicked from subscription'),
+      });
+    });
+    // conduit.subscribe({
+    //   app: 'treaty',
+    //   path: `/treaty/${key}`,
+    //   event: (data: any) => {
+    //     // stateTree.
+    //     Object.assign(metadataStore, data['metadata-update'].associations); //.data['metadata-update'].associations;
+    //   },
+    //   err: () => console.log('Subscription rejected'),
+    //   quit: () => console.log('Kicked from subscription'),
+    // });
+    // const treaty = { ...normalizeDocket(result, desk), ship };
+    // set((state) => ({
+    //   treaties: { ...state.treaties, [key]: treaty },
+    // }));
+    // return treaty;
+  },
 };

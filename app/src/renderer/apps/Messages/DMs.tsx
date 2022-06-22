@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -15,19 +15,24 @@ import { useShip } from 'renderer/logic/store';
 import { toJS } from 'mobx';
 import { WindowThemeType } from 'renderer/logic/stores/config';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
-import { lighten, rgba } from 'polished';
+import { darken, lighten, rgba } from 'polished';
 
 type IProps = {
   theme: WindowThemeType;
   headerOffset: number;
   height: number;
   onSelectDm: (dm: any) => void;
+  onNewChat: (evt: any) => void;
 };
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
-  const { height, headerOffset, theme, onSelectDm } = props;
+  const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { ship } = useShip();
   const { backgroundColor, textColor, iconColor, dockColor } = theme;
+  const windowColor = useMemo(
+    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
+    [props.theme.windowColor]
+  );
 
   const chat = ship!.chat;
   return (
@@ -38,11 +43,12 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       overflowY="hidden"
     >
       <Titlebar
+        hasBlur
         hasBorder
         zIndex={5}
         theme={{
           ...props.theme,
-          windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.8),
+          windowColor,
         }}
       >
         <Flex pl={3} pr={4} mr={2} justifyContent="center" alignItems="center">
@@ -62,8 +68,8 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             placeholder="Search"
             wrapperStyle={{
               cursor: 'none',
-              borderRadius: 18,
-              backgroundColor: rgba(backgroundColor, 0.2),
+              borderRadius: 9,
+              backgroundColor: darken(0.05, windowColor),
               '&:hover': {
                 borderColor: backgroundColor,
               },
@@ -71,12 +77,13 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             }}
           />
         </Flex>
-        <Flex ml={2} mr={2} pl={2} pr={2}>
+        <Flex ml={1} pl={2} pr={2}>
           <IconButton
             customBg={dockColor}
             className="realm-cursor-hover"
             size={28}
             color={iconColor}
+            onClick={onNewChat}
           >
             <Icons name="Plus" />
           </IconButton>
@@ -89,6 +96,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           bottom: 0,
           left: 0,
           right: 0,
+          backgroundColor: windowColor,
         }}
         mb={headerOffset}
         overflowY="hidden"
@@ -97,6 +105,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           gap={2}
           mt={1}
           mb={3}
+          pb={4}
           noGutter
           expand
           height={height}

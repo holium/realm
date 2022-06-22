@@ -53,8 +53,6 @@ export const ShipStatusModel = types
 
 export type LoaderModelType = Instance<typeof LoaderModel>;
 
-type BaseShipModelType = typeof BaseShipModel;
-
 export const ShipModel = BaseShipModel.named('ShipModel')
   .views((self) => ({
     get isLoaded() {
@@ -74,6 +72,7 @@ export const ShipModel = BaseShipModel.named('ShipModel')
   }));
 
 export type ShipModelType = Instance<typeof ShipModel>;
+
 export const ShipStore = types
   .model('ShipStore', {
     ship: types.maybe(ShipModel),

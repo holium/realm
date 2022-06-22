@@ -10,10 +10,6 @@ export const ContactApi = {
     const { url, cookie } = credentials;
     try {
       const conduit = new Urbit(url, ship, cookie);
-      // conduit.open();
-      // conduit.on('ready', () => {
-      //   console.log('after open');
-      // });
 
       const response = await conduit.scry({
         app: 'contact-store',
@@ -22,7 +18,7 @@ export const ContactApi = {
       conduit.delete();
 
       const contact = response['contact-update']?.add.contact;
-      // color: newContact.color && cleanNounColor(newContact.color),
+
       return {
         ...contact,
         color: contact.color && cleanNounColor(contact.color),
@@ -43,7 +39,6 @@ export const ContactApi = {
       color: removeHash(data.color),
       avatar: data.avatar || '',
     };
-    console.log(preparedData, data.color);
     const conduit = new Urbit(url, ship, cookie);
     conduit.open();
     const editJson = Object.keys(preparedData).map((updateKey: string) => ({
@@ -78,7 +73,6 @@ export const ContactApi = {
           })
       )
     );
-    console.log(res1, res2);
     conduit.delete();
     return {
       nickname: preparedData.nickname,

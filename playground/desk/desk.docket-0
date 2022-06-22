@@ -1,0 +1,9 @@
+:~  title+'Playground'
+    info+'A simple app that can be used to test various feature injection through an Urbit AppWindow.'
+    color+0x2e.4347
+    glob-http+['https://bootstrap.urbit.org/glob-0v5.hurm4.ejod5.ngg9h.iub9i.n1j7o.glob' 0v5.hurm4.ejod5.ngg9h.iub9i.n1j7o]
+    base+'playground'
+    version+[0 0 1]
+    website+'https://github.com/holium/realm/playground'
+    license+'MIT'
+==

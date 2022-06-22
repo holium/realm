@@ -110,7 +110,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
         transform: translateZ(0);
         transition: ${(props: IProps) => props.theme.transitionFast};
         background-color: ${props.customBg
-          ? rgba(lighten(0.1, props.customBg), 0.3)
+          ? rgba(darken(0.1, props.customBg), 0.3)
           : 'inherit'};
       }
     `}

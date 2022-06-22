@@ -26,6 +26,7 @@ const inputTokens = {
 };
 
 type BaseInputProps = {
+  as?: 'input' | 'textarea';
   /** Icon or ‘Interactive Icon’ adornment to apply to the left of the content area */
   leftIcon?: JSX.Element;
   leftInteractive?: boolean;
@@ -47,7 +48,7 @@ export type InputProps = StyledComponentProps<
   never
 >;
 
-const InputWrapper = styled(Flex)`
+export const InputWrapper = styled(Flex)`
   /* display: block; */
   width: 100%;
   pointer-events: none;
@@ -59,7 +60,9 @@ const InputWrapper = styled(Flex)`
         ? props.theme.colors.ui.intent.alert
         : props.theme.colors.ui.input.borderColor};
   border-radius: ${(props) => props.theme.input.borderRadius}px;
-
+  textarea {
+    resize: none;
+  }
   &:hover {
     transition: ${(props) => props.theme.transition};
     border-color: ${(props) => props.theme.colors.ui.input.borderHover};
@@ -233,11 +236,16 @@ const RightIcon: any = styled(Box)<
   }
 `;
 
-export type FullProps = InputProps & { wrapperRef?: any; wrapperStyle?: any };
+export type FullProps = InputProps & {
+  wrapperRef?: any;
+  wrapperStyle?: any;
+  rows?: any;
+};
 
 export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
   (props: FullProps, ref) => {
     const {
+      as,
       leftIcon,
       leftInteractive,
       rightIcon,
@@ -285,7 +293,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
           </LeftIcon>
         )}
         <ContentArea
-          as="input"
+          as={as}
           variant={variant}
           ref={ref}
           hasLeftIcon={leftIcon}
@@ -316,4 +324,5 @@ Input.defaultProps = {
   rightInteractive: false,
   type: 'text',
   variant: 'body',
+  as: 'input',
 };
