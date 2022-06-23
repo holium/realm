@@ -50,7 +50,7 @@ export const spaces: { [key: string]: any } = {
       textColor: '#2a2927',
       textTheme: 'light',
       wallpaper:
-        'https://unsplash.com/photos/nqSeto6vWfU/download?ixid=MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjUzMTQ3NTM3',
+        'https://images.unsplash.com/photo-1621290102989-e9865bef2dcf?ixlib=rb-1.2.1&q=30&fm=jpg&crop=entropy&cs=tinysrgb',
       windowColor: '#f5f5f4',
     },
     apps: {

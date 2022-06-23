@@ -89,7 +89,6 @@ window.electron.core.onEffect((_event: any, value: any) => {
   }
   if (value.response === 'patch') {
     if (value.resource === 'ship') {
-      // console.log(value);
       shipState.ship?.syncPatches(value);
     }
     if (value.resource === 'auth') {

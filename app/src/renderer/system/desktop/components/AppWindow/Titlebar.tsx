@@ -41,7 +41,7 @@ export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
     background: ${props.customBg};
     z-index: ${props.zIndex};
     border-bottom: ${props.hasBorder
-      ? `1px solid ${rgba(darken(0.06, props.customBg), 0.9)}`
+      ? `1px solid ${rgba(darken(0.15, props.customBg), 0.9)}`
       : 'none'};
   `}
 `;

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useMemo } from 'react';
 import { lighten } from 'polished';
 import { Flex, Text } from 'renderer/components';
 import { WindowThemeType } from 'renderer/logic/stores/config';
@@ -7,11 +7,12 @@ import { Message } from './Message';
 import { displayDate } from 'renderer/logic/utils/time';
 
 export type MessageType = {
+  index?: string;
   author: string;
-  content: any;
+  contents: any[];
   position: 'right' | 'left';
   timeSent: number;
-  type: 'text' | 'url' | 'mention' | 'code' | 'reference' | string;
+  // type: 'text' | 'url' | 'mention' | 'code' | 'reference' | string;
 };
 
 type IProps = {
@@ -25,6 +26,27 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
   const { theme, our, ourColor, message } = props;
   const primaryBubble = our === `~${message.author}`;
   const color = primaryBubble ? 'white' : undefined;
+
+  //
+  // Conditional to remove empty text blocks
+  //
+  if (
+    message.contents.length === 1 &&
+    'text' in message.contents[0] &&
+    message.contents[0].text === ''
+  ) {
+    return <div></div>;
+  }
+
+  const messageTypes = useMemo(
+    () =>
+      message.contents.map((content: any) => {
+        return Object.keys(content)[0];
+      }),
+    [message.index]
+  );
+
+  const isMention = messageTypes.includes('mention');
   return (
     <Flex
       justifyContent={primaryBubble ? 'flex-end' : 'flex-start'}
@@ -36,7 +58,31 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
         primary={primaryBubble}
         customBg={primaryBubble ? ourColor : lighten(0.1, theme!.windowColor)}
       >
-        <Message type={message.type} color={color} content={message.content} />
+        <Flex
+          flexDirection={isMention ? 'row' : 'column'}
+          gap={isMention ? 1 : 4}
+          style={{
+            flexFlow: isMention ? 'wrap' : 'column',
+          }}
+        >
+          {message.contents.map(
+            (content: { [type: string]: any }, index: number) => {
+              const type = Object.keys(content)[0];
+              if (content[type] === '') {
+                return;
+              }
+              return (
+                <Message
+                  key={`${index}-message-${index}`}
+                  type={type}
+                  color={color}
+                  content={content}
+                />
+              );
+            }
+          )}
+        </Flex>
+
         {/* TODO detect if time is today, yesterday or full */}
         <Text mt={2} color={color} textAlign="right" fontSize={1} opacity={0.4}>
           {displayDate(message.timeSent)}

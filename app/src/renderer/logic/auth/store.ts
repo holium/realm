@@ -100,6 +100,7 @@ export const SignupStore = types
       code: string;
     }) {
       self.loader.set('loading');
+      console.log(payload);
       try {
         const [response, error] = yield AuthIPC.addShip(
           payload.ship,

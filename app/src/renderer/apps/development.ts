@@ -15,4 +15,16 @@ export const devApps: {
       development: true,
     },
   },
+  'playground-dev': {
+    id: 'playground-dev',
+    title: 'Playground - Dev',
+    type: 'web',
+    color: '#000000',
+    icon: '',
+    web: {
+      openFullscreen: true,
+      url: 'http://localhost:3010/apps/playground/',
+      development: true,
+    },
+  },
 };

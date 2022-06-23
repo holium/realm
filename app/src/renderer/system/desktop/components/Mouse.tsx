@@ -1,9 +1,10 @@
-import { FC } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import AnimatedCursor from './Cursor';
-import { hexToRgb } from 'renderer/logic/utils/color';
+import AnimatedCursor, { CurrentUserCursor, Vec2 } from './Cursor';
+import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
 import { useMemo } from 'react';
+import { Presences } from './Presences';
 
 export const MouseArea = styled(motion.div)`
   cursor: none;
@@ -16,24 +17,13 @@ interface MouseProps {
 
 export const Mouse: FC<MouseProps> = (props: MouseProps) => {
   const { animateOut, cursorColor, hide } = props;
-  const rgb: any = cursorColor && hexToRgb(cursorColor);
+  const rgb = cursorColor && rgbToString(hexToRgb(cursorColor));
   return useMemo(
     () => (
       <MouseArea
         animate={{ zIndex: 11000, display: hide ? 'none' : 'inherit' }}
       >
-        <AnimatedCursor
-          animateOut={animateOut}
-          innerSize={10}
-          outerSize={12}
-          trailingSpeed={1}
-          color={
-            (cursorColor && `${rgb.r}, ${rgb.g}, ${rgb.b}`) || '193, 11, 111'
-          }
-          outerAlpha={0.2}
-          innerScale={0.9}
-          outerScale={2}
-        />
+        <CurrentUserCursor animateOut={animateOut} color={rgb || undefined} />
       </MouseArea>
     ),
     [hide, cursorColor]
@@ -41,3 +31,4 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
 };
 
 export default Mouse;
+export { Presences };
