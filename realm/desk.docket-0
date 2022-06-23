@@ -4,7 +4,7 @@
     image+'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg'
     glob-http+['https://lomder-librun.sfo3.digitaloceanspaces.com/globs/glob-0v28ktr.ujaup.832r3.fbs8q.b9ssn.glob' 0v28ktr.ujaup.832r3.fbs8q.b9ssn]
     base+'realm'
-    version+[0 0 1]
+    version+[0 1 0]
     website+'https://holium.com'
     license+'MIT'
 ==
