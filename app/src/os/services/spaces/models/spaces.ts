@@ -83,7 +83,6 @@ export const SpacesStore = types
   }))
   .actions((self) => ({
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
-      // Apply persisted snapshot
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
     },
@@ -94,17 +93,12 @@ export const SpacesStore = types
       self.our = ourSpace;
       if (!self.selected) self.selected = ourSpace;
     },
-    selectSpace(spaceKey: string) {
-      self.selected = self.spaces.get(spaceKey)!;
-      // osState.theme.setCurrentSpaceTheme(spaceKey);
-      // if (
-      //   self.selected.theme.wallpaper !== osState.theme.theme.wallpaper
-      // ) {
-      //   console.log(self.selected.theme.wallpaper);
-      //   osState.theme.setWallpaper(self.selected.theme.wallpaper, {
-      //     spaceId: spaceKey,
-      //   });
-      // }
+    selectSpace(spacePath: string) {
+      if (spacePath === self.our!.path) {
+        self.selected = self.our;
+      } else {
+        self.selected = self.spaces.get(spacePath)!;
+      }
     },
   }));
 

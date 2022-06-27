@@ -17,6 +17,7 @@ import { cleanPath, fromPathString } from './lib/action';
 import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
+import { DesktopService } from './services/shell/desktop.service';
 
 export interface ISession {
   ship: string;
@@ -162,6 +163,7 @@ export class Realm extends EventEmitter {
     signup: SignupService.preload,
     ship: ShipService.preload,
     spaces: SpacesService.preload,
+    shell: DesktopService.preload,
   };
 }
 
@@ -181,6 +183,7 @@ export type OSPreloadType = {
   signup: typeof SignupService.preload;
   ship: typeof ShipService.preload;
   spaces: typeof SpacesService.preload;
+  shell: typeof DesktopService.preload;
   // ship: {
   //   getContacts: () => any;
   //   getMetadata: (path: string) => any;

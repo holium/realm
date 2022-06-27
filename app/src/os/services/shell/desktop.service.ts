@@ -14,11 +14,13 @@ import { DesktopStoreType, DesktopStore } from './desktop.model';
 /**
  * DesktopService
  */
-export class SpacesService extends BaseService {
+export class DesktopService extends BaseService {
   private db: Store<DesktopStoreType>; // for persistance
   private state?: DesktopStoreType; // for state management
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
+    'realm.desktop.set-active': this.setActive,
+    'realm.desktop.open-app-window': this.openAppWindow,
   };
 
   static preload = {
@@ -28,6 +30,12 @@ export class SpacesService extends BaseService {
         spaceId,
         wallpaper
       );
+    },
+    setActive: (spaceId: string, appId: string) => {
+      return ipcRenderer.invoke('realm.desktop.set-active', spaceId, appId);
+    },
+    openAppWindow: (spaceId: string, app: any) => {
+      return ipcRenderer.invoke('realm.desktop.open-app-window', spaceId, app);
     },
   };
 
@@ -67,5 +75,12 @@ export class SpacesService extends BaseService {
 
   changeWallpaper(_event: any, spaceId: string, wallpaper: string) {
     this.state?.setWallpaper(wallpaper);
+  }
+
+  setActive(spaceId: string, appId: string) {
+    // this.state?.activeWindow =
+  }
+  openAppWindow(spaceId: string, selectedApp: any) {
+    // this.state?.activeWindow =
   }
 }

@@ -23,7 +23,7 @@ export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
     padding: 8px;
     box-shadow: ${props.theme.elevations.one};
     box-sizing: border-box;
-    border-radius: 12px;
+    border-radius: 9px;
     color: ${props.theme.colors.text.primary};
     &:hover {
       transition: ${props.theme.transition};

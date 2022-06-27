@@ -11,4 +11,7 @@ export const SpacesApi = {
   setPinnedOrder: async (newOrder: any[]) => {
     return await window.electron.os.spaces.setPinnedOrder(newOrder);
   },
+  selectSpace: async (path: string) => {
+    return await window.electron.os.spaces.selectSpace(path);
+  },
 };

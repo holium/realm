@@ -1,40 +1,19 @@
 export function openAppWindow(app: any, partition: string) {
-  try {
-    const response = window.electron.app.openApp(app, partition);
-    return [response, null];
-  } catch (err) {
-    return [null, err];
-  }
+  return window.electron.app.openApp(app, partition);
 }
-
+export function setActive(spacePath: string, app: any) {
+  return window.electron.os.shell.setActive(spacePath, app);
+}
 export function setPartitionCookies(partition: string, cookies: any) {
-  try {
-    const response = window.electron.app.setPartitionCookies(
-      partition,
-      cookies
-    );
-    return [response, null];
-  } catch (err) {
-    return [null, err];
-  }
+  return window.electron.app.setPartitionCookies(partition, cookies);
 }
 
 export async function closeAppWindow(app: any) {
-  try {
-    const response = window.electron.app.closeApp(app);
-    return [response, null];
-  } catch (err) {
-    return [null, err];
-  }
+  return window.electron.app.closeApp(app);
 }
 
 export async function toggleDevTools() {
-  try {
-    const response = window.electron.app.toggleDevTools();
-    return [response, null];
-  } catch (err) {
-    return [null, err];
-  }
+  return window.electron.app.toggleDevTools();
 }
 
 export default {

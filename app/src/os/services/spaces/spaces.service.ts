@@ -25,6 +25,7 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   handlers = {
+    'realm.spaces.create-new': this.createNew,
     'realm.spaces.set-selected': this.setSelected,
     'realm.spaces.pin-app': this.pinApp,
     'realm.spaces.unpin-app': this.unpinApp,
@@ -32,17 +33,20 @@ export class SpacesService extends BaseService {
   };
 
   static preload = {
-    setSelected: (spaceId: string) => {
-      return ipcRenderer.invoke('realm.signup.set-selected', spaceId);
+    createNew: (newSpace: any) => {
+      return ipcRenderer.invoke('realm.spaces.create-new', newSpace);
+    },
+    selectSpace: (spaceId: string) => {
+      return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
     pinApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.signup.pin-app', path, appId);
+      return ipcRenderer.invoke('realm.spaces.pin-app', path, appId);
     },
     unpinApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.signup.unpin-app', path, appId);
+      return ipcRenderer.invoke('realm.spaces.unpin-app', path, appId);
     },
     setPinnedOrder: (newOrder: any[]) => {
-      return ipcRenderer.invoke('realm.signup.set-pinned-order', newOrder);
+      return ipcRenderer.invoke('realm.spaces.set-pinned-order', newOrder);
     },
   };
 
@@ -95,8 +99,12 @@ export class SpacesService extends BaseService {
     this.core.onEffect(syncEffect);
   }
 
-  async setSelected() {
-    // this.state.
+  createNew(_event: any, body: any) {
+    console.log('creating new');
+  }
+
+  setSelected(_event: any, path: string) {
+    this.state?.selectSpace(path);
   }
 
   pinApp(_event: any, path: string, appId: string) {
@@ -104,11 +112,11 @@ export class SpacesService extends BaseService {
   }
 
   unpinApp(_event: any, path: string, appId: string) {
-    // this.state.
+    this.state?.selected?.unpinApp(appId);
   }
 
   setPinnedOrder(_event: any, order: any[]) {
-    // this.state.
+    this.state?.selected?.setPinnedOrder(order);
   }
 
   setShipSpace(ship: ShipModelType) {

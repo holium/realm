@@ -30,9 +30,9 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
         <AppDock />
       </Flex>
       <Flex>
-        <IconButton customBg={dockColor} size={24} ml={1} color={iconColor}>
+        {/* <IconButton customBg={dockColor} size={24} ml={1} color={iconColor}>
           <Icons name="Search" />
-        </IconButton>
+        </IconButton> */}
       </Flex>
     </SystemBarStyle>
   );
