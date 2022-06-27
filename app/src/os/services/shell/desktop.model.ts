@@ -84,6 +84,9 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
+    setWallpaper(newWallpaper: string) {
+      self.theme.wallpaper = newWallpaper;
+    },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {
         width,
@@ -150,7 +153,7 @@ export const DesktopStore = types
       // //   name: app.id!,
       // //   url: formAppUrl,
       // //   customCSS: {},
-      // //   theme: toJS(osState.themeStore),
+      // //   theme: toJS(osState.theme),
       // //   cookies: {
       // //     url: formAppUrl,
       // //     name: `urbauth-${ship.patp}`,

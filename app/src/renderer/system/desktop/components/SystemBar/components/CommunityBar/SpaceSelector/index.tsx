@@ -16,12 +16,11 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
   (props: SpaceSelectorProps) => {
     const { ship, spaces, shell } = useServices();
     // const { shipLoader } = ShipService;
-    const { themeStore } = shell;
-    const theme = themeStore.theme;
+    const { theme } = shell;
     const selectorRef = createRef<HTMLDivElement>();
     const appRef = createRef<HTMLDivElement>();
 
-    const { windowColor, dockColor, textColor } = theme;
+    const { windowColor, dockColor, textColor } = theme.theme;
     const dividerBg = useMemo(
       () => rgba(lighten(0.2, dockColor), 0.4),
       [theme]
@@ -65,7 +64,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             >
               <Flex>
                 <Pulser
-                  background={rgba(theme.backgroundColor, 0.5)}
+                  background={rgba(theme.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={28}
                   width={28}
@@ -73,19 +72,18 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
               </Flex>
               <Flex
                 style={{ pointerEvents: 'none' }}
-                // mt="2px"
                 flexDirection="column"
                 justifyContent="center"
               >
                 <Pulser
                   style={{ marginBottom: 2 }}
-                  background={rgba(theme.backgroundColor, 0.5)}
+                  background={rgba(theme.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={12}
                   width={40}
                 />
                 <Pulser
-                  background={rgba(theme.backgroundColor, 0.5)}
+                  background={rgba(theme.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={14}
                   width={90}

@@ -41,8 +41,8 @@ export const SpacesStore = types
   .actions((self) => ({
     setShipSpace(ship: any) {
       const theme =
-        servicesStore.shell.themeStore.ships.get(ship.patp) ||
-        servicesStore.shell.themeStore.os;
+        servicesStore.shell.theme.ships.get(ship.patp) ||
+        servicesStore.shell.theme.os;
       self.our = SpaceModel.create({
         path: ship.patp,
         name: ship.patp,
@@ -72,7 +72,7 @@ export const SpacesStore = types
       });
 
       if (self.our && self.our.theme.wallpaper) {
-        servicesStore.shell.themeStore.setWallpaper(self.our.theme.wallpaper, {
+        servicesStore.shell.theme.setWallpaper(self.our.theme.wallpaper, {
           patp: ship.patp,
         });
       }

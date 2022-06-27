@@ -31,7 +31,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
   const { identity, shell } = useServices();
   const { auth } = identity;
-  const { themeStore } = shell;
+  const { theme } = shell;
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -51,9 +51,9 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 
   useEffect(() => {
     // Set the wallpaper on load
-    !themeStore.theme &&
+    !theme.theme &&
       pendingShip &&
-      themeStore.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER, {
+      theme.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER, {
         patp: pendingShip?.patp!,
       });
   }, [pendingShip !== null]);
@@ -76,8 +76,8 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   let colorProps = null;
   // if (theme) {
   colorProps = {
-    color: themeStore.theme?.textColor,
-    textShadow: themeStore.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
+    color: theme.theme?.textColor,
+    textShadow: theme.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
   };
   // }
 
@@ -170,7 +170,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                         ) : (
                           <IconButton
                             ref={submitRef}
-                            luminosity={themeStore.theme?.textTheme}
+                            luminosity={theme.theme?.textTheme}
                             size={24}
                             canFocus
                             onKeyDown={submitPassword}
@@ -184,7 +184,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   <IconButton
                     size={26}
                     ref={optionsRef}
-                    luminosity={themeStore.theme?.textTheme}
+                    luminosity={theme.theme?.textTheme}
                     opacity={1}
                     onClick={(evt: any) => {
                       evt.preventDefault();
@@ -196,7 +196,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   </IconButton>
                   <Menu
                     id={`${pendingShip.patp}-user-menu`}
-                    customBg={themeStore.theme.windowColor}
+                    customBg={theme.theme.windowColor}
                     style={{
                       top: anchorPoint && anchorPoint.y + 8,
                       left: anchorPoint && anchorPoint.x + 10,
@@ -210,14 +210,14 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   >
                     <MenuItem
                       label="Reset password"
-                      customBg={themeStore.theme.windowColor}
+                      customBg={theme.theme.windowColor}
                       onClick={() => {
                         console.log('do reset form');
                       }}
                     />
                     <MenuItem
                       label="Remove ship"
-                      customBg={themeStore.theme.windowColor}
+                      customBg={theme.theme.windowColor}
                       mt={1}
                       onClick={() => {
                         AuthApi.removeShip(pendingShip.patp);

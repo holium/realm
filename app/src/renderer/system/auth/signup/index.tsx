@@ -175,7 +175,7 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
               onClick={() => continueSignup(ship.id)}
               key={`continue-${ship.patp}`}
               ship={ship}
-              theme={themeStore.theme}
+              theme={theme.theme}
             />
           ))}
         </Flex>

@@ -18,11 +18,11 @@ type SpacesProps = {
 
 export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
   const { ship, shell, spaces } = useServices();
-  const { themeStore } = shell;
+  const { theme } = shell;
 
   const { dimensions } = props;
 
-  const spaceTheme = useMemo(() => themeStore.theme, [themeStore.theme]);
+  const spaceTheme = useMemo(() => theme.theme, [theme.theme]);
   const { backgroundColor, textColor, dockColor, iconColor } = spaceTheme;
   // console.log(toJS(spacesStore.spacesList));
   // const iconColor = darken(0.5, textColor);
@@ -74,11 +74,11 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
         overflowY="hidden"
       >
-        {/* <SpacesList
-          selected={spacesStore.selected}
-          spaces={spacesStore.spacesList}
-          onSelect={spacesStore.selectSpace}
-        /> */}
+        <SpacesList
+          selected={spaces.selected}
+          spaces={spaces.spacesList}
+          onSelect={spaces.selectSpace}
+        />
       </Flex>
       <Grid.Row expand noGutter></Grid.Row>
       <Flex
@@ -92,11 +92,11 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         flex={1}
         height={bottomHeight}
       >
-        {/* <YouRow
-          selected={ship?.patp === spacesStore.selected?.id}
+        <YouRow
+          selected={ship?.patp === spaces.selected?.path}
           ship={ship!}
-          onSelect={spacesStore.selectSpace}
-        /> */}
+          onSelect={spaces.selectSpace}
+        />
       </Flex>
     </Grid.Column>
   );

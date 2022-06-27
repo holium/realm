@@ -16,7 +16,7 @@ type OSFrameProps = {
 export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
   const { hasLoaded } = props;
   const { shell } = useServices();
-  const { desktopStore } = shell;
+  const { desktop } = shell;
 
   return hasLoaded ? (
     <Fill>
@@ -25,11 +25,11 @@ export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
           {() => (
             <Layer zIndex={1}>
               <Layer zIndex={0}>
-                {/* <WindowManager isOpen={!desktopStore.showHomePane} /> */}
+                {/* <WindowManager isOpen={!desktop.showHomePane} /> */}
               </Layer>
               <Layer zIndex={1}>
-                {desktopStore.showHomePane && (
-                  <AppGrid isOpen={desktopStore.showHomePane} />
+                {desktop.showHomePane && (
+                  <AppGrid isOpen={desktop.showHomePane} />
                 )}
               </Layer>
             </Layer>

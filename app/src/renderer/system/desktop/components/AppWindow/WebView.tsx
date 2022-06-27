@@ -14,7 +14,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>``;
 export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   const { window, isResizing } = props;
   const { ship, shell } = useServices();
-  const { desktopStore, themeStore } = shell;
+  const { desktop, theme } = shell;
   const webViewRef = useRef<any>(null);
   const elementRef = useRef(null);
 
@@ -34,7 +34,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
     webview?.addEventListener('did-finish-load', () => {
-      webview!.send('mouse-color', desktopStore.mouseColor);
+      webview!.send('mouse-color', desktop.mouseColor);
       let css = '* { cursor: none !important; }';
       webview!.insertCSS(css);
     });
@@ -67,10 +67,10 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
         ref={webViewRef}
         id={`${window.id}-web-webview`}
         partition={webData.development ? 'persist:dev-webview' : 'web-webview'}
-        preload={`file://${desktopStore.appviewPreload}`}
+        preload={`file://${desktop.appviewPreload}`}
         src={webData.url}
-        onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}
-        onMouseLeave={() => desktopStore.setIsMouseInWebview(false)}
+        onMouseEnter={() => desktop.setIsMouseInWebview(true)}
+        onMouseLeave={() => desktop.setIsMouseInWebview(false)}
         style={{
           width: 'inherit',
           height: '100%',

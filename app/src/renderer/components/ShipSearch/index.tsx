@@ -23,8 +23,8 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
   (props: ShipSearchProps) => {
     const { search, selected, customBg, heightOffset, onSelected } = props;
     const { shell, ship } = useServices();
-    const { themeStore } = shell;
-    const { textTheme } = themeStore.theme;
+    const { theme } = shell;
+    const { textTheme } = theme.theme;
     const contacts = ship ? Array.from(ship?.contacts.rolodex.entries()) : [];
     const isAddingDisabled = selected.size > 0;
 

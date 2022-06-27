@@ -23,8 +23,8 @@ export const Services = types
   .model('ServicesStore', {
     shell: types.model('ShellStore', {
       // preferenceStore: ConfigStore,
-      themeStore: ThemeStore,
-      desktopStore: DesktopStore,
+      theme: ThemeStore,
+      desktop: DesktopStore,
     }),
     identity: types.model('identity', {
       auth: AuthStore,
@@ -37,13 +37,16 @@ export const Services = types
     setShip(ship: any) {
       self.ship = ship;
     },
+    clearShip() {
+      self.ship = undefined;
+    },
   }));
 
 const services = Services.create({
   shell: {
     // preferenceStore: {},
-    themeStore: {},
-    desktopStore: {},
+    theme: {},
+    desktop: {},
   },
   identity: {
     auth: {
@@ -62,11 +65,6 @@ const services = Services.create({
 });
 
 export const servicesStore = services;
-
-// onAction(servicesStore, (call: any) => {
-//   console.log(call);
-//   applyAction(call);
-// });
 
 // -------------------------------
 // Create core context
@@ -151,6 +149,13 @@ onSnapshot(servicesStore, (snapshot) => {
   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
 });
 
+// Auth events
+window.electron.os.auth.onLogout((_event: any) => {
+  console.log('on log out event');
+  servicesStore.clearShip();
+});
+
+// Effect events
 window.electron.os.onEffect((_event: any, value: any) => {
   // if (value.response === 'diff') {
   //   console.log('got effect data => ', value.json);
@@ -173,13 +178,13 @@ window.electron.os.onEffect((_event: any, value: any) => {
   if (value.response === 'initial') {
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
-      servicesStore.shell.desktopStore.setIsBlurred(false);
+      servicesStore.shell.desktop.setIsBlurred(false);
     }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);
     }
     if (value.resource === 'theme') {
-      // osState.themeStore.initialSync(value);
+      // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
@@ -190,9 +195,9 @@ window.electron.os.onEffect((_event: any, value: any) => {
 });
 
 // window.electron.app.setFullscreen((_event: any, data: any) => {
-//   // osState.desktopStore.setFullscreen(data);
+//   // osState.desktop.setFullscreen(data);
 // });
 
 // window.electron.app.setAppviewPreload((_event: any, data: any) => {
-//   // osState.desktopStore.setAppviewPreload(data);
+//   // osState.desktop.setAppviewPreload(data);
 // });

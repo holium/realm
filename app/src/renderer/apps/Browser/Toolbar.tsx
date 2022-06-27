@@ -41,12 +41,12 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
     onMaximize,
   } = props;
   const { shell } = useServices();
-  const { desktopStore, themeStore } = shell;
+  const { desktop, theme } = shell;
   const browserStore = useBrowser();
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
 
-  const { iconColor } = themeStore.theme;
+  const { iconColor } = theme.theme;
 
   const { searchForm, searchQuery } = useMemo(
     () =>

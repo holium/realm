@@ -19,17 +19,17 @@ import { observer } from 'mobx-react';
 export const App = observer(() => {
   const { booted } = useCore();
   const { shell } = useServices();
-  const { desktopStore } = shell;
+  const { desktop } = shell;
   const shellMemo = useMemo(() => (booted ? <Shell /> : <div />), [booted]);
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
-        hide={desktopStore.isMouseInWebview}
-        cursorColor={desktopStore.mouseColor}
+        hide={desktop.isMouseInWebview}
+        cursorColor={desktop.mouseColor}
         animateOut={false}
       />
     );
-  }, [desktopStore.mouseColor, desktopStore.isMouseInWebview]);
+  }, [desktop.mouseColor, desktop.isMouseInWebview]);
 
   return (
     <CoreProvider value={coreStore}>

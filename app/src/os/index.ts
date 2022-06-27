@@ -110,6 +110,7 @@ export class Realm extends EventEmitter {
   clearSession(): void {
     this.session = undefined;
     this.db.clear();
+    this.conduit?.reset();
   }
 
   onLogin() {

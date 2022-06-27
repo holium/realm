@@ -83,7 +83,7 @@ export const SignupStore = types
       // console.log(handleError(error));
       if (error) throw error;
 
-      servicesStore.shell.desktopStore.setMouseColor(response.color);
+      servicesStore.shell.desktop.setMouseColor(response.color);
       self.signupShip!.setContactMetadata(response);
       self.currentStep = 'set-password';
       return response;
@@ -213,9 +213,9 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
       // on initial sync we should set themes and various other variables
 
       self.selected?.loggedIn &&
-        servicesStore.shell.desktopStore.setIsBlurred(false);
+        servicesStore.shell.desktop.setIsBlurred(false);
       self.selected?.loggedIn &&
-        servicesStore.shell.desktopStore.setMouseColor(self.selected?.color!);
+        servicesStore.shell.desktop.setMouseColor(self.selected?.color!);
       self.loader.set('loaded');
     },
     syncPatches: (patchEffect: any) => {
@@ -225,12 +225,9 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
     setSession: (shipRef: any) => {
       self.selected = shipRef;
 
-      servicesStore.shell.themeStore.setWallpaper(
-        self.currentShip!.wallpaper!,
-        {
-          patp: self.currentShip!.patp!,
-        }
-      );
+      servicesStore.shell.theme.setWallpaper(self.currentShip!.wallpaper!, {
+        patp: self.currentShip!.patp!,
+      });
       AuthIPC.setSelected(self.currentShip!.patp);
     },
     clearSession() {
@@ -254,8 +251,8 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
         const [response, error] = yield AuthIPC.login(ship, password);
         self.selected!.setLoggedIn(true);
 
-        servicesStore.shell.desktopStore.setIsBlurred(false);
-        servicesStore.shell.desktopStore.setMouseColor(self.selected?.color!);
+        servicesStore.shell.desktop.setIsBlurred(false);
+        servicesStore.shell.desktop.setMouseColor(self.selected?.color!);
         if (error) throw error;
       } catch (err: any) {
         self.loader.error(err);
@@ -267,7 +264,7 @@ export const AuthStore = BaseAuthStore.named('AuthStore')
         if (error) throw error;
         self.selected!.setLoggedIn(false);
 
-        servicesStore.shell.desktopStore.setIsBlurred(true);
+        servicesStore.shell.desktop.setIsBlurred(true);
       } catch (err: any) {
         self.loader.error(err);
       }

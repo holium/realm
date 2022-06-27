@@ -9,9 +9,9 @@ type HomeButton = {};
 
 export const HomeButton: FC<HomeButton> = observer(() => {
   const { shell } = useServices();
-  const { themeStore, desktopStore } = shell;
+  const { theme, desktop } = shell;
 
-  const { dockColor, textColor } = themeStore.theme;
+  const { dockColor, textColor } = theme.theme;
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
@@ -21,7 +21,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
     y.set(event.clientY - rect.top);
   }
   const onHome = () => {
-    desktopStore.setHomePane(!desktopStore.showHomePane);
+    desktop.setHomePane(!desktop.showHomePane);
   };
 
   return useMemo(
@@ -56,7 +56,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
         </SystemBarStyle>
       </motion.div>
     ),
-    [themeStore.theme.textColor, themeStore.theme.dockColor]
+    [theme.theme.textColor, theme.theme.dockColor]
   );
 });
 

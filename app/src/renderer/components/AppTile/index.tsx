@@ -102,7 +102,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     open,
     onAppClick,
   } = props;
-  // const { themeStore } = useMst();
+  // const { theme } = useMst();
   const tileRef = useRef(null);
 
   return useMemo(() => {

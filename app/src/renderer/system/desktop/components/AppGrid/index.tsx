@@ -25,7 +25,7 @@ type AppGridProps = {
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
   const { ship, spaces, shell } = useServices();
-  const { desktopStore, themeStore } = shell;
+  const { desktop, theme } = shell;
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
@@ -41,7 +41,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           display: isOpen ? 'block' : 'none',
         }}
         exit={{ opacity: 0 }}
-        customBg={themeStore.theme.dockColor}
+        customBg={theme.theme.dockColor}
       >
         <Flex
           flex={1}
@@ -138,7 +138,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                     exit: { opacity: 0, top: 100 },
                   }}
                   onAppClick={(selectedApp: AppModelType) => {
-                    desktopStore.openBrowserWindow(selectedApp);
+                    desktop.openBrowserWindow(selectedApp);
                   }}
                 />
               );

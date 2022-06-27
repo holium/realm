@@ -14,6 +14,7 @@ import { displayDate } from 'renderer/logic-old/utils/time';
 import { ThemeModelType } from 'core-a/theme/store';
 import { nativeApps } from '..';
 import { useServices } from 'renderer/logic/store-2';
+import { AuthApi } from 'renderer/logic/auth';
 
 type ProfileProps = {
   theme: ThemeModelType;
@@ -26,7 +27,7 @@ type ProfileProps = {
 export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
   const { shell, ship, identity } = useServices();
   const { auth } = identity;
-  const { desktopStore, themeStore } = shell;
+  const { desktop, theme } = shell;
   let [batteryLevel, setBatteryLevel] = useState(0);
   const { dimensions } = props;
   const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
@@ -46,7 +47,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
   }, []);
 
   const openSettingsApp = () => {
-    desktopStore.openBrowserWindow(nativeApps['os-settings']);
+    desktop.openBrowserWindow(nativeApps['os-settings']);
   };
 
   const currentShip = ship!;
@@ -106,7 +107,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
             color={iconColor}
             style={{ cursor: 'none' }}
             onClick={() => {
-              auth.logout(currentShip.patp);
+              AuthApi.logout(currentShip.patp);
             }}
           >
             <Icons name="Lock" />

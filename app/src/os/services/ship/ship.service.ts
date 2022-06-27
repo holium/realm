@@ -185,6 +185,12 @@ export class ShipService extends BaseService {
     this.core.onEffect(syncEffect);
   }
 
+  logout() {
+    this.db = undefined;
+    this.state = undefined;
+    this.core.mainWindow.webContents.send('realm.auth.on-log-out');
+  }
+
   storeNewShip(ship: AuthShipType): ShipModelType {
     const newShip = ShipModel.create({
       patp: ship.patp,

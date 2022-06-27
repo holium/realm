@@ -20,7 +20,7 @@
 // export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
 //   const { isResizing, window } = props;
 //   const { ship } = useShip();
-//   const { desktopStore, themeStore } = useMst();
+//   const { desktop, theme } = useMst();
 //   const elementRef = useRef(null);
 //   const webViewRef = useRef<any>(null);
 
@@ -52,7 +52,7 @@
 
 //     if (window && ship) {
 //       webview?.addEventListener('did-finish-load', () => {
-//         webview!.send('mouse-color', desktopStore.mouseColor);
+//         webview!.send('mouse-color', desktop.mouseColor);
 //         let css = '* { cursor: none !important; }';
 //         webview!.insertCSS(css);
 //         // webview!.openDevTools();
@@ -62,7 +62,7 @@
 //         // @ts-ignore
 //         webview!.closeDevTools();
 //       });
-//       const location = desktopStore.openBrowserWindow(toJS(window));
+//       const location = desktop.openBrowserWindow(toJS(window));
 //       setAppConfig(location);
 //     }
 //   }, [window?.id, ship]);
@@ -90,10 +90,10 @@
 //           ref={webViewRef}
 //           id={`${window.id}-urbit-webview`}
 //           partition="urbit-webview"
-//           preload={`file://${desktopStore.appviewPreload}`}
+//           preload={`file://${desktop.appviewPreload}`}
 //           src={appConfig.url}
-//           onMouseEnter={() => desktopStore.setIsMouseInWebview(true)}
-//           onMouseLeave={() => desktopStore.setIsMouseInWebview(false)}
+//           onMouseEnter={() => desktop.setIsMouseInWebview(true)}
+//           onMouseLeave={() => desktop.setIsMouseInWebview(false)}
 //           style={{
 //             width: 'inherit',
 //             height: '100%',
@@ -130,7 +130,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
   const { ship, shell } = useServices();
-  const { desktopStore, themeStore } = shell;
+  const { desktop, theme } = shell;
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 
@@ -139,7 +139,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
     url: null,
   });
 
-  const isActive = desktopStore.isActiveWindow(window.id);
+  const isActive = desktop.isActiveWindow(window.id);
 
   const [loading, setLoading] = useState(false);
 
@@ -163,7 +163,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
 
     if (window && ship) {
       webview?.addEventListener('did-finish-load', () => {
-        webview!.send('mouse-color', desktopStore.mouseColor);
+        webview!.send('mouse-color', desktop.mouseColor);
         let css = '* { cursor: none !important; }';
         webview!.insertCSS(css);
       });
@@ -173,17 +173,17 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         webview!.closeDevTools();
       });
       let appUrl = `${ship!.url}/apps/${window.id!}`;
-      desktopStore.openBrowserWindow(clone(window));
+      desktop.openBrowserWindow(clone(window));
       setAppConfig({ url: appUrl });
     }
   }, [window?.id, ship]);
 
   const onMouseEnter = useCallback(() => {
-    desktopStore.setIsMouseInWebview(true);
-  }, [desktopStore]);
+    desktop.setIsMouseInWebview(true);
+  }, [desktop]);
   const onMouseLeave = useCallback(() => {
-    desktopStore.setIsMouseInWebview(false);
-  }, [desktopStore]);
+    desktop.setIsMouseInWebview(false);
+  }, [desktop]);
 
   return useMemo(() => {
     // console.log('render app window');
@@ -209,7 +209,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           ref={webViewRef}
           id={`${window.id}-urbit-webview`}
           partition="urbit-webview"
-          preload={`file://${desktopStore.appviewPreload}`}
+          preload={`file://${desktop.appviewPreload}`}
           src={appConfig.url}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}

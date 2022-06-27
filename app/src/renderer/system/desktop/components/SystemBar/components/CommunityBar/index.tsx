@@ -10,15 +10,15 @@ type CommunityBarProps = {};
 
 export const CommunityBar: FC<CommunityBarProps> = observer(() => {
   const { shell } = useServices();
-  const { themeStore } = shell;
+  const { theme } = shell;
 
   const dockColor = useMemo(
-    () => themeStore.theme.dockColor,
-    [themeStore.theme.dockColor]
+    () => theme.theme.dockColor,
+    [theme.theme.dockColor]
   );
   const textColor = useMemo(
-    () => themeStore.theme.textColor,
-    [themeStore.theme.textColor]
+    () => theme.theme.textColor,
+    [theme.theme.textColor]
   );
 
   const iconColor = textColor;
@@ -26,7 +26,9 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
   return (
     <SystemBarStyle pr={3} width="100%" customBg={dockColor}>
       <SpaceSelector />
-      <Flex flex={1}>{/* <AppDock /> */}</Flex>
+      <Flex flex={1}>
+        <AppDock />
+      </Flex>
       <Flex>
         <IconButton customBg={dockColor} size={24} ml={1} color={iconColor}>
           <Icons name="Search" />

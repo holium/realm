@@ -35,27 +35,22 @@ export class AuthService extends BaseService {
   };
 
   static preload = {
-    login: (ship: string, password: string) => {
-      return ipcRenderer.invoke('realm.auth.login', ship, password);
-    },
-    logout: (ship: string) => {
-      return ipcRenderer.invoke('realm.auth.logout', ship);
-    },
-    setSelected: (ship: string) => {
-      return ipcRenderer.invoke('realm.auth.set-selected', ship);
-    },
-    setOrder: (order: any[]) => {
-      return ipcRenderer.invoke('realm.auth.set-order', order);
-    },
-    addShip: (newShip: { ship: string; url: string; code: string }) => {
-      return ipcRenderer.invoke('realm.auth.add-ship', newShip);
-    },
-    getShips: () => {
-      return ipcRenderer.invoke('realm.auth.get-ships');
-    },
-    removeShip: (ship: string) => {
-      return ipcRenderer.invoke('realm.auth.remove-ship', ship);
-    },
+    login: (ship: string, password: string) =>
+      ipcRenderer.invoke('realm.auth.login', ship, password),
+    logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
+    setSelected: (ship: string) =>
+      ipcRenderer.invoke('realm.auth.set-selected', ship),
+
+    setOrder: (order: any[]) =>
+      ipcRenderer.invoke('realm.auth.set-order', order),
+    addShip: (newShip: { ship: string; url: string; code: string }) =>
+      ipcRenderer.invoke('realm.auth.add-ship', newShip),
+    getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
+    removeShip: (ship: string) =>
+      ipcRenderer.invoke('realm.auth.remove-ship', ship),
+    onLogin: (callback: any) => ipcRenderer.on('core:on-log-in', callback),
+    onLogout: (callback: any) =>
+      ipcRenderer.on('realm.auth.on-log-out', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -122,6 +117,7 @@ export class AuthService extends BaseService {
 
   logout(_event: any, ship: string) {
     this.core.clearSession();
+    this.core.services.ship.logout();
   }
 
   storeNewShip(ship: AuthShipType) {
@@ -188,11 +184,5 @@ export class AuthService extends BaseService {
 
   removeShip(_event: any, ship: string) {
     this.state.deleteShip(ship);
-  }
-
-  applyAction(action: MSTAction) {
-    console.log(this.state.selected?.patp);
-    applyAction(this.state, { ...action, path: '' });
-    console.log(this.state.selected?.patp);
   }
 }

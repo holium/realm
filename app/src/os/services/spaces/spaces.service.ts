@@ -120,12 +120,12 @@ export class SpacesService extends BaseService {
       // @ts-ignore FIX
       apps: {
         pinned: ['ballot', 'escape', 'webterm', 'landscape'],
-        // TODO fix
+        endorsed: {},
         ...(ship.docket.apps
           ? {
-              docket: DocketMap.create(getSnapshot(ship.docket.apps)),
+              installed: DocketMap.create(getSnapshot(ship.docket.apps)),
             }
-          : { docket: {} }),
+          : { installed: {} }),
       },
       token: undefined,
       picture: ship.avatar || null,
@@ -158,7 +158,7 @@ export class SpacesService extends BaseService {
     // self.selected = self.spaces.get(ship.patp)!;
 
     // if (self.selected && self.selected.theme.wallpaper) {
-    //   osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
+    //   osState.theme.setWallpaper(self.selected.theme.wallpaper, {
     //     patp: ship.patp,
     //   });
     // }

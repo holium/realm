@@ -12,11 +12,11 @@ interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
   const { shell, spaces } = useServices();
-  const { desktopStore, themeStore } = shell;
+  const { desktop, theme } = shell;
 
   const dividerBg = useMemo(
-    () => rgba(lighten(0.2, themeStore.theme.dockColor), 0.4),
-    [themeStore.theme]
+    () => rgba(lighten(0.2, theme.theme.dockColor), 0.4),
+    [theme.theme]
   );
 
   const orderedList = useMemo(
@@ -41,8 +41,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         }}
       >
         {orderedList.map((app: AppModelType | any, index: number) => {
-          const selected = desktopStore.isActiveWindow(app.id);
-          const open = !selected && desktopStore.isOpenWindow(app.id);
+          const selected = desktop.isActiveWindow(app.id);
+          const open = !selected && desktop.isOpenWindow(app.id);
           return (
             <Reorder.Item
               key={app.id}
@@ -62,10 +62,10 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               // }}
               onClick={(evt: any) => {
                 const selectedApp = app;
-                if (desktopStore.isOpenWindow(selectedApp.id)) {
-                  desktopStore.setActive(selectedApp.id);
+                if (desktop.isOpenWindow(selectedApp.id)) {
+                  desktop.setActive(selectedApp.id);
                 } else {
-                  desktopStore.openBrowserWindow(selectedApp);
+                  desktop.openBrowserWindow(selectedApp);
                 }
               }}
               whileDrag={{ zIndex: 20 }}
@@ -109,14 +109,14 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       </Reorder.Group>
     );
   }, [
-    desktopStore.activeWindow?.id,
-    desktopStore.openAppIds,
+    desktop.activeWindow?.id,
+    desktop.openAppIds,
     spaces.selected?.path,
     spaces.selected?.apps.pinned,
     spaces.selected?.pinnedApps,
   ]);
 
-  const activeAndUnpinned = desktopStore.openApps.filter(
+  const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       spaces.selected &&
       spaces.selected.pinnedApps.findIndex(
@@ -135,8 +135,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
           const app = spaces.selected?.getAppData(unpinnedApp.id)!;
-          const selected = desktopStore.isActiveWindow(app.id);
-          const open = !selected && desktopStore.isOpenWindow(app.id);
+          const selected = desktop.isActiveWindow(app.id);
+          const open = !selected && desktop.isOpenWindow(app.id);
           return (
             <AppTile
               key={`unpinned-${app.id}`}
@@ -171,10 +171,10 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 },
               ]}
               onAppClick={(selectedApp: any) => {
-                if (desktopStore.isOpenWindow(selectedApp.id)) {
-                  desktopStore.setActive(selectedApp.id);
+                if (desktop.isOpenWindow(selectedApp.id)) {
+                  desktop.setActive(selectedApp.id);
                 } else {
-                  desktopStore.openBrowserWindow(selectedApp);
+                  desktop.openBrowserWindow(selectedApp);
                 }
               }}
             />

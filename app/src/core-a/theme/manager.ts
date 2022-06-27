@@ -18,13 +18,13 @@ export type ThemePreloadType = {
 };
 
 export class ThemeManager extends EventEmitter {
-  private themeStore: Store<any>;
+  private theme: Store<any>;
   private stateTree: ThemeStoreType;
 
   constructor() {
     super();
 
-    this.themeStore = new Store({
+    this.theme = new Store({
       name: 'theme.manager',
       accessPropertiesByDotNotation: true,
     });
@@ -37,12 +37,12 @@ export class ThemeManager extends EventEmitter {
     ipcMain.handle('theme:set-ship-theme', this.setShipTheme);
     ipcMain.handle('theme:set-space-theme', this.setSpaceTheme);
 
-    let persistedState: ThemeStoreType = this.themeStore.store;
+    let persistedState: ThemeStoreType = this.theme.store;
 
     this.stateTree = ThemeStore.create(castToSnapshot(persistedState));
 
     onSnapshot(this.stateTree, (snapshot) => {
-      this.themeStore.store = snapshot;
+      this.theme.store = snapshot;
     });
 
     onPatch(this.stateTree, (patch) => {
@@ -90,7 +90,7 @@ export class ThemeManager extends EventEmitter {
 
   onAction(action: Action) {
     console.log(action);
-    // this.themeStore.set(
+    // this.theme.set(
     //   `themes.auth${action.context.ship}.${action.data.key}`,
     //   action.data.value
     // );

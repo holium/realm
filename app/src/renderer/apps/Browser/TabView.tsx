@@ -25,9 +25,9 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
   const { shell } = useServices();
-  const { desktopStore, themeStore } = shell;
+  const { desktop, theme } = shell;
   const browserStore = useBrowser();
-  const { iconColor } = themeStore.theme;
+  const { iconColor } = theme.theme;
 
   const [loading, setLoading] = useState(false);
   // const [urlData, setUrlData] = useState<any>(tab ? new URL(tab.url) : null);
@@ -49,7 +49,7 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
     webview?.addEventListener('did-stop-loading', onStopLoading);
 
     webview?.addEventListener('did-finish-load', () => {
-      webview!.send('mouse-color', desktopStore.mouseColor);
+      webview!.send('mouse-color', desktop.mouseColor);
       let css = '* { cursor: none !important; }';
 
       webview!.insertCSS(css);
@@ -95,9 +95,9 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
         id={`${tab.id}-browser-webview`}
         src={tab.url}
         partition="browser-webview"
-        preload={`file://${desktopStore.appviewPreload}`}
-        onMouseEnter={() => !loading && desktopStore.setIsMouseInWebview(true)}
-        onMouseLeave={() => !loading && desktopStore.setIsMouseInWebview(false)}
+        preload={`file://${desktop.appviewPreload}`}
+        onMouseEnter={() => !loading && desktop.setIsMouseInWebview(true)}
+        onMouseLeave={() => !loading && desktop.setIsMouseInWebview(false)}
         useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
         style={{
           width: 'inherit',

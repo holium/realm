@@ -97,8 +97,7 @@ export const SpaceStore = types
   }))
   .actions((self) => ({
     setShipSpace(ship: ShipModelType) {
-      const theme =
-        osState.themeStore.ships.get(ship.patp) || osState.themeStore.os;
+      const theme = osState.theme.ships.get(ship.patp) || osState.theme.os;
       self.spaces.set(
         ship.patp,
         Space.create({
@@ -133,31 +132,31 @@ export const SpaceStore = types
       self.selected = self.spaces.get(ship.patp)!;
 
       if (self.selected && self.selected.theme.wallpaper) {
-        osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
+        osState.theme.setWallpaper(self.selected.theme.wallpaper, {
           patp: ship.patp,
         });
       }
     },
     selectSpace(spaceKey: string) {
       self.selected = self.spaces.get(spaceKey)!;
-      osState.themeStore.setCurrentSpaceTheme(spaceKey);
+      osState.theme.setCurrentSpaceTheme(spaceKey);
       // if (
-      //   self.selected.theme.wallpaper !== osState.themeStore.theme.wallpaper
+      //   self.selected.theme.wallpaper !== osState.theme.theme.wallpaper
       // ) {
       //   console.log(self.selected.theme.wallpaper);
-      //   osState.themeStore.setWallpaper(self.selected.theme.wallpaper, {
+      //   osState.theme.setWallpaper(self.selected.theme.wallpaper, {
       //     spaceId: spaceKey,
       //   });
       // }
     },
-    load(selectedKey: string, themeStore: any) {
+    load(selectedKey: string, theme: any) {
       Object.keys(MockData).forEach((spaceKey: string) => {
         self.spaces.set(spaceKey, Space.create(MockData[spaceKey]));
       });
       if (selectedKey) {
         self.selected = self.spaces.get(selectedKey);
         if (self.selected!.theme.wallpaper) {
-          themeStore.setWallpaper(self.selected!.theme.wallpaper, {
+          theme.setWallpaper(self.selected!.theme.wallpaper, {
             spaceId: selectedKey,
           });
         }

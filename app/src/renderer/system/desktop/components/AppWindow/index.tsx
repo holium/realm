@@ -49,7 +49,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     const { theme, window, desktopRef } = props;
     const { textColor, windowColor } = theme;
     const { shell } = useServices();
-    const { desktopStore } = shell;
+    const { desktop } = shell;
 
     const [unmaximize, setUnmaximize] = useState<
       | {
@@ -100,7 +100,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           height: mHeight.get(),
           width: mWidth.get(),
         });
-        const offset = desktopStore.isFullscreen ? 0 : 30;
+        const offset = desktop.isFullscreen ? 0 : 30;
         // @ts-ignore
         const desktopDims = desktopRef.current!.getBoundingClientRect();
         mX.set(0);
@@ -115,18 +115,18 @@ export const AppWindow: FC<AppWindowProps> = observer(
         setUnmaximize(undefined);
       }
       activeWindow &&
-        desktopStore.setDimensions(activeWindow.id, {
+        desktop.setDimensions(activeWindow.id, {
           x: mX.get(),
           y: mY.get(),
           height: mHeight.get(),
           width: mWidth.get(),
         });
-    }, [desktopStore.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
+    }, [desktop.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
 
     const onDragStop = () => {
       setIsDragging(false);
       activeWindow &&
-        desktopStore.setDimensions(activeWindow.id, {
+        desktop.setDimensions(activeWindow.id, {
           x: mX.get(),
           y: mY.get(),
           height: mHeight.get(),
@@ -139,14 +139,14 @@ export const AppWindow: FC<AppWindowProps> = observer(
     };
 
     const onClose = () => {
-      desktopStore.activeWindow
-        ? desktopStore.closeBrowserWindow(desktopStore.activeWindow?.id)
+      desktop.activeWindow
+        ? desktop.closeBrowserWindow(desktop.activeWindow?.id)
         : {};
     };
 
-    let webviewId = `${desktopStore.activeWindow?.id}-urbit-webview`;
+    let webviewId = `${desktop.activeWindow?.id}-urbit-webview`;
     if (window.type === 'web') {
-      webviewId = `${desktopStore.activeWindow?.id}-web-webview`;
+      webviewId = `${desktop.activeWindow?.id}-web-webview`;
     }
 
     const onDevTools = () => {
@@ -157,7 +157,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     };
 
     const onMouseDown = () => {
-      desktopStore.setActive(window.id);
+      desktop.setActive(window.id);
     };
 
     const windowId = `app-window-${activeWindow?.id}`;
@@ -275,7 +275,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
               onPointerUp={() => {
                 setIsResizing(false);
                 activeWindow &&
-                  desktopStore.setDimensions(activeWindow.id, {
+                  desktop.setDimensions(activeWindow.id, {
                     x: mX.get(),
                     y: mY.get(),
                     height: mHeight.get(),

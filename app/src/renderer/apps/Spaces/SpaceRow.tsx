@@ -52,15 +52,15 @@ type SpaceRowProps = {
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { shell } = useServices();
-  const { themeStore } = shell;
+  const { theme } = shell;
 
-  const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
+  const currentTheme = useMemo(() => theme.theme, [theme.theme]);
   return (
     <SpaceRowStyle
       data-close-tray="true"
       selected={selected}
       className="realm-cursor-hover"
-      customBg={theme.dockColor}
+      customBg={currentTheme.dockColor}
       onClick={() => {
         onSelect(space.id);
       }}

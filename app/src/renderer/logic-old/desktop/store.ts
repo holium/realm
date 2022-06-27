@@ -149,7 +149,7 @@ export const DesktopStore = types
       //   name: app.id!,
       //   url: formAppUrl,
       //   customCSS: {},
-      //   theme: toJS(osState.themeStore),
+      //   theme: toJS(osState.theme),
       //   cookies: {
       //     url: formAppUrl,
       //     name: `urbauth-${ship.patp}`,

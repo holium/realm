@@ -14,19 +14,19 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    // const { desktopStore, themeStore } = useMst();
+    // const { desktop, theme } = useMst();
     const { shell } = useServices();
-    const { desktopStore, themeStore } = shell;
+    const { desktop, theme } = shell;
     const desktopRef = useRef<any>(null);
 
     useEffect(() => {
       const dims = desktopRef.current?.getBoundingClientRect();
-      desktopStore.setDesktopDimensions(dims.width, dims.height);
+      desktop.setDesktopDimensions(dims.width, dims.height);
     }, [desktopRef.current]);
 
     const managerType = 'classic';
-    const hasOpenWindows = desktopStore.windows.size > 0;
-    const windows = Array.from(desktopStore.windows.values());
+    const hasOpenWindows = desktop.windows.size > 0;
+    const windows = Array.from(desktop.windows.values());
 
     return (
       <motion.div
@@ -44,13 +44,13 @@ export const WindowManager: FC<WindowManagerProps> = observer(
           top: 0,
           right: 0,
           height: `calc(100vh - ${0}px)`,
-          paddingTop: desktopStore.isFullscreen ? 0 : 30,
+          paddingTop: desktop.isFullscreen ? 0 : 30,
         }}
       >
         <ContextMenu
           isComponentContext={false}
-          textColor={themeStore.theme.textColor}
-          customBg={rgba(themeStore.theme.windowColor, 0.9)}
+          textColor={theme.theme.textColor}
+          customBg={rgba(theme.theme.windowColor, 0.9)}
           containerId="desktop-fill"
           parentRef={desktopRef}
           style={{ minWidth: 180 }}
@@ -88,7 +88,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
               desktopRef={desktopRef}
               key={key}
               window={window}
-              theme={themeStore.theme}
+              theme={theme.theme}
             />
           );
         })}

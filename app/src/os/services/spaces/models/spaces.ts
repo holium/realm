@@ -66,7 +66,7 @@ export const SpacesStore = types
     loader: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
     our: types.maybe(SpaceModel),
-    spaces: types.array(SpaceModel),
+    spaces: types.map(SpaceModel),
   })
   .views((self) => ({
     get isLoading() {
@@ -74,6 +74,11 @@ export const SpacesStore = types
     },
     get isLoaded() {
       return self.loader.state === 'loaded';
+    },
+    get spacesList() {
+      return Array.from(self.spaces.values()).filter(
+        (space: SpaceModelType) => space.type !== 'our'
+      );
     },
   }))
   .actions((self) => ({
@@ -88,6 +93,18 @@ export const SpacesStore = types
     setOurSpace(ourSpace: any) {
       self.our = ourSpace;
       if (!self.selected) self.selected = ourSpace;
+    },
+    selectSpace(spaceKey: string) {
+      self.selected = self.spaces.get(spaceKey)!;
+      // osState.theme.setCurrentSpaceTheme(spaceKey);
+      // if (
+      //   self.selected.theme.wallpaper !== osState.theme.theme.wallpaper
+      // ) {
+      //   console.log(self.selected.theme.wallpaper);
+      //   osState.theme.setWallpaper(self.selected.theme.wallpaper, {
+      //     spaceId: spaceKey,
+      //   });
+      // }
     },
   }));
 

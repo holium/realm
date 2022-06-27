@@ -11,10 +11,8 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
 
-import { ShipModelType } from '../ship/models/ship';
-
 /**
- * SpacesService
+ * DesktopService
  */
 export class SpacesService extends BaseService {
   private db: Store<DesktopStoreType>; // for persistance
@@ -67,5 +65,7 @@ export class SpacesService extends BaseService {
     return getSnapshot(this.state!);
   }
 
-  changeWallpaper(_event: any, spaceId: string, wallpaper: string) {}
+  changeWallpaper(_event: any, spaceId: string, wallpaper: string) {
+    this.state?.setWallpaper(wallpaper);
+  }
 }

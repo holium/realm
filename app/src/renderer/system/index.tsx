@@ -23,11 +23,11 @@ const DragBar = styled.div`
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   const { shell, identity, ship } = useServices();
-  const { themeStore, desktopStore } = shell;
+  const { theme, desktop } = shell;
   const { auth } = identity;
 
-  const isFullscreen = desktopStore.isFullscreen;
-  const wallpaper = themeStore.theme.wallpaper;
+  const isFullscreen = desktop.isFullscreen;
+  const wallpaper = theme.theme.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
@@ -35,8 +35,8 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 
   const loggedIn = ship !== undefined && !auth.isLoading;
   const isBlurred = useMemo(
-    () => !loggedIn || desktopStore.isBlurred,
-    [loggedIn, desktopStore.isBlurred]
+    () => !loggedIn || desktop.isBlurred,
+    [loggedIn, desktop.isBlurred]
   );
 
   const shipLoaded = ship?.loader.isLoaded;
