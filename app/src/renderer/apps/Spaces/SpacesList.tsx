@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { SpaceModelType } from 'renderer/logic/space/store';
+import { SpaceModelType } from 'renderer/logic-old/space/store';
 
 import { Grid } from 'renderer/components';
 import { SpaceRow } from './SpaceRow';

@@ -5,9 +5,8 @@ import { darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
-import { WindowThemeType } from 'renderer/logic/stores/config';
-import { WindowModelType } from 'renderer/logic/desktop/store';
-import { useMst } from 'renderer/logic/store';
+import { WindowThemeType } from 'renderer/logic-old/stores/config';
+import { WindowModelType } from 'renderer/logic-old/desktop/store';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
 import { WebView } from './WebView';
@@ -17,6 +16,7 @@ import { toJS } from 'mobx';
 import { NativeView } from './NativeView';
 import { nativeApps } from 'renderer/apps';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
+import { useServices } from 'renderer/logic/store-2';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -48,7 +48,9 @@ export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
     const { theme, window, desktopRef } = props;
     const { textColor, windowColor } = theme;
-    const { desktopStore } = useMst();
+    const { shell } = useServices();
+    const { desktopStore } = shell;
+
     const [unmaximize, setUnmaximize] = useState<
       | {
           x: number;

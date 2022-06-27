@@ -2,12 +2,11 @@ import { FC, useMemo, useState } from 'react';
 import { toJS } from 'mobx';
 import { rgba, lighten, darken } from 'polished';
 
-import { useSpaces, useShip, useMst } from 'renderer/logic/store';
-
 import { Grid, Flex, IconButton, Icons, Text } from 'renderer/components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store-2';
 
 type SpacesProps = {
   theme: any;
@@ -18,9 +17,8 @@ type SpacesProps = {
 };
 
 export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
-  const { ship } = useShip();
-  const { themeStore } = useMst();
-  const spacesStore = useSpaces();
+  const { ship, shell, spaces } = useServices();
+  const { themeStore } = shell;
 
   const { dimensions } = props;
 
@@ -76,11 +74,11 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
         overflowY="hidden"
       >
-        <SpacesList
+        {/* <SpacesList
           selected={spacesStore.selected}
           spaces={spacesStore.spacesList}
           onSelect={spacesStore.selectSpace}
-        />
+        /> */}
       </Flex>
       <Grid.Row expand noGutter></Grid.Row>
       <Flex
@@ -94,11 +92,11 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         flex={1}
         height={bottomHeight}
       >
-        <YouRow
+        {/* <YouRow
           selected={ship?.patp === spacesStore.selected?.id}
           ship={ship!}
           onSelect={spacesStore.selectSpace}
-        />
+        /> */}
       </Flex>
     </Grid.Column>
   );

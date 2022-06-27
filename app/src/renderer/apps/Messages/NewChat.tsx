@@ -13,12 +13,12 @@ import {
   Badge,
   Tag,
 } from 'renderer/components';
-import { useShip } from 'renderer/logic/store';
 import { toJS } from 'mobx';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { WindowThemeType } from 'renderer/logic-old/stores/config';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useServices } from 'renderer/logic/store-2';
 
 type IProps = {
   theme: WindowThemeType;
@@ -30,7 +30,7 @@ type IProps = {
 
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
-  const { ship } = useShip();
+  const { ship } = useServices();
   const { backgroundColor, textColor, iconColor, dockColor } = theme;
   const windowColor = useMemo(
     () => rgba(lighten(0.225, props.theme.windowColor), 0.8),

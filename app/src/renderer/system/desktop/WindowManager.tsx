@@ -1,12 +1,11 @@
 import { FC, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-
-import { useMst } from 'renderer/logic/store';
 import AppWindow from './components/AppWindow';
 import { ContextMenu } from 'renderer/components';
-import { toggleDevTools } from 'renderer/logic/desktop/api';
+import { toggleDevTools } from 'renderer/logic-old/desktop/api';
 import { rgba } from 'polished';
+import { useServices } from 'renderer/logic/store-2';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -15,7 +14,9 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    const { desktopStore, themeStore } = useMst();
+    // const { desktopStore, themeStore } = useMst();
+    const { shell } = useServices();
+    const { desktopStore, themeStore } = shell;
     const desktopRef = useRef<any>(null);
 
     useEffect(() => {

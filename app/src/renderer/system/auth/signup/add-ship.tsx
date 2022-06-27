@@ -19,7 +19,8 @@ import {
 // @ts-expect-error its there...
 import UrbitSVG from '../../../../../assets/urbit.svg';
 import { observer } from 'mobx-react';
-import { useAuth } from 'renderer/logic/store';
+import { useServices } from 'renderer/logic/store-2';
+import { SignupApi } from 'renderer/logic/signup';
 
 export const createShipForm = (
   defaults: any = {
@@ -98,12 +99,13 @@ type AddShipProps = {
 
 export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
   const { firstTime, next } = props;
-  const { signupStore, authStore } = useAuth();
+  const { identity } = useServices();
+  const { auth, signup } = identity;
   const { shipForm, urbitId, shipUrl, accessKey } = useMemo(
     () =>
       createShipForm(
         undefined,
-        [...authStore.shipList].map((ship: any) => ship.patp)
+        [...auth.shipList].map((ship: any) => ship.patp)
       ),
     []
   );
@@ -217,15 +219,14 @@ export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
           <div>
             <TextButton
               disabled={isNextDisabled}
-              // loading={authStore.isLoading}
+              // loading={auth.isLoading}
               onClick={(evt: any) => {
                 const formData = shipForm.actions.submit();
-                signupStore
-                  .addShip({
-                    ship: formData['urbit-id'],
-                    url: formData['ship-id'],
-                    code: formData['access-key'],
-                  })
+                SignupApi.addShip({
+                  ship: formData['urbit-id'],
+                  url: formData['ship-id'],
+                  code: formData['access-key'],
+                })
                   .then(() => {
                     console.log('before next');
                     // eslint-disable-next-line promise/no-callback-in-promise
@@ -238,7 +239,7 @@ export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
                   });
               }}
             >
-              {authStore.isLoading || signupStore.isLoading ? (
+              {auth.isLoading || signup.isLoading ? (
                 <Spinner size={0} />
               ) : (
                 'Next'

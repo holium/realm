@@ -1,6 +1,6 @@
 import { FC, useRef } from 'react';
 import styled from 'styled-components';
-import { WindowModelType } from 'renderer/logic/desktop/store';
+import { WindowModelType } from 'renderer/logic-old/desktop/store';
 import { nativeApps } from 'renderer/apps';
 
 export interface NativeViewProps {

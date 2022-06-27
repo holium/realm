@@ -2,20 +2,21 @@ import { FC, createRef, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten } from 'polished';
 
-import { useShip, useMst } from 'renderer/logic/store';
 import { Flex, Pulser, Divider } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';
 import { TrayMenu } from '../../TrayMenu';
 import { MiniApp } from '../../MiniAppWindow';
 import { Spaces } from 'renderer/apps/Spaces';
 import { SelectedSpace } from './SelectedSpace';
+import { useServices } from 'renderer/logic/store-2';
 
 type SpaceSelectorProps = {};
 
 export const SpaceSelector: FC<SpaceSelectorProps> = observer(
   (props: SpaceSelectorProps) => {
-    const { shipLoader } = useShip();
-    const { themeStore } = useMst();
+    const { ship, spaces, shell } = useServices();
+    // const { shipLoader } = ShipService;
+    const { themeStore } = shell;
     const theme = themeStore.theme;
     const selectorRef = createRef<HTMLDivElement>();
     const appRef = createRef<HTMLDivElement>();
@@ -52,7 +53,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             </MiniApp>
           }
         >
-          {shipLoader.isLoaded ? (
+          {spaces.isLoaded ? (
             <SelectedSpace selectorRef={selectorRef} />
           ) : (
             <TrayButton
@@ -93,7 +94,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             </TrayButton>
           )}
         </TrayMenu>
-        {shipLoader.isLoaded && <Divider customBg={dividerBg} ml={2} mr={2} />}
+        {ship && <Divider customBg={dividerBg} ml={2} mr={2} />}
       </Flex>
     );
   }

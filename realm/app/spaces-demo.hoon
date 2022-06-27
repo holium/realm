@@ -585,23 +585,23 @@
 ::
 ++  on-agent  on-agent:def
 ::
-++  on-arvo
-  |=  [=wire =sign-arvo]
-  ^-  (quip card _this)
+++  on-arvo  on-arvo:def
+  :: |=  [=wire =sign-arvo]
+  :: ^-  (quip card _this)
 
-  %-  (slog leaf+"{<dap.bowl>}: on-arvo called {<wire>}, {<sign-arvo>}..." ~)
+  :: %-  (slog leaf+"{<dap.bowl>}: on-arvo called {<wire>}, {<sign-arvo>}..." ~)
 
-  ?+  wire  (on-arvo:def wire sign-arvo)
+  :: ?+  wire  (on-arvo:def wire sign-arvo)
 
-    [%bind-route ~]
-      ?>  ?=([%eyre %bound *] sign-arvo)
-      ?:  accepted.sign-arvo
-        %-  (slog leaf+"{<dap.bowl>}: {<[wire sign-arvo]>}" ~)
-        `this
-        %-  (slog leaf+"{<dap.bowl>}: binding route failed" ~)
-      `this
+  ::   [%bind-route ~]
+  ::     ?>  ?=([%eyre %bound *] sign-arvo)
+  ::     ?:  accepted.sign-arvo
+  ::       %-  (slog leaf+"{<dap.bowl>}: {<[wire sign-arvo]>}" ~)
+  ::       `this
+  ::       %-  (slog leaf+"{<dap.bowl>}: binding route failed" ~)
+  ::     `this
 
-  ==
+  :: ==
 ::
 ++  on-fail   on-fail:def
 --

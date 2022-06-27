@@ -1,11 +1,10 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { WindowModelType } from 'renderer/logic/desktop/store';
 import { nativeApps } from 'renderer/apps';
-import { useMst, useShip } from 'renderer/logic/store';
+import { useServices } from 'renderer/logic/store-2';
 
 export interface WebviewProps {
-  window: WindowModelType | any;
+  window: any;
   isResizing?: boolean;
   hasTitlebar: boolean | undefined;
 }
@@ -14,8 +13,8 @@ const View = styled.div<{ hasTitleBar?: boolean }>``;
 
 export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   const { window, isResizing } = props;
-  const { ship } = useShip();
-  const { desktopStore, themeStore } = useMst();
+  const { ship, shell } = useServices();
+  const { desktopStore, themeStore } = shell;
   const webViewRef = useRef<any>(null);
   const elementRef = useRef(null);
 

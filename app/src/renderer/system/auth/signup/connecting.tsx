@@ -1,7 +1,8 @@
 import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Grid, Spinner, Text } from 'renderer/components';
-import { useAuth } from 'renderer/logic/store';
+import { useServices } from 'renderer/logic/store-2';
+import { SignupApi } from 'renderer/logic/signup';
 
 type AddShipProps = {
   next: () => any;
@@ -9,14 +10,15 @@ type AddShipProps = {
 
 export const ConnectingShip: FC<AddShipProps> = observer(
   (props: AddShipProps) => {
-    const { signupStore } = useAuth();
+    const { identity } = useServices();
+    const { signup } = identity;
     useEffect(() => {
-      signupStore.signupShip &&
-        signupStore.getProfile().then(() => {
+      signup.signupShip &&
+        SignupApi.getProfile(signup.signupShip.patp).then(() => {
           console.log('got profile');
           props.next();
         });
-    }, []);
+    }, [signup.signupShip]);
     // authStore.
     return (
       <Grid.Row expand noGutter>

@@ -2,10 +2,10 @@ import { FC, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { rgba, lighten } from 'polished';
 import styled, { css } from 'styled-components';
-import { useShip, useMst } from 'renderer/logic/store';
 import { Flex, Icons, Text } from 'renderer/components';
-import { SpaceModelType } from 'renderer/logic/space/store';
+import { SpaceModelType } from 'renderer/logic-old/space/store';
 import { ThemeType } from '../../theme';
+import { useServices } from 'renderer/logic/store-2';
 
 const EmptyGroup = styled.div`
   height: 32px;
@@ -51,7 +51,8 @@ type SpaceRowProps = {
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { themeStore } = useMst();
+  const { shell } = useServices();
+  const { themeStore } = shell;
 
   const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
   return (

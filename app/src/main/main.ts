@@ -15,7 +15,9 @@ import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { RealmCore } from '../core';
+// import { RealmCore } from '../core-a';
+import { Realm } from '../os';
+
 import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
@@ -111,7 +113,8 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  RealmCore.boot(mainWindow);
+  Realm.start(mainWindow);
+  // RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);

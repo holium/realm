@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { Flex, Spinner, Input } from 'renderer/components';
-import { useMst } from 'renderer/logic/store';
+import { useServices } from 'renderer/logic/store-2';
 import { useBrowser } from './store';
 
 // const ToolbarStyle = styled(TitlebarStyle)`
@@ -24,8 +24,8 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
   const { tab, isResizing } = props;
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
-
-  const { desktopStore, themeStore } = useMst();
+  const { shell } = useServices();
+  const { desktopStore, themeStore } = shell;
   const browserStore = useBrowser();
   const { iconColor } = themeStore.theme;
 

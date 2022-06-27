@@ -10,7 +10,7 @@
 
 +$  token
   $:  chain=?(%ethereum %uqbar)
-      contract-address=@t
+      contract=@t
       symbol=@t
       name=@t
       icon=@t

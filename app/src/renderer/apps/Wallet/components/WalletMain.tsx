@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
-import { WindowThemeType } from '../../../logic/stores/config';
+import { WindowThemeType } from '../../../logic-old/stores/config';
 import {
   Grid,
   Flex,

@@ -2,14 +2,15 @@ import { FC, useMemo } from 'react';
 import { Flex, Icons, IconButton } from 'renderer/components';
 import { SystemBarStyle } from '../../SystemBar.styles';
 import { SpaceSelector } from './SpaceSelector';
-import { useMst } from 'renderer/logic/store';
 import { AppDock } from './AppDock';
 import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store-2';
 
 type CommunityBarProps = {};
 
 export const CommunityBar: FC<CommunityBarProps> = observer(() => {
-  const { themeStore } = useMst();
+  const { shell } = useServices();
+  const { themeStore } = shell;
 
   const dockColor = useMemo(
     () => themeStore.theme.dockColor,
@@ -25,9 +26,7 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
   return (
     <SystemBarStyle pr={3} width="100%" customBg={dockColor}>
       <SpaceSelector />
-      <Flex flex={1}>
-        <AppDock />
-      </Flex>
+      <Flex flex={1}>{/* <AppDock /> */}</Flex>
       <Flex>
         <IconButton customBg={dockColor} size={24} ml={1} color={iconColor}>
           <Icons name="Search" />

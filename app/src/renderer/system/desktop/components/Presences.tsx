@@ -2,8 +2,8 @@
 // and renders cursor based on presence
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ShipModelType } from 'renderer/logic/ship/store';
-import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
+import { ShipModelType } from 'renderer/logic-old/ship/store';
+import { hexToRgb, rgbToString } from 'renderer/logic-old/utils/color';
 import styled from 'styled-components';
 import AnimatedCursor, { Vec2 } from './Cursor';
 import { useEventListener } from './Cursor/useEventListener';

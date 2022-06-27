@@ -1,4 +1,4 @@
-import { LoaderModel } from '../../logic/stores/common/loader';
+import { LoaderModel } from '../../logic-old/stores/common/loader';
 import { types, onSnapshot, Instance, tryReference } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { createContext, useContext } from 'react';

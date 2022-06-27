@@ -4,12 +4,12 @@ import { toJS } from 'mobx';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { useMst, useShip } from 'renderer/logic/store';
 import { searchPatpOrNickname } from './helpers';
 import { Flex, Text, Box, Sigil, IconButton, Icons } from '../';
 import { Row } from '../NewRow';
-import { ContactModelType } from 'core/ship/stores/contacts';
+import { ContactModelType } from 'core-a/ship/stores/contacts';
 import { darken } from 'polished';
+import { useServices } from 'renderer/logic/store-2';
 
 interface ShipSearchProps {
   heightOffset: number;
@@ -22,9 +22,9 @@ interface ShipSearchProps {
 export const ShipSearch: FC<ShipSearchProps> = observer(
   (props: ShipSearchProps) => {
     const { search, selected, customBg, heightOffset, onSelected } = props;
-    const { themeStore } = useMst();
+    const { shell, ship } = useServices();
+    const { themeStore } = shell;
     const { textTheme } = themeStore.theme;
-    const { ship } = useShip();
     const contacts = ship ? Array.from(ship?.contacts.rolodex.entries()) : [];
     const isAddingDisabled = selected.size > 0;
 

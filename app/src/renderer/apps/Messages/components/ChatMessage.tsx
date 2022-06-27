@@ -1,10 +1,10 @@
 import { FC, useMemo } from 'react';
 import { lighten } from 'polished';
 import { Flex, Text } from 'renderer/components';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { WindowThemeType } from 'renderer/logic-old/stores/config';
 import { Bubble } from './Bubble';
 import { Message } from './Message';
-import { displayDate } from 'renderer/logic/utils/time';
+import { displayDate } from 'renderer/logic-old/utils/time';
 
 export type MessageType = {
   index?: string;

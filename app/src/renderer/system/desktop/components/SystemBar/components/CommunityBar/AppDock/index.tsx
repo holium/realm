@@ -1,18 +1,18 @@
 import { FC, useMemo } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppModelType } from 'core/ship/stores/docket';
+import { AppModelType } from 'core-a/ship/stores/docket';
 import { AppTile } from 'renderer/components/AppTile';
-import { useMst, useSpaces } from 'renderer/logic/store';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
+import { useServices } from 'renderer/logic/store-2';
 
 interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
-  const { desktopStore, themeStore } = useMst();
-  const spacesStore = useSpaces();
+  const { shell, spaces } = useServices();
+  const { desktopStore, themeStore } = shell;
 
   const dividerBg = useMemo(
     () => rgba(lighten(0.2, themeStore.theme.dockColor), 0.4),
@@ -20,8 +20,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   );
 
   const orderedList = useMemo(
-    () => (spacesStore.selected ? spacesStore.selected.pinnedApps! : []),
-    [spacesStore.selected?.apps.pinned, spacesStore.selected?.pinnedApps]
+    () => (spaces.selected ? spaces.selected.pinnedApps! : []),
+    [spaces.selected?.apps.pinned, spaces.selected?.pinnedApps]
   );
 
   const pinnedApps = useMemo(() => {
@@ -37,7 +37,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         values={orderedList}
         onReorder={(newOrder: any) => {
           const newPinList = newOrder.map((app: any) => app.id);
-          spacesStore.selected?.setPinnedOrder(newPinList);
+          spaces.selected?.setPinnedOrder(newPinList);
         }}
       >
         {orderedList.map((app: AppModelType | any, index: number) => {
@@ -82,7 +82,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     label: 'Unpin',
                     onClick: (evt: any) => {
                       evt.stopPropagation();
-                      spacesStore.selected?.unpinApp(app.id);
+                      spaces.selected?.unpinApp(app.id);
                     },
                   },
 
@@ -111,15 +111,15 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   }, [
     desktopStore.activeWindow?.id,
     desktopStore.openAppIds,
-    spacesStore.selected?.id,
-    spacesStore.selected?.apps.pinned,
-    spacesStore.selected?.pinnedApps,
+    spaces.selected?.path,
+    spaces.selected?.apps.pinned,
+    spaces.selected?.pinnedApps,
   ]);
 
   const activeAndUnpinned = desktopStore.openApps.filter(
-    (appWindow) =>
-      spacesStore.selected &&
-      spacesStore.selected.pinnedApps.findIndex(
+    (appWindow: any) =>
+      spaces.selected &&
+      spaces.selected.pinnedApps.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );
@@ -134,7 +134,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       )}
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
-          const app = spacesStore.selected?.getAppData(unpinnedApp.id)!;
+          const app = spaces.selected?.getAppData(unpinnedApp.id)!;
           const selected = desktopStore.isActiveWindow(app.id);
           const open = !selected && desktopStore.isOpenWindow(app.id);
           return (
@@ -151,7 +151,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   label: 'Unpin',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    spacesStore.selected?.unpinApp(app.id);
+                    spaces.selected?.unpinApp(app.id);
                   },
                 },
                 {

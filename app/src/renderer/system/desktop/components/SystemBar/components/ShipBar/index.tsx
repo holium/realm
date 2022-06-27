@@ -4,18 +4,16 @@ import { observer } from 'mobx-react';
 
 import { SystemBarStyle } from '../../SystemBar.styles';
 import { Flex, IconButton, Icons } from 'renderer/components';
-import { ShipModelType } from 'renderer/logic/ship/store';
-import { useMst } from 'renderer/logic/store';
 import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
+import { useServices } from 'renderer/logic/store-2';
 
-type ShipTrayProps = {
-  ship: ShipModelType;
-};
+type ShipTrayProps = {};
 
-export const ShipTray: FC<ShipTrayProps> = observer((props: ShipTrayProps) => {
-  const { themeStore } = useMst();
+export const ShipTray: FC<ShipTrayProps> = observer(() => {
+  const { shell } = useServices();
+  const { themeStore } = shell;
 
   const { dockColor, textColor } = useMemo(
     () => themeStore.theme,
@@ -55,7 +53,7 @@ export const ShipTray: FC<ShipTrayProps> = observer((props: ShipTrayProps) => {
         {/* Holds the DM interface */}
         <MessagesTray theme={themeStore.theme} />
         {/* Allows logging out */}
-        <AccountTray theme={themeStore.theme} ship={props.ship} />
+        <AccountTray theme={themeStore.theme} />
       </Flex>
     </SystemBarStyle>
   );

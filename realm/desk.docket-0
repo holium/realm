@@ -1,8 +1,7 @@
 :~  title+'Realm'
     info+'A desktop environment for DAOs and communities. Developed by Holium.'
     color+0xce.bef0
-    image+'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg'
-    glob-http+['https://lomder-librun.sfo3.digitaloceanspaces.com/globs/glob-0v28ktr.ujaup.832r3.fbs8q.b9ssn.glob' 0v28ktr.ujaup.832r3.fbs8q.b9ssn]
+    glob-ames+[~zod 0v0]
     base+'realm'
     version+[0 1 0]
     website+'https://holium.com'

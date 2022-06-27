@@ -1,7 +1,7 @@
 import { useRef, FC, useEffect } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
-
+import { toJS } from 'mobx';
 import {
   Flex,
   Box,
@@ -16,9 +16,10 @@ import {
   MenuItem,
   Spinner,
 } from 'renderer/components';
-import { useAuth, useMst } from 'renderer/logic/store';
 import { ShipSelector } from './ShipSelector';
-import { DEFAULT_WALLPAPER } from 'core/theme/store';
+import { DEFAULT_WALLPAPER } from 'core-a/theme/store';
+import { useServices } from 'renderer/logic/store-2';
+import { AuthApi } from 'renderer/logic/auth';
 
 type LoginProps = {
   addShip: () => void;
@@ -28,8 +29,9 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { authStore } = useAuth();
-  const { themeStore } = useMst();
+  const { identity, shell } = useServices();
+  const { auth } = identity;
+  const { themeStore } = shell;
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -44,7 +46,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   });
   const { anchorPoint, show, setShow } = config;
 
-  const pendingShip = authStore.currentShip;
+  const pendingShip = auth.currentShip;
   const shipName = pendingShip?.nickname || pendingShip?.patp;
 
   useEffect(() => {
@@ -66,7 +68,8 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       passwordRef.current.blur();
       // @ts-expect-error typescript...
       wrapperRef.current.blur();
-      authStore.login(pendingShip!.patp, event.target.value);
+      window.electron.os.auth.login(pendingShip!.patp, event.target.value);
+      // auth.login(pendingShip!.patp, event.target.value);
     }
   };
 
@@ -77,6 +80,8 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     textShadow: themeStore.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
   };
   // }
+
+  console.log(toJS(auth.loader));
 
   return (
     <Fill>
@@ -160,7 +165,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     onKeyDown={submitPassword}
                     rightIcon={
                       <Flex justifyContent="center" alignItems="center">
-                        {authStore.loader.isLoading ? (
+                        {auth.loader.isLoading ? (
                           <Spinner size={0} />
                         ) : (
                           <IconButton
@@ -215,8 +220,9 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                       customBg={themeStore.theme.windowColor}
                       mt={1}
                       onClick={() => {
-                        authStore.removeShip(pendingShip.patp);
-                        authStore.clearSession();
+                        AuthApi.removeShip(pendingShip.patp);
+                        // auth.removeShip(pendingShip.patp);
+                        // auth.clearSession();
                       }}
                     />
                   </Menu>
@@ -239,7 +245,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
           <Flex gap={12}>
             <TextButton
               {...colorProps}
-              style={{ padding: '0 16px' }}
+              style={{ padding: '6px 10px', borderRadius: 6 }}
               onClick={() => addShip()}
             >
               <Flex

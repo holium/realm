@@ -1,4 +1,4 @@
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { WindowThemeType } from 'renderer/logic-old/stores/config';
 import { SystemApp } from './System';
 import { Browser, BrowserProps } from './Browser';
 import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';

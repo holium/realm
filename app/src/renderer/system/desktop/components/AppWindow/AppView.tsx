@@ -109,12 +109,12 @@
 
 import { FC, useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { useMst, useShip } from 'renderer/logic/store';
 import { Spinner, Flex } from 'renderer/components';
-import { WindowModelType } from 'renderer/logic/desktop/store';
+import { WindowModelType } from 'renderer/logic-old/desktop/store';
 import { toJS } from 'mobx';
 import { clone } from 'mobx-state-tree';
 import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store-2';
 
 interface AppViewProps {
   window: WindowModelType;
@@ -129,8 +129,8 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
-  const { ship } = useShip();
-  const { desktopStore, themeStore } = useMst();
+  const { ship, shell } = useServices();
+  const { desktopStore, themeStore } = shell;
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 

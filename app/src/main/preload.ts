@@ -1,7 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { AuthManager } from '../core/auth/manager';
-import { ShipManager } from '../core/ship/manager';
-import { RealmCore } from '../core';
+import { AuthManager } from '../core-a/auth/manager';
+import { ShipManager } from '../core-a/ship/manager';
+import { RealmCore } from '../core-a';
+import { Realm } from '../os';
 
 contextBridge.exposeInMainWorld('electron', {
   auth: AuthManager.preload,
@@ -30,4 +31,5 @@ contextBridge.exposeInMainWorld('electron', {
       return ipcRenderer.invoke('toggle-devtools');
     },
   },
+  os: Realm.preload,
 });

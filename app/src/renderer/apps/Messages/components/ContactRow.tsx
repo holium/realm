@@ -5,9 +5,9 @@ import { rgba, lighten, darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 import { Sigil, Flex, Box, Text, TextButton } from 'renderer/components';
-import { ChatType } from 'renderer/logic/ship/chat/store';
+import { ChatType } from 'renderer/logic-old/ship/chat/store';
 import { Message } from './Message';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { WindowThemeType } from 'renderer/logic-old/stores/config';
 
 type DMContact = {
   theme: WindowThemeType;

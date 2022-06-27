@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { rgba, lighten, darken } from 'polished';
-import { WindowThemeType } from '../../logic/stores/config';
+import { WindowThemeType } from '../../logic-old/stores/config';
 import { Grid, Flex, IconButton, Icons, Text } from '../../components';
 import { WalletMain } from './components/WalletMain';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';

@@ -1,5 +1,5 @@
 import { createField, createForm } from 'mobx-easy-form';
-import { tokenizeMessage } from 'renderer/logic/utils/dms';
+import { tokenizeMessage } from 'renderer/logic-old/utils/dms';
 
 export const createDmForm = (
   defaults: any = {

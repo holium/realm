@@ -1,7 +1,8 @@
-import { RealmCorePreloadType } from '../core';
-import { ShipPreloadType } from '../core/ship/manager';
-import { AuthPreloadType } from '../core/auth/manager';
-import { ThemePreloadType } from '../core/theme/manager';
+import { OSPreloadType } from './../os/index';
+import { RealmCorePreloadType } from '../core-a';
+import { ShipPreloadType } from '../core-a/ship/manager';
+import { AuthPreloadType } from '../core-a/auth/manager';
+import { ThemePreloadType } from '../core-a/theme/manager';
 
 declare global {
   interface Window {
@@ -19,6 +20,7 @@ declare global {
         closeApp(app: any): Promise<any>;
         toggleDevTools(): void;
       };
+      os: OSPreloadType;
     };
   }
 }

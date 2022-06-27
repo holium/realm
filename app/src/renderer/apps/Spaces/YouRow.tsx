@@ -1,9 +1,9 @@
 import { FC, useMemo } from 'react';
 
 import { Flex, Sigil, Text } from 'renderer/components';
-import { useShip, useMst } from 'renderer/logic/store';
-import { ShipModelType } from 'core/ship/stores/ship';
+import { ShipModelType } from 'core-a/ship/stores/ship';
 import { SpaceRowStyle } from './SpaceRow';
+import { useServices } from 'renderer/logic/store-2';
 
 type SpaceRowProps = {
   ship: ShipModelType;
@@ -13,8 +13,8 @@ type SpaceRowProps = {
 
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, onSelect } = props;
-  const { ship } = useShip();
-  const { themeStore } = useMst();
+  const { ship, shell } = useServices();
+  const { themeStore } = shell;
   const currentShip = ship!;
   const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
   return (

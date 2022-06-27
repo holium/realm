@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { WindowThemeType } from 'renderer/logic-old/stores/config';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';

@@ -10,10 +10,10 @@ import {
   Text,
   IconButton,
 } from 'renderer/components';
-import { useMst, useShip, useAuth } from 'renderer/logic/store';
-import { displayDate } from 'renderer/logic/utils/time';
-import { ThemeModelType } from 'core/theme/store';
+import { displayDate } from 'renderer/logic-old/utils/time';
+import { ThemeModelType } from 'core-a/theme/store';
 import { nativeApps } from '..';
+import { useServices } from 'renderer/logic/store-2';
 
 type ProfileProps = {
   theme: ThemeModelType;
@@ -24,9 +24,9 @@ type ProfileProps = {
 };
 
 export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
-  const { ship } = useShip();
-  const { authStore } = useAuth();
-  const { desktopStore, themeStore } = useMst();
+  const { shell, ship, identity } = useServices();
+  const { auth } = identity;
+  const { desktopStore, themeStore } = shell;
   let [batteryLevel, setBatteryLevel] = useState(0);
   const { dimensions } = props;
   const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
@@ -106,7 +106,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
             color={iconColor}
             style={{ cursor: 'none' }}
             onClick={() => {
-              authStore.logout(currentShip.patp);
+              auth.logout(currentShip.patp);
             }}
           >
             <Icons name="Lock" />
@@ -174,7 +174,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
           icon={<Icons size={1} name="Logout" />}
           customBg={bgHover}
           onClick={() => {
-            authStore.logout();
+            auth.logout();
           }}
         />
       </Flex> */}
