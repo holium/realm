@@ -84,6 +84,7 @@ export class SpacesService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
+
     this.setShipSpace(ship);
 
     const syncEffect = {

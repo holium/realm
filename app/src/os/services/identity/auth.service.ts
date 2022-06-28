@@ -40,7 +40,6 @@ export class AuthService extends BaseService {
     logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
     setSelected: (ship: string) =>
       ipcRenderer.invoke('realm.auth.set-selected', ship),
-
     setOrder: (order: any[]) =>
       ipcRenderer.invoke('realm.auth.set-order', order),
     addShip: (newShip: { ship: string; url: string; code: string }) =>
