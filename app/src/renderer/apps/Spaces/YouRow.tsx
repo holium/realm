@@ -1,9 +1,9 @@
 import { FC, useMemo } from 'react';
 
 import { Flex, Sigil, Text } from 'renderer/components';
-import { useShip, useMst } from 'renderer/logic/store';
-import { ShipModelType } from 'core/ship/stores/ship';
+import { ShipModelType } from 'os/services/ship/models/ship';
 import { SpaceRowStyle } from './SpaceRow';
+import { useServices } from 'renderer/logic/store';
 
 type SpaceRowProps = {
   ship: ShipModelType;
@@ -13,17 +13,17 @@ type SpaceRowProps = {
 
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, onSelect } = props;
-  const { ship } = useShip();
-  const { themeStore } = useMst();
+  const { ship, shell } = useServices();
+  const { theme } = shell;
   const currentShip = ship!;
-  const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
+  const currentTheme = useMemo(() => theme.theme, [theme.theme]);
   return (
     <SpaceRowStyle
       data-close-tray="true"
       style={{ width: '100%' }}
       className="realm-cursor-hover"
       selected={selected}
-      customBg={theme.dockColor}
+      customBg={currentTheme.dockColor}
       onClick={() => {
         onSelect(ship!.patp);
       }}

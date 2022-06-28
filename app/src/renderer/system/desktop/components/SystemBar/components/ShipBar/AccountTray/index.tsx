@@ -1,23 +1,22 @@
 import { FC, createRef } from 'react';
 import { motion } from 'framer-motion';
-import { Flex, Icons, Pulser, Sigil } from 'renderer/components';
-import { ShipModelType } from 'renderer/logic/ship/store';
+import { Flex, Pulser, Sigil } from 'renderer/components';
 
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
-import { useShip } from 'renderer/logic/store';
 import { Profile } from 'renderer/apps/Profile';
 import { rgba } from 'polished';
-import { ThemeModelType } from 'core/theme/store';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { useServices } from 'renderer/logic/store';
 
 type AccountTrayProps = {
-  ship: ShipModelType;
   theme: ThemeModelType;
 };
 
 export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
-  const { ship, theme } = props;
-  const { shipLoader } = useShip();
+  const { theme } = props;
+  const { ship } = useServices();
+  // const { shipLoader } = useShip();
 
   const { windowColor, textColor } = theme;
   const accountButtonRef = createRef<HTMLButtonElement>();
@@ -57,7 +56,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
         whileTap={{ scale: 0.9 }}
         transition={{ scale: 0.2 }}
       >
-        {shipLoader.isLoaded ? (
+        {ship ? (
           <Sigil
             simple
             size={28}

@@ -4,58 +4,47 @@ import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { theme } from './theme';
 import {
-  AuthProvider,
-  authState,
-  shipState,
-  OSProvider,
-  osState,
-  ShipProvider,
-  useMst,
-  useShip,
+  CoreProvider,
+  useCore,
+  coreStore,
+  ServiceProvider,
+  servicesStore,
+  useServices,
 } from './logic/store';
-import { onStart } from './logic/api/realm.core';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Mouse } from './system/desktop/components/Mouse';
 
-import { observer, Observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 
 export const App = observer(() => {
-  const { themeStore, desktopStore } = useMst();
-  useEffect(() => {
-    onStart();
-  }, []);
-
-  const shellMemo = useMemo(
-    () => (themeStore.loader.isLoaded ? <Shell /> : <div />),
-    [themeStore.loader.isLoaded]
-  );
-
+  const { booted } = useCore();
+  const { shell } = useServices();
+  const { desktop } = shell;
+  const shellMemo = useMemo(() => (booted ? <Shell /> : <div />), [booted]);
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
-        hide={desktopStore.isMouseInWebview}
-        cursorColor={desktopStore.mouseColor}
+        hide={desktop.isMouseInWebview}
+        cursorColor={desktop.mouseColor}
         animateOut={false}
       />
     );
-  }, [desktopStore.mouseColor, desktopStore.isMouseInWebview]);
+  }, [desktop.mouseColor, desktop.isMouseInWebview]);
 
   return (
-    <OSProvider value={osState}>
+    <CoreProvider value={coreStore}>
       <ThemeProvider theme={theme.light}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}
-          <AuthProvider value={authState}>
-            <ShipProvider value={shipState}>
-              {mouseMemo}
-              {shellMemo}
-              <div id="portal-root" />
-            </ShipProvider>
-          </AuthProvider>
+          <ServiceProvider value={servicesStore}>
+            {mouseMemo}
+            {shellMemo}
+            <div id="portal-root" />
+          </ServiceProvider>
         </MotionConfig>
       </ThemeProvider>
-    </OSProvider>
+    </CoreProvider>
   );
 });
 

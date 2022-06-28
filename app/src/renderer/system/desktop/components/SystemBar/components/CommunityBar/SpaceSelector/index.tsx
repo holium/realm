@@ -2,25 +2,25 @@ import { FC, createRef, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten } from 'polished';
 
-import { useShip, useMst } from 'renderer/logic/store';
 import { Flex, Pulser, Divider } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';
 import { TrayMenu } from '../../TrayMenu';
 import { MiniApp } from '../../MiniAppWindow';
 import { Spaces } from 'renderer/apps/Spaces';
 import { SelectedSpace } from './SelectedSpace';
+import { useServices } from 'renderer/logic/store';
 
 type SpaceSelectorProps = {};
 
 export const SpaceSelector: FC<SpaceSelectorProps> = observer(
   (props: SpaceSelectorProps) => {
-    const { shipLoader } = useShip();
-    const { themeStore } = useMst();
-    const theme = themeStore.theme;
+    const { ship, spaces, shell } = useServices();
+    // const { shipLoader } = ShipService;
+    const { theme } = shell;
     const selectorRef = createRef<HTMLDivElement>();
     const appRef = createRef<HTMLDivElement>();
 
-    const { windowColor, dockColor, textColor } = theme;
+    const { windowColor, dockColor, textColor } = theme.theme;
     const dividerBg = useMemo(
       () => rgba(lighten(0.2, dockColor), 0.4),
       [theme]
@@ -52,7 +52,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             </MiniApp>
           }
         >
-          {shipLoader.isLoaded ? (
+          {spaces.isLoaded ? (
             <SelectedSpace selectorRef={selectorRef} />
           ) : (
             <TrayButton
@@ -64,7 +64,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             >
               <Flex>
                 <Pulser
-                  background={rgba(theme.backgroundColor, 0.5)}
+                  background={rgba(theme.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={28}
                   width={28}
@@ -72,19 +72,18 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
               </Flex>
               <Flex
                 style={{ pointerEvents: 'none' }}
-                // mt="2px"
                 flexDirection="column"
                 justifyContent="center"
               >
                 <Pulser
                   style={{ marginBottom: 2 }}
-                  background={rgba(theme.backgroundColor, 0.5)}
+                  background={rgba(theme.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={12}
                   width={40}
                 />
                 <Pulser
-                  background={rgba(theme.backgroundColor, 0.5)}
+                  background={rgba(theme.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={14}
                   width={90}
@@ -93,7 +92,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             </TrayButton>
           )}
         </TrayMenu>
-        {shipLoader.isLoaded && <Divider customBg={dividerBg} ml={2} mr={2} />}
+        {ship && <Divider customBg={dividerBg} ml={2} mr={2} />}
       </Flex>
     );
   }

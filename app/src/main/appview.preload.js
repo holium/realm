@@ -20,7 +20,7 @@ ipc.on('load-window-id', (e, windowId) => {
 });
 
 window.onload = function () {
-  ipc.on('mouse-color', (event, color) => {
+  ipc.on('mouse-color', (event, color, initialRender) => {
     renderMouse(color);
   });
   renderMouse();

@@ -1,9 +1,6 @@
-import { WindowThemeType } from 'renderer/logic/stores/config';
-import { SystemApp } from './System';
-import { Browser, BrowserProps } from './Browser';
-import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';
 const isDev = true;
 import { devApps } from './development';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 
 export type NativeAppType = {
   id: string;
@@ -15,13 +12,11 @@ export type NativeAppType = {
     hideTitlebarBorder?: boolean;
     noTitlebar?: boolean;
     openFullscreen?: boolean;
-    titlebar?: React.FC<any>;
-    component: React.FC<any>;
   };
   web?: {
     url: string;
     openFullscreen?: boolean;
-    theme?: WindowThemeType;
+    theme?: ThemeModelType;
     development?: boolean;
   };
 };
@@ -41,8 +36,6 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: false,
       noTitlebar: true,
       openFullscreen: true,
-      titlebar: (props: BrowserToolbarProps) => <BrowserToolbar {...props} />,
-      component: (props: BrowserProps) => <Browser {...props} />,
     },
   },
   'os-settings': {
@@ -53,7 +46,6 @@ export const nativeApps: AppManifestMap = {
     type: 'native',
     native: {
       hideTitlebarBorder: true,
-      component: (props: any) => <SystemApp {...props} />,
     },
   },
   ...{ ...(isDev ? devApps : {}) },

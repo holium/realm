@@ -1,13 +1,15 @@
 import { FC } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
-import { useMst, useShip, useSpaces } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
 import { AppTile } from 'renderer/components/AppTile';
-import { AppModelType } from 'core/ship/stores/docket';
+import { AppModelType } from 'os/services/ship/models/docket';
 import { NativeAppList } from 'renderer/apps';
+import { useServices } from 'renderer/logic/store';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type HomeWindowProps = {
   customBg: string;
@@ -24,9 +26,8 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
-  const { ship } = useShip();
-  const { desktopStore, themeStore } = useMst();
-  const spacesStore = useSpaces();
+  const { ship, spaces, shell } = useServices();
+  const { desktop, theme } = shell;
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
@@ -42,7 +43,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           display: isOpen ? 'block' : 'none',
         }}
         exit={{ opacity: 0 }}
-        customBg={themeStore.theme.dockColor}
+        customBg={theme.theme.dockColor}
       >
         <Flex
           flex={1}
@@ -88,7 +89,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             flexDirection="row"
           >
             {apps.map((app: any, index: number) => {
-              const isAppPinned = spacesStore.selected?.isAppPinned(app.id);
+              const isAppPinned = spaces.selected?.isAppPinned(app.id);
               return (
                 <AppTile
                   key={app.title + index + 'grid'}
@@ -103,8 +104,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                       onClick: (evt: any) => {
                         evt.stopPropagation();
                         isAppPinned
-                          ? spacesStore.selected?.unpinApp(app.id)
-                          : spacesStore.selected?.pinApp(app.id);
+                          ? spaces.selected?.unpinApp(app.id)
+                          : spaces.selected?.pinApp(app.id);
                       },
                     },
                     {
@@ -139,7 +140,12 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                     exit: { opacity: 0, top: 100 },
                   }}
                   onAppClick={(selectedApp: AppModelType) => {
-                    desktopStore.openBrowserWindow(selectedApp);
+                    DesktopActions.openAppWindow(
+                      spaces.selected!.path,
+                      toJS(selectedApp)
+                    );
+                    // DesktopActions.setBlur(false);
+                    DesktopActions.setHomePane(false);
                   }}
                 />
               );

@@ -1,16 +1,18 @@
-import { FC, useCallback, useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { SystemBarStyle } from '../SystemBar.styles';
 import { motion, useMotionValue } from 'framer-motion';
 import HoliumAnimated from 'renderer/components/Icons/holium';
-import { useMst } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type HomeButton = {};
 
 export const HomeButton: FC<HomeButton> = observer(() => {
-  const { themeStore, desktopStore } = useMst();
+  const { shell } = useServices();
+  const { theme, desktop } = shell;
 
-  const { dockColor, textColor } = themeStore.theme;
+  const { dockColor, textColor } = theme.theme;
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
@@ -20,7 +22,8 @@ export const HomeButton: FC<HomeButton> = observer(() => {
     y.set(event.clientY - rect.top);
   }
   const onHome = () => {
-    desktopStore.setHomePane(!desktopStore.showHomePane);
+    // DesktopActions.setBlur(!desktop.isBlurred);
+    DesktopActions.setHomePane(!desktop.showHomePane);
   };
 
   return useMemo(
@@ -55,7 +58,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
         </SystemBarStyle>
       </motion.div>
     ),
-    [themeStore.theme.textColor, themeStore.theme.dockColor]
+    [theme.theme.textColor, theme.theme.dockColor]
   );
 });
 

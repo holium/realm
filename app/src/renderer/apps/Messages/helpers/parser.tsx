@@ -2,7 +2,7 @@ import { toJS } from 'mobx';
 import { Text, GroupLink } from 'renderer/components';
 import { AppLink } from 'renderer/components/Embeds/AppLink';
 import { TextParsed } from '../components/TextContent';
-import { cleanNounColor } from 'renderer/logic/utils/color';
+import { cleanNounColor } from 'os/lib/color';
 
 export const getTextFromContent = (type: string, content: any) => {
   if (type === 'reference') {
@@ -16,7 +16,7 @@ export const getReferenceView = async (reference: any, setter: any) => {
   const referenceType: any = Object.keys(reference)[0];
   switch (referenceType) {
     case 'group':
-      window.electron.ship
+      window.electron.os.ship
         .getMetadata(`${reference.group}/groups${reference.group}`)
         .then((response: any) => {
           if (response) {
@@ -45,7 +45,7 @@ export const getReferenceView = async (reference: any, setter: any) => {
 
       break;
     case 'app':
-      window.electron.ship
+      window.electron.os.ship
         .getAppPreview(reference.app.ship, reference.app.desk)
         .then((response: any) => {
           setter(

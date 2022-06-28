@@ -1,10 +1,10 @@
 import { FC, useMemo } from 'react';
 import { lighten } from 'polished';
 import { Flex, Text } from 'renderer/components';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Bubble } from './Bubble';
 import { Message } from './Message';
-import { displayDate } from 'renderer/logic/utils/time';
+import { displayDate } from 'os/lib/time';
 
 export type MessageType = {
   index?: string;
@@ -16,7 +16,7 @@ export type MessageType = {
 };
 
 type IProps = {
-  theme?: WindowThemeType;
+  theme?: ThemeModelType;
   our: string;
   ourColor: string;
   message: MessageType;

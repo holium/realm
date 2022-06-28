@@ -1,7 +1,7 @@
 import { useRef, FC, useEffect } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
-
+import { toJS } from 'mobx';
 import {
   Flex,
   Box,
@@ -16,9 +16,10 @@ import {
   MenuItem,
   Spinner,
 } from 'renderer/components';
-import { useAuth, useMst } from 'renderer/logic/store';
 import { ShipSelector } from './ShipSelector';
-import { DEFAULT_WALLPAPER } from 'core/theme/store';
+import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
+import { useServices } from 'renderer/logic/store';
+import { AuthActions } from 'renderer/logic/actions/auth';
 
 type LoginProps = {
   addShip: () => void;
@@ -28,8 +29,9 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { authStore } = useAuth();
-  const { themeStore } = useMst();
+  const { identity, shell } = useServices();
+  const { auth } = identity;
+  const { theme } = shell;
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -44,14 +46,14 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   });
   const { anchorPoint, show, setShow } = config;
 
-  const pendingShip = authStore.currentShip;
+  const pendingShip = auth.currentShip;
   const shipName = pendingShip?.nickname || pendingShip?.patp;
 
   useEffect(() => {
     // Set the wallpaper on load
-    !themeStore.theme &&
+    !theme.theme &&
       pendingShip &&
-      themeStore.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER, {
+      theme.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER, {
         patp: pendingShip?.patp!,
       });
   }, [pendingShip !== null]);
@@ -61,20 +63,24 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       // @ts-expect-error typescript...
       submitRef.current.focus();
       // @ts-expect-error typescript...
-      submitRef.current.click();
-      // @ts-expect-error typescript...
       passwordRef.current.blur();
       // @ts-expect-error typescript...
       wrapperRef.current.blur();
-      authStore.login(pendingShip!.patp, event.target.value);
     }
+  };
+  const clickSubmit = (event: any) => {
+    event.stopPropagation();
+
+    // console.log(passwordRef.current.value);
+    // @ts-expect-error typescript...
+    window.electron.os.auth.login(pendingShip!.patp, passwordRef.current.value);
   };
 
   let colorProps = null;
   // if (theme) {
   colorProps = {
-    color: themeStore.theme?.textColor,
-    textShadow: themeStore.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
+    color: theme.theme?.textColor,
+    textShadow: theme.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
   };
   // }
 
@@ -160,15 +166,15 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     onKeyDown={submitPassword}
                     rightIcon={
                       <Flex justifyContent="center" alignItems="center">
-                        {authStore.loader.isLoading ? (
+                        {auth.loader.isLoading ? (
                           <Spinner size={0} />
                         ) : (
                           <IconButton
                             ref={submitRef}
-                            luminosity={themeStore.theme?.textTheme}
+                            luminosity={theme.theme?.textTheme}
                             size={24}
                             canFocus
-                            onKeyDown={submitPassword}
+                            onClick={(evt: any) => clickSubmit(evt)}
                           >
                             <Icons opacity={0.5} name="ArrowRightLine" />
                           </IconButton>
@@ -179,7 +185,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   <IconButton
                     size={26}
                     ref={optionsRef}
-                    luminosity={themeStore.theme?.textTheme}
+                    luminosity={theme.theme?.textTheme}
                     opacity={1}
                     onClick={(evt: any) => {
                       evt.preventDefault();
@@ -191,7 +197,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   </IconButton>
                   <Menu
                     id={`${pendingShip.patp}-user-menu`}
-                    customBg={themeStore.theme.windowColor}
+                    customBg={theme.theme.windowColor}
                     style={{
                       top: anchorPoint && anchorPoint.y + 8,
                       left: anchorPoint && anchorPoint.x + 10,
@@ -205,18 +211,19 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   >
                     <MenuItem
                       label="Reset password"
-                      customBg={themeStore.theme.windowColor}
+                      customBg={theme.theme.windowColor}
                       onClick={() => {
                         console.log('do reset form');
                       }}
                     />
                     <MenuItem
                       label="Remove ship"
-                      customBg={themeStore.theme.windowColor}
+                      customBg={theme.theme.windowColor}
                       mt={1}
                       onClick={() => {
-                        authStore.removeShip(pendingShip.patp);
-                        authStore.clearSession();
+                        AuthActions.removeShip(pendingShip.patp);
+                        // auth.removeShip(pendingShip.patp);
+                        // auth.clearSession();
                       }}
                     />
                   </Menu>
@@ -239,7 +246,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
           <Flex gap={12}>
             <TextButton
               {...colorProps}
-              style={{ padding: '0 16px' }}
+              style={{ padding: '6px 10px', borderRadius: 6 }}
               onClick={() => addShip()}
             >
               <Flex

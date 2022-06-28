@@ -6,8 +6,8 @@ import normalizeUrl from 'normalize-url';
 import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { Flex, Icons, Input, Spinner } from 'renderer/components';
 import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
-import { useMst } from 'renderer/logic/store';
 import { useBrowser } from './store';
+import { useServices } from 'renderer/logic/store';
 
 const ToolbarStyle = styled(TitlebarStyle)`
   /* height: 42px; */
@@ -40,12 +40,13 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
     onClose,
     onMaximize,
   } = props;
-  const { themeStore } = useMst();
+  const { shell } = useServices();
+  const { desktop, theme } = shell;
   const browserStore = useBrowser();
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
 
-  const { iconColor } = themeStore.theme;
+  const { iconColor } = theme.theme;
 
   const { searchForm, searchQuery } = useMemo(
     () =>

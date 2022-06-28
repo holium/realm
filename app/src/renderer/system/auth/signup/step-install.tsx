@@ -1,7 +1,6 @@
 import { FC, useMemo } from 'react';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
-import { useAuth } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 
 import {
@@ -15,6 +14,8 @@ import {
   Box,
   TextButton,
 } from '../../../components';
+import { useServices } from 'renderer/logic/store';
+import { SignupActions } from 'renderer/logic/actions/signup';
 
 type InstallStepProps = {
   next: () => void;
@@ -24,13 +25,14 @@ type InstallStepProps = {
 
 export const StepInstall: FC<InstallStepProps> = observer(
   (props: InstallStepProps) => {
-    const { signupStore } = useAuth();
+    const { identity } = useServices();
+    const { signup } = identity;
     const { next } = props;
 
-    const shipName = signupStore.signupShip!.patp;
-    const shipNick = signupStore.signupShip!.nickname;
-    const shipColor = signupStore.signupShip!.color!;
-    const avatar = signupStore.signupShip!.avatar;
+    const shipName = signup.signupShip!.patp;
+    const shipNick = signup.signupShip!.nickname;
+    const shipColor = signup.signupShip!.color!;
+    const avatar = signup.signupShip!.avatar;
 
     return (
       <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
@@ -92,15 +94,15 @@ export const StepInstall: FC<InstallStepProps> = observer(
               height={32}
               style={{ width: 200 }}
               rightContent={
-                signupStore.installer.isLoading ? (
+                signup.installer.isLoading ? (
                   <Spinner size={0} />
-                ) : signupStore.installer.isLoaded ? (
+                ) : signup.installer.isLoaded ? (
                   <Icons ml={2} size={1} name="CheckCircle" />
                 ) : (
                   <Icons ml={2} size={1} name="DownloadCircle" />
                 )
               }
-              onClick={() => signupStore.installRealm()}
+              onClick={() => signup.installRealm()}
             >
               Install Realm
             </ActionButton>
@@ -112,7 +114,7 @@ export const StepInstall: FC<InstallStepProps> = observer(
               opacity={0.6}
               mt={3}
             >
-              {!signupStore.installer.isLoaded
+              {!signup.installer.isLoaded
                 ? 'This will just take a minute'
                 : 'Congrats! You are ready to enter a new world.'}
             </Text>
@@ -126,14 +128,13 @@ export const StepInstall: FC<InstallStepProps> = observer(
             justifyContent="space-between"
           >
             <TextButton
-              disabled={!signupStore.installer.isLoaded}
+              disabled={!signup.installer.isLoaded}
               onClick={(evt: any) => {
-                signupStore.completeSignup().then(() => {
-                  next();
-                });
+                SignupActions.completeSignup();
+                next();
               }}
             >
-              {signupStore.isLoading ? <Spinner size={0} /> : 'Next'}
+              {signup.isLoading ? <Spinner size={0} /> : 'Next'}
             </TextButton>
           </Flex>
         </Box>

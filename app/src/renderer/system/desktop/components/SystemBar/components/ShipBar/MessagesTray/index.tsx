@@ -1,12 +1,11 @@
 import { FC, useRef, createRef } from 'react';
 import { IconButton, Icons, Badge } from 'renderer/components';
-import { WindowThemeType } from 'renderer/logic/stores/config';
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { Chat } from 'renderer/apps/Messages';
 
 type MessagesTrayProps = {
-  theme: WindowThemeType;
+  theme: any;
 };
 
 const iconSize = 28;

@@ -1,27 +1,29 @@
 import { FC, useMemo } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppModelType } from 'core/ship/stores/docket';
+import { AppModelType } from 'os/services/ship/models/docket';
 import { AppTile } from 'renderer/components/AppTile';
-import { useMst, useSpaces } from 'renderer/logic/store';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
+import { useServices } from 'renderer/logic/store';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
-  const { desktopStore, themeStore } = useMst();
-  const spacesStore = useSpaces();
+  const { shell, spaces } = useServices();
+  const { desktop, theme } = shell;
 
   const dividerBg = useMemo(
-    () => rgba(lighten(0.2, themeStore.theme.dockColor), 0.4),
-    [themeStore.theme]
+    () => rgba(lighten(0.2, theme.theme.dockColor), 0.4),
+    [theme.theme]
   );
 
   const orderedList = useMemo(
-    () => (spacesStore.selected ? spacesStore.selected.pinnedApps! : []),
-    [spacesStore.selected?.apps.pinned, spacesStore.selected?.pinnedApps]
+    () => (spaces.selected ? spaces.selected.pinnedApps! : []),
+    [spaces.selected?.apps.pinned, spaces.selected?.pinnedApps]
   );
 
   const pinnedApps = useMemo(() => {
@@ -37,12 +39,12 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         values={orderedList}
         onReorder={(newOrder: any) => {
           const newPinList = newOrder.map((app: any) => app.id);
-          spacesStore.selected?.setPinnedOrder(newPinList);
+          spaces.selected?.setPinnedOrder(newPinList);
         }}
       >
         {orderedList.map((app: AppModelType | any, index: number) => {
-          const selected = desktopStore.isActiveWindow(app.id);
-          const open = !selected && desktopStore.isOpenWindow(app.id);
+          const selected = desktop.isActiveWindow(app.id);
+          const open = !selected && desktop.isOpenWindow(app.id);
           return (
             <Reorder.Item
               key={app.id}
@@ -62,10 +64,17 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               // }}
               onClick={(evt: any) => {
                 const selectedApp = app;
-                if (desktopStore.isOpenWindow(selectedApp.id)) {
-                  desktopStore.setActive(selectedApp.id);
+                if (desktop.isOpenWindow(selectedApp.id)) {
+                  DesktopActions.setActive(
+                    spaces.selected!.path,
+                    selectedApp.id
+                  );
+                  // desktop.setActive(selectedApp.id);
                 } else {
-                  desktopStore.openBrowserWindow(selectedApp);
+                  DesktopActions.openAppWindow(
+                    spaces.selected!.path,
+                    selectedApp.toJSON()
+                  );
                 }
               }}
               whileDrag={{ zIndex: 20 }}
@@ -82,22 +91,17 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     label: 'Unpin',
                     onClick: (evt: any) => {
                       evt.stopPropagation();
-                      spacesStore.selected?.unpinApp(app.id);
-                    },
-                  },
-
-                  {
-                    label: 'Uninstall app',
-                    disabled: true,
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      console.log('start uninstall');
+                      SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                     },
                   },
                   {
                     label: 'Close',
                     section: 2,
                     onClick: (evt: any) => {
+                      DesktopActions.closeAppWindow(
+                        spaces.selected?.path!,
+                        toJS(app)
+                      );
                       evt.stopPropagation();
                     },
                   },
@@ -109,17 +113,17 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       </Reorder.Group>
     );
   }, [
-    desktopStore.activeWindow?.id,
-    desktopStore.openAppIds,
-    spacesStore.selected?.id,
-    spacesStore.selected?.apps.pinned,
-    spacesStore.selected?.pinnedApps,
+    desktop.activeWindow?.id,
+    desktop.openAppIds,
+    spaces.selected?.path,
+    spaces.selected?.apps.pinned,
+    spaces.selected?.pinnedApps,
   ]);
 
-  const activeAndUnpinned = desktopStore.openApps.filter(
-    (appWindow) =>
-      spacesStore.selected &&
-      spacesStore.selected.pinnedApps.findIndex(
+  const activeAndUnpinned = desktop.openApps.filter(
+    (appWindow: any) =>
+      spaces.selected &&
+      spaces.selected.pinnedApps.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );
@@ -134,9 +138,9 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       )}
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
-          const app = spacesStore.selected?.getAppData(unpinnedApp.id)!;
-          const selected = desktopStore.isActiveWindow(app.id);
-          const open = !selected && desktopStore.isOpenWindow(app.id);
+          const app = spaces.selected?.getAppData(unpinnedApp.id)!;
+          const selected = desktop.isActiveWindow(app.id);
+          const open = !selected && desktop.isOpenWindow(app.id);
           return (
             <AppTile
               key={`unpinned-${app.id}`}
@@ -151,30 +155,32 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   label: 'Unpin',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    spacesStore.selected?.unpinApp(app.id);
-                  },
-                },
-                {
-                  label: 'Uninstall app',
-                  disabled: true,
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    console.log('start uninstall');
+                    SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                   },
                 },
                 {
                   label: 'Close',
                   section: 2,
                   onClick: (evt: any) => {
+                    DesktopActions.closeAppWindow(
+                      spaces.selected?.path!,
+                      toJS(app)
+                    );
                     evt.stopPropagation();
                   },
                 },
               ]}
               onAppClick={(selectedApp: any) => {
-                if (desktopStore.isOpenWindow(selectedApp.id)) {
-                  desktopStore.setActive(selectedApp.id);
+                if (desktop.isOpenWindow(selectedApp.id)) {
+                  DesktopActions.setActive(
+                    spaces.selected!.path,
+                    selectedApp.id
+                  );
                 } else {
-                  desktopStore.openBrowserWindow(selectedApp);
+                  DesktopActions.openAppWindow(
+                    spaces.selected!.path,
+                    selectedApp
+                  );
                 }
               }}
             />

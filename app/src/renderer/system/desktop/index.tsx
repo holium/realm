@@ -3,7 +3,8 @@ import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar';
 import { WindowManager } from './WindowManager';
 import { AppGrid } from './components/AppGrid';
-import { useMst } from 'renderer/logic/store';
+// import { useMst } from 'renderer/logic/store';
+import { useServices } from 'renderer/logic/store';
 import { Observer } from 'mobx-react';
 
 type OSFrameProps = {
@@ -14,7 +15,8 @@ type OSFrameProps = {
 
 export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
   const { hasLoaded } = props;
-  const { desktopStore } = useMst();
+  const { shell } = useServices();
+  const { desktop } = shell;
 
   return hasLoaded ? (
     <Fill>
@@ -23,11 +25,11 @@ export const Desktop: FC<OSFrameProps> = (props: OSFrameProps) => {
           {() => (
             <Layer zIndex={1}>
               <Layer zIndex={0}>
-                <WindowManager isOpen={!desktopStore.showHomePane} />
+                <WindowManager isOpen={!desktop.showHomePane} />
               </Layer>
               <Layer zIndex={1}>
-                {desktopStore.showHomePane && (
-                  <AppGrid isOpen={desktopStore.showHomePane} />
+                {desktop.showHomePane && (
+                  <AppGrid isOpen={desktop.showHomePane} />
                 )}
               </Layer>
             </Layer>

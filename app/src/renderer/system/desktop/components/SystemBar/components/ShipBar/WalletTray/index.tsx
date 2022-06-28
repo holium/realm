@@ -1,7 +1,7 @@
 import { FC, createRef } from 'react';
 
 import { IconButton, Icons } from 'renderer/components';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { WindowThemeType } from 'renderer/logic-old/stores/config';
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { Wallet } from 'renderer/apps/Wallet';

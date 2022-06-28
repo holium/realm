@@ -1,12 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { AuthManager } from '../core/auth/manager';
-import { ShipManager } from '../core/ship/manager';
-import { RealmCore } from '../core';
+import { Realm } from '../os';
 
 contextBridge.exposeInMainWorld('electron', {
-  auth: AuthManager.preload,
-  ship: ShipManager.preload,
-  core: RealmCore.preload,
   app: {
     setFullscreen(callback: any) {
       ipcRenderer.on('set-fullscreen', callback);
@@ -30,4 +25,5 @@ contextBridge.exposeInMainWorld('electron', {
       return ipcRenderer.invoke('toggle-devtools');
     },
   },
+  os: Realm.preload,
 });

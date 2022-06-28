@@ -1,4 +1,4 @@
-import { ContactModelType } from 'core/ship/stores/contacts';
+import { ContactModelType } from 'core-a/ship/stores/contacts';
 import { isValidPatp } from 'urbit-ob';
 
 export const searchPatpOrNickname = (

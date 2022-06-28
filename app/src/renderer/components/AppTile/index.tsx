@@ -2,11 +2,10 @@ import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, ContextMenu } from '..';
-import { AppModelType } from '../../../core/ship/stores/docket';
+import { AppModelType } from 'os/services/ship/models/docket';
 import { toJS } from 'mobx';
-import { bgIsLightOrDark } from 'core/theme/lib';
+import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
-import { useMst } from 'renderer/logic/store';
 import { Portal } from 'renderer/system/modals/Portal';
 import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
@@ -103,7 +102,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     open,
     onAppClick,
   } = props;
-  // const { themeStore } = useMst();
+  // const { theme } = useMst();
   const tileRef = useRef(null);
 
   return useMemo(() => {

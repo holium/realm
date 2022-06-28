@@ -1,6 +1,5 @@
-import { LoaderModel } from '../../logic/stores/common/loader';
-import { types, onSnapshot, Instance, tryReference } from 'mobx-state-tree';
-import { toJS } from 'mobx';
+import { LoaderModel } from 'os/services/common.model';
+import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
 
 const TabModel = types.model('BrowserTabModel', {

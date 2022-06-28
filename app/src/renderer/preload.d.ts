@@ -1,15 +1,8 @@
-import { RealmCorePreloadType } from '../core';
-import { ShipPreloadType } from '../core/ship/manager';
-import { AuthPreloadType } from '../core/auth/manager';
-import { ThemePreloadType } from '../core/theme/manager';
+import { OSPreloadType } from './../os/index';
 
 declare global {
   interface Window {
     electron: {
-      auth: AuthPreloadType;
-      ship: ShipPreloadType;
-      core: RealmCorePreloadType;
-      theme: ThemePreloadType;
       app: {
         setFullscreen(callback: any): void;
         setAppviewPreload(callback: any): void;
@@ -19,6 +12,7 @@ declare global {
         closeApp(app: any): Promise<any>;
         toggleDevTools(): void;
       };
+      os: OSPreloadType;
     };
   }
 }

@@ -1,7 +1,6 @@
 import { FC, useMemo } from 'react';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
-import { useAuth } from 'renderer/logic/store';
 
 import {
   Grid,
@@ -17,6 +16,7 @@ import {
 } from '../../../components';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store';
 
 export const createPasswordForm = () => {
   const passwordForm = createForm({
@@ -57,13 +57,14 @@ type StepPasswordProps = {
 
 export const StepPassword: FC<StepPasswordProps> = observer(
   (props: StepPasswordProps) => {
-    const { signupStore } = useAuth();
+    const { identity } = useServices();
+    const { signup } = identity;
     const { next } = props;
 
-    const shipName = signupStore.signupShip!.patp;
-    const shipNick = signupStore.signupShip!.nickname;
-    const shipColor = signupStore.signupShip!.color!;
-    const avatar = signupStore.signupShip!.avatar;
+    const shipName = signup.signupShip!.patp;
+    const shipNick = signup.signupShip!.nickname;
+    const shipColor = signup.signupShip!.color!;
+    const avatar = signup.signupShip!.avatar;
     const { passwordForm, password, confirmPassword } = useMemo(
       () => createPasswordForm(),
       []
@@ -178,7 +179,7 @@ export const StepPassword: FC<StepPasswordProps> = observer(
                 next();
               }}
             >
-              {signupStore.isLoading ? <Spinner size={0} /> : 'Next'}
+              {signup.isLoading ? <Spinner size={0} /> : 'Next'}
             </TextButton>
           </Flex>
         </Box>

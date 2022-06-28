@@ -1,18 +1,8 @@
-import {
-  createRef,
-  FC,
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-} from 'react';
-import { toJS } from 'mobx';
+import { createRef, FC, useEffect, useState, useMemo, useRef } from 'react';
 import { lighten, rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
 import ScrollView from 'react-inverted-scrollview';
 
-import { useMst, useShip } from 'renderer/logic/store';
 import {
   Flex,
   IconButton,
@@ -23,15 +13,15 @@ import {
   Grid,
   Box,
 } from 'renderer/components';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { MessageType, ChatMessage } from './components/ChatMessage';
 import { createDmForm } from './forms/chatForm';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
-import styled from 'styled-components';
-import { ChatInput } from './components/ChatInput';
+import { useServices } from 'renderer/logic/store';
+import { DmActions } from 'renderer/logic/actions/chat';
 
 type IProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   height: number;
   selectedChat: any;
   headerOffset: number;
@@ -61,7 +51,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
-  const { ship } = useShip();
+  const { ship } = useServices();
   const chatData = ship?.chat.dms.get(selectedChat.contact)!;
   const windowColor = useMemo(
     () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
@@ -82,9 +72,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         if (formData) console.log(formData);
         const dmMessageContent = formData['dm-message'];
         // console.log(dmMessage);
-        chatData.sendDm(dmMessageContent).then((response: any) => {
-          console.log('end of promise ', response);
-        });
+        DmActions.sendDm(selectedChat.contact, dmMessageContent);
         // @ts-ignore
         chatInputRef.current.value = '';
       }
