@@ -10,7 +10,7 @@ import {
   ServiceProvider,
   servicesStore,
   useServices,
-} from './logic/store-2';
+} from './logic/store';
 import { useMemo } from 'react';
 import { Mouse } from './system/desktop/components/Mouse';
 

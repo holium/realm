@@ -7,7 +7,7 @@ import { Flex, IconButton, Icons } from 'renderer/components';
 import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type ShipTrayProps = {};
 

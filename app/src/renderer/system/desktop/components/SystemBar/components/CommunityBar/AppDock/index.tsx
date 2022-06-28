@@ -1,12 +1,12 @@
 import { FC, useMemo } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppModelType } from 'core-a/ship/stores/docket';
+import { AppModelType } from 'os/services/ship/models/docket';
 import { AppTile } from 'renderer/components/AppTile';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { SpacesApi } from 'renderer/logic/actions/spaces';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 

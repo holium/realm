@@ -12,13 +12,13 @@ import {
 } from 'renderer/components';
 import { ContactRow } from './components/ContactRow';
 import { toJS } from 'mobx';
-import { WindowThemeType } from 'renderer/logic-old/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { darken, lighten, rgba } from 'polished';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type IProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onSelectDm: (dm: any) => void;

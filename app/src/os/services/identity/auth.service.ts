@@ -1,4 +1,3 @@
-import Urbit from '../../urbit/api';
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import {
@@ -24,6 +23,7 @@ import { ContactApi } from '../../api/contacts';
 export class AuthService extends BaseService {
   private db: Store<AuthStoreType>;
   private state: AuthStoreType;
+
   handlers = {
     'realm.auth.add-ship': this.addShip,
     'realm.auth.get-ships': this.getShips,
@@ -48,7 +48,8 @@ export class AuthService extends BaseService {
     getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
     removeShip: (ship: string) =>
       ipcRenderer.invoke('realm.auth.remove-ship', ship),
-    onLogin: (callback: any) => ipcRenderer.on('core:on-log-in', callback),
+    onLogin: (callback: any) =>
+      ipcRenderer.on('realm.auth.on-log-in', callback),
     onLogout: (callback: any) =>
       ipcRenderer.on('realm.auth.on-log-out', callback),
   };
@@ -60,23 +61,21 @@ export class AuthService extends BaseService {
       accessPropertiesByDotNotation: true,
       defaults: AuthStore.create({ firstTime: true }),
     });
-
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
-
     let persistedState: AuthStoreType = this.db.store;
     this.state = AuthStore.create(castToSnapshot(persistedState));
 
     onSnapshot(this.state, (snapshot) => {
       this.db.store = castToSnapshot(snapshot);
     });
-
     onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
         resource: 'auth',
+        key: null,
         response: 'patch',
       };
       this.core.onEffect(patchEffect);
@@ -85,6 +84,10 @@ export class AuthService extends BaseService {
 
   get snapshot() {
     return getSnapshot(this.state);
+  }
+
+  setLoader(state: 'initial' | 'loading' | 'error' | 'loaded') {
+    this.state.setLoader(state);
   }
 
   getCredentials(ship: string, password: string) {
@@ -99,13 +102,12 @@ export class AuthService extends BaseService {
     return this.db.get(`ships.auth${ship}`);
   }
 
-  set loader(state: 'initial' | 'loading' | 'error' | 'loaded') {
-    this.state.loader.set(state);
-  }
+  // set loader(state: 'initial' | 'loading' | 'error' | 'loaded') {
+  //   this.state.loader.set(state);
+  // }
 
   login(_event: any, ship: string, password: string) {
     this.state.login(`auth${ship}`);
-    this.loader = 'loading';
     // TODO decrypt stored snapshot
     const { url, cookie } = this.getCredentials(ship, password);
     this.core.setSession({

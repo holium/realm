@@ -14,7 +14,7 @@ import {
   Box,
   TextButton,
 } from '../../../components';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { SignupApi } from 'renderer/logic/actions/signup';
 
 type InstallStepProps = {

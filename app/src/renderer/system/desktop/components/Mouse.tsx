@@ -2,7 +2,7 @@ import { FC, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import AnimatedCursor, { CurrentUserCursor, Vec2 } from './Cursor';
-import { hexToRgb, rgbToString } from 'renderer/logic-old/utils/color';
+import { hexToRgb, rgbToString } from 'os/lib/color';
 import { useMemo } from 'react';
 import { Presences } from './Presences';
 

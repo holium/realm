@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { calculateAnchorPoint } from '../../logic-old/utils/anchor-point';
+import { calculateAnchorPoint } from 'os/lib/anchor-point';
 
 const useContextMenu = (
   containerId: string,

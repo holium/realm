@@ -3,9 +3,9 @@ import { observer } from 'mobx-react';
 import { Flex } from 'renderer/components';
 import { Signup } from './signup';
 import { Login } from './login';
-import { useServices } from '../../logic/store-2';
+import { useServices } from '../../logic/store';
 // import { useAuth } from 'renderer/logic/store';
-import { AuthShipType } from 'core-a/auth/store';
+import { AuthShipType } from 'os/services/identity/auth.model';
 
 type LoginProps = {
   hasWallpaper?: boolean;

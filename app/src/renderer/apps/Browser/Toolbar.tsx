@@ -7,7 +7,7 @@ import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titl
 import { Flex, Icons, Input, Spinner } from 'renderer/components';
 import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
 import { useBrowser } from './store';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 const ToolbarStyle = styled(TitlebarStyle)`
   /* height: 42px; */

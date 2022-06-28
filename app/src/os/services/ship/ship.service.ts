@@ -80,100 +80,102 @@ export class ShipService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  subscribe(ship: string, shipInfo: any) {
-    // TODO password protect data
-    this.db = new Store<ShipModelType>({
-      name: `realm.ship.${ship}`,
-      accessPropertiesByDotNotation: true,
-    });
-    let persistedState: ShipModelType = this.db.store;
+  async subscribe(ship: string, shipInfo: any) {
+    return new Promise((resolve, reject) => {
+      // TODO password protect data
+      this.db = new Store<ShipModelType>({
+        name: `realm.ship.${ship}`,
+        accessPropertiesByDotNotation: true,
+      });
+      let persistedState: ShipModelType = this.db.store;
 
-    // TODO set up multiple ships properly
-    // this is the error
-    // (Object type: 'map<string, AnonymousModel>', Path upon death: '/ships/~0bus/docket/apps', Subpath: 'ballot', Action: '/ships/~0bus/docket/apps.@APPLY_SNAPSHOT()')
-    // console.log(this.currentShip);
-    this.state = ShipModel.create({
-      patp: ship,
-      url: persistedState.url || shipInfo.url,
-      wallpaper: persistedState.wallpaper || null,
-      color: persistedState.color || null,
-      nickname: persistedState.nickname || null,
-      avatar: persistedState.avatar || null,
-      cookie: persistedState.cookie || shipInfo.cookie,
-      loggedIn: true,
-      loader: { state: 'initial' },
-      // theme: castToSnapshot(persistedState.theme),
-      chat: persistedState.chat
-        ? castToSnapshot(persistedState.chat)
-        : { loader: { state: 'initial' } },
-      contacts: persistedState.contacts
-        ? castToSnapshot(persistedState.contacts)
-        : { ourPatp: ship },
-      docket: persistedState.docket
-        ? castToSnapshot(persistedState.docket)
-        : {},
-    });
+      // TODO set up multiple ships properly
+      // this is the error
+      // (Object type: 'map<string, AnonymousModel>', Path upon death: '/ships/~0bus/docket/apps', Subpath: 'ballot', Action: '/ships/~0bus/docket/apps.@APPLY_SNAPSHOT()')
+      // console.log(this.currentShip);
+      this.state = ShipModel.create({
+        patp: ship,
+        url: persistedState.url || shipInfo.url,
+        wallpaper: persistedState.wallpaper || null,
+        color: persistedState.color || null,
+        nickname: persistedState.nickname || null,
+        avatar: persistedState.avatar || null,
+        cookie: persistedState.cookie || shipInfo.cookie,
+        loggedIn: true,
+        loader: { state: 'initial' },
+        // theme: castToSnapshot(persistedState.theme),
+        chat: persistedState.chat
+          ? castToSnapshot(persistedState.chat)
+          : { loader: { state: 'initial' } },
+        contacts: persistedState.contacts
+          ? castToSnapshot(persistedState.contacts)
+          : { ourPatp: ship },
+        docket: persistedState.docket
+          ? castToSnapshot(persistedState.docket)
+          : {},
+      });
 
-    onSnapshot(this.state, (snapshot: any) => {
-      this.db!.store = snapshot;
-    });
+      onSnapshot(this.state, (snapshot: any) => {
+        this.db!.store = snapshot;
+      });
 
-    const syncEffect = {
-      model: getSnapshot(this.state!),
-      resource: 'ship',
-      key: ship,
-      response: 'initial',
-    };
-
-    this.core.onEffect(syncEffect);
-
-    onPatch(this.state, (patch) => {
-      // send patches to UI store
-      const patchEffect = {
-        patch,
+      const syncEffect = {
+        model: getSnapshot(this.state!),
         resource: 'ship',
         key: ship,
-        response: 'patch',
+        response: 'initial',
       };
-      this.core.onEffect(patchEffect);
-    });
 
-    try {
-      this.core.conduit!.subscribe({
-        app: 'contact-store',
-        path: '/all',
-        event: (data: any) => {
-          this.state?.contacts.setInitial(data);
-        },
-        err: () => console.log('Subscription rejected'),
-        quit: () => console.log('Kicked from subscription'),
+      this.core.onEffect(syncEffect);
+
+      onPatch(this.state, (patch) => {
+        // send patches to UI store
+        const patchEffect = {
+          patch,
+          resource: 'ship',
+          key: ship,
+          response: 'patch',
+        };
+        this.core.onEffect(patchEffect);
       });
-    } catch {
-      console.log('Subscription failed');
-    }
 
-    ContactApi.getContact(ship, this.core.credentials!).then((value: any) => {
-      this.state?.setOurMetadata(value);
-    });
+      try {
+        this.core.conduit!.subscribe({
+          app: 'contact-store',
+          path: '/all',
+          event: (data: any) => {
+            this.state?.contacts.setInitial(data);
+          },
+          err: () => console.log('Subscription rejected'),
+          quit: () => console.log('Kicked from subscription'),
+        });
+      } catch {
+        console.log('Subscription failed');
+      }
 
-    MetadataApi.syncGroupMetadata(this.core.conduit!, this.metadataStore);
-    MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
+      ContactApi.getContact(ship, this.core.credentials!).then((value: any) => {
+        this.state?.setOurMetadata(value);
+      });
 
-    // register dm update handler
-    DmApi.updates(this.core.conduit!, this.state);
-    DmApi.graphUpdates(this.core.conduit!, this.state);
+      MetadataApi.syncGroupMetadata(this.core.conduit!, this.metadataStore);
+      MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
 
-    // load initial dms
-    this.getDMs().then((response) => {
-      this.state?.chat.setDMs(ship, response);
-    });
+      // register dm update handler
+      DmApi.updates(this.core.conduit!, this.state);
+      DmApi.graphUpdates(this.core.conduit!, this.state);
 
-    DocketApi.getApps(this.core.conduit!).then((apps) => {
-      this.state?.docket.setInitial(apps);
-      // this.core.services.spaces.setShipSpace(this.state!);
-      this.core.services.spaces.load(ship, this.state!);
-      this.core.services.identity.auth.loader = 'loaded';
-      this.state?.loader.set('loaded');
+      // load initial dms
+      this.getDMs().then((response) => {
+        this.state?.chat.setDMs(ship, response);
+      });
+
+      DocketApi.getApps(this.core.conduit!).then((apps) => {
+        this.state?.docket.setInitial(apps);
+        // this.core.services.spaces.setShipSpace(this.state!);
+        this.core.services.spaces.load(ship, this.state!);
+        this.state?.loader.set('loaded');
+        resolve(this.state);
+      });
     });
     // this.core.services.identity.auth.loader = 'loaded';
   }

@@ -3,9 +3,8 @@ import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import AppWindow from './components/AppWindow';
 import { ContextMenu } from 'renderer/components';
-import { toggleDevTools } from 'renderer/logic-old/desktop/api';
 import { rgba } from 'polished';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type WindowManagerProps = {
@@ -76,9 +75,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
             {
               label: 'Toggle devtools',
               onClick: (evt: any) => {
-                toggleDevTools();
-                // window.openDevTools();
-                // console.log('open app info');
+                DesktopActions.toggleDevTools();
               },
             },
           ]}

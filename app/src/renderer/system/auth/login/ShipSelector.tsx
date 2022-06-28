@@ -4,12 +4,11 @@ import { lighten } from 'polished';
 import { motion, Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
-import { debounce, delay } from 'lodash';
+import { delay } from 'lodash';
 
 import { Flex, Sigil, Tooltip } from 'renderer/components';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { AuthApi } from 'renderer/logic/actions/auth';
-import { getSnapshot } from 'mobx-state-tree';
 
 // ----------------------------------------
 // -------- Local style components --------

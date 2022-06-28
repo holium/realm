@@ -8,7 +8,7 @@ import { TrayMenu } from '../../TrayMenu';
 import { MiniApp } from '../../MiniAppWindow';
 import { Spaces } from 'renderer/apps/Spaces';
 import { SelectedSpace } from './SelectedSpace';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type SpaceSelectorProps = {};
 

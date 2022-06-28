@@ -2,12 +2,11 @@ import {
   detach,
   Instance,
   types,
-  destroy,
   flow,
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { ThemeModel } from '../../../renderer/logic-old/theme/store';
+import { ThemeModel } from '../shell/theme.model';
 import { LoaderModel } from '../common.model';
 import { StepList } from '../common.model';
 
@@ -65,10 +64,8 @@ export const AuthStore = types
     },
     get currentShip() {
       let selectedShip = self.selected;
-      // console.log('current', getSnapshot(selectedShip));
       if (!selectedShip) {
         selectedShip = self.ships.get(self.order[0]);
-        // console.log('in ordered', getSnapshot(selectedShip));
       }
       return selectedShip;
     },
@@ -105,6 +102,9 @@ export const AuthStore = types
     setFirstTime() {
       self.firstTime = false;
     },
+    setLoader(state: 'initial' | 'loading' | 'error' | 'loaded') {
+      self.loader.set(state);
+    },
     setOrder(newOrder: any) {
       self.order.replace(newOrder);
     },
@@ -140,12 +140,12 @@ export const AuthStore = types
       // Apply persisted snapshot
       applySnapshot(self, castToSnapshot(syncEffect.model));
       // on initial sync we should set themes and various other variables
-      self.loader.set('loaded');
     },
     clearSession() {
       self.selected = undefined;
     },
     login(id: string) {
+      self.loader.set('loading');
       const loggedInShip = self.ships.get(id);
       self.selected = loggedInShip;
     },

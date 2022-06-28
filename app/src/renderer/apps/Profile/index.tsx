@@ -10,10 +10,10 @@ import {
   Text,
   IconButton,
 } from 'renderer/components';
-import { displayDate } from 'renderer/logic-old/utils/time';
-import { ThemeModelType } from 'core-a/theme/store';
+import { displayDate } from 'os/lib/time';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { nativeApps } from '..';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { AuthApi } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 

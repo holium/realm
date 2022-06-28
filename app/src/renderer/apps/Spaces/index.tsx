@@ -6,7 +6,7 @@ import { Grid, Flex, IconButton, Icons, Text } from 'renderer/components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { SpacesApi } from 'renderer/logic/actions/spaces';
 
 type SpacesProps = {

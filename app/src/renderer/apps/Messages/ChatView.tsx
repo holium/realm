@@ -22,16 +22,16 @@ import {
   Grid,
   Box,
 } from 'renderer/components';
-import { WindowThemeType } from 'renderer/logic-old/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { MessageType, ChatMessage } from './components/ChatMessage';
 import { createDmForm } from './forms/chatForm';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import styled from 'styled-components';
 import { ChatInput } from './components/ChatInput';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type IProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   height: number;
   selectedChat: any;
   headerOffset: number;

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { Flex, Spinner, Input } from 'renderer/components';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { useBrowser } from './store';
 
 // const ToolbarStyle = styled(TitlebarStyle)`

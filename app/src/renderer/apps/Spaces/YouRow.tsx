@@ -3,7 +3,7 @@ import { FC, useMemo } from 'react';
 import { Flex, Sigil, Text } from 'renderer/components';
 import { ShipModelType } from 'os/services/ship/models/ship';
 import { SpaceRowStyle } from './SpaceRow';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type SpaceRowProps = {
   ship: ShipModelType;

@@ -2,7 +2,7 @@ import { toJS } from 'mobx';
 import { Text, GroupLink } from 'renderer/components';
 import { AppLink } from 'renderer/components/Embeds/AppLink';
 import { TextParsed } from '../components/TextContent';
-import { cleanNounColor } from 'renderer/logic-old/utils/color';
+import { cleanNounColor } from 'os/lib/color';
 
 export const getTextFromContent = (type: string, content: any) => {
   if (type === 'reference') {

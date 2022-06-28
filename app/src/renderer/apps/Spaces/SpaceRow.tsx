@@ -5,7 +5,7 @@ import styled, { css } from 'styled-components';
 import { Flex, Icons, Text } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 const EmptyGroup = styled.div`
   height: 32px;

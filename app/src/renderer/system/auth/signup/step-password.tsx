@@ -16,7 +16,7 @@ import {
 } from '../../../components';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 export const createPasswordForm = () => {
   const passwordForm = createForm({

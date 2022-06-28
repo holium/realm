@@ -1,13 +1,10 @@
 import {
-  detach,
   Instance,
   types,
-  destroy,
-  flow,
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { ThemeModel } from '../../../../renderer/logic-old/theme/store';
+import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 import { NativeAppList } from '../../../../renderer/apps';
@@ -104,6 +101,7 @@ export const SpacesStore = types
       } else {
         self.selected = self.spaces.get(spacePath)!;
       }
+      return self.selected!;
     },
   }));
 

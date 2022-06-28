@@ -21,7 +21,7 @@ import {
   Spinner,
 } from '../../../components';
 import { observer, Observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { SignupApi } from 'renderer/logic/actions/signup';
 interface ColorTileProps {
   tileColor: string;

@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { nativeApps } from 'renderer/apps';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 export interface WebviewProps {
   window: any;

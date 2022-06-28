@@ -6,8 +6,8 @@ import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { Profile } from 'renderer/apps/Profile';
 import { rgba } from 'polished';
-import { ThemeModelType } from 'core-a/theme/store';
-import { useServices } from 'renderer/logic/store-2';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { useServices } from 'renderer/logic/store';
 
 type AccountTrayProps = {
   theme: ThemeModelType;

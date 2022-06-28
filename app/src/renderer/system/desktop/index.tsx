@@ -4,7 +4,7 @@ import { SystemBar } from './components/SystemBar';
 import { WindowManager } from './WindowManager';
 import { AppGrid } from './components/AppGrid';
 // import { useMst } from 'renderer/logic/store';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { Observer } from 'mobx-react';
 
 type OSFrameProps = {

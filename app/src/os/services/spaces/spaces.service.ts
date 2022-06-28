@@ -103,7 +103,8 @@ export class SpacesService extends BaseService {
   }
 
   setSelected(_event: any, path: string) {
-    this.state?.selectSpace(path);
+    const selected = this.state?.selectSpace(path);
+    this.core.services.shell.setTheme(selected?.theme!);
   }
 
   pinApp(_event: any, path: string, appId: string) {

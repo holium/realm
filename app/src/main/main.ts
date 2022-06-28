@@ -15,7 +15,6 @@ import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-// import { RealmCore } from '../core-a';
 import { Realm } from '../os';
 
 import FullscreenHelper from './helpers/fullscreen';

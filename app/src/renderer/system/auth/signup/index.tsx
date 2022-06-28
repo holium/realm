@@ -13,7 +13,7 @@ import {
 } from 'renderer/components';
 import { AddShip } from './add-ship';
 import { ConnectingShip } from './connecting';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import ProfileSetup from './step-profile';
 import StepPassword from './step-password';
 import StepInstall from './step-install';

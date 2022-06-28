@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { Flex, Text, Sigil } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 const EmptyPicture = styled.div`
   height: 32px;

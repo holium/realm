@@ -5,11 +5,13 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
+  applySnapshot,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
+import { ThemeModelType } from './theme.model';
 
 /**
  * DesktopService
@@ -22,6 +24,8 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-active': this.setActive,
     'realm.desktop.set-desktop-dimensions': this.setDesktopDimensions,
     'realm.desktop.set-app-dimensions': this.setAppDimensions,
+    'realm.desktop.set-mouse-color': this.setMouseColor,
+    'realm.desktop.set-theme': this.setTheme,
     'realm.desktop.open-app-window': this.openAppWindow,
     'realm.desktop.close-app-window': this.closeAppWindow,
   };
@@ -53,6 +57,12 @@ export class DesktopService extends BaseService {
         windowId,
         dimensions
       );
+    },
+    setMouseColor: (mouseColor: string) => {
+      return ipcRenderer.invoke('realm.desktop.set-mouse-color', mouseColor);
+    },
+    setTheme: (theme: ThemeModelType) => {
+      return ipcRenderer.invoke('realm.desktop.set-theme', theme);
     },
     openAppWindow: (spaceId: string, app: any) => {
       return ipcRenderer.invoke('realm.desktop.open-app-window', spaceId, app);
@@ -102,6 +112,14 @@ export class DesktopService extends BaseService {
   setActive(_event: any, spaceId: string, appId: string) {
     this.state?.setActive(appId);
     // this.state?.activeWindow =
+  }
+  setMouseColor(_event: any, mouseColor: string) {
+    this.state?.setMouseColor(mouseColor);
+  }
+  setTheme(theme: ThemeModelType) {
+    if (this.state?.theme.themeId !== theme.themeId) {
+      applySnapshot(this.state!.theme, theme);
+    }
   }
   setDesktopDimensions(_event: any, width: number, height: number) {
     this.state?.setDesktopDimensions(width, height);

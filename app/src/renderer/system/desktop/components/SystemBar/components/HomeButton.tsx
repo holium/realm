@@ -3,7 +3,7 @@ import { SystemBarStyle } from '../SystemBar.styles';
 import { motion, useMotionValue } from 'framer-motion';
 import HoliumAnimated from 'renderer/components/Icons/holium';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type HomeButton = {};
 

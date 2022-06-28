@@ -19,7 +19,7 @@ import {
 // @ts-expect-error its there...
 import UrbitSVG from '../../../../../assets/urbit.svg';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { SignupApi } from 'renderer/logic/actions/signup';
 
 export const createShipForm = (

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 // import { useAuth, useMst, useShip } from 'renderer/logic/store';
-import { useCore, useServices } from 'renderer/logic/store-2';
+import { coreStore, useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
 import { BackgroundImage, BackgroundFill } from './system.styles';
@@ -22,6 +22,7 @@ const DragBar = styled.div`
 `;
 
 export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
+  const { loggedIn } = useCore();
   const { shell, identity, ship } = useServices();
   const { theme, desktop } = shell;
   const { auth } = identity;
@@ -31,14 +32,10 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
-  // const loggedIn = ship !== undefined;
-
-  const loggedIn = ship !== undefined && !auth.isLoading;
   const isBlurred = useMemo(
-    () => !loggedIn || desktop.isBlurred,
-    [loggedIn, desktop.isBlurred]
+    () => !loggedIn && desktop.isBlurred,
+    [desktop.isBlurred, loggedIn]
   );
-
   const shipLoaded = ship?.loader.isLoaded;
 
   return (

@@ -7,9 +7,9 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { searchPatpOrNickname } from './helpers';
 import { Flex, Text, Box, Sigil, IconButton, Icons } from '../';
 import { Row } from '../NewRow';
-import { ContactModelType } from 'core-a/ship/stores/contacts';
+import { ContactModelType } from 'os/services/ship/models/contacts';
 import { darken } from 'polished';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 interface ShipSearchProps {
   heightOffset: number;

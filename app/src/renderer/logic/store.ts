@@ -20,6 +20,12 @@ import { AuthStore } from '../../os/services/identity/auth.model';
 import { SignupStore } from '../../os/services/identity/signup.model';
 import { ShipModel } from '../../os/services/ship/models/ship';
 
+const loadSnapshot = (serviceKey: string) => {
+  const localStore = localStorage.getItem('servicesStore');
+  if (localStore) return JSON.parse(localStore)[serviceKey];
+  return {};
+};
+
 export const Services = types
   .model('ServicesStore', {
     shell: types.model('ShellStore', {
@@ -47,7 +53,7 @@ const services = Services.create({
   shell: {
     // preferenceStore: {},
     theme: {},
-    desktop: {},
+    desktop: loadSnapshot('shell').desktop,
   },
   identity: {
     auth: {
@@ -101,10 +107,20 @@ export const CoreStore = types
       // onBoot();
       self.booted = true;
     },
+    setLoggedIn(isLoggedIn: boolean) {
+      self.loggedIn = isLoggedIn;
+    },
+    reset() {
+      self.booted = false;
+    },
     login() {},
   }));
 
 export const coreStore = CoreStore.create();
+
+coreStore.reset(); // need to reset coreStore for proper boot sequence
+
+// servicesStore.shell.desktop.setIsBlurred(true);
 
 // After boot, set the initial data
 onBoot().then((response: any) => {
@@ -119,13 +135,13 @@ onBoot().then((response: any) => {
 
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
+    coreStore.setLoggedIn(true);
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
   }
   if (response.shell) {
     applySnapshot(servicesStore.shell.desktop, response.shell);
-    servicesStore.shell.desktop.setIsBlurred(false);
   }
   //
   coreStore.setBooted();
@@ -155,9 +171,16 @@ onSnapshot(servicesStore, (snapshot) => {
 });
 
 // Auth events
+window.electron.os.auth.onLogin((_event: any) => {
+  coreStore.setLoggedIn(true);
+});
+
+// Auth events
 window.electron.os.auth.onLogout((_event: any) => {
-  console.log('on log out event');
+  coreStore.setLoggedIn(false);
   servicesStore.clearShip();
+  // servicesStore.identity.auth.loader.set('loading');
+  servicesStore.shell.desktop.setIsBlurred(true);
 });
 
 // Effect events
@@ -165,7 +188,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
   // if (value.response === 'diff') {
   //   console.log('got effect data => ', value.json);
   // }
-  // console.log(value);
   if (value.response === 'patch') {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
@@ -186,7 +208,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
   if (value.response === 'initial') {
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
-      servicesStore.shell.desktop.setIsBlurred(false);
     }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);

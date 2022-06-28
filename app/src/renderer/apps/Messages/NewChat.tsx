@@ -14,14 +14,14 @@ import {
   Tag,
 } from 'renderer/components';
 import { toJS } from 'mobx';
-import { WindowThemeType } from 'renderer/logic-old/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type IProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onBack: () => void;

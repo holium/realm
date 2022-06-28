@@ -4,7 +4,7 @@ import { SystemBarStyle } from '../../SystemBar.styles';
 import { SpaceSelector } from './SpaceSelector';
 import { AppDock } from './AppDock';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 
 type CommunityBarProps = {};
 

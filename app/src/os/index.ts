@@ -10,6 +10,7 @@ import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
+import { toJS } from 'mobx';
 
 export interface ISession {
   ship: string;
@@ -31,6 +32,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     shell: DesktopService;
   };
+
   readonly handlers = {
     'realm.boot': this.boot,
     'realm.apply-action': this.applyAction,
@@ -49,8 +51,7 @@ export class Realm extends EventEmitter {
     sendAction: (action: any) => {
       return ipcRenderer.invoke('core:send-action', action);
     },
-    onEffect: (callback: any) => ipcRenderer.on('core:on-effect', callback),
-    onLogin: (callback: any) => ipcRenderer.on('core:on-log-in', callback),
+    onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
     auth: AuthService.preload,
     signup: SignupService.preload,
     ship: ShipService.preload,
@@ -68,7 +69,7 @@ export class Realm extends EventEmitter {
       accessPropertiesByDotNotation: true,
       fileExtension: 'lock',
     });
-    if (this.db.store) {
+    if (this.db.size > 0) {
       this.setSession(this.db.store);
     }
     // Create an instance of all services
@@ -86,11 +87,6 @@ export class Realm extends EventEmitter {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
-    // Capture all on-effect events and push through the core on-effect
-    this.services.identity.auth.on('on-effect', this.onEffect);
-    this.services.identity.signup.on('on-effect', this.onEffect);
-    this.services.ship.on('on-effect', this.onEffect);
-    // this.services.ship.on('on-effect', this.onEffect);
   }
 
   static start(mainWindow: BrowserWindow) {
@@ -146,9 +142,13 @@ export class Realm extends EventEmitter {
     this.conduit?.reset();
   }
 
-  onLogin() {
-    this.services.ship.subscribe(this.session?.ship!, this.session);
-    this.mainWindow.webContents.send('core:on-log-in');
+  async onLogin() {
+    const ship = await this.services.ship.subscribe(
+      this.session?.ship!,
+      this.session
+    );
+    this.services.identity.auth.setLoader('loaded');
+    this.mainWindow.webContents.send('realm.auth.on-log-in', toJS(ship));
   }
 
   /**
@@ -173,7 +173,7 @@ export class Realm extends EventEmitter {
    * @param data
    */
   onEffect(data: any): void {
-    this.mainWindow.webContents.send('core:on-effect', data);
+    this.mainWindow.webContents.send('realm.on-effect', data);
   }
 }
 

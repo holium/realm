@@ -6,9 +6,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
 import { Flex } from 'renderer/components';
 import { AppTile } from 'renderer/components/AppTile';
-import { AppModelType } from 'core-a/ship/stores/docket';
+import { AppModelType } from 'os/services/ship/models/docket';
 import { NativeAppList } from 'renderer/apps';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type HomeWindowProps = {

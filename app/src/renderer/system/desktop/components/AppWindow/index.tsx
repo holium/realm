@@ -5,8 +5,8 @@ import { darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
-import { WindowThemeType } from 'renderer/logic-old/stores/config';
-import { WindowModelType } from 'renderer/logic-old/desktop/store';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { WindowModelType } from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
 import { WebView } from './WebView';
@@ -17,7 +17,7 @@ import { NativeView } from './NativeView';
 import { nativeApps } from 'renderer/apps';
 import { nativeRenderers } from 'renderer/apps/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
-import { useServices } from 'renderer/logic/store-2';
+import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type AppWindowStyleProps = {
@@ -39,7 +39,7 @@ export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
 });
 
 type AppWindowProps = {
-  theme: Partial<WindowThemeType>;
+  theme: Partial<ThemeModelType>;
   window: WindowModelType;
   hideTitlebar?: boolean;
   children?: React.ReactNode;

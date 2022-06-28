@@ -17,8 +17,8 @@ import {
   Spinner,
 } from 'renderer/components';
 import { ShipSelector } from './ShipSelector';
-import { DEFAULT_WALLPAPER } from 'core-a/theme/store';
-import { useServices } from 'renderer/logic/store-2';
+import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
+import { useServices } from 'renderer/logic/store';
 import { AuthApi } from 'renderer/logic/actions/auth';
 
 type LoginProps = {
@@ -80,8 +80,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     textShadow: theme.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
   };
   // }
-
-  console.log(toJS(auth.loader));
 
   return (
     <Fill>
