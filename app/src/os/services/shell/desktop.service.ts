@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import { ipcMain, session, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -20,7 +20,10 @@ export class DesktopService extends BaseService {
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
+    'realm.desktop.set-desktop-dimensions': this.setDesktopDimensions,
+    'realm.desktop.set-app-dimensions': this.setAppDimensions,
     'realm.desktop.open-app-window': this.openAppWindow,
+    'realm.desktop.close-app-window': this.closeAppWindow,
   };
 
   static preload = {
@@ -34,8 +37,28 @@ export class DesktopService extends BaseService {
     setActive: (spaceId: string, appId: string) => {
       return ipcRenderer.invoke('realm.desktop.set-active', spaceId, appId);
     },
+    setDesktopDimensions: (width: number, height: number) => {
+      return ipcRenderer.invoke(
+        'realm.desktop.set-desktop-dimensions',
+        width,
+        height
+      );
+    },
+    setAppDimensions: (
+      windowId: any,
+      dimensions: { width: number; height: number; x: number; y: number }
+    ) => {
+      return ipcRenderer.invoke(
+        'realm.desktop.set-app-dimensions',
+        windowId,
+        dimensions
+      );
+    },
     openAppWindow: (spaceId: string, app: any) => {
       return ipcRenderer.invoke('realm.desktop.open-app-window', spaceId, app);
+    },
+    closeAppWindow: (spaceId: string, app: any) => {
+      return ipcRenderer.invoke('realm.desktop.close-app-window', spaceId, app);
     },
   };
 
@@ -44,7 +67,6 @@ export class DesktopService extends BaseService {
     this.db = new Store({
       name: `realm.desktop.${core.credentials?.ship}`,
       accessPropertiesByDotNotation: true,
-      defaults: DesktopStore.create(),
     });
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
@@ -65,22 +87,50 @@ export class DesktopService extends BaseService {
         resource: 'desktop',
         response: 'patch',
       };
-      this.onEffect(patchEffect);
+      this.core.onEffect(patchEffect);
     });
   }
 
   get snapshot() {
-    return getSnapshot(this.state!);
+    return this.state ? getSnapshot(this.state) : null;
   }
 
   changeWallpaper(_event: any, spaceId: string, wallpaper: string) {
     this.state?.setWallpaper(wallpaper);
   }
 
-  setActive(spaceId: string, appId: string) {
+  setActive(_event: any, spaceId: string, appId: string) {
+    this.state?.setActive(appId);
     // this.state?.activeWindow =
   }
-  openAppWindow(spaceId: string, selectedApp: any) {
-    // this.state?.activeWindow =
+  setDesktopDimensions(_event: any, width: number, height: number) {
+    this.state?.setDesktopDimensions(width, height);
+  }
+  setAppDimensions(
+    _event: any,
+    windowId: any,
+    dimensions: { width: number; height: number; x: number; y: number }
+  ) {
+    this.state?.setDimensions(windowId, dimensions);
+  }
+  openAppWindow(_event: any, spaceId: string, selectedApp: any) {
+    this.state?.openBrowserWindow(selectedApp);
+    const credentials = this.core.credentials!;
+
+    if (
+      selectedApp.type === 'urbit' ||
+      (selectedApp.type === 'web' && !selectedApp.web.development)
+    ) {
+      const appUrl = `${credentials.url}/apps/${selectedApp.id!}`;
+      // Hit the main process handler for setting partition cookies
+      session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
+        url: appUrl,
+        name: `urbauth-${credentials.ship}`,
+        value: credentials.cookie!.split('=')[1].split('; ')[0],
+      });
+    }
+  }
+  closeAppWindow(_event: any, spaceId: string, selectedApp: any) {
+    this.state?.closeBrowserWindow(selectedApp.id);
   }
 }

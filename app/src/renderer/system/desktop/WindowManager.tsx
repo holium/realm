@@ -6,6 +6,7 @@ import { ContextMenu } from 'renderer/components';
 import { toggleDevTools } from 'renderer/logic-old/desktop/api';
 import { rgba } from 'polished';
 import { useServices } from 'renderer/logic/store-2';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -21,11 +22,12 @@ export const WindowManager: FC<WindowManagerProps> = observer(
 
     useEffect(() => {
       const dims = desktopRef.current?.getBoundingClientRect();
-      desktop.setDesktopDimensions(dims.width, dims.height);
+      DesktopActions.setDesktopDimensions(dims.width, dims.height);
     }, [desktopRef.current]);
 
     const managerType = 'classic';
     const hasOpenWindows = desktop.windows.size > 0;
+
     const windows = Array.from(desktop.windows.values());
 
     return (

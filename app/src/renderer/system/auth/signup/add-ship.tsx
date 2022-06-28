@@ -20,7 +20,7 @@ import {
 import UrbitSVG from '../../../../../assets/urbit.svg';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store-2';
-import { SignupApi } from 'renderer/logic/signup';
+import { SignupApi } from 'renderer/logic/actions/signup';
 
 export const createShipForm = (
   defaults: any = {

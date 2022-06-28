@@ -14,7 +14,8 @@ import { displayDate } from 'renderer/logic-old/utils/time';
 import { ThemeModelType } from 'core-a/theme/store';
 import { nativeApps } from '..';
 import { useServices } from 'renderer/logic/store-2';
-import { AuthApi } from 'renderer/logic/auth';
+import { AuthApi } from 'renderer/logic/actions/auth';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type ProfileProps = {
   theme: ThemeModelType;
@@ -27,7 +28,7 @@ type ProfileProps = {
 export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
   const { shell, ship, identity } = useServices();
   const { auth } = identity;
-  const { desktop, theme } = shell;
+  // const { desktop, theme } = shell;
   let [batteryLevel, setBatteryLevel] = useState(0);
   const { dimensions } = props;
   const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
@@ -47,7 +48,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
   }, []);
 
   const openSettingsApp = () => {
-    desktop.openBrowserWindow(nativeApps['os-settings']);
+    DesktopActions.openAppWindow('', nativeApps['os-settings']);
   };
 
   const currentShip = ship!;

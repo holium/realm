@@ -2,7 +2,7 @@ import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Grid, Spinner, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store-2';
-import { SignupApi } from 'renderer/logic/signup';
+import { SignupApi } from 'renderer/logic/actions/signup';
 
 type AddShipProps = {
   next: () => any;

@@ -48,7 +48,18 @@ export const DesktopStore = types
     dynamicMouse: types.optional(types.boolean, true),
     isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),
-    theme: ThemeModel,
+    theme: types.optional(ThemeModel, {
+      themeId: 'os',
+      wallpaper:
+        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
+      backgroundColor: '#c2b4b4',
+      dockColor: '#f0ecec',
+      windowColor: '#f0ecec',
+      textTheme: 'light',
+      textColor: '#261f1f',
+      iconColor: '#333333',
+      mouseColor: '#4E9EFD',
+    }),
     desktopDimensions: types.optional(
       types.model({
         width: types.number,
@@ -129,8 +140,8 @@ export const DesktopStore = types
       self.isMouseInWebview = inWebview;
     },
     setDimensions(windowId: string, dimensions: DimensionModelType) {
-      const windowDimensions = self.windows.get(windowId)!.dimensions;
-      applySnapshot(windowDimensions, dimensions);
+      const windowDimensions = self.windows.get(windowId)?.dimensions;
+      windowDimensions && applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(app: any) {
       const newWindow = Window.create({
@@ -138,7 +149,11 @@ export const DesktopStore = types
         title: app.title,
         zIndex: self.windows.size + 1,
         type: app.type,
-        dimensions: getInitialWindowDimensions(app, self.isFullscreen),
+        dimensions: getInitialWindowDimensions(
+          app,
+          self.desktopDimensions,
+          self.isFullscreen
+        ),
       });
       self.windows.set(newWindow.id, newWindow);
       self.activeWindow = self.windows.get(newWindow.id);
@@ -146,31 +161,6 @@ export const DesktopStore = types
         self.showHomePane = false;
         self.isBlurred = false;
       }
-      // const ship = servicesStore.ShipService.ship!;
-
-      // const formAppUrl = `${ship.url}/apps/${app.id!}`;
-      // // const windowPayload: any = {
-      // //   name: app.id!,
-      // //   url: formAppUrl,
-      // //   customCSS: {},
-      // //   theme: toJS(osState.theme),
-      // //   cookies: {
-      // //     url: formAppUrl,
-      // //     name: `urbauth-${ship.patp}`,
-      // //     value: ship.cookie!.split('=')[1].split('; ')[0],
-      // //   },
-      // // };
-      // if (
-      //   app.type === 'urbit' ||
-      //   (app.type === 'web' && !app.web.development)
-      // ) {
-      //   // openAppWindow(windowPayload, PartitionMap[app.type]);
-      //   setPartitionCookies(`${app.type}-webview`, {
-      //     url: formAppUrl,
-      //     name: `urbauth-${ship.patp}`,
-      //     value: ship.cookie!.split('=')[1].split('; ')[0],
-      //   });
-      // }
     },
     closeBrowserWindow(appId: any) {
       if (self.activeWindow?.id === appId) {

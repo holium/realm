@@ -15,7 +15,7 @@ import {
   TextButton,
 } from '../../../components';
 import { useServices } from 'renderer/logic/store-2';
-import { SignupApi } from 'renderer/logic/signup';
+import { SignupApi } from 'renderer/logic/actions/signup';
 
 type InstallStepProps = {
   next: () => void;

@@ -1,6 +1,7 @@
+import { DesktopActions } from './actions/desktop';
 import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
-import { onBoot } from './realm.core';
+import { onBoot } from './actions/realm.core';
 
 import {
   applyPatch,
@@ -12,8 +13,8 @@ import {
 } from 'mobx-state-tree';
 
 // import { ConfigStore } from '../logic-old/stores/config';
-import { ThemeStore } from '../logic-old/theme/store';
-import { DesktopStore } from '../logic-old/desktop/store';
+import { ThemeStore } from '../../os/services/shell/theme.model';
+import { DesktopStore } from '../../os/services/shell/desktop.model';
 import { SpacesStore } from '../../os/services/spaces/models/spaces';
 import { AuthStore } from '../../os/services/identity/auth.model';
 import { SignupStore } from '../../os/services/identity/signup.model';
@@ -88,8 +89,6 @@ export const CoreStore = types
     booted: types.optional(types.boolean, false),
     onboarded: types.optional(types.boolean, false),
     loggedIn: types.optional(types.boolean, false),
-
-    // services: types.map()
   })
   .actions((self) => ({
     setOnboarded() {
@@ -117,14 +116,20 @@ onBoot().then((response: any) => {
     key: 'ships',
     model: response.signup,
   });
+
+  if (response.ship) {
+    servicesStore.setShip(ShipModel.create(response.ship));
+  }
+  if (response.spaces) {
+    applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
+  }
+  if (response.shell) {
+    applySnapshot(servicesStore.shell.desktop, response.shell);
+    servicesStore.shell.desktop.setIsBlurred(false);
+  }
+  //
   coreStore.setBooted();
 });
-
-// window.electron.os.booted((_event: any, data: any) => {
-//   console.log('on-ready');
-
-//   coreStore.setBooted();
-// });
 
 // -------------------------------
 // Create core context
@@ -141,9 +146,9 @@ export function useCore() {
   return store;
 }
 
-onSnapshot(coreStore, (snapshot) => {
-  localStorage.setItem('coreStore', JSON.stringify(snapshot));
-});
+// onSnapshot(coreStore, (snapshot) => {
+//   localStorage.setItem('coreStore', JSON.stringify(snapshot));
+// });
 
 onSnapshot(servicesStore, (snapshot) => {
   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
@@ -174,6 +179,9 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'ship') {
       applyPatch(servicesStore.ship, value.patch);
     }
+    if (value.resource === 'desktop') {
+      applyPatch(servicesStore.shell.desktop, value.patch);
+    }
   }
   if (value.response === 'initial') {
     if (value.resource === 'ship') {
@@ -198,6 +206,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
 //   // osState.desktop.setFullscreen(data);
 // });
 
-// window.electron.app.setAppviewPreload((_event: any, data: any) => {
-//   // osState.desktop.setAppviewPreload(data);
-// });
+window.electron.app.setAppviewPreload((_event: any, data: any) => {
+  servicesStore.shell.desktop.setAppviewPreload(data);
+});

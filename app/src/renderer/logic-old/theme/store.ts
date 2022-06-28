@@ -8,7 +8,7 @@ import {
   castToSnapshot,
   getSnapshot,
 } from 'mobx-state-tree';
-import { sendAction } from '../../logic/realm.core';
+import { sendAction } from '../../logic/actions/realm.core';
 import {
   ThemeModel as BaseThemeModel,
   ThemeStore as BaseThemeStore,

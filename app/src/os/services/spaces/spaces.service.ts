@@ -60,7 +60,7 @@ export class SpacesService extends BaseService {
   }
 
   get snapshot() {
-    return getSnapshot(this.state!);
+    return this.state ? getSnapshot(this.state) : null;
   }
 
   async load(patp: string, ship: ShipModelType) {
@@ -82,7 +82,6 @@ export class SpacesService extends BaseService {
         resource: 'spaces',
         response: 'patch',
       };
-      // console.log('patcjhing', patch);
       this.core.onEffect(patchEffect);
     });
 

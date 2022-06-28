@@ -19,7 +19,7 @@ import {
 import { ShipSelector } from './ShipSelector';
 import { DEFAULT_WALLPAPER } from 'core-a/theme/store';
 import { useServices } from 'renderer/logic/store-2';
-import { AuthApi } from 'renderer/logic/auth';
+import { AuthApi } from 'renderer/logic/actions/auth';
 
 type LoginProps = {
   addShip: () => void;

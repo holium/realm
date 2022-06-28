@@ -8,7 +8,7 @@ import { debounce, delay } from 'lodash';
 
 import { Flex, Sigil, Tooltip } from 'renderer/components';
 import { useServices } from 'renderer/logic/store-2';
-import { AuthApi } from 'renderer/logic/auth';
+import { AuthApi } from 'renderer/logic/actions/auth';
 import { getSnapshot } from 'mobx-state-tree';
 
 // ----------------------------------------

@@ -7,7 +7,8 @@ import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
 import { useServices } from 'renderer/logic/store-2';
-import { SpacesApi } from 'renderer/logic/spaces';
+import { SpacesApi } from 'renderer/logic/actions/spaces';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface AppDockProps {}
 
@@ -64,9 +65,16 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               onClick={(evt: any) => {
                 const selectedApp = app;
                 if (desktop.isOpenWindow(selectedApp.id)) {
-                  desktop.setActive(selectedApp.id);
+                  DesktopActions.setActive(
+                    spaces.selected!.path,
+                    selectedApp.id
+                  );
+                  // desktop.setActive(selectedApp.id);
                 } else {
-                  desktop.openBrowserWindow(selectedApp);
+                  DesktopActions.openAppWindow(
+                    spaces.selected!.path,
+                    selectedApp.toJSON()
+                  );
                 }
               }}
               whileDrag={{ zIndex: 20 }}
@@ -86,19 +94,14 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                       SpacesApi.unpinApp(spaces.selected?.path!, app.id);
                     },
                   },
-
-                  {
-                    label: 'Uninstall app',
-                    disabled: true,
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      console.log('start uninstall');
-                    },
-                  },
                   {
                     label: 'Close',
                     section: 2,
                     onClick: (evt: any) => {
+                      DesktopActions.closeAppWindow(
+                        spaces.selected?.path!,
+                        toJS(app)
+                      );
                       evt.stopPropagation();
                     },
                   },
@@ -156,26 +159,28 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   },
                 },
                 {
-                  label: 'Uninstall app',
-                  disabled: true,
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    console.log('start uninstall');
-                  },
-                },
-                {
                   label: 'Close',
                   section: 2,
                   onClick: (evt: any) => {
+                    DesktopActions.closeAppWindow(
+                      spaces.selected?.path!,
+                      toJS(app)
+                    );
                     evt.stopPropagation();
                   },
                 },
               ]}
               onAppClick={(selectedApp: any) => {
                 if (desktop.isOpenWindow(selectedApp.id)) {
-                  desktop.setActive(selectedApp.id);
+                  DesktopActions.setActive(
+                    spaces.selected!.path,
+                    selectedApp.id
+                  );
                 } else {
-                  desktop.openBrowserWindow(selectedApp);
+                  DesktopActions.openAppWindow(
+                    spaces.selected!.path,
+                    selectedApp
+                  );
                 }
               }}
             />

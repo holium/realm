@@ -7,7 +7,7 @@ import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store-2';
-import { SpacesApi } from 'renderer/logic/spaces';
+import { SpacesApi } from 'renderer/logic/actions/spaces';
 
 type SpacesProps = {
   theme: any;

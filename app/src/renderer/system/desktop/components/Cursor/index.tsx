@@ -24,6 +24,7 @@ type AnimatedCursorProps = {
   isVisible?: boolean;
   isTextCursor?: boolean;
   isResizeCursor?: boolean;
+  initialRender?: boolean;
   // clickables: string[];
 };
 

@@ -11,19 +11,24 @@ export const MouseArea = styled(motion.div)`
 `;
 interface MouseProps {
   hide?: boolean;
+  initialRender?: boolean;
   cursorColor: string;
   animateOut?: boolean;
 }
 
 export const Mouse: FC<MouseProps> = (props: MouseProps) => {
-  const { animateOut, cursorColor, hide } = props;
+  const { animateOut, cursorColor, hide, initialRender } = props;
   const rgb = cursorColor && rgbToString(hexToRgb(cursorColor));
   return useMemo(
     () => (
       <MouseArea
         animate={{ zIndex: 11000, display: hide ? 'none' : 'inherit' }}
       >
-        <CurrentUserCursor animateOut={animateOut} color={rgb || undefined} />
+        <CurrentUserCursor
+          initialRender={initialRender}
+          animateOut={animateOut}
+          color={rgb || undefined}
+        />
       </MouseArea>
     ),
     [hide, cursorColor]

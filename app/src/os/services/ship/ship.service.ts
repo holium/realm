@@ -5,6 +5,9 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
+  IStateTreeNode,
+  IAnyModelType,
+  IType,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -74,7 +77,7 @@ export class ShipService extends BaseService {
   }
 
   get snapshot() {
-    return getSnapshot(this.state!);
+    return this.state ? getSnapshot(this.state) : null;
   }
 
   subscribe(ship: string, shipInfo: any) {

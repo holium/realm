@@ -1,7 +1,7 @@
 import { FC, useRef } from 'react';
 import styled from 'styled-components';
 import { WindowModelType } from 'renderer/logic-old/desktop/store';
-import { nativeApps } from 'renderer/apps';
+import { nativeRenderers } from 'renderer/apps/native';
 
 export interface NativeViewProps {
   window: WindowModelType | any;
@@ -16,7 +16,7 @@ export const NativeView: FC<NativeViewProps> = (props: NativeViewProps) => {
 
   const elementRef = useRef(null);
   const ViewComponent: FC<any> | undefined =
-    nativeApps[window.id].native?.component!;
+    nativeRenderers[window.id].component!;
 
   return (
     <View
@@ -28,9 +28,7 @@ export const NativeView: FC<NativeViewProps> = (props: NativeViewProps) => {
       }}
       ref={elementRef}
     >
-      {nativeApps[window.id].native?.component && (
-        <ViewComponent isResizing={isResizing} />
-      )}
+      {ViewComponent && <ViewComponent isResizing={isResizing} />}
     </View>
   );
 };

@@ -15,8 +15,10 @@ import { Flex } from 'renderer/components';
 import { toJS } from 'mobx';
 import { NativeView } from './NativeView';
 import { nativeApps } from 'renderer/apps';
+import { nativeRenderers } from 'renderer/apps/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
 import { useServices } from 'renderer/logic/store-2';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -115,7 +117,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         setUnmaximize(undefined);
       }
       activeWindow &&
-        desktop.setDimensions(activeWindow.id, {
+        DesktopActions.setAppDimensions(activeWindow.id, {
           x: mX.get(),
           y: mY.get(),
           height: mHeight.get(),
@@ -126,7 +128,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     const onDragStop = () => {
       setIsDragging(false);
       activeWindow &&
-        desktop.setDimensions(activeWindow.id, {
+        DesktopActions.setAppDimensions(activeWindow.id, {
           x: mX.get(),
           y: mY.get(),
           height: mHeight.get(),
@@ -140,7 +142,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
 
     const onClose = () => {
       desktop.activeWindow
-        ? desktop.closeBrowserWindow(desktop.activeWindow?.id)
+        ? DesktopActions.closeAppWindow('', toJS(desktop.activeWindow))
         : {};
     };
 
@@ -157,7 +159,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     };
 
     const onMouseDown = () => {
-      desktop.setActive(window.id);
+      DesktopActions.setActive('', window.id);
     };
 
     const windowId = `app-window-${activeWindow?.id}`;
@@ -169,7 +171,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     if (window.type === 'native') {
       hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
       noTitlebar = nativeApps[window.id].native!.noTitlebar!;
-      CustomTitlebar = nativeApps[window.id].native!.titlebar!;
+      CustomTitlebar = nativeRenderers[window.id].titlebar!;
       showDevToolsToggle = false;
       preventClickEvents = false;
     }
@@ -275,7 +277,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
               onPointerUp={() => {
                 setIsResizing(false);
                 activeWindow &&
-                  desktop.setDimensions(activeWindow.id, {
+                  DesktopActions.setAppDimensions(activeWindow.id, {
                     x: mX.get(),
                     y: mY.get(),
                     height: mHeight.get(),

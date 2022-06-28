@@ -1,11 +1,3 @@
-// Core
-// Window
-// Auth
-//  - auth.manager
-//  - ship.manager
-// Settings
-// Apps
-// Notifications
 import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
@@ -27,18 +19,43 @@ export interface ISession {
 
 export class Realm extends EventEmitter {
   conduit?: Urbit;
-  mainWindow: BrowserWindow;
+  readonly mainWindow: BrowserWindow;
   private session?: ISession;
   private db: Store<ISession>;
-
-  services: {
+  readonly services: {
     identity: {
       auth: AuthService;
       signup: SignupService;
-      // signup:
     };
     ship: ShipService;
     spaces: SpacesService;
+    shell: DesktopService;
+  };
+  readonly handlers = {
+    'realm.boot': this.boot,
+    'realm.apply-action': this.applyAction,
+  };
+
+  static preload = {
+    boot: () => {
+      return ipcRenderer.invoke('realm.boot');
+    },
+    applyAction: (action: any) => {
+      return ipcRenderer.invoke('realm.apply-action', action);
+    },
+    install: (ship: string) => {
+      return ipcRenderer.invoke('core:install-realm', ship);
+    },
+    sendAction: (action: any) => {
+      return ipcRenderer.invoke('core:send-action', action);
+    },
+    onEffect: (callback: any) => ipcRenderer.on('core:on-effect', callback),
+    onLogin: (callback: any) => ipcRenderer.on('core:on-log-in', callback),
+    auth: AuthService.preload,
+    signup: SignupService.preload,
+    ship: ShipService.preload,
+    spaces: SpacesService.preload,
+    shell: DesktopService.preload,
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -52,7 +69,7 @@ export class Realm extends EventEmitter {
       fileExtension: 'lock',
     });
     if (this.db.store) {
-      this.session = this.db.store;
+      this.setSession(this.db.store);
     }
     // Create an instance of all services
     this.services = {
@@ -62,7 +79,13 @@ export class Realm extends EventEmitter {
       },
       ship: new ShipService(this),
       spaces: new SpacesService(this),
+      shell: new DesktopService(this),
     };
+
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-ignore
+      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
     // Capture all on-effect events and push through the core on-effect
     this.services.identity.auth.on('on-effect', this.onEffect);
     this.services.identity.signup.on('on-effect', this.onEffect);
@@ -71,15 +94,24 @@ export class Realm extends EventEmitter {
   }
 
   static start(mainWindow: BrowserWindow) {
-    const realm = new Realm(mainWindow);
-    ipcMain.handle('core:boot', realm.boot.bind(realm));
-    ipcMain.handle('core:apply-action', realm.applyAction.bind(realm));
+    return new Realm(mainWindow);
   }
 
   async boot(_event: any) {
+    let ship = null;
+    let spaces = null;
+    let shell = null;
+    if (this.session) {
+      ship = this.services.ship.snapshot;
+      spaces = this.services.spaces.snapshot;
+      shell = this.services.shell.snapshot;
+    }
     return {
       auth: this.services.identity.auth.snapshot,
       signup: this.services.identity.signup.snapshot,
+      ship,
+      spaces,
+      shell,
     };
   }
 
@@ -143,73 +175,50 @@ export class Realm extends EventEmitter {
   onEffect(data: any): void {
     this.mainWindow.webContents.send('core:on-effect', data);
   }
-
-  static preload = {
-    boot: () => {
-      return ipcRenderer.invoke('core:boot');
-    },
-    applyAction: (action: any) => {
-      return ipcRenderer.invoke('core:apply-action', action);
-    },
-    install: (ship: string) => {
-      return ipcRenderer.invoke('core:install-realm', ship);
-    },
-    sendAction: (action: any) => {
-      return ipcRenderer.invoke('core:send-action', action);
-    },
-    onEffect: (callback: any) => ipcRenderer.on('core:on-effect', callback),
-    onLogin: (callback: any) => ipcRenderer.on('core:on-log-in', callback),
-    auth: AuthService.preload,
-    signup: SignupService.preload,
-    ship: ShipService.preload,
-    spaces: SpacesService.preload,
-    shell: DesktopService.preload,
-  };
 }
 
 export default Realm;
 
-//
-// Preload types
-//
-export type OSPreloadType = {
-  boot: () => Promise<any>; // starts an instance of the OS
-  install: () => Promise<any>; // calls the kiln install command
-  onInstalled: () => Promise<any>;
-  // onStart: () => Promise<any>;
-  onEffect: (callback: any) => Promise<any>;
-  applyAction: (action: any) => Promise<any>;
-  auth: typeof AuthService.preload;
-  signup: typeof SignupService.preload;
-  ship: typeof ShipService.preload;
-  spaces: typeof SpacesService.preload;
-  shell: typeof DesktopService.preload;
-  // ship: {
-  //   getContacts: () => any;
-  //   getMetadata: (path: string) => any;
-  //   getProfile: (ship: string) => Promise<any>;
-  //   saveProfile: (ship: string, data: any) => Promise<any>;
-  //   beacon: {
-  //     getNotifications: () => Promise<any>;
-  //     createNotification: (params: any) => Promise<any>;
-  //     seenNotification: (id: string) => Promise<any>;
-  //     archiveNotification: (id: string) => Promise<any>;
-  //   };
-  //   docket: {
-  //     getApps: () => Promise<any>;
-  //     getAppPreview: (ship: string, desk: string) => Promise<any>;
-  //   };
-  //   dms: {
-  //     setScreen: (screen: boolean) => Promise<any>;
-  //     acceptDm: (ship: string) => Promise<any>;
-  //     declineDm: (ship: string) => Promise<any>;
-  //     getDMs: () => Promise<any>;
-  //     sendDm: (toShip: string, content: any[]) => Promise<any>;
-  //     removeDm: (ship: string, index: any) => Promise<any>;
-  //   };
-  // };
-  // spaces: {
-  //   getSpaces: () => any;
-  //   setActive: (space: any) => any;
-  // };
-};
+export type OSPreloadType = typeof Realm.preload;
+
+// {
+//   boot: () => Promise<any>; // starts an instance of the OS
+//   install: () => Promise<any>; // calls the kiln install command
+//   onInstalled: () => Promise<any>;
+//   // onStart: () => Promise<any>;
+//   onEffect: (callback: any) => Promise<any>;
+//   applyAction: (action: any) => Promise<any>;
+//   auth: typeof AuthService.preload;
+//   signup: typeof SignupService.preload;
+//   ship: typeof ShipService.preload;
+//   spaces: typeof SpacesService.preload;
+//   shell: typeof DesktopService.preload;
+//   // ship: {
+//   //   getContacts: () => any;
+//   //   getMetadata: (path: string) => any;
+//   //   getProfile: (ship: string) => Promise<any>;
+//   //   saveProfile: (ship: string, data: any) => Promise<any>;
+//   //   beacon: {
+//   //     getNotifications: () => Promise<any>;
+//   //     createNotification: (params: any) => Promise<any>;
+//   //     seenNotification: (id: string) => Promise<any>;
+//   //     archiveNotification: (id: string) => Promise<any>;
+//   //   };
+//   //   docket: {
+//   //     getApps: () => Promise<any>;
+//   //     getAppPreview: (ship: string, desk: string) => Promise<any>;
+//   //   };
+//   //   dms: {
+//   //     setScreen: (screen: boolean) => Promise<any>;
+//   //     acceptDm: (ship: string) => Promise<any>;
+//   //     declineDm: (ship: string) => Promise<any>;
+//   //     getDMs: () => Promise<any>;
+//   //     sendDm: (toShip: string, content: any[]) => Promise<any>;
+//   //     removeDm: (ship: string, index: any) => Promise<any>;
+//   //   };
+//   // };
+//   // spaces: {
+//   //   getSpaces: () => any;
+//   //   setActive: (space: any) => any;
+//   // };
+// };

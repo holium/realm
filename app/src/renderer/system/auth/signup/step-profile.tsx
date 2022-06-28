@@ -22,7 +22,7 @@ import {
 } from '../../../components';
 import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store-2';
-import { SignupApi } from 'renderer/logic/signup';
+import { SignupApi } from 'renderer/logic/actions/signup';
 interface ColorTileProps {
   tileColor: string;
 }

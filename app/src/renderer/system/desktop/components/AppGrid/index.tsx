@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -8,6 +9,7 @@ import { AppTile } from 'renderer/components/AppTile';
 import { AppModelType } from 'core-a/ship/stores/docket';
 import { NativeAppList } from 'renderer/apps';
 import { useServices } from 'renderer/logic/store-2';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type HomeWindowProps = {
   customBg: string;
@@ -138,7 +140,12 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                     exit: { opacity: 0, top: 100 },
                   }}
                   onAppClick={(selectedApp: AppModelType) => {
-                    desktop.openBrowserWindow(selectedApp);
+                    DesktopActions.openAppWindow(
+                      spaces.selected!.path,
+                      toJS(selectedApp)
+                    );
+                    desktop.setIsBlurred(false);
+                    desktop.setHomePane(false);
                   }}
                 />
               );

@@ -10,6 +10,7 @@ import {
 import { ThemeModel } from '../../../../renderer/logic-old/theme/store';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
+import { NativeAppList } from '../../../../renderer/apps';
 
 import { TokenModel } from './token';
 
@@ -35,19 +36,23 @@ export const SpaceModel = types
   .views((self) => ({
     get pinnedApps() {
       const pins = self.apps.pinned;
-      return [...Array.from(self.apps.installed!.values())]
+      return [...Array.from(self.apps.installed!.values()), ...NativeAppList]
         .filter((app: any) => self.apps.pinned.includes(app.id))
         .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
     },
     isAppPinned(appId: string) {
       return self.apps.pinned.includes(appId);
     },
-  }))
-  .actions((self) => ({
     getAppData(appId: string) {
       const apps = Array.from(self.apps.installed.values());
-      return apps.find((app: any) => app.id === appId);
+      return [...apps, ...NativeAppList].find((app: any) => app.id === appId);
     },
+    get spaceApps() {
+      const apps = Array.from(self.apps.installed.values());
+      return [...apps, ...NativeAppList];
+    },
+  }))
+  .actions((self) => ({
     pinApp(appId: string) {
       self.apps.pinned.push(appId);
     },

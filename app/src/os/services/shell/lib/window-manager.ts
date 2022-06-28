@@ -38,10 +38,11 @@ export const getCenteredXY = (
  * @returns { x: number; y: number; width: number; height: number }
  */
 export const getFullscreenDimensions = (
+  desktopDimensions: { width: number; height: number },
   isFullscreen?: boolean
 ): { x: number; y: number; width: number; height: number } => {
   const offset = isFullscreen ? 0 : 30;
-  const { innerWidth: width, innerHeight: height } = window;
+  const { width, height } = desktopDimensions;
   const windowHeight = height - (16 + offset) - 50;
   const windowWidth = width - 16;
   return {
@@ -61,9 +62,10 @@ export const getFullscreenDimensions = (
  * @returns { x: number; y: number; width: number; height: number }
  */
 export const getCenteredDimensions = (
-  app: any
+  app: any,
+  desktopDimensions: { width: number; height: number }
 ): { x: number; y: number; width: number; height: number } => {
-  const { innerWidth: width, innerHeight: height } = window;
+  const { width, height } = desktopDimensions;
   const defaultAppDimensions = {
     width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
       ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
@@ -95,29 +97,30 @@ export const getCenteredDimensions = (
  */
 export const getInitialWindowDimensions = (
   app: any,
+  desktopDimensions: { width: number; height: number },
   isFullscreen?: boolean
 ): { x: number; y: number; width: number; height: number } => {
   let dimensions: { x: number; y: number; width: number; height: number };
   switch (app.type) {
     case 'urbit':
       const urbitApp: AppModelType = app;
-      dimensions = getCenteredDimensions(urbitApp);
+      dimensions = getCenteredDimensions(urbitApp, desktopDimensions);
       break;
     case 'web':
       const webApp: NativeAppType = app;
       if (webApp.web?.openFullscreen) {
-        dimensions = getFullscreenDimensions(isFullscreen);
+        dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
         break;
       }
-      dimensions = getCenteredDimensions(webApp);
+      dimensions = getCenteredDimensions(webApp, desktopDimensions);
       break;
     case 'native':
       const nativeApp: NativeAppType = app;
       if (nativeApp.native?.openFullscreen) {
-        dimensions = getFullscreenDimensions(isFullscreen);
+        dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
         break;
       }
-      dimensions = getCenteredDimensions(nativeApp);
+      dimensions = getCenteredDimensions(nativeApp, desktopDimensions);
       break;
   }
   return dimensions!;
