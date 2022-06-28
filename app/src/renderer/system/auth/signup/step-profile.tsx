@@ -22,7 +22,7 @@ import {
 } from '../../../components';
 import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { SignupApi } from 'renderer/logic/actions/signup';
+import { SignupActions } from 'renderer/logic/actions/signup';
 interface ColorTileProps {
   tileColor: string;
 }
@@ -369,7 +369,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
               onClick={(evt: any) => {
                 if (profileForm.computed.isDirty) {
                   const formData = profileForm.actions.submit();
-                  SignupApi.saveProfile(shipName, {
+                  SignupActions.saveProfile(shipName, {
                     color: formData['sigil-color'],
                     nickname: formData['nickname'],
                     avatar: formData['avatar'],

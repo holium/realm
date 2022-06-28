@@ -71,6 +71,7 @@ export class AuthService extends BaseService {
     onSnapshot(this.state, (snapshot) => {
       this.db.store = castToSnapshot(snapshot);
     });
+
     onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
@@ -108,6 +109,8 @@ export class AuthService extends BaseService {
 
   login(_event: any, ship: string, password: string) {
     this.state.login(`auth${ship}`);
+    this.core.services.shell.setMouseColor(null, this.state.selected?.color!);
+
     // TODO decrypt stored snapshot
     const { url, cookie } = this.getCredentials(ship, password);
     this.core.setSession({
@@ -118,6 +121,8 @@ export class AuthService extends BaseService {
   }
 
   logout(_event: any, ship: string) {
+    // this.core.services.shell.resetMouseColor(null);
+
     this.core.clearSession();
     this.core.services.ship.logout();
   }

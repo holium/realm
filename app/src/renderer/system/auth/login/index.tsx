@@ -19,7 +19,7 @@ import {
 import { ShipSelector } from './ShipSelector';
 import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
-import { AuthApi } from 'renderer/logic/actions/auth';
+import { AuthActions } from 'renderer/logic/actions/auth';
 
 type LoginProps = {
   addShip: () => void;
@@ -63,14 +63,17 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       // @ts-expect-error typescript...
       submitRef.current.focus();
       // @ts-expect-error typescript...
-      submitRef.current.click();
-      // @ts-expect-error typescript...
       passwordRef.current.blur();
       // @ts-expect-error typescript...
       wrapperRef.current.blur();
-      window.electron.os.auth.login(pendingShip!.patp, event.target.value);
-      // auth.login(pendingShip!.patp, event.target.value);
     }
+  };
+  const clickSubmit = (event: any) => {
+    event.stopPropagation();
+
+    // console.log(passwordRef.current.value);
+    // @ts-expect-error typescript...
+    window.electron.os.auth.login(pendingShip!.patp, passwordRef.current.value);
   };
 
   let colorProps = null;
@@ -171,7 +174,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                             luminosity={theme.theme?.textTheme}
                             size={24}
                             canFocus
-                            onKeyDown={submitPassword}
+                            onClick={(evt: any) => clickSubmit(evt)}
                           >
                             <Icons opacity={0.5} name="ArrowRightLine" />
                           </IconButton>
@@ -218,7 +221,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                       customBg={theme.theme.windowColor}
                       mt={1}
                       onClick={() => {
-                        AuthApi.removeShip(pendingShip.patp);
+                        AuthActions.removeShip(pendingShip.patp);
                         // auth.removeShip(pendingShip.patp);
                         // auth.clearSession();
                       }}

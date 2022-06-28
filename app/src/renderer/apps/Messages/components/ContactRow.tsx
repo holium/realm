@@ -1,16 +1,16 @@
 import { FC } from 'react';
 import styled, { css } from 'styled-components';
-import { useShip } from 'renderer/logic/store';
 import { rgba, lighten, darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 import { Sigil, Flex, Box, Text, TextButton } from 'renderer/components';
-import { ChatType } from 'renderer/logic-old/ship/chat/store';
+import { ChatType } from 'os/services/ship/models/dms';
 import { Message } from './Message';
-import { WindowThemeType } from 'renderer/logic-old/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { DmActions } from 'renderer/logic/actions/chat';
 
 type DMContact = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   dm: ChatType;
   onClick: (evt: any) => void;
 };
@@ -59,14 +59,14 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
   if (dm.pending) {
     const onAccept = (evt: any) => {
       evt.stopPropagation();
-      dm.acceptDm().then((response: any) => {
+      DmActions.acceptDm(dm.contact).then((response: any) => {
         console.log('accept ContactRow response', response);
       });
       console.log('accepting');
     };
     const onDecline = (evt: any) => {
       evt.stopPropagation();
-      dm.declineDm().then((response: any) => {
+      DmActions.declineDm(dm.contact).then((response: any) => {
         console.log('response', response);
       });
       console.log('rejecting');

@@ -23,6 +23,8 @@ export class DesktopService extends BaseService {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
     'realm.desktop.set-desktop-dimensions': this.setDesktopDimensions,
+    'realm.desktop.set-blur': this.setBlur,
+    'realm.desktop.set-home-pane': this.setHomePane,
     'realm.desktop.set-app-dimensions': this.setAppDimensions,
     'realm.desktop.set-mouse-color': this.setMouseColor,
     'realm.desktop.set-theme': this.setTheme,
@@ -37,6 +39,12 @@ export class DesktopService extends BaseService {
         spaceId,
         wallpaper
       );
+    },
+    setBlur: (blurred: boolean) => {
+      return ipcRenderer.invoke('realm.desktop.set-blur', blurred);
+    },
+    setHomePane: (isHome: boolean) => {
+      return ipcRenderer.invoke('realm.desktop.set-home-pane', isHome);
     },
     setActive: (spaceId: string, appId: string) => {
       return ipcRenderer.invoke('realm.desktop.set-active', spaceId, appId);
@@ -113,6 +121,14 @@ export class DesktopService extends BaseService {
     this.state?.setActive(appId);
     // this.state?.activeWindow =
   }
+  setHomePane(_event: any, isHome: boolean) {
+    this.state?.setHomePane(isHome);
+    this.state?.setIsBlurred(isHome);
+  }
+  setBlur(_event: any, blurred: boolean) {
+    this.state?.setIsBlurred(blurred);
+  }
+
   setMouseColor(_event: any, mouseColor: string) {
     this.state?.setMouseColor(mouseColor);
   }

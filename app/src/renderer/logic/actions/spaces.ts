@@ -1,7 +1,7 @@
 /**
- * SpacesApi for interfacing with core process
+ * SpacesActions for interfacing with core process
  */
-export const SpacesApi = {
+export const SpacesActions = {
   pinApp: async (path: string, appId: string) => {
     return await window.electron.os.spaces.pinApp(path, appId);
   },

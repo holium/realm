@@ -1,7 +1,7 @@
 /**
- * SignupApi for interfacing with core process
+ * SignupActions for interfacing with core process
  */
-export const SignupApi = {
+export const SignupActions = {
   addShip: async (newShip: { ship: string; url: string; code: string }) => {
     return await window.electron.os.signup.addShip(newShip);
   },

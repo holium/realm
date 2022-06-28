@@ -11,6 +11,7 @@ import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
 import { toJS } from 'mobx';
+import { ShipModelType } from './services/ship/models/ship';
 
 export interface ISession {
   ship: string;
@@ -102,6 +103,7 @@ export class Realm extends EventEmitter {
       spaces = this.services.spaces.snapshot;
       shell = this.services.shell.snapshot;
     }
+    this.services.identity.auth.setLoader('initial');
     return {
       auth: this.services.identity.auth.snapshot,
       signup: this.services.identity.signup.snapshot,
@@ -143,7 +145,7 @@ export class Realm extends EventEmitter {
   }
 
   async onLogin() {
-    const ship = await this.services.ship.subscribe(
+    const ship: ShipModelType = await this.services.ship.subscribe(
       this.session?.ship!,
       this.session
     );

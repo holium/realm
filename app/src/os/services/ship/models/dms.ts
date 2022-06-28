@@ -174,7 +174,7 @@ export const Chat = types
       self.messages.unshift(
         NewChatMessage.create({
           index: post.index,
-          pending: false,
+          pending: true,
           author: post.author,
           timeSent: post['time-sent'],
           contents: post.contents,

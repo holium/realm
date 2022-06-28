@@ -8,6 +8,12 @@ export const DesktopActions = {
   setActive: async (spacePath: string, app: any) => {
     return await window.electron.os.shell.setActive(spacePath, app);
   },
+  setBlur: async (blurred: boolean) => {
+    return await window.electron.os.shell.setBlur(blurred);
+  },
+  setHomePane: async (isHome: boolean) => {
+    return await window.electron.os.shell.setHomePane(isHome);
+  },
   setAppDimensions: async (
     windowId: any,
     dimensions: { width: number; height: number; x: number; y: number }

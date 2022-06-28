@@ -1,4 +1,3 @@
-import Urbit from '../../../core-a/urbit/api';
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import {
@@ -24,6 +23,7 @@ import { ContactApi } from '../../api/contacts';
 export class SignupService extends BaseService {
   private db: Store<SignupStoreType>; // for persistance
   private state: SignupStoreType; // for state management
+
   handlers = {
     'realm.signup.add-ship': this.addShip,
     'realm.signup.get-profile': this.getProfile,
@@ -79,7 +79,7 @@ export class SignupService extends BaseService {
         resource: 'signup',
         response: 'patch',
       };
-      this.onEffect(patchEffect);
+      this.core.onEffect(patchEffect);
     });
   }
 

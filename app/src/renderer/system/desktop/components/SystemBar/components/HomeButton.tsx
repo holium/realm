@@ -4,6 +4,7 @@ import { motion, useMotionValue } from 'framer-motion';
 import HoliumAnimated from 'renderer/components/Icons/holium';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type HomeButton = {};
 
@@ -21,7 +22,8 @@ export const HomeButton: FC<HomeButton> = observer(() => {
     y.set(event.clientY - rect.top);
   }
   const onHome = () => {
-    desktop.setHomePane(!desktop.showHomePane);
+    // DesktopActions.setBlur(!desktop.isBlurred);
+    DesktopActions.setHomePane(!desktop.showHomePane);
   };
 
   return useMemo(

@@ -7,7 +7,7 @@ import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { SpacesApi } from 'renderer/logic/actions/spaces';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 type SpacesProps = {
   theme: any;
@@ -78,7 +78,7 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         <SpacesList
           selected={spaces.selected!}
           spaces={spaces.spacesList}
-          onSelect={(path: string) => SpacesApi.selectSpace(path)}
+          onSelect={(path: string) => SpacesActions.selectSpace(path)}
         />
       </Flex>
       <Grid.Row expand noGutter></Grid.Row>
@@ -96,7 +96,7 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         <YouRow
           selected={ship?.patp === spaces.selected?.path}
           ship={ship!}
-          onSelect={(path: string) => SpacesApi.selectSpace(path)}
+          onSelect={(path: string) => SpacesActions.selectSpace(path)}
         />
       </Flex>
     </Grid.Column>

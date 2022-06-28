@@ -74,6 +74,7 @@ export class ShipService extends BaseService {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
+    this.subscribe = this.subscribe.bind(this);
   }
 
   get snapshot() {
@@ -81,7 +82,7 @@ export class ShipService extends BaseService {
   }
 
   async subscribe(ship: string, shipInfo: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<ShipModelType>((resolve, reject) => {
       // TODO password protect data
       this.db = new Store<ShipModelType>({
         name: `realm.ship.${ship}`,
@@ -174,7 +175,7 @@ export class ShipService extends BaseService {
         // this.core.services.spaces.setShipSpace(this.state!);
         this.core.services.spaces.load(ship, this.state!);
         this.state?.loader.set('loaded');
-        resolve(this.state);
+        resolve(this.state!);
       });
     });
     // this.core.services.identity.auth.loader = 'loaded';
@@ -267,6 +268,8 @@ export class ShipService extends BaseService {
   }
   async sendDm(_event: any, toShip: string, contents: any[]) {
     const ourShip = this.state?.patp!;
+    const dm = this.state?.chat.dms.get(toShip)!;
+    dm.sendDm(contents);
     return await DmApi.sendDM(
       ourShip,
       toShip,

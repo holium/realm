@@ -1,13 +1,4 @@
-import {
-  createRef,
-  FC,
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-} from 'react';
-import { toJS } from 'mobx';
+import { createRef, FC, useEffect, useState, useMemo, useRef } from 'react';
 import { lighten, rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
 import ScrollView from 'react-inverted-scrollview';
@@ -26,9 +17,8 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { MessageType, ChatMessage } from './components/ChatMessage';
 import { createDmForm } from './forms/chatForm';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
-import styled from 'styled-components';
-import { ChatInput } from './components/ChatInput';
 import { useServices } from 'renderer/logic/store';
+import { DmActions } from 'renderer/logic/actions/chat';
 
 type IProps = {
   theme: ThemeModelType;
@@ -82,7 +72,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         if (formData) console.log(formData);
         const dmMessageContent = formData['dm-message'];
         // console.log(dmMessage);
-        chatData.sendDm(dmMessageContent);
+        DmActions.sendDm(selectedChat.contact, dmMessageContent);
         // @ts-ignore
         chatInputRef.current.value = '';
       }

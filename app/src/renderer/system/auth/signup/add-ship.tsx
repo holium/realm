@@ -20,7 +20,7 @@ import {
 import UrbitSVG from '../../../../../assets/urbit.svg';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { SignupApi } from 'renderer/logic/actions/signup';
+import { SignupActions } from 'renderer/logic/actions/signup';
 
 export const createShipForm = (
   defaults: any = {
@@ -222,14 +222,12 @@ export const AddShip: FC<AddShipProps> = observer((props: AddShipProps) => {
               // loading={auth.isLoading}
               onClick={(evt: any) => {
                 const formData = shipForm.actions.submit();
-                SignupApi.addShip({
+                SignupActions.addShip({
                   ship: formData['urbit-id'],
                   url: formData['ship-id'],
                   code: formData['access-key'],
                 })
                   .then(() => {
-                    console.log('before next');
-                    // eslint-disable-next-line promise/no-callback-in-promise
                     next();
                     evt.target.blur();
                     return null;

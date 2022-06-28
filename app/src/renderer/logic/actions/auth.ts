@@ -1,7 +1,7 @@
 /**
- * AuthApi for interfacing with core process
+ * AuthActions for interfacing with core process
  */
-export const AuthApi = {
+export const AuthActions = {
   getShips: async () => {
     return await window.electron.os.auth.getShips();
   },

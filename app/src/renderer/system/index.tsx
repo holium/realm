@@ -33,9 +33,10 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
 
   const hasWallpaper = bgImage ? true : false;
   const isBlurred = useMemo(
-    () => !loggedIn && desktop.isBlurred,
+    () => !loggedIn || desktop.isBlurred,
     [desktop.isBlurred, loggedIn]
   );
+
   const shipLoaded = ship?.loader.isLoaded;
 
   return (
@@ -52,7 +53,6 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
         ) : (
           <Auth hasWallpaper={hasWallpaper} />
         )}
-        {/* <Auth hasWallpaper={hasWallpaper} /> */}
       </BackgroundFill>
     </ViewPort>
   );

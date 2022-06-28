@@ -2,7 +2,7 @@ import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Grid, Spinner, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { SignupApi } from 'renderer/logic/actions/signup';
+import { SignupActions } from 'renderer/logic/actions/signup';
 
 type AddShipProps = {
   next: () => any;
@@ -14,8 +14,7 @@ export const ConnectingShip: FC<AddShipProps> = observer(
     const { signup } = identity;
     useEffect(() => {
       signup.signupShip &&
-        SignupApi.getProfile(signup.signupShip.patp).then(() => {
-          console.log('got profile');
+        SignupActions.getProfile(signup.signupShip.patp).then(() => {
           props.next();
         });
     }, [signup.signupShip]);

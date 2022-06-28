@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import styled from 'styled-components';
 import { Flex, Text, Sigil } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';

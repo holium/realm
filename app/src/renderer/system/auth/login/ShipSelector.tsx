@@ -8,7 +8,7 @@ import { delay } from 'lodash';
 
 import { Flex, Sigil, Tooltip } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { AuthApi } from 'renderer/logic/actions/auth';
+import { AuthActions } from 'renderer/logic/actions/auth';
 
 // ----------------------------------------
 // -------- Local style components --------
@@ -42,13 +42,13 @@ export const ShipSelector: FC = observer(() => {
         whileDrag={{ zIndex: 20 }}
         onDragStart={(evt: any) => setDragging(true)}
         onClick={() => {
-          !dragging && AuthApi.setSelected(ship.patp);
+          !dragging && AuthActions.setSelected(ship.patp);
         }}
         onMouseUp={() => {
           setDragging(false);
         }}
         onDragEnd={(_event: any) => {
-          delay(() => AuthApi.setOrder(toJS(auth.order)), 1500);
+          delay(() => AuthActions.setOrder(toJS(auth.order)), 1500);
         }}
       >
         <Flex position="relative" height="100%">

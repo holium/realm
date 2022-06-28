@@ -1,7 +1,7 @@
 import { DesktopActions } from './actions/desktop';
 import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
-import { onBoot } from './actions/realm.core';
+import { OSActions } from './actions/os';
 
 import {
   applyPatch,
@@ -12,7 +12,6 @@ import {
   types,
 } from 'mobx-state-tree';
 
-// import { ConfigStore } from '../logic-old/stores/config';
 import { ThemeStore } from '../../os/services/shell/theme.model';
 import { DesktopStore } from '../../os/services/shell/desktop.model';
 import { SpacesStore } from '../../os/services/spaces/models/spaces';
@@ -49,11 +48,13 @@ export const Services = types
     },
   }));
 
+const shellSnapshot = loadSnapshot('shell');
+
 const services = Services.create({
   shell: {
     // preferenceStore: {},
     theme: {},
-    desktop: loadSnapshot('shell').desktop,
+    desktop: (shellSnapshot && shellSnapshot.desktop) || {},
   },
   identity: {
     auth: {
@@ -123,7 +124,7 @@ coreStore.reset(); // need to reset coreStore for proper boot sequence
 // servicesStore.shell.desktop.setIsBlurred(true);
 
 // After boot, set the initial data
-onBoot().then((response: any) => {
+OSActions.onBoot().then((response: any) => {
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
@@ -136,6 +137,7 @@ onBoot().then((response: any) => {
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
     coreStore.setLoggedIn(true);
+    DesktopActions.setBlur(false);
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
@@ -173,14 +175,14 @@ onSnapshot(servicesStore, (snapshot) => {
 // Auth events
 window.electron.os.auth.onLogin((_event: any) => {
   coreStore.setLoggedIn(true);
+  DesktopActions.setBlur(false);
 });
 
 // Auth events
 window.electron.os.auth.onLogout((_event: any) => {
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
-  // servicesStore.identity.auth.loader.set('loading');
-  servicesStore.shell.desktop.setIsBlurred(true);
+  DesktopActions.setBlur(true);
 });
 
 // Effect events
@@ -206,6 +208,7 @@ window.electron.os.onEffect((_event: any, value: any) => {
     }
   }
   if (value.response === 'initial') {
+    // console.log('initial', value);
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }

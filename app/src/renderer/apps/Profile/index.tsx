@@ -14,7 +14,7 @@ import { displayDate } from 'os/lib/time';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { nativeApps } from '..';
 import { useServices } from 'renderer/logic/store';
-import { AuthApi } from 'renderer/logic/actions/auth';
+import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type ProfileProps = {
@@ -108,7 +108,7 @@ export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
             color={iconColor}
             style={{ cursor: 'none' }}
             onClick={() => {
-              AuthApi.logout(currentShip.patp);
+              AuthActions.logout(currentShip.patp);
             }}
           >
             <Icons name="Lock" />

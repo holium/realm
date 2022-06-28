@@ -144,8 +144,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                       spaces.selected!.path,
                       toJS(selectedApp)
                     );
-                    desktop.setIsBlurred(false);
-                    desktop.setHomePane(false);
+                    // DesktopActions.setBlur(false);
+                    DesktopActions.setHomePane(false);
                   }}
                 />
               );

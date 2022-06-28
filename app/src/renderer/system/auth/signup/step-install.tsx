@@ -15,7 +15,7 @@ import {
   TextButton,
 } from '../../../components';
 import { useServices } from 'renderer/logic/store';
-import { SignupApi } from 'renderer/logic/actions/signup';
+import { SignupActions } from 'renderer/logic/actions/signup';
 
 type InstallStepProps = {
   next: () => void;
@@ -130,7 +130,7 @@ export const StepInstall: FC<InstallStepProps> = observer(
             <TextButton
               disabled={!signup.installer.isLoaded}
               onClick={(evt: any) => {
-                SignupApi.completeSignup();
+                SignupActions.completeSignup();
                 next();
               }}
             >

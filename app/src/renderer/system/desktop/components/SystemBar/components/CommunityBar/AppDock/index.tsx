@@ -7,7 +7,7 @@ import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
-import { SpacesApi } from 'renderer/logic/actions/spaces';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface AppDockProps {}
@@ -91,7 +91,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     label: 'Unpin',
                     onClick: (evt: any) => {
                       evt.stopPropagation();
-                      SpacesApi.unpinApp(spaces.selected?.path!, app.id);
+                      SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                     },
                   },
                   {
@@ -155,7 +155,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   label: 'Unpin',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    SpacesApi.unpinApp(spaces.selected?.path!, app.id);
+                    SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                   },
                 },
                 {
