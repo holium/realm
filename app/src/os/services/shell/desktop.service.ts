@@ -17,7 +17,7 @@ import { ThemeModelType } from './theme.model';
  * DesktopService
  */
 export class DesktopService extends BaseService {
-  private db: Store<DesktopStoreType>; // for persistance
+  private db?: Store<DesktopStoreType>; // for persistance
   private state?: DesktopStoreType; // for state management
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
@@ -82,21 +82,24 @@ export class DesktopService extends BaseService {
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
-    this.db = new Store({
-      name: `realm.desktop.${core.credentials?.ship}`,
-      accessPropertiesByDotNotation: true,
-    });
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
+  }
+
+  async load(patp: string, mouseColor: string) {
+    this.db = new Store({
+      name: `realm.desktop.${patp}`,
+      accessPropertiesByDotNotation: true,
     });
 
     let persistedState: DesktopStoreType = this.db.store;
     this.state = DesktopStore.create(castToSnapshot(persistedState));
 
     onSnapshot(this.state, (snapshot) => {
-      this.db.store = castToSnapshot(snapshot);
+      this.db!.store = castToSnapshot(snapshot);
     });
 
     onPatch(this.state, (patch) => {
@@ -107,6 +110,8 @@ export class DesktopService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
+
+    this.state.setMouseColor(mouseColor);
   }
 
   get snapshot() {

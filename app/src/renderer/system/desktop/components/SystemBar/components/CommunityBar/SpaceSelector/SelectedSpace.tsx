@@ -44,7 +44,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
             simple
             size={28}
             avatar={ship!.avatar}
-            patp={ship!.nickname || ship!.patp}
+            patp={ship!.patp}
             color={[ship!.color || '#000000', 'white']}
           />
 

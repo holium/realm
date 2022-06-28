@@ -202,7 +202,8 @@ export class Urbit extends EventEmitter {
           this.ship = new RegExp(/urbauth-~([\w-]+)/).exec(cookie)![1];
         }
         this.cookie = cookie;
-      });
+      })
+      .catch((err) => console.log(err));
   }
 
   /**
@@ -371,16 +372,20 @@ export class Urbit extends EventEmitter {
   }
 
   private async sendJSONtoChannel(...json: Message[]): Promise<void> {
-    const response = await axios.put(this.channelUrl, json, {
-      headers: this.headers,
-      signal: this.abort.signal,
-    });
-    // console.log(response);
-    if (response.statusText !== 'ok') {
-      throw new Error('Failed to PUT channel');
-    }
-    if (!this.sseClientInitialized) {
-      await this.eventSource();
+    try {
+      const response = await axios.put(this.channelUrl, json, {
+        headers: this.headers,
+        signal: this.abort.signal,
+      });
+      // console.log(response);
+      if (response.statusText !== 'ok') {
+        throw new Error('Failed to PUT channel');
+      }
+      if (!this.sseClientInitialized) {
+        await this.eventSource();
+      }
+    } catch (err: any) {
+      console.log(err.message);
     }
   }
 
