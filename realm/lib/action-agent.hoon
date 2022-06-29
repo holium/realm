@@ -54,8 +54,12 @@
     ++  on-peek
       |=  =path
       ^-  (unit (unit cage))
-
-      (on-peek:ag path)
+      ?+  path  [~ ~]
+        [%x %dbug %state ~]
+          ~&  >  "[action-agent state]"
+          ~&  >  "{<store.state>}"
+          (on-peek:ag path)
+      ==
     ::
     ++  on-watch
       |=  =path

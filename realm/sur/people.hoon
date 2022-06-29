@@ -14,10 +14,21 @@
   $:  =ship
       =role
   ==
-+$  person  [rank=@t]
-+$  me
-  $:  spaces=(map @t (list metaspace))
-      people=(map @t person)
-      contacts=(map ship contact:contact-store)
++$  spaces  (map @t (set metaspace))
+::  $contacts: one-to-one mapping of contact-store to this agent's store
+::    contacts are kept in sync and then extended based on needs
+::
++$  contacts  (map ship contact:contact-store)
+::  $person: todo. build out based on further feature development
+::
++$  person
+  $:  rank=@t
   ==
++$  people  (map ship person)
+::  unused
+:: +$  profile
+::   $:  spaces=(map @t (list metaspace))
+::       people=(map @t person)
+::       contacts=(map ship contact:contact-store)
+::   ==
 --
