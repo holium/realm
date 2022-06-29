@@ -3,6 +3,7 @@
 ::    syncs with %contact-store while also providing additional support
 ::    for Realm integration.
 ::
+/-  contact-store
 |%
 ::  $role - user roles which drive Realm permissioning
 ::
@@ -17,6 +18,6 @@
 +$  me
   $:  spaces=(map @t (list metaspace))
       people=(map @t person)
-      contacts=(map ship contact)
+      contacts=(map ship contact:contact-store)
   ==
 --

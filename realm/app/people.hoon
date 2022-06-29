@@ -1,15 +1,15 @@
-/-  *group, group-store, act
+/-  *group, group-store, act, *people
 /+  store=group-store, default-agent, resource, action-agent
 |%
 +$  card  card:agent:gall
 +$  versioned-state
     $%  state-0
     ==
-+$  state-0  [%0 store=json]
++$  state-0  [%0 contacts=rolodex:contact-store]
 --
 =|  state-0
 =*  state  -
-%-  action-agent:act
+%-  agent:action-agent
 ^-  agent:gall
 =<
   |_  =bowl:gall
@@ -17,8 +17,11 @@
       def   ~(. (default-agent this %.n) bowl)
   ::
   ++  on-init  :: on-init:def
-      ^-  (quip card:agent:gall agent:gall)
-      `this(store [%s 'test'])
+    ^-  (quip card _this)
+    :_  this
+    ::  %watch: get the initial contact list and watch for updates
+    :~  [%pass /contacts %agent [our.bowl %contact-store] %watch /all]
+    ==
   ::
   ++  on-save  ::on-save:def
       ^-  vase
@@ -40,19 +43,52 @@
   ::
   ++  on-peek  on-peek:def
   ::
-  ++  on-agent  on-agent:def
+  ++  on-agent
+    |=  [=wire =sign:agent:gall]
+    ^-  (quip card _this)
+    =/  wirepath  `path`wire
+    ?+    wire  (on-agent:def wire sign)
+      :: handle updates coming in from group store
+      [%contacts ~]
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: contact-store subscription failed"
+            `this
+      ::
+          %kick
+            ~&  >  "{<dap.bowl>}: contact-store kicked us, resubscribing..."
+            :_  this
+            :~  [%pass /group %agent [our.bowl %group-store] %watch /groups]
+            ==
+      ::
+          %fact
+            ?+    p.cage.sign  (on-agent:def wire sign)
+                %contact-update-0
+                  =/  action  !<(=update:contact-store q.cage.sign)
+                  ?+  -.action  (on-agent:def wire sign)
+                    %initial
+                      =^  cards  state
+                        (on-contacts-initial action)
+                      [cards this]
+                  ==
+            ==
+        ==
+    ==
   ::
   ++  on-arvo  on-arvo:def
   ::
   ++  on-fail   on-fail:def
   --
 |_  =bowl:gall
-::  $initialize: initialize this agent; either via on-init or thru an action
+::  $on-contacts-initial: imports initial contact list
+::    from %contact-store when the agent starts
 ::
-++  initialize
-  ^-  (quip card _state)
-
-  :_  state
-
-  ~[]
+++  on-contacts-initial
+  |=  [=update:contact-store]
+  ?>  ?=(%initial -.update)
+  ::  stuff all contacts under the %contact key in state
+  :_  state(contacts (~(gas by contacts.state) ~(tap by rolodex.update)))
+  ::  no effects
+  [~]
 --

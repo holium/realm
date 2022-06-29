@@ -14,11 +14,10 @@
 ::
 ++  agent
   |=  =agent:gall
-  %-  agent:dbug
   =|  state-0
   =*  state  -
+  %-  agent:dbug
   ^-  agent:gall
-  :: !.
   =<
     |_  =bowl:gall
     +*  this  .
@@ -408,16 +407,17 @@
     ::     :_  store.result
 
     ::     effects.result
-  --
 |_  =bowl:gall
 ::
-++  invoke
-  |=  res-path=path
-  ^-  [(list card) json]
+:: ++  invoke
+::   |=  [res-path=path]
+::   ^-  [(list card) json]
 
-  =/  result=action-result:plugin  (path-to-action:plugin bowl store res-path)
+::   [~ ~]
+  :: =/  result=action-result:plugin  (path-to-action:plugin bowl store res-path)
 
-  :_  store.result
+  :: :_  store.result
 
-  effects.result
+  :: effects.result
+  --
 --
