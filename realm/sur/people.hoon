@@ -5,9 +5,14 @@
 ::
 /-  contact-store
 |%
+::
 ::  $role - user roles which drive Realm permissioning
 ::
 +$  role  ?(%owner %admin %member %initiate)
+::
+::  $rank - user rank (exploratory)
+::
++$  rank  ?(%duke)
 ::  $metaspace - selective aspects of a broader space used for
 ::    efficiency purposes
 +$  metaspace
@@ -15,37 +20,35 @@
       =role
   ==
 +$  spaces  (map @t (set metaspace))
+::
 ::  $contacts: one-to-one mapping of contact-store to this agent's store
 ::    contacts are kept in sync and then extended based on needs
 ::
 +$  contacts  (map ship contact:contact-store)
+::
 ::  $person: todo. build out based on further feature development
 ::
 +$  person
-  $:  =ship
-      rank=@t
+  $:  rank=@t
+      last-updated=@da
   ==
+::
++$  edit-field
+  $%  [%rank =rank]
+  ==
+::
++$  edit-person-field
+  $:  =person
+      =edit-field
+  ==
+::
++$  edit-bulk  (set edit-field)
+::
 +$  people  (map ship person)
-
-+$  people-state
-  $:  spaces=(map @t (list metaspace))
-      people=(map ship person)
-      contacts=(map ship contact:contact-store)
-  ==
-
-+$  action
-  $:  action=@t
-      resource=@t
-  ==
-
-+$  space-context
-  $:  space=@t
-  ==
-
-+$  add-person
-  $:  =bowl
-      =action
-      =space-context
-      =person
+::
++$  update
+  $%  [%add =ship =person]
+      [%remove =ship]
+      [%edit =ship =edit-field timestamp=@da]
   ==
 --

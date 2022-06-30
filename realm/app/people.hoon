@@ -1,5 +1,5 @@
-/-  *group, group-store, act, *people
-/+  store=group-store, default-agent, resource, action-agent
+/-  store=people, contact-store
+/+  default-agent, resource, action-agent
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -7,9 +7,9 @@
     ==
 +$  state-0
   $:  %0
-      =spaces
-      =people
-      =contacts
+      =spaces:store
+      =people:store
+      =contacts:store
       allowed-groups=(set resource)
       allowed-ships=(set ship)
       is-public=_|
@@ -43,7 +43,38 @@
       %0  `this(state old)
     ==
   ::
-  ++  on-poke  on-poke:def
+  ++  on-poke
+    |=  [=mark =vase]
+    ^-  (quip card _this)
+    =^  cards  state
+    ?+  mark  (on-poke:def mark vase)
+      %people-update-0  (update !<(update:store vase))
+    ==
+    [cards this]
+
+    ::   %update
+    ::     =^  cards  state
+    ::     =/  update  !<(update )
+    ::       (add-person !<(person vase))
+    ::     [cards this]
+    ::   %add-person
+    ::     =^  cards  state
+    ::       (add-person !<(person vase))
+    ::     [cards this]
+    ::   %edit-person
+    ::     =^  cards  state
+    ::       (edit-person !<(person vase))
+    ::     [cards this]
+    ::   %edit-person-field
+    ::     =^  cards  state
+    ::       !<(edit-person-field vase)
+    ::       (handle-edit-person-field !<(edit-field vase))
+    ::     [cards this]
+    ::   %delete-person
+    ::     =^  cards  state
+    ::       (delete-person !<(person vase))
+    ::     [cards this]
+    :: ==
   ::
   ++  on-leave  on-leave:def
   ::
@@ -121,6 +152,88 @@
   ++  on-fail   on-fail:def
   --
 |_  =bowl:gall
+++  update
+  |=  =update:store
+  ^-  (quip card _state)
+  ?-  -.update
+    %add         (handle-add +.update)
+    %remove      (handle-remove +.update)
+    %edit        (handle-edit +.update)
+  ==
+::
+++  handle-add
+  |=  [=ship =person:store]
+  ^-  (quip card _state)
+  ::  ensure difference
+  =/  old=(unit person:store)  (~(get by people) ship)
+  ?.  ?|  ?=(~ old)
+          !=(person(last-updated *@da) u.old(last-updated *@da))
+      ==
+    [~ state]
+  :_  state(people (~(put by people) ship person))
+  :~  [%give %fact [/updates ~] %person-update-0 !>([%add ship person])]
+  ==
+::
+++  handle-remove
+  |=  [=ship]
+  ^-  (quip card _state)
+  `state
+::
+++  handle-edit
+  |=  [=ship edit=edit-field:store timestamp=@da]
+  ^-  (quip card _state)
+  `state
+:: ::
+:: ::  $add-person: add a new person to the person store. generate
+:: ::    an error if the person already exists
+:: ::
+:: ++  add-person
+::   |=  =person
+::   ^-  (quip card _state)
+::   =/  item  (~(get by people.state) ship.person)
+::   ?.  =(item ~)  (give-error (crip "{<ship.person>} exists"))
+::   `state(people (~(put by people.state) ship.person person)
+:: ::
+:: ::  $edit-person: modify an entire person in the people store
+:: ::
+:: ++  edit-person
+::   |=  =person
+::   ^-  (quip card _state)
+::   =/  item  (~(get by people.state) ship.person)
+::   ?:  =(item ~)  (give-error (crip "{<ship.person>} not found"))
+::   `state(people (~(put by people.state) ship.person person))
+:: ::
+:: ::  $edit-person: modify an entire person in the people store
+:: ::
+:: ++  edit-person-bulk
+::   |=  =ship edits=edit-bulk
+::   ^-  person
+::   =/  item  (~(get by people.state) ship)
+::   ?:  =(item ~)  (give-error (crip "{<ship.person>} not found"))
+::   %-  ~(rep in edits)
+::     |=  [=edit-field @]
+::     (edit-person-field edit-field)
+::   `state(people (~(put by people.state) ship.person person))
+:: ::
+:: ::  $edit-person-field: modify an individual person field
+:: ::
+:: ++  edit-person-field
+::   |=  =person edit=edit-field
+::   ^-  person
+::   ?-  -.edit
+::     %rank  person(rank rank.edit)
+::   ==
+:: ::
+:: ::  $handle-edit-person-field: wraps person modification with update to state
+:: ::
+:: ++  handle-edit-person-field
+::   |=  =ship edit=edit-field
+::   ^-  (quip card _state)
+::   =/  person  (~(get by people.state) ship)
+::   ?:  =(item ~)  (give-error (crip "{<ship.person>} not found"))
+::   =/  person  (edit-person-field person edit)
+::   `state(people (~(put by people.state) ship.person ))
+::
 ::  $on-contacts-initial: imports initial contact list
 ::    from %contact-store when the agent starts
 ::

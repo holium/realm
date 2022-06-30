@@ -48,21 +48,14 @@
     ++  on-poke
       |=  [=mark =vase]
       ^-  (quip card:agent:gall agent:gall)
+      `this
+      :: ?+    mark  (on-poke:def mark vase)
 
-      ?+    mark  (on-poke:def mark vase)
-
-          %handle-http-request
-            =^  cards  state
-
-            =/  req  !<((pair @ta inbound-request:eyre) vase)
-
-            =/  req-args
-                  (my q:(need `(unit (pair pork:eyre quay:eyre))`(rush url.request.q.req ;~(plug apat:de-purl:html yque:de-purl:html))))
-
-              (handle-resource-action req req-args)
-
-            [cards this]
-        ==
+      ::     %handle-http-request
+      ::       =^  cards  state
+      ::         (on-http-request !<((pair @ta inbound-request:eyre) vase))
+      ::       [cards this]
+      ::   ==
 
     ::
     ++  on-peek
@@ -188,245 +181,233 @@
     ::
 
 |_  =bowl:gall
-::
-  ARM:  ++  on-http-request
+:: ::
+:: :: $on-http-request: Called when http request received from Eyre.
+:: ::   All actions come into our agent as POST requests.
+:: ::
+:: ++  on-http-request
+::   |=  [req=(pair @ta inbound-request:eyre)]
+::   ^-  (quip card _state)
 
-  Called when http request received from Eyre. All actions come into
-    our agent as POST requests.
+::   :: ?:  ?&  =(authentication.state 'enable')
+::   ::         !authenticated.q.req
+::   ::     ==
+::   ::     ~&  >>>  "{<dap.bowl>}: authentication is enabled. request is not authenticated"
+::   ::     (send-api-error req 'not authenticated')
 
-++  on-http-request
-  |=  [req=(pair @ta inbound-request:eyre)]
+::   :: parse query string portion of url into map of arguments (key/value pair)
+::   =/  req-args
+::         (my q:(need `(unit (pair pork:eyre quay:eyre))`(rush url.request.q.req ;~(plug apat:de-purl:html yque:de-purl:html))))
 
-  :: ?:  ?&  =(authentication.state 'enable')
-  ::         !authenticated.q.req
-  ::     ==
-  ::     ~&  >>>  "{<dap.bowl>}: authentication is enabled. request is not authenticated"
-  ::     (send-api-error req 'not authenticated')
+::   =/  path  (stab url.request.q.req)
 
-  :: parse query string portion of url into map of arguments (key/value pair)
-  =/  req-args
-        (my q:(need `(unit (pair pork:eyre quay:eyre))`(rush url.request.q.req ;~(plug apat:de-purl:html yque:de-purl:html))))
+::   ::  all actions come in as POST method requests over http
+::   ?+    method.request.q.req  (send-api-error req 'unsupported')
 
-  =/  path  (stab url.request.q.req)
+::         %'POST'
+::           (handle-resource-action-http req req-args)
 
-  ::  all actions come in as POST method requests over http
-  ?+    method.request.q.req  (send-api-error req 'unsupported')
+::   ==
 
-        %'POST'
-          (handle-resource-action-http req req-args)
+:: ::
+:: :: $handle-resource-action-http: Handles action payloads that come in via http
+:: ::
+:: ++  handle-resource-action-http
+::   |=  [req=(pair @ta inbound-request:eyre) args=(map @t @t)]
+::   ^-  (quip card _state)
 
-  ==
+::   =/  til=octs
+::         (tail body.request.q.req)
 
-::
-::  ARM:  ++  handle-resource-action
-::
-::   All actions funnel thru this arm. They come into Eyre as http
-::     POST method requests.
-::
-++  handle-resource-action-http
-  |=  [req=(pair @ta inbound-request:eyre) args=(map @t @t)]
-  ^-  [(list card) json]
+::   ::  variable to hold request body (as $json)
+::   =/  payload  (need (de-json:html q.til))
 
-  =/  til=octs
-        (tail body.request.q.req)
+::   =/  result=action-result:plugin  (handle-resource-action payload)
 
-  ::  variable to hold request body (as $json)
-  =/  payload  (need (de-json:html q.til))
+::   =/  =response-header:http
+::     :-  ?:(success.result 200 500)
+::     :~  ['Content-Type' 'application/json']
+::     ==
 
-  =/  result=action-result:plugin  (handle-resource-action payload)
+::   =/  response-data  (crip (en-json:html data.result))
 
-  =/  =response-header:http
-    :-  ?:(success.result 200 500)
-    :~  ['Content-Type' 'application/json']
-    ==
+::   ::  convert the string to a form that arvo will understand
+::   =/  data=octs
+::         (as-octs:mimes:html response-data)
 
-  =/  response-data  (crip (en-json:html data.result))
+::   :_  store.result
+::   :~
+::     [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
+::     [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
+::     [%give %kick [/http-response/[p.req]]~ ~]
+::   ==
 
-  ::  convert the string to a form that arvo will understand
-  =/  data=octs
-        (as-octs:mimes:html response-data)
+:: ++  handle-resource-action-poke
+::   |=  [payload=json]
+::   ^-  [(list card) json]
 
-  :_  store.result
-  :~
-    [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
-    [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
-    [%give %kick [/http-response/[p.req]]~ ~]
-  ==
+::   =/  result=action-result:plugin  (handle-resource-action payload)
 
-++  handle-resource-action-poke
-  |=  [payload=json]
-  ^-  [(list card) json]
+::   :_  store.result  effects.result
 
-  =/  result=action-result:plugin  (handle-resource-action payload)
+:: ++  handle-resource-action
+::   |=  [payload=json]
+::   :: ^-  [(list card) (map @t json)]
+::   ^-  action-result:plugin
 
-  :_  store.result  effects.result
+::   ::  check store in state to ensure there's configured resources
+::   =/  store  (to-map:plugin store)
 
-++  handle-resource-action
-  |=  [payload=json]
-  :: ^-  [(list card) (map @t json)]
-  ^-  action-result:plugin
+::   =/  resources  (~(get by store) 'resources')
+::   ?~  resources  (send-error "{<dap.bowl>}: invalid agent state. missing resources" ~)
+::   =/  resources  (to-map:plugin (need resources))
 
-  ::  check store in state to ensure there's configured resources
-  =/  store  (to-map:plugin store)
+::   ::  do some initial validation
+::   =/  action-payload  (to-map:plugin payload)
 
-  =/  resources  (~(get by store) 'resources')
-  ?~  resources  (send-error "{<dap.bowl>}: invalid agent state. missing resources" ~)
-  =/  resources  (to-map:plugin (need resources))
+::   =/  context  (~(get by action-payload) 'context')
+::   ?~  context  (send-error "{<dap.bowl>}: invalid payload. missing context element" ~)
+::   =/  context  (to-map:plugin (need context))
 
-  ::  do some initial validation
-  =/  action-payload  (to-map:plugin payload)
+::   =/  action  (~(get by action-payload) 'action')
+::   ?~  action  (send-error "{<dap.bowl>}: invalid payload. missing action element" ~)
+::   =/  action  (so:dejs:format (need action))
 
-  =/  context  (~(get by action-payload) 'context')
-  ?~  context  (send-error "{<dap.bowl>}: invalid payload. missing context element" ~)
-  =/  context  (to-map:plugin (need context))
+::   =/  data  (~(get by action-payload) 'data')
+::   ?~  data  (send-error "{<dap.bowl>}: invalid payload. missing data element" ~)
+::   =/  data  (need data)
 
-  =/  action  (~(get by action-payload) 'action')
-  ?~  action  (send-error "{<dap.bowl>}: invalid payload. missing action element" ~)
-  =/  action  (so:dejs:format (need action))
+::   =/  resource  (~(get by action-payload) 'resource')
+::   ?~  resource  (send-error "{<dap.bowl>}: invalid payload. missing resource element" ~)
+::   =/  resource  (so:dejs:format (need resource))
 
-  =/  data  (~(get by action-payload) 'data')
-  ?~  data  (send-error "{<dap.bowl>}: invalid payload. missing data element" ~)
-  =/  data  (need data)
+::   =/  resource-store  (~(get by resources) resource)
+::   ?~  resource-store  (send-error "{<dap.bowl>}: resource {<resource>} store not found" ~)
+::   =/  resource-store  ((om json):dejs:format (need resource-store))
 
-  =/  resource  (~(get by action-payload) 'resource')
-  ?~  resource  (send-error "{<dap.bowl>}: invalid payload. missing resource element" ~)
-  =/  resource  (so:dejs:format (need resource))
+::   =/  dispatch-mode  (~(get by resource-store) 'dispatcher')
+::   =/  dispatch-mode  ?~(dispatch-mode 'direct' (so:dejs:format (need dispatch-mode)))
 
-  =/  resource-store  (~(get by resources) resource)
-  ?~  resource-store  (send-error "{<dap.bowl>}: resource {<resource>} store not found" ~)
-  =/  resource-store  ((om json):dejs:format (need resource-store))
+::   =+  c-ctx=`call-context:plugin`[bowl args=context store=[%o store] payload=data]
 
-  =/  dispatch-mode  (~(get by resource-store) 'dispatcher')
-  =/  dispatch-mode  ?~(dispatch-mode 'direct' (so:dejs:format (need dispatch-mode)))
+::   ?+  dispatch-mode  (send-error "{<dap.bowl>}: unrecognized dispatcher value" ~)
 
-  =+  c-ctx=`call-context:plugin`[bowl args=context store=[%o store] payload=data]
+::     %direct
+::       (execute-direct resource action c-ctx)
 
-  ?+  dispatch-mode  (send-error "{<dap.bowl>}: unrecognized dispatcher value" ~)
+::     %proxy
+::       (execute-by-proxy resource action c-ctx)
 
-    %direct
-      (execute-direct resource action c-ctx)
+::   ==
 
-    %proxy
-      (execute-by-proxy resource action c-ctx)
+:: ++  execute-direct
+::   |=  [resource=@t action=@t c=call-context:plugin]
+::   :: ^-  [(list card) (map @t json)]
+::   ^-  action-result:plugin
 
-  ==
+::   =/  lib-file=path  /(scot %p our.bowl)/(scot %tas dap.bowl)/(scot %da now.bowl)/lib/(scot %tas dap.bowl)/resources/(scot %tas resource)/(scot %tas action)/hoon
 
-++  execute-direct
-  |=  [resource=@t action=@t c=call-context:plugin]
-  :: ^-  [(list card) (map @t json)]
-  ^-  action-result:plugin
+::   ?.  .^(? %cu lib-file)
+::     (send-error "{<dap.bowl>}: resource action lib file {<lib-file>} not found" ~)
 
-  =/  lib-file=path  /(scot %p our.bowl)/(scot %tas dap.bowl)/(scot %da now.bowl)/lib/(scot %tas dap.bowl)/resources/(scot %tas resource)/(scot %tas action)/hoon
+::   =/  action-lib  .^([p=type q=*] %ca lib-file)
+::   =/  on-func  (slam (slap action-lib [%limb %on]) !>([bowl.c store.c args.c]))
+::   =/  result  !<(action-result:plugin (slam (slap on-func [%limb %action]) !>(payload.c)))
 
-  ?.  .^(? %cu lib-file)
-    (send-error "{<dap.bowl>}: resource action lib file {<lib-file>} not found" ~)
+::   result
 
-  =/  action-lib  .^([p=type q=*] %ca lib-file)
-  =/  on-func  (slam (slap action-lib [%limb %on]) !>([bowl.c store.c args.c]))
-  =/  result  !<(action-result:plugin (slam (slap on-func [%limb %action]) !>(payload.c)))
+:: ++  execute-by-proxy
+::   |=  [resource=@t action=@t c=call-context:plugin]
+::   :: ^-  [(list card) (map @t json)]
+::   ^-  action-result:plugin
 
-  result
-  :: `action-result+!>([%.y ~ ~ ])
+::   =/  lib-file=path  /(scot %p our.bowl)/(scot %tas dap.bowl)/(scot %da now.bowl)/lib/(scot %tas dap.bowl)/resources/(scot %tas resource)/actions/hoon
 
-  :: :_  state.result
+::   ?.  .^(? %cu lib-file)
+::     (send-error "{<dap.bowl>}: resource action lib file {<lib-file>} not found" ~)
 
-  :: effects.result
+::   =/  action-lib  .^([p=type q=*] %ca lib-file)
+::   =/  on-func  (slam (slap action-lib [%limb %on]) !>([bowl.c store.c args.c]))
+::   =/  result=action-result:plugin  !<(action-result:plugin (slam (slap on-func [%limb action]) !>(payload.c)))
 
-++  execute-by-proxy
-  |=  [resource=@t action=@t c=call-context:plugin]
-  :: ^-  [(list card) (map @t json)]
-  ^-  action-result:plugin
+::   result
 
-  =/  lib-file=path  /(scot %p our.bowl)/(scot %tas dap.bowl)/(scot %da now.bowl)/lib/(scot %tas dap.bowl)/resources/(scot %tas resource)/actions/hoon
+:: ::  send an error as poke back to calling agent
+:: ++  send-error
+::   |=  [reason=tape jon=json]
+::   :: ^-  [(list card) (map @t json)]
+::   ^-  action-result:plugin
+::   ~&  >>>  (crip reason)
+::   ::  if json is null, send back reason error as json string
+::   =/  payload=json  ?~  jon
+::         ::  then
+::         s+(crip reason)  :: send back reason error as string
+::       :: else stuff payload with error message
+::       %-  pairs:enjs:format
+::       :~
+::         ['error' s+(crip reason)]
+::       ==
 
-  ?.  .^(? %cu lib-file)
-    (send-error "{<dap.bowl>}: resource action lib file {<lib-file>} not found" ~)
+::   ?.  =(our.bowl src.bowl)
+::     ::  ensure action: 'error' in json for this to be recognized
+::     ::   on the remote agent
+::     =/  effects
+::     :~  [%pass /errors %agent [src.bowl dap.bowl] %poke %json !>(payload)]
+::     ==
+::     !<(action-result:plugin !>([success=%.n data=payload effects=effects]))
+::     :: :_  store
+::     :: :~  [%pass /errors %agent [src.bowl dap.bowl] %poke %json !>(payload)]
+::     :: ==
+::   (give-error payload)
 
-  =/  action-lib  .^([p=type q=*] %ca lib-file)
-  =/  on-func  (slam (slap action-lib [%limb %on]) !>([bowl.c store.c args.c]))
-  =/  result=action-result:plugin  !<(action-result:plugin (slam (slap on-func [%limb action]) !>(payload.c)))
+:: ::  use this for errors that should appear in UI
+:: ++  give-error
+::   |=  [jon=json]
+::   :: ^-  [(list card) (map @t json)]
+::   ^-  action-result:plugin
+::   =/  effects
+::   :~  [%give %fact ~[/errors] %json !>(jon)]
+::   ==
+::   !<(action-result:plugin !>([success=%.n data=jon store=store effects=effects]))
+::   :: :_  store
+::   :: :~  [%give %fact ~[/errors] %json !>(jon)]
+::   :: ==
 
-  result
-  :: :_  state.result
+:: ++  send-api-error
+::   |=  [req=(pair @ta inbound-request:eyre) msg=@t]
 
-  :: effects.result
+::   =/  =response-header:http
+::     :-  500
+::     :~  ['Content-Type' 'text/plain']
+::     ==
 
-::  send an error as poke back to calling agent
-++  send-error
-  |=  [reason=tape jon=json]
-  :: ^-  [(list card) (map @t json)]
-  ^-  action-result:plugin
-  ~&  >>>  (crip reason)
-  ::  if json is null, send back reason error as json string
-  =/  payload=json  ?~  jon
-        ::  then
-        s+(crip reason)  :: send back reason error as string
-      :: else stuff payload with error message
-      %-  pairs:enjs:format
-      :~
-        ['error' s+(crip reason)]
-      ==
+::   ::  convert the string to a form that arvo will understand
+::   =/  data=octs
+::         (as-octs:mimes:html msg)
 
-  ?.  =(our.bowl src.bowl)
-    ::  ensure action: 'error' in json for this to be recognized
-    ::   on the remote agent
-    =/  effects
-    :~  [%pass /errors %agent [src.bowl dap.bowl] %poke %json !>(payload)]
-    ==
-    !<(action-result:plugin !>([success=%.n data=payload effects=effects]))
-    :: :_  store
-    :: :~  [%pass /errors %agent [src.bowl dap.bowl] %poke %json !>(payload)]
-    :: ==
-  (give-error payload)
+::   :_  store
+::   :~
+::     [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
+::     [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
+::     [%give %kick [/http-response/[p.req]]~ ~]
+::   ==
 
-::  use this for errors that should appear in UI
-++  give-error
-  |=  [jon=json]
-  :: ^-  [(list card) (map @t json)]
-  ^-  action-result:plugin
-  =/  effects
-  :~  [%give %fact ~[/errors] %json !>(jon)]
-  ==
-  !<(action-result:plugin !>([success=%.n data=jon store=store effects=effects]))
-  :: :_  store
-  :: :~  [%give %fact ~[/errors] %json !>(jon)]
-  :: ==
+::   ++  handle-scry
+::     |=  res-path=path
+::     ^-  (unit (unit cage))
 
-++  send-api-error
-  |=  [req=(pair @ta inbound-request:eyre) msg=@t]
+::     =/  result=action-result:plugin  (path-to-action:plugin bowl store res-path)
 
-  =/  =response-header:http
-    :-  500
-    :~  ['Content-Type' 'text/plain']
-    ==
+::     ?~(data.result ~ ``json+!>(data.result))
 
-  ::  convert the string to a form that arvo will understand
-  =/  data=octs
-        (as-octs:mimes:html msg)
+::   ++  invoke
+::     |=  res-path=path
+::     ^-  [(list card) json]
 
-  :_  store
-  :~
-    [%give %fact [/http-response/[p.req]]~ %http-response-header !>(response-header)]
-    [%give %fact [/http-response/[p.req]]~ %http-response-data !>(`data)]
-    [%give %kick [/http-response/[p.req]]~ ~]
-  ==
+::     =/  result=action-result:plugin  (path-to-action:plugin bowl store res-path)
 
-  ++  handle-scry
-    |=  res-path=path
-    ^-  (unit (unit cage))
+::     :_  store.result
 
-    =/  result=action-result:plugin  (path-to-action:plugin bowl store res-path)
-
-    ?~(data.result ~ ``json+!>(data.result))
-
-  ++  invoke
-    |=  res-path=path
-    ^-  [(list card) json]
-
-    =/  result=action-result:plugin  (path-to-action:plugin bowl store res-path)
-
-    :_  store.result
-
-    effects.result
+::     effects.result
   --
 --
