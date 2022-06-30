@@ -22,13 +22,30 @@
 ::  $person: todo. build out based on further feature development
 ::
 +$  person
-  $:  rank=@t
+  $:  =ship
+      rank=@t
   ==
 +$  people  (map ship person)
-::  unused
-:: +$  profile
-::   $:  spaces=(map @t (list metaspace))
-::       people=(map @t person)
-::       contacts=(map ship contact:contact-store)
-::   ==
+
++$  people-state
+  $:  spaces=(map @t (list metaspace))
+      people=(map ship person)
+      contacts=(map ship contact:contact-store)
+  ==
+
++$  action
+  $:  action=@t
+      resource=@t
+  ==
+
++$  space-context
+  $:  space=@t
+  ==
+
++$  add-person
+  $:  =bowl
+      =action
+      =space-context
+      =person
+  ==
 --
