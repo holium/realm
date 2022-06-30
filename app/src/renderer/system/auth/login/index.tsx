@@ -20,6 +20,7 @@ import { ShipSelector } from './ShipSelector';
 import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type LoginProps = {
   addShip: () => void;
@@ -29,9 +30,9 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, shell } = useServices();
+  const { identity, shell, ship } = useServices();
   const { auth } = identity;
-  const { theme } = shell;
+  const { theme } = shell.desktop;
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -51,11 +52,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 
   useEffect(() => {
     // Set the wallpaper on load
-    !theme.theme &&
+    !theme &&
       pendingShip &&
-      theme.setWallpaper(pendingShip?.wallpaper || DEFAULT_WALLPAPER, {
-        patp: pendingShip?.patp!,
-      });
+      DesktopActions.changeWallpaper(
+        pendingShip?.patp!,
+        pendingShip?.wallpaper || DEFAULT_WALLPAPER
+      );
   }, [pendingShip !== null]);
 
   const submitPassword = (event: any) => {
@@ -70,29 +72,35 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   };
   const clickSubmit = (event: any) => {
     event.stopPropagation();
-
-    // console.log(passwordRef.current.value);
-    // @ts-expect-error typescript...
-    window.electron.os.auth.login(pendingShip!.patp, passwordRef.current.value);
+    window.electron.os.auth.login(
+      pendingShip!.patp,
+      // @ts-ignore
+      passwordRef!.current!.value
+    );
   };
 
   let colorProps = null;
   // if (theme) {
   colorProps = {
-    color: theme.theme?.textColor,
-    textShadow: theme.theme?.textTheme === 'dark' ? '0 1px black' : 'none',
+    color: theme?.textColor,
+    textShadow: theme?.textTheme === 'dark' ? '0 1px black' : 'none',
   };
   // }
+
+  const isVertical = true;
 
   return (
     <Fill>
       <Centered>
         {pendingShip && (
           <Flex alignItems="center" justifyContent="center">
-            <Flex gap={24} width={460}>
+            <Flex
+              flexDirection={isVertical ? 'column' : 'row'}
+              alignItems="center"
+              gap={24}
+            >
               <Box>
                 <Sigil
-                  // key={pendingShip.patp}
                   isLogin
                   size={72}
                   simple={false}
@@ -105,7 +113,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
               <Flex flexDirection="column" gap={10}>
                 <Flex
                   gap={12}
-                  flexDirection="row"
+                  flexDirection={isVertical ? 'column' : 'row'}
                   alignItems="center"
                   justifyContent="flex-start"
                 >
@@ -141,7 +149,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     </Text>
                   )}
                 </Flex>
-                <Flex gap={12} alignItems="center">
+                <Flex mt={isVertical ? 2 : 0} gap={12} alignItems="center">
                   <Input
                     ref={passwordRef}
                     wrapperRef={wrapperRef}
@@ -156,7 +164,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     }
                     wrapperStyle={{
                       borderRadius: 8,
-                      width: 260,
+                      minWidth: isVertical ? 300 : 260,
                     }}
                     placeholder="Password"
                     fontSize={16}
@@ -165,68 +173,71 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     rightInteractive
                     onKeyDown={submitPassword}
                     rightIcon={
-                      <Flex justifyContent="center" alignItems="center">
+                      <Flex gap={4} justifyContent="center" alignItems="center">
+                        <IconButton
+                          size={26}
+                          ref={optionsRef}
+                          luminosity={theme?.textTheme}
+                          opacity={1}
+                          onClick={(evt: any) => {
+                            !show && setShow && setShow(true);
+                          }}
+                        >
+                          <Icons name="MoreHorizontal" />
+                        </IconButton>
+                        <Menu
+                          id={`${pendingShip.patp}-user-menu`}
+                          customBg={theme.windowColor}
+                          style={{
+                            top: anchorPoint && anchorPoint.y + 8,
+                            left: anchorPoint && anchorPoint.x + 10,
+                            visibility: show ? 'visible' : 'hidden',
+                            width: menuWidth,
+                          }}
+                          isOpen={show}
+                          onClose={() => {
+                            setShow(false);
+                          }}
+                        >
+                          <MenuItem
+                            label="Reset password"
+                            customBg={theme.windowColor}
+                            onClick={() => {
+                              console.log('do reset form');
+                            }}
+                          />
+                          <MenuItem
+                            label="Remove ship"
+                            customBg={theme.windowColor}
+                            mt={1}
+                            onClick={() => {
+                              AuthActions.removeShip(pendingShip.patp);
+                            }}
+                          />
+                        </Menu>
                         {auth.loader.isLoading ? (
-                          <Spinner size={0} />
+                          <Flex
+                            justifyContent="center"
+                            alignItems="center"
+                            width={24}
+                            height={24}
+                          >
+                            <Spinner size={0} />
+                          </Flex>
                         ) : (
                           <IconButton
                             ref={submitRef}
-                            luminosity={theme.theme?.textTheme}
+                            luminosity={theme?.textTheme}
                             size={24}
                             canFocus
                             onClick={(evt: any) => clickSubmit(evt)}
                           >
-                            <Icons opacity={0.5} name="ArrowRightLine" />
+                            <Icons name="ArrowRightLine" />
                           </IconButton>
                         )}
                       </Flex>
                     }
                   />
-                  <IconButton
-                    size={26}
-                    ref={optionsRef}
-                    luminosity={theme.theme?.textTheme}
-                    opacity={1}
-                    onClick={(evt: any) => {
-                      evt.preventDefault();
-                      evt.currentTarget.blur();
-                      !show && setShow && setShow(true);
-                    }}
-                  >
-                    <Icons name="Settings5Line" />
-                  </IconButton>
-                  <Menu
-                    id={`${pendingShip.patp}-user-menu`}
-                    customBg={theme.theme.windowColor}
-                    style={{
-                      top: anchorPoint && anchorPoint.y + 8,
-                      left: anchorPoint && anchorPoint.x + 10,
-                      visibility: show ? 'visible' : 'hidden',
-                      width: menuWidth,
-                    }}
-                    isOpen={show}
-                    onClose={() => {
-                      setShow(false);
-                    }}
-                  >
-                    <MenuItem
-                      label="Reset password"
-                      customBg={theme.theme.windowColor}
-                      onClick={() => {
-                        console.log('do reset form');
-                      }}
-                    />
-                    <MenuItem
-                      label="Remove ship"
-                      customBg={theme.theme.windowColor}
-                      mt={1}
-                      onClick={() => {
-                        AuthActions.removeShip(pendingShip.patp);
-                        // auth.removeShip(pendingShip.patp);
-                        // auth.clearSession();
-                      }}
-                    />
-                  </Menu>
                 </Flex>
               </Flex>
             </Flex>

@@ -82,6 +82,13 @@ export const SpacesStore = types
         (space: SpaceModelType) => space.type !== 'our'
       );
     },
+    getSpaceByPath(spacePath: string) {
+      if (spacePath === self.our!.path) {
+        return self.our;
+      } else {
+        return self.spaces.get(spacePath)!;
+      }
+    },
   }))
   .actions((self) => ({
     initialSync: (syncEffect: { key: string; model: typeof self }) => {

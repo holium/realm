@@ -1,6 +1,4 @@
-import { FC, useCallback } from 'react';
-// import { useShip } from 'renderer/logic/store';
-import { useServices } from 'renderer/logic/store';
+import { FC } from 'react';
 import { Flex } from 'renderer/components';
 import { HomeButton } from './components/HomeButton';
 import { ShipTray } from './components/ShipBar';

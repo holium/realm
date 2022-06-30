@@ -10,15 +10,15 @@ type CommunityBarProps = {};
 
 export const CommunityBar: FC<CommunityBarProps> = observer(() => {
   const { shell } = useServices();
-  const { theme } = shell;
+  const { desktop } = shell;
 
   const dockColor = useMemo(
-    () => theme.theme.dockColor,
-    [theme.theme.dockColor]
+    () => desktop.theme.dockColor,
+    [desktop.theme.dockColor]
   );
   const textColor = useMemo(
-    () => theme.theme.textColor,
-    [theme.theme.textColor]
+    () => desktop.theme.textColor,
+    [desktop.theme.textColor]
   );
 
   const iconColor = textColor;

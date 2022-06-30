@@ -14,9 +14,9 @@ type SpaceRowProps = {
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, onSelect } = props;
   const { ship, shell } = useServices();
-  const { theme } = shell;
+  const { theme } = shell.desktop;
   const currentShip = ship!;
-  const currentTheme = useMemo(() => theme.theme, [theme.theme]);
+  const currentTheme = useMemo(() => theme, [theme]);
   return (
     <SpaceRowStyle
       data-close-tray="true"
@@ -44,6 +44,7 @@ export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
               flexDirection: 'row',
               justifyContent: 'space-between',
             }}
+            color={currentTheme.textColor}
             fontSize={3}
             fontWeight={500}
             variant="body"

@@ -1,30 +1,33 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
-import { WindowThemeType } from '../../../logic-old/stores/config';
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  Sigil,
-  Text,
-} from '../../../components';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { Grid, Flex, Text } from '../../../components';
 import { CircleButton } from './CircleButton';
 
 type WalletMainProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
 };
 
 export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
   // const { walletStore } = useMst();
   const { theme } = props;
 
+  const windowColor = useMemo(
+    () => rgba(lighten(0.1, props.theme.windowColor), 0.8),
+    [props.theme.windowColor]
+  );
   return (
-    <Grid.Column noGutter expand align="center" justify="center">
+    <Grid.Column
+      style={{
+        background: windowColor,
+      }}
+      noGutter
+      expand
+      align="center"
+      justify="center"
+    >
       <Text
         letterSpacing="6%"
         mb={1}

@@ -1,4 +1,5 @@
 import Realm from '..';
+import Store from 'electron-store';
 import { EventEmitter } from 'stream';
 import {
   getSnapshot,
@@ -12,15 +13,13 @@ import {
  *
  * @interface
  */
-export class BaseService extends EventEmitter {
-  core: Realm;
+export class PreferenceService extends EventEmitter {
   options: any;
   preferences: any;
   // private state?: any;
 
-  constructor(core: Realm, options: any = {}) {
+  constructor(options: any = {}) {
     super();
-    this.core = core;
     this.options = options;
     this.preferences = {};
   }

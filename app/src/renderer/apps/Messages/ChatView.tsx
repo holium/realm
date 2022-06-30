@@ -47,16 +47,22 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     headerOffset,
     onSend,
   } = props;
-  const { backgroundColor, iconColor, dockColor, textTheme, textColor } =
-    props.theme;
+  const {
+    backgroundColor,
+    iconColor,
+    dockColor,
+    textTheme,
+    textColor,
+    windowColor,
+  } = props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
   const { ship } = useServices();
   const chatData = ship?.chat.dms.get(selectedChat.contact)!;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
+  // const windowColor = useMemo(
+  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
+  //   [props.theme.windowColor]
+  // );
 
   const [rows, setRows] = useState(1);
 
@@ -109,7 +115,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     // scrollView.current?.scrollToBottom();
   }, [scrollView.current]);
 
-  const inputHeight = 58;
+  const inputHeight = 60;
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -124,7 +130,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         zIndex={5}
         theme={{
           ...props.theme,
-          windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.8),
+          windowColor: rgba(lighten(0.125, windowColor), 0.8),
         }}
       >
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
@@ -232,9 +238,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             left={0}
             right={0}
             style={{
-              background: windowColor,
+              background: rgba(lighten(0.125, windowColor), 0.8),
               backdropFilter: 'blur(8px)',
-              borderTop: `1px solid ${rgba(darken(0.15, windowColor), 0.9)}`,
+              borderTop: `1px solid ${rgba(windowColor, 0.9)}`,
               minHeight: inputHeight,
             }}
           >

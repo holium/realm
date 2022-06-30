@@ -1,10 +1,13 @@
 import { FC, useRef } from 'react';
 import styled from 'styled-components';
-import { WindowModelType } from 'renderer/logic-old/desktop/store';
+import {
+  WindowModelType,
+  WindowModelProps,
+} from 'os/services/shell/desktop.model';
 import { nativeRenderers } from 'renderer/apps/native';
 
 export interface NativeViewProps {
-  window: WindowModelType | any;
+  window: WindowModelProps | any;
   isResizing?: boolean;
   hasTitlebar: boolean | undefined;
 }

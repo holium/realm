@@ -1,14 +1,17 @@
 import { FC, useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Spinner, Flex } from 'renderer/components';
-import { WindowModelType } from 'os/services/shell/desktop.model';
+import {
+  WindowModelType,
+  WindowModelProps,
+} from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 interface AppViewProps {
-  window: WindowModelType;
+  window: WindowModelProps;
   isResizing: boolean;
   isDragging: boolean;
   hasTitlebar: boolean;

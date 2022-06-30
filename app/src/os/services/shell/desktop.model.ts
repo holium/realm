@@ -4,7 +4,7 @@ import { toJS } from 'mobx';
 // import { setPartitionCookies } from './api';
 import { getInitialWindowDimensions } from './lib/window-manager';
 import { NativeAppList } from 'renderer/apps';
-import { ThemeModel } from './theme.model';
+import { ThemeModel, ThemeModelType } from './theme.model';
 
 // const Grid = types.model({
 //   width: types.enumeration(['1', '2', '3']),
@@ -26,7 +26,7 @@ const Window = types
     title: types.optional(types.string, ''),
     zIndex: types.number,
     type: types.optional(
-      types.enumeration(['urbit', 'web', 'native']),
+      types.enumeration(['urbit', 'web', 'native', 'dialog']),
       'urbit'
     ),
     dimensions: DimensionsModel,
@@ -38,6 +38,18 @@ const Window = types
   }));
 
 export type WindowModelType = Instance<typeof Window>;
+export type WindowModelProps = {
+  id: string;
+  title: string;
+  zIndex: number;
+  type: 'urbit' | 'web' | 'native' | 'dialog';
+  dimensions: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+};
 
 export const DesktopStore = types
   .model('DesktopStore', {
@@ -69,6 +81,7 @@ export const DesktopStore = types
     ),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
+    dialogId: types.maybe(types.string),
   })
   .views((self) => ({
     get currentOrder() {
@@ -95,8 +108,17 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
+    openDialog(dialogId: string) {
+      self.dialogId = dialogId;
+    },
+    closeDialog() {
+      self.dialogId = undefined;
+    },
     setWallpaper(newWallpaper: string) {
       self.theme.wallpaper = newWallpaper;
+    },
+    setTheme(newTheme: ThemeModelType) {
+      self.theme = newTheme;
     },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {

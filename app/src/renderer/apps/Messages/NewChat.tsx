@@ -31,11 +31,12 @@ type IProps = {
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
   const { ship } = useServices();
-  const { backgroundColor, textColor, iconColor, dockColor } = theme;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
+  const { backgroundColor, textColor, iconColor, dockColor, windowColor } =
+    theme;
+  // const windowColor = useMemo(
+  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
+  //   [props.theme.windowColor]
+  // );
 
   // const { newChatForm, urbitId } = createNewChatForm();
 

@@ -14,4 +14,7 @@ export const SpacesActions = {
   selectSpace: async (path: string) => {
     return await window.electron.os.spaces.selectSpace(path);
   },
+  getOurGroups: async () => {
+    return await window.electron.os.ship.getOurGroups();
+  },
 };

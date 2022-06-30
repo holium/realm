@@ -17,8 +17,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   const { desktop, theme } = shell;
 
   const dividerBg = useMemo(
-    () => rgba(lighten(0.2, theme.theme.dockColor), 0.4),
-    [theme.theme]
+    () => rgba(lighten(0.2, desktop.theme.dockColor), 0.4),
+    [desktop.theme]
   );
 
   const orderedList = useMemo(

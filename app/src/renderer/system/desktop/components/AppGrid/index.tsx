@@ -43,7 +43,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           display: isOpen ? 'block' : 'none',
         }}
         exit={{ opacity: 0 }}
-        customBg={theme.theme.dockColor}
+        customBg={desktop.theme.dockColor}
       >
         <Flex
           flex={1}

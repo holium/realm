@@ -7,7 +7,7 @@ import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
 
-const EmptyGroup = styled.div`
+export const EmptyGroup = styled.div`
   height: 32px;
   width: 32px;
   background: ${(p) => p.color || '#000'};
@@ -31,7 +31,7 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
   ${(props: RowProps) =>
     props.selected
       ? css`
-          background-color: ${lighten(0.05, props.customBg)};
+          background-color: ${lighten(0.015, props.customBg)};
         `
       : css`
           &:hover {
@@ -52,9 +52,9 @@ type SpaceRowProps = {
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { shell } = useServices();
-  const { theme } = shell;
+  const { theme } = shell.desktop;
 
-  const currentTheme = useMemo(() => theme.theme, [theme.theme]);
+  const currentTheme = useMemo(() => theme, [theme]);
   return (
     <SpaceRowStyle
       data-close-tray="true"
@@ -84,6 +84,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
               justifyContent: 'space-between',
             }}
             fontSize={3}
+            color={currentTheme.textColor}
             fontWeight={500}
             variant="body"
           >
@@ -112,6 +113,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
                 <Icons name="Coins" size={16} opacity={0.6} />
                 <Text
                   fontWeight={400}
+                  color={currentTheme.textColor}
                   mt="1px"
                   mr={1}
                   opacity={0.6}

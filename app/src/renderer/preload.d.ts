@@ -1,4 +1,4 @@
-import { OSPreloadType } from './../os/index';
+import { OSPreloadType } from 'os/index';
 
 declare global {
   interface Window {

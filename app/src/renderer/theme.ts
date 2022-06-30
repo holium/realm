@@ -140,10 +140,11 @@ export const theme = {
         primary: '#FBFBFB',
         secondary: '#FFFFFF',
         tertiary: '#f1f1f2',
-        blendedBg: rgba('#FFFFFF', 0.4),
+        blendedBg: rgba('#FFFFFF', 0.5),
         inset: '#F5F5F5',
         toolbar: '#F1F3F4',
         divider: '#DBDBDB',
+        body: '#DBDBDB',
       },
       icon: {
         app: '#85898E',
@@ -224,13 +225,13 @@ export const theme = {
         secondary: '#2A3843',
         tertiary: '#212E37',
         blendedBg: rgba('#2A3843', 0.4),
-
         inset: '#1c2128',
         toolbar: '#1D2932',
         divider: '#09151E',
+        body: '#1D2932',
       },
       icon: {
-        app: '#A2A8AC90',
+        app: '#FFFFFF50',
         toolbar: '#A2A8AC',
       },
       text: {

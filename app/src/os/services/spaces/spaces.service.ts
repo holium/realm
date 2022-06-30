@@ -1,10 +1,12 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
+import { toJS } from 'mobx';
 import {
   onPatch,
   onSnapshot,
   getSnapshot,
   castToSnapshot,
+  cast,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -117,6 +119,21 @@ export class SpacesService extends BaseService {
 
   setPinnedOrder(_event: any, order: any[]) {
     this.state?.selected?.setPinnedOrder(order);
+  }
+
+  async setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
+    const space = this.state?.getSpaceByPath(spacePath);
+    if (space) {
+      const newTheme = await space.theme!.setWallpaper(
+        spacePath,
+        color,
+        wallpaper
+      );
+      // this.core.services.shell.setTheme(cast(newTheme));
+      return newTheme;
+    }
+    // todo handle errors better
+    return null;
   }
 
   setShipSpace(ship: ShipModelType) {

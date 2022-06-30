@@ -25,9 +25,7 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
   const { shell } = useServices();
-  const { desktop, theme } = shell;
-  const browserStore = useBrowser();
-  const { iconColor } = theme.theme;
+  const { desktop } = shell;
 
   const [loading, setLoading] = useState(false);
   // const [urlData, setUrlData] = useState<any>(tab ? new URL(tab.url) : null);

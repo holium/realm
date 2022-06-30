@@ -2,7 +2,7 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
 
-import { WindowThemeType } from 'renderer/logic-old/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
@@ -55,7 +55,7 @@ const TitleCentered = styled(Flex)`
 `;
 
 type TitlebarProps = {
-  theme: Partial<WindowThemeType>;
+  theme: Partial<ThemeModelType>;
   zIndex: number;
   showDevToolsToggle?: boolean;
   hasBorder?: boolean;

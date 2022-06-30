@@ -12,7 +12,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
   const { shell } = useServices();
   const { theme, desktop } = shell;
 
-  const { dockColor, textColor } = theme.theme;
+  const { dockColor, textColor } = desktop.theme;
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
@@ -48,6 +48,9 @@ export const HomeButton: FC<HomeButton> = observer(() => {
           animate={{ scale: 1 }}
           transition={{ scale: 0.5 }}
           whileTap={{ scale: 0.95 }}
+          // transition={{
+          //   backgroundColor: { duration: 1 },
+          // }}
           width={42}
           display="flex"
           justifyContent="center"
@@ -58,7 +61,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
         </SystemBarStyle>
       </motion.div>
     ),
-    [theme.theme.textColor, theme.theme.dockColor]
+    [desktop.theme.textColor, desktop.theme.dockColor]
   );
 });
 

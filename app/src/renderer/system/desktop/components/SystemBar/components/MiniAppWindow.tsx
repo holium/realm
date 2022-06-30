@@ -23,8 +23,7 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border: 1px solid ${(props: MiniAppStyleProps) => rgba(props.customBg!, 0.7)};
 `)<MiniAppStyleProps>({
   // @ts-expect-error annoying
-  backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? darken(0.025, props.customBg!) : 'initial',
+  backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
 });
 
 type MiniAppProps = {

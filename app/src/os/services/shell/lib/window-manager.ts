@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { AppModelType } from 'core-a/ship/stores/docket';
+import { AppModelType } from 'os/services/ship/models/docket';
 import { NativeAppType } from 'renderer/apps';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';
 
@@ -121,6 +121,14 @@ export const getInitialWindowDimensions = (
         break;
       }
       dimensions = getCenteredDimensions(nativeApp, desktopDimensions);
+      break;
+    case 'dialog':
+      const dialog: NativeAppType = app;
+      if (dialog.native?.openFullscreen) {
+        dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
+        break;
+      }
+      dimensions = getCenteredDimensions(dialog, desktopDimensions);
       break;
   }
   return dimensions!;

@@ -1,13 +1,11 @@
 import { ipcMain, session, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import { toJS } from 'mobx';
 import {
   onPatch,
   onSnapshot,
   getSnapshot,
   castToSnapshot,
   applySnapshot,
-  cast,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -16,17 +14,9 @@ import { DesktopStoreType, DesktopStore } from './desktop.model';
 import { ThemeModelType } from './theme.model';
 
 /**
- * DesktopService
- *
- * Preferences
- *  - desktop
- *    - isolation-mode: boolean
- *    - window-manager: "calm", "classic"
- *  - mouse
- *    - cursor-type: "system", "realm"
- *    - use-profile-color: boolean
+ * DialogService
  */
-export class DesktopService extends BaseService {
+export class DialogService extends BaseService {
   private db?: Store<DesktopStoreType>; // for persistance
   private state?: DesktopStoreType; // for state management
   handlers = {
@@ -40,20 +30,13 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-theme': this.setTheme,
     'realm.desktop.open-app-window': this.openAppWindow,
     'realm.desktop.close-app-window': this.closeAppWindow,
-    'realm.desktop.open-dialog': this.openDialog,
-    'realm.desktop.close-dialog': this.closeDialog,
   };
 
   static preload = {
-    changeWallpaper: async (
-      spaceId: string,
-      color: string,
-      wallpaper: string
-    ) => {
+    changeWallpaper: (spaceId: string, wallpaper: string) => {
       return ipcRenderer.invoke(
         'realm.desktop.change-wallpaper',
         spaceId,
-        color,
         wallpaper
       );
     },
@@ -95,12 +78,6 @@ export class DesktopService extends BaseService {
     closeAppWindow: (spaceId: string, app: any) => {
       return ipcRenderer.invoke('realm.desktop.close-app-window', spaceId, app);
     },
-    openDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.desktop.open-dialog', dialogId);
-    },
-    closeDialog: () => {
-      return ipcRenderer.invoke('realm.desktop.close-dialog');
-    },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -140,26 +117,9 @@ export class DesktopService extends BaseService {
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
   }
-  openDialog(_event: any, dialogId: string) {
-    this.state?.openDialog(dialogId);
-  }
 
-  closeDialog(_event: any) {
-    this.state?.closeDialog();
-  }
-  async changeWallpaper(
-    _event: any,
-    spaceId: string,
-    color: string,
-    wallpaper: string
-  ) {
-    const newTheme = await this.core.services.spaces.setSpaceWallpaper(
-      spaceId,
-      color,
-      wallpaper
-    );
-    newTheme && this.state?.setTheme(cast(newTheme)!);
-    return toJS(newTheme);
+  changeWallpaper(_event: any, spaceId: string, wallpaper: string) {
+    this.state?.setWallpaper(wallpaper);
   }
 
   setActive(_event: any, spaceId: string, appId: string) {

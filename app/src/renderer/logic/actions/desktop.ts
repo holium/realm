@@ -1,9 +1,17 @@
+import { average } from 'color.js';
+
 /**
  * DesktopActions for interfacing with core process
  */
 export const DesktopActions = {
-  openAppWindow: async (spacePath: string, app: any) => {
-    return await window.electron.os.shell.openAppWindow(spacePath, app);
+  changeWallpaper: async (spacePath: string, wallpaper: string) => {
+    // Need to do this on the client side will not work in node
+    const color = await average(wallpaper, { group: 10, format: 'hex' });
+    return await window.electron.os.shell.changeWallpaper(
+      spacePath,
+      color.toString(),
+      wallpaper
+    );
   },
   setActive: async (spacePath: string, app: any) => {
     return await window.electron.os.shell.setActive(spacePath, app);
@@ -29,12 +37,19 @@ export const DesktopActions = {
   setPartitionCookies: (partition: string, cookies: any) => {
     return window.electron.app.setPartitionCookies(partition, cookies);
   },
-
+  openAppWindow: async (spacePath: string, app: any) => {
+    return await window.electron.os.shell.openAppWindow(spacePath, app);
+  },
   closeAppWindow: async (spacePath: string, app: any) => {
     return await window.electron.os.shell.closeAppWindow(spacePath, app);
   },
-
   toggleDevTools: async () => {
     return window.electron.app.toggleDevTools();
+  },
+  openDialog: async (dialogId: string) => {
+    return await window.electron.os.shell.openDialog(dialogId);
+  },
+  closeDialog: async () => {
+    return await window.electron.os.shell.closeDialog();
   },
 };

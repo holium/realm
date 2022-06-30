@@ -1,3 +1,4 @@
+import { average } from 'color.js';
 import { types, flow, Instance, tryReference } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from '../../lib/color';
@@ -19,34 +20,41 @@ export const DEFAULT_WALLPAPER =
 // export const DEFAULT_WALLPAPER =
 //   'https://images.unsplash.com/photo-1643916861364-02e63ce3e52f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2870&q=100';
 
+// const
+
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
   return {
+    mode: bgLuminosity,
     backgroundColor: baseColor,
     dockColor:
       bgLuminosity === 'dark'
-        ? darken(0.2, baseColor)
+        ? darken(0.05, baseColor)
         : lighten(0.2, baseColor),
     windowColor:
       bgLuminosity === 'dark'
-        ? darken(0.2, baseColor)
+        ? darken(0.07, baseColor)
         : lighten(0.2, baseColor),
     textColor:
       bgLuminosity === 'dark'
         ? lighten(0.9, baseColor)
         : darken(0.6, baseColor),
     textTheme: bgLuminosity,
-    iconColor: rgba(darken(0.4, baseColor), 0.5),
+    iconColor:
+      bgLuminosity === 'dark'
+        ? rgba(lighten(0.5, baseColor), 0.4)
+        : rgba(darken(0.4, baseColor), 0.3),
   };
 };
 
 export const ThemeModel = types
   .model('ThemeModel', {
-    themeId: types.identifier,
+    themeId: types.string,
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     backgroundColor: types.optional(types.string, '#c4c3bf'),
     dockColor: types.optional(types.string, '#f5f5f4'),
     windowColor: types.optional(types.string, '#f5f5f4'),
     textTheme: types.optional(types.enumeration(['light', 'dark']), 'light'),
+    mode: types.optional(types.enumeration(['light', 'dark']), 'light'),
     textColor: types.optional(types.string, '#2a2927'),
     iconColor: types.optional(types.string, '#333333'),
     mouseColor: types.optional(types.string, '#4E9EFD'),
@@ -54,6 +62,17 @@ export const ThemeModel = types
   .actions((self) => ({
     setMouseColor(color: string) {
       self.mouseColor = color;
+    },
+    setWallpaper(path: string, color: string, wallpaper: string) {
+      const bgLuminosity = bgIsLightOrDark(color.toString());
+      const windowTheme = generateColors(color, bgLuminosity);
+      const theme = ThemeModel.create({
+        themeId: path,
+        ...windowTheme,
+        wallpaper,
+      });
+      self = theme;
+      return self;
     },
   }));
 

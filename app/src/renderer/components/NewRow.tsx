@@ -7,24 +7,24 @@ type RowProps = {
   theme: ThemeType;
   customBg?: string;
   pending?: boolean;
+  gap?: number;
 };
 
 export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;
   width: 100%;
   padding: 8px;
-  gap: 10px;
   display: flex;
   flex-direction: row;
   align-items: center;
   transition: ${(props: RowProps) => props.theme.transition};
   ${(props: RowProps) =>
-    !props.pending &&
     css`
+      gap: ${props.gap || 10}px;
       &:hover {
         transition: ${props.theme.transition};
         background-color: ${props.customBg
-          ? lighten(0.02, props.customBg)
+          ? darken(0.02, props.customBg)
           : 'initial'};
       }
     `}

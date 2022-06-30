@@ -28,11 +28,12 @@ type IProps = {
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { ship } = useServices();
-  const { backgroundColor, textColor, iconColor, dockColor } = theme;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
+  const { backgroundColor, textColor, iconColor, dockColor, windowColor } =
+    theme;
+  // const windowColor = useMemo(
+  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
+  //   [props.theme.windowColor]
+  // );
 
   const chat = ship!.chat;
   return (
@@ -48,7 +49,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
         zIndex={5}
         theme={{
           ...props.theme,
-          windowColor,
+          windowColor: rgba(lighten(0.125, windowColor), 0.8),
         }}
       >
         <Flex pl={3} pr={4} mr={2} justifyContent="center" alignItems="center">
@@ -69,7 +70,8 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             wrapperStyle={{
               cursor: 'none',
               borderRadius: 9,
-              backgroundColor: darken(0.05, windowColor),
+              backgroundColor: darken(0.025, windowColor),
+
               '&:hover': {
                 borderColor: backgroundColor,
               },

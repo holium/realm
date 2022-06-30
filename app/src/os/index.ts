@@ -103,13 +103,14 @@ export class Realm extends EventEmitter {
       spaces = this.services.spaces.snapshot;
       shell = this.services.shell.snapshot;
     }
-    this.services.identity.auth.setLoader('initial');
+    this.services.identity.auth.setLoader('loaded');
     return {
       auth: this.services.identity.auth.snapshot,
       signup: this.services.identity.signup.snapshot,
       ship,
       spaces,
       shell,
+      loggedIn: this.session ? true : false,
     };
   }
 

@@ -16,14 +16,14 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
   (props: SpaceSelectorProps) => {
     const { ship, spaces, shell } = useServices();
     // const { shipLoader } = ShipService;
-    const { theme } = shell;
+    const { desktop } = shell;
     const selectorRef = createRef<HTMLDivElement>();
     const appRef = createRef<HTMLDivElement>();
 
-    const { windowColor, dockColor, textColor } = theme.theme;
+    const { windowColor, dockColor, textColor } = desktop.theme;
     const dividerBg = useMemo(
       () => rgba(lighten(0.2, dockColor), 0.4),
-      [theme]
+      [desktop.theme]
     );
 
     const dimensions = {
@@ -48,7 +48,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
               backgroundColor={windowColor}
               textColor={textColor}
             >
-              <Spaces theme={theme} dimensions={dimensions} />
+              <Spaces theme={desktop.theme} dimensions={dimensions} />
             </MiniApp>
           }
         >
@@ -64,7 +64,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             >
               <Flex>
                 <Pulser
-                  background={rgba(theme.theme.backgroundColor, 0.5)}
+                  background={rgba(desktop.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={28}
                   width={28}
@@ -77,13 +77,13 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
               >
                 <Pulser
                   style={{ marginBottom: 2 }}
-                  background={rgba(theme.theme.backgroundColor, 0.5)}
+                  background={rgba(desktop.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={12}
                   width={40}
                 />
                 <Pulser
-                  background={rgba(theme.theme.backgroundColor, 0.5)}
+                  background={rgba(desktop.theme.backgroundColor, 0.5)}
                   borderRadius={4}
                   height={14}
                   width={90}

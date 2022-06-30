@@ -16,7 +16,7 @@ import { ThemeType } from '../../theme';
 type IProps = {
   highlightColor?: string;
   textColor?: string;
-  fontSize?: string;
+  fontSize?: string | number;
   theme: ThemeType;
   disabled?: boolean;
 } & OpacityProps &
@@ -79,7 +79,7 @@ export const TextButtonStyle = styled(styled.div`
 type TextButtonProps = {
   highlightColor?: string;
   textColor?: string;
-  fontSize?: string;
+  fontSize?: number | string;
   disabled?: boolean;
   style?: any;
   onClick?: (evt: any) => void;

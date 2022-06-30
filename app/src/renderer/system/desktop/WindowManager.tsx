@@ -50,18 +50,17 @@ export const WindowManager: FC<WindowManagerProps> = observer(
       >
         <ContextMenu
           isComponentContext={false}
-          textColor={theme.theme.textColor}
-          customBg={rgba(theme.theme.windowColor, 0.9)}
+          textColor={desktop.theme.textColor}
+          customBg={rgba(desktop.theme.windowColor, 0.9)}
           containerId="desktop-fill"
           parentRef={desktopRef}
           style={{ minWidth: 180 }}
           menu={[
             {
               label: 'Change wallpaper',
-              disabled: true,
               onClick: (evt: any) => {
-                evt.stopPropagation();
-                console.log('changing wallpaper');
+                DesktopActions.setBlur(true);
+                DesktopActions.openDialog('wallpaper-dialog');
               },
             },
             {
@@ -87,7 +86,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
               desktopRef={desktopRef}
               key={key}
               window={window}
-              theme={theme.theme}
+              theme={desktop.theme}
             />
           );
         })}

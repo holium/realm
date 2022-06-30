@@ -11,9 +11,6 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     box-sizing: border-box;
     cursor: none !important;
     font-family: "Rubik", sans-serif;
-      // --webkit-backface-visibility: hidden;
-      // --webkit-transform: translate3d(0, 0, 0);
-      // --webkit-perspective: 1000;
   }
   
   :root {
@@ -22,6 +19,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   }
   
   body {
+    background-color: ${(props) => props.theme.colors.bg.body};
     color: ${(props) => props.theme.colors.text.primary};
     height: 100vh;
     width: 100vw;

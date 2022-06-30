@@ -1,12 +1,12 @@
 import { FC } from 'react';
 import { rgba, lighten, darken } from 'polished';
-import { WindowThemeType } from '../../logic-old/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Grid, Flex, IconButton, Icons, Text } from '../../components';
 import { WalletMain } from './components/WalletMain';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 
 type WalletProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;

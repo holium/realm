@@ -18,7 +18,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
   const { ship } = useServices();
   // const { shipLoader } = useShip();
 
-  const { windowColor, textColor } = theme;
+  const { windowColor, dockColor, textColor } = theme;
   const accountButtonRef = createRef<HTMLButtonElement>();
   const appRef = createRef<HTMLDivElement>();
 
@@ -38,7 +38,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
           id="account-tray-app"
           ref={appRef}
           dimensions={dimensions}
-          backgroundColor={windowColor}
+          backgroundColor={dockColor}
           textColor={textColor}
         >
           <Profile theme={theme} dimensions={dimensions} />

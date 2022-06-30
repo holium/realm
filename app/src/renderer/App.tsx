@@ -20,7 +20,13 @@ export const App = observer(() => {
   const { booted } = useCore();
   const { shell } = useServices();
   const { desktop } = shell;
-  const shellMemo = useMemo(() => (booted ? <Shell /> : <div />), [booted]);
+  // const shipLoaded = ship?.loggedIn;
+  const textTheme = desktop.theme.textTheme;
+
+  const shellMemo = useMemo(
+    () => (booted ? <Shell /> : <div>Booting...</div>),
+    [booted]
+  );
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
@@ -33,7 +39,7 @@ export const App = observer(() => {
 
   return (
     <CoreProvider value={coreStore}>
-      <ThemeProvider theme={theme.light}>
+      <ThemeProvider theme={theme[textTheme]}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}
