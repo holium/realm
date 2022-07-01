@@ -14,14 +14,10 @@ export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
   // const { walletStore } = useMst();
   const { theme } = props;
 
-  const windowColor = useMemo(
-    () => rgba(lighten(0.1, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
   return (
     <Grid.Column
       style={{
-        background: windowColor,
+        background: theme.windowColor,
       }}
       noGutter
       expand

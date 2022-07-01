@@ -87,7 +87,12 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    this.setShipSpace(ship);
+    if (!this.state.our) {
+      const space = this.setShipSpace(ship);
+      this.core.services.shell.setTheme(space.theme);
+    } else {
+      this.setSelected(null, ship.patp);
+    }
 
     const syncEffect = {
       model: getSnapshot(this.state!),
@@ -124,12 +129,7 @@ export class SpacesService extends BaseService {
   async setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
     const space = this.state?.getSpaceByPath(spacePath);
     if (space) {
-      const newTheme = await space.theme!.setWallpaper(
-        spacePath,
-        color,
-        wallpaper
-      );
-      // this.core.services.shell.setTheme(cast(newTheme));
+      const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
       return newTheme;
     }
     // todo handle errors better
@@ -180,6 +180,7 @@ export class SpacesService extends BaseService {
       // },
     });
     this.state?.setOurSpace(ourSpace);
+    return ourSpace;
     // self.selected = self.spaces.get(ship.patp)!;
 
     // if (self.selected && self.selected.theme.wallpaper) {

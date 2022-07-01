@@ -36,7 +36,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
           alignItems="center"
           gap={24}
         >
-          <Text color={textColor} width={200} textAlign="center" opacity={0.6}>
+          <Text color={textColor} width={200} textAlign="center" opacity={0.3}>
             None of your groups have Spaces enabled.
           </Text>
           <Flex

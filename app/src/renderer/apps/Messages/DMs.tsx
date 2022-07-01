@@ -28,12 +28,8 @@ type IProps = {
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { ship } = useServices();
-  const { backgroundColor, textColor, iconColor, dockColor, windowColor } =
+  const { inputColor, textColor, iconColor, dockColor, windowColor, mode } =
     theme;
-  // const windowColor = useMemo(
-  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-  //   [props.theme.windowColor]
-  // );
 
   const chat = ship!.chat;
   return (
@@ -45,11 +41,13 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
     >
       <Titlebar
         hasBlur
-        hasBorder
+        hasBorder={false}
         zIndex={5}
         theme={{
           ...props.theme,
-          windowColor: rgba(lighten(0.125, windowColor), 0.8),
+          // windowColor: rgba(lighten(0.125, windowColor), 0.8),
+          // windowColor: rgba(windowColor, 0.8),
+          windowColor,
         }}
       >
         <Flex pl={3} pr={4} mr={2} justifyContent="center" alignItems="center">
@@ -70,12 +68,9 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             wrapperStyle={{
               cursor: 'none',
               borderRadius: 9,
-              backgroundColor: darken(0.025, windowColor),
+              backgroundColor: inputColor,
 
-              '&:hover': {
-                borderColor: backgroundColor,
-              },
-              borderColor: rgba(backgroundColor, 0.7),
+              // borderColor: rgba(backgroundColor, 0.7),
             }}
           />
         </Flex>
@@ -120,6 +115,32 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
+              {chat!.list.length === 0 && (
+                <Flex
+                  flex={1}
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  gap={24}
+                >
+                  {/* <Text
+                    color={textColor}
+                    width={200}
+                    textAlign="center"
+                    opacity={0.6}
+                  >
+                    No DMs
+                  </Text> */}
+                  <Text
+                    color={textColor}
+                    width={200}
+                    textAlign="center"
+                    opacity={0.3}
+                  >
+                    No Direct Messages. Click the <b>+</b> to start.
+                  </Text>
+                </Flex>
+              )}
               {chat!.list.map((dm: any) => (
                 <Box ml={1} mr={1} display="block" key={dm.contact}>
                   <ContactRow

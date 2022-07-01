@@ -1,5 +1,5 @@
 // import { osState, shipState } from './../store';
-import { types, applySnapshot, Instance } from 'mobx-state-tree';
+import { types, applySnapshot, Instance, clone } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 // import { setPartitionCookies } from './api';
 import { getInitialWindowDimensions } from './lib/window-manager';
@@ -118,7 +118,7 @@ export const DesktopStore = types
       self.theme.wallpaper = newWallpaper;
     },
     setTheme(newTheme: ThemeModelType) {
-      self.theme = newTheme;
+      self.theme = clone(newTheme);
     },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {

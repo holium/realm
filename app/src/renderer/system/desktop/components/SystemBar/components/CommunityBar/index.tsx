@@ -21,8 +21,6 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
     [desktop.theme.textColor]
   );
 
-  const iconColor = textColor;
-
   return (
     <SystemBarStyle pr={3} width="100%" customBg={dockColor}>
       <SpaceSelector />
@@ -30,9 +28,16 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
         <AppDock />
       </Flex>
       <Flex>
-        {/* <IconButton customBg={dockColor} size={24} ml={1} color={iconColor}>
-          <Icons name="Search" />
-        </IconButton> */}
+        <IconButton
+          customBg={dockColor}
+          color={textColor}
+          whileTap={{ scale: 0.9 }}
+          transition={{ scale: 0.1 }}
+          size={28}
+          ml={1}
+        >
+          <Icons name="Connect" />
+        </IconButton>
       </Flex>
     </SystemBarStyle>
   );

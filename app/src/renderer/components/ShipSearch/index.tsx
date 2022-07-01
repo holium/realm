@@ -49,7 +49,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
           <Row
             key={contact[0]}
             style={{ justifyContent: 'space-between' }}
-            customBg={customBg ? darken(0.1, customBg) : undefined}
+            customBg={customBg}
           >
             <Flex gap={10} flexDirection="row" alignItems="center">
               <Box>

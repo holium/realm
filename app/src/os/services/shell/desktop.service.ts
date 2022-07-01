@@ -7,6 +7,7 @@ import {
   getSnapshot,
   castToSnapshot,
   applySnapshot,
+  clone,
   cast,
 } from 'mobx-state-tree';
 
@@ -25,6 +26,11 @@ import { ThemeModelType } from './theme.model';
  *  - mouse
  *    - cursor-type: "system", "realm"
  *    - use-profile-color: boolean
+ *  - theme
+ *    - appearance: "light" | "dark" | "wallpaper"
+ *    - colors: "default" | "wallpaper-derived" | <hex value>
+ *    - font: "default" | "custom"
+ *      - google-font: "philosopher"
  */
 export class DesktopService extends BaseService {
   private db?: Store<DesktopStoreType>; // for persistance
@@ -158,6 +164,7 @@ export class DesktopService extends BaseService {
       color,
       wallpaper
     );
+    this.state?.closeDialog();
     newTheme && this.state?.setTheme(cast(newTheme)!);
     return toJS(newTheme);
   }
@@ -178,9 +185,9 @@ export class DesktopService extends BaseService {
     this.state?.setMouseColor(mouseColor);
   }
   setTheme(theme: ThemeModelType) {
-    if (this.state?.theme.themeId !== theme.themeId) {
-      applySnapshot(this.state!.theme, theme);
-    }
+    this.state?.setTheme(clone(theme)!);
+    // if (this.state?.theme.wallpaper !== theme.wallpaper) {
+    // }
   }
   setDesktopDimensions(_event: any, width: number, height: number) {
     this.state?.setDesktopDimensions(width, height);

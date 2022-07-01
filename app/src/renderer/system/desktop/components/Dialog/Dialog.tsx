@@ -3,7 +3,7 @@ import {
   WindowModelType,
 } from 'os/services/shell/desktop.model';
 import { FC, useRef } from 'react';
-import { dialogRenderers, DialogRenders } from 'renderer/apps/dialog';
+import { dialogRenderers } from 'renderer/apps/dialog';
 import styled from 'styled-components';
 
 export interface DialogViewProps {

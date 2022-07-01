@@ -38,7 +38,7 @@ export const AccountTray: FC<AccountTrayProps> = (props: AccountTrayProps) => {
           id="account-tray-app"
           ref={appRef}
           dimensions={dimensions}
-          backgroundColor={dockColor}
+          backgroundColor={windowColor}
           textColor={textColor}
         >
           <Profile theme={theme} dimensions={dimensions} />

@@ -77,6 +77,7 @@ export const TextButtonStyle = styled(styled.div`
 );
 
 type TextButtonProps = {
+  tabIndex?: number;
   highlightColor?: string;
   textColor?: string;
   fontSize?: number | string;

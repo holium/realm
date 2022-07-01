@@ -65,11 +65,12 @@ export const CreateSpaceModal: FC<any> = observer(() => {
             const groupKey = data.group.split('/')[2];
             return (
               <SelectRow
-                key={groupKey}
-                image={data.metadata.image}
+                key={data.group}
+                image={data.metadata.picture}
                 customBg={windowColor}
                 title={data.metadata.title || groupKey}
                 buttonText="Add Space"
+                subtitle={`${data.members.length} members`}
               />
             );
           })
@@ -141,10 +142,11 @@ interface ISelectRow {
   image?: string;
   customBg: string;
   buttonText: string;
+  subtitle?: string;
 }
 
 const SelectRow = (props: ISelectRow) => {
-  const { customBg, icon, image, title, buttonText } = props;
+  const { customBg, icon, image, title, buttonText, subtitle } = props;
   let leftIcon = <EmptyGroup />;
   if (icon) {
     leftIcon = <Icons size={32} name={icon!} />;
@@ -158,10 +160,17 @@ const SelectRow = (props: ISelectRow) => {
     <Row gap={16} customBg={customBg}>
       {leftIcon}
       <Flex flex={1} alignItems="center" justifyContent="space-between">
-        <Text opacity={0.9} fontSize={3} fontWeight={500}>
-          {title}
-        </Text>
-        <TextButton fontSize={3}>{buttonText}</TextButton>
+        <Flex flexDirection="column">
+          <Text opacity={0.9} fontSize={3} fontWeight={500}>
+            {title}
+          </Text>
+          {subtitle && (
+            <Text opacity={0.5} fontSize={2} fontWeight={400}>
+              {subtitle}
+            </Text>
+          )}
+        </Flex>
+        <TextButton fontSize={2}>{buttonText}</TextButton>
       </Flex>
     </Row>
   );

@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, lighten } from 'polished';
+import { rgba, darken, lighten } from 'polished';
 import styled, { css } from 'styled-components';
 import { Flex, Icons, Text } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
@@ -31,13 +31,13 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
   ${(props: RowProps) =>
     props.selected
       ? css`
-          background-color: ${lighten(0.015, props.customBg)};
+          background-color: ${darken(0.025, props.customBg)};
         `
       : css`
           &:hover {
             transition: ${(props: RowProps) => props.theme.transition};
             background-color: ${props.customBg
-              ? rgba(lighten(0.1, props.customBg), 0.4)
+              ? darken(0.025, props.customBg)
               : 'inherit'};
           }
         `}

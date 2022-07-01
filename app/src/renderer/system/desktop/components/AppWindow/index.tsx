@@ -41,8 +41,9 @@ export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
     ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
 `)<AppWindowStyleProps>({
   // @ts-expect-error annoying
-  backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? darken(0.002, props.customBg!) : 'initial',
+  // backgroundColor: (props: SystemBarStyleProps) =>
+  //   props.customBg ? darken(0.002, props.customBg!) : 'initial',
+  backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
 });
 
 type AppWindowProps = {

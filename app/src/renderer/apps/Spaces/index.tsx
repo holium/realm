@@ -28,12 +28,7 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
   const { dockColor, iconColor, textColor, windowColor } = spaceTheme;
 
   const bottomHeight = 58;
-  // const windowColor = useMemo(
-  //   () => rgba(spaceTheme.windowColor, 0.7),
-  //   [spaceTheme.windowColor]
-  // );
 
-  // const windowColor = spaceTheme.windowColor;
   const [coords, setCoords] = useState<{
     left: number;
     bottom: number;
@@ -115,6 +110,7 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         height={bottomHeight}
       >
         <YouRow
+          colorTheme={windowColor}
           selected={ship?.patp === spaces.selected?.path}
           ship={ship!}
           onSelect={(path: string) => SpacesActions.selectSpace(path)}

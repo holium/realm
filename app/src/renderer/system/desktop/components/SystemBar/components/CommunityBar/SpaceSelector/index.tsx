@@ -15,14 +15,13 @@ type SpaceSelectorProps = {};
 export const SpaceSelector: FC<SpaceSelectorProps> = observer(
   (props: SpaceSelectorProps) => {
     const { ship, spaces, shell } = useServices();
-    // const { shipLoader } = ShipService;
     const { desktop } = shell;
     const selectorRef = createRef<HTMLDivElement>();
     const appRef = createRef<HTMLDivElement>();
 
     const { windowColor, dockColor, textColor } = desktop.theme;
     const dividerBg = useMemo(
-      () => rgba(lighten(0.2, dockColor), 0.4),
+      () => rgba(lighten(0.2, dockColor), 0.3),
       [desktop.theme]
     );
 

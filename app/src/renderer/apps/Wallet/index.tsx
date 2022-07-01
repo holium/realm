@@ -15,9 +15,8 @@ type WalletProps = {
 
 export const Wallet: FC<WalletProps> = (props: WalletProps) => {
   const { dimensions } = props;
-  const { windowColor, dockColor, backgroundColor, textColor } = props.theme;
+  const { windowColor, inputColor, iconColor, textColor } = props.theme;
 
-  const iconColor = darken(0.5, textColor!);
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -27,10 +26,10 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
     >
       <Titlebar
         closeButton={false}
-        hasBorder
+        hasBorder={false}
         theme={{
           ...props.theme,
-          windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.9),
+          windowColor,
         }}
       >
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
@@ -62,7 +61,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
           flexDirection="row"
           justifyContent="space-between"
           alignItems="space-between"
-          background={darken(0.01, windowColor!)}
+          background={rgba(inputColor, 0.8)}
         >
           <Text
             display="flex"
@@ -122,7 +121,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
         justify="space-between"
         align="center"
         style={{
-          background: rgba(lighten(0.225, windowColor!), 0.9),
+          background: windowColor,
           // backdropFilter: 'blur(8px)',
           borderTop: `1px solid ${rgba(windowColor!, 0.7)}`,
           position: 'absolute',
@@ -142,7 +141,7 @@ export const Wallet: FC<WalletProps> = (props: WalletProps) => {
           style={{ cursor: 'pointer' }}
         >
           1JCKfg...u8vJCh
-          <IconButton size={22} ml="6px" color={iconColor}>
+          <IconButton size={26} ml={2} color={iconColor}>
             <Icons name="Copy" />
           </IconButton>
         </Text>

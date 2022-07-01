@@ -31,8 +31,7 @@ type IProps = {
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
   const { ship } = useServices();
-  const { backgroundColor, textColor, iconColor, dockColor, windowColor } =
-    theme;
+  const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
   // const windowColor = useMemo(
   //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
   //   [props.theme.windowColor]
@@ -213,11 +212,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
               marginRight: 8,
               width: 'calc(100% - 16px)',
               borderRadius: 9,
-              backgroundColor: darken(0.05, windowColor),
-              '&:hover': {
-                borderColor: backgroundColor,
-              },
-              borderColor: rgba(backgroundColor, 0.7),
+              backgroundColor: inputColor,
             }}
           />
         </FormControl.Field>

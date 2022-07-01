@@ -2,6 +2,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { nativeApps } from 'renderer/apps';
 import { useServices } from 'renderer/logic/store';
+import { lighten } from 'polished';
 
 export interface WebviewProps {
   window: any;
@@ -72,6 +73,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
         onMouseEnter={() => desktop.setIsMouseInWebview(true)}
         onMouseLeave={() => desktop.setIsMouseInWebview(false)}
         style={{
+          background: lighten(0.04, desktop.theme.windowColor),
           width: 'inherit',
           height: '100%',
           position: 'relative',

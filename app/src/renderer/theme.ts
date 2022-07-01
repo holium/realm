@@ -107,7 +107,7 @@ export const theme = {
         secondary: '#EF9134',
         neutral: '#F3F3F3',
         accent: '#DB7C00',
-        muted: rgba('#4E9EFD', 0.2),
+        muted: rgba('#4E9EFD', 0.1),
       },
       ui: {
         primary: '#262626',

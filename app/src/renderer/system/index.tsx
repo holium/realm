@@ -26,7 +26,7 @@ export const Shell: FC = observer(() => {
   const { shell, identity, ship } = useServices();
   const { desktop } = shell;
 
-  const isFullscreen = desktop.isFullscreen;
+  const isFullscreen = true; //desktop.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
@@ -82,7 +82,7 @@ const BgImage = ({
           onLoad={imageLoaded}
           animate={{
             opacity: 1,
-            filter: blurred ? 'blur(20px)' : 'blur(0px)',
+            filter: blurred ? 'blur(24px)' : 'blur(0px)',
           }}
           transition={{
             opacity: { duration: 1 },

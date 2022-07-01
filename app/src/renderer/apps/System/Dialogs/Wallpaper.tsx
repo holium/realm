@@ -18,19 +18,38 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
 import { toJS } from 'mobx';
+import { darken, lighten } from 'polished';
+import { DialogConfig } from 'renderer/apps/dialog';
+
+export const WallpaperDialogConfig: DialogConfig = {
+  component: (props: any) => <WallpaperDialog {...props} />,
+  // onOpen: () => {
+  //   // DesktopActions.setBlur(true);
+  // },
+  onClose: () => {
+    // DesktopActions.closeDialog();
+    // DesktopActions.setBlur(false);
+  },
+  window: {
+    id: 'wallpaper-dialog',
+    title: 'Wallpaper Dialog',
+    zIndex: 13,
+    type: 'dialog',
+    dimensions: {
+      x: 0,
+      y: 0,
+      width: 300,
+      height: 300,
+    },
+  },
+  hasCloseButton: false,
+  noTitlebar: true,
+};
 
 const WallpaperPreview = styled(motion.img)`
   height: 150px;
   border-radius: 6px;
   transition: all 0.25s ease;
-  /* &:hover {
-    -webkit-filter: brightness(95%);
-    -webkit-transition: all 0.25s ease;
-    -moz-transition: all 0.25s ease;
-    -o-transition: all 0.25s ease;
-    -ms-transition: all 0.25s ease;
-    transition: all 0.25s ease;
-  } */
 `;
 
 const createWallpaperForm = (
@@ -66,6 +85,7 @@ const createWallpaperForm = (
 export const WallpaperDialog: FC = observer(() => {
   const { shell, spaces } = useServices();
   const [loading, setLoading] = useState(false);
+  const { inputColor, windowColor } = shell.desktop.theme;
   const { wallpaperForm, imageUrl } = useMemo(
     () => createWallpaperForm({ imageUrl: shell.desktop.theme.wallpaper }),
     []
@@ -94,10 +114,11 @@ export const WallpaperDialog: FC = observer(() => {
       <WallpaperPreview src={shell.desktop.theme.wallpaper} />
       <FormControl.Field>
         <Input
-          tabIndex={2}
+          autoFocus
+          tabIndex={0}
           name="imageUrl"
           wrapperStyle={{
-            backgroundColor: shell.desktop.theme.backgroundColor,
+            backgroundColor: inputColor,
           }}
           placeholder="https://my-image.google.com"
           defaultValue={imageUrl.state.value}
@@ -114,6 +135,7 @@ export const WallpaperDialog: FC = observer(() => {
 
       <Flex justifyContent="space-between">
         <TextButton
+          tabIndex={2}
           style={{ fontWeight: 400 }}
           highlightColor="#EC415A"
           textColor="#EC415A"
@@ -125,6 +147,7 @@ export const WallpaperDialog: FC = observer(() => {
           Close
         </TextButton>
         <TextButton
+          tabIndex={1}
           style={{ fontWeight: 400 }}
           // disabled={imageUrl.state.value === shell.desktop.theme.wallpaper}
           onClick={(evt: any) => onChange(evt)}

@@ -200,6 +200,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           }}
                         >
                           <MenuItem
+                            data-prevent-context-close={false}
                             label="Reset password"
                             customBg={theme.windowColor}
                             onClick={() => {

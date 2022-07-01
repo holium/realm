@@ -1,5 +1,12 @@
 import { average } from 'color.js';
-import { types, flow, Instance, tryReference } from 'mobx-state-tree';
+import {
+  types,
+  flow,
+  Instance,
+  clone,
+  tryReference,
+  applySnapshot,
+} from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from '../../lib/color';
 import { LoaderModel } from '../common.model';
@@ -23,21 +30,27 @@ export const DEFAULT_WALLPAPER =
 // const
 
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
+  const windowColor =
+    bgLuminosity === 'dark'
+      ? darken(0.05, baseColor)
+      : lighten(0.35, baseColor);
   return {
+    // TODO add window border color
     mode: bgLuminosity,
     backgroundColor: baseColor,
+    inputColor:
+      bgLuminosity === 'dark'
+        ? darken(0.06, windowColor)
+        : lighten(0.05, windowColor),
     dockColor:
       bgLuminosity === 'dark'
-        ? darken(0.05, baseColor)
-        : lighten(0.2, baseColor),
-    windowColor:
-      bgLuminosity === 'dark'
-        ? darken(0.07, baseColor)
-        : lighten(0.2, baseColor),
+        ? lighten(0.05, baseColor)
+        : lighten(0.4, baseColor),
+    windowColor,
     textColor:
       bgLuminosity === 'dark'
         ? lighten(0.9, baseColor)
-        : darken(0.6, baseColor),
+        : darken(0.8, baseColor),
     textTheme: bgLuminosity,
     iconColor:
       bgLuminosity === 'dark'
@@ -50,6 +63,7 @@ export const ThemeModel = types
   .model('ThemeModel', {
     themeId: types.string,
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
+    inputColor: types.optional(types.string, '#ffffff'),
     backgroundColor: types.optional(types.string, '#c4c3bf'),
     dockColor: types.optional(types.string, '#f5f5f4'),
     windowColor: types.optional(types.string, '#f5f5f4'),
@@ -71,7 +85,7 @@ export const ThemeModel = types
         ...windowTheme,
         wallpaper,
       });
-      self = theme;
+      applySnapshot(self, clone(theme));
       return self;
     },
   }));
@@ -84,9 +98,7 @@ export const ThemeStore = types
     currentTheme: types.safeReference(ThemeModel),
     os: types.optional(ThemeModel, {
       themeId: 'os',
-      // wallpaper: DEFAULT_WALLPAPER,
-      wallpaper:
-        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
+      wallpaper: DEFAULT_WALLPAPER,
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
       windowColor: '#f0ecec',

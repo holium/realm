@@ -48,21 +48,18 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     onSend,
   } = props;
   const {
-    backgroundColor,
+    inputColor,
     iconColor,
     dockColor,
     textTheme,
     textColor,
     windowColor,
+    mode,
   } = props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
   const { ship } = useServices();
   const chatData = ship?.chat.dms.get(selectedChat.contact)!;
-  // const windowColor = useMemo(
-  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-  //   [props.theme.windowColor]
-  // );
 
   const [rows, setRows] = useState(1);
 
@@ -130,7 +127,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         zIndex={5}
         theme={{
           ...props.theme,
-          windowColor: rgba(lighten(0.125, windowColor), 0.8),
         }}
       >
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
@@ -183,14 +179,16 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           left: 0,
           right: 0,
           backfaceVisibility: 'hidden',
-          backgroundColor: props.theme.windowColor,
+          backgroundColor:
+            mode === 'light'
+              ? darken(0.05, windowColor)
+              : darken(0.05, windowColor),
           transform: 'translate3d(0, 0, 0)',
         }}
         overflowY="hidden"
       >
         <Flex
           gap={2}
-          mb={2}
           height={height}
           position="relative"
           overflowY="scroll"
@@ -224,6 +222,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                   borderRadius: 14,
                   cursor: 'none',
                   backdropFilter: 'blur(4px)',
+                  background: windowColor,
                 }}
                 size={28}
                 onClick={scrollToBottom}
@@ -238,9 +237,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             left={0}
             right={0}
             style={{
-              background: rgba(lighten(0.125, windowColor), 0.8),
+              background: windowColor,
               backdropFilter: 'blur(8px)',
-              borderTop: `1px solid ${rgba(windowColor, 0.9)}`,
+              borderTop: `1px solid ${rgba(darken(0.5, windowColor), 0.2)}`,
               minHeight: inputHeight,
             }}
           >
@@ -260,8 +259,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
               >
                 <Icons name="Attachment" />
               </IconButton>
-              {/* <ChatInput /> */}
-
               <Input
                 as="textarea"
                 ref={chatInputRef}
@@ -294,12 +291,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onBlur={() => dmMessage.actions.onBlur()}
                 wrapperStyle={{
                   height: 'max-content',
-                  borderRadius: 12,
-                  backgroundColor: darken(0.05, windowColor),
-                  '&:hover': {
-                    borderColor: backgroundColor,
-                  },
-                  borderColor: rgba(backgroundColor, 0.7),
+                  borderRadius: 9,
+                  backgroundColor: inputColor,
                 }}
               />
             </Flex>

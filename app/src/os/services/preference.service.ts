@@ -9,9 +9,8 @@ import {
 } from 'mobx-state-tree';
 
 /**
- * Base Service Interface
+ * Preference Service
  *
- * @interface
  */
 export class PreferenceService extends EventEmitter {
   options: any;
@@ -23,19 +22,6 @@ export class PreferenceService extends EventEmitter {
     this.options = options;
     this.preferences = {};
   }
-
-  /**
-   * onEffect: sends effect data to the core process
-   *
-   * @param data
-   */
-  onEffect(data: any) {
-    this.emit('on-effect', data);
-  }
-  // TODO explore generic state and db functions here
-  // get snapshot() {
-  //   return this.state ? getSnapshot(this.state) : null;
-  // }
 
   /**
    * Preload functions to register with the renderer
