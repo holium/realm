@@ -91,6 +91,17 @@ export const SpacesStore = types
     },
   }))
   .actions((self) => ({
+    initialScry: (data: any) => {
+      Object.values(data).forEach((space: any) => {
+        const path = space.spaceId;
+        if (space.type === 'our') {
+          delete space.spaceId;
+          self.our = SpaceModel.create({ ...space, path });
+        } else {
+          self.spaces.set(path, SpaceModel.create({ ...space, path }));
+        }
+      });
+    },
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');

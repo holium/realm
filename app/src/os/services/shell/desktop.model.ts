@@ -56,7 +56,7 @@ export const DesktopStore = types
     showHomePane: types.optional(types.boolean, false),
     isBlurred: types.optional(types.boolean, true),
     appviewPreload: types.maybe(types.string),
-    isFullscreen: types.optional(types.boolean, false),
+    isFullscreen: types.optional(types.boolean, true),
     dynamicMouse: types.optional(types.boolean, true),
     isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),

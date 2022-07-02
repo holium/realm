@@ -199,6 +199,8 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.identity.signup, value.patch);
     }
     if (value.resource === 'spaces') {
+      console.log('spaces patch', value.patch);
+
       applyPatch(servicesStore.spaces, value.patch);
     }
     if (value.resource === 'ship') {

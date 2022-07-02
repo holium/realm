@@ -10,24 +10,9 @@ import {
 import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from '../../lib/color';
 import { LoaderModel } from '../common.model';
-// import Wallpaper from '../../../assets/sample-wallpaper.png';
-// import Image from '/Users/drunkplato/Documents/Holium/Design/Assets/os-wallpaper/The_Course_of_Empire_Desolation.jpeg';
-
-// import { bgIsLightOrDark } from '../utils/color';
-
-// https://unsplash.com/@pawel_czerwinski
-// export const DEFAULT_WALLPAPER =
-//   'https://images.unsplash.com/photo-1650361072639-e2d0d4f7f3e6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=100';
-
-// export const DEFAULT_WALLPAPER = Image;
 
 export const DEFAULT_WALLPAPER =
   'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
-
-// export const DEFAULT_WALLPAPER =
-//   'https://images.unsplash.com/photo-1643916861364-02e63ce3e52f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2870&q=100';
-
-// const
 
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
   const windowColor =
@@ -61,7 +46,7 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 
 export const ThemeModel = types
   .model('ThemeModel', {
-    themeId: types.string,
+    themeId: types.maybe(types.string),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     inputColor: types.optional(types.string, '#ffffff'),
     backgroundColor: types.optional(types.string, '#c4c3bf'),

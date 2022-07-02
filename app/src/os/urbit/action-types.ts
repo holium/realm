@@ -14,3 +14,14 @@ export interface SendAction {
     data?: any;
   };
 }
+
+export interface RealmAction {
+  action: string;
+  resource: string;
+  context:
+    | {
+        [resourceType: string]: string;
+      }
+    | {};
+  data?: any;
+}

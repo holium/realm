@@ -8,7 +8,6 @@ import { Auth } from './auth';
 import { Desktop } from './desktop';
 import { BackgroundImage, BackgroundFill } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
-import useImagePreloader from './useImagePreloader';
 
 const DragBar = styled.div`
   position: absolute;
@@ -26,7 +25,7 @@ export const Shell: FC = observer(() => {
   const { shell, identity, ship } = useServices();
   const { desktop } = shell;
 
-  const isFullscreen = true; //desktop.isFullscreen;
+  const isFullscreen = desktop.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 

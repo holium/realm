@@ -109,6 +109,7 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
           onMouseLeave={onMouseLeave}
           useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
           style={{
+            background: 'white',
             width: 'inherit',
             height: 'calc(100% - 50px)',
             position: 'relative',

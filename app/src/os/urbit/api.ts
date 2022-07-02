@@ -20,7 +20,7 @@ import {
   FatalError,
 } from './types';
 import { hexString } from './utils';
-import { SendAction } from './action-types';
+import { SendAction, RealmAction } from './action-types';
 
 /**
  * A class for interacting with an urbit ship, given its URL and code

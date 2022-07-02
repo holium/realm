@@ -19,6 +19,7 @@ import {
 } from './models/spaces';
 
 import { ShipModelType } from '../ship/models/ship';
+import { SpacesDemoApi } from '../../api/spaces-demo';
 
 /**
  * SpacesService
@@ -72,7 +73,10 @@ export class SpacesService extends BaseService {
     });
 
     let persistedState: SpacesStoreType = this.db.store;
+    // const spaces = await SpacesDemoApi.getSpaces(this.core.conduit!);
+
     this.state = SpacesStore.create(castToSnapshot(persistedState));
+    // this.state?.initialScry(spaces);
 
     onSnapshot(this.state, (snapshot) => {
       this.db!.store = castToSnapshot(snapshot);
@@ -87,6 +91,9 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
+    // SpacesDemoApi.createSpace(this.core.conduit!);
+
+    // console.log(spaces);
     if (!this.state.our) {
       const space = this.setShipSpace(ship);
       this.core.services.shell.setTheme(space.theme);
@@ -114,12 +121,16 @@ export class SpacesService extends BaseService {
     this.core.services.shell.setTheme(selected?.theme!);
   }
 
-  pinApp(_event: any, path: string, appId: string) {
+  async pinApp(_event: any, path: string, appId: string) {
+    console.log('pinning');
+    console.log(this.state?.selected);
     this.state?.selected?.pinApp(appId);
+    return;
   }
 
-  unpinApp(_event: any, path: string, appId: string) {
+  async unpinApp(_event: any, path: string, appId: string) {
     this.state?.selected?.unpinApp(appId);
+    return;
   }
 
   setPinnedOrder(_event: any, order: any[]) {

@@ -10,6 +10,7 @@ import { AppModelType } from 'os/services/ship/models/docket';
 import { NativeAppList } from 'renderer/apps';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 type HomeWindowProps = {
   customBg: string;
@@ -104,8 +105,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                       onClick: (evt: any) => {
                         evt.stopPropagation();
                         isAppPinned
-                          ? spaces.selected?.unpinApp(app.id)
-                          : spaces.selected?.pinApp(app.id);
+                          ? SpacesActions.unpinApp('', app.id)
+                          : SpacesActions.pinApp('', app.id);
                       },
                     },
                     {

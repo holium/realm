@@ -39,7 +39,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         values={orderedList}
         onReorder={(newOrder: any) => {
           const newPinList = newOrder.map((app: any) => app.id);
-          spaces.selected?.setPinnedOrder(newPinList);
+          SpacesActions.setPinnedOrder(newPinList);
         }}
       >
         {orderedList.map((app: AppModelType | any, index: number) => {
@@ -73,7 +73,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,
-                    selectedApp.toJSON()
+                    toJS(selectedApp)
                   );
                 }
               }}

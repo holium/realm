@@ -20,6 +20,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   
   body {
     background-color: ${(props) => props.theme.colors.bg.body};
+    transition: background-color 1s ease;
     color: ${(props) => props.theme.colors.text.primary};
     height: 100vh;
     width: 100vw;
