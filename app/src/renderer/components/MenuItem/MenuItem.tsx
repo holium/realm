@@ -82,7 +82,7 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
           {icon}
         </Box>
       )}
-      <Text fontSize={2} fontWeight={500}>
+      <Text style={{ pointerEvents: 'none' }} fontSize={2} fontWeight={400}>
         {label}
       </Text>
       {children && <ChildrenBox interaction={disabled}>{children}</ChildrenBox>}

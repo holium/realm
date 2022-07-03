@@ -4675,6 +4675,11 @@ express@^4.17.3:
     utils-merge "1.0.1"
     vary "~1.1.2"
 
+extract-colors@^1.1.22:
+  version "1.1.22"
+  resolved "https://registry.yarnpkg.com/extract-colors/-/extract-colors-1.1.22.tgz#10fbeb66fa48dccc120991515dca846ee9e1f370"
+  integrity sha512-advoa+7dMS7DCkOFARC/keCmrh6rceQ6knz36Z0FJk0srXuGLs5WJJ0lUrKOYAddm6j3kyDoq4Pnje+ZjSeiOQ==
+
 extract-zip@^1.0.3:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-1.7.0.tgz#556cc3ae9df7f452c493a0cfb51cc30277940927"

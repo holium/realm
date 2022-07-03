@@ -11,9 +11,9 @@ import {
   Text,
   TextButton,
 } from 'renderer/components';
-import { AddShip, ContinueButton } from './add-ship';
+import { AddShip } from './add-ship';
 import { ConnectingShip } from './connecting';
-import { useAuth, useMst } from 'renderer/logic/store';
+import { useServices } from 'renderer/logic/store';
 import ProfileSetup from './step-profile';
 import StepPassword from './step-password';
 import StepInstall from './step-install';
@@ -30,12 +30,10 @@ type LoginProps = {
 
 export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
   const { firstTime, goToLogin } = props;
-  const { themeStore } = useMst();
-  const { authStore, signupStore } = useAuth();
-  const [step, setStep] = useState(
-    signupStore.steps.indexOf(signupStore.currentStep)
-  );
-  const inProgressShips = authStore.inProgressList;
+  const { shell, identity } = useServices();
+  const { auth, signup } = identity;
+  const [step, setStep] = useState(signup.steps.indexOf(signup.currentStep));
+  const inProgressShips = auth.inProgressList;
 
   const goBack = () => {
     if (step === 0) {
@@ -50,13 +48,13 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
   const continueSignup = useCallback(
     (id: string) => {
       setStep(1);
-      signupStore.setSignupShip(authStore.ships.get(id));
+      signup.setSignupShip(auth.ships.get(id));
     },
-    [authStore.setSession, setStep]
+    [auth.setSession, setStep]
   );
 
   const next = () => {
-    if (step !== signupStore.steps.length - 1) setStep(step + 1);
+    if (step !== signup.steps.length - 1) setStep(step + 1);
   };
 
   const cardSizes = {
@@ -135,10 +133,11 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
             // eslint-disable-next-line jsx-a11y/no-access-key
             <AddShip
               firstTime={firstTime}
-              hasShips={authStore.hasShips}
+              hasShips={auth.hasShips}
               next={() => next()}
             />
           )}
+
           {step === 1 && <ConnectingShip next={() => next()} />}
           {step === 2 && <ProfileSetup next={() => next()} />}
           {step === 3 && <StepPassword next={() => next()} />}
@@ -160,27 +159,6 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
           </Box>
         </Card>
       </motion.div>
-      {/* {step === 0 && (
-        <Flex
-          mt={4}
-          top={`calc(50% + ${height / 2}px)`}
-          key="continue-section"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: firstTime ? 5 : 0 }}
-          position="absolute"
-          gap={12}
-        >
-          {inProgressShips.map((ship: any) => (
-            <ContinueButton
-              onClick={() => continueSignup(ship.id)}
-              key={`continue-${ship.patp}`}
-              ship={ship}
-              theme={themeStore.theme}
-            />
-          ))}
-        </Flex>
-      )} */}
     </AnimatePresence>
   );
 });

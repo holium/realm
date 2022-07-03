@@ -2,11 +2,10 @@ import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, ContextMenu } from '..';
-import { AppModelType } from '../../../core/ship/stores/docket';
+import { AppModelType } from 'os/services/ship/models/docket';
 import { toJS } from 'mobx';
-import { bgIsLightOrDark } from 'core/theme/lib';
+import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
-import { useMst } from 'renderer/logic/store';
 import { Portal } from 'renderer/system/modals/Portal';
 import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
@@ -103,14 +102,17 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     open,
     onAppClick,
   } = props;
-  // const { themeStore } = useMst();
+  // const { theme } = useMst();
   const tileRef = useRef(null);
 
   return useMemo(() => {
     let title;
     const isAppGrid = tileSize === 'xxl';
     const boxShadowStyle = isAppGrid
-      ? '0px 0px 4px rgba(0, 0, 0, 0.06)'
+      ? '0px 2px 8px rgba(0, 0, 0, 0.15)'
+      : 'none';
+    const boxShadowHover = isAppGrid
+      ? '0px 4px 8px rgba(0, 0, 0, 0.15)'
       : 'none';
     const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     const isLight = lightOrDark === 'light';
@@ -144,15 +146,21 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           }}
           whileHover={{
             scale: 1 + scales[tileSize] / 2,
-            boxShadow: boxShadowStyle,
+            boxShadow: boxShadowHover,
           }}
           whileTap={{
             scale: 1 - scales[tileSize],
+            boxShadow: boxShadowHover,
+          }}
+          animate={{
             boxShadow: boxShadowStyle,
           }}
-          transition={{ scale: 0.5 }}
+          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
           minWidth={sizes[tileSize]}
-          style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
+          style={{
+            borderRadius: radius[tileSize],
+            overflow: 'hidden',
+          }}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
           backgroundColor={app.color || '#F2F3EF'}
@@ -181,13 +189,16 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           }}
           whileHover={{
             scale: 1 + scales[tileSize] / 2,
-            boxShadow: boxShadowStyle,
+            boxShadow: boxShadowHover,
           }}
           whileTap={{
             scale: 1 - scales[tileSize],
+            boxShadow: boxShadowHover,
+          }}
+          animate={{
             boxShadow: boxShadowStyle,
           }}
-          transition={{ scale: 0.5 }}
+          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
           minWidth={sizes[tileSize]}
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           height={sizes[tileSize]}
@@ -205,11 +216,23 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
-          whileHover={{ scale: 1 + scales[tileSize] / 2 }}
-          whileTap={{ scale: 1 - scales[tileSize] }}
-          transition={{ scale: 0.5 }}
+          whileHover={{
+            scale: 1 + scales[tileSize] / 2,
+            boxShadow: boxShadowHover,
+          }}
+          whileTap={{
+            scale: 1 - scales[tileSize],
+            boxShadow: boxShadowHover,
+          }}
+          animate={{
+            boxShadow: boxShadowStyle,
+          }}
+          transition={{
+            scale: { duration: 0.5 },
+            boxShadow: { duration: 0.5 },
+          }}
           minWidth={sizes[tileSize]}
-          style={{ borderRadius: radius[tileSize] }}
+          style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           key={app.title}
           backgroundColor={app.color}
           height={sizes[tileSize]}

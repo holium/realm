@@ -1,13 +1,13 @@
 import { FC, createRef } from 'react';
 
 import { IconButton, Icons } from 'renderer/components';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { MiniApp } from '../../MiniAppWindow';
 import { TrayMenu } from '../../TrayMenu';
 import { Wallet } from 'renderer/apps/Wallet';
 
 type WalletTrayProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
 };
 
 export const WalletTray: FC<WalletTrayProps> = (props: WalletTrayProps) => {

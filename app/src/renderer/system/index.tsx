@@ -1,14 +1,13 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
-import { useAuth, useMst, useShip } from 'renderer/logic/store';
+// import { useAuth, useMst, useShip } from 'renderer/logic/store';
+import { coreStore, useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
 import { BackgroundImage, BackgroundFill } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
-
-type ShellProps = {};
 
 const DragBar = styled.div`
   position: absolute;
@@ -20,32 +19,30 @@ const DragBar = styled.div`
   app-region: drag;
 `;
 
-export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
-  const { themeStore, desktopStore } = useMst();
-  const { authStore } = useAuth();
-  const { ship } = useShip();
+export const Shell: FC = observer(() => {
+  const { loggedIn } = useCore();
 
-  const isFullscreen = desktopStore.isFullscreen;
-  const wallpaper = themeStore.theme.wallpaper;
+  const { shell, identity, ship } = useServices();
+  const { desktop } = shell;
+
+  const isFullscreen = desktop.isFullscreen;
+  const wallpaper = desktop.theme.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
-  // const loggedIn = true; // shipStore.session?.loggedIn;
-
-  const loggedIn = authStore.currentShip?.loggedIn && !authStore.isLoading;
   const isBlurred = useMemo(
-    () => !loggedIn || desktopStore.isBlurred,
-    [loggedIn, desktopStore.isBlurred]
+    () => !loggedIn || desktop.isBlurred,
+    [desktop.isBlurred, loggedIn]
   );
 
-  const shipLoaded = ship && ship.isLoaded;
-  // console.log('rerendering shell');
+  const shipLoaded = ship?.loader.isLoaded;
+
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <BgImage blurred={isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {loggedIn ? (
+        {shipLoaded ? (
           <Desktop
             hasLoaded={shipLoaded}
             hasWallpaper={true}
@@ -68,6 +65,11 @@ const BgImage = ({
   blurred: boolean;
   wallpaper: string;
 }) => {
+  const [imageLoading, setImageLoading] = useState(true);
+
+  const imageLoaded = () => {
+    setImageLoading(false);
+  };
   return useMemo(
     () => (
       <AnimatePresence>
@@ -76,9 +78,10 @@ const BgImage = ({
           src={wallpaper}
           initial={{ opacity: 0 }}
           exit={{ opacity: 0 }}
+          onLoad={imageLoaded}
           animate={{
             opacity: 1,
-            filter: blurred ? 'blur(20px)' : 'blur(0px)',
+            filter: blurred ? 'blur(24px)' : 'blur(0px)',
           }}
           transition={{
             opacity: { duration: 1 },
@@ -86,6 +89,6 @@ const BgImage = ({
         />
       </AnimatePresence>
     ),
-    [blurred, wallpaper]
+    [blurred, wallpaper, imageLoading]
   );
 };

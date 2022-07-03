@@ -15,7 +15,7 @@ import {
   LayoutProps,
   TypographyProps,
 } from 'styled-system';
-import { PathsType, paths } from './icons';
+import { IconPathsType, paths } from './icons';
 import { uuid } from './uuid';
 
 export type IconProps = SpaceProps &
@@ -27,7 +27,7 @@ export type IconProps = SpaceProps &
 const SvgComponent = forwardRef<
   SVGSVGElement,
   React.SVGProps<SVGSVGElement> & {
-    name: PathsType;
+    name: IconPathsType;
     title?: string;
   }
 >(({ title, name, ...props }, svgRef) => {

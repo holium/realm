@@ -1,29 +1,31 @@
 import { FC, useMemo } from 'react';
 
 import { Flex, Sigil, Text } from 'renderer/components';
-import { useShip, useMst } from 'renderer/logic/store';
-import { ShipModelType } from 'core/ship/stores/ship';
+import { ShipModelType } from 'os/services/ship/models/ship';
 import { SpaceRowStyle } from './SpaceRow';
+import { useServices } from 'renderer/logic/store';
 
 type SpaceRowProps = {
+  colorTheme: string;
   ship: ShipModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;
 };
 
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
-  const { selected, onSelect } = props;
-  const { ship } = useShip();
-  const { themeStore } = useMst();
+  const { selected, colorTheme, onSelect } = props;
+  const { ship, shell } = useServices();
+  const { theme } = shell.desktop;
   const currentShip = ship!;
-  const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
+  const currentTheme = useMemo(() => theme, [theme]);
+
   return (
     <SpaceRowStyle
       data-close-tray="true"
       style={{ width: '100%' }}
       className="realm-cursor-hover"
       selected={selected}
-      customBg={theme.dockColor}
+      customBg={colorTheme}
       onClick={() => {
         onSelect(ship!.patp);
       }}
@@ -44,6 +46,7 @@ export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
               flexDirection: 'row',
               justifyContent: 'space-between',
             }}
+            color={currentTheme.textColor}
             fontSize={3}
             fontWeight={500}
             variant="body"

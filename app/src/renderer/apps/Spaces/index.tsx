@@ -2,12 +2,13 @@ import { FC, useMemo, useState } from 'react';
 import { toJS } from 'mobx';
 import { rgba, lighten, darken } from 'polished';
 
-import { useSpaces, useShip, useMst } from 'renderer/logic/store';
-
 import { Grid, Flex, IconButton, Icons, Text } from 'renderer/components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type SpacesProps = {
   theme: any;
@@ -18,21 +19,30 @@ type SpacesProps = {
 };
 
 export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
-  const { ship } = useShip();
-  const { themeStore } = useMst();
-  const spacesStore = useSpaces();
+  const { ship, shell, spaces } = useServices();
+  const { desktop } = shell;
 
   const { dimensions } = props;
 
-  const spaceTheme = useMemo(() => themeStore.theme, [themeStore.theme]);
-  const { backgroundColor, textColor, dockColor, iconColor } = spaceTheme;
-  // console.log(toJS(spacesStore.spacesList));
-  // const iconColor = darken(0.5, textColor);
+  const spaceTheme = useMemo(() => desktop.theme, [desktop.theme]);
+  const { dockColor, iconColor, textColor, windowColor } = spaceTheme;
+
   const bottomHeight = 58;
+
+  const [coords, setCoords] = useState<{
+    left: number;
+    bottom: number;
+  }>({ left: 0, bottom: 48 });
+
+  const [isVisible, setIsVisible] = useState(true);
 
   return (
     <Grid.Column
-      style={{ position: 'relative', height: dimensions.height }}
+      style={{
+        position: 'relative',
+        height: dimensions.height,
+        background: windowColor,
+      }}
       expand
       noGutter
       overflowY="hidden"
@@ -55,6 +65,7 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
       >
         <Text
           opacity={0.8}
+          color={textColor}
           style={{ textTransform: 'uppercase' }}
           fontWeight={600}
         >
@@ -66,8 +77,12 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
           customBg={dockColor}
           size={28}
           color={iconColor}
+          data-close-tray="true"
+          onClick={(evt: any) => {
+            DesktopActions.openDialog('create-spaces-1');
+          }}
         >
-          <Icons name="Plus" />
+          <Icons name="Plus" opacity={0.7} />
         </IconButton>
       </Grid.Row>
       <Flex
@@ -77,9 +92,9 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         overflowY="hidden"
       >
         <SpacesList
-          selected={spacesStore.selected}
-          spaces={spacesStore.spacesList}
-          onSelect={spacesStore.selectSpace}
+          selected={spaces.selected!}
+          spaces={spaces.spacesList}
+          onSelect={(path: string) => SpacesActions.selectSpace(path)}
         />
       </Flex>
       <Grid.Row expand noGutter></Grid.Row>
@@ -95,9 +110,10 @@ export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
         height={bottomHeight}
       >
         <YouRow
-          selected={ship?.patp === spacesStore.selected?.id}
+          colorTheme={windowColor}
+          selected={ship?.patp === spaces.selected?.path}
           ship={ship!}
-          onSelect={spacesStore.selectSpace}
+          onSelect={(path: string) => SpacesActions.selectSpace(path)}
         />
       </Flex>
     </Grid.Column>

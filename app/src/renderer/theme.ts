@@ -107,7 +107,7 @@ export const theme = {
         secondary: '#EF9134',
         neutral: '#F3F3F3',
         accent: '#DB7C00',
-        muted: rgba('#4E9EFD', 0.2),
+        muted: rgba('#4E9EFD', 0.1),
       },
       ui: {
         primary: '#262626',
@@ -140,10 +140,11 @@ export const theme = {
         primary: '#FBFBFB',
         secondary: '#FFFFFF',
         tertiary: '#f1f1f2',
-        blendedBg: rgba('#FFFFFF', 0.4),
-        inset: '#f6f8fa',
+        blendedBg: rgba('#FFFFFF', 0.5),
+        inset: '#F5F5F5',
         toolbar: '#F1F3F4',
         divider: '#DBDBDB',
+        body: '#DBDBDB',
       },
       icon: {
         app: '#85898E',
@@ -161,8 +162,6 @@ export const theme = {
         error: '#D0421B',
         success: '#138000',
       },
-      // primaryHighlight: rgba('#4E9EFD', 0.05),
-      // primaryExtraHighlight: rgba('#4E9EFD', 0.1),
       highlights: {
         primaryHighlight: darken(0.05, '#4E9EFD'),
         primaryExtraHighlight: darken(0.1, '#4E9EFD'),
@@ -226,13 +225,13 @@ export const theme = {
         secondary: '#2A3843',
         tertiary: '#212E37',
         blendedBg: rgba('#2A3843', 0.4),
-
         inset: '#1c2128',
         toolbar: '#1D2932',
         divider: '#09151E',
+        body: '#1D2932',
       },
       icon: {
-        app: '#A2A8AC90',
+        app: '#FFFFFF50',
         toolbar: '#A2A8AC',
       },
       text: {

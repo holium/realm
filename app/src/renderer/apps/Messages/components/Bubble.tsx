@@ -18,7 +18,7 @@ type BubbleProps = {
   ColorProps;
 
 export const Bubble = styled(motion.div)<BubbleProps>`
-  max-width: calc(100% - 40px);
+  max-width: calc(100% - 10px);
   box-sizing: none;
   background: ${(props: BubbleProps) =>
     props.customBg || props.theme.colors.bg.blendedBg};

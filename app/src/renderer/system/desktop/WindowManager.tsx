@@ -1,12 +1,11 @@
 import { FC, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-
-import { useMst } from 'renderer/logic/store';
 import AppWindow from './components/AppWindow';
 import { ContextMenu } from 'renderer/components';
-import { toggleDevTools } from 'renderer/logic/desktop/api';
 import { rgba } from 'polished';
+import { useServices } from 'renderer/logic/store';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -15,17 +14,20 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    const { desktopStore, themeStore } = useMst();
+    // const { desktop, theme } = useMst();
+    const { shell } = useServices();
+    const { desktop, theme } = shell;
     const desktopRef = useRef<any>(null);
 
     useEffect(() => {
       const dims = desktopRef.current?.getBoundingClientRect();
-      desktopStore.setDesktopDimensions(dims.width, dims.height);
+      DesktopActions.setDesktopDimensions(dims.width, dims.height);
     }, [desktopRef.current]);
 
     const managerType = 'classic';
-    const hasOpenWindows = desktopStore.windows.size > 0;
-    const windows = Array.from(desktopStore.windows.values());
+    const hasOpenWindows = desktop.windows.size > 0;
+
+    const windows = Array.from(desktop.windows.values());
 
     return (
       <motion.div
@@ -43,23 +45,22 @@ export const WindowManager: FC<WindowManagerProps> = observer(
           top: 0,
           right: 0,
           height: `calc(100vh - ${0}px)`,
-          paddingTop: desktopStore.isFullscreen ? 0 : 30,
+          paddingTop: desktop.isFullscreen ? 0 : 30,
         }}
       >
         <ContextMenu
           isComponentContext={false}
-          textColor={themeStore.theme.textColor}
-          customBg={rgba(themeStore.theme.windowColor, 0.9)}
+          textColor={desktop.theme.textColor}
+          customBg={rgba(desktop.theme.windowColor, 0.9)}
           containerId="desktop-fill"
           parentRef={desktopRef}
           style={{ minWidth: 180 }}
           menu={[
             {
               label: 'Change wallpaper',
-              disabled: true,
               onClick: (evt: any) => {
-                evt.stopPropagation();
-                console.log('changing wallpaper');
+                DesktopActions.setBlur(true);
+                DesktopActions.openDialog('wallpaper-dialog');
               },
             },
             {
@@ -73,9 +74,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
             {
               label: 'Toggle devtools',
               onClick: (evt: any) => {
-                toggleDevTools();
-                // window.openDevTools();
-                // console.log('open app info');
+                DesktopActions.toggleDevTools();
               },
             },
           ]}
@@ -87,7 +86,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
               desktopRef={desktopRef}
               key={key}
               window={window}
-              theme={themeStore.theme}
+              theme={desktop.theme}
             />
           );
         })}

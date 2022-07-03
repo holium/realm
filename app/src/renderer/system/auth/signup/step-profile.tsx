@@ -4,7 +4,6 @@ import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { useAuth } from 'renderer/logic/store';
 import { TwitterPicker, SwatchesPicker } from 'react-color';
 
 import {
@@ -22,6 +21,8 @@ import {
   Spinner,
 } from '../../../components';
 import { observer, Observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store';
+import { SignupActions } from 'renderer/logic/actions/signup';
 interface ColorTileProps {
   tileColor: string;
 }
@@ -109,15 +110,14 @@ type ProfileSetupProps = {
 
 export const ProfileSetup: FC<ProfileSetupProps> = observer(
   (props: ProfileSetupProps) => {
-    const { signupStore } = useAuth();
+    const { identity } = useServices();
+    const { signup } = identity;
     const colorPickerRef = useRef(null);
     const { next } = props;
-    const shipName = signupStore.signupShip!.patp;
+    const shipName = signup.signupShip!.patp;
 
-    const [color, setColor] = useState(
-      signupStore.signupShip!.color || '#000000'
-    );
-    // const [avatarEl, setAvatar] = useState(signupStore.signupShip!.avatar || '');
+    const [color, setColor] = useState(signup.signupShip!.color || '#000000');
+    // const [avatarEl, setAvatar] = useState(signup.signupShip!.avatar || '');
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
     const handleClickOutside = (event: any) => {
@@ -139,16 +139,16 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
 
     useEffect(() => {
       document.addEventListener('click', handleClickOutside, true);
-      sigilColor.actions.onChange(signupStore.signupShip!.color || '#000000');
+      sigilColor.actions.onChange(signup.signupShip!.color || '#000000');
       () => {
         document.removeEventListener('click', handleClickOutside, true);
       };
     }, []);
 
     const shipInfo = {
-      nickname: signupStore.signupShip!.nickname,
+      nickname: signup.signupShip!.nickname,
       sigilColor: color,
-      avatar: signupStore.signupShip!.avatar || '',
+      avatar: signup.signupShip!.avatar || '',
     };
 
     const { profileForm, nickname, avatar, sigilColor } = useMemo(
@@ -369,12 +369,11 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
               onClick={(evt: any) => {
                 if (profileForm.computed.isDirty) {
                   const formData = profileForm.actions.submit();
-                  signupStore
-                    .saveProfile({
-                      color: formData['sigil-color'],
-                      nickname: formData['nickname'],
-                      avatar: formData['avatar'],
-                    })
+                  SignupActions.saveProfile(shipName, {
+                    color: formData['sigil-color'],
+                    nickname: formData['nickname'],
+                    avatar: formData['avatar'],
+                  })
                     .then((value: any) => {
                       next();
                       evt.target.blur();
@@ -388,7 +387,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                 }
               }}
             >
-              {signupStore.isLoading ? (
+              {signup.isLoading ? (
                 <Spinner size={0} />
               ) : shouldSave ? (
                 'Save'

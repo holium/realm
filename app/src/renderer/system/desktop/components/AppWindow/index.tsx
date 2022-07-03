@@ -1,13 +1,15 @@
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState, useCallback, useEffect } from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
-import { WindowThemeType } from 'renderer/logic/stores/config';
-import { WindowModelType } from 'renderer/logic/desktop/store';
-import { useMst } from 'renderer/logic/store';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import {
+  WindowModelProps,
+  WindowModelType,
+} from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
 import { WebView } from './WebView';
@@ -16,7 +18,14 @@ import { Flex } from 'renderer/components';
 import { toJS } from 'mobx';
 import { NativeView } from './NativeView';
 import { nativeApps } from 'renderer/apps';
+import { nativeRenderers } from 'renderer/apps/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
+import { useServices } from 'renderer/logic/store';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { DialogView } from '../Dialog/Dialog';
+import { CreateSpaceModal } from 'renderer/apps/Spaces/Workflow/CreateSpaceModal';
+import { DialogTitlebar, DialogTitlebarProps } from '../Dialog/DialogTitlebar';
+import { dialogRenderers } from 'renderer/apps/dialog';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -32,13 +41,14 @@ export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
     ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
 `)<AppWindowStyleProps>({
   // @ts-expect-error annoying
-  backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? darken(0.002, props.customBg!) : 'initial',
+  // backgroundColor: (props: SystemBarStyleProps) =>
+  //   props.customBg ? darken(0.002, props.customBg!) : 'initial',
+  backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
 });
 
 type AppWindowProps = {
-  theme: Partial<WindowThemeType>;
-  window: WindowModelType;
+  theme: Partial<ThemeModelType>;
+  window: WindowModelProps;
   hideTitlebar?: boolean;
   children?: React.ReactNode;
   desktopRef: any;
@@ -48,7 +58,9 @@ export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
     const { theme, window, desktopRef } = props;
     const { textColor, windowColor } = theme;
-    const { desktopStore } = useMst();
+    const { shell } = useServices();
+    const { desktop } = shell;
+
     const [unmaximize, setUnmaximize] = useState<
       | {
           x: number;
@@ -58,6 +70,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         }
       | undefined
     >();
+
     const dragControls = useDragControls();
     const [isResizing, setIsResizing] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -98,7 +111,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           height: mHeight.get(),
           width: mWidth.get(),
         });
-        const offset = desktopStore.isFullscreen ? 0 : 30;
+        const offset = desktop.isFullscreen ? 0 : 30;
         // @ts-ignore
         const desktopDims = desktopRef.current!.getBoundingClientRect();
         mX.set(0);
@@ -113,18 +126,18 @@ export const AppWindow: FC<AppWindowProps> = observer(
         setUnmaximize(undefined);
       }
       activeWindow &&
-        desktopStore.setDimensions(activeWindow.id, {
+        DesktopActions.setAppDimensions(activeWindow.id, {
           x: mX.get(),
           y: mY.get(),
           height: mHeight.get(),
           width: mWidth.get(),
         });
-    }, [desktopStore.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
+    }, [desktop.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
 
     const onDragStop = () => {
       setIsDragging(false);
       activeWindow &&
-        desktopStore.setDimensions(activeWindow.id, {
+        DesktopActions.setAppDimensions(activeWindow.id, {
           x: mX.get(),
           y: mY.get(),
           height: mHeight.get(),
@@ -137,14 +150,14 @@ export const AppWindow: FC<AppWindowProps> = observer(
     };
 
     const onClose = () => {
-      desktopStore.activeWindow
-        ? desktopStore.closeBrowserWindow(desktopStore.activeWindow?.id)
+      desktop.activeWindow
+        ? DesktopActions.closeAppWindow('', toJS(desktop.activeWindow))
         : {};
     };
 
-    let webviewId = `${desktopStore.activeWindow?.id}-urbit-webview`;
+    let webviewId = `${desktop.activeWindow?.id}-urbit-webview`;
     if (window.type === 'web') {
-      webviewId = `${desktopStore.activeWindow?.id}-web-webview`;
+      webviewId = `${desktop.activeWindow?.id}-web-webview`;
     }
 
     const onDevTools = () => {
@@ -155,21 +168,119 @@ export const AppWindow: FC<AppWindowProps> = observer(
     };
 
     const onMouseDown = () => {
-      desktopStore.setActive(window.id);
+      DesktopActions.setActive('', window.id);
     };
 
     const windowId = `app-window-${activeWindow?.id}`;
     let hideTitlebarBorder = false;
     let noTitlebar = false;
-    let CustomTitlebar: React.FC<BrowserToolbarProps> | undefined = undefined; // todo fix typings
+    let CustomTitlebar:
+      | React.FC<BrowserToolbarProps>
+      | React.FC<DialogTitlebarProps>
+      | undefined = undefined; // todo fix typings
     let showDevToolsToggle = true;
     let preventClickEvents = true;
+    let maximizeButton = true;
+    let borderRadius = 12;
+    let titlebar = (
+      <Titlebar
+        isAppWindow
+        maximizeButton={maximizeButton}
+        closeButton
+        noTitlebar={noTitlebar}
+        hasBorder={!hideTitlebarBorder}
+        showDevToolsToggle={showDevToolsToggle}
+        // shareable
+        dragControls={dragControls}
+        onDevTools={onDevTools}
+        onDragStart={() => onDragStart()}
+        onDragStop={() => onDragStop()}
+        onClose={() => onClose()}
+        onMaximize={() => maximize()}
+        theme={theme}
+        // theme={{
+        //   ...theme,
+        //   windowColor: darken(0.002, theme.windowColor!),
+        // }}
+        app={window}
+      />
+    );
     if (window.type === 'native') {
       hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
       noTitlebar = nativeApps[window.id].native!.noTitlebar!;
-      CustomTitlebar = nativeApps[window.id].native!.titlebar!;
+      CustomTitlebar = nativeRenderers[window.id].titlebar!;
       showDevToolsToggle = false;
       preventClickEvents = false;
+      if (CustomTitlebar) {
+        titlebar = (
+          <CustomTitlebar
+            zIndex={window.zIndex}
+            windowColor={darken(0.002, theme.windowColor!)}
+            showDevToolsToggle
+            dragControls={dragControls}
+            onDragStart={() => onDragStart()}
+            onDragStop={() => onDragStop()}
+            onClose={() => onClose()}
+            onMaximize={() => maximize()}
+          />
+        );
+      } else {
+        titlebar = (
+          <Titlebar
+            isAppWindow
+            maximizeButton={maximizeButton}
+            closeButton
+            noTitlebar={noTitlebar}
+            hasBorder={!hideTitlebarBorder}
+            showDevToolsToggle={showDevToolsToggle}
+            // shareable
+            dragControls={dragControls}
+            onDevTools={onDevTools}
+            onDragStart={() => onDragStart()}
+            onDragStop={() => onDragStop()}
+            onClose={() => onClose()}
+            onMaximize={() => maximize()}
+            theme={theme}
+            // theme={{
+            //   ...theme,
+            //   windowColor: darken(0.002, theme.windowColor!),
+            // }}
+            app={window}
+          />
+        );
+      }
+    }
+    if (window.type === 'dialog') {
+      hideTitlebarBorder = true;
+      noTitlebar = dialogRenderers[window.id].noTitlebar!;
+      CustomTitlebar = DialogTitlebar;
+      showDevToolsToggle = false;
+      preventClickEvents = false;
+      maximizeButton = false;
+      borderRadius = 16;
+      const onCloseDialog = dialogRenderers[window.id].onClose;
+      const onOpenDialog = dialogRenderers[window.id].onOpen;
+      useEffect(() => {
+        console.log('opening dialog');
+        // trigger onOpen only once
+        onOpenDialog && onOpenDialog();
+      }, []);
+      if (noTitlebar) {
+        titlebar = <div />;
+      } else {
+        titlebar = (
+          <CustomTitlebar
+            zIndex={window.zIndex}
+            windowColor={darken(0.002, theme.windowColor!)}
+            showDevToolsToggle
+            dragControls={dragControls}
+            onDragStart={() => onDragStart()}
+            onDragStop={() => onDragStop()}
+            onClose={onCloseDialog}
+            onMaximize={() => maximize()}
+          />
+        );
+      }
     }
 
     return (
@@ -203,6 +314,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           width: mWidth,
           height: mHeight,
           zIndex: window.zIndex,
+          borderRadius,
         }}
         color={textColor}
         customBg={windowColor}
@@ -212,45 +324,12 @@ export const AppWindow: FC<AppWindowProps> = observer(
           flexDirection="column"
           style={{
             overflow: 'hidden',
-            borderRadius: 9,
+            borderRadius,
             height: 'inherit',
             width: 'inherit',
           }}
         >
-          {(typeof CustomTitlebar !== 'undefined' && (
-            <CustomTitlebar
-              zIndex={window.zIndex}
-              windowColor={darken(0.002, theme.windowColor!)}
-              showDevToolsToggle
-              dragControls={dragControls}
-              onDragStart={() => onDragStart()}
-              onDragStop={() => onDragStop()}
-              onClose={() => onClose()}
-              onMaximize={() => maximize()}
-            />
-          )) || (
-            <Titlebar
-              isAppWindow
-              maximizeButton
-              closeButton
-              noTitlebar={noTitlebar}
-              hasBorder={!hideTitlebarBorder}
-              showDevToolsToggle={showDevToolsToggle}
-              // shareable
-              dragControls={dragControls}
-              onDevTools={onDevTools}
-              onDragStart={() => onDragStart()}
-              onDragStop={() => onDragStop()}
-              onClose={() => onClose()}
-              onMaximize={() => maximize()}
-              theme={{
-                ...theme,
-                windowColor: darken(0.002, theme.windowColor!),
-              }}
-              app={window}
-            />
-          )}
-
+          {titlebar}
           <WindowType
             hasTitlebar
             isResizing={isResizing}
@@ -273,7 +352,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
               onPointerUp={() => {
                 setIsResizing(false);
                 activeWindow &&
-                  desktopStore.setDimensions(activeWindow.id, {
+                  DesktopActions.setAppDimensions(activeWindow.id, {
                     x: mX.get(),
                     y: mY.get(),
                     height: mHeight.get(),
@@ -301,7 +380,7 @@ type WindowTypeProps = {
   hasTitlebar: boolean;
   isResizing: boolean;
   isDragging: boolean;
-  window: WindowModelType;
+  window: WindowModelProps;
 };
 
 export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
@@ -332,6 +411,8 @@ export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
           window={window}
         />
       );
+    case 'dialog':
+      return <DialogView window={window} />;
     default:
       return <div>No view</div>;
   }

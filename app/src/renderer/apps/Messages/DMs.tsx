@@ -11,14 +11,14 @@ import {
   IconButton,
 } from 'renderer/components';
 import { ContactRow } from './components/ContactRow';
-import { useShip } from 'renderer/logic/store';
 import { toJS } from 'mobx';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { darken, lighten, rgba } from 'polished';
+import { useServices } from 'renderer/logic/store';
 
 type IProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onSelectDm: (dm: any) => void;
@@ -27,12 +27,9 @@ type IProps = {
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
-  const { ship } = useShip();
-  const { backgroundColor, textColor, iconColor, dockColor } = theme;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
+  const { ship } = useServices();
+  const { inputColor, textColor, iconColor, dockColor, windowColor, mode } =
+    theme;
 
   const chat = ship!.chat;
   return (
@@ -43,10 +40,13 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       overflowY="hidden"
     >
       <Titlebar
-        hasBorder
+        hasBlur
+        hasBorder={false}
         zIndex={5}
         theme={{
           ...props.theme,
+          // windowColor: rgba(lighten(0.125, windowColor), 0.8),
+          // windowColor: rgba(windowColor, 0.8),
           windowColor,
         }}
       >
@@ -68,11 +68,9 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             wrapperStyle={{
               cursor: 'none',
               borderRadius: 9,
-              backgroundColor: darken(0.05, windowColor),
-              '&:hover': {
-                borderColor: backgroundColor,
-              },
-              borderColor: rgba(backgroundColor, 0.7),
+              backgroundColor: inputColor,
+
+              // borderColor: rgba(backgroundColor, 0.7),
             }}
           />
         </Flex>
@@ -104,6 +102,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           gap={2}
           mt={1}
           mb={3}
+          pb={4}
           noGutter
           expand
           height={height}
@@ -116,6 +115,32 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
+              {chat!.list.length === 0 && (
+                <Flex
+                  flex={1}
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  gap={24}
+                >
+                  {/* <Text
+                    color={textColor}
+                    width={200}
+                    textAlign="center"
+                    opacity={0.6}
+                  >
+                    No DMs
+                  </Text> */}
+                  <Text
+                    color={textColor}
+                    width={200}
+                    textAlign="center"
+                    opacity={0.3}
+                  >
+                    No Direct Messages. Click the <b>+</b> to start.
+                  </Text>
+                </Flex>
+              )}
               {chat!.list.map((dm: any) => (
                 <Box ml={1} mr={1} display="block" key={dm.contact}>
                   <ContactRow

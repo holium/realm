@@ -1,13 +1,13 @@
 import { FC, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, lighten } from 'polished';
+import { rgba, darken, lighten } from 'polished';
 import styled, { css } from 'styled-components';
-import { useShip, useMst } from 'renderer/logic/store';
 import { Flex, Icons, Text } from 'renderer/components';
-import { SpaceModelType } from 'renderer/logic/space/store';
+import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
+import { useServices } from 'renderer/logic/store';
 
-const EmptyGroup = styled.div`
+export const EmptyGroup = styled.div`
   height: 32px;
   width: 32px;
   background: ${(p) => p.color || '#000'};
@@ -31,13 +31,13 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
   ${(props: RowProps) =>
     props.selected
       ? css`
-          background-color: ${lighten(0.05, props.customBg)};
+          background-color: ${darken(0.025, props.customBg)};
         `
       : css`
           &:hover {
             transition: ${(props: RowProps) => props.theme.transition};
             background-color: ${props.customBg
-              ? rgba(lighten(0.1, props.customBg), 0.4)
+              ? darken(0.025, props.customBg)
               : 'inherit'};
           }
         `}
@@ -51,17 +51,18 @@ type SpaceRowProps = {
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { themeStore } = useMst();
+  const { shell } = useServices();
+  const { theme } = shell.desktop;
 
-  const theme = useMemo(() => themeStore.theme, [themeStore.theme]);
+  const currentTheme = useMemo(() => theme, [theme]);
   return (
     <SpaceRowStyle
       data-close-tray="true"
       selected={selected}
       className="realm-cursor-hover"
-      customBg={theme.dockColor}
+      customBg={currentTheme.dockColor}
       onClick={() => {
-        onSelect(space.id);
+        onSelect(space.path);
       }}
     >
       <Flex style={{ pointerEvents: 'none' }} alignItems="center">
@@ -73,7 +74,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
             src={space.picture}
           />
         ) : (
-          <EmptyGroup color={space.color} />
+          <EmptyGroup color={space.color! || '#000000'} />
         )}
         <Flex ml={2} flexDirection="column">
           <Text
@@ -83,6 +84,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
               justifyContent: 'space-between',
             }}
             fontSize={3}
+            color={currentTheme.textColor}
             fontWeight={500}
             variant="body"
           >
@@ -92,7 +94,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
             {/* <Icons.ExpandMore ml="6px" /> */}
           </Text>
           <Flex flexDirection="row" gap={12}>
-            <Flex gap={4} flexDirection="row" alignItems="center">
+            {/* <Flex gap={4} flexDirection="row" alignItems="center">
               <Icons name="Members" size={16} opacity={0.6} />
               {space.members && (
                 <Text
@@ -105,12 +107,13 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
                   {space.members.count} members
                 </Text>
               )}
-            </Flex>
+            </Flex> */}
             {space.token && (
               <Flex gap={4} flexDirection="row" alignItems="center">
                 <Icons name="Coins" size={16} opacity={0.6} />
                 <Text
                   fontWeight={400}
+                  color={currentTheme.textColor}
                   mt="1px"
                   mr={1}
                   opacity={0.6}

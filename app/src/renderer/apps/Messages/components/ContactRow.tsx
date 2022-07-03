@@ -1,16 +1,16 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { useShip } from 'renderer/logic/store';
 import { rgba, lighten, darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 import { Sigil, Flex, Box, Text, TextButton } from 'renderer/components';
-import { ChatType } from 'renderer/logic/ship/chat/store';
+import { ChatType } from 'os/services/ship/models/dms';
 import { Message } from './Message';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { DmActions } from 'renderer/logic/actions/chat';
 
 type DMContact = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   dm: ChatType;
   onClick: (evt: any) => void;
 };
@@ -37,7 +37,7 @@ export const Row = styled(motion.div)<RowProps>`
       &:hover {
         transition: ${props.theme.transition};
         background-color: ${props.customBg
-          ? lighten(0.02, props.customBg)
+          ? darken(0.025, props.customBg)
           : 'initial'};
       }
     `}
@@ -59,14 +59,14 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
   if (dm.pending) {
     const onAccept = (evt: any) => {
       evt.stopPropagation();
-      dm.acceptDm().then((response: any) => {
+      DmActions.acceptDm(dm.contact).then((response: any) => {
         console.log('accept ContactRow response', response);
       });
       console.log('accepting');
     };
     const onDecline = (evt: any) => {
       evt.stopPropagation();
-      dm.declineDm().then((response: any) => {
+      DmActions.declineDm(dm.contact).then((response: any) => {
         console.log('response', response);
       });
       console.log('rejecting');
@@ -101,6 +101,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     const type = Object.keys(lastMessage)[0];
     subTitle = <Message preview type={type} content={lastMessage} />;
   }
+
   return (
     <Row
       pending={dm.pending}

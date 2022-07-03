@@ -35,14 +35,13 @@ export type StyleProps = SpaceProps &
 
 // TODO make variants
 export const MenuItemStyle: any = styled(styled.li`
-  height: 32px;
   display: flex;
   align-items: flex-start;
   background: inherit;
   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
   -moz-box-sizing: border-box; /* Firefox, other Gecko */
   box-sizing: border-box; /* Opera/IE 8+ */
-  padding: 12px;
+  padding: 8px;
   /* margin: 0px 4px; */
   border-radius: ${(props) => props.theme.containers.outerBorderRadius}px;
   /* color: ${(props: StyleProps) =>

@@ -20,11 +20,13 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   transform: translateZ(0);
   width: 270px;
   box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};
-  border: 1px solid ${(props: MiniAppStyleProps) => rgba(props.customBg!, 0.7)};
+  border: 1px solid
+    ${(props: MiniAppStyleProps) => darken(0.1, props.customBg!)};
+  /* border: 1px solid ${(props: MiniAppStyleProps) =>
+    rgba(props.customBg!, 0.7)}; */
 `)<MiniAppStyleProps>({
   // @ts-expect-error annoying
-  backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? darken(0.025, props.customBg!) : 'initial',
+  backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
 });
 
 type MiniAppProps = {

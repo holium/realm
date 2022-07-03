@@ -1,0 +1,194 @@
+import { ipcMain, ipcRenderer } from 'electron';
+import Store from 'electron-store';
+import {
+  onPatch,
+  onSnapshot,
+  getSnapshot,
+  castToSnapshot,
+  clone,
+  applyAction,
+  cast,
+} from 'mobx-state-tree';
+
+import Realm from '../..';
+import { BaseService } from '../base.service';
+import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
+import { MSTAction } from '../../types';
+import axios from 'axios';
+import { ContactApi } from '../../api/contacts';
+
+/**
+ * AuthService
+ */
+export class AuthService extends BaseService {
+  private db: Store<AuthStoreType>;
+  private state: AuthStoreType;
+
+  handlers = {
+    'realm.auth.add-ship': this.addShip,
+    'realm.auth.get-ships': this.getShips,
+    'realm.auth.set-selected': this.setSelected,
+    'realm.auth.set-order': this.setOrder,
+    'realm.auth.login': this.login,
+    'realm.auth.logout': this.logout,
+    'realm.auth.remove-ship': this.removeShip,
+  };
+
+  static preload = {
+    login: (ship: string, password: string) =>
+      ipcRenderer.invoke('realm.auth.login', ship, password),
+    logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
+    setSelected: (ship: string) =>
+      ipcRenderer.invoke('realm.auth.set-selected', ship),
+    setOrder: (order: any[]) =>
+      ipcRenderer.invoke('realm.auth.set-order', order),
+    addShip: (newShip: { ship: string; url: string; code: string }) =>
+      ipcRenderer.invoke('realm.auth.add-ship', newShip),
+    getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
+    removeShip: (ship: string) =>
+      ipcRenderer.invoke('realm.auth.remove-ship', ship),
+    onLogin: (callback: any) =>
+      ipcRenderer.on('realm.auth.on-log-in', callback),
+    onLogout: (callback: any) =>
+      ipcRenderer.on('realm.auth.on-log-out', callback),
+  };
+
+  constructor(core: Realm, options: any = {}) {
+    super(core, options);
+    this.db = new Store({
+      name: 'realm.auth',
+      accessPropertiesByDotNotation: true,
+      defaults: AuthStore.create({ firstTime: true }),
+    });
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-ignore
+      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
+    let persistedState: AuthStoreType = this.db.store;
+    this.state = AuthStore.create(castToSnapshot(persistedState));
+
+    onSnapshot(this.state, (snapshot) => {
+      this.db.store = castToSnapshot(snapshot);
+    });
+
+    onPatch(this.state, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'auth',
+        key: null,
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
+  }
+
+  get snapshot() {
+    return getSnapshot(this.state);
+  }
+
+  setLoader(state: 'initial' | 'loading' | 'error' | 'loaded') {
+    this.state.setLoader(state);
+  }
+
+  getCredentials(ship: string, password: string) {
+    // const path: string = `auth${ship}`;
+    const authShip = this.state.ships.get(`auth${ship}`)!;
+    let url = authShip.url;
+    let cookie = authShip.cookie || '';
+    return { url, cookie };
+  }
+
+  getShip(ship: string): AuthShipType {
+    return this.db.get(`ships.auth${ship}`);
+  }
+
+  // set loader(state: 'initial' | 'loading' | 'error' | 'loaded') {
+  //   this.state.loader.set(state);
+  // }
+
+  login(_event: any, ship: string, password: string) {
+    this.state.login(`auth${ship}`);
+    this.core.services.shell.setMouseColor(null, this.state.selected?.color!);
+
+    // TODO decrypt stored snapshot
+    const { url, cookie } = this.getCredentials(ship, password);
+    this.core.setSession({
+      ship,
+      url,
+      cookie,
+    });
+  }
+
+  logout(_event: any, ship: string) {
+    // this.core.services.shell.resetMouseColor(null);
+
+    this.core.clearSession();
+    this.core.services.ship.logout();
+  }
+
+  storeNewShip(ship: AuthShipType) {
+    const newShip = AuthShip.create(ship);
+    // const newShip = this.state.ships.get(ship.id)!;
+    this.state.setShip(newShip);
+    newShip.setStatus('completed');
+    this.state.completeSignup(newShip.id);
+    return newShip;
+  }
+
+  async setSelected(_event: any, ship: string): Promise<void> {
+    const selectedShip = this.state.ships.get(`auth${ship}`);
+    this.state.setSelected(selectedShip!);
+  }
+
+  async setOrder(_event: any, order: any[]): Promise<void> {
+    this.state.setOrder(order);
+  }
+
+  async addShip(
+    _event: any,
+    newShip: { ship: string; url: string; code: string }
+  ) {
+    const { ship, url, code } = newShip;
+    const response = await axios.post(
+      `${url}/~/login`,
+      `password=${code.trim()}`,
+      {
+        withCredentials: true,
+      }
+    );
+
+    const cookie = response.headers['set-cookie']![0];
+    const id = `auth${ship}`;
+
+    const parts = new RegExp(/(urbauth-~[\w-]+)=(.*); Path=\/;/).exec(
+      cookie!.toString()
+    )!;
+
+    const newAuthShip = AuthShip.create({
+      id,
+      url,
+      cookie,
+      patp: ship,
+      wallpaper:
+        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
+    });
+
+    this.db.set(`ships.${id}`, getSnapshot(newAuthShip));
+    this.state.setShip(newAuthShip);
+
+    return {
+      url,
+      cookie,
+      patp: parts[1],
+      value: parts[2],
+    };
+  }
+
+  getShips() {
+    return this.db.get('ships');
+  }
+
+  removeShip(_event: any, ship: string) {
+    this.state.deleteShip(ship);
+  }
+}

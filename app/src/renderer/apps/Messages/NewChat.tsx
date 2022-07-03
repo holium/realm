@@ -13,15 +13,15 @@ import {
   Badge,
   Tag,
 } from 'renderer/components';
-import { useShip } from 'renderer/logic/store';
 import { toJS } from 'mobx';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useServices } from 'renderer/logic/store';
 
 type IProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onBack: () => void;
@@ -30,12 +30,12 @@ type IProps = {
 
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
-  const { ship } = useShip();
-  const { backgroundColor, textColor, iconColor, dockColor } = theme;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
+  const { ship } = useServices();
+  const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
+  // const windowColor = useMemo(
+  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
+  //   [props.theme.windowColor]
+  // );
 
   // const { newChatForm, urbitId } = createNewChatForm();
 
@@ -212,11 +212,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
               marginRight: 8,
               width: 'calc(100% - 16px)',
               borderRadius: 9,
-              backgroundColor: darken(0.05, windowColor),
-              '&:hover': {
-                borderColor: backgroundColor,
-              },
-              borderColor: rgba(backgroundColor, 0.7),
+              backgroundColor: inputColor,
             }}
           />
         </FormControl.Field>

@@ -25,6 +25,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true
   },
-  "include": ["./src"],
+  "include": ["./src/"],
   "exclude": ["test", "release/build", "release/app/dist", ".holium/dll"]
 }

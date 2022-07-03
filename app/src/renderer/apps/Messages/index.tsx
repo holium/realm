@@ -1,13 +1,13 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { WindowThemeType } from 'renderer/logic/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
 
 type ChatProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;

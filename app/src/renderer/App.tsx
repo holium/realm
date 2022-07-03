@@ -2,25 +2,20 @@ import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
+import { useContext, useEffect, useMemo } from 'react';
+import { observer } from 'mobx-react';
 import { theme } from './theme';
 import {
-  AuthProvider,
-  authState,
-  shipState,
-  OSProvider,
-  osState,
-  ShipProvider,
-  useMst,
-  useShip,
-  useSpaces,
+  CoreProvider,
+  useCore,
+  coreStore,
+  ServiceProvider,
+  servicesStore,
+  useServices,
 } from './logic/store';
 
-import * as RealmMultiplayer from '../../../playground/ui/src/lib/realm-multiplayer';
-import { onStart } from './logic/api/realm.core';
-import React, { useContext, useEffect, useMemo } from 'react';
 import { Mouse } from './system/desktop/components/Mouse';
-
-import { observer, Observer } from 'mobx-react';
+import * as RealmMultiplayer from '../../../playground/ui/src/lib/realm-multiplayer';
 import { Presences } from './system/desktop/components/Multiplayer/Presences';
 import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
@@ -30,60 +25,54 @@ import {
 } from './system/desktop/components/Multiplayer/types';
 
 export const App = observer(() => {
-  const { themeStore, desktopStore } = useMst();
-  useEffect(() => {
-    onStart();
-  }, []);
+  const { booted } = useCore();
+  const { shell } = useServices();
+  const { desktop } = shell;
+  // const shipLoaded = ship?.loggedIn;
+  const textTheme = desktop.theme.textTheme;
 
   const shellMemo = useMemo(
-    () => (themeStore.loader.isLoaded ? <Shell /> : <div />),
-    [themeStore.loader.isLoaded]
+    () => (booted ? <Shell /> : <div>Booting...</div>),
+    [booted]
   );
-
-  // const mouseMemo = useMemo(() => {
-  //   return (
-  //     <Mouse
-  //       hide={desktopStore.isMouseInWebview}
-  //       cursorColor={desktopStore.mouseColor}
-  //       animateOut={false}
-  //     />
-  //   );
-  // }, [desktopStore.mouseColor, desktopStore.isMouseInWebview]);
+  const mouseMemo = useMemo(() => {
+    return (
+      <Mouse
+        hide={desktop.isMouseInWebview}
+        cursorColor={desktop.mouseColor}
+        animateOut={false}
+      />
+    );
+  }, [desktop.mouseColor, desktop.isMouseInWebview]);
 
   return (
-    <OSProvider value={osState}>
-      <ThemeProvider theme={theme.light}>
+    <CoreProvider value={coreStore}>
+      <ThemeProvider theme={theme[textTheme]}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}
-          <AuthProvider value={authState}>
-            <ShipProvider value={shipState}>
-              <Mouse
-                hide={desktopStore.isMouseInWebview}
-                cursorColor={desktopStore.mouseColor}
-                animateOut={false}
-              />
-              {shellMemo}
-              <MultiplayerMouse />
-              <div id="portal-root" />
-            </ShipProvider>
-          </AuthProvider>
+
+          <ServiceProvider value={servicesStore}>
+            {mouseMemo}
+            {shellMemo}
+            <MultiplayerMouse />
+            <div id="portal-root" />
+          </ServiceProvider>
         </MotionConfig>
       </ThemeProvider>
-    </OSProvider>
+    </CoreProvider>
   );
 });
 
 function MultiplayerMouse() {
-  const { ship } = useShip();
-  const spacesStore = useSpaces();
+  const { ship, spaces } = useServices();
   if (!ship?.isLoaded) return null;
 
   return (
     <RealmMultiplayer.Provider
       api={api}
       ship={ship}
-      channel={spacesStore.selected?.id}
+      channel={spaces.selected?.path}
     >
       <Cursors />
     </RealmMultiplayer.Provider>
@@ -96,12 +85,12 @@ function Cursors() {
       api: RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
     }>
   );
-  const { desktopStore } = useMst();
+  const { shell } = useServices();
   useEffect(() => {
     api?.send({
       event: CursorEvent.Leave,
     });
-  }, [desktopStore.isMouseInWebview]);
+  }, [shell.desktop.isMouseInWebview]);
   return <Presences />;
 }
 

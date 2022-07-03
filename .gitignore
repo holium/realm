@@ -113,3 +113,8 @@ dist
 
 # Hide urbit repo
 /urbit
+
+.env
+.env.moon1
+.env.moon2
+!.env.local-example

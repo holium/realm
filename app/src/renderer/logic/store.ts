@@ -1,199 +1,239 @@
-// @ts-nocheck
-import { LoaderModel } from './stores/common/loader';
+import { DesktopActions } from './actions/desktop';
+import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
+import { OSActions } from './actions/os';
+
 import {
+  applyPatch,
+  castToSnapshot,
   Instance,
   onSnapshot,
-  types,
-  castToSnapshot,
   applySnapshot,
+  types,
 } from 'mobx-state-tree';
-import { ShipModel, ShipStore } from './ship/store';
-import { ConfigStore, ConfigStoreType } from './stores/config';
-import { AuthStore, AuthStoreType } from './auth/store';
-import { SpaceStore, SpaceStoreType } from './space/store';
-import { SignupStore } from './auth/store';
-import { onStart } from './api/realm.core';
-import { ThemeStore } from './theme/store';
-import { DesktopStore } from './desktop/store';
 
-// type OSStoreType = {
-//   shipStore: ShipStoreType;
-//   configStore: ConfigStoreType;
-//   authStore: AuthStoreType;
-//   spaceStore: SpaceStoreType;
-// };
+import { ThemeStore } from '../../os/services/shell/theme.model';
+import { DesktopStore } from '../../os/services/shell/desktop.model';
+import { SpacesStore } from '../../os/services/spaces/models/spaces';
+import { AuthStore } from '../../os/services/identity/auth.model';
+import { SignupStore } from '../../os/services/identity/signup.model';
+import { ShipModel } from '../../os/services/ship/models/ship';
+import { toJS } from 'mobx';
 
-function loadStoreSnapshot(stateName: string, storeName: string) {
-  const rootState = localStorage.getItem(stateName);
-  if (rootState) {
-    const storeData = JSON.parse(rootState)[storeName];
-    return storeData;
+const loadSnapshot = (serviceKey: string) => {
+  const localStore = localStorage.getItem('servicesStore');
+  if (localStore) return JSON.parse(localStore)[serviceKey];
+  return {};
+};
+
+export const Services = types
+  .model('ServicesStore', {
+    shell: types.model('ShellStore', {
+      // preferenceStore: ConfigStore,
+      theme: ThemeStore,
+      desktop: DesktopStore,
+    }),
+    identity: types.model('identity', {
+      auth: AuthStore,
+      signup: SignupStore,
+    }),
+    ship: types.maybe(ShipModel),
+    spaces: SpacesStore,
+  })
+  .actions((self) => ({
+    setShip(ship: any) {
+      self.ship = ship;
+    },
+    clearShip() {
+      self.ship = undefined;
+    },
+  }));
+
+const shellSnapshot = loadSnapshot('shell');
+
+const services = Services.create({
+  shell: {
+    // preferenceStore: {},
+    theme: {},
+    desktop: (shellSnapshot && shellSnapshot.desktop) || {},
+  },
+  identity: {
+    auth: {
+      loader: { state: 'initial' },
+      firstTime: true,
+    },
+    signup: {
+      loader: { state: 'initial' },
+    },
+  },
+  ship: undefined,
+  spaces: {
+    loader: { state: 'initial' },
+    spaces: undefined,
+  },
+});
+
+export const servicesStore = services;
+
+// -------------------------------
+// Create core context
+// -------------------------------
+export type ServiceInstance = Instance<typeof Services>;
+const ServicesContext = createContext<null | ServiceInstance>(services);
+
+export const ServiceProvider = ServicesContext.Provider;
+export function useServices() {
+  const store = useContext(ServicesContext);
+  if (store === null) {
+    throw new Error('Store cannot be null, please add a context provider');
   }
-  return null;
+  return store;
 }
 
-const OSStore = types.model('OSStore', {
-  configStore: ConfigStore,
-  themeStore: ThemeStore,
-  desktopStore: DesktopStore,
-});
+export const CoreStore = types
+  .model({
+    loader: types.optional(LoaderModel, { state: 'initial' }),
+    started: types.optional(types.boolean, false),
+    booted: types.optional(types.boolean, false),
+    onboarded: types.optional(types.boolean, false),
+    loggedIn: types.optional(types.boolean, false),
+  })
+  .actions((self) => ({
+    setOnboarded() {
+      self.onboarded = true;
+    },
+    start() {
+      self.started = true;
+    },
+    setBooted() {
+      self.booted = true;
+    },
+    setLoggedIn(isLoggedIn: boolean) {
+      self.loggedIn = isLoggedIn;
+    },
+    reset() {
+      self.booted = false;
+    },
+    login() {},
+  }));
 
-const AuthState = types.model('AuthState', {
-  authStore: AuthStore,
-  signupStore: SignupStore,
-});
+export const coreStore = CoreStore.create();
 
-const initialAuthState = AuthState.create({
-  authStore: loadStoreSnapshot('authState', 'authStore') || { firstTime: true },
-  signupStore: loadStoreSnapshot('osState', 'signupStore') || {},
-});
+coreStore.reset(); // need to reset coreStore for proper boot sequence
 
-const initialOSState = OSStore.create({
-  // authStore: loadStoreSnapshot('osState', 'authStore') || {},
-  // signupStore: loadStoreSnapshot('osState', 'signupStore') || {},
-  configStore: loadStoreSnapshot('osState', 'configStore') || {},
-  themeStore: loadStoreSnapshot('osState', 'themeStore') || {
-    wallpaper:
-      'https://images.unsplash.com/photo-1554147090-e1221a04a025?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=4096&q=80',
-  },
-  desktopStore: loadStoreSnapshot('osState', 'desktopStore') || {},
-  // shipStore: loadStoreSnapshot('osState', 'shipStore') || {},
-  // spaceStore: loadStoreSnapshot('osState', 'spaceStore') || { pinned: [] },
-});
+// servicesStore.shell.desktop.setIsBlurred(true);
 
-const initialShipState = ShipStore.create({
-  ship: loadStoreSnapshot('osState', 'shipStore') || undefined,
-});
-
-export const osState = initialOSState;
-export const authState = initialAuthState;
-export const shipState = initialShipState;
-
-const initialSpacesState = SpaceStore.create({
-  loader: { state: 'initial' },
-  spaces: loadStoreSnapshot('spacesState', 'spaces') || {},
-});
-initialSpacesState.load(
-  loadStoreSnapshot('spacesState', 'selected'),
-  osState.themeStore
-);
-
-export const spacesState = initialSpacesState;
-
-window.electron.core.onEffect((_event: any, value: any) => {
-  // console.log(value);
-
-  if (value.response === 'diff') {
-    console.log('got effect data => ', value.json);
+// After boot, set the initial data
+OSActions.onBoot().then((response: any) => {
+  servicesStore.identity.auth.initialSync({
+    key: 'ships',
+    model: response.auth,
+  });
+  servicesStore.identity.signup.initialSync({
+    key: 'ships',
+    model: response.signup,
+  });
+  if (response.ship) {
+    servicesStore.setShip(ShipModel.create(response.ship));
+    coreStore.setLoggedIn(true);
+    DesktopActions.setBlur(false);
   }
+  if (response.spaces) {
+    applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
+  }
+  if (response.shell) {
+    applySnapshot(servicesStore.shell.desktop, response.shell);
+  }
+  if (response.loggedIn) {
+    coreStore.setLoggedIn(true);
+  }
+  coreStore.setBooted();
+});
+
+// -------------------------------
+// Create core context
+// -------------------------------
+export type CoreInstance = Instance<typeof CoreStore>;
+const CoreStateContext = createContext<null | CoreInstance>(coreStore);
+
+export const CoreProvider = CoreStateContext.Provider;
+export function useCore() {
+  const store = useContext(CoreStateContext);
+  if (store === null) {
+    throw new Error('Store cannot be null, please add a context provider');
+  }
+  return store;
+}
+
+// onSnapshot(coreStore, (snapshot) => {
+//   localStorage.setItem('coreStore', JSON.stringify(snapshot));
+// });
+
+onSnapshot(servicesStore, (snapshot) => {
+  localStorage.setItem('servicesStore', JSON.stringify(snapshot));
+});
+
+// Auth events
+window.electron.os.auth.onLogin((_event: any) => {
+  coreStore.setLoggedIn(true);
+  DesktopActions.setBlur(false);
+});
+
+// Auth events
+window.electron.os.auth.onLogout((_event: any) => {
+  coreStore.setLoggedIn(false);
+  servicesStore.clearShip();
+  DesktopActions.setBlur(true);
+});
+
+// Effect events
+window.electron.os.onEffect((_event: any, value: any) => {
+  // if (value.response === 'diff') {
+  //   console.log('got effect data => ', value.json);
+  // }
   if (value.response === 'patch') {
-    if (value.resource === 'ship') {
-      shipState.ship?.syncPatches(value);
-    }
     if (value.resource === 'auth') {
-      authState.authStore.syncPatches(value);
+      applyPatch(servicesStore.identity.auth, value.patch);
+    }
+    if (value.resource === 'signup') {
+      applyPatch(servicesStore.identity.signup, value.patch);
+    }
+    if (value.resource === 'spaces') {
+      console.log('spaces patch', value.patch);
+
+      applyPatch(servicesStore.spaces, value.patch);
+    }
+    if (value.resource === 'ship') {
+      applyPatch(servicesStore.ship, value.patch);
+    }
+    if (value.resource === 'desktop') {
+      console.log('desktop patch', value.patch);
+      applyPatch(servicesStore.shell.desktop, value.patch);
     }
   }
   if (value.response === 'initial') {
+    // console.log('initial', value);
     if (value.resource === 'ship') {
-      shipState.initialSync(value);
+      servicesStore.setShip(ShipModel.create(value.model));
     }
     if (value.resource === 'auth') {
-      authState.authStore.initialSync(value);
+      // authState.authStore.initialSync(value);
     }
     if (value.resource === 'theme') {
-      osState.themeStore.initialSync(value);
+      // osState.theme.initialSync(value);
+    }
+    if (value.resource === 'spaces') {
+      applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
+      // servicesStore.spaces.setInitial(value.model);
+      // spacesState.syncPatches(value);
     }
   }
 });
 
-window.electron.core.onReady((_event: any, data: any) => {
-  // TODO on ready status handling
-  // osStore.spaceStore.getApps();
-  // console.log('logged in a ready', data);
-  // onStart();
-});
-
-window.electron.app.setFullscreen((_event: any, data: any) => {
-  osState.desktopStore.setFullscreen(data);
-});
+// window.electron.app.setFullscreen((_event: any, data: any) => {
+//   // osState.desktop.setFullscreen(data);
+// });
 
 window.electron.app.setAppviewPreload((_event: any, data: any) => {
-  osState.desktopStore.setAppviewPreload(data);
+  servicesStore.shell.desktop.setAppviewPreload(data);
 });
-
-onSnapshot(osState, (snapshot) => {
-  localStorage.setItem('osState', JSON.stringify(snapshot));
-});
-
-onSnapshot(authState, (snapshot) => {
-  localStorage.setItem('authState', JSON.stringify(snapshot));
-});
-
-onSnapshot(shipState, (snapshot) => {
-  localStorage.setItem('shipState', JSON.stringify(snapshot));
-});
-
-onSnapshot(spacesState, (snapshot) => {
-  localStorage.setItem('spacesState', JSON.stringify(snapshot));
-});
-
-// -------------------------------
-// Create OS context
-// -------------------------------
-export type OSInstance = Instance<typeof OSStore>;
-const OSStateContext = createContext<null | OSInstance>(osState);
-
-export const OSProvider = OSStateContext.Provider;
-export function useMst() {
-  const store = useContext(OSStateContext);
-  if (store === null) {
-    throw new Error('Store cannot be null, please add a context provider');
-  }
-  return store;
-}
-// -------------------------------
-// Create auth context
-// -------------------------------
-export type AuthInstance = Instance<typeof AuthState>;
-const AuthStateContext = createContext<null | AuthInstance>(authState);
-
-export const AuthProvider = AuthStateContext.Provider;
-export function useAuth() {
-  const store = useContext(AuthStateContext);
-  if (store === null) {
-    throw new Error('Store cannot be null, please add a context provider');
-  }
-  return store;
-}
-
-// -------------------------------
-// Create ship context
-// -------------------------------
-export type ShipInstance = Instance<typeof ShipStore>;
-const ShipStateContext = createContext<null | ShipInstance>(shipState);
-
-export const ShipProvider = ShipStateContext.Provider;
-export function useShip() {
-  const store = useContext(ShipStateContext);
-  if (store === null) {
-    throw new Error('Store cannot be null, please add a context provider');
-  }
-  return store;
-}
-
-// -------------------------------
-// Create spaces context
-// -------------------------------
-export type SpaceInstance = Instance<typeof SpaceStore>;
-const SpacesStateContext = createContext<null | SpaceInstance>(spacesState);
-
-export const SpaceProvider = SpacesStateContext.Provider;
-export function useSpaces() {
-  const store = useContext(SpacesStateContext);
-  if (store === null) {
-    throw new Error('Store cannot be null, please add a context provider');
-  }
-  return store;
-}
