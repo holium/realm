@@ -106,7 +106,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           noGutter
           expand
           height={height}
-          overflowY="scroll"
+          overflowY="auto"
         >
           {chat.loader.isLoading ? (
             <Flex flex={1} alignItems="center" justifyContent="center">

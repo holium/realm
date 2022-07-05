@@ -21,7 +21,7 @@ const configuration: webpack.Configuration = {
 
   entry: path.join(
     webpackPaths.srcRendererPath,
-    './system/desktop/components/Mouse.tsx'
+    './system/desktop/components/Multiplayer/preload.ts'
   ),
 
   output: {

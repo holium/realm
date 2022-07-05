@@ -16,6 +16,7 @@ export type SigilStyleProps = BorderProps & {
   sigilColor?: string;
   sigilSize?: number;
   borderRadiusOverride?: string;
+  overlayBorder?: string;
   raised?: boolean;
   theme: any;
 };
@@ -32,9 +33,9 @@ export const AvatarWrapper = styled(styled.div`
   position: relative;
   text-align: center;
   vertical-align: middle;
-  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-  -moz-box-sizing: border-box; /* Firefox, other Gecko */
-  box-sizing: border-box; /* Opera/IE 8+ */
+  -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: content-box; /* Firefox, other Gecko */
+  box-sizing: content-box; /* Opera/IE 8+ */
   overflow: visible;
   pointer-events: none;
   img {
@@ -43,6 +44,17 @@ export const AvatarWrapper = styled(styled.div`
     /* pointer-events: ${(props) => (props.clickable ? 'none' : 'inherit')}; */
   }
   transition: ${(props) => props.theme.transition};
+
+  ${(props: SigilStyleProps) =>
+    props.overlayBorder &&
+    css`
+      img {
+        border-width: 3px;
+        border-style: solid;
+        border-color: ${props.overlayBorder};
+        box-sizing: content-box; /* Opera/IE 8+ */
+      }
+    `}
 
   ${(props: SigilStyleProps) =>
     props.clickable &&
@@ -69,9 +81,9 @@ export const SigilStyle = styled(
     position: relative;
     text-align: center;
     vertical-align: middle;
-    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-    -moz-box-sizing: border-box; /* Firefox, other Gecko */
-    box-sizing: border-box; /* Opera/IE 8+ */
+    -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: content-box; /* Firefox, other Gecko */
+    box-sizing: content-box; /* Opera/IE 8+ */
     overflow: visible;
     height: ${(props) => props.sigilSize}px;
     /* width: ${(props) => props.sigilSize}px; */
@@ -88,6 +100,14 @@ export const SigilStyle = styled(
         transition: ${(props) => props.theme.transition};
       }
     }
+
+    ${(props: SigilStyleProps) =>
+      props.overlayBorder &&
+      css`
+        border-width: 3px;
+        border-style: solid;
+        border-color: ${props.overlayBorder};
+      `}
 
     ${(props: SigilStyleProps) =>
       props.clickable &&

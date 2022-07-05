@@ -34,8 +34,10 @@ export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   height: ${(props: TitlebarStyleProps) => (props.isAppWindow ? 30 : 50)}px;
   padding: 0 4px 0
     ${(props: TitlebarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
-  --webkit-transform: translate3d(0, 0, 0);
-  transform: translateZ(0);
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
   will-change: transform;
   ${(props: TitlebarStyleProps) => css`
     background: ${props.customBg};

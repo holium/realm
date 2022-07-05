@@ -23,7 +23,7 @@ export const devApps: {
     icon: '',
     web: {
       openFullscreen: true,
-      url: 'http://localhost:3010/apps/playground/',
+      url: `http://localhost:${process.env.PLAYGROUND_PORT}/apps/playground/`,
       development: true,
     },
   },

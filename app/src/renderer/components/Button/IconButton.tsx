@@ -57,8 +57,10 @@ export const IconButton = styled(styled(motion.button)<IProps>`
   -moz-box-sizing: border-box; /* Firefox, other Gecko */
   box-sizing: border-box; /* Opera/IE 8+ */
   outline: none;
+  transition: ${(props: IProps) => props.theme.transition};
 
   &:active {
+    transition: ${(props: IProps) => props.theme.transition};
     svg {
       fill: ${(props: IProps) => props.theme.colors.brand.primary};
     }
@@ -68,18 +70,20 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     props.hoverReveal
       ? css`
           opacity: 0;
-          transition: ${props.theme.transitionFast};
+          transition: ${props.theme.transition};
           padding: 3px;
           background: transparent;
           &:hover {
+            transition: ${props.theme.transition};
             transform: translateZ(0);
             opacity: 0.5;
             background: ${props.theme.colors.highlights.bgHighlight};
           }
         `
       : css`
-          transition: ${props.theme.transitionFast};
+          transition: ${props.theme.transition};
           &:hover {
+            transition: ${props.theme.transition};
             transform: translateZ(0);
             background: ${props.luminosity
               ? props.theme.colors.highlights.bgClearHighlight
@@ -95,10 +99,13 @@ export const IconButton = styled(styled(motion.button)<IProps>`
       &:focus,
       &:active {
         transform: translateZ(0);
-        transition: ${props.theme.transitionFast};
+        transition: ${props.theme.transition};
         outline: none;
         svg {
-          fill: ${darken('10%', props.theme.colors.brand.primary)};
+          fill: ${darken(
+            0.1,
+            props.customBg || props.theme.colors.brand.primary
+          )};
         }
       }
     `}
@@ -108,9 +115,9 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     css`
       &:hover {
         transform: translateZ(0);
-        transition: ${(props: IProps) => props.theme.transitionFast};
+        transition: ${(props: IProps) => props.theme.transition};
         background-color: ${props.customBg
-          ? rgba(darken(0.1, props.customBg), 0.3)
+          ? darken(0.1, props.customBg)
           : 'inherit'};
       }
     `}
@@ -120,6 +127,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     css`
       &:hover {
         transform: translateZ(0);
+        transition: ${props.theme.transition};
         color: ${props.hoverFill};
         svg {
           fill: ${props.hoverFill};

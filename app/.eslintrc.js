@@ -1,5 +1,5 @@
 module.exports = {
-  extends: 'holium',
+  // extends: 'holium',
   plugins: ['import'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
@@ -39,7 +39,9 @@ module.exports = {
       webpack: {
         config: require.resolve('./.holium/configs/webpack.config.eslint.ts'),
       },
-      typescript: {},
+      typescript: {
+        react: require.resolve('./node_modules/@types/react/index.d.ts'),
+      },
     },
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx'],

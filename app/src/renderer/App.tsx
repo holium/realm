@@ -2,6 +2,8 @@ import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
+import { FC, useContext, useEffect, useMemo } from 'react';
+import { observer } from 'mobx-react';
 import { theme } from './theme';
 import {
   CoreProvider,
@@ -11,12 +13,18 @@ import {
   servicesStore,
   useServices,
 } from './logic/store';
-import { useMemo } from 'react';
+
 import { Mouse } from './system/desktop/components/Mouse';
+import * as RealmMultiplayer from '../../../playground/ui/src/lib/realm-multiplayer';
+import { Presences } from './system/desktop/components/Multiplayer/Presences';
+import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
-import { observer } from 'mobx-react';
+import {
+  CursorEvent,
+  RealmMultiplayerInterface,
+} from './system/desktop/components/Multiplayer/types';
 
-export const App = observer(() => {
+export const App: FC = observer(() => {
   const { booted } = useCore();
   const { shell } = useServices();
   const { desktop } = shell;
@@ -43,9 +51,11 @@ export const App = observer(() => {
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}
+
           <ServiceProvider value={servicesStore}>
             {mouseMemo}
             {shellMemo}
+            <MultiplayerMouse />
             <div id="portal-root" />
           </ServiceProvider>
         </MotionConfig>
@@ -53,5 +63,35 @@ export const App = observer(() => {
     </CoreProvider>
   );
 });
+
+function MultiplayerMouse() {
+  const { ship, spaces } = useServices();
+  if (!ship?.isLoaded) return null;
+
+  return (
+    <RealmMultiplayer.Provider
+      api={api}
+      ship={ship}
+      channel={spaces.selected?.path}
+    >
+      <Cursors />
+    </RealmMultiplayer.Provider>
+  );
+}
+
+function Cursors() {
+  const { api } = useContext(
+    RealmMultiplayer.Context as React.Context<{
+      api: RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
+    }>
+  );
+  const { shell } = useServices();
+  useEffect(() => {
+    api?.send({
+      event: CursorEvent.Leave,
+    });
+  }, [shell.desktop.isMouseInWebview]);
+  return <Presences />;
+}
 
 export default App;

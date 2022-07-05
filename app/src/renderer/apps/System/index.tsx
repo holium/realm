@@ -10,7 +10,7 @@ export const SystemApp: FC<any> = observer(() => {
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
   return (
     <React.Fragment>
-      <Box overflowY="scroll">
+      <Box overflowY="auto">
         <Flex gap={12} flexDirection="column" p="12px">
           <Card
             p="12px"

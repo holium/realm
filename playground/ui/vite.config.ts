@@ -13,9 +13,9 @@ export default ({ mode }) => {
   return defineConfig({
     server: {
       fs: {
-        allow: ["../"],
+        allow: ["../../"],
       },
-      port: 3010,
+      port: parseInt(process.env.VITE_PORT) || 3010,
     },
     plugins: [
       urbitPlugin({ base: "playground", target: SHIP_URL, secure: false }),

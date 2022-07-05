@@ -86,8 +86,8 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   isResizeCursor,
   children,
 }) => {
-  const cursorOuterRef = useRef();
-  const cursorInnerRef = useRef();
+  const cursorOuterRef = useRef<HTMLDivElement>(null);
+  const cursorInnerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef();
   const previousTimeRef = useRef();
   let endX = useRef(0);
@@ -96,6 +96,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Outer Cursor Animation Delay
   const animateOuterCursor = useCallback(
     (time) => {
+      if (!cursorOuterRef.current) return;
       if (previousTimeRef.current !== undefined) {
         coords.x += (endX.current - coords.x) / trailingSpeed;
         coords.y += (endY.current - coords.y) / trailingSpeed;
@@ -174,7 +175,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
     cursorInner: {
       zIndex: 100000,
       display: 'block',
-      position: 'fixed',
+      position: 'absolute',
       // borderRadius: '50%',
       width: innerSize,
       height: innerSize,
@@ -189,7 +190,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
       boxSizing: 'content-box',
       zIndex: 100000,
       display: 'block',
-      position: 'fixed',
+      position: 'absolute',
       borderRadius: '50%',
       pointerEvents: 'none',
       width: outerSize,
@@ -301,8 +302,8 @@ export function CurrentUserCursor({
   });
 
   const setMouseCoords = useCallback((evt: any) => {
-    const { clientX, clientY } = evt;
-    setCoords({ x: clientX, y: clientY });
+    const { pageX, pageY } = evt;
+    setCoords({ x: pageX, y: pageY });
   }, []);
 
   const onMouseMove = useCallback((evt: MouseEvent) => {
