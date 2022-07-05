@@ -1,6 +1,6 @@
 import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { FC, useEffect, useRef, useState } from 'react';
-import { dialogRenderers } from 'renderer/apps/dialog';
+import { dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { Flex, TextButton, Box, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';

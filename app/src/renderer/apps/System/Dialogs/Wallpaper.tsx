@@ -19,7 +19,7 @@ import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
 import { toJS } from 'mobx';
 import { darken, lighten } from 'polished';
-import { DialogConfig } from 'renderer/apps/dialog';
+import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,

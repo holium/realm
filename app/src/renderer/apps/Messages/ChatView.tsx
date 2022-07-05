@@ -1,5 +1,5 @@
-import { createRef, FC, useEffect, useState, useMemo, useRef } from 'react';
-import { lighten, rgba, darken } from 'polished';
+import { FC, useEffect, useState, useMemo, useRef } from 'react';
+import { rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
 import ScrollView from 'react-inverted-scrollview';
 
@@ -36,7 +36,7 @@ type IProps = {
 export const ChatView: FC<IProps> = observer((props: IProps) => {
   const submitRef = useRef(null);
   const chatInputRef = useRef(null);
-  let scrollView = createRef();
+  let scrollView = useRef<any>(null);
   const attachmentRef = useRef(null);
   const {
     dimensions,
@@ -104,13 +104,12 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   };
   const scrollToBottom = () => {
     if (!scrollView) return;
-    // @ts-expect-error
     scrollView.current.scrollToBottom();
   };
 
   useEffect(() => {
-    // scrollView.current?.scrollToBottom();
-  }, [scrollView.current]);
+    scrollView.current?.scrollToBottom();
+  }, [scrollView]);
 
   const inputHeight = 60;
   return (
@@ -191,7 +190,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           gap={2}
           height={height}
           position="relative"
-          overflowY="scroll"
+          overflowY="auto"
           alignContent="center"
         >
           <ScrollView
@@ -199,8 +198,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             height={dimensions.height}
             ref={scrollView}
             onScroll={handleScroll}
+            restoreScrollPositionOnUpdate
           >
-            <Flex style={{ minHeight: headerOffset }} />
+            <Flex style={{ minHeight: headerOffset + 8 }} />
             {chatData.list.map((message: MessageType, index: number) => (
               <ChatMessage
                 key={`${message.index}-${message.timeSent}-${index}`}

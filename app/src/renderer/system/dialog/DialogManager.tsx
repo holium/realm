@@ -1,10 +1,10 @@
-import React, { FC, useRef, useEffect } from 'react';
+import React, { FC, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import AppWindow from '../desktop/components/Window';
 import { getCenteredXY } from 'os/services/shell/lib/window-manager';
-import { dialogRenderers } from 'renderer/apps/dialog';
+import { dialogRenderers } from 'renderer/system/dialog/dialogs';
 
 type DialogManagerProps = {
   dialogId?: string;
@@ -15,10 +15,11 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     const { dialogId } = props;
 
     const { shell } = useServices();
-    const { desktop, theme } = shell;
+    const { desktop } = shell;
     const desktopRef = useRef<any>(null);
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;
+
     if (isOpen) {
       const dialogConfig = dialogRenderers[dialogId];
       const dimensions = {
@@ -28,6 +29,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
           desktop.desktopDimensions
         ),
       };
+
       dialogWindow = (
         <AppWindow
           desktopRef={desktopRef}
@@ -39,14 +41,13 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         />
       );
     }
+
     return (
       <motion.div
         id="dialog-fill"
         ref={desktopRef}
-        animate={{
-          display: isOpen ? 'block' : 'none',
-        }}
         style={{
+          display: isOpen ? 'block' : 'none',
           bottom: 0,
           padding: '8px',
           position: 'absolute',

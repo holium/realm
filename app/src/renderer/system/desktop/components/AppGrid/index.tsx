@@ -28,7 +28,7 @@ type AppGridProps = {
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
   const { ship, spaces, shell } = useServices();
-  const { desktop, theme } = shell;
+  const { desktop } = shell;
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]

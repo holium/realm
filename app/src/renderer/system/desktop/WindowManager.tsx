@@ -14,9 +14,8 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    // const { desktop, theme } = useMst();
     const { shell } = useServices();
-    const { desktop, theme } = shell;
+    const { desktop } = shell;
     const desktopRef = useRef<any>(null);
 
     useEffect(() => {

@@ -14,7 +14,7 @@ interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
   const { shell, spaces } = useServices();
-  const { desktop, theme } = shell;
+  const { desktop } = shell;
 
   const dividerBg = useMemo(
     () => rgba(lighten(0.2, desktop.theme.dockColor), 0.4),

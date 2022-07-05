@@ -28,7 +28,6 @@ type ProfileProps = {
 export const Profile: FC<ProfileProps> = (props: ProfileProps) => {
   const { shell, ship, identity } = useServices();
   const { auth } = identity;
-  // const { desktop, theme } = shell;
   let [batteryLevel, setBatteryLevel] = useState(0);
   const { dimensions } = props;
   const { backgroundColor, textColor, windowColor, iconColor } = props.theme;

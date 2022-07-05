@@ -6,7 +6,7 @@ import { AppModelType } from 'os/services/ship/models/docket';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
-import { Portal } from 'renderer/system/modals/Portal';
+import { Portal } from 'renderer/system/dialog/Portal';
 import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
 

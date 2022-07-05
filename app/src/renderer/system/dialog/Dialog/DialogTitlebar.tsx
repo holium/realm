@@ -35,7 +35,7 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
     onClose,
   } = props;
   const { shell } = useServices();
-  const { desktop, theme } = shell;
+  const { desktop } = shell;
 
   const { iconColor } = desktop.theme;
 

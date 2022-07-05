@@ -15,7 +15,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>``;
 export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   const { window, isResizing } = props;
   const { ship, shell } = useServices();
-  const { desktop, theme } = shell;
+  const { desktop } = shell;
   const webViewRef = useRef<any>(null);
   const elementRef = useRef(null);
 

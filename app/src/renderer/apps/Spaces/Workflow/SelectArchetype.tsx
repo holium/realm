@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Grid, Text, Flex } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { BaseDialogProps } from 'renderer/apps/dialog';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { SelectRow } from '../components/SelectionRow';
 
 export const SelectArchetype: FC<BaseDialogProps> = observer(

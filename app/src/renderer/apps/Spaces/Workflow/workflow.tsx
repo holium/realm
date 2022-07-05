@@ -1,40 +1,10 @@
-import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { CreateSpaceModal } from './Spaces/Workflow/CreateSpaceModal';
-import { SpacesFinalSummary } from './Spaces/Workflow/FinalSummary';
-import { SelectArchetype } from './Spaces/Workflow/SelectArchetype';
-import { WallpaperDialogConfig } from './System/Dialogs/Wallpaper';
+import { DialogRenderers } from 'renderer/system/dialog/dialogs';
+import { CreateSpaceModal } from './CreateSpaceModal';
+import { SpacesFinalSummary } from './FinalSummary';
+import { SelectArchetype } from './SelectArchetype';
 
-export type BaseWorkflowProps = {
-  workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
-  firstStep?: boolean; // identifies the first dialog in a workflow
-  customNext?: boolean; // an override to remove the next button if the dialog has a custom "next" component
-  workflowState?: any; // the state that is passed between the various dialogs in a workflow
-  setState?: (data: any) => void; // a function that is passed into the dialog component for setting workflow state.
-  isValidated?: (state: any) => boolean;
-  onNext?: (data?: any) => void;
-  onPrevious?: (data?: any) => void;
-};
-
-export type BaseDialogProps = {
-  onOpen?: () => void;
-  onClose?: () => void;
-  hasCloseButton: boolean;
-  noTitlebar?: boolean;
-} & BaseWorkflowProps;
-
-export type DialogConfig = {
-  titlebar?: React.FC<any>;
-  component: React.FC<any>;
-  window: WindowModelProps;
-} & BaseDialogProps;
-
-export type DialogRenderers = {
-  [key: string]: DialogConfig;
-};
-
-export const dialogRenderers: DialogRenderers = {
-  'wallpaper-dialog': WallpaperDialogConfig,
+export const spacesDialogs: DialogRenderers = {
   'create-spaces-1': {
     workflow: true,
     firstStep: true,

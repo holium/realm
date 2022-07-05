@@ -5,7 +5,7 @@ import { Grid, Text, Flex, Skeleton } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { BaseDialogProps } from 'renderer/apps/dialog';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { SelectRow } from '../components/SelectionRow';
 
 export const Wrapper = styled(motion.div)`

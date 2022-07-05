@@ -30,7 +30,6 @@ export const Services = types
   .model('ServicesStore', {
     shell: types.model('ShellStore', {
       // preferenceStore: ConfigStore,
-      theme: ThemeStore,
       desktop: DesktopStore,
     }),
     identity: types.model('identity', {
@@ -53,8 +52,6 @@ const shellSnapshot = loadSnapshot('shell');
 
 const services = Services.create({
   shell: {
-    // preferenceStore: {},
-    theme: {},
     desktop: (shellSnapshot && shellSnapshot.desktop) || {},
   },
   identity: {

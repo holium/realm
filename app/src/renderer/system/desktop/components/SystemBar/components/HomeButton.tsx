@@ -10,7 +10,7 @@ type HomeButton = {};
 
 export const HomeButton: FC<HomeButton> = observer(() => {
   const { shell } = useServices();
-  const { theme, desktop } = shell;
+  const { desktop } = shell;
 
   const { dockColor, textColor } = desktop.theme;
   const x = useMotionValue(200);
