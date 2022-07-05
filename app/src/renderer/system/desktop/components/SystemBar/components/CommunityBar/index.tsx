@@ -5,6 +5,7 @@ import { SpaceSelector } from './SpaceSelector';
 import { AppDock } from './AppDock';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { AssemblyTray } from './Assembly';
 
 type CommunityBarProps = {};
 
@@ -28,16 +29,7 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
         <AppDock />
       </Flex>
       <Flex>
-        <IconButton
-          customBg={dockColor}
-          color={textColor}
-          whileTap={{ scale: 0.9 }}
-          transition={{ scale: 0.1 }}
-          size={28}
-          ml={1}
-        >
-          <Icons name="Connect" />
-        </IconButton>
+        <AssemblyTray />
       </Flex>
     </SystemBarStyle>
   );

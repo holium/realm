@@ -16,9 +16,7 @@ export const DEFAULT_WALLPAPER =
 
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
   const windowColor =
-    bgLuminosity === 'dark'
-      ? darken(0.05, baseColor)
-      : lighten(0.35, baseColor);
+    bgLuminosity === 'dark' ? darken(0.05, baseColor) : lighten(0.3, baseColor);
   return {
     // TODO add window border color
     mode: bgLuminosity,

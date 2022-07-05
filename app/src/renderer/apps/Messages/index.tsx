@@ -39,7 +39,7 @@ export const Chat: FC<any> = observer((props: ChatProps) => {
           noGutter
           expand
           height={dimensions.height}
-          overflowY="scroll"
+          overflowY="auto"
         >
           <Flex flex={1} alignItems="center" justifyContent="center">
             <Spinner size={2} />

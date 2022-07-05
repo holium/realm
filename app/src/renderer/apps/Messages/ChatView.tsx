@@ -191,7 +191,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           gap={2}
           height={height}
           position="relative"
-          overflowY="scroll"
+          overflowY="auto"
           alignContent="center"
         >
           <ScrollView

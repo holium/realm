@@ -1,9 +1,9 @@
 // Loaded in the webview/appview preload script, connects to websocket directly
 // and renders cursor based on presence
-import { Ship } from '@holium/playground/src/lib/realm-multiplayer/hooks';
+// import { Ship } from '../../../../../../../playground/src/lib/realm-multiplayer/hooks';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
-import { hexToRgb, rgbToString } from 'renderer/logic/utils/color';
+import { hexToRgb, rgbToString } from 'os/lib/color';
 import styled from 'styled-components';
 import AnimatedCursor from '../Cursor';
 import { useEventListener } from '../Cursor/useEventListener';
@@ -21,6 +21,7 @@ import {
   CursorOutPayload,
   PresenceStateSyncPayload,
 } from './types';
+import { Ship } from '../../../../../../../playground/ui/src/lib/realm-multiplayer/hooks';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 

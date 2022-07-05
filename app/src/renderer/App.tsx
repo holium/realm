@@ -2,7 +2,7 @@ import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
-import { useContext, useEffect, useMemo } from 'react';
+import { FC, useContext, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { theme } from './theme';
 import {
@@ -24,7 +24,7 @@ import {
   RealmMultiplayerInterface,
 } from './system/desktop/components/Multiplayer/types';
 
-export const App = observer(() => {
+export const App: FC = observer(() => {
   const { booted } = useCore();
   const { shell } = useServices();
   const { desktop } = shell;

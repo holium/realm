@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/prop-types */
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
@@ -12,8 +12,8 @@ export type TrayMenuProps = {
   buttonRef: any;
   appRef: any;
   style?: any;
-  content?: React.ReactNode | string;
-  children: React.ReactNode;
+  content?: any | string;
+  children: any;
   defaultIsVisible?: boolean;
   buttonOffset?: {
     x?: number;
@@ -40,9 +40,12 @@ const Wrapper = styled(motion.div)`
 
 export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
   z-index: 4;
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-perspective: 1000;
+  backface-visibility: hidden;
+  perspective: 1000;
+  transform: translate3d(0, 0, 0);
   will-change: transform;
 `)(compose(space, color, typography));
 
