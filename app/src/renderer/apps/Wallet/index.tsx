@@ -3,7 +3,7 @@ import { rgba, lighten, darken } from 'polished';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Grid, Flex, IconButton, Icons, Text } from '../../components';
 import { WalletMain } from './components/WalletMain';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 
 type WalletProps = {
   theme: ThemeModelType;

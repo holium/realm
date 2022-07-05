@@ -1,7 +1,7 @@
 import { FC, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import AppWindow from './components/AppWindow';
+import AppWindow from './components/Window';
 import { ContextMenu } from 'renderer/components';
 import { rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';

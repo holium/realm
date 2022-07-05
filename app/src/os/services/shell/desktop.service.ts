@@ -48,6 +48,8 @@ export class DesktopService extends BaseService {
     'realm.desktop.close-app-window': this.closeAppWindow,
     'realm.desktop.open-dialog': this.openDialog,
     'realm.desktop.close-dialog': this.closeDialog,
+    'realm.desktop.next-dialog': this.nextDialog,
+    'realm.desktop.previous-dialog': this.previousDialog,
   };
 
   static preload = {
@@ -104,6 +106,12 @@ export class DesktopService extends BaseService {
     openDialog: (dialogId: string) => {
       return ipcRenderer.invoke('realm.desktop.open-dialog', dialogId);
     },
+    nextDialog: (dialogId: string) => {
+      return ipcRenderer.invoke('realm.desktop.next-dialog', dialogId);
+    },
+    previousDialog: (dialogId: string) => {
+      return ipcRenderer.invoke('realm.desktop.next-dialog', dialogId);
+    },
     closeDialog: () => {
       return ipcRenderer.invoke('realm.desktop.close-dialog');
     },
@@ -146,7 +154,17 @@ export class DesktopService extends BaseService {
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
   }
+
   openDialog(_event: any, dialogId: string) {
+    this.state?.closeDialog(); // must close old dialogs first
+    this.state?.openDialog(dialogId);
+  }
+
+  nextDialog(_event: any, dialogId: string) {
+    this.state?.openDialog(dialogId);
+  }
+
+  previousDialog(_event: any, dialogId: string) {
     this.state?.openDialog(dialogId);
   }
 

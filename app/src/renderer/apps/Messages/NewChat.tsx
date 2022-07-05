@@ -15,7 +15,7 @@ import {
 } from 'renderer/components';
 import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';

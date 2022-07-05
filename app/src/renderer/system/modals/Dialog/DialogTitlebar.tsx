@@ -1,9 +1,7 @@
 import { FC, useMemo } from 'react';
 import styled from 'styled-components';
-import { rgba } from 'polished';
-import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
-import { Flex, Icons, Input, Spinner } from 'renderer/components';
-import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
+import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
+import { WindowIcon } from 'renderer/system/desktop/components/Window/WindowIcon';
 import { useServices } from 'renderer/logic/store';
 
 const ToolbarStyle = styled(TitlebarStyle)`

@@ -1,8 +1,8 @@
-import { FC, useRef, useEffect } from 'react';
+import React, { FC, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
-import AppWindow from './components/AppWindow';
+import AppWindow from '../desktop/components/Window';
 import { getCenteredXY } from 'os/services/shell/lib/window-manager';
 import { dialogRenderers } from 'renderer/apps/dialog';
 

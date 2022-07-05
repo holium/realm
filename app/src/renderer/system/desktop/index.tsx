@@ -6,7 +6,7 @@ import { AppGrid } from './components/AppGrid';
 // import { useMst } from 'renderer/logic/store';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
-import { DialogManager } from './DialogManager';
+import { DialogManager } from '../modals/DialogManager';
 
 type OSFrameProps = {
   hasLoaded?: boolean;

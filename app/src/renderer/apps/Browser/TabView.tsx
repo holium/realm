@@ -1,7 +1,7 @@
 import { FC, useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
 import { Flex, Spinner, Input } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { useBrowser } from './store';

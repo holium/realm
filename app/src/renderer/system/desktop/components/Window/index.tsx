@@ -22,9 +22,12 @@ import { nativeRenderers } from 'renderer/apps/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { DialogView } from '../Dialog/Dialog';
+import { DialogView } from '../../../modals/Dialog/Dialog';
 import { CreateSpaceModal } from 'renderer/apps/Spaces/Workflow/CreateSpaceModal';
-import { DialogTitlebar, DialogTitlebarProps } from '../Dialog/DialogTitlebar';
+import {
+  DialogTitlebar,
+  DialogTitlebarProps,
+} from '../../../modals/Dialog/DialogTitlebar';
 import { dialogRenderers } from 'renderer/apps/dialog';
 
 type AppWindowStyleProps = {

@@ -40,7 +40,7 @@ const Window = types
 export type WindowModelType = Instance<typeof Window>;
 export type WindowModelProps = {
   id: string;
-  title: string;
+  title?: string;
   zIndex: number;
   type: 'urbit' | 'web' | 'native' | 'dialog';
   dimensions: {

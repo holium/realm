@@ -16,7 +16,7 @@ import {
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { MessageType, ChatMessage } from './components/ChatMessage';
 import { createDmForm } from './forms/chatForm';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { DmActions } from 'renderer/logic/actions/chat';
 

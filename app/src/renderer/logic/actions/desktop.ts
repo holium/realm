@@ -49,6 +49,12 @@ export const DesktopActions = {
   openDialog: async (dialogId: string) => {
     return await window.electron.os.shell.openDialog(dialogId);
   },
+  previousDialog: async (dialogId: string) => {
+    return await window.electron.os.shell.previousDialog(dialogId);
+  },
+  nextDialog: async (dialogId: string) => {
+    return await window.electron.os.shell.nextDialog(dialogId);
+  },
   closeDialog: async () => {
     return await window.electron.os.shell.closeDialog();
   },
