@@ -1,0 +1,17 @@
+/+  *people-store
+::
+|_  upd=update
+++  grad  %noun
+++  grow
+  |%
+  ++  noun  upd
+  ++  people-update-0  upd
+  ++  json  (update:enjs upd)
+  --
+::
+++  grab
+  |%
+  ++  noun  update
+  ++  json  update:dejs
+  --
+--

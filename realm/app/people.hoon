@@ -1,5 +1,5 @@
 /-  store=people, contact-store
-/+  default-agent, resource, action-agent
+/+  default-agent, resource, action-agent, people-store
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -46,9 +46,22 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
+    ~&  >>  "{<dap.bowl>}: on-poke"
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
       %people-update-0  (update !<(update:store vase))
+      %test-mark
+        %-  (slog leaf+"{<dap.bowl>}: received {<mark>}" ~)
+        :: =/  person=person:store  ['test' now.bowl]
+        :: =+  data=[%add our.bowl person]
+        :: %-  (slog leaf+"{<dap.bowl>}: building tube" ~)
+        :: :: =/  home=path  /(scot %p our.bowl)/home/(scot %da now.bowl)
+        :: =/  home=path  /(scot %p our.bowl)/realm/(scot %da now.bowl)
+        :: =/  js-tube  .^(tube:clay %cc (weld home /mar/person/json))
+        :: %-  (slog leaf+"{<dap.bowl>}: tube built" ~)
+        :: =/  result  !<(json (js-tube !>(data)))
+        :: ~&  >  "{<result>}"
+        `state
     ==
     [cards this]
 

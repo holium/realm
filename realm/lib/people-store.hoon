@@ -1,4 +1,4 @@
-/-  sur=people-store
+/-  sur=people
 /+  res=resource
 =<  [sur .]
 =,  sur
@@ -40,17 +40,14 @@
     |=  =person
     ^-  json
     %-  pairs
-    :~  [%rank s+rank.person]
+    :~  [%rank [%s rank.person]]
         [%last-updated (time last-updated.person)]
     ==
   ::
   ++  edit
     |=  field=edit-field
     ^-  json
-    %+  frond  -.field
-    ?-  -.field
-      %rank      s+rank.field
-    ==
+    [%s rank.field]
   --
 ::
 ++  dejs
@@ -85,12 +82,25 @@
     ::
     ++  cont
       %-  ot
-      :~  [%rank so]
+      :~  [%rank rnk]
+          [%last-updated di]
       ==
     ::
     ++  edit
       %-  of
-      :~  [%rank so]
+      :~  [%rank rnk]
       ==
+  ::
+  ++  rnk
+    |=  =json
+    ^-  rank:title
+    ?>  ?=(%s -.json)
+    ?:  =('czar' p.json)  %czar
+    ?:  =('king' p.json)  %king
+    ?:  =('duke' p.json)  %duke
+    ?:  =('earl' p.json)  %earl
+    ?:  =('pawn' p.json)  %pawn
+    !!
     --
   --
+--

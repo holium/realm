@@ -12,7 +12,7 @@
 ::
 ::  $rank - user rank (exploratory)
 ::
-+$  rank  ?(%duke)
+:: +$  rank  ?(%duke %null)
 ::  $metaspace - selective aspects of a broader space used for
 ::    efficiency purposes
 +$  metaspace
@@ -29,12 +29,12 @@
 ::  $person: todo. build out based on further feature development
 ::
 +$  person
-  $:  rank=@t
+  $:  =rank:title
       last-updated=@da
   ==
 ::
 +$  edit-field
-  $%  [%rank =rank]
+  $%  [%rank =rank:title]
   ==
 ::
 +$  edit-person-field

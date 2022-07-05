@@ -48,7 +48,7 @@
     ++  on-poke
       |=  [=mark =vase]
       ^-  (quip card:agent:gall agent:gall)
-      `this
+      (on-poke:ag mark vase)
       :: ?+    mark  (on-poke:def mark vase)
 
       ::     %handle-http-request
