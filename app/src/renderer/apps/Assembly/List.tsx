@@ -21,8 +21,7 @@ export const Assemblies: FC<AssemblyListProps> = observer(
   (props: AssemblyListProps) => {
     const { dimensions } = props;
     const { ship, shell } = useServices();
-    const { backgroundColor, textColor, windowColor, iconColor } =
-      shell.desktop.theme;
+    const { windowColor } = shell.desktop.theme;
     const [muted, setMuted] = useState(false);
     const { assemblyApp } = useTrayApps();
     const { selected, assemblies } = assemblyApp;
@@ -57,7 +56,7 @@ export const Assemblies: FC<AssemblyListProps> = observer(
               style={{ textTransform: 'uppercase' }}
               fontWeight={600}
             >
-              Assembly
+              Rooms
             </Text>
           </Flex>
           <Flex ml={1} pl={2} pr={2}>
@@ -82,10 +81,10 @@ export const Assemblies: FC<AssemblyListProps> = observer(
               mb={46}
             >
               <Text fontWeight={500} mb={2} opacity={0.5}>
-                No assemblies
+                No rooms
               </Text>
               <Text width="90%" textAlign="center" opacity={0.3}>
-                An assembly is a room for communication and collaboration
+                A room enables collaboration with other people.
               </Text>
             </Flex>
           )}

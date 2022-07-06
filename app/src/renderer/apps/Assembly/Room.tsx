@@ -17,6 +17,7 @@ import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from './components/CommButton';
 import { VoiceAnalyzer } from './components/VoiceVisualizer';
+import { Speaker } from './components/Speaker';
 
 export type BaseAssemblyProps = {
   theme: ThemeModelType;
@@ -55,8 +56,6 @@ export const Room: FC<BaseAssemblyProps> = observer(
         console.log('hasMic', hasMic);
       });
     }, []);
-
-    console.log(audio);
 
     return (
       <Grid.Column
@@ -125,40 +124,15 @@ export const Room: FC<BaseAssemblyProps> = observer(
           {/* <Text mt="2px" fontSize={2} opacity={0.5} fontWeight={400}>
             {assemblyApp.selected?.host}
           </Text> */}
-          <Flex flex={2} flexDirection="row" flexWrap="wrap">
-            {people.map((person: string, index: number) => {
-              const metadata = ship?.contacts.getContactAvatarMetadata(person);
-              const hasVoice = audio && person === ship?.patp;
-              let name = metadata?.nickname || person;
-              if (name.length > 18) name = `${name.substring(0, 18)}...`;
-              return (
-                <Flex
-                  key={person}
-                  gap={12}
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  width={'50%'}
-                >
-                  <Sigil
-                    borderRadiusOverride="6px"
-                    simple
-                    size={36}
-                    avatar={metadata && metadata.avatar}
-                    patp={person}
-                    color={[(metadata && metadata.color) || '#000000', 'white']}
-                  />
-                  <Text fontSize={3} fontWeight={500}>
-                    {name}
-                  </Text>
-                  {hasVoice ? (
-                    <VoiceAnalyzer audio={audio} />
-                  ) : (
-                    <Flex height={30}></Flex>
-                  )}
-                </Flex>
-              );
-            })}
+          <Flex
+            flex={2}
+            flexDirection="row"
+            flexWrap="wrap"
+            alignItems="center"
+          >
+            {people.map((person: string, index: number) => (
+              <Speaker key={person} person={person} audio={audio} />
+            ))}
           </Flex>
           <Flex
             pb={16}
@@ -215,7 +189,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
-                  assemblyApp.leaveRoom();
+                  assemblyApp.leaveRoom(ship!.patp!);
                 }}
               >
                 <Icons name="LoginLine" />

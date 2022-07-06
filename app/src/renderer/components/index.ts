@@ -31,3 +31,4 @@ export * from './Embeds/LinkPreview';
 export * from './Embeds/Mention';
 export * from './Embeds/EmbedBox';
 export * from './Skeleton';
+export * from './NFTBadge';

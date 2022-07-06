@@ -29,7 +29,7 @@ export const AvatarRow: FC<AvatarRowProps> = (props: AvatarRowProps) => {
               borderColor={backgroundColor}
               borderRadiusOverride="4px"
               simple
-              size={26}
+              size={22}
               avatar={metadata && metadata.avatar}
               patp={person}
               color={[(metadata && metadata.color) || '#000000', 'white']}

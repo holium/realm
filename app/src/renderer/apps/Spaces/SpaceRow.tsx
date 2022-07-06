@@ -31,7 +31,7 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
   ${(props: RowProps) =>
     props.selected
       ? css`
-          background-color: ${darken(0.025, props.customBg)};
+          background-color: ${darken(0.03, props.customBg)};
         `
       : css`
           &:hover {
@@ -60,7 +60,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
       data-close-tray="true"
       selected={selected}
       className="realm-cursor-hover"
-      customBg={currentTheme.dockColor}
+      customBg={currentTheme.windowColor}
       onClick={() => {
         onSelect(space.path);
       }}
@@ -94,9 +94,10 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
             {/* <Icons.ExpandMore ml="6px" /> */}
           </Text>
           <Flex flexDirection="row" gap={12}>
-            {/* <Flex gap={4} flexDirection="row" alignItems="center">
-              <Icons name="Members" size={16} opacity={0.6} />
-              {space.members && (
+            {space.path === '~hatryx-lastud/spaces/other-life' && (
+              <Flex gap={4} flexDirection="row" alignItems="center">
+                <Icons name="Members" size={16} opacity={0.6} />
+
                 <Text
                   fontWeight={400}
                   mt="1px"
@@ -104,11 +105,11 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
                   opacity={0.6}
                   fontSize={2}
                 >
-                  {space.members.count} members
+                  {1261} members
                 </Text>
-              )}
-            </Flex> */}
-            {space.token && (
+              </Flex>
+            )}
+            {space.path === '~hatryx-lastud/spaces/other-life' && (
               <Flex gap={4} flexDirection="row" alignItems="center">
                 <Icons name="Coins" size={16} opacity={0.6} />
                 <Text
@@ -119,7 +120,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
                   opacity={0.6}
                   fontSize={2}
                 >
-                  {space.token.symbol}
+                  $LIFE
                 </Text>
               </Flex>
             )}

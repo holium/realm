@@ -70,7 +70,7 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
               style={{ textTransform: 'uppercase' }}
               fontWeight={600}
             >
-              Assembly
+              New Room
             </Text>
           </Flex>
           <Flex ml={1} pl={2} pr={2}></Flex>

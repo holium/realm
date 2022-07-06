@@ -103,7 +103,9 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
           >
             <Text
               style={{ textTransform: 'capitalize', pointerEvents: 'none' }}
-              color={textColor}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              transition={{ color: { duration: 0.5 } }}
               lineHeight="14px"
               fontSize={1}
               opacity={0.5}
@@ -112,7 +114,9 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
             </Text>
             <Text
               style={{ pointerEvents: 'none' }}
-              color={textColor}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              transition={{ color: { duration: 0.5 } }}
               fontSize={2}
               fontWeight={500}
             >

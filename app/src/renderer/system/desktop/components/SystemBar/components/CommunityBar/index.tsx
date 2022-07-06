@@ -6,6 +6,7 @@ import { AppDock } from './AppDock';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { AssemblyTray } from './Assembly';
+import { rgba } from 'polished';
 
 type CommunityBarProps = {};
 
@@ -13,17 +14,23 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
   const { shell } = useServices();
   const { desktop } = shell;
 
-  const dockColor = useMemo(
-    () => desktop.theme.dockColor,
+  const { dockColor } = useMemo(
+    () => ({
+      ...desktop.theme,
+      dockColor: rgba(desktop.theme.dockColor!, 0.55),
+    }),
     [desktop.theme.dockColor]
-  );
-  const textColor = useMemo(
-    () => desktop.theme.textColor,
-    [desktop.theme.textColor]
   );
 
   return (
-    <SystemBarStyle pr={3} width="100%" customBg={dockColor}>
+    <SystemBarStyle
+      initial={{ backgroundColor: dockColor }}
+      animate={{ backgroundColor: dockColor }}
+      transition={{ backgroundColor: { duration: 0.5 } }}
+      pr={3}
+      width="100%"
+      backgroundColor={dockColor}
+    >
       <SpaceSelector />
       <Flex flex={1}>
         <AppDock />

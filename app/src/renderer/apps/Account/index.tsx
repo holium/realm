@@ -16,6 +16,7 @@ import { nativeApps } from '..';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { useTrayApps } from 'renderer/logic/apps/store';
 
 type ProfileProps = {
   theme: ThemeModelType;
@@ -27,6 +28,7 @@ type ProfileProps = {
 
 export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
   const { shell, ship, identity } = useServices();
+  const { setActiveApp } = useTrayApps();
   const { auth } = identity;
   let [batteryLevel, setBatteryLevel] = useState(0);
   const { dimensions } = props;
@@ -102,12 +104,13 @@ export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
         <Flex gap={16} alignItems="center">
           <IconButton
             className="realm-cursor-hover"
-            customBg={backgroundColor}
+            customBg={windowColor}
             size={26}
             color={iconColor}
             style={{ cursor: 'none' }}
             onClick={() => {
               AuthActions.logout(currentShip.patp);
+              setActiveApp(null);
             }}
           >
             <Icons name="Lock" />
@@ -116,7 +119,7 @@ export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
             className="realm-cursor-hover"
             data-close-tray="true"
             style={{ cursor: 'none' }}
-            customBg={backgroundColor}
+            customBg={windowColor}
             size={26}
             color={iconColor}
             onClick={() => openSettingsApp()}

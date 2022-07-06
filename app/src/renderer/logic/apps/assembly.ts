@@ -40,7 +40,10 @@ export const AssemblyAppState = types
       self.selected = newRoom;
       self.live = newRoom;
     },
-    leaveRoom() {
+    leaveRoom(ourShip: string) {
+      if (ourShip === self.selected?.host) {
+        self.assemblies.remove(self.selected!);
+      }
       self.selected = undefined;
       self.live = undefined;
       self.currentView = 'list';

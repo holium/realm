@@ -59,13 +59,18 @@ export const trayStore = TrayAppStore.create({
   assemblyApp: {
     currentView: 'list',
     selected: undefined,
-    live: 'degen-chat-for-da-bois',
+    live: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
     assemblies: [
       {
-        id: 'degen-chat-for-da-bois',
-        title: 'Degen chat for da bois',
+        id: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
+        title: 'Daily work chat',
         host: '~labruc-dillyx-lomder-librun',
-        people: ['~labruc-dillyx-lomder-librun', '~bus'],
+        people: [
+          '~labruc-dillyx-lomder-librun',
+          '~lomder-librun',
+          '~lodlev-migdev',
+          '~bus',
+        ],
         cursors: true,
         private: false,
       },

@@ -26,7 +26,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
       () =>
         mode === 'dark'
           ? rgba(lighten(0.2, dockColor), 0.3)
-          : rgba(darken(0.05, dockColor), 0.3),
+          : rgba(lighten(0.2, dockColor), 0.3),
       [desktop.theme]
     );
 

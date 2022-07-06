@@ -25,7 +25,7 @@ type SpacesListProps = {
 export const SpacesList: FC<SpacesListProps> = observer(
   (props: SpacesListProps) => {
     const { shell } = useServices();
-    const { textColor } = shell.desktop.theme;
+    const { textColor, windowColor } = shell.desktop.theme;
     const { selected, spaces, onSelect } = props;
     if (!spaces.length) {
       return (

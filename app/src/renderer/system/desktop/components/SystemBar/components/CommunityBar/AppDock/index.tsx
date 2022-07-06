@@ -5,7 +5,7 @@ import { AppTile } from 'renderer/components/AppTile';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
-import { Reorder } from 'framer-motion';
+import { Reorder, AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -47,21 +47,24 @@ export const AppDock: FC<AppDockProps> = observer(() => {
           const open = !selected && desktop.isOpenWindow(app.id);
           return (
             <Reorder.Item
-              key={app.id}
+              key={`${app.id}-${spaces.selected?.path}`}
               value={app}
               style={{ zIndex: 1 }}
-              // onDragStart={(evt: any) => {
-              //   evt.preventDefault();
-              //   evt.stopPropagation();
-              // }}
-              // onDrag={(evt: any) => {
-              //   evt.preventDefault();
-              //   evt.stopPropagation();
-              // }}
-              // onDragEnd={(evt: any) => {
-              //   evt.preventDefault();
-              //   evt.stopPropagation();
-              // }}
+              initial={{
+                opacity: 0.5,
+              }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  opacity: { duration: 0.25, delay: 0.5 },
+                },
+              }}
+              exit={{
+                opacity: 0.5,
+                transition: {
+                  opacity: { duration: 1, delay: 0 },
+                },
+              }}
               onClick={(evt: any) => {
                 const selectedApp = app;
                 if (desktop.isOpenWindow(selectedApp.id)) {
@@ -130,12 +133,14 @@ export const AppDock: FC<AppDockProps> = observer(() => {
 
   return (
     <Flex position="relative" flexDirection="row" alignItems="center">
-      {pinnedApps}
-      {activeAndUnpinned.length ? (
-        <Divider customBg={dividerBg} ml={2} mr={2} />
-      ) : (
-        []
-      )}
+      <AnimatePresence>
+        {pinnedApps}
+        {activeAndUnpinned.length ? (
+          <Divider customBg={dividerBg} ml={2} mr={2} />
+        ) : (
+          []
+        )}
+      </AnimatePresence>
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
           const app = spaces.selected?.getAppData(unpinnedApp.id)!;

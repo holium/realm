@@ -1,12 +1,5 @@
 import { average } from 'color.js';
-import {
-  types,
-  flow,
-  Instance,
-  clone,
-  tryReference,
-  applySnapshot,
-} from 'mobx-state-tree';
+import { types, flow, Instance, clone, applySnapshot } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from '../../lib/color';
 import { LoaderModel } from '../common.model';
@@ -46,6 +39,7 @@ export const ThemeModel = types
   .model('ThemeModel', {
     themeId: types.maybe(types.string),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
+    accentColor: types.optional(types.string, '#4E9EFD'),
     inputColor: types.optional(types.string, '#ffffff'),
     backgroundColor: types.optional(types.string, '#c4c3bf'),
     dockColor: types.optional(types.string, '#f5f5f4'),

@@ -41,6 +41,8 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
           evt.stopPropagation();
           return;
         }
+        // ------------------------------------------------
+        // ------------------------------------------------
         const { left, bottom }: any = calculateAnchorPoint(
           evt,
           anchorOffset,

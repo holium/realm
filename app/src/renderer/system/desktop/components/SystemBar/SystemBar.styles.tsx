@@ -48,11 +48,8 @@ export const SystemBarStyle = styled(styled(motion.div)<SystemBarStyleProps>`
   backface-visibility: hidden;
   perspective: 1000;
   transform: translate3d(0, 0, 0);
+  transition: ${(props: any) => props.theme.transition};
 `)<SystemBarStyleProps>(
-  {
-    // @ts-expect-error annoying
-    backgroundColor: (props: SystemBarStyleProps) =>
-      props.customBg ? rgba(props.customBg!, 0.55) : 'initial',
-  },
+  {},
   compose(space, layout, flexbox, border, position, color, backgroundColor)
 );

@@ -27,7 +27,7 @@ export const AssemblyRow: FC<AssemblyRowProps> = observer(
       peopleText = 'person';
     }
 
-    let peopleNoHost = people; //.filter((person: string) => person !== ship?.patp);
+    let peopleNoHost = people.filter((person: string) => person !== ship?.patp);
     let titleText = title;
     if (titleText.length > 16 && tray) {
       titleText = titleText.substring(0, 16) + '...';
