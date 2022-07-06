@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ThemeType } from '../theme';
 
 type RowProps = {
+  small?: boolean;
   selected?: boolean;
   disabled?: boolean;
   theme: ThemeType;
@@ -23,7 +24,6 @@ export const Row = styled(motion.div)<RowProps>`
   ${(props: RowProps) =>
     css`
       gap: ${props.gap || 10}px;
-
       ${!props.disabled
         ? css`
             &:hover {
@@ -44,6 +44,10 @@ export const Row = styled(motion.div)<RowProps>`
           transition: ${props.theme.transition};
           background-color: ${rgba(props.theme.colors.brand.primary, 0.2)};
         }
+      `}
+       ${props.small &&
+      css`
+        padding: 2px 2px;
       `}
     `}
 `;

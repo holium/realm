@@ -4,7 +4,7 @@ import { Grid, Flex, Icons, Text, TextButton } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Row } from 'renderer/components/NewRow';
 import { AssemblyRow } from './components/AssemblyRow';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { AssemblyModelType } from 'renderer/logic/apps/assembly';

@@ -45,8 +45,6 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
     isValidated && setValidated(isValidated(workflowState));
   }, [isValidated, workflowState]);
 
-  console.log('rendering dialog');
-
   return (
     <View ref={elementRef}>
       <Flex flex={1}>

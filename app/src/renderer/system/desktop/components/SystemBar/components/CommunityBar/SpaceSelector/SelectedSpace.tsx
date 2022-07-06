@@ -15,6 +15,7 @@ const EmptyPicture = styled.div`
 
 interface SelectedSpaceProps {
   selectorRef: any;
+  onClick?: any;
 }
 const FadeInMotion = {
   initial: { opacity: 0 },
@@ -27,7 +28,7 @@ const FadeInMotion = {
 
 export const SelectedSpace: FC<SelectedSpaceProps> = observer(
   (props: SelectedSpaceProps) => {
-    const { selectorRef } = props;
+    const { selectorRef, onClick } = props;
     const { spaces, ship, shell } = useServices();
     const selectedSpace = spaces.selected!;
     const { dockColor, textColor } = shell.desktop.theme;
@@ -128,6 +129,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
         whileTap={{ scale: 0.975 }}
         transition={{ scale: 0.2 }}
         customBg={dockColor}
+        onClick={onClick}
       >
         {innerContent}
       </TrayButton>

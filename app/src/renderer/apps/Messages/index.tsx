@@ -21,7 +21,7 @@ type ChatProps = {
 // }
 type ChatViewType = 'dm-list' | 'dm-chat' | 'new-chat' | 'loading';
 
-export const Chat: FC<any> = observer((props: ChatProps) => {
+export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
   const { dimensions } = props;
   const [currentView, setCurrentView] = useState<ChatViewType>('dm-list');
   const [selectedChat, setSelectedChat] = useState<any>(null);

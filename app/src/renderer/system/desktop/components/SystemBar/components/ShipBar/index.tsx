@@ -8,6 +8,7 @@ import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
 import { useServices } from 'renderer/logic/store';
+import { TrayClock } from './Clock';
 
 type ShipTrayProps = {};
 
@@ -34,7 +35,6 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
       alignItems="center"
     >
       <Flex gap={10} justifyContent="center" alignItems="center">
-        {/* Toggles voice on/off for voice subsystem */}
         <IconButton
           size={28}
           customBg={dockColor}
@@ -48,12 +48,10 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
             />
           </motion.div>
         </IconButton>
-        {/* Holds the wallet interface */}
         <WalletTray theme={desktop.theme} />
-        {/* Holds the DM interface */}
         <MessagesTray theme={desktop.theme} />
-        {/* Allows logging out */}
         <AccountTray theme={desktop.theme} />
+        {/* <TrayClock /> */}
       </Flex>
     </SystemBarStyle>
   );

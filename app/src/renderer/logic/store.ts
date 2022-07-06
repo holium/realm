@@ -12,7 +12,6 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { ThemeStore } from '../../os/services/shell/theme.model';
 import { DesktopStore } from '../../os/services/shell/desktop.model';
 import { SpacesStore } from '../../os/services/spaces/models/spaces';
 import { AuthStore } from '../../os/services/identity/auth.model';

@@ -14,7 +14,7 @@ import {
 } from 'renderer/components';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from './components/CommButton';
 import { VoiceAnalyzer } from './components/VoiceVisualizer';
 
@@ -95,9 +95,8 @@ export const Room: FC<BaseAssemblyProps> = observer(
             <Flex flexDirection="column">
               <Text
                 ml={2}
-                opacity={0.8}
-                fontSize={2}
-                fontWeight={600}
+                fontSize={3}
+                fontWeight={500}
                 style={{
                   wordWrap: 'normal',
                   textOverflow: 'ellipsis',
@@ -105,9 +104,6 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 }}
               >
                 {assemblyApp.selected?.title}
-              </Text>
-              <Text mt="2px" fontSize={2} opacity={0.5} fontWeight={400}>
-                {assemblyApp.selected?.host}
               </Text>
             </Flex>
           </Flex>
@@ -126,6 +122,9 @@ export const Room: FC<BaseAssemblyProps> = observer(
           </Flex>
         </Titlebar>
         <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
+          {/* <Text mt="2px" fontSize={2} opacity={0.5} fontWeight={400}>
+            {assemblyApp.selected?.host}
+          </Text> */}
           <Flex flex={2} flexDirection="row" flexWrap="wrap">
             {people.map((person: string, index: number) => {
               const metadata = ship?.contacts.getContactAvatarMetadata(person);
@@ -216,6 +215,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
+                  assemblyApp.leaveRoom();
                 }}
               >
                 <Icons name="LoginLine" />

@@ -1,9 +1,9 @@
-import { FC, useRef, createRef } from 'react';
-import { IconButton, Icons, Badge } from 'renderer/components';
-import { MiniApp } from '../../MiniAppWindow';
-import { TrayMenu } from '../../TrayMenu';
-import { Chat } from 'renderer/apps/Messages';
+import { FC, useCallback } from 'react';
+import { observer } from 'mobx-react';
 
+import { IconButton, Icons, Badge, Flex } from 'renderer/components';
+import { useTrayApps } from 'renderer/logic/apps/store';
+import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 type MessagesTrayProps = {
   theme: any;
 };
@@ -14,53 +14,69 @@ const dimensions = {
   width: 390,
 };
 
-export const MessagesTray: FC<MessagesTrayProps> = (
-  props: MessagesTrayProps
-) => {
-  const { theme } = props;
-  const appRef = createRef<HTMLDivElement>();
-  const messagesButtonRef = useRef<HTMLButtonElement>(null);
-  const { dockColor, windowColor, textColor } = theme;
+export const MessagesTray: FC<MessagesTrayProps> = observer(
+  (props: MessagesTrayProps) => {
+    const { theme } = props;
+    const { dockColor, textColor } = theme;
+    const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
+      useTrayApps();
 
-  return (
-    <TrayMenu
-      id="messages-tray"
-      appRef={appRef}
-      buttonRef={messagesButtonRef}
-      dimensions={dimensions}
-      content={
-        <MiniApp
-          id="messages-tray-app"
-          ref={appRef}
-          dimensions={dimensions}
-          backgroundColor={dockColor}
-          textColor={textColor}
-        >
-          <Chat theme={theme} dimensions={dimensions} />
-        </MiniApp>
-      }
-    >
-      <Badge
-        wrapperHeight={iconSize}
-        wrapperWidth={iconSize}
-        top={1}
-        right={1}
-        minimal
-        count={0}
+    const position = 'top-left';
+    const anchorOffset = { x: 4, y: 26 };
+
+    const onButtonClick = useCallback(
+      (evt: any) => {
+        evt.stopPropagation();
+        if (activeApp === 'messages-tray') {
+          setActiveApp(null);
+          return;
+        }
+        const { left, bottom }: any = calculateAnchorPoint(
+          evt,
+          anchorOffset,
+          position,
+          dimensions
+        );
+        setTrayAppCoords({
+          left,
+          bottom,
+        });
+        setTrayAppDimensions(dimensions);
+        setActiveApp('messages-tray');
+      },
+      [activeApp, anchorOffset, position, dimensions]
+    );
+
+    return (
+      <Flex
+        id="messages-tray-icon"
+        className="realm-cursor-hover"
+        position="relative"
+        whileTap={{ scale: 0.95 }}
+        transition={{ scale: 0.2 }}
+        onClick={onButtonClick}
       >
-        <IconButton
-          id="messages-tray-icon"
-          ref={messagesButtonRef}
-          size={iconSize}
-          customBg={dockColor}
-          // data-selected
-          color={textColor}
-          whileTap={{ scale: 0.9 }}
-          transition={{ scale: 0.1 }}
+        <Badge
+          wrapperHeight={iconSize}
+          wrapperWidth={iconSize}
+          top={1}
+          right={1}
+          minimal
+          count={0}
         >
-          <Icons name="Messages" pointerEvents="none" />
-        </IconButton>
-      </Badge>
-    </TrayMenu>
-  );
-};
+          <IconButton
+            id="messages-tray-icon"
+            size={iconSize}
+            customBg={dockColor}
+            // data-selected
+            color={textColor}
+            whileTap={{ scale: 0.9 }}
+            transition={{ scale: 0.1 }}
+          >
+            <Icons name="Messages" pointerEvents="none" />
+          </IconButton>
+        </Badge>
+      </Flex>
+    );
+  }
+);

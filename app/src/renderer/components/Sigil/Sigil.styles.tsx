@@ -33,6 +33,7 @@ export const AvatarWrapper = styled(styled.div`
   position: relative;
   text-align: center;
   vertical-align: middle;
+  background: transparent;
   -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
   -moz-box-sizing: content-box; /* Firefox, other Gecko */
   box-sizing: content-box; /* Opera/IE 8+ */
@@ -41,20 +42,10 @@ export const AvatarWrapper = styled(styled.div`
   img {
     user-select: none;
     pointer-events: none;
-    /* pointer-events: ${(props) => (props.clickable ? 'none' : 'inherit')}; */
+    height: ${(props) => props.sigilSize}px;
+    width: ${(props) => props.sigilSize}px;
   }
   transition: ${(props) => props.theme.transition};
-
-  ${(props: SigilStyleProps) =>
-    props.overlayBorder &&
-    css`
-      img {
-        border-width: 3px;
-        border-style: solid;
-        border-color: ${props.overlayBorder};
-        box-sizing: content-box; /* Opera/IE 8+ */
-      }
-    `}
 
   ${(props: SigilStyleProps) =>
     props.clickable &&
@@ -100,14 +91,6 @@ export const SigilStyle = styled(
         transition: ${(props) => props.theme.transition};
       }
     }
-
-    ${(props: SigilStyleProps) =>
-      props.overlayBorder &&
-      css`
-        border-width: 3px;
-        border-style: solid;
-        border-color: ${props.overlayBorder};
-      `}
 
     ${(props: SigilStyleProps) =>
       props.clickable &&

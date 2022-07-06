@@ -35,7 +35,6 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
     () =>
       avatar ? (
         <AvatarWrapper
-          overlayBorder={borderColor}
           id="ship"
           raised={isLogin}
           style={{ borderRadius: borderRadiusOverride || 4 }}
@@ -54,7 +53,6 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
         </AvatarWrapper>
       ) : (
         <SigilStyle
-          overlayBorder={borderColor}
           raised={isLogin}
           sigilSize={size}
           sigilColor={color[0]}
@@ -62,6 +60,7 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
           style={{
             paddingLeft: horizontalPadding,
             paddingRight: horizontalPadding,
+            borderRadius: borderRadiusOverride || 4,
           }}
           borderRadiusOverride={borderRadiusOverride}
         >

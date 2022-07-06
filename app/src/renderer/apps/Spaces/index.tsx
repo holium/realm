@@ -1,7 +1,4 @@
 import { FC, useMemo, useState } from 'react';
-import { toJS } from 'mobx';
-import { rgba, lighten, darken } from 'polished';
-
 import { Grid, Flex, IconButton, Icons, Text } from 'renderer/components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
@@ -18,7 +15,7 @@ type SpacesProps = {
   };
 };
 
-export const Spaces: FC<SpacesProps> = observer((props: SpacesProps) => {
+export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
   const { ship, shell, spaces } = useServices();
   const { desktop } = shell;
 

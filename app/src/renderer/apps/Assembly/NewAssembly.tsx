@@ -13,7 +13,7 @@ import {
 } from 'renderer/components';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 
 export type BaseAssemblyProps = {
   theme: ThemeModelType;

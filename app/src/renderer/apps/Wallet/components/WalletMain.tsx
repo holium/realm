@@ -34,7 +34,7 @@ export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
         YOUR BALANCE
       </Text>
       <Text mb={1} fontWeight={600} color="text.primary" fontSize={9}>
-        0 BSV
+        0 BTC
       </Text>
       <Text fontWeight={400} opacity={0.6} color="text.primary" fontSize={5}>
         ≈ 0 USD

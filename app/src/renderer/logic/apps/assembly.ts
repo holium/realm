@@ -20,6 +20,7 @@ export const AssemblyAppState = types
   .model('AssemblyAppState', {
     currentView: types.enumeration(['list', 'room', 'new-assembly']),
     selected: types.safeReference(AssemblyModel),
+    live: types.safeReference(AssemblyModel),
     assemblies: types.array(AssemblyModel),
   })
   .actions((self) => ({
@@ -27,14 +28,22 @@ export const AssemblyAppState = types
       self.currentView = view;
     },
     setSelected(selected: AssemblyModelType) {
-      self.selected = self.assemblies.find(
+      const room = self.assemblies.find(
         (a: AssemblyModelType) => a.title === selected.title
       );
+      self.selected = room;
+      self.live = room;
     },
     startRoom(newRoomData: AssemblyModelType) {
       const newRoom = AssemblyModel.create(newRoomData);
       self.assemblies.unshift(newRoom);
       self.selected = newRoom;
+      self.live = newRoom;
+    },
+    leaveRoom() {
+      self.selected = undefined;
+      self.live = undefined;
+      self.currentView = 'list';
     },
   }));
 
