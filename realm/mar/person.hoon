@@ -14,6 +14,6 @@
   |%
   ++  noun  action
   ++  json  action:dejs
-  ++  text  action:detxt
+  ++  text  (action:dejs (dejs:format (action:entxt act)))
   --
 --

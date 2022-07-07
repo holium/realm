@@ -152,15 +152,4 @@
     ^-  cord
     (crip (en-json:html (action:enjs upd)))
   --
-::
-++  detxt
-  =,  dejs:format
-  |%
-  ++  action
-    |=  txt=cord
-    ^-  ^action
-    =/  jon  (de-json:html txt)
-    ?~  jon  !!
-    (action:dejs (need jon))
-  --
 --
