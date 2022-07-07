@@ -1,3 +1,8 @@
+/**
+ * Virtual renderers:
+ * - https://github.com/wellyshen/react-cool-virtual
+ */
+
 import { FC, useEffect, useState, useMemo, useRef } from 'react';
 import { rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
@@ -74,7 +79,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         const formData = dmForm.actions.submit();
         if (formData) console.log(formData);
         const dmMessageContent = formData['dm-message'];
-        // console.log(dmMessage);
+        console.log(selectedChat.contact, dmMessageContent);
+
         DmActions.sendDm(selectedChat.contact, dmMessageContent);
         // @ts-ignore
         chatInputRef.current.value = '';

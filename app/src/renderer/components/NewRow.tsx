@@ -35,7 +35,7 @@ export const Row = styled(motion.div)<RowProps>`
           `
         : css`
             pointer-events: none;
-            opacity: 0.3;
+            opacity: 0.5;
           `}
       ${props.selected &&
       css`

@@ -127,7 +127,10 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
-    mainWindow.webContents.send('set-fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send(
+      'realm.desktop.set-fullscreen',
+      mainWindow.isFullScreen()
+    );
     mainWindow.webContents.send(
       'set-appview-preload',
       path.join(app.getAppPath(), 'appview.preload.js')

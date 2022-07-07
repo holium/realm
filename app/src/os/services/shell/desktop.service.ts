@@ -44,6 +44,7 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-app-dimensions': this.setAppDimensions,
     'realm.desktop.set-mouse-color': this.setMouseColor,
     'realm.desktop.set-theme': this.setTheme,
+    // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
     'realm.desktop.close-app-window': this.closeAppWindow,
     'realm.desktop.open-dialog': this.openDialog,
@@ -115,6 +116,11 @@ export class DesktopService extends BaseService {
     closeDialog: () => {
       return ipcRenderer.invoke('realm.desktop.close-dialog');
     },
+    // setFullscreen(isFullscreen: boolean) {
+    //   console.log('realm.desktop.set-fullscreen');
+    //   return ipcRenderer.invoke('realm.desktop.set-fullscreen', isFullscreen);
+    //   // ipcRenderer.on('realm.desktop.set-fullscreen', callback);
+    // },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -153,6 +159,10 @@ export class DesktopService extends BaseService {
 
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
+  }
+
+  setFullscreen(_event: any, isFullscreen: boolean) {
+    this.state?.setFullscreen(isFullscreen);
   }
 
   openDialog(_event: any, dialogId: string) {

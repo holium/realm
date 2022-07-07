@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
-import { Flex } from 'renderer/components';
+import { Flex, Input, Icons } from 'renderer/components';
 import { AppTile } from 'renderer/components/AppTile';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { NativeAppList } from 'renderer/apps';
@@ -49,10 +49,32 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         <Flex
           flex={1}
           height="100%"
-          flexDirection="row"
+          flexDirection="column"
           alignItems="center"
-          justifyContent="center"
+          justifyContent="flex-start"
+          pt={180}
         >
+          <Input
+            className="realm-cursor-text-cursor"
+            type="text"
+            placeholder="Search for apps"
+            bgOpacity={0.3}
+            borderColor={'input.borderHover'}
+            bg="bg.blendedBg"
+            wrapperStyle={{
+              borderRadius: 25,
+              height: 44,
+              maxWidth: 400,
+              marginBottom: 50,
+              paddingLeft: 12,
+              paddingRight: 16,
+            }}
+            rightIcon={
+              <Flex>
+                <Icons name="Search" opacity={0.5} />
+              </Flex>
+            }
+          />
           <Flex
             variants={{
               hidden: {

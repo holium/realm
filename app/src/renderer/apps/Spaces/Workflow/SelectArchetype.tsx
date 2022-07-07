@@ -1,6 +1,4 @@
-import { FC, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { FC, useState } from 'react';
 import { Grid, Text, Flex } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';

@@ -59,21 +59,21 @@ export const trayStore = TrayAppStore.create({
   assemblyApp: {
     currentView: 'list',
     selected: undefined,
-    live: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
+    // live: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
     assemblies: [
-      {
-        id: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
-        title: 'Daily work chat',
-        host: '~labruc-dillyx-lomder-librun',
-        people: [
-          '~labruc-dillyx-lomder-librun',
-          '~lomder-librun',
-          '~lodlev-migdev',
-          '~bus',
-        ],
-        cursors: true,
-        private: false,
-      },
+      // {
+      //   id: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
+      //   title: 'Daily work chat',
+      //   host: '~labruc-dillyx-lomder-librun',
+      //   people: [
+      //     '~labruc-dillyx-lomder-librun',
+      //     '~lomder-librun',
+      //     '~lodlev-migdev',
+      //     '~bus',
+      //   ],
+      //   cursors: true,
+      //   private: false,
+      // },
     ],
   },
 });

@@ -160,7 +160,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     autoCorrect="false"
                     bgOpacity={hasWallpaper ? 0.3 : 1}
                     borderColor={
-                      hasWallpaper ? 'inpurt.borderHover' : 'input.borderColor'
+                      hasWallpaper ? 'input.borderHover' : 'input.borderColor'
                     }
                     wrapperStyle={{
                       borderRadius: 8,

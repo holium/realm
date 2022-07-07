@@ -315,6 +315,13 @@ export class ShipService extends BaseService {
     const ourShip = this.state?.patp!;
     const dm = this.state?.chat.dms.get(toShip)!;
     dm.sendDm(contents);
+    // TODO fix send new dm
+    // if (this.state?.chat.dms.get(toShip)) {
+    // } else {
+    //   // this.state?.chat.sendNewDm([toShip], this.con)
+    //   // const dm = this.state?.chat.dms.get(toShip)!;
+    //   // dm.sendDm(contents);
+    // }
     return await DmApi.sendDM(
       ourShip,
       toShip,
