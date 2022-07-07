@@ -1,5 +1,5 @@
 import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
+import { spacesDialogs, onboardingDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
 
 export type BaseWorkflowProps = {
@@ -33,4 +33,5 @@ export type DialogRenderers = {
 export const dialogRenderers: DialogRenderers = {
   'wallpaper-dialog': WallpaperDialogConfig,
   ...spacesDialogs,
+  ...onboardingDialogs
 };

@@ -1,0 +1,48 @@
+import { FC, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import { createField, createForm } from 'mobx-easy-form';
+import { Grid, Text, Flex } from 'renderer/components';
+import { observer } from 'mobx-react';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+
+// some stuff goes here
+const DisclaimerDialog: FC<BaseDialogProps> = observer(
+  (props: BaseDialogProps) => {
+    let [checked, setChecked] = useState(props.workflowState?.disclaimerAccepted || false)
+
+  function toggleChecked (): void {
+    let toggledValue = !checked
+    props.setState && props.setState({ disclaimerAccepted: toggledValue })
+    setChecked(toggledValue)
+  }
+
+    return (
+      <Grid.Column noGutter lg={12} xl={12}>
+        <Text
+          fontSize={3}
+          fontWeight={600}
+          mb={20}
+        >
+          Disclaimer
+        </Text>
+        <Text
+          fontSize={2}
+          fontWeight={300}
+          variant="body">
+          User acknowledges and agrees that this software and system are experimental, that all use thereof is on an “as is” basis, and that Holium Corporation makes no warranties and EXPRESSLY DISCLAIMS the warranties of merchantability, fitness for a particular purpose, and non-infringement.  User accordingly agrees to be an Alpha user under these conditions.
+          <br/><br/>
+          Possible addition, or separate instruction to users:  Alpha users are encouraged to report any perceived bugs or problems in the software and system to Holium Corporation by email at bugs@holium.io
+        </Text>
+        <br/>
+        <Flex flexDirection="row" justifyContent="flex-start">
+          <input type="checkbox" id="disclaimer" onClick={toggleChecked}/>
+          <Text fontSize={2} fontWeight={300}>I agree</Text>
+        </Flex>
+        {checked}
+      </Grid.Column>
+    )
+  }
+)
+
+export default DisclaimerDialog

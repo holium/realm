@@ -27,4 +27,15 @@ export const devApps: {
       development: true,
     },
   },
+  'onboarding-dev': {
+    id: 'onboarding-dev',
+    title: 'Onboarding — Dev',
+    type: 'native',
+    color: '#ffffff',
+    icon: '',
+    native: {
+      hideTitlebarBorder: false,
+      openFullscreen: false
+    }
+  }
 };

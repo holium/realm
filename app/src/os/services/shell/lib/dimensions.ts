@@ -25,4 +25,8 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     width: 800,
     height: 800,
   },
+  ['onboarding-demo']: {
+    width: 100,
+    height: 150
+  }
 };

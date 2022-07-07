@@ -10,6 +10,7 @@ import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
+import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
 
@@ -25,6 +26,7 @@ export class Realm extends EventEmitter {
   private session?: ISession;
   private db: Store<ISession>;
   readonly services: {
+    onboarding: OnboardingService;
     identity: {
       auth: AuthService;
       signup: SignupService;
@@ -58,6 +60,7 @@ export class Realm extends EventEmitter {
     ship: ShipService.preload,
     spaces: SpacesService.preload,
     shell: DesktopService.preload,
+    onboarding: OnboardingService.preload
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -75,6 +78,7 @@ export class Realm extends EventEmitter {
     }
     // Create an instance of all services
     this.services = {
+      onboarding: new OnboardingService(this),
       identity: {
         auth: new AuthService(this),
         signup: new SignupService(this),
