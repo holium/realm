@@ -13,6 +13,9 @@
 ::  $rank - user rank (exploratory)
 ::
 :: +$  rank  ?(%duke %null)
+::
+::  $space - space id as @t
+:: +$  space  path
 ::  $metaspace - selective aspects of a broader space used for
 ::    efficiency purposes
 +$  metaspace
@@ -29,12 +32,14 @@
 ::  $person: todo. build out based on further feature development
 ::
 +$  person
-  $:  =rank:title
+  $:  =role
+      =rank:title
       last-updated=@da
   ==
 ::
 +$  edit-field
-  $%  [%rank =rank:title]
+  $%  [%role =role]
+      [%rank =rank:title]
   ==
 ::
 +$  edit-person-field
@@ -46,9 +51,11 @@
 ::
 +$  people  (map ship person)
 ::
-+$  update
-  $%  [%add =ship =person]
-      [%remove =ship]
-      [%edit =ship =edit-field timestamp=@da]
+::  $action:
+::    =path - space url
++$  action
+  $%  [%add space=@t =ship =person]
+      [%remove space=@t =ship]
+      [%edit space=@t =ship =edit-field timestamp=@da]
   ==
 --

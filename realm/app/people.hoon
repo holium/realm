@@ -49,18 +49,17 @@
     ~&  >>  "{<dap.bowl>}: on-poke"
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %people-update-0  (update !<(update:store vase))
+      %people-action  (act !<(action:store vase))
       %test-mark
         %-  (slog leaf+"{<dap.bowl>}: received {<mark>}" ~)
-        :: =/  person=person:store  ['test' now.bowl]
-        :: =+  data=[%add our.bowl person]
-        :: %-  (slog leaf+"{<dap.bowl>}: building tube" ~)
-        :: :: =/  home=path  /(scot %p our.bowl)/home/(scot %da now.bowl)
-        :: =/  home=path  /(scot %p our.bowl)/realm/(scot %da now.bowl)
-        :: =/  js-tube  .^(tube:clay %cc (weld home /mar/person/json))
-        :: %-  (slog leaf+"{<dap.bowl>}: tube built" ~)
-        :: =/  result  !<(json (js-tube !>(data)))
-        :: ~&  >  "{<result>}"
+        =/  person=person:store  [%owner %czar now.bowl]
+        =+  data=[%add %my-space our.bowl person]
+        %-  (slog leaf+"{<dap.bowl>}: building tube" ~)
+        =/  home=path  /(scot %p our.bowl)/realm/(scot %da now.bowl)
+        =/  js-tube  .^(tube:clay %cc (weld home /person/json))
+        %-  (slog leaf+"{<dap.bowl>}: tube built" ~)
+        =/  result  (js-tube !>(data))
+        ~&  >  "{<result>}"
         `state
     ==
     [cards this]
@@ -165,17 +164,19 @@
   ++  on-fail   on-fail:def
   --
 |_  =bowl:gall
-++  update
-  |=  =update:store
+++  act
+  |=  =action:store
   ^-  (quip card _state)
-  ?-  -.update
-    %add         (handle-add +.update)
-    %remove      (handle-remove +.update)
-    %edit        (handle-edit +.update)
+  ?-  -.action
+    %add         (handle-add +.action)
+    %remove      (handle-remove +.action)
+    %edit        (handle-edit +.action)
   ==
 ::
+::  $handle-add: add a new person to the person store, while
+::    also adding a new space entry to track ship/role relationships
 ++  handle-add
-  |=  [=ship =person:store]
+  |=  [space=@t =ship =person:store]
   ^-  (quip card _state)
   ::  ensure difference
   =/  old=(unit person:store)  (~(get by people) ship)
@@ -183,17 +184,20 @@
           !=(person(last-updated *@da) u.old(last-updated *@da))
       ==
     [~ state]
-  :_  state(people (~(put by people) ship person))
-  :~  [%give %fact [/updates ~] %person-update-0 !>([%add ship person])]
+  =/  meta=metaspace:store   [ship role.person]
+  =/  metas  (~(got by spaces) space)
+  =/  metas  (~(put in metas) meta)
+  :_  state(spaces (~(put by spaces) space metas), people (~(put by people) ship person))
+  :~  [%give %fact [/updates ~] %person-action !>([%add ship person])]
   ==
 ::
 ++  handle-remove
-  |=  [=ship]
+  |=  [space=@t =ship]
   ^-  (quip card _state)
   `state
 ::
 ++  handle-edit
-  |=  [=ship edit=edit-field:store timestamp=@da]
+  |=  [space=@t =ship edit=edit-field:store timestamp=@da]
   ^-  (quip card _state)
   `state
 :: ::

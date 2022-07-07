@@ -7,55 +7,78 @@
 ++  enjs
   =,  enjs:format
   |%
-  ++  update
-    |=  upd=^update
+  ++  action
+    |=  upd=^action
     ^-  json
-    %+  frond  %people-update
     %-  pairs
-    :_  ~
-    ^-  [cord json]
+    ^-  (list [cord json])
+    %-  weld
+    :_  ^-  (list [cord json])
+        :~  [%action s+-.upd]
+            [%resource s+%people]
+        ==
+    ^-  (list [cord json])
     ?-  -.upd
     ::
         %add
-      :-  %add
-      %-  pairs
-      :~  [%ship (ship ship.upd)]
-          [%person (cont person.upd)]
-      ==
+      :~  :-  %context
+          %-  pairs
+          :~  [%space s+space.upd]
+          ==
+          :-  %data
+          %-  pairs
+          :~  [%ship (ship ship.upd)]
+              [%person (cont person.upd)]
+      ==  ==
     ::
         %remove
-      :-  %remove
-      (pairs [%ship (ship ship.upd)]~)
+    :~  :-  %context
+        %-  pairs
+        :~  [%space s+space.upd]
+        ==
+        :-  %data
+        %-  pairs
+        :~  [%ship (ship ship.upd)]
+    ==  ==
     ::
         %edit
-      :-  %edit
-      %-  pairs
-      :~  [%ship (ship ship.upd)]
-          [%edit-field (edit edit-field.upd)]
-          [%timestamp (time timestamp.upd)]
-      ==
-    ==
+    :~  :-  %context
+        %-  pairs
+        :~  [%space s+space.upd]
+            [%ship (ship ship.upd)]
+        ==
+        :-  %data
+        %-  pairs
+        :~  [%edit-field (edit edit-field.upd)]
+            [%timestamp (time timestamp.upd)]
+    ==  ==  ==
+
   ::
   ++  cont
     |=  =person
     ^-  json
     %-  pairs
-    :~  [%rank [%s rank.person]]
+    :~  [%role [%s role.person]]
+        [%rank [%s rank.person]]
         [%last-updated (time last-updated.person)]
     ==
   ::
   ++  edit
     |=  field=edit-field
     ^-  json
-    [%s rank.field]
+    %+  frond  -.field
+    ?-  -.field
+      %role      s+role.field
+      %rank      s+rank.field
+    ==
   --
 ::
 ++  dejs
   =,  dejs:format
   |%
-  ++  update
+  ++  action
     |=  jon=json
-    ^-  ^update
+    ^-  ^action
     =<  (decode jon)
     |%
     ++  decode
@@ -67,22 +90,29 @@
     ::
     ++  add-person
       %-  ot
-      :~  [%ship (su ;~(pfix sig fed:ag))]
+      :~  [%space so]
+          [%ship (su ;~(pfix sig fed:ag))]
           [%person cont]
       ==
     ::
-    ++  remove-person  (ot [%ship (su ;~(pfix sig fed:ag))]~)
+    ++  remove-person
+      %-  ot
+      :~  [%space so]
+          [%ship (su ;~(pfix sig fed:ag))]
+      ==
     ::
     ++  edit-person
       %-  ot
-      :~  [%ship (su ;~(pfix sig fed:ag))]
+      :~  [%space so]
+          [%ship (su ;~(pfix sig fed:ag))]
           [%edit-field edit]
           [%timestamp di]
       ==
     ::
     ++  cont
       %-  ot
-      :~  [%rank rnk]
+      :~  [%role rol]
+          [%rank rnk]
           [%last-updated di]
       ==
     ::
@@ -101,6 +131,36 @@
     ?:  =('earl' p.json)  %earl
     ?:  =('pawn' p.json)  %pawn
     !!
+  ::
+  ++  rol
+    |=  =json
+    ^-  role
+    ?>  ?=(%s -.json)
+    ?:  =('owner' p.json)  %owner
+    ?:  =('admin' p.json)  %admin
+    ?:  =('member' p.json)  %member
+    ?:  =('initiate' p.json)  %initiate
+    !!
     --
+  --
+::
+++  entxt
+  =,  enjs:format
+  |%
+  ++  action
+    |=  upd=^action
+    ^-  cord
+    (crip (en-json:html (action:enjs upd)))
+  --
+::
+++  detxt
+  =,  dejs:format
+  |%
+  ++  action
+    |=  txt=cord
+    ^-  ^action
+    =/  jon  (de-json:html txt)
+    ?~  jon  !!
+    (action:dejs (need jon))
   --
 --

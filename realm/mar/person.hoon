@@ -1,17 +1,19 @@
 /+  *people-store
 ::
-|_  upd=update
+|_  act=action
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  upd
-  ++  people-update-0  upd
-  ++  json  (update:enjs upd)
+  ++  noun  act
+  ++  people-update-0  act
+  ++  json  (action:enjs act)
+  ++  text  (action:entxt act)
   --
 ::
 ++  grab
   |%
-  ++  noun  update
-  ++  json  update:dejs
+  ++  noun  action
+  ++  json  action:dejs
+  ++  text  action:detxt
   --
 --
