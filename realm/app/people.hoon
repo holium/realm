@@ -51,15 +51,15 @@
     ?+  mark  (on-poke:def mark vase)
       %people-action  (act !<(action:store vase))
       %test-mark
-        %-  (slog leaf+"{<dap.bowl>}: received {<mark>}" ~)
+        %-  (slog leaf+"{<dap.bowl>}: received {<mark>}, {<vase>}" ~)
         =/  person=person:store  [%owner %czar now.bowl]
         =+  data=[%add %my-space our.bowl person]
         %-  (slog leaf+"{<dap.bowl>}: building tube" ~)
         =/  home=path  /(scot %p our.bowl)/realm/(scot %da now.bowl)
         =/  js-tube  .^(tube:clay %cc (weld home /person/json))
         %-  (slog leaf+"{<dap.bowl>}: tube built" ~)
-        =/  result  (js-tube !>(data))
-        ~&  >  "{<result>}"
+        =/  result  !<(json (js-tube !>(data)))
+        ~&  >  (en-json:html result)
         `state
     ==
     [cards this]

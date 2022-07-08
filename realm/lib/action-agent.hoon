@@ -10,7 +10,7 @@
 ::  ~lodlev-migdev - the action agent manages its own state; but must
 ::   also manage/persist the underlying app's (derived app) state for this
 ::   model to work
-+$  state-0  [%0 store=(map @t json) app-state=vase]
++$  state-0  [%0 store=(map @t json) app-state=* app-state-type=type]
 ::
 ++  agent
   |=  =agent:gall
@@ -31,17 +31,21 @@
     ::
     ++  on-save
       ^-  vase
-      =.  app-state.state  on-save:ag
+      =/  app-state  on-save:ag
+      =.  app-state-type.state  -.app-state
+      =.  app-state.state  +.app-state
+      :: ~&  >  state
       !>(state)
+      :: on-save:ag
     ::
     ++  on-load
       |=  old-state=vase
       ^-  (quip card:agent:gall agent:gall)
+      :: (on-load:ag old-state)
       =/  old  !<(versioned-state old-state)
       ?-  -.old
         %0
-          :: =/  app-state  (cue app-state.old)
-          =^  cards  agent  (on-load:ag app-state.old)
+          =^  cards  agent  (on-load:ag [app-state-type.old app-state.old])
           `this(state old)
       ==
     ::

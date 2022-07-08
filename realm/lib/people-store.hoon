@@ -144,12 +144,22 @@
     --
   --
 ::
-++  entxt
+++  en-txt
   =,  enjs:format
   |%
   ++  action
     |=  upd=^action
     ^-  cord
     (crip (en-json:html (action:enjs upd)))
+  --
+++  de-txt
+  =,  dejs:format
+  |%
+  ++  action
+    |=  txt=@t
+    ^-  ^action
+    ::(action:dejs (dejs:format (action:entxt txt)))
+    :: %-  (slog leaf+"{<txt>}" ~)
+    *action
   --
 --
