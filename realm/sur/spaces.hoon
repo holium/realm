@@ -4,10 +4,6 @@
 ::  A space is a higher level concept above a %landscape group.
 /-  *apps
 |%
-
-:: +$  choice  [label=@t description=@t action=@t]
-:: +$  status  ?(%pending %recorded %counted)
-
 +$  token
   $:  chain=?(%ethereum %uqbar)
       contract=@t
@@ -19,11 +15,14 @@
 +$  theme
   $:  label=@t
       background-color=@ux
+      accent-color=@ux
+      input-color=@ux
       dock-color=@ux
       icon-color=@ux
       text-color=@ux
       window-color=@ux
       text-theme=@t
+      mode=?(%dark %light)
       wallpaper=@t
   ==
 
@@ -32,14 +31,14 @@
       apps=(list apps)
   ==
 
-+$  base-space
++$  space
   $:  path=@t
       name=@t
       type=?(%group %our %dao)
       picture=@t
+      color=@ux
       =theme
       =token
-
   ==
 
 --

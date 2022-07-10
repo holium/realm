@@ -22,9 +22,8 @@
 
 ::  
 +$  native-app
-  $:  id=@tas
+  $:  desk=@tas
       title=@t
-      type=?(%native %web)
       info=@t
       color=@ux
       image=cord
@@ -34,7 +33,6 @@
 +$  web-app
   $:  id=@tas
       title=@t
-      type=?(%native %web)
       href=cord
   ==
 
