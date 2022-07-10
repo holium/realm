@@ -97,14 +97,15 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     acceptFirstMouse: true,
+    paintWhenInitiallyHidden: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
+      // nodeIntegrationInSubFrames: true,
       // sandbox: true,
       // nodeIntegrationInWorker: true,
       contextIsolation: true,
-      // additionalArguments: [`storePath:${app.getPath('userData')}`],
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.holium/dll/preload.js'),
@@ -122,8 +123,11 @@ const createWindow = async () => {
   MediaHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+
   mainWindow.maximize();
   mainWindow.on('ready-to-show', () => {
+    // This is how you can set scale
+    mainWindow?.webContents.setZoomFactor(1.1);
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }

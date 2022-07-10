@@ -1,5 +1,5 @@
 import { FC, useMemo } from 'react';
-import { lighten } from 'polished';
+import { darken, lighten } from 'polished';
 import { Flex, Text } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Bubble } from './Bubble';
@@ -46,6 +46,14 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
     [message.index]
   );
 
+  const referenceColor = useMemo(
+    () =>
+      theme!.mode === 'light'
+        ? darken(0.075, theme!.windowColor)
+        : theme!.windowColor,
+    [theme?.windowColor]
+  );
+
   const isMention = messageTypes.includes('mention');
   return (
     <Flex
@@ -76,6 +84,8 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
                   key={`${index}-message-${index}`}
                   type={type}
                   color={color}
+                  textColor={theme!.textColor}
+                  bgColor={referenceColor}
                   content={content}
                 />
               );

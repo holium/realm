@@ -33,7 +33,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
     : [...NativeAppList];
-
   return (
     <AnimatePresence>
       <HomeWindow
@@ -48,11 +47,12 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
       >
         <Flex
           flex={1}
+          overflowY="auto"
           height="100%"
           flexDirection="column"
           alignItems="center"
           justifyContent="flex-start"
-          pt={180}
+          pt="100px"
         >
           <Input
             className="realm-cursor-text-cursor"
@@ -108,6 +108,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             exit="hidden"
             gap={16}
             width="888px"
+            mb="180px"
             flexWrap="wrap"
             flexDirection="row"
           >

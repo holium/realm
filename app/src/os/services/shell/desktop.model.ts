@@ -23,6 +23,7 @@ type DimensionModelType = Instance<typeof DimensionsModel>;
 const Window = types
   .model('WindowModel', {
     id: types.identifier,
+    glob: types.optional(types.boolean, false),
     title: types.optional(types.string, ''),
     zIndex: types.number,
     type: types.optional(
@@ -41,6 +42,7 @@ export type WindowModelType = Instance<typeof Window>;
 export type WindowModelProps = {
   id: string;
   title?: string;
+  glob?: boolean;
   zIndex: number;
   type: 'urbit' | 'web' | 'native' | 'dialog';
   dimensions: {
@@ -166,9 +168,14 @@ export const DesktopStore = types
       windowDimensions && applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(app: any) {
+      let glob = app.glob;
+      if (app.href) {
+        glob = app.href.glob ? true : false;
+      }
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
+        glob,
         zIndex: self.windows.size + 1,
         type: app.type,
         dimensions: getInitialWindowDimensions(
@@ -183,6 +190,7 @@ export const DesktopStore = types
         self.showHomePane = false;
         self.isBlurred = false;
       }
+      return newWindow;
     },
     closeBrowserWindow(appId: any) {
       if (self.activeWindow?.id === appId) {

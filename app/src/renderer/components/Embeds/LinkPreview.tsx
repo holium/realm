@@ -3,7 +3,9 @@ import { Flex, Icons, EmbedBox } from '..';
 import styled from 'styled-components';
 import { ThemeType } from 'renderer/theme';
 
-const LinkPreviewStyle = styled(Flex)`
+type LinkPreviewStyleType = { theme: ThemeType; customTextColor?: string };
+
+const LinkPreviewStyle = styled(Flex)<LinkPreviewStyleType>`
   /* border-radius: 6px; */
   height: 30px;
   padding: 2px 8px;
@@ -11,10 +13,8 @@ const LinkPreviewStyle = styled(Flex)`
   width: 100%;
   gap: 8px;
   align-items: center;
-  /* background: ${(props: { theme: ThemeType }) =>
-    props.theme.colors.ui.tertiary}; */
   svg {
-    fill: ${(props: { theme: ThemeType }) => props.theme.colors.text.tertiary};
+    fill: ${(props: LinkPreviewStyleType) => props.customTextColor};
   }
 
   a {
@@ -25,19 +25,24 @@ const LinkPreviewStyle = styled(Flex)`
     width: calc(100% - 20px);
     text-overflow: ellipsis;
     font-size: 14px;
-    color: ${(props: { theme: ThemeType }) => props.theme.colors.text.tertiary};
+    color: ${(props: LinkPreviewStyleType) => props.customTextColor};
   }
 `;
 
 interface ILinkPreview {
   link: string;
   canPreview?: boolean;
+  textColor?: string;
+  customBg?: string;
 }
 
 export const LinkPreview: FC<ILinkPreview> = (props: ILinkPreview) => {
   return (
-    <EmbedBox canHover>
-      <LinkPreviewStyle className="realm-cursor-hover">
+    <EmbedBox canHover customBg={props.customBg}>
+      <LinkPreviewStyle
+        customTextColor={props.textColor}
+        className="realm-cursor-hover"
+      >
         <Icons name="Link" />
         <a href={props.link}>{props.link}</a>
       </LinkPreviewStyle>

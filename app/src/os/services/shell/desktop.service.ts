@@ -13,6 +13,7 @@ import {
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
+import { AppModelType } from '../ship/models/docket';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
 import { ThemeModelType } from './theme.model';
 
@@ -228,14 +229,16 @@ export class DesktopService extends BaseService {
     this.state?.setDimensions(windowId, dimensions);
   }
   openAppWindow(_event: any, spaceId: string, selectedApp: any) {
-    this.state?.openBrowserWindow(selectedApp);
+    const newWindow = this.state!.openBrowserWindow(selectedApp);
     const credentials = this.core.credentials!;
 
     if (
       selectedApp.type === 'urbit' ||
-      (selectedApp.type === 'web' && !selectedApp.web.development)
+      (selectedApp.type === 'web' && !selectedApp.web?.development)
     ) {
-      const appUrl = `${credentials.url}/apps/${selectedApp.id!}`;
+      const appUrl = newWindow.glob
+        ? `${credentials.url}/apps/${selectedApp.id!}`
+        : `${credentials.url}/${selectedApp.id!}`;
       // Hit the main process handler for setting partition cookies
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
         url: appUrl,

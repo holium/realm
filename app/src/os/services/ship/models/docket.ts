@@ -1,18 +1,28 @@
-import { types, Instance, flow, applySnapshot } from 'mobx-state-tree';
+import {
+  types,
+  Instance,
+  cast,
+  getType,
+  applySnapshot,
+  castToSnapshot,
+} from 'mobx-state-tree';
 
 const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 
 export const Glob = types.model({
-  glob: types.model({
-    base: types.string,
-    'glob-reference': types.model({
-      location: types.model({
-        http: types.maybe(types.string),
-        ames: types.maybe(types.string),
+  site: types.maybe(types.string),
+  glob: types.maybe(
+    types.model({
+      base: types.string,
+      'glob-reference': types.model({
+        location: types.model({
+          http: types.maybe(types.string),
+          ames: types.maybe(types.string),
+        }),
+        hash: types.string,
       }),
-      hash: types.string,
-    }),
-  }),
+    })
+  ),
 });
 
 export const DocketApp = types.model('DocketApp', {
@@ -75,8 +85,12 @@ export const DocketStore = types
           (app: DocketAppType) => app.title !== 'System' // && app.title !== 'Terminal'
         )
         .forEach((app: DocketAppType) => {
+          let id = app.title;
+          if (app.href.glob) {
+            id = app.href.glob!.base!;
+          }
           const appTile = DocketApp.create({
-            id: app.href.glob.base,
+            id,
             title: app.title,
             info: app.info,
             color: app.color,
@@ -87,7 +101,7 @@ export const DocketStore = types
             website: app.website,
             license: app.license,
           });
-          preparedApps[app.href.glob.base] = appTile;
+          preparedApps[id] = appTile;
         });
       applySnapshot(self.apps, preparedApps);
     },

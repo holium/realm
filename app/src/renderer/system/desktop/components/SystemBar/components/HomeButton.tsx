@@ -10,7 +10,7 @@ import { rgba } from 'polished';
 type HomeButton = {};
 
 export const HomeButton: FC<HomeButton> = observer(() => {
-  const { shell } = useServices();
+  const { ship, shell } = useServices();
   const { desktop } = shell;
 
   const { dockColor, textColor } = useMemo(
@@ -69,7 +69,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
         </SystemBarStyle>
       </motion.div>
     ),
-    [desktop.theme.textColor, desktop.theme.dockColor]
+    [ship?.patp, desktop.theme.textColor, desktop.theme.dockColor]
   );
 });
 

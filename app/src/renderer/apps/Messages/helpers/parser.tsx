@@ -12,7 +12,12 @@ export const getTextFromContent = (type: string, content: any) => {
   }
 };
 
-export const getReferenceView = async (reference: any, setter: any) => {
+export const getReferenceView = async (
+  reference: any,
+  setter: any,
+  embedColor?: string,
+  textColor?: string
+) => {
   const referenceType: any = Object.keys(reference)[0];
   switch (referenceType) {
     case 'group':
@@ -23,6 +28,8 @@ export const getReferenceView = async (reference: any, setter: any) => {
             setter(
               <GroupLink
                 {...response.metadata}
+                textColor={textColor}
+                bgColor={embedColor}
                 description={null}
                 color={
                   response.metadata.color
@@ -34,6 +41,8 @@ export const getReferenceView = async (reference: any, setter: any) => {
           } else {
             setter(
               <GroupLink
+                textColor={textColor}
+                bgColor={embedColor}
                 title={reference.group.replace('/ship/', '')}
                 description="Could not load metadata"
                 color="#a1a1a1"
@@ -41,7 +50,16 @@ export const getReferenceView = async (reference: any, setter: any) => {
             );
           }
         });
-      setter(<GroupLink loading title="" description="" color="" />);
+      setter(
+        <GroupLink
+          bgColor={embedColor}
+          textColor={textColor}
+          loading
+          title=""
+          description=""
+          color=""
+        />
+      );
 
       break;
     case 'app':
@@ -51,11 +69,24 @@ export const getReferenceView = async (reference: any, setter: any) => {
           setter(
             <AppLink
               {...response}
+              textColor={textColor}
+              bgColor={embedColor}
               color={response.color ? cleanNounColor(response.color) : null}
             />
           );
         });
-      setter(<AppLink loading title="" info="" ship="" version="" color="" />);
+      setter(
+        <AppLink
+          bgColor={embedColor}
+          textColor={textColor}
+          loading
+          title=""
+          info=""
+          ship=""
+          version=""
+          color=""
+        />
+      );
       break;
     case 'code':
       setter(<Text fontSize={2}>{reference.code.expression}</Text>);

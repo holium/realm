@@ -66,7 +66,10 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         // @ts-ignore
         webview!.closeDevTools();
       });
-      let appUrl = `${ship!.url}/apps/${window.id!}`;
+      console.log(toJS(window));
+      let appUrl = window.glob
+        ? `${ship!.url}/apps/${window.id!}`
+        : `${ship!.url}/${window.id!}`;
 
       DesktopActions.openAppWindow('', toJS(window));
       setAppConfig({ url: appUrl });

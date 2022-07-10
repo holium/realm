@@ -29,7 +29,7 @@ export const Shell: FC = observer(() => {
   const isFullscreen = desktop.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
-  const { backgroundColor, mode } = shell.desktop.theme;
+  // const { backgroundColor, mode } = shell.desktop.theme;
 
   const hasWallpaper = bgImage ? true : false;
   const isBlurred = useMemo(
