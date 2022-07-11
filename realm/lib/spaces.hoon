@@ -6,7 +6,7 @@
 ++  create-space
   |=  [=ship name=@t slug=@t type=space-type:store]
   ^-  space:store
-  =/  default-theme 
+  =/  default-theme
     [
       mode=%light
       background-color='#C4C3BF'
@@ -103,12 +103,12 @@
           [%type space-type]
       ==
     ++  edit-space
-      %-  ot 
+      %-  ot
       :~  [%path path]
-          [%payload edit-payload]  
+          [%payload edit-payload]
       ==
     ::
-    ++  path 
+    ++  path
       %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space-name so]
