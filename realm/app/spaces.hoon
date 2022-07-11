@@ -1,8 +1,8 @@
 /-  store=spaces
 /+  default-agent, verb, dbug, lib=spaces, *string
 ^-  agent:gall
-:: 
-::  %spaces [realm]: 
+::
+::  %spaces [realm]:
 ::
 ::  A store for Realm space metadata and management.
 ::
@@ -36,7 +36,7 @@
     =/  our-space  (create-space:lib our.bowl our-name 'our' %our)
     =/  initial-spaces  `spaces:store`(~(put by spaces.state) [path:our-space our-space])
     =.  state  [%0 spaces=initial-spaces]       ::  set initial state
-    :-  ~  this 
+    :-  ~  this
   ::
   ++  on-save
     ^-  vase
@@ -60,7 +60,7 @@
         ::
         ::  %space actions
         ::
-        ::  Usage: 
+        ::  Usage:
         ::    :spaces &space [%create 'other-life' %group]
         ::
         %spaces-action    (action:core !<(action:store vase))
@@ -98,7 +98,8 @@
   :: --
   :: --
   ++  handle-edit
-    |=  [=space-path:store =space:store]
+    :: |=  [=space-path:store =space:store]
+    |=  [=space-path:store payload=edit-action:store]
     ^-  (quip card _state)
     `state
     :: =/  new-space  (create-space:lib our.bowl name.payload slug.payload type.payload)
@@ -130,7 +131,7 @@
 ::     ++  handle-add
 ::       |=  [payload=space-add-payload *]
 ::       ^-  (quip card _state)
-::       :: 
+::       ::
 ::       state(sp state)
 ::   --
 --
