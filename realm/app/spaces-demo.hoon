@@ -541,7 +541,7 @@
         =/  space-id  `@t`i.t.t.path
         =/  space  (~(get by spaces.state) space-id)
         ?~  space
-          ``json+!>((generate-error 'spaces' (crip "space {<space-id>} not found")))
+          ``json+!>((generate-error 'spaces' ~ (crip "space {<space-id>} not found")))
         ``json+!>((need space))
 
       ::  return a space's subspaces
@@ -549,7 +549,7 @@
         =/  space-id  `@t`i.t.t.path
         =/  children  (~(get by hier.state) space-id)
         ?~  children
-          ``json+!>((generate-error 'spaces' (crip "space {<space-id>} not found")))
+          ``json+!>((generate-error 'spaces' ~ (crip "space {<space-id>} not found")))
         =/  children  (need children)
         =/  children  ?:(?=([%a *] children) p.children ~)
         =/  response=(map @t json)
@@ -565,8 +565,16 @@
         ``json+!>([%o response])
 
   ==
+
+  ::  ARM
+  ::  ++  generate-error
+  ::  args:
+  ::    res - resource name
+  ::    bore - is the source/originating http action request
+  ::           payload (if applicable)
+  ::    err - error message as text/cord
   ++  generate-error
-    |=  [res=@t err=@t]
+    |=  [res=@t bore=json err=@t]
     ^-  json
     =/  error-data=json
     %-  pairs:enjs:format
@@ -579,6 +587,7 @@
       ['resource' s+res]
       ['effect' s+'error']
       ['data' error-data]
+      ['bore' bore]
     ==
     result
   --

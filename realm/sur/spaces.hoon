@@ -13,32 +13,47 @@
   ==
 
 +$  theme
-  $:  label=@t
-      background-color=@ux
-      accent-color=@ux
-      input-color=@ux
-      dock-color=@ux
-      icon-color=@ux
-      text-color=@ux
-      window-color=@ux
-      text-theme=@t
-      mode=?(%dark %light)
+  $:  mode=?(%dark %light)
+      background-color=@t
+      accent-color=@t
+      input-color=@t
+      dock-color=@t
+      icon-color=@t
+      text-color=@t
+      window-color=@t
       wallpaper=@t
   ==
 
-+$  arsenal
-  $:  pinned=@t
-      apps=(list apps)
-  ==
-
++$  space-name  cord  :: should be a unique name to the ship
++$  space-path  [=ship =space-name]
++$  space-type  ?(%group %our)
 +$  space
-  $:  path=@t
-      name=@t
-      type=?(%group %our %dao)
+  $:  path=space-path
+      name=space-name
+      type=space-type  
       picture=@t
-      color=@ux
+      color=@t  :: '#000000' 
       =theme
-      =token
   ==
-
+::
++$  spaces  (map space-path space)
+::
+:: /~lomder-librun/my-new-group
++$  edit-action
+  $%  [%name name=@t]
+      [%picture picture=@t]
+      [%color color=@t]
+      :: [%theme =theme]
+  ==
+::
++$  action
+  $%  [%create name=@t slug=@t type=space-type]
+      [%edit path=space-path payload=edit-action]
+      :: [%archive =space-path]
+  ==
+::
++$  reaction
+  $%  [%add-reaction =space]
+      [%edit-reaction =space-path =space]
+  ==
 --

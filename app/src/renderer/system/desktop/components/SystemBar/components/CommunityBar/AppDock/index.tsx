@@ -144,6 +144,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
           const app = spaces.selected?.getAppData(unpinnedApp.id)!;
+          console.log(toJS(spaces.selected));
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (

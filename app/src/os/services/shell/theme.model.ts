@@ -38,17 +38,17 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 export const ThemeModel = types
   .model('ThemeModel', {
     themeId: types.maybe(types.string),
-    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
-    accentColor: types.optional(types.string, '#4E9EFD'),
-    inputColor: types.optional(types.string, '#ffffff'),
     backgroundColor: types.optional(types.string, '#c4c3bf'),
-    dockColor: types.optional(types.string, '#f5f5f4'),
+    accentColor: types.optional(types.string, '#4E9EFD'),
+    inputColor: types.optional(types.string, '#FFFFFF'),
+    dockColor: types.optional(types.string, '#F5F5F4'),
     windowColor: types.optional(types.string, '#f5f5f4'),
     textTheme: types.optional(types.enumeration(['light', 'dark']), 'light'),
     mode: types.optional(types.enumeration(['light', 'dark']), 'light'),
     textColor: types.optional(types.string, '#2a2927'),
     iconColor: types.optional(types.string, '#333333'),
     mouseColor: types.optional(types.string, '#4E9EFD'),
+    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
   })
   .actions((self) => ({
     setMouseColor(color: string) {
