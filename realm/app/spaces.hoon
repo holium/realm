@@ -67,9 +67,14 @@
       ==
     [cards this]
     --
+  ++  on-peek
+    |=  =path
+    ^-  (unit (unit cage))
+    ?+    path  (on-peek:def path)
+      [%x %all ~]     ``noun+!>((reaction:enjs:lib [%all spaces.state]))
+    ==
   ++  on-watch  |=(path !!)
   ++  on-leave  |=(path `..on-init)
-  ++  on-peek   |=(path ~)
   ++  on-agent  |=([wire sign:agent:gall] !!)
   ++  on-arvo   |=([wire sign-arvo] !!)
   ++  on-fail   |=([term tang] `..on-init)
@@ -83,7 +88,7 @@
   :: ~&  >  [+.action]
   ?-  -.act
     %create    (handle-create +.act)
-    %edit      (handle-edit +.act)
+    :: %edit      (handle-edit +.act)
     :: %delete    (handle-create +.action)
   ==
   ::

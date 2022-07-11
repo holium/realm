@@ -5,8 +5,8 @@
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  upd
-  :: ++  json  (update:enjs upd)
+  ++  noun  act
+  ++  json  (reaction:enjs act)
   --
 ::
 ++  grab

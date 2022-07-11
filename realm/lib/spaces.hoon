@@ -28,34 +28,61 @@
       theme=default-theme
     ]
   new-space
-
-++  to-js
-  |=  spc=space:store
-  |^  ^-  json
-  %-  pairs:enjs:format
-  :: =/  ship-name  (scot %p ship.path.spc)
-  :~
-    ['path' (path:enjs:format /(scot %p ship.path.spc))]
-    ['name' s+name.spc]
-    ['type' s+type.spc]
-    ['picture' s+picture.spc]
-    ['color' s+color.spc]
-    ['theme' theme]
-  ==
-  ++  theme
-    %-  pairs:enjs:format
-    :~
-      [%mode s+mode.theme.spc]
-      [%background-color s+background-color.theme.spc]
-      [%accent-color s+accent-color.theme.spc]
-      [%input-color s+input-color.theme.spc]
-      [%dock-color s+dock-color.theme.spc]
-      [%icon-color s+icon-color.theme.spc]
-      [%text-color s+text-color.theme.spc]
-      [%window-color s+window-color.theme.spc]
-      [%wallpaper s+wallpaper.theme.spc]
+::
+++  enjs
+  =,  enjs:format
+  |%
+  ++  reaction
+    |=  rct=^reaction
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    ?-  -.rct
+        %all
+      :-  %all
+      %-  pairs
+      :~  [%spaces (spaces-map spaces.rct)]
+      ==
     ==
-  --
+    ::
+    ++  spaces-map
+      |=  =spaces:store
+      ^-  json
+      %-  pairs
+      %+  turn  ~(tap by spaces)
+      |=  [pth=space-path:store space=space:store]
+      =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space-name.pth))
+      ^-  [cord json]
+      [spc-path (spc space)]
+    ::
+    ++  spc
+      |=  [=space]
+      ^-  json
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.space)/(scot %tas space-name.path.space))]
+          [%name s+name.space]
+          [%type s+type.space]
+          [%picture s+picture.space]
+          [%color s+color.space]
+          [%theme (thm theme.space)]
+      ==
+    ++  thm
+      |=  =theme
+      ^-  json
+      %-  pairs
+      :~
+        [%mode s+(scot %tas mode.theme)]
+        [%background-color s+background-color.theme]
+        [%accent-color s+accent-color.theme]
+        [%input-color s+input-color.theme]
+        [%dock-color s+dock-color.theme]
+        [%icon-color s+icon-color.theme]
+        [%text-color s+text-color.theme]
+        [%window-color s+window-color.theme]
+        [%wallpaper s+wallpaper.theme]
+      ==
+    --
 ++  dejs
   =,  dejs:format
   |%
@@ -67,7 +94,7 @@
     ++  decode
       %-  of
       :~  [%create create-space]
-          [%edit edit-space]
+          :: [%edit edit-space]
       ==
     ++  create-space
       %-  ot
@@ -82,12 +109,12 @@
       ==
     ::
     ++  path 
-      %-  of
+      %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space-name so]
       ==
     ++  edit-payload
-      %-  of
+      %-  ot
       :~  [%name so]
           [%picture so]
           [%color so]
