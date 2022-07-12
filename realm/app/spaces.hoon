@@ -17,7 +17,7 @@
   +$  state-0
     $:  %0
         spaces=spaces:store
-        archive=spaces:store
+        :: permission
     ==
   --
 =|  state-0
@@ -36,7 +36,7 @@
     =/  our-name  `@t`(scot %p our.bowl)
     =/  our-space  (create-space:lib our.bowl our-name 'our' %our now.bowl)
     =/  initial-spaces  `spaces:store`(~(put by spaces.state) [path:our-space our-space])
-    =.  state  [%0 spaces=initial-spaces archive=~]       ::  set initial state
+    =.  state  [%0 spaces=initial-spaces]       ::  set initial state
     :-  ~  this
   ::
   ++  on-save
@@ -62,8 +62,8 @@
         ::  %space actions
         ::
         ::  Usage:
-        ::    :spaces &space [%create 'other-life' %group]
-        ::    :spaces &space [%edit [~fes 'other-life'] [%name name="The Other Life"]]
+        ::    :spaces &space [%add 'other-life' %group]
+        ::    :spaces &space [%update [~fes 'other-life'] [%name name="The Other Life"]]
         ::
         %spaces-action    (action:core !<(action:store vase))
       ==
@@ -74,26 +74,37 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/spaces/all.json
+    ::  ~/scry/spaces.json
     ::
-      [%x %all ~]     ``noun+!>((reaction:enjs:lib [%all spaces.state]))
+      [%x ~]        ``noun+!>((view:enjs:lib [%spaces spaces.state]))
     ::
-    ::  ~/scry/spaces/space/~fes/our.json
+    ::  ~/scry/spaces/~fes/our.json
     ::
-      [%x %space @ @ ~]
-    =/  =ship       (slav %p i.t.t.path)
-    =/  space-pth   `@t`i.t.t.t.path
-    =/  space  (~(got by spaces.state) [ship space-pth])
-    ``noun+!>((reaction:enjs:lib [%space space]))
+      [%x @ @ ~]
+    =/  =ship       (slav %p i.t.path)
+    =/  space-pth   `@t`i.t.t.path
+    =/  space       (~(got by spaces.state) [ship space-pth])
+    ``noun+!>((view:enjs:lib [%space space]))
     ==
-  ++  on-watch  |=(path !!)
+  ++  on-watch  
+    |=  =path
+    ^-  (quip card _this)
+    =/  cards=(list card)
+    ~&  >  path
+      ?+  path        (on-watch:def path)
+        [%updates ~]  (send-reaction:core [%initial spaces.state])
+      ::
+      ==
+    [cards this]
+    ::
   ++  on-leave  |=(path `..on-init)
   ++  on-agent  |=([wire sign:agent:gall] !!)
   ++  on-arvo   |=([wire sign-arvo] !!)
   ++  on-fail   |=([term tang] `..on-init)
   --
+::
 |_  [=bowl:gall cards=(list card)]
-:: |_  =bowl:gall
+::
 ++  core  .
 ::
 ++  action
@@ -101,29 +112,30 @@
   ^-  (quip card _state)
   |^
   ?-  -.act
-    %create    (handle-create +.act)
-    %edit      (handle-edit +.act)
-    %archive   (handle-archive +.act)
+    %add        (handle-add +.act)
+    %update     (handle-update +.act)
+    %remove     (handle-remove +.act)
   ==
   ::
-  ++  handle-create
+  ++  handle-add
     |=  [payload=[name=space-name:store slug=@t type=space-type:store]]
     ^-  (quip card _state)
     =/  new-space  (create-space:lib our.bowl name.payload slug.payload type.payload now.bowl)
-    :: TODO check if path already exists
-    `state(spaces (~(put by spaces.state) [path.new-space new-space]))
+    ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
+      [~ state]
+    :-  (send-reaction [%add new-space])
+    state(spaces (~(put by spaces.state) [path.new-space new-space]))
   ::
-  ++  handle-edit
+  ++  handle-update
     |=  [path=space-path:store edit-payload=edit-action:store]
     ^-  (quip card _state)
     =/  old                   (~(got by spaces.state) path)
-    ~&  >  [path.old]
     =/  updated               `space:store`(edit-space old edit-payload)
     ?:  =(old updated)        :: if the old type equals new
         [~ state]             :: return state unchange
     =.  updated-at.updated    now.bowl
-    :: :-  (send-reaction [%edit updated])
-    `state(spaces (~(put by spaces.state) path updated))
+    :-  (send-reaction [%replace updated])
+    state(spaces (~(put by spaces.state) path updated))
     ::
     ++  edit-space
       |=  [=space:store edit=edit-action:store]
@@ -135,27 +147,33 @@
         %theme      space(theme theme.edit)
       ==
   ::
-  ++  handle-archive
+  ++  handle-remove
     |=  [path=space-path:store]
     ^-  (quip card _state)
     ?>  (team:title our.bowl src.bowl)
-    ~&  >  [=('our' space.path)]
     ?:  =('our' space.path)
       [~ state]
-    =/  archived          (~(got by spaces.state) path)
-    ~&  >  [archived]
-    =.  archive.state     (~(put by archive.state) path.archived archived)
-    =.  spaces.state      (~(del by spaces.state) path.archived)
-    `state
-  :: ++  send-reaction
-  ::   |=  [=reaction:store]
-  ::   ^-  (list card)
-  ::   =/  paths=(list path)
-  ::     [/updates /all ~]
-  ::   [%give %fact paths %spaces-action !>(reaction)]~
-  :: --
+    =/  deleted          (~(got by spaces.state) path)
+    =.  spaces.state      (~(del by spaces.state) path.deleted)
+    :-  (send-reaction [%remove path])
+    state
+  ::
   --
 ::
+++  send-reaction
+  |=  [=reaction:store]
+  ^-  (list card)
+  =/  paths=(list path)
+    [/updates ~]
+  [%give %fact paths %spaces-reaction !>(reaction)]~
+
+++  send-scry
+  |=  [=reaction:store]
+  ^-  (list card)
+  =/  paths=(list path)
+    [/updates ~]
+  [%give %fact paths %spaces-view !>(reaction)]~
+
 ++  is-host
   |=  [=ship]
   =(our.bowl ship)

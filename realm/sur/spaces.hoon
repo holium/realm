@@ -47,17 +47,27 @@
       [%theme =theme]
   ==
 ::
+::  Poke actions
+::
 +$  action
-  $%  [%create name=@t slug=@t type=space-type]
-      [%edit path=space-path payload=edit-action]
-      [%archive path=space-path]
+  $%  [%add name=@t slug=@t type=space-type]
+      [%update path=space-path payload=edit-action]
+      [%remove path=space-path]
   ==
 ::
+::  Reaction via watch paths
+::
 +$  reaction
-  $%  [%all =spaces]
-      [%space =space]
-      :: [%create =space]
-      [%edit =space]
-      [%archive path=space-path]
+  $%  [%initial =spaces]
+      [%add =space]
+      [%replace =space]
+      [%remove path=space-path]
+  ==
+::
+::  Scry views
+::
++$  view
+  $%  [%space =space]
+      [%spaces =spaces]
   ==
 --
