@@ -19,7 +19,7 @@ import {
 } from './models/spaces';
 
 import { ShipModelType } from '../ship/models/ship';
-import { SpacesDemoApi } from '../../api/spaces-demo';
+import { SpacesApi } from '../../api/spaces';
 
 /**
  * SpacesService
@@ -91,7 +91,7 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    // SpacesDemoApi.createSpace(this.core.conduit!);
+    SpacesApi.syncUpdates(this.core.conduit!, this.state);
 
     // console.log(spaces);
     if (!this.state.our) {

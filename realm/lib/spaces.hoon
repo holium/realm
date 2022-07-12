@@ -38,66 +38,94 @@
   ++  reaction
     |=  rct=^reaction
     ^-  json
+    %+  frond  %spaces-reaction
     %-  pairs
     :_  ~
     ^-  [cord json]
     ?-  -.rct
-        %all
-      [%spaces (spaces-map spaces.rct)]
+        %initial
+      :-  %initial
+      %-  pairs
+      :~  [%spaces (spaces-map:encode spaces.rct)]
+      ==
     ::
-        %space
-      [%space (spc space.rct)]
+        %add
+      :-  %add
+      %-  pairs
+      :~  [%space (spc:encode space.rct)]
+      ==
+    :: ::
+    ::     %space
+    ::   [%space (spc:encode space.rct)]
+    :: ::
+        %replace
+      :-  %replace
+      %-  pairs
+      :~  [%space (spc:encode space.rct)]
+      ==
     ::
-        %edit
-      [%space (spc space.rct)]
-    ::
-        %archive
-      [%archive s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-    ::
-      :: %paired
-      :: :-  %all
-      :: %-  pairs
-      :: :~  [%spaces (spaces-map spaces.rct)]
-      :: ==
+        %remove
+      :-  %remove
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ==
     ==
-    ++  spaces-map
-      |=  =spaces:store
-      ^-  json
-      %-  pairs
-      %+  turn  ~(tap by spaces)
-      |=  [pth=space-path:store space=space:store]
-      =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-      ^-  [cord json]
-      [spc-path (spc space)]
+  ::
+  ++  view :: encodes for on-peek
+    |=  view=^view
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    ?-  -.view
+        %space
+      [%space (spc:encode space.view)]
     ::
-    ++  spc
-      |=  =space
-      ^-  json
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
-          [%name s+name.space]
-          [%type s+type.space]
-          [%picture s+picture.space]
-          [%color s+color.space]
-          [%theme (thm theme.space)]
-          [%updated-at (time updated-at.space)]
-      ==
-    ++  thm
-      |=  =theme
-      ^-  json
-      %-  pairs
-      :~
-        [%mode s+(scot %tas mode.theme)]
-        [%background-color s+background-color.theme]
-        [%accent-color s+accent-color.theme]
-        [%input-color s+input-color.theme]
-        [%dock-color s+dock-color.theme]
-        [%icon-color s+icon-color.theme]
-        [%text-color s+text-color.theme]
-        [%window-color s+window-color.theme]
-        [%wallpaper s+wallpaper.theme]
-      ==
-    --
+        %spaces
+      [%spaces (spaces-map:encode spaces.view)]
+    ==
+  --
+++  encode
+  =,  enjs:format
+  |%
+  ++  spaces-map
+    |=  =spaces:store
+    ^-  json
+    %-  pairs:enjs:format
+    %+  turn  ~(tap by spaces)
+    |=  [pth=space-path:store space=space:store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (spc space)]
+  ::
+  ++  spc
+    |=  =space
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
+        ['name' s+name.space]
+        ['type' s+type.space]
+        ['picture' s+picture.space]
+        ['color' s+color.space]
+        ['theme' (thm theme.space)]
+        ['updatedAt' (time updated-at.space)]
+    ==
+  ++  thm
+    |=  =theme
+    ^-  json
+    %-  pairs:enjs:format
+    :~
+      ['mode' s+(scot %tas mode.theme)]
+      ['backgroundColor' s+background-color.theme]
+      ['accentColor' s+accent-color.theme]
+      ['inputColor' s+input-color.theme]
+      ['dockColor' s+dock-color.theme]
+      ['iconColor' s+icon-color.theme]
+      ['textColor' s+text-color.theme]
+      ['windowColor' s+window-color.theme]
+      ['wallpaper' s+wallpaper.theme]
+    ==
+  --
 ++  dejs
   =,  dejs:format
   |%
@@ -108,23 +136,23 @@
     |%
     ++  decode
       %-  of
-      :~  [%create create-space]
-          [%edit edit-space]
-          [%archive archive-space]
+      :~  [%add add-space]
+          [%update update-space]
+          [%remove remove-space]
       ==
-    ++  create-space
+    ++  add-space
       %-  ot
       :~  [%name so]
           [%slug so]
           [%type space-type]
       ==
-    ++  edit-space
+    ++  update-space
       %-  ot
       :~  [%path pth]
           [%payload edit-payload]
       ==
     ::
-    ++  archive-space
+    ++  remove-space
       %-  ot
       :~  [%path pth]
       ==
