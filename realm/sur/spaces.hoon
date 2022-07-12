@@ -50,7 +50,7 @@
 +$  action
   $%  [%create name=@t slug=@t type=space-type]
       [%edit path=space-path payload=edit-action]
-      :: [%archive =space-path]
+      [%archive path=space-path]
   ==
 ::
 +$  reaction
@@ -58,5 +58,6 @@
       [%space =space]
       :: [%create =space]
       [%edit =space]
+      [%archive path=space-path]
   ==
 --

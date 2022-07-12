@@ -51,13 +51,15 @@
         %edit
       [%space (spc space.rct)]
     ::
+        %archive
+      [%archive s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+    ::
       :: %paired
       :: :-  %all
       :: %-  pairs
       :: :~  [%spaces (spaces-map spaces.rct)]
       :: ==
     ==
-    ::
     ++  spaces-map
       |=  =spaces:store
       ^-  json
@@ -108,6 +110,7 @@
       %-  of
       :~  [%create create-space]
           [%edit edit-space]
+          [%archive archive-space]
       ==
     ++  create-space
       %-  ot
@@ -117,14 +120,18 @@
       ==
     ++  edit-space
       %-  ot
-      :~  [%path path]
+      :~  [%path pth]
           [%payload edit-payload]
       ==
     ::
-    ++  path
+    ++  archive-space
       %-  ot
-      :~  [%ship (se %p):dejs:format]
-          :: [%ship (su ;~(pfix sig fed:ag))]
+      :~  [%path pth]
+      ==
+    ::
+    ++  pth
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
       ==
     ++  edit-payload
