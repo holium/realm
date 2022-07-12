@@ -11,9 +11,9 @@
       name=@t
       icon=@t
   ==
-
++$  theme-mode  ?(%dark %light)
 +$  theme
-  $:  mode=?(%dark %light)
+  $:  mode=theme-mode 
       background-color=@t
       accent-color=@t
       input-color=@t
@@ -25,7 +25,7 @@
   ==
 
 +$  space-name  cord  :: should be a unique name to the ship
-+$  space-path  [=ship =space-name]
++$  space-path  [ship=ship space=space-name]
 +$  space-type  ?(%group %our)
 +$  space
   $:  path=space-path
@@ -33,7 +33,8 @@
       type=space-type  
       picture=@t
       color=@t  :: '#000000' 
-      =theme
+      theme=theme
+      updated-at=@da
   ==
 ::
 +$  spaces  (map space-path space)
@@ -43,18 +44,19 @@
   $%  [%name name=@t]
       [%picture picture=@t]
       [%color color=@t]
-      :: [%theme =theme]
+      [%theme =theme]
   ==
 ::
 +$  action
   $%  [%create name=@t slug=@t type=space-type]
-      :: [%edit path=space-path payload=edit-action]
+      [%edit path=space-path payload=edit-action]
       :: [%archive =space-path]
   ==
 ::
 +$  reaction
   $%  [%all =spaces]
+      [%space =space]
       :: [%create =space]
-      :: [%edit =space-path =space]
+      [%edit =space]
   ==
 --

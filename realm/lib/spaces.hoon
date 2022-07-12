@@ -4,7 +4,7 @@
 |%
 
 ++  create-space
-  |=  [=ship name=@t slug=@t type=space-type:store]
+  |=  [=ship name=@t slug=@t type=space-type:store updated-at=@da]
   ^-  space:store
   =/  default-theme
     [
@@ -21,13 +21,16 @@
   =/  new-space
     [
       path=[ship slug]
-      name=`@t`(scot %p ship)
+      name=name
       type=type
       picture=''
       color='#000000'
       theme=default-theme
+      updated-at=updated-at
     ]
   new-space
+::
+::  JSON 
 ::
 ++  enjs
   =,  enjs:format
@@ -40,10 +43,19 @@
     ^-  [cord json]
     ?-  -.rct
         %all
-      :-  %all
-      %-  pairs
-      :~  [%spaces (spaces-map spaces.rct)]
-      ==
+      [%spaces (spaces-map spaces.rct)]
+    ::
+        %space
+      [%space (spc space.rct)]
+    ::
+        %edit
+      [%space (spc space.rct)]
+    ::
+      :: %paired
+      :: :-  %all
+      :: %-  pairs
+      :: :~  [%spaces (spaces-map spaces.rct)]
+      :: ==
     ==
     ::
     ++  spaces-map
@@ -52,20 +64,21 @@
       %-  pairs
       %+  turn  ~(tap by spaces)
       |=  [pth=space-path:store space=space:store]
-      =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space-name.pth))
+      =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
       ^-  [cord json]
       [spc-path (spc space)]
     ::
     ++  spc
-      |=  [=space]
+      |=  =space
       ^-  json
       %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.space)/(scot %tas space-name.path.space))]
+      :~  [%path s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
           [%name s+name.space]
           [%type s+type.space]
           [%picture s+picture.space]
           [%color s+color.space]
           [%theme (thm theme.space)]
+          [%updated-at (time updated-at.space)]
       ==
     ++  thm
       |=  =theme
@@ -94,7 +107,7 @@
     ++  decode
       %-  of
       :~  [%create create-space]
-          :: [%edit edit-space]
+          [%edit edit-space]
       ==
     ++  create-space
       %-  ot
@@ -110,15 +123,37 @@
     ::
     ++  path
       %-  ot
-      :~  [%ship (su ;~(pfix sig fed:ag))]
-          [%space-name so]
+      :~  [%ship (se %p):dejs:format]
+          :: [%ship (su ;~(pfix sig fed:ag))]
+          [%space so]
       ==
     ++  edit-payload
-      %-  ot
+      %-  of
       :~  [%name so]
           [%picture so]
           [%color so]
+          [%theme thm]
       ==
+    ++  thm
+      %-  ot
+      :~  [%mode theme-mode]
+          [%background-color so]
+          [%accent-color so]
+          [%input-color so]
+          [%dock-color so]
+          [%icon-color so]
+          [%text-color so]
+          [%window-color so]
+          [%wallpaper so]
+      ==
+    ++  theme-mode
+      |=  =json
+      ^-  theme-mode:store
+      ?>  ?=(%s -.json)
+      ?:  =('light' p.json)    %light
+      ?:  =('dark' p.json)     %dark
+      !!
+
     ++  space-type
       |=  =json
       ^-  space-type:store

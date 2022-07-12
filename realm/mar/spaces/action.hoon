@@ -6,7 +6,7 @@
 ++  grow
   |%
   ++  noun  act
-  ++  json  (reaction:enjs act)
+  ++  json  reaction:enjs
   --
 ::
 ++  grab
