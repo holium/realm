@@ -1,5 +1,5 @@
 /-  store=spaces
-/+  default-agent, verb, dbug, lib=spaces, *string
+/+  default-agent, verb, dbug, lib=spaces
 ^-  agent:gall
 ::
 ::  %spaces [realm]:
