@@ -252,8 +252,8 @@
   ::  beings management is sync'd with contact apps beings management
   =/  =beings:contact-store  +.update
   ?-  -.beings
-    %group  `state(allowed-groups (~(del in allowed-groups) resource.beings))
-    %ships  `state(allowed-ships (~(dif in allowed-ships) ships.beings))
+    %group  `state(allowed-groups (~(put in allowed-groups) resource.beings))
+    %ships  `state(allowed-ships (~(uni in allowed-ships) ships.beings))
   ==
 ::
 ++  on-spaces-initial
