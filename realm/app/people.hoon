@@ -277,6 +277,6 @@
 ++  on-spaces-remove
   |=  [=reaction:spaces]
   ^-  (quip card _state)
-  ?>  ?=(%replace -.reaction)
+  ?>  ?=(%remove -.reaction)
   `state
 --
