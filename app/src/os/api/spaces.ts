@@ -8,15 +8,16 @@ export const SpacesApi = {
       app: 'spaces',
       path: `/updates`,
       event: async (data: any) => {
-        console.log(data);
+        console.log(data['spaces-reaction']);
         switch (data['spaces-reaction']) {
           case 'initial':
             break;
-          case 'create':
+          case 'add':
+            console.log(data['spaces-reaction']['add']);
             break;
-          case 'edit':
+          case 'replace':
             break;
-          case 'delete':
+          case 'remove':
             break;
           default:
             // unknown

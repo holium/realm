@@ -1,4 +1,4 @@
-/-  store=spaces, auth-store=auth
+/-  store=spaces, membership-store=membership
 /+  default-agent, verb, dbug, lib=spaces
 ^-  agent:gall
 ::
@@ -17,7 +17,7 @@
   +$  state-0
     $:  %0
         spaces=spaces:store
-        auth=spaces-auth:auth-store
+        membership=membership:membership-store
     ==
   --
 =|  state-0
@@ -35,8 +35,8 @@
     =/  our-name  `@t`(scot %p our.bowl)
     =/  our-space  (create-space:lib our.bowl our-name 'our' %our now.bowl)
     =/  initial-spaces  `spaces:store`(~(put by spaces.state) [path:our-space our-space])
-    =/  our-auth  (malt `(list (pair ship roles:auth-store))`~[[our.bowl (silt `(list role:auth-store)`~[%owner %admin])]])
-    =/  initial-auth   `spaces-auth:auth-store`(malt `(list (pair space-path:store people-map:auth-store))`~[[path:our-space our-auth]])
+    =/  our-members  (malt `(list (pair ship roles:membership-store))`~[[our.bowl (silt `(list role:membership-store)`~[%owner %admin])]])
+    =/  initial-auth   `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path:our-space our-members]])
     ~&  >  '%spaces initialized'
     =.  state  [%0 spaces=initial-spaces auth=initial-auth]
     :-  ~  this
@@ -55,7 +55,7 @@
   ::
   ++  on-poke
     |=  [=mark =vase]
-    ^-  (quip card _this)
+    ^-  (quip card _this)  
     ?>  (team:title our.bowl src.bowl) :: is our ship or moon
     |^
     =^  cards  state
@@ -68,7 +68,7 @@
         ::    :spaces &space [%update [~fes 'other-life'] [%name name="The Other Life"]]
         ::
         %spaces-action    (action:core !<(action:store vase))
-        :: %people-action    (action:core !<(action:auth-store vase))
+        :: %members-action   (action:core !<(action:membership-store vase))
       ==
     [cards this]
     --
@@ -94,7 +94,7 @@
     ^-  (quip card _this)
     =/  cards=(list card)
       ?+  path        (on-watch:def path)
-        [%updates ~]  (send-reaction:core [%initial spaces.state])
+        [%updates ~]  (send-reaction:core [%initial spaces.state membership.state])
       ::
       ==
     [cards this]
@@ -120,16 +120,17 @@
   ==
   ::
   ++  handle-add
-    |=  [payload=[name=space-name:store slug=@t type=space-type:store people=people-map:auth-store]]
+    |=  [payload=[name=space-name:store slug=@t type=space-type:store members=members:membership-store]]
     ^-  (quip card _state)
     ?>  (team:title our.bowl src.bowl)
     =/  new-space  (create-space:lib our.bowl name.payload slug.payload type.payload now.bowl)
-    =.  people.payload    (~(put by people.payload) [our.bowl (silt `(list role:auth-store)`~[%owner %admin])])
+    =.  members.payload    (~(put by members.payload) [our.bowl (silt `(list role:membership-store)`~[%owner %admin])])
     ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
       [~ state]
-    =.  spaces.state      (~(put by spaces.state) [path.new-space new-space])
-    =.  auth.state        (~(put by auth.state) [path.new-space people.payload])
-    :-  (send-reaction [%add new-space])
+    =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
+    =.  membership.state      (~(put by membership.state) [path.new-space members.payload])
+    :-  (send-reaction [%add new-space members.payload])
+    :: :-  (send-reaction %people-reaction [%add new-space])
     state
   ::
   ++  handle-update
@@ -159,11 +160,11 @@
     ^-  (quip card _state)
     ?>  (has-auth:core path src.bowl %owner)
     :: ?>  (team:title our.bowl src.bowl)
-    ?:  =('our' space.path)     :: we cannot delete our space
+    ?:  =('our' space.path) :: we cannot delete our space
       [~ state]
-    =/  deleted           (~(got by spaces.state) path)
-    =.  spaces.state      (~(del by spaces.state) path.deleted)
-    =.  auth.state        (~(del by auth.state) path.deleted)
+    =/  deleted             (~(got by spaces.state) path)
+    =.  spaces.state        (~(del by spaces.state) path.deleted)
+    =.  membership.state    (~(del by membership.state) path.deleted)
     :-  (send-reaction [%remove path])
     state
   ::
@@ -184,8 +185,8 @@
   [%give %fact paths %spaces-view !>(reaction)]~
 ::
 ++  has-auth
-  |=  [=space-path:store =ship =role:auth-store]
-  (~(has in (~(got by (~(got by auth.state) space-path)) ship)) role)
+  |=  [=space-path:store =ship =role:membership-store]
+  (~(has in (~(got by (~(got by membership.state) space-path)) ship)) role)
 ::
 ++  is-host
   |=  [=ship]

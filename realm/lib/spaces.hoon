@@ -1,4 +1,4 @@
-/-  store=spaces, auth-store=auth
+/-  store=spaces, member-store=membership
 =<  [store .]
 =,  store
 |%
@@ -47,12 +47,14 @@
       :-  %initial
       %-  pairs
       :~  [%spaces (spaces-map:encode spaces.rct)]
+          [%membership (membership-map:encode membership.rct)]
       ==
     ::
         %add
       :-  %add
       %-  pairs
       :~  [%space (spc:encode space.rct)]
+          [%members (membs:encode members.rct)]
       ==
     ::
         %replace
@@ -88,12 +90,31 @@
   ++  spaces-map
     |=  =spaces:store
     ^-  json
-    %-  pairs:enjs:format
+    %-  pairs
     %+  turn  ~(tap by spaces)
     |=  [pth=space-path:store space=space:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [spc-path (spc space)]
+  ::
+  ++  membership-map
+    |=  =membership:member-store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by membership)
+    |=  [pth=space-path:store members=members:member-store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (membs members)]
+  ::
+  ++  membs
+    |=  =members:member-store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by members)
+    |=  [=^ship =roles:member-store]
+    ^-  [cord json]
+    [(scot %p ship) [%a (turn ~(tap in roles) |=(rol=role:member-store s+(scot %tas rol)))]] 
   ::
   ++  spc
     |=  =space
@@ -145,7 +166,7 @@
       :~  [%name so]
           [%slug so]
           [%type space-type]
-          [%people (op ;~(pfix sig fed:ag) (as rol))]
+          [%members (op ;~(pfix sig fed:ag) (as rol))]
       ==
     ::
     ++  update-space
@@ -205,7 +226,7 @@
     ::
     ++  rol
       |=  =json
-      ^-  role:auth-store
+      ^-  role:member-store
       ?>  ?=(%s -.json)
       ?:  =('initiate' p.json)   %initiate
       ?:  =('member' p.json)     %member

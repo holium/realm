@@ -2,7 +2,7 @@
 ::  Defines the types for the spaces concept.
 
 ::  A space is a higher level concept above a %landscape group.
-/-  *apps, auth
+/-  *apps, membership
 |%
 +$  token
   $:  chain=?(%ethereum %uqbar)
@@ -43,7 +43,7 @@
 ::  Poke actions
 ::
 +$  action
-  $%  [%add name=@t slug=@t type=space-type people=people-map:auth]
+  $%  [%add name=@t slug=@t type=space-type members=members:membership]
       [%update path=space-path payload=edit-action]
       [%remove path=space-path]
   ==
@@ -58,8 +58,8 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces]
-      [%add =space]
+  $%  [%initial =spaces =membership:membership]
+      [%add =space =members:membership]
       [%replace =space]
       [%remove path=space-path]
   ==
