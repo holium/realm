@@ -22,7 +22,7 @@
   $:  =ship
       =role
   ==
-+$  spaces  (map @t (set metaspace))
++$  metaspaces  (map @t (set metaspace))
 ::
 ::  $contacts: one-to-one mapping of contact-store to this agent's store
 ::    contacts are kept in sync and then extended based on needs
@@ -53,7 +53,7 @@
 +$  action
   $%  [%add =ship =person]
       [%remove =ship]
-      [%edit =ship =edit-field timestamp=@da]
+      [%edit =ship payload=edit-field timestamp=@da]
   ==
 ::
 +$  reaction

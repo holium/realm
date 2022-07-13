@@ -13,7 +13,7 @@
   ==
 +$  theme-mode  ?(%dark %light)
 +$  theme
-  $:  mode=theme-mode 
+  $:  mode=theme-mode
       background-color=@t
       accent-color=@t
       input-color=@t
@@ -30,9 +30,9 @@
 +$  space
   $:  path=space-path
       name=space-name
-      type=space-type  
+      type=space-type
       picture=@t
-      color=@t  :: '#000000' 
+      color=@t  :: '#000000'
       theme=theme
       updated-at=@da
   ==

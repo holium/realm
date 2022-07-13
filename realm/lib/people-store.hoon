@@ -35,7 +35,7 @@
       :-  %edit
       %-  pairs
       :~  [%ship (ship ship.act)]
-          [%edit-field (edit edit-field.act)]
+          [%edit-field (edit payload.act)]
           [%timestamp (time timestamp.act)]
       ==
     ==
@@ -100,7 +100,12 @@
       %-  ot
       :~  [%role rol]
           [%rank rnk]
-          [%nickname so]
+          [%contact cont]
+      ==
+    ::
+    ++  cont
+      %-  ot
+      :~  [%nickname so]
           [%bio so]
           [%status so]
           [%color nu]
