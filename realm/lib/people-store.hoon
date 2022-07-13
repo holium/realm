@@ -3,64 +3,57 @@
 =<  [sur .]
 =,  sur
 |%
+++  nu                                              ::  parse number as hex
+  |=  jon=json
+  ?>  ?=([%s *] jon)
+  (rash p.jon hex)
 ::
 ++  enjs
   =,  enjs:format
   |%
   ++  action
-    |=  upd=^action
+    |=  act=^action
     ^-  json
+    %+  frond  %people-action
     %-  pairs
-    ^-  (list [cord json])
-    %-  weld
-    :_  ^-  (list [cord json])
-        :~  [%action s+-.upd]
-            [%resource s+%people]
-        ==
-    ^-  (list [cord json])
-    ?-  -.upd
+    :_  ~
+    ^-  [cord json]
+    ?-  -.act
     ::
         %add
-      :~  :-  %context
-          %-  pairs
-          :~  [%space s+space.upd]
-          ==
-          :-  %data
-          %-  pairs
-          :~  [%ship (ship ship.upd)]
-              [%person (cont person.upd)]
-      ==  ==
+      :-  %add
+      %-  pairs
+      :~  [%ship (ship ship.act)]
+          [%person (pers person.act)]
+      ==
     ::
         %remove
-    :~  :-  %context
-        %-  pairs
-        :~  [%space s+space.upd]
-        ==
-        :-  %data
-        %-  pairs
-        :~  [%ship (ship ship.upd)]
-    ==  ==
+      :-  %remove
+      (pairs [%ship (ship ship.act)]~)
     ::
         %edit
-    :~  :-  %context
-        %-  pairs
-        :~  [%space s+space.upd]
-            [%ship (ship ship.upd)]
-        ==
-        :-  %data
-        %-  pairs
-        :~  [%edit-field (edit edit-field.upd)]
-            [%timestamp (time timestamp.upd)]
-    ==  ==  ==
-
+      :-  %edit
+      %-  pairs
+      :~  [%ship (ship ship.act)]
+          [%edit-field (edit payload.act)]
+          [%timestamp (time timestamp.act)]
+      ==
+    ==
   ::
-  ++  cont
+  ++  pers
     |=  =person
     ^-  json
     %-  pairs
-    :~  [%role [%s role.person]]
-        [%rank [%s rank.person]]
-        [%last-updated (time last-updated.person)]
+    :~  [%role s+role.person]
+        [%rank s+rank.person]
+        [%nickname s+nickname.contact.person]
+        [%bio s+bio.contact.person]
+        [%status s+status.contact.person]
+        [%color s+(scot %ux color.contact.person)]
+        [%avatar ?~(avatar.contact.person ~ s+u.avatar.contact.person)]
+        [%cover ?~(cover.contact.person ~ s+u.cover.contact.person)]
+        [%groups a+(turn ~(tap in groups.contact.person) (cork enjs-path:res (lead %s)))]
+        [%last-updated (time last-updated.contact.person)]
     ==
   ::
   ++  edit
@@ -68,8 +61,8 @@
     ^-  json
     %+  frond  -.field
     ?-  -.field
-      %role      s+role.field
-      %rank      s+rank.field
+      %role      [%s role.field]
+      %rank      [%s rank.field]
     ==
   --
 ::
@@ -90,76 +83,64 @@
     ::
     ++  add-person
       %-  ot
-      :~  [%space so]
-          [%ship (su ;~(pfix sig fed:ag))]
-          [%person cont]
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+          [%person pers]
       ==
     ::
-    ++  remove-person
-      %-  ot
-      :~  [%space so]
-          [%ship (su ;~(pfix sig fed:ag))]
-      ==
+    ++  remove-person  (ot [%ship (su ;~(pfix sig fed:ag))]~)
     ::
     ++  edit-person
       %-  ot
-      :~  [%space so]
-          [%ship (su ;~(pfix sig fed:ag))]
+      :~  [%ship (su ;~(pfix sig fed:ag))]
           [%edit-field edit]
           [%timestamp di]
       ==
     ::
-    ++  cont
+    ++  pers
       %-  ot
       :~  [%role rol]
           [%rank rnk]
+          [%contact cont]
+      ==
+    ::
+    ++  cont
+      %-  ot
+      :~  [%nickname so]
+          [%bio so]
+          [%status so]
+          [%color nu]
+          [%avatar (mu so)]
+          [%cover (mu so)]
+          [%groups (as dejs:res)]
           [%last-updated di]
       ==
     ::
     ++  edit
       %-  of
-      :~  [%rank rnk]
+      :~  [%role rol]
+          [%rank rnk]
       ==
-  ::
-  ++  rnk
-    |=  =json
-    ^-  rank:title
-    ?>  ?=(%s -.json)
-    ?:  =('czar' p.json)  %czar
-    ?:  =('king' p.json)  %king
-    ?:  =('duke' p.json)  %duke
-    ?:  =('earl' p.json)  %earl
-    ?:  =('pawn' p.json)  %pawn
-    !!
-  ::
-  ++  rol
-    |=  =json
-    ^-  role
-    ?>  ?=(%s -.json)
-    ?:  =('owner' p.json)  %owner
-    ?:  =('admin' p.json)  %admin
-    ?:  =('member' p.json)  %member
-    ?:  =('initiate' p.json)  %initiate
-    !!
+    ::
+    ++  rnk
+      |=  =json
+      ^-  rank:title
+      ?>  ?=(%s -.json)
+      ?:  =('czar' p.json)  %czar
+      ?:  =('king' p.json)  %king
+      ?:  =('duke' p.json)  %duke
+      ?:  =('earl' p.json)  %earl
+      ?:  =('pawn' p.json)  %pawn
+      !!
+    ::
+    ++  rol
+      |=  =json
+      ^-  role
+      ?>  ?=(%s -.json)
+      ?:  =('owner' p.json)  %owner
+      ?:  =('admin' p.json)  %admin
+      ?:  =('member' p.json)  %member
+      ?:  =('initiate' p.json)  %initiate
+      !!
     --
-  --
-::
-++  en-txt
-  =,  enjs:format
-  |%
-  ++  action
-    |=  upd=^action
-    ^-  cord
-    (crip (en-json:html (action:enjs upd)))
-  --
-++  de-txt
-  =,  dejs:format
-  |%
-  ++  action
-    |=  txt=@t
-    ^-  ^action
-    ::(action:dejs (dejs:format (action:entxt txt)))
-    :: %-  (slog leaf+"{<txt>}" ~)
-    *action
   --
 --

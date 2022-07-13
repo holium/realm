@@ -3,7 +3,7 @@
 ::    syncs with %contact-store while also providing additional support
 ::    for Realm integration.
 ::
-/-  contact-store
+/-  resource, contact-store
 |%
 ::
 ::  $role - user roles which drive Realm permissioning
@@ -22,19 +22,20 @@
   $:  =ship
       =role
   ==
-+$  spaces  (map @t (set metaspace))
++$  metaspaces  (map @t (set metaspace))
 ::
 ::  $contacts: one-to-one mapping of contact-store to this agent's store
 ::    contacts are kept in sync and then extended based on needs
 ::
 +$  contacts  (map ship contact:contact-store)
++$  people    (map ship person)
 ::
 ::  $person: todo. build out based on further feature development
 ::
 +$  person
   $:  =role
       =rank:title
-      last-updated=@da
+      =contact:contact-store
   ==
 ::
 +$  edit-field
@@ -49,13 +50,16 @@
 ::
 +$  edit-bulk  (set edit-field)
 ::
-+$  people  (map ship person)
-::
-::  $action:
-::    =path - space url
 +$  action
-  $%  [%add space=@t =ship =person]
-      [%remove space=@t =ship]
-      [%edit space=@t =ship =edit-field timestamp=@da]
+  $%  [%add =ship =person]
+      [%remove =ship]
+      [%edit =ship payload=edit-field timestamp=@da]
+  ==
+::
++$  reaction
+  $%  [%initial =people]
+      [%add =ship =person]
+      [%remove =ship]
+      [%edit =ship =edit-field timestamp=@da]
   ==
 --
