@@ -1,4 +1,4 @@
-/-  store=spaces
+/-  store=spaces, auth-store=auth
 =<  [store .]
 =,  store
 |%
@@ -30,7 +30,7 @@
     ]
   new-space
 ::
-::  JSON 
+::  json 
 ::
 ++  enjs
   =,  enjs:format
@@ -54,10 +54,7 @@
       %-  pairs
       :~  [%space (spc:encode space.rct)]
       ==
-    :: ::
-    ::     %space
-    ::   [%space (spc:encode space.rct)]
-    :: ::
+    ::
         %replace
       :-  %replace
       %-  pairs
@@ -110,6 +107,7 @@
         ['theme' (thm theme.space)]
         ['updatedAt' (time updated-at.space)]
     ==
+  ::
   ++  thm
     |=  =theme
     ^-  json
@@ -126,6 +124,7 @@
       ['wallpaper' s+wallpaper.theme]
     ==
   --
+::
 ++  dejs
   =,  dejs:format
   |%
@@ -140,12 +139,15 @@
           [%update update-space]
           [%remove remove-space]
       ==
+    ::
     ++  add-space
       %-  ot
       :~  [%name so]
           [%slug so]
           [%type space-type]
+          [%people (op ;~(pfix sig fed:ag) (as rol))]
       ==
+    ::
     ++  update-space
       %-  ot
       :~  [%path pth]
@@ -162,6 +164,7 @@
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
       ==
+    ::
     ++  edit-payload
       %-  of
       :~  [%name so]
@@ -169,6 +172,7 @@
           [%color so]
           [%theme thm]
       ==
+    ::
     ++  thm
       %-  ot
       :~  [%mode theme-mode]
@@ -181,6 +185,7 @@
           [%window-color so]
           [%wallpaper so]
       ==
+    ::
     ++  theme-mode
       |=  =json
       ^-  theme-mode:store
@@ -188,13 +193,24 @@
       ?:  =('light' p.json)    %light
       ?:  =('dark' p.json)     %dark
       !!
-
+    ::
     ++  space-type
       |=  =json
       ^-  space-type:store
       ?>  ?=(%s -.json)
       ?:  =('group' p.json)   %group
       ?:  =('our' p.json)     %our
+      ?:  =('space' p.json)   %space
+      !!
+    ::
+    ++  rol
+      |=  =json
+      ^-  role:auth-store
+      ?>  ?=(%s -.json)
+      ?:  =('initiate' p.json)   %initiate
+      ?:  =('member' p.json)     %member
+      ?:  =('admin' p.json)      %admin
+      ?:  =('owner' p.json)      %owner
       !!
     --
   --

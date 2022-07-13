@@ -2,7 +2,7 @@
 ::  Defines the types for the spaces concept.
 
 ::  A space is a higher level concept above a %landscape group.
-/-  *apps
+/-  *apps, auth
 |%
 +$  token
   $:  chain=?(%ethereum %uqbar)
@@ -11,6 +11,7 @@
       name=@t
       icon=@t
   ==
+::
 +$  theme-mode  ?(%dark %light)
 +$  theme
   $:  mode=theme-mode 
@@ -23,10 +24,10 @@
       window-color=@t
       wallpaper=@t
   ==
-
+::
 +$  space-name  cord  :: should be a unique name to the ship
 +$  space-path  [ship=ship space=space-name]
-+$  space-type  ?(%group %our)
++$  space-type  ?(%group %space %our)
 +$  space
   $:  path=space-path
       name=space-name
@@ -39,20 +40,19 @@
 ::
 +$  spaces  (map space-path space)
 ::
-:: /~lomder-librun/my-new-group
+::  Poke actions
+::
++$  action
+  $%  [%add name=@t slug=@t type=space-type people=people-map:auth]
+      [%update path=space-path payload=edit-action]
+      [%remove path=space-path]
+  ==
+:: 
 +$  edit-action
   $%  [%name name=@t]
       [%picture picture=@t]
       [%color color=@t]
       [%theme =theme]
-  ==
-::
-::  Poke actions
-::
-+$  action
-  $%  [%add name=@t slug=@t type=space-type]
-      [%update path=space-path payload=edit-action]
-      [%remove path=space-path]
   ==
 ::
 ::  Reaction via watch paths
