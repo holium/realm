@@ -203,7 +203,7 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.ship, value.patch);
     }
     if (value.resource === 'desktop') {
-      console.log('desktop patch', value.patch);
+      // console.log('desktop patch', value.patch);
       applyPatch(servicesStore.shell.desktop, value.patch);
     }
   }

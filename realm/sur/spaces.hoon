@@ -28,6 +28,7 @@
 +$  space-name  cord  :: should be a unique name to the ship
 +$  space-path  [ship=ship space=space-name]
 +$  space-type  ?(%group %space %our)
++$  archetype   ?(%lodge %creator-dao %service-dao %investment-dao)
 +$  space
   $:  path=space-path
       name=space-name

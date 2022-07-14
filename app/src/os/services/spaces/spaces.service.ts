@@ -7,6 +7,7 @@ import {
   getSnapshot,
   castToSnapshot,
   cast,
+  clone,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -20,6 +21,7 @@ import {
 
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
+import { snakeify } from '../../lib/obj';
 
 /**
  * SpacesService
@@ -73,15 +75,42 @@ export class SpacesService extends BaseService {
     });
 
     let persistedState: SpacesStoreType = this.db.store;
-    // const spaces = await SpacesDemoApi.getSpaces(this.core.conduit!);
-
     this.state = SpacesStore.create(castToSnapshot(persistedState));
-    // this.state?.initialScry(spaces);
 
+    const tempApps = {
+      pinned: ['ballot', 'escape', 'webterm', 'landscape'],
+      endorsed: {},
+      ...(ship.docket.apps
+        ? {
+            installed: clone(DocketMap.create(getSnapshot(ship.docket.apps))),
+          }
+        : { installed: {} }),
+    };
+
+    // Get the initial scry
+    // TODO for some reason the initial selected reference is undefined so you cant
+    // TODO reload to the same space you logged out from
+    const spaces = await SpacesApi.getSpaces(this.core.conduit!);
+    this.state!.initialScry(spaces, tempApps);
+    this.state!.selected &&
+      this.core.services.shell.setTheme(this.state!.selected?.theme);
+
+    // initial sync effect
+    const syncEffect = {
+      model: getSnapshot(this.state!),
+      resource: 'spaces',
+      key: null,
+      response: 'initial',
+    };
+    this.state.setLoader('loaded');
+    this.core.onEffect(syncEffect);
+
+    // set up snapshotting
     onSnapshot(this.state, (snapshot) => {
       this.db!.store = castToSnapshot(snapshot);
     });
 
+    // Start patching after we've initialized the state
     onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
@@ -91,25 +120,8 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
+    // Subscribe to sync updates
     SpacesApi.syncUpdates(this.core.conduit!, this.state);
-
-    // console.log(spaces);
-    if (!this.state.our) {
-      const space = this.setShipSpace(ship);
-      this.core.services.shell.setTheme(space.theme);
-    } else {
-      this.setSelected(null, ship.patp);
-    }
-
-    const syncEffect = {
-      model: getSnapshot(this.state!),
-      resource: 'spaces',
-      key: null,
-      response: 'initial',
-    };
-
-    this.state.setLoader('loaded');
-    this.core.onEffect(syncEffect);
   }
 
   createNew(_event: any, body: any) {
@@ -141,63 +153,14 @@ export class SpacesService extends BaseService {
     const space = this.state?.getSpaceByPath(spacePath);
     if (space) {
       const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
+      SpacesApi.updateSpace(
+        this.core.conduit!,
+        { path: space.path, payload: { theme: snakeify(newTheme) } },
+        this.core.credentials!
+      );
       return newTheme;
     }
     // todo handle errors better
     return null;
-  }
-
-  setShipSpace(ship: ShipModelType) {
-    const ourSpace = SpaceModel.create({
-      path: ship.patp,
-      name: ship.nickname || ship.patp,
-      color: ship.color || '#000000',
-      type: 'our',
-      // @ts-ignore FIX
-      apps: {
-        pinned: ['ballot', 'escape', 'webterm', 'landscape'],
-        endorsed: {},
-        ...(ship.docket.apps
-          ? {
-              installed: DocketMap.create(getSnapshot(ship.docket.apps)),
-            }
-          : { installed: {} }),
-      },
-      token: undefined,
-      picture: ship.avatar || null,
-      theme: {
-        themeId: 'os',
-        // wallpaper: DEFAULT_WALLPAPER,
-        wallpaper:
-          'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
-        backgroundColor: '#c2b4b4',
-        dockColor: '#f0ecec',
-        windowColor: '#f0ecec',
-        textTheme: 'light',
-        textColor: '#261f1f',
-        iconColor: '#333333',
-        mouseColor: '#4E9EFD',
-      },
-      // theme: {
-      //   themeId: ship.patp,
-      //   wallpaper: theme.wallpaper,
-      //   backgroundColor: theme.backgroundColor,
-      //   dockColor: theme.dockColor,
-      //   windowColor: theme.windowColor,
-      //   textTheme: theme.textTheme,
-      //   textColor: theme.textColor,
-      //   iconColor: theme.iconColor,
-      //   mouseColor: theme.mouseColor,
-      // },
-    });
-    this.state?.setOurSpace(ourSpace);
-    return ourSpace;
-    // self.selected = self.spaces.get(ship.patp)!;
-
-    // if (self.selected && self.selected.theme.wallpaper) {
-    //   osState.theme.setWallpaper(self.selected.theme.wallpaper, {
-    //     patp: ship.patp,
-    //   });
-    // }
   }
 }

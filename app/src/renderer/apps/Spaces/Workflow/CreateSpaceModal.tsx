@@ -73,6 +73,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                         title,
                         image: data.metadata.picture,
                         subtitle,
+                        type: 'group',
                       });
                     props.onNext && props.onNext();
                   }}
@@ -122,7 +123,8 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
             title="New Space"
             buttonText="Create"
             onButtonClick={(data: any) => {
-              props.setState && props.setState({ title: 'New Space' });
+              props.setState &&
+                props.setState({ title: 'New Space', type: 'space' });
               props.onNext && props.onNext(data);
             }}
           />

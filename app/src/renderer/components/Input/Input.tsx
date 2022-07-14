@@ -272,6 +272,9 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         position="relative"
         ref={wrapperRef}
         borderColor={borderColor}
+        // animate={{
+        //   backgroundColor: bg,
+        // }}
         color={color}
         bg={bg}
         mx={mx}

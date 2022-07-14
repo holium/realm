@@ -73,7 +73,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
         }
       | undefined
     >();
-
     const dragControls = useDragControls();
     const [isResizing, setIsResizing] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -88,6 +87,14 @@ export const AppWindow: FC<AppWindowProps> = observer(
     const mWidth = useMotionValue(
       activeWindow ? activeWindow.dimensions.width : 600
     );
+
+    useEffect(() => {
+      mX.set(activeWindow.dimensions.x);
+      mY.set(activeWindow.dimensions.y);
+      mWidth.set(activeWindow.dimensions.width);
+      mHeight.set(activeWindow.dimensions.height);
+    }, [activeWindow.dimensions.width, activeWindow.dimensions.height]);
+
     const resizeRightX = useMotionValue(0);
     const resizeRightY = useMotionValue(0);
 

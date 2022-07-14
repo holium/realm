@@ -1,7 +1,7 @@
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 import { CreateSpaceModal } from './CreateSpaceModal';
-import { SpacesFinalSummary } from './FinalSummary';
+import { SpacesCreateForm } from './CreateForm';
 import { SelectArchetype } from './SelectArchetype';
 
 export const spacesDialogs: DialogRenderers = {
@@ -69,7 +69,7 @@ export const spacesDialogs: DialogRenderers = {
   },
   'create-spaces-3': {
     workflow: true,
-    component: (props: any) => <SpacesFinalSummary {...props} />,
+    component: (props: any) => <SpacesCreateForm {...props} />,
 
     onNext: (data: any) => {
       DesktopActions.nextDialog('create-spaces-3');
@@ -89,7 +89,7 @@ export const spacesDialogs: DialogRenderers = {
         x: 0,
         y: 0,
         width: 580,
-        height: 550,
+        height: 600,
       },
     },
     hasCloseButton: true,

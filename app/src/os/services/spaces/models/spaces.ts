@@ -3,6 +3,7 @@ import {
   types,
   applySnapshot,
   castToSnapshot,
+  clone,
 } from 'mobx-state-tree';
 import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
@@ -26,8 +27,8 @@ export const SpaceModel = types
     token: types.maybe(TokenModel),
     apps: types.model({
       pinned: types.array(types.string),
-      endorsed: DocketMap,
-      installed: DocketMap,
+      endorsed: DocketMap, // recommended
+      installed: DocketMap, // registered
     }),
   })
   .views((self) => ({
@@ -91,16 +92,30 @@ export const SpacesStore = types
     },
   }))
   .actions((self) => ({
-    initialScry: (data: any) => {
-      Object.values(data).forEach((space: any) => {
-        const path = space.spaceId;
-        if (space.type === 'our') {
-          delete space.spaceId;
-          self.our = SpaceModel.create({ ...space, path });
-        } else {
-          self.spaces.set(path, SpaceModel.create({ ...space, path }));
+    initialScry: (data: any, tempApps: any) => {
+      Object.entries(data).forEach(
+        ([path, space]: [path: string, space: any]) => {
+          if (space.type === 'our') {
+            self.our = SpaceModel.create({ ...space, path, apps: tempApps });
+          } else {
+            self.spaces.set(
+              path,
+              SpaceModel.create({
+                ...space,
+                path,
+                apps: {
+                  pinned: [],
+                  endorsed: {},
+                  installed: {},
+                },
+              })
+            );
+          }
         }
-      });
+      );
+      console.log(self.selected?.path);
+      if (!self.selected) self.selected = self.our;
+      // return self.selected!;
     },
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
       applySnapshot(self, castToSnapshot(syncEffect.model));
