@@ -1,65 +1,65 @@
-::  @author:  ~lodlev-migdev
+::  people [realm]
+::
+::      @author:  ~lodlev-migdev
+::
 ::  people: feature definitions used by the people agent. the people agent
 ::    syncs with %contact-store while also providing additional support
 ::    for Realm integration.
 ::
-/-  resource, contact-store
+/-  resource, contact-store, spaces, membership
 |%
-::
-::  $role - user roles which drive Realm permissioning
-::
-+$  role  ?(%owner %admin %member %initiate)
-::
-::  $rank - user rank (exploratory)
-::
-:: +$  rank  ?(%duke %null)
-::
-::  $space - space id as @t
-:: +$  space  path
-::  $metaspace - selective aspects of a broader space used for
-::    efficiency purposes
-+$  metaspace
-  $:  =ship
-      =role
-  ==
-+$  metaspaces  (map @t (set metaspace))
 ::
 ::  $contacts: one-to-one mapping of contact-store to this agent's store
 ::    contacts are kept in sync and then extended based on needs
 ::
 +$  contacts  (map ship contact:contact-store)
-+$  people    (map ship person)
 ::
-::  $person: todo. build out based on further feature development
+::  $passport: track space membership and other metadata
++$  passport
+   $:  =roles:membership
+       alias=cord
+   ==
+::
+::  $passports: passports (access) to spaces within Realm
++$  passports      (map ship passport)
+::
+::  $districts: subdivisions of the entire realm universe
++$  districts     (map path=space-path:spaces passports)
+::
+::  $person: todo. build out based on further feature development.
+::   only add fields here that are "global"; independent of any space
 ::
 +$  person
-  $:  =role
-      =rank:title
-      =contact:contact-store
+  $:  last-known-active=(unit @da)
   ==
 ::
-+$  edit-field
-  $%  [%role =role]
-      [%rank =rank:title]
-  ==
+::  $people: mainly used to store "global" metadata (independent of space)
+::    for a given person
++$  people    (map ship person)
 ::
-+$  edit-person-field
-  $:  =person
-      =edit-field
++$  mod
+  $%  [%alias alias=@t]
+      [%add-roles =roles:membership]
+      [%remove-roles =roles:membership]
   ==
-::
-+$  edit-bulk  (set edit-field)
++$  payload  (set mod)
 ::
 +$  action
-  $%  [%add =ship =person]
-      [%remove =ship]
-      [%edit =ship payload=edit-field timestamp=@da]
+  $%  [%ping msg=(unit @t)]
+      [%add path=space-path:spaces =ship =payload]
+      [%edit path=space-path:spaces =ship =payload]
+      [%remove path=space-path:spaces =ship]
   ==
 ::
 +$  reaction
-  $%  [%initial =people]
-      [%add =ship =person]
-      [%remove =ship]
-      [%edit =ship =edit-field timestamp=@da]
+  $%  [%pong =ship timestamp=@da]
+      [%add path=space-path:spaces =ship =person =passport]
+  ==
+::
+::  Scry views
+::
++$  view
+  $%  [%people =people]
+      [%passports =passports]
   ==
 --
