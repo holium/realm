@@ -45,7 +45,6 @@
 +$  payload  (set mod)
 ::
 +$  action
-  :: $%  [%edit path=space-path:spaces =ship payload=edit-field timestamp=@da]
   $%  [%ping msg=(unit @t)]
       [%add path=space-path:spaces =ship =payload]
       [%edit path=space-path:spaces =ship =payload]
@@ -55,8 +54,6 @@
 +$  reaction
   $%  [%pong =ship timestamp=@da]
       [%add path=space-path:spaces =ship =person =passport]
-      :: [%remove =ship]
-      :: [%edit =ship =edit-field timestamp=@da]
   ==
 ::
 ::  Scry views

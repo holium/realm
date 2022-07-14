@@ -91,19 +91,20 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/spaces/~zod/our/people/passports.json
+    ::  ~/scry/people/~zod/our/passports.json
     ::
-      [%x @ @ %people %passports ~]
+      [%x @ @ %passports ~]
         =/  =ship       (slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
+        ~&  >>  "{<ship>}, {<space-pth>}"
         =/  passports   (~(get by districts.state) [ship space-pth])
         ?~  passports      ``json+!>(~)
         ``json+!>((view:enjs:lib [%passports u.passports]))
 
     ::
-    ::  ~/scry/spaces/~zod/our/people.json
+    ::  ~/scry/people/~zod/our/people.json
     ::
-      [%x @ @ %people ~]
+      [%x @ @ ~]
         =/  =ship       (slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
         ``json+!>((view:enjs:lib [%people people.state]))
