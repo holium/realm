@@ -1,4 +1,4 @@
-/+  *people-store
+/+  *people
 ::
 |_  act=action
 ++  grad  %noun

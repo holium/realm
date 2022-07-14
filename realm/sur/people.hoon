@@ -58,4 +58,11 @@
       :: [%remove =ship]
       :: [%edit =ship =edit-field timestamp=@da]
   ==
+::
+::  Scry views
+::
++$  view
+  $%  [%people =people]
+      [%passports =passports]
+  ==
 --

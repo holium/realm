@@ -25,7 +25,7 @@
 ::
 ::
 /-  store=people, contact-store, spaces, membership-store=membership
-/+  dbug, default-agent, resource, people
+/+  dbug, default-agent, resource, lib=people
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -75,6 +75,7 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
+    ~&  >  "{<mark>}, {<vase>}"
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
       %people-action  (act !<(action:store vase))
@@ -88,21 +89,25 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-    (on-peek:def path)
-    :: ?+    path  (on-peek:def path)
-    :: ::
-    :: ::  ~/scry/people/~zod/our.json
-    :: ::
-    ::   [%x ~]        ``noun+!>((view:enjs:lib [%spaces spaces.state]))
-    :: ::
-    :: ::  ~/scry/spaces/~fes/our.json
-    :: ::
-    ::   [%x @ @ ~]
-    :: =/  =ship       (slav %p i.t.path)
-    :: =/  space-pth   `@t`i.t.t.path
-    :: =/  space       (~(got by spaces.state) [ship space-pth])
-    :: ``noun+!>((view:enjs:lib [%space space]))
-    :: ==
+    ?+    path  (on-peek:def path)
+    ::
+    ::  ~/scry/spaces/~zod/our/people/passports.json
+    ::
+      [%x @ @ %people %passports ~]
+        =/  =ship       (slav %p i.t.path)
+        =/  space-pth   `@t`i.t.t.path
+        =/  passports   (~(get by districts.state) [ship space-pth])
+        ?~  passports      ``json+!>(~)
+        ``json+!>((view:enjs:lib [%passports u.passports]))
+
+    ::
+    ::  ~/scry/spaces/~zod/our/people.json
+    ::
+      [%x @ @ %people ~]
+        =/  =ship       (slav %p i.t.path)
+        =/  space-pth   `@t`i.t.t.path
+        ``json+!>((view:enjs:lib [%people people.state]))
+    ==
   ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
@@ -213,7 +218,7 @@
   ?~  passports
     ~&  >>  "{<dap.bowl>}: handle-add - {<path>} not found"
     `state
-  ?.  (~(has by u.passports) ship)
+  ?:  (~(has by u.passports) ship)
     ~&  >>>  "{<dap.bowl>}: handle-add - {<ship>} already exists"
     `state
   ::  if needed, add a create method; otherwise the statement below

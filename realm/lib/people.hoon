@@ -83,6 +83,20 @@
     |=  =roles:membership
     ^-  json
     [%a (turn ~(tap in roles) |=(rol=role:membership s+(scot %tas rol)))]
+  ::
+  ++  view :: encodes for on-peek
+    |=  view=^view
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    ?-  -.view
+        %people
+      [%people (peeps:encode people.view)]
+    ::
+        %passports
+      [%passports (passes:encode passports.view)]
+    ==
   --
 ::
 ++  dejs
@@ -150,5 +164,48 @@
       ?:  =('owner' p.json)      %owner
       !!
     --
+  --
+++  encode
+  =,  enjs:format
+  |%
+  ++  peeps
+    |=  =people
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by people)
+    |=  [=^ship =person]
+    ^-  [cord json]
+    [(scot %p ship) (pers person)]
+  ::
+  ++  passes
+    |=  =passports
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by passports)
+    |=  [=^ship =passport]
+    ^-  [cord json]
+    [(scot %p ship) (pass passport)]
+  ::
+  ++  pers
+    |=  =person
+    ^-  json
+    %-  pairs
+    :~
+      ['last-known-active' ?~(last-known-active.person ~ (time u.last-known-active.person))]
+    ==
+  ::
+  ++  pass
+    |=  =passport
+    ^-  json
+    %-  pairs
+    :~
+      ['alias' s+alias.passport]
+      ['roles' (rols roles.passport)]
+    ==
+  ::
+  ++  rols
+    |=  =roles:membership
+    ^-  json
+    [%a (turn ~(tap in roles) |=(rol=role:membership s+(scot %tas rol)))]
   --
 --

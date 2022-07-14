@@ -1,4 +1,4 @@
-/+  *people-store
+/+  *people
 ::
 |_  react=reaction
 ++  grad  %noun
