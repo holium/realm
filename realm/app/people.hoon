@@ -24,7 +24,7 @@
 ::       agent when adding spaces are changing people permissions
 ::
 ::
-/-  store=people, contact-store, spaces, membership-store=membership
+/-  store=people, contact-store, spaces, membership-store=membership, hark=hark-store
 /+  dbug, default-agent, resource, lib=people
 |%
 +$  card  card:agent:gall
@@ -229,8 +229,10 @@
   =/  passport  (update-passport passport payload)
   ::  put updated civ back in civs map
   =/  passports  (~(put by u.passports) ship passport)
+  =/  notify=action:hark  (notify path /invite ' issued you a passport to Realm')
   :_  state(people (~(put by people) ship *person:store), districts (~(put by districts) path passports))
   :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship *person:store passport])]
+      [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]
   ==
 ::
 ::  $handle-remove: remove all person artifacts across all stores
@@ -388,4 +390,17 @@
   ^-  (quip card _state)
   ?>  ?=(%remove -.reaction)
   `state(districts (~(del by districts) path.reaction))
+::
+++  notify
+  |=  [pth=space-path:spaces slug=path msg=cord]
+  ^-  action:hark
+  :+  %add-note  `bin:hark`[/ [%spaces /spaces/(scot %p ship.pth)]]
+  :*  [ship/ship.pth text/msg ~]
+      ~
+      now.bowl
+      /
+      %-  weld
+      :-  /spaces/(scot %p ship.pth)/(scot %tas space.pth)
+      slug
+  ==
 --
