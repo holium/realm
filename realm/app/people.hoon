@@ -49,6 +49,7 @@
   |_  =bowl:gall
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
+      core   ~(. +> [bowl ~])
   ::
   ++  on-init  :: on-init:def
     ^-  (quip card _this)
@@ -78,7 +79,7 @@
     ~&  >  "{<mark>}, {<vase>}"
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %people-action  (act !<(action:store vase))
+      %people-action  (act:core !<(action:store vase))
     ==
     [cards this]
   ::
@@ -140,27 +141,27 @@
                     ::
                     %initial
                       =^  cards  state
-                        (on-contacts-initial action)
+                        (on-contacts-initial:core action)
                       [cards this]
                     ::
                     %edit
                       =^  cards  state
-                        (on-contact-edit action)
+                        (on-contact-edit:core action)
                       [cards this]
                     ::
                     %set-public
                       =^  cards  state
-                        (on-contact-set-public action)
+                        (on-contact-set-public:core action)
                       [cards this]
                     ::
                     %disallow
                       =^  cards  state
-                        (on-contact-disallow action)
+                        (on-contact-disallow:core action)
                       [cards this]
                     ::
                     %allow
                       =^  cards  state
-                        (on-contact-allow action)
+                        (on-contact-allow:core action)
                       [cards this]
                   ==
             ==
@@ -185,10 +186,10 @@
                   =/  action  !<(=reaction:spaces q.cage.sign)
                   =^  cards  state
                   ?-  -.action :: (on-agent:def wire sign)
-                    %initial  (on-spaces-initial action)
-                    %add      (on-spaces-add action)
-                    %replace  (on-spaces-replace action)
-                    %remove   (on-spaces-remove action)
+                    %initial  (on-spaces-initial:core action)
+                    %add      (on-spaces-add:core action)
+                    %replace  (on-spaces-replace:core action)
+                    %remove   (on-spaces-remove:core action)
                   ==
                   [cards this]
             ==
@@ -199,7 +200,10 @@
   ::
   ++  on-fail   on-fail:def
   --
-|_  =bowl:gall
+|_  [=bowl:gall cards=(list card)]
+::
+++  core  .
+::
 ++  act
   |=  =action:store
   ^-  (quip card _state)
@@ -229,7 +233,8 @@
   =/  passport  (update-passport passport payload)
   ::  put updated civ back in civs map
   =/  passports  (~(put by u.passports) ship passport)
-  =/  notify=action:hark  (notify path /invite ' issued you a passport to Realm')
+  =/  notify=action:hark  (notify path /invite (crip " issued you a passport to the {<`@t`(scot %tas space.path)>} space in Realm."))
+  ~&  >>  "{<notify>}"
   :_  state(people (~(put by people) ship *person:store), districts (~(put by districts) path passports))
   :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship *person:store passport])]
       [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]
@@ -394,7 +399,7 @@
 ++  notify
   |=  [pth=space-path:spaces slug=path msg=cord]
   ^-  action:hark
-  :+  %add-note  `bin:hark`[/ [%spaces /spaces/(scot %p ship.pth)]]
+  :+  %add-note  `bin:hark`[/ [%realm /spaces/(scot %p ship.pth)]]
   :*  [ship/ship.pth text/msg ~]
       ~
       now.bowl
