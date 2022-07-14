@@ -76,7 +76,6 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
-    ~&  >  "{<mark>}, {<vase>}"
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
       %people-action  (act:core !<(action:store vase))
@@ -234,7 +233,6 @@
   ::  put updated civ back in civs map
   =/  passports  (~(put by u.passports) ship passport)
   =/  notify=action:hark  (notify path /invite (crip " issued you a passport to the {<`@t`(scot %tas space.path)>} space in Realm."))
-  ~&  >>  "{<notify>}"
   :_  state(people (~(put by people) ship *person:store), districts (~(put by districts) path passports))
   :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship *person:store passport])]
       [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]
