@@ -35,8 +35,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%ship (ship ship.act)]
-          [%person (pers person.act)]
-          [%roles (rols roles.act)]
+          [%payload (payl payload.act)]
       ==
     ::
         %remove
@@ -48,7 +47,7 @@
       %-  pairs
       :~  [%path (pth path.act)]
           [%ship (ship ship.act)]
-          [%payload (edit payload.act)]
+          [%payload (payl payload.act)]
       ==
     ::
         %ping
@@ -61,20 +60,24 @@
     ^-  json
     [%s (spat /(scot %p ship.path)/(scot %tas space.path))]
   ::
-  ++  pers
-    |=  =person
+  ++  mo
+    |=  edit=mod
     ^-  json
-    %-  pairs
-    :~  [%last-known-active ?~(last-known-active.person ~ (time (need last-known-active.person)))]
+    %+  frond  -.edit
+    ?-  -.edit
+      %alias         [%s alias.edit]
+      %add-roles     (rols roles.edit)
+      %remove-roles  (rols roles.edit)
     ==
   ::
-  ++  edit
-    |=  field=edit-field
+  ++  payl
+    |=  =payload
     ^-  json
-    %+  frond  -.field
-    ?-  -.field
-      %alias      [%s alias.field]
-    ==
+    =/  obj=(map @t json)
+    %-  ~(rep in payload)
+    |=  [edit=mod obj=(map @t json)]
+    (~(put by obj) -.edit (mo edit))
+    [%o obj]
   ::
   ++  rols
     |=  =roles:membership
@@ -101,8 +104,7 @@
       %-  ot
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]
-          [%person pers]
-          [%roles (as rol)]
+          [%payload payl]
       ==
     ::
     ++  remove-person
@@ -115,23 +117,27 @@
       %-  ot
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]
-          [%payload edit-payload]
+          [%payload payl]
       ==
     ::
-    ++  pers
-      %-  ot
-      :~  [%last-known-active (mu di)]
+    ++  payl
+      |=  jon=json
+      ^-  payload
+      =/  data  ?:(?=([%o *] jon) p.jon ~)
+      =/  result=payload
+      %-  ~(rep by data)
+      |=  [[key=@tas jon=json] obj=payload]
+      ?+  key  obj
+         %alias         (~(put in obj) [%alias (so jon)])
+         %add-roles     (~(put in obj) [%add-roles ((as rol) jon)])
+         %remove-roles  (~(put in obj) [%remove-roles ((as rol) jon)])
       ==
+      result
     ::
     ++  pth
       %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
-      ==
-    ::
-    ++  edit-payload
-      %-  of
-      :~  [%alias so]
       ==
     ::
     ++  rol

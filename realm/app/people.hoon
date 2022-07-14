@@ -33,7 +33,7 @@
     ==
 +$  state-0
   $:  %0
-      =membership:membership-store
+      =districts:store
       =people:store
       =contacts:store
       allowed-groups=(set resource)
@@ -207,21 +207,70 @@
 ::  $handle-add: add a new person to the person store, while
 ::    also adding a new space entry to track ship/role relationships
 ++  handle-add
-  |=  [path=space-path:spaces =ship =person:store =roles:membership-store]
+  |=  [path=space-path:spaces =ship =payload:store]
   ^-  (quip card _state)
-  :_  state(people (~(put by people) ship person))
-  :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship person])]
+  =/  passports  (~(get by districts) path)
+  ?~  passports
+    ~&  >>  "{<dap.bowl>}: handle-add - {<path>} not found"
+    `state
+  ?.  (~(has by u.passports) ship)
+    ~&  >>>  "{<dap.bowl>}: handle-add - {<ship>} already exists"
+    `state
+  ::  if needed, add a create method; otherwise the statement below
+  ::    will construct a civ object w/ defaults based on types
+  =|  passport=passport:store
+  ::  update the civ instance with values from the attributes
+  =/  passport  (update-passport passport payload)
+  ::  put updated civ back in civs map
+  =/  passports  (~(put by u.passports) ship passport)
+  :_  state(people (~(put by people) ship *person:store), districts (~(put by districts) path passports))
+  :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship *person:store passport])]
   ==
 ::
+::  $handle-remove: remove all person artifacts across all stores
+::    this differs from %kick which only removes a person from a space
 ++  handle-remove
   |=  [path=space-path:spaces =ship]
   ^-  (quip card _state)
-  `state
+  =/  passports  (~(get by districts) path)
+  ?~  passports
+    ~&  >>  "{<dap.bowl>}: handle-remove - {<path>} not found"
+    `state
+  =/  passports  (~(del by u.passports) ship)
+  `state(people (~(del by people) ship), districts (~(put by districts) path passports))
 ::
+::  $handle-edit: modify a person attribute.
+::    note that $alias values are space specific; therefore, editing
+::    the alias changes the membership store and not people store
 ++  handle-edit
-  |=  [path=space-path:spaces =ship edit=edit-field:store]
+  |=  [path=space-path:spaces =ship =payload:store]
   ^-  (quip card _state)
-  `state
+  =/  passports  (~(get by districts) path)
+  ?~  passports
+    ~&  >>  "{<dap.bowl>}: handle-edit - {<path>} not found"
+    `state
+  =/  passport  (~(get by u.passports) ship)
+  ?~  passport
+    ~&  >>>  "{<dap.bowl>}: handle-edit - {<ship>} not found"
+    `state
+  ::  update existing civ based on attributes
+  =/  passport  (update-passport u.passport payload)
+  ::  put updated civ back in civs map
+  =/  passports  (~(put by u.passports) ship passport)
+  `state(districts (~(put by districts) path passports))
+::
+::  $update-civ: update the civilian based on the updated attributes (fields)
+++  update-passport
+|=  [=passport:store =payload:store]
+^-  passport:store
+%-  ~(rep in payload)
+:: |=  [attribute=edit-field:store rslt=civ:store]
+|:  [=mod:store acc=`passport:store`passport]
+?-  -.mod
+  %alias         acc(alias alias.mod)
+  %add-roles     acc(roles (~(gas in roles.passport) ~(tap in roles.mod)))
+  %remove-roles  acc(roles (~(dif in roles.passport) roles.mod))
+==
 ::
 ::  $handle-ping: %ping pokes come in from UI to indicate user is
 ::    actively using Realm. we record the timestamp of this ping and
@@ -298,13 +347,29 @@
   |=  [=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%initial -.reaction)
-  `state(membership membership.reaction)
+  =/  districts
+  %-  ~(rep by membership.reaction)
+  |=  [[path=space-path:spaces =members:membership-store] acc=districts:store]
+  =/  passes  (to-passports members)
+  (~(put by acc) path passes)
+  `state(districts districts)
 ::
 ++  on-spaces-add
   |=  [=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%add -.reaction)
-  `state(membership (~(put by membership.state) path.space.reaction members.reaction))
+  =/  passports=(map ship passport:store)  (to-passports members.reaction)
+  `state(districts (~(put by districts) path.space.reaction passports))
+::
+++  to-passports
+  |=  =members:membership-store
+  ^-  passports:store
+  %-  ~(rep by members)
+  |=  [[=ship =roles:membership-store] passports=(map ship passport:store)]
+  =|  passport=passport:store
+  =.  alias.passport  ''
+  =.  roles.passport  roles
+  (~(put by passports) ship passport)
 ::
 ++  on-spaces-replace
   |=  [=reaction:spaces]
@@ -316,5 +381,5 @@
   |=  [=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%remove -.reaction)
-  `state(membership (~(del by membership.state) path.reaction))
+  `state(districts (~(del by districts) path.reaction))
 --

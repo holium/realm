@@ -14,11 +14,17 @@
 ::
 +$  contacts  (map ship contact:contact-store)
 ::
-::  $civs: people (civilians) residing in a given space
-+$  civs      (map ship [roles:membership alias=cord])
+::  $passport: track space membership and other metadata
++$  passport
+   $:  =roles:membership
+       alias=cord
+   ==
 ::
-::  $zones: subvisions of the entire realm universe
-+$  zones     (map path=space-path:spaces civs)
+::  $passports: passports (access) to spaces within Realm
++$  passports      (map ship passport)
+::
+::  $districts: subdivisions of the entire realm universe
++$  districts     (map path=space-path:spaces passports)
 ::
 ::  $person: todo. build out based on further feature development.
 ::   only add fields here that are "global"; independent of any space
@@ -31,21 +37,24 @@
 ::    for a given person
 +$  people    (map ship person)
 ::
-+$  edit-field
++$  mod
   $%  [%alias alias=@t]
+      [%add-roles =roles:membership]
+      [%remove-roles =roles:membership]
   ==
++$  payload  (set mod)
 ::
 +$  action
   :: $%  [%edit path=space-path:spaces =ship payload=edit-field timestamp=@da]
   $%  [%ping msg=(unit @t)]
-      [%add path=space-path:spaces =ship =person =roles:membership]
-      [%edit path=space-path:spaces =ship payload=edit-field]
+      [%add path=space-path:spaces =ship =payload]
+      [%edit path=space-path:spaces =ship =payload]
       [%remove path=space-path:spaces =ship]
   ==
 ::
 +$  reaction
   $%  [%pong =ship timestamp=@da]
-      [%add path=space-path:spaces =ship =person]
+      [%add path=space-path:spaces =ship =person =passport]
       :: [%remove =ship]
       :: [%edit =ship =edit-field timestamp=@da]
   ==
