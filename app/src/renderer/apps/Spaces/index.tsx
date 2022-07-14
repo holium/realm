@@ -108,7 +108,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
       >
         <YouRow
           colorTheme={windowColor}
-          selected={ship?.patp === spaces.selected?.path}
+          selected={`/${ship?.patp}/our` === spaces.selected?.path}
           ship={ship!}
           onSelect={(path: string) => SpacesActions.selectSpace(path)}
         />

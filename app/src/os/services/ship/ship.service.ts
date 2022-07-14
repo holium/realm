@@ -204,8 +204,6 @@ export class ShipService extends BaseService {
 
       DocketApi.getApps(this.core.conduit!).then((apps) => {
         this.state?.docket.setInitial(apps);
-        // this.core.services.spaces.setShipSpace(this.state!);
-        this.core.services.spaces.load(ship, this.state!);
         this.state?.loader.set('loaded');
         resolve(this.state!);
       });

@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react';
+import { FC, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';

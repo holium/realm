@@ -23,36 +23,7 @@ import {
 import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { SignupActions } from 'renderer/logic/actions/signup';
-interface ColorTileProps {
-  tileColor: string;
-}
-const ColorTile = styled.div<ColorTileProps>`
-  background: ${(props: ColorTileProps) => props.tileColor};
-  height: 30px;
-  width: 30px;
-  cursor: none;
-  position: relative;
-  outline: none;
-  float: left;
-  border-radius: 4px;
-  margin: 0px 6px 0px 0px;
-`;
-interface ColorPopoverProps {
-  isOpen: boolean;
-}
-const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
-  position: absolute;
-  z-index: 3;
-  top: 40px;
-  left: -6px;
-  width: 170px;
-  .cursor-style {
-    div {
-      cursor: none !important;
-    }
-  }
-  display: ${(props: ColorPopoverProps) => (props.isOpen ? 'block' : 'none')};
-`;
+import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 
 export const createProfileForm = (
   defaults: any = {

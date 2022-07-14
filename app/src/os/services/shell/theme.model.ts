@@ -37,7 +37,6 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
 
 export const ThemeModel = types
   .model('ThemeModel', {
-    themeId: types.maybe(types.string),
     backgroundColor: types.optional(types.string, '#c4c3bf'),
     accentColor: types.optional(types.string, '#4E9EFD'),
     inputColor: types.optional(types.string, '#FFFFFF'),
@@ -58,7 +57,6 @@ export const ThemeModel = types
       const bgLuminosity = bgIsLightOrDark(color.toString());
       const windowTheme = generateColors(color, bgLuminosity);
       const theme = ThemeModel.create({
-        themeId: path,
         ...windowTheme,
         wallpaper,
       });
@@ -74,7 +72,6 @@ export const ThemeStore = types
     loader: types.optional(LoaderModel, { state: 'initial' }),
     currentTheme: types.safeReference(ThemeModel),
     os: types.optional(ThemeModel, {
-      themeId: 'os',
       wallpaper: DEFAULT_WALLPAPER,
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
@@ -110,30 +107,28 @@ export const ThemeStore = types
       self.currentTheme = self.spaces.get(spaceId);
       return self.currentTheme;
     },
-    setWallpaper: flow(function* (
-      wallpaper: string,
-      config: { patp?: string; spaceId?: string }
-    ) {
-      const themeId = (config.patp && `ship${config.patp}`) || config.spaceId;
-      // console.log(themeId);
-      // const color = yield average(wallpaper, { group: 15, format: 'hex' });
-      const color = '#c4c3bf';
-      const bgLuminosity = bgIsLightOrDark(color.toString());
-      const windowTheme = generateColors(color, bgLuminosity);
-      const theme = ThemeModel.create({
-        themeId: themeId!,
-        ...windowTheme,
-        wallpaper,
-      });
-      if (config.patp) {
-        self.ships.set(themeId!, theme);
-        self.currentTheme = self.ships.get(themeId!);
-      }
-      if (config.spaceId) {
-        self.spaces.set(themeId!, theme);
-        self.currentTheme = self.ships.get(themeId!);
-      }
-    }),
+    // setWallpaper: flow(function* (
+    //   wallpaper: string,
+    //   config: { patp?: string; spaceId?: string }
+    // ) {
+    //   // console.log(themeId);
+    //   // const color = yield average(wallpaper, { group: 15, format: 'hex' });
+    //   const color = '#c4c3bf';
+    //   const bgLuminosity = bgIsLightOrDark(color.toString());
+    //   const windowTheme = generateColors(color, bgLuminosity);
+    //   const theme = ThemeModel.create({
+    //     ...windowTheme,
+    //     wallpaper,
+    //   });
+    //   // if (config.patp) {
+    //   //   self.ships.set(themeId!, theme);
+    //   //   self.currentTheme = self.ships.get(themeId!);
+    //   // }
+    //   // if (config.spaceId) {
+    //   //   self.spaces.set(themeId!, theme);
+    //   //   self.currentTheme = self.ships.get(themeId!);
+    //   // }
+    // }),
   }));
 
 export type ThemeStoreType = Instance<typeof ThemeStore>;

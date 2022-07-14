@@ -27,7 +27,7 @@ export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
       selected={selected}
       customBg={colorTheme}
       onClick={() => {
-        onSelect(ship!.patp);
+        onSelect(`/${ship!.patp}/our`);
       }}
     >
       <Flex gap={8} alignItems="center" style={{ pointerEvents: 'none' }}>
