@@ -35,7 +35,8 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%ship (ship ship.act)]
-          [%payload (edit payload.act)]
+          [%person (pers person.act)]
+          [%roles (rols roles.act)]
       ==
     ::
         %remove
@@ -74,6 +75,11 @@
     ?-  -.field
       %alias      [%s alias.field]
     ==
+  ::
+  ++  rols
+    |=  =roles:membership
+    ^-  json
+    [%a (turn ~(tap in roles) |=(rol=role:membership s+(scot %tas rol)))]
   --
 ::
 ++  dejs
@@ -95,7 +101,8 @@
       %-  ot
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]
-          [%payload edit-payload]
+          [%person pers]
+          [%roles (as rol)]
       ==
     ::
     ++  remove-person
@@ -111,6 +118,11 @@
           [%payload edit-payload]
       ==
     ::
+    ++  pers
+      %-  ot
+      :~  [%last-known-active (mu di)]
+      ==
+    ::
     ++  pth
       %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
@@ -121,6 +133,16 @@
       %-  of
       :~  [%alias so]
       ==
+    ::
+    ++  rol
+      |=  =json
+      ^-  role:membership
+      ?>  ?=(%s -.json)
+      ?:  =('initiate' p.json)   %initiate
+      ?:  =('member' p.json)     %member
+      ?:  =('admin' p.json)      %admin
+      ?:  =('owner' p.json)      %owner
+      !!
     --
   --
 --

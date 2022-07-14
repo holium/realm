@@ -207,21 +207,10 @@
 ::  $handle-add: add a new person to the person store, while
 ::    also adding a new space entry to track ship/role relationships
 ++  handle-add
-  |=  [path=space-path:spaces =ship payload=edit-field:store]
+  |=  [path=space-path:spaces =ship =person:store =roles:membership-store]
   ^-  (quip card _state)
-  ~&  >  "{<dap.bowl>}: handle-add {<path>}, {<ship>}, {<payload>}"
-  ::  ensure difference
-  :: =/  old=(unit person:store)  (~(get by people) ship)
-  :: ?.  ?|  ?=(~ old)
-  ::         !=(person(last-updated.contact *@da) u.old(last-updated.contact *@da))
-  ::     ==
-  ::   [~ state]
-  :: =/  meta=metaspace:store   [ship role.person]
-  :: =/  metas  (~(got by spaces) space)
-  :: =/  metas  (~(put in metas) meta)
-  :: :_  state(spaces (~(put by spaces) space metas), people (~(put by people) ship person))
-  :_  state(people (~(put by people) ship *person:store))
-  :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship payload])]
+  :_  state(people (~(put by people) ship person))
+  :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship person])]
   ==
 ::
 ++  handle-remove
@@ -234,10 +223,17 @@
   ^-  (quip card _state)
   `state
 ::
+::  $handle-ping: %ping pokes come in from UI to indicate user is
+::    actively using Realm. we record the timestamp of this ping and
+::    then forward (reaction) our status to all subscribers
+::
 ++  handle-ping
   |=  [msg=(unit @t)]
   ^-  (quip card _state)
-  :_  state
+  =/  per  (~(get by people.state) our.bowl)
+  ?~  per  `state
+  =.  last-known-active.u.per  (some now.bowl)
+  :_  state(people (~(put by people.state) our.bowl u.per))
   :~  [%give %fact [/updates ~] %people-reaction !>([%pong our.bowl now.bowl])]
   ==
 ::

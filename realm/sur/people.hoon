@@ -38,14 +38,14 @@
 +$  action
   :: $%  [%edit path=space-path:spaces =ship payload=edit-field timestamp=@da]
   $%  [%ping msg=(unit @t)]
-      [%add path=space-path:spaces =ship payload=edit-field]
+      [%add path=space-path:spaces =ship =person =roles:membership]
       [%edit path=space-path:spaces =ship payload=edit-field]
       [%remove path=space-path:spaces =ship]
   ==
 ::
 +$  reaction
   $%  [%pong =ship timestamp=@da]
-      [%add path=space-path:spaces =ship payload=edit-field]
+      [%add path=space-path:spaces =ship =person]
       :: [%remove =ship]
       :: [%edit =ship =edit-field timestamp=@da]
   ==
