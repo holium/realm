@@ -3,11 +3,12 @@ import { motion } from 'framer-motion';
 
 interface ColorTileProps {
   tileColor: string;
+  size?: number;
 }
 export const ColorTile = styled(motion.div)<ColorTileProps>`
   background: ${(props: ColorTileProps) => props.tileColor};
-  height: 30px;
-  width: 30px;
+  height: ${(props) => (props.size ? `${props.size}px` : '30px')};
+  width: ${(props) => (props.size ? `${props.size}px` : '30px')};
   cursor: none;
   position: relative;
   outline: none;
@@ -17,12 +18,14 @@ export const ColorTile = styled(motion.div)<ColorTileProps>`
 `;
 interface ColorPopoverProps {
   isOpen: boolean;
+  size?: number;
 }
 export const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
   position: absolute;
   z-index: 3;
   top: 40px;
-  left: -6px;
+  left: ${(props) =>
+    props.size ? `-${Math.ceil(props.size / 3.5)}px` : '-6px'};
   width: 170px;
   .cursor-style {
     div {

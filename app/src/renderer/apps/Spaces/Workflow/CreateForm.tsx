@@ -5,7 +5,6 @@ import {
   Grid,
   Text,
   Flex,
-  FormControl,
   Label,
   Box,
   Input,
@@ -13,6 +12,8 @@ import {
   InlineEdit,
   Crest,
   RadioGroup,
+  FormControl,
+  RadioList,
 } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
@@ -24,6 +25,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { SelectRow } from '../components/SelectionRow';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import ReactDOM from 'react-dom';
+import { Row } from 'renderer/components/NewRow';
 
 const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -92,19 +94,22 @@ export const createSpaceForm = (
 };
 
 type CrestOptionType = 'color' | 'image';
+type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
 export const SpacesCreateForm: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { shell } = useServices();
     const { inputColor, windowColor, textColor } = shell.desktop.theme;
-    const { workflowState } = props;
+    const { workflowState, setState } = props;
     const colorPickerRef = useRef(null);
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
     const [crestOption, setCrestOption] = useState<CrestOptionType>('color');
     const [validatedColor, setValidatedColor] = useState('#000000'); // todo add maybe group color
     const [validatedImageUrl, setValidatedImageUrl] = useState(''); // todo add maybe group image url
-    // const []
+
+    const [accessOption, setAccessOption] =
+      useState<AccessOptionType>('public');
 
     const handleClickOutside = (event: any) => {
       const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
@@ -127,10 +132,11 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
       props.setState!({
-        title: 'New Space',
         type: 'space',
         archetype: 'lodge',
         archetypeTitle: 'Lodge',
+        color: '#000000',
+        access: 'public',
       });
       () => {
         document.removeEventListener('click', handleClickOutside, true);
@@ -142,25 +148,54 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       []
     );
 
+    const setWorkspaceState = (obj: any) => {
+      setState &&
+        setState({
+          ...workflowState,
+          ...obj,
+        });
+    };
+
     return (
       <Grid.Column noGutter lg={12} xl={12}>
         <Text
           fontSize={5}
           lineHeight="24px"
           fontWeight={500}
-          mb={24}
+          mb={16}
           variant="body"
         >
-          Place details
+          Edit details
         </Text>
-        <Flex pl={1} pr={1} flexDirection="column" justifyContent="flex-start">
-          <Flex flexDirection="row" gap={16}>
+        <Flex flexDirection="column" gap={16} justifyContent="flex-start">
+          {/* <InlineEdit
+            variant="h3"
+            pb={2}
+            pt={2}
+            name="name"
+            tabIndex={1}
+            fontWeight={500}
+            required
+            placeholder="Space Name *"
+            customBg={inputColor}
+            defaultValue={name.state.value}
+            error={name.computed.ifWasEverBlurredThenError}
+            onChange={(e: any) => {
+              name.actions.onChange(e.target.value);
+              setWorkspaceState({ name: e.target.value });
+            }}
+            onFocus={() => name.actions.onFocus()}
+            onBlur={(e: any) => {
+              name.actions.onBlur();
+            }}
+          /> */}
+          <Flex flexDirection="row" alignItems="center" gap={16}>
             <Crest
               color={validatedColor}
               picture={validatedImageUrl}
-              size="md2"
+              size="md"
             />
-            <Flex flex={1} flexDirection="column" gap={1}>
+            <Flex flex={1} flexDirection="column" gap={4}>
               <RadioGroup
                 customBg={windowColor}
                 textColor={textColor}
@@ -169,7 +204,9 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   { label: 'Color', value: 'color' },
                   { label: 'Image', value: 'image' },
                 ]}
-                onClick={(value: CrestOptionType) => setCrestOption(value)}
+                onClick={(value: CrestOptionType) => {
+                  setCrestOption(value);
+                }}
               />
 
               <Flex
@@ -184,7 +221,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                 <Input
                   name="color"
                   tabIndex={1}
-                  height={40}
+                  height={34}
                   required
                   leftIcon={<Text opacity={0.5}>#</Text>}
                   rightInteractive
@@ -192,6 +229,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                     <Flex position="relative" justifyContent="flex-end">
                       <ColorTile
                         id="space-color-tile"
+                        size={26}
                         tileColor={validatedColor}
                         onClick={(_evt: any) => {
                           setColorPickerOpen(!colorPickerOpen);
@@ -199,6 +237,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                       />
                       <ColorTilePopover
                         id="space-color-tile-popover"
+                        size={26}
                         ref={colorPickerRef}
                         isOpen={colorPickerOpen}
                         data-is-open={colorPickerOpen}
@@ -209,6 +248,9 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                           color={validatedColor}
                           onChange={(newColor: { hex: string }) => {
                             color.actions.onChange(newColor.hex);
+                            setWorkspaceState({
+                              color: newColor.hex,
+                            });
                             setValidatedColor(newColor.hex);
                           }}
                           triangle="top-left"
@@ -237,6 +279,9 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   onChange={(e: any) => {
                     if (isValidHexColor(e.target.value)) {
                       setValidatedColor(`#${e.target.value}`);
+                      setWorkspaceState({
+                        color: `#${e.target.value}`,
+                      });
                     }
                     color.actions.onChange(e.target.value);
                   }}
@@ -261,7 +306,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   }
                   name="picture"
                   placeholder="Paste image link here"
-                  height={40}
+                  height={34}
                   wrapperStyle={{
                     borderRadius: 6,
                     paddingLeft: 6,
@@ -270,9 +315,11 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   value={picture.state.value}
                   // error={!avatar.computed.isDirty || avatar.computed.error}
                   onChange={(e: any) => {
-                    // validatedImageUrl
                     if (isValidImageUrl(e.target.value)) {
                       setValidatedImageUrl(e.target.value);
+                      setWorkspaceState({
+                        picture: e.target.value,
+                      });
                     }
                     picture.actions.onChange(e.target.value);
                   }}
@@ -282,25 +329,66 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
               </Flex>
             </Flex>
           </Flex>
-          <Flex mt={6} flex={1} gap={12} flexDirection="column">
-            <Flex gap={4} flexDirection="column">
-              <InlineEdit
-                variant="h4"
+          <Flex mt={1} flex={1} gap={20} flexDirection="column">
+            <FormControl.Field>
+              <Label fontWeight={500} required>
+                Place name
+              </Label>
+              <Input
+                tabIndex={1}
                 pb={2}
                 pt={2}
                 name="name"
-                tabIndex={1}
-                fontWeight={500}
                 required
-                placeholder="Space Name *"
-                customBg={inputColor}
+                placeholder="Enter name"
+                wrapperStyle={{
+                  height: 36,
+                  borderRadius: 6,
+                  backgroundColor: inputColor,
+                }}
                 defaultValue={name.state.value}
                 error={name.computed.ifWasEverBlurredThenError}
-                onChange={(e: any) => name.actions.onChange(e.target.value)}
+                onChange={(e: any) => {
+                  name.actions.onChange(e.target.value);
+                  setWorkspaceState({ name: e.target.value });
+                }}
                 onFocus={() => name.actions.onFocus()}
-                onBlur={() => name.actions.onBlur()}
+                onBlur={(e: any) => {
+                  name.actions.onBlur();
+                }}
               />
-              <InlineEdit
+            </FormControl.Field>
+            <FormControl.Field>
+              <Label fontWeight={500} adornment="optional">
+                Description
+              </Label>
+              <Input
+                tabIndex={1}
+                pb={2}
+                pt={2}
+                name="description"
+                fontWeight={400}
+                fontSize={2}
+                placeholder="Enter description"
+                wrapperStyle={{
+                  height: 36,
+                  borderRadius: 6,
+                  backgroundColor: inputColor,
+                }}
+                defaultValue={description.state.value}
+                error={description.computed.ifWasEverBlurredThenError}
+                onChange={(e: any) =>
+                  description.actions.onChange(e.target.value)
+                }
+                onFocus={() => description.actions.onFocus()}
+                onBlur={(e: any) => {
+                  setWorkspaceState({
+                    description: e.target.value,
+                  });
+                  description.actions.onBlur();
+                }}
+              />
+              {/* <InlineEdit
                 variant="p"
                 pb={2}
                 pt={2}
@@ -317,8 +405,44 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                 }
                 onFocus={() => description.actions.onFocus()}
                 onBlur={() => description.actions.onBlur()}
+              /> */}
+            </FormControl.Field>
+            <FormControl.Field>
+              <Label mb={1} fontWeight={500} required>
+                Access
+              </Label>
+              <RadioList
+                customBg={windowColor}
+                textColor={textColor}
+                selected={accessOption}
+                options={[
+                  {
+                    icon: 'Public',
+                    label: 'Public',
+                    value: 'public',
+                    sublabel: 'Anyone can search for and fully join.',
+                  },
+                  {
+                    icon: 'DoorOpen',
+                    label: 'Antechamber',
+                    value: 'antechamber',
+                    sublabel: 'Anyone can join a public holding area.',
+                  },
+                  {
+                    icon: 'EyeOff',
+                    label: 'Private',
+                    value: 'private',
+                    sublabel: 'Only those with an invite can join.',
+                  },
+                ]}
+                onClick={(value: AccessOptionType) => {
+                  setAccessOption(value);
+                  setWorkspaceState({
+                    access: value,
+                  });
+                }}
               />
-            </Flex>
+            </FormControl.Field>
             {/* <FormControl.FieldSet>
               <FormControl.Field>
                 <Label>Emblem</Label>

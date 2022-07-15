@@ -193,8 +193,6 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         height={height}
         style={{ backgroundColor: windowColor }}
       >
-        {/* TODO autocomplete patp's */}
-
         <FormControl.Field>
           <Input
             tabIndex={1}

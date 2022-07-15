@@ -29,8 +29,11 @@ export const Row = styled(motion.div)<RowProps>`
             &:hover {
               transition: ${props.theme.transition};
               background-color: ${props.customBg
-                ? darken(0.025, props.customBg)
+                ? darken(0.02, props.customBg)
                 : 'initial'};
+            }
+            &:focus {
+              background-color: ${rgba(props.theme.colors.brand.primary, 0.2)};
             }
           `
         : css`
@@ -39,10 +42,14 @@ export const Row = styled(motion.div)<RowProps>`
           `}
       ${props.selected &&
       css`
-        background-color: ${rgba(props.theme.colors.brand.primary, 0.2)};
+        background-color: ${props.customBg
+          ? darken(0.02, props.customBg)
+          : rgba(props.theme.colors.brand.primary, 0.15)};
         &:hover {
           transition: ${props.theme.transition};
-          background-color: ${rgba(props.theme.colors.brand.primary, 0.2)};
+          background-color: ${props.customBg
+            ? darken(0.02, props.customBg)
+            : rgba(props.theme.colors.brand.primary, 0.15)};
         }
       `}
        ${props.small &&

@@ -54,7 +54,12 @@ const RadioHighlight = styled(motion.label)<IRadioLabel>`
         `}
 `;
 
-type RadioOption = { label: string; value: string; icon?: IconTypes };
+export type RadioOption = {
+  label: string;
+  value: string;
+  sublabel?: string;
+  icon?: IconTypes;
+};
 
 interface IRadioGroup {
   customBg: string;
@@ -67,6 +72,7 @@ interface IRadioGroup {
 export const RadioGroup: FC<IRadioGroup> = (props: IRadioGroup) => {
   const { options, selected, customBg, textColor, onClick } = props;
   const optionBg = darken(0.025, customBg);
+  // TODO get the select transition working with framer
   return (
     <Flex
       p={1}
@@ -86,7 +92,7 @@ export const RadioGroup: FC<IRadioGroup> = (props: IRadioGroup) => {
           >
             {isSelected && (
               <RadioHighlight
-                layoutId="selection"
+                // layoutId="selection"
                 customBg={optionBg}
                 selected
               />

@@ -272,7 +272,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 rows={rows}
                 name="dm-message"
                 className="realm-cursor-text-cursor"
-                // height={34}
                 width={300}
                 placeholder="Write a message"
                 rightInteractive

@@ -93,6 +93,7 @@ export const useMenu = (
       if (event.target.id === ref.current.id && !show) {
         event.preventDefault();
         event.currentTarget.blur(); // this is to lose focus after clicking.
+        event.stopPropagation();
         setAnchorPoint(
           calculateAnchorPoint(
             event,
@@ -104,6 +105,7 @@ export const useMenu = (
         setShow(true);
       } else {
         event.preventDefault();
+        event.stopPropagation();
         // setShow(false);
       }
     },

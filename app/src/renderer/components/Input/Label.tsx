@@ -8,6 +8,7 @@ import { ThemeType } from '../../theme';
 type StyledLabelProps = {
   /** Apply the mandatory adornment */
   required?: boolean;
+  bold?: boolean;
   /** A custom adornment to apply */
   adornment?: 'required' | string | JSX.Element;
   /** HTML element to render */
@@ -26,6 +27,7 @@ const StyledLabel = styled(Text)`
     props.required &&
     `&:after {
       content: "*";
+      margin-left: 3px;
       color: ${props.theme.colors.brand.secondary};
     }`};
 `;
@@ -53,8 +55,9 @@ export const Label: FC<LabelProps> = forwardRef<HTMLLabelElement, LabelProps>(
           <Box
             display="inline-flex"
             alignItems="center"
-            color="text.secondary"
-            ml={1}
+            color="text.placeholder"
+            ml={2}
+            fontWeight={400}
           >
             {adornment}
           </Box>
