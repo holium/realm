@@ -17,6 +17,7 @@ const RadioLabel = styled(motion.label)<IRadioLabel>`
   /* padding: 8px; */
   height: 26px;
   z-index: 14;
+  font-size: 14px;
   position: relative;
   font-weight: 500;
   ${(props: IRadioLabel) =>

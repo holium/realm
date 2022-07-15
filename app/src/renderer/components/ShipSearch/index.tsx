@@ -23,12 +23,12 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
   (props: ShipSearchProps) => {
     const { search, selected, customBg, heightOffset, onSelected } = props;
     const { shell, ship } = useServices();
-    const { textTheme } = shell.desktop.theme;
+    const { textTheme, textColor } = shell.desktop.theme;
     const contacts = ship ? Array.from(ship?.contacts.rolodex.entries()) : [];
     const isAddingDisabled = selected.size > 0;
 
     const results = useMemo<Array<[string, ContactModelType]>>(
-      () => searchPatpOrNickname(search, contacts, selected),
+      () => searchPatpOrNickname(search, contacts, selected, ship?.patp),
       [search, contacts, selected]
     );
 
@@ -90,7 +90,36 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
         </div>
       );
     };
-
+    // Todo, move the show logic in here
+    if (results.length === 0) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          gap={24}
+        >
+          {/* <Text
+                    color={textColor}
+                    width={200}
+                    textAlign="center"
+                    opacity={0.6}
+                  >
+                    No DMs
+                  </Text> */}
+          {/* <Text
+            color={textColor}
+            width={200}
+            fontSize={2}
+            textAlign="center"
+            opacity={0.3}
+          >
+            Type a valid ID
+          </Text> */}
+        </Flex>
+      );
+    }
     return (
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
