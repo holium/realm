@@ -60,6 +60,7 @@ export type RadioOption = {
   value: string;
   sublabel?: string;
   icon?: IconTypes;
+  hidden?: boolean;
 };
 
 interface IRadioGroup {

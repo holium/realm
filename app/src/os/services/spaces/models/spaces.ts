@@ -4,6 +4,7 @@ import {
   applySnapshot,
   castToSnapshot,
   clone,
+  applyPatch,
 } from 'mobx-state-tree';
 import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
@@ -21,7 +22,8 @@ export const SpaceModel = types
     path: types.identifier,
     name: types.string,
     color: types.maybeNull(types.string),
-    type: types.enumeration(['group', 'our', 'dao']),
+    type: types.enumeration(['group', 'our', 'space']),
+    archetype: types.optional(types.enumeration(['home', 'lodge']), 'home'), //TODO remove the optional
     picture: types.maybeNull(types.string),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
@@ -93,33 +95,52 @@ export const SpacesStore = types
   }))
   .actions((self) => ({
     initialScry: (data: any, tempApps: any) => {
+      const spacesList = Object.entries(data);
+      const our = spacesList.filter(
+        ([_path, space]: [path: string, space: any]) => space.type === 'our'
+      )[0];
+      const ourSpace: any = our[1];
+      self.our = SpaceModel.create({
+        ...ourSpace,
+        path: our[0],
+        apps: tempApps,
+      });
+      delete data[our[0]!];
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
-          if (space.type === 'our') {
-            self.our = SpaceModel.create({ ...space, path, apps: tempApps });
-          } else {
-            self.spaces.set(
-              path,
-              SpaceModel.create({
-                ...space,
-                path,
-                apps: {
-                  pinned: [],
-                  endorsed: {},
-                  installed: {},
-                },
-              })
-            );
-          }
+          data[path].apps = {
+            pinned: [],
+            endorsed: {},
+            installed: {},
+          };
         }
       );
-      console.log(self.selected?.path);
+      applySnapshot(self.spaces, data);
+
       if (!self.selected) self.selected = self.our;
       // return self.selected!;
     },
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
+    },
+    addSpace: (addReaction: any) => {
+      const space = addReaction['spaces-reaction'].add.space;
+      space.apps = {
+        pinned: [],
+        endorsed: {},
+        installed: {},
+      };
+      const newSpace = SpaceModel.create(space);
+      self.spaces.set(space.path, SpaceModel.create(space));
+      return newSpace;
+    },
+    deleteSpace: (deleteReaction: any) => {
+      const path = deleteReaction['spaces-reaction'].remove['space-path'];
+      if (self.selected === path) self.selected = self.our;
+      self.spaces.delete(path);
+
+      return path;
     },
     setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.loader.state = status;

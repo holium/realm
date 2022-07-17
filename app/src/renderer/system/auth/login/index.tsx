@@ -83,7 +83,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   // if (theme) {
   colorProps = {
     color: theme?.textColor,
-    textShadow: theme?.textTheme === 'dark' ? '0 1px black' : 'none',
+    textShadow: theme?.mode === 'dark' ? '0 1px black' : 'none',
   };
   // }
 
@@ -177,7 +177,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                         <IconButton
                           size={26}
                           ref={optionsRef}
-                          luminosity={theme?.textTheme}
+                          luminosity={theme?.mode}
                           opacity={1}
                           onClick={(evt: any) => {
                             !show && setShow && setShow(true);
@@ -228,7 +228,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                         ) : (
                           <IconButton
                             ref={submitRef}
-                            luminosity={theme?.textTheme}
+                            luminosity={theme?.mode}
                             size={24}
                             canFocus
                             onClick={(evt: any) => clickSubmit(evt)}

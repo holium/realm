@@ -1,5 +1,7 @@
 import { Urbit } from '../urbit/api';
 
+type EffectKeyType = 'add' | 'replace' | 'remove' | string;
+
 export const quickPoke = async (
   ship: string,
   data: { app: string; mark: string; json: any },
@@ -16,42 +18,37 @@ export const quickPoke = async (
   const res1 = await new Promise(async (resolve, reject) => {
     try {
       conduit.on('ready', async () => {
+        let messageId;
         if (path) {
-          const messageId = await conduit.subscribe({
+          messageId = await conduit.subscribe({
             app: data.app,
             path: path!,
-            event: async (data: any) => {
-              switch (data['spaces-reaction']) {
-                case 'initial':
-                  // console.log(data['spaces-reaction']);
-                  break;
-                case 'add':
-                  console.log(data['spaces-reaction']['add']);
-                  break;
-                case 'replace':
-                  console.log(data['spaces-reaction']['replace']);
-                  break;
-                case 'remove':
-                  break;
-                default:
-                  // unknown
-                  break;
+            event: (data: any) => {
+              const effectType: EffectKeyType = Object.keys(
+                data['spaces-reaction']
+              )[0];
+              if (effectType === response!.op) {
+                resolve(data);
               }
+              // switch (effectType) {
+              //   case 'add':
+              //     console.log(data['spaces-reaction']['add']);
+              //     break;
+              //   case 'replace':
+              //     console.log('in response', data);
+              //     console.log(data['spaces-reaction']['replace']);
+              //     break;
+              //   case 'remove':
+              //     break;
+              // }
             },
             err: () => console.log('Subscription rejected'),
             quit: () => console.log('Kicked from subscription'),
           });
-          data.json.id = messageId;
         }
-        console.log(data);
-        const response = await conduit.poke(data);
+        messageId = await conduit.poke(data);
         if (!path) {
-          resolve(response);
-        }
-        if (path) {
-          resolve(await conduit.subscribeOnce(data.app, path));
-        } else {
-          resolve(response);
+          resolve(messageId);
         }
       });
     } catch (err) {

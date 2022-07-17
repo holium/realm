@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { Grid, Text, Flex } from 'renderer/components';
+// import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -9,7 +10,7 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { shell } = useServices();
     const { windowColor } = shell.desktop.theme;
-    const { workflowState } = props;
+    const { workflowState, setState } = props;
     const [selectedArchetype, setSelectedArchetype] = useState<string | null>(
       null
     );
@@ -51,12 +52,17 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
               selected={selectedArchetype === 'lodge'}
               onClick={() => {
                 setSelectedArchetype('lodge');
-                props.setState &&
-                  props.setState({
+                setState &&
+                  setState({
                     ...props.workflowState,
                     archetype: 'lodge',
                     archetypeTitle: 'Lodge',
                   });
+                // workflowState.set({
+                //   ...props.workflowState,
+                //   archetype: 'lodge',
+                //   archetypeTitle: 'Lodge',
+                // });
               }}
             />
             <SelectRow

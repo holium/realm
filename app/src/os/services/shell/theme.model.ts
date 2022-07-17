@@ -27,7 +27,6 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
       bgLuminosity === 'dark'
         ? lighten(0.9, baseColor)
         : darken(0.8, baseColor),
-    textTheme: bgLuminosity,
     iconColor:
       bgLuminosity === 'dark'
         ? rgba(lighten(0.5, baseColor), 0.4)
@@ -42,7 +41,6 @@ export const ThemeModel = types
     inputColor: types.optional(types.string, '#FFFFFF'),
     dockColor: types.optional(types.string, '#F5F5F4'),
     windowColor: types.optional(types.string, '#f5f5f4'),
-    textTheme: types.optional(types.enumeration(['light', 'dark']), 'light'),
     mode: types.optional(types.enumeration(['light', 'dark']), 'light'),
     textColor: types.optional(types.string, '#2a2927'),
     iconColor: types.optional(types.string, '#333333'),
@@ -76,7 +74,6 @@ export const ThemeStore = types
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
       windowColor: '#f0ecec',
-      textTheme: 'light',
       textColor: '#261f1f',
       iconColor: '#333333',
       mouseColor: '#4E9EFD',

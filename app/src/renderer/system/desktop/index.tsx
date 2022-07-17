@@ -26,17 +26,13 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
 
   return hasLoaded ? (
     <Fill>
-      <Layer zIndex={1}>
-        <Layer zIndex={2}>
-          <Layer zIndex={2}>{DialogLayer}</Layer>
-          <Layer zIndex={0}>
-            <WindowManager isOpen={!desktop.showHomePane} />
-          </Layer>
-          <Layer zIndex={1}>
-            {desktop.showHomePane && <AppGrid isOpen={desktop.showHomePane} />}
-          </Layer>
-        </Layer>
+      <Layer zIndex={0}>
+        <WindowManager isOpen={!desktop.showHomePane} />
       </Layer>
+      <Layer zIndex={1}>
+        {desktop.showHomePane && <AppGrid isOpen={desktop.showHomePane} />}
+      </Layer>
+      <Layer zIndex={2}>{DialogLayer}</Layer>
       <Layer zIndex={12}>
         <Bottom size={58}>
           <SystemBar />

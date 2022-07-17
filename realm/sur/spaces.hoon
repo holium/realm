@@ -25,16 +25,19 @@
       wallpaper=@t
   ==
 ::
-+$  space-name  cord  :: should be a unique name to the ship
-+$  space-path  [ship=ship space=space-name]
-+$  space-type  ?(%group %space %our)
-+$  archetype   ?(%lodge %creator-dao %service-dao %investment-dao)
++$  space-name     cord  :: should be a unique name to the ship
++$  space-path     [ship=ship space=space-name]
++$  space-type     ?(%group %space %our)
++$  archetype      ?(%home %lodge %creator-dao %service-dao %investment-dao)
++$  space-access   ?(%public %antechamber %private)
 +$  space
   $:  path=space-path
       name=space-name
       type=space-type
+      access=space-access
       picture=@t
       color=@t  :: '#000000'
+      =archetype
       theme=theme
       updated-at=@da
   ==
@@ -44,12 +47,21 @@
 ::  Poke actions
 ::
 +$  action
-  $%  [%add name=@t slug=@t type=space-type members=members:membership]
-      [%update path=space-path payload=edit-action]
+  $%  [%add slug=@t payload=add-payload members=members:membership]
+      [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
   ==
 :: 
-+$  edit-action
++$  add-payload 
+  $:  name=space-name
+      type=space-type
+      access=space-access
+      picture=@t
+      color=@t  :: '#000000'
+      =archetype
+  ==
+::
++$  edit-payload
   $%  [%name name=@t]
       [%picture picture=@t]
       [%color color=@t]

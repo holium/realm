@@ -5,6 +5,7 @@ import useSystemContextMenu from './useSystemContextMenu';
 import { MenuItem } from '../MenuItem';
 import { MenuWrapper } from '../Menu';
 import { rgba } from 'polished';
+import Portal from 'renderer/system/dialog/Portal';
 
 export type ContextMenuProps = {
   isComponentContext?: boolean;
@@ -34,7 +35,6 @@ export const ContextMenu = (props: ContextMenuProps) => {
   let anchorPoint;
   let show;
   if (isComponentContext) {
-    // todo orientation
     const context = useContextMenu(
       containerId,
       parentRef,
@@ -55,6 +55,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
       return arr.concat([
         [
           <MenuItem
+            id={obj.id}
             color={obj.disabled ? rgba(textColor, 0.7) : textColor}
             customBg={customBg}
             type={menuItemtype}
@@ -66,6 +67,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
     }
     arr[arr.length - 1].push(
       <MenuItem
+        id={obj.id}
         color={obj.disabled ? rgba(textColor, 0.7) : textColor}
         customBg={customBg}
         type={menuItemtype}
@@ -78,52 +80,53 @@ export const ContextMenu = (props: ContextMenuProps) => {
 
   // if (show) {
   return (
-    <MenuWrapper
-      key={containerId}
-      id={`${containerId}-context-menu`}
-      className="menu"
-      customBg={customBg}
-      initial={{
-        opacity: 0,
-        // x: anchorPoint.x,
-        // y: anchorPoint.y,
-      }}
-      animate={{
-        opacity: 1,
-        transition: {
-          duration: 0.2,
-        },
-      }}
-      exit={{
-        opacity: 0,
-        y: 8,
-        transition: {
-          duration: 0.2,
-        },
-      }}
-      // @ts-ignore
-      ref={contextMenuRef}
-      style={{
-        top: anchorPoint.y,
-        left: anchorPoint.x,
-        display: show ? 'block' : 'none',
-        ...style,
-      }}
-    >
-      {sectionsArray.map((menuSection: any[], index: number) => {
-        let divider = <hr />;
-        if (index === sectionsArray.length - 1) {
-          // @ts-ignore
-          divider = undefined;
-        }
-        return (
-          <section key={`section-${index}`}>
-            {menuSection}
-            {divider}
-          </section>
-        );
-      })}
-    </MenuWrapper>
+    <Portal>
+      <MenuWrapper
+        key={containerId}
+        id={`${containerId}-context-menu`}
+        className="menu"
+        customBg={customBg}
+        initial={{
+          opacity: 0,
+          // y: 0,
+        }}
+        animate={{
+          opacity: 1,
+          transition: {
+            duration: 0.1,
+          },
+        }}
+        exit={{
+          opacity: 0,
+          // y: 8,
+          transition: {
+            duration: 0.1,
+          },
+        }}
+        // @ts-ignore
+        ref={contextMenuRef}
+        style={{
+          y: anchorPoint.y,
+          x: anchorPoint.x,
+          display: show ? 'block' : 'none',
+          ...style,
+        }}
+      >
+        {sectionsArray.map((menuSection: any[], index: number) => {
+          let divider = <hr />;
+          if (index === sectionsArray.length - 1) {
+            // @ts-ignore
+            divider = undefined;
+          }
+          return (
+            <section key={`section-${index}`}>
+              {menuSection}
+              {divider}
+            </section>
+          );
+        })}
+      </MenuWrapper>
+    </Portal>
   );
   // }
   // return <></>;

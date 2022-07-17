@@ -14,6 +14,7 @@ import {
   FlexboxProps,
   BorderProps,
   PositionProps,
+  FontSizeProps,
 } from 'styled-system';
 import type { ThemeType } from '../../theme';
 import { IntentProps } from './MenuItem';
@@ -21,6 +22,7 @@ import { IntentProps } from './MenuItem';
 export type StyleProps = SpaceProps &
   ColorProps &
   LayoutProps &
+  FontSizeProps &
   FlexboxProps &
   BorderProps &
   PositionProps &
@@ -42,6 +44,7 @@ export const MenuItemStyle: any = styled(styled.li`
   -moz-box-sizing: border-box; /* Firefox, other Gecko */
   box-sizing: border-box; /* Opera/IE 8+ */
   padding: 8px;
+  font-size: 14px;
   /* margin: 0px 4px; */
   border-radius: ${(props) => props.theme.containers.outerBorderRadius}px;
   /* color: ${(props: StyleProps) =>
@@ -60,7 +63,7 @@ export const MenuItemStyle: any = styled(styled.li`
   ${(props: StyleProps) =>
     !props.disabled &&
     css`
-      &:hover {
+      &:hover:not([disabled]) {
         transition: ${props.theme.transition};
         background: ${props.highlightType === 'brand' &&
         props.theme.colors.brand.primary};
@@ -92,7 +95,7 @@ export const MenuItemStyle: any = styled(styled.li`
     props.customBg &&
     css`
       background-color: transparent;
-      &:hover {
+      &:hover:not([disabled]) {
         background-color: ${darken(0.035, props.customBg)};
       }
     `}

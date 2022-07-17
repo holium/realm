@@ -29,7 +29,7 @@ export const App: FC = observer(() => {
   const { shell } = useServices();
   const { desktop } = shell;
   // const shipLoaded = ship?.loggedIn;
-  const textTheme = desktop.theme.textTheme;
+  const themeMode = desktop.theme.mode;
 
   const shellMemo = useMemo(
     () => (booted ? <Shell /> : <div>Booting...</div>),
@@ -47,7 +47,7 @@ export const App: FC = observer(() => {
 
   return (
     <CoreProvider value={coreStore}>
-      <ThemeProvider theme={theme[textTheme]}>
+      <ThemeProvider theme={theme[themeMode]}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}

@@ -21,7 +21,8 @@ import {
 
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
-import { snakeify } from '../../lib/obj';
+import { snakeify, camelToSnake } from '../../lib/obj';
+import { spaceToSnake } from '../../lib/text';
 
 /**
  * SpacesService
@@ -30,17 +31,16 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   handlers = {
-    'realm.spaces.create-new': this.createNew,
     'realm.spaces.set-selected': this.setSelected,
     'realm.spaces.pin-app': this.pinApp,
     'realm.spaces.unpin-app': this.unpinApp,
     'realm.spaces.set-pinned-order': this.setPinnedOrder,
+    'realm.spaces.create-space': this.createSpace,
+    'realm.spaces.update-space': this.updateSpace,
+    'realm.spaces.delete-space': this.deleteSpace,
   };
 
   static preload = {
-    createNew: (newSpace: any) => {
-      return ipcRenderer.invoke('realm.spaces.create-new', newSpace);
-    },
     selectSpace: (spaceId: string) => {
       return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
@@ -52,6 +52,15 @@ export class SpacesService extends BaseService {
     },
     setPinnedOrder: (newOrder: any[]) => {
       return ipcRenderer.invoke('realm.spaces.set-pinned-order', newOrder);
+    },
+    createSpace: (form: any) => {
+      return ipcRenderer.invoke('realm.spaces.create-space', form);
+    },
+    updateSpace: (path: any, update: any) => {
+      return ipcRenderer.invoke('realm.spaces.update-space', path, update);
+    },
+    deleteSpace: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.delete-space', path);
     },
   };
 
@@ -124,8 +133,42 @@ export class SpacesService extends BaseService {
     SpacesApi.syncUpdates(this.core.conduit!, this.state);
   }
 
-  createNew(_event: any, body: any) {
-    console.log('creating new');
+  async createSpace(_event: any, body: any) {
+    const members = body.members;
+    delete body.members;
+    const response = await SpacesApi.createSpace(
+      this.core.conduit!,
+      {
+        slug: spaceToSnake(body.name),
+        payload: snakeify({
+          name: body.name,
+          type: body.type,
+          access: body.access,
+          picture: body.picture,
+          color: body.color,
+          archetype: body.archetype,
+        }),
+        members,
+      },
+      this.core.credentials!
+    );
+    const newSpace = this.state!.addSpace(response);
+    return toJS(newSpace);
+  }
+
+  updateSpace(_event: any, path: any, update: any) {
+    console.log('update space: ', path);
+  }
+
+  async deleteSpace(_event: any, path: string) {
+    console.log('deleting space: ', path);
+    const response = await SpacesApi.deleteSpace(
+      this.core.conduit!,
+      { path },
+      this.core.credentials!
+    );
+    const newSpace = this.state!.deleteSpace(response);
+    return toJS(newSpace);
   }
 
   setSelected(_event: any, path: string) {
@@ -153,11 +196,12 @@ export class SpacesService extends BaseService {
     const space = this.state?.getSpaceByPath(spacePath);
     if (space) {
       const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
-      SpacesApi.updateSpace(
+      const response = await SpacesApi.updateSpace(
         this.core.conduit!,
         { path: space.path, payload: { theme: snakeify(newTheme) } },
         this.core.credentials!
       );
+      console.log('wallpaper set response, ', response);
       return newTheme;
     }
     // todo handle errors better

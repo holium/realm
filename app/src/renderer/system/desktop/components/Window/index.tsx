@@ -23,7 +23,7 @@ import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogView } from '../../../dialog/Dialog/Dialog';
-import { CreateSpaceModal } from 'renderer/apps/Spaces/Workflow/CreateSpaceModal';
+import { CreateSpaceModal } from 'renderer/apps/Spaces/Workflow/SelectType';
 import {
   DialogTitlebar,
   DialogTitlebarProps,

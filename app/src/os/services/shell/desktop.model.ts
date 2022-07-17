@@ -63,13 +63,12 @@ export const DesktopStore = types
     isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     theme: types.optional(ThemeModel, {
-      themeId: 'os',
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
       windowColor: '#f0ecec',
-      textTheme: 'light',
+      mode: 'light',
       textColor: '#261f1f',
       iconColor: '#333333',
       mouseColor: '#4E9EFD',

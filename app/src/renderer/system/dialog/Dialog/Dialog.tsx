@@ -1,7 +1,14 @@
 import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState, useMemo } from 'react';
+
+import {
+  Flex,
+  TextButton,
+  Spinner,
+  IconButton,
+  Icons,
+} from 'renderer/components';
 import { dialogRenderers } from 'renderer/system/dialog/dialogs';
-import { Flex, TextButton, Box, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 
@@ -26,18 +33,27 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const { shell } = useServices();
   const elementRef = useRef(null);
 
-  const [workflowState, setWorkflowState] = useState<any>(null);
+  const [workflowState, setWorkflowState] = useState<any>({ loading: false });
   const [validated, setValidated] = useState<boolean>(false);
 
-  const ViewComponent: FC<any> | undefined =
-    dialogRenderers[window.id].component!;
-  const { workflow, customNext, firstStep, onNext, onPrevious, isValidated } =
-    dialogRenderers[window.id];
+  const ViewComponent: FC<any> | undefined = useMemo(
+    () => dialogRenderers[window.id].component!,
+    [window.id]
+  );
+
+  const {
+    workflow,
+    customNext,
+    firstStep,
+    nextButtonText,
+    onNext,
+    onPrevious,
+    isValidated,
+  } = dialogRenderers[window.id];
 
   useEffect(() => {
     if (firstStep) {
       setValidated(false);
-      setWorkflowState(null);
     }
   }, [firstStep]);
 
@@ -74,7 +90,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           <Flex alignItems="center" justifyContent="flex-start">
             {onPrevious && (
               <IconButton
-                customBg={shell.desktop.theme.backgroundColor}
+                customBg={shell.desktop.theme.windowColor}
                 onClick={() => {
                   onPrevious();
                 }}
@@ -86,12 +102,16 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           <Flex alignItems="center" justifyContent="space-between">
             {!customNext && onNext && (
               <TextButton
-                disabled={!validated}
+                disabled={!validated || workflowState.loading}
                 onClick={(evt: any) => {
-                  onNext(evt);
+                  onNext(evt, workflowState, setWorkflowState);
                 }}
               >
-                Next
+                {workflowState.loading ? (
+                  <Spinner size={0} />
+                ) : (
+                  <>{nextButtonText || 'Next'}</>
+                )}
               </TextButton>
             )}
           </Flex>

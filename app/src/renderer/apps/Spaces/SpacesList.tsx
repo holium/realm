@@ -52,7 +52,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
               rightContent={<Icons size={2} name="Plus" />}
               data-close-tray="true"
               onClick={(evt: any) => {
-                DesktopActions.openDialog('create-spaces-1');
+                DesktopActions.openDialog('create-space-1');
               }}
             >
               Create one

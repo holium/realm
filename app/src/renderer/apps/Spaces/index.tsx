@@ -76,7 +76,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
           color={iconColor}
           data-close-tray="true"
           onClick={(evt: any) => {
-            DesktopActions.openDialog('create-spaces-1');
+            DesktopActions.openDialog('create-space-1');
           }}
         >
           <Icons name="Plus" opacity={0.7} />

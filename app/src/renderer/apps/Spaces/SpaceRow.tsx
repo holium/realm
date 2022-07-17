@@ -1,11 +1,12 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { rgba, darken, lighten } from 'polished';
 import styled, { css } from 'styled-components';
-import { Flex, Icons, Text } from 'renderer/components';
+import { ContextMenu, Flex, Icons, Text } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 export const EmptyGroup = styled.div`
   height: 32px;
@@ -22,10 +23,12 @@ type RowProps = {
 
 export const SpaceRowStyle = styled(motion.div)<RowProps>`
   height: 48px;
+  position: relative;
   border-radius: 8px;
   padding: 0 8px;
   display: flex;
   flex-direction: row;
+  overflow: visible;
   align-items: center;
   transition: ${(props: RowProps) => props.theme.transition};
   ${(props: RowProps) =>
@@ -53,18 +56,65 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { shell } = useServices();
   const { theme } = shell.desktop;
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  // const {} =
+  const rowRef = useRef<any>(null);
 
   const currentTheme = useMemo(() => theme, [theme]);
+
+  const contextMenuItems = [
+    {
+      id: `space-row-${space.path}-btn-edit`,
+      label: 'Edit',
+      onClick: (evt: any) => {
+        // evt.stopPropagation();
+        // DesktopActions.toggleDevTools();
+      },
+    },
+    {
+      id: `space-row-${space.path}-btn-delete`,
+      label: 'Delete',
+      loading: deleteLoading,
+      onClick: (evt: any) => {
+        setDeleteLoading(true);
+        SpacesActions.deleteSpace(space.path).then((_response: any) => {
+          setDeleteLoading(false);
+        });
+        // DesktopActions.toggleDevTools();
+      },
+    },
+  ];
+
+  const contextMenuButtonIds = contextMenuItems.map((item: any) => item.id);
+
   return (
     <SpaceRowStyle
+      id={`space-row-${space.path}`}
+      ref={rowRef}
       data-close-tray="true"
       selected={selected}
       className="realm-cursor-hover"
       customBg={currentTheme.windowColor}
-      onClick={() => {
-        onSelect(space.path);
+      onClick={(evt: any) => {
+        // If a menu item is clicked
+        if (contextMenuButtonIds.includes(evt.target.id)) {
+          return;
+        } else {
+          onSelect(space.path);
+        }
       }}
+      // onContextMenu={(evt: any) => evt.stopPropagation()}
     >
+      <ContextMenu
+        isComponentContext
+        textColor={theme.textColor}
+        customBg={rgba(theme.windowColor, 0.9)}
+        containerId={`space-row-${space.path}`}
+        parentRef={rowRef}
+        style={{ minWidth: 180 }}
+        position="below"
+        menu={contextMenuItems}
+      />
       <Flex style={{ pointerEvents: 'none' }} alignItems="center">
         {space.picture ? (
           <img

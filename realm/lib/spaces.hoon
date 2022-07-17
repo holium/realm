@@ -4,7 +4,7 @@
 |%
 
 ++  create-space
-  |=  [=ship name=@t slug=@t type=space-type:store updated-at=@da]
+  |=  [=ship slug=@t payload=add-payload:store updated-at=@da]
   ^-  space:store
   =/  default-theme
     [
@@ -21,10 +21,12 @@
   =/  new-space
     [
       path=[ship slug]
-      name=name
-      type=type
-      picture=''
-      color='#000000'
+      name=name:payload
+      type=type:payload
+      access=access:payload
+      picture=picture:payload
+      color=color:payload
+      archetype=archetype:payload
       theme=default-theme
       updated-at=updated-at
     ]
@@ -163,9 +165,8 @@
     ::
     ++  add-space
       %-  ot
-      :~  [%name so]
-          [%slug so]
-          [%type space-type]
+      :~  [%slug so]
+          [%payload add-payload]
           [%members (op ;~(pfix sig fed:ag) (as rol))]
       ==
     ::
@@ -184,6 +185,16 @@
       %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%space so]
+      ==
+    ::
+    ++  add-payload
+      %-  ot
+      :~  [%name so]
+          [%type space-type]
+          [%access access]
+          [%picture so]
+          [%color so]
+          [%archetype archetype]
       ==
     ::
     ++  edit-payload
@@ -232,6 +243,26 @@
       ?:  =('member' p.json)     %member
       ?:  =('admin' p.json)      %admin
       ?:  =('owner' p.json)      %owner
+      !!
+    ::
+    ++  archetype
+      |=  =json
+      ^-  archetype:store
+      ?>  ?=(%s -.json)
+      ?:  =('home' p.json)                %home
+      ?:  =('lodge' p.json)               %lodge
+      ?:  =('creator-dao' p.json)         %creator-dao
+      ?:  =('service-dao' p.json)         %service-dao
+      ?:  =('investment-dao' p.json)      %investment-dao
+      !!
+    ::
+    ++  access
+      |=  =json
+      ^-  space-access:store
+      ?>  ?=(%s -.json)
+      ?:  =('public' p.json)              %public
+      ?:  =('antechamber' p.json)         %antechamber
+      ?:  =('private' p.json)             %private
       !!
     --
   --

@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
+// import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
 import { Grid, Text, Flex, Skeleton } from 'renderer/components';
 import { observer } from 'mobx-react';
@@ -32,6 +33,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { shell } = useServices();
     const { windowColor } = shell.desktop.theme;
+    const { workflowState, setState } = props;
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
@@ -68,14 +70,20 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                   buttonText="Add Space"
                   subtitle={subtitle}
                   onButtonClick={(_evt: any) => {
-                    props.setState &&
-                      props.setState({
+                    setState &&
+                      setState({
                         title,
                         image: data.metadata.picture,
                         subtitle,
                         type: 'group',
                       });
-                    props.onNext && props.onNext();
+                    // workflowState.set({
+                    //   title,
+                    //   image: data.metadata.picture,
+                    //   subtitle,
+                    //   type: 'group',
+                    // });
+                    props.onNext && props.onNext(_evt);
                   }}
                 />
               );
@@ -123,9 +131,19 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
             title="New Space"
             buttonText="Create"
             onButtonClick={(data: any) => {
-              props.setState &&
-                props.setState({ title: 'New Space', type: 'space' });
-              props.onNext && props.onNext(data);
+              setState &&
+                setState({
+                  title: 'New Space',
+                  type: 'space',
+                });
+              // workflowState.set({
+              //   title: 'New Space',
+              //   type: 'space',
+              // });
+              props.onNext && props.onNext(null, data);
+              // props.setState &&
+              //   props.setState({ title: 'New Space', type: 'space' });
+              // props.onNext && props.onNext(data);
             }}
           />
           <Flex mt={8} flex={1} flexDirection="column">

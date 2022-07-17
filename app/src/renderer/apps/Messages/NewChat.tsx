@@ -215,13 +215,15 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
           />
         </FormControl.Field>
         {contactArray}
-        <ShipSearch
-          heightOffset={90}
-          search={patp}
-          selected={selectedPatp}
-          customBg={windowColor}
-          onSelected={(contact: any) => onShipSelected(contact)}
-        />
+        <Flex pl={2} pr={2} flex={1} flexDirection="column">
+          <ShipSearch
+            heightOffset={90}
+            search={patp}
+            selected={selectedPatp}
+            customBg={windowColor}
+            onSelected={(contact: any) => onShipSelected(contact)}
+          />
+        </Flex>
       </Grid.Column>
     </Grid.Column>
   );

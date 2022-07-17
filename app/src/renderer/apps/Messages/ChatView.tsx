@@ -52,15 +52,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     headerOffset,
     onSend,
   } = props;
-  const {
-    inputColor,
-    iconColor,
-    dockColor,
-    textTheme,
-    textColor,
-    windowColor,
-    mode,
-  } = props.theme;
+  const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
+    props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
   const { ship } = useServices();
@@ -280,7 +273,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                   <Flex justifyContent="center" alignItems="center">
                     <IconButton
                       ref={submitRef}
-                      luminosity={textTheme}
+                      luminosity={mode}
                       size={24}
                       canFocus
                       onKeyDown={submitDm}

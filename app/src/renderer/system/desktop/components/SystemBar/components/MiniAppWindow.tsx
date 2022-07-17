@@ -69,6 +69,7 @@ export const MiniApp: FC<MiniAppProps> = forwardRef(
         }}
         color={textColor}
         customBg={backgroundColor}
+        onContextMenu={(evt: any) => evt.stopPropagation()}
       >
         {children}
       </MiniAppWindow>

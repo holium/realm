@@ -22,10 +22,8 @@ import { TwitterPicker } from 'react-color';
 
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { SelectRow } from '../components/SelectionRow';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import ReactDOM from 'react-dom';
-import { Row } from 'renderer/components/NewRow';
 
 const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -128,16 +126,33 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       }
     };
 
+    const setWorkspaceState = (obj: any) => {
+      setState &&
+        setState({
+          ...workflowState,
+          ...obj,
+        });
+      // workflowState.set({
+      //   ...workflowState,
+      //   ...obj,
+      // });
+    };
+
     useEffect(() => {
       // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
-      props.setState!({
-        type: 'space',
-        archetype: 'lodge',
-        archetypeTitle: 'Lodge',
-        color: '#000000',
+      setWorkspaceState({
         access: 'public',
+        color: '#000000',
+        picture: '',
       });
+      // props.setState!({
+      //   type: 'space',
+      //   archetype: 'lodge',
+      //   archetypeTitle: 'Lodge',
+      //   color: '#000000',
+      //   access: 'public',
+      // });
       () => {
         document.removeEventListener('click', handleClickOutside, true);
       };
@@ -147,14 +162,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       () => createSpaceForm({ color: validatedColor }),
       []
     );
-
-    const setWorkspaceState = (obj: any) => {
-      setState &&
-        setState({
-          ...workflowState,
-          ...obj,
-        });
-    };
 
     return (
       <Grid.Column noGutter lg={12} xl={12}>
@@ -168,27 +175,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
           Edit details
         </Text>
         <Flex flexDirection="column" gap={16} justifyContent="flex-start">
-          {/* <InlineEdit
-            variant="h3"
-            pb={2}
-            pt={2}
-            name="name"
-            tabIndex={1}
-            fontWeight={500}
-            required
-            placeholder="Space Name *"
-            customBg={inputColor}
-            defaultValue={name.state.value}
-            error={name.computed.ifWasEverBlurredThenError}
-            onChange={(e: any) => {
-              name.actions.onChange(e.target.value);
-              setWorkspaceState({ name: e.target.value });
-            }}
-            onFocus={() => name.actions.onFocus()}
-            onBlur={(e: any) => {
-              name.actions.onBlur();
-            }}
-          /> */}
           <Flex flexDirection="row" alignItems="center" gap={16}>
             <Crest
               color={validatedColor}
@@ -336,8 +322,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
               </Label>
               <Input
                 tabIndex={1}
-                pb={2}
-                pt={2}
                 name="name"
                 required
                 placeholder="Enter name"
@@ -364,8 +348,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
               </Label>
               <Input
                 tabIndex={1}
-                pb={2}
-                pt={2}
                 name="description"
                 fontWeight={400}
                 fontSize={2}
@@ -388,24 +370,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   description.actions.onBlur();
                 }}
               />
-              {/* <InlineEdit
-                variant="p"
-                pb={2}
-                pt={2}
-                name="description"
-                tabIndex={1}
-                fontWeight={400}
-                fontSize={2}
-                placeholder="Description (optional)"
-                customBg={inputColor}
-                defaultValue={description.state.value}
-                error={description.computed.ifWasEverBlurredThenError}
-                onChange={(e: any) =>
-                  description.actions.onChange(e.target.value)
-                }
-                onFocus={() => description.actions.onFocus()}
-                onBlur={() => description.actions.onBlur()}
-              /> */}
             </FormControl.Field>
             <FormControl.Field>
               <Label mb={1} fontWeight={500} required>

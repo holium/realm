@@ -10,6 +10,7 @@ type RowProps = {
   theme: ThemeType;
   customBg?: string;
   pending?: boolean;
+  noHover?: boolean;
   gap?: number;
 };
 
@@ -24,22 +25,19 @@ export const Row = styled(motion.div)<RowProps>`
   ${(props: RowProps) =>
     css`
       gap: ${props.gap || 10}px;
-      ${!props.disabled
-        ? css`
-            &:hover {
-              transition: ${props.theme.transition};
-              background-color: ${props.customBg
-                ? darken(0.02, props.customBg)
-                : 'initial'};
-            }
-            &:focus {
-              background-color: ${rgba(props.theme.colors.brand.primary, 0.2)};
-            }
-          `
-        : css`
-            pointer-events: none;
-            opacity: 0.5;
-          `}
+      ${!props.disabled &&
+      !props.noHover &&
+      css`
+        &:hover {
+          transition: ${props.theme.transition};
+          background-color: ${props.customBg
+            ? darken(0.02, props.customBg)
+            : 'initial'};
+        }
+        &:focus {
+          background-color: ${rgba(props.theme.colors.brand.primary, 0.2)};
+        }
+      `}
       ${props.selected &&
       css`
         background-color: ${props.customBg
@@ -55,6 +53,11 @@ export const Row = styled(motion.div)<RowProps>`
        ${props.small &&
       css`
         padding: 2px 2px;
+      `}
+      ${props.disabled &&
+      css`
+        pointer-events: none;
+        opacity: 0.5;
       `}
     `}
 `;

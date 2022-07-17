@@ -97,7 +97,8 @@ export const WallpaperDialog: FC = observer(() => {
     DesktopActions.changeWallpaper(
       spaces.selected!.path!,
       formData.imageUrl
-    ).then((newTheme: any) => {
+    ).then((response: any) => {
+      console.log(response);
       DesktopActions.closeDialog();
       DesktopActions.setBlur(false);
       setLoading(false);

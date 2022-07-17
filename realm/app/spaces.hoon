@@ -33,12 +33,12 @@
   ++  on-init
     ^-  (quip card _this)
     =/  our-name  `@t`(scot %p our.bowl)
-    =/  our-space  (create-space:lib our.bowl our-name 'our' %our now.bowl)
+    =/  our-space  (create-space:lib our.bowl 'our' [name=our-name %our %private '' '#000000' %home] now.bowl)
     =/  initial-spaces  `spaces:store`(~(put by spaces.state) [path:our-space our-space])
     =/  our-members  (malt `(list (pair ship roles:membership-store))`~[[our.bowl (silt `(list role:membership-store)`~[%owner %admin])]])
     =/  initial-auth   `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path:our-space our-members]])
     ~&  >  '%spaces initialized'
-    =.  state  [%0 spaces=initial-spaces auth=initial-auth]
+    =.  state  [%0 spaces=initial-spaces membership=initial-auth]
     :-  ~  this
   ::
   ++  on-save
@@ -89,16 +89,18 @@
     =/  space       (~(got by spaces.state) [ship space-pth])
     ``noun+!>((view:enjs:lib [%space space]))
     ==
+  ::
   ++  on-watch  
     |=  =path
     ^-  (quip card _this)
     =/  cards=(list card)
-      ?+  path        (on-watch:def path)
-        [%updates ~]  (send-reaction:core [%initial spaces.state membership.state])
+      ?+  path      (on-watch:def path)
+        [%updates ~]      (send-reaction:core [%initial spaces.state membership.state])
+        [%response ~]     ~
       ::
       ==
     [cards this]
-    ::
+  ::
   ++  on-leave  |=(path `..on-init)
   ++  on-agent  |=([wire sign:agent:gall] !!)
   ++  on-arvo   |=([wire sign-arvo] !!)
@@ -120,21 +122,21 @@
   ==
   ::
   ++  handle-add
-    |=  [payload=[name=space-name:store slug=@t type=space-type:store members=members:membership-store]]
+    |=  [slug=@t payload=add-payload:store members=members:membership-store]
     ^-  (quip card _state)
     ?>  (team:title our.bowl src.bowl)
-    =/  new-space  (create-space:lib our.bowl name.payload slug.payload type.payload now.bowl)
-    =.  members.payload    (~(put by members.payload) [our.bowl (silt `(list role:membership-store)`~[%owner %admin])])
+    =/  new-space  (create-space:lib our.bowl slug payload now.bowl)
+    =.  members    (~(put by members) [our.bowl (silt `(list role:membership-store)`~[%owner %admin])])
     ?:  (~(has by spaces.state) path.new-space)   :: checks if the path exists
       [~ state]
     =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
-    =.  membership.state      (~(put by membership.state) [path.new-space members.payload])
-    :-  (send-reaction [%add new-space members.payload])
+    =.  membership.state      (~(put by membership.state) [path.new-space members])
+    :-  (send-reaction [%add new-space members])
     :: :-  (send-reaction %people-reaction [%add new-space])
     state
   ::
   ++  handle-update
-    |=  [path=space-path:store edit-payload=edit-action:store]
+    |=  [path=space-path:store edit-payload=edit-payload:store]
     ^-  (quip card _state)
     ?>  (has-auth:core path src.bowl %admin)
     =/  old                   (~(got by spaces.state) path)
@@ -146,7 +148,7 @@
     state(spaces (~(put by spaces.state) path updated))
     ::
     ++  edit-space
-      |=  [=space:store edit=edit-action:store]
+      |=  [=space:store edit=edit-payload:store]
       ^-  space:store
       ?-  -.edit
         %name       space(name name.edit)
@@ -174,7 +176,7 @@
   |=  [=reaction:store]
   ^-  (list card)
   =/  paths=(list path)
-    [/updates ~]
+    [/updates /response ~]
   [%give %fact paths %spaces-reaction !>(reaction)]~
 
 ++  send-view

@@ -6,10 +6,11 @@ export type BaseWorkflowProps = {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
   firstStep?: boolean; // identifies the first dialog in a workflow
   customNext?: boolean; // an override to remove the next button if the dialog has a custom "next" component
+  nextButtonText?: string; // renames the text of "Next"
   workflowState?: any; // the state that is passed between the various dialogs in a workflow
   setState?: (data: any) => void; // a function that is passed into the dialog component for setting workflow state.
   isValidated?: (state: any) => boolean; // a function that takes in the state and can then check for value.
-  onNext?: (data?: any) => void; // is the function executes when the "next" button is clicked.
+  onNext?: (evt: any, state?: any, setState?: any) => void; // is the function executes when the "next" button is clicked.
   onPrevious?: (data?: any) => void; // is the function that executes whent the back arrow is clicked.
 };
 
@@ -23,6 +24,7 @@ export type BaseDialogProps = {
 export type DialogConfig = {
   titlebar?: React.FC<any>;
   component: React.FC<any>;
+  stateKey?: string;
   window: WindowModelProps;
 } & BaseDialogProps;
 

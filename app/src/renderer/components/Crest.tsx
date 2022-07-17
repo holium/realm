@@ -2,6 +2,7 @@ import { FC } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import CrestSymbol from './Icons/crest';
+import { background } from 'styled-system';
 
 const crestSize = {
   xsm: 16,
@@ -71,9 +72,11 @@ export const Crest: FC<ICrest> = (props: ICrest) => {
       height={crestSize[size]}
       width={crestSize[size]}
       borderRadius={crestRadius[size]}
+      transition={{ backgroundColor: { duration: 0.5 } }}
     >
       <CrestSymbol
         fill={color}
+        transitionDuration={0.5}
         height={crestSize[size] * 0.65}
         width={crestSize[size] * 0.65}
       />

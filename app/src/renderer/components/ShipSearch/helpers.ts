@@ -28,7 +28,6 @@ export const searchPatpOrNickname = (
   const filtered: Array<[string, ContactModelType]> = results.filter(
     (el: [string, ContactModelType]) => {
       const patp = el[0].toLocaleLowerCase();
-      console.log(patp);
       if (patp === our) {
         return;
       }

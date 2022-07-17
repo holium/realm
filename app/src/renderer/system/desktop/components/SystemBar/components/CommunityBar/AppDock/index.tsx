@@ -51,7 +51,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               value={app}
               style={{ zIndex: 1 }}
               initial={{
-                opacity: 0.5,
+                opacity: 0.0,
               }}
               animate={{
                 opacity: 1,

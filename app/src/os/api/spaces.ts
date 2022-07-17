@@ -13,6 +13,26 @@ export const SpacesApi = {
     });
     return response.spaces;
   },
+  createSpace: async (
+    conduit: Urbit,
+    payload: { slug: string; payload: any; members: any },
+    credentials: ISession
+  ) => {
+    const response = await quickPoke(
+      conduit.ship!,
+      {
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          add: payload,
+        },
+      },
+      credentials,
+      { path: '/response', op: 'add' }
+    );
+
+    return response;
+  },
   updateSpace: async (
     conduit: Urbit,
     payload: { path: string; payload: any },
@@ -23,10 +43,6 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    console.log({
-      path: pathObj,
-      payload: payload.payload,
-    });
     const response = await quickPoke(
       conduit.ship!,
       {
@@ -40,13 +56,34 @@ export const SpacesApi = {
         },
       },
       credentials,
-      { path: '/updates' }
+      { path: '/response', op: 'replace' }
     );
-    console.log(response);
-    //  const response = await conduit.scry({
-    //     app: 'spaces',
-    //     path: '', // the spaces scry is at the root of the path
-    //   });
+    return response;
+  },
+  deleteSpace: async (
+    conduit: Urbit,
+    payload: { path: string },
+    credentials: ISession
+  ) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    const response = await quickPoke(
+      conduit.ship!,
+      {
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          remove: {
+            path: pathObj,
+          },
+        },
+      },
+      credentials,
+      { path: '/response', op: 'remove' }
+    );
     return response;
   },
   syncUpdates: (conduit: Urbit, state: SpacesStoreType): void => {

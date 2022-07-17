@@ -10,7 +10,7 @@ type MenuWrapperStyleProps = {
 };
 
 export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
-  z-index: 3;
+  z-index: 1000;
   position: absolute;
   display: flex;
   margin-top: 1px;
@@ -21,7 +21,7 @@ export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
     transition: ${props.theme.transition};
     min-width: 125px;
     padding: 8px;
-    box-shadow: ${props.theme.elevations.one};
+    box-shadow: ${props.theme.elevations.two};
     box-sizing: border-box;
     border-radius: 9px;
     color: ${props.theme.colors.text.primary};
