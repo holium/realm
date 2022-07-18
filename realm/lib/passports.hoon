@@ -8,7 +8,7 @@
 ::   synch's contacts from contact-store.
 ::
 ::
-/-  sur=people
+/-  sur=passports
 /+  res=resource
 =<  [sur .]
 =,  sur
@@ -24,7 +24,7 @@
   ++  action
     |=  act=^action
     ^-  json
-    %+  frond  %people-action
+    %+  frond  %passports-action
     %-  pairs
     :_  ~
     ^-  [cord json]
@@ -109,25 +109,25 @@
     |%
     ++  decode
       %-  of
-      :~  [%add add-person]
-          [%remove remove-person]
-          [%edit edit-person]
+      :~  [%add add-passport]
+          [%remove remove-passport]
+          [%edit edit-passport]
       ==
     ::
-    ++  add-person
+    ++  add-passport
       %-  ot
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]
           [%payload payl]
       ==
     ::
-    ++  remove-person
+    ++  remove-passport
       %-  ot
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
-    ++  edit-person
+    ++  edit-passport
       %-  ot
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]

@@ -1,4 +1,4 @@
-/+  *people
+/+  *passports
 ::
 |_  react=reaction
 ++  grad  %noun

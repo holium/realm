@@ -24,8 +24,8 @@
 ::       agent when adding spaces are changing people permissions
 ::
 ::
-/-  store=people, contact-store, spaces, membership-store=membership, hark=hark-store
-/+  dbug, default-agent, resource, lib=people
+/-  store=passports, contact-store, spaces, membership-store=membership, hark=hark-store
+/+  dbug, default-agent, resource, lib=passports
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -34,6 +34,7 @@
 +$  state-0
   $:  %0
       =districts:store
+      =passports:store
       =people:store
       =contacts:store
       allowed-groups=(set resource)
@@ -78,7 +79,7 @@
     ^-  (quip card _this)
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %people-action  (act:core !<(action:store vase))
+      %passports-action  (act:core !<(action:store vase))
     ==
     [cards this]
   ::
@@ -234,7 +235,7 @@
   =/  passports  (~(put by u.passports) ship passport)
   =/  notify=action:hark  (notify path /invite (crip " issued you a passport to the {<`@t`(scot %tas space.path)>} space in Realm."))
   :_  state(people (~(put by people) ship *person:store), districts (~(put by districts) path passports))
-  :~  [%give %fact [/updates ~] %people-reaction !>([%add path ship *person:store passport])]
+  :~  [%give %fact [/updates ~] %passports-reaction !>([%add path ship *person:store passport])]
       [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]
   ==
 ::
@@ -294,7 +295,7 @@
   ?~  per  `state
   =.  last-known-active.u.per  (some now.bowl)
   :_  state(people (~(put by people.state) our.bowl u.per))
-  :~  [%give %fact [/updates ~] %people-reaction !>([%pong our.bowl now.bowl])]
+  :~  [%give %fact [/updates ~] %passports-reaction !>([%pong our.bowl now.bowl])]
   ==
 ::
 ::  $on-contacts-initial: imports initial contact list
