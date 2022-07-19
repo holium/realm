@@ -24,7 +24,6 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type LoginProps = {
   addShip: () => void;
-  continueSignup: (ship: any) => void;
   hasWallpaper?: boolean;
 };
 
