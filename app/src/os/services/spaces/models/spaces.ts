@@ -137,7 +137,7 @@ export const SpacesStore = types
     },
     deleteSpace: (deleteReaction: any) => {
       const path = deleteReaction['spaces-reaction'].remove['space-path'];
-      if (self.selected === path) self.selected = self.our;
+      if (self.selected === path) self.selected = self.our; // TODO do this outside of this function
       self.spaces.delete(path);
 
       return path;

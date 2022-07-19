@@ -17,6 +17,14 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     width: 1200,
     height: 900,
   },
+  ['chatstead']: {
+    width: 1200,
+    height: 900,
+  },
+  ['homestead']: {
+    width: 1200,
+    height: 900,
+  },
   ['webterm']: {
     width: 780,
     height: 600,

@@ -21,7 +21,7 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
   return useMemo(
     () => (
       <MouseArea
-        animate={{ zIndex: 11000, display: hide ? 'none' : 'inherit' }}
+        animate={{ zIndex: 2147483648, display: hide ? 'none' : 'inherit' }} // to be higher than one zIndex that I saw in action
       >
         <CurrentUserCursor
           initialRender={initialRender}

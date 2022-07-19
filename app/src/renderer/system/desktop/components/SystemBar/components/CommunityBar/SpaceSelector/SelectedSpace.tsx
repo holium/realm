@@ -96,7 +96,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
               src={selectedSpace.picture}
             />
           ) : (
-            <EmptyPicture color={'#000000'} />
+            <EmptyPicture color={selectedSpace.color || '#000000'} />
           )}
           <Flex
             style={{ pointerEvents: 'none' }}
