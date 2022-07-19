@@ -10,6 +10,8 @@ import { ThemeModel } from '../shell/theme.model';
 import { LoaderModel } from '../common.model';
 import { StepList } from '../common.model';
 
+export const DEFAULT_WALLPAPER = 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
+
 export const AuthShip = types
   .model('AuthShipModel', {
     url: types.string,
@@ -27,21 +29,12 @@ export const AuthShip = types
       textColor: '#261f1f',
       textTheme: 'light',
     }),
-    wallpaper: types.maybeNull(types.string),
+    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
   })
   .actions((self) => ({
     setStatus(status: Instance<typeof StepList>) {
       self.status = status;
-    },
-    setContactMetadata: (contactMetadata: {
-      color?: string;
-      nickname?: string;
-      avatar?: string;
-    }) => {
-      self.color = contactMetadata.color || '#000000';
-      if (contactMetadata.nickname) self.nickname = contactMetadata.nickname;
-      if (contactMetadata.avatar) self.avatar = contactMetadata.avatar;
     },
   }));
 
@@ -54,6 +47,7 @@ export const AuthStore = types
     selected: types.safeReference(AuthShip), // patp string
     ships: types.map(AuthShip),
     order: types.optional(types.array(types.string), []), // patp string
+    clientId: types.string
   })
   .views((self) => ({
     get isLoading() {
