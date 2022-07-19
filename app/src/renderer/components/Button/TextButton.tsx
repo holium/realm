@@ -8,6 +8,8 @@ import {
   layout,
   opacity,
   OpacityProps,
+  position,
+  PositionProps,
   typography,
   ButtonStyleProps,
 } from 'styled-system';
@@ -20,7 +22,7 @@ type IProps = {
   theme: ThemeType;
   disabled?: boolean;
 } & OpacityProps &
-  ButtonStyleProps;
+  ButtonStyleProps & PositionProps;
 
 export const TextButtonStyle = styled(styled.div`
   font-family: ${(props: any) => props.theme.fonts.body};
@@ -69,11 +71,11 @@ export const TextButtonStyle = styled(styled.div`
           opacity: 0.3;
         `
       }
-     
+
     `};
 `)<IProps>(
   {},
-  compose(space, color, layout, backgroundColor, typography, opacity)
+  compose(space, color, layout, backgroundColor, typography, opacity, position)
 );
 
 type TextButtonProps = {
@@ -84,7 +86,7 @@ type TextButtonProps = {
   disabled?: boolean;
   style?: any;
   onClick?: (evt: any) => void;
-};
+} & PositionProps;
 
 export const TextButton: FC<TextButtonProps> = (props: TextButtonProps) => {
   return (

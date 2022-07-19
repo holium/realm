@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { FC, forwardRef } from 'react';
+import { darken } from 'polished';
 import styled, { StyledComponentProps } from 'styled-components';
 import {
   border,
@@ -11,8 +12,10 @@ import {
   space,
   color,
   variant,
+  fontWeight,
   BorderProps,
   FlexboxProps,
+  FontWeightProps,
   LayoutProps,
   PositionProps,
   BackgroundProps,
@@ -27,12 +30,13 @@ export type StyledButtonProps = SpaceProps &
   BorderProps &
   BackgroundProps &
   ColorProps &
-  PositionProps & {
+  PositionProps &
+  FontWeightProps & {
     leftIcon?: JSX.Element;
     rightIcon?: JSX.Element;
     isLoading?: boolean;
     disabled?: boolean;
-    variant?: 'primary' | 'secondary' | 'transparent' | 'minimal' | 'custom';
+    variant?: 'primary' | 'secondary' | 'base' | 'transparent' | 'minimal' | 'custom';
   };
 
 const defaultButtonStyles = {
@@ -101,6 +105,16 @@ const buttonVariants = variant({
         borderColor: 'ui.disabled',
       },
     },
+    base: {
+      ...defaultButtonStyles,
+      bg: darken(.03, '#f0ecec'),
+      color: 'text.primary',
+      border: `1px solid ${darken(.09, '#f0ecec')}`,
+      '&:hover': {
+        transition: '0.2s ease',
+        backgroundColor: darken(.07, '#f0ecec'),
+      }
+    },
     minimal: {
       ...defaultButtonStyles,
       bg: 'brand.muted',
@@ -160,7 +174,7 @@ const buttonVariants = variant({
 
 const StyledButton = styled.button<ButtonProps>`
   ${buttonVariants}
-  ${compose(space, layout, color, background, flexbox, border, position)}
+  ${compose(space, layout, color, background, flexbox, border, position, fontWeight)}
 `;
 
 export type ButtonProps = StyledComponentProps<
@@ -191,6 +205,7 @@ export const Button: FC<ButtonProps> = forwardRef<
     <StyledButton
       ref={ref}
       py={2}
+      px={2}
       disabled={disabled}
       isLoading={isLoading}
       {...props}
