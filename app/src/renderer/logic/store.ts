@@ -12,13 +12,12 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { ThemeStore } from '../../os/services/shell/theme.model';
 import { DesktopStore } from '../../os/services/shell/desktop.model';
 import { SpacesStore } from '../../os/services/spaces/models/spaces';
 import { AuthStore } from '../../os/services/identity/auth.model';
 import { SignupStore } from '../../os/services/identity/signup.model';
+import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel } from '../../os/services/ship/models/ship';
-import { toJS } from 'mobx';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -29,13 +28,13 @@ const loadSnapshot = (serviceKey: string) => {
 export const Services = types
   .model('ServicesStore', {
     shell: types.model('ShellStore', {
-      // preferenceStore: ConfigStore,
       desktop: DesktopStore,
     }),
     identity: types.model('identity', {
       auth: AuthStore,
       signup: SignupStore,
     }),
+    onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
   })
@@ -58,11 +57,13 @@ const services = Services.create({
     auth: {
       loader: { state: 'initial' },
       firstTime: true,
+      clientId: 'placeholder'
     },
     signup: {
       loader: { state: 'initial' },
     },
   },
+  onboarding: {},
   ship: undefined,
   spaces: {
     loader: { state: 'initial' },
@@ -135,6 +136,9 @@ OSActions.onBoot().then((response: any) => {
     coreStore.setLoggedIn(true);
     DesktopActions.setBlur(false);
   }
+  if (response.onboarding) {
+    applySnapshot(servicesStore.onboarding, castToSnapshot(response.onboarding));
+  }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
   }
@@ -162,10 +166,6 @@ export function useCore() {
   return store;
 }
 
-// onSnapshot(coreStore, (snapshot) => {
-//   localStorage.setItem('coreStore', JSON.stringify(snapshot));
-// });
-
 onSnapshot(servicesStore, (snapshot) => {
   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
 });
@@ -185,15 +185,15 @@ window.electron.os.auth.onLogout((_event: any) => {
 
 // Effect events
 window.electron.os.onEffect((_event: any, value: any) => {
-  // if (value.response === 'diff') {
-  //   console.log('got effect data => ', value.json);
-  // }
   if (value.response === 'patch') {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
     }
     if (value.resource === 'signup') {
       applyPatch(servicesStore.identity.signup, value.patch);
+    }
+    if (value.resource === 'onboarding') {
+      applyPatch(servicesStore.onboarding, value.patch);
     }
     if (value.resource === 'spaces') {
       console.log('spaces patch', value.patch);
@@ -209,7 +209,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
     }
   }
   if (value.response === 'initial') {
-    // console.log('initial', value);
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }
@@ -221,15 +220,9 @@ window.electron.os.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'spaces') {
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
-      // servicesStore.spaces.setInitial(value.model);
-      // spacesState.syncPatches(value);
     }
   }
 });
-
-// window.electron.app.setFullscreen((_event: any, data: any) => {
-//   // osState.desktop.setFullscreen(data);
-// });
 
 window.electron.app.setAppviewPreload((_event: any, data: any) => {
   servicesStore.shell.desktop.setAppviewPreload(data);
