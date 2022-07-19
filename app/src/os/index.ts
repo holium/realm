@@ -13,6 +13,7 @@ import { DesktopService } from './services/shell/desktop.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
+import HoliumAPI from './api/holium';
 
 export interface ISession {
   ship: string;
@@ -35,6 +36,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     shell: DesktopService;
   };
+  readonly holiumClient: HoliumAPI;
 
   readonly handlers = {
     'realm.boot': this.boot,
@@ -88,6 +90,8 @@ export class Realm extends EventEmitter {
       shell: new DesktopService(this),
     };
 
+    this.holiumClient = new HoliumAPI(this.services.identity.auth.clientId);
+
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
@@ -111,6 +115,7 @@ export class Realm extends EventEmitter {
     return {
       auth: this.services.identity.auth.snapshot,
       signup: this.services.identity.signup.snapshot,
+      onboarding: this.services.onboarding.snapshot,
       ship,
       spaces,
       shell,
@@ -155,6 +160,7 @@ export class Realm extends EventEmitter {
       this.session
     );
     this.services.identity.auth.setLoader('loaded');
+    this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.auth.on-log-in', toJS(ship));
   }
 
@@ -180,6 +186,8 @@ export class Realm extends EventEmitter {
    * @param data
    */
   onEffect(data: any): void {
+    console.log(`hey from onEffect`)
+    console.log(data);
     this.mainWindow.webContents.send('realm.on-effect', data);
   }
 }
