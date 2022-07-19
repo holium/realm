@@ -26,16 +26,5 @@ export const devApps: {
       url: 'http://localhost:3010/apps/playground/',
       development: true,
     },
-  },
-  'onboarding-dev': {
-    id: 'onboarding-dev',
-    title: 'Onboarding — Dev',
-    type: 'native',
-    color: '#ffffff',
-    icon: '',
-    native: {
-      hideTitlebarBorder: false,
-      openFullscreen: false
-    }
   }
 };
