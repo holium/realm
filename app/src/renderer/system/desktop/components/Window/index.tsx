@@ -7,8 +7,7 @@ import styled from 'styled-components';
 import { ThemeType } from '../../../../theme';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import {
-  WindowModelProps,
-  WindowModelType,
+  WindowModelProps
 } from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
@@ -23,7 +22,6 @@ import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogView } from '../../../dialog/Dialog/Dialog';
-import { CreateSpaceModal } from 'renderer/apps/Spaces/Workflow/CreateSpaceModal';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
@@ -80,14 +78,18 @@ export const AppWindow: FC<AppWindowProps> = observer(
 
     const activeWindow = window;
 
-    const mX = useMotionValue(activeWindow ? activeWindow.dimensions.x : 20);
-    const mY = useMotionValue(activeWindow ? activeWindow.dimensions.y : 20);
-    const mHeight = useMotionValue(
-      activeWindow ? activeWindow.dimensions.height : 600
-    );
-    const mWidth = useMotionValue(
-      activeWindow ? activeWindow.dimensions.width : 600
-    );
+    const mX = useMotionValue(20);
+    const mY = useMotionValue(20);
+    const mHeight = useMotionValue(600);
+    const mWidth = useMotionValue(600);
+
+    if (activeWindow) {
+      mX.set(activeWindow.dimensions.x);
+      mY.set(activeWindow.dimensions.y);
+      mHeight.set(activeWindow.dimensions.height);
+      mWidth.set(activeWindow.dimensions.width);
+    }
+
     const resizeRightX = useMotionValue(0);
     const resizeRightY = useMotionValue(0);
 
