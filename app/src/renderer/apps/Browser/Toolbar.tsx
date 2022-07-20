@@ -73,7 +73,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
         // search qwant
         const query = new URLSearchParams({ q: term });
         if (term.length > 0) {
-          const search = `https://www.qwant.com/?${query}&t=web`;
+          const search = `https://neeva.com/search?q=${query}`;
           browserStore.setCurrentTab(search);
           setUrlData(new URL(normalizeUrl(search)));
         }

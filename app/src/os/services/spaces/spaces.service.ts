@@ -23,6 +23,7 @@ import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
+import { PassportsApi } from '../../api/passports';
 
 /**
  * SpacesService
@@ -38,6 +39,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.get-passports': this.getPassports,
   };
 
   static preload = {
@@ -61,6 +63,9 @@ export class SpacesService extends BaseService {
     },
     deleteSpace: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.delete-space', path);
+    },
+    getPassports: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.get-passports', path);
     },
   };
 
@@ -169,6 +174,13 @@ export class SpacesService extends BaseService {
     );
     const newSpace = this.state!.deleteSpace(response);
     return toJS(newSpace);
+  }
+
+  async getPassports(_event: any, path: string) {
+    console.log(path);
+    const response = await PassportsApi.getPassports(this.core.conduit!, path);
+    console.log(response);
+    return response;
   }
 
   setSelected(_event: any, path: string) {

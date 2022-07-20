@@ -14,7 +14,7 @@ export const BrowserModel = types
   .model('BrowserModel', {
     currentTab: types.optional(TabModel, {
       id: 'tab-0',
-      url: 'https://qwant.com',
+      url: 'https://neeva.com',
       title: 'New tab',
       favicon: '',
     }),
