@@ -38,6 +38,7 @@
   :_  this
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
+      [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
   ==
 
 ++  on-save   !>(~)
@@ -111,19 +112,13 @@
           :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
           ==
     ::
-        :: %fact
-        ::   ?+    p.cage.sign  (on-agent:def wire sign)
-        ::       %spaces-reaction
-        ::         =/  action  !<(=reaction:spaces q.cage.sign)
-        ::         =^  cards  state
-        ::         ?-  -.action :: (on-agent:def wire sign)
-        ::           %initial  (on-spaces-initial:core action)
-        ::           %add      (on-spaces-add:core action)
-        ::           %replace  (on-spaces-replace:core action)
-        ::           %remove   (on-spaces-remove:core action)
-        ::         ==
-        ::         [cards this]
-        ::   ==
+        %fact
+          ?+    p.cage.sign  (on-agent:def wire sign)
+              %spaces-reaction
+                =^  cards  state
+                  (on:sp:core !<(=reaction:spaces q.cage.sign))
+                [cards this]
+          ==
       ==
 
     [%docket ~]
@@ -205,6 +200,35 @@
     |=  [=desk]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
+    `state
+  --
+::  spaces arms
+++  sp
+  |%
+  ++  on
+    |=  =reaction:spaces
+    ^-  (quip card _state)
+    ?-  -.reaction
+      %initial  (ini +.reaction)
+      %add      (add +.reaction)
+      %replace  (rep +.reaction)
+      %remove   (rem +.reaction)
+    ==
+  ++  ini
+    |=  [=spaces:spaces =membership:membership-store]
+    ^-  (quip card _state)
+    `state
+  ++  add
+    |=  [=space:spaces =members:membership-store]
+    ^-  (quip card _state)
+    `state
+  ++  rep
+    |=  [=space:spaces]
+    ^-  (quip card _state)
+    `state
+  ++  rem
+    |=  [path=space-path:spaces]
+    ^-  (quip card _state)
     `state
   --
 ::
