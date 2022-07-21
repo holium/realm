@@ -1,4 +1,4 @@
-/+  *people
+/+  *passports
 ::
 |_  act=action
 ++  grad  %noun

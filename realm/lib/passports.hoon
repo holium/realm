@@ -9,7 +9,6 @@
 ::
 ::
 /-  sur=passports
-/+  res=resource
 =<  [sur .]
 =,  sur
 |%

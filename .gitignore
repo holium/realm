@@ -110,6 +110,7 @@ dist
 # Hide developer ships
 /comets
 /ships
+/globs
 
 # Hide urbit repo
 /urbit

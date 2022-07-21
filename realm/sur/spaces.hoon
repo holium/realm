@@ -2,7 +2,7 @@
 ::  Defines the types for the spaces concept.
 
 ::  A space is a higher level concept above a %landscape group.
-/-  *apps, membership
+/-  membership
 |%
 +$  token
   $:  chain=?(%ethereum %uqbar)
@@ -51,8 +51,8 @@
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
   ==
-:: 
-+$  add-payload 
+::
++$  add-payload
   $:  name=space-name
       type=space-type
       access=space-access

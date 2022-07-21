@@ -55,7 +55,7 @@
   ::
   ++  on-poke
     |=  [=mark =vase]
-    ^-  (quip card _this)  
+    ^-  (quip card _this)
     ?>  (team:title our.bowl src.bowl) :: is our ship or moon
     |^
     =^  cards  state
@@ -90,7 +90,7 @@
     ``noun+!>((view:enjs:lib [%space space]))
     ==
   ::
-  ++  on-watch  
+  ++  on-watch
     |=  =path
     ^-  (quip card _this)
     =/  cards=(list card)

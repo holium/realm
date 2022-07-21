@@ -24,7 +24,7 @@
 ::       agent when adding spaces are changing people permissions
 ::
 ::
-/-  store=passports, contact-store, spaces, membership-store=membership, hark=hark-store
+/-  store=passports, contact-store, spaces, membership-store=membership, hark=hark-store, resource
 /+  dbug, default-agent, resource, lib=passports
 |%
 +$  card  card:agent:gall
@@ -34,7 +34,7 @@
 +$  state-0
   $:  %0
       =districts:store
-      =passports:store
+      :: =passports:store
       =people:store
       =contacts:store
       allowed-groups=(set resource)
@@ -116,7 +116,7 @@
     ^-  (quip card _this)
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
-      :: handle updates coming in from group store
+      :: handle updates coming in from contact store
       [%contacts ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
