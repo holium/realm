@@ -5,7 +5,7 @@
 ::
 ::  Should watch and sync data with %treaty and %docket under /garden.
 ::
-/-  store=bazaar, docket, spaces, membership-store=membership, hark=hark-store
+/-  store=bazaar, docket, sp-sur=spaces, membership-store=membership, hark=hark-store
 /+  dbug, default-agent
 |%
 +$  card  card:agent:gall
@@ -14,6 +14,7 @@
     ==
 +$  state-0
   $:  %0
+      =membership:membership-store
       =installed-apps:store
       =space-apps:store
   ==
@@ -116,7 +117,7 @@
           ?+    p.cage.sign  (on-agent:def wire sign)
               %spaces-reaction
                 =^  cards  state
-                  (on:sp:core !<(=reaction:spaces q.cage.sign))
+                  (on:sp:core !<(=reaction:sp-sur q.cage.sign))
                 [cards this]
           ==
       ==
@@ -162,12 +163,12 @@
     ==
   ::
   ++  add
-    |=  [path=space-path:spaces =sample:store]
+    |=  [path=space-path:sp-sur =sample:store]
     ^-  (quip card _state)
     `state
   ::
   ++  rem
-    |=  [path=space-path:spaces =sample:store]
+    |=  [path=space-path:sp-sur =sample:store]
     ^-  (quip card _state)
     `state
   --
@@ -206,7 +207,7 @@
 ++  sp
   |%
   ++  on
-    |=  =reaction:spaces
+    |=  =reaction:sp-sur
     ^-  (quip card _state)
     ?-  -.reaction
       %initial  (ini +.reaction)
@@ -215,19 +216,27 @@
       %remove   (rem +.reaction)
     ==
   ++  ini
-    |=  [=spaces:spaces =membership:membership-store]
+    |=  [sps=spaces:sp-sur mems=membership:membership-store]
     ^-  (quip card _state)
-    `state
+    =/  cards=(list card)
+    %-  ~(rep by sps)
+    |=  [[path=space-path:sp-sur =space:sp-sur] acc=(list card)]
+      %-  weld
+      :-  acc  ^-  (list card)
+      :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
+      ==
+    :_  state(membership mems)
+    cards
   ++  add
-    |=  [=space:spaces =members:membership-store]
+    |=  [=space:sp-sur =members:membership-store]
     ^-  (quip card _state)
     `state
   ++  rep
-    |=  [=space:spaces]
+    |=  [=space:sp-sur]
     ^-  (quip card _state)
     `state
   ++  rem
-    |=  [path=space-path:spaces]
+    |=  [path=space-path:sp-sur]
     ^-  (quip card _state)
     `state
   --
