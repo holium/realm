@@ -230,15 +230,26 @@
   ++  add
     |=  [=space:sp-sur =members:membership-store]
     ^-  (quip card _state)
-    `state
+    =/  key  [ship.path.space space.path.space]
+    :_  state(membership (~(put by membership.state) key members))
+    :~  [%pass /bazaar/(scot %tas space.path.space) %agent [our.bowl dap.bowl] %watch /updates]
+    ==
+  ::
+  ::  $rep: not sure what to do here. could try and get existing space
+  ::    and delete that from map, then re-add this new space, but what to
+  ::    do about missing membership info?
   ++  rep
     |=  [=space:sp-sur]
     ^-  (quip card _state)
     `state
+  ::
   ++  rem
     |=  [path=space-path:sp-sur]
     ^-  (quip card _state)
-    `state
+    =/  key  [ship.path space.path]
+    :_  state(membership (~(del by membership.state) key))
+    :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %leave ~]
+    ==
   --
 ::
 :: ++  dejs
