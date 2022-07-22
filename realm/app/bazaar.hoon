@@ -5,7 +5,7 @@
 ::
 ::  Should watch and sync data with %treaty and %docket under /garden.
 ::
-/-  store=bazaar, docket, sp-sur=spaces, membership-store=membership, hark=hark-store
+/-  store=bazaar, docket, sp-sur=spaces, membership-store=membership, hark=hark-store, passport-store=passports
 /+  dbug, default-agent
 |%
 +$  card  card:agent:gall
@@ -53,7 +53,17 @@
     %app-store-action  (on:action:core !<(action:store vase))
   ==
   [cards this]
-++  on-watch  |=(path !!)
+::
+++  on-watch
+  |=  =path
+  ^-  (quip card _this)
+  =^  cards  state
+  ?+  path            (on-watch:def path)
+    [%updates @ ~]    (bind:su:core i.t.path)
+    [%response ~]     ~
+  ==
+  [cards this]
+::
 ++  on-leave  |=(path `..on-init)
 ::
 ++  on-peek
@@ -215,6 +225,7 @@
       %replace  (rep +.reaction)
       %remove   (rem +.reaction)
     ==
+  ::
   ++  ini
     |=  [sps=spaces:sp-sur mems=membership:membership-store]
     ^-  (quip card _state)
@@ -227,6 +238,7 @@
       ==
     :_  state(membership mems)
     cards
+  ::
   ++  add
     |=  [=space:sp-sur =members:membership-store]
     ^-  (quip card _state)
@@ -250,6 +262,35 @@
     :_  state(membership (~(del by membership.state) key))
     :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %leave ~]
     ==
+  --
+::  subscription (watch) handling
+++  su
+  |%
+  ::
+  ::  $bi: bind. check that remote is a valid space member. if
+  ::    member allow subscription.
+  ++  bind
+    |=  [space=cord]
+    ^-  (quip card _state)
+    :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
+    ::  recommends crash on permission check or other failure
+    ?.  (check-member:security:core space src.bowl)  !!
+    `state
+  --
+::
+::  $security. member/permission checks
+++  security
+  |%
+  ::  $check-member - check for member existence and 'joined' status
+  ::    add additional security as needed
+  ++  check-member
+    |=  [space=cord =ship]
+    =/  members  (~(get by membership.state) [our.bowl space])
+    ?~  members  %.n
+    =/  member  (~(get by u.members) ship)
+    ?~  member  %.n
+    =/  passport  .^(passport:passport-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/passport/[space]/noun)
+    ?:(=(status.passport 'joined') %.y %.n)
   --
 ::
 :: ++  dejs

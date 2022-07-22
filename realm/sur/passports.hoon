@@ -18,6 +18,7 @@
 +$  passport
    $:  =roles:membership
        alias=cord
+       status=?(%invited %joined %marooned %unknown)
    ==
 ::
 ::  $passports: passports (access) to spaces within Realm
