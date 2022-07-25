@@ -138,31 +138,3 @@ ContextMenu.defaultProps = {
 };
 
 export default ContextMenu;
-// With animation test
-// <Spring
-//   config={{ duration: 10 }}
-//   from={{ opacity: 0, x: anchorPoint.x + 10, y: anchorPoint.y + 10 }}
-//   to={{ opacity: 1, x: anchorPoint.x, y: anchorPoint.y }}
-// >
-//   {(springProps: any) => (
-//     <ContextMenuStyles
-//       id={`${containerId}-context-menu`}
-//       className="menu"
-//       ref={contextMenuRef}
-//       style={{ top: springProps.y, left: springProps.x }}
-//     >
-//       {sectionsArray.map((menuSection: any[], index: number) => {
-//         let divider = <hr />;
-//         if (index === sectionsArray.length - 1) {
-//           divider = undefined;
-//         }
-//         return (
-//           <div key={`section-${index}`}>
-//             {menuSection}
-//             {divider}
-//           </div>
-//         );
-//       })}
-//     </ContextMenuStyles>
-//   )}
-// </Spring>;

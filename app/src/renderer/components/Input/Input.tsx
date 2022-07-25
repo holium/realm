@@ -270,6 +270,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         flex={flex}
         style={wrapperStyle}
         isDisabled={disabled}
+        transition={{ background: { duration: 1 } }}
       >
         {leftIcon && (
           <LeftIcon
