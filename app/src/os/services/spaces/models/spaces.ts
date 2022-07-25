@@ -36,7 +36,7 @@ export const SpaceModel = types
   })
   .views((self) => ({
     get pinnedApps() {
-      console.log(toJS(self.apps.pinned), toJS(self.apps.installed));
+      // console.log(toJS(self.apps.pinned), toJS(self.apps.installed));
       const pins = self.apps.pinned;
       return [...Array.from(self.apps.installed!.values()), ...NativeAppList]
         .filter((app: any) => self.apps.pinned.includes(app.id))

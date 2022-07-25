@@ -31,22 +31,22 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
   const { ship, spaces, shell } = useServices();
   const { desktop } = shell;
-  const [passports, setPassports] = useState([]);
+  // const [passports, setPassports] = useState([]);
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
     : [...NativeAppList];
 
-  useEffect(() => {
-    if (spaces.selected?.path) {
-      PassportsActions.getPassports(spaces.selected!.path!).then(
-        (passes: any) => {
-          console.log(passes);
-          setPassports(passes);
-        }
-      );
-    }
-  }, [spaces.selected?.path]);
+  // useEffect(() => {
+  //   if (spaces.selected?.path) {
+  //     PassportsActions.getPassports(spaces.selected!.path!).then(
+  //       (passes: any) => {
+  //         console.log(passes);
+  //         setPassports(passes);
+  //       }
+  //     );
+  //   }
+  // }, [spaces.selected?.path]);
   return (
     <AnimatePresence>
       <HomeWindow

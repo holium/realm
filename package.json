@@ -1,0 +1,14 @@
+{
+  "private": "true",
+  "name": "realm-monorepo",
+  "workspaces": [
+    "app",
+    "playground/ui"
+  ],
+  "scripts": {
+    "start": "yarn workspace @holium/realm start"
+  },
+  "devDependencies": {
+    "electron": "19.0.0"
+  }
+}
