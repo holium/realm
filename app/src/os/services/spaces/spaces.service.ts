@@ -98,14 +98,16 @@ export class SpacesService extends BaseService {
         ? {
             installed: clone(DocketMap.create(getSnapshot(ship.docket.apps))),
           }
-        : { installed: {} }),
+        : {
+            installed: [],
+          }),
     };
 
     // Get the initial scry
     // TODO for some reason the initial selected reference is undefined so you cant
     // TODO reload to the same space you logged out from
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
-    this.state!.initialScry(spaces, tempApps);
+    this.state!.initialScry(spaces, tempApps, persistedState);
     this.state!.selected &&
       this.core.services.shell.setTheme(this.state!.selected?.theme);
 
@@ -189,9 +191,10 @@ export class SpacesService extends BaseService {
   }
 
   async pinApp(_event: any, path: string, appId: string) {
+    const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
-    console.log(this.state?.selected);
-    this.state?.selected?.pinApp(appId);
+    console.log(space);
+    space.pinApp(appId);
     return;
   }
 

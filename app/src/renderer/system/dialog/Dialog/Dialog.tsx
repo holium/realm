@@ -16,7 +16,7 @@ export interface DialogViewProps {
   window: WindowModelProps;
 }
 
-const View = styled.div<{ hasTitleBar?: boolean }>`
+const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -26,6 +26,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
   width: inherit;
   height: inherit;
   padding: 24px 24px;
+  background: ${(props) => props.background};
 `;
 
 export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
@@ -62,7 +63,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   }, [isValidated, workflowState]);
 
   return (
-    <View ref={elementRef}>
+    <View ref={elementRef} background={shell.desktop.theme.windowColor}>
       <Flex flex={1}>
         {ViewComponent && (
           <ViewComponent

@@ -23,7 +23,7 @@ import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogView } from '../../../dialog/Dialog/Dialog';
-import { CreateSpaceModal } from 'renderer/apps/Spaces/Workflow/SelectType';
+
 import {
   DialogTitlebar,
   DialogTitlebarProps,
@@ -35,19 +35,15 @@ type AppWindowStyleProps = {
   customBg?: string;
 };
 
-export const AppWindowStyle = styled(styled(motion.div)<AppWindowStyleProps>`
+export const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
   border-radius: 9px;
   box-sizing: content-box;
+  transform: transale3d(0, 0, 0);
   box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
   border: 1px solid
     ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
-`)<AppWindowStyleProps>({
-  // @ts-expect-error annoying
-  // backgroundColor: (props: SystemBarStyleProps) =>
-  //   props.customBg ? darken(0.002, props.customBg!) : 'initial',
-  backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
-});
+`;
 
 type AppWindowProps = {
   theme: Partial<ThemeModelType>;
@@ -312,6 +308,9 @@ export const AppWindow: FC<AppWindowProps> = observer(
             duration: 0.15,
           },
         }}
+        transition={{
+          background: { duration: 0.25 },
+        }}
         exit={{
           opacity: 0,
           transition: {
@@ -325,6 +324,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           height: mHeight,
           zIndex: window.zIndex,
           borderRadius,
+          background: windowColor,
         }}
         color={textColor}
         customBg={windowColor}

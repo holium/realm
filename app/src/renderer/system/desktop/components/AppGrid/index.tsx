@@ -128,6 +128,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               flexDirection="row"
             >
               {apps.map((app: any, index: number) => {
+                const spacePath = spaces.selected?.path!;
                 const isAppPinned = spaces.selected?.isAppPinned(app.id);
                 return (
                   <AppTile
@@ -143,8 +144,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                         onClick: (evt: any) => {
                           evt.stopPropagation();
                           isAppPinned
-                            ? SpacesActions.unpinApp('', app.id)
-                            : SpacesActions.pinApp('', app.id);
+                            ? SpacesActions.unpinApp(spacePath, app.id)
+                            : SpacesActions.pinApp(spacePath, app.id);
                         },
                       },
                       {
@@ -191,9 +192,9 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               })}
             </Flex>
           </Flex>
-          <Flex flexDirection="column" flex={2}>
+          {/* <Flex flexDirection="column" flex={2}>
             <Members />
-          </Flex>
+          </Flex> */}
         </Flex>
       </HomeWindow>
     </AnimatePresence>

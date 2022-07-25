@@ -66,7 +66,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         // @ts-ignore
         webview!.closeDevTools();
       });
-      console.log(toJS(window));
+
       let appUrl = window.glob
         ? `${ship!.url}/apps/${window.id!}`
         : `${ship!.url}/${window.id!}`;
@@ -114,6 +114,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             width: 'inherit',
             height: '100%',
             position: 'relative',
+            background: desktop.theme.windowColor,
             pointerEvents: lockView ? 'none' : 'auto',
           }}
         />

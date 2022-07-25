@@ -51,8 +51,8 @@ export const Shell: FC = observer(() => {
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
-      <BgImage blurred wallpaper={bgImage} />
-      {/* <BgImage blurred={isBlurred} wallpaper={bgImage} /> */}
+      {/* <BgImage blurred wallpaper={bgImage} /> */}
+      <BgImage blurred={isBlurred} wallpaper={bgImage} />
 
       {/* {nft && (
         <Layer zIndex={2}>

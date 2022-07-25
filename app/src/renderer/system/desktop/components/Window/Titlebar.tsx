@@ -165,6 +165,9 @@ export const Titlebar = (props: TitlebarProps) => {
           }
         : {})}
       zIndex={zIndex}
+      transition={{
+        background: { duration: 0.25 },
+      }}
       customBg={windowColor!}
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}

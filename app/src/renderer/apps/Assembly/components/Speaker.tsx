@@ -35,7 +35,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      width={'50%'}
+      width={'100%'}
     >
       <Sigil
         borderRadiusOverride="6px"

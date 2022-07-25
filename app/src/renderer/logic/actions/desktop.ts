@@ -31,6 +31,9 @@ export const DesktopActions = {
   setHomePane: async (isHome: boolean) => {
     return await window.electron.os.shell.setHomePane(isHome);
   },
+  setMouseColor: async (mouseColor: string) => {
+    return await window.electron.os.shell.setMouseColor(mouseColor);
+  },
   setAppDimensions: async (
     windowId: any,
     dimensions: { width: number; height: number; x: number; y: number }

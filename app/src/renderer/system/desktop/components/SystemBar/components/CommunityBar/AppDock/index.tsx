@@ -23,7 +23,11 @@ export const AppDock: FC<AppDockProps> = observer(() => {
 
   const orderedList = useMemo(
     () => (spaces.selected ? spaces.selected.pinnedApps! : []),
-    [spaces.selected?.apps.pinned, spaces.selected?.pinnedApps]
+    [
+      spaces.selected?.path,
+      spaces.selected?.apps.pinned,
+      spaces.selected?.pinnedApps,
+    ]
   );
 
   const pinnedApps = useMemo(() => {

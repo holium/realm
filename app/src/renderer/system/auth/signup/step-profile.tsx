@@ -24,6 +24,7 @@ import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { SignupActions } from 'renderer/logic/actions/signup';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 export const createProfileForm = (
   defaults: any = {
@@ -230,7 +231,6 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                       color={sigilColor.state.value}
                       onChange={(color: { hex: string }) => {
                         sigilColor.actions.onChange(color.hex);
-                        // setColor(color.hex);
                       }}
                       triangle="top-left"
                       colors={[
@@ -340,6 +340,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
               onClick={(evt: any) => {
                 if (profileForm.computed.isDirty) {
                   const formData = profileForm.actions.submit();
+                  DesktopActions.setMouseColor(formData['sigil-color']);
                   SignupActions.saveProfile(shipName, {
                     color: formData['sigil-color'],
                     nickname: formData['nickname'],

@@ -33,6 +33,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
     const selectedSpace = spaces.selected!;
     const { dockColor, textColor } = shell.desktop.theme;
     let innerContent: any;
+
     if (selectedSpace.type === 'our') {
       innerContent = (
         <Flex
