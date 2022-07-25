@@ -15,12 +15,14 @@ import {
 export class BaseService extends EventEmitter {
   core: Realm;
   options: any;
+  preferences: any;
   // private state?: any;
 
   constructor(core: Realm, options: any = {}) {
     super();
     this.core = core;
     this.options = options;
+    this.preferences = {};
   }
 
   /**

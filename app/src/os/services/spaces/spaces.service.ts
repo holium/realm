@@ -1,10 +1,13 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
+import { toJS } from 'mobx';
 import {
   onPatch,
   onSnapshot,
   getSnapshot,
   castToSnapshot,
+  cast,
+  clone,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -17,6 +20,10 @@ import {
 } from './models/spaces';
 
 import { ShipModelType } from '../ship/models/ship';
+import { SpacesApi } from '../../api/spaces';
+import { snakeify, camelToSnake } from '../../lib/obj';
+import { spaceToSnake } from '../../lib/text';
+import { PassportsApi } from '../../api/passports';
 
 /**
  * SpacesService
@@ -25,17 +32,17 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   handlers = {
-    'realm.spaces.create-new': this.createNew,
     'realm.spaces.set-selected': this.setSelected,
     'realm.spaces.pin-app': this.pinApp,
     'realm.spaces.unpin-app': this.unpinApp,
     'realm.spaces.set-pinned-order': this.setPinnedOrder,
+    'realm.spaces.create-space': this.createSpace,
+    'realm.spaces.update-space': this.updateSpace,
+    'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.get-passports': this.getPassports,
   };
 
   static preload = {
-    createNew: (newSpace: any) => {
-      return ipcRenderer.invoke('realm.spaces.create-new', newSpace);
-    },
     selectSpace: (spaceId: string) => {
       return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
@@ -47,6 +54,18 @@ export class SpacesService extends BaseService {
     },
     setPinnedOrder: (newOrder: any[]) => {
       return ipcRenderer.invoke('realm.spaces.set-pinned-order', newOrder);
+    },
+    createSpace: (form: any) => {
+      return ipcRenderer.invoke('realm.spaces.create-space', form);
+    },
+    updateSpace: (path: any, update: any) => {
+      return ipcRenderer.invoke('realm.spaces.update-space', path, update);
+    },
+    deleteSpace: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.delete-space', path);
+    },
+    getPassports: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.get-passports', path);
     },
   };
 
@@ -72,10 +91,42 @@ export class SpacesService extends BaseService {
     let persistedState: SpacesStoreType = this.db.store;
     this.state = SpacesStore.create(castToSnapshot(persistedState));
 
+    const tempApps = {
+      pinned: ['ballot', 'escape', 'webterm', 'landscape'],
+      endorsed: {},
+      ...(ship.docket.apps
+        ? {
+            installed: clone(DocketMap.create(getSnapshot(ship.docket.apps))),
+          }
+        : {
+            installed: [],
+          }),
+    };
+
+    // Get the initial scry
+    // TODO for some reason the initial selected reference is undefined so you cant
+    // TODO reload to the same space you logged out from
+    const spaces = await SpacesApi.getSpaces(this.core.conduit!);
+    this.state!.initialScry(spaces, tempApps, persistedState);
+    this.state!.selected &&
+      this.core.services.shell.setTheme(this.state!.selected?.theme);
+
+    // initial sync effect
+    const syncEffect = {
+      model: getSnapshot(this.state!),
+      resource: 'spaces',
+      key: null,
+      response: 'initial',
+    };
+    this.state.setLoader('loaded');
+    this.core.onEffect(syncEffect);
+
+    // set up snapshotting
     onSnapshot(this.state, (snapshot) => {
       this.db!.store = castToSnapshot(snapshot);
     });
 
+    // Start patching after we've initialized the state
     onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
@@ -85,21 +136,53 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    this.setShipSpace(ship);
-
-    const syncEffect = {
-      model: getSnapshot(this.state!),
-      resource: 'spaces',
-      key: null,
-      response: 'initial',
-    };
-
-    this.state.setLoader('loaded');
-    this.core.onEffect(syncEffect);
+    // Subscribe to sync updates
+    SpacesApi.syncUpdates(this.core.conduit!, this.state);
   }
 
-  createNew(_event: any, body: any) {
-    console.log('creating new');
+  async createSpace(_event: any, body: any) {
+    const members = body.members;
+    delete body.members;
+    const response = await SpacesApi.createSpace(
+      this.core.conduit!,
+      {
+        slug: spaceToSnake(body.name),
+        payload: snakeify({
+          name: body.name,
+          type: body.type,
+          access: body.access,
+          picture: body.picture,
+          color: body.color,
+          archetype: body.archetype,
+        }),
+        members,
+      },
+      this.core.credentials!
+    );
+    const newSpace = this.state!.addSpace(response);
+    return toJS(newSpace);
+  }
+
+  updateSpace(_event: any, path: any, update: any) {
+    console.log('update space: ', path);
+  }
+
+  async deleteSpace(_event: any, path: string) {
+    console.log('deleting space: ', path);
+    const response = await SpacesApi.deleteSpace(
+      this.core.conduit!,
+      { path },
+      this.core.credentials!
+    );
+    const newSpace = this.state!.deleteSpace(response);
+    return toJS(newSpace);
+  }
+
+  async getPassports(_event: any, path: string) {
+    console.log(path);
+    const response = await PassportsApi.getPassports(this.core.conduit!, path);
+    console.log(response);
+    return response;
   }
 
   setSelected(_event: any, path: string) {
@@ -107,68 +190,36 @@ export class SpacesService extends BaseService {
     this.core.services.shell.setTheme(selected?.theme!);
   }
 
-  pinApp(_event: any, path: string, appId: string) {
-    this.state?.selected?.pinApp(appId);
+  async pinApp(_event: any, path: string, appId: string) {
+    const space = this.state!.getSpaceByPath(path)!;
+    console.log('pinning');
+    console.log(space);
+    space.pinApp(appId);
+    return;
   }
 
-  unpinApp(_event: any, path: string, appId: string) {
+  async unpinApp(_event: any, path: string, appId: string) {
     this.state?.selected?.unpinApp(appId);
+    return;
   }
 
   setPinnedOrder(_event: any, order: any[]) {
     this.state?.selected?.setPinnedOrder(order);
   }
 
-  setShipSpace(ship: ShipModelType) {
-    const ourSpace = SpaceModel.create({
-      path: ship.patp,
-      name: ship.nickname || ship.patp,
-      color: ship.color || '#000000',
-      type: 'our',
-      // @ts-ignore FIX
-      apps: {
-        pinned: ['ballot', 'escape', 'webterm', 'landscape'],
-        endorsed: {},
-        ...(ship.docket.apps
-          ? {
-              installed: DocketMap.create(getSnapshot(ship.docket.apps)),
-            }
-          : { installed: {} }),
-      },
-      token: undefined,
-      picture: ship.avatar || null,
-      theme: {
-        themeId: 'os',
-        // wallpaper: DEFAULT_WALLPAPER,
-        wallpaper:
-          'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
-        backgroundColor: '#c2b4b4',
-        dockColor: '#f0ecec',
-        windowColor: '#f0ecec',
-        textTheme: 'light',
-        textColor: '#261f1f',
-        iconColor: '#333333',
-        mouseColor: '#4E9EFD',
-      },
-      // theme: {
-      //   themeId: ship.patp,
-      //   wallpaper: theme.wallpaper,
-      //   backgroundColor: theme.backgroundColor,
-      //   dockColor: theme.dockColor,
-      //   windowColor: theme.windowColor,
-      //   textTheme: theme.textTheme,
-      //   textColor: theme.textColor,
-      //   iconColor: theme.iconColor,
-      //   mouseColor: theme.mouseColor,
-      // },
-    });
-    this.state?.setOurSpace(ourSpace);
-    // self.selected = self.spaces.get(ship.patp)!;
-
-    // if (self.selected && self.selected.theme.wallpaper) {
-    //   osState.theme.setWallpaper(self.selected.theme.wallpaper, {
-    //     patp: ship.patp,
-    //   });
-    // }
+  async setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
+    const space = this.state?.getSpaceByPath(spacePath);
+    if (space) {
+      const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
+      const response = await SpacesApi.updateSpace(
+        this.core.conduit!,
+        { path: space.path, payload: { theme: snakeify(newTheme) } },
+        this.core.credentials!
+      );
+      console.log('wallpaper set response, ', response);
+      return newTheme;
+    }
+    // todo handle errors better
+    return null;
   }
 }

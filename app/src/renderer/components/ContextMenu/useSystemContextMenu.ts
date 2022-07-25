@@ -8,7 +8,9 @@ const useContextMenu = () => {
   const handleContextMenu = useCallback(
     (event) => {
       event.preventDefault();
-      setAnchorPoint({ x: event.pageX, y: event.pageY });
+      // setAnchorPoint({ x: event.pageX - 4, y: event.pageY - 28 });
+      setAnchorPoint({ x: event.pageX + 2, y: event.pageY + 2 });
+
       setShow(true);
     },
     [setShow, setAnchorPoint]

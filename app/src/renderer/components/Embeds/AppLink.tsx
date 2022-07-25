@@ -17,6 +17,8 @@ interface AppLinkProps {
   ship: string;
   version: string;
   color: string;
+  bgColor?: string;
+  textColor?: string;
   desk?: string;
 }
 
@@ -80,7 +82,8 @@ export const AppLink = (props: AppLinkProps) => {
       mb={2}
       p={2}
       pr={3}
-      // customBg={props.color}
+      customTextColor={props.textColor}
+      customBg={props.bgColor}
       canHover={!props.loading}
       onClick={(evt: any) => {
         evt.preventDefault();

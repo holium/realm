@@ -1,20 +1,37 @@
 import { ipcMain, session, ipcRenderer } from 'electron';
 import Store from 'electron-store';
+import { toJS } from 'mobx';
 import {
   onPatch,
   onSnapshot,
   getSnapshot,
   castToSnapshot,
   applySnapshot,
+  clone,
+  cast,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
+import { AppModelType } from '../ship/models/docket';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
 import { ThemeModelType } from './theme.model';
 
 /**
  * DesktopService
+ *
+ * Preferences
+ *  - desktop
+ *    - isolation-mode: boolean
+ *    - window-manager: "calm", "classic"
+ *  - mouse
+ *    - cursor-type: "system", "realm"
+ *    - use-profile-color: boolean
+ *  - theme
+ *    - appearance: "light" | "dark" | "wallpaper"
+ *    - colors: "default" | "wallpaper-derived" | <hex value>
+ *    - font: "default" | "custom"
+ *      - google-font: "philosopher"
  */
 export class DesktopService extends BaseService {
   private db?: Store<DesktopStoreType>; // for persistance
@@ -28,15 +45,25 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-app-dimensions': this.setAppDimensions,
     'realm.desktop.set-mouse-color': this.setMouseColor,
     'realm.desktop.set-theme': this.setTheme,
+    // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
     'realm.desktop.close-app-window': this.closeAppWindow,
+    'realm.desktop.open-dialog': this.openDialog,
+    'realm.desktop.close-dialog': this.closeDialog,
+    'realm.desktop.next-dialog': this.nextDialog,
+    'realm.desktop.previous-dialog': this.previousDialog,
   };
 
   static preload = {
-    changeWallpaper: (spaceId: string, wallpaper: string) => {
+    changeWallpaper: async (
+      spaceId: string,
+      color: string,
+      wallpaper: string
+    ) => {
       return ipcRenderer.invoke(
         'realm.desktop.change-wallpaper',
         spaceId,
+        color,
         wallpaper
       );
     },
@@ -78,6 +105,23 @@ export class DesktopService extends BaseService {
     closeAppWindow: (spaceId: string, app: any) => {
       return ipcRenderer.invoke('realm.desktop.close-app-window', spaceId, app);
     },
+    openDialog: (dialogId: string) => {
+      return ipcRenderer.invoke('realm.desktop.open-dialog', dialogId);
+    },
+    nextDialog: (dialogId: string) => {
+      return ipcRenderer.invoke('realm.desktop.next-dialog', dialogId);
+    },
+    previousDialog: (dialogId: string) => {
+      return ipcRenderer.invoke('realm.desktop.next-dialog', dialogId);
+    },
+    closeDialog: () => {
+      return ipcRenderer.invoke('realm.desktop.close-dialog');
+    },
+    // setFullscreen(isFullscreen: boolean) {
+    //   console.log('realm.desktop.set-fullscreen');
+    //   return ipcRenderer.invoke('realm.desktop.set-fullscreen', isFullscreen);
+    //   // ipcRenderer.on('realm.desktop.set-fullscreen', callback);
+    // },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -118,8 +162,40 @@ export class DesktopService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  changeWallpaper(_event: any, spaceId: string, wallpaper: string) {
-    this.state?.setWallpaper(wallpaper);
+  setFullscreen(_event: any, isFullscreen: boolean) {
+    this.state?.setFullscreen(isFullscreen);
+  }
+
+  openDialog(_event: any, dialogId: string) {
+    this.state?.closeDialog(); // must close old dialogs first
+    this.state?.openDialog(dialogId);
+  }
+
+  nextDialog(_event: any, dialogId: string) {
+    this.state?.openDialog(dialogId);
+  }
+
+  previousDialog(_event: any, dialogId: string) {
+    this.state?.openDialog(dialogId);
+  }
+
+  closeDialog(_event: any) {
+    this.state?.closeDialog();
+  }
+  async changeWallpaper(
+    _event: any,
+    spaceId: string,
+    color: string,
+    wallpaper: string
+  ) {
+    const newTheme = await this.core.services.spaces.setSpaceWallpaper(
+      spaceId,
+      color,
+      wallpaper
+    );
+    this.state?.closeDialog();
+    newTheme && this.state?.setTheme(cast(newTheme)!);
+    return toJS(newTheme);
   }
 
   setActive(_event: any, spaceId: string, appId: string) {
@@ -138,9 +214,9 @@ export class DesktopService extends BaseService {
     this.state?.setMouseColor(mouseColor);
   }
   setTheme(theme: ThemeModelType) {
-    if (this.state?.theme.themeId !== theme.themeId) {
-      applySnapshot(this.state!.theme, theme);
-    }
+    this.state?.setTheme(clone(theme)!);
+    // if (this.state?.theme.wallpaper !== theme.wallpaper) {
+    // }
   }
   setDesktopDimensions(_event: any, width: number, height: number) {
     this.state?.setDesktopDimensions(width, height);
@@ -153,14 +229,16 @@ export class DesktopService extends BaseService {
     this.state?.setDimensions(windowId, dimensions);
   }
   openAppWindow(_event: any, spaceId: string, selectedApp: any) {
-    this.state?.openBrowserWindow(selectedApp);
+    const newWindow = this.state!.openBrowserWindow(selectedApp);
     const credentials = this.core.credentials!;
 
     if (
       selectedApp.type === 'urbit' ||
-      (selectedApp.type === 'web' && !selectedApp.web.development)
+      (selectedApp.type === 'web' && !selectedApp.web?.development)
     ) {
-      const appUrl = `${credentials.url}/apps/${selectedApp.id!}`;
+      const appUrl = newWindow.glob
+        ? `${credentials.url}/apps/${selectedApp.id!}`
+        : `${credentials.url}/${selectedApp.id!}`;
       // Hit the main process handler for setting partition cookies
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
         url: appUrl,

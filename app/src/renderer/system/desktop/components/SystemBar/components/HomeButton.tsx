@@ -5,14 +5,25 @@ import HoliumAnimated from 'renderer/components/Icons/holium';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { rgba } from 'polished';
 
 type HomeButton = {};
 
 export const HomeButton: FC<HomeButton> = observer(() => {
-  const { shell } = useServices();
-  const { theme, desktop } = shell;
+  const { ship, shell } = useServices();
+  const { desktop } = shell;
 
-  const { dockColor, textColor } = theme.theme;
+  const { dockColor, textColor } = useMemo(
+    () => ({
+      ...desktop.theme,
+      dockColor: rgba(desktop.theme.dockColor!, 0.55),
+      textColor:
+        desktop.theme.mode === 'light'
+          ? rgba(desktop.theme.textColor!, 0.8)
+          : desktop.theme.textColor!,
+    }),
+    [desktop.theme.dockColor]
+  );
   const x = useMotionValue(200);
   const y = useMotionValue(200);
 
@@ -45,20 +56,20 @@ export const HomeButton: FC<HomeButton> = observer(() => {
             zIndex: 3,
             minWidth: 42,
           }}
-          animate={{ scale: 1 }}
-          transition={{ scale: 0.5 }}
+          initial={{ backgroundColor: dockColor }}
+          animate={{ scale: 1, backgroundColor: dockColor }}
+          transition={{ scale: 0.5, backgroundColor: { duration: 0.5 } }}
           whileTap={{ scale: 0.95 }}
           width={42}
           display="flex"
           justifyContent="center"
           alignItems="center"
-          customBg={dockColor}
         >
           <HoliumAnimated width="22px" height="22px" fill={textColor} />
         </SystemBarStyle>
       </motion.div>
     ),
-    [theme.theme.textColor, theme.theme.dockColor]
+    [ship?.patp, desktop.theme.textColor, desktop.theme.dockColor]
   );
 });
 

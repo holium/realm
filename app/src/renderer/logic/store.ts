@@ -12,12 +12,12 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { ThemeStore } from '../../os/services/shell/theme.model';
 import { DesktopStore } from '../../os/services/shell/desktop.model';
 import { SpacesStore } from '../../os/services/spaces/models/spaces';
 import { AuthStore } from '../../os/services/identity/auth.model';
 import { SignupStore } from '../../os/services/identity/signup.model';
 import { ShipModel } from '../../os/services/ship/models/ship';
+import { toJS } from 'mobx';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -29,7 +29,6 @@ export const Services = types
   .model('ServicesStore', {
     shell: types.model('ShellStore', {
       // preferenceStore: ConfigStore,
-      theme: ThemeStore,
       desktop: DesktopStore,
     }),
     identity: types.model('identity', {
@@ -52,8 +51,6 @@ const shellSnapshot = loadSnapshot('shell');
 
 const services = Services.create({
   shell: {
-    // preferenceStore: {},
-    theme: {},
     desktop: (shellSnapshot && shellSnapshot.desktop) || {},
   },
   identity: {
@@ -105,7 +102,6 @@ export const CoreStore = types
       self.started = true;
     },
     setBooted() {
-      // onBoot();
       self.booted = true;
     },
     setLoggedIn(isLoggedIn: boolean) {
@@ -133,7 +129,6 @@ OSActions.onBoot().then((response: any) => {
     key: 'ships',
     model: response.signup,
   });
-
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
     coreStore.setLoggedIn(true);
@@ -145,7 +140,9 @@ OSActions.onBoot().then((response: any) => {
   if (response.shell) {
     applySnapshot(servicesStore.shell.desktop, response.shell);
   }
-  //
+  if (response.loggedIn) {
+    coreStore.setLoggedIn(true);
+  }
   coreStore.setBooted();
 });
 
@@ -198,12 +195,14 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.identity.signup, value.patch);
     }
     if (value.resource === 'spaces') {
+      console.log('spaces patch', value.patch);
       applyPatch(servicesStore.spaces, value.patch);
     }
     if (value.resource === 'ship') {
       applyPatch(servicesStore.ship, value.patch);
     }
     if (value.resource === 'desktop') {
+      // console.log('desktop patch', value.patch);
       applyPatch(servicesStore.shell.desktop, value.patch);
     }
   }

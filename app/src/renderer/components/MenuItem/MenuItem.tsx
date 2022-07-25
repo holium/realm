@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { SpaceProps } from 'styled-system';
-import { Box, Text } from '../';
+import { Box, Spinner, Text } from '../';
 import { ChildrenBox, MenuItemStyle } from './MenuItem.styles';
 
 export type IntentProps = {
@@ -8,8 +8,10 @@ export type IntentProps = {
 };
 
 export type MenuItemProps = {
+  id?: string;
   icon?: any;
   style?: any;
+  loading?: boolean;
   tabIndex?: number;
   label: string;
   disabled?: boolean;
@@ -26,6 +28,7 @@ export type MenuItemProps = {
 
 export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
   const {
+    id,
     icon,
     label,
     style,
@@ -39,10 +42,31 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
     color,
     children,
     tabIndex,
+    loading,
   } = props;
-
+  let innerContent;
+  if (loading) {
+    innerContent = <Spinner size={1} />;
+  } else {
+    innerContent = (
+      <>
+        {icon && (
+          <Box color="inherit" mr={2}>
+            {icon}
+          </Box>
+        )}
+        <Text style={{ pointerEvents: 'none' }} fontSize={2} fontWeight={400}>
+          {label}
+        </Text>
+        {children && (
+          <ChildrenBox interaction={disabled}>{children}</ChildrenBox>
+        )}
+      </>
+    );
+  }
   return (
     <MenuItemStyle
+      id={id}
       tabIndex={tabIndex}
       style={style}
       flex={1}
@@ -75,21 +99,14 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
         }
       }}
       value={label}
-      {...props}
+      // {...props}
     >
-      {icon && (
-        <Box color="inherit" mr={2}>
-          {icon}
-        </Box>
-      )}
-      <Text fontSize={2} fontWeight={400}>
-        {label}
-      </Text>
-      {children && <ChildrenBox interaction={disabled}>{children}</ChildrenBox>}
+      {innerContent}
     </MenuItemStyle>
   );
 };
 
 MenuItem.defaultProps = {
   type: 'neutral',
+  loading: false,
 };

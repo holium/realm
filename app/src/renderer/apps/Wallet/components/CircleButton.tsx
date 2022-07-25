@@ -11,13 +11,13 @@ import {
   Sigil,
   Text,
 } from '../../../components';
-import { PathsType } from '../../../components/Icons/icons';
+import { IconPathsType } from '../../../components/Icons/icons';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 
 type CircleButtonProps = {
-  icon: PathsType;
+  icon: IconPathsType;
   title?: string;
 };
 

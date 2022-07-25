@@ -1,5 +1,10 @@
-import { createRef, FC, useEffect, useState, useMemo, useRef } from 'react';
-import { lighten, rgba, darken } from 'polished';
+/**
+ * Virtual renderers:
+ * - https://github.com/wellyshen/react-cool-virtual
+ */
+
+import { FC, useEffect, useState, useMemo, useRef } from 'react';
+import { rgba, darken } from 'polished';
 import { observer } from 'mobx-react';
 import ScrollView from 'react-inverted-scrollview';
 
@@ -16,7 +21,7 @@ import {
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { MessageType, ChatMessage } from './components/ChatMessage';
 import { createDmForm } from './forms/chatForm';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { DmActions } from 'renderer/logic/actions/chat';
 
@@ -36,7 +41,7 @@ type IProps = {
 export const ChatView: FC<IProps> = observer((props: IProps) => {
   const submitRef = useRef(null);
   const chatInputRef = useRef(null);
-  let scrollView = createRef();
+  let scrollView = useRef<any>(null);
   const attachmentRef = useRef(null);
   const {
     dimensions,
@@ -47,16 +52,12 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     headerOffset,
     onSend,
   } = props;
-  const { backgroundColor, iconColor, dockColor, textTheme, textColor } =
+  const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
     props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
   const { ship } = useServices();
   const chatData = ship?.chat.dms.get(selectedChat.contact)!;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
 
   const [rows, setRows] = useState(1);
 
@@ -71,7 +72,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         const formData = dmForm.actions.submit();
         if (formData) console.log(formData);
         const dmMessageContent = formData['dm-message'];
-        // console.log(dmMessage);
+        console.log(selectedChat.contact, dmMessageContent);
+
         DmActions.sendDm(selectedChat.contact, dmMessageContent);
         // @ts-ignore
         chatInputRef.current.value = '';
@@ -101,15 +103,14 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   };
   const scrollToBottom = () => {
     if (!scrollView) return;
-    // @ts-expect-error
     scrollView.current.scrollToBottom();
   };
 
   useEffect(() => {
-    // scrollView.current?.scrollToBottom();
-  }, [scrollView.current]);
+    scrollView.current?.scrollToBottom();
+  }, [scrollView]);
 
-  const inputHeight = 58;
+  const inputHeight = 60;
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -124,7 +125,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         zIndex={5}
         theme={{
           ...props.theme,
-          windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.8),
         }}
       >
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
@@ -177,17 +177,19 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           left: 0,
           right: 0,
           backfaceVisibility: 'hidden',
-          backgroundColor: props.theme.windowColor,
+          backgroundColor:
+            mode === 'light'
+              ? darken(0.05, windowColor)
+              : darken(0.05, windowColor),
           transform: 'translate3d(0, 0, 0)',
         }}
         overflowY="hidden"
       >
         <Flex
           gap={2}
-          mb={2}
           height={height}
           position="relative"
-          overflowY="scroll"
+          overflowY="auto"
           alignContent="center"
         >
           <ScrollView
@@ -195,8 +197,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             height={dimensions.height}
             ref={scrollView}
             onScroll={handleScroll}
+            restoreScrollPositionOnUpdate
           >
-            <Flex style={{ minHeight: headerOffset }} />
+            <Flex style={{ minHeight: headerOffset + 8 }} />
             {chatData.list.map((message: MessageType, index: number) => (
               <ChatMessage
                 key={`${message.index}-${message.timeSent}-${index}`}
@@ -218,6 +221,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                   borderRadius: 14,
                   cursor: 'none',
                   backdropFilter: 'blur(4px)',
+                  background: windowColor,
                 }}
                 size={28}
                 onClick={scrollToBottom}
@@ -234,7 +238,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             style={{
               background: windowColor,
               backdropFilter: 'blur(8px)',
-              borderTop: `1px solid ${rgba(darken(0.15, windowColor), 0.9)}`,
+              borderTop: `1px solid ${rgba(darken(0.5, windowColor), 0.2)}`,
               minHeight: inputHeight,
             }}
           >
@@ -254,8 +258,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
               >
                 <Icons name="Attachment" />
               </IconButton>
-              {/* <ChatInput /> */}
-
               <Input
                 as="textarea"
                 ref={chatInputRef}
@@ -263,7 +265,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 rows={rows}
                 name="dm-message"
                 className="realm-cursor-text-cursor"
-                // height={34}
                 width={300}
                 placeholder="Write a message"
                 rightInteractive
@@ -272,7 +273,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                   <Flex justifyContent="center" alignItems="center">
                     <IconButton
                       ref={submitRef}
-                      luminosity={textTheme}
+                      luminosity={mode}
                       size={24}
                       canFocus
                       onKeyDown={submitDm}
@@ -288,12 +289,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onBlur={() => dmMessage.actions.onBlur()}
                 wrapperStyle={{
                   height: 'max-content',
-                  borderRadius: 12,
-                  backgroundColor: darken(0.05, windowColor),
-                  '&:hover': {
-                    borderColor: backgroundColor,
-                  },
-                  borderColor: rgba(backgroundColor, 0.7),
+                  borderRadius: 9,
+                  backgroundColor: inputColor,
                 }}
               />
             </Flex>

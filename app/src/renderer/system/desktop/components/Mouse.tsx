@@ -1,10 +1,9 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import AnimatedCursor, { CurrentUserCursor, Vec2 } from './Cursor';
 import { hexToRgb, rgbToString } from 'os/lib/color';
 import { useMemo } from 'react';
-import { Presences } from './Presences';
 
 export const MouseArea = styled(motion.div)`
   cursor: none;
@@ -22,7 +21,7 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
   return useMemo(
     () => (
       <MouseArea
-        animate={{ zIndex: 11000, display: hide ? 'none' : 'inherit' }}
+        animate={{ zIndex: 2147483648, display: hide ? 'none' : 'inherit' }} // to be higher than one zIndex that I saw in action
       >
         <CurrentUserCursor
           initialRender={initialRender}
@@ -36,4 +35,3 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
 };
 
 export default Mouse;
-export { Presences };

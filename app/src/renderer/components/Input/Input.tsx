@@ -36,6 +36,9 @@ type BaseInputProps = {
   /** Does the input have a validation error */
   error?: string | boolean | undefined;
   variant?: any;
+  hasPointerEvents?: boolean;
+  shouldHighlightOnFocus?: boolean;
+  isDisabled?: boolean;
   small?: boolean;
   bgOpacity?: number;
   theme: ThemeType;
@@ -51,7 +54,11 @@ export type InputProps = StyledComponentProps<
 export const InputWrapper = styled(Flex)`
   /* display: block; */
   width: 100%;
-  pointer-events: none;
+  ${(props) =>
+    !props.hasPointerEvents &&
+    css`
+      pointer-events: none;
+    `};
   transition: ${(props) => props.theme.transition};
   /* background-color: ${(props) => props.theme.colors.ui.tertiary}; */
   border: 1px solid
@@ -63,71 +70,46 @@ export const InputWrapper = styled(Flex)`
   textarea {
     resize: none;
   }
-  &:hover {
-    transition: ${(props) => props.theme.transition};
-    border-color: ${(props) => props.theme.colors.ui.input.borderHover};
-  }
 
-  &:focus,
-  &:focus-within,
-  &:active {
-    transition: ${(props) => props.theme.transition};
-    outline: none;
-    border-color: ${(props) => props.theme.colors.brand.primary};
-    &::placeholder {
-      color: transparent;
-    }
-  }
-  &:disabled {
-    -webkit-text-fill-color: currentColor; /* set text fill to current color for safari */
-    opacity: 1; /* correct opacity on iOS */
-    color: ${(props) => props.theme.colors.text.disabled};
-    background-color: ${(props) => props.theme.colors.ui.disabled};
-    border-color: ${(props) => props.theme.colors.ui.disabled};
-
-    &::placeholder {
-      color: ${(props) => props.theme.colors.text.disabled};
-      opacity: 1;
-    }
-  }
+  ${(props) =>
+    props.shouldHighlightOnFocus &&
+    css`
+      &:focus,
+      &:focus-within,
+      &:active {
+        transition: ${(props) => props.theme.transition};
+        outline: none;
+        border-color: ${(props) => props.theme.colors.brand.primary};
+        &::placeholder {
+          color: transparent;
+        }
+      }
+    `}
 
   ${compose(backgroundColor)}
+
+  ${(props) =>
+    props.isDisabled &&
+    css`
+      pointer-events: none;
+      input {
+        pointer-events: none;
+      }
+      opacity: 0.6; /* correct opacity on iOS */
+      &::placeholder {
+        color: ${(props) => props.theme.colors.text.disabled};
+        opacity: 1;
+      }
+      &:hover {
+        border-color: transparent;
+      }
+    `}
 
   ${(props) =>
     props.error &&
     css`
       border-color: ${props.theme.colors.intent.alert};
-    `} /* &:-moz-read-only {
-    background-color: ${(props) => props.theme.colors.ui.tertiary};
-    border-color: ${(props) => props.theme.colors.ui.input.borderColor};
-  }
-
-  &:read-only {
-    background-color: ${(props) => props.theme.colors.ui.tertiary};
-    border-color: ${(props) => props.theme.colors.ui.input.borderColor};
-
-    &::placeholder {
-      color: ${(props) => props.theme.colors.text.placeholder};
-    }
-  } */
-
-  /* ${(props: any) =>
-    props.borderColor &&
-    css`
-      border-color: ${props.borderColor};
-      &:hover {
-        border-color: ${props.borderColor};
-      }
-      &:read-only {
-        border-color: ${props.borderColor};
-      }
-      &:-moz-read-only {
-        border-color: ${props.borderColor};
-      }
-      &:focus {
-        border-color: ${props.borderColor};
-      }
-    `} */
+    `}
 `;
 
 InputWrapper.defaultProps = {
@@ -141,6 +123,8 @@ InputWrapper.defaultProps = {
   color: 'text.primary',
   bg: 'bg.tertiary',
   mb: 0,
+  hasPointerEvents: false,
+  shouldHighlightOnFocus: true,
 };
 
 const ContentArea: any = styled(Text)<
@@ -272,6 +256,9 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         position="relative"
         ref={wrapperRef}
         borderColor={borderColor}
+        // animate={{
+        //   backgroundColor: bg,
+        // }}
         color={color}
         bg={bg}
         mx={mx}
@@ -282,6 +269,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         mr={mr}
         flex={flex}
         style={wrapperStyle}
+        isDisabled={disabled}
       >
         {leftIcon && (
           <LeftIcon

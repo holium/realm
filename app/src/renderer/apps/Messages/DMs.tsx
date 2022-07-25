@@ -13,7 +13,7 @@ import {
 import { ContactRow } from './components/ContactRow';
 import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';
 
@@ -28,11 +28,8 @@ type IProps = {
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { ship } = useServices();
-  const { backgroundColor, textColor, iconColor, dockColor } = theme;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
+  const { inputColor, textColor, iconColor, dockColor, windowColor, mode } =
+    theme;
 
   const chat = ship!.chat;
   return (
@@ -44,10 +41,12 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
     >
       <Titlebar
         hasBlur
-        hasBorder
+        hasBorder={false}
         zIndex={5}
         theme={{
           ...props.theme,
+          // windowColor: rgba(lighten(0.125, windowColor), 0.8),
+          // windowColor: rgba(windowColor, 0.8),
           windowColor,
         }}
       >
@@ -69,11 +68,9 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             wrapperStyle={{
               cursor: 'none',
               borderRadius: 9,
-              backgroundColor: darken(0.05, windowColor),
-              '&:hover': {
-                borderColor: backgroundColor,
-              },
-              borderColor: rgba(backgroundColor, 0.7),
+              backgroundColor: inputColor,
+
+              // borderColor: rgba(backgroundColor, 0.7),
             }}
           />
         </Flex>
@@ -109,7 +106,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           noGutter
           expand
           height={height}
-          overflowY="scroll"
+          overflowY="auto"
         >
           {chat.loader.isLoading ? (
             <Flex flex={1} alignItems="center" justifyContent="center">
@@ -118,6 +115,32 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
+              {chat!.list.length === 0 && (
+                <Flex
+                  flex={1}
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  gap={24}
+                >
+                  {/* <Text
+                    color={textColor}
+                    width={200}
+                    textAlign="center"
+                    opacity={0.6}
+                  >
+                    No DMs
+                  </Text> */}
+                  <Text
+                    color={textColor}
+                    width={200}
+                    textAlign="center"
+                    opacity={0.3}
+                  >
+                    No Direct Messages. Click the <b>+</b> to start.
+                  </Text>
+                </Flex>
+              )}
               {chat!.list.map((dm: any) => (
                 <Box ml={1} mr={1} display="block" key={dm.contact}>
                   <ContactRow

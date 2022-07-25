@@ -1,13 +1,14 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, lighten } from 'polished';
+import { rgba, darken, lighten } from 'polished';
 import styled, { css } from 'styled-components';
-import { Flex, Icons, Text } from 'renderer/components';
+import { ContextMenu, Flex, Icons, Text } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-const EmptyGroup = styled.div`
+export const EmptyGroup = styled.div`
   height: 32px;
   width: 32px;
   background: ${(p) => p.color || '#000'};
@@ -22,22 +23,24 @@ type RowProps = {
 
 export const SpaceRowStyle = styled(motion.div)<RowProps>`
   height: 48px;
+  position: relative;
   border-radius: 8px;
   padding: 0 8px;
   display: flex;
   flex-direction: row;
+  overflow: visible;
   align-items: center;
   transition: ${(props: RowProps) => props.theme.transition};
   ${(props: RowProps) =>
     props.selected
       ? css`
-          background-color: ${lighten(0.05, props.customBg)};
+          background-color: ${darken(0.03, props.customBg)};
         `
       : css`
           &:hover {
             transition: ${(props: RowProps) => props.theme.transition};
             background-color: ${props.customBg
-              ? rgba(lighten(0.1, props.customBg), 0.4)
+              ? darken(0.025, props.customBg)
               : 'inherit'};
           }
         `}
@@ -52,19 +55,66 @@ type SpaceRowProps = {
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { shell } = useServices();
-  const { theme } = shell;
+  const { theme } = shell.desktop;
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  // const {} =
+  const rowRef = useRef<any>(null);
 
-  const currentTheme = useMemo(() => theme.theme, [theme.theme]);
+  const currentTheme = useMemo(() => theme, [theme]);
+
+  const contextMenuItems = [
+    {
+      id: `space-row-${space.path}-btn-edit`,
+      label: 'Edit',
+      onClick: (evt: any) => {
+        // evt.stopPropagation();
+        // DesktopActions.toggleDevTools();
+      },
+    },
+    {
+      id: `space-row-${space.path}-btn-delete`,
+      label: 'Delete',
+      loading: deleteLoading,
+      onClick: (evt: any) => {
+        setDeleteLoading(true);
+        SpacesActions.deleteSpace(space.path).then((_response: any) => {
+          setDeleteLoading(false);
+        });
+        // DesktopActions.toggleDevTools();
+      },
+    },
+  ];
+
+  const contextMenuButtonIds = contextMenuItems.map((item: any) => item.id);
+
   return (
     <SpaceRowStyle
+      id={`space-row-${space.path}`}
+      ref={rowRef}
       data-close-tray="true"
       selected={selected}
       className="realm-cursor-hover"
-      customBg={currentTheme.dockColor}
-      onClick={() => {
-        onSelect(space.path);
+      customBg={currentTheme.windowColor}
+      onClick={(evt: any) => {
+        // If a menu item is clicked
+        if (contextMenuButtonIds.includes(evt.target.id)) {
+          return;
+        } else {
+          onSelect(space.path);
+        }
       }}
+      // onContextMenu={(evt: any) => evt.stopPropagation()}
     >
+      <ContextMenu
+        isComponentContext
+        textColor={theme.textColor}
+        customBg={rgba(theme.windowColor, 0.9)}
+        containerId={`space-row-${space.path}`}
+        parentRef={rowRef}
+        style={{ minWidth: 180 }}
+        position="below"
+        menu={contextMenuItems}
+      />
       <Flex style={{ pointerEvents: 'none' }} alignItems="center">
         {space.picture ? (
           <img
@@ -84,6 +134,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
               justifyContent: 'space-between',
             }}
             fontSize={3}
+            color={currentTheme.textColor}
             fontWeight={500}
             variant="body"
           >
@@ -93,9 +144,10 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
             {/* <Icons.ExpandMore ml="6px" /> */}
           </Text>
           <Flex flexDirection="row" gap={12}>
-            {/* <Flex gap={4} flexDirection="row" alignItems="center">
-              <Icons name="Members" size={16} opacity={0.6} />
-              {space.members && (
+            {space.path === '~hatryx-lastud/spaces/other-life' && (
+              <Flex gap={4} flexDirection="row" alignItems="center">
+                <Icons name="Members" size={16} opacity={0.6} />
+
                 <Text
                   fontWeight={400}
                   mt="1px"
@@ -103,21 +155,22 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
                   opacity={0.6}
                   fontSize={2}
                 >
-                  {space.members.count} members
+                  {1261} members
                 </Text>
-              )}
-            </Flex> */}
-            {space.token && (
+              </Flex>
+            )}
+            {space.path === '~hatryx-lastud/spaces/other-life' && (
               <Flex gap={4} flexDirection="row" alignItems="center">
                 <Icons name="Coins" size={16} opacity={0.6} />
                 <Text
                   fontWeight={400}
+                  color={currentTheme.textColor}
                   mt="1px"
                   mr={1}
                   opacity={0.6}
                   fontSize={2}
                 >
-                  {space.token.symbol}
+                  $LIFE
                 </Text>
               </Flex>
             )}

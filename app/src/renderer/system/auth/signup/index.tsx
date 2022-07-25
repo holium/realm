@@ -159,27 +159,6 @@ export const Signup: FC<LoginProps> = observer((props: LoginProps) => {
           </Box>
         </Card>
       </motion.div>
-      {/* {step === 0 && (
-        <Flex
-          mt={4}
-          top={`calc(50% + ${height / 2}px)`}
-          key="continue-section"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: firstTime ? 5 : 0 }}
-          position="absolute"
-          gap={12}
-        >
-          {inProgressShips.map((ship: any) => (
-            <ContinueButton
-              onClick={() => continueSignup(ship.id)}
-              key={`continue-${ship.patp}`}
-              ship={ship}
-              theme={theme.theme}
-            />
-          ))}
-        </Flex>
-      )} */}
     </AnimatePresence>
   );
 });

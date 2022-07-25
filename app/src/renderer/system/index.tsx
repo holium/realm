@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
@@ -8,8 +8,7 @@ import { Auth } from './auth';
 import { Desktop } from './desktop';
 import { BackgroundImage, BackgroundFill } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
-
-type ShellProps = {};
+import { Flex, NFTBadge } from 'renderer/components';
 
 const DragBar = styled.div`
   position: absolute;
@@ -21,15 +20,16 @@ const DragBar = styled.div`
   app-region: drag;
 `;
 
-export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
+export const Shell: FC = observer(() => {
   const { loggedIn } = useCore();
+
   const { shell, identity, ship } = useServices();
-  const { theme, desktop } = shell;
-  const { auth } = identity;
+  const { desktop } = shell;
 
   const isFullscreen = desktop.isFullscreen;
-  const wallpaper = theme.theme.wallpaper;
+  const wallpaper = desktop.theme.wallpaper;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
+  // const { backgroundColor, mode } = shell.desktop.theme;
 
   const hasWallpaper = bgImage ? true : false;
   const isBlurred = useMemo(
@@ -38,13 +38,31 @@ export const Shell: FC<ShellProps> = observer((props: ShellProps) => {
   );
 
   const shipLoaded = ship?.loader.isLoaded;
-
+  let nft = undefined;
+  if (ship?.patp === '~labruc-dillyx-lomder-librun') {
+    nft = {
+      creator: '~lomder-librun',
+      blockchain: 'ethereum',
+      contract: '0x513c...77a2',
+      tokenStandard: 'ERC-721',
+      tokenId: '191',
+    };
+  }
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
+      {/* <BgImage blurred wallpaper={bgImage} /> */}
       <BgImage blurred={isBlurred} wallpaper={bgImage} />
+
+      {/* {nft && (
+        <Layer zIndex={2}>
+          <Flex position="absolute" top={16} right={16}>
+            <NFTBadge mode={mode} color={backgroundColor} />
+          </Flex>
+        </Layer>
+      )} */}
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {loggedIn ? (
+        {shipLoaded ? (
           <Desktop
             hasLoaded={shipLoaded}
             hasWallpaper={true}
@@ -63,10 +81,23 @@ export default Shell;
 const BgImage = ({
   blurred,
   wallpaper,
+  nft,
 }: {
   blurred: boolean;
   wallpaper: string;
+  nft?: {
+    creator: string;
+    blockchain: string;
+    contract: string;
+    tokenStandard: string;
+    tokenId: string;
+  };
 }) => {
+  const [imageLoading, setImageLoading] = useState(true);
+
+  const imageLoaded = () => {
+    setImageLoading(false);
+  };
   return useMemo(
     () => (
       <AnimatePresence>
@@ -75,9 +106,10 @@ const BgImage = ({
           src={wallpaper}
           initial={{ opacity: 0 }}
           exit={{ opacity: 0 }}
+          onLoad={imageLoaded}
           animate={{
             opacity: 1,
-            filter: blurred ? 'blur(20px)' : 'blur(0px)',
+            filter: blurred ? 'blur(24px)' : 'blur(0px)',
           }}
           transition={{
             opacity: { duration: 1 },
@@ -85,6 +117,6 @@ const BgImage = ({
         />
       </AnimatePresence>
     ),
-    [blurred, wallpaper]
+    [blurred, wallpaper, imageLoading, nft]
   );
 };

@@ -6,6 +6,8 @@ interface GroupViewProps {
   picture?: string;
   title: string;
   color?: string;
+  bgColor?: string;
+  textColor?: string;
   description: string;
   peers?: number;
 }
@@ -68,6 +70,8 @@ export const GroupLink = (props: GroupViewProps) => {
       mb={2}
       p={2}
       canHover={!props.loading}
+      customTextColor={props.textColor}
+      customBg={props.bgColor}
       onClick={(evt: any) => {
         evt.preventDefault();
         // TODO make this open groups app and load url

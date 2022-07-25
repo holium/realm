@@ -25,6 +25,8 @@ type DMContact = {
   type: 'text' | 'url' | 'mention' | 'code' | 'reference' | string;
   content: any;
   color?: string;
+  textColor?: string;
+  bgColor?: string;
   preview?: boolean;
 };
 
@@ -49,7 +51,7 @@ export const MessagePreview = styled(motion.div)<MessagePreviewProps>`
 `;
 
 export const Message: FC<DMContact> = (props: DMContact) => {
-  const { type, content, preview, color } = props;
+  const { type, content, preview, color, bgColor, textColor } = props;
   const [messageContainer, setMessageComponent] = useState<any>([]);
   // let message: any = '';
   useEffect(() => {
@@ -83,7 +85,11 @@ export const Message: FC<DMContact> = (props: DMContact) => {
           } else {
             setMessageComponent(
               <Flex flexDirection="row" mb={1} minWidth={250}>
-                <LinkPreview link={message} />
+                <LinkPreview
+                  textColor={textColor}
+                  customBg={bgColor}
+                  link={message}
+                />
               </Flex>
             );
           }
@@ -92,7 +98,12 @@ export const Message: FC<DMContact> = (props: DMContact) => {
           if (typeof content.reference === 'string') {
             setMessageComponent(content.reference);
           } else {
-            getReferenceView(content.reference, setMessageComponent);
+            getReferenceView(
+              content.reference,
+              setMessageComponent,
+              bgColor,
+              textColor
+            );
           }
           break;
         case 'mention':

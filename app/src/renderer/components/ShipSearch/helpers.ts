@@ -1,10 +1,11 @@
-import { ContactModelType } from 'core-a/ship/stores/contacts';
+import { ContactModelType } from 'os/services/ship/models/contacts';
 import { isValidPatp } from 'urbit-ob';
 
 export const searchPatpOrNickname = (
   search: string,
   contacts: Array<[string, ContactModelType]>,
-  selected: Set<string>
+  selected: Set<string>,
+  our?: string
 ): Array<[string, ContactModelType]> => {
   let results: Array<[string, ContactModelType]> = contacts;
   // results from urbit-ob
@@ -27,11 +28,15 @@ export const searchPatpOrNickname = (
   const filtered: Array<[string, ContactModelType]> = results.filter(
     (el: [string, ContactModelType]) => {
       const patp = el[0].toLocaleLowerCase();
+      if (patp === our) {
+        return;
+      }
       const nickname = el[1].nickname?.toLocaleLowerCase();
       const searchTerm = search.toLocaleLowerCase();
       if (Array.from(selected.values()).includes(patp)) {
         return;
       }
+
       return patp.includes(searchTerm) || nickname?.includes(searchTerm);
     }
   );

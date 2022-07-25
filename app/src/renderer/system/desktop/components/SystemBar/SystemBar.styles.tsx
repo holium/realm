@@ -41,15 +41,15 @@ export const SystemBarStyle = styled(styled(motion.div)<SystemBarStyleProps>`
   flex-direction: row;
   align-items: center;
   border-radius: 6px;
-  transform: translateZ(0);
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
+  /* transform: translateZ(0); */
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-perspective: 1000;
+  backface-visibility: hidden;
+  perspective: 1000;
+  transform: translate3d(0, 0, 0);
+  transition: ${(props: any) => props.theme.transition};
 `)<SystemBarStyleProps>(
-  {
-    // @ts-expect-error annoying
-    backgroundColor: (props: SystemBarStyleProps) =>
-      props.customBg ? rgba(props.customBg!, 0.55) : 'initial',
-  },
+  {},
   compose(space, layout, flexbox, border, position, color, backgroundColor)
 );

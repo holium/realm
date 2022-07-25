@@ -11,7 +11,7 @@ export const devApps: {
     icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
     web: {
       openFullscreen: true,
-      url: 'http://localhost:3000/apps/ballot/',
+      url: 'http://localhost:3001/apps/ballot/',
       development: true,
     },
   },
@@ -23,7 +23,7 @@ export const devApps: {
     icon: '',
     web: {
       openFullscreen: true,
-      url: 'http://localhost:3010/apps/playground/',
+      url: `http://localhost:${process.env.PLAYGROUND_PORT}/apps/playground/`,
       development: true,
     },
   },

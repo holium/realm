@@ -27,7 +27,7 @@ Holds all the metadata about a space, syncs token price, has permissions, manage
     "iconColor": "rgba(95,94,88,0.5)",
     "mouseColor": "#d00b0b",
     "textColor": "#2a2927",
-    "textTheme": "light",
+    "mode": "light",
     "wallpaper": "https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100",
     "windowColor": "#f5f5f4"
   },

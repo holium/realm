@@ -1,13 +1,13 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { WindowThemeType } from 'renderer/logic-old/stores/config';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
 
 type ChatProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;
@@ -21,7 +21,7 @@ type ChatProps = {
 // }
 type ChatViewType = 'dm-list' | 'dm-chat' | 'new-chat' | 'loading';
 
-export const Chat: FC<any> = observer((props: ChatProps) => {
+export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
   const { dimensions } = props;
   const [currentView, setCurrentView] = useState<ChatViewType>('dm-list');
   const [selectedChat, setSelectedChat] = useState<any>(null);
@@ -39,7 +39,7 @@ export const Chat: FC<any> = observer((props: ChatProps) => {
           noGutter
           expand
           height={dimensions.height}
-          overflowY="scroll"
+          overflowY="auto"
         >
           <Flex flex={1} alignItems="center" justifyContent="center">
             <Spinner size={2} />

@@ -31,7 +31,11 @@ export const ContactStore = types
     },
     getContactAvatarMetadata(patp: string) {
       const contact = self.rolodex.get(patp);
-      return { color: contact?.color, avatar: contact?.avatar };
+      return {
+        color: contact?.color,
+        avatar: contact?.avatar,
+        nickname: contact?.nickname,
+      };
     },
   }))
   .actions((self) => ({

@@ -15,8 +15,9 @@ import { ThemeType } from '../../theme';
 
 type IProps = {
   highlightColor?: string;
+  showBackground?: boolean;
   textColor?: string;
-  fontSize?: string;
+  fontSize?: string | number;
   theme: ThemeType;
   disabled?: boolean;
 } & OpacityProps &
@@ -42,6 +43,9 @@ export const TextButtonStyle = styled(styled.div`
     css`
       font-size: ${props.fontSize ? `${props.fontSize}px` : '14px'};
       color: ${props.textColor || props.theme.colors.brand.primary};
+      background-color: ${
+        props.showBackground ? `${props.highlightColor}25` : 'transparent'
+      };
       transition: .1s;
       :hover {
         transition: .1s
@@ -77,9 +81,11 @@ export const TextButtonStyle = styled(styled.div`
 );
 
 type TextButtonProps = {
+  tabIndex?: number;
   highlightColor?: string;
+  showBackground?: boolean;
   textColor?: string;
-  fontSize?: string;
+  fontSize?: number | string;
   disabled?: boolean;
   style?: any;
   onClick?: (evt: any) => void;

@@ -6,26 +6,28 @@ import { SpaceRowStyle } from './SpaceRow';
 import { useServices } from 'renderer/logic/store';
 
 type SpaceRowProps = {
+  colorTheme: string;
   ship: ShipModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;
 };
 
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
-  const { selected, onSelect } = props;
+  const { selected, colorTheme, onSelect } = props;
   const { ship, shell } = useServices();
-  const { theme } = shell;
+  const { theme } = shell.desktop;
   const currentShip = ship!;
-  const currentTheme = useMemo(() => theme.theme, [theme.theme]);
+  const currentTheme = useMemo(() => theme, [theme]);
+
   return (
     <SpaceRowStyle
       data-close-tray="true"
       style={{ width: '100%' }}
       className="realm-cursor-hover"
       selected={selected}
-      customBg={currentTheme.dockColor}
+      customBg={colorTheme}
       onClick={() => {
-        onSelect(ship!.patp);
+        onSelect(`/${ship!.patp}/our`);
       }}
     >
       <Flex gap={8} alignItems="center" style={{ pointerEvents: 'none' }}>
@@ -44,6 +46,7 @@ export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
               flexDirection: 'row',
               justifyContent: 'space-between',
             }}
+            color={currentTheme.textColor}
             fontSize={3}
             fontWeight={500}
             variant="body"

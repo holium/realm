@@ -14,17 +14,21 @@ type MiniAppStyleProps = {
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
   backdrop-filter: var(--blur-enabled);
-  --webkit-backface-visibility: hidden;
-  --webkit-transform: translate3d(0, 0, 0);
-  --webkit-perspective: 1000;
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
   transform: translateZ(0);
   width: 270px;
   box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};
-  border: 1px solid ${(props: MiniAppStyleProps) => rgba(props.customBg!, 0.7)};
+  border: 1px solid
+    ${(props: MiniAppStyleProps) => darken(0.1, props.customBg!)};
+  /* border: 1px solid ${(props: MiniAppStyleProps) =>
+    rgba(props.customBg!, 0.7)}; */
 `)<MiniAppStyleProps>({
   // @ts-expect-error annoying
-  backgroundColor: (props: SystemBarStyleProps) =>
-    props.customBg ? darken(0.025, props.customBg!) : 'initial',
+  backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
 });
 
 type MiniAppProps = {
@@ -39,7 +43,7 @@ type MiniAppProps = {
   };
   textColor?: string;
   buttonRef?: any;
-  children?: React.ReactNode;
+  children: any | React.ReactNode;
 };
 
 const DEFAULT_PROPS = {
@@ -65,6 +69,7 @@ export const MiniApp: FC<MiniAppProps> = forwardRef(
         }}
         color={textColor}
         customBg={backgroundColor}
+        onContextMenu={(evt: any) => evt.stopPropagation()}
       >
         {children}
       </MiniAppWindow>

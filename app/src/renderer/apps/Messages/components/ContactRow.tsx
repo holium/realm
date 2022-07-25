@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba, lighten, darken } from 'polished';
 import { motion } from 'framer-motion';
@@ -37,7 +37,7 @@ export const Row = styled(motion.div)<RowProps>`
       &:hover {
         transition: ${props.theme.transition};
         background-color: ${props.customBg
-          ? darken(0.02, props.customBg)
+          ? darken(0.025, props.customBg)
           : 'initial'};
       }
     `}
@@ -101,6 +101,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     const type = Object.keys(lastMessage)[0];
     subTitle = <Message preview type={type} content={lastMessage} />;
   }
+
   return (
     <Row
       pending={dm.pending}

@@ -20,6 +20,7 @@ import { DmApi } from '../../api/dms';
 import { DocketApi } from '../../api/docket';
 import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
+import { GroupsApi } from '../../api/groups';
 
 /**
  * ShipService
@@ -27,7 +28,14 @@ import { AuthShipType } from '../identity/auth.model';
 export class ShipService extends BaseService {
   private db?: Store<ShipModelType>;
   private state?: ShipModelType;
-  private metadataStore: { [key: string]: any } = {};
+  private ourGroups: any[] = [];
+  private metadataStore: {
+    groups: { [key: string]: any };
+    graph: { [key: string]: any };
+  } = {
+    groups: {},
+    graph: {},
+  };
   handlers = {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.send-dm': this.sendDm,
@@ -35,11 +43,15 @@ export class ShipService extends BaseService {
     'realm.ship.accept-dm-request': this.acceptDm,
     'realm.ship.decline-dm-request': this.declineDm,
     'realm.ship.get-app-preview': this.getAppPreview,
+    'realm.ship.get-our-groups': this.getOurGroups,
   };
 
   static preload = {
     getApps: () => {
       return ipcRenderer.invoke('realm.ship.get-apps');
+    },
+    getOurGroups: () => {
+      return ipcRenderer.invoke('realm.ship.get-our-groups');
     },
     getAppPreview: (ship: string, desk: string) => {
       return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
@@ -160,7 +172,25 @@ export class ShipService extends BaseService {
         this.state?.setOurMetadata(value);
       });
 
-      MetadataApi.syncGroupMetadata(this.core.conduit!, this.metadataStore);
+      MetadataApi.syncGroupMetadata(
+        this.core.conduit!,
+        this.metadataStore
+      ).then(async () => {
+        const groupMetadata = Object.values(this.metadataStore.groups).reduce(
+          (groupMap, group) => {
+            return {
+              ...groupMap,
+              [group.resource]: group,
+            };
+          },
+          {}
+        );
+        this.ourGroups = await GroupsApi.getOur(
+          this.core.conduit!,
+          groupMetadata
+        );
+        // console.log(this.ourGroups);
+      });
       MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
 
       // register dm update handler
@@ -174,13 +204,10 @@ export class ShipService extends BaseService {
 
       DocketApi.getApps(this.core.conduit!).then((apps) => {
         this.state?.docket.setInitial(apps);
-        // this.core.services.spaces.setShipSpace(this.state!);
-        this.core.services.spaces.load(ship, this.state!);
         this.state?.loader.set('loaded');
         resolve(this.state!);
       });
     });
-    // this.core.services.identity.auth.loader = 'loaded';
   }
 
   async init(ship: string) {
@@ -230,11 +257,25 @@ export class ShipService extends BaseService {
     // this.stateTree.deleteShip(patp);
   }
 
+  async getOurGroups(_event: any): Promise<any> {
+    // const groupMetadata = Object.values(this.metadataStore.groups).reduce(
+    //   (groupMap, group) => {
+    //     return {
+    //       ...groupMap,
+    //       [group.resource]: group,
+    //     };
+    //   },
+    //   {}
+    // );
+
+    return this.ourGroups; // await GroupsApi.getOur(this.core.conduit!, groupMetadata);
+  }
+
   // ------------------------------------------
   // ------------ Action handlers -------------
   // ------------------------------------------
   getMetadata(_event: any, path: string): any {
-    return this.metadataStore[path];
+    return this.metadataStore['graph'][path];
   }
 
   async getAppPreview(_event: any, ship: string, desk: string): Promise<any> {
@@ -272,6 +313,13 @@ export class ShipService extends BaseService {
     const ourShip = this.state?.patp!;
     const dm = this.state?.chat.dms.get(toShip)!;
     dm.sendDm(contents);
+    // TODO fix send new dm
+    // if (this.state?.chat.dms.get(toShip)) {
+    // } else {
+    //   // this.state?.chat.sendNewDm([toShip], this.con)
+    //   // const dm = this.state?.chat.dms.get(toShip)!;
+    //   // dm.sendDm(contents);
+    // }
     return await DmApi.sendDM(
       ourShip,
       toShip,

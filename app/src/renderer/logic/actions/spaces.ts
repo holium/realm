@@ -14,4 +14,16 @@ export const SpacesActions = {
   selectSpace: async (path: string) => {
     return await window.electron.os.spaces.selectSpace(path);
   },
+  getOurGroups: async () => {
+    return await window.electron.os.ship.getOurGroups();
+  },
+  createSpace: async (data: any) => {
+    return await window.electron.os.spaces.createSpace(data);
+  },
+  updateSpace: async (path: any, update: any) => {
+    return await window.electron.os.spaces.updateSpace(path, update);
+  },
+  deleteSpace: async (path: any) => {
+    return await window.electron.os.spaces.deleteSpace(path);
+  },
 };

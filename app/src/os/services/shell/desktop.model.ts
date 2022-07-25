@@ -1,10 +1,10 @@
 // import { osState, shipState } from './../store';
-import { types, applySnapshot, Instance } from 'mobx-state-tree';
+import { types, applySnapshot, Instance, clone } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 // import { setPartitionCookies } from './api';
 import { getInitialWindowDimensions } from './lib/window-manager';
 import { NativeAppList } from 'renderer/apps';
-import { ThemeModel } from './theme.model';
+import { ThemeModel, ThemeModelType } from './theme.model';
 
 // const Grid = types.model({
 //   width: types.enumeration(['1', '2', '3']),
@@ -23,10 +23,11 @@ type DimensionModelType = Instance<typeof DimensionsModel>;
 const Window = types
   .model('WindowModel', {
     id: types.identifier,
+    glob: types.optional(types.boolean, false),
     title: types.optional(types.string, ''),
     zIndex: types.number,
     type: types.optional(
-      types.enumeration(['urbit', 'web', 'native']),
+      types.enumeration(['urbit', 'web', 'native', 'dialog']),
       'urbit'
     ),
     dimensions: DimensionsModel,
@@ -38,24 +39,36 @@ const Window = types
   }));
 
 export type WindowModelType = Instance<typeof Window>;
+export type WindowModelProps = {
+  id: string;
+  title?: string;
+  glob?: boolean;
+  zIndex: number;
+  type: 'urbit' | 'web' | 'native' | 'dialog';
+  dimensions: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+};
 
 export const DesktopStore = types
   .model('DesktopStore', {
     showHomePane: types.optional(types.boolean, false),
     isBlurred: types.optional(types.boolean, true),
     appviewPreload: types.maybe(types.string),
-    isFullscreen: types.optional(types.boolean, false),
+    isFullscreen: types.optional(types.boolean, true),
     dynamicMouse: types.optional(types.boolean, true),
     isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     theme: types.optional(ThemeModel, {
-      themeId: 'os',
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
       windowColor: '#f0ecec',
-      textTheme: 'light',
+      mode: 'light',
       textColor: '#261f1f',
       iconColor: '#333333',
       mouseColor: '#4E9EFD',
@@ -69,6 +82,7 @@ export const DesktopStore = types
     ),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
+    dialogId: types.maybe(types.string),
   })
   .views((self) => ({
     get currentOrder() {
@@ -95,8 +109,17 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
+    openDialog(dialogId: string) {
+      self.dialogId = dialogId;
+    },
+    closeDialog() {
+      self.dialogId = undefined;
+    },
     setWallpaper(newWallpaper: string) {
       self.theme.wallpaper = newWallpaper;
+    },
+    setTheme(newTheme: ThemeModelType) {
+      self.theme = clone(newTheme);
     },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {
@@ -144,9 +167,14 @@ export const DesktopStore = types
       windowDimensions && applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(app: any) {
+      let glob = app.glob;
+      if (app.href) {
+        glob = app.href.glob ? true : false;
+      }
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
+        glob,
         zIndex: self.windows.size + 1,
         type: app.type,
         dimensions: getInitialWindowDimensions(
@@ -161,6 +189,7 @@ export const DesktopStore = types
         self.showHomePane = false;
         self.isBlurred = false;
       }
+      return newWindow;
     },
     closeBrowserWindow(appId: any) {
       if (self.activeWindow?.id === appId) {

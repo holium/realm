@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import { createField, createForm } from 'mobx-easy-form';
 import normalizeUrl from 'normalize-url';
 
-import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
 import { Flex, Icons, Input, Spinner } from 'renderer/components';
-import { WindowIcon } from 'renderer/system/desktop/components/AppWindow/WindowIcon';
+import { WindowIcon } from 'renderer/system/desktop/components/Window/WindowIcon';
 import { useBrowser } from './store';
 import { useServices } from 'renderer/logic/store';
 
@@ -41,12 +41,12 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
     onMaximize,
   } = props;
   const { shell } = useServices();
-  const { desktop, theme } = shell;
+  const { desktop } = shell;
   const browserStore = useBrowser();
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
 
-  const { iconColor } = theme.theme;
+  const { iconColor, inputColor } = desktop.theme;
 
   const { searchForm, searchQuery } = useMemo(
     () =>
@@ -73,7 +73,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
         // search qwant
         const query = new URLSearchParams({ q: term });
         if (term.length > 0) {
-          const search = `https://www.qwant.com/?${query}&t=web`;
+          const search = `https://neeva.com/search?q=${query}`;
           browserStore.setCurrentTab(search);
           setUrlData(new URL(normalizeUrl(search)));
         }
@@ -219,7 +219,11 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
               </Flex>
             }
             placeholder="Search Qwant or enter url"
-            wrapperStyle={{ borderRadius: '20px', height: 32 }}
+            wrapperStyle={{
+              borderRadius: '20px',
+              height: 32,
+              backgroundColor: inputColor,
+            }}
             defaultValue={searchQuery.state.value}
             onKeyPress={onKeyPress}
             error={!searchQuery.computed.isDirty || searchQuery.computed.error}

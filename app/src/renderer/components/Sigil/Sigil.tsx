@@ -11,6 +11,7 @@ export type SigilProps = {
   size: number;
   simple?: boolean;
   borderRadiusOverride?: string;
+  borderColor?: string;
   color: [string, string];
   isLogin?: boolean;
   clickable?: boolean;
@@ -26,6 +27,7 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
     simple,
     clickable,
     isLogin,
+    borderColor,
   } = props;
   const sigilSize = size / 2;
   const horizontalPadding = sigilSize / 2;
@@ -58,6 +60,7 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
           style={{
             paddingLeft: horizontalPadding,
             paddingRight: horizontalPadding,
+            borderRadius: borderRadiusOverride || 4,
           }}
           borderRadiusOverride={borderRadiusOverride}
         >

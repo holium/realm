@@ -20,12 +20,11 @@ export const AuthShip = types
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
     theme: types.optional(ThemeModel, {
-      themeId: 'base',
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
       windowColor: '#f0ecec',
       textColor: '#261f1f',
-      textTheme: 'light',
+      mode: 'light',
     }),
     wallpaper: types.maybeNull(types.string),
     status: types.optional(StepList, 'initial'),

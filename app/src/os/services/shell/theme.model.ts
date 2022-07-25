@@ -1,59 +1,65 @@
-import { types, flow, Instance, tryReference } from 'mobx-state-tree';
+import { average } from 'color.js';
+import { types, flow, Instance, clone, applySnapshot } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
 import { bgIsLightOrDark } from '../../lib/color';
 import { LoaderModel } from '../common.model';
-// import Wallpaper from '../../../assets/sample-wallpaper.png';
-// import Image from '/Users/drunkplato/Documents/Holium/Design/Assets/os-wallpaper/The_Course_of_Empire_Desolation.jpeg';
-
-// import { bgIsLightOrDark } from '../utils/color';
-
-// https://unsplash.com/@pawel_czerwinski
-// export const DEFAULT_WALLPAPER =
-//   'https://images.unsplash.com/photo-1650361072639-e2d0d4f7f3e6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=100';
-
-// export const DEFAULT_WALLPAPER = Image;
 
 export const DEFAULT_WALLPAPER =
   'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
 
-// export const DEFAULT_WALLPAPER =
-//   'https://images.unsplash.com/photo-1643916861364-02e63ce3e52f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2870&q=100';
-
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
+  const windowColor =
+    bgLuminosity === 'dark' ? darken(0.05, baseColor) : lighten(0.3, baseColor);
   return {
+    // TODO add window border color
+    mode: bgLuminosity,
     backgroundColor: baseColor,
+    inputColor:
+      bgLuminosity === 'dark'
+        ? darken(0.06, windowColor)
+        : lighten(0.05, windowColor),
     dockColor:
       bgLuminosity === 'dark'
-        ? darken(0.2, baseColor)
-        : lighten(0.2, baseColor),
-    windowColor:
-      bgLuminosity === 'dark'
-        ? darken(0.2, baseColor)
-        : lighten(0.2, baseColor),
+        ? lighten(0.05, baseColor)
+        : lighten(0.4, baseColor),
+    windowColor,
     textColor:
       bgLuminosity === 'dark'
         ? lighten(0.9, baseColor)
-        : darken(0.6, baseColor),
-    textTheme: bgLuminosity,
-    iconColor: rgba(darken(0.4, baseColor), 0.5),
+        : darken(0.8, baseColor),
+    iconColor:
+      bgLuminosity === 'dark'
+        ? rgba(lighten(0.5, baseColor), 0.4)
+        : rgba(darken(0.4, baseColor), 0.3),
   };
 };
 
 export const ThemeModel = types
   .model('ThemeModel', {
-    themeId: types.identifier,
-    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     backgroundColor: types.optional(types.string, '#c4c3bf'),
-    dockColor: types.optional(types.string, '#f5f5f4'),
+    accentColor: types.optional(types.string, '#4E9EFD'),
+    inputColor: types.optional(types.string, '#FFFFFF'),
+    dockColor: types.optional(types.string, '#F5F5F4'),
     windowColor: types.optional(types.string, '#f5f5f4'),
-    textTheme: types.optional(types.enumeration(['light', 'dark']), 'light'),
+    mode: types.optional(types.enumeration(['light', 'dark']), 'light'),
     textColor: types.optional(types.string, '#2a2927'),
     iconColor: types.optional(types.string, '#333333'),
     mouseColor: types.optional(types.string, '#4E9EFD'),
+    wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
   })
   .actions((self) => ({
     setMouseColor(color: string) {
       self.mouseColor = color;
+    },
+    setWallpaper(path: string, color: string, wallpaper: string) {
+      const bgLuminosity = bgIsLightOrDark(color.toString());
+      const windowTheme = generateColors(color, bgLuminosity);
+      const theme = ThemeModel.create({
+        ...windowTheme,
+        wallpaper,
+      });
+      applySnapshot(self, clone(theme));
+      return self;
     },
   }));
 
@@ -64,14 +70,10 @@ export const ThemeStore = types
     loader: types.optional(LoaderModel, { state: 'initial' }),
     currentTheme: types.safeReference(ThemeModel),
     os: types.optional(ThemeModel, {
-      themeId: 'os',
-      // wallpaper: DEFAULT_WALLPAPER,
-      wallpaper:
-        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
+      wallpaper: DEFAULT_WALLPAPER,
       backgroundColor: '#c2b4b4',
       dockColor: '#f0ecec',
       windowColor: '#f0ecec',
-      textTheme: 'light',
       textColor: '#261f1f',
       iconColor: '#333333',
       mouseColor: '#4E9EFD',
@@ -102,30 +104,28 @@ export const ThemeStore = types
       self.currentTheme = self.spaces.get(spaceId);
       return self.currentTheme;
     },
-    setWallpaper: flow(function* (
-      wallpaper: string,
-      config: { patp?: string; spaceId?: string }
-    ) {
-      const themeId = (config.patp && `ship${config.patp}`) || config.spaceId;
-      // console.log(themeId);
-      // const color = yield average(wallpaper, { group: 15, format: 'hex' });
-      const color = '#c4c3bf';
-      const bgLuminosity = bgIsLightOrDark(color.toString());
-      const windowTheme = generateColors(color, bgLuminosity);
-      const theme = ThemeModel.create({
-        themeId: themeId!,
-        ...windowTheme,
-        wallpaper,
-      });
-      if (config.patp) {
-        self.ships.set(themeId!, theme);
-        self.currentTheme = self.ships.get(themeId!);
-      }
-      if (config.spaceId) {
-        self.spaces.set(themeId!, theme);
-        self.currentTheme = self.ships.get(themeId!);
-      }
-    }),
+    // setWallpaper: flow(function* (
+    //   wallpaper: string,
+    //   config: { patp?: string; spaceId?: string }
+    // ) {
+    //   // console.log(themeId);
+    //   // const color = yield average(wallpaper, { group: 15, format: 'hex' });
+    //   const color = '#c4c3bf';
+    //   const bgLuminosity = bgIsLightOrDark(color.toString());
+    //   const windowTheme = generateColors(color, bgLuminosity);
+    //   const theme = ThemeModel.create({
+    //     ...windowTheme,
+    //     wallpaper,
+    //   });
+    //   // if (config.patp) {
+    //   //   self.ships.set(themeId!, theme);
+    //   //   self.currentTheme = self.ships.get(themeId!);
+    //   // }
+    //   // if (config.spaceId) {
+    //   //   self.spaces.set(themeId!, theme);
+    //   //   self.currentTheme = self.ships.get(themeId!);
+    //   // }
+    // }),
   }));
 
 export type ThemeStoreType = Instance<typeof ThemeStore>;

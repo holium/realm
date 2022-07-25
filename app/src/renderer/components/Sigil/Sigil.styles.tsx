@@ -16,6 +16,7 @@ export type SigilStyleProps = BorderProps & {
   sigilColor?: string;
   sigilSize?: number;
   borderRadiusOverride?: string;
+  overlayBorder?: string;
   raised?: boolean;
   theme: any;
 };
@@ -32,15 +33,17 @@ export const AvatarWrapper = styled(styled.div`
   position: relative;
   text-align: center;
   vertical-align: middle;
-  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-  -moz-box-sizing: border-box; /* Firefox, other Gecko */
-  box-sizing: border-box; /* Opera/IE 8+ */
+  background: transparent;
+  -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: content-box; /* Firefox, other Gecko */
+  box-sizing: content-box; /* Opera/IE 8+ */
   overflow: visible;
   pointer-events: none;
   img {
     user-select: none;
     pointer-events: none;
-    /* pointer-events: ${(props) => (props.clickable ? 'none' : 'inherit')}; */
+    height: ${(props) => props.sigilSize}px;
+    width: ${(props) => props.sigilSize}px;
   }
   transition: ${(props) => props.theme.transition};
 
@@ -69,9 +72,9 @@ export const SigilStyle = styled(
     position: relative;
     text-align: center;
     vertical-align: middle;
-    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-    -moz-box-sizing: border-box; /* Firefox, other Gecko */
-    box-sizing: border-box; /* Opera/IE 8+ */
+    -webkit-box-sizing: content-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: content-box; /* Firefox, other Gecko */
+    box-sizing: content-box; /* Opera/IE 8+ */
     overflow: visible;
     height: ${(props) => props.sigilSize}px;
     /* width: ${(props) => props.sigilSize}px; */

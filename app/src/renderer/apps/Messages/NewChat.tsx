@@ -15,7 +15,7 @@ import {
 } from 'renderer/components';
 import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { Titlebar } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
@@ -31,11 +31,11 @@ type IProps = {
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
   const { ship } = useServices();
-  const { backgroundColor, textColor, iconColor, dockColor } = theme;
-  const windowColor = useMemo(
-    () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-    [props.theme.windowColor]
-  );
+  const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
+  // const windowColor = useMemo(
+  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
+  //   [props.theme.windowColor]
+  // );
 
   // const { newChatForm, urbitId } = createNewChatForm();
 
@@ -193,8 +193,6 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         height={height}
         style={{ backgroundColor: windowColor }}
       >
-        {/* TODO autocomplete patp's */}
-
         <FormControl.Field>
           <Input
             tabIndex={1}
@@ -212,22 +210,20 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
               marginRight: 8,
               width: 'calc(100% - 16px)',
               borderRadius: 9,
-              backgroundColor: darken(0.05, windowColor),
-              '&:hover': {
-                borderColor: backgroundColor,
-              },
-              borderColor: rgba(backgroundColor, 0.7),
+              backgroundColor: inputColor,
             }}
           />
         </FormControl.Field>
         {contactArray}
-        <ShipSearch
-          heightOffset={90}
-          search={patp}
-          selected={selectedPatp}
-          customBg={windowColor}
-          onSelected={(contact: any) => onShipSelected(contact)}
-        />
+        <Flex pl={2} pr={2} flex={1} flexDirection="column">
+          <ShipSearch
+            heightOffset={90}
+            search={patp}
+            selected={selectedPatp}
+            customBg={windowColor}
+            onSelected={(contact: any) => onShipSelected(contact)}
+          />
+        </Flex>
       </Grid.Column>
     </Grid.Column>
   );

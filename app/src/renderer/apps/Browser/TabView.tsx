@@ -1,7 +1,7 @@
 import { FC, useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TitlebarStyle } from 'renderer/system/desktop/components/AppWindow/Titlebar';
+import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
 import { Flex, Spinner, Input } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { useBrowser } from './store';
@@ -25,9 +25,7 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
   const { shell } = useServices();
-  const { desktop, theme } = shell;
-  const browserStore = useBrowser();
-  const { iconColor } = theme.theme;
+  const { desktop } = shell;
 
   const [loading, setLoading] = useState(false);
   // const [urlData, setUrlData] = useState<any>(tab ? new URL(tab.url) : null);
@@ -111,6 +109,7 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
           onMouseLeave={onMouseLeave}
           useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36"
           style={{
+            background: 'white',
             width: 'inherit',
             height: 'calc(100% - 50px)',
             position: 'relative',

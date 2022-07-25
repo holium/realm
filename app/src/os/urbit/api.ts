@@ -20,7 +20,7 @@ import {
   FatalError,
 } from './types';
 import { hexString } from './utils';
-import { SendAction } from './action-types';
+import { SendAction, RealmAction } from './action-types';
 
 /**
  * A class for interacting with an urbit ship, given its URL and code
@@ -561,6 +561,7 @@ export class Urbit extends EventEmitter {
     const { app, path, noDotJson } = params;
 
     let jsonType = noDotJson ? '' : '.json';
+    // console.log(`${this.url}/~/scry/${app}${path}${jsonType}`);
     const response: any = await axios.get(
       `${this.url}/~/scry/${app}${path}${jsonType}`,
       this.fetchOptions

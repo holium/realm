@@ -1,22 +1,13 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
-import { WindowThemeType } from '../../../logic-old/stores/config';
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  Sigil,
-  Text,
-} from '../../../components';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { Grid, Flex, Text } from '../../../components';
 import { CircleButton } from './CircleButton';
 
 type WalletMainProps = {
-  theme: WindowThemeType;
+  theme: ThemeModelType;
 };
 
 export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
@@ -24,7 +15,15 @@ export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
   const { theme } = props;
 
   return (
-    <Grid.Column noGutter expand align="center" justify="center">
+    <Grid.Column
+      style={{
+        background: theme.windowColor,
+      }}
+      noGutter
+      expand
+      align="center"
+      justify="center"
+    >
       <Text
         letterSpacing="6%"
         mb={1}
@@ -35,7 +34,7 @@ export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
         YOUR BALANCE
       </Text>
       <Text mb={1} fontWeight={600} color="text.primary" fontSize={9}>
-        0 BSV
+        0 BTC
       </Text>
       <Text fontWeight={400} opacity={0.6} color="text.primary" fontSize={5}>
         ≈ 0 USD

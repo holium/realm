@@ -2,7 +2,7 @@ import { SystemApp } from './System';
 import { Browser, BrowserProps } from './Browser';
 import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';
 
-type NativeRenders = {
+export type NativeRenders = {
   [key: string]: {
     titlebar?: React.FC<any>;
     component: React.FC<any>;

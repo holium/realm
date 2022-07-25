@@ -8,30 +8,38 @@ import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
 import { useServices } from 'renderer/logic/store';
+import { TrayClock } from './Clock';
+import { rgba } from 'polished';
 
 type ShipTrayProps = {};
 
 export const ShipTray: FC<ShipTrayProps> = observer(() => {
   const { shell } = useServices();
-  const { theme } = shell;
+  const { desktop } = shell;
 
-  const { dockColor, textColor } = useMemo(() => theme.theme, [theme.theme]);
+  const { dockColor, textColor } = useMemo(
+    () => ({
+      ...desktop.theme,
+      dockColor: rgba(desktop.theme.dockColor!, 0.55),
+    }),
+    [desktop.theme.dockColor]
+  );
 
   const [voiceOn, setVoiceOn] = useState(false);
 
   return (
     <SystemBarStyle
-      animate={{ scale: 1 }}
-      transition={{ scale: 0.5 }}
+      initial={{ backgroundColor: dockColor }}
+      animate={{ scale: 1, backgroundColor: dockColor }}
+      transition={{ scale: 0.5, backgroundColor: { duration: 0.5 } }}
       pl={2}
       pr={2}
-      customBg={dockColor}
+      backgroundColor={dockColor}
       display="flex"
       justifyContent="center"
       alignItems="center"
     >
       <Flex gap={10} justifyContent="center" alignItems="center">
-        {/* Toggles voice on/off for voice subsystem */}
         <IconButton
           size={28}
           customBg={dockColor}
@@ -45,12 +53,10 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
             />
           </motion.div>
         </IconButton>
-        {/* Holds the wallet interface */}
-        <WalletTray theme={theme.theme} />
-        {/* Holds the DM interface */}
-        <MessagesTray theme={theme.theme} />
-        {/* Allows logging out */}
-        <AccountTray theme={theme.theme} />
+        <WalletTray theme={desktop.theme} />
+        <MessagesTray theme={desktop.theme} />
+        <AccountTray theme={desktop.theme} />
+        {/* <TrayClock /> */}
       </Flex>
     </SystemBarStyle>
   );

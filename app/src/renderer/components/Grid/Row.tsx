@@ -17,14 +17,12 @@ const Row = styled.div<RowType>`
   flex-direction: row;
   flex: 1 1 auto;
   flex-wrap: wrap;
-
   ${(p) =>
     p.expand &&
     css`
       width: 100%;
       height: 100%;
     `}
-
   ${(p) =>
     !p.noGutter &&
     css`

@@ -15,6 +15,7 @@ const EmptyPicture = styled.div`
 
 interface SelectedSpaceProps {
   selectorRef: any;
+  onClick?: any;
 }
 const FadeInMotion = {
   initial: { opacity: 0 },
@@ -27,11 +28,12 @@ const FadeInMotion = {
 
 export const SelectedSpace: FC<SelectedSpaceProps> = observer(
   (props: SelectedSpaceProps) => {
-    const { selectorRef } = props;
-    const { spaces, ship } = useServices();
+    const { selectorRef, onClick } = props;
+    const { spaces, ship, shell } = useServices();
     const selectedSpace = spaces.selected!;
-    const { dockColor, textColor } = selectedSpace.theme;
+    const { dockColor, textColor } = shell.desktop.theme;
     let innerContent: any;
+
     if (selectedSpace.type === 'our') {
       innerContent = (
         <Flex
@@ -59,6 +61,8 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
               style={{ textTransform: 'capitalize', pointerEvents: 'none' }}
               color={textColor}
               lineHeight="14px"
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
               fontSize={1}
               opacity={0.5}
             >
@@ -67,6 +71,8 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
             <Text
               style={{ pointerEvents: 'none' }}
               color={textColor}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
               fontSize={2}
               fontWeight={500}
             >
@@ -91,7 +97,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
               src={selectedSpace.picture}
             />
           ) : (
-            <EmptyPicture color={'#000000'} />
+            <EmptyPicture color={selectedSpace.color || '#000000'} />
           )}
           <Flex
             style={{ pointerEvents: 'none' }}
@@ -102,7 +108,9 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
           >
             <Text
               style={{ textTransform: 'capitalize', pointerEvents: 'none' }}
-              color={textColor}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              transition={{ color: { duration: 0.5 } }}
               lineHeight="14px"
               fontSize={1}
               opacity={0.5}
@@ -111,7 +119,9 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
             </Text>
             <Text
               style={{ pointerEvents: 'none' }}
-              color={textColor}
+              initial={{ color: textColor }}
+              animate={{ color: textColor }}
+              transition={{ color: { duration: 0.5 } }}
               fontSize={2}
               fontWeight={500}
             >
@@ -128,6 +138,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
         whileTap={{ scale: 0.975 }}
         transition={{ scale: 0.2 }}
         customBg={dockColor}
+        onClick={onClick}
       >
         {innerContent}
       </TrayButton>

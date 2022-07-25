@@ -2,25 +2,26 @@ import styled, { css } from 'styled-components';
 
 interface ISkeleton {
   height: number;
-  width: number;
+  width?: number;
+  borderRadius?: number;
 }
 
 export const Skeleton = styled.div<ISkeleton>`
-  width: 100%;
-  ${(props: ISkeleton) => css`
-    height: ${props.height}px;
-    width: ${props.width}px;
-  `}
+  ${(props: ISkeleton) =>
+    css`
+      height: ${props.height}px;
+      width: ${props.width ? `${props.width}px` : '100%'}px;
+      border-radius: ${props.borderRadius || 4}px;
+    `}
   display: block;
-  border-radius: 3px;
   animation: skeleton-loading 1s linear infinite alternate;
 
   @keyframes skeleton-loading {
     0% {
-      background-color: hsl(230, 20%, 95%);
+      background-color: #78787806;
     }
     100% {
-      background-color: hsl(230, 20%, 88%);
+      background-color: #6b6b6b14;
     }
   }
   @keyframes shine {

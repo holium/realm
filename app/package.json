@@ -1,5 +1,6 @@
 {
   "name": "@holium/realm",
+  "version": "0.0.1",
   "description": "A desktop environment for Urbit",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
@@ -8,7 +9,7 @@
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
     "package": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --publish never",
-    "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts && opencollective-postinstall",
+    "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts",
     "start": "ts-node ./.holium/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.preload.dev.ts",
@@ -227,6 +228,7 @@
     "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
     "eventsource": "^2.0.0",
+    "extract-colors": "^1.1.22",
     "framer-motion": "^6.2.10",
     "history": "^5.3.0",
     "lodash": "^4.17.21",

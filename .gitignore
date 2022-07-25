@@ -71,8 +71,8 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
-!.env.sample
 .env.*
+!.env.sample
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -110,6 +110,7 @@ dist
 # Hide developer ships
 /comets
 /ships
+/globs
 
 # Hide urbit repo
 /urbit
@@ -118,3 +119,4 @@ dist
 .env.moon1
 .env.moon2
 !.env.local-example
+build

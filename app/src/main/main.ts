@@ -20,6 +20,8 @@ import { Realm } from '../os';
 import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
+import MediaHelper from './helpers/media';
+
 // Ad block
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
@@ -95,14 +97,15 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     acceptFirstMouse: true,
+    paintWhenInitiallyHidden: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
+      // nodeIntegrationInSubFrames: true,
       // sandbox: true,
       // nodeIntegrationInWorker: true,
       contextIsolation: true,
-      // additionalArguments: [`storePath:${app.getPath('userData')}`],
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.holium/dll/preload.js'),
@@ -117,14 +120,21 @@ const createWindow = async () => {
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
+  MediaHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+
   mainWindow.maximize();
   mainWindow.on('ready-to-show', () => {
+    // This is how you can set scale
+    mainWindow?.webContents.setZoomFactor(1.1);
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
-    mainWindow.webContents.send('set-fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send(
+      'realm.desktop.set-fullscreen',
+      mainWindow.isFullScreen()
+    );
     mainWindow.webContents.send(
       'set-appview-preload',
       path.join(app.getAppPath(), 'appview.preload.js')

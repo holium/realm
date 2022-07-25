@@ -107,14 +107,13 @@ const StyledButton = styled.button`
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    border-radius: 4px;
+    border-radius: 6px;
     border-color: transparent;
     cursor: none;
     box-shadow: none;
     text-align: left;
-    font-size: 14px;
-    /* height: 32px; */
-    padding: 0px 12px;
+    font-size: 16px;
+    padding: 4px 12px;
     transition: ${props.theme.transition};
     line-height: ${props.theme.lineHeights.solid}
     font-family: ${props.theme.fonts.body};
