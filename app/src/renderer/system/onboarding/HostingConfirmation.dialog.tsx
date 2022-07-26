@@ -1,14 +1,9 @@
-import React, { FC, useEffect, useState, useRef } from 'react';
-import styled, { css } from 'styled-components';
-import { darken } from 'polished';
-// @ts-expect-error its there...
-import UrbitSVG from '../../../../assets/urbit.svg';
-import { Box, Sigil, Grid, Text, Flex, Icons, Button } from 'renderer/components';
+import { FC, useEffect, useState, useRef } from 'react';
+import { Box, Sigil, Grid, Text, Flex, Button } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { HostingPlanet } from 'os/api/holium';
 
 interface SelectPlanProps extends BaseDialogProps {
   patp: string
@@ -17,15 +12,14 @@ interface SelectPlanProps extends BaseDialogProps {
 function useInterval(callback: any, delay: number) {
   const savedCallback = useRef();
 
-  // Remember the latest callback.
   useEffect(() => {
     savedCallback.current = callback;
   }, [callback]);
 
-  // Set up the interval.
   useEffect(() => {
     function tick() {
-      savedCallback.current();
+        // @ts-ignore
+        savedCallback.current();
     }
     if (delay !== null) {
       let id = setInterval(tick, delay);
@@ -37,24 +31,23 @@ function useInterval(callback: any, delay: number) {
 const HostingConfirmation: FC<SelectPlanProps> = observer(
   (props: SelectPlanProps) => {
     let [ loading, setLoading ] = useState(true);
-    let [ message, setMessage ] = useState('Booting planet...')
     let { onboarding } = useServices();
     let planet = onboarding.planet!;
 
     useInterval(() => {
-      OnboardingActions.getHostedShip()
-        .then((ship) => {
-          if (ship && ship.code) {
+      OnboardingActions.checkShipBooted()
+        .then((booted: boolean) => {
+          if (booted) {
             setLoading(false)
-            setMessage(`Planet ready, welcome to the network`)
+            props.onNext && props.onNext()
           } else {
-            console.log('still loading...', ship)
+            console.log('still loading...')
           }
         })
         .catch((reason) => {
           setLoading(false)
-          setMessage(`Something went wrong :(`)
           console.error(reason)
+
         })
     }, 5000)
 
@@ -68,11 +61,28 @@ const HostingConfirmation: FC<SelectPlanProps> = observer(
             </Box>
             <Text> { planet.patp! } </Text>
           </Flex>
-          <Box>
-            <Button isLoading={loading} disabled={true}>
-              {message}
-            </Button>
-          </Box>
+          {loading
+          ? (
+            <>
+              <Box>
+                <Text variant="body">
+                  Your planet is booting...this may take a bit.
+                </Text>
+              </Box>
+              <Box>
+                <Button isLoading={loading} disabled={true}>
+                  Booting planet...
+                </Button>
+              </Box>
+            </>
+          )
+          : (
+            <Box>
+              <Text variant="body" color="text.error">
+                An error occured while booting your ship. Please contact support.
+              </Text>
+            </Box>
+          )}
         </Flex>
       </Grid.Column>
     )
