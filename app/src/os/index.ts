@@ -90,7 +90,7 @@ export class Realm extends EventEmitter {
       shell: new DesktopService(this),
     };
 
-    this.holiumClient = new HoliumAPI(this.services.identity.auth.clientId);
+    this.holiumClient = new HoliumAPI();
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -195,45 +195,3 @@ export class Realm extends EventEmitter {
 export default Realm;
 
 export type OSPreloadType = typeof Realm.preload;
-
-// {
-//   boot: () => Promise<any>; // starts an instance of the OS
-//   install: () => Promise<any>; // calls the kiln install command
-//   onInstalled: () => Promise<any>;
-//   // onStart: () => Promise<any>;
-//   onEffect: (callback: any) => Promise<any>;
-//   applyAction: (action: any) => Promise<any>;
-//   auth: typeof AuthService.preload;
-//   signup: typeof SignupService.preload;
-//   ship: typeof ShipService.preload;
-//   spaces: typeof SpacesService.preload;
-//   shell: typeof DesktopService.preload;
-//   // ship: {
-//   //   getContacts: () => any;
-//   //   getMetadata: (path: string) => any;
-//   //   getProfile: (ship: string) => Promise<any>;
-//   //   saveProfile: (ship: string, data: any) => Promise<any>;
-//   //   beacon: {
-//   //     getNotifications: () => Promise<any>;
-//   //     createNotification: (params: any) => Promise<any>;
-//   //     seenNotification: (id: string) => Promise<any>;
-//   //     archiveNotification: (id: string) => Promise<any>;
-//   //   };
-//   //   docket: {
-//   //     getApps: () => Promise<any>;
-//   //     getAppPreview: (ship: string, desk: string) => Promise<any>;
-//   //   };
-//   //   dms: {
-//   //     setScreen: (screen: boolean) => Promise<any>;
-//   //     acceptDm: (ship: string) => Promise<any>;
-//   //     declineDm: (ship: string) => Promise<any>;
-//   //     getDMs: () => Promise<any>;
-//   //     sendDm: (toShip: string, content: any[]) => Promise<any>;
-//   //     removeDm: (ship: string, index: any) => Promise<any>;
-//   //   };
-//   // };
-//   // spaces: {
-//   //   getSpaces: () => any;
-//   //   setActive: (space: any) => any;
-//   // };
-// };

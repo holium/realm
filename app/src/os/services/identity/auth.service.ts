@@ -56,7 +56,7 @@ export class AuthService extends BaseService {
     this.db = new Store({
       name: 'realm.auth',
       accessPropertiesByDotNotation: true,
-      defaults: AuthStore.create({ firstTime: true, clientId: crypto.randomBytes(6).toString('hex') }),
+      defaults: AuthStore.create({ firstTime: true }),
     });
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -84,8 +84,20 @@ export class AuthService extends BaseService {
     return getSnapshot(this.state);
   }
 
-  get clientId() {
-    return this.state.clientId;
+  get accountId() {
+    return this.state.accountId;
+  }
+
+  setAccountId(accountId: string) {
+    this.state.setAccountId(accountId)
+  }
+
+  get clientSecret() {
+    return this.state.clientSecret;
+  }
+
+  setClientSecret(secret: string) {
+    this.state.setClientSecret(secret);
   }
 
   setLoader(state: 'initial' | 'loading' | 'error' | 'loaded') {

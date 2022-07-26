@@ -47,7 +47,8 @@ export const AuthStore = types
     selected: types.safeReference(AuthShip), // patp string
     ships: types.map(AuthShip),
     order: types.optional(types.array(types.string), []), // patp string
-    clientId: types.string
+    accountId: types.maybe(types.string),
+    clientSecret: types.maybe(types.string)
   })
   .views((self) => ({
     get isLoading() {
@@ -104,6 +105,12 @@ export const AuthStore = types
     },
     setSession: (shipRef: any) => {
       self.selected = shipRef;
+    },
+    setAccountId: (accountId: string) => {
+      self.accountId = accountId;
+    },
+    setClientSecret: (secret: string) => {
+      self.clientSecret = secret;
     },
     completeSignup(id: string) {
       self.selected = self.ships.get(id);

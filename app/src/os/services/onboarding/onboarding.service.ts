@@ -14,7 +14,7 @@ import { OnboardingStore, OnboardingStoreType, OnboardingStep } from './onboardi
 import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
-import { HostingPlanet } from 'os/api/holium';
+import { HostingPlanet, AccessCode } from 'os/api/holium';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
@@ -25,6 +25,11 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.agreedToDisclaimer': this.agreedToDisclaimer,
     'realm.onboarding.selfHosted': this.setSelfHosted,
     'realm.onboarding.getAvailablePlanets': this.getAvailablePlanets,
+    'realm.onboarding.prepareCheckout': this.prepareCheckout,
+    'realm.onboarding.completeCheckout': this.completeCheckout,
+    'realm.onboarding.getAccessCode': this.getAccessCode,
+    'realm.onboarding.setAccessCode': this.setAccessCode,
+    'realm.onboarding.checkShipBooted': this.checkShipBooted,
     'realm.onboarding.addShip': this.addShip,
     'realm.onboarding.selectPlanet': this.selectPlanet,
     'realm.onboarding.getProfile': this.getProfile,
@@ -49,6 +54,26 @@ export class OnboardingService extends BaseService {
 
     getAvailablePlanets() {
       return ipcRenderer.invoke('realm.onboarding.getAvailablePlanets');
+    },
+
+    prepareCheckout() {
+      return ipcRenderer.invoke('realm.onboarding.prepareCheckout');
+    },
+
+    completeCheckout() {
+      return ipcRenderer.invoke('realm.onboarding.completeCheckout');
+    },
+
+    getAccessCode(code: string) {
+      return ipcRenderer.invoke('realm.onboarding.getAccessCode', code);
+    },
+
+    setAccessCode(code: string) {
+      return ipcRenderer.invoke('realm.onboarding.setAccessCode', code);
+    },
+
+    checkShipBooted() {
+      return ipcRenderer.invoke('realm.onboarding.checkShipBooted');
     },
 
     addShip(shipInfo: ShipConnectionData) {
@@ -134,15 +159,59 @@ export class OnboardingService extends BaseService {
 
   setSelfHosted(_event: any, selfHosted: boolean) {
     this.state.setSelfHosted(selfHosted);
-
-    if (!selfHosted) {
-      // pre-fetch available planets
-      this.core.holiumClient.getPlanets();
-    }
   }
 
   async getAvailablePlanets() {
-    return await this.core.holiumClient.getPlanets();
+    const { auth } = this.core.services.identity;
+    if (!auth.accountId) {
+      let account = await this.core.holiumClient.createAccount();
+      auth.setAccountId(account.id);
+      return account.planets;
+    }
+
+    let planets = await this.core.holiumClient.getPlanets(auth.accountId, this.state.accessCode);
+    return planets;
+  }
+
+  async getAccessCode(_event: any, code: string): Promise<{invalid: boolean, accessCode: AccessCode | null }> {
+    let accessCode = await this.core.holiumClient.getAccessCode(code)
+    return { invalid: accessCode ? false : true, accessCode }
+  }
+
+  async prepareCheckout() {
+    const { auth } = this.core.services.identity;
+    let { clientSecret } = await this.core.holiumClient.prepareCheckout(auth.accountId!, this.state.planet!.patp);
+    auth.setClientSecret(clientSecret)
+    return clientSecret
+  }
+
+  async setAccessCode(_event: any, code: string) {
+    this.state.setAccessCode(code);
+  }
+
+  async completeCheckout() {
+    const { auth } = this.core.services.identity
+    let { checkoutComplete } = await this.core.holiumClient.completeCheckout(auth.accountId!, this.state.planet!.patp)
+
+    if (!checkoutComplete) {
+      throw new Error('Unable to complete checkout.');
+    }
+
+    this.state.setCheckoutComplete();
+    return true;
+  }
+
+  async checkShipBooted(): Promise<boolean> {
+    const { auth } = this.core.services.identity;
+    let ships = await this.core.holiumClient.getShips(auth.accountId!);
+    let ship = ships.find(ship => ship.patp === this.state.planet!.patp);
+
+    if (!ship?.code) {
+      return false;
+    }
+
+    await this.addShip('_event', { patp: ship.patp, url: ship.link!, code: ship.code })
+    return true;
   }
 
   async addShip(

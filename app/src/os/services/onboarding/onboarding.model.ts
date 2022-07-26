@@ -12,9 +12,11 @@ export enum OnboardingStep {
 
     ADD_SHIP = 'onboarding:add-ship',
 
+    ACCESS_CODE = 'onboarding:access-code',
+
     SELECT_PATP = 'onboarding:hosted:select-patp',
     SELECT_HOSTING_PLAN = 'onboarding:hosted:select-hosting-plan',
-    PAYMENT = 'onboarding:hosted:payment',
+    STRIPE_PAYMENT = 'onboarding:hosted:stripe_payment',
     CONFIRMATION = 'onboarding:hosted:confirmation',
 
   CONNECTING_SHIP = 'onboarding:connecting-ship',
@@ -26,7 +28,6 @@ export enum OnboardingStep {
 export const PlanetModel = types
   .model({
     patp: types.string,
-    sigil: types.string,
     booted: types.boolean
   })
 
@@ -60,6 +61,8 @@ export const OnboardingStore = types
     planet: types.maybe(PlanetModel),
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
+    checkoutComplete: false,
+    accessCode: types.maybe(types.string)
   })
   .actions((self) => ({
 
@@ -87,6 +90,18 @@ export const OnboardingStore = types
       self.ship = OnboardingShipModel.create({ ...shipInfo, id: `onboarding${shipInfo.patp}` });
     }),
 
+    setCheckoutComplete() {
+      self.checkoutComplete = true;
+    },
+
+    setAccessCode(code: string) {
+      self.accessCode = code;
+    },
+
+    clearAccessCode() {
+      self.accessCode = undefined;
+    },
+
     installRealm: flow(function* () {
       self.installer.set('loading');
       self.installer.set('loaded');
@@ -94,7 +109,11 @@ export const OnboardingStore = types
 
     reset() {
       self.ship = undefined;
+      self.accessCode = undefined;
+      self.checkoutComplete = false;
       self.agreedToDisclaimer = false;
+      self.planet = undefined;
+      self.ship = undefined;
       self.currentStep = OnboardingStep.DISCLAIMER;
     }
   }));
