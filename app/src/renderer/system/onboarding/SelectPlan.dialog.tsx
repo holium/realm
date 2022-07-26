@@ -9,6 +9,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
+import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
 interface SelectPlanProps extends BaseDialogProps {
   patp: string
@@ -16,8 +17,21 @@ interface SelectPlanProps extends BaseDialogProps {
 
 const SelectPlan: FC<SelectPlanProps> = observer(
   (props: SelectPlanProps) => {
+    let [ subscribeLoading, setSubscribeLoading ] = useState(false)
     let { onboarding } = useServices();
     let planet = onboarding.planet!;
+
+    async function subscribe() {
+      setSubscribeLoading(true)
+      await OnboardingActions.prepareCheckout()
+      setSubscribeLoading(false)
+      console.log('done loading, on nextttt')
+      props.onNext && props.onNext();
+    }
+
+    async function previous() {
+      OnboardingActions.setStep(OnboardingStep.ACCESS_CODE);
+    }
 
     // TODO fix hardcoded colors once shell.theme is available pre-login
     return (
@@ -54,8 +68,8 @@ const SelectPlan: FC<SelectPlanProps> = observer(
                 </Flex>
               </Flex>
               <Flex px={20} width="100%" flexDirection="row" justifyContent="space-between">
-                <Button variant="base"> Invite code </Button>
-                <Button> Subscribe </Button>
+                <Button variant="base" onClick={previous}> Invite code </Button>
+                <Button isLoading={subscribeLoading} onClick={subscribe}> Subscribe </Button>
               </Flex>
             </Flex>
           </Box>

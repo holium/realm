@@ -17,7 +17,7 @@ interface AvailablePlanetProps extends React.HtmlHTMLAttributes<HTMLDivElement> 
 // TODO fix hardcoded colors once shell.theme is available pre-login
 const AvailablePlanet: FC<AvailablePlanetProps> = (props: AvailablePlanetProps) => {
   const Unselected = (props: any) => (
-    <Box height={40} minWidth={160} border="1px solid rgba(0, 0, 0, 0.1)" background={darken(.01, '#f0ecec')} borderRadius={6} mb={12} mr={12} onClick={props.onClick}>
+    <Box pl={2} height={40} minWidth={180} border="1px solid rgba(0, 0, 0, 0.1)" background={darken(.01, '#f0ecec')} borderRadius={6} mb={12} mr={12} onClick={props.onClick}>
       <Flex height="100%" width="100%" flexDirection="row" alignItems="center" justifyContent="space-around">
         <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
         <Text fontSize={14} fontWeight={400} pr={2}> { props.patp } </Text>
@@ -25,7 +25,7 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (props: AvailablePlanetProps) 
     </Box>
   )
   const Selected = (props: any) => (
-    <Box height={40} minWidth={160} border="1px solid rgba(78, 158, 253, 0.4)" background="rgba(78, 158, 253, 0.12)" borderRadius={6} mb={12} mr={12}  onClick={props.onClick}>
+    <Box pl={2} height={40} minWidth={180} border="1px solid rgba(78, 158, 253, 0.4)" background="rgba(78, 158, 253, 0.12)" borderRadius={6} mb={12} mr={12}  onClick={props.onClick}>
       <Flex height="100%" width="100%" flexDirection="row" alignItems="center" justifyContent="space-around">
         <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
         <Text fontSize={14} fontWeight={500} color="brand.primary" pr={2}> { props.patp } </Text>
