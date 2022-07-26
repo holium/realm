@@ -3,8 +3,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import Collaboration from "@tiptap/extension-collaboration";
 import StarterKit from "@tiptap/starter-kit";
 import * as Y from "yjs";
-import { useChannel } from "../lib/realm-multiplayer";
-import { BaseRealmPayload } from "../../../../app/src/renderer/system/desktop/components/Multiplayer/types";
+import { useChannel, BaseRealmPayload } from "@holium/realm-multiplayer";
 import debounce from "lodash.debounce";
 const ydoc = new Y.Doc();
 

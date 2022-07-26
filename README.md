@@ -77,3 +77,18 @@ Now, you want to start your dev ship `zod`.
 ```zsh
 ./urbit zod
 ```
+
+### Yarn linking
+
+To setup the workspace, do the following:
+
+```zsh
+cd lib/multiplayer
+yarn link
+
+cd app
+yarn link "@holium/realm-multiplayer"
+
+cd playground/ui
+yarn link "@holium/realm-multiplayer"
+```

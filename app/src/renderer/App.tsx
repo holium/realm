@@ -15,14 +15,14 @@ import {
 } from './logic/store';
 
 import { Mouse } from './system/desktop/components/Mouse';
-import * as RealmMultiplayer from '../../../playground/ui/src/lib/realm-multiplayer';
+import * as RealmMultiplayer from '@holium/realm-multiplayer';
 import { Presences } from './system/desktop/components/Multiplayer/Presences';
 import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
 import {
   CursorEvent,
   RealmMultiplayerInterface,
-} from './system/desktop/components/Multiplayer/types';
+} from '@holium/realm-multiplayer';
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
