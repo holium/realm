@@ -1,8 +1,7 @@
 import axios from 'axios'
 
-const ONE_HOUR = 1000 * 60 * 60; // in miliseconds
 const baseURL = process.env.HOLIUM_API_BASEURL || `http://localhost:7000`;
-const CLIENT = axios.create({ baseURL });
+const client = axios.create({ baseURL });
 
 export interface HostingPlanet {
   patp: string
@@ -10,47 +9,61 @@ export interface HostingPlanet {
   booted: boolean
 }
 
+export interface HostingPurchasedShip {
+  patp: string
+  sponsor?: string
+  link?: string
+  code?: string
+  firstBoot?: boolean
+  lastRestarted?: string
+  ethAddress?: string
+}
+
+export interface AccessCode {
+  type: string
+  value?: string
+  redeemed?: boolean
+  image?: string
+  title?: string
+  description?: string
+  expiresAt?: string
+}
+
 export class HoliumAPI {
-  private clientId: string
-  private planets: HostingPlanet[]
-  private timestamp?: number
-  private ongoingFetch: Promise<HostingPlanet[]> | null
 
-  constructor(clientId: string) {
-    this.clientId = clientId;
-    this.planets = [];
-    this.ongoingFetch = null;
-
+  async createAccount(accessCode?: string): Promise<{ id: string, planets: HostingPlanet[] }> {
+    let { data } = await client.post(`accounts/create${accessCode ? `?accessCode=${accessCode}` : ''}`);
+    return { id: data.id, planets: data.planets };
   }
 
-  async getPlanets(): Promise<HostingPlanet[]> {
-    if (this.ongoingFetch)
-      return this.ongoingFetch
-
-    let ongoingFetch = this.getPlanetsInternal()
-    ongoingFetch.then(() => { this.ongoingFetch = null; })
-    this.ongoingFetch = ongoingFetch;
-
-    return ongoingFetch;
+  async getPlanets(accountId: string, accessCode?: string): Promise<HostingPlanet[]> {
+    let { data } = await client.post(`accounts/${accountId}/assign-planets${accessCode ? `?accessCode=${accessCode}` : ''}`);
+    return data.planets;
   }
 
-  private async getPlanetsInternal(): Promise<HostingPlanet[]> {
-    if (this.planets && this.planetsStillValid())
-      return this.planets;
-
-    let { data: planets } = await CLIENT.get(`planets/${this.clientId}`);
-    this.planets = planets;
-    this.timestamp = Date.now();
-
-    return planets;
+  async prepareCheckout(accountId: string, patp: string) {
+    let { data } = await client.post(`accounts/${accountId}/prepare-checkout?patp=${patp}`);
+    return { clientSecret: data.clientSecret };
   }
 
-  private planetsStillValid (): boolean {
-    if (!this.timestamp)
-      return false;
+  async completeCheckout(accountId: string, patp: string) {
+    let { data } = await client.post(`accounts/${accountId}/complete-checkout?patp=${patp}`);
+    return { id: data.id, patp: data.patp, checkoutComplete: data.checkoutComplete };
+  }
 
-    let now = Date.now();
-    return this.timestamp > (now - ONE_HOUR)
+  async getShips(accountId: string): Promise<HostingPurchasedShip[]> {
+    let { data } = await client.get(`accounts/${accountId}/get-ships`);
+    return data
+  }
+
+  async getAccessCode(code: string): Promise<AccessCode | null> {
+    try {
+      let { data } = await client.get(`access-codes/${code}`);
+      return data;
+    } catch (err) {
+      console.error(err)
+      return null
+    }
   }
 }
 
