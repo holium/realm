@@ -9,11 +9,14 @@ import AddShip from 'renderer/system/onboarding/AddShip.dialog';
 import ConnectingShip from 'renderer/system/onboarding/ConnectingShip.dialog';
 import ProfileSetup from 'renderer/system/onboarding/ProfileSetup.dialog';
 import SetPassword from 'renderer/system/onboarding/SetPassword.dialog';
-import InstallAgent from 'renderer/system/onboarding/InstallAgent';
+import InstallAgent from 'renderer/system/onboarding/InstallAgent.dialog';
 import SelectPatp from 'renderer/system/onboarding/SelectPatp.dialog';
 import SelectPlan from 'renderer/system/onboarding/SelectPlan.dialog';
+import StripePayment from 'renderer/system/onboarding/StripePayment.dialog';
+import HostingConfirmation from 'renderer/system/onboarding/HostingConfirmation.dialog';
+import AccessCode from 'renderer/system/onboarding/AccessCode.dialog';
 
-export const onboardingDialogs: DialogRenderers = {
+const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.DISCLAIMER]: {
     workflow: true,
     firstStep: true,
@@ -52,7 +55,7 @@ export const onboardingDialogs: DialogRenderers = {
       OnboardingActions.setSelfHosted(selfHosted);
       return selfHosted
         ? OnboardingActions.setStep(OnboardingStep.ADD_SHIP)
-        : OnboardingActions.setStep(OnboardingStep.SELECT_PATP);
+        : OnboardingActions.setStep(OnboardingStep.ACCESS_CODE);
     },
     window: {
       id: OnboardingStep.HAVE_URBIT_ID,
@@ -65,7 +68,13 @@ export const onboardingDialogs: DialogRenderers = {
         height: 360,
       },
     },
-  },
+  }
+}
+
+
+
+
+const selfHostedDialogs: DialogRenderers = {
   [OnboardingStep.ADD_SHIP]: {
     workflow: true,
     hasCloseButton: false,
@@ -86,7 +95,13 @@ export const onboardingDialogs: DialogRenderers = {
         height: 300,
       },
     },
-  },
+  }
+}
+
+
+
+
+const completeProfileDialogs: DialogRenderers = {
   [OnboardingStep.CONNECTING_SHIP]: {
     workflow: true,
     hasCloseButton: false,
@@ -163,13 +178,40 @@ export const onboardingDialogs: DialogRenderers = {
       }
     }
   },
+}
+
+
+
+
+const hostingProviderDialogs: DialogRenderers = {
+  [OnboardingStep.ACCESS_CODE]: {
+    workflow: true,
+    hasCloseButton: false,
+    customNext: true,
+    component: (props: any) => <AccessCode {...props} />,
+    onPrevious: () => {
+      OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID)
+    },
+    onNext: () => OnboardingActions.setStep(OnboardingStep.SELECT_PATP),
+    window: {
+      id: OnboardingStep.ACCESS_CODE,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 500,
+        height: 400,
+      },
+    },
+  },
   [OnboardingStep.SELECT_PATP]: {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <SelectPatp {...props} />,
     onPrevious: () => {
-      OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID)
+      OnboardingActions.setStep(OnboardingStep.ACCESS_CODE)
     },
     onNext: () => OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
     window: {
@@ -192,7 +234,7 @@ export const onboardingDialogs: DialogRenderers = {
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.SELECT_PATP)
     },
-    onNext: () => 'placeholder',
+    onNext: () => OnboardingActions.setStep(OnboardingStep.STRIPE_PAYMENT),
     window: {
       id: OnboardingStep.SELECT_HOSTING_PLAN,
       zIndex: 13,
@@ -205,4 +247,48 @@ export const onboardingDialogs: DialogRenderers = {
       },
     },
   },
+    [OnboardingStep.STRIPE_PAYMENT]: {
+    workflow: true,
+    hasCloseButton: false,
+    customNext: true,
+    component: (props: any) => <StripePayment {...props} />,
+    onPrevious: () => OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
+    onNext: () => OnboardingActions.setStep(OnboardingStep.CONFIRMATION),
+    window: {
+      id: OnboardingStep.STRIPE_PAYMENT,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 750,
+        height: 550,
+      },
+    },
+  },
+  [OnboardingStep.CONFIRMATION]: {
+    workflow: true,
+    hasCloseButton: false,
+    customNext: true,
+    component: (props: any) => <HostingConfirmation {...props} />,
+    onNext: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+    window: {
+      id: OnboardingStep.CONFIRMATION,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 460,
+        height: 360,
+      },
+    },
+  },
+}
+
+export const onboardingDialogs: DialogRenderers = {
+  ...initialOnboardingDialogs,
+  ...selfHostedDialogs,
+  ...hostingProviderDialogs,
+  ...completeProfileDialogs
 }

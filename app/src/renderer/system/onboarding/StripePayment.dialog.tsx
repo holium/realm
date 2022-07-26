@@ -16,32 +16,19 @@ interface StripePaymentProps extends BaseDialogProps {
   patp: string
 }
 
-const stripePromise = loadStripe("pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM");
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      color: "#32325d",
-      fontFamily: '"Rubik", sans-serif',
-      fontWeight: 300,
-      fontSmoothing: "antialiased",
-      fontSize: "16px",
-      "::placeholder": {
-        color: "#aab7c4",
-      },
-      backgroundColor: "blue"
-    },
-    invalid: {
-      color: "#fa755a",
-      iconColor: "#fa755a",
-    },
-  },
-};
+const appearance = {
+  variables: {
+    fontFamily: '"Rubik", sans-serif',
+    fontWeight: 500
+  }
+}
 
+const stripePromise = loadStripe("pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM");
 const StripePayment: FC<StripePaymentProps> = (props: StripePaymentProps) => {
   let { identity } = useServices();
   let clientSecret = identity.auth.clientSecret!;
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
+    <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
       <MainComponent {...props} />
     </Elements>
   )
@@ -53,38 +40,23 @@ const MainComponent: FC<StripePaymentProps> = observer(
     const elements = useElements();
     let { onboarding, identity } = useServices();
 
-    let [ message, setMessage ] = useState('Subscribe for $12/mo by clicking the purchase button.');
+    let [ message, setMessage ] = useState({ type: 'notification', text: '' });
     let [ loading, setLoading ] = useState(false);
 
 
     let planet = onboarding.planet!;
-    let clientSecret = identity.auth.clientSecret!;
 
-    useEffect(() => {
-      if (!stripe) {
-        return;
+    async function completeCheckout() {
+      try {
+        await OnboardingActions.completeCheckout();
+        setLoading(false);
+        props.onNext && props.onNext();
+      } catch (reason) {
+        console.error(reason);
+        setLoading(false);
+        setMessage({ type: 'error', text: 'There was an error completing your checkout.' });
       }
-
-      stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
-        switch (paymentIntent?.status) {
-          case "succeeded":
-            setMessage("Payment succeeded!");
-            setTimeout(() => {
-              props.onNext && props.onNext();
-            }, 2000)
-            break;
-          case "processing":
-            setMessage("Your payment is processing.");
-            break;
-          case "requires_payment_method":
-            setMessage("Your payment was not successful, please try again.");
-            break;
-          default:
-            setMessage("Something went wrong.");
-            break;
-        }
-      });
-    }, [stripe]);
+    }
 
     async function handleSubmit (e: any) {
       e.preventDefault();
@@ -106,27 +78,12 @@ const MainComponent: FC<StripePaymentProps> = observer(
       });
 
       if (paymentIntent) {
-        switch (paymentIntent?.status) {
-          case "succeeded":
-            setMessage("Payment succeeded!");
-            setTimeout(() => {
-              props.onNext && props.onNext();
-            }, 2000)
-            break;
-          case "processing":
-            setMessage("Your payment is processing.");
-            break;
-          case "requires_payment_method":
-            setMessage("Your payment was not successful, please try again.");
-            break;
-          default:
-            setMessage("Something went wrong.");
-            break;
+        if (paymentIntent?.status === 'succeeded') {
+          setMessage({ type: 'notification', text: 'Payment succeeded. Completing your purchase...'});
+          await completeCheckout();
+        } else {
+          setMessage({ type: 'error', text: 'Your payment was not successful, please try again.'})
         }
-      }
-
-      if (error && error.message) {
-        setMessage('there was an error, sad')
       }
 
       setLoading(false);
@@ -135,31 +92,40 @@ const MainComponent: FC<StripePaymentProps> = observer(
 
     // TODO fix hardcoded colors once shell.theme is available pre-login
     return (
-      <Grid.Row expand noGutter>
-        <Grid.Column>
-          <Flex width="100%" height="100%" flexDirection="column" justifyContent="center">
-            <Flex flexDirection="column" justifyContent="center" alignItems="center">
-              <Box height={48} width={48} mb={12}>
-                <Sigil color={['black', 'white']} simple={false} size={48} patp={planet.patp!} />
-              </Box>
-              <Text> { planet.patp! } </Text>
-            </Flex>
-            <Box height={300} hidden={message === ''}>
-              {message}
-            </Box>
+      <Flex width="100%" height="100%" flexDirection="row">
+          <Box flex={2} display="flex" flexDirection="column">
+              <Flex flex={2} flexDirection="column" justifyContent="center" alignItems="center">
+                <Flex flex={2} flexDirection="column" alignItems="center" justifyContent="center">
+                  <Sigil color={['black', 'white']} simple={false} size={48} patp={planet.patp!} />
+                  <Box>
+                    <Text mt={3} flex={1}> { planet.patp! } </Text>
+                  </Box>
+                </Flex>
+                <Box flex={1} >
+                    <Text hidden={!onboarding.accessCode} variant="body">
+                      Redeeming <Text ml={2} display="inline" variant='patp' color="brand.primary">{onboarding.accessCode}</Text>
+                    </Text>
+                </Box>
+              </Flex>
+              <Flex width="100%" flex={1} justifyContent="center" hidden={message.text === ''}>
+                <Text textAlign="center" variant="body" color={message.type === 'error' ? 'text.error' : undefined }>{message.text}</Text>
+              </Flex>
+          </Box>
+          <Flex flex={3} alignItems="center" justifyContent="center">
+            <form onSubmit={handleSubmit}>
+              <Flex flexDirection="column">
+                <Flex flex={6}>
+                  <PaymentElement />
+                </Flex>
+                <Flex mt={36} flex={1} align-items="flex-end" justifyContent="flex-end">
+                  <Button isLoading={loading} disabled={loading || !stripe || !elements} id="submit">
+                    Purchase
+                  </Button>
+                </Flex>
+              </Flex>
+            </form>
           </Flex>
-        </Grid.Column>
-        <Grid.Column>
-          <form id="payment-form" onSubmit={handleSubmit}>
-            <label>
-              <PaymentElement />
-            </label>
-            <Button isLoading={loading} disabled={loading || !stripe || !elements} id="submit">
-              Purchase
-            </Button>
-          </form>
-        </Grid.Column>
-      </Grid.Row>
+      </Flex>
     )
   }
 );
