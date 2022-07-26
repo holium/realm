@@ -1,6 +1,6 @@
 import { OnboardingStep } from "os/services/onboarding/onboarding.model";
 import { ShipConnectionData } from 'os/lib/shipHelpers';
-import { HostingPlanet } from "os/api/holium";
+import { HostingPlanet, AccessCode } from "os/api/holium";
 
 export const OnboardingActions = {
   setStep: async (step: OnboardingStep) => {
@@ -25,6 +25,26 @@ export const OnboardingActions = {
 
   selectPlanet: async(planet: HostingPlanet) => {
     return await window.electron.os.onboarding.selectPlanet(planet);
+  },
+
+  prepareCheckout: async() => {
+    return await window.electron.os.onboarding.prepareCheckout();
+  },
+
+  completeCheckout: async() => {
+    return await window.electron.os.onboarding.completeCheckout();
+  },
+
+  checkShipBooted: async() => {
+    return await window.electron.os.onboarding.checkShipBooted();
+  },
+
+  getAccessCode: async(code: string): Promise<{invalid: boolean, accessCode: AccessCode | null }> => {
+    return await window.electron.os.onboarding.getAccessCode(code);
+  },
+
+  setAccessCode: async(code: string) => {
+    return await window.electron.os.onboarding.setAccessCode(code);
   },
 
   getProfile: async () => {
