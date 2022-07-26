@@ -6,10 +6,13 @@ import { MenuItem } from '../MenuItem';
 import { MenuWrapper } from '../Menu';
 import { rgba } from 'polished';
 import Portal from 'renderer/system/dialog/Portal';
+import { MenuOrientation } from 'os/lib/anchor-point';
 
 export type ContextMenuProps = {
   isComponentContext?: boolean;
   position?: 'above' | 'below';
+  orientation?: MenuOrientation;
+  adaptive?: boolean;
   style?: any;
   textColor: string;
   containerId: string;
@@ -30,6 +33,8 @@ export const ContextMenu = (props: ContextMenuProps) => {
     customBg,
     textColor,
     isComponentContext,
+    orientation,
+    adaptive,
   } = props;
   const contextMenuRef = React.useRef();
   let anchorPoint;
@@ -40,7 +45,9 @@ export const ContextMenu = (props: ContextMenuProps) => {
       parentRef,
       contextMenuRef,
       (menu.length + 1) * 32 + 16, // the padding plus each element,
-      position
+      position,
+      orientation,
+      adaptive
     );
     anchorPoint = context.anchorPoint;
     show = context.show;

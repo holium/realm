@@ -31,7 +31,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { ship, spaces, shell } = useServices();
   const { desktop } = shell;
   const [passports, setPassports] = useState([]);
-  const [sidebar, setSidebar] = useState<SidebarType>(null);
+  const [sidebar, setSidebar] = useState<SidebarType>('people');
+  // const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
@@ -48,7 +49,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
     }
   }, [spaces.selected?.path]);
 
-  console.log(passports);
+  // console.log(passports);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -75,6 +76,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                     patp: '~lomder-librun',
                     color: '#F08735',
                     pinned: true,
+                    description:
+                      'Building a community OS experience on Urbit. Works at Holium.',
                   },
                   { patp: '~lodlev-migdev', color: '#2469BD', pinned: true },
                   { patp: '~ronseg-hacsym', color: '#D48BFB' },

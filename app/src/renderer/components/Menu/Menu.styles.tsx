@@ -15,12 +15,12 @@ export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
   display: flex;
   margin-top: 1px;
   flex-direction: column;
-  backdrop-filter: var(--blur-enabled);
-  /* transform: transale3d(0, 0, 0); */
+  --webkit-backdrop-filter: var(--blur-enabled);
+  --webkit-transform: transale3d(0, 0, 0);
   ${(props: MenuWrapperStyleProps) => css`
     background: ${props.customBg || props.theme.colors.bg.secondary};
     border: 1px solid ${props.theme.colors.ui.input.borderColor};
-    transition: ${props.theme.transition};
+    --webkit-transition: ${props.theme.transition};
     min-width: 125px;
     padding: 8px;
     box-shadow: ${props.theme.elevations.two};

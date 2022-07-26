@@ -105,9 +105,10 @@ const BgImage = ({
           animate={{
             opacity: 1,
             filter: blurred ? `blur(24px)` : 'blur(0px)',
+            // transition:
           }}
           transition={{
-            opacity: { duration: 1 },
+            opacity: { duration: 0.5 },
           }}
         />
       </AnimatePresence>
