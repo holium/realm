@@ -10,8 +10,8 @@
     "pretty": true,
     "sourceMap": true,
     "baseUrl": "./src/",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -21,9 +21,9 @@
     "outDir": "release/app/dist",
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false
   },
   "include": ["./src"]
 }

@@ -10,6 +10,9 @@
     "test": "tsc --noEmit",
     "tsc": "tsc --noEmit"
   },
+  "resolutions": {
+    "@types/react": "^18.0.0"
+  },
   "dependencies": {
     "@tiptap/react": "^2.0.0-beta.109",
     "@tiptap/starter-kit": "^2.0.0-beta.185",
@@ -17,12 +20,10 @@
     "yjs": "^13.5.38",
     "y-protocols": "^1.0.5",
     "lodash.debounce": "^4.0.8",
-    "@radix-ui/react-slot": "^0.1.2",
     "@superwf/mobx-react-router": "^7.4.0",
     "@tlon/indigo-light": "^1.0.7",
     "@tlon/indigo-react": "^1.2.27",
     "@tlon/sigil-js": "^1.4.5",
-    "@types/react-dnd": "^3.0.2",
     "@urbit/api": "^2.0.0",
     "@urbit/http-api": "^2.0.0",
     "history": "5.0.1",
@@ -33,23 +34,16 @@
     "mobx-router": "^1.0.0",
     "polished": "^4.1.4",
     "react": "^18.0.0",
-    "react-beautiful-dnd": "^13.1.0",
-    "react-dnd": "^15.1.1",
-    "react-dnd-html5-backend": "^15.1.2",
     "react-dom": "^18.0.0",
     "react-helmet": "^6.1.0",
     "react-router": "^6.2.1",
     "react-router-dom": "^6.2.1",
-    "react-spaces": "^0.3.2",
-    "react-spring": "^8.0.27",
-    "remixicon-react": "^1.0.0",
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5"
   },
   "devDependencies": {
     "@types/node": "^16.11.12",
     "@types/react": "^18.0.0",
-    "@types/react-beautiful-dnd": "^13.1.2",
     "@types/react-dom": "^18.0.0",
     "@types/react-helmet": "^6.1.5",
     "@types/react-router": "^5.1.18",
