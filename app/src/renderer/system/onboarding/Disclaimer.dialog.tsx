@@ -24,7 +24,6 @@ const DisclaimerDialog: FC<BaseDialogProps> = observer(
         </Text>
         <Text
           fontSize={2}
-          fontWeight={300}
           lineHeight="copy"
           variant="body"
           mb={20}>
@@ -38,7 +37,7 @@ const DisclaimerDialog: FC<BaseDialogProps> = observer(
         <br/>
         <Flex flexDirection="row" justifyContent="flex-start">
           <input type="checkbox" id="disclaimer" onClick={toggleChecked}/>
-          <Text ml={16} fontSize={2} fontWeight={300}>I agree</Text>
+          <Text ml={16} fontSize={2}>I agree</Text>
         </Flex>
       </Grid.Column>
     )

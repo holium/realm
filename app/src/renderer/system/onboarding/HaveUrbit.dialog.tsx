@@ -48,7 +48,6 @@ const HaveUrbitDialog: FC<BaseDialogProps> = observer(
           <Flex width="100%" height="100%" alignItems="center" justifyContent="center">
             <Text
               fontSize={2}
-              fontWeight={300}
               lineHeight="copy"
               variant="body">
                 An Urbit ID is like a phone number. It’s how your friends connect with you on Urbit.

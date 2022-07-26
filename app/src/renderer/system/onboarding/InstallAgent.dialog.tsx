@@ -123,7 +123,7 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
               disabled={!onboarding.installer.isLoaded}
               onClick={async (evt: any) => {
                 await OnboardingActions.completeOnboarding();
-                props.onNext && props.onNext();
+                window.location.reload();
               }}
             >
               Next
