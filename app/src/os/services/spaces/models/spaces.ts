@@ -108,11 +108,14 @@ export const SpacesStore = types
         apps: tempApps,
       });
       delete data[our[0]!];
+      console.log(data)
+      console.log(persistedState)
+
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
-          const persistedData = persistedState.spaces[path];
+          const persistedData = persistedState && persistedState.spaces ? persistedState.spaces[path] : {};
           data[path].apps = {
-            ...persistedData.apps,
+            ...persistedData ? persistedData.apps : {},
             installed: clone(tempApps.installed),
           };
         }
