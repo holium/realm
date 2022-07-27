@@ -5,17 +5,13 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
-  clone,
-  applyAction,
-  cast,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
-import { MSTAction } from '../../types';
 import axios from 'axios';
-import { ContactApi } from '../../api/contacts';
+import crypto from 'crypto';
 
 /**
  * AuthService
@@ -27,6 +23,7 @@ export class AuthService extends BaseService {
   handlers = {
     'realm.auth.add-ship': this.addShip,
     'realm.auth.get-ships': this.getShips,
+    'realm.auth.set-first-time': this.setFirstTime,
     'realm.auth.set-selected': this.setSelected,
     'realm.auth.set-order': this.setOrder,
     'realm.auth.login': this.login,
@@ -38,6 +35,7 @@ export class AuthService extends BaseService {
     login: (ship: string, password: string) =>
       ipcRenderer.invoke('realm.auth.login', ship, password),
     logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
+    setFirstTime: () => ipcRenderer.invoke('realm.auth.set-first-time'),
     setSelected: (ship: string) =>
       ipcRenderer.invoke('realm.auth.set-selected', ship),
     setOrder: (order: any[]) =>
@@ -86,12 +84,31 @@ export class AuthService extends BaseService {
     return getSnapshot(this.state);
   }
 
+  get accountId() {
+    return this.state.accountId;
+  }
+
+  setAccountId(accountId: string) {
+    this.state.setAccountId(accountId)
+  }
+
+  get clientSecret() {
+    return this.state.clientSecret;
+  }
+
+  setClientSecret(secret: string) {
+    this.state.setClientSecret(secret);
+  }
+
   setLoader(state: 'initial' | 'loading' | 'error' | 'loaded') {
     this.state.setLoader(state);
   }
 
+  setFirstTime() {
+    this.state.setFirstTime();
+  }
+
   getCredentials(ship: string, password: string) {
-    // const path: string = `auth${ship}`;
     const authShip = this.state.ships.get(`auth${ship}`)!;
     let url = authShip.url;
     let cookie = authShip.cookie || '';
@@ -101,10 +118,6 @@ export class AuthService extends BaseService {
   getShip(ship: string): AuthShipType {
     return this.db.get(`ships.auth${ship}`);
   }
-
-  // set loader(state: 'initial' | 'loading' | 'error' | 'loaded') {
-  //   this.state.loader.set(state);
-  // }
 
   login(_event: any, ship: string, password: string) {
     this.state.login(`auth${ship}`);
@@ -120,18 +133,17 @@ export class AuthService extends BaseService {
   }
 
   logout(_event: any, ship: string) {
-    // this.core.services.shell.resetMouseColor(null);
-
     this.core.clearSession();
     this.core.services.ship.logout();
   }
 
   storeNewShip(ship: AuthShipType) {
     const newShip = AuthShip.create(ship);
-    // const newShip = this.state.ships.get(ship.id)!;
+
     this.state.setShip(newShip);
     newShip.setStatus('completed');
     this.state.completeSignup(newShip.id);
+
     return newShip;
   }
 

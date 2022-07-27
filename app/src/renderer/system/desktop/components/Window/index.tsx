@@ -7,8 +7,7 @@ import styled from 'styled-components';
 import { ThemeType } from '../../../../theme';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import {
-  WindowModelProps,
-  WindowModelType,
+  WindowModelProps
 } from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
@@ -23,7 +22,6 @@ import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogView } from '../../../dialog/Dialog/Dialog';
-
 import {
   DialogTitlebar,
   DialogTitlebarProps,

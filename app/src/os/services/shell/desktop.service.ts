@@ -6,7 +6,6 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
-  applySnapshot,
   clone,
   cast,
 } from 'mobx-state-tree';
@@ -200,7 +199,6 @@ export class DesktopService extends BaseService {
 
   setActive(_event: any, spaceId: string, appId: string) {
     this.state?.setActive(appId);
-    // this.state?.activeWindow =
   }
   setHomePane(_event: any, isHome: boolean) {
     this.state?.setHomePane(isHome);
@@ -215,8 +213,6 @@ export class DesktopService extends BaseService {
   }
   setTheme(theme: ThemeModelType) {
     this.state?.setTheme(clone(theme)!);
-    // if (this.state?.theme.wallpaper !== theme.wallpaper) {
-    // }
   }
   setDesktopDimensions(_event: any, width: number, height: number) {
     this.state?.setDesktopDimensions(width, height);

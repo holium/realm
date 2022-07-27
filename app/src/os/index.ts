@@ -10,8 +10,10 @@ import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
+import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
+import HoliumAPI from './api/holium';
 
 export interface ISession {
   ship: string;
@@ -25,6 +27,7 @@ export class Realm extends EventEmitter {
   private session?: ISession;
   private db: Store<ISession>;
   readonly services: {
+    onboarding: OnboardingService;
     identity: {
       auth: AuthService;
       signup: SignupService;
@@ -33,6 +36,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     shell: DesktopService;
   };
+  readonly holiumClient: HoliumAPI;
 
   readonly handlers = {
     'realm.boot': this.boot,
@@ -58,6 +62,7 @@ export class Realm extends EventEmitter {
     ship: ShipService.preload,
     spaces: SpacesService.preload,
     shell: DesktopService.preload,
+    onboarding: OnboardingService.preload
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -75,6 +80,7 @@ export class Realm extends EventEmitter {
     }
     // Create an instance of all services
     this.services = {
+      onboarding: new OnboardingService(this),
       identity: {
         auth: new AuthService(this),
         signup: new SignupService(this),
@@ -83,6 +89,8 @@ export class Realm extends EventEmitter {
       spaces: new SpacesService(this),
       shell: new DesktopService(this),
     };
+
+    this.holiumClient = new HoliumAPI();
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -107,6 +115,7 @@ export class Realm extends EventEmitter {
     return {
       auth: this.services.identity.auth.snapshot,
       signup: this.services.identity.signup.snapshot,
+      onboarding: this.services.onboarding.snapshot,
       ship,
       spaces,
       shell,
@@ -152,6 +161,7 @@ export class Realm extends EventEmitter {
     );
     await this.services.spaces.load(this.session?.ship!, ship);
     this.services.identity.auth.setLoader('loaded');
+    this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.auth.on-log-in', toJS(ship));
   }
 
@@ -177,6 +187,8 @@ export class Realm extends EventEmitter {
    * @param data
    */
   onEffect(data: any): void {
+    console.log(`hey from onEffect`)
+    console.log(data);
     this.mainWindow.webContents.send('realm.on-effect', data);
   }
 }
@@ -184,45 +196,3 @@ export class Realm extends EventEmitter {
 export default Realm;
 
 export type OSPreloadType = typeof Realm.preload;
-
-// {
-//   boot: () => Promise<any>; // starts an instance of the OS
-//   install: () => Promise<any>; // calls the kiln install command
-//   onInstalled: () => Promise<any>;
-//   // onStart: () => Promise<any>;
-//   onEffect: (callback: any) => Promise<any>;
-//   applyAction: (action: any) => Promise<any>;
-//   auth: typeof AuthService.preload;
-//   signup: typeof SignupService.preload;
-//   ship: typeof ShipService.preload;
-//   spaces: typeof SpacesService.preload;
-//   shell: typeof DesktopService.preload;
-//   // ship: {
-//   //   getContacts: () => any;
-//   //   getMetadata: (path: string) => any;
-//   //   getProfile: (ship: string) => Promise<any>;
-//   //   saveProfile: (ship: string, data: any) => Promise<any>;
-//   //   beacon: {
-//   //     getNotifications: () => Promise<any>;
-//   //     createNotification: (params: any) => Promise<any>;
-//   //     seenNotification: (id: string) => Promise<any>;
-//   //     archiveNotification: (id: string) => Promise<any>;
-//   //   };
-//   //   docket: {
-//   //     getApps: () => Promise<any>;
-//   //     getAppPreview: (ship: string, desk: string) => Promise<any>;
-//   //   };
-//   //   dms: {
-//   //     setScreen: (screen: boolean) => Promise<any>;
-//   //     acceptDm: (ship: string) => Promise<any>;
-//   //     declineDm: (ship: string) => Promise<any>;
-//   //     getDMs: () => Promise<any>;
-//   //     sendDm: (toShip: string, content: any[]) => Promise<any>;
-//   //     removeDm: (ship: string, index: any) => Promise<any>;
-//   //   };
-//   // };
-//   // spaces: {
-//   //   getSpaces: () => any;
-//   //   setActive: (space: any) => any;
-//   // };
-// };

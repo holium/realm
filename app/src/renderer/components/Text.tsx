@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { variant } from 'styled-system';
+import { variant, space, layout } from 'styled-system';
 import type { ThemeType } from '../theme';
 import {
   TypographyFunctionsProps,
@@ -106,6 +106,8 @@ const textVariants = variant({
 });
 
 export const Text = styled(motion.p)<TextProps>`
+  ${space}
+  ${layout}
   ${textVariants}
   ${typographyFunctions};
   ${(props) =>

@@ -15,6 +15,8 @@ import {
   compose,
   flexbox,
   FlexboxProps,
+  grid,
+  GridProps,
   layout,
   LayoutProps,
   opacity,
@@ -41,6 +43,7 @@ export type BoxProps = {
   ColorProps &
   ColorStyleProps &
   FlexboxProps &
+  GridProps &
   BorderProps &
   LayoutProps &
   OpacityProps &
@@ -71,6 +74,7 @@ const boxStyles = compose(
   color,
   colorStyle,
   flexbox,
+  grid,
   layout,
   opacity,
   position,

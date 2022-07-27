@@ -16,5 +16,5 @@ export const nativeRenderers: NativeRenders = {
   },
   'os-settings': {
     component: (props: any) => <SystemApp {...props} />,
-  },
+  }
 };

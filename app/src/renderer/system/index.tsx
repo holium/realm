@@ -1,9 +1,8 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
-// import { useAuth, useMst, useShip } from 'renderer/logic/store';
-import { coreStore, useCore, useServices } from 'renderer/logic/store';
+import { useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
 import { BackgroundImage, BackgroundFill } from './system.styles';
@@ -28,6 +27,7 @@ export const Shell: FC = observer(() => {
 
   const isFullscreen = desktop.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
+  const firstTime = identity.auth.firstTime;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
   // const { backgroundColor, mode } = shell.desktop.theme;
 
@@ -69,7 +69,7 @@ export const Shell: FC = observer(() => {
             isFullscreen={isFullscreen}
           />
         ) : (
-          <Auth hasWallpaper={hasWallpaper} />
+          <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
         )}
       </BackgroundFill>
     </ViewPort>

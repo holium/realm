@@ -87,6 +87,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           bottom={20}
           right={20}
           left={20}
+          width={customNext ? 30 : undefined}
         >
           <Flex alignItems="center" justifyContent="flex-start">
             {onPrevious && (
