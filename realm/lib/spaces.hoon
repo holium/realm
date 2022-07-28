@@ -38,7 +38,7 @@
   =,  enjs:format
   |%
   ++  reaction
-    |=  rct=^reaction
+    |=  rct=spaces-reaction:store
     ^-  json
     %+  frond  %spaces-reaction
     %-  pairs
@@ -161,6 +161,7 @@
       :~  [%add add-space]
           [%update update-space]
           [%remove remove-space]
+          :: [%send-invite invite-member]
       ==
     ::
     ++  add-space
@@ -180,6 +181,13 @@
       %-  ot
       :~  [%path pth]
       ==
+    ::
+    :: ++  invite-member
+    ::   %-  ot
+    ::   :~  [%path pth]
+    ::       [%ship (su ;~(pfix sig fed:ag))]
+    ::       [%role rol]
+    ::   ==
     ::
     ++  pth
       %-  ot

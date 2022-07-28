@@ -31,8 +31,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { ship, spaces, shell } = useServices();
   const { desktop } = shell;
   const [passports, setPassports] = useState([]);
-  const [sidebar, setSidebar] = useState<SidebarType>('people');
-  // const [sidebar, setSidebar] = useState<SidebarType>(null);
+  // const [sidebar, setSidebar] = useState<SidebarType>('people');
+  const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
