@@ -173,7 +173,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   // Cursor Styles
   const styles = {
     cursorInner: {
-      zIndex: 100000,
+      zIndex: 100000, // to be higher than one zIndex that I saw in action
       display: 'block',
       position: 'absolute',
       // borderRadius: '50%',

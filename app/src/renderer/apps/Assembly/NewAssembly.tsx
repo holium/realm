@@ -86,7 +86,7 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
             <Input
               className="realm-cursor-text-cursor"
               type="text"
-              placeholder="Name your assembly"
+              placeholder="Name your room"
               wrapperStyle={{
                 cursor: 'none',
                 borderRadius: 6,

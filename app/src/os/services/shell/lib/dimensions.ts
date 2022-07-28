@@ -3,7 +3,7 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
 } = {
   ['ballot']: {
     width: 1200,
-    height: 900,
+    height: 1000,
   },
   ['escape']: {
     width: 1200,
@@ -17,6 +17,14 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     width: 1200,
     height: 900,
   },
+  ['chatstead']: {
+    width: 1200,
+    height: 900,
+  },
+  ['homestead']: {
+    width: 1200,
+    height: 900,
+  },
   ['webterm']: {
     width: 780,
     height: 600,
@@ -24,5 +32,13 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
   ['os-settings']: {
     width: 800,
     height: 800,
+  },
+  ['sphinx']: {
+    width: 600,
+    height: 700,
+  },
+  ['channel']: {
+    width: 1000,
+    height: 900,
   },
 };

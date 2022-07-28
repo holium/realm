@@ -48,7 +48,7 @@ const SvgComponent = forwardRef<
         strokeWidth="1.5px"
         variants={{
           initial: { stroke: props.fill, pathLength: 0, opacity: 0.7 },
-          show: { stroke: props.fill, pathLength: 1.1 },
+          show: { stroke: props.fill, pathLength: 1.1, opacity: 1 },
         }}
         initial="initial"
         animate="show"
@@ -61,7 +61,7 @@ const SvgComponent = forwardRef<
           },
           show: {
             fill: props.fill,
-            opacity: 0.9,
+            opacity: 1,
             transition: { opacity: { delay: 1.2 }, fill: { duration: 1 } },
           },
         }}

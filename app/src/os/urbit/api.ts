@@ -561,6 +561,7 @@ export class Urbit extends EventEmitter {
     const { app, path, noDotJson } = params;
 
     let jsonType = noDotJson ? '' : '.json';
+    // console.log(`${this.url}/~/scry/${app}${path}${jsonType}`);
     const response: any = await axios.get(
       `${this.url}/~/scry/${app}${path}${jsonType}`,
       this.fetchOptions

@@ -6,6 +6,7 @@ import {
   clone,
   applyPatch,
 } from 'mobx-state-tree';
+import { toJS } from 'mobx';
 import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
@@ -35,6 +36,7 @@ export const SpaceModel = types
   })
   .views((self) => ({
     get pinnedApps() {
+      // console.log(toJS(self.apps.pinned), toJS(self.apps.installed));
       const pins = self.apps.pinned;
       return [...Array.from(self.apps.installed!.values()), ...NativeAppList]
         .filter((app: any) => self.apps.pinned.includes(app.id))
@@ -94,7 +96,7 @@ export const SpacesStore = types
     },
   }))
   .actions((self) => ({
-    initialScry: (data: any, tempApps: any) => {
+    initialScry: (data: any, tempApps: any, persistedState: any) => {
       const spacesList = Object.entries(data);
       const our = spacesList.filter(
         ([_path, space]: [path: string, space: any]) => space.type === 'our'
@@ -108,17 +110,16 @@ export const SpacesStore = types
       delete data[our[0]!];
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
+          const persistedData = persistedState.spaces[path];
           data[path].apps = {
-            pinned: [],
-            endorsed: {},
-            installed: {},
+            ...persistedData.apps,
+            installed: clone(tempApps.installed),
           };
         }
       );
       applySnapshot(self.spaces, data);
 
       if (!self.selected) self.selected = self.our;
-      // return self.selected!;
     },
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
       applySnapshot(self, castToSnapshot(syncEffect.model));
@@ -137,7 +138,7 @@ export const SpacesStore = types
     },
     deleteSpace: (deleteReaction: any) => {
       const path = deleteReaction['spaces-reaction'].remove['space-path'];
-      if (self.selected === path) self.selected = self.our;
+      if (self.selected === path) self.selected = self.our; // TODO do this outside of this function
       self.spaces.delete(path);
 
       return path;

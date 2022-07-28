@@ -38,6 +38,7 @@ type BaseInputProps = {
   variant?: any;
   hasPointerEvents?: boolean;
   shouldHighlightOnFocus?: boolean;
+  isDisabled?: boolean;
   small?: boolean;
   bgOpacity?: number;
   theme: ThemeType;
@@ -69,10 +70,6 @@ export const InputWrapper = styled(Flex)`
   textarea {
     resize: none;
   }
-  &:hover:not([disabled]) {
-    transition: ${(props) => props.theme.transition};
-    border-color: ${(props) => props.theme.colors.ui.input.borderHover};
-  }
 
   ${(props) =>
     props.shouldHighlightOnFocus &&
@@ -92,57 +89,27 @@ export const InputWrapper = styled(Flex)`
   ${compose(backgroundColor)}
 
   ${(props) =>
-    props.disabled &&
+    props.isDisabled &&
     css`
-      -webkit-text-fill-color: currentColor; /* set text fill to current color for safari */
-      opacity: 0.7; /* correct opacity on iOS */
-      color: ${(props) => props.theme.colors.text.disabled};
-      background-color: ${(props) => props.theme.colors.ui.disabled};
-      border-color: ${(props) => props.theme.colors.ui.disabled};
-
+      pointer-events: none;
+      input {
+        pointer-events: none;
+      }
+      opacity: 0.6; /* correct opacity on iOS */
       &::placeholder {
         color: ${(props) => props.theme.colors.text.disabled};
         opacity: 1;
       }
+      &:hover {
+        border-color: transparent;
+      }
     `}
-
-  
 
   ${(props) =>
     props.error &&
     css`
       border-color: ${props.theme.colors.intent.alert};
-    `} /* &:-moz-read-only {
-    background-color: ${(props) => props.theme.colors.ui.tertiary};
-    border-color: ${(props) => props.theme.colors.ui.input.borderColor};
-  }
-
-  &:read-only {
-    background-color: ${(props) => props.theme.colors.ui.tertiary};
-    border-color: ${(props) => props.theme.colors.ui.input.borderColor};
-
-    &::placeholder {
-      color: ${(props) => props.theme.colors.text.placeholder};
-    }
-  } */
-
-  /* ${(props: any) =>
-    props.borderColor &&
-    css`
-      border-color: ${props.borderColor};
-      &:hover {
-        border-color: ${props.borderColor};
-      }
-      &:read-only {
-        border-color: ${props.borderColor};
-      }
-      &:-moz-read-only {
-        border-color: ${props.borderColor};
-      }
-      &:focus {
-        border-color: ${props.borderColor};
-      }
-    `} */
+    `}
 `;
 
 InputWrapper.defaultProps = {
@@ -302,6 +269,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         mr={mr}
         flex={flex}
         style={wrapperStyle}
+        isDisabled={disabled}
       >
         {leftIcon && (
           <LeftIcon

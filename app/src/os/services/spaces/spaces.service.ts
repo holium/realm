@@ -23,6 +23,7 @@ import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
+import { PassportsApi } from '../../api/passports';
 
 /**
  * SpacesService
@@ -38,6 +39,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.get-passports': this.getPassports,
   };
 
   static preload = {
@@ -61,6 +63,9 @@ export class SpacesService extends BaseService {
     },
     deleteSpace: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.delete-space', path);
+    },
+    getPassports: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.get-passports', path);
     },
   };
 
@@ -93,14 +98,16 @@ export class SpacesService extends BaseService {
         ? {
             installed: clone(DocketMap.create(getSnapshot(ship.docket.apps))),
           }
-        : { installed: {} }),
+        : {
+            installed: [],
+          }),
     };
 
     // Get the initial scry
     // TODO for some reason the initial selected reference is undefined so you cant
     // TODO reload to the same space you logged out from
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
-    this.state!.initialScry(spaces, tempApps);
+    this.state!.initialScry(spaces, tempApps, persistedState);
     this.state!.selected &&
       this.core.services.shell.setTheme(this.state!.selected?.theme);
 
@@ -171,15 +178,23 @@ export class SpacesService extends BaseService {
     return toJS(newSpace);
   }
 
+  async getPassports(_event: any, path: string) {
+    console.log(path);
+    const response = await PassportsApi.getPassports(this.core.conduit!, path);
+    console.log(response);
+    return response;
+  }
+
   setSelected(_event: any, path: string) {
     const selected = this.state?.selectSpace(path);
     this.core.services.shell.setTheme(selected?.theme!);
   }
 
   async pinApp(_event: any, path: string, appId: string) {
+    const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
-    console.log(this.state?.selected);
-    this.state?.selected?.pinApp(appId);
+    console.log(space);
+    space.pinApp(appId);
     return;
   }
 

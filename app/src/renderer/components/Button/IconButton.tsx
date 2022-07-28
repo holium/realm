@@ -115,6 +115,7 @@ export const IconButton = styled(styled(motion.button)<IProps>`
     css`
       &:hover {
         transform: translateZ(0);
+        border-color: transparent;
         transition: ${(props: IProps) => props.theme.transition};
         background-color: ${props.customBg
           ? darken(0.1, props.customBg)

@@ -28,6 +28,7 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
     <Fill>
       <Layer zIndex={0}>
         <WindowManager isOpen={!desktop.showHomePane} />
+        {/* <WindowManager isOpen /> */}
       </Layer>
       <Layer zIndex={1}>
         {desktop.showHomePane && <AppGrid isOpen={desktop.showHomePane} />}

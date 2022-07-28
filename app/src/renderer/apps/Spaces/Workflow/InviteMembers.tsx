@@ -90,16 +90,6 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
     const { workflowState, setState } = props;
     const searchRef = useRef(null);
 
-    // Setting up options menu
-    useEffect(() => {
-      setWorkspaceState({
-        members: {
-          [ship!.patp]: ['owner'],
-        },
-      });
-      selectedPatp.add(ship!.patp);
-    }, []);
-
     const { peopleForm, person } = useMemo(() => createPeopleForm(), []);
     const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
     const [nicknameMap, setNicknameMap] = useState<{ [patp: string]: string }>(
@@ -117,11 +107,17 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
           ...workflowState,
           ...obj,
         });
-      // workflowState.set({
-      //   ...workflowState,
-      //   ...obj,
-      // });
     };
+
+    // Setting up options menu
+    useEffect(() => {
+      setWorkspaceState({
+        members: {
+          [ship!.patp]: ['owner'],
+        },
+      });
+      selectedPatp.add(ship!.patp);
+    }, []);
 
     const onShipSelected = (contact: [string, string?]) => {
       const patp = contact[0];

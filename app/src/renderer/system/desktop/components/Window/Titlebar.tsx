@@ -130,7 +130,7 @@ export const Titlebar = (props: TitlebarProps) => {
           {icon && <img height={24} width={24} src={icon} />}
           <Text
             opacity={0.7}
-            style={{ textTransform: 'uppercase' }}
+            style={{ textTransform: 'capitalize' }}
             fontSize={2}
             fontWeight={500}
           >
@@ -165,6 +165,9 @@ export const Titlebar = (props: TitlebarProps) => {
           }
         : {})}
       zIndex={zIndex}
+      transition={{
+        background: { duration: 0.25 },
+      }}
       customBg={windowColor!}
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}

@@ -14,6 +14,14 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
     const [selectedArchetype, setSelectedArchetype] = useState<string | null>(
       null
     );
+
+    const setWorkspaceState = (obj: any) => {
+      setState &&
+        setState({
+          ...workflowState,
+          ...obj,
+        });
+    };
     return (
       <Grid.Column noGutter lg={12} xl={12}>
         <Text
@@ -47,22 +55,15 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
           <Flex pl={4} pr={4} mt={4} flex={1} gap={12} flexDirection="column">
             <SelectRow
               customBg={windowColor}
-              title="Lodge"
+              title="Community"
               subtitle="A space to hangout and chat with friends."
               selected={selectedArchetype === 'lodge'}
               onClick={() => {
                 setSelectedArchetype('lodge');
-                setState &&
-                  setState({
-                    ...props.workflowState,
-                    archetype: 'lodge',
-                    archetypeTitle: 'Lodge',
-                  });
-                // workflowState.set({
-                //   ...props.workflowState,
-                //   archetype: 'lodge',
-                //   archetypeTitle: 'Lodge',
-                // });
+                setWorkspaceState({
+                  archetype: 'lodge',
+                  archetypeTitle: 'Community',
+                });
               }}
             />
             <SelectRow

@@ -33,6 +33,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
     const selectedSpace = spaces.selected!;
     const { dockColor, textColor } = shell.desktop.theme;
     let innerContent: any;
+
     if (selectedSpace.type === 'our') {
       innerContent = (
         <Flex
@@ -96,7 +97,7 @@ export const SelectedSpace: FC<SelectedSpaceProps> = observer(
               src={selectedSpace.picture}
             />
           ) : (
-            <EmptyPicture color={'#000000'} />
+            <EmptyPicture color={selectedSpace.color || '#000000'} />
           )}
           <Flex
             style={{ pointerEvents: 'none' }}

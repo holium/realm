@@ -127,7 +127,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
           <Flex
             flex={2}
             flexDirection="row"
-            flexWrap="wrap"
+            // flexWrap="wrap"
             alignItems="center"
           >
             {people.map((person: string, index: number) => (
