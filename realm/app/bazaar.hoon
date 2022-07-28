@@ -90,7 +90,7 @@
           =/  apps  (~(get by recommended.space-apps.state) [ship space-pth])
           ?~  apps      ``json+!>(~)
           ::  sort the list of recommended apps by star count
-          =/  apps=(list [@ud app:store])  (sort:rec:core u.apps)
+          =/  apps=(list [@u app:store])  (srt:rec:core u.apps)
           ``json+!>((view:enjs:core [%recommended apps]))
         ::
         %suite
@@ -295,15 +295,13 @@
   --
 ++  rec
   |%
-  ++  sort
-    |=  [apps=(set [stars=@ud app:store])]
-    ^-  (list [@ud app:store])
+  ++  srt
+    |=  apps=(set [@u app:store])
+    ^-  (list [@u app:store])
     %+  sort  ~(tap in apps)
-    |=  [a=[stars=@ud *] b=[stars=@ud *]]
+    |=  [p=[stars=@u app:store] q=[stars=@u app:store]]
     ^-  ?
-    :: =/  a=[stars=@ud =app:store]  `[@ud app:store]`a
-    :: =/  b=[stars=@ud =app:store]  `[@ud app:store]`b
-    (gth stars.a stars.b)
+    (gth stars.p stars.q)
   --
 ++  enjs
   |%
@@ -321,10 +319,10 @@
 ++  encode
   |%
   ++  rec
-    |=  [apps=(list [@ud app:store])]
+    |=  [apps=(list [@u app:store])]
     ^-  (list json)
     %+  turn  apps
-    |=  [stars=@ud =app:store]
+    |=  [stars=@u =app:store]
     ?-  -.app
       %native   (nat +.app)
       %web      (web +.app)

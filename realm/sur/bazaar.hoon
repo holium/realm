@@ -44,7 +44,7 @@
 
 +$  space-apps
   $:  pinned=(map space-path:spaces (set app))
-      recommended=(map space-path:spaces (set [@ud app]))
+      recommended=(map space-path:spaces (set [@u app]))
       suite=(map space-path:spaces (set app))
   ==
 
@@ -72,6 +72,6 @@
 ::  Scry views
 ::
 +$  view
-  $%  [%recommended apps=(list [@ud app])]
+  $%  [%recommended apps=(list [@u app])]
   ==
 --
