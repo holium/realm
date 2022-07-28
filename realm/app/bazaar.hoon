@@ -87,10 +87,11 @@
           :: ``json+!>((view:enjs:core [%pinned u.apps]))
         ::
         %recommended
-        ``json+!>(~)
-          :: =/  apps  (~(get by recommended.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%recommended u.apps]))
+          =/  apps  (~(get by recommended.space-apps.state) [ship space-pth])
+          ?~  apps      ``json+!>(~)
+          ::  sort the list of recommended apps by star count
+          =/  apps=(list [@ud app:store])  (sort:rec:core u.apps)
+          ``json+!>((view:enjs:core [%recommended apps]))
         ::
         %suite
         ``json+!>(~)
@@ -291,6 +292,77 @@
     ?~  member  %.n
     =/  passport  .^(passport:passport-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/passport/[space]/noun)
     ?:(=(status.passport 'joined') %.y %.n)
+  --
+++  rec
+  |%
+  ++  sort
+    |=  [apps=(set [stars=@ud app:store])]
+    ^-  (list [@ud app:store])
+    %+  sort  ~(tap in apps)
+    |=  [a=[stars=@ud *] b=[stars=@ud *]]
+    ^-  ?
+    :: =/  a=[stars=@ud =app:store]  `[@ud app:store]`a
+    :: =/  b=[stars=@ud =app:store]  `[@ud app:store]`b
+    (gth stars.a stars.b)
+  --
+++  enjs
+  |%
+  ++  view
+    |=  =view:store
+    ^-  json
+    %-  pairs:enjs:format
+    :_  ~
+    ^-  [cord json]
+    ?-  -.view
+        %recommended
+      [%recommended [%a (rec:encode apps.view)]]
+    ==
+  --
+++  encode
+  |%
+  ++  rec
+    |=  [apps=(list [@ud app:store])]
+    ^-  (list json)
+    %+  turn  apps
+    |=  [stars=@ud =app:store]
+    ?-  -.app
+      %native   (nat +.app)
+      %web      (web +.app)
+    ==
+  ::
+  ++  nat
+    |=  [app=native-app:store]
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['desk' s+desk.app]
+        ['title' s+title.app]
+        ['info' s+info.app]
+        ['color' s+(scot %ux color.app)]
+        ['image' s+image.app]
+        ['href' (ref href.app)]
+    ==
+  ::
+  ++  web
+    |=  [app=web-app:store]
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['id' s+id.app]
+        ['title' s+title.app]
+        ['href' s+href.app]
+    ==
+  ::
+  ++  ref
+    |=  [=href:store]
+    ^-  json
+    ?-  -.href
+      %glob   (glob +.href)
+      %site   s+(spat path.href)
+    ==
+  ::
+  ++  glob
+    |=  [base=term =glob-reference:store]
+    ^-  json
+    [%s base]
   --
 ::
 :: ++  dejs

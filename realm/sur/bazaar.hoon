@@ -44,7 +44,7 @@
 
 +$  space-apps
   $:  pinned=(map space-path:spaces (set app))
-      promoted=(map space-path:spaces (set app))
+      recommended=(map space-path:spaces (set [@ud app]))
       suite=(map space-path:spaces (set app))
   ==
 
@@ -52,6 +52,12 @@
 
 +$  board   ?(%pinned %recommended %suite)
 +$  sample  [=ship =desk =board]
+::
+::  $activity: recent activity. e.g. new recommended/pinned/suite app
+::    changes (added/removed/modified), new members joined. new apps
+::    installed and made available to space (allow link to add
+::    newly installed app to board.bazaar type???)
+:: +$  activity
 ::
 +$  action
   $%  [%add path=space-path:spaces =sample]
@@ -61,5 +67,11 @@
 +$  reaction
   $%  [%add path=space-path:spaces =sample]
       [%remove path=space-path:spaces =sample]
+  ==
+::
+::  Scry views
+::
++$  view
+  $%  [%recommended apps=(list [@ud app])]
   ==
 --
