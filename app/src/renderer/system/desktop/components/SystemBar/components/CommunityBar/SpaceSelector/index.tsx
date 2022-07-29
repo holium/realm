@@ -13,8 +13,7 @@ type SpaceSelectorProps = {};
 
 export const SpaceSelector: FC<SpaceSelectorProps> = observer(
   (props: SpaceSelectorProps) => {
-    const { ship, spaces, shell } = useServices();
-    const { desktop } = shell;
+    const { ship, spaces, desktop } = useServices();
     const selectorRef = createRef<HTMLDivElement>();
 
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =

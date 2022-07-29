@@ -4,7 +4,7 @@ import { SpaceModelType } from 'os/services/spaces/models/spaces';
 
 import { Flex, Grid, Text, ActionButton, Icons } from 'renderer/components';
 import { SpaceRow } from './SpaceRow';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 
 export type Space = {
@@ -24,8 +24,8 @@ type SpacesListProps = {
 
 export const SpacesList: FC<SpacesListProps> = observer(
   (props: SpacesListProps) => {
-    const { shell } = useServices();
-    const { textColor, windowColor } = shell.desktop.theme;
+    const { desktop } = useServices();
+    const { textColor, windowColor } = desktop.theme;
     const { selected, spaces, onSelect } = props;
     if (!spaces.length) {
       return (
@@ -52,7 +52,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
               rightContent={<Icons size={2} name="Plus" />}
               data-close-tray="true"
               onClick={(evt: any) => {
-                DesktopActions.openDialog('create-space-1');
+                ShellActions.openDialog('create-space-1');
               }}
             >
               Create one

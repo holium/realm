@@ -14,8 +14,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
   (props: DialogManagerProps) => {
     const { dialogId } = props;
 
-    const { shell } = useServices();
-    const { desktop } = shell;
+    const { desktop, shell } = useServices();
     const desktopRef = useRef<any>(null);
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;
@@ -26,7 +25,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         ...dialogConfig.window.dimensions,
         ...getCenteredXY(
           dialogConfig.window.dimensions,
-          desktop.desktopDimensions
+          shell.desktopDimensions
         ),
       };
 

@@ -1,13 +1,15 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useState, useRef, useEffect, useLayoutEffect } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 import { useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { BackgroundImage, BackgroundFill } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { Flex, NFTBadge } from 'renderer/components';
+import { DialogManager } from './dialog/DialogManager';
 
 const DragBar = styled.div`
   position: absolute;
@@ -19,22 +21,37 @@ const DragBar = styled.div`
   app-region: drag;
 `;
 
+function useWindowSize() {
+  useLayoutEffect(() => {
+    function updateSize() {
+      ShellActions.setDesktopDimensions(window.innerWidth, window.innerHeight);
+      console.log('size updated')
+    }
+    window.addEventListener('resize', updateSize);
+    updateSize();
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+}
+
 export const Shell: FC = observer(() => {
   const { loggedIn } = useCore();
-
-  const { shell, identity, ship } = useServices();
-  const { desktop } = shell;
+  const { shell, desktop, identity, ship } = useServices();
+  useWindowSize();
 
   const isFullscreen = desktop.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
   const firstTime = identity.auth.firstTime;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
-  // const { backgroundColor, mode } = shell.desktop.theme;
 
   const hasWallpaper = bgImage ? true : false;
   const isBlurred = useMemo(
-    () => !loggedIn || desktop.isBlurred,
-    [desktop.isBlurred, loggedIn]
+    () => !loggedIn || shell.isBlurred,
+    [shell.isBlurred, loggedIn]
+  );
+
+  const DialogLayer = useMemo(
+    () => <DialogManager dialogId={shell.dialogId} />,
+    [shell.dialogId]
   );
 
   const shipLoaded = ship?.loader.isLoaded;
@@ -51,6 +68,7 @@ export const Shell: FC = observer(() => {
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
+      <Layer zIndex={2}>{DialogLayer}</Layer>
       {/* <BgImage blurred wallpaper={bgImage} /> */}
       <BgImage blurred={isBlurred} wallpaper={bgImage} />
 

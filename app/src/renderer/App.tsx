@@ -26,8 +26,7 @@ import {
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
-  const { shell } = useServices();
-  const { desktop } = shell;
+  const { desktop } = useServices();
   // const shipLoaded = ship?.loggedIn;
   const themeMode = desktop.theme.mode;
 
@@ -90,7 +89,7 @@ function Cursors() {
     api?.send({
       event: CursorEvent.Leave,
     });
-  }, [shell.desktop.isMouseInWebview]);
+  }, [shell.isMouseInWebview]);
   return <Presences />;
 }
 

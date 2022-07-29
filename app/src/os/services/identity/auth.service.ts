@@ -121,7 +121,7 @@ export class AuthService extends BaseService {
 
   login(_event: any, ship: string, password: string) {
     this.state.login(`auth${ship}`);
-    this.core.services.shell.setMouseColor(null, this.state.selected?.color!);
+    this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
 
     // TODO decrypt stored snapshot
     const { url, cookie } = this.getCredentials(ship, password);

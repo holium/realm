@@ -10,6 +10,7 @@ import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
+import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
@@ -34,7 +35,8 @@ export class Realm extends EventEmitter {
     };
     ship: ShipService;
     spaces: SpacesService;
-    shell: DesktopService;
+    desktop: DesktopService;
+    shell: ShellService;
   };
   readonly holiumClient: HoliumAPI;
 
@@ -61,7 +63,8 @@ export class Realm extends EventEmitter {
     signup: SignupService.preload,
     ship: ShipService.preload,
     spaces: SpacesService.preload,
-    shell: DesktopService.preload,
+    desktop: DesktopService.preload,
+    shell: ShellService.preload,
     onboarding: OnboardingService.preload
   };
 
@@ -87,7 +90,8 @@ export class Realm extends EventEmitter {
       },
       ship: new ShipService(this),
       spaces: new SpacesService(this),
-      shell: new DesktopService(this),
+      desktop: new DesktopService(this),
+      shell: new ShellService(this),
     };
 
     this.holiumClient = new HoliumAPI();
@@ -105,10 +109,12 @@ export class Realm extends EventEmitter {
   async boot(_event: any) {
     let ship = null;
     let spaces = null;
+    let desktop = null;
     let shell = null;
     if (this.session) {
       ship = this.services.ship.snapshot;
       spaces = this.services.spaces.snapshot;
+      desktop = this.services.desktop.snapshot;
       shell = this.services.shell.snapshot;
     }
     this.services.identity.auth.setLoader('loaded');
@@ -118,6 +124,7 @@ export class Realm extends EventEmitter {
       onboarding: this.services.onboarding.snapshot,
       ship,
       spaces,
+      desktop,
       shell,
       loggedIn: this.session ? true : false,
     };
@@ -187,8 +194,6 @@ export class Realm extends EventEmitter {
    * @param data
    */
   onEffect(data: any): void {
-    console.log(`hey from onEffect`)
-    console.log(data);
     this.mainWindow.webContents.send('realm.on-effect', data);
   }
 }

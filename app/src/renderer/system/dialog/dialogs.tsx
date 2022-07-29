@@ -11,7 +11,7 @@ export type BaseWorkflowProps = {
   workflowState?: any; // the state that is passed between the various dialogs in a workflow
   setState?: (data: any) => void; // a function that is passed into the dialog component for setting workflow state.
   isValidated?: (state: any) => boolean; // a function that takes in the state and can then check for value.
-  onNext?: (evt: any, state?: any, setState?: any) => void; // is the function executes when the "next" button is clicked.
+  onNext?: (evt?: any, state?: any, setState?: any) => void; // is the function executes when the "next" button is clicked.
   onPrevious?: (data?: any) => void; // is the function that executes whent the back arrow is clicked.
 };
 

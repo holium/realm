@@ -29,9 +29,9 @@ const FadeInMotion = {
 export const SelectedSpace: FC<SelectedSpaceProps> = observer(
   (props: SelectedSpaceProps) => {
     const { selectorRef, onClick } = props;
-    const { spaces, ship, shell } = useServices();
+    const { spaces, ship, desktop } = useServices();
     const selectedSpace = spaces.selected!;
-    const { dockColor, textColor } = shell.desktop.theme;
+    const { dockColor, textColor } = desktop.theme;
     let innerContent: any;
 
     if (selectedSpace.type === 'our') {

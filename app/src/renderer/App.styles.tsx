@@ -12,12 +12,12 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     cursor: none !important;
     font-family: "Rubik", sans-serif;
   }
-  
+
   :root {
     --blur-enabled: ${(props: StyleProps) =>
       props.blur ? 'blur(16px)' : 'none'};
   }
-  
+
   body {
     background-color: ${(props) => props.theme.colors.bg.body};
     transition: background-color 1s ease;
@@ -26,7 +26,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     width: 100vw;
     margin: 0;
   }
-  
+
   li {
     list-style: none;
   }

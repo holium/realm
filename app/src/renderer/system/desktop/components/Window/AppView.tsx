@@ -23,8 +23,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
-  const { ship, shell } = useServices();
-  const { desktop } = shell;
+  const { ship, desktop } = useServices();
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 

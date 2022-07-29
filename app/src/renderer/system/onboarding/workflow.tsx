@@ -1,4 +1,4 @@
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
@@ -27,12 +27,12 @@ const initialOnboardingDialogs: DialogRenderers = {
       return state && state.disclaimerAccepted
     },
     onOpen: () => {
-      DesktopActions.setBlur(true);
+      ShellActions.setBlur(true);
     },
     onNext: (data: any) => {
       console.log('next?')
       OnboardingActions.agreedToDisclaimer();
-      OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
+      ShellActions.nextDialog(OnboardingStep.HAVE_URBIT_ID);
     },
     window: {
       id: OnboardingStep.DISCLAIMER,
@@ -54,8 +54,8 @@ const initialOnboardingDialogs: DialogRenderers = {
     onNext(selfHosted: boolean) {
       OnboardingActions.setSelfHosted(selfHosted);
       return selfHosted
-        ? OnboardingActions.setStep(OnboardingStep.ADD_SHIP)
-        : OnboardingActions.setStep(OnboardingStep.ACCESS_CODE);
+        ? ShellActions.nextDialog(OnboardingStep.ADD_SHIP)
+        : ShellActions.nextDialog(OnboardingStep.ACCESS_CODE);
     },
     window: {
       id: OnboardingStep.HAVE_URBIT_ID,
@@ -81,9 +81,9 @@ const selfHostedDialogs: DialogRenderers = {
     customNext: true,
     component: (props: any) => <AddShip {...props } />,
     onPrevious: () => {
-      OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
+      ShellActions.nextDialog(OnboardingStep.HAVE_URBIT_ID);
     },
-    onNext: () => OnboardingActions.setStep(OnboardingStep.CONNECTING_SHIP),
+    onNext: () => ShellActions.nextDialog(OnboardingStep.CONNECTING_SHIP),
     window: {
       id: OnboardingStep.ADD_SHIP,
       zIndex: 13,
@@ -107,8 +107,8 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <ConnectingShip {...props} />,
-    onPrevious: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
-    onNext:() => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+    onPrevious: () => ShellActions.nextDialog(OnboardingStep.PROFILE_SETUP),
+    onNext:() => ShellActions.nextDialog(OnboardingStep.PROFILE_SETUP),
     window: {
       id: OnboardingStep.CONNECTING_SHIP,
       zIndex: 13,
@@ -126,8 +126,8 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <ProfileSetup {...props} />,
-    onPrevious: () => OnboardingActions.setStep(OnboardingStep.ADD_SHIP),
-    onNext:() => OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),
+    onPrevious: () => ShellActions.nextDialog(OnboardingStep.ADD_SHIP),
+    onNext:() => ShellActions.nextDialog(OnboardingStep.SET_PASSWORD),
     window: {
       id: OnboardingStep.PROFILE_SETUP,
       zIndex: 13,
@@ -145,8 +145,8 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <SetPassword {...props} />,
-    onPrevious: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
-    onNext:() => OnboardingActions.setStep(OnboardingStep.INSTALL_AGENT),
+    onPrevious: () => ShellActions.nextDialog(OnboardingStep.PROFILE_SETUP),
+    onNext:() => ShellActions.nextDialog(OnboardingStep.INSTALL_AGENT),
     window: {
       id: OnboardingStep.SET_PASSWORD,
       zIndex: 13,
@@ -164,7 +164,7 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <InstallAgent {...props} />,
-    onPrevious: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+    onPrevious: () => ShellActions.nextDialog(OnboardingStep.PROFILE_SETUP),
     onNext:() => {},
     window: {
       id: OnboardingStep.INSTALL_AGENT,
@@ -190,9 +190,9 @@ const hostingProviderDialogs: DialogRenderers = {
     customNext: true,
     component: (props: any) => <AccessCode {...props} />,
     onPrevious: () => {
-      OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID)
+      ShellActions.nextDialog(OnboardingStep.HAVE_URBIT_ID)
     },
-    onNext: () => OnboardingActions.setStep(OnboardingStep.SELECT_PATP),
+    onNext: () => ShellActions.nextDialog(OnboardingStep.SELECT_PATP),
     window: {
       id: OnboardingStep.ACCESS_CODE,
       zIndex: 13,
@@ -211,9 +211,9 @@ const hostingProviderDialogs: DialogRenderers = {
     customNext: true,
     component: (props: any) => <SelectPatp {...props} />,
     onPrevious: () => {
-      OnboardingActions.setStep(OnboardingStep.ACCESS_CODE)
+      ShellActions.nextDialog(OnboardingStep.ACCESS_CODE)
     },
-    onNext: () => OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
+    onNext: () => ShellActions.nextDialog(OnboardingStep.SELECT_HOSTING_PLAN),
     window: {
       id: OnboardingStep.SELECT_PATP,
       zIndex: 13,
@@ -232,9 +232,9 @@ const hostingProviderDialogs: DialogRenderers = {
     customNext: true,
     component: (props: any) => <SelectPlan {...props} />,
     onPrevious: () => {
-      OnboardingActions.setStep(OnboardingStep.SELECT_PATP)
+      ShellActions.nextDialog(OnboardingStep.SELECT_PATP)
     },
-    onNext: () => OnboardingActions.setStep(OnboardingStep.STRIPE_PAYMENT),
+    onNext: () => ShellActions.nextDialog(OnboardingStep.STRIPE_PAYMENT),
     window: {
       id: OnboardingStep.SELECT_HOSTING_PLAN,
       zIndex: 13,
@@ -252,8 +252,8 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <StripePayment {...props} />,
-    onPrevious: () => OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
-    onNext: () => OnboardingActions.setStep(OnboardingStep.CONFIRMATION),
+    onPrevious: () => ShellActions.nextDialog(OnboardingStep.SELECT_HOSTING_PLAN),
+    onNext: () => ShellActions.nextDialog(OnboardingStep.CONFIRMATION),
     window: {
       id: OnboardingStep.STRIPE_PAYMENT,
       zIndex: 13,
@@ -271,7 +271,7 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <HostingConfirmation {...props} />,
-    onNext: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+    onNext: () => ShellActions.nextDialog(OnboardingStep.PROFILE_SETUP),
     window: {
       id: OnboardingStep.CONFIRMATION,
       zIndex: 13,

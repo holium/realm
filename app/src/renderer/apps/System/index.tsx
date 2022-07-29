@@ -5,8 +5,8 @@ import { useServices } from 'renderer/logic/store';
 import { darken, lighten } from 'polished';
 
 export const SystemApp: FC<any> = observer(() => {
-  const { shell } = useServices();
-  const { windowColor } = shell.desktop.theme;
+  const { desktop } = useServices();
+  const { windowColor } = desktop.theme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
   return (
     <React.Fragment>

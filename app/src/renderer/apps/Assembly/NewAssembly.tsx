@@ -26,10 +26,10 @@ export type BaseAssemblyProps = {
 export const NewAssembly: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
-    const { shell, ship } = useServices();
+    const { desktop, ship } = useServices();
     const { assemblyApp } = useTrayApps();
 
-    const { dockColor, windowColor, inputColor } = shell.desktop.theme;
+    const { dockColor, windowColor, inputColor } = desktop.theme;
     return (
       <Grid.Column
         style={{ position: 'relative', height: dimensions.height }}

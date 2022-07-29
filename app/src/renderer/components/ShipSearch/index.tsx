@@ -54,8 +54,8 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
   (props: ShipSearchProps) => {
     const { search, isDropdown, selected, customBg, heightOffset, onSelected } =
       props;
-    const { shell, ship } = useServices();
-    const { mode, dockColor, windowColor } = shell.desktop.theme;
+    const { desktop, ship } = useServices();
+    const { mode, dockColor, windowColor } = desktop.theme;
     const contacts = ship ? Array.from(ship?.contacts.rolodex.entries()) : [];
     const isAddingDisabled = selected.size > 0;
 

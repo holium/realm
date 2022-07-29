@@ -12,7 +12,6 @@ import {
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { AppModelType } from '../ship/models/docket';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
 import { ThemeModelType } from './theme.model';
 

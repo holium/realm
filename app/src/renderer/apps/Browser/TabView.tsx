@@ -24,8 +24,7 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
   const { tab, isResizing } = props;
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
-  const { shell } = useServices();
-  const { desktop } = shell;
+  const { desktop } = useServices();
 
   const [loading, setLoading] = useState(false);
   // const [urlData, setUrlData] = useState<any>(tab ? new URL(tab.url) : null);

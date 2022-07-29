@@ -153,7 +153,6 @@ export const AuthStore = types
       try {
         // const [response, error] = yield AuthIPC.logout(ship);
         // if (error) throw error;
-        // servicesStore.shell.desktop.setIsBlurred(true);
       } catch (err: any) {
         self.loader.error(err);
       }

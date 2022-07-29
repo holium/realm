@@ -223,7 +223,7 @@ const RightIcon: any = styled(Box)<
 export type FullProps = InputProps & {
   wrapperRef?: any;
   wrapperStyle?: any;
-  noCursor: boolean;
+  noCursor?: boolean;
   rows?: any;
 };
 
@@ -294,7 +294,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
           aria-invalid={props.error ? 'true' : 'false'}
           {...props}
           bg="transparent"
-          style={{ width: '100%', caretColor: noCursor ? 'transparent' : 'inherit' }}
+          style={{ width: '100%', caretColor: noCursor ? 'transparent' : undefined }}
         />
         {rightIcon && (
           <RightIcon

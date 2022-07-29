@@ -29,9 +29,9 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, shell, ship } = useServices();
+  const { identity, desktop, ship } = useServices();
   const { auth } = identity;
-  const { theme } = shell.desktop;
+  const { theme } = desktop;
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);

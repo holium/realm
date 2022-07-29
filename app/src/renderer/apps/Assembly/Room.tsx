@@ -30,13 +30,13 @@ export type BaseAssemblyProps = {
 export const Room: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
-    const { ship, shell } = useServices();
+    const { ship, desktop } = useServices();
     const { assemblyApp } = useTrayApps();
     const { people } = assemblyApp.selected!;
 
     const [audio, setAudio] = useState<MediaStream | null>(null);
 
-    const { dockColor, windowColor, inputColor } = shell.desktop.theme;
+    const { dockColor, windowColor, inputColor } = desktop.theme;
 
     const getMicrophone = async () => {
       const audioMedia = await navigator.mediaDevices.getUserMedia({

@@ -84,9 +84,8 @@ const heightOffset = 0;
 
 export const InviteMembers: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { shell, ship } = useServices();
-    const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
-      shell.desktop.theme;
+    const { desktop, ship } = useServices();
+    const { inputColor, iconColor, textColor, windowColor, mode, dockColor } = desktop.theme;
     const { workflowState, setState } = props;
     const searchRef = useRef(null);
 

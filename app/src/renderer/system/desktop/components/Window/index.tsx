@@ -55,8 +55,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
     const { theme, window, desktopRef } = props;
     const { textColor, windowColor } = theme;
-    const { shell } = useServices();
-    const { desktop } = shell;
+    const { desktop } = useServices();
 
     const [unmaximize, setUnmaximize] = useState<
       | {

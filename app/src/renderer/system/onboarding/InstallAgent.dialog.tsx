@@ -15,6 +15,7 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 export const InstallAgent: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
@@ -123,7 +124,7 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
               disabled={!onboarding.installer.isLoaded}
               onClick={async (evt: any) => {
                 await OnboardingActions.completeOnboarding();
-                window.location.reload();
+                ShellActions.setBlur(false);
               }}
             >
               Next
