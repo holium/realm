@@ -15,8 +15,8 @@
 +$  state-0
   $:  %0
       =membership:membership-store
-      =installed-apps:store
       =space-apps:store
+      =apps:store
   ==
 --
 =|  state-0
@@ -76,34 +76,12 @@
     [%x @ @ %apps @ ~]
       =/  =ship       (slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-      =/  which  i.t.t.t.t.path
-      ~&  >>  "{<ship>}, {<space-pth>}, {<which>}"
-      ?+  which  ``json+!>(~)
-        ::
-        %pinned
-        ``json+!>(~)
-          :: =/  apps  (~(get by pinned.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%pinned u.apps]))
-        ::
-        %recommended
-          =/  apps  (~(get by recommended.space-apps.state) [ship space-pth])
-          ?~  apps      ``json+!>(~)
-          ::  sort the list of recommended apps by star count
-          =/  apps=(list [@u app:store])  (srt:rec:core u.apps)
-          ``json+!>((view:enjs:core [%recommended apps]))
-        ::
-        %suite
-        ``json+!>(~)
-          :: =/  apps  (~(get by suite.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%suite u.apps]))
-        ::
-        :: %installed
-        ::   =/  apps  (~(get by suite.space-apps.state) [ship space-pth])
-        ::   ?~  apps      ``json+!>(~)
-        ::   ``json+!>((view:enjs:core [%installed u.apps]))
-      ==
+      =/  arg  i.t.t.t.t.path
+      ~&  >>  "{<ship>}, {<space-pth>}, {<arg>}"
+      ?>  ?=(tag:store arg)
+      =/  apps  (apps:view:core [ship space-pth] arg)
+      =/  apps  (srt:rec:core apps)
+      ``json+!>((view:enjs:core [arg apps]))
   ==
 ::
 ++  on-agent
@@ -171,15 +149,46 @@
     ?-  -.action
       %add         (add +.action)
       %remove      (rem +.action)
+      %pin         (pin +.action)
+      %recommend   (rec +.action)
     ==
   ::
-  ++  add
-    |=  [path=space-path:sp-sur =sample:store]
+  ++  rec
+    |=  [path=space-path:sp-sur =app-id:store]
     ^-  (quip card _state)
+    =/  index  (~(get by space-apps.state) path)
+    ?~  index  `state
+    =/  entry  (~(get by u.index) app-id)
+    ?~  entry  `state
+    :: =.  rank.u.entry  (add rank.u.entry 1)
     `state
   ::
+  ++  pin
+    |=  [path=space-path:sp-sur =app-id:store]
+    ^-  (quip card _state)
+    `state
+    :: =/  index  (~(get by space-apps.state) path)
+    :: ?~  index  `state
+    :: =/  entry  (~(get by u.index) app-id)
+    :: ?~  entry  `state
+    :: =.  tags.u.entry  (~(put in tags.u.entry) app-id)
+    :: `state
+  ::
+  ++  add
+    |=  [path=space-path:sp-sur =app-id:store]
+    ^-  (quip card _state)
+    `state
+    :: =/  index  (~(get by space-apps.state) path)
+    :: ?~  index  `state
+    :: =/  is-installed  (~(has by apps.state) app-id)
+    :: =|  tags=(set tag:store)
+    :: =.  tags  (~(put in tags) %suite)
+    :: =.  tags  ?:(is-installed (~(put in tags) %installed) tags)
+    :: =/  index  (~(put by u.index) app-id [%0 tags])
+    :: `state(space-apps (~(put by space-apps.state) path index))
+  ::
   ++  rem
-    |=  [path=space-path:sp-sur =sample:store]
+    |=  [path=space-path:sp-sur =app-id:store]
     ^-  (quip card _state)
     `state
   --
@@ -293,15 +302,33 @@
     =/  passport  .^(passport:passport-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/passport/[space]/noun)
     ?:(=(status.passport 'joined') %.y %.n)
   --
+++  view
+  |%
+  ++  apps
+    |=  [path=space-path:sp-sur =tag:store]
+    ^-  (list app-view:store)
+    =/  index  (~(get by space-apps.state) path)
+    ?~  index  ~
+    ::  listify the map into list of key/value pairs
+    %+  roll  ~(tap by u.index)
+    |=  [[=app-id:store =app-entry:store] acc=(list app-view:store)]
+    ?.  (~(has in tags.app-entry) tag)  acc
+    =/  app  (~(get by apps.state) app-id)
+    ?~  app  acc
+    =|  vw=app-view:store
+    =.  meta.vw  app-entry
+    =.  app.vw   u.app
+    (snoc acc vw)
+  --
 ++  rec
   |%
   ++  srt
-    |=  apps=(set [@u app:store])
-    ^-  (list [@u app:store])
-    %+  sort  ~(tap in apps)
-    |=  [p=[stars=@u app:store] q=[stars=@u app:store]]
+    |=  apps=(list app-view:store)
+    ^-  (list app-view:store)
+    %+  sort  apps
+    |=  [p=app-view:store q=app-view:store]
     ^-  ?
-    (gth stars.p stars.q)
+    (gth rank.meta.p rank.meta.q)
   --
 ++  enjs
   |%
@@ -311,21 +338,24 @@
     %-  pairs:enjs:format
     :_  ~
     ^-  [cord json]
-    ?-  -.view
+    ?+  which.view  [%o ~]
         %recommended
-      [%recommended [%a (rec:encode apps.view)]]
+      [%recommended [%a (vw:encode apps.view)]]
     ==
   --
 ++  encode
   |%
-  ++  rec
-    |=  [apps=(list [@u app:store])]
+  ++  vw
+    |=  [apps=(list app-view:store)]
     ^-  (list json)
-    %+  turn  apps
-    |=  [stars=@u =app:store]
-    ?-  -.app
-      %native   (nat +.app)
-      %web      (web +.app)
+    (turn apps ap)
+  ::
+  ++  ap
+    |=  [=app-view:store]
+    ^-  json
+    ?-  -.app.app-view
+      %native   (nat +.app.app-view)
+      %web      (web +.app.app-view)
     ==
   ::
   ++  nat

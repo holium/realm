@@ -20,10 +20,11 @@
   $%  [%glob base=term =glob-reference]
       [%site =path]
   ==
-
+::
++$  app-id  @tas
 ::
 +$  native-app
-  $:  desk=@tas
+  $:  desk=app-id
       title=@t
       info=@t
       color=@ux
@@ -32,7 +33,7 @@
   ==
 
 +$  web-app
-  $:  id=@tas
+  $:  id=app-id
       title=@t
       href=cord
   ==
@@ -42,16 +43,32 @@
       [%web =web-app]
   ==
 
-+$  space-apps
-  $:  pinned=(map space-path:spaces (set app))
-      recommended=(map space-path:spaces (set [@u app]))
-      suite=(map space-path:spaces (set app))
++$  tag  ?(%pinned %recommended %suite %installed)
++$  tags  (set tag)
+
+::  $app-entry: app metadata common to all apps and
+::    used for resolution
++$  app-entry
+      :: $rank: can be used for sorting apps; and simultaneously
+      ::   (in the case of recommended apps) represent the # of "likes"
+  $:  rank=@u
+      =tags
   ==
 
-+$  installed-apps  (map desk charge:docket)
-
-+$  board   ?(%pinned %recommended %suite)
-+$  sample  [=ship =desk =board]
++$  app-view
+  $:  meta=app-entry
+      =app
+  ==
+::  $app-index: index of app ids. used to perform fast lookups
+::   into the apps 'directory' when scrying
++$  app-index     (map app-id app-entry)
++$  space-apps    (map space-path:spaces app-index)
+:: +$  pinned        (map space-path:spaces (set @tas))
+:: +$  recommended   (map space-path:spaces (set @tas))
+:: +$  suite         (map space-path:spaces (set @tas))
+::  $apps: @tas is id in the case of web apps, and
+::    desk name in the case of native apps
++$  apps  (map app-id app)
 ::
 ::  $activity: recent activity. e.g. new recommended/pinned/suite app
 ::    changes (added/removed/modified), new members joined. new apps
@@ -60,18 +77,20 @@
 :: +$  activity
 ::
 +$  action
-  $%  [%add path=space-path:spaces =sample]
-      [%remove path=space-path:spaces =sample]
+  $%  [%pin path=space-path:spaces =app-id]
+      [%recommend path=space-path:spaces =app-id]
+      [%add path=space-path:spaces =app-id]
+      [%remove path=space-path:spaces =app-id]
   ==
 ::
 +$  reaction
-  $%  [%add path=space-path:spaces =sample]
-      [%remove path=space-path:spaces =sample]
+  $%  [%add path=space-path:spaces =app]
+      [%remove path=space-path:spaces =app-id]
   ==
 ::
 ::  Scry views
 ::
 +$  view
-  $%  [%recommended apps=(list [@u app])]
+  $%  [which=@tas apps=(list app-view)]
   ==
 --
