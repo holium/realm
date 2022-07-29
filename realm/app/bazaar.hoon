@@ -147,7 +147,7 @@
     |=  =action:store
     ^-  (quip card _state)
     ?-  -.action
-      %add         (add +.action)
+      %add         (ad +.action)
       %remove      (rem +.action)
       %pin         (pin +.action)
       %recommend   (rec +.action)
@@ -160,32 +160,32 @@
     ?~  index  `state
     =/  entry  (~(get by u.index) app-id)
     ?~  entry  `state
-    :: =.  rank.u.entry  (add rank.u.entry 1)
-    `state
+    =.  rank.u.entry  (add 1 rank.u.entry)
+    =/  index  (~(put by u.index) app-id u.entry)
+    `state(space-apps (~(put by space-apps.state) path index))
   ::
   ++  pin
     |=  [path=space-path:sp-sur =app-id:store]
     ^-  (quip card _state)
-    `state
-    :: =/  index  (~(get by space-apps.state) path)
-    :: ?~  index  `state
-    :: =/  entry  (~(get by u.index) app-id)
-    :: ?~  entry  `state
-    :: =.  tags.u.entry  (~(put in tags.u.entry) app-id)
-    :: `state
+    =/  index  (~(get by space-apps.state) path)
+    ?~  index  `state
+    =/  entry  (~(get by u.index) app-id)
+    ?~  entry  `state
+    =.  tags.u.entry  (~(put in tags.u.entry) %pinned)
+    =/  index  (~(put by u.index) app-id u.entry)
+    `state(space-apps (~(put by space-apps.state) path index))
   ::
-  ++  add
+  ++  ad
     |=  [path=space-path:sp-sur =app-id:store]
     ^-  (quip card _state)
-    `state
-    :: =/  index  (~(get by space-apps.state) path)
-    :: ?~  index  `state
-    :: =/  is-installed  (~(has by apps.state) app-id)
-    :: =|  tags=(set tag:store)
-    :: =.  tags  (~(put in tags) %suite)
-    :: =.  tags  ?:(is-installed (~(put in tags) %installed) tags)
-    :: =/  index  (~(put by u.index) app-id [%0 tags])
-    :: `state(space-apps (~(put by space-apps.state) path index))
+    =/  index  (~(get by space-apps.state) path)
+    ?~  index  `state
+    =/  is-installed  (~(has by apps.state) app-id)
+    =|  tags=(set tag:store)
+    =.  tags  (~(put in tags) %suite)
+    =.  tags  ?:(is-installed (~(put in tags) %installed) tags)
+    =/  index  (~(put by u.index) app-id [%0 tags])
+    `state(space-apps (~(put by space-apps.state) path index))
   ::
   ++  rem
     |=  [path=space-path:sp-sur =app-id:store]

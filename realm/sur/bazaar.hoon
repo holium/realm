@@ -42,10 +42,9 @@
   $%  [%native =native-app]
       [%web =web-app]
   ==
-
+::
 +$  tag  ?(%pinned %recommended %suite %installed)
 +$  tags  (set tag)
-
 ::  $app-entry: app metadata common to all apps and
 ::    used for resolution
 +$  app-entry
@@ -54,7 +53,7 @@
   $:  rank=@u
       =tags
   ==
-
+::
 +$  app-view
   $:  meta=app-entry
       =app
