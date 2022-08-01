@@ -23,21 +23,6 @@
 ++  enjs
   =,  enjs:format
   |%
-  ++  invite-reaction
-    |=  rct=^invite-reaction
-    ^-  json
-    %+  frond  %invite-reaction
-    %-  pairs
-    :_  ~
-    ^-  [cord json]
-    ?-  -.rct
-        %invite-sent
-      :-  %invite-sent
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%invite (invite:encode invite.rct)]
-      ==
-    ==
   ++  invite-action
     |=  act=^invite-action
     ^-  json
@@ -59,18 +44,66 @@
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%invite (invite:encode invite.act)]
       ==
-        %accepted
-      :-  %accepted
+        %accept-invite
+      :-  %accept-invite
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
       ==
+      ::   %accepted
+      :: :-  %accepted
+      :: %-  pairs
+      :: :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
+      :: ==
     ==
   ::
+  ++  invite-reaction
+    |=  rct=^invite-reaction
+    ^-  json
+    %+  frond  %invite-reaction
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    ?-  -.rct
+        %invite-sent
+      :-  %invite-sent
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%invite (invite:encode invite.rct)]
+      ==
+        %invite-accepted
+      :-  %invite-accepted
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%space (spc:encode:spaces-lib space.rct)]
+      ==
+    ==
+  ::
+  ::
+  ++  invite-view
+    |=  act=invite-view:store
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    ?-  -.act
+        %invitations
+      [%invitations (our-invites:encode invites.act)]
+    ==
   --
 ::
 ++  encode
   =,  enjs:format
   |%
+  ++  our-invites
+    |=  =our-invites:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by our-invites)
+    |=  [pth=space-path:store inv=invite:store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (invite inv)]
+  ::
   ++  invite
     |=  =invite:store
     ^-  json
@@ -91,19 +124,26 @@
   |%
   ++  invite-action
     |=  jon=json
-    ^-  ^invite-action
+    ^-  invite-action:store
     =<  (decode jon)
     |%
     ++  decode
       %-  of
       :~  [%send-invite send-invite-payload]
+          [%accept-invite accept-invite-payload]
           [%invited invited-payload]
-          [%accepted accepted-payload]
+          :: [%accepted accepted-payload]
       ==
     ::
-    ++  accepted-payload
+    :: ++  accepted-payload
+    ::   %-  ot
+    ::   :~  [%path pth]
+    ::   ==
+    :: ::
+    ++  accept-invite-payload
       %-  ot
       :~  [%path pth]
+          :: [%space space:action:dejs:spaces-lib]
       ==
     ::
     ++  invited-payload
@@ -140,6 +180,7 @@
       |=  =json
       ^-  role:member-store
       ?>  ?=(%s -.json)
+      ?:  =('invited' p.json)    %invited
       ?:  =('initiate' p.json)   %initiate
       ?:  =('member' p.json)     %member
       ?:  =('admin' p.json)      %admin

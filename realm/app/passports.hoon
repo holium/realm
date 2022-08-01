@@ -181,7 +181,7 @@
             ==
       ::
           %fact
-            ?+    p.cage.sign  (on-agent:def wire sign)
+            ?+    p.cage.sign     (on-agent:def wire sign)
                 %spaces-reaction
                   =/  action  !<(=spaces-reaction:spaces q.cage.sign)
                   =^  cards  state

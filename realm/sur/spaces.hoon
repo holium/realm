@@ -84,14 +84,17 @@
       [%color color=@t]
       [%theme =theme]
   ==
-
 ::
 ::  Reaction via watch paths
+::
++$  reaction
+  $%  [%spaces-reaction spaces-reaction]  
+      [%invite-reaction invite-reaction]
+  ==
 ::
 +$  spaces-reaction
   $%  [%initial =spaces =membership:membership]
       [%add =space =members:membership]
-      :: [%invitee =space =invite]
       [%replace =space]
       [%remove path=space-path]
   ==
@@ -102,27 +105,26 @@
   $%  [%space =space]
       [%spaces =spaces]
   ==
-
-
+::
 :::::::::::::
-
 +$  invite-action
   $%  [%send-invite path=space-path =ship =role:membership]
+      [%accept-invite path=space-path]
       [%invited path=space-path =invite]
-      [%accepted path=space-path]
+      :: [%accepted path=space-path]
       :: [%kick path=space-path =ship]
       :: [%ban path=space-path =ship]
   ==
 
 +$  invite-reaction
   $%  [%invite-sent path=space-path =invite]
+      [%invite-accepted path=space-path =space]
       :: [%invite-accepted path=space-path =ship]
       :: [%invite-received path=space-path =ship]
   ==
 ::
-+$  reaction
-  $%  [%spaces-reaction spaces-reaction]  
-      [%invite-reaction invite-reaction]
++$  invite-view
+  $%  [%invitations invites=our-invites]
   ==
 ::
 --
