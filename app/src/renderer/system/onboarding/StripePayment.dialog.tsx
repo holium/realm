@@ -10,7 +10,7 @@ import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { HostingPlanet } from 'os/api/holium';
+import { AccessCode, HostingPlanet } from 'os/api/holium';
 
 interface StripePaymentProps extends BaseDialogProps {
   patp: string
@@ -38,13 +38,10 @@ const MainComponent: FC<StripePaymentProps> = observer(
   (props: StripePaymentProps) => {
     let stripe = useStripe();
     const elements = useElements();
-    let { onboarding, identity } = useServices();
+    let { onboarding } = useServices();
 
     let [ message, setMessage ] = useState({ type: 'notification', text: '' });
     let [ loading, setLoading ] = useState(false);
-
-
-    let planet = onboarding.planet!;
 
     async function completeCheckout() {
       try {
@@ -96,14 +93,14 @@ const MainComponent: FC<StripePaymentProps> = observer(
           <Box flex={2} display="flex" flexDirection="column">
               <Flex flex={2} flexDirection="column" justifyContent="center" alignItems="center">
                 <Flex flex={2} flexDirection="column" alignItems="center" justifyContent="center">
-                  <Sigil color={['black', 'white']} simple={false} size={48} patp={planet.patp!} />
+                  <Sigil color={['black', 'white']} simple={false} size={48} patp={onboarding.planet!.patp!} />
                   <Box>
-                    <Text mt={3} flex={1}> { planet.patp! } </Text>
+                    <Text mt={3} flex={1}> { onboarding.planet!.patp } </Text>
                   </Box>
                 </Flex>
                 <Box flex={1} >
                     <Text hidden={!onboarding.accessCode} variant="body">
-                      Redeeming <Text ml={2} display="inline" variant='patp' color="brand.primary">{onboarding.accessCode}</Text>
+                      Redeeming <Text ml={2} display="inline" variant='patp' color="brand.primary">{onboarding!.accessCode.id}</Text>
                     </Text>
                 </Box>
               </Flex>
@@ -131,28 +128,3 @@ const MainComponent: FC<StripePaymentProps> = observer(
 );
 
 export default StripePayment;
-
-// return (
-//   <Grid.Column noGutter lg={12} xl={12}>
-//     <Flex width="100%" height="100%" flexDirection="column" alignItems="center" justifyContent="space-around">
-//       <Flex flexDirection="column" justifyContent="center" alignItems="center">
-//         <Box height={48} width={48} mb={12}>
-//           <Sigil color={['black', 'white']} simple={false} size={48} patp={planet.patp!} />
-//         </Box>
-//         <Text> { planet.patp! } </Text>
-//       </Flex>
-//       <Box hidden={message === ''}>
-//         {message}
-//       </Box>
-//       <form id="payment-form" onSubmit={handleSubmit}>
-//         <label>
-//           <PaymentElement />
-//         </label>
-//         <Button isLoading={loading} disabled={loading || !stripe || !elements} id="submit">
-//           Purchase
-//         </Button>
-//       </form>
-//     </Flex>
-//   </Grid.Column>
-// )
-// }

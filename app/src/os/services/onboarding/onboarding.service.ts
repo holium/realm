@@ -68,8 +68,8 @@ export class OnboardingService extends BaseService {
       return ipcRenderer.invoke('realm.onboarding.getAccessCode', code);
     },
 
-    setAccessCode(code: string) {
-      return ipcRenderer.invoke('realm.onboarding.setAccessCode', code);
+    setAccessCode(accessCode: AccessCode) {
+      return ipcRenderer.invoke('realm.onboarding.setAccessCode', accessCode);
     },
 
     checkShipBooted() {
@@ -169,7 +169,7 @@ export class OnboardingService extends BaseService {
       return account.planets;
     }
 
-    let planets = await this.core.holiumClient.getPlanets(auth.accountId, this.state.accessCode);
+    let planets = await this.core.holiumClient.getPlanets(auth.accountId, this.state.accessCode?.id);
     return planets;
   }
 
@@ -185,8 +185,8 @@ export class OnboardingService extends BaseService {
     return clientSecret
   }
 
-  async setAccessCode(_event: any, code: string) {
-    this.state.setAccessCode(code);
+  async setAccessCode(_event: any, accessCode: AccessCode) {
+    this.state.setAccessCode(accessCode);
   }
 
   async completeCheckout() {

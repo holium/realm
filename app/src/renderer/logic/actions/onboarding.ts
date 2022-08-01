@@ -43,8 +43,8 @@ export const OnboardingActions = {
     return await window.electron.os.onboarding.getAccessCode(code);
   },
 
-  setAccessCode: async(code: string) => {
-    return await window.electron.os.onboarding.setAccessCode(code);
+  setAccessCode: async(accessCode: AccessCode) => {
+    return await window.electron.os.onboarding.setAccessCode(accessCode);
   },
 
   getProfile: async () => {

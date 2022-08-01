@@ -4,7 +4,7 @@ import {
   types,
 } from 'mobx-state-tree';
 import { LoaderModel } from '../common.model';
-import { HostingPlanet } from 'os/api/holium';
+import { AccessCode, HostingPlanet } from 'os/api/holium';
 
 export enum OnboardingStep {
   DISCLAIMER = 'onboarding:disclaimer',
@@ -29,6 +29,17 @@ export const PlanetModel = types
   .model({
     patp: types.string,
     booted: types.boolean
+  })
+
+export const AccessCodeModel = types
+  .model({
+    id: types.string,
+    value: types.maybeNull(types.string),
+    redeemed: types.maybeNull(types.boolean),
+    image: types.maybeNull(types.string),
+    title: types.maybeNull(types.string),
+    description: types.maybeNull(types.string),
+    expiresAt: types.maybeNull(types.string)
   })
 
 export const OnboardingShipModel = types
@@ -62,7 +73,7 @@ export const OnboardingStore = types
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
     checkoutComplete: false,
-    accessCode: types.maybe(types.string)
+    accessCode: types.maybe(AccessCodeModel)
   })
   .actions((self) => ({
 
@@ -94,8 +105,8 @@ export const OnboardingStore = types
       self.checkoutComplete = true;
     },
 
-    setAccessCode(code: string) {
-      self.accessCode = code;
+    setAccessCode(accessCode: AccessCode) {
+      self.accessCode = AccessCodeModel.create(accessCode);
     },
 
     clearAccessCode() {

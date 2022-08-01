@@ -20,6 +20,7 @@ export interface HostingPurchasedShip {
 }
 
 export interface AccessCode {
+  id: string
   type: string
   value?: string
   redeemed?: boolean

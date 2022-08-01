@@ -81,7 +81,7 @@ const AccessCode: FC<BaseDialogProps> = observer(
     }
 
     async function redeemCode() {
-      await OnboardingActions.setAccessCode(inputText);
+      await OnboardingActions.setAccessCode(accessCode!);
       props.onNext && props.onNext();
     }
 
