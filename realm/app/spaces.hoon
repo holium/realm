@@ -131,10 +131,10 @@
       ::
           %fact
             ?+  p.cage.sign  (on-agent:def wire sign)
-              %invite-reaction 
+              %invite-reaction
                 =/  rct  !<(invite-reaction:store q.cage.sign)
                 =^  cards  state
-                ?-  -.rct 
+                ?-  -.rct
                     %invite-sent      (handle-sent:on-invite-reaction +.rct)
                     %invite-accepted  (handle-accepted:on-invite-reaction +.rct)
                 ==
@@ -161,7 +161,7 @@
     ^-  (quip card _state)
     ~&  >  [path invite]
     `state
-  :: 
+  ::
   ++  handle-accepted
     |=  [path=space-path:store =space:store]
     ^-  (quip card _state)
@@ -190,13 +190,21 @@
       [~ state]
     =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
     =.  membership.state      (~(put by membership.state) [path.new-space members])
-    ::  TODO invite all members in member map here
-    :: %-  ~(urn by (~(got by membership.state) path.new-space))
-    ::     |=  [=ship =role:membershsip]
-    ::     (handle-send:invite-lib [%send-invite path.new-space ship role])
-    ::     :: ==
-    :-  (spaces:send-reaction [%add new-space members])
-    state
+    ::  start by getting member map for the current space
+    =/  members  (~(got by membership.state) path.new-space)
+    ::  build a list of invitations (pokes) to each member
+    =/  invitations=(list card)
+    ::  loop thru each member, and build a list of invitations/pokes (acc)
+    %-  ~(rep by members)
+      |=  [[=ship =roles:membership-store] acc=(list card)]
+      =/  invitation  [%send-invite path.new-space ship roles]
+      %+  snoc  acc
+      [%pass / %agent [ship %spaces] %poke spaces-action+!>(invitation)]
+    ::  return updated state and a combination of pokes to new members
+    ::    and gifts to any existing/current subscribers (weld)
+    :_  state
+    %+  weld  invitations
+    (spaces:send-reaction [%add new-space members])
   ::
   ++  handle-update
     |=  [path=space-path:store edit-payload=edit-payload:store]
@@ -259,7 +267,7 @@
     =/  space                 (~(got by spaces.state) path)
     =/  new-invite            (new-invite:inv-lib path src.bowl ship role space now.bowl)
     =/  space-invites         (~(gut by invitations.state) path `space-invitations:store`[~])
-    =.  space-invites         (~(put by space-invites) [ship new-invite])  
+    =.  space-invites         (~(put by space-invites) [ship new-invite])
     =.  invitations.state     (~(put by invitations.state) [path space-invites])
     :_  state
     :~  [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]   ::  send invite to ship
@@ -275,7 +283,7 @@
       ::       [invite-action+!>([%invited path new-invite])]
             :: [%booth-store-response !>([%response-proposal ship bth-name new-proposal])]
      :: ==
-    
+
     :: state
   ::
   ++  handle-invited
@@ -294,7 +302,7 @@
     ?:  =(our.bowl ship.path)                                   ::  If we are the host
       ~&  >  [src.bowl path 'accepted']
       =/  space                 (~(got by spaces.state) path)   ::  Get the space
-      :_  state 
+      :_  state
       (invite:send-reaction [%invite-accepted path space])      ::  Send space to invitee
     ::  If we are invited, not host
     ~&  >  [src.bowl path 'send accept']

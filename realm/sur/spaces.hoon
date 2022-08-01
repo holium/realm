@@ -88,7 +88,7 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%spaces-reaction spaces-reaction]  
+  $%  [%spaces-reaction spaces-reaction]
       [%invite-reaction invite-reaction]
   ==
 ::
