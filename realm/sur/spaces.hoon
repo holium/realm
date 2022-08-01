@@ -64,7 +64,7 @@
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
       :: Managing members
-      :: [%send-invite path=space-path =ship =role:membership]
+      :: [%invite path=space-path =ship =roles:membership]
       :: [%kick path=space-path =ship]
       :: [%ban path=space-path =ship]
   ==

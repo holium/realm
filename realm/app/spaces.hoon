@@ -197,9 +197,12 @@
     ::  loop thru each member, and build a list of invitations/pokes (acc)
     %-  ~(rep by members)
       |=  [[=ship =roles:membership-store] acc=(list card)]
-      =/  invitation  [%send-invite path.new-space ship roles]
+      ::  can there be more than one role per member, or do we just
+      ::   keep it simple and worry about 'main' role (role at index 0)
+      =/  role  (snag 0 ~(tap in roles))
+      =/  invitation  [%send-invite path.new-space ship role]
       %+  snoc  acc
-      [%pass / %agent [ship %spaces] %poke spaces-action+!>(invitation)]
+      [%pass / %agent [ship %spaces] %poke invite-action+!>(invitation)]
     ::  return updated state and a combination of pokes to new members
     ::    and gifts to any existing/current subscribers (weld)
     :_  state
