@@ -16,7 +16,6 @@ import { DesktopStore } from '../../os/services/shell/desktop.model';
 import { ShellStore } from 'os/services/shell/shell.model';
 import { SpacesStore } from '../../os/services/spaces/models/spaces';
 import { AuthStore } from '../../os/services/identity/auth.model';
-import { SignupStore } from '../../os/services/identity/signup.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel } from '../../os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
@@ -37,7 +36,6 @@ export const Services = types
 
     identity: types.model('identity', {
       auth: AuthStore,
-      signup: SignupStore,
     }),
     onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
@@ -65,9 +63,6 @@ const services = Services.create({
     auth: {
       loader: { state: 'initial' },
       firstTime: true
-    },
-    signup: {
-      loader: { state: 'initial' },
     },
   },
   onboarding: {},
@@ -132,10 +127,6 @@ OSActions.onBoot().then((response: any) => {
     key: 'ships',
     model: response.auth,
   });
-  servicesStore.identity.signup.initialSync({
-    key: 'ships',
-    model: response.signup,
-  });
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
     coreStore.setLoggedIn(true);
@@ -193,9 +184,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
-    }
-    if (value.resource === 'signup') {
-      applyPatch(servicesStore.identity.signup, value.patch);
     }
     if (value.resource === 'onboarding') {
       applyPatch(servicesStore.onboarding, value.patch);

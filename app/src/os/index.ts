@@ -6,7 +6,6 @@ import Urbit from './urbit/api';
 import { AuthService } from './services/identity/auth.service';
 import { MSTAction } from './types';
 import { cleanPath, fromPathString } from './lib/action';
-import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
@@ -31,7 +30,6 @@ export class Realm extends EventEmitter {
     onboarding: OnboardingService;
     identity: {
       auth: AuthService;
-      signup: SignupService;
     };
     ship: ShipService;
     spaces: SpacesService;
@@ -60,7 +58,6 @@ export class Realm extends EventEmitter {
     },
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
     auth: AuthService.preload,
-    signup: SignupService.preload,
     ship: ShipService.preload,
     spaces: SpacesService.preload,
     desktop: DesktopService.preload,
@@ -86,7 +83,6 @@ export class Realm extends EventEmitter {
       onboarding: new OnboardingService(this),
       identity: {
         auth: new AuthService(this),
-        signup: new SignupService(this),
       },
       ship: new ShipService(this),
       spaces: new SpacesService(this),
@@ -120,7 +116,6 @@ export class Realm extends EventEmitter {
     this.services.identity.auth.setLoader('loaded');
     return {
       auth: this.services.identity.auth.snapshot,
-      signup: this.services.identity.signup.snapshot,
       onboarding: this.services.onboarding.snapshot,
       ship,
       spaces,
