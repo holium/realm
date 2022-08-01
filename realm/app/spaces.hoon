@@ -192,21 +192,10 @@
     =.  membership.state      (~(put by membership.state) [path.new-space members])
     ::  start by getting member map for the current space
     =/  members  (~(got by membership.state) path.new-space)
-    ::  build a list of invitations (pokes) to each member
-    =/  invitations=(list card)
-    ::  loop thru each member, and build a list of invitations/pokes (acc)
-    %-  ~(rep by members)
-      |=  [[=ship =roles:membership-store] acc=(list card)]
-      ::  can there be more than one role per member, or do we just
-      ::   keep it simple and worry about 'main' role (role at index 0)
-      =/  role  (snag 0 ~(tap in roles))
-      =/  invitation  [%send-invite path.new-space ship role]
-      %+  snoc  acc
-      [%pass / %agent [ship %spaces] %poke invite-action+!>(invitation)]
-    ::  return updated state and a combination of pokes to new members
-    ::    and gifts to any existing/current subscribers (weld)
+    ::  return updated state and a combination of invitations (pokes)
+    ::   to new members and gifts to any existing/current subscribers (weld)
     :_  state
-    %+  weld  invitations
+    %+  weld  (make-invitations path.new-space members)
     (spaces:send-reaction [%add new-space members])
   ::
   ++  handle-update
@@ -243,6 +232,20 @@
     :-  (spaces:send-reaction [%remove path])
     state
   ::
+  ::  $make-invitations: helper to generate a list of invitations
+  ::   (invite-action pokes) for the given space and members
+  ++  make-invitations
+    |=  [path=space-path:store =members:membership-store]
+    ^-  (list card)
+    ::  loop thru each member, and build a list of invitations/pokes (acc)
+    %-  ~(rep by members)
+      |=  [[=ship =roles:membership-store] acc=(list card)]
+      ::  can there be more than one role per member, or do we just
+      ::   keep it simple and worry about 'main' role (role at index 0)
+      =/  role  (snag 0 ~(tap in roles))
+      =/  invitation  [%send-invite path ship role]
+      %+  snoc  acc
+      [%pass / %agent [ship %spaces] %poke invite-action+!>(invitation)]
   --
 ::
 ++  invite-lib
