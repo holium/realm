@@ -80,14 +80,17 @@
   ::
   ::
   ++  invite-view
-    |=  act=invite-view:store
+    |=  view=^invite-view
     ^-  json
     %-  pairs
     :_  ~
     ^-  [cord json]
-    ?-  -.act
+    ?-  -.view
         %invitations
-      [%invitations (our-invites:encode invites.act)]
+      :-  %invitations
+      %-  pairs
+      :~  [%invites (our-invites:encode invites.view)]
+      ==
     ==
   --
 ::

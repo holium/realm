@@ -83,22 +83,20 @@
     ::
     ::  ~/scry/spaces.json
     ::
-      [%x ~]        ``noun+!>((view:enjs:lib [%spaces spaces.state]))
-    ::
-    ::  ~/scry/spaces/~fes/our.json
-    ::
-      [%x @ @ ~]
-    =/  =ship       (slav %p i.t.path)
-    =/  space-pth   `@t`i.t.t.path
-    =/  space       (~(got by spaces.state) [ship space-pth])
-    ``noun+!>((view:enjs:lib [%space space]))
-    
+      [%x ~]                ``noun+!>((view:enjs:lib [%spaces spaces.state]))
     ::
     ::  ~/scry/spaces/invitations.json
     ::
-    ::   [%x %villages %invitations ~]
-    :: =/  invites     (~(got by our-invites.state) [path])
-    :: ``noun+!>((invite-view:enjs:lib [%invitations invites]))
+      [%x %invitations ~]   ``invite-view+!>((invite-view:enjs:lib [%invitations our-invites.state]))
+
+    ::
+    ::  ~/scry/spaces/~fes/our.json
+    ::
+      [%x %village @ @ ~]
+    =/  =ship       (slav %p i.t.t.path)
+    =/  space-pth   `@t`i.t.t.t.path
+    =/  space       (~(got by spaces.state) [ship space-pth])
+    ``noun+!>((view:enjs:lib [%space space]))
     ==
   ::
   ++  on-watch
@@ -113,7 +111,6 @@
       ==
     [cards this]
   ::
-  ++  on-leave  |=(path `..on-init)
   ++  on-agent  ::  on-agent:def
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
@@ -134,7 +131,7 @@
       ::
           %fact
             ?+  p.cage.sign  (on-agent:def wire sign)
-              %invite-reaction  ::(on-invite-reaction:core !<(invite-reaction:store q.cage.sign))
+              %invite-reaction 
                 =/  rct  !<(invite-reaction:store q.cage.sign)
                 =^  cards  state
                 ?-  -.rct 
@@ -147,6 +144,7 @@
     ==
   ++  on-arvo   |=([wire sign-arvo] !!)
   ++  on-fail   |=([term tang] `..on-init)
+  ++  on-leave  |=(path `..on-init)
   --
 ::
 |_  [=bowl:gall cards=(list card)]
@@ -157,32 +155,20 @@
 ::
 ++  on-invite-reaction
   |%
-  :: |=  [rct=invite-reaction:store]
-  :: ^-  (quip card _state)
-  :: =^  cards  state
-  :: |^
-  :: ?-  -.rct
-  ::   %invite-sent      (handle-sent +.rct)
-  ::   %invite-accepted  (handle-accepted +.rct)
-  :: ==
   ::
   ++  handle-sent
     |=  [path=space-path:store =invite:store]
     ^-  (quip card _state)
-    :: ?>  ?=(%invite-sent -.rct)
     ~&  >  [path invite]
     `state
-    
   :: 
   ++  handle-accepted
     |=  [path=space-path:store =space:store]
     ^-  (quip card _state)
-    :: ?>  ?=(%invite-accepted -.rct)
     ~&  >  [path space]
     `state
   ::
   --
-  :: [cards this]
 ::
 ++  spaces-action
   |=  [act=action:store]
@@ -205,6 +191,10 @@
     =.  spaces.state          (~(put by spaces.state) [path.new-space new-space])
     =.  membership.state      (~(put by membership.state) [path.new-space members])
     ::  TODO invite all members in member map here
+    :: %-  ~(urn by (~(got by membership.state) path.new-space))
+    ::     |=  [=ship =role:membershsip]
+    ::     (handle-send:invite-lib [%send-invite path.new-space ship role])
+    ::     :: ==
     :-  (spaces:send-reaction [%add new-space members])
     state
   ::
@@ -259,10 +249,10 @@
     ^-  (quip card _state)
     :: ?>  (team:title our.bowl src.bowl)
     :: TODO check if we have permission to invite
-    ?.  =(our.bowl ship.path)                                               ::  If we are the host
-      :: ----- TODO                                                         ::  Add new invitee to member list
-      :_  state                                                             ::  return state
-      :~ [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]  ::  Send the invite
+    ?.  =(our.bowl ship.path)                                                 ::  If we are the host
+      :: ----- TODO                                                           ::  Add new invitee to member list
+      :_  state                                                               ::  return state
+      :~  [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]   ::  Send the invite
           ::  TODO update members of new invitee
       ==
     ::  we are a member or admin
