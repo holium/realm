@@ -98,13 +98,17 @@ const MainComponent: FC<StripePaymentProps> = observer(
                     <Text mt={3} flex={1}> { onboarding.planet!.patp } </Text>
                   </Box>
                 </Flex>
-                <Box flex={1} >
-                    <Text hidden={!onboarding.accessCode} variant="body">
-                      Redeeming <Text ml={2} display="inline" variant='patp' color="brand.primary">{onboarding!.accessCode.id}</Text>
+                <Flex flex={1} width="100%" flexDirection="column" alignItems="center" justifyContent="center" hidden={!onboarding.accessCode} >
+                    <Text variant="body" color="text.tertiary">
+                      Applying access code:
                     </Text>
-                </Box>
+                    <Flex mt={18} flexDirection="row" alignItems="center" justifyContent="center">
+                      <img height={28} style={{ borderRadius: 6 }} src={onboarding?.accessCode?.image as string} />
+                      <Text ml={3} variant="body">{onboarding?.accessCode?.title}</Text>
+                    </Flex>
+                </Flex>
               </Flex>
-              <Flex width="100%" flex={1} justifyContent="center" hidden={message.text === ''}>
+              <Flex mt={56} width="100%" flex={1} justifyContent="center" hidden={message.text === ''}>
                 <Text textAlign="center" variant="body" color={message.type === 'error' ? 'text.error' : undefined }>{message.text}</Text>
               </Flex>
           </Box>
