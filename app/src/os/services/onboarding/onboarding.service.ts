@@ -151,6 +151,7 @@ export class OnboardingService extends BaseService {
 
   setStep(_event: any, step: OnboardingStep) {
     this.state.setStep(step);
+    this.core.services.shell.nextDialog('_event', step);
   }
 
   agreedToDisclaimer(_event: any) {
