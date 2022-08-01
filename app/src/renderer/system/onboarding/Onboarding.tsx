@@ -11,20 +11,14 @@ export const Onboarding: FC = observer((props: any) => {
   let { onboarding } = useServices();
 
   useEffect(() => {
-    ShellActions.openDialog(OnboardingStep.DISCLAIMER);
+    ShellActions.openDialog(onboarding.currentStep);
 
     return () => {
       ShellActions.closeDialog();
     }
   }), [];
 
-  return (
-    <Fill>
-      <Layer zIndex={2}>
-        {/* <DialogManager dialogId={onboarding.currentStep}/> */}
-      </Layer>
-    </Fill>
-  )
+  return <></>
 })
 
 export default Onboarding;
