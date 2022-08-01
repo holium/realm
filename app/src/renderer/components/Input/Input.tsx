@@ -10,6 +10,7 @@ import {
   border,
   position,
   color,
+  background,
   backgroundColor,
 } from 'styled-system';
 import { rgba } from 'polished';
@@ -86,7 +87,7 @@ export const InputWrapper = styled(Flex)`
       }
     `}
 
-  ${compose(backgroundColor)}
+  ${compose(backgroundColor, background)}
 
   ${(props) =>
     props.isDisabled &&
@@ -257,7 +258,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         ref={wrapperRef}
         borderColor={borderColor}
         // animate={{
-        //   backgroundColor: bg,
+        //   background: bg,
         // }}
         color={color}
         bg={bg}
@@ -270,6 +271,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         flex={flex}
         style={wrapperStyle}
         isDisabled={disabled}
+        transition={{ background: { duration: 1 } }}
       >
         {leftIcon && (
           <LeftIcon

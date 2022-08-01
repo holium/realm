@@ -181,9 +181,9 @@
             ==
       ::
           %fact
-            ?+    p.cage.sign  (on-agent:def wire sign)
+            ?+    p.cage.sign     (on-agent:def wire sign)
                 %spaces-reaction
-                  =/  action  !<(=reaction:spaces q.cage.sign)
+                  =/  action  !<(=spaces-reaction:spaces q.cage.sign)
                   =^  cards  state
                   ?-  -.action :: (on-agent:def wire sign)
                     %initial  (on-spaces-initial:core action)
@@ -356,22 +356,22 @@
   ==
 ::
 ++  on-spaces-initial
-  |=  [=reaction:spaces]
+  |=  [rct=spaces-reaction:spaces]
   ^-  (quip card _state)
-  ?>  ?=(%initial -.reaction)
+  ?>  ?=(%initial -.rct)
   =/  districts
-  %-  ~(rep by membership.reaction)
+  %-  ~(rep by membership.rct)
   |=  [[path=space-path:spaces =members:membership-store] acc=districts:store]
   =/  passes  (to-passports members)
   (~(put by acc) path passes)
   `state(districts districts)
 ::
 ++  on-spaces-add
-  |=  [=reaction:spaces]
+  |=  [rct=spaces-reaction:spaces]
   ^-  (quip card _state)
-  ?>  ?=(%add -.reaction)
-  =/  passports=(map ship passport:store)  (to-passports members.reaction)
-  `state(districts (~(put by districts) path.space.reaction passports))
+  ?>  ?=(%add -.rct)
+  =/  passports=(map ship passport:store)  (to-passports members.rct)
+  `state(districts (~(put by districts) path.space.rct passports))
 ::
 ++  to-passports
   |=  =members:membership-store
@@ -384,16 +384,16 @@
   (~(put by passports) ship passport)
 ::
 ++  on-spaces-replace
-  |=  [=reaction:spaces]
+  |=  [rct=spaces-reaction:spaces]
   ^-  (quip card _state)
-  ?>  ?=(%replace -.reaction)
+  ?>  ?=(%replace -.rct)
   `state
 ::
 ++  on-spaces-remove
-  |=  [=reaction:spaces]
+  |=  [rct=spaces-reaction:spaces]
   ^-  (quip card _state)
-  ?>  ?=(%remove -.reaction)
-  `state(districts (~(del by districts) path.reaction))
+  ?>  ?=(%remove -.rct)
+  `state(districts (~(del by districts) path.rct))
 ::
 ++  notify
   |=  [pth=space-path:spaces slug=path msg=cord]

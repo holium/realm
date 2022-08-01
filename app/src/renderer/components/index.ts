@@ -34,3 +34,4 @@ export * from './Skeleton';
 export * from './NFTBadge';
 export * from './Crest';
 export * from './ShipSearch';
+export * from './People';

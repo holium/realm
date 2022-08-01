@@ -54,17 +54,19 @@ export const BackgroundFill = styled(Fill)`
   background: ${(props: BackgroundStyleProps) =>
     props.hasWallpaper ? 'transparent' : props.theme.colors.bg.primary};
 `;
-//
-//   background: ${(props: BackgroundStyleProps) =>
-//    props.hasWallpaper ? '#333333' : 'transparent'};
-//
-export const BackgroundDarken = styled(Fill)<BackgroundStyleProps>`
-  ${(props: BackgroundStyleProps) =>
-    css`
-      --webkit-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
-      --moz-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
-      --o-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
-      --ms-filter: blur(${props.hasWallpaper ? '20px' : '0px'});
-      filter: blur(${props.hasWallpaper ? '20px' : '0px'});
-    `}
+
+export const BackgroundLighten = styled(Fill)`
+  position: relative;
+  z-index: 1;
+  user-select: none;
+  color: #ffffff;
+  opacity: 0.45;
+`;
+
+export const BackgroundDarken = styled(Fill)`
+  position: relative;
+  z-index: 1;
+  user-select: none;
+  color: #000000;
+  opacity: 0.25;
 `;

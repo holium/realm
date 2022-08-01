@@ -42,7 +42,20 @@
       updated-at=@da
   ==
 ::
-+$  spaces  (map space-path space)
++$  spaces              (map space-path space)
+::
++$  invitations         (map space-path space-invitations)
++$  our-invites         (map space-path invite)
++$  space-invitations   (map ship invite)
++$  invite
+  $:  inviter=ship
+      path=space-path
+      role=role:membership
+      message=cord
+      name=space-name
+      type=space-type
+      invited-at=@da
+  ==
 ::
 ::  Poke actions
 ::
@@ -50,6 +63,10 @@
   $%  [%add slug=@t payload=add-payload members=members:membership]
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
+      :: Managing members
+      :: [%invite path=space-path =ship =roles:membership]
+      :: [%kick path=space-path =ship]
+      :: [%ban path=space-path =ship]
   ==
 ::
 +$  add-payload
@@ -71,6 +88,11 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
+  $%  [%spaces-reaction spaces-reaction]
+      [%invite-reaction invite-reaction]
+  ==
+::
++$  spaces-reaction
   $%  [%initial =spaces =membership:membership]
       [%add =space =members:membership]
       [%replace =space]
@@ -83,4 +105,26 @@
   $%  [%space =space]
       [%spaces =spaces]
   ==
+::
+:::::::::::::
++$  invite-action
+  $%  [%send-invite path=space-path =ship =role:membership]
+      [%accept-invite path=space-path]
+      [%invited path=space-path =invite]
+      :: [%accepted path=space-path]
+      :: [%kick path=space-path =ship]
+      :: [%ban path=space-path =ship]
+  ==
+
++$  invite-reaction
+  $%  [%invite-sent path=space-path =invite]
+      [%invite-accepted path=space-path =space]
+      :: [%invite-accepted path=space-path =ship]
+      :: [%invite-received path=space-path =ship]
+  ==
+::
++$  invite-view
+  $%  [%invitations invites=our-invites]
+  ==
+::
 --
