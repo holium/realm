@@ -55,7 +55,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
     const { theme, window, desktopRef } = props;
     const { textColor, windowColor } = theme;
-    const { desktop } = useServices();
+    const { shell, desktop } = useServices();
 
     const [unmaximize, setUnmaximize] = useState<
       | {
@@ -114,7 +114,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           height: mHeight.get(),
           width: mWidth.get(),
         });
-        const offset = desktop.isFullscreen ? 0 : 30;
+        const offset = shell.isFullscreen ? 0 : 30;
         // @ts-ignore
         const desktopDims = desktopRef.current!.getBoundingClientRect();
         mX.set(0);
@@ -135,7 +135,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           height: mHeight.get(),
           width: mWidth.get(),
         });
-    }, [desktop.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
+    }, [shell.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
 
     const onDragStop = () => {
       setIsDragging(false);

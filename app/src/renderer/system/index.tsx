@@ -38,7 +38,7 @@ export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();
   useWindowSize();
 
-  const isFullscreen = desktop.isFullscreen;
+  const isFullscreen = shell.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
   const firstTime = identity.auth.firstTime;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);

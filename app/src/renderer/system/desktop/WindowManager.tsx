@@ -15,7 +15,7 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    const { desktop } = useServices();
+    const { shell, desktop } = useServices();
     const desktopRef = useRef<any>(null);
 
     // useEffect(() => {
@@ -44,7 +44,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
           top: 0,
           right: 0,
           height: `calc(100vh - ${0}px)`,
-          paddingTop: desktop.isFullscreen ? 0 : 30,
+          paddingTop: shell.isFullscreen ? 0 : 30,
         }}
       >
         <ContextMenu

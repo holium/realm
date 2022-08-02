@@ -54,7 +54,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
           top: 0,
           right: 0,
           height: `calc(100vh - ${0}px)`,
-          paddingTop: desktop.isFullscreen ? 0 : 30,
+          paddingTop: shell.isFullscreen ? 0 : 30,
         }}
       >
         {dialogWindow}
