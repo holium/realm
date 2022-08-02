@@ -4,14 +4,14 @@
 =,  store
 |%
 ++  new-invite
-  |=  [path=space-path:store inviter=ship =ship =role:membership =space:store invited-at=@da]
+  |=  [path=space-path:store inviter=ship =ship =role:membership =space:store message=@t invited-at=@da]
   ^-  invite:store
   =/  new-invite
     [
       inviter=inviter
       path=path
       role=role
-      message=''
+      message=message
       name=name:space
       type=type:space
       invited-at=invited-at
@@ -37,6 +37,7 @@
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%ship s+(scot %p ship.act)]
           [%role s+(scot %tas role.act)]
+          [%message s+message.act]
       ==
         %invited
       :-  %invited
@@ -49,11 +50,11 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
       ==
-      ::   %accepted
-      :: :-  %accepted
-      :: %-  pairs
-      :: :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
-      :: ==
+        %stamped
+      :-  %stamped
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
+      ==
     ==
   ::
   ++  invite-reaction
@@ -74,8 +75,14 @@
       :-  %invite-accepted
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%space (spc:encode:spaces-lib space.rct)]
+          [%ship s+(scot %p ship.path.rct)]
+          [%member (memb:encode member.rct)]
       ==
+      :: %stamped
+      :: :-  %stamped
+      :: %-  pairs
+      :: :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      :: ==
     ==
   ::
   ::
@@ -119,8 +126,16 @@
         ['type' s+type.invite]
         ['invitedAt' (time invited-at.invite)]
     ==
+  ::
+  ++  memb
+    |=  =member:member-store
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
+        ['status' s+(scot %tas status.member)]
+    ==
+  ::
   --
-
 ::
 ++  dejs
   =,  dejs:format
@@ -135,18 +150,17 @@
       :~  [%send-invite send-invite-payload]
           [%accept-invite accept-invite-payload]
           [%invited invited-payload]
-          :: [%accepted accepted-payload]
+          [%stamped stamped-payload]
       ==
     ::
-    :: ++  accepted-payload
-    ::   %-  ot
-    ::   :~  [%path pth]
-    ::   ==
-    :: ::
+    ++  stamped-payload
+      %-  ot
+      :~  [%path pth]
+      ==
+    ::
     ++  accept-invite-payload
       %-  ot
       :~  [%path pth]
-          :: [%space space:action:dejs:spaces-lib]
       ==
     ::
     ++  invited-payload
@@ -171,6 +185,7 @@
       :~  [%path pth]
           [%ship (su ;~(pfix sig fed:ag))]
           [%role rol]
+          [%message so]
       ==
     ::
     ++  pth
@@ -183,11 +198,19 @@
       |=  =json
       ^-  role:member-store
       ?>  ?=(%s -.json)
-      ?:  =('invited' p.json)    %invited
       ?:  =('initiate' p.json)   %initiate
       ?:  =('member' p.json)     %member
       ?:  =('admin' p.json)      %admin
       ?:  =('owner' p.json)      %owner
+      !!
+    ::
+    ++  status
+      |=  =json
+      ^-  status:member-store
+      ?>  ?=(%s -.json)
+      ?:  =('invited' p.json)     %invited
+      ?:  =('joined' p.json)      %joined
+      ?:  =('host' p.json)        %host
       !!
     --
   --

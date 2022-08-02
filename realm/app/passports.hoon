@@ -182,21 +182,25 @@
       ::
           %fact
             ?+    p.cage.sign     (on-agent:def wire sign)
-              %spaces-reaction
-                =/  action  !<(=spaces-reaction:spaces q.cage.sign)
-                =^  cards  state
-                ?-  -.action :: (on-agent:def wire sign)
-                  %initial  (on-spaces-initial:core action)
-                  %add      (on-spaces-add:core action)
-                  %replace  (on-spaces-replace:core action)
-                  %remove   (on-spaces-remove:core action)
-                ==
-                [cards this]
-              ::
-              %invite-reaction
-                =^  cards  state
-                  (on:inv:core !<(=invite-reaction:spaces +.q.cage.sign))
-                [cards this]
+                %spaces-reaction
+                  =/  rct  !<(=spaces-reaction:spaces q.cage.sign)
+                  =^  cards  state
+                  ?-  -.rct :: (on-agent:def wire sign)
+                    %initial  (on-spaces-initial:core rct)
+                    %add      (on-spaces-add:core rct)
+                    %replace  (on-spaces-replace:core rct)
+                    %remove   (on-spaces-remove:core rct)
+                  ==
+                  [cards this]
+                ::
+                %invite-reaction
+                  =/  rct  !<(=invite-reaction:spaces q.cage.sign)
+                  =^  cards  state
+                  ?-  -.rct
+                    %invite-sent      (handle-sent:on-invite-reaction +.rct)
+                    %invite-accepted  (handle-accepted:on-invite-reaction +.rct)
+                  ==
+                  [cards this]
             ==
         ==
     ==
@@ -322,6 +326,23 @@
   :~  [%give %fact [/updates ~] %passports-reaction !>([%pong our.bowl now.bowl])]
   ==
 ::
+++  on-invite-reaction
+  |%
+  ::
+  ++  handle-sent
+    |=  [path=space-path:spaces =invite:spaces]
+    ^-  (quip card _state)
+    ~&  >  [path invite]
+    `state
+  ::
+  ++  handle-accepted
+    |=  [path=space-path:spaces =ship =member:membership-store]
+    ^-  (quip card _state)
+    ~&  >  [path ship member]
+    `state
+  ::
+  --
+::
 ::  $on-contacts-initial: imports initial contact list
 ::    from %contact-store when the agent starts
 ::
@@ -401,10 +422,11 @@
   |=  =members:membership-store
   ^-  passports:store
   %-  ~(rep by members)
-  |=  [[=ship =roles:membership-store] passports=(map ship passport:store)]
+  |=  [[=ship =member:membership-store] passports=(map ship passport:store)]
   =|  passport=passport:store
   =.  alias.passport  ''
-  =.  roles.passport  roles
+  =.  roles.passport    roles.member
+  =.  status.passport   status.member
   (~(put by passports) ship passport)
 ::
 ++  on-spaces-replace
