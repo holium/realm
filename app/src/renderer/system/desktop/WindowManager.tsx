@@ -18,11 +18,6 @@ export const WindowManager: FC<WindowManagerProps> = observer(
     const { shell, desktop } = useServices();
     const desktopRef = useRef<any>(null);
 
-    // useEffect(() => {
-    //   const dims = desktopRef.current?.getBoundingClientRect();
-    //   ShellActions.setDesktopDimensions(dims.width, dims.height);
-    // }, [desktopRef.current]);
-
     const managerType = 'classic';
     const hasOpenWindows = desktop.windows.size > 0;
 

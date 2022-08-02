@@ -79,32 +79,11 @@ export const AddShip: FC<BaseDialogProps> = observer((props: BaseDialogProps) =>
   const isNextDisabled = !shipForm.computed.isValid;
   console.log(isNextDisabled)
   return (
-    <Grid.Row expand noGutter>
-      <Grid.Column
-        noGutter
-        expand
-        mt={2}
-        lg={5}
-        xl={5}
-        align="center"
-        justify="center"
-      >
-        <img src={UrbitSVG} alt="urbit logo" />
-        <a target="_blank" href="https://urbit.live/">
-          <ActionButton
-            tabIndex={-1}
-            mt={5}
-            height={32}
-            rightContent={<Icons ml={2} size={1} name="ArrowRightLine" />}
-          >
-            Get Urbit ID
-          </ActionButton>
-        </a>
-      </Grid.Column>
-
-      <Grid.Column noGutter lg={7} xl={7}>
-        <Grid.Column noGutter gap={12}>
-          <Grid.Column mt={3} noGutter>
+    <Grid.Row expand>
+      <Grid.Column lg={7} xl={7} px={50}>
+        <Grid.Column gap={12}>
+          <img height={56} src={UrbitSVG} alt="urbit logo" />
+          <Flex mt={2} flexDirection="column">
             <FormControl.FieldSet>
               <FormControl.Field>
                 <Label>Urbit ID</Label>
@@ -172,11 +151,11 @@ export const AddShip: FC<BaseDialogProps> = observer((props: BaseDialogProps) =>
                   )}
               </FormControl.Field>
             </FormControl.FieldSet>
-          </Grid.Column>
+          </Flex>
         </Grid.Column>
       </Grid.Column>
-      <Box position="absolute" left={494} bottom={20} onClick={shipForm.actions.submit}>
-          <TextButton>
+      <Box position="absolute" left={385} bottom={20}>
+          <TextButton disabled={!shipForm.computed.isValid} onClick={shipForm.actions.submit}>
             Next
           </TextButton>
         </Box>

@@ -51,13 +51,11 @@ export const Services = types
   }));
 
 const desktopSnapshot = loadSnapshot('desktop');
+const shellSnapshot = loadSnapshot('shell');
 
 const services = Services.create({
-  // shell: {
-  //   desktop: (shellSnapshot && shellSnapshot.desktop) || {},
-  // },
   desktop: desktopSnapshot || {},
-  shell: {},
+  shell: shellSnapshot || {},
   identity: {
     auth: {
       loader: { state: 'initial' },
@@ -136,9 +134,6 @@ OSActions.onBoot().then((response: any) => {
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
-  }
-  if (response.shell) {
-    applySnapshot(servicesStore.desktop, response.shell);
   }
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);

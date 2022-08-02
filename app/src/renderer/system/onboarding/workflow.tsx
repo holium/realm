@@ -1,5 +1,5 @@
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
@@ -90,8 +90,8 @@ const selfHostedDialogs: DialogRenderers = {
       dimensions: {
         x: 0,
         y: 0,
-        width: 560,
-        height: 300,
+        width: 450,
+        height: 370,
       },
     },
   }

@@ -25,7 +25,6 @@ function useWindowSize() {
   useLayoutEffect(() => {
     function updateSize() {
       ShellActions.setDesktopDimensions(window.innerWidth, window.innerHeight);
-      console.log('size updated')
     }
     window.addEventListener('resize', updateSize);
     updateSize();

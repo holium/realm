@@ -21,7 +21,7 @@ export type BaseDialogProps = {
   onClose?: () => void; // is the funciton that executres when the dialog is closed
   hasCloseButton: boolean; // should the dialog have a close button in the top right
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
-  theme: ThemeModelType;
+  theme?: ThemeModelType;
 } & BaseWorkflowProps;
 
 export type DialogConfig = {
