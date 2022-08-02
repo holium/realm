@@ -88,6 +88,14 @@ export class ShellService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
+  get desktopDimensions() {
+    return this.state?.desktopDimensions;
+  }
+
+  get isFullscreen() {
+    return this.state?.isFullscreen;
+  }
+
   setFullscreen(_event: any, isFullscreen: boolean) {
     this.state?.setFullscreen(isFullscreen);
   }

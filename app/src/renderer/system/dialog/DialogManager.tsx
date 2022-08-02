@@ -57,7 +57,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
           paddingTop: shell.isFullscreen ? 0 : 30,
         }}
       >
-        {dialogWindow}
+        {dialogWindow as any}
       </motion.div>
     );
   }

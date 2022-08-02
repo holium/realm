@@ -33,7 +33,6 @@ function useWindowSize() {
 }
 
 export const Shell: FC = observer(() => {
-  const { loggedIn } = useCore();
   const { shell, desktop, identity, ship } = useServices();
   useWindowSize();
 
@@ -43,10 +42,6 @@ export const Shell: FC = observer(() => {
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
-  const isBlurred = useMemo(
-    () => !loggedIn || shell.isBlurred,
-    [shell.isBlurred, loggedIn]
-  );
 
   const DialogLayer = useMemo(
     () => <DialogManager dialogId={shell.dialogId} />,
@@ -69,7 +64,7 @@ export const Shell: FC = observer(() => {
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       {/* <BgImage blurred wallpaper={bgImage} /> */}
-      <BgImage blurred={isBlurred} wallpaper={bgImage} />
+      <BgImage blurred={shell.isBlurred} wallpaper={bgImage} />
 
       {/* {nft && (
         <Layer zIndex={2}>
