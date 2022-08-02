@@ -164,7 +164,6 @@ export class Realm extends EventEmitter {
     await this.services.spaces.load(this.session?.ship!, ship);
     this.services.identity.auth.setLoader('loaded');
     this.services.onboarding.reset();
-    this.services.shell.setBlur(null, false);
     this.mainWindow.webContents.send('realm.auth.on-log-in', toJS(ship));
   }
 

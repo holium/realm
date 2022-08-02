@@ -77,7 +77,6 @@ const MainComponent: FC<StripePaymentProps> = observer(
 
       if (paymentIntent) {
         if (paymentIntent?.status === 'succeeded') {
-          setMessage({ type: 'notification', text: 'Payment succeeded. Completing your purchase...'});
           await completeCheckout();
         } else {
           setMessage({ type: 'error', text: 'Your payment was not successful, please try again.'})
