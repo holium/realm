@@ -70,6 +70,14 @@
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
+    ::
+        %space
+      :-  %space
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%space (spc:encode space.rct)]
+          [%members (membs:encode members.rct)]
+      ==
     ==
   ::
   ++  view :: encodes for on-peek
@@ -87,6 +95,9 @@
     ::
         %members
       [%members (membs:encode members.view)]
+    ::
+        %friends
+      [%friends (membs:encode members.view)]
     ==
   --
 ++  encode

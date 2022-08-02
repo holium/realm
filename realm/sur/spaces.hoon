@@ -101,6 +101,7 @@
       [%add =space =members:membership]
       [%replace =space]
       [%remove path=space-path]
+      [%space path=space-path =space =members:membership]
   ==
 ::
 ::  Scry views
@@ -109,6 +110,7 @@
   $%  [%space =space]
       [%spaces =spaces]
       [%members =members:membership]
+      [%friends =members:membership]
   ==
 ::
 :::::::::::::
@@ -117,15 +119,13 @@
       [%accept-invite path=space-path]
       [%invited path=space-path =invite]
       [%stamped path=space-path]
+      [%kick-member path=space-path =ship]
   ==
 
 +$  invite-reaction
   $%  [%invite-sent path=space-path =invite]
       [%invite-accepted path=space-path =ship =member:membership]
-      :: [%initial path=space-path =space]
-
-      :: [%invite-accepted path=space-path =ship]
-      :: [%invite-received path=space-path =ship]
+      [%kicked path=space-path =ship]
   ==
 ::
 +$  invite-view

@@ -190,6 +190,7 @@
                     %add      (on-spaces-add:core rct)
                     %replace  (on-spaces-replace:core rct)
                     %remove   (on-spaces-remove:core rct)
+                    %space    (on-spaces-sub:core rct)
                   ==
                   [cards this]
                 ::
@@ -197,8 +198,9 @@
                   =/  rct  !<(=invite-reaction:spaces q.cage.sign)
                   =^  cards  state
                   ?-  -.rct
-                    %invite-sent      (handle-sent:on-invite-reaction +.rct)
-                    %invite-accepted  (handle-accepted:on-invite-reaction +.rct)
+                    %invite-sent      (on-sent:invite-reaction +.rct)
+                    %invite-accepted  (on-accepted:invite-reaction +.rct)
+                    %kicked           (on-kicked:invite-reaction +.rct)
                   ==
                   [cards this]
             ==
@@ -307,19 +309,23 @@
   :~  [%give %fact [/updates ~] %passports-reaction !>([%pong our.bowl now.bowl])]
   ==
 ::
-++  on-invite-reaction
+++  invite-reaction
   |%
   ::
-  ++  handle-sent
+  ++  on-sent
     |=  [path=space-path:spaces =invite:spaces]
     ^-  (quip card _state)
     ~&  >  [path invite]
     `state
   ::
-  ++  handle-accepted
+  ++  on-accepted
     |=  [path=space-path:spaces =ship =member:membership-store]
     ^-  (quip card _state)
-    ~&  >  [path ship member]
+    `state
+  ::
+  ++  on-kicked
+    |=  [path=space-path:spaces =ship]
+    ^-  (quip card _state)
     `state
   ::
   --
@@ -421,6 +427,12 @@
   ^-  (quip card _state)
   ?>  ?=(%remove -.rct)
   `state(districts (~(del by districts) path.rct))
+::
+++  on-spaces-sub
+  |=  [rct=spaces-reaction:spaces]
+  ^-  (quip card _state)
+  ?>  ?=(%space -.rct)
+  `state
 ::
 ++  notify
   |=  [pth=space-path:spaces slug=path msg=cord]

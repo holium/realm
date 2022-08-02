@@ -39,21 +39,31 @@
           [%role s+(scot %tas role.act)]
           [%message s+message.act]
       ==
+      ::
         %invited
       :-  %invited
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%invite (invite:encode invite.act)]
       ==
+      ::
         %accept-invite
       :-  %accept-invite
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
       ==
+      ::
         %stamped
       :-  %stamped
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
+      ==
+      ::
+      %kick-member
+      :-  %kick-member
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
+          [%ship s+(scot %p ship.act)]
       ==
     ==
   ::
@@ -71,6 +81,7 @@
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%invite (invite:encode invite.rct)]
       ==
+      ::
         %invite-accepted
       :-  %invite-accepted
       %-  pairs
@@ -78,11 +89,13 @@
           [%ship s+(scot %p ship.path.rct)]
           [%member (memb:encode member.rct)]
       ==
-      :: %stamped
-      :: :-  %stamped
-      :: %-  pairs
-      :: :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-      :: ==
+      ::
+        %kicked
+      :-  %kicked
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%ship s+(scot %p ship.rct)]
+      ==
     ==
   ::
   ::
@@ -151,7 +164,15 @@
           [%accept-invite accept-invite-payload]
           [%invited invited-payload]
           [%stamped stamped-payload]
+          [%kick-member kicked-payload]
       ==
+    ::
+    ++  kicked-payload
+      %-  ot
+      :~  [%path pth]
+          [%ship (su ;~(pfix sig fed:ag))]
+      ==
+    ::
     ::
     ++  stamped-payload
       %-  ot
