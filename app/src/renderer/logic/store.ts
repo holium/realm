@@ -51,14 +51,13 @@ export const Services = types
   }));
 
 const desktopSnapshot = loadSnapshot('desktop');
-const shellSnapshot = loadSnapshot('shell');
 
 const services = Services.create({
   // shell: {
   //   desktop: (shellSnapshot && shellSnapshot.desktop) || {},
   // },
   desktop: desktopSnapshot || {},
-  shell: shellSnapshot || {},
+  shell: {},
   identity: {
     auth: {
       loader: { state: 'initial' },
