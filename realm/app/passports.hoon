@@ -317,9 +317,9 @@
     `state
   ::
   ++  handle-accepted
-    |=  [path=space-path:spaces =ship =roles:membership-store]
+    |=  [path=space-path:spaces =ship =member:membership-store]
     ^-  (quip card _state)
-    ~&  >  [path ship roles]
+    ~&  >  [path ship member]
     `state
   ::
   --
@@ -403,10 +403,11 @@
   |=  =members:membership-store
   ^-  passports:store
   %-  ~(rep by members)
-  |=  [[=ship =roles:membership-store] passports=(map ship passport:store)]
+  |=  [[=ship =member:membership-store] passports=(map ship passport:store)]
   =|  passport=passport:store
   =.  alias.passport  ''
-  =.  roles.passport  roles
+  =.  roles.passport    roles.member
+  =.  status.passport   status.member
   (~(put by passports) ship passport)
 ::
 ++  on-spaces-replace

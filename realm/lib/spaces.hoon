@@ -117,9 +117,18 @@
     ^-  json
     %-  pairs
     %+  turn  ~(tap by members)
-    |=  [=^ship =roles:member-store]
+    |=  [=^ship =member:member-store]
     ^-  [cord json]
-    [(scot %p ship) [%a (turn ~(tap in roles) |=(rol=role:member-store s+(scot %tas rol)))]] 
+    [(scot %p ship) (memb member)] 
+  ::
+  ++  memb
+    |=  =member:member-store
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
+        ['status' s+(scot %tas status.member)]
+        :: ['pinned' b+pinned.member]
+    ==
   ::
   ++  spc
     |=  =space
@@ -171,7 +180,7 @@
       %-  ot
       :~  [%slug so]
           [%payload add-payload]
-          [%members (op ;~(pfix sig fed:ag) (as rol))]
+          [%members (op ;~(pfix sig fed:ag) memb)]
       ==
     ::
     ++  update-space
@@ -229,6 +238,13 @@
           [%wallpaper so]
       ==
     ::
+    ++  memb
+      %-  ot
+      :~  [%roles (as rol)]
+          [%status status]
+          :: [%pinned bo]
+      ==
+    ::
     ++  theme-mode
       |=  =json
       ^-  theme-mode:store
@@ -250,7 +266,6 @@
       |=  =json
       ^-  role:member-store
       ?>  ?=(%s -.json)
-      ?:  =('invited' p.json)    %invited
       ?:  =('initiate' p.json)   %initiate
       ?:  =('member' p.json)     %member
       ?:  =('admin' p.json)      %admin
@@ -275,6 +290,15 @@
       ?:  =('public' p.json)              %public
       ?:  =('antechamber' p.json)         %antechamber
       ?:  =('private' p.json)             %private
+      !!
+    ::
+    ++  status
+      |=  =json
+      ^-  status:member-store
+      ?>  ?=(%s -.json)
+      ?:  =('invited' p.json)     %invited
+      ?:  =('joined' p.json)      %joined
+      ?:  =('host' p.json)        %host
       !!
     --
   --

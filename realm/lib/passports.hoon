@@ -157,7 +157,6 @@
       |=  =json
       ^-  role:membership
       ?>  ?=(%s -.json)
-      ?:  =('invited' p.json)    %invited
       ?:  =('initiate' p.json)   %initiate
       ?:  =('member' p.json)     %member
       ?:  =('admin' p.json)      %admin
