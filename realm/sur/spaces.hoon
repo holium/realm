@@ -104,6 +104,7 @@
 +$  view
   $%  [%space =space]
       [%spaces =spaces]
+      [%members =members:membership]
   ==
 ::
 :::::::::::::
@@ -118,7 +119,9 @@
 
 +$  invite-reaction
   $%  [%invite-sent path=space-path =invite]
-      [%invite-accepted path=space-path =space]
+      [%invite-accepted path=space-path =ship =roles:membership]
+      :: [%initial path=space-path =space]
+
       :: [%invite-accepted path=space-path =ship]
       :: [%invite-received path=space-path =ship]
   ==

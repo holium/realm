@@ -84,6 +84,9 @@
     ::
         %spaces
       [%spaces (spaces-map:encode spaces.view)]
+    ::
+        %members
+      [%members (membs:encode members.view)]
     ==
   --
 ++  encode

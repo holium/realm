@@ -74,7 +74,8 @@
       :-  %invite-accepted
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%space (spc:encode:spaces-lib space.rct)]
+          [%ship s+(scot %p ship.path.rct)]
+          [%roles [%a (turn ~(tap in roles.rct) |=(rol=role:member-store s+(scot %tas rol)))]]
       ==
     ==
   ::
