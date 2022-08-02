@@ -14,4 +14,7 @@ export const ShellActions = {
   closeDialog: async () => {
     return await window.electron.os.shell.closeDialog();
   },
+  setIsMouseInWebview: async(isInWebview: boolean) => {
+    return await window.electron.os.shell.setIsMouseInWebview(isInWebview);
+  }
 }

@@ -26,7 +26,7 @@ import {
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
-  const { desktop } = useServices();
+  const { desktop, shell} = useServices();
   // const shipLoaded = ship?.loggedIn;
   const themeMode = desktop.theme.mode;
 
@@ -37,12 +37,12 @@ export const App: FC = observer(() => {
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
-        hide={desktop.isMouseInWebview}
+        hide={shell.isMouseInWebview}
         cursorColor={desktop.mouseColor}
         animateOut={false}
       />
     );
-  }, [desktop.mouseColor, desktop.isMouseInWebview]);
+  }, [desktop.mouseColor, shell.isMouseInWebview]);
 
   return (
     <CoreProvider value={coreStore}>

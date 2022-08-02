@@ -11,6 +11,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { AccessCode, HostingPlanet } from 'os/api/holium';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 interface StripePaymentProps extends BaseDialogProps {
   patp: string
@@ -114,7 +115,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
           <Flex flex={3} alignItems="center" justifyContent="center">
             <form onSubmit={handleSubmit}>
               <Flex flexDirection="column">
-                <Flex flex={6}>
+                <Flex flex={6} onMouseEnter={() => ShellActions.setIsMouseInWebview(true)} onMouseLeave={() => ShellActions.setIsMouseInWebview(false)}>
                   <PaymentElement />
                 </Flex>
                 <Flex mt={36} flex={1} align-items="flex-end" justifyContent="flex-end">
