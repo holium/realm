@@ -1,4 +1,5 @@
 import { WindowModelProps } from 'os/services/shell/desktop.model';
+import { ThemeModelType } from 'os/services/spaces/models/theme';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
 import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
@@ -20,6 +21,7 @@ export type BaseDialogProps = {
   onClose?: () => void; // is the funciton that executres when the dialog is closed
   hasCloseButton: boolean; // should the dialog have a close button in the top right
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
+  theme: ThemeModelType;
 } & BaseWorkflowProps;
 
 export type DialogConfig = {

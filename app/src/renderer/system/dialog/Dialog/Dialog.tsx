@@ -75,6 +75,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
             onPrevious={onPrevious}
             setState={setWorkflowState}
             workflowState={workflowState}
+            theme={desktop.theme}
           />
         )}
       </Flex>
