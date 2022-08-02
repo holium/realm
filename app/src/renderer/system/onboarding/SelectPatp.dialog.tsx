@@ -7,25 +7,33 @@ import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
+import { theme } from 'renderer/theme'
+import { transparentize } from 'polished';
 
 interface AvailablePlanetProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   patp: string
   selected: boolean
+  theme: any
   onClick: React.MouseEventHandler<HTMLDivElement>
 }
 
-// TODO fix hardcoded colors once shell.theme is available pre-login
 const AvailablePlanet: FC<AvailablePlanetProps> = (props: AvailablePlanetProps) => {
+
+  const background = darken(.01, props.theme.windowColor);
+  const border = `1px solid ${transparentize(.9, '#000000')}`
   const Unselected = (props: any) => (
-    <Box pl={2} height={40} minWidth={180} border="1px solid rgba(0, 0, 0, 0.1)" background={darken(.01, '#f0ecec')} borderRadius={6} mb={12} mr={12} onClick={props.onClick}>
+    <Box pl={2} height={40} minWidth={180} border={border} background={background} borderRadius={6} mb={12} mr={12} onClick={props.onClick}>
       <Flex height="100%" width="100%" flexDirection="row" alignItems="center" justifyContent="space-around">
         <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
         <Text fontSize={14} fontWeight={400} pr={2}> { props.patp } </Text>
       </Flex>
     </Box>
-  )
+  );
+
+  const selectedBackground = transparentize(.8, theme.light.colors.brand.primary);
+  const selectedBorder = `1px solid ${transparentize(.5, theme.light.colors.brand.primary)}`;
   const Selected = (props: any) => (
-    <Box pl={2} height={40} minWidth={180} border="1px solid rgba(78, 158, 253, 0.4)" background="rgba(78, 158, 253, 0.12)" borderRadius={6} mb={12} mr={12}  onClick={props.onClick}>
+    <Box pl={2} height={40} minWidth={180} border={selectedBorder} background={selectedBackground} borderRadius={6} mb={12} mr={12}  onClick={props.onClick}>
       <Flex height="100%" width="100%" flexDirection="row" alignItems="center" justifyContent="space-around">
         <Sigil color={['black', 'white']} size={25} simple patp={props.patp} />
         <Text fontSize={14} fontWeight={500} color="brand.primary" pr={2}> { props.patp } </Text>
@@ -74,6 +82,7 @@ const SelectPatp: FC<BaseDialogProps> = observer(
                   key={index}
                   patp={planet.patp}
                   selected={index === selectedIndex}
+                  theme={props.theme}
                   onClick={() => setSelectedIndex(index)}/>
               ))
             }

@@ -51,7 +51,6 @@ const HostingConfirmation: FC<SelectPlanProps> = observer(
         })
     }, 5000)
 
-    // TODO fix hardcoded colors once shell.theme is available pre-login
     return (
       <Grid.Column noGutter lg={12} xl={12}>
         <Flex width="100%" height="100%" flexDirection="column" alignItems="center" justifyContent="space-around">

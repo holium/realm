@@ -87,7 +87,6 @@ const MainComponent: FC<StripePaymentProps> = observer(
     };
 
 
-    // TODO fix hardcoded colors once shell.theme is available pre-login
     return (
       <Flex width="100%" height="100%" flexDirection="row">
           <Box flex={2} display="flex" flexDirection="column">
