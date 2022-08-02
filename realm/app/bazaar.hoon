@@ -299,8 +299,9 @@
     ?~  members  %.n
     =/  member  (~(get by u.members) ship)
     ?~  member  %.n
-    =/  passport  .^(passport:passport-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/passport/[space]/noun)
-    ?:(=(status.passport 'joined') %.y %.n)
+    (~(any in roles.member) |=(a=@ ?=(a %invited)))
+    :: =/  passport  .^(passport:passport-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/passport/[space]/noun)
+    :: ?:(=(status.passport 'joined') %.y %.n)
   --
 ++  view
   |%
