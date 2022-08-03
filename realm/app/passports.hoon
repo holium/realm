@@ -214,25 +214,6 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  core  .
-::  invite (watch) handling
-++  inv
-  |%
-  ++  on
-    |=  [=invite-reaction:sp-sur]
-    ^-  (quip card _state)
-    ::  only handle reactions this agent
-    ::  is interested in ignore all other reactions
-    ?+  -.invite-reaction  `state
-      %invite-accepted  (acc +.invite-reaction)
-    ==
-  ::
-  ::  $acc:  on invite-accepted, began watching
-  ++  acc
-    |=  [path=space-path:sp-sur =space:sp-sur]
-    :_  state
-    :~  [%pass /spaces/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
-    ==
-  --
 ::
 ++  act
   |=  =action:store
