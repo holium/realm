@@ -214,6 +214,25 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  core  .
+::  invite (watch) handling
+++  inv
+  |%
+  ++  on
+    |=  [=invite-reaction:sp-sur]
+    ^-  (quip card _state)
+    ::  only handle reactions this agent
+    ::  is interested in ignore all other reactions
+    ?+  -.invite-reaction  `state
+      %invite-accepted  (acc +.invite-reaction)
+    ==
+  ::
+  ::  $acc:  on invite-accepted, began watching
+  ++  acc
+    |=  [path=space-path:sp-sur =space:sp-sur]
+    :_  state
+    :~  [%pass /spaces/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
+    ==
+  --
 ::
 ++  act
   |=  =action:store
@@ -238,11 +257,11 @@
     ~&  >>>  "{<dap.bowl>}: handle-add - {<ship>} already exists"
     `state
   ::  if needed, add a create method; otherwise the statement below
-  ::    will construct a civ object w/ defaults based on types
+  ::    will construct a passport object w/ defaults based on types
   =|  passport=passport:store
-  ::  update the civ instance with values from the attributes
+  ::  update the passport instance with values from the attributes
   =/  passport  (update-passport passport payload)
-  ::  put updated civ back in civs map
+  ::  put updated passport back in passports map
   =/  passports  (~(put by u.passports) ship passport)
   =/  notify=action:hark  (notify path /invite (crip " issued you a passport to the {<`@t`(scot %tas space.path)>} space in Realm."))
   :_  state(people (~(put by people) ship *person:store), districts (~(put by districts) path passports))
