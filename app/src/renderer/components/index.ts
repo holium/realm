@@ -1,4 +1,3 @@
-import { IconPathsType } from './Icons/icons';
 export * from './Box';
 export * from './Card';
 export * from './Column';

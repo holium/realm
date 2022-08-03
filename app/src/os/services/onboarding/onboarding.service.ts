@@ -10,7 +10,11 @@ import {
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { OnboardingStore, OnboardingStoreType, OnboardingStep } from './onboarding.model';
+import {
+  OnboardingStore,
+  OnboardingStoreType,
+  OnboardingStep,
+} from './onboarding.model';
 import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
@@ -37,7 +41,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setPassword': this.setPassword,
     'realm.onboarding.installRealm': this.installRealm,
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
-  }
+  };
 
   static preload = {
     setStep(step: OnboardingStep) {
@@ -106,8 +110,8 @@ export class OnboardingService extends BaseService {
 
     completeOnboarding() {
       return ipcRenderer.invoke('realm.onboarding.completeOnboarding');
-    }
-  }
+    },
+  };
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
@@ -118,9 +122,10 @@ export class OnboardingService extends BaseService {
     });
 
     let persistedState: OnboardingStoreType = this.db.store;
-    this.state = Object.keys(persistedState).length !== 0
-      ? OnboardingStore.create(castToSnapshot(persistedState))
-      : OnboardingStore.create();
+    this.state =
+      Object.keys(persistedState).length !== 0
+        ? OnboardingStore.create(castToSnapshot(persistedState))
+        : OnboardingStore.create();
 
     onSnapshot(this.state, (snapshot) => {
       this.db!.store = castToSnapshot(snapshot);
@@ -170,20 +175,29 @@ export class OnboardingService extends BaseService {
       return account.planets;
     }
 
-    let planets = await this.core.holiumClient.getPlanets(auth.accountId, this.state.accessCode?.id);
+    let planets = await this.core.holiumClient.getPlanets(
+      auth.accountId,
+      this.state.accessCode?.id
+    );
     return planets;
   }
 
-  async getAccessCode(_event: any, code: string): Promise<{invalid: boolean, accessCode: AccessCode | null }> {
-    let accessCode = await this.core.holiumClient.getAccessCode(code)
-    return { invalid: accessCode ? false : true, accessCode }
+  async getAccessCode(
+    _event: any,
+    code: string
+  ): Promise<{ invalid: boolean; accessCode: AccessCode | null }> {
+    let accessCode = await this.core.holiumClient.getAccessCode(code);
+    return { invalid: accessCode ? false : true, accessCode };
   }
 
   async prepareCheckout() {
     const { auth } = this.core.services.identity;
-    let { clientSecret } = await this.core.holiumClient.prepareCheckout(auth.accountId!, this.state.planet!.patp);
-    auth.setClientSecret(clientSecret)
-    return clientSecret
+    let { clientSecret } = await this.core.holiumClient.prepareCheckout(
+      auth.accountId!,
+      this.state.planet!.patp
+    );
+    auth.setClientSecret(clientSecret);
+    return clientSecret;
   }
 
   async setAccessCode(_event: any, accessCode: AccessCode) {
@@ -191,8 +205,11 @@ export class OnboardingService extends BaseService {
   }
 
   async completeCheckout() {
-    const { auth } = this.core.services.identity
-    let { checkoutComplete } = await this.core.holiumClient.completeCheckout(auth.accountId!, this.state.planet!.patp)
+    const { auth } = this.core.services.identity;
+    let { checkoutComplete } = await this.core.holiumClient.completeCheckout(
+      auth.accountId!,
+      this.state.planet!.patp
+    );
 
     if (!checkoutComplete) {
       throw new Error('Unable to complete checkout.');
@@ -205,13 +222,17 @@ export class OnboardingService extends BaseService {
   async checkShipBooted(): Promise<boolean> {
     const { auth } = this.core.services.identity;
     let ships = await this.core.holiumClient.getShips(auth.accountId!);
-    let ship = ships.find(ship => ship.patp === this.state.planet!.patp);
+    let ship = ships.find((ship) => ship.patp === this.state.planet!.patp);
 
     if (!ship?.code) {
       return false;
     }
 
-    await this.addShip('_event', { patp: ship.patp, url: ship.link!, code: ship.code })
+    await this.addShip('_event', {
+      patp: ship.patp,
+      url: ship.link!,
+      code: ship.code,
+    });
     return true;
   }
 
@@ -226,13 +247,13 @@ export class OnboardingService extends BaseService {
       this.state.setShip({
         patp,
         cookie,
-        url
+        url,
       });
 
       return { url, cookie, patp };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
-      throw new Error('Failed to connect to ship')
+      throw new Error('Failed to connect to ship');
     }
   }
 
@@ -242,9 +263,9 @@ export class OnboardingService extends BaseService {
 
   async getProfile(_event: any) {
     if (!this.state.ship)
-      throw new Error('Cannot get profile, onboarding ship not set.')
+      throw new Error('Cannot get profile, onboarding ship not set.');
 
-    console.log('get profile', castToSnapshot(this.state.ship))
+    console.log('get profile', castToSnapshot(this.state.ship));
 
     const { url, cookie, patp } = this.state.ship;
     const ourProfile = await ContactApi.getContact(patp, {
@@ -257,7 +278,6 @@ export class OnboardingService extends BaseService {
     return ourProfile;
   }
 
-
   async setProfile(
     _event: any,
     profileData: {
@@ -266,7 +286,7 @@ export class OnboardingService extends BaseService {
       avatar: string | null;
     }
   ) {
-    console.log('setting profile', profileData)
+    console.log('setting profile', profileData);
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
 
@@ -274,10 +294,10 @@ export class OnboardingService extends BaseService {
     const credentials = {
       ship: patp,
       url,
-      cookie: cookie!
+      cookie: cookie!,
     };
 
-    console.log('creds', credentials)
+    console.log('creds', credentials);
 
     const updatedProfile = await ContactApi.saveContact(
       patp,
@@ -292,7 +312,7 @@ export class OnboardingService extends BaseService {
 
   async setPassword(_event: any, password: string) {
     // TODO store password hash
-    console.log('placeholder: saving password...')
+    console.log('placeholder: saving password...');
   }
 
   async installRealm(_event: any, ship: string) {
@@ -306,10 +326,11 @@ export class OnboardingService extends BaseService {
       throw new Error('Cannot complete onboarding, ship not set.');
 
     const ship = clone(this.state.ship);
-    const authShip = AuthShip.create({ ...ship, id: `auth${ship.patp}`});
+    const authShip = AuthShip.create({ ...ship, id: `auth${ship.patp}` });
 
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setFirstTime();
+    this.core.services.shell.closeDialog(null);
     this.core.services.ship.storeNewShip(authShip);
   }
 }

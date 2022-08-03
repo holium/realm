@@ -122,6 +122,24 @@ export const Text = styled(motion.p)<TextProps>`
     `}
 `;
 
+export const Anchor = styled(motion.a)<TextProps>`
+  ${textVariants}
+  ${(props) =>
+    props.fontByName &&
+    css`
+      font-family: ${props.theme.fontByName[props.fontByName]};
+    `};
+  ${(props) =>
+    props.fontByType &&
+    css`
+      font-family: ${props.theme.fonts[props.fontByType]};
+    `}
+`;
+
 Text.defaultProps = {
+  variant: 'inherit',
+};
+
+Anchor.defaultProps = {
   variant: 'inherit',
 };

@@ -21,7 +21,6 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { onboarding } = useServices();
 
-
     const shipName = onboarding.ship!.patp;
     const shipNick = onboarding.ship!.nickname;
     const shipColor = onboarding.ship!.color!;
@@ -122,9 +121,8 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
           >
             <TextButton
               disabled={!onboarding.installer.isLoaded}
-              onClick={async (evt: any) => {
+              onClick={async (_evt: any) => {
                 await OnboardingActions.completeOnboarding();
-                ShellActions.setBlur(false);
               }}
             >
               Next

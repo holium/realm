@@ -71,11 +71,13 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   };
   const clickSubmit = (event: any) => {
     event.stopPropagation();
-    window.electron.os.auth.login(
-      pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
-    );
+    window.electron.os.auth
+      .login(
+        pendingShip!.patp,
+        // @ts-ignore
+        passwordRef!.current!.value
+      )
+      .catch((err) => console.warn(err));
   };
 
   let colorProps = null;

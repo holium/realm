@@ -89,7 +89,7 @@ export class AuthService extends BaseService {
   }
 
   setAccountId(accountId: string) {
-    this.state.setAccountId(accountId)
+    this.state.setAccountId(accountId);
   }
 
   get clientSecret() {

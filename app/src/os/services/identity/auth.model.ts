@@ -9,8 +9,10 @@ import {
 import { ThemeModel } from '../shell/theme.model';
 import { LoaderModel } from '../common.model';
 import { StepList } from '../common.model';
+import { Patp } from '../../urbit/types';
 
-export const DEFAULT_WALLPAPER = 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
+export const DEFAULT_WALLPAPER =
+  'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
 
 export const AuthShip = types
   .model('AuthShipModel', {
@@ -47,7 +49,7 @@ export const AuthStore = types
     ships: types.map(AuthShip),
     order: types.optional(types.array(types.string), []), // patp string
     accountId: types.maybe(types.string),
-    clientSecret: types.maybe(types.string)
+    clientSecret: types.maybe(types.string),
   })
   .views((self) => ({
     get isLoading() {
@@ -113,7 +115,9 @@ export const AuthStore = types
     },
     completeSignup(id: string) {
       self.selected = self.ships.get(id);
-      if (!self.order.find((orderedShip: any) => orderedShip.id === id)) {
+      if (
+        self.order.findIndex((orderedShip: Patp) => orderedShip === id) !== -1
+      ) {
         self.order.push(id);
       }
     },
