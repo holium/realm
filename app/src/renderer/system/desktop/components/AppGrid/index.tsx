@@ -13,6 +13,8 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { Members } from './Members';
 import { PassportsActions } from 'renderer/logic/actions/passports';
+import { BazaarActions } from 'renderer/logic/actions/bazaar';
+import { isValidPatp } from 'urbit-ob';
 
 type HomeWindowProps = {};
 
@@ -31,8 +33,13 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { ship, spaces, shell } = useServices();
   const { desktop } = shell;
   const [passports, setPassports] = useState([]);
+  //  apps is already defined, name bazaarApps instead
+  const [bazaarApps, setBazaarApps] = useState([]);
   // const [sidebar, setSidebar] = useState<SidebarType>('people');
   const [sidebar, setSidebar] = useState<SidebarType>(null);
+  const [searchString, setSearchString] = useState('');
+  const [searchPlaceholder, setSearchPlaceholder] = useState('Search');
+  const [selectedShip, setSelectedShip] = useState('');
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
@@ -48,6 +55,15 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
       );
     }
   }, [spaces.selected?.path]);
+
+  useEffect(() => {
+    if (selectedShip) {
+      BazaarActions.getApps(selectedShip).then((apps: any) => {
+        console.log(apps);
+        setBazaarApps(apps);
+      });
+    }
+  }, [selectedShip]);
 
   // console.log(passports);
 
@@ -145,7 +161,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 flex={8}
                 className="realm-cursor-text-cursor"
                 type="text"
-                placeholder="Search for apps"
+                placeholder={searchPlaceholder}
                 bgOpacity={0.3}
                 borderColor={'input.borderHover'}
                 bg="bg.blendedBg"
@@ -161,6 +177,27 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                     <Icons name="Search" size="18px" opacity={0.5} />
                   </Flex>
                 }
+                value={searchString}
+                onKeyDown={(evt: any) => {
+                  if (evt.key === 'Enter' && isValidPatp(searchString)) {
+                    setSearchPlaceholder(
+                      [searchString, ': Search for apps...'].join(' ')
+                    );
+                    setSelectedShip(searchString);
+                    setSearchString('');
+                  } else if (evt.key === 'Escape') {
+                    setSearchPlaceholder('Search...');
+                    setSelectedShip('');
+                    setSearchString('');
+                  }
+                }}
+                onChange={(e: any) => {
+                  setSearchString(e.target.value);
+                  if (isValidPatp(e.target.value)) {
+                  }
+                }}
+                onFocus={() => {}}
+                onBlur={() => {}}
               />
               <Flex flex={1} justifyContent="flex-end">
                 <IconButton

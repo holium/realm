@@ -10,6 +10,7 @@ import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
+import { BazaarService } from './services/spaces/bazaar.service';
 import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
 
@@ -32,6 +33,7 @@ export class Realm extends EventEmitter {
     ship: ShipService;
     spaces: SpacesService;
     shell: DesktopService;
+    bazaar: BazaarService;
   };
 
   readonly handlers = {
@@ -58,6 +60,7 @@ export class Realm extends EventEmitter {
     ship: ShipService.preload,
     spaces: SpacesService.preload,
     shell: DesktopService.preload,
+    bazaar: BazaarService.preload,
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -82,6 +85,7 @@ export class Realm extends EventEmitter {
       ship: new ShipService(this),
       spaces: new SpacesService(this),
       shell: new DesktopService(this),
+      bazaar: new BazaarService(this),
     };
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
