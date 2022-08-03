@@ -313,14 +313,15 @@
   |%
   ::
   ++  on-sent
-    |=  [path=space-path:spaces =invite:spaces]
+    |=  [path=space-path:spaces =ship =role:membership-store]
     ^-  (quip card _state)
-    ~&  >  [path invite]
+    ~&  >  [path ship role]
     `state
   ::
   ++  on-accepted
     |=  [path=space-path:spaces =ship =member:membership-store]
     ^-  (quip card _state)
+    ~&  >  ['invite accepted' ship member]
     `state
   ::
   ++  on-kicked

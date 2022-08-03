@@ -79,7 +79,8 @@
       :-  %invite-sent
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%invite (invite:encode invite.rct)]
+          [%ship s+(scot %p ship.path.rct)]
+          [%role s+(scot %tas role.rct)]
       ==
       ::
         %invite-accepted
@@ -109,7 +110,7 @@
         %invitations
       :-  %invitations
       %-  pairs
-      :~  [%invites (our-invites:encode invites.view)]
+      :~  [%invites (invitations:encode invites.view)]
       ==
     ==
   --
@@ -117,15 +118,41 @@
 ++  encode
   =,  enjs:format
   |%
-  ++  our-invites
-    |=  =our-invites:store
+  ++  invitations
+    |=  =invitations:store
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['outgoing' (outgoing-map outgoing.invitations)]
+        ['incoming' (incoming-map incoming.invitations)]
+    ==
+  ++  outgoing-map
+    |=  outgoing=outgoing-invitations:store
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by our-invites)
+    %+  turn  ~(tap by outgoing)
+    |=  [pth=space-path:store invitations=space-invitations:store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (invite-map invitations)]
+  ::
+  ++  incoming-map
+    |=  incoming=incoming-invitations:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by incoming)
     |=  [pth=space-path:store inv=invite:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [spc-path (invite inv)]
+  ::
+  ++  invite-map
+    |=  =space-invitations:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by space-invitations)
+    |=  [=^ship inv=invite:store]
+    ^-  [cord json]
+    [(scot %p ship) (invite inv)]
   ::
   ++  invite
     |=  =invite:store

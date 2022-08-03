@@ -243,7 +243,7 @@
     =/  deleted             (~(got by spaces.state) path)
     =.  spaces.state        (~(del by spaces.state) path.deleted)
     =.  membership.state    (~(del by membership.state) path.deleted)
-    =/  watch-paths           [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths         [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
     :-  (spaces:send-reaction [%remove path] watch-paths)
     state
   ::
@@ -330,9 +330,10 @@
     =/  members                     (~(put by (~(got by membership.state) path)) [ship [roles=(silt `(list role:membership-store)`~[role]) status=%invited]])
     =.  membership.state            (~(put by membership.state) [path members])
     =.  outgoing.invitations.state  (set-outgoing path ship new-invite)
+    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
     :_  state
     :~  [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]     ::  Send invite request to host
-        [%give %fact [/updates /our ~] invite-reaction+!>([%invite-sent path new-invite])]    ::  Notify watchers
+        [%give %fact watch-paths invite-reaction+!>([%invite-sent path new-invite])]            ::  Notify watchers
     ==
     ::
     ++  set-outgoing
@@ -368,8 +369,10 @@
     =/  space-invites               (~(got by outgoing.invitations.state) path)
     =.  space-invites               (~(del by space-invites) accepter)
     =.  outgoing.invitations.state  (~(put by outgoing.invitations.state) [path space-invites])
+    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
     :_  state
     :~  [%pass / %agent [accepter dap.bowl] %poke invite-action+!>([%stamped path])]  :: Send space to invitee
+        [%give %fact watch-paths invite-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
     ==
   ::
   ++  handle-stamped
@@ -404,15 +407,19 @@
   |%
   ::
   ++  on-sent
-    |=  [path=space-path:store =invite:store]
+    |=  [path=space-path:store =ship =role:membership-store]
     ^-  (quip card _state)
-    ~&  >  [path invite]
+    ~&  >  [path ship role]
+    =/  members                     (~(put by (~(got by membership.state) path)) [ship [roles=(silt `(list role:membership-store)`~[role]) status=%invited]])
+    =.  membership.state            (~(put by membership.state) [path members])
     `state
   ::
   ++  on-accepted
     |=  [path=space-path:store =ship =member:membership-store]
     ^-  (quip card _state)
     ~&  >  [path]
+    =/  members                     (~(put by (~(got by membership.state) path)) [ship member])
+    =.  membership.state            (~(put by membership.state) [path members])
     `state
   ::
   ++  on-kicked

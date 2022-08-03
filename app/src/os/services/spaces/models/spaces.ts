@@ -18,6 +18,44 @@ export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
 
+export const Invite = types.model({
+  inviter: types.string,
+  patp: types.string,
+  role: types.string,
+  message: types.string,
+  name: types.string,
+  type: types.string,
+  invitedAt: types.Date,
+});
+
+export const InvitationsModel = types
+  .model({
+    incoming: types.map(Invite), // Map<SpacePath, Invite>
+    outgoing: types.map(types.map(Invite)), // Map<SpacePath, Map<Patp, Invite>>
+  })
+  .views((self) => ({
+    get invitations() {
+      return self.incoming;
+    },
+    get sent() {
+      return self.outgoing;
+    },
+    sentByPlace(placePath: string) {
+      return self.outgoing.get(placePath);
+    },
+  }))
+  .actions((self) => ({
+    initial(data: any) {
+      // set initial data
+    },
+    updateIncoming(data: any) {
+      // update incoming invitations
+    },
+    updateOutgoing(data: any) {
+      // update outgoing invitations
+    },
+  }));
+
 export const SpaceModel = types
   .model('SpaceModel', {
     path: types.identifier,
@@ -28,6 +66,10 @@ export const SpaceModel = types
     picture: types.maybeNull(types.string),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
+    invitations: types.optional(InvitationsModel, {
+      outgoing: {},
+      incoming: {},
+    }),
     apps: types.model({
       pinned: types.array(types.string),
       endorsed: DocketMap, // recommended
@@ -110,7 +152,10 @@ export const SpacesStore = types
       delete data[our[0]!];
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
-          const persistedData = persistedState.spaces[path];
+          const persistedData =
+            persistedState && persistedState.spaces
+              ? persistedState.spaces[path]
+              : {};
           data[path].apps = {
             ...persistedData.apps,
             installed: clone(tempApps.installed),

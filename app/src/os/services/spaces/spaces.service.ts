@@ -39,10 +39,14 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
-    'realm.spaces.get-passports': this.getPassports,
+    'realm.spaces.get-members': this.getMembers,
+    'realm.spaces.get-friends': this.getFriends,
   };
 
   static preload = {
+    getOurGroups: () => {
+      return ipcRenderer.invoke('realm.spaces.get-our-groups');
+    },
     selectSpace: (spaceId: string) => {
       return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
@@ -64,8 +68,11 @@ export class SpacesService extends BaseService {
     deleteSpace: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.delete-space', path);
     },
-    getPassports: (path: any) => {
-      return ipcRenderer.invoke('realm.spaces.get-passports', path);
+    getMembers: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.get-members', path);
+    },
+    getFriends: () => {
+      return ipcRenderer.invoke('realm.spaces.get-friends');
     },
   };
 
@@ -178,9 +185,13 @@ export class SpacesService extends BaseService {
     return toJS(newSpace);
   }
 
-  async getPassports(_event: any, path: string) {
-    console.log(path);
-    const response = await PassportsApi.getPassports(this.core.conduit!, path);
+  async getMembers(_event: any, path: string) {
+    const response = await SpacesApi.getMembers(this.core.conduit!, path);
+    console.log(response);
+    return response;
+  }
+  async getFriends(_event: any) {
+    const response = await SpacesApi.getFriends(this.core.conduit!);
     console.log(response);
     return response;
   }

@@ -12,7 +12,6 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { Members } from './Members';
-import { PassportsActions } from 'renderer/logic/actions/passports';
 
 type HomeWindowProps = {};
 
@@ -30,7 +29,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
   const { ship, spaces, shell } = useServices();
   const { desktop } = shell;
-  const [passports, setPassports] = useState([]);
+  const [members, setMembers] = useState([]);
   // const [sidebar, setSidebar] = useState<SidebarType>('people');
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
@@ -40,16 +39,11 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
 
   useEffect(() => {
     if (spaces.selected?.path) {
-      PassportsActions.getPassports(spaces.selected!.path!).then(
-        (passes: any) => {
-          console.log(passes);
-          setPassports(passes);
-        }
-      );
+      SpacesActions.getMembers(spaces.selected!.path!).then((members: any) => {
+        setMembers(members);
+      });
     }
   }, [spaces.selected?.path]);
-
-  // console.log(passports);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -88,7 +82,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         )}
       </AnimatePresence>
     );
-  }, [sidebar, passports]);
+  }, [sidebar, members]);
 
   return (
     <AnimatePresence>

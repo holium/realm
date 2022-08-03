@@ -51,7 +51,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
           const open = !selected && desktop.isOpenWindow(app.id);
           return (
             <Reorder.Item
-              key={`${app.id}-${spaces.selected?.path}`}
+              key={`pinned-${app.id}-${spaces.selected?.path}`}
               value={app}
               style={{ zIndex: 1 }}
               initial={{
@@ -140,7 +140,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       <AnimatePresence>
         {pinnedApps}
         {activeAndUnpinned.length ? (
-          <Divider customBg={dividerBg} ml={2} mr={2} />
+          <Divider key="app-dock-divider" customBg={dividerBg} ml={2} mr={2} />
         ) : (
           []
         )}
@@ -148,7 +148,6 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
           const app = spaces.selected?.getAppData(unpinnedApp.id)!;
-          console.log(toJS(spaces.selected));
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (

@@ -6,7 +6,11 @@ export const quickPoke = async (
   ship: string,
   data: { app: string; mark: string; json: any },
   credentials: { url: string; cookie: string },
-  response?: { path?: string; mark?: string; op?: 'add' | 'replace' | 'remove' }
+  response?: {
+    path?: string;
+    mark?: string;
+    op?: 'add' | 'replace' | 'remove' | string;
+  }
 ) => {
   const { url, cookie } = credentials;
   let path: string | undefined = undefined;

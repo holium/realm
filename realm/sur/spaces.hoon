@@ -48,9 +48,11 @@
   $:  outgoing=(map space-path space-invitations)
       incoming=(map space-path invite)
   ==
+::
++$  outgoing-invitations  (map space-path space-invitations)
 ::         
-+$  our-invites         (map space-path invite)
-+$  space-invitations   (map ship invite)
++$  incoming-invitations  (map space-path invite)
++$  space-invitations     (map ship invite)
 +$  invite
   $:  inviter=ship
       path=space-path
@@ -123,13 +125,13 @@
   ==
 
 +$  invite-reaction
-  $%  [%invite-sent path=space-path =invite]
+  $%  [%invite-sent path=space-path =ship =role:membership]
       [%invite-accepted path=space-path =ship =member:membership]
       [%kicked path=space-path =ship]
   ==
 ::
 +$  invite-view
-  $%  [%invitations invites=our-invites]
+  $%  [%invitations invites=invitations]
   ==
 ::
 --
