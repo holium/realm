@@ -13,7 +13,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
-  const { shell, spaces } = useServices();
+  const { shell, spaces, bazaar } = useServices();
   const { desktop } = shell;
 
   const dividerBg = useMemo(
@@ -22,12 +22,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   );
 
   const orderedList = useMemo(
-    () => (spaces.selected ? spaces.selected.pinnedApps! : []),
-    [
-      spaces.selected?.path,
-      spaces.selected?.apps.pinned,
-      spaces.selected?.pinnedApps,
-    ]
+    () => (spaces.selected ? bazaar.pinnedApps! : []),
+    [bazaar.pinned, bazaar.pinnedApps]
   );
 
   const pinnedApps = useMemo(() => {
@@ -123,14 +119,14 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.activeWindow?.id,
     desktop.openAppIds,
     spaces.selected?.path,
-    spaces.selected?.apps.pinned,
-    spaces.selected?.pinnedApps,
+    bazaar.pinned,
+    bazaar.pinnedApps,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       spaces.selected &&
-      spaces.selected.pinnedApps.findIndex(
+      bazaar.pinnedApps.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );
@@ -147,7 +143,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       </AnimatePresence>
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
-          const app = spaces.selected?.getAppData(unpinnedApp.id)!;
+          const app = bazaar.getAppData(unpinnedApp.id)!;
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (

@@ -1,3 +1,4 @@
+import { BazaarModel } from './../../os/services/spaces/models/bazaar';
 import { DesktopActions } from './actions/desktop';
 import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
@@ -37,6 +38,7 @@ export const Services = types
     }),
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
+    bazaar: BazaarModel,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -67,6 +69,7 @@ const services = Services.create({
     loader: { state: 'initial' },
     spaces: undefined,
   },
+  bazaar: {},
 });
 
 export const servicesStore = services;
@@ -191,6 +194,9 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
     }
+    if (value.resource === 'bazaar') {
+      applyPatch(servicesStore.bazaar, value.patch);
+    }
     if (value.resource === 'signup') {
       applyPatch(servicesStore.identity.signup, value.patch);
     }
@@ -218,6 +224,7 @@ window.electron.os.onEffect((_event: any, value: any) => {
       // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
+      console.log('initial', value.model);
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
       // servicesStore.spaces.setInitial(value.model);
       // spacesState.syncPatches(value);

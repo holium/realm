@@ -1,3 +1,4 @@
+import { initial } from './../../../../../urbit/pkg/interface/src/logic/reducers/launch-update';
 import { PassportsApi } from './../../api/passports';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
@@ -20,10 +21,13 @@ import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp } from 'os/types';
 import { FriendsApi } from '../../api/friends';
+import { FriendsType, FriendsStore } from './models/friends';
+import { BazaarModel } from './models/bazaar';
 
 type SpaceModels = {
   bazaar?: any;
   passports?: any;
+  friends: FriendsType;
 };
 /**
  * SpacesService
@@ -32,8 +36,9 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
-    bazaar: undefined,
+    bazaar: BazaarModel.create(),
     passports: undefined,
+    friends: FriendsStore.create(),
   };
   handlers = {
     'realm.spaces.set-selected': this.setSelected,
@@ -87,8 +92,10 @@ export class SpacesService extends BaseService {
       path: string,
       payload: { patp: string; role: MemberRole; message: string }
     ) => ipcRenderer.invoke('realm.spaces.invite-member', path, payload),
+    //
     kickMember: async (path: string, patp: string) =>
       ipcRenderer.invoke('realm.spaces.kick-member', path, patp),
+    //
     addFriend: async (patp: Patp) =>
       ipcRenderer.invoke('realm.spaces.add-friend', patp),
     //
@@ -103,7 +110,6 @@ export class SpacesService extends BaseService {
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
-    // this.friends = new FriendsService(core.conduit!);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -124,23 +130,13 @@ export class SpacesService extends BaseService {
     let persistedState: SpacesStoreType = this.db.store;
     this.state = SpacesStore.create(castToSnapshot(persistedState));
 
-    const tempApps = {
-      pinned: ['ballot', 'escape', 'webterm', 'landscape'],
-      endorsed: {},
-      ...(ship.docket.apps
-        ? {
-            installed: clone(DocketMap.create(getSnapshot(ship.docket.apps))),
-          }
-        : {
-            installed: [],
-          }),
-    };
+    this.models.bazaar.initial(getSnapshot(ship.docket.apps) || []);
 
     // Get the initial scry
     // TODO for some reason the initial selected reference is undefined so you cant
     // TODO reload to the same space you logged out from
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
-    this.state!.initialScry(spaces, tempApps, persistedState);
+    this.state!.initialScry(spaces, persistedState, patp);
     this.state!.selected &&
       this.core.services.shell.setTheme(this.state!.selected?.theme);
 
@@ -151,6 +147,7 @@ export class SpacesService extends BaseService {
       key: null,
       response: 'initial',
     };
+
     this.state.setLoader('loaded');
     this.core.onEffect(syncEffect);
 
@@ -164,6 +161,16 @@ export class SpacesService extends BaseService {
       const patchEffect = {
         patch,
         resource: 'spaces',
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
+
+    // Start patching after we've initialized the state
+    onPatch(this.models.bazaar, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'bazaar',
         response: 'patch',
       };
       this.core.onEffect(patchEffect);
@@ -281,17 +288,17 @@ export class SpacesService extends BaseService {
     const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
     console.log(space);
-    space.pinApp(appId);
+    this.models.bazaar.pinApp(appId);
     return;
   }
 
   async unpinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    this.state?.selected?.unpinApp(appId);
+    this.models.bazaar.unpinApp(appId);
     return;
   }
 
   setPinnedOrder(_event: IpcMainInvokeEvent, order: any[]) {
-    this.state?.selected?.setPinnedOrder(order);
+    this.models.bazaar.setPinnedOrder(order);
   }
 
   async setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {

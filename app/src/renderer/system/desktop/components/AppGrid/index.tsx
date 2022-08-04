@@ -29,7 +29,7 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
-  const { ship, spaces, shell } = useServices();
+  const { ship, spaces, shell, bazaar } = useServices();
   const { desktop } = shell;
   const [members, setMembers] = useState<any>([]);
   // const [sidebar, setSidebar] = useState<SidebarType>('people');
@@ -215,7 +215,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               >
                 {apps.map((app: any, index: number) => {
                   const spacePath = spaces.selected?.path!;
-                  const isAppPinned = spaces.selected?.isAppPinned(app.id);
+                  const isAppPinned = bazaar.isAppPinned(app.id);
                   return (
                     <AppTile
                       key={app.title + index + 'grid'}
