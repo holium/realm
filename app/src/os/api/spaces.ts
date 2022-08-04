@@ -6,6 +6,8 @@ import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
 // import { cleanNounColor } from '../lib/color';
 
+const pendingRequests: { [key: string]: (data?: any) => any } = {};
+
 export const SpacesApi = {
   getSpaces: async (conduit: Urbit) => {
     const response = await conduit.scry({
@@ -37,154 +39,120 @@ export const SpacesApi = {
   },
   createSpace: async (
     conduit: Urbit,
-    payload: { slug: string; payload: any; members: any },
-    credentials: ISession
-  ) => {
-    const response = await quickPoke(
-      conduit.ship!,
-      {
-        app: 'spaces',
-        mark: 'spaces-action',
-        json: {
-          add: payload,
-        },
+    payload: { slug: string; payload: any; members: any }
+  ): Promise<SpacePath> => {
+    console.log(payload);
+    await conduit.poke({
+      app: 'spaces',
+      mark: 'spaces-action',
+      json: {
+        add: payload,
       },
-      credentials,
-      { mark: 'spaces-reaction', path: '/response', op: 'add' }
-    );
-
-    return response;
+    });
+    return new Promise((resolve) => {
+      pendingRequests['spaces-action-add'] = (data: any) => {
+        resolve(data);
+      };
+    });
   },
   updateSpace: async (
     conduit: Urbit,
-    payload: { path: SpacePath; payload: any },
-    credentials: ISession
+    payload: { path: SpacePath; payload: any }
   ) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    const response = await quickPoke(
-      conduit.ship!,
-      {
-        app: 'spaces',
-        mark: 'spaces-action',
-        json: {
-          update: {
-            path: pathObj,
-            payload: snakeify(payload.payload),
-          },
+    const response = await conduit.poke({
+      app: 'spaces',
+      mark: 'spaces-action',
+      json: {
+        update: {
+          path: pathObj,
+          payload: snakeify(payload.payload),
         },
       },
-      credentials,
-      { mark: 'spaces-reaction', path: '/response', op: 'replace' }
-    );
-    return response;
+    });
+    return new Promise((resolve) => {
+      pendingRequests['spaces-action-replace'] = () => {
+        resolve(response);
+      };
+    });
   },
-  deleteSpace: async (
-    conduit: Urbit,
-    payload: { path: SpacePath },
-    credentials: ISession
-  ) => {
+  deleteSpace: async (conduit: Urbit, payload: { path: SpacePath }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    const response = await quickPoke(
-      conduit.ship!,
-      {
-        app: 'spaces',
-        mark: 'spaces-action',
-        json: {
-          remove: {
-            path: pathObj,
-          },
+    await conduit.poke({
+      app: 'spaces',
+      mark: 'spaces-action',
+      json: {
+        remove: {
+          path: pathObj,
         },
       },
-      credentials,
-      { mark: 'spaces-reaction', path: '/response', op: 'remove' }
-    );
-    return response;
+    });
+    return new Promise((resolve) => {
+      pendingRequests['spaces-action-remove'] = (data: any) => {
+        resolve(data);
+      };
+    });
   },
   sendInvite: async (
     conduit: Urbit,
     path: SpacePath,
-    payload: { patp: Patp; role: MemberRole; message: string },
-    credentials: ISession
+    payload: { patp: Patp; role: MemberRole; message: string }
   ) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    const response = await quickPoke(
-      conduit.ship!,
-      {
-        app: 'spaces',
-        mark: 'invite-action',
-        json: {
-          'send-invite': {
-            path: pathObj,
-            ship: payload.patp,
-            role: payload.role,
-            message: payload.message,
-          },
+    const response = await conduit.poke({
+      app: 'spaces',
+      mark: 'invite-action',
+      json: {
+        'send-invite': {
+          path: pathObj,
+          ship: payload.patp,
+          role: payload.role,
+          message: payload.message,
         },
       },
-      credentials,
-      {
-        mark: 'invite-reaction',
-        path: `spaces/${pathArr[1]}/${pathArr[2]}`,
-        op: 'invite-sent',
-      }
-    );
+    });
     return response;
   },
-  kickMember: async (
-    conduit: Urbit,
-    path: SpacePath,
-    patp: Patp,
-    credentials: ISession
-  ) => {
+  kickMember: async (conduit: Urbit, path: SpacePath, patp: Patp) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    const response = await quickPoke(
-      conduit.ship!,
-      {
-        app: 'spaces',
-        mark: 'invite-action',
-        json: {
-          'kick-member': {
-            path: pathObj,
-            ship: patp,
-          },
+    const response = await conduit.poke({
+      app: 'spaces',
+      mark: 'invite-action',
+      json: {
+        'kick-member': {
+          path: pathObj,
+          ship: patp,
         },
       },
-      credentials,
-      {
-        mark: 'invite-reaction',
-        path: `spaces/${pathArr[1]}/${pathArr[2]}`,
-        op: 'kicked',
-      }
-    );
+    });
     return response;
   },
   watchUpdates: (conduit: Urbit, state: SpacesStoreType): void => {
     conduit.subscribe({
       app: 'spaces',
       path: `/updates`,
-      event: async (data: any) => {
-        console.log(data);
+      event: async (data: any, id: string) => {
         if (data['spaces-reaction']) {
-          handleSpacesReactions(data['spaces-reaction'], state);
+          handleSpacesReactions(data['spaces-reaction'], state, id);
         }
         if (data['invite-reaction']) {
-          handleInviteReactions(data['invite-reaction'], state);
+          handleInviteReactions(data['invite-reaction'], state, id);
         }
       },
       err: () => console.log('Subscription rejected'),
@@ -193,7 +161,11 @@ export const SpacesApi = {
   },
 };
 
-const handleSpacesReactions = (data: any, state: SpacesStoreType) => {
+const handleSpacesReactions = (
+  data: any,
+  state: SpacesStoreType,
+  id: string
+) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
@@ -201,13 +173,23 @@ const handleSpacesReactions = (data: any, state: SpacesStoreType) => {
       state.initialReaction(data['initial']);
       break;
     case 'add':
-      console.log(data['add']);
+      const newSpace = state.addSpace(data['add']);
+      if (pendingRequests['spaces-action-add']) {
+        pendingRequests['spaces-action-add'](newSpace);
+        pendingRequests['spaces-action-add'] = () => {};
+      }
       break;
     case 'replace':
-      console.log(data['replace']);
+      state.updateSpace(data['replace']);
+      if (pendingRequests['spaces-action-replace']) {
+        pendingRequests['spaces-action-replace']();
+        pendingRequests['spaces-action-replace'] = () => {};
+      }
       break;
     case 'remove':
-      console.log(data['remove']);
+      const deleted = state.deleteSpace(data['remove']);
+      if (pendingRequests['spaces-action-remove'])
+        pendingRequests['spaces-action-remove'](deleted);
       break;
     default:
       // unknown
@@ -215,7 +197,11 @@ const handleSpacesReactions = (data: any, state: SpacesStoreType) => {
   }
 };
 
-const handleInviteReactions = (data: any, state: SpacesStoreType) => {
+const handleInviteReactions = (
+  data: any,
+  state: SpacesStoreType,
+  id: string
+) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'invite-sent':

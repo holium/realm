@@ -82,7 +82,7 @@ export const SpacesStore = types
         ([path, space]: [path: string, space: any]) => {
           const persistedData =
             persistedState && persistedState.spaces
-              ? persistedState.spaces[path]
+              ? persistedState.spaces[path].members
               : {};
           data[path].members = {};
         }
@@ -97,29 +97,32 @@ export const SpacesStore = types
     },
     initialReaction: (data: { spaces: any; membership: any }) => {
       Object.keys(data.spaces).forEach((key: string) => {
-        data.spaces[key].members = data.membership[key];
+        if (!data.spaces[key].all) {
+          data.spaces[key].all = {};
+        }
+        data.spaces[key].members = MembersStore.create({
+          all: data.membership[key],
+        });
       });
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
     },
-    addSpace: (addReaction: any) => {
-      const space = addReaction['spaces-reaction'].add.space;
-      space.apps = {
-        pinned: [],
-        endorsed: {},
-        installed: {},
-      };
+    addSpace: (addReaction: { space: any; membership: any }) => {
+      const space = addReaction.space;
       const newSpace = SpaceModel.create(space);
-      self.spaces.set(space.path, SpaceModel.create(space));
-      return newSpace;
+      newSpace.members?.initial(addReaction.membership);
+      self.spaces.set(space.path, newSpace);
+      return newSpace.path;
     },
-    updateSpace: (spacePath: string, update: any) => {
-      console.log(spacePath, update);
+    updateSpace: (replaceReaction: { space: any }) => {
+      const members = self.spaces.get(replaceReaction.space.path)?.members;
+      self.spaces.set(replaceReaction.space.path, {
+        ...replaceReaction.space,
+        members,
+      });
     },
-    deleteSpace: (deleteReaction: any) => {
-      const path = deleteReaction['spaces-reaction'].remove['space-path'];
-      // if (self.selected === path) self.selected = self.our; // TODO do this outside of this function
+    deleteSpace: (deleteReaction: { 'space-path': string }) => {
+      const path = deleteReaction['space-path'];
       self.spaces.delete(path);
-
       return path;
     },
     setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {

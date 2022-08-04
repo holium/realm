@@ -22,6 +22,7 @@ import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './FriendsList';
 import { toJS } from 'mobx';
+import { MembersList } from './MembersList';
 
 type HomeSidebarProps = {
   filterMode: 'light' | 'dark';
@@ -193,6 +194,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
         />
       </Flex>
       {our && <FriendsList friends={spaces.friends.list} />}
+      {!our && <MembersList members={spaces.selected!.members!.list} />}
     </HomeSidebar>
   );
 });

@@ -19,7 +19,7 @@ import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
-import { MemberRole, Patp } from 'os/types';
+import { MemberRole, Patp, SpacePath } from 'os/types';
 import { FriendsApi } from '../../api/friends';
 import { FriendsType, FriendsStore } from './models/friends';
 import { BazaarModel } from './models/bazaar';
@@ -186,8 +186,8 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
-    delete body.members;
-    const response = await SpacesApi.createSpace(
+    console.log(members);
+    const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
         slug: spaceToSnake(body.name),
@@ -200,11 +200,13 @@ export class SpacesService extends BaseService {
           archetype: body.archetype,
         }),
         members,
-      },
-      this.core.credentials!
+      }
     );
-    const newSpace = this.state!.addSpace(response);
-    return toJS(newSpace);
+    this.core.services.shell.closeDialog(_event);
+    this.core.services.shell.setBlur(_event, false);
+    const selected = this.state?.selectSpace(spacePath);
+    this.core.services.shell.setTheme(selected?.theme!);
+    return spacePath;
   }
 
   updateSpace(_event: IpcMainInvokeEvent, path: any, update: any) {
@@ -212,14 +214,14 @@ export class SpacesService extends BaseService {
   }
 
   async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
-    console.log('deleting space: ', path);
-    const response = await SpacesApi.deleteSpace(
-      this.core.conduit!,
-      { path },
-      this.core.credentials!
-    );
-    const newSpace = this.state!.deleteSpace(response);
-    return toJS(newSpace);
+    // if we have the deleted path already selected
+    if (path === this.state?.selected?.path) {
+      const selected = this.state?.selectSpace(
+        `/~${this.core.conduit?.ship}/our`
+      );
+      this.core.services.shell.setTheme(selected?.theme!);
+    }
+    return await SpacesApi.deleteSpace(this.core.conduit!, { path });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
@@ -245,20 +247,14 @@ export class SpacesService extends BaseService {
     const response = await SpacesApi.sendInvite(
       this.core.conduit!,
       path,
-      payload,
-      this.core.credentials!
+      payload
     );
 
     return response;
   }
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    const response = await SpacesApi.kickMember(
-      this.core.conduit!,
-      path,
-      patp,
-      this.core.credentials!
-    );
+    const response = await SpacesApi.kickMember(this.core.conduit!, path, patp);
 
     return response;
   }
@@ -268,9 +264,11 @@ export class SpacesService extends BaseService {
   async getFriends(_event: IpcMainInvokeEvent) {
     return await FriendsApi.getFriends(this.core.conduit!);
   }
+  //
   async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
     return await FriendsApi.addFriend(this.core.conduit!, patp);
   }
+  //
   async editFriend(
     _event: IpcMainInvokeEvent,
     patp: Patp,
@@ -305,11 +303,10 @@ export class SpacesService extends BaseService {
     const space = this.state?.getSpaceByPath(spacePath);
     if (space) {
       const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
-      const response = await SpacesApi.updateSpace(
-        this.core.conduit!,
-        { path: space.path, payload: { theme: snakeify(newTheme) } },
-        this.core.credentials!
-      );
+      const response = await SpacesApi.updateSpace(this.core.conduit!, {
+        path: space.path,
+        payload: { theme: snakeify(newTheme) },
+      });
       console.log('wallpaper set response, ', response);
       return newTheme;
     }

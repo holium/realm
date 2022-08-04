@@ -202,11 +202,14 @@
     ::  we need to set a host + member value and exclude the host from make-invitations
     =/  host-members          (~(put by members) [our.bowl [roles=(silt `(list role:membership-store)`~[%owner %admin]) status=%host]])
     =.  membership.state      (~(put by membership.state) [path.new-space host-members])
+    :: =.  members               (~(del by members) our.bowl)
     ::  return updated state and a combination of invitations (pokes)
     ::   to new members and gifts to any existing/current subscribers (weld)
+    :: =/  invites
+    :: =.  outgoing.invitations.state   (~(rep by members) |=(new-invite:inv-lib path src.bowl ship role space '' now.bowl))    ::  We are not the host, but still set our outgoing
     :_  state
-    %+  weld  (make-invitations path.new-space members)
-    (spaces:send-reaction [%add new-space host-members] [/updates /our ~])
+    %+  weld  (make-invitations path.new-space members new-space)
+    (spaces:send-reaction [%add new-space members] [/updates /our ~])
   ::
   ++  handle-update
     |=  [path=space-path:store edit-payload=edit-payload:store]
@@ -247,17 +250,17 @@
   ::  $make-invitations: helper to generate a list of invitations
   ::   (invite-action pokes) for the given space and members
   ++  make-invitations
-    |=  [path=space-path:store =members:membership-store]
+    |=  [path=space-path:store =members:membership-store =space:store]
     ^-  (list card)
     ::  loop thru each member, and build a list of invitations/pokes (acc)
+    =.  members       (~(del by members) our.bowl)
     %-  ~(rep by members)
       |=  [[=ship =member:membership-store] acc=(list card)]
-      ::  can there be more than one role per member, or do we just
-      ::   keep it simple and worry about 'main' role (role at index 0)
-      =/  role  (snag 0 ~(tap in roles.member))
-      =/  invitation  [%send-invite path ship role]
+      =/  role          (snag 0 ~(tap in roles.member))
+      =/  new-invite    (new-invite:inv-lib path src.bowl ship role space '' now.bowl)
+      =/  invitation    [%invited path new-invite]
       %+  snoc  acc
-      [%pass / %agent [ship %spaces] %poke invite-action+!>(invitation)]
+      [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]
   --
 ::
 ++  spaces-reaction
@@ -326,18 +329,18 @@
     ::  We are host
     =/  members                     (~(put by (~(got by membership.state) path)) [ship [roles=(silt `(list role:membership-store)`~[role]) status=%invited]])
     =.  membership.state            (~(put by membership.state) [path members])
-    =.  outgoing.invitations.state  (set-outgoing path ship new-invite)
+    =.  outgoing.invitations.state  (set-outgoing:core path ship new-invite)
     =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
     :_  state
-    :~  [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]     ::  Send invite request to host
+    :~  [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]     ::  Send invite request to invited
         [%give %fact watch-paths invite-reaction+!>([%invite-sent path new-invite])]            ::  Notify watchers
     ==
     ::
-    ++  set-outgoing
-      |=  [path=space-path:store =ship =invite:invite-store]
-      =/  space-invites               (~(gut by outgoing.invitations.state) path `space-invitations:invite-store`[~])
-      =.  space-invites               (~(put by space-invites) [ship invite])
-      (~(put by outgoing.invitations.state) [path space-invites])
+    :: ++  set-outgoing
+    ::   |=  [path=space-path:store =ship =invite:invite-store]
+    ::   =/  space-invites               (~(gut by outgoing.invitations.state) path `space-invitations:invite-store`[~])
+    ::   =.  space-invites               (~(put by space-invites) [ship invite])
+    ::   (~(put by outgoing.invitations.state) [path space-invites])
   ::
   ::  handles the case when an invite is received
   ++  handle-invited  
@@ -431,6 +434,12 @@
     `state
   ::
   --
+::
+++  set-outgoing
+      |=  [path=space-path:store =ship =invite:invite-store]
+      =/  space-invites               (~(gut by outgoing.invitations.state) path `space-invitations:invite-store`[~])
+      =.  space-invites               (~(put by space-invites) [ship invite])
+      (~(put by outgoing.invitations.state) [path space-invites])
 ::
 ++  send-reaction
   |%
