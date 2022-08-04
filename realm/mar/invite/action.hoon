@@ -1,17 +1,16 @@
-/-  store=spaces
-/+  spaces, *invite
+/+  *invite
 ::
-|_  act=invite-action:store
+|_  act=action
 ++  grad  %noun
 ++  grow
   |%
   ++  noun  act
-  ++  json  invite-action:enjs
+  ++  json  (action:enjs act)
   --
 ::
 ++  grab
   |%
-  ++  noun  invite-action:store
-  ++  json  invite-action:dejs
+  ++  noun  action:store
+  ++  json  action:dejs
   --
 --

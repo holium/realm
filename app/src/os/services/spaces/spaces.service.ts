@@ -1,4 +1,6 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import { initial } from './../../../../../urbit/pkg/interface/src/logic/reducers/launch-update';
+import { PassportsApi } from './../../api/passports';
+import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { toJS } from 'mobx';
 import {
@@ -6,31 +8,38 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
-  cast,
   clone,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import {
-  DocketMap,
-  SpaceModel,
-  SpacesStore,
-  SpacesStoreType,
-} from './models/spaces';
+import { DocketMap, SpacesStore, SpacesStoreType } from './models/spaces';
 
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
-import { PassportsApi } from '../../api/passports';
+import { MemberRole, Patp, SpacePath } from 'os/types';
+import { FriendsApi } from '../../api/friends';
+import { FriendsType, FriendsStore } from './models/friends';
+import { BazaarModel } from './models/bazaar';
 
+type SpaceModels = {
+  bazaar?: any;
+  passports?: any;
+  friends: FriendsType;
+};
 /**
  * SpacesService
  */
 export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
+  private models: SpaceModels = {
+    bazaar: BazaarModel.create(),
+    passports: undefined,
+    friends: FriendsStore.create(),
+  };
   handlers = {
     'realm.spaces.set-selected': this.setSelected,
     'realm.spaces.pin-app': this.pinApp,
@@ -39,10 +48,19 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
-    'realm.spaces.get-passports': this.getPassports,
+    'realm.spaces.get-members': this.getMembers,
+    'realm.spaces.get-friends': this.getFriends,
+    'realm.spaces.add-friend': this.addFriend,
+    'realm.spaces.edit-friend': this.editFriend,
+    'realm.spaces.remove-friend': this.removeFriend,
+    'realm.spaces.invite-member': this.inviteMember,
+    'realm.spaces.kick-member': this.kickMember,
   };
 
   static preload = {
+    getOurGroups: () => {
+      return ipcRenderer.invoke('realm.spaces.get-our-groups');
+    },
     selectSpace: (spaceId: string) => {
       return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
@@ -64,9 +82,30 @@ export class SpacesService extends BaseService {
     deleteSpace: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.delete-space', path);
     },
-    getPassports: (path: any) => {
-      return ipcRenderer.invoke('realm.spaces.get-passports', path);
+    getMembers: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.get-members', path);
     },
+    getFriends: () => {
+      return ipcRenderer.invoke('realm.spaces.get-friends');
+    },
+    inviteMember: async (
+      path: string,
+      payload: { patp: string; role: MemberRole; message: string }
+    ) => ipcRenderer.invoke('realm.spaces.invite-member', path, payload),
+    //
+    kickMember: async (path: string, patp: string) =>
+      ipcRenderer.invoke('realm.spaces.kick-member', path, patp),
+    //
+    addFriend: async (patp: Patp) =>
+      ipcRenderer.invoke('realm.spaces.add-friend', patp),
+    //
+    editFriend: async (
+      patp: Patp,
+      payload: { pinned: boolean; tags: string[] }
+    ) => ipcRenderer.invoke('realm.spaces.edit-friend', patp, payload),
+    //
+    removeFriend: async (patp: Patp) =>
+      ipcRenderer.invoke('realm.spaces.remove-friend', patp),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -91,23 +130,13 @@ export class SpacesService extends BaseService {
     let persistedState: SpacesStoreType = this.db.store;
     this.state = SpacesStore.create(castToSnapshot(persistedState));
 
-    const tempApps = {
-      pinned: ['ballot', 'escape', 'webterm', 'landscape'],
-      endorsed: {},
-      ...(ship.docket.apps
-        ? {
-            installed: clone(DocketMap.create(getSnapshot(ship.docket.apps))),
-          }
-        : {
-            installed: [],
-          }),
-    };
+    this.models.bazaar.initial(getSnapshot(ship.docket.apps) || []);
 
     // Get the initial scry
     // TODO for some reason the initial selected reference is undefined so you cant
     // TODO reload to the same space you logged out from
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
-    this.state!.initialScry(spaces, tempApps, persistedState);
+    this.state!.initialScry(spaces, persistedState, patp);
     this.state!.selected &&
       this.core.services.shell.setTheme(this.state!.selected?.theme);
 
@@ -118,6 +147,7 @@ export class SpacesService extends BaseService {
       key: null,
       response: 'initial',
     };
+
     this.state.setLoader('loaded');
     this.core.onEffect(syncEffect);
 
@@ -136,14 +166,28 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    // Subscribe to sync updates
-    SpacesApi.syncUpdates(this.core.conduit!, this.state);
-  }
+    // Start patching after we've initialized the state
+    onPatch(this.models.bazaar, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'bazaar',
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
 
-  async createSpace(_event: any, body: any) {
+    // Subscribe to sync updates
+    SpacesApi.watchUpdates(this.core.conduit!, this.state);
+    // PassportsApi.syncUpdates(this.core.conduit!, this.state);
+    FriendsApi.watchFriends(this.core.conduit!, this.state);
+  }
+  // ***********************************************************
+  // ************************ SPACES ***************************
+  // ***********************************************************
+  async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
-    delete body.members;
-    const response = await SpacesApi.createSpace(
+    console.log(members);
+    const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
         slug: spaceToSnake(body.name),
@@ -156,66 +200,113 @@ export class SpacesService extends BaseService {
           archetype: body.archetype,
         }),
         members,
-      },
-      this.core.credentials!
+      }
     );
-    const newSpace = this.state!.addSpace(response);
-    return toJS(newSpace);
+    this.core.services.shell.closeDialog(_event);
+    this.core.services.shell.setBlur(_event, false);
+    const selected = this.state?.selectSpace(spacePath);
+    this.core.services.shell.setTheme(selected?.theme!);
+    return spacePath;
   }
 
-  updateSpace(_event: any, path: any, update: any) {
+  updateSpace(_event: IpcMainInvokeEvent, path: any, update: any) {
     console.log('update space: ', path);
   }
 
-  async deleteSpace(_event: any, path: string) {
-    console.log('deleting space: ', path);
-    const response = await SpacesApi.deleteSpace(
-      this.core.conduit!,
-      { path },
-      this.core.credentials!
-    );
-    const newSpace = this.state!.deleteSpace(response);
-    return toJS(newSpace);
+  async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
+    // if we have the deleted path already selected
+    if (path === this.state?.selected?.path) {
+      const selected = this.state?.selectSpace(
+        `/~${this.core.conduit?.ship}/our`
+      );
+      this.core.services.shell.setTheme(selected?.theme!);
+    }
+    return await SpacesApi.deleteSpace(this.core.conduit!, { path });
   }
 
-  async getPassports(_event: any, path: string) {
-    console.log(path);
-    const response = await PassportsApi.getPassports(this.core.conduit!, path);
-    console.log(response);
-    return response;
-  }
-
-  setSelected(_event: any, path: string) {
+  setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
     this.core.services.shell.setTheme(selected?.theme!);
   }
+  // ***********************************************************
+  // *********************** MEMBERS ***************************
+  // ***********************************************************
+  async getMembers(_event: IpcMainInvokeEvent, path: string) {
+    return await SpacesApi.getMembers(this.core.conduit!, path);
+  }
 
-  async pinApp(_event: any, path: string, appId: string) {
+  async inviteMember(
+    _event: IpcMainInvokeEvent,
+    path: string,
+    payload: {
+      patp: Patp;
+      role: MemberRole;
+      message: string;
+    }
+  ) {
+    const response = await SpacesApi.sendInvite(
+      this.core.conduit!,
+      path,
+      payload
+    );
+
+    return response;
+  }
+
+  async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
+    const response = await SpacesApi.kickMember(this.core.conduit!, path, patp);
+
+    return response;
+  }
+  // ***********************************************************
+  // *********************** FRIENDS ***************************
+  // ***********************************************************
+  async getFriends(_event: IpcMainInvokeEvent) {
+    return await FriendsApi.getFriends(this.core.conduit!);
+  }
+  //
+  async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+    return await FriendsApi.addFriend(this.core.conduit!, patp);
+  }
+  //
+  async editFriend(
+    _event: IpcMainInvokeEvent,
+    patp: Patp,
+    payload: { pinned: boolean; tags: string[] }
+  ) {
+    return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
+  }
+  async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+    return await FriendsApi.removeFriend(this.core.conduit!, patp);
+  }
+  // ***********************************************************
+  // ************************ BAZAAR ***************************
+  // ***********************************************************
+  async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
     const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
     console.log(space);
-    space.pinApp(appId);
+    this.models.bazaar.pinApp(appId);
     return;
   }
 
-  async unpinApp(_event: any, path: string, appId: string) {
-    this.state?.selected?.unpinApp(appId);
+  async unpinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
+    this.models.bazaar.unpinApp(appId);
     return;
   }
 
-  setPinnedOrder(_event: any, order: any[]) {
-    this.state?.selected?.setPinnedOrder(order);
+  setPinnedOrder(_event: IpcMainInvokeEvent, order: any[]) {
+    this.models.bazaar.setPinnedOrder(order);
   }
 
   async setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
     const space = this.state?.getSpaceByPath(spacePath);
     if (space) {
       const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
-      const response = await SpacesApi.updateSpace(
-        this.core.conduit!,
-        { path: space.path, payload: { theme: snakeify(newTheme) } },
-        this.core.credentials!
-      );
+      const response = await SpacesApi.updateSpace(this.core.conduit!, {
+        path: space.path,
+        payload: { theme: snakeify(newTheme) },
+      });
       console.log('wallpaper set response, ', response);
       return newTheme;
     }

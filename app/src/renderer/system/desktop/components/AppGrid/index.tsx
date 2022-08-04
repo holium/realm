@@ -1,4 +1,5 @@
 import { FC, useState, useEffect, useMemo } from 'react';
+import { clone, detach } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
@@ -12,12 +13,12 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { Members } from './Members';
-import { PassportsActions } from 'renderer/logic/actions/passports';
 import AppSearchApp from './AppSearch';
+import { Member } from 'os/types';
 
 type HomeWindowProps = {};
 
-type SidebarType = 'people' | null;
+type SidebarType = 'friends' | 'members' | null;
 
 const HomeWindow = styled(motion.div)<HomeWindowProps>`
   height: 100%;
@@ -29,30 +30,38 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
-  const { ship, spaces, shell } = useServices();
+  const { ship, spaces, shell, bazaar } = useServices();
   const { desktop } = shell;
-  const [passports, setPassports] = useState([]);
-  //  apps is already defined, name bazaarApps instead
-  const [bazaarApps, setBazaarApps] = useState([]);
+  const [members, setMembers] = useState<any>([]);
   // const [sidebar, setSidebar] = useState<SidebarType>('people');
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
     : [...NativeAppList];
-
+  const isOur = spaces.selected?.type === 'our';
   useEffect(() => {
     if (spaces.selected?.path) {
-      PassportsActions.getPassports(spaces.selected!.path!).then(
-        (passes: any) => {
-          console.log(passes);
-          setPassports(passes);
-        }
-      );
+      if (isOur) {
+        setMembers(spaces.friends.list);
+      } else {
+        SpacesActions.getMembers(spaces.selected!.path!).then(
+          (members: any) => {
+            setMembers(generateMemberList(Object.entries<Member>(members)));
+          }
+        );
+      }
     }
   }, [spaces.selected?.path]);
 
-  // console.log(passports);
+  const generateMemberList = (entries: [key: string, value: any][]) => {
+    return Array.from(entries).map((entry: [key: string, value: any]) => {
+      return {
+        ...entry[1],
+        patp: entry[0],
+      };
+    });
+  };
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -70,28 +79,12 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             flexDirection="column"
             flex={2}
           >
-            {sidebar === 'people' && (
-              <Members
-                our={true}
-                friends={[
-                  {
-                    nickname: 'DrunkPlato',
-                    patp: '~lomder-librun',
-                    color: '#F08735',
-                    pinned: true,
-                    description:
-                      'Building a community OS experience on Urbit. Works at Holium.',
-                  },
-                  { patp: '~lodlev-migdev', color: '#2469BD', pinned: true },
-                  { patp: '~ronseg-hacsym', color: '#D48BFB' },
-                ]}
-              />
-            )}
+            {sidebar !== null && <Members our={sidebar === 'friends'} />}
           </Flex>
         )}
       </AnimatePresence>
     );
-  }, [sidebar, passports]);
+  }, [sidebar, members, spaces.friends.list]);
 
   return (
     <AnimatePresence>
@@ -150,7 +143,11 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   size={3}
                   customBg={desktop.theme.windowColor}
                   onClick={() => {
-                    setSidebar(!sidebar ? 'people' : null);
+                    if (spaces.selected?.type === 'our') {
+                      setSidebar(!sidebar ? 'friends' : null);
+                    } else {
+                      setSidebar(!sidebar ? 'members' : null);
+                    }
                   }}
                 >
                   <Icons name="Members" size="22px" opacity={0.8} />
@@ -199,7 +196,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               >
                 {apps.map((app: any, index: number) => {
                   const spacePath = spaces.selected?.path!;
-                  const isAppPinned = spaces.selected?.isAppPinned(app.id);
+                  const isAppPinned = bazaar.isAppPinned(app.id);
                   return (
                     <AppTile
                       key={app.title + index + 'grid'}

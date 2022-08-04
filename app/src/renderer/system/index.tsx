@@ -35,28 +35,11 @@ export const Shell: FC = observer(() => {
   );
 
   const shipLoaded = ship?.loader.isLoaded;
-  let nft = undefined;
-  if (ship?.patp === '~labruc-dillyx-lomder-librun') {
-    nft = {
-      creator: '~lomder-librun',
-      blockchain: 'ethereum',
-      contract: '0x513c...77a2',
-      tokenStandard: 'ERC-721',
-      tokenId: '191',
-    };
-  }
+
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <BgImage blurred={isBlurred} wallpaper={bgImage} />
-      {/* {nft && (
-        <Layer zIndex={2}>
-          <Flex position="absolute" top={16} right={16}>
-            <NFTBadge mode={mode} color={backgroundColor} />
-          </Flex>
-        </Layer>
-      )} */}
-
       {shipLoaded ? (
         <Desktop
           hasLoaded={shipLoaded}

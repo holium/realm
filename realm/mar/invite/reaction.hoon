@@ -1,16 +1,15 @@
-/-  store=spaces
-/+  spaces, *invite
+/+  *invite
 ::
-|_  act=invite-reaction:store
+|_  rct=reaction
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  act
-  ++  json  (invite-reaction:enjs act)
+  ++  noun  rct
+  ++  json  (reaction:enjs rct)
   --
 ::
 ++  grab
   |%
-  ++  noun  invite-reaction:store
+  ++  noun  reaction
   --
 --

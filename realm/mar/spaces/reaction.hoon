@@ -1,16 +1,15 @@
-/-  store=spaces
 /+  *spaces
 ::
-|_  act=spaces-reaction:store
+|_  rct=reaction
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  act
-  ++  json  (spaces-reaction:enjs act)
+  ++  noun  rct
+  ++  json  (reaction:enjs rct)
   --
 ::
 ++  grab
   |%
-  ++  noun  spaces-reaction:store
+  ++  noun  reaction
   --
 --

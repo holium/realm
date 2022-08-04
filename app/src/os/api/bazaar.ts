@@ -3,6 +3,9 @@
  *   all scrying and actions (pokes) should be supported here
  */
 import { Urbit } from './../urbit/api';
+import { quickPoke } from '../lib/poke';
+import { docketInstall } from '@urbit/api';
+import { ISession } from '../';
 
 export const BazaarApi = {
   //  to get all apps on a ship, path should be /{ship}
@@ -35,5 +38,13 @@ export const BazaarApi = {
       path: `/treaties/${ship}`,
     });
     return response.apps;
+  },
+  installApp: async (
+    ourShip: string,
+    ship: string,
+    desk: string,
+    credentials: ISession
+  ) => {
+    return await quickPoke(ourShip, docketInstall(ship, desk), credentials);
   },
 };

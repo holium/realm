@@ -28,7 +28,7 @@ export const App: FC = observer(() => {
   const { booted } = useCore();
   const { shell } = useServices();
   const { desktop } = shell;
-  // const shipLoaded = ship?.loggedIn;
+
   const themeMode = desktop.theme.mode;
 
   const shellMemo = useMemo(
@@ -51,7 +51,6 @@ export const App: FC = observer(() => {
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}
-
           <ServiceProvider value={servicesStore}>
             {mouseMemo}
             {shellMemo}

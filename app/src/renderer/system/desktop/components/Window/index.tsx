@@ -197,6 +197,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         hasBorder={!hideTitlebarBorder}
         showDevToolsToggle={showDevToolsToggle}
         // shareable
+        zIndex={window.zIndex}
         dragControls={dragControls}
         onDevTools={onDevTools}
         onDragStart={() => onDragStart()}
@@ -239,6 +240,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             noTitlebar={noTitlebar}
             hasBorder={!hideTitlebarBorder}
             showDevToolsToggle={showDevToolsToggle}
+            zIndex={window.zIndex}
             // shareable
             dragControls={dragControls}
             onDevTools={onDevTools}

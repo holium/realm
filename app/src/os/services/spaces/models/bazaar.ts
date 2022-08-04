@@ -1,33 +1,37 @@
-import { Instance, types } from 'mobx-state-tree';
-import { LoaderModel } from '../../common.model';
+import { types, castToSnapshot } from 'mobx-state-tree';
+import { NativeAppList } from '../../../../renderer/apps';
+import { DocketApp, WebApp } from '../../ship/models/docket';
 
-export const AppModel = types.model('AppModel', {
-  name: types.string,
-  status: types.string,
-});
+export const DocketMap = types.map(
+  types.union({ eager: false }, DocketApp, WebApp)
+);
 
-export type AppModelType = Instance<typeof AppModel>;
-
-export const BazaarStore = types
-  .model('BazaarStore', {
-    loader: types.optional(LoaderModel, { state: 'initial' }),
-    apps: types.map(AppModel),
+export const BazaarModel = types
+  .model({
+    pinned: types.array(types.string),
+    endorsed: DocketMap, // recommended
+    installed: DocketMap, // registered
   })
   .views((self) => ({
-    get isLoading() {
-      return self.loader.state === 'loading';
+    get pinnedApps() {
+      const pins = self.pinned;
+      return [...Array.from(self.installed!.values()), ...NativeAppList]
+        .filter((app: any) => self.pinned.includes(app.id))
+        .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
     },
-    get isLoaded() {
-      return self.loader.state === 'loaded';
+    isAppPinned(appId: string) {
+      return self.pinned.includes(appId);
     },
-    get appsList() {
-      return Array.from(self.apps.values()).filter((app: AppModelType) => true);
+    getAppData(appId: string) {
+      const apps = Array.from(self.installed.values());
+      return [...apps, ...NativeAppList].find((app: any) => app.id === appId);
     },
   }))
   .actions((self) => ({
-    setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
-      self.loader.state = status;
+    initial(shipApps: any) {
+      self.installed = shipApps;
+    },
+    loadPins(pins: string[]) {
+      self.pinned = castToSnapshot(pins);
     },
   }));
-
-export type BazaarStoreType = Instance<typeof BazaarStore>;

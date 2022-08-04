@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, webFrame } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 import { Realm } from '../os';
 
 const appPreload = {

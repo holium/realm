@@ -19,6 +19,10 @@ import {
   ShipSearch,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { FriendsList } from './FriendsList';
+import { toJS } from 'mobx';
+import { MembersList } from './MembersList';
 
 type HomeSidebarProps = {
   filterMode: 'light' | 'dark';
@@ -40,7 +44,7 @@ const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
 
 interface IMembers {
   our: boolean;
-  friends: any[];
+  friends?: any[];
 }
 
 export const createPeopleForm = (
@@ -73,7 +77,7 @@ export const createPeopleForm = (
 };
 
 export const Members: FC<IMembers> = observer((props: IMembers) => {
-  const { our, friends } = props;
+  const { our } = props;
   const { shell, spaces } = useServices();
   const searchRef = useRef(null);
 
@@ -87,89 +91,25 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
     new Set()
   );
 
-  const rowBg = rgba(darken(0.075, windowColor), 0.5);
-
-  const [pinned, setPinned] = useState(
-    friends.filter((friend: any) => friend.pinned)
-  );
-  const [all, setAll] = useState(
-    friends.filter((friend: any) => !friend.pinned)
-  );
-
-  const RowRenderer = (
-    { index, style }: { index: number; style: any },
-    usePinnedList: boolean
-  ) => {
-    const person = usePinnedList ? pinned[index] : all[index];
-
-    return (
-      <PersonRow
-        patp={person.patp}
-        nickname={person.nickname}
-        sigilColor={person.color}
-        avatar={person.avatar}
-        description={person.description}
-        listId="member-list"
-        rowBg={rowBg}
-        style={{ ...style }}
-        theme={{
-          textColor,
-          windowColor,
-        }}
-        contextMenuOptions={
-          usePinnedList
-            ? [
-                {
-                  label: 'Unpin',
-                  onClick: (evt: any) => {
-                    console.log('unpin');
-                  },
-                },
-                {
-                  label: 'Remove',
-                  onClick: (evt: any) => {
-                    console.log('remove');
-                  },
-                },
-              ]
-            : [
-                {
-                  label: 'Pin',
-                  onClick: (evt: any) => {
-                    console.log('pin');
-                  },
-                },
-                {
-                  label: 'Remove',
-                  onClick: (evt: any) => {
-                    console.log('remove');
-                  },
-                },
-              ]
-        }
-      />
-    );
-  };
   const onShipSelected = (ship: [string, string?], metadata?: any) => {
     const patp = ship[0];
     const nickname = ship[1];
+    SpacesActions.addFriend(patp);
     // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
     selectedNickname.add(nickname ? nickname : '');
     setSelectedNickname(new Set(selectedNickname));
-    const updatedAll = all;
-    updatedAll.push({
-      patp: patp,
-      nickname: nickname,
-      color: '#000000',
-      ...metadata,
-    });
-    setAll(updatedAll);
+    // const updatedAll = all;
+    // // TODO check the contact store for metadata
+    // updatedAll.push({
+    //   patp: patp,
+    //   nickname: nickname,
+    //   color: '#000000',
+    //   ...metadata,
+    // });
   };
-  //
-  const showHint =
-    friends.length === 0 || (pinned.length > 0 && all.length === 0);
+
   return (
     <HomeSidebar
       filterMode={mode}
@@ -253,76 +193,8 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           }}
         />
       </Flex>
-
-      <Flex mt={18} height={24 + pinned.length * 42} flexDirection="column">
-        <Text
-          style={{ textTransform: 'uppercase' }}
-          fontSize={1}
-          fontWeight={600}
-          opacity={0.6}
-          ml="2px"
-          mb="4px"
-        >
-          Pinned
-        </Text>
-        <AutoSizer>
-          {({ height, width }: { height: number; width: number }) => (
-            <List
-              className="List"
-              height={height}
-              itemCount={pinned.length}
-              itemSize={40}
-              width={width}
-            >
-              {(pinProps: { index: number; style: any }) =>
-                RowRenderer(pinProps, true)
-              }
-            </List>
-          )}
-        </AutoSizer>
-      </Flex>
-      <Flex mt={18} height={24 + all.length * 42} flexDirection="column">
-        <Text
-          style={{ textTransform: 'uppercase' }}
-          fontSize={1}
-          fontWeight={600}
-          opacity={0.6}
-          ml="2px"
-          mb="4px"
-        >
-          All
-        </Text>
-        {showHint && (
-          <Flex
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            height={40}
-          >
-            <Text fontSize={2} opacity={0.5}>
-              {pinned.length > 0 &&
-                all.length === 0 &&
-                'All your friends are pinned'}
-              {friends.length === 0 && 'Add some friends above'}
-            </Text>
-          </Flex>
-        )}
-        <AutoSizer>
-          {({ height, width }: { height: number; width: number }) => (
-            <List
-              className="List"
-              height={height}
-              itemCount={all.length}
-              itemSize={44}
-              width={width}
-            >
-              {(pinProps: { index: number; style: any }) =>
-                RowRenderer(pinProps, false)
-              }
-            </List>
-          )}
-        </AutoSizer>
-      </Flex>
+      {our && <FriendsList friends={spaces.friends.list} />}
+      {!our && <MembersList members={spaces.selected!.members!.list} />}
     </HomeSidebar>
   );
 });
