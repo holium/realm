@@ -71,29 +71,53 @@ function Content({ children, ...props }) {
   );
 }
 
-function renderApps() {
-  const apps = [{ id: 0, name: 'TODO: Determine how to store recent apps...' }];
-  return apps.map((item, index) => <Text key={item.id}>{item.name}</Text>);
+function renderDevs() {
+  let store = localStorage.getItem('~zod/garden/recents-store');
+  if (!store)
+    return (
+      <Text>{`'~zod/garden/recents-store' not found in local storage...`}</Text>
+    );
+  return store.state.recentDevs.map((item, index) => <Text>{item}</Text>);
 }
+
+function renderApps() {
+  let store = localStorage.getItem('~zod/garden/recents-store');
+  if (!store)
+    return (
+      <Text>{`'~zod/garden/recents-store' not found in local storage...`}</Text>
+    );
+  return store.state.recentApps.map((item, index) => <Text>{item}</Text>);
+}
+
 function renderStart() {
   return (
     <>
-      <Flex css={{ flexDirection: 'column' }}>
+      <Flex css={{ flexDirection: 'column', gap: 10 }}>
         <Text bold>Recent Apps</Text>
-        {renderApps()}
+        <Flex css={{ flexDirection: 'column', gap: 2 }}>{renderApps()}</Flex>
         <Text bold>Recent Developers</Text>
+        <Flex css={{ flexDirection: 'column', gap: 2 }}>{renderDevs()}</Flex>
       </Flex>
     </>
   );
 }
 
-function renderShipSearch() {
+const renderProviders = (data: Array, searchString) => {
+  return data
+    .filter((item) => item.name.startsWith(searchString))
+    .map((item, index) => <Text>{item.name}</Text>);
+};
+
+function renderShipSearch(data, searchString) {
   return (
     <>
       <Flex css={{ flexDirection: 'column', gap: 10 }}>
         <Text bold css={{ marginBottom: 10 }}>
-          Searching software providers...
+          Searching Software Providers
         </Text>
+        <Flex css={{ flexDirection: 'column', gap: 2 }}>
+          {renderProviders(data, searchString)}
+        </Flex>
       </Flex>
     </>
   );
@@ -203,7 +227,6 @@ const Text = styled('div', {
 const AppSearchApp = (props) => {
   const { space } = props;
   const { spaces } = useServices();
-  const [toggle, triggerSearch] = useState(false);
   const [data, setData] = useState([]);
   const [searchMode, setSearchMode] = useState('none');
   const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
@@ -280,7 +303,10 @@ const AppSearchApp = (props) => {
           }}
           onChange={(e: any) => {
             setSearchString(e.target.value);
-            if (isValidPatp(e.target.value)) {
+            if (e.target.value) {
+              setSearchMode('ship-search');
+            } else {
+              setSearchMode('start');
             }
           }}
           // onClick={() => triggerSearch(!toggle)}
@@ -302,7 +328,7 @@ const AppSearchApp = (props) => {
       </PopoverAnchor>
       <PopoverContent sideOffset={5}>
         {searchMode === 'start' && renderStart()}
-        {searchMode === 'ship-search' && renderShipSearch()}
+        {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
         {searchMode === 'app-search' && renderAppSearch(searchModeArgs[0])}
       </PopoverContent>
     </Popover>
