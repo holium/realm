@@ -24,7 +24,7 @@
 ::       agent when adding spaces are changing people permissions
 ::
 ::
-/-  store=passports, contact-store, spaces, membership-store=membership, hark=hark-store, resource
+/-  store=passports, contact-store, spaces, invite, membership-store=membership, hark=hark-store, resource
 /+  dbug, default-agent, resource, lib=passports
 |%
 +$  card  card:agent:gall
@@ -37,6 +37,7 @@
       :: =passports:store
       =people:store
       =contacts:store
+      =friends:store
       allowed-groups=(set resource)
       allowed-ships=(set ship)
       is-public=_|
@@ -85,30 +86,42 @@
   ::
   ++  on-leave  on-leave:def
   ::
-  ++  on-watch  on-watch:def
+  ++  on-watch
+    |=  =path
+    ^-  (quip card _this)
+    =/  cards=(list card)
+      ?+    path      (on-watch:def path)
+          [%friends ~]  
+        ::  only host should get all updates
+        ?>  =(our.bowl src.bowl)
+        (friends:send-reaction [%friends friends.state] [/friends ~])
+      ==
+    [cards this]
   ::
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/people/~zod/our/passports.json
-    ::
+    ::  ~/scry/passports/~zod/our/passports.json
       [%x @ @ %passports ~]
         =/  =ship       (slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
         ~&  >>  "{<ship>}, {<space-pth>}"
         =/  passports   (~(get by districts.state) [ship space-pth])
         ?~  passports      ``json+!>(~)
-        ``json+!>((view:enjs:lib [%passports u.passports]))
-
+        ``noun+!>((view:enjs:lib [%passports u.passports]))
     ::
-    ::  ~/scry/people/~zod/our/people.json
+    ::  ~/scry/passports/friends.json
+      [%x %friends ~]
+        ?>  (team:title our.bowl src.bowl)
+        ``noun+!>((view:enjs:lib [%friends friends.state]))
     ::
+    ::  ~/scry/passports/~zod/our/people.json
       [%x @ @ ~]
         =/  =ship       (slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
-        ``json+!>((view:enjs:lib [%people people.state]))
+        ``noun+!>((view:enjs:lib [%people people.state]))
     ==
   ::
   ++  on-agent
@@ -183,7 +196,7 @@
           %fact
             ?+    p.cage.sign     (on-agent:def wire sign)
                 %spaces-reaction
-                  =/  rct  !<(=spaces-reaction:spaces q.cage.sign)
+                  =/  rct  !<(=reaction:spaces q.cage.sign)
                   =^  cards  state
                   ?-  -.rct :: (on-agent:def wire sign)
                     %initial  (on-spaces-initial:core rct)
@@ -195,7 +208,7 @@
                   [cards this]
                 ::
                 %invite-reaction
-                  =/  rct  !<(=invite-reaction:spaces q.cage.sign)
+                  =/  rct  !<(=reaction:invite q.cage.sign)
                   =^  cards  state
                   ?-  -.rct
                     %invite-sent      (on-sent:invite-reaction +.rct)
@@ -219,10 +232,18 @@
   |=  =action:store
   ^-  (quip card _state)
   ?-  -.action
-    %add         (handle-add +.action)
-    %remove      (handle-remove +.action)
-    %edit        (handle-edit +.action)
-    %ping        (handle-ping +.action)
+    %add            (handle-add +.action)
+    %remove         (handle-remove +.action)
+    %edit           (handle-edit +.action)
+    %ping           (handle-ping +.action)
+    :: Friends
+    %add-friend     (add-fren +.action)
+    %edit-friend    (edit-fren +.action)
+    %remove-friend  (remove-fren +.action)
+    :: Receiving
+    %be-fren        (be-fren src.bowl)
+    %yes-fren       (yes-fren src.bowl)
+    %bye-fren       (bye-fren src.bowl)
   ==
 ::
 ::  $handle-add: add a new person to the person store, while
@@ -284,16 +305,16 @@
 ::
 ::  $update-civ: update the civilian based on the updated attributes (fields)
 ++  update-passport
-|=  [=passport:store =payload:store]
-^-  passport:store
-%-  ~(rep in payload)
-:: |=  [attribute=edit-field:store rslt=civ:store]
-|:  [=mod:store acc=`passport:store`passport]
-?-  -.mod
-  %alias         acc(alias alias.mod)
-  %add-roles     acc(roles (~(gas in roles.passport) ~(tap in roles.mod)))
-  %remove-roles  acc(roles (~(dif in roles.passport) roles.mod))
-==
+  |=  [=passport:store =payload:store]
+  ^-  passport:store
+  %-  ~(rep in payload)
+  :: |=  [attribute=edit-field:store rslt=civ:store]
+  |:  [=mod:store acc=`passport:store`passport]
+  ?-  -.mod
+    %alias         acc(alias alias.mod)
+    %add-roles     acc(roles (~(gas in roles.passport) ~(tap in roles.mod)))
+    %remove-roles  acc(roles (~(dif in roles.passport) roles.mod))
+  ==
 ::
 ::  $handle-ping: %ping pokes come in from UI to indicate user is
 ::    actively using Realm. we record the timestamp of this ping and
@@ -309,6 +330,98 @@
   :~  [%give %fact [/updates ~] %passports-reaction !>([%pong our.bowl now.bowl])]
   ==
 ::
+++  add-fren
+  |=  [=ship]
+  ^-  (quip card _state)
+  ~&  >  ['adding friend' ship]
+  ?:  (~(has by friends.state) ship)   :: checks if is fren is added
+      =/  added-fren            (~(got by friends.state) ship)
+      =.  mutual.added-fren     %.y
+      =.  friends.state         (~(put by friends.state) [ship added-fren])
+      :_  state
+      :~  [%pass / %agent [ship dap.bowl] %poke passports-action+!>([%yes-fren ~])]  :: confirms you are mutual fren
+          [%give %fact [/friends ~] passports-reaction+!>([%new-friend ship added-fren])]
+      ==
+  ::  If the fren is not added yet 
+  =/  fren    
+    [
+      pinned=%.n
+      tags=(silt `(list cord)`[~])
+      mutual=%.n
+    ]
+  =.  friends.state   (~(put by friends.state) [ship fren])
+  :_  state
+  :~  [%pass / %agent [ship dap.bowl] %poke passports-action+!>([%be-fren ~])]  :: Ask new fren to be fren
+      [%give %fact [/friends ~] passports-reaction+!>([%new-friend ship fren])]      ::  Notify watchers
+  ==
+::
+++  edit-fren
+  |=  [=ship pinned=? tags=friend-tags:store]
+  ^-  (quip card _state)
+  =/  prev-fren           (~(got by friends.state) ship)
+  =.  pinned.prev-fren    pinned
+  =.  tags.prev-fren      tags
+  =.  friends.state       (~(put by friends.state) [ship prev-fren])
+  :_  state
+  :~  [%give %fact [/friends ~] passports-reaction+!>([%friend ship prev-fren])]      ::  Notify watchers
+  ==
+::
+++  remove-fren
+  |=  [=ship]
+  ^-  (quip card _state)
+  =.  friends.state   (~(del by friends.state) ship)
+  :_  state
+  :~  [%pass / %agent [ship dap.bowl] %poke passports-action+!>([%bye-fren ~])]  :: Ask new fren to be fren
+      [%give %fact [/friends ~] passports-reaction+!>([%bye-friend ship])]       ::  Notify watchers
+  ==
+::
+++  be-fren
+  |=  [=ship]
+  ^-  (quip card _state)
+  ?<  =(our.bowl src.bowl)              ::  we can't be-fren ourselves
+  =/  is-added    (~(has by friends.state) ship)
+  =/  fren    
+    [
+      pinned=%.n
+      tags=(silt `(list cord)`[~])
+      mutual=is-added
+    ]
+  ?:  is-added   :: checks if is fren is added
+    =.  friends.state       (~(put by friends.state) [ship fren])
+    :_  state
+    :~  [%pass / %agent [ship dap.bowl] %poke passports-action+!>([%yes-fren ~])]  :: confirms you are mutual fren
+    ==
+  :: if not, we will add new non-mutual fren
+  =.  friends.state       (~(put by friends.state) [ship fren])
+  :_  state
+  [%give %fact [/friends ~] passports-reaction+!>([%friend ship fren])]~        ::  Notify watchers
+::
+::
+++  yes-fren
+  |=  [=ship]
+  ^-  (quip card _state)
+  ?<  =(our.bowl src.bowl)              ::  we can't yes ourselves
+  =/  prev-fren           (~(got by friends.state) ship)
+  =.  mutual.prev-fren    %.y
+  =.  friends.state       (~(put by friends.state) [ship prev-fren])
+  :_  state
+  :~  [%give %fact [/friends ~] passports-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers
+  ==
+::
+++  bye-fren
+  |=  [=ship]
+  ^-  (quip card _state)
+  ?<  =(our.bowl src.bowl)              ::  we can't bye ourselves
+  ?.  (~(has by friends.state) ship)    ::  checks if is not fren is added
+    `state
+  =/  prev-fren           (~(got by friends.state) ship)
+  =.  mutual.prev-fren    %.n
+  =.  friends.state       (~(put by friends.state) [ship prev-fren])
+  :_  state
+  :~  [%give %fact [/friends ~] passports-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers
+  ==
+::
+
 ++  invite-reaction
   |%
   ::
@@ -389,7 +502,7 @@
   ==
 ::
 ++  on-spaces-initial
-  |=  [rct=spaces-reaction:spaces]
+  |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%initial -.rct)
   =/  districts
@@ -400,7 +513,7 @@
   `state(districts districts)
 ::
 ++  on-spaces-add
-  |=  [rct=spaces-reaction:spaces]
+  |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%add -.rct)
   =/  passports=(map ship passport:store)  (to-passports members.rct)
@@ -418,22 +531,30 @@
   (~(put by passports) ship passport)
 ::
 ++  on-spaces-replace
-  |=  [rct=spaces-reaction:spaces]
+  |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%replace -.rct)
   `state
 ::
 ++  on-spaces-remove
-  |=  [rct=spaces-reaction:spaces]
+  |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%remove -.rct)
   `state(districts (~(del by districts) path.rct))
 ::
 ++  on-spaces-sub
-  |=  [rct=spaces-reaction:spaces]
+  |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%space -.rct)
   `state
+::
+++  send-reaction
+  |%
+  ++  friends
+    |=  [rct=reaction:store paths=(list path)]
+    ^-  (list card)      
+    [%give %fact paths passports-reaction+!>(rct)]~
+  --
 ::
 ++  notify
   |=  [pth=space-path:spaces slug=path msg=cord]

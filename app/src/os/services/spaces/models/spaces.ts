@@ -11,50 +11,15 @@ import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 import { NativeAppList } from '../../../../renderer/apps';
+import { InvitationsModel } from './invitations';
 
 import { TokenModel } from './token';
+import { FriendsStore } from './friends';
+import { MembersModel, MembersStore } from './members';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
-
-export const Invite = types.model({
-  inviter: types.string,
-  patp: types.string,
-  role: types.string,
-  message: types.string,
-  name: types.string,
-  type: types.string,
-  invitedAt: types.Date,
-});
-
-export const InvitationsModel = types
-  .model({
-    incoming: types.map(Invite), // Map<SpacePath, Invite>
-    outgoing: types.map(types.map(Invite)), // Map<SpacePath, Map<Patp, Invite>>
-  })
-  .views((self) => ({
-    get invitations() {
-      return self.incoming;
-    },
-    get sent() {
-      return self.outgoing;
-    },
-    sentByPlace(placePath: string) {
-      return self.outgoing.get(placePath);
-    },
-  }))
-  .actions((self) => ({
-    initial(data: any) {
-      // set initial data
-    },
-    updateIncoming(data: any) {
-      // update incoming invitations
-    },
-    updateOutgoing(data: any) {
-      // update outgoing invitations
-    },
-  }));
 
 export const SpaceModel = types
   .model('SpaceModel', {
@@ -70,41 +35,44 @@ export const SpaceModel = types
       outgoing: {},
       incoming: {},
     }),
-    apps: types.model({
-      pinned: types.array(types.string),
-      endorsed: DocketMap, // recommended
-      installed: DocketMap, // registered
-    }),
+    members: types.maybe(MembersStore),
+    apps: types.maybe(
+      types.model({
+        pinned: types.array(types.string),
+        endorsed: DocketMap, // recommended
+        installed: DocketMap, // registered
+      })
+    ),
   })
   .views((self) => ({
     get pinnedApps() {
       // console.log(toJS(self.apps.pinned), toJS(self.apps.installed));
-      const pins = self.apps.pinned;
-      return [...Array.from(self.apps.installed!.values()), ...NativeAppList]
-        .filter((app: any) => self.apps.pinned.includes(app.id))
+      const pins = self.apps!.pinned;
+      return [...Array.from(self.apps!.installed!.values()), ...NativeAppList]
+        .filter((app: any) => self.apps!.pinned.includes(app.id))
         .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
     },
     isAppPinned(appId: string) {
-      return self.apps.pinned.includes(appId);
+      return self.apps!.pinned.includes(appId);
     },
     getAppData(appId: string) {
-      const apps = Array.from(self.apps.installed.values());
+      const apps = Array.from(self.apps!.installed.values());
       return [...apps, ...NativeAppList].find((app: any) => app.id === appId);
     },
     get spaceApps() {
-      const apps = Array.from(self.apps.installed.values());
+      const apps = Array.from(self.apps!.installed.values());
       return [...apps, ...NativeAppList];
     },
   }))
   .actions((self) => ({
     pinApp(appId: string) {
-      self.apps.pinned.push(appId);
+      self.apps!.pinned.push(appId);
     },
     unpinApp(appId: string) {
-      self.apps.pinned.remove(appId);
+      self.apps!.pinned.remove(appId);
     },
     setPinnedOrder(newOrder: any) {
-      self.apps.pinned = newOrder;
+      self.apps!.pinned = newOrder;
     },
   }));
 
@@ -116,6 +84,7 @@ export const SpacesStore = types
     selected: types.safeReference(SpaceModel),
     our: types.maybe(SpaceModel),
     spaces: types.map(SpaceModel),
+    friends: types.optional(FriendsStore, { all: {} }),
   })
   .views((self) => ({
     get isLoading() {
@@ -156,6 +125,7 @@ export const SpacesStore = types
             persistedState && persistedState.spaces
               ? persistedState.spaces[path]
               : {};
+          data[path].members = {};
           data[path].apps = {
             ...persistedData.apps,
             installed: clone(tempApps.installed),
@@ -170,6 +140,17 @@ export const SpacesStore = types
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
     },
+    initialReaction: (data: { spaces: any; membership: any }) => {
+      console.log(data);
+      applySnapshot(self.spaces, castToSnapshot(data.spaces));
+      Object.keys(data.membership).forEach((spacePath: any) => {
+        self.spaces
+          .get(spacePath)!
+          .members!.initial(data.membership[spacePath]);
+      });
+      // applySnapshot(self.members, castToSnapshot(data.membership));
+      // self.loader.set('loaded');
+    },
     addSpace: (addReaction: any) => {
       const space = addReaction['spaces-reaction'].add.space;
       space.apps = {
@@ -180,6 +161,9 @@ export const SpacesStore = types
       const newSpace = SpaceModel.create(space);
       self.spaces.set(space.path, SpaceModel.create(space));
       return newSpace;
+    },
+    updateSpace: (spacePath: string, update: any) => {
+      console.log(spacePath, update);
     },
     deleteSpace: (deleteReaction: any) => {
       const path = deleteReaction['spaces-reaction'].remove['space-path'];

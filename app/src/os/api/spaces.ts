@@ -50,7 +50,7 @@ export const SpacesApi = {
         },
       },
       credentials,
-      { path: '/response', op: 'add' }
+      { mark: 'spaces-reaction', path: '/response', op: 'add' }
     );
 
     return response;
@@ -78,7 +78,7 @@ export const SpacesApi = {
         },
       },
       credentials,
-      { path: '/response', op: 'replace' }
+      { mark: 'spaces-reaction', path: '/response', op: 'replace' }
     );
     return response;
   },
@@ -104,16 +104,17 @@ export const SpacesApi = {
         },
       },
       credentials,
-      { path: '/response', op: 'remove' }
+      { mark: 'spaces-reaction', path: '/response', op: 'remove' }
     );
     return response;
   },
   sendInvite: async (
     conduit: Urbit,
-    payload: { path: SpacePath; ship: Patp; role: MemberRole; message: string },
+    path: SpacePath,
+    payload: { patp: Patp; role: MemberRole; message: string },
     credentials: ISession
   ) => {
-    const pathArr = payload.path.split('/');
+    const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
@@ -122,36 +123,68 @@ export const SpacesApi = {
       conduit.ship!,
       {
         app: 'spaces',
-        mark: 'spaces-action',
+        mark: 'invite-action',
         json: {
           'send-invite': {
             path: pathObj,
-            ship: payload.ship,
+            ship: payload.patp,
             role: payload.role,
             message: payload.message,
           },
         },
       },
       credentials,
-      { path: '/response', op: 'invite-sent' }
+      {
+        mark: 'invite-reaction',
+        path: `spaces/${pathArr[1]}/${pathArr[2]}`,
+        op: 'invite-sent',
+      }
     );
     return response;
   },
-  syncUpdates: (conduit: Urbit, state: SpacesStoreType): void => {
+  kickMember: async (
+    conduit: Urbit,
+    path: SpacePath,
+    patp: Patp,
+    credentials: ISession
+  ) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    const response = await quickPoke(
+      conduit.ship!,
+      {
+        app: 'spaces',
+        mark: 'invite-action',
+        json: {
+          'kick-member': {
+            path: pathObj,
+            ship: patp,
+          },
+        },
+      },
+      credentials,
+      {
+        mark: 'invite-reaction',
+        path: `spaces/${pathArr[1]}/${pathArr[2]}`,
+        op: 'kicked',
+      }
+    );
+    return response;
+  },
+  watchUpdates: (conduit: Urbit, state: SpacesStoreType): void => {
     conduit.subscribe({
       app: 'spaces',
       path: `/updates`,
       event: async (data: any) => {
-        switch (data) {
-          case 'spaces-reaction':
-            handleSpacesReactions(data, state);
-            break;
-          case 'invite-reaction':
-            handleInviteReactions(data, state);
-            break;
-          default:
-            // unknown
-            break;
+        console.log(data);
+        if (data['spaces-reaction']) {
+          handleSpacesReactions(data['spaces-reaction'], state);
+        }
+        if (data['invite-reaction']) {
+          handleInviteReactions(data['invite-reaction'], state);
         }
       },
       err: () => console.log('Subscription rejected'),
@@ -161,18 +194,20 @@ export const SpacesApi = {
 };
 
 const handleSpacesReactions = (data: any, state: SpacesStoreType) => {
-  switch (data['spaces-reaction']) {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
     case 'initial':
-      console.log(data['spaces-reaction']['initial']);
+      // console.log(data['initial']);
+      state.initialReaction(data['initial']);
       break;
     case 'add':
-      console.log(data['spaces-reaction']['add']);
+      console.log(data['add']);
       break;
     case 'replace':
-      console.log(data['spaces-reaction']['replace']);
+      console.log(data['replace']);
       break;
     case 'remove':
-      console.log(data['spaces-reaction']['remove']);
+      console.log(data['remove']);
       break;
     default:
       // unknown
@@ -181,7 +216,8 @@ const handleSpacesReactions = (data: any, state: SpacesStoreType) => {
 };
 
 const handleInviteReactions = (data: any, state: SpacesStoreType) => {
-  switch (data['invite-reaction']) {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
     case 'invite-sent':
       console.log(data['invite-reaction']['invite-sent']);
       break;

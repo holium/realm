@@ -1,5 +1,5 @@
-/-  store=spaces
-/+  *spaces
+/-  store=passports
+/+  *passports
 ::
 |_  view=view:store
 ++  grad  %noun

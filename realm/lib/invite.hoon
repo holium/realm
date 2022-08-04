@@ -1,10 +1,10 @@
-/-  store=spaces, member-store=membership
+/-  store=invite, spaces-store=spaces, member-store=membership
 /+  spaces-lib=spaces
 =<  [store .]
 =,  store
 |%
 ++  new-invite
-  |=  [path=space-path:store inviter=ship =ship =role:membership =space:store message=@t invited-at=@da]
+  |=  [path=space-path:spaces-store inviter=ship =ship =role:membership =space:spaces-store message=@t invited-at=@da]
   ^-  invite:store
   =/  new-invite
     [
@@ -23,8 +23,8 @@
 ++  enjs
   =,  enjs:format
   |%
-  ++  invite-action
-    |=  act=^invite-action
+  ++  action
+    |=  act=^action
     ^-  json
     %+  frond  %invite-action
     %-  pairs
@@ -67,8 +67,8 @@
       ==
     ==
   ::
-  ++  invite-reaction
-    |=  rct=^invite-reaction
+  ++  reaction
+    |=  rct=^reaction
     ^-  json
     %+  frond  %invite-reaction
     %-  pairs
@@ -100,8 +100,8 @@
     ==
   ::
   ::
-  ++  invite-view
-    |=  view=^invite-view
+  ++  view
+    |=  view=^view
     ^-  json
     %-  pairs
     :_  ~
@@ -130,7 +130,7 @@
     ^-  json
     %-  pairs
     %+  turn  ~(tap by outgoing)
-    |=  [pth=space-path:store invitations=space-invitations:store]
+    |=  [pth=space-path:spaces-store invitations=space-invitations:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [spc-path (invite-map invitations)]
@@ -140,7 +140,7 @@
     ^-  json
     %-  pairs
     %+  turn  ~(tap by incoming)
-    |=  [pth=space-path:store inv=invite:store]
+    |=  [pth=space-path:spaces-store inv=invite:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [spc-path (invite inv)]
@@ -180,9 +180,9 @@
 ++  dejs
   =,  dejs:format
   |%
-  ++  invite-action
+  ++  action
     |=  jon=json
-    ^-  invite-action:store
+    ^-  action:store
     =<  (decode jon)
     |%
     ++  decode

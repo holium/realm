@@ -1,4 +1,5 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import { PassportsApi } from './../../api/passports';
+import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { toJS } from 'mobx';
 import {
@@ -6,31 +7,34 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
-  cast,
   clone,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import {
-  DocketMap,
-  SpaceModel,
-  SpacesStore,
-  SpacesStoreType,
-} from './models/spaces';
+import { DocketMap, SpacesStore, SpacesStoreType } from './models/spaces';
 
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
-import { PassportsApi } from '../../api/passports';
+import { MemberRole, Patp } from 'os/types';
+import { FriendsApi } from '../../api/friends';
 
+type SpaceModels = {
+  bazaar?: any;
+  passports?: any;
+};
 /**
  * SpacesService
  */
 export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
+  private models: SpaceModels = {
+    bazaar: undefined,
+    passports: undefined,
+  };
   handlers = {
     'realm.spaces.set-selected': this.setSelected,
     'realm.spaces.pin-app': this.pinApp,
@@ -41,6 +45,11 @@ export class SpacesService extends BaseService {
     'realm.spaces.delete-space': this.deleteSpace,
     'realm.spaces.get-members': this.getMembers,
     'realm.spaces.get-friends': this.getFriends,
+    'realm.spaces.add-friend': this.addFriend,
+    'realm.spaces.edit-friend': this.editFriend,
+    'realm.spaces.remove-friend': this.removeFriend,
+    'realm.spaces.invite-member': this.inviteMember,
+    'realm.spaces.kick-member': this.kickMember,
   };
 
   static preload = {
@@ -74,10 +83,27 @@ export class SpacesService extends BaseService {
     getFriends: () => {
       return ipcRenderer.invoke('realm.spaces.get-friends');
     },
+    inviteMember: async (
+      path: string,
+      payload: { patp: string; role: MemberRole; message: string }
+    ) => ipcRenderer.invoke('realm.spaces.invite-member', path, payload),
+    kickMember: async (path: string, patp: string) =>
+      ipcRenderer.invoke('realm.spaces.kick-member', path, patp),
+    addFriend: async (patp: Patp) =>
+      ipcRenderer.invoke('realm.spaces.add-friend', patp),
+    //
+    editFriend: async (
+      patp: Patp,
+      payload: { pinned: boolean; tags: string[] }
+    ) => ipcRenderer.invoke('realm.spaces.edit-friend', patp, payload),
+    //
+    removeFriend: async (patp: Patp) =>
+      ipcRenderer.invoke('realm.spaces.remove-friend', patp),
   };
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
+    // this.friends = new FriendsService(core.conduit!);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -144,10 +170,14 @@ export class SpacesService extends BaseService {
     });
 
     // Subscribe to sync updates
-    SpacesApi.syncUpdates(this.core.conduit!, this.state);
+    SpacesApi.watchUpdates(this.core.conduit!, this.state);
+    // PassportsApi.syncUpdates(this.core.conduit!, this.state);
+    FriendsApi.watchFriends(this.core.conduit!, this.state);
   }
-
-  async createSpace(_event: any, body: any) {
+  // ***********************************************************
+  // ************************ SPACES ***************************
+  // ***********************************************************
+  async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
     delete body.members;
     const response = await SpacesApi.createSpace(
@@ -170,11 +200,11 @@ export class SpacesService extends BaseService {
     return toJS(newSpace);
   }
 
-  updateSpace(_event: any, path: any, update: any) {
+  updateSpace(_event: IpcMainInvokeEvent, path: any, update: any) {
     console.log('update space: ', path);
   }
 
-  async deleteSpace(_event: any, path: string) {
+  async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
     console.log('deleting space: ', path);
     const response = await SpacesApi.deleteSpace(
       this.core.conduit!,
@@ -185,23 +215,69 @@ export class SpacesService extends BaseService {
     return toJS(newSpace);
   }
 
-  async getMembers(_event: any, path: string) {
-    const response = await SpacesApi.getMembers(this.core.conduit!, path);
-    console.log(response);
-    return response;
-  }
-  async getFriends(_event: any) {
-    const response = await SpacesApi.getFriends(this.core.conduit!);
-    console.log(response);
-    return response;
-  }
-
-  setSelected(_event: any, path: string) {
+  setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
     this.core.services.shell.setTheme(selected?.theme!);
   }
+  // ***********************************************************
+  // *********************** MEMBERS ***************************
+  // ***********************************************************
+  async getMembers(_event: IpcMainInvokeEvent, path: string) {
+    return await SpacesApi.getMembers(this.core.conduit!, path);
+  }
 
-  async pinApp(_event: any, path: string, appId: string) {
+  async inviteMember(
+    _event: IpcMainInvokeEvent,
+    path: string,
+    payload: {
+      patp: Patp;
+      role: MemberRole;
+      message: string;
+    }
+  ) {
+    const response = await SpacesApi.sendInvite(
+      this.core.conduit!,
+      path,
+      payload,
+      this.core.credentials!
+    );
+
+    return response;
+  }
+
+  async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
+    const response = await SpacesApi.kickMember(
+      this.core.conduit!,
+      path,
+      patp,
+      this.core.credentials!
+    );
+
+    return response;
+  }
+  // ***********************************************************
+  // *********************** FRIENDS ***************************
+  // ***********************************************************
+  async getFriends(_event: IpcMainInvokeEvent) {
+    return await FriendsApi.getFriends(this.core.conduit!);
+  }
+  async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+    return await FriendsApi.addFriend(this.core.conduit!, patp);
+  }
+  async editFriend(
+    _event: IpcMainInvokeEvent,
+    patp: Patp,
+    payload: { pinned: boolean; tags: string[] }
+  ) {
+    return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
+  }
+  async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+    return await FriendsApi.removeFriend(this.core.conduit!, patp);
+  }
+  // ***********************************************************
+  // ************************ BAZAAR ***************************
+  // ***********************************************************
+  async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
     const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
     console.log(space);
@@ -209,12 +285,12 @@ export class SpacesService extends BaseService {
     return;
   }
 
-  async unpinApp(_event: any, path: string, appId: string) {
+  async unpinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
     this.state?.selected?.unpinApp(appId);
     return;
   }
 
-  setPinnedOrder(_event: any, order: any[]) {
+  setPinnedOrder(_event: IpcMainInvokeEvent, order: any[]) {
     this.state?.selected?.setPinnedOrder(order);
   }
 

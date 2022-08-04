@@ -9,6 +9,21 @@
 /-  resource, contact-store, spaces, membership
 |%
 ::
+::  $friends: specifically used for the our space.
+::
++$  friends   (map ship friend)
+::
+::  $friend: specifically used for the our space, keeps track of another
+::    ship and allows metadata.
+::
++$  friend-state  ?(%added %mutual)
++$  friend-tags   (set cord)
++$  friend  
+  $:  pinned=?
+      tags=friend-tags
+      mutual=?
+  ==  
+::
 ::  $contacts: one-to-one mapping of contact-store to this agent's store
 ::    contacts are kept in sync and then extended based on needs
 ::
@@ -50,11 +65,21 @@
       [%add path=space-path:spaces =ship =payload]
       [%edit path=space-path:spaces =ship =payload]
       [%remove path=space-path:spaces =ship]
+      ::  Our friend actions
+      [%add-friend =ship]
+      [%edit-friend =ship pinned=? tags=friend-tags]
+      [%remove-friend =ship]
+      ::  Poke friend actions
+      [%be-fren ~]
+      [%yes-fren ~]
+      [%bye-fren ~]
   ==
 ::
 +$  reaction
-  $%  [%pong =ship timestamp=@da]
-      [%add path=space-path:spaces =ship =person =passport]
+  $%  [%friends =friends]
+      [%friend =ship =friend]     ::  reacts when on update to existing friend
+      [%new-friend =ship =friend] ::  reacts when a new friend is addedd
+      [%bye-friend =ship]         ::  reacts when a friend is removed 
   ==
 ::
 ::  Scry views
@@ -62,5 +87,6 @@
 +$  view
   $%  [%people =people]
       [%passports =passports]
+      [%friends =friends]
   ==
 --

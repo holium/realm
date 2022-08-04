@@ -38,7 +38,7 @@
   =,  enjs:format
   |%
   ++  reaction
-    |=  rct=spaces-reaction:store
+    |=  rct=^reaction
     ^-  json
     %+  frond  %spaces-reaction
     %-  pairs
@@ -88,88 +88,21 @@
     ^-  [cord json]
     ?-  -.view
         %space
-      [%space (spc:encode space.view)]
-    ::
+      :-  %space
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.view)/(scot %tas space.path.view))]
+          [%space (spc:encode space.view)]
+          [%members (membs:encode members.view)]
+      ==
+      ::
         %spaces
       [%spaces (spaces-map:encode spaces.view)]
-    ::
+      ::
         %members
       [%members (membs:encode members.view)]
-    ::
-        %friends
-      [%friends (membs:encode members.view)]
     ==
   --
-++  encode
-  =,  enjs:format
-  |%
-  ++  spaces-map
-    |=  =spaces:store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by spaces)
-    |=  [pth=space-path:store space=space:store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-    ^-  [cord json]
-    [spc-path (spc space)]
-  ::
-  ++  membership-map
-    |=  =membership:member-store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by membership)
-    |=  [pth=space-path:store members=members:member-store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-    ^-  [cord json]
-    [spc-path (membs members)]
-  ::
-  ++  membs
-    |=  =members:member-store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by members)
-    |=  [=^ship =member:member-store]
-    ^-  [cord json]
-    [(scot %p ship) (memb member)] 
-  ::
-  ++  memb
-    |=  =member:member-store
-    ^-  json
-    %-  pairs:enjs:format
-    :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
-        ['status' s+(scot %tas status.member)]
-        :: ['pinned' b+pinned.member]
-    ==
-  ::
-  ++  spc
-    |=  =space
-    ^-  json
-    %-  pairs:enjs:format
-    :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
-        ['name' s+name.space]
-        ['type' s+type.space]
-        ['picture' s+picture.space]
-        ['color' s+color.space]
-        ['theme' (thm theme.space)]
-        ['updatedAt' (time updated-at.space)]
-    ==
-  ::
-  ++  thm
-    |=  =theme
-    ^-  json
-    %-  pairs:enjs:format
-    :~
-      ['mode' s+(scot %tas mode.theme)]
-      ['backgroundColor' s+background-color.theme]
-      ['accentColor' s+accent-color.theme]
-      ['inputColor' s+input-color.theme]
-      ['dockColor' s+dock-color.theme]
-      ['iconColor' s+icon-color.theme]
-      ['textColor' s+text-color.theme]
-      ['windowColor' s+window-color.theme]
-      ['wallpaper' s+wallpaper.theme]
-    ==
-  --
+
 ::
 ++  dejs
   =,  dejs:format
@@ -184,7 +117,6 @@
       :~  [%add add-space]
           [%update update-space]
           [%remove remove-space]
-          :: [%send-invite invite-member]
       ==
     ::
     ++  add-space
@@ -204,13 +136,6 @@
       %-  ot
       :~  [%path pth]
       ==
-    ::
-    :: ++  invite-member
-    ::   %-  ot
-    ::   :~  [%path pth]
-    ::       [%ship (su ;~(pfix sig fed:ag))]
-    ::       [%role rol]
-    ::   ==
     ::
     ++  pth
       %-  ot
@@ -313,5 +238,77 @@
       !!
     --
   --
+::
+::  
+::
+++  encode
+  =,  enjs:format
+  |%
+  ++  spaces-map
+    |=  =spaces:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by spaces)
+    |=  [pth=space-path:store space=space:store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (spc space)]
   ::
+  ++  membership-map
+    |=  =membership:member-store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by membership)
+    |=  [pth=space-path:store members=members:member-store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (membs members)]
+  ::
+  ++  membs
+    |=  =members:member-store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by members)
+    |=  [=^ship =member:member-store]
+    ^-  [cord json]
+    [(scot %p ship) (memb member)] 
+  ::
+  ++  memb
+    |=  =member:member-store
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
+        ['status' s+(scot %tas status.member)]
+        :: ['pinned' b+pinned.member]
+    ==
+  ::
+  ++  spc
+    |=  =space
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
+        ['name' s+name.space]
+        ['type' s+type.space]
+        ['picture' s+picture.space]
+        ['color' s+color.space]
+        ['theme' (thm theme.space)]
+        ['updatedAt' (time updated-at.space)]
+    ==
+  ::
+  ++  thm
+    |=  =theme
+    ^-  json
+    %-  pairs:enjs:format
+    :~
+      ['mode' s+(scot %tas mode.theme)]
+      ['backgroundColor' s+background-color.theme]
+      ['accentColor' s+accent-color.theme]
+      ['inputColor' s+input-color.theme]
+      ['dockColor' s+dock-color.theme]
+      ['iconColor' s+icon-color.theme]
+      ['textColor' s+text-color.theme]
+      ['windowColor' s+window-color.theme]
+      ['wallpaper' s+wallpaper.theme]
+    ==
+  --
 --
