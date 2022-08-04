@@ -15,11 +15,24 @@ export class BazaarService extends BaseService {
   private state?: BazaarStoreType; // for state management
   handlers = {
     'realm.spaces.bazaar.get-apps': this.getApps,
+    'realm.spaces.bazaar.get-allies': this.getAllies,
+    'realm.spaces.bazaar.get-treaties': this.getTreaties,
   };
 
   static preload = {
-    getApps: (path: any) => {
-      return ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path);
+    getApps: (shipName: string, shipPath: string, category: string = 'all') => {
+      return ipcRenderer.invoke(
+        'realm.spaces.bazaar.get-apps',
+        shipName,
+        shipPath,
+        category
+      );
+    },
+    getAllies: () => {
+      return ipcRenderer.invoke('realm.spaces.bazaar.get-allies');
+    },
+    getTreaties: (shipName: string) => {
+      return ipcRenderer.invoke('realm.spaces.bazaar.get-treaties', shipName);
     },
   };
 
@@ -36,9 +49,33 @@ export class BazaarService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async getApps(_event: any, path: string) {
-    console.log(path);
-    const response = await BazaarApi.getApps(this.core.conduit!, path);
+  async getApps(
+    _event: any,
+    shipName: string,
+    shipPath: string,
+    category: string = 'all'
+  ) {
+    console.log('bazaar-service: getAllies');
+    const response = await BazaarApi.getApps(
+      this.core.conduit!,
+      shipName,
+      shipPath,
+      category
+    );
+    console.log(response);
+    return response;
+  }
+
+  async getAllies(_event: any) {
+    console.log('bazaar-service: getAllies');
+    const response = await BazaarApi.getAllies(this.core.conduit!);
+    console.log(response);
+    return response;
+  }
+
+  async getTreaties(_event: any, shipName: string) {
+    console.log('bazaar-service: getTreaties => %o', shipName);
+    const response = await BazaarApi.getTreaties(this.core.conduit!, shipName);
     console.log(response);
     return response;
   }

@@ -5,7 +5,7 @@
 ::
 ::  Should watch and sync data with %treaty and %docket under /garden.
 ::
-/-  store=bazaar, docket, sp-sur=spaces, membership-store=membership, hark=hark-store, passport-store=passports
+/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passport-store=passports, treaty-store=treaty
 /+  dbug, default-agent
 |%
 +$  card  card:agent:gall
@@ -71,7 +71,7 @@
   ^-  (unit (unit cage))
   ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|installed].json
+    ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|all].json
     ::
     [%x @ @ %apps @ ~]
       =/  =ship       (slav %p i.t.path)
@@ -82,6 +82,17 @@
       =/  apps  (apps:view:core [ship space-pth] arg)
       =/  apps  (srt:rec:core apps)
       ``json+!>((view:enjs:core [arg apps]))
+    ::
+    ::  ~/scry/bazaar/allies
+    ::  leverage treaty agent for now to get list of allies
+    [%x %allies ~]
+      ``json+!>(.^(json %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/allies/json))
+    ::
+    ::  ~/scry/bazaar/treaties/${ship}
+    ::  leverage treaty agent for now to get list of treaties by ship
+    [%x %treaties @ ~]
+      =/  =ship       (slav %p i.t.t.path)
+      ``json+!>(.^(json %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/json))
   ==
 ::
 ++  on-agent
@@ -106,7 +117,7 @@
           ?+    p.cage.sign  (on-agent:def wire sign)
               %spaces-reaction
                 =^  cards  state
-                  (on:sp:core !<(=reaction:sp-sur q.cage.sign))
+                  (on:sp:core !<(=spaces-reaction:spaces-store q.cage.sign))
                 [cards this]
           ==
       ==
@@ -154,7 +165,7 @@
     ==
   ::
   ++  rec
-    |=  [path=space-path:sp-sur =app-id:store]
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     =/  index  (~(get by space-apps.state) path)
     ?~  index  `state
@@ -165,7 +176,7 @@
     `state(space-apps (~(put by space-apps.state) path index))
   ::
   ++  pin
-    |=  [path=space-path:sp-sur =app-id:store]
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     =/  index  (~(get by space-apps.state) path)
     ?~  index  `state
@@ -176,7 +187,7 @@
     `state(space-apps (~(put by space-apps.state) path index))
   ::
   ++  ad
-    |=  [path=space-path:sp-sur =app-id:store]
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     =/  index  (~(get by space-apps.state) path)
     ?~  index  `state
@@ -188,7 +199,7 @@
     `state(space-apps (~(put by space-apps.state) path index))
   ::
   ++  rem
-    |=  [path=space-path:sp-sur =app-id:store]
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
   --
@@ -227,30 +238,33 @@
 ++  sp
   |%
   ++  on
-    |=  =reaction:sp-sur
+    |=  reaction=spaces-reaction:spaces-store
     ^-  (quip card _state)
+    :: `state
     ?-  -.reaction
       %initial  (ini +.reaction)
       %add      (add +.reaction)
       %replace  (rep +.reaction)
       %remove   (rem +.reaction)
+      %space    (spc +.reaction)
     ==
   ::
   ++  ini
-    |=  [sps=spaces:sp-sur mems=membership:membership-store]
+    |=  [=spaces:spaces-store mems=membership:membership-store]
     ^-  (quip card _state)
-    =/  cards=(list card)
-    %-  ~(rep by sps)
-    |=  [[path=space-path:sp-sur =space:sp-sur] acc=(list card)]
-      %-  weld
-      :-  acc  ^-  (list card)
-      :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
-      ==
-    :_  state(membership mems)
-    cards
+    `state
+    :: =/  cards=(list card)
+    :: %-  ~(rep by spaces)
+    :: |=  [[path=space-path:spaces-store =space:spaces-store] acc=(list card)]
+    ::   %-  weld
+    ::   :-  acc  ^-  (list card)
+    ::   :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
+    ::   ==
+    :: :_  state(membership mems)
+    :: cards
   ::
   ++  add
-    |=  [=space:sp-sur =members:membership-store]
+    |=  [=space:spaces-store =members:membership-store]
     ^-  (quip card _state)
     =/  key  [ship.path.space space.path.space]
     :_  state(membership (~(put by membership.state) key members))
@@ -261,17 +275,21 @@
   ::    and delete that from map, then re-add this new space, but what to
   ::    do about missing membership info?
   ++  rep
-    |=  [=space:sp-sur]
+    |=  [=space:spaces-store]
     ^-  (quip card _state)
     `state
   ::
   ++  rem
-    |=  [path=space-path:sp-sur]
+    |=  [path=space-path:spaces-store]
     ^-  (quip card _state)
     =/  key  [ship.path space.path]
     :_  state(membership (~(del by membership.state) key))
     :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %leave ~]
     ==
+  ++  spc
+    |=  [path=space-path:spaces-store =space:spaces-store =members:membership-store]
+    ^-  (quip card _state)
+    `state
   --
 ::  subscription (watch) handling
 ++  su
@@ -299,14 +317,14 @@
     ?~  members  %.n
     =/  member  (~(get by u.members) ship)
     ?~  member  %.n
-    (~(any in roles.member) |=(a=@ ?=(a %invited)))
+    (~(any in roles.u.member) |=(a=@ ?:(=(a %invited) %.y %.n)))
     :: =/  passport  .^(passport:passport-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/passport/[space]/noun)
     :: ?:(=(status.passport 'joined') %.y %.n)
   --
 ++  view
   |%
   ++  apps
-    |=  [path=space-path:sp-sur =tag:store]
+    |=  [path=space-path:spaces-store =tag:store]
     ^-  (list app-view:store)
     =/  index  (~(get by space-apps.state) path)
     ?~  index  ~
@@ -469,7 +487,7 @@
 ::     ::
 ::     ++  rol
 ::       |=  =json
-::       ^-  role:membership
+::       ^-  role:membership-store
 ::       ?>  ?=(%s -.json)
 ::       ?:  =('initiate' p.json)   %initiate
 ::       ?:  =('member' p.json)     %member
