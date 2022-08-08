@@ -14,8 +14,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
   (props: DialogManagerProps) => {
     const { dialogId } = props;
 
-    const { shell } = useServices();
-    const { desktop } = shell;
+    const { desktop, shell } = useServices();
     const desktopRef = useRef<any>(null);
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;
@@ -26,7 +25,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         ...dialogConfig.window.dimensions,
         ...getCenteredXY(
           dialogConfig.window.dimensions,
-          desktop.desktopDimensions
+          shell.desktopDimensions
         ),
       };
 
@@ -55,10 +54,10 @@ export const DialogManager: FC<DialogManagerProps> = observer(
           top: 0,
           right: 0,
           height: `calc(100vh - ${0}px)`,
-          paddingTop: desktop.isFullscreen ? 0 : 30,
+          paddingTop: shell.isFullscreen ? 0 : 30,
         }}
       >
-        {dialogWindow}
+        {dialogWindow as any}
       </motion.div>
     );
   }

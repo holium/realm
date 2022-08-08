@@ -78,11 +78,11 @@ export const createPeopleForm = (
 
 export const Members: FC<IMembers> = observer((props: IMembers) => {
   const { our } = props;
-  const { shell, spaces } = useServices();
+  const { desktop, spaces } = useServices();
   const searchRef = useRef(null);
 
   const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
-    shell.desktop.theme;
+    desktop.theme;
 
   const { peopleForm, person } = useMemo(() => createPeopleForm(), []);
   // Ship search

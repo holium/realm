@@ -5,7 +5,7 @@
 ::
 ::  Should watch and sync data with %treaty and %docket under /garden.
 ::
-/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passport-store=passports, treaty-store=treaty
+/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passport-store=passports, treaty-store=treaty, invite-store=invite
 /+  dbug, default-agent
 |%
 +$  card  card:agent:gall
@@ -120,6 +120,17 @@
                 =^  cards  state
                   (on:sp:core !<(=reaction:spaces-store q.cage.sign))
                 [cards this]
+
+                ::
+                %invite-reaction
+                  =/  rct  !<(=reaction:invite-store q.cage.sign)
+                  =^  cards  state
+                  ?-  -.rct
+                    %invite-sent      (on-sent:invite-reaction +.rct)
+                    %invite-accepted  (on-accepted:invite-reaction +.rct)
+                    %kicked           (on-kicked:invite-reaction:core rct)
+                  ==
+                  [cards this]
           ==
       ==
 
@@ -203,6 +214,37 @@
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
+  --
+::
+++  invite-reaction
+  |%
+  ::
+  ++  on-sent
+    |=  [path=space-path:spaces-store =ship =role:membership-store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ::  $on-accepted: if this ship has accepted an invitation to a space
+  ::    that is not hosted locally, subscribe to the space host to get remote
+  ::    bazaar updates
+  ++  on-accepted
+    |=  [path=space-path:spaces-store =ship =member:membership-store]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: invite-reaction:on-accepted {<[path ship member]>}"
+    ?:  =(ship.path our.bowl)   `state
+    ::  if this ship is the one that accepted, subscribe to bazaar on space host
+    ?.  =(ship our.bowl)        `state
+    =/  watch-path              /bazaar/(scot %p ship.path)/(scot %tas space.path)
+    ~&  >>  "{<dap.bowl>}: invite-reaction:on-accepted subscribing to {<watch-path>} on {<ship.path>}..."
+    :_  state
+    :~  [%pass /bazaar %agent [ship.path dap.bowl] %watch watch-path]
+    ==
+  ::
+  ++  on-kicked
+    |=  [rct=reaction:invite-store]
+    ^-  (quip card _state)
+    `state
+  ::
   --
 ::  charge arms
 ++  ch

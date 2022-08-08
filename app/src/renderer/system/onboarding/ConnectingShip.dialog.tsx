@@ -2,23 +2,18 @@ import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Grid, Spinner, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { SignupActions } from 'renderer/logic/actions/signup';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
-type AddShipProps = {
-  next: () => any;
-};
-
-export const ConnectingShip: FC<AddShipProps> = observer(
-  (props: AddShipProps) => {
-    const { identity } = useServices();
-    const { signup } = identity;
+export const ConnectingShip: FC<BaseDialogProps> = observer(
+  (props: BaseDialogProps) => {
+    const { onboarding } = useServices();
     useEffect(() => {
-      signup.signupShip &&
-        SignupActions.getProfile(signup.signupShip.patp).then(() => {
-          props.next();
+      onboarding.ship &&
+      OnboardingActions.getProfile().then(() => {
+          props.onNext && props.onNext();
         });
-    }, [signup.signupShip]);
-    // authStore.
+    }, [onboarding.ship]);
     return (
       <Grid.Row expand noGutter>
         <Grid.Column mt={3} noGutter>

@@ -14,8 +14,7 @@ import { rgba } from 'polished';
 type ShipTrayProps = {};
 
 export const ShipTray: FC<ShipTrayProps> = observer(() => {
-  const { shell } = useServices();
-  const { desktop } = shell;
+  const { desktop } = useServices();
 
   const { dockColor, textColor } = useMemo(
     () => ({

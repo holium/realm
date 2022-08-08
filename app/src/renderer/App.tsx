@@ -23,14 +23,15 @@ import {
   CursorEvent,
   RealmMultiplayerInterface,
 } from './system/desktop/components/Multiplayer/types';
+import { ShellActions } from './logic/actions/shell';
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
-  const { shell } = useServices();
-  const { desktop } = shell;
+  const { desktop, shell } = useServices();
 
   const themeMode = desktop.theme.mode;
 
+  // ShellActions.closeDialog();
   const shellMemo = useMemo(
     () => (booted ? <Shell /> : <div>Booting...</div>),
     [booted]
@@ -38,12 +39,12 @@ export const App: FC = observer(() => {
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
-        hide={desktop.isMouseInWebview}
+        hide={shell.isMouseInWebview}
         cursorColor={desktop.mouseColor}
         animateOut={false}
       />
     );
-  }, [desktop.mouseColor, desktop.isMouseInWebview]);
+  }, [desktop.mouseColor, shell.isMouseInWebview]);
 
   return (
     <CoreProvider value={coreStore}>
@@ -89,7 +90,7 @@ function Cursors() {
     api?.send({
       event: CursorEvent.Leave,
     });
-  }, [shell.desktop.isMouseInWebview]);
+  }, [shell.isMouseInWebview]);
   return <Presences />;
 }
 

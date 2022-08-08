@@ -1,5 +1,5 @@
-import { FC, useMemo } from 'react';
-import { createField, createForm } from 'mobx-easy-form';
+import { FC } from 'react';
+import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
 
 import {
@@ -12,63 +12,46 @@ import {
   Box,
   Flex,
   TextButton,
-  Spinner,
-} from '../../../components';
+} from 'renderer/components';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
-export const createPasswordForm = () => {
-  const passwordForm = createForm({
-    onSubmit({ values }) {
-      return values;
-    },
-  });
+export const SetPassword: FC<BaseDialogProps> = observer(
+  (props: BaseDialogProps) => {
+    const { onboarding } = useServices();
 
-  const password = createField({
-    id: 'password',
-    form: passwordForm,
-    initialValue: '',
-    validationSchema: yup.string().required('Password is required'),
-  });
+    const shipName = onboarding.ship!.patp;
+    const shipNick = onboarding.ship!.nickname;
+    const shipColor = onboarding.ship!.color!;
+    const avatar = onboarding.ship!.avatar;
 
-  const confirmPassword = createField({
-    id: 'confirm',
-    form: passwordForm,
-    initialValue: '',
-    validationSchema: yup
-      .string()
-      .oneOf([yup.ref('password'), null], 'Passwords must match'),
-  });
+    const passwordForm = useForm({
+      async onSubmit({ values }) {
+        console.log('submitting...');
+        console.log(values);
+        props.onNext && props.onNext();
+      }
+    });
 
-  return {
-    passwordForm,
-    password,
-    confirmPassword,
-  };
-};
+    const password = useField({
+      id: 'password',
+      form: passwordForm,
+      initialValue: '',
+      validationSchema: yup.string().required('Password is required'),
+    });
 
-type StepPasswordProps = {
-  next: () => void;
-
-  // isValid: boolean;
-  // setValid: (isValid: boolean) => void;
-};
-
-export const StepPassword: FC<StepPasswordProps> = observer(
-  (props: StepPasswordProps) => {
-    const { identity } = useServices();
-    const { signup } = identity;
-    const { next } = props;
-
-    const shipName = signup.signupShip!.patp;
-    const shipNick = signup.signupShip!.nickname;
-    const shipColor = signup.signupShip!.color!;
-    const avatar = signup.signupShip!.avatar;
-    const { passwordForm, password, confirmPassword } = useMemo(
-      () => createPasswordForm(),
-      []
-    );
+    const confirmPassword = useField({
+      id: 'confirm',
+      form: passwordForm,
+      initialValue: '',
+      validate: (confirm) => {
+        return password.state.value === confirm
+          ? { parsed: confirm }
+          : { error: 'Passwords must match.' }
+      }
+    });
 
     return (
       <Grid.Column pl={12} noGutter lg={12} xl={12}>
@@ -174,12 +157,13 @@ export const StepPassword: FC<StepPasswordProps> = observer(
             justifyContent="space-between"
           >
             <TextButton
-              // disabled={passwordForm.computed.isError}
-              onClick={(evt: any) => {
-                next();
-              }}
+              onClick={passwordForm.actions.submit}
+              disabled={passwordForm.computed.isError}
+              // onClick={(evt: any) => {
+              //   next();
+              // }}
             >
-              {signup.isLoading ? <Spinner size={0} /> : 'Next'}
+              Next
             </TextButton>
           </Flex>
         </Box>
@@ -188,4 +172,4 @@ export const StepPassword: FC<StepPasswordProps> = observer(
   }
 );
 
-export default StepPassword;
+export default SetPassword;

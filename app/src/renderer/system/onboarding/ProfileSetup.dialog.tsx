@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { createField, createForm } from 'mobx-easy-form';
+import { useField, useForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -19,78 +19,99 @@ import {
   Flex,
   TextButton,
   Spinner,
-} from '../../../components';
+} from 'renderer/components';
 import { observer, Observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { SignupActions } from 'renderer/logic/actions/signup';
-import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
-export const createProfileForm = (
-  defaults: any = {
-    nickname: '',
-    sigilColor: '#000000',
-    avatar: '',
+interface ColorTileProps {
+  tileColor: string;
+}
+const ColorTile = styled.div<ColorTileProps>`
+  background: ${(props: ColorTileProps) => props.tileColor};
+  height: 30px;
+  width: 30px;
+  cursor: none;
+  position: relative;
+  outline: none;
+  float: left;
+  border-radius: 4px;
+  margin: 0px 6px 0px 0px;
+`;
+interface ColorPopoverProps {
+  isOpen: boolean;
+}
+const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
+  position: absolute;
+  z-index: 3;
+  top: 40px;
+  left: -6px;
+  width: 170px;
+  .cursor-style {
+    div {
+      cursor: none !important;
+    }
   }
-) => {
-  const profileForm = createForm({
-    onSubmit({ values }) {
-      return values;
-    },
-  });
+  display: ${(props: ColorPopoverProps) => (props.isOpen ? 'block' : 'none')};
+`;
 
-  const nickname = createField({
-    id: 'nickname',
-    form: profileForm,
-    initialValue: defaults.nickname || '',
-    // validationSchema: yup.string().required('Name is required'),
-  });
-  const sigilColor = createField({
-    id: 'sigil-color',
-    form: profileForm,
-    initialValue: defaults.sigilColor || '',
-    validationSchema: yup
-      .string()
-      .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
-      .required('Enter a hex value'),
-  });
-  const avatar = createField({
-    id: 'avatar',
-    form: profileForm,
-    initialValue: defaults.avatar || '',
-    validationSchema: yup
-      .string()
-      .optional()
-      .matches(
-        /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-        'Enter correct url!'
-      ),
-  });
-  return {
-    profileForm,
-    nickname,
-    sigilColor,
-    avatar,
-  };
-};
-
-type ProfileSetupProps = {
-  // isValid: boolean;
-  next: () => void;
-  // setValid: (isValid: boolean) => void;
-};
-
-export const ProfileSetup: FC<ProfileSetupProps> = observer(
-  (props: ProfileSetupProps) => {
-    const { identity } = useServices();
-    const { signup } = identity;
+export const ProfileSetup: FC<BaseDialogProps> = observer(
+  (props: BaseDialogProps) => {
+    const { onboarding } = useServices();
     const colorPickerRef = useRef(null);
-    const { next } = props;
-    const shipName = signup.signupShip!.patp;
-
-    const [color, setColor] = useState(signup.signupShip!.color || '#000000');
-    // const [avatarEl, setAvatar] = useState(signup.signupShip!.avatar || '');
+    const shipName = onboarding.ship!.patp;
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
+
+    const profileForm = useForm({
+      async onSubmit({ values }) {
+        if (profileForm.computed.isDirty) {
+          try {
+            let profileData = {
+              color: values.color,
+              nickname: values.nickname,
+              avatar: values.avatar
+            };
+            await OnboardingActions.setProfile(profileData);
+            props.setState && props.setState({ ...props.workflowState, profile: profileData})
+            props.onNext && props.onNext();
+          } catch (reason) {
+            console.log(reason)
+          }
+        } else {
+          props.onNext && props.onNext();
+        }
+      },
+    });
+
+    const nickname = useField({
+      id: 'nickname',
+      form: profileForm,
+      initialValue: '',
+    });
+
+    const sigilColor = useField({
+      id: 'color',
+      form: profileForm,
+      initialValue: '',
+      validationSchema: yup
+        .string()
+        .matches(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Enter a hex value')
+        .required('Enter a hex value'),
+    });
+
+    const avatar = useField({
+      id: 'avatar',
+      form: profileForm,
+      initialValue: '',
+      validationSchema: yup
+        .string()
+        .optional()
+        .matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter correct url!'
+        ),
+    });
 
     const handleClickOutside = (event: any) => {
       const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
@@ -111,28 +132,11 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
 
     useEffect(() => {
       document.addEventListener('click', handleClickOutside, true);
-      sigilColor.actions.onChange(signup.signupShip!.color || '#000000');
+      sigilColor.actions.onChange(onboarding.ship!.color || '#000000');
       () => {
         document.removeEventListener('click', handleClickOutside, true);
       };
     }, []);
-
-    const shipInfo = {
-      nickname: signup.signupShip!.nickname,
-      sigilColor: color,
-      avatar: signup.signupShip!.avatar || '',
-    };
-
-    const { profileForm, nickname, avatar, sigilColor } = useMemo(
-      () => createProfileForm(shipInfo),
-      []
-    );
-
-    // const onAvatarUpload = (file: any) => {
-    //   console.log(file);
-    // };
-
-    const shouldSave = profileForm.computed.isDirty;
 
     return (
       <Grid.Column pl={12} noGutter lg={12} xl={12}>
@@ -231,6 +235,7 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                       color={sigilColor.state.value}
                       onChange={(color: { hex: string }) => {
                         sigilColor.actions.onChange(color.hex);
+                        // setColor(color.hex);
                       }}
                       triangle="top-left"
                       colors={[
@@ -247,12 +252,6 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
                   </ColorTilePopover>
                 </Flex>
               </FormControl.Field>
-              {/* <Grid.Row
-              expand
-              noGutter
-              align="flex-start"
-              justify="space-between"
-            > */}
               <FormControl.Field>
                 <Label>Avatar</Label>
                 <Flex>
@@ -337,35 +336,11 @@ export const ProfileSetup: FC<ProfileSetupProps> = observer(
             justifyContent="space-between"
           >
             <TextButton
-              onClick={(evt: any) => {
-                if (profileForm.computed.isDirty) {
-                  const formData = profileForm.actions.submit();
-                  DesktopActions.setMouseColor(formData['sigil-color']);
-                  SignupActions.saveProfile(shipName, {
-                    color: formData['sigil-color'],
-                    nickname: formData['nickname'],
-                    avatar: formData['avatar'],
-                  })
-                    .then((value: any) => {
-                      next();
-                      evt.target.blur();
-                      return null;
-                    })
-                    .catch((reason: any) => {
-                      console.log(reason);
-                    });
-                } else {
-                  next();
-                }
-              }}
+              onClick={profileForm.actions.submit}
             >
-              {signup.isLoading ? (
+              {false ? (
                 <Spinner size={0} />
-              ) : shouldSave ? (
-                'Save'
-              ) : (
-                'Next'
-              )}
+              ) : 'Next'}
             </TextButton>
           </Flex>
         </Box>

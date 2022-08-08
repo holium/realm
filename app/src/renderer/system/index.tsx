@@ -1,13 +1,14 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState, useLayoutEffect } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
-// import { useAuth, useMst, useShip } from 'renderer/logic/store';
-import { useCore, useServices } from 'renderer/logic/store';
+import { useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import { BackgroundImage } from './system.styles';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { BackgroundImage, BackgroundFill } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
+import { DialogManager } from './dialog/DialogManager';
 
 const DragBar = styled.div`
   position: absolute;
@@ -18,37 +19,50 @@ const DragBar = styled.div`
   --webkit-app-region: drag;
 `;
 
+function useWindowSize() {
+  useLayoutEffect(() => {
+    function updateSize() {
+      ShellActions.setDesktopDimensions(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', updateSize);
+    updateSize();
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+}
+
 export const Shell: FC = observer(() => {
-  const { loggedIn } = useCore();
+  const { shell, desktop, identity, ship } = useServices();
+  useWindowSize();
 
-  const { shell, ship } = useServices();
-  const { desktop } = shell;
-
-  const isFullscreen = desktop.isFullscreen;
+  const isFullscreen = shell.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
+  const firstTime = identity.auth.firstTime;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
   const hasWallpaper = bgImage ? true : false;
-  const isBlurred = useMemo(
-    () => !loggedIn || desktop.isBlurred || desktop.showHomePane,
-    [desktop.showHomePane, desktop.isBlurred, loggedIn]
+
+  const DialogLayer = useMemo(
+    () => <DialogManager dialogId={shell.dialogId} />,
+    [shell.dialogId]
   );
 
   const shipLoaded = ship?.loader.isLoaded;
-
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
-      <BgImage blurred={isBlurred} wallpaper={bgImage} />
-      {shipLoaded ? (
-        <Desktop
-          hasLoaded={shipLoaded}
-          hasWallpaper={true}
-          isFullscreen={isFullscreen}
-        />
-      ) : (
-        <Auth hasWallpaper={hasWallpaper} />
-      )}
+      <Layer zIndex={2}>{DialogLayer}</Layer>
+      <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
+      <BackgroundFill hasWallpaper={hasWallpaper}>
+        {shipLoaded ? (
+          <Desktop
+            hasLoaded={shipLoaded}
+            hasWallpaper={true}
+            isFullscreen={isFullscreen}
+          />
+        ) : (
+          <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
+        )}
+      </BackgroundFill>
     </ViewPort>
   );
 });

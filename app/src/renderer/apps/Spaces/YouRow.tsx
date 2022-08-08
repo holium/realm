@@ -14,8 +14,8 @@ type SpaceRowProps = {
 
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, colorTheme, onSelect } = props;
-  const { ship, shell } = useServices();
-  const { theme } = shell.desktop;
+  const { ship, desktop } = useServices();
+  const { theme } = desktop;
   const currentShip = ship!;
   const currentTheme = useMemo(() => theme, [theme]);
 

@@ -31,7 +31,7 @@ const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
 
 export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const { window } = props;
-  const { shell } = useServices();
+  const { desktop } = useServices();
   const elementRef = useRef(null);
 
   const [workflowState, setWorkflowState] = useState<any>({ loading: false });
@@ -63,7 +63,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   }, [isValidated, workflowState]);
 
   return (
-    <View ref={elementRef} background={shell.desktop.theme.windowColor}>
+    <View ref={elementRef} background={desktop.theme.windowColor}>
       <Flex flex={1}>
         {ViewComponent && (
           <ViewComponent
@@ -75,6 +75,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
             onPrevious={onPrevious}
             setState={setWorkflowState}
             workflowState={workflowState}
+            theme={desktop.theme}
           />
         )}
       </Flex>
@@ -87,11 +88,12 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           bottom={20}
           right={20}
           left={20}
+          width={customNext ? 30 : undefined}
         >
           <Flex alignItems="center" justifyContent="flex-start">
             {onPrevious && (
               <IconButton
-                customBg={shell.desktop.theme.windowColor}
+                customBg={desktop.theme.windowColor}
                 onClick={() => {
                   onPrevious();
                 }}

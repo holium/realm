@@ -60,7 +60,7 @@
   ::
   ++  on-poke
     |=  [=mark =vase]
-    ^-  (quip card _this)    
+    ^-  (quip card _this)
     :: ?>  (team:title our.bowl src.bowl) :: is our ship or moon
     |^
     =^  cards  state
@@ -111,12 +111,12 @@
     ^-  (quip card _this)
     =/  cards=(list card)
       ?+    path      (on-watch:def path)
-          [%updates ~]  
+          [%updates ~]
         ::  only host should get all updates
         ?>  (is-host:core src.bowl)
         (spaces:send-reaction [%initial spaces.state membership.state] [/updates ~])
         ::
-          [%our ~]                      
+          [%our ~]
           ::  only host should get our updates
         ?>  (is-host:core src.bowl)
         [~]
@@ -220,7 +220,7 @@
     ?:  =(old updated)        :: if the old type equals new
         [~ state]             :: return state unchanged
     =.  updated-at.updated    now.bowl
-    =/  watch-paths           [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths           [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
     :-  (spaces:send-reaction [%replace updated] watch-paths)
     state(spaces (~(put by spaces.state) path updated))
     ::
@@ -243,7 +243,7 @@
     =/  deleted             (~(got by spaces.state) path)
     =.  spaces.state        (~(del by spaces.state) path.deleted)
     =.  membership.state    (~(del by membership.state) path.deleted)
-    =/  watch-paths         [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths         [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
     :-  (spaces:send-reaction [%remove path] watch-paths)
     state
   ::
@@ -323,14 +323,14 @@
     =/  new-invite                  (new-invite:inv-lib path src.bowl ship role space message now.bowl)
     ?.  (is-host:core ship.path)                                              ::  Check if we should relay to host
       =.  outgoing.invitations.state  (set-outgoing path ship new-invite)     ::  We are not the host, but still set our outgoing
-      :_  state                                                                                 
+      :_  state
       :~  [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]   ::  Send invite request to host
       ==
     ::  We are host
     =/  members                     (~(put by (~(got by membership.state) path)) [ship [roles=(silt `(list role:membership-store)`~[role]) status=%invited]])
     =.  membership.state            (~(put by membership.state) [path members])
     =.  outgoing.invitations.state  (set-outgoing:core path ship new-invite)
-    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
     :_  state
     :~  [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]     ::  Send invite request to invited
         [%give %fact watch-paths invite-reaction+!>([%invite-sent path new-invite])]            ::  Notify watchers
@@ -343,7 +343,7 @@
     ::   (~(put by outgoing.invitations.state) [path space-invites])
   ::
   ::  handles the case when an invite is received
-  ++  handle-invited  
+  ++  handle-invited
     |=  [path=space-path:store =invite:invite-store]
     ^-  (quip card _state)
     =.  incoming.invitations.state    (~(put by incoming.invitations.state) [path invite])
@@ -355,7 +355,7 @@
   ++  handle-accept
     |=  [path=space-path:store]
     ^-  (quip card _state)
-    ?.  (is-host:core ship.path) 
+    ?.  (is-host:core ship.path)
       ::  If we are invited we will send the invite action to the host
       :_  state
       :~  [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]
@@ -369,7 +369,7 @@
     =/  space-invites               (~(got by outgoing.invitations.state) path)
     =.  space-invites               (~(del by space-invites) accepter)
     =.  outgoing.invitations.state  (~(put by outgoing.invitations.state) [path space-invites])
-    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
     :_  state
     :~  [%pass / %agent [accepter dap.bowl] %poke invite-action+!>([%stamped path])]  :: Send space to invitee
         [%give %fact watch-paths invite-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
@@ -379,7 +379,7 @@
     |=  [path=space-path:store]
     ^-  (quip card _state)
     =.  incoming.invitations.state  (~(del by incoming.invitations.state) path)
-    =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)                   
+    =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)
     :_  state
     [%pass /spaces %agent [ship.path %spaces] %watch watch-path]~
   ::
@@ -387,7 +387,7 @@
     |=  [path=space-path:store =ship]
     ^-  (quip card _state)
     ?>  (has-auth:core path src.bowl %admin)
-    ?.  (is-host:core ship.path) 
+    ?.  (is-host:core ship.path)
       ::  If we are invited we will send the invite action to the host
       :_  state
       :~  [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]
@@ -396,7 +396,7 @@
     =.  membs                   (~(del by membs) ship)
     =.  membership.state        (~(put by membership.state) [path membs])
     :_  state
-    =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)                   
+    =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)
     :~  [%give %fact [watch-path ~] invite-reaction+!>([%kicked path ship])]
         [%give %kick ~[watch-path] (some ship)]
     ==
@@ -426,7 +426,7 @@
     |=  [rct=reaction:invite-store]
     ^-  (quip card _state)
     ?>  ?=(%kicked -.rct)
-    ?.  =(our.bowl ship.+.rct)    
+    ?.  =(our.bowl ship.+.rct)
         :: we weren't kicked, but someone else was
        `state
     =.  spaces.state          (~(del by spaces.state) path.rct)
@@ -445,7 +445,7 @@
   |%
   ++  member
     |=  [rct=reaction:store paths=(list path)]
-    ^-  (list card)      
+    ^-  (list card)
     [%give %fact paths spaces-reaction+!>(rct)]~
   ::
   ++  invite

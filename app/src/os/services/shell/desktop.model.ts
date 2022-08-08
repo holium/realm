@@ -56,11 +56,8 @@ export type WindowModelProps = {
 export const DesktopStore = types
   .model('DesktopStore', {
     showHomePane: types.optional(types.boolean, false),
-    isBlurred: types.optional(types.boolean, true),
     appviewPreload: types.maybe(types.string),
-    isFullscreen: types.optional(types.boolean, true),
     dynamicMouse: types.optional(types.boolean, true),
-    isMouseInWebview: types.optional(types.boolean, false),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     theme: types.optional(ThemeModel, {
       wallpaper:
@@ -73,16 +70,8 @@ export const DesktopStore = types
       iconColor: '#333333',
       mouseColor: '#4E9EFD',
     }),
-    desktopDimensions: types.optional(
-      types.model({
-        width: types.number,
-        height: types.number,
-      }),
-      { width: 0, height: 0 }
-    ),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
-    dialogId: types.maybe(types.string),
   })
   .views((self) => ({
     get currentOrder() {
@@ -109,37 +98,17 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
-    openDialog(dialogId: string) {
-      self.dialogId = dialogId;
-    },
-    closeDialog() {
-      self.dialogId = undefined;
-    },
     setWallpaper(newWallpaper: string) {
       self.theme.wallpaper = newWallpaper;
     },
     setTheme(newTheme: ThemeModelType) {
       self.theme = clone(newTheme);
     },
-    setDesktopDimensions(width: number, height: number) {
-      self.desktopDimensions = {
-        width,
-        height,
-      };
-    },
     setMouseColor(newMouseColor: string) {
       self.mouseColor = newMouseColor;
     },
     setHomePane(isHome: boolean) {
       self.showHomePane = isHome;
-      if (isHome) {
-        self.isBlurred = true;
-      } else {
-        self.isBlurred = false;
-      }
-    },
-    setIsBlurred(isBlurred: boolean) {
-      self.isBlurred = isBlurred;
     },
     setActive(activeWindowId: string) {
       self.windows.forEach((win: WindowModelType) => {
@@ -153,20 +122,18 @@ export const DesktopStore = types
       });
       self.activeWindow = self.windows.get(activeWindowId);
     },
-    setFullscreen(isFullscreen: boolean) {
-      self.isFullscreen = isFullscreen;
-    },
     setAppviewPreload(preloadPath: string) {
       self.appviewPreload = preloadPath;
-    },
-    setIsMouseInWebview(inWebview: boolean) {
-      self.isMouseInWebview = inWebview;
     },
     setDimensions(windowId: string, dimensions: DimensionModelType) {
       const windowDimensions = self.windows.get(windowId)?.dimensions;
       windowDimensions && applySnapshot(windowDimensions, dimensions);
     },
-    openBrowserWindow(app: any) {
+    openBrowserWindow(
+      app: any,
+      desktopDimensions: { width: number; height: number },
+      isFullscreen: boolean
+    ) {
       let glob = app.glob;
       if (app.href) {
         glob = app.href.glob ? true : false;
@@ -179,15 +146,14 @@ export const DesktopStore = types
         type: app.type,
         dimensions: getInitialWindowDimensions(
           app,
-          self.desktopDimensions,
-          self.isFullscreen
+          desktopDimensions,
+          isFullscreen
         ),
       });
       self.windows.set(newWindow.id, newWindow);
       self.activeWindow = self.windows.get(newWindow.id);
       if (self.showHomePane) {
         self.showHomePane = false;
-        self.isBlurred = false;
       }
       return newWindow;
     },

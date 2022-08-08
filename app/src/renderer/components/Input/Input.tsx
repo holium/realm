@@ -54,7 +54,7 @@ export type InputProps = StyledComponentProps<
 
 export const InputWrapper = styled(Flex)`
   /* display: block; */
-  width: 100%;
+  width: ${(props) => props.width ? props.width : '100%'};
   ${(props) =>
     !props.hasPointerEvents &&
     css`
@@ -224,6 +224,7 @@ const RightIcon: any = styled(Box)<
 export type FullProps = InputProps & {
   wrapperRef?: any;
   wrapperStyle?: any;
+  noCursor?: boolean;
   rows?: any;
 };
 
@@ -242,12 +243,14 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
       my,
       ml,
       mr,
+      noCursor,
       disabled,
       variant,
       borderColor,
       // eslint-disable-next-line @typescript-eslint/no-shadow
       color,
       bg,
+      width,
       wrapperRef,
       wrapperStyle,
     } = props;
@@ -268,6 +271,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         mt={mt}
         ml={ml}
         mr={mr}
+        width={width}
         flex={flex}
         style={wrapperStyle}
         isDisabled={disabled}
@@ -292,7 +296,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
           aria-invalid={props.error ? 'true' : 'false'}
           {...props}
           bg="transparent"
-          style={{ width: '100%' }}
+          style={{ width: '100%', caretColor: noCursor ? 'transparent' : undefined }}
         />
         {rightIcon && (
           <RightIcon

@@ -83,7 +83,8 @@
   ==
 ::
 +$  reaction
-  $%  [%add path=space-path:spaces =app]
+  $%  [%initial path=space-path:spaces =app]
+      [%add path=space-path:spaces =app]
       [%remove path=space-path:spaces =app-id]
   ==
 ::

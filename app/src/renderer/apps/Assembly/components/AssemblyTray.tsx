@@ -14,10 +14,9 @@ type AssemblyRowProps = AssemblyModelType & {
 export const AssemblyRow: FC<AssemblyRowProps> = observer(
   (props: AssemblyRowProps) => {
     const { title, host, people, cursors, onClick } = props;
-    const { shell, ship } = useServices();
+    const { desktop, ship } = useServices();
 
-    const { backgroundColor, textColor, windowColor, iconColor } =
-      shell.desktop.theme;
+    const { backgroundColor, textColor, windowColor, iconColor } = desktop.theme;
 
     let peopleText = 'people';
     if (people.length === 1) {

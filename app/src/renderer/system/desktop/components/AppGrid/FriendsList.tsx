@@ -28,10 +28,10 @@ interface IFriendsList {
 
 export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   const { friends } = props;
-  const { shell, spaces } = useServices();
+  const { desktop } = useServices();
   const searchRef = useRef(null);
 
-  const { textColor, windowColor } = shell.desktop.theme;
+  const { textColor, windowColor } = desktop.theme;
 
   const rowBg = rgba(darken(0.075, windowColor), 0.5);
 

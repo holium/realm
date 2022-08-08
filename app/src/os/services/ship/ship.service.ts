@@ -128,7 +128,7 @@ export class ShipService extends BaseService {
           : {},
       });
 
-      this.core.services.shell.load(ship, this.state.color!);
+      this.core.services.desktop.load(ship, this.state.color!);
 
       onSnapshot(this.state, (snapshot: any) => {
         this.db!.store = snapshot;

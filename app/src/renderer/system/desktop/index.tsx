@@ -16,13 +16,7 @@ type OSFrameProps = {
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
   const { hasLoaded } = props;
-  const { shell } = useServices();
-  const { desktop } = shell;
-
-  const DialogLayer = useMemo(
-    () => <DialogManager dialogId={desktop.dialogId} />,
-    [desktop.dialogId]
-  );
+  const { desktop } = useServices();
 
   return hasLoaded ? (
     <Fill>
@@ -33,7 +27,6 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
       <Layer zIndex={1}>
         {desktop.showHomePane && <AppGrid isOpen={desktop.showHomePane} />}
       </Layer>
-      <Layer zIndex={2}>{DialogLayer}</Layer>
       <Layer zIndex={12}>
         <Bottom size={58}>
           <SystemBar />

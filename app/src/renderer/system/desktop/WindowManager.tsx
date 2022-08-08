@@ -6,6 +6,7 @@ import { ContextMenu } from 'renderer/components';
 import { rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -14,14 +15,8 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    const { shell } = useServices();
-    const { desktop } = shell;
+    const { shell, desktop } = useServices();
     const desktopRef = useRef<any>(null);
-
-    useEffect(() => {
-      const dims = desktopRef.current?.getBoundingClientRect();
-      DesktopActions.setDesktopDimensions(dims.width, dims.height);
-    }, [desktopRef.current]);
 
     const managerType = 'classic';
     const hasOpenWindows = desktop.windows.size > 0;
@@ -44,7 +39,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
           top: 0,
           right: 0,
           height: `calc(100vh - ${0}px)`,
-          paddingTop: desktop.isFullscreen ? 0 : 30,
+          paddingTop: shell.isFullscreen ? 0 : 30,
         }}
       >
         <ContextMenu
@@ -58,8 +53,8 @@ export const WindowManager: FC<WindowManagerProps> = observer(
             {
               label: 'Change wallpaper',
               onClick: (evt: any) => {
-                DesktopActions.setBlur(true);
-                DesktopActions.openDialog('wallpaper-dialog');
+                ShellActions.setBlur(true);
+                ShellActions.openDialog('wallpaper-dialog');
               },
             },
             {
