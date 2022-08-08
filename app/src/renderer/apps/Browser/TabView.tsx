@@ -24,8 +24,7 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
   const { tab, isResizing } = props;
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
-  const { shell } = useServices();
-  const { desktop } = shell;
+  const { desktop, shell } = useServices();
 
   const [loading, setLoading] = useState(false);
   // const [urlData, setUrlData] = useState<any>(tab ? new URL(tab.url) : null);
@@ -73,11 +72,11 @@ export const TabView: FC<BrowserTabProps> = (props: BrowserTabProps) => {
   }, [tab.url]);
 
   const onMouseEnter = useCallback(() => {
-    desktop.setIsMouseInWebview(true);
-  }, [desktop]);
+    shell.setIsMouseInWebview(true);
+  }, [shell]);
   const onMouseLeave = useCallback(() => {
-    desktop.setIsMouseInWebview(false);
-  }, [desktop]);
+    shell.setIsMouseInWebview(false);
+  }, [shell]);
 
   return useMemo(() => {
     return (

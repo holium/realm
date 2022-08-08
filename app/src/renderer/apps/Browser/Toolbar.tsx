@@ -40,8 +40,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = (
     onClose,
     onMaximize,
   } = props;
-  const { shell } = useServices();
-  const { desktop } = shell;
+  const { desktop } = useServices();
   const browserStore = useBrowser();
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);

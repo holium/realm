@@ -29,8 +29,7 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
-  const { ship, spaces, shell } = useServices();
-  const { desktop } = shell;
+  const { ship, spaces, desktop } = useServices();
   // const [passports, setPassports] = useState([]);
 
   const apps: any = ship
@@ -184,7 +183,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                         spaces.selected!.path,
                         toJS(selectedApp)
                       );
-                      // DesktopActions.setBlur(false);
                       DesktopActions.setHomePane(false);
                     }}
                   />

@@ -15,6 +15,7 @@ import {
 } from 'renderer/components';
 import * as yup from 'yup';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
 import { toJS } from 'mobx';
@@ -23,13 +24,7 @@ import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,
-  // onOpen: () => {
-  //   // DesktopActions.setBlur(true);
-  // },
-  onClose: () => {
-    // DesktopActions.closeDialog();
-    // DesktopActions.setBlur(false);
-  },
+  onClose: () => {},
   window: {
     id: 'wallpaper-dialog',
     title: 'Wallpaper Dialog',
@@ -83,11 +78,11 @@ const createWallpaperForm = (
 };
 
 export const WallpaperDialog: FC = observer(() => {
-  const { shell, spaces } = useServices();
+  const { desktop, spaces } = useServices();
   const [loading, setLoading] = useState(false);
-  const { inputColor, windowColor } = shell.desktop.theme;
+  const { inputColor, windowColor } = desktop.theme;
   const { wallpaperForm, imageUrl } = useMemo(
-    () => createWallpaperForm({ imageUrl: shell.desktop.theme.wallpaper }),
+    () => createWallpaperForm({ imageUrl: desktop.theme.wallpaper }),
     []
   );
 
@@ -99,8 +94,8 @@ export const WallpaperDialog: FC = observer(() => {
       formData.imageUrl
     ).then((response: any) => {
       console.log(response);
-      DesktopActions.closeDialog();
-      DesktopActions.setBlur(false);
+      ShellActions.closeDialog();
+      ShellActions.setBlur(false);
       setLoading(false);
     });
   };
@@ -113,7 +108,7 @@ export const WallpaperDialog: FC = observer(() => {
       flexDirection="column"
       justifyContent="space-between"
     >
-      <WallpaperPreview src={shell.desktop.theme.wallpaper} />
+      <WallpaperPreview src={desktop.theme.wallpaper} />
       <FormControl.Field>
         <Input
           autoFocus
@@ -142,8 +137,8 @@ export const WallpaperDialog: FC = observer(() => {
           highlightColor="#EC415A"
           textColor="#EC415A"
           onClick={() => {
-            DesktopActions.closeDialog();
-            DesktopActions.setBlur(false);
+            ShellActions.closeDialog();
+            ShellActions.setBlur(false);
           }}
         >
           Close
@@ -151,7 +146,6 @@ export const WallpaperDialog: FC = observer(() => {
         <TextButton
           tabIndex={1}
           style={{ fontWeight: 400 }}
-          // disabled={imageUrl.state.value === shell.desktop.theme.wallpaper}
           onClick={(evt: any) => onChange(evt)}
         >
           {loading ? <Spinner size={0} /> : 'Change'}

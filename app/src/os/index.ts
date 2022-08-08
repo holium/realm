@@ -6,12 +6,14 @@ import Urbit from './urbit/api';
 import { AuthService } from './services/identity/auth.service';
 import { MSTAction } from './types';
 import { cleanPath, fromPathString } from './lib/action';
-import { SignupService } from './services/identity/signup.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
+import { ShellService } from './services/shell/shell.service';
+import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
+import HoliumAPI from './api/holium';
 
 export interface ISession {
   ship: string;
@@ -25,14 +27,16 @@ export class Realm extends EventEmitter {
   private session?: ISession;
   private db: Store<ISession>;
   readonly services: {
+    onboarding: OnboardingService;
     identity: {
       auth: AuthService;
-      signup: SignupService;
     };
     ship: ShipService;
     spaces: SpacesService;
-    shell: DesktopService;
+    desktop: DesktopService;
+    shell: ShellService;
   };
+  readonly holiumClient: HoliumAPI;
 
   readonly handlers = {
     'realm.boot': this.boot,
@@ -54,10 +58,11 @@ export class Realm extends EventEmitter {
     },
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
     auth: AuthService.preload,
-    signup: SignupService.preload,
     ship: ShipService.preload,
     spaces: SpacesService.preload,
-    shell: DesktopService.preload,
+    desktop: DesktopService.preload,
+    shell: ShellService.preload,
+    onboarding: OnboardingService.preload
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -75,14 +80,17 @@ export class Realm extends EventEmitter {
     }
     // Create an instance of all services
     this.services = {
+      onboarding: new OnboardingService(this),
       identity: {
         auth: new AuthService(this),
-        signup: new SignupService(this),
       },
       ship: new ShipService(this),
       spaces: new SpacesService(this),
-      shell: new DesktopService(this),
+      desktop: new DesktopService(this),
+      shell: new ShellService(this),
     };
+
+    this.holiumClient = new HoliumAPI();
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -97,18 +105,21 @@ export class Realm extends EventEmitter {
   async boot(_event: any) {
     let ship = null;
     let spaces = null;
+    let desktop = null;
     let shell = null;
     if (this.session) {
       ship = this.services.ship.snapshot;
       spaces = this.services.spaces.snapshot;
+      desktop = this.services.desktop.snapshot;
       shell = this.services.shell.snapshot;
     }
     this.services.identity.auth.setLoader('loaded');
     return {
       auth: this.services.identity.auth.snapshot,
-      signup: this.services.identity.signup.snapshot,
+      onboarding: this.services.onboarding.snapshot,
       ship,
       spaces,
+      desktop,
       shell,
       loggedIn: this.session ? true : false,
     };
@@ -152,6 +163,7 @@ export class Realm extends EventEmitter {
     );
     await this.services.spaces.load(this.session?.ship!, ship);
     this.services.identity.auth.setLoader('loaded');
+    this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.auth.on-log-in', toJS(ship));
   }
 
@@ -184,45 +196,3 @@ export class Realm extends EventEmitter {
 export default Realm;
 
 export type OSPreloadType = typeof Realm.preload;
-
-// {
-//   boot: () => Promise<any>; // starts an instance of the OS
-//   install: () => Promise<any>; // calls the kiln install command
-//   onInstalled: () => Promise<any>;
-//   // onStart: () => Promise<any>;
-//   onEffect: (callback: any) => Promise<any>;
-//   applyAction: (action: any) => Promise<any>;
-//   auth: typeof AuthService.preload;
-//   signup: typeof SignupService.preload;
-//   ship: typeof ShipService.preload;
-//   spaces: typeof SpacesService.preload;
-//   shell: typeof DesktopService.preload;
-//   // ship: {
-//   //   getContacts: () => any;
-//   //   getMetadata: (path: string) => any;
-//   //   getProfile: (ship: string) => Promise<any>;
-//   //   saveProfile: (ship: string, data: any) => Promise<any>;
-//   //   beacon: {
-//   //     getNotifications: () => Promise<any>;
-//   //     createNotification: (params: any) => Promise<any>;
-//   //     seenNotification: (id: string) => Promise<any>;
-//   //     archiveNotification: (id: string) => Promise<any>;
-//   //   };
-//   //   docket: {
-//   //     getApps: () => Promise<any>;
-//   //     getAppPreview: (ship: string, desk: string) => Promise<any>;
-//   //   };
-//   //   dms: {
-//   //     setScreen: (screen: boolean) => Promise<any>;
-//   //     acceptDm: (ship: string) => Promise<any>;
-//   //     declineDm: (ship: string) => Promise<any>;
-//   //     getDMs: () => Promise<any>;
-//   //     sendDm: (toShip: string, content: any[]) => Promise<any>;
-//   //     removeDm: (ship: string, index: any) => Promise<any>;
-//   //   };
-//   // };
-//   // spaces: {
-//   //   getSpaces: () => any;
-//   //   setActive: (space: any) => any;
-//   // };
-// };

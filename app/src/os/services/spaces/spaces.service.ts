@@ -109,7 +109,7 @@ export class SpacesService extends BaseService {
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
     this.state!.initialScry(spaces, tempApps, persistedState);
     this.state!.selected &&
-      this.core.services.shell.setTheme(this.state!.selected?.theme);
+      this.core.services.desktop.setTheme(this.state!.selected?.theme);
 
     // initial sync effect
     const syncEffect = {
@@ -187,7 +187,7 @@ export class SpacesService extends BaseService {
 
   setSelected(_event: any, path: string) {
     const selected = this.state?.selectSpace(path);
-    this.core.services.shell.setTheme(selected?.theme!);
+    this.core.services.desktop.setTheme(selected?.theme!);
   }
 
   async pinApp(_event: any, path: string, appId: string) {

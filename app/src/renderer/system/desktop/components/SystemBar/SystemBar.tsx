@@ -14,10 +14,10 @@ type SystemBarProps = {};
 
 export const SystemBar: FC<SystemBarProps> = observer(
   (props: SystemBarProps) => {
-    const { shell } = useServices();
+    const { desktop } = useServices();
     let trayAppRef;
 
-    const { windowColor, textColor } = shell.desktop.theme;
+    const { windowColor, textColor } = desktop.theme;
     const { activeApp, dimensions, coords } = useTrayApps();
 
     let TrayAppView: FC<any> | undefined;
@@ -42,7 +42,7 @@ export const SystemBar: FC<SystemBarProps> = observer(
                 textColor={textColor}
               >
                 <TrayAppView
-                  theme={shell.desktop.theme}
+                  theme={desktop.theme}
                   dimensions={dimensions}
                 />
               </MiniApp>

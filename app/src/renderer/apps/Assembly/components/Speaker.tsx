@@ -23,7 +23,7 @@ interface ISpeaker {
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   const { person, audio } = props;
-  const { ship, shell } = useServices();
+  const { ship } = useServices();
   const metadata = ship?.contacts.getContactAvatarMetadata(person);
   const hasVoice = audio && person === ship?.patp;
   let name = metadata?.nickname || person;

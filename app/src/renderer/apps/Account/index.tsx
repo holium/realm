@@ -27,7 +27,7 @@ type ProfileProps = {
 };
 
 export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
-  const { shell, ship, identity } = useServices();
+  const { ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
   const { auth } = identity;
   let [batteryLevel, setBatteryLevel] = useState(0);

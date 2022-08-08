@@ -110,7 +110,10 @@ export const SpacesStore = types
       delete data[our[0]!];
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
-          const persistedData = persistedState.spaces[path];
+          const persistedData =
+            persistedState && persistedState.spaces
+              ? persistedState.spaces[path]
+              : {};
           data[path].apps = {
             ...persistedData.apps,
             installed: clone(tempApps.installed),
