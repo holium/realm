@@ -108,8 +108,6 @@ export const SpacesStore = types
         apps: tempApps,
       });
       delete data[our[0]!];
-      console.log(data)
-      console.log(persistedState)
 
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
