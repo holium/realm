@@ -132,20 +132,11 @@ export const spacesDialogs: DialogRenderers = {
       const createForm: NewSpace = state;
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
-<<<<<<< HEAD
       // DesktopActions.setDialogLoading(true);
       SpacesActions.createSpace(createForm).then(() => {
         // DesktopActions.closeDialog();
         setState({ loading: false });
         // DesktopActions.setBlur(false);
-=======
-      SpacesActions.createSpace(createForm).then((newSpace: any) => {
-        console.log(newSpace);
-        setState({ loading: false });
-        ShellActions.closeDialog();
-        ShellActions.setBlur(false);
-        SpacesActions.selectSpace(newSpace.path);
->>>>>>> main
       });
     },
     onPrevious: () => {

@@ -82,18 +82,9 @@ export const SpacesStore = types
         ([path, space]: [path: string, space: any]) => {
           const persistedData =
             persistedState && persistedState.spaces
-<<<<<<< HEAD
               ? persistedState.spaces[path].members
               : {};
           data[path].members = {};
-=======
-              ? persistedState.spaces[path]
-              : {};
-          data[path].apps = {
-            ...persistedData.apps,
-            installed: clone(tempApps.installed),
-          };
->>>>>>> main
         }
       );
       applySnapshot(self.spaces, data);

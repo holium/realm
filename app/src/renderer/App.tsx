@@ -23,6 +23,7 @@ import {
   CursorEvent,
   RealmMultiplayerInterface,
 } from './system/desktop/components/Multiplayer/types';
+import { ShellActions } from './logic/actions/shell';
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
@@ -30,6 +31,7 @@ export const App: FC = observer(() => {
 
   const themeMode = desktop.theme.mode;
 
+  // ShellActions.closeDialog();
   const shellMemo = useMemo(
     () => (booted ? <Shell /> : <div>Booting...</div>),
     [booted]

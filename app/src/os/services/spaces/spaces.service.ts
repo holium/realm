@@ -1,5 +1,3 @@
-import { initial } from './../../../../../urbit/pkg/interface/src/logic/reducers/launch-update';
-import { PassportsApi } from './../../api/passports';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { toJS } from 'mobx';
@@ -8,7 +6,6 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
-  clone,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -213,7 +210,7 @@ export class SpacesService extends BaseService {
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
     const selected = this.state?.selectSpace(spacePath);
-    this.core.services.shell.setTheme(selected?.theme!);
+    this.core.services.desktop.setTheme(selected?.theme!);
     return spacePath;
   }
 
@@ -227,14 +224,14 @@ export class SpacesService extends BaseService {
       const selected = this.state?.selectSpace(
         `/~${this.core.conduit?.ship}/our`
       );
-      this.core.services.shell.setTheme(selected?.theme!);
+      this.core.services.desktop.setTheme(selected?.theme!);
     }
     return await SpacesApi.deleteSpace(this.core.conduit!, { path });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
-    this.core.services.shell.setTheme(selected?.theme!);
+    this.core.services.desktop.setTheme(selected?.theme!);
   }
   // ***********************************************************
   // *********************** MEMBERS ***************************
@@ -261,18 +258,10 @@ export class SpacesService extends BaseService {
     return response;
   }
 
-<<<<<<< HEAD
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    const response = await SpacesApi.kickMember(this.core.conduit!, path, patp);
-=======
-  setSelected(_event: any, path: string) {
-    const selected = this.state?.selectSpace(path);
-    this.core.services.desktop.setTheme(selected?.theme!);
+    return await SpacesApi.kickMember(this.core.conduit!, path, patp);
   }
->>>>>>> main
 
-    return response;
-  }
   // ***********************************************************
   // *********************** FRIENDS ***************************
   // ***********************************************************
