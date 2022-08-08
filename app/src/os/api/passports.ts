@@ -7,13 +7,13 @@ import { Patp } from '../types';
 // import { cleanNounColor } from '../lib/color';
 
 export const PassportsApi = {
-  getFriends: async (conduit: Urbit) => {
-    const response = await conduit.scry({
-      app: 'passports',
-      path: '/friends', // the spaces scry is at the root of the path
-    });
-    return response.friends;
-  },
+  // getSpaceMembers: async (conduit: Urbit) => {
+  //   const response = await conduit.scry({
+  //     app: 'spaces',
+  //     path: `${path}`, // the spaces scry is at the root of the path
+  //   });
+  //   return response.friends;
+  // },
   addFriend: async (conduit: Urbit, patp: Patp, credentials: ISession) => {
     const response = await quickPoke(
       conduit.ship!,

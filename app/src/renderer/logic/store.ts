@@ -217,6 +217,9 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }
+    if (value.resource === 'bazaar') {
+      applySnapshot(servicesStore.bazaar, value.model);
+    }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);
     }

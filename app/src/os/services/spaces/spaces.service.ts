@@ -40,6 +40,7 @@ export class SpacesService extends BaseService {
     passports: undefined,
     friends: FriendsStore.create(),
   };
+
   handlers = {
     'realm.spaces.set-selected': this.setSelected,
     'realm.spaces.pin-app': this.pinApp,
@@ -131,6 +132,14 @@ export class SpacesService extends BaseService {
     this.state = SpacesStore.create(castToSnapshot(persistedState));
 
     this.models.bazaar.initial(getSnapshot(ship.docket.apps) || []);
+    // initial sync effect
+    const bazaarSyncEffect = {
+      model: getSnapshot(this.models.bazaar!),
+      resource: 'bazaar',
+      key: null,
+      response: 'initial',
+    };
+    this.core.onEffect(bazaarSyncEffect);
 
     // Get the initial scry
     // TODO for some reason the initial selected reference is undefined so you cant
@@ -157,20 +166,20 @@ export class SpacesService extends BaseService {
     });
 
     // Start patching after we've initialized the state
-    onPatch(this.state, (patch) => {
+    onPatch(this.models.bazaar, (patch) => {
       const patchEffect = {
         patch,
-        resource: 'spaces',
+        resource: 'bazaar',
         response: 'patch',
       };
       this.core.onEffect(patchEffect);
     });
 
     // Start patching after we've initialized the state
-    onPatch(this.models.bazaar, (patch) => {
+    onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
-        resource: 'bazaar',
+        resource: 'spaces',
         response: 'patch',
       };
       this.core.onEffect(patchEffect);
@@ -186,7 +195,6 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
-    console.log(members);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
