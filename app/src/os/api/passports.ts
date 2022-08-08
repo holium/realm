@@ -1,116 +1,106 @@
-import { applySnapshot, IJsonPatch, applyPatch } from 'mobx-state-tree';
-import { ISession } from './../index';
-import { quickPoke } from '../lib/poke';
+import {
+  applySnapshot,
+  IJsonPatch,
+  applyPatch,
+  getSnapshot,
+} from 'mobx-state-tree';
 import { Urbit } from './../urbit/api';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
-import { Patp } from '../types';
+import { MemberRole, Patp, SpacePath } from '../types';
+import { MembershipType, MembersType } from '../services/spaces/models/members';
 // import { cleanNounColor } from '../lib/color';
 
 export const PassportsApi = {
-  // getSpaceMembers: async (conduit: Urbit) => {
-  //   const response = await conduit.scry({
-  //     app: 'spaces',
-  //     path: `${path}`, // the spaces scry is at the root of the path
-  //   });
-  //   return response.friends;
-  // },
-  addFriend: async (conduit: Urbit, patp: Patp, credentials: ISession) => {
-    const response = await quickPoke(
-      conduit.ship!,
-      {
-        app: 'passports',
-        mark: 'passports-action',
-        json: {
-          'add-friend': {
-            ship: patp,
-          },
-        },
-      },
-      credentials,
-      {
-        mark: 'passports-reaction',
-        path: `/friends`,
-        op: 'friend',
-      }
-    );
-    return response;
+  getMembers: async (conduit: Urbit, path: SpacePath) => {
+    const response = await conduit.scry({
+      app: 'passports',
+      path: `${path}/passports`, // the spaces scry is at the root of the path
+    });
+    return response.passports;
   },
-  editFriend: async (
+  /**
+   * inviteMember: invite a member to a space
+   *
+   * @param conduit the conduit instance
+   * @param path  i.e. ~lomder-librun/my-place
+   * @param payload  {patp: string, role: string, message: string}
+
+   * @returns
+   */
+  inviteMember: async (
     conduit: Urbit,
-    patp: Patp,
-    payload: { pinned: boolean; tags: string[] },
-    credentials: ISession
+    path: SpacePath,
+    payload: { patp: Patp; role: MemberRole; message: string }
   ) => {
-    console.log(payload);
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
     const response = await conduit.poke({
       app: 'passports',
-      mark: 'passports-action',
+      mark: 'invite-action',
       json: {
-        'edit-friend': {
-          ship: patp,
-          pinned: payload.pinned,
-          tags: payload.tags || [],
+        'send-invite': {
+          path: pathObj,
+          ship: payload.patp,
+          role: payload.role,
+          message: payload.message,
         },
       },
     });
-    // const response = await quickPoke(
-    //   conduit.ship!,
-    //   {
-    //     app: 'passports',
-    //     mark: 'passports-action',
-    //     json: {
-    //       'edit-friend': {
-    //         ship: patp,
-    //         pinned: payload.pinned,
-    //         tags: payload.tags || [],
-    //       },
-    //     },
-    //   },
-    //   credentials
-    // );
     return response;
   },
-  kickFriend: async (conduit: Urbit, patp: Patp, credentials: ISession) => {
-    const response = await quickPoke(
-      conduit.ship!,
-      {
-        app: 'passports',
-        mark: 'passports-action',
-        json: {
-          'kick-friend': {
-            ship: patp,
-          },
+  kickMember: async (conduit: Urbit, path: SpacePath, patp: Patp) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    const response = await conduit.poke({
+      app: 'passports',
+      mark: 'invite-action',
+      json: {
+        'kick-member': {
+          path: pathObj,
+          ship: patp,
         },
       },
-      credentials,
-      {
-        mark: 'passports-reaction',
-        path: `/friends`,
-        op: 'bye-friend',
-      }
-    );
+    });
     return response;
   },
-  syncUpdates: (conduit: Urbit, state: SpacesStoreType): void => {
+  watchMembers: (conduit: Urbit, state: MembershipType): void => {
     conduit.subscribe({
       app: 'passports',
-      path: `/friends`,
+      path: `/members`,
       event: async (data: any) => {
-        if (data['friends']) {
-          applySnapshot(state.friends, { all: data['friends'] });
+        console.log(data['members']);
+        if (data['members']) {
+          applySnapshot(state.spaces, data['members']);
+          // applySnapshot(state.initial(data[members]))
+          // Object.keys(data['members']).forEach((spaceKey: string) => {
+          //   const space = state.spaces.get(spaceKey)!;
+          //   if (space) {
+          //     console.log(spaceKey, space);
+          //     const members = data['members'][spaceKey];
+          //     applySnapshot(space.members, {
+          //       all: members,
+          //     });
+          //   }
+          // });
         }
-        if (data['friend']) {
-          const patp = data['friend'].ship;
-          const update = data['friend'].friend;
-          const patches: IJsonPatch[] = Object.keys(update).map(
-            (key: string) => ({
-              op: 'replace',
-              path: `/${patp}/${key}`,
-              value: update[key],
-            })
-          );
-          applyPatch(state.friends.all, patches);
-        }
+        // if (data['friend']) {
+        //   const patp = data['friend'].ship;
+        //   const update = data['friend'].friend;
+        //   const patches: IJsonPatch[] = Object.keys(update).map(
+        //     (key: string) => ({
+        //       op: 'replace',
+        //       path: `/${patp}/${key}`,
+        //       value: update[key],
+        //     })
+        //   );
+        //   applyPatch(state.friends.all, patches);
+        // }
       },
       err: () => console.log('Subscription rejected'),
       quit: () => console.log('Kicked from subscription'),

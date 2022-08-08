@@ -62,7 +62,7 @@ export class Realm extends EventEmitter {
     spaces: SpacesService.preload,
     desktop: DesktopService.preload,
     shell: ShellService.preload,
-    onboarding: OnboardingService.preload
+    onboarding: OnboardingService.preload,
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -121,6 +121,7 @@ export class Realm extends EventEmitter {
       spaces,
       desktop,
       shell,
+      bazaar: this.services.spaces.bazaarSnapshot,
       loggedIn: this.session ? true : false,
     };
   }

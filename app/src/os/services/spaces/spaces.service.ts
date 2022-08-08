@@ -11,20 +11,23 @@ import {
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DocketMap, SpacesStore, SpacesStoreType } from './models/spaces';
-
+import { MembershipStore } from './models/members';
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-import { FriendsApi } from '../../api/friends';
-import { FriendsType, FriendsStore } from './models/friends';
+// import { FriendsApi } from '../../api/friends';
+import { FriendsType, FriendsStore } from '../ship/models/friends';
 import { BazaarModel } from './models/bazaar';
+import { PassportsApi } from '../../api/passports';
+import { InvitationsModel } from './models/invitations';
 
 type SpaceModels = {
   bazaar?: any;
-  passports?: any;
-  friends: FriendsType;
+  members?: any;
+  invitations?: any;
+  // friends: FriendsType;
 };
 /**
  * SpacesService
@@ -33,9 +36,17 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
-    bazaar: BazaarModel.create(),
-    passports: undefined,
-    friends: FriendsStore.create(),
+    invitations: InvitationsModel.create({
+      outgoing: {},
+      incoming: {},
+    }),
+    bazaar: BazaarModel.create({
+      pinned: [],
+      endorsed: {},
+      installed: {},
+    }),
+    members: MembershipStore.create({ spaces: {} }),
+    // friends: FriendsStore.create({ all: {} }),
   };
 
   handlers = {
@@ -47,12 +58,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
     'realm.spaces.get-members': this.getMembers,
-    'realm.spaces.get-friends': this.getFriends,
-    'realm.spaces.add-friend': this.addFriend,
-    'realm.spaces.edit-friend': this.editFriend,
-    'realm.spaces.remove-friend': this.removeFriend,
-    'realm.spaces.invite-member': this.inviteMember,
-    'realm.spaces.kick-member': this.kickMember,
+    'realm.spaces.members.invite-member': this.inviteMember,
+    'realm.spaces.members.kick-member': this.kickMember,
   };
 
   static preload = {
@@ -83,27 +90,14 @@ export class SpacesService extends BaseService {
     getMembers: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.get-members', path);
     },
-    getFriends: () => {
-      return ipcRenderer.invoke('realm.spaces.get-friends');
-    },
     inviteMember: async (
       path: string,
       payload: { patp: string; role: MemberRole; message: string }
-    ) => ipcRenderer.invoke('realm.spaces.invite-member', path, payload),
+    ) =>
+      ipcRenderer.invoke('realm.spaces.members.invite-member', path, payload),
     //
     kickMember: async (path: string, patp: string) =>
-      ipcRenderer.invoke('realm.spaces.kick-member', path, patp),
-    //
-    addFriend: async (patp: Patp) =>
-      ipcRenderer.invoke('realm.spaces.add-friend', patp),
-    //
-    editFriend: async (
-      patp: Patp,
-      payload: { pinned: boolean; tags: string[] }
-    ) => ipcRenderer.invoke('realm.spaces.edit-friend', patp, payload),
-    //
-    removeFriend: async (patp: Patp) =>
-      ipcRenderer.invoke('realm.spaces.remove-friend', patp),
+      ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -119,6 +113,10 @@ export class SpacesService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
+  get bazaarSnapshot() {
+    return this.models.bazaar ? getSnapshot(this.models.bazaar) : null;
+  }
+
   async load(patp: string, ship: ShipModelType) {
     this.db = new Store({
       name: `realm.spaces.${patp}`,
@@ -128,16 +126,7 @@ export class SpacesService extends BaseService {
     let persistedState: SpacesStoreType = this.db.store;
     this.state = SpacesStore.create(castToSnapshot(persistedState));
 
-    this.models.bazaar.initial(getSnapshot(ship.docket.apps) || []);
-    // initial sync effect
-    const bazaarSyncEffect = {
-      model: getSnapshot(this.models.bazaar!),
-      resource: 'bazaar',
-      key: null,
-      response: 'initial',
-    };
-    this.core.onEffect(bazaarSyncEffect);
-
+    this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
     // Get the initial scry
     // TODO for some reason the initial selected reference is undefined so you cant
     // TODO reload to the same space you logged out from
@@ -184,8 +173,7 @@ export class SpacesService extends BaseService {
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(this.core.conduit!, this.state);
-    // PassportsApi.syncUpdates(this.core.conduit!, this.state);
-    FriendsApi.watchFriends(this.core.conduit!, this.state);
+    PassportsApi.watchMembers(this.core.conduit!, this.models.members);
   }
   // ***********************************************************
   // ************************ SPACES ***************************
@@ -237,7 +225,7 @@ export class SpacesService extends BaseService {
   // *********************** MEMBERS ***************************
   // ***********************************************************
   async getMembers(_event: IpcMainInvokeEvent, path: string) {
-    return await SpacesApi.getMembers(this.core.conduit!, path);
+    return await PassportsApi.getMembers(this.core.conduit!, path);
   }
 
   async inviteMember(
@@ -262,27 +250,27 @@ export class SpacesService extends BaseService {
     return await SpacesApi.kickMember(this.core.conduit!, path, patp);
   }
 
-  // ***********************************************************
-  // *********************** FRIENDS ***************************
-  // ***********************************************************
-  async getFriends(_event: IpcMainInvokeEvent) {
-    return await FriendsApi.getFriends(this.core.conduit!);
-  }
-  //
-  async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
-    return await FriendsApi.addFriend(this.core.conduit!, patp);
-  }
-  //
-  async editFriend(
-    _event: IpcMainInvokeEvent,
-    patp: Patp,
-    payload: { pinned: boolean; tags: string[] }
-  ) {
-    return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
-  }
-  async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
-    return await FriendsApi.removeFriend(this.core.conduit!, patp);
-  }
+  // // ***********************************************************
+  // // *********************** FRIENDS ***************************
+  // // ***********************************************************
+  // async getFriends(_event: IpcMainInvokeEvent) {
+  //   return await FriendsApi.getFriends(this.core.conduit!);
+  // }
+  // //
+  // async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+  //   return await FriendsApi.addFriend(this.core.conduit!, patp);
+  // }
+  // //
+  // async editFriend(
+  //   _event: IpcMainInvokeEvent,
+  //   patp: Patp,
+  //   payload: { pinned: boolean; tags: string[] }
+  // ) {
+  //   return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
+  // }
+  // async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+  //   return await FriendsApi.removeFriend(this.core.conduit!, patp);
+  // }
   // ***********************************************************
   // ************************ BAZAAR ***************************
   // ***********************************************************

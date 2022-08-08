@@ -19,8 +19,8 @@ import {
   ShipSearch,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { toJS } from 'mobx';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 interface IFriendsList {
   friends: any[];
@@ -30,6 +30,8 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   const { friends } = props;
   const { desktop } = useServices();
   const searchRef = useRef(null);
+
+  console.log(friends);
 
   const { textColor, windowColor } = desktop.theme;
 
@@ -46,19 +48,19 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   );
 
   const all = useMemo(
-    () => friends.filter((friend: any) => !friend.pinned && !friend.mutual),
+    () => friends.filter((friend: any) => !friend.pinned),
     [friends && friends.filter((friend: any) => !friend.pinned).length]
   );
 
   const onUnpin = (person: any) => {
-    SpacesActions.editFriend(person.patp, {
+    ShipActions.editFriend(person.patp, {
       pinned: false,
       tags: person.tags,
     });
   };
 
   const onPin = (person: any) => {
-    SpacesActions.editFriend(person.patp, {
+    ShipActions.editFriend(person.patp, {
       pinned: true,
       tags: person.tags,
     });
@@ -107,7 +109,7 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
           {
             label: 'Remove',
             onClick: (_evt: any) => {
-              SpacesActions.removeFriend(person.patp);
+              ShipActions.removeFriend(person.patp);
             },
           },
         ]}

@@ -17,6 +17,13 @@ export const MembersModel = types.model({
 
 export type MemberType = Instance<typeof MembersModel>;
 
+export const MembershipStore = types.model({
+  selected: types.safeReference(MembersModel),
+  spaces: types.map(types.map(MembersModel)),
+});
+
+export type MembershipType = Instance<typeof MembershipStore>;
+
 export const MembersStore = types
   .model({ all: types.map(MembersModel) })
   .views((self) => ({

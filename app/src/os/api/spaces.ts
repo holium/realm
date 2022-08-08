@@ -148,6 +148,7 @@ export const SpacesApi = {
       app: 'spaces',
       path: `/updates`,
       event: async (data: any, id: string) => {
+        console.log(data);
         if (data['spaces-reaction']) {
           handleSpacesReactions(data['spaces-reaction'], state, id);
         }
@@ -169,7 +170,7 @@ const handleSpacesReactions = (
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      // console.log(data['initial']);
+      console.log(data['initial']);
       state.initialReaction(data['initial']);
       break;
     case 'add':
@@ -202,16 +203,18 @@ const handleInviteReactions = (
   state: SpacesStoreType,
   id: string
 ) => {
+  console.log(data);
   const reaction: string = Object.keys(data)[0];
+  console.log(reaction);
   switch (reaction) {
     case 'invite-sent':
-      console.log(data['invite-reaction']['invite-sent']);
+      console.log(data['invite-sent']);
       break;
     case 'invite-accepted':
-      console.log(data['invite-reaction']['invite-accepted']);
+      console.log(data['invite-accepted']);
       break;
     case 'kicked':
-      console.log(data['invite-reaction']['kicked']);
+      console.log(data['kicked']);
       break;
     default:
       // unknown

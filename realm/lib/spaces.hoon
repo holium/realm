@@ -49,14 +49,14 @@
       :-  %initial
       %-  pairs
       :~  [%spaces (spaces-map:encode spaces.rct)]
-          [%membership (membership-map:encode membership.rct)]
+          :: [%membership (membership-map:encode membership.rct)]
       ==
     ::
         %add
       :-  %add
       %-  pairs
       :~  [%space (spc:encode space.rct)]
-          [%members (membs:encode members.rct)]
+          :: [%members (membs:encode members.rct)]
       ==
     ::
         %replace
@@ -76,7 +76,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%space (spc:encode space.rct)]
-          [%members (membs:encode members.rct)]
+          :: [%members (membs:encode members.rct)]
       ==
     ==
   ::
@@ -92,14 +92,14 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.view)/(scot %tas space.path.view))]
           [%space (spc:encode space.view)]
-          [%members (membs:encode members.view)]
+          :: [%members (membs:encode members.view)]
       ==
       ::
         %spaces
       [%spaces (spaces-map:encode spaces.view)]
       ::
-        %members
-      [%members (membs:encode members.view)]
+      ::   %members
+      :: [%members (membs:encode members.view)]
     ==
   --
 

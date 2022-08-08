@@ -72,19 +72,19 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces =membership:membership]
-      [%add =space =members:membership]
+  $%  [%initial =spaces]
+      [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]
-      [%space path=space-path =space =members:membership]
+      [%space path=space-path =space]
   ==
 ::
 ::  Scry views
 ::
 +$  view :: rename to effects
-  $%  [%space path=space-path =space =members:membership]
+  $%  [%space path=space-path =space]
       [%spaces =spaces]
-      [%members =members:membership]
+      :: [%members =members:membership]
   ==
 ::
 --

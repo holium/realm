@@ -8,7 +8,7 @@
 ::   synch's contacts from contact-store.
 ::
 ::
-/-  sur=passports
+/-  sur=passports, spcs=spaces, frens-sur=friends
 =<  [sur .]
 =,  sur
 |%
@@ -27,26 +27,29 @@
     :_  ~
     ^-  [cord json]
     ?-  -.rct
-        %friends
-      [%friends (frens:encode friends.rct)]
+      ::   %friends
+      :: [%friends (frens:encode friends.rct)]
       ::
-        %friend
-      :-  %friend
-      %-  pairs
-      :~  [%ship s+(scot %p ship.rct)]
-          [%friend (fren:encode friend.rct)]
-      ==
+      ::   %friend
+      :: :-  %friend
+      :: %-  pairs
+      :: :~  [%ship s+(scot %p ship.rct)]
+      ::     [%friend (fren:encode friend.rct)]
+      :: ==
       ::
-        %new-friend
-      :-  %new-friend
-      %-  pairs
-      :~  [%ship s+(scot %p ship.rct)]
-          [%friend (fren:encode friend.rct)]
-      ==
-      ::
-        %bye-friend
-      :-  %bye-friend
-      (pairs [%ship s+(scot %p ship.rct)]~)
+      ::   %new-friend
+      :: :-  %new-friend
+      :: %-  pairs
+      :: :~  [%ship s+(scot %p ship.rct)]
+      ::     [%friend (fren:encode friend.rct)]
+      :: ==
+      :: ::
+      ::   %bye-friend
+      :: :-  %bye-friend
+      :: (pairs [%ship s+(scot %p ship.rct)]~)
+      :: ::
+        %members
+      [%members (dists:encode districts.rct)]
     ==
   ::
   ++  action
@@ -81,43 +84,6 @@
         %ping
       :-  %ping
       (pairs [%msg ?~(msg.act ~ s+(need msg.act))]~)
-    ::
-    ::  Friends
-    ::
-        %add-friend
-      :-  %add-friend
-      %-  pairs
-      :~  [%ship s+(scot %p ship.act)]
-      ==
-    ::
-        %edit-friend
-      :-  %edit-friend
-      %-  pairs
-      :~  [%ship s+(scot %p ship.act)]
-          [%pinned [%b pinned.act]]
-          [%tags [%a (turn ~(tap in tags.act) |=(tag=cord s+tag))]]
-      ==
-    ::
-        %remove-friend
-      :-  %remove-friend
-      %-  pairs
-      :~  [%ship s+(scot %p ship.act)]
-      ==
-    ::
-    ::  Receiving
-    ::
-        %be-fren
-      :-  %be-fren
-      ~
-    ::
-        %yes-fren
-      :-  %yes-fren
-      ~
-    ::
-        %bye-fren
-      :-  %bye-fren
-      ~
-    ::
     ::
     ==
   ::
@@ -163,8 +129,11 @@
         %passports
       [%passports (passes:encode passports.view)]
       ::
-        %friends
-      [%friends (frens:encode friends.view)]
+        %is-member
+      [%is-member (is-mem:encode is-member.view)]
+      ::
+        %districts
+      [%districts (dists:encode districts.view)]
     ==
   --
 ::
@@ -181,12 +150,12 @@
       :~  [%add add-passport]
           [%remove remove-passport]
           [%edit edit-passport]
-          [%add-friend add-friend]
-          [%edit-friend edit-friend]
-          [%remove-friend remove-friend]
-          [%be-fren ul]
-          [%yes-fren ul]
-          [%bye-fren ul]
+          :: [%add-friend add-friend]
+          :: [%edit-friend edit-friend]
+          :: [%remove-friend remove-friend]
+          :: [%be-fren ul]
+          :: [%yes-fren ul]
+          :: [%bye-fren ul]
       ==
     ::
     ++  add-friend
@@ -263,6 +232,16 @@
 ++  encode
   =,  enjs:format
   |%
+  ++  dists
+    |=  =districts
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by districts)
+    |=  [pth=space-path:spcs =passports]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))  
+    ^-  [cord json]
+    [spc-path (passes passports)]
+  ::
   ++  peeps
     |=  =people
     ^-  json
@@ -273,11 +252,11 @@
     [(scot %p ship) (pers person)]
   ::
   ++  frens
-    |=  =friends
+    |=  =friends:frens-sur
     ^-  json
     %-  pairs
     %+  turn  ~(tap by friends)
-    |=  [=^ship =friend]
+    |=  [=^ship =friend:frens-sur]
     ^-  [cord json]
     [(scot %p ship) (fren friend)]
   ::
@@ -299,7 +278,7 @@
     ==
   ::
   ++  fren
-    |=  =friend
+    |=  =friend:frens-sur
     ^-  json
     %-  pairs:enjs:format
     :~  ['pinned' b+pinned.friend]
@@ -314,11 +293,21 @@
     :~
       ['alias' s+alias.passport]
       ['roles' (rols roles.passport)]
+      ['status' s+(scot %tas status.passport)]
     ==
   ::
   ++  rols
     |=  =roles:membership
     ^-  json
     [%a (turn ~(tap in roles) |=(rol=role:membership s+(scot %tas rol)))]
+  ::
+  ++  is-mem
+    |=  is=?
+    ^-  json
+    %-  pairs
+    :~
+      ['is-member' b+is]
+    ==
+  ::
   --
 --

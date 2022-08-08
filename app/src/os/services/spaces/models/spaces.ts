@@ -3,8 +3,6 @@ import {
   types,
   applySnapshot,
   castToSnapshot,
-  clone,
-  applyPatch,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { ThemeModel } from '../../shell/theme.model';
@@ -13,7 +11,7 @@ import { DocketApp, WebApp } from '../../ship/models/docket';
 import { InvitationsModel } from './invitations';
 
 import { TokenModel } from './token';
-import { FriendsStore } from './friends';
+// import { FriendsStore } from '../../ship/models/friends';
 import { MembersModel, MembersStore } from './members';
 import { Patp } from 'os/types';
 
@@ -35,7 +33,7 @@ export const SpaceModel = types
       outgoing: {},
       incoming: {},
     }),
-    members: types.maybe(MembersStore),
+    members: types.optional(MembersStore, { all: {} }),
     apps: types.maybe(
       types.model({
         pinned: types.array(types.string),
@@ -54,7 +52,7 @@ export const SpacesStore = types
     loader: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
-    friends: types.optional(FriendsStore, { all: {} }),
+    // friends: types.optional(FriendsStore, { all: {} }),
   })
   .views((self) => ({
     get isLoading() {
@@ -80,10 +78,11 @@ export const SpacesStore = types
     initialScry: (data: any, persistedState: any, ship: Patp) => {
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
-          const persistedData =
-            persistedState && persistedState.spaces
-              ? persistedState.spaces[path].members
-              : {};
+          console.log(path, space);
+          // const persistedData =
+          //   persistedState && persistedState.spaces
+          //     ? persistedState.spaces[path].members
+          //     : {};
           data[path].members = {};
         }
       );
@@ -95,14 +94,14 @@ export const SpacesStore = types
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
     },
-    initialReaction: (data: { spaces: any; membership: any }) => {
+    initialReaction: (data: { spaces: any; members: any }) => {
       Object.keys(data.spaces).forEach((key: string) => {
-        if (!data.spaces[key].all) {
-          data.spaces[key].all = {};
-        }
-        data.spaces[key].members = MembersStore.create({
-          all: data.membership[key],
-        });
+        // if (!data.spaces[key].members) {
+        //   data.spaces[key].members = { all: {} };
+        // }
+        // data.spaces[key].members = MembersStore.create({
+        //   all: data.members[key],
+        // });
       });
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
     },

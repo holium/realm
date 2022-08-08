@@ -9,21 +9,6 @@
 /-  resource, contact-store, spaces, membership
 |%
 ::
-::  $friends: specifically used for the our space.
-::
-+$  friends   (map ship friend)
-::
-::  $friend: specifically used for the our space, keeps track of another
-::    ship and allows metadata.
-::
-+$  friend-state  ?(%added %mutual)
-+$  friend-tags   (set cord)
-+$  friend  
-  $:  pinned=?
-      tags=friend-tags
-      mutual=?
-  ==  
-::
 ::  $contacts: one-to-one mapping of contact-store to this agent's store
 ::    contacts are kept in sync and then extended based on needs
 ::
@@ -31,10 +16,10 @@
 ::
 ::  $passport: track space membership and other metadata
 +$  passport
-   $:  =roles:membership
-       alias=cord
-       status=status:membership
-   ==
+  $:  =roles:membership
+      alias=cord
+      status=status:membership
+  ==
 ::
 ::  $passports: passports (access) to spaces within Realm
 +$  passports      (map ship passport)
@@ -65,21 +50,10 @@
       [%add path=space-path:spaces =ship =payload]
       [%edit path=space-path:spaces =ship =payload]
       [%remove path=space-path:spaces =ship]
-      ::  Our friend actions
-      [%add-friend =ship]
-      [%edit-friend =ship pinned=? tags=friend-tags]
-      [%remove-friend =ship]
-      ::  Poke friend actions
-      [%be-fren ~]
-      [%yes-fren ~]
-      [%bye-fren ~]
   ==
 ::
 +$  reaction
-  $%  [%friends =friends]
-      [%friend =ship =friend]     ::  reacts when on update to existing friend
-      [%new-friend =ship =friend] ::  reacts when a new friend is addedd
-      [%bye-friend =ship]         ::  reacts when a friend is removed 
+  $%  [%members =districts]
   ==
 ::
 ::  Scry views
@@ -87,6 +61,7 @@
 +$  view
   $%  [%people =people]
       [%passports =passports]
-      [%friends =friends]
+      [%districts =districts]
+      [%is-member is-member=?]
   ==
 --
