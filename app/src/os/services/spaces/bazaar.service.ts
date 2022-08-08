@@ -20,11 +20,10 @@ export class BazaarService extends BaseService {
   };
 
   static preload = {
-    getApps: (shipName: string, shipPath: string, category: string = 'all') => {
+    getApps: (spacePath: string, category: string = 'all') => {
       return ipcRenderer.invoke(
         'realm.spaces.bazaar.get-apps',
-        shipName,
-        shipPath,
+        spacePath,
         category
       );
     },
@@ -49,17 +48,11 @@ export class BazaarService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async getApps(
-    _event: any,
-    shipName: string,
-    shipPath: string,
-    category: string = 'all'
-  ) {
+  async getApps(_event: any, spacePath: string, category: string = 'all') {
     console.log('bazaar-service: getAllies');
     const response = await BazaarApi.getApps(
       this.core.conduit!,
-      shipName,
-      shipPath,
+      spacePath,
       category
     );
     console.log(response);

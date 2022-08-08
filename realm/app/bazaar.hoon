@@ -78,7 +78,6 @@
       =/  space-pth   `@t`i.t.t.path
       =/  arg  i.t.t.t.t.path
       ~&  >>  "{<ship>}, {<space-pth>}, {<arg>}"
-      ?>  ?=(tag:store arg)
       =/  apps  (apps:view:core [ship space-pth] arg)
       =/  apps  (srt:rec:core apps)
       ``json+!>((view:enjs:core [arg apps]))
@@ -86,7 +85,9 @@
     ::  ~/scry/bazaar/allies
     ::  leverage treaty agent for now to get list of allies
     [%x %allies ~]
-      ``json+!>(.^(json %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/allies/json))
+      =/  allies  .^(json %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/allies/json)
+      ~&  >>  allies
+      ``json+!>(allies)
     ::
     ::  ~/scry/bazaar/treaties/${ship}
     ::  leverage treaty agent for now to get list of treaties by ship
@@ -117,7 +118,7 @@
           ?+    p.cage.sign  (on-agent:def wire sign)
               %spaces-reaction
                 =^  cards  state
-                  (on:sp:core !<(=spaces-reaction:spaces-store q.cage.sign))
+                  (on:sp:core !<(=reaction:spaces-store q.cage.sign))
                 [cards this]
           ==
       ==
@@ -238,7 +239,7 @@
 ++  sp
   |%
   ++  on
-    |=  reaction=spaces-reaction:spaces-store
+    |=  reaction=reaction:spaces-store
     ^-  (quip card _state)
     :: `state
     ?-  -.reaction
@@ -324,20 +325,25 @@
 ++  view
   |%
   ++  apps
-    |=  [path=space-path:spaces-store =tag:store]
+    |=  [path=space-path:spaces-store tag=@tas]
     ^-  (list app-view:store)
     =/  index  (~(get by space-apps.state) path)
     ?~  index  ~
     ::  listify the map into list of key/value pairs
-    %+  roll  ~(tap by u.index)
+    %+  roll  ~(tap by u.index)      :: ?>  ?=(tag:store arg)
     |=  [[=app-id:store =app-entry:store] acc=(list app-view:store)]
-    ?.  (~(has in tags.app-entry) tag)  acc
-    =/  app  (~(get by apps.state) app-id)
-    ?~  app  acc
-    =|  vw=app-view:store
-    =.  meta.vw  app-entry
-    =.  app.vw   u.app
-    (snoc acc vw)
+      ?:  ?|  =(tag %all)
+              ?&  ?>  ?=(tag:store tag)
+                  (~(has in tags.app-entry) tag)
+              ==
+          ==
+        =/  app  (~(get by apps.state) app-id)
+        ?~  app  acc
+        =|  vw=app-view:store
+        =.  meta.vw  app-entry
+        =.  app.vw   u.app
+        (snoc acc vw)
+      acc
   --
 ++  rec
   |%
@@ -358,8 +364,10 @@
     :_  ~
     ^-  [cord json]
     ?+  which.view  [%o ~]
+        %all
+      [%apps [%a (vw:encode apps.view)]]
         %recommended
-      [%recommended [%a (vw:encode apps.view)]]
+      [%apps [%a (vw:encode apps.view)]]
     ==
   --
 ++  encode

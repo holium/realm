@@ -13,13 +13,12 @@ export const BazaarApi = {
   //    path should be /{ship}/{space-path}
   getApps: async (
     conduit: Urbit,
-    shipName: string,
-    shipPath: string,
+    spacePath: string,
     category: string = 'all'
   ) => {
     const response = await conduit.scry({
       app: 'bazaar',
-      path: `/apps/${shipName}/${shipPath}/${category}`,
+      path: `${spacePath}/apps/${category}`,
     });
     return response.apps;
   },
