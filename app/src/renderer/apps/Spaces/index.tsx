@@ -5,7 +5,7 @@ import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type SpacesProps = {
   theme: any;
@@ -16,8 +16,7 @@ type SpacesProps = {
 };
 
 export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
-  const { ship, shell, spaces } = useServices();
-  const { desktop } = shell;
+  const { ship, desktop, spaces } = useServices();
 
   const { dimensions } = props;
 
@@ -76,7 +75,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
           color={iconColor}
           data-close-tray="true"
           onClick={(evt: any) => {
-            DesktopActions.openDialog('create-space-1');
+            ShellActions.openDialog('create-space-1');
           }}
         >
           <Icons name="Plus" opacity={0.7} />

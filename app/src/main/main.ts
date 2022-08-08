@@ -132,7 +132,7 @@ const createWindow = async () => {
       throw new Error('"mainWindow" is not defined');
     }
     mainWindow.webContents.send(
-      'realm.desktop.set-fullscreen',
+      'realm.shell.set-fullscreen',
       mainWindow.isFullScreen()
     );
     mainWindow.webContents.send(

@@ -16,58 +16,40 @@ export const DesktopActions = {
       format: 'hex',
     });
     console.log(accent);
-    return await window.electron.os.shell.changeWallpaper(
+    return await window.electron.os.desktop.changeWallpaper(
       spacePath,
       color.toString(),
       wallpaper
     );
   },
   setActive: async (spacePath: string, app: any) => {
-    return await window.electron.os.shell.setActive(spacePath, app);
-  },
-  setBlur: async (blurred: boolean) => {
-    return await window.electron.os.shell.setBlur(blurred);
+    return await window.electron.os.desktop.setActive(spacePath, app);
   },
   setHomePane: async (isHome: boolean) => {
-    return await window.electron.os.shell.setHomePane(isHome);
+    return await window.electron.os.desktop.setHomePane(isHome);
   },
   setMouseColor: async (mouseColor: string) => {
-    return await window.electron.os.shell.setMouseColor(mouseColor);
+    return await window.electron.os.desktop.setMouseColor(mouseColor);
   },
   setAppDimensions: async (
     windowId: any,
     dimensions: { width: number; height: number; x: number; y: number }
   ) => {
-    return await window.electron.os.shell.setAppDimensions(
+    return await window.electron.os.desktop.setAppDimensions(
       windowId,
       dimensions
     );
-  },
-  setDesktopDimensions: async (width: number, height: number) => {
-    return await window.electron.os.shell.setDesktopDimensions(width, height);
   },
   setPartitionCookies: (partition: string, cookies: any) => {
     return window.electron.app.setPartitionCookies(partition, cookies);
   },
   openAppWindow: async (spacePath: string, app: any) => {
-    return await window.electron.os.shell.openAppWindow(spacePath, app);
+    return await window.electron.os.desktop.openAppWindow(spacePath, app);
   },
   closeAppWindow: async (spacePath: string, app: any) => {
-    return await window.electron.os.shell.closeAppWindow(spacePath, app);
+    return await window.electron.os.desktop.closeAppWindow(spacePath, app);
   },
   toggleDevTools: async () => {
     return window.electron.app.toggleDevTools();
-  },
-  openDialog: async (dialogId: string) => {
-    return await window.electron.os.shell.openDialog(dialogId);
-  },
-  previousDialog: async (dialogId: string) => {
-    return await window.electron.os.shell.previousDialog(dialogId);
-  },
-  nextDialog: async (dialogId: string) => {
-    return await window.electron.os.shell.nextDialog(dialogId);
-  },
-  closeDialog: async () => {
-    return await window.electron.os.shell.closeDialog();
   },
 };

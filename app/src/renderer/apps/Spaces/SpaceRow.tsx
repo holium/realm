@@ -54,8 +54,8 @@ type SpaceRowProps = {
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { shell } = useServices();
-  const { theme } = shell.desktop;
+  const { desktop } = useServices();
+  const { theme } = desktop;
   const [deleteLoading, setDeleteLoading] = useState(false);
   // const {} =
   const rowRef = useRef<any>(null);

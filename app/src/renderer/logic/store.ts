@@ -14,11 +14,12 @@ import {
 } from 'mobx-state-tree';
 
 import { DesktopStore } from '../../os/services/shell/desktop.model';
+import { ShellStore } from 'os/services/shell/shell.model';
 import { SpacesStore } from '../../os/services/spaces/models/spaces';
 import { AuthStore } from '../../os/services/identity/auth.model';
-import { SignupStore } from '../../os/services/identity/signup.model';
+import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel } from '../../os/services/ship/models/ship';
-import { toJS } from 'mobx';
+import { ShellActions } from './actions/shell';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -28,14 +29,16 @@ const loadSnapshot = (serviceKey: string) => {
 
 export const Services = types
   .model('ServicesStore', {
-    shell: types.model('ShellStore', {
-      // preferenceStore: ConfigStore,
-      desktop: DesktopStore,
-    }),
+    // shell: types.model('ShellStore', {
+    //   desktop: DesktopStore,
+    // }),
+    desktop: DesktopStore,
+    shell: ShellStore,
+
     identity: types.model('identity', {
       auth: AuthStore,
-      signup: SignupStore,
     }),
+    onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
     bazaar: BazaarModel,
@@ -49,21 +52,19 @@ export const Services = types
     },
   }));
 
+const desktopSnapshot = loadSnapshot('desktop');
 const shellSnapshot = loadSnapshot('shell');
 
 const services = Services.create({
-  shell: {
-    desktop: (shellSnapshot && shellSnapshot.desktop) || {},
-  },
+  desktop: desktopSnapshot || {},
+  shell: shellSnapshot || {},
   identity: {
     auth: {
       loader: { state: 'initial' },
       firstTime: true,
     },
-    signup: {
-      loader: { state: 'initial' },
-    },
   },
+  onboarding: {},
   ship: undefined,
   spaces: {
     loader: { state: 'initial' },
@@ -120,28 +121,25 @@ export const coreStore = CoreStore.create();
 
 coreStore.reset(); // need to reset coreStore for proper boot sequence
 
-// servicesStore.shell.desktop.setIsBlurred(true);
-
 // After boot, set the initial data
 OSActions.onBoot().then((response: any) => {
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
   });
-  servicesStore.identity.signup.initialSync({
-    key: 'ships',
-    model: response.signup,
-  });
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
     coreStore.setLoggedIn(true);
-    DesktopActions.setBlur(false);
+    ShellActions.setBlur(false);
+  }
+  if (response.onboarding) {
+    applySnapshot(
+      servicesStore.onboarding,
+      castToSnapshot(response.onboarding)
+    );
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
-  }
-  if (response.shell) {
-    applySnapshot(servicesStore.shell.desktop, response.shell);
   }
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
@@ -164,10 +162,6 @@ export function useCore() {
   return store;
 }
 
-// onSnapshot(coreStore, (snapshot) => {
-//   localStorage.setItem('coreStore', JSON.stringify(snapshot));
-// });
-
 onSnapshot(servicesStore, (snapshot) => {
   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
 });
@@ -175,21 +169,18 @@ onSnapshot(servicesStore, (snapshot) => {
 // Auth events
 window.electron.os.auth.onLogin((_event: any) => {
   coreStore.setLoggedIn(true);
-  DesktopActions.setBlur(false);
+  ShellActions.setBlur(false);
 });
 
 // Auth events
 window.electron.os.auth.onLogout((_event: any) => {
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
-  DesktopActions.setBlur(true);
+  ShellActions.setBlur(true);
 });
 
 // Effect events
 window.electron.os.onEffect((_event: any, value: any) => {
-  // if (value.response === 'diff') {
-  //   console.log('got effect data => ', value.json);
-  // }
   if (value.response === 'patch') {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
@@ -197,8 +188,8 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'bazaar') {
       applyPatch(servicesStore.bazaar, value.patch);
     }
-    if (value.resource === 'signup') {
-      applyPatch(servicesStore.identity.signup, value.patch);
+    if (value.resource === 'onboarding') {
+      applyPatch(servicesStore.onboarding, value.patch);
     }
     if (value.resource === 'spaces') {
       console.log('spaces patch', value.patch);
@@ -208,12 +199,13 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.ship, value.patch);
     }
     if (value.resource === 'desktop') {
-      // console.log('desktop patch', value.patch);
-      applyPatch(servicesStore.shell.desktop, value.patch);
+      applyPatch(servicesStore.desktop, value.patch);
+    }
+    if (value.resource === 'shell') {
+      applyPatch(servicesStore.shell, value.patch);
     }
   }
   if (value.response === 'initial') {
-    // console.log('initial', value);
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }
@@ -229,16 +221,10 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'spaces') {
       console.log('initial', value.model);
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
-      // servicesStore.spaces.setInitial(value.model);
-      // spacesState.syncPatches(value);
     }
   }
 });
 
-// window.electron.app.setFullscreen((_event: any, data: any) => {
-//   // osState.desktop.setFullscreen(data);
-// });
-
 window.electron.app.setAppviewPreload((_event: any, data: any) => {
-  servicesStore.shell.desktop.setAppviewPreload(data);
+  servicesStore.desktop.setAppviewPreload(data);
 });

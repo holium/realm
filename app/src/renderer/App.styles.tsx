@@ -12,7 +12,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     cursor: none !important;
     font-family: "Rubik", sans-serif;
   }
-  
+
   :root {
     ${(props: StyleProps) => css`
       --blur-enabled: ${props.blur ? 'blur(16px)' : 'none'};
@@ -23,7 +23,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
       --text-color: ${props.theme.colors.text.primary};
     `}
   }
-  
+
   body {
     background-color: ${(props) => props.theme.colors.bg.body};
     transition: background-color 1s ease;
@@ -32,7 +32,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     width: 100vw;
     margin: 0;
   }
-  
+
   li {
     list-style: none;
   }

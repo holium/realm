@@ -96,8 +96,8 @@ type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
 export const SpacesCreateForm: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { shell } = useServices();
-    const { inputColor, windowColor, textColor } = shell.desktop.theme;
+    const { desktop } = useServices();
+    const { inputColor, windowColor, textColor } = desktop.theme;
     const { workflowState, setState } = props;
     const colorPickerRef = useRef(null);
 
@@ -446,7 +446,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   </ColorTilePopover>
                 </Flex>
               </FormControl.Field>
-    
+
               <FormControl.Field>
                 <FormControl.Field>
                   <Label>Space name</Label>

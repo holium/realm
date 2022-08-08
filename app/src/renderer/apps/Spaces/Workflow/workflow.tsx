@@ -1,14 +1,11 @@
-import { applySnapshot, Instance, types } from 'mobx-state-tree';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
-import { toJS } from 'mobx';
 
 import { CreateSpaceModal } from './SelectType';
 import { SpacesCreateForm } from './Details';
 import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { createContext, useContext } from 'react';
 
 type NewSpace = {
   access: 'public' | 'antechamber' | 'private';
@@ -21,39 +18,6 @@ type NewSpace = {
   type: 'our' | 'group' | 'space';
 };
 
-// // This state tree is passed between workflow steps
-// const NewSpaceModel = types
-//   .model({
-//     loading: types.optional(types.boolean, false),
-//     // Step 1
-//     title: types.maybe(types.string),
-//     image: types.maybe(types.string),
-//     subtitle: types.maybe(types.string),
-//     // Poke data
-//     type: types.maybe(types.enumeration(['our', 'group', 'space'])),
-//     access: types.maybe(
-//       types.enumeration(['public', 'antechamber', 'private'])
-//     ),
-//     archetype: types.maybe(types.enumeration(['home', 'lodge'])),
-//     archetypeTitle: types.maybe(types.enumeration(['Home', 'Lodge'])),
-//     name: types.maybe(types.string),
-//     color: types.optional(types.string, '#000000'),
-//     picture: types.optional(types.string, ''),
-//     members: types.map(
-//       types.array(types.enumeration(['owner', 'initiate', 'admin', 'member']))
-//     ),
-//   })
-//   .actions((self) => ({
-//     set(data: any) {
-//       applySnapshot(self, data);
-//     },
-//     reset() {
-//       self = NewSpaceModel.create();
-//     },
-//   }));
-
-// export const createSpacesState = NewSpaceModel.create();
-
 export const spacesDialogs: DialogRenderers = {
   'create-space-1': {
     workflow: true,
@@ -62,14 +26,14 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <CreateSpaceModal {...props} />,
     onOpen: () => {
-      DesktopActions.setBlur(true);
+      ShellActions.setBlur(true);
     },
     onNext: (_evt: any) => {
-      DesktopActions.nextDialog('create-space-2');
+      ShellActions.nextDialog('create-space-2');
     },
     onClose: () => {
-      DesktopActions.setBlur(false);
-      DesktopActions.closeDialog();
+      ShellActions.setBlur(false);
+      ShellActions.closeDialog();
     },
     window: {
       id: 'create-space-1',
@@ -97,14 +61,14 @@ export const spacesDialogs: DialogRenderers = {
       }
     },
     onNext: (_evt: any) => {
-      DesktopActions.nextDialog('create-space-3');
+      ShellActions.nextDialog('create-space-3');
     },
     onPrevious: () => {
-      DesktopActions.nextDialog('create-space-1');
+      ShellActions.nextDialog('create-space-1');
     },
     onClose: () => {
-      DesktopActions.setBlur(false);
-      DesktopActions.closeDialog();
+      ShellActions.setBlur(false);
+      ShellActions.closeDialog();
     },
     window: {
       id: 'create-space-2',
@@ -124,14 +88,14 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <SpacesCreateForm {...props} />,
     onNext: (_evt: any) => {
-      DesktopActions.nextDialog('create-space-4');
+      ShellActions.nextDialog('create-space-4');
     },
     onPrevious: () => {
-      DesktopActions.nextDialog('create-space-2');
+      ShellActions.nextDialog('create-space-2');
     },
     onClose: () => {
-      DesktopActions.setBlur(false);
-      DesktopActions.closeDialog();
+      ShellActions.setBlur(false);
+      ShellActions.closeDialog();
     },
     isValidated: (state: any) => {
       if (
@@ -168,19 +132,28 @@ export const spacesDialogs: DialogRenderers = {
       const createForm: NewSpace = state;
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
+<<<<<<< HEAD
       // DesktopActions.setDialogLoading(true);
       SpacesActions.createSpace(createForm).then(() => {
         // DesktopActions.closeDialog();
         setState({ loading: false });
         // DesktopActions.setBlur(false);
+=======
+      SpacesActions.createSpace(createForm).then((newSpace: any) => {
+        console.log(newSpace);
+        setState({ loading: false });
+        ShellActions.closeDialog();
+        ShellActions.setBlur(false);
+        SpacesActions.selectSpace(newSpace.path);
+>>>>>>> main
       });
     },
     onPrevious: () => {
-      DesktopActions.nextDialog('create-space-3');
+      ShellActions.nextDialog('create-space-3');
     },
     onClose: () => {
-      DesktopActions.setBlur(false);
-      DesktopActions.closeDialog();
+      ShellActions.setBlur(false);
+      ShellActions.closeDialog();
     },
     isValidated: () => {
       return true;

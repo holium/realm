@@ -29,11 +29,11 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
-  const { ship, spaces, shell, bazaar } = useServices();
-  const { desktop } = shell;
+  const { desktop, ship, spaces, bazaar } = useServices();
   const [members, setMembers] = useState<any>([]);
   // const [sidebar, setSidebar] = useState<SidebarType>('people');
   const [sidebar, setSidebar] = useState<SidebarType>(null);
+  // const [passports, setPassports] = useState([]);
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
@@ -270,7 +270,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                           spaces.selected!.path,
                           toJS(selectedApp)
                         );
-                        // DesktopActions.setBlur(false);
                         DesktopActions.setHomePane(false);
                       }}
                     />

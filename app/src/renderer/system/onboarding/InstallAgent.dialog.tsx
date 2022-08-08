@@ -1,6 +1,4 @@
-import { FC, useMemo } from 'react';
-import { createField, createForm } from 'mobx-easy-form';
-import * as yup from 'yup';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
 
 import {
@@ -13,26 +11,20 @@ import {
   Spinner,
   Box,
   TextButton,
-} from '../../../components';
+} from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { SignupActions } from 'renderer/logic/actions/signup';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
-type InstallStepProps = {
-  next: () => void;
-  // isValid: boolean;
-  // setValid: (isValid: boolean) => void;
-};
+export const InstallAgent: FC<BaseDialogProps> = observer(
+  (props: BaseDialogProps) => {
+    const { onboarding } = useServices();
 
-export const StepInstall: FC<InstallStepProps> = observer(
-  (props: InstallStepProps) => {
-    const { identity } = useServices();
-    const { signup } = identity;
-    const { next } = props;
-
-    const shipName = signup.signupShip!.patp;
-    const shipNick = signup.signupShip!.nickname;
-    const shipColor = signup.signupShip!.color!;
-    const avatar = signup.signupShip!.avatar;
+    const shipName = onboarding.ship!.patp;
+    const shipNick = onboarding.ship!.nickname;
+    const shipColor = onboarding.ship!.color!;
+    const avatar = onboarding.ship!.avatar;
 
     return (
       <Grid.Column pl={12} noGutter lg={12} xl={12} width="100%">
@@ -94,15 +86,15 @@ export const StepInstall: FC<InstallStepProps> = observer(
               height={32}
               style={{ width: 200 }}
               rightContent={
-                signup.installer.isLoading ? (
+                onboarding.installer.isLoading ? (
                   <Spinner size={0} />
-                ) : signup.installer.isLoaded ? (
+                ) : onboarding.installer.isLoaded ? (
                   <Icons ml={2} size={1} name="CheckCircle" />
                 ) : (
                   <Icons ml={2} size={1} name="DownloadCircle" />
                 )
               }
-              onClick={() => signup.installRealm()}
+              onClick={() => OnboardingActions.installRealm()}
             >
               Install Realm
             </ActionButton>
@@ -114,7 +106,7 @@ export const StepInstall: FC<InstallStepProps> = observer(
               opacity={0.6}
               mt={3}
             >
-              {!signup.installer.isLoaded
+              {!onboarding.installer.isLoaded
                 ? 'This will just take a minute'
                 : 'Congrats! You are ready to enter a new world.'}
             </Text>
@@ -128,13 +120,12 @@ export const StepInstall: FC<InstallStepProps> = observer(
             justifyContent="space-between"
           >
             <TextButton
-              disabled={!signup.installer.isLoaded}
-              onClick={(evt: any) => {
-                SignupActions.completeSignup();
-                next();
+              disabled={!onboarding.installer.isLoaded}
+              onClick={async (_evt: any) => {
+                await OnboardingActions.completeOnboarding();
               }}
             >
-              {signup.isLoading ? <Spinner size={0} /> : 'Next'}
+              Next
             </TextButton>
           </Flex>
         </Box>
@@ -143,4 +134,4 @@ export const StepInstall: FC<InstallStepProps> = observer(
   }
 );
 
-export default StepInstall;
+export default InstallAgent;

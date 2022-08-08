@@ -14,7 +14,7 @@ const iconSize = 28;
 
 export const AssemblyTray: FC<AssemblyTrayProps> = observer(
   (props: AssemblyTrayProps) => {
-    const { shell } = useServices();
+    const { desktop } = useServices();
 
     const {
       activeApp,
@@ -23,7 +23,7 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
       setTrayAppCoords,
       setTrayAppDimensions,
     } = useTrayApps();
-    const { dockColor, textColor } = shell.desktop.theme;
+    const { dockColor, textColor } = desktop.theme;
     const roomsButtonRef = createRef<HTMLButtonElement>();
 
     const dimensions = {

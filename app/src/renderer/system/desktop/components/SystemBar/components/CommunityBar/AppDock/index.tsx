@@ -13,8 +13,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
-  const { shell, spaces, bazaar } = useServices();
-  const { desktop } = shell;
+  const { desktop, spaces, bazaar } = useServices();
 
   const dividerBg = useMemo(
     () => rgba(lighten(0.2, desktop.theme.dockColor), 0.4),

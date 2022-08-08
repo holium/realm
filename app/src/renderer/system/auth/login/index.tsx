@@ -24,15 +24,14 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 type LoginProps = {
   addShip: () => void;
-  continueSignup: (ship: any) => void;
   hasWallpaper?: boolean;
 };
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, shell, ship } = useServices();
+  const { identity, desktop, ship } = useServices();
   const { auth } = identity;
-  const { theme } = shell.desktop;
+  const { theme } = desktop;
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -72,11 +71,13 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   };
   const clickSubmit = (event: any) => {
     event.stopPropagation();
-    window.electron.os.auth.login(
-      pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
-    );
+    window.electron.os.auth
+      .login(
+        pendingShip!.patp,
+        // @ts-ignore
+        passwordRef!.current!.value
+      )
+      .catch((err) => console.warn(err));
   };
 
   let colorProps = null;

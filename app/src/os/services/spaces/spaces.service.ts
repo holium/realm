@@ -147,7 +147,7 @@ export class SpacesService extends BaseService {
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
     this.state!.initialScry(spaces, persistedState, patp);
     this.state!.selected &&
-      this.core.services.shell.setTheme(this.state!.selected?.theme);
+      this.core.services.desktop.setTheme(this.state!.selected?.theme);
 
     // initial sync effect
     const syncEffect = {
@@ -261,8 +261,15 @@ export class SpacesService extends BaseService {
     return response;
   }
 
+<<<<<<< HEAD
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
     const response = await SpacesApi.kickMember(this.core.conduit!, path, patp);
+=======
+  setSelected(_event: any, path: string) {
+    const selected = this.state?.selectSpace(path);
+    this.core.services.desktop.setTheme(selected?.theme!);
+  }
+>>>>>>> main
 
     return response;
   }

@@ -26,5 +26,5 @@ export const devApps: {
       url: `http://localhost:${process.env.PLAYGROUND_PORT}/apps/playground/`,
       development: true,
     },
-  },
+  }
 };
