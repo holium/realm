@@ -129,7 +129,11 @@ export const DesktopStore = types
       const windowDimensions = self.windows.get(windowId)?.dimensions;
       windowDimensions && applySnapshot(windowDimensions, dimensions);
     },
-    openBrowserWindow(app: any, desktopDimensions: { width: number, height: number }, isFullscreen: boolean) {
+    openBrowserWindow(
+      app: any,
+      desktopDimensions: { width: number; height: number },
+      isFullscreen: boolean
+    ) {
       let glob = app.glob;
       if (app.href) {
         glob = app.href.glob ? true : false;

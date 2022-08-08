@@ -23,7 +23,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
-  const { ship, desktop } = useServices();
+  const { ship, shell, desktop } = useServices();
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 
@@ -76,11 +76,11 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   }, [window?.id, ship]);
 
   const onMouseEnter = useCallback(() => {
-    desktop.setIsMouseInWebview(true);
-  }, [desktop]);
+    shell.setIsMouseInWebview(true);
+  }, [shell]);
   const onMouseLeave = useCallback(() => {
-    desktop.setIsMouseInWebview(false);
-  }, [desktop]);
+    shell.setIsMouseInWebview(false);
+  }, [shell]);
 
   return useMemo(() => {
     return (
