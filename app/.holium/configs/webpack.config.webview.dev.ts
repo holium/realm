@@ -69,7 +69,7 @@ const configuration: webpack.Configuration = {
     reactDOM: 'react-dom',
   },
 
-  watch: false,
+  watch: true,
 };
 
 export default merge(baseConfig, configuration);
