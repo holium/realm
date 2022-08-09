@@ -12,7 +12,7 @@ export const SpacesApi = {
   getSpaces: async (conduit: Urbit) => {
     const response = await conduit.scry({
       app: 'spaces',
-      path: '', // the spaces scry is at the root of the path
+      path: '/all', // the spaces scry is at the root of the path
     });
     return response.spaces;
   },
