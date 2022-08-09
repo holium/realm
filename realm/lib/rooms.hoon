@@ -68,14 +68,14 @@
       %-  pairs
       :~
       ['provider' %s (scot %p provider.upd)]
-      ['roomId' %s rid.upd]
+      ['id' %s rid.upd]
       ['invitedBy' %s (scot %p ship.upd)]
       ==
     %kicked
       %-  pairs
       :~
       ['provider' %s (scot %p provider.upd)]
-      ['roomId' %s rid.upd]
+      ['id' %s rid.upd]
       ['kickedBy' %s (scot %p ship.upd)]
       ==
     %chat
@@ -87,6 +87,7 @@
     ==
   ++  view
     |=  viw=^view
+    ~&  >  %libroomsviw
     ^-  json
     %+  frond  %rooms-view
     %-  pairs
@@ -94,6 +95,7 @@
     :-  -.viw
     ?-  -.viw
     %full
+      ~&  >>>  %full
       %-  pairs
       :~
       :-  %my-room
@@ -104,6 +106,7 @@
         [%s (scot %p u.provider.viw)]
       ==
     %present
+      ~&  >>>  %present
       (set-ship:encode ships.viw)
     ==
   --
@@ -113,17 +116,20 @@
   ++  room
     |=  =^room
     ^-  json
+    ~&  >>>  %encoderoom
     %-  pairs
     :~
-    ['roomId' %s rid.room]
+    ['id' %s rid.room]
     ['provider' %s (scot %p provider.room)]
     ['creator' %s (scot %p creator.room)]
     ['access' %s access.room]
     ['title' %s title.room]
     ['capacity' (numb capacity.room)]
     :-  'space'
-      ?~  space.room  ~
-      [%s u.space.room]
+      :-  %s
+      ?~  space.room
+        ''
+      u.space.room
     ['present' (set-ship present.room)]
     ['whitelist' (set-ship whitelist.room)]
     ==
@@ -172,6 +178,7 @@
       (su ;~(pfix sig fed:ag))
     :: ::
     ++  create
+      ~&  >  [%create jon]
       %-  ot
       :~  [%rid so]
           [%access access]

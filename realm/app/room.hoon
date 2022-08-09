@@ -38,6 +38,8 @@
 ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
+
+    ~&  >  %peekekekekeekek
     ?+    path  (on-peek:def path)
     ::
       [%x ~]
@@ -51,6 +53,7 @@
 ++  on-watch
   |=  =path
   ^-  (quip card _this)
+  ~&  >  %watchchchc12312312312312
   ?+    path
     (on-watch:def path)
       [%room %local ~]
@@ -141,9 +144,16 @@
       abet
     ++  set-provider
       |=  =ship
+      :: leave my room if im setting a new provider
+      :: TODO if leave, send an exit
+      ::  for now, we depend on the frontend for this housekeeping
+      =?  my-room
+          ?~  provider  |
+          ?!
+          =(u.provider ship)
+        ~
       =.  provider
-          :-  ~  ship
-      =.  my-room   ~
+        [~ ship]
       `state
     :: ::
     :: ::
