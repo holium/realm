@@ -11,6 +11,7 @@ import {
   TextButton,
   Checkbox,
 } from 'renderer/components';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -27,7 +28,7 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
     const { desktop, ship } = useServices();
-    const { assemblyApp } = useTrayApps();
+    const { roomsApp } = useTrayApps();
 
     const { dockColor, windowColor, inputColor } = desktop.theme;
     return (
@@ -59,7 +60,7 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                assemblyApp.setView('list');
+                RoomsActions.setView('list');
               }}
             >
               <Icons name="ArrowLeftLine" />
@@ -101,16 +102,18 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 const peopleList: string[] = [ship?.patp!];
-                assemblyApp.setView('room');
-                assemblyApp.startRoom({
-                  id: `${ship?.patp}/new-room`,
-                  title: 'New room',
-                  host: ship?.patp!,
-                  // @ts-ignore
-                  people: peopleList,
-                  private: false,
-                  cursors: true,
-                });
+                // roomsApp.setView('room');
+                RoomsActions.setView('room');
+                // roomsApp.startRoom({
+                //   id: `${ship?.patp}/new-room`,
+                //   title: 'New Room',  // TODO insert title
+                //   host: ship?.patp!,
+                //   provider: ship?.patp!,  // TODO get this from space host
+                //   // @ts-ignore
+                //   people: peopleList,
+                //   private: false,
+                //   cursors: true,
+                // });
               }}
             >
               Start

@@ -22,8 +22,8 @@ export type AssemblyAppProps = {
 
 export const AssemblyApp: FC<AssemblyAppProps> = observer(
   (props: AssemblyAppProps) => {
-    const { assemblyApp } = useTrayApps();
-    const View = AssemblyViews[assemblyApp.currentView];
+    const { roomsApp } = useTrayApps();
+    const View = AssemblyViews[roomsApp.currentView];
     return <View {...props} />;
   }
 );

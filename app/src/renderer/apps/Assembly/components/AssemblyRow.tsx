@@ -5,10 +5,10 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
-import { AssemblyModelType } from 'renderer/logic/apps/assembly';
 import { rgba } from 'polished';
+import { RoomsModelType } from 'os/services/tray/rooms.model';
 
-type AssemblyRowProps = AssemblyModelType & {
+type AssemblyRowProps = Partial<RoomsModelType> & {
   tray?: boolean;
   onClick?: (evt: any) => any;
   rightChildren?: any;

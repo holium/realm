@@ -18,6 +18,8 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from './components/CommButton';
 import { VoiceAnalyzer } from './components/VoiceVisualizer';
 import { Speaker } from './components/Speaker';
+import {Urbit} from '@urbit/http-api';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
 
 export type BaseAssemblyProps = {
   theme: ThemeModelType;
@@ -27,16 +29,64 @@ export type BaseAssemblyProps = {
   };
 };
 
+const urb = new Urbit('', '');
+urb.ship = window.ship;
+
+
 export const Room: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
     const { ship, desktop } = useServices();
-    const { assemblyApp } = useTrayApps();
-    const { people } = assemblyApp.selected!;
+    const { roomsApp } = useTrayApps();
+    const { people } = roomsApp.selected!;
 
     const [audio, setAudio] = useState<MediaStream | null>(null);
 
     const { dockColor, windowColor, inputColor } = desktop.theme;
+
+    /*
+    const [roomSub, setRoomSub] = useState(0);
+
+    useEffect(() => {
+      if (!urb || roomSub) {
+        return;
+      }
+      urb.url = ship.url;
+      urb.subscribe({
+            app: "room",
+            path: "/room/local",
+            event: handleRoomSub,
+            quit: subFail,
+            err: subFail
+        })
+        .then((subscriptionId) => {
+          setRoomSub(subscriptionId);
+          });
+    }, [urb, ship, roomSub]);
+
+      // unsub on window close or refresh
+      useEffect(() => {
+        window.addEventListener("beforeunload", unsubFunc);
+        return () => {
+          window.removeEventListener("beforeunload", unsubFunc);
+        };
+      }, [roomSub]);
+      //
+      const unsubFunc = () => {
+        urb.unsubscribe(roomSub);
+        urb.delete();
+      };
+
+      function handleRoomSub(update:any) {
+        console.log("room update:")
+        console.log(update)
+      };
+
+    function subFail() {
+        console.log("fail!")
+      };
+      */
+
 
     const getMicrophone = async () => {
       const audioMedia = await navigator.mediaDevices.getUserMedia({
@@ -52,6 +102,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
     };
 
     useEffect(() => {
+      console.log("room innit??")
       window.electron.app.askForMicrophone().then((hasMic: any) => {
         console.log('hasMic', hasMic);
       });
@@ -86,7 +137,8 @@ export const Room: FC<BaseAssemblyProps> = observer(
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                assemblyApp.setView('list');
+                RoomsActions.setView('list')
+                // assemblyApp.setView('list');
               }}
             >
               <Icons name="ArrowLeftLine" />
@@ -102,7 +154,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                   // textTransform: 'uppercase',
                 }}
               >
-                {assemblyApp.selected?.title}
+                {roomsApp.selected?.title}
               </Text>
             </Flex>
           </Flex>
@@ -179,6 +231,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
+                  // assemblyApp.testAction();
                 }}
               />
             </Flex>
@@ -189,7 +242,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
-                  assemblyApp.leaveRoom(ship!.patp!);
+                  // assemblyApp.leaveRoom(ship!.patp!);
                 }}
               >
                 <Icons name="LoginLine" />

@@ -21,6 +21,7 @@ import { DocketApi } from '../../api/docket';
 import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
+import { RoomsService } from '../tray/rooms.service';
 
 /**
  * ShipService
@@ -36,6 +37,7 @@ export class ShipService extends BaseService {
     groups: {},
     graph: {},
   };
+  private rooms?: RoomsService;
   handlers = {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.send-dm': this.sendDm,
@@ -207,6 +209,9 @@ export class ShipService extends BaseService {
         this.state?.loader.set('loaded');
         resolve(this.state!);
       });
+      
+      this.rooms = new RoomsService(this.core);
+      
     });
   }
 

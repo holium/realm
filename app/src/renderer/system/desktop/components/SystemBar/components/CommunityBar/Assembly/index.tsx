@@ -14,11 +14,13 @@ const iconSize = 28;
 
 export const AssemblyTray: FC<AssemblyTrayProps> = observer(
   (props: AssemblyTrayProps) => {
-    const { desktop } = useServices();
-
+    const { desktop, ship } = useServices();
+    // TODO ship.cookie
+    // ship
+//
     const {
       activeApp,
-      assemblyApp,
+      roomsApp, // add an action for setProvider, setCookie
       setActiveApp,
       setTrayAppCoords,
       setTrayAppDimensions,
@@ -51,14 +53,14 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
         );
         // TODO hacky fix for positioning issue with larger button
         setTrayAppCoords({
-          left: assemblyApp.live ? left + 4 : left,
-          bottom: assemblyApp.live ? bottom - 2 : bottom,
+          left: roomsApp.live ? left + 4 : left,
+          bottom: roomsApp.live ? bottom - 2 : bottom,
         });
         setTrayAppDimensions(dimensions);
         setActiveApp('rooms-tray');
-        if (assemblyApp.live) {
-          assemblyApp.setSelected(assemblyApp.live);
-          assemblyApp.setView('room');
+        if (roomsApp.live) {
+          roomsApp.setSelected(roomsApp.live);
+          roomsApp.setView('room');
         }
       },
       [activeApp, anchorOffset, position, dimensions]
@@ -75,11 +77,11 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
         position="relative"
         onClick={onButtonClick}
       >
-        {assemblyApp.live ? (
+        {roomsApp.live ? (
           <Flex style={{ pointerEvents: 'none' }}>
             <AssemblyRow
               tray
-              {...assemblyApp.live}
+              {...roomsApp.live}
               rightChildren={
                 <Icons
                   // mb="2px"

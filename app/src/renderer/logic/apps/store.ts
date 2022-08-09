@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
-import { Instance, types } from 'mobx-state-tree';
-import { AssemblyAppState } from './assembly';
+import { applyPatch, Instance, types } from 'mobx-state-tree';
+
+import { RoomsAppState } from 'os/services/tray/rooms.model';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -32,7 +33,7 @@ export const TrayAppStore = types
     ),
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
-    assemblyApp: AssemblyAppState,
+    roomsApp: RoomsAppState,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -56,25 +57,10 @@ export const trayStore = TrayAppStore.create({
     width: 200,
     height: 200,
   },
-  assemblyApp: {
+  roomsApp: {
     currentView: 'list',
     selected: undefined,
-    // live: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
-    assemblies: [
-      // {
-      //   id: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
-      //   title: 'Daily work chat',
-      //   host: '~labruc-dillyx-lomder-librun',
-      //   people: [
-      //     '~labruc-dillyx-lomder-librun',
-      //     '~lomder-librun',
-      //     '~lodlev-migdev',
-      //     '~bus',
-      //   ],
-      //   cursors: true,
-      //   private: false,
-      // },
-    ],
+    rooms: [],
   },
 });
 
@@ -92,3 +78,16 @@ export function useTrayApps() {
   }
   return store;
 }
+
+window.electron.os.onEffect((_event: any, value: any) => {
+  if (value.response === 'patch') {
+    if (value.resource === 'rooms') {
+      applyPatch(trayStore.roomsApp, value.patch);
+    }
+  }
+  // if (value.response === 'initial') {
+  //   if (value.resource === 'auth') {
+  //     // authState.authStore.initialSync(value);
+  //   }
+  // }
+});

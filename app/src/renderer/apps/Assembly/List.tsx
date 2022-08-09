@@ -7,7 +7,8 @@ import { AssemblyRow } from './components/AssemblyRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/logic/apps/store';
-import { AssemblyModelType } from 'renderer/logic/apps/assembly';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
+import { RoomsModelType } from 'os/services/tray/rooms.model';
 
 export type AssemblyListProps = {
   theme: ThemeModelType;
@@ -23,10 +24,10 @@ export const Assemblies: FC<AssemblyListProps> = observer(
     const { ship, desktop } = useServices();
     const { windowColor } = desktop.theme;
     const [muted, setMuted] = useState(false);
-    const { assemblyApp } = useTrayApps();
-    const { selected, assemblies } = assemblyApp;
+    const { roomsApp } = useTrayApps();
+    const { selected, rooms } = roomsApp;
     const amHosting =
-      assemblies.findIndex((a: any) => a.host === ship?.patp) !== -1;
+    rooms.findIndex((a: any) => a.host === ship?.patp) !== -1;
 
     return (
       <Grid.Column
@@ -64,7 +65,7 @@ export const Assemblies: FC<AssemblyListProps> = observer(
               disabled={amHosting}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                assemblyApp.setView('new-assembly');
+                RoomsActions.setView('new-assembly')
               }}
             >
               Create
@@ -72,7 +73,7 @@ export const Assemblies: FC<AssemblyListProps> = observer(
           </Flex>
         </Titlebar>
         <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
-          {assemblies.length === 0 && (
+          {rooms.length === 0 && (
             <Flex
               flex={1}
               flexDirection="column"
@@ -88,7 +89,7 @@ export const Assemblies: FC<AssemblyListProps> = observer(
               </Text>
             </Flex>
           )}
-          {assemblies.map((room: AssemblyModelType, index: number) => {
+          {rooms.map((room: RoomsModelType, index: number) => {
             return (
               <AssemblyRow
                 key={`${room.title}-${index}`}
@@ -100,8 +101,8 @@ export const Assemblies: FC<AssemblyListProps> = observer(
                 private={room.private}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
-                  assemblyApp.setSelected(room);
-                  assemblyApp.setView('room');
+                  roomsApp.setSelected(room);
+                  RoomsActions.setView('room')
                 }}
               />
             );
