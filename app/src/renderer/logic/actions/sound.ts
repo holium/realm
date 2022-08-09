@@ -30,5 +30,7 @@ export const SoundActions = {
   playSystemNotification: async () => {},
   playError: async () => {},
   playDMNotify: async () => {},
-  playDMSend: async () => {},
+  playDMSend: async () => {
+    playAudio('/sounds/dm_sent.wav');
+  },
 };
