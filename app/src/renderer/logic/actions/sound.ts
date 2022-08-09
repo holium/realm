@@ -1,37 +1,32 @@
-import { average, prominent } from 'color.js';
-// const colors = ['#005050', '#000000', '#505050', '#000050', '#a05050'];
-// ['#005050', '#000000']
-// ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
-/**
- * DesktopActions for interfacing with core process
- */
+/*
+available sound bites:
+'startup'
+'login'
+'logout'
+'system-notification'
+'error'
+'dm-notify'
+'dm-send'
+*/
+const playAudio = (src) => {
+  console.log(`sound.playStartup called: '${src}'`);
+  if (window.audio) {
+    window.audio.src = src;
+  } else {
+    window.audio = new window.Audio(src);
+  }
+  window.audio.play();
+};
 export const SoundActions = {
-  playSound: async (soundbite: string) => {
-    switch (soundbite) {
-      case 'startup':
-        SoundActions.playStartup();
-        return;
-      case 'login':
-        SoundActions.playLogin();
-        return;
-      case 'system-notification':
-        SoundActions.playSystemNotification();
-        return;
-      case 'error':
-        SoundActions.playError();
-        return;
-      case 'dm-notify':
-        SoundActions.playDMNotify();
-        return;
-      case 'dm-send':
-        SoundActions.playDMSend();
-        return;
-      default:
-        console.warn(`playSound unrecognized sound '{soundbite}'`);
-    }
+  playStartup: async () => {
+    playAudio('/sounds/startup.wav');
   },
-  playStartup: async () => {},
-  playLogin: async () => {},
+  playLogin: async () => {
+    playAudio('/sounds/login.wav');
+  },
+  playLogout: async () => {
+    playAudio('/sounds/logout.wav');
+  },
   playSystemNotification: async () => {},
   playError: async () => {},
   playDMNotify: async () => {},
