@@ -80,7 +80,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%ship s+(scot %p ship.path.rct)]
-          [%role s+(scot %tas role.rct)]
+          [%invite (invite:encode invite.rct)]
       ==
       ::
         %invite-accepted

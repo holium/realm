@@ -29,12 +29,8 @@ const loadSnapshot = (serviceKey: string) => {
 
 export const Services = types
   .model('ServicesStore', {
-    // shell: types.model('ShellStore', {
-    //   desktop: DesktopStore,
-    // }),
     desktop: DesktopStore,
     shell: ShellStore,
-
     identity: types.model('identity', {
       auth: AuthStore,
     }),
@@ -54,6 +50,7 @@ export const Services = types
 
 const desktopSnapshot = loadSnapshot('desktop');
 const shellSnapshot = loadSnapshot('shell');
+const bazaarSnapshot = loadSnapshot('bazaar');
 
 const services = Services.create({
   desktop: desktopSnapshot || {},
@@ -70,7 +67,7 @@ const services = Services.create({
     loader: { state: 'initial' },
     spaces: undefined,
   },
-  bazaar: {},
+  bazaar: bazaarSnapshot || {},
 });
 
 export const servicesStore = services;

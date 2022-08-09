@@ -59,7 +59,18 @@
   ^-  (quip card _this)
   =^  cards  state
   ?+  path            (on-watch:def path)
+    ::
     [%updates @ ~]    (bind:su:core i.t.path)
+    ::
+    [@ @ %apps ~]  `state
+        :: The space level watch subscription
+        :: =/  host        `@p`(slav %p i.path)
+        :: =/  space-pth   `@t`i.t.path
+        :: ~&  >  [i.t.path host space-pth src.bowl]
+        :: :: ?>  (check-member:core [host space-pth] src.bowl)     ::  only members should subscribe
+        :: =/  space        (~(got by spaces.state) [host space-pth])
+        :: (member:send-reaction [%space-apps [host space-pth] space] [/spaces/(scot %p host)/(scot %tas space-pth) ~])
+    ::
     [%response ~]     ~
   ==
   [cards this]
@@ -215,18 +226,17 @@
     ^-  (quip card _state)
     `state
   --
-::
 ++  invite-reaction
   |%
   ::
   ++  on-sent
-    |=  [path=space-path:spaces-store =ship =role:membership-store]
+    |=  [path=space-path:spaces-store =ship =invite:invite-store]
     ^-  (quip card _state)
+    ~&  >  [path ship invite]
+    :: =/  members                     (~(put by (~(got by membership.state) path)) [ship [roles=(silt `(list role:membership-store)`~[role.invite]) status=%invited]])
+    :: =.  membership.state            (~(put by membership.state) [path members])
     `state
   ::
-  ::  $on-accepted: if this ship has accepted an invitation to a space
-  ::    that is not hosted locally, subscribe to the space host to get remote
-  ::    bazaar updates
   ++  on-accepted
     |=  [path=space-path:spaces-store =ship =member:membership-store]
     ^-  (quip card _state)
@@ -243,6 +253,12 @@
   ++  on-kicked
     |=  [rct=reaction:invite-store]
     ^-  (quip card _state)
+    ?>  ?=(%kicked -.rct)
+    ?.  =(our.bowl ship.+.rct)
+        :: we weren't kicked, but someone else was
+       `state
+    :: =.  spaces.state          (~(del by spaces.state) path.rct)
+    :: =.  membership.state      (~(del by membership.state) path.rct)
     `state
   ::
   --
@@ -293,7 +309,7 @@
     ==
   ::
   ++  ini
-    |=  [=spaces:spaces-store mems=membership:membership-store]
+    |=  [=spaces:spaces-store]
     ^-  (quip card _state)
     `state
     :: =/  cards=(list card)
@@ -307,12 +323,13 @@
     :: cards
   ::
   ++  add
-    |=  [=space:spaces-store =members:membership-store]
+    |=  [=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
     =/  key  [ship.path.space space.path.space]
-    :_  state(membership (~(put by membership.state) key members))
-    :~  [%pass /bazaar/(scot %tas space.path.space) %agent [our.bowl dap.bowl] %watch /updates]
-    ==
+    `state
+    :: :_  state(membership (~(put by membership.state) key members))
+    :: :~  [%pass /bazaar/(scot %tas space.path.space) %agent [our.bowl dap.bowl] %watch /updates]
+    :: ==
   ::
   ::  $rep: not sure what to do here. could try and get existing space
   ::    and delete that from map, then re-add this new space, but what to
@@ -330,7 +347,7 @@
     :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %leave ~]
     ==
   ++  spc
-    |=  [path=space-path:spaces-store =space:spaces-store =members:membership-store]
+    |=  [path=space-path:spaces-store =space:spaces-store]
     ^-  (quip card _state)
     `state
   --

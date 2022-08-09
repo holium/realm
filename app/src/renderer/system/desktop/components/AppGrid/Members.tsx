@@ -23,6 +23,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './FriendsList';
 import { toJS } from 'mobx';
 import { MembersList } from './MembersList';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type HomeSidebarProps = {
   filterMode: 'light' | 'dark';
@@ -78,7 +79,7 @@ export const createPeopleForm = (
 
 export const Members: FC<IMembers> = observer((props: IMembers) => {
   const { our } = props;
-  const { desktop, spaces } = useServices();
+  const { desktop, spaces, ship } = useServices();
   const searchRef = useRef(null);
 
   const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
@@ -94,7 +95,15 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
   const onShipSelected = (ship: [string, string?], metadata?: any) => {
     const patp = ship[0];
     const nickname = ship[1];
-    SpacesActions.addFriend(patp);
+    if (our) {
+      ShipActions.addFriend(patp);
+    } else {
+      SpacesActions.inviteMember(spaces.selected!.path, {
+        patp,
+        role: 'member',
+        message: '',
+      });
+    }
     // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
@@ -193,7 +202,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           }}
         />
       </Flex>
-      {our && <FriendsList friends={spaces.friends.list} />}
+      {our && <FriendsList friends={ship!.friends.list} />}
       {!our && <MembersList members={spaces.selected!.members!.list} />}
     </HomeSidebar>
   );

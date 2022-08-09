@@ -1,7 +1,8 @@
+import { ShipModelType } from './../services/ship/models/ship';
 import { Urbit } from './../urbit/api';
-import { SpacesStoreType } from 'os/services/spaces/models/spaces';
-import { FriendsType } from 'os/services/spaces/models/friends';
+import { FriendsType } from '../services/ship/models/friends';
 import { Patp } from '../types';
+import { applySnapshot, castToSnapshot } from 'mobx-state-tree';
 
 export const FriendsApi = {
   /**
@@ -14,8 +15,8 @@ export const FriendsApi = {
     conduit: Urbit
   ): Promise<{ [patp: Patp]: FriendsType }> => {
     const response = await conduit.scry({
-      app: 'passports',
-      path: '/friends', // the spaces scry is at the root of the path
+      app: 'friends',
+      path: '/all', // the spaces scry is at the root of the path
     });
     return response.friends;
   },
@@ -28,8 +29,8 @@ export const FriendsApi = {
    */
   addFriend: async (conduit: Urbit, patp: Patp) => {
     const response = await conduit.poke({
-      app: 'passports',
-      mark: 'passports-action',
+      app: 'friends',
+      mark: 'friends-action',
       json: {
         'add-friend': {
           ship: patp,
@@ -52,8 +53,8 @@ export const FriendsApi = {
     payload: { pinned: boolean; tags: string[] }
   ) => {
     const response = await conduit.poke({
-      app: 'passports',
-      mark: 'passports-action',
+      app: 'friends',
+      mark: 'friends-action',
       json: {
         'edit-friend': {
           ship: patp,
@@ -73,8 +74,8 @@ export const FriendsApi = {
    */
   removeFriend: async (conduit: Urbit, patp: Patp) => {
     const response = await conduit.poke({
-      app: 'passports',
-      mark: 'passports-action',
+      app: 'friends',
+      mark: 'friends-action',
       json: {
         'remove-friend': {
           ship: patp,
@@ -89,12 +90,14 @@ export const FriendsApi = {
    * @param conduit the conduit instance
    * @param state the state-tree
    */
-  watchFriends: (conduit: Urbit, state: SpacesStoreType): void => {
+  watchFriends: (conduit: Urbit, state: ShipModelType): void => {
     conduit.subscribe({
-      app: 'passports',
-      path: `/friends`,
+      app: 'friends',
+      path: `/all`,
       event: async (data: any) => {
+        console.log(data);
         if (data['friends']) {
+          // applySnapshot(state.friends.all, castToSnapshot(data['friends']));
           state.friends.initial(data['friends']);
         }
         if (data['friend']) {

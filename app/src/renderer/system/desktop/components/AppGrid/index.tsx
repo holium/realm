@@ -43,7 +43,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   useEffect(() => {
     if (spaces.selected?.path) {
       if (isOur) {
-        setMembers(spaces.friends.list);
+        setMembers(ship!.friends.list);
       } else {
         SpacesActions.getMembers(spaces.selected!.path!).then(
           (members: any) => {
@@ -84,7 +84,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         )}
       </AnimatePresence>
     );
-  }, [sidebar, members, spaces.friends.list]);
+  }, [sidebar, members, ship!.friends.list]);
 
   return (
     <AnimatePresence>
