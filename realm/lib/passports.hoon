@@ -27,28 +27,13 @@
     :_  ~
     ^-  [cord json]
     ?-  -.rct
-      ::   %friends
-      :: [%friends (frens:encode friends.rct)]
-      ::
-      ::   %friend
-      :: :-  %friend
-      :: %-  pairs
-      :: :~  [%ship s+(scot %p ship.rct)]
-      ::     [%friend (fren:encode friend.rct)]
-      :: ==
-      ::
-      ::   %new-friend
-      :: :-  %new-friend
-      :: %-  pairs
-      :: :~  [%ship s+(scot %p ship.rct)]
-      ::     [%friend (fren:encode friend.rct)]
-      :: ==
-      :: ::
-      ::   %bye-friend
-      :: :-  %bye-friend
-      :: (pairs [%ship s+(scot %p ship.rct)]~)
-      :: ::
         %members
+      :-  %members
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%members (passes:encode passports.rct)]
+      ==
+        %all
       [%members (dists:encode districts.rct)]
     ==
   ::
@@ -126,11 +111,14 @@
         %people
       [%people (peeps:encode people.view)]
       ::
-        %passports
-      [%passports (passes:encode passports.view)]
+        %members
+      [%members (passes:encode passports.view)]
+      ::
+        %member
+      [%member (pass:encode passport.view)]
       ::
         %is-member
-      [%is-member (is-mem:encode is-member.view)]
+      [%is-member b+is-member.view]
       ::
         %districts
       [%districts (dists:encode districts.view)]
@@ -150,12 +138,6 @@
       :~  [%add add-passport]
           [%remove remove-passport]
           [%edit edit-passport]
-          :: [%add-friend add-friend]
-          :: [%edit-friend edit-friend]
-          :: [%remove-friend remove-friend]
-          :: [%be-fren ul]
-          :: [%yes-fren ul]
-          :: [%bye-fren ul]
       ==
     ::
     ++  add-friend

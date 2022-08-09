@@ -51,6 +51,8 @@
   $%  [%add slug=@t payload=add-payload members=members:membership]
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
+      [%join path=space-path]
+      [%kicked path=space-path ship=ship]
   ==
 ::
 +$  add-payload
@@ -82,9 +84,8 @@
 ::  Scry views
 ::
 +$  view :: rename to effects
-  $%  [%space path=space-path =space]
-      [%spaces =spaces]
-      :: [%members =members:membership]
+  $%  [%spaces =spaces]  
+      [%space =space]
   ==
 ::
 --
