@@ -20,6 +20,7 @@ import { AuthStore } from '../../os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel } from '../../os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
+import { MembershipStore } from 'os/services/spaces/models/members';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -38,6 +39,7 @@ export const Services = types
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
     bazaar: BazaarModel,
+    membership: MembershipStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -68,6 +70,7 @@ const services = Services.create({
     spaces: undefined,
   },
   bazaar: bazaarSnapshot || {},
+  membership: {},
 });
 
 export const servicesStore = services;
@@ -141,6 +144,9 @@ OSActions.onBoot().then((response: any) => {
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
   }
+  if (response.membership) {
+    applySnapshot(servicesStore.membership, response.membership);
+  }
   coreStore.setBooted();
 });
 
@@ -201,6 +207,10 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applyPatch(servicesStore.shell, value.patch);
     }
+    if (value.resource === 'membership') {
+      console.log('membership patch', value.path);
+      applyPatch(servicesStore.membership, value.patch);
+    }
   }
   if (value.response === 'initial') {
     if (value.resource === 'ship') {
@@ -217,7 +227,11 @@ window.electron.os.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'spaces') {
       console.log('initial', value.model);
-      applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
+      applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
+      applySnapshot(
+        servicesStore.membership,
+        castToSnapshot(value.model.membership)
+      );
     }
   }
 });

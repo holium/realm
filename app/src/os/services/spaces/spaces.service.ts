@@ -11,21 +11,19 @@ import {
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DocketMap, SpacesStore, SpacesStoreType } from './models/spaces';
-import { MembershipStore } from './models/members';
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-// import { FriendsApi } from '../../api/friends';
-import { FriendsType, FriendsStore } from '../ship/models/friends';
 import { BazaarModel } from './models/bazaar';
 import { PassportsApi } from '../../api/passports';
 import { InvitationsModel } from './models/invitations';
+import { loadMembersFromDisk } from './passports';
 
 type SpaceModels = {
   bazaar?: any;
-  members?: any;
+  membership?: any;
   invitations?: any;
   // friends: FriendsType;
 };
@@ -45,8 +43,6 @@ export class SpacesService extends BaseService {
       endorsed: {},
       installed: {},
     }),
-    members: MembershipStore.create({ spaces: {} }),
-    // friends: FriendsStore.create({ all: {} }),
   };
 
   handlers = {
@@ -117,14 +113,20 @@ export class SpacesService extends BaseService {
     return this.models.bazaar ? getSnapshot(this.models.bazaar) : null;
   }
 
+  get membershipSnapshot() {
+    return this.models.membership ? getSnapshot(this.models.membership) : null;
+  }
+
   async load(patp: string, ship: ShipModelType) {
     this.db = new Store({
-      name: `realm.spaces.${patp}`,
+      name: 'spaces',
+      cwd: `realm.${patp}`,
       accessPropertiesByDotNotation: true,
     });
 
     let persistedState: SpacesStoreType = this.db.store;
     this.state = SpacesStore.create(castToSnapshot(persistedState));
+    this.models.membership = loadMembersFromDisk(patp);
 
     this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
     // Get the initial scry
@@ -137,7 +139,10 @@ export class SpacesService extends BaseService {
 
     // initial sync effect
     const syncEffect = {
-      model: getSnapshot(this.state!),
+      model: {
+        spaces: getSnapshot(this.state!),
+        membership: getSnapshot(this.models.membership),
+      },
       resource: 'spaces',
       key: null,
       response: 'initial',
@@ -162,6 +167,16 @@ export class SpacesService extends BaseService {
     });
 
     // Start patching after we've initialized the state
+    onPatch(this.models.membership, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'membership',
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
+
+    // Start patching after we've initialized the state
     onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
@@ -172,8 +187,12 @@ export class SpacesService extends BaseService {
     });
 
     // Subscribe to sync updates
-    SpacesApi.watchUpdates(this.core.conduit!, this.state);
-    PassportsApi.watchMembers(this.core.conduit!, this.models.members);
+    SpacesApi.watchUpdates(
+      this.core.conduit!,
+      this.state,
+      this.models.membership
+    );
+    PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
   }
   // ***********************************************************
   // ************************ SPACES ***************************
@@ -237,7 +256,7 @@ export class SpacesService extends BaseService {
       message: string;
     }
   ) {
-    const response = await SpacesApi.sendInvite(
+    const response = await PassportsApi.inviteMember(
       this.core.conduit!,
       path,
       payload
@@ -247,7 +266,7 @@ export class SpacesService extends BaseService {
   }
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    return await SpacesApi.kickMember(this.core.conduit!, path, patp);
+    return await PassportsApi.kickMember(this.core.conduit!, path, patp);
   }
 
   // // ***********************************************************
@@ -277,7 +296,7 @@ export class SpacesService extends BaseService {
   async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
     const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
-    console.log(space);
+    // console.log(space);
     this.models.bazaar.pinApp(appId);
     return;
   }

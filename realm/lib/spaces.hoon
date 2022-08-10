@@ -56,7 +56,7 @@
       :-  %add
       %-  pairs
       :~  [%space (spc:encode space.rct)]
-          :: [%members (membs:encode members.rct)]
+          [%members (membs:encode members.rct)]
       ==
     ::
         %replace

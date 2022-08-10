@@ -82,7 +82,13 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
             },
           },
         ]}
-      />
+      >
+        {person.status === 'invited' && (
+          <Text opacity={0.3} fontSize={1}>
+            Pending
+          </Text>
+        )}
+      </PersonRow>
     );
   };
 

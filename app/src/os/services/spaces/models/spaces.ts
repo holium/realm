@@ -78,7 +78,7 @@ export const SpacesStore = types
     initialScry: (data: any, persistedState: any, ship: Patp) => {
       Object.entries(data).forEach(
         ([path, space]: [path: string, space: any]) => {
-          console.log(path, space);
+          // console.log(path, space);
           // const persistedData =
           //   persistedState && persistedState.spaces
           //     ? persistedState.spaces[path].members
@@ -105,10 +105,10 @@ export const SpacesStore = types
       });
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
     },
-    addSpace: (addReaction: { space: any; membership: any }) => {
+    addSpace: (addReaction: { space: any; members: any }) => {
       const space = addReaction.space;
       const newSpace = SpaceModel.create(space);
-      newSpace.members?.initial(addReaction.membership);
+      newSpace.members?.initial(addReaction.members);
       self.spaces.set(space.path, newSpace);
       return newSpace.path;
     },

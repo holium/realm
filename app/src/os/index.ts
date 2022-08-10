@@ -122,6 +122,7 @@ export class Realm extends EventEmitter {
       desktop,
       shell,
       bazaar: this.services.spaces.bazaarSnapshot,
+      membership: this.services.spaces.membershipSnapshot,
       loggedIn: this.session ? true : false,
     };
   }

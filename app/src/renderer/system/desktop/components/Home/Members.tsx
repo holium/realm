@@ -2,9 +2,6 @@ import { FC, useRef, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createField, createForm } from 'mobx-easy-form';
 import { isValidPatp } from 'urbit-ob';
-import { FixedSizeList as List } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
-
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, lighten, darken } from 'polished';
@@ -15,14 +12,13 @@ import {
   Text,
   Input,
   TextButton,
-  PersonRow,
   ShipSearch,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { FriendsList } from './FriendsList';
+import { FriendsList } from './Ship/FriendsList';
 import { toJS } from 'mobx';
-import { MembersList } from './MembersList';
+import { MembersList } from './Space/MembersList';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
 type HomeSidebarProps = {
@@ -79,7 +75,7 @@ export const createPeopleForm = (
 
 export const Members: FC<IMembers> = observer((props: IMembers) => {
   const { our } = props;
-  const { desktop, spaces, ship } = useServices();
+  const { desktop, spaces, ship, membership } = useServices();
   const searchRef = useRef(null);
 
   const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
@@ -203,7 +199,11 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
         />
       </Flex>
       {our && <FriendsList friends={ship!.friends.list} />}
-      {!our && <MembersList members={spaces.selected!.members!.list} />}
+      {!our && (
+        <MembersList
+          members={membership.getMembersList(spaces.selected!.path)}
+        />
+      )}
     </HomeSidebar>
   );
 });
