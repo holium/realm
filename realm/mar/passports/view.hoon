@@ -6,7 +6,7 @@
 ++  grow
   |%
   ++  noun  view
-  ++  json  view:enjs
+  ++  json  (view:enjs view)
   --
 ::
 ++  grab

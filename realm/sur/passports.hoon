@@ -53,14 +53,16 @@
   ==
 ::
 +$  reaction
-  $%  [%members =districts]
+  $%  [%all =districts]
+      [%members path=space-path:spaces =passports]
   ==
 ::
 ::  Scry views
 ::
 +$  view
   $%  [%people =people]
-      [%passports =passports]
+      [%members =passports]
+      [%member =passport]
       [%districts =districts]
       [%is-member is-member=?]
   ==

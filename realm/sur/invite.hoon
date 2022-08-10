@@ -1,4 +1,4 @@
-/-  membership, spc=spaces
+/-  membership, spc=spaces, pprt=passports
 |%
 ::
 +$  invitations
@@ -31,7 +31,7 @@
 
 +$  reaction
   $%  [%invite-sent path=space-path:spc =ship =invite]
-      [%invite-accepted path=space-path:spc =ship =member:membership]
+      [%invite-accepted path=space-path:spc =ship =passport:pprt]
       [%kicked path=space-path:spc =ship]
   ==
 ::

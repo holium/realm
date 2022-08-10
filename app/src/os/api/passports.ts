@@ -14,9 +14,9 @@ export const PassportsApi = {
   getMembers: async (conduit: Urbit, path: SpacePath) => {
     const response = await conduit.scry({
       app: 'passports',
-      path: `${path}/passports`, // the spaces scry is at the root of the path
+      path: `${path}/members`, // the spaces scry is at the root of the path
     });
-    return response.passports;
+    return response.members;
   },
   /**
    * inviteMember: invite a member to a space
@@ -72,11 +72,11 @@ export const PassportsApi = {
   watchMembers: (conduit: Urbit, state: MembershipType): void => {
     conduit.subscribe({
       app: 'passports',
-      path: `/members`,
+      path: `/all`,
       event: async (data: any) => {
-        console.log(data['members']);
-        if (data['members']) {
-          applySnapshot(state.spaces, data['members']);
+        console.log(data);
+        if (data['all']) {
+          applySnapshot(state.spaces, data['all']);
           // applySnapshot(state.initial(data[members]))
           // Object.keys(data['members']).forEach((spaceKey: string) => {
           //   const space = state.spaces.get(spaceKey)!;

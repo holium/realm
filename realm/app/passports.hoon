@@ -26,28 +26,29 @@
 ::
 /-  store=passports, contact-store, spaces, invite, membership-store=membership, hark=hark-store, resource
 /+  dbug, default-agent, resource, lib=passports, inv-lib=invite
-|%
-+$  card  card:agent:gall
-+$  versioned-state
-    $%  state-0
+^-  agent:gall
+::
+=>
+  |%
+  +$  card  card:agent:gall
+  +$  versioned-state
+      $%  state-0
+      ==
+  +$  state-0
+    $:  %0
+        =contacts:store
+        membership=districts:store
+        invitations=invitations:invite
+        allowed-groups=(set resource)
+        allowed-ships=(set ship)
+        is-public=_|
     ==
-+$  state-0
-  $:  %0
-      :: =passports:store
-      =people:store
-      =contacts:store
-      membership=districts:store
-      invitations=invitations:invite
-      allowed-groups=(set resource)
-      allowed-ships=(set ship)
-      is-public=_|
-  ==
---
+  --
 =|  state-0
 =*  state  -
-%-  agent:dbug
-^-  agent:gall
+:: ^-  agent:gall
 =<
+  %-  agent:dbug  
   |_  =bowl:gall
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
@@ -65,7 +66,6 @@
     =/  our-members  (malt `(list (pair ship passport:store))`~[[our.bowl our-member]])
     =/  initial-mem   `districts:store`(malt `(list (pair space-path:spaces passports:store))`~[[[~fes 'our'] our-members]])
     =.  membership.state          initial-mem
-    :: =.  state.invitations       [outgoing=[[~] ~] incoming=[~]]
     :_  this
     ::  %watch: get the initial contact list and watch for updates
     :~  ::  [%pass /contacts %agent [our.bowl %contact-store] %watch /all]
@@ -91,7 +91,7 @@
     ^-  (quip card _this)
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %passports-action  (act:core !<(action:store vase))
+      :: %passports-action  (act:core !<(action:store vase))
       %invite-action     (inv-act:core !<(action:invite vase))
     ==
     [cards this]
@@ -104,10 +104,19 @@
     =/  cards=(list card)
       ?+    path      (on-watch:def path)
         ::
-          [%members ~]  
+          [%all ~]  
         ::  only host should get all updates
         ?>  =(our.bowl src.bowl)
-        (members:send-reaction [%members membership.state] [/members ~])
+        (members:send-reaction [%all membership.state] [/all ~])
+        ::
+          [%members @ @ ~]
+        ::  space level watch subscription
+        =/  host        `@p`(slav %p i.t.path)
+        =/  space-pth   `@t`i.t.t.path
+        ::  only host should get all updates
+        ?>  (check-member:core [host space-pth] src.bowl)     ::  only members should subscribe
+        =/  passports       (~(got by membership.state) [host space-pth])
+        (members:send-reaction [%members [host space-pth] passports] [/members/(scot %p host)/(scot %tas space-pth) ~])
       ==
     [cards this]
   ::
@@ -116,31 +125,32 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/passports/~zod/our/passports.json
-      [%x @ @ %passports ~]
-        =/  =ship       (slav %p i.t.path)
+    ::  ~/scry/passports/~zod/our/members.json
+      [%x @ @ %members ~]
+        =/  host        `@p`(slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
-        ~&  >>  "{<ship>}, {<space-pth>}"
-        =/  passports   (~(get by membership.state) [ship space-pth])
-        ?~  passports      ``json+!>(~)
-        ``noun+!>((view:enjs:lib [%passports u.passports]))
+        =/  passports   (~(got by membership.state) [host space-pth])
+        :: ?~  passports      ``json+!>(~)
+        ``passports-view+!>([%members passports])
     ::
-    ::  ~/scry/passports/~zod/our/is-member/~fes
-      :: [%x @ @ %is-member @ ~]
-      ::   =/  =ship       (slav %p i.t.path)
-      ::   =/  space-pth   `@t`i.t.t.path
-      ::   =/  patp        (slav %p i.t.t.t.t.path)
-      ::   ~&  >>  "{<ship>}, {<space-pth>}, {patp}"
-      ::   =/  passports   (~(get by membership.state) [ship space-pth])
-      ::   =/  is-member   (~(has by passports) patp)
-      ::   ``noun+!>(is-member)
-
-    ::
-    ::  ~/scry/passports/~zod/our/people.json
-      [%x @ @ ~]
-        =/  =ship       (slav %p i.t.path)
+    ::  ~/scry/passports/~zod/our/members/~dev.json
+      [%x @ @ %members @ ~]
+        =/  host        `@p`(slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
-        ``noun+!>((view:enjs:lib [%people people.state]))
+        =/  patp        `@p`(slav %p i.t.t.t.t.path)
+        =/  passports   (~(got by membership.state) [host space-pth])
+        =/  member      (~(got by passports) patp)
+        :: ?~  member      ``json+!>(~)
+        ``passports-view+!>([%member member])
+    ::
+    ::  ~/scry/passports/~zod/our/is-member/~fes.json
+      [%x @ @ %is-member @ ~]
+        =/  host        `@p`(slav %p i.t.path)
+        =/  space-pth   `@t`i.t.t.path
+        =/  patp        `@p`(slav %p i.t.t.t.t.path)
+        =/  passports   (~(got by membership.state) [host space-pth])
+        =/  is-member   (~(has by passports) patp)
+        ``passports-view+!>([%is-member is-member])
     ==
   ::
   ++  on-agent
@@ -206,11 +216,11 @@
             ~&  >>>  "{<dap.bowl>}: spaces subscription failed"
             `this
       ::
-          %kick
-            ~&  >  "{<dap.bowl>}: spaces kicked us, resubscribing..."
-            :_  this
-            :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
-            ==
+          :: %kick
+          ::   ~&  >  "{<dap.bowl>}: spaces kicked us, resubscribing..."
+          ::   :_  this
+          ::   :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          ::   ==
       ::
           %fact
             ?+    p.cage.sign     (on-agent:def wire sign)
@@ -225,16 +235,34 @@
                     %space    (on-spaces-sub:core rct)
                   ==
                   [cards this]
-                ::
-                :: %invite-reaction
-                ::   =/  rct  !<(=reaction:invite q.cage.sign)
-                ::   =^  cards  state
-                ::   ?-  -.rct
-                ::     %invite-sent      (on-sent:invite-reaction +.rct)
-                ::     %invite-accepted  (on-accepted:invite-reaction +.rct)
-                ::     %kicked           (on-kicked:invite-reaction +.rct)
-                ::   ==
-                ::   [cards this]
+            ==
+        ==
+      ::
+      [%passports ~]
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: passports subscription failed"
+            `this
+      ::
+          %kick
+            ~&  >  "{<dap.bowl>}: passports kicked us, resubscribing..."
+            ~&  >  [sign]
+            :_  this
+            :~  [%pass /passports %agent [our.bowl %spaces] %watch /all]
+            ==
+      ::
+          %fact
+            ?+    p.cage.sign  (on-agent:def wire sign)
+                %invite-reaction       
+                =^  cards  state 
+                  (invite-reaction:core !<(=reaction:invite q.cage.sign))
+                [cards this]
+                
+                %passports-reaction    
+                =^  cards  state 
+                  (passports-reaction:core !<(=reaction:store q.cage.sign))
+                [cards this]
             ==
         ==
     ==
@@ -243,44 +271,102 @@
   ::
   ++  on-fail   on-fail:def
   --
+::
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  core  .
+++  this  .
 ::
-++  act
-  |=  =action:store
-  ^-  (quip card _state)
-  ?-  -.action
-    %add            (handle-add +.action)
-    %remove         (handle-remove +.action)
-    %edit           (handle-edit +.action)
-    %ping           (handle-ping +.action)
-  ==
+
 ::
 ::  $handle-add: add a new person to the person store, while
 ::    also adding a new space entry to track ship/role relationships
-++  handle-add
-  |=  [path=space-path:spaces =ship =payload:store]
-  ^-  (quip card _state)
-  =/  passports  (~(get by membership) path)
-  ?~  passports
-    ~&  >>  "{<dap.bowl>}: handle-add - {<path>} not found"
-    `state
-  ?:  (~(has by u.passports) ship)
-    ~&  >>>  "{<dap.bowl>}: handle-add - {<ship>} already exists"
-    `state
-  ::  if needed, add a create method; otherwise the statement below
-  ::    will construct a passport object w/ defaults based on types
-  =|  passport=passport:store
-  ::  update the passport instance with values from the attributes
-  =/  passport  (update-passport passport payload)
-  ::  put updated passport back in passports map
-  =/  passports  (~(put by u.passports) ship passport)
-  =/  notify=action:hark  (notify path /invite (crip " issued you a passport to the {<`@t`(scot %tas space.path)>} space in Realm."))
-  :_  state(people (~(put by people) ship *person:store), membership (~(put by membership) path passports))
-  :~  [%give %fact [/updates ~] %passports-reaction !>([%add path ship *person:store passport])]
-      [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]
-  ==
+:: ++  handle-add
+::   |=  [path=space-path:spaces =ship =payload:store]
+::   ^-  (quip card _state)
+::   =/  passports  (~(get by membership) path)
+::   ?~  passports
+::     ~&  >>  "{<dap.bowl>}: handle-add - {<path>} not found"
+::     `state
+::   ?:  (~(has by u.passports) ship)
+::     ~&  >>>  "{<dap.bowl>}: handle-add - {<ship>} already exists"
+::     `state
+::   `state
+::   ::  if needed, add a create method; otherwise the statement below
+::   ::    will construct a civ object w/ defaults based on types
+::   :: =|  passport=passport:store
+::   :: ::  update the civ instance with values from the attributes
+::   :: =/  passport  (update-passport passport payload)
+::   :: ::  put updated civ back in civs map
+::   :: =/  passports  (~(put by u.passports) ship passport)
+::   :: =/  notify=action:hark  (notify path /invite (crip " issued you a passport to the {<`@t`(scot %tas space.path)>} space in Realm."))
+::   :: :: :_  state(people (~(put by people) ship *person:store), membership (~(put by membership) path passports))
+::   :: :~  [%give %fact [/all ~] %passports-reaction !>([%add path ship *person:store passport])]
+::   ::     [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]
+::   :: ==
+:: ::
+:: ::
+:: ::
+:: ::  $handle-remove: remove all person artifacts across all stores
+:: ::    this differs from %kick which only removes a person from a space
+:: ++  handle-remove
+::   |=  [path=space-path:spaces =ship]
+::   ^-  (quip card _state)
+::   =/  passports  (~(get by membership) path)
+::   ?~  passports
+::     ~&  >>  "{<dap.bowl>}: handle-remove - {<path>} not found"
+::     `state
+::   =/  passports  (~(del by u.passports) ship)
+::   `state(people (~(del by people) ship), membership (~(put by membership) path passports))
+:: ::
+:: ::  $handle-edit: modify a person attribute.
+:: ::    note that $alias values are space specific; therefore, editing
+:: ::    the alias changes the membership store and not people store
+:: ++  handle-edit
+::   |=  [path=space-path:spaces =ship =payload:store]
+::   ^-  (quip card _state)
+::   =/  passports  (~(get by membership) path)
+::   ?~  passports
+::     ~&  >>  "{<dap.bowl>}: handle-edit - {<path>} not found"
+::     `state
+::   =/  passport  (~(get by u.passports) ship)
+::   ?~  passport
+::     ~&  >>>  "{<dap.bowl>}: handle-edit - {<ship>} not found"
+::     `state
+::   ::  update existing civ based on attributes
+::   =/  passport  (update-passport u.passport payload)
+::   ::  put updated civ back in civs map
+::   =/  passports  (~(put by u.passports) ship passport)
+::   `state(membership (~(put by membership) path passports))
+:: ::
+:: ::  $update-civ: update the civilian based on the updated attributes (fields)
+:: ++  update-passport
+::   |=  [=passport:store =payload:store]
+::   ^-  passport:store
+::   %-  ~(rep in payload)
+::   :: |=  [attribute=edit-field:store rslt=civ:store]
+::   |:  [=mod:store acc=`passport:store`passport]
+::   ?-  -.mod
+::     %alias         acc(alias alias.mod)
+::     %add-roles     acc(roles (~(gas in roles.passport) ~(tap in roles.mod)))
+::     %remove-roles  acc(roles (~(dif in roles.passport) roles.mod))
+::   ==
+:: ::
+:: ::  $handle-ping: %ping pokes come in from UI to indicate user is
+:: ::    actively using Realm. we record the timestamp of this ping and
+:: ::    then forward (reaction) our status to all subscribers
+:: ::
+:: ++  handle-ping
+::   |=  [msg=(unit @t)]
+::   ^-  (quip card _state)
+::   `state
+::   :: =/  per  (~(get by people.state) our.bowl)
+::   :: ?~  per  `state
+::   :: =.  last-known-active.u.per  (some now.bowl)
+::   :: :_  state(people (~(put by people.state) our.bowl u.per))
+::   :: :~  [%give %fact [/all ~] %passports-reaction !>([%pong our.bowl now.bowl])]
+::   :: ==
+:: ::
 ::
 ++  make-invitations
   |=  [path=space-path:spaces =members:membership-store =space:spaces]
@@ -295,66 +381,6 @@
     %+  snoc  acc
     [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]
 ::
-::
-::  $handle-remove: remove all person artifacts across all stores
-::    this differs from %kick which only removes a person from a space
-++  handle-remove
-  |=  [path=space-path:spaces =ship]
-  ^-  (quip card _state)
-  =/  passports  (~(get by membership) path)
-  ?~  passports
-    ~&  >>  "{<dap.bowl>}: handle-remove - {<path>} not found"
-    `state
-  =/  passports  (~(del by u.passports) ship)
-  `state(people (~(del by people) ship), membership (~(put by membership) path passports))
-::
-::  $handle-edit: modify a person attribute.
-::    note that $alias values are space specific; therefore, editing
-::    the alias changes the membership store and not people store
-++  handle-edit
-  |=  [path=space-path:spaces =ship =payload:store]
-  ^-  (quip card _state)
-  =/  passports  (~(get by membership) path)
-  ?~  passports
-    ~&  >>  "{<dap.bowl>}: handle-edit - {<path>} not found"
-    `state
-  =/  passport  (~(get by u.passports) ship)
-  ?~  passport
-    ~&  >>>  "{<dap.bowl>}: handle-edit - {<ship>} not found"
-    `state
-  ::  update existing civ based on attributes
-  =/  passport  (update-passport u.passport payload)
-  ::  put updated civ back in civs map
-  =/  passports  (~(put by u.passports) ship passport)
-  `state(membership (~(put by membership) path passports))
-::
-::  $update-civ: update the civilian based on the updated attributes (fields)
-++  update-passport
-  |=  [=passport:store =payload:store]
-  ^-  passport:store
-  %-  ~(rep in payload)
-  :: |=  [attribute=edit-field:store rslt=civ:store]
-  |:  [=mod:store acc=`passport:store`passport]
-  ?-  -.mod
-    %alias         acc(alias alias.mod)
-    %add-roles     acc(roles (~(gas in roles.passport) ~(tap in roles.mod)))
-    %remove-roles  acc(roles (~(dif in roles.passport) roles.mod))
-  ==
-::
-::  $handle-ping: %ping pokes come in from UI to indicate user is
-::    actively using Realm. we record the timestamp of this ping and
-::    then forward (reaction) our status to all subscribers
-::
-++  handle-ping
-  |=  [msg=(unit @t)]
-  ^-  (quip card _state)
-  =/  per  (~(get by people.state) our.bowl)
-  ?~  per  `state
-  =.  last-known-active.u.per  (some now.bowl)
-  :_  state(people (~(put by people.state) our.bowl u.per))
-  :~  [%give %fact [/updates ~] %passports-reaction !>([%pong our.bowl now.bowl])]
-  ==
-::
 ++  inv-act
   |=  [act=action:invite]
   ^-  (quip card _state)
@@ -367,38 +393,36 @@
     %kick-member    (handle-kicked +.act)
   ==
   ::
-  ++  handle-send
+  ++  handle-send     ::  MEMBER | HOST
     |=  [path=space-path:spaces =ship =role:membership-store message=@t]
     ^-  (quip card _state)
-    :: TODO check if we have permission to invite
-    ?>  (check-member:core path src.bowl)     ::  only members should invite
-    :: =/  space                       (~(got by spaces.state) path)
-    =/  space  .^(space:spaces %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/[path]/noun)
-    =/  new-invite                  (new-invite:inv-lib path src.bowl ship role space message now.bowl)
-    ::  TODO scry spaces metadata
+    ?>  (check-member:core path src.bowl)                                     ::  only members should invite
+    =/  space-scry                .^(view:spaces %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/noun)
+    ?>  ?=(%space -.space-scry)
+    =/  new-invite                (new-invite:inv-lib path src.bowl ship role space.space-scry message now.bowl)
     ?.  (is-host:core ship.path)                                              ::  Check if we should relay to host
+      ::
+      ::  MEMBER
+      ::
       =.  outgoing.invitations.state  (set-outgoing path ship new-invite)     ::  We are not the host, but still set our outgoing
       :_  state                                                                                 
       :~  [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]   ::  Send invite request to host
       ==
-    ::  We are host
-    =/  members                     (~(put by (~(got by membership.state) path)) [ship [roles=(silt `(list role:membership-store)`~[role]) alias='' status=%invited]])
-    =.  membership.state            (~(put by membership.state) [path members])
+    ::
+    ::  HOST
+    ::
+    =/  passports                   (~(gut by membership.state) path `passports:store`[~])
+    =.  passports                   (~(put by passports) [ship [roles=(silt `(list role:membership-store)`~[role]) alias='' status=%invited]])
+    =.  membership.state            (~(put by membership.state) [path passports])
     =.  outgoing.invitations.state  (set-outgoing:core path ship new-invite)
-    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths                 [/all /members/(scot %p ship.path)/(scot %tas space.path) ~]              
     :_  state
     :~  [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]     ::  Send invite request to invited
         [%give %fact watch-paths invite-reaction+!>([%invite-sent path ship new-invite])]            ::  Notify watchers
     ==
-    ::
-    :: ++  set-outgoing
-    ::   |=  [path=space-path:spaces =ship =invite:invite]
-    ::   =/  space-invites               (~(gut by outgoing.invitations.state) path `space-invitations:invite`[~])
-    ::   =.  space-invites               (~(put by space-invites) [ship invite])
-    ::   (~(put by outgoing.invitations.state) [path space-invites])
   ::
   ::  handles the case when an invite is received
-  ++  handle-invited  
+  ++  handle-invited    ::  MEMBER
     |=  [path=space-path:spaces =invite:invite]
     ^-  (quip card _state)
     =.  incoming.invitations.state    (~(put by incoming.invitations.state) [path invite])
@@ -407,85 +431,122 @@
     :~  [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]                  ::  send notification to ship
     ==
   ::
-  ++  handle-accept
+  ++  handle-accept     ::  MEMBER | HOST
     |=  [path=space-path:spaces]
     ^-  (quip card _state)
     ?.  (is-host:core ship.path) 
+      ::
+      ::  MEMBER
       ::  If we are invited we will send the invite action to the host
       :_  state
-      :~  [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]
+      :~  [%pass / %agent [ship.path %passports] %poke invite-action+!>(act)]
       ==
+    ::
+    ::  HOST
+    ::
     =/  accepter                    src.bowl
-    =/  membs                       (~(got by membership.state) path)
-    =/  upd-mem                     (~(got by membs) accepter)
+    =/  passes                      (~(gut by membership.state) path `passports:store`[~])
+    =/  upd-mem                     (~(got by passes) accepter)
     =.  status.upd-mem              %joined
-    =.  membs                       (~(put by membs) [accepter upd-mem])
-    =.  membership.state            (~(put by membership.state) [path membs])
+    =.  passes                      (~(put by passes) [accepter upd-mem])
+    =.  membership.state            (~(put by membership.state) [path passes])
     =/  space-invites               (~(got by outgoing.invitations.state) path)
     =.  space-invites               (~(del by space-invites) accepter)
     =.  outgoing.invitations.state  (~(put by outgoing.invitations.state) [path space-invites])
-    =/  watch-paths                 [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths                 [/all /members/(scot %p ship.path)/(scot %tas space.path) ~]              
     :_  state
-    :~  [%pass / %agent [accepter dap.bowl] %poke invite-action+!>([%stamped path])]  :: Send space to invitee
+    :~  [%pass / %agent [accepter %passports] %poke invite-action+!>([%stamped path])]              :: Send space to invitee
         [%give %fact watch-paths invite-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
     ==
   ::
-  ++  handle-stamped
+  ++  handle-stamped    :: MEMBER
     |=  [path=space-path:spaces]
     ^-  (quip card _state)
     =.  incoming.invitations.state  (~(del by incoming.invitations.state) path)
-    =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)                   
     :_  state
-    [%pass /spaces %agent [ship.path %spaces] %watch watch-path]~
+    ::  watch the spaces and passports path once invite flow is complete
+    :~  
+      [%pass /passports %agent [ship.path %passports] %watch /members/(scot %p ship.path)/(scot %tas space.path)]
+      :: [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %watch /spaces/(scot %p ship.path)/(scot %tas space.path)]
+      [%pass / %agent [our.bowl %spaces] %poke spaces-action+!>([%join path])]
+    ==
   ::
-  ++  handle-kicked
+  ++  handle-kicked     ::  MEMBER | HOST
     |=  [path=space-path:spaces =ship]
     ^-  (quip card _state)
     ?>  (has-auth:core path src.bowl %admin)
-    ?.  (is-host:core ship.path) 
-      ::  If we are invited we will send the invite action to the host
+    ?.  (is-host:core ship.path)
+      ::
+      ::  MEMBER
+      ::
+      ::  If we are kicking someone else we will send the invite action to the host
       :_  state
-      :~  [%pass / %agent [ship.path dap.bowl] %poke invite-action+!>(act)]
-      ==
+      [%pass /passports %agent [ship.path dap.bowl] %poke invite-action+!>(act)]~
+    ::
+    ::  HOST
+    ::
     =/  membs                   (~(got by membership.state) path)
     =.  membs                   (~(del by membs) ship)
     =.  membership.state        (~(put by membership.state) [path membs])
     :_  state
-    =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)                   
-    :~  [%give %fact [watch-path ~] invite-reaction+!>([%kicked path ship])]
-        [%give %kick ~[watch-path] (some ship)]
+    =/  watch-path              /members/(scot %p ship.path)/(scot %tas space.path)
+    :~  [%give %fact [watch-path /all ~] invite-reaction+!>([%kicked path ship])]
+        [%give %kick ~[/members/(scot %p ship.path)/(scot %tas space.path)] (some ship)]
+        [%pass /spaces %agent [ship %spaces] %poke spaces-action+!>([%kicked path ship])]
     ==
   ::
   --
-
+++  passports-reaction
+  |=  [rct=reaction:store]
+  ^-  (quip card _state)
+  |^
+  ?-  -.rct
+    %all            (on-all +.rct)
+    %members         (on-members +.rct)
+  ==
+  ::
+  ++  on-all
+    |=  [=districts:store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-members
+    |=  [path=space-path:spaces =passports:store]
+    ^-  (quip card _state)
+    =.  membership.state      (~(put by membership.state) [path passports])
+    `state
+  ::
+  --
+::
 ++  invite-reaction
-  |%
+  |=  [rct=reaction:invite]
+  ^-  (quip card _state)
+  |^
+  ?-  -.rct
+    %invite-sent        (on-sent +.rct)
+    %invite-accepted    (on-accepted +.rct)
+    %kicked             (on-kicked +.rct)
+  ==
   ::
   ++  on-sent
     |=  [path=space-path:spaces =ship =invite:invite]
     ^-  (quip card _state)
-    ~&  >  [path ship invite]
-    :: =/  members                     (~(put by (~(got by membership.state) path)) [ship [roles=(silt `(list role:membership-store)`~[role.invite]) status=%invited]])
-    :: =.  membership.state            (~(put by membership.state) [path members])
+    =/  passes                      (~(gut by membership.state) path `passports:store`[~])
+    =.  passes                      (~(put by passes) [ship [roles=(silt `(list role:membership-store)`~[role.invite]) alias='' status=%invited]])
+    =.  membership.state            (~(put by membership.state) [path passes])
     `state
   ::
   ++  on-accepted
-    |=  [path=space-path:spaces =ship =member:membership-store]
+    |=  [path=space-path:spaces =ship =passport:store]
     ^-  (quip card _state)
-    ~&  >  [path]
-    :: =/  members                     (~(put by (~(got by membership.state) path)) [ship member])
-    :: =.  membership.state            (~(put by membership.state) [path members])
+    =/  passes                      (~(gut by membership.state) path `passports:store`[~])
+    =.  passes                      (~(put by passes) [ship passport])
+    =.  membership.state            (~(put by membership.state) [path passes])
     `state
   ::
   ++  on-kicked
-    |=  [rct=reaction:invite]
+    |=  [path=space-path:spaces =ship]
     ^-  (quip card _state)
-    ?>  ?=(%kicked -.rct)
-    ?.  =(our.bowl ship.+.rct)    
-        :: we weren't kicked, but someone else was
-       `state
-    :: =.  spaces.state          (~(del by spaces.state) path.rct)
-    :: =.  membership.state      (~(del by membership.state) path.rct)
     `state
   ::
   --
@@ -554,20 +615,17 @@
   |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%initial -.rct)
-  :: =/  spaces
-  :: %-  ~(rep by spaces.rct)
-  :: |=  [[path=space-path:spaces =space:spaces] acc=membership:store]
-  :: =/  passes  (to-passports members)
-  :: (~(put by acc) path passes)
   `state
-  :: `state(membership membership)
 ::
 ++  on-spaces-add
   |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%add -.rct)
   =/  passports=(map ship passport:store)  (to-passports members.rct)
-  `state(membership (~(put by membership) path.space.rct passports))
+  =.  membership.state      (~(put by membership) path.space.rct passports)
+  :_  state
+  %+  weld  (make-invitations path.space.rct members.rct space.rct)
+  (members:send-reaction [%members path.space.rct passports] [/members/(scot %p ship.path.space.rct)/(scot %tas space.path.space.rct) ~])
 ::
 ++  to-passports
   |=  =members:membership-store
@@ -596,6 +654,7 @@
   |=  [rct=reaction:spaces]
   ^-  (quip card _state)
   ?>  ?=(%space -.rct)
+  ~&  >  ['spaces subbed']
   `state
 ::
 ++  send-reaction
@@ -612,12 +671,10 @@
   --
 ::
 ++  check-member
-  |=  [=space-path:spaces =ship]
+  |=  [path=space-path:spaces =ship]
   ^-  ?
-  =/  members   (~(got by membership.state) space-path)
-  ?.  (~(has by members) ship)
-      %.n
-  %.y
+  =/  passports   (~(got by membership.state) path)
+  (~(has by passports) ship)
 ::
 ++  is-host
   |=  [=ship]
@@ -625,8 +682,6 @@
 ::
 ++  has-auth
   |=  [=space-path:spaces =ship =role:membership-store]
-  ::  TODO scry passports
-  ::  
   =/  member        (~(got by (~(got by membership.state) space-path)) ship)
   (~(has in roles.member) role)
 ::

@@ -81,25 +81,19 @@
     ==
   ::
   ++  view :: encodes for on-peek
-    |=  view=^view
+    |=  vi=^view
     ^-  json
     %-  pairs
     :_  ~
     ^-  [cord json]
-    ?-  -.view
+    :-  -.vi
+    ?-  -.vi
+      ::
         %space
-      :-  %space
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.view)/(scot %tas space.path.view))]
-          [%space (spc:encode space.view)]
-          :: [%members (membs:encode members.view)]
-      ==
+      (spc:encode space.vi)
       ::
         %spaces
-      [%spaces (spaces-map:encode spaces.view)]
-      ::
-      ::   %members
-      :: [%members (membs:encode members.view)]
+      (spaces-map:encode spaces.vi)
     ==
   --
 
@@ -117,6 +111,27 @@
       :~  [%add add-space]
           [%update update-space]
           [%remove remove-space]
+          [%join joined-space]
+          [%kicked kicked]
+      ==
+    ::
+    ++  joined-space
+      %-  ot
+      :~  [%path pth]
+          :: [%space de-space]
+      ==
+    ::
+    ++  de-space
+      %-  ot
+      :~  [%path pth]
+          [%name so]
+          [%type space-type]
+          [%access access]
+          [%picture so]
+          [%color so]
+          [%archetype archetype]
+          [%theme thm]
+          [%updated-at di]
       ==
     ::
     ++  add-space
@@ -130,6 +145,12 @@
       %-  ot
       :~  [%path pth]
           [%payload edit-payload]
+      ==
+    ::
+    ++  kicked
+      %-  ot
+      :~  [%path pth]
+          [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
     ++  remove-space
@@ -276,7 +297,7 @@
   ++  memb
     |=  =member:member-store
     ^-  json
-    %-  pairs:enjs:format
+    %-  pairs
     :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
         ['status' s+(scot %tas status.member)]
         :: ['pinned' b+pinned.member]
@@ -285,7 +306,7 @@
   ++  spc
     |=  =space
     ^-  json
-    %-  pairs:enjs:format
+    %-  pairs
     :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
         ['name' s+name.space]
         ['type' s+type.space]
@@ -298,7 +319,7 @@
   ++  thm
     |=  =theme
     ^-  json
-    %-  pairs:enjs:format
+    %-  pairs
     :~
       ['mode' s+(scot %tas mode.theme)]
       ['backgroundColor' s+background-color.theme]

@@ -1,4 +1,4 @@
-/-  store=invite, spaces-store=spaces, member-store=membership
+/-  store=invite, spaces-store=spaces, member-store=membership, passport-store=passports
 /+  spaces-lib=spaces
 =<  [store .]
 =,  store
@@ -88,7 +88,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%ship s+(scot %p ship.path.rct)]
-          [%member (memb:encode member.rct)]
+          [%member (memb:encode passport.rct)]
       ==
       ::
         %kicked
@@ -168,11 +168,12 @@
     ==
   ::
   ++  memb
-    |=  =member:member-store
+    |=  =passport:passport-store
     ^-  json
     %-  pairs:enjs:format
-    :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
-        ['status' s+(scot %tas status.member)]
+    :~  ['roles' a+(turn ~(tap in roles.passport) |=(rol=role:member-store s+(scot %tas rol)))]
+        ['alias' s+alias.passport]
+        ['status' s+(scot %tas status.passport)]
     ==
   ::
   --
