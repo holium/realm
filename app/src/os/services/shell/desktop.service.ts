@@ -118,7 +118,6 @@ export class DesktopService extends BaseService {
         resource: 'desktop',
         response: 'patch',
       };
-      console.log('desktop', patchEffect);
       this.core.onEffect(patchEffect);
     });
 

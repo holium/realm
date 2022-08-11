@@ -69,7 +69,6 @@ export const DesktopStore = types
       mode: 'light',
       textColor: '#261f1f',
       iconColor: rgba('#333333', 0.6),
-      mouseColor: '#4E9EFD',
     }),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
@@ -105,7 +104,7 @@ export const DesktopStore = types
     setTheme(newTheme: ThemeModelType) {
       self.theme = clone(newTheme);
     },
-    setMouseColor(newMouseColor: string) {
+    setMouseColor(newMouseColor: string = '#4E9EFD') {
       self.mouseColor = newMouseColor;
     },
     setHomePane(isHome: boolean) {

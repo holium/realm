@@ -9,7 +9,7 @@ import {
   IconButton,
 } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { ThemeModelType } from 'os/services/spaces/models/theme';
+import { ThemeModelType } from 'os/services/shell/theme.model';
 
 type SpaceTitlebarProps = {
   space: SpaceModelType;

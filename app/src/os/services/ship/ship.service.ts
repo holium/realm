@@ -1,4 +1,9 @@
-import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
+import {
+  ipcMain,
+  IpcMainInvokeEvent,
+  IpcMessageEvent,
+  ipcRenderer,
+} from 'electron';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -48,6 +53,7 @@ export class ShipService extends BaseService {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.send-dm': this.sendDm,
     'realm.ship.get-metadata': this.getMetadata,
+    'realm.ship.get-contact': this.getContact,
     'realm.ship.accept-dm-request': this.acceptDm,
     'realm.ship.decline-dm-request': this.declineDm,
     'realm.ship.get-app-preview': this.getAppPreview,
@@ -73,6 +79,9 @@ export class ShipService extends BaseService {
     },
     getMetadata: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-metadata', path);
+    },
+    getContact: (ship: string) => {
+      return ipcRenderer.invoke('realm.ship.get-contact', ship);
     },
     acceptDm: (toShip: string) => {
       return ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
@@ -156,7 +165,7 @@ export class ShipService extends BaseService {
           : {},
       });
 
-      this.core.services.desktop.load(ship, this.state.color!);
+      this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
       onSnapshot(this.state, (snapshot: any) => {
         this.db!.store = snapshot;
@@ -337,6 +346,10 @@ export class ShipService extends BaseService {
     return await FriendsApi.removeFriend(this.core.conduit!, patp);
   }
   // ---
+  getContact(_event: IpcMessageEvent, ship: string): any {
+    const patp = ship.includes('~') ? ship : `~${ship}`;
+    return this.state?.contacts.getContactAvatarMetadata(patp);
+  }
   getMetadata(_event: any, path: string): any {
     return this.metadataStore['graph'][path];
   }

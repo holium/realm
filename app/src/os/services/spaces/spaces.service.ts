@@ -130,17 +130,16 @@ export class SpacesService extends BaseService {
     // Load sub-models
     this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
-
+    // Temporary setup
     this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
 
     // Get the initial scry
-    // TODO for some reason the initial selected reference is undefined so you cant
-    // TODO reload to the same space you logged out from
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
     this.state!.initialScry(spaces, persistedState, patp);
     this.state!.selected &&
       this.core.services.desktop.setTheme(this.state!.selected?.theme);
 
+    this.state.setLoader('loaded');
     // initial sync effect
     const syncEffect = {
       model: {
@@ -152,7 +151,6 @@ export class SpacesService extends BaseService {
       response: 'initial',
     };
 
-    this.state.setLoader('loaded');
     this.core.onEffect(syncEffect);
 
     // set up snapshotting

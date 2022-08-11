@@ -91,6 +91,7 @@ export const SpacesStore = types
       if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
     },
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
+      console.log('initial %spaces sync');
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
     },
