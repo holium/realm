@@ -63,6 +63,10 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
     [desktop.theme.windowColor]
   );
 
+  const currentBazaar = spaces.selected
+    ? bazaar.getBazaar(spaces.selected?.path)
+    : null;
+
   return (
     <Flex flexDirection="row" height="calc(100vh - 58px)">
       <Flex
@@ -174,7 +178,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           >
             {apps.map((app: any, index: number) => {
               const spacePath = spaces.selected?.path!;
-              const isAppPinned = bazaar.isAppPinned(app.id);
+              const isAppPinned =
+                (currentBazaar && currentBazaar.isAppPinned(app.id)) || false;
               return (
                 <AppTile
                   key={app.title + index + 'grid'}

@@ -54,7 +54,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   }, [sidebar, members]);
   if (!currentSpace) return null;
   const headerWidth = '50%';
-  const paneWidth = '60%';
+  const paneWidth = '50%';
   return (
     <Flex flexDirection="row" width="100%" height="calc(100vh - 58px)">
       <Flex

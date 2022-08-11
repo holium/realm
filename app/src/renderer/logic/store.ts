@@ -1,4 +1,4 @@
-import { BazaarModel } from './../../os/services/spaces/models/bazaar';
+import { BazaarStore } from './../../os/services/spaces/models/bazaar';
 import { DesktopActions } from './actions/desktop';
 import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
@@ -38,7 +38,7 @@ export const Services = types
     onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
-    bazaar: BazaarModel,
+    bazaar: BazaarStore,
     membership: MembershipStore,
   })
   .actions((self) => ({

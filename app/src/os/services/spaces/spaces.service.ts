@@ -16,7 +16,7 @@ import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-import { BazaarModel } from './models/bazaar';
+import { BazaarStore } from './models/bazaar';
 import { PassportsApi } from '../../api/passports';
 import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
@@ -39,11 +39,7 @@ export class SpacesService extends BaseService {
       outgoing: {},
       incoming: {},
     }),
-    bazaar: BazaarModel.create({
-      pinned: [],
-      endorsed: {},
-      installed: {},
-    }),
+    bazaar: BazaarStore.create({}),
   };
 
   handlers = {
@@ -72,8 +68,12 @@ export class SpacesService extends BaseService {
     unpinApp: (path: string, appId: string) => {
       return ipcRenderer.invoke('realm.spaces.unpin-app', path, appId);
     },
-    setPinnedOrder: (newOrder: any[]) => {
-      return ipcRenderer.invoke('realm.spaces.set-pinned-order', newOrder);
+    setPinnedOrder: (path: string, newOrder: any[]) => {
+      return ipcRenderer.invoke(
+        'realm.spaces.set-pinned-order',
+        path,
+        newOrder
+      );
     },
     createSpace: (form: any) => {
       return ipcRenderer.invoke('realm.spaces.create-space', form);
@@ -131,7 +131,7 @@ export class SpacesService extends BaseService {
     this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
     // Temporary setup
-    this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
+    this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
     // Get the initial scry
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
@@ -276,20 +276,22 @@ export class SpacesService extends BaseService {
   // ************************ BAZAAR ***************************
   // ***********************************************************
   async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
-    // console.log(space);
-    this.models.bazaar.pinApp(appId);
+    console.log(path);
+    console.log(this.models.bazaar.getBazaar(path));
+    this.models.bazaar.getBazaar(path).pinApp(appId);
     return;
   }
 
   async unpinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    this.models.bazaar.unpinApp(appId);
+    console.log(path);
+    console.log(this.models.bazaar.getBazaar(path));
+    this.models.bazaar.getBazaar(path).unpinApp(appId);
     return;
   }
 
-  setPinnedOrder(_event: IpcMainInvokeEvent, order: any[]) {
-    this.models.bazaar.setPinnedOrder(order);
+  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
+    this.models.bazaar.getBazaar(path).setPinnedOrder(order);
   }
 
   setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
