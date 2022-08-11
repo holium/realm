@@ -107,11 +107,15 @@ export class Realm extends EventEmitter {
     let spaces = null;
     let desktop = null;
     let shell = null;
+    let membership = null;
+    let bazaar = null;
     if (this.session) {
       ship = this.services.ship.snapshot;
       spaces = this.services.spaces.snapshot;
       desktop = this.services.desktop.snapshot;
       shell = this.services.shell.snapshot;
+      bazaar = this.services.spaces.bazaarSnapshot;
+      membership = this.services.spaces.membershipSnapshot;
     }
     this.services.identity.auth.setLoader('loaded');
     return {
@@ -121,8 +125,8 @@ export class Realm extends EventEmitter {
       spaces,
       desktop,
       shell,
-      bazaar: this.services.spaces.bazaarSnapshot,
-      membership: this.services.spaces.membershipSnapshot,
+      bazaar,
+      membership,
       loggedIn: this.session ? true : false,
     };
   }

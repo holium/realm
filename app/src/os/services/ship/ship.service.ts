@@ -122,8 +122,8 @@ export class ShipService extends BaseService {
     return new Promise<ShipModelType>((resolve, reject) => {
       // TODO password protect data
       this.db = new Store<ShipModelType>({
-        name: `realm.ship.${ship}`,
-        accessPropertiesByDotNotation: true,
+        name: 'ship',
+        cwd: `realm.${ship}`,
       });
       let persistedState: ShipModelType = this.db.store;
 

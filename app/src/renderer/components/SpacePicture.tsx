@@ -63,7 +63,14 @@ export const SpacePicture: FC<SpacePictureProps> = (
           {/* Subtitle row */}
           <Flex gap={4} alignItems="center">
             {/* Member count */}
-            <Icons name="Members" size="14px" fill={textColor} opacity={0.7} />
+            <Icons
+              name="Members"
+              size="14px"
+              initial={{ fill: textColor }}
+              animate={{ fill: textColor }}
+              transition={{ fill: { duration: 0.5 } }}
+              opacity={0.7}
+            />
             <Text
               initial={{ color: textColor }}
               animate={{ color: textColor }}

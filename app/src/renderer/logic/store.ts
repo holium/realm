@@ -208,7 +208,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.shell, value.patch);
     }
     if (value.resource === 'membership') {
-      console.log('membership patch', value.path);
       applyPatch(servicesStore.membership, value.patch);
     }
   }
@@ -226,7 +225,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
       // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
-      console.log('initial', value.model);
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
       applySnapshot(
         servicesStore.membership,

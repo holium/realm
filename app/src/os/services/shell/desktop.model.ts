@@ -5,6 +5,7 @@ import { toJS } from 'mobx';
 import { getInitialWindowDimensions } from './lib/window-manager';
 import { NativeAppList } from 'renderer/apps';
 import { ThemeModel, ThemeModelType } from './theme.model';
+import { rgba } from 'polished';
 
 // const Grid = types.model({
 //   width: types.enumeration(['1', '2', '3']),
@@ -67,7 +68,7 @@ export const DesktopStore = types
       windowColor: '#f0ecec',
       mode: 'light',
       textColor: '#261f1f',
-      iconColor: '#333333',
+      iconColor: rgba('#333333', 0.6),
       mouseColor: '#4E9EFD',
     }),
     activeWindow: types.safeReference(Window),

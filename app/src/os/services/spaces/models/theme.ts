@@ -29,7 +29,7 @@ const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
         : lighten(0.2, baseColor),
     windowColor:
       bgLuminosity === 'dark'
-        ? darken(0.2, baseColor)
+        ? darken(0.17, baseColor)
         : lighten(0.2, baseColor),
     textColor:
       bgLuminosity === 'dark'

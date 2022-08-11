@@ -70,7 +70,7 @@ export const SpacesStore = types
       // if (spacePath === self.our!.path) {
       //   return self.our;
       // } else {
-      return self.spaces.get(spacePath)!;
+      return self.spaces.get(spacePath);
       // }
     },
   }))

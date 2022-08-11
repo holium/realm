@@ -19,6 +19,7 @@ import { Flex } from '../Flex';
 import { TypographyFunctionsProps } from '../typography-functions';
 import { Text } from '../Text';
 import { ThemeType } from '../../theme';
+import { AnimationProps } from 'framer-motion';
 
 const inputTokens = {
   iconSize: 4, // icon size on font-size scale
@@ -42,6 +43,7 @@ type BaseInputProps = {
   isDisabled?: boolean;
   small?: boolean;
   bgOpacity?: number;
+  wrapperMotionProps?: AnimationProps;
   theme: ThemeType;
 } & TypographyFunctionsProps;
 
@@ -54,7 +56,7 @@ export type InputProps = StyledComponentProps<
 
 export const InputWrapper = styled(Flex)`
   /* display: block; */
-  width: ${(props) => props.width ? props.width : '100%'};
+  width: ${(props) => (props.width ? props.width : '100%')};
   ${(props) =>
     !props.hasPointerEvents &&
     css`
@@ -122,7 +124,7 @@ InputWrapper.defaultProps = {
   borderStyle: 'solid',
   borderRadius: 4,
   color: 'text.primary',
-  bg: 'bg.tertiary',
+  // bg: 'bg.tertiary',
   mb: 0,
   hasPointerEvents: false,
   shouldHighlightOnFocus: true,
@@ -247,6 +249,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
       disabled,
       variant,
       borderColor,
+      wrapperMotionProps,
       // eslint-disable-next-line @typescript-eslint/no-shadow
       color,
       bg,
@@ -254,15 +257,13 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
       wrapperRef,
       wrapperStyle,
     } = props;
+    console.log(wrapperMotionProps);
     return (
       <InputWrapper
         alignItems="center"
         position="relative"
         ref={wrapperRef}
         borderColor={borderColor}
-        // animate={{
-        //   background: bg,
-        // }}
         color={color}
         bg={bg}
         mx={mx}
@@ -275,7 +276,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         flex={flex}
         style={wrapperStyle}
         isDisabled={disabled}
-        transition={{ background: { duration: 1 } }}
+        {...wrapperMotionProps}
       >
         {leftIcon && (
           <LeftIcon
@@ -296,7 +297,10 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
           aria-invalid={props.error ? 'true' : 'false'}
           {...props}
           bg="transparent"
-          style={{ width: '100%', caretColor: noCursor ? 'transparent' : undefined }}
+          style={{
+            width: '100%',
+            caretColor: noCursor ? 'transparent' : undefined,
+          }}
         />
         {rightIcon && (
           <RightIcon
@@ -319,4 +323,9 @@ Input.defaultProps = {
   type: 'text',
   variant: 'body',
   as: 'input',
+  wrapperMotionProps: {
+    transition: {
+      background: { duration: 1 },
+    },
+  },
 };

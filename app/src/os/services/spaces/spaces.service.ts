@@ -20,6 +20,7 @@ import { BazaarModel } from './models/bazaar';
 import { PassportsApi } from '../../api/passports';
 import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
+import { loadBazaarFromDisk } from './bazaar';
 
 type SpaceModels = {
   bazaar?: any;
@@ -126,9 +127,12 @@ export class SpacesService extends BaseService {
 
     let persistedState: SpacesStoreType = this.db.store;
     this.state = SpacesStore.create(castToSnapshot(persistedState));
-    this.models.membership = loadMembersFromDisk(patp);
+    // Load sub-models
+    this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
+    this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
 
     this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
+
     // Get the initial scry
     // TODO for some reason the initial selected reference is undefined so you cant
     // TODO reload to the same space you logged out from
@@ -154,26 +158,6 @@ export class SpacesService extends BaseService {
     // set up snapshotting
     onSnapshot(this.state, (snapshot) => {
       this.db!.store = castToSnapshot(snapshot);
-    });
-
-    // Start patching after we've initialized the state
-    onPatch(this.models.bazaar, (patch) => {
-      const patchEffect = {
-        patch,
-        resource: 'bazaar',
-        response: 'patch',
-      };
-      this.core.onEffect(patchEffect);
-    });
-
-    // Start patching after we've initialized the state
-    onPatch(this.models.membership, (patch) => {
-      const patchEffect = {
-        patch,
-        resource: 'membership',
-        response: 'patch',
-      };
-      this.core.onEffect(patchEffect);
     });
 
     // Start patching after we've initialized the state
@@ -310,18 +294,14 @@ export class SpacesService extends BaseService {
     this.models.bazaar.setPinnedOrder(order);
   }
 
-  async setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
-    const space = this.state?.getSpaceByPath(spacePath);
-    if (space) {
-      const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
-      const response = await SpacesApi.updateSpace(this.core.conduit!, {
-        path: space.path,
-        payload: { theme: snakeify(newTheme) },
-      });
-      console.log('wallpaper set response, ', response);
-      return newTheme;
-    }
-    // todo handle errors better
-    return null;
+  setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
+    const space = this.state!.getSpaceByPath(spacePath)!;
+
+    const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
+    SpacesApi.updateSpace(this.core.conduit!, {
+      path: space.path,
+      payload: { theme: snakeify(newTheme) },
+    });
+    return newTheme;
   }
 }

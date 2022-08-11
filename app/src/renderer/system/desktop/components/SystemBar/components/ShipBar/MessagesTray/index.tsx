@@ -1,4 +1,6 @@
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useMemo } from 'react';
+import { darken, rgba } from 'polished';
+
 import { observer } from 'mobx-react';
 
 import { IconButton, Icons, Badge, Flex } from 'renderer/components';
@@ -47,6 +49,11 @@ export const MessagesTray: FC<MessagesTrayProps> = observer(
       [activeApp, anchorOffset, position, dimensions]
     );
 
+    const iconHoverColor = useMemo(
+      () => rgba(darken(0.05, theme.dockColor), 0.5),
+      [theme.windowColor]
+    );
+
     return (
       <Flex
         id="messages-tray-icon"
@@ -67,7 +74,7 @@ export const MessagesTray: FC<MessagesTrayProps> = observer(
           <IconButton
             id="messages-tray-icon"
             size={iconSize}
-            customBg={dockColor}
+            customBg={iconHoverColor}
             // data-selected
             color={textColor}
             whileTap={{ scale: 0.9 }}

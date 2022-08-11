@@ -27,8 +27,6 @@ type HomeSidebarProps = {
 };
 
 const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
-  background: ${(props: HomeSidebarProps) =>
-    rgba(props.customBg, props.filterMode === 'light' ? 0.9 : 0.9)};
   position: relative;
   backdrop-filter: var(--blur-enabled);
   transform: transale3d(0, 0, 0);
@@ -115,6 +113,19 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
     // });
   };
 
+  const themeInputColor = useMemo(
+    () =>
+      mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
+    [inputColor]
+  );
+  const backgroundColor = useMemo(
+    () =>
+      mode === 'light'
+        ? lighten(0.025, rgba(dockColor, 0.9))
+        : darken(0.05, rgba(dockColor, 0.9)),
+    [dockColor]
+  );
+
   return (
     <HomeSidebar
       filterMode={mode}
@@ -122,13 +133,14 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
       onContextMenu={(evt: any) => {
         evt.stopPropagation();
       }}
+      initial={{ background: backgroundColor }}
       animate={{
-        background:
-          mode === 'light'
-            ? lighten(0.025, rgba(dockColor, 0.9))
-            : darken(0.05, rgba(dockColor, 0.9)),
-        transition: { background: { duration: 1 } },
+        background: backgroundColor,
       }}
+      exit={{
+        background: backgroundColor,
+      }}
+      transition={{ background: { duration: 0.5 } }}
     >
       <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
         <Icons name="Members" size="18px" opacity={0.5} />
@@ -147,11 +159,24 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           ref={searchRef}
           height={34}
           placeholder="Search..."
-          bg={
-            mode === 'light'
-              ? lighten(0.2, inputColor)
-              : darken(0.005, inputColor)
-          }
+          // bg={
+          //   mode === 'light'
+          //     ? lighten(0.2, inputColor)
+          //     : darken(0.005, inputColor)
+          // }
+          wrapperMotionProps={{
+            initial: {
+              backgroundColor: themeInputColor,
+            },
+            animate: {
+              backgroundColor: themeInputColor,
+            },
+            transition: {
+              backgroundColor: { duration: 0.3 },
+              borderColor: { duration: 0.3 },
+              color: { duration: 0.5 },
+            },
+          }}
           wrapperStyle={{
             borderRadius: 6,
             paddingRight: 4,

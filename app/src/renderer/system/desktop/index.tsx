@@ -6,7 +6,6 @@ import { HomePane } from './components/Home';
 // import { useMst } from 'renderer/logic/store';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
-import { DialogManager } from '../dialog/DialogManager';
 
 type OSFrameProps = {
   hasLoaded?: boolean;
@@ -22,7 +21,6 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
     <Fill>
       <Layer zIndex={0}>
         <WindowManager isOpen={!desktop.showHomePane} />
-        {/* <WindowManager isOpen /> */}
       </Layer>
       <Layer zIndex={1}>
         {desktop.showHomePane && <HomePane isOpen={desktop.showHomePane} />}

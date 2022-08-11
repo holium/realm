@@ -1,5 +1,5 @@
 import { toJS } from 'mobx';
-import { types, castToSnapshot } from 'mobx-state-tree';
+import { types, castToSnapshot, Instance } from 'mobx-state-tree';
 import { NativeAppList } from '../../../../renderer/apps';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 
@@ -36,3 +36,5 @@ export const BazaarModel = types
       self.pinned = castToSnapshot(pins);
     },
   }));
+
+export type BazaarModelType = Instance<typeof BazaarModel>;

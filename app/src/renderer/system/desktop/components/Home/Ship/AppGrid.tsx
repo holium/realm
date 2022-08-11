@@ -1,7 +1,8 @@
 import { FC, useState, useEffect, useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
+import { rgba, darken } from 'polished';
+
 import { AnimatePresence, motion } from 'framer-motion';
 import { Flex, Input, Icons, IconButton, Sigil } from 'renderer/components';
 import { AppTile } from 'renderer/components/AppTile';
@@ -22,9 +23,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen } = props;
   const { desktop, ship, spaces, bazaar } = useServices();
   const [members, setMembers] = useState<any>([]);
-  // const [sidebar, setSidebar] = useState<SidebarType>('people');
   const [sidebar, setSidebar] = useState<SidebarType>(null);
-  // const [passports, setPassports] = useState([]);
 
   const apps: any = ship
     ? [...ship!.apps, ...NativeAppList]
@@ -58,6 +57,11 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
       </AnimatePresence>
     );
   }, [sidebar, members, ship!.friends.list]);
+
+  const iconHoverColor = useMemo(
+    () => rgba(darken(0.03, desktop.theme.iconColor), 0.1),
+    [desktop.theme.windowColor]
+  );
 
   return (
     <Flex flexDirection="row" height="calc(100vh - 58px)">
@@ -118,13 +122,10 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           <Flex flex={1} justifyContent="flex-end">
             <IconButton
               size={3}
-              customBg={desktop.theme.windowColor}
+              customBg={iconHoverColor}
+              color={desktop.theme.iconColor}
               onClick={() => {
-                if (spaces.selected?.type === 'our') {
-                  setSidebar(!sidebar ? 'friends' : null);
-                } else {
-                  setSidebar(!sidebar ? 'members' : null);
-                }
+                setSidebar(!sidebar ? 'friends' : null);
               }}
             >
               <Icons name="Members" size="22px" opacity={0.8} />

@@ -9,7 +9,6 @@ import { AppSuite } from './AppSuite';
 import { RecommendedApps } from './Recommended';
 import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
-import { Member } from 'os/types';
 
 type HomePaneProps = {
   isOpen?: boolean;
@@ -17,26 +16,18 @@ type HomePaneProps = {
 
 type SidebarType = 'members' | null;
 
-const generateMemberList = (entries: [key: string, value: any][]) => {
-  return Array.from(entries).map((entry: [key: string, value: any]) => {
-    return {
-      ...entry[1],
-      patp: entry[0],
-    };
-  });
-};
-
 export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const { isOpen } = props;
   const { desktop, spaces, membership } = useServices();
   const currentSpace = spaces.selected;
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
-  if (!currentSpace) return null;
 
   useEffect(() => {
-    const memberMap = membership.getMembersList(currentSpace.path);
-    setMembers(memberMap);
+    if (currentSpace) {
+      const memberMap = membership.getMembersList(currentSpace.path);
+      setMembers(memberMap);
+    }
   }, [currentSpace]);
 
   const sidebarComponent = useMemo(() => {
@@ -61,6 +52,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       </AnimatePresence>
     );
   }, [sidebar, members]);
+  if (!currentSpace) return null;
   const headerWidth = '50%';
   const paneWidth = '60%';
   return (
