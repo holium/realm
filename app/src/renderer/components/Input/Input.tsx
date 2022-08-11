@@ -257,7 +257,6 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
       wrapperRef,
       wrapperStyle,
     } = props;
-    console.log(wrapperMotionProps);
     return (
       <InputWrapper
         alignItems="center"
