@@ -20,7 +20,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   // if()
 
   return (
-    <Flex flexGrow={1} flexDirection="column" position="relative" gap={20}>
+    <Flex flexDirection="column" position="relative" gap={20} mb={60}>
       <Flex>
         <Text variant="h3" fontWeight={500}>
           Your App Suite

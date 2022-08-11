@@ -44,7 +44,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         values={orderedList}
         onReorder={(newOrder: any) => {
           const newPinList = newOrder.map((app: any) => app.id);
-          SpacesActions.setPinnedOrder(spaces.selected?.path, newPinList);
+          SpacesActions.setPinnedOrder(spaces.selected!.path, newPinList);
         }}
       >
         {orderedList.map((app: AppModelType | any, index: number) => {

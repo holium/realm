@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 import { Flex, Icons, Text } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import { pluralize } from 'renderer/logic/lib/text';
 
 type SpacePictureProps = {
   space: SpaceModelType;
@@ -48,7 +49,12 @@ export const SpacePicture: FC<SpacePictureProps> = (
       ) : (
         <EmptyPicture size={size} color={space.color || '#000000'} />
       )}
-      <Flex flexDirection="column" justifyContent="center" {...FadeInMotion}>
+      <Flex
+        flexDirection="column"
+        justifyContent="center"
+        gap={4}
+        {...FadeInMotion}
+      >
         {/* Title column */}
         <Text
           initial={{ color: textColor }}
@@ -79,7 +85,7 @@ export const SpacePicture: FC<SpacePictureProps> = (
               fontSize={2}
               fontWeight={400}
             >
-              {membersCount} members
+              {membersCount} {membersCount && pluralize('member', membersCount)}
             </Text>
           </Flex>
           {space.token && (

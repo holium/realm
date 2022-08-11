@@ -22,6 +22,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const currentSpace = spaces.selected;
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
+  const [appGrid, showAppGrid] = useState(false);
 
   useEffect(() => {
     if (currentSpace) {
@@ -83,6 +84,9 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
             space={currentSpace}
             theme={desktop.theme}
             membersCount={members.length}
+            onToggleApps={() => {
+              showAppGrid(!appGrid);
+            }}
             onMemberClick={() => {
               setSidebar(!sidebar ? 'members' : null);
             }}
@@ -96,6 +100,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           width={paneWidth}
         >
           <Flex
+            flex={4}
             flexGrow={1}
             position="relative"
             flexDirection="column"

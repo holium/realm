@@ -1,11 +1,7 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { AnimatePresence, motion } from 'framer-motion';
-import { rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { Flex } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 
 type RecentActivityProps = {
   isOpen?: boolean;
@@ -18,8 +14,9 @@ export const RecentActivity: FC<RecentActivityProps> = observer(
 
     return (
       <Flex flex={1}>
-        <Flex></Flex>
-        Recent Activity
+        <Text variant="h3" fontWeight={500}>
+          Recent Activity
+        </Text>
       </Flex>
     );
   }
