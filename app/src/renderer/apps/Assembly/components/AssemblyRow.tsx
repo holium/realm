@@ -16,21 +16,23 @@ type AssemblyRowProps = Partial<RoomsModelType> & {
 
 export const AssemblyRow: FC<AssemblyRowProps> = observer(
   (props: AssemblyRowProps) => {
-    const { tray, title, host, people, cursors, onClick, rightChildren } =
+    const { tray, title, creator, present, cursors, onClick, rightChildren } =
       props;
     const { desktop, ship } = useServices();
 
     const { mode, dockColor, windowColor } = desktop.theme;
 
     let peopleText = 'people';
-    if (people.length === 1) {
+    if (present!.length === 1) {
       peopleText = 'person';
     }
 
-    let peopleNoHost = people.filter((person: string) => person !== ship?.patp);
+    let peopleNoHost = present!.filter(
+      (person: string) => person !== ship?.patp
+    );
     let titleText = title;
-    if (titleText.length > 16 && tray) {
-      titleText = titleText.substring(0, 16) + '...';
+    if (titleText!.length > 16 && tray) {
+      titleText = titleText!.substring(0, 16) + '...';
     }
 
     return (
@@ -57,8 +59,9 @@ export const AssemblyRow: FC<AssemblyRowProps> = observer(
               <Flex flexDirection="row">
                 <Icons mr={1} opacity={0.5} name="Friends" />
                 <Text opacity={0.5} fontWeight={400} fontSize={2}>
-                  {people.length} {peopleText}{' '}
-                  {host === ship?.patp && `  -  Hosting`}
+                  {present!.length} {peopleText}{' '}
+                  {present!.includes(ship!.patp) && ` - (You)`}
+                  {/* {creator! === ship?.patp && `  -  Hosting`} */}
                 </Text>
               </Flex>
             )}

@@ -1,6 +1,7 @@
+import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import {
   Flex,
   Grid,
@@ -11,10 +12,44 @@ import {
   TextButton,
   Checkbox,
 } from 'renderer/components';
+import * as yup from 'yup';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
+import { camelToSnake, snakeify } from 'os/lib/obj';
+
+export const createRoomForm = (
+  defaults: any = {
+    name: '',
+    isPrivate: false,
+  }
+) => {
+  const form = createForm({
+    onSubmit({ values }: { values: any }) {
+      return values;
+    },
+  });
+
+  const name = createField({
+    id: 'name',
+    form,
+    initialValue: defaults.name || '',
+    validationSchema: yup.string().required('Name is required'),
+  });
+
+  const isPrivate = createField({
+    id: 'isPrivate',
+    form: form,
+    initialValue: defaults.isPrivate || false,
+  });
+
+  return {
+    form,
+    name,
+    isPrivate,
+  };
+};
 
 export type BaseAssemblyProps = {
   theme: ThemeModelType;
@@ -28,9 +63,11 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
     const { desktop, ship } = useServices();
-    const { roomsApp } = useTrayApps();
 
     const { dockColor, windowColor, inputColor } = desktop.theme;
+
+    const { form, name, isPrivate } = useMemo(() => createRoomForm(), []);
+
     return (
       <Grid.Column
         style={{ position: 'relative', height: dimensions.height }}
@@ -93,27 +130,31 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
                 borderRadius: 6,
                 backgroundColor: inputColor,
               }}
+              value={name.state.value}
+              error={!name.computed.isDirty || name.computed.error}
+              onChange={(e: any) => {
+                name.actions.onChange(e.target.value);
+              }}
+              onFocus={() => name.actions.onFocus()}
+              onBlur={() => name.actions.onBlur()}
             />
             <TextButton
               showBackground
               textColor="#0FC383"
               highlightColor="#0FC383"
+              disabled={!form.computed.isValid}
               style={{ borderRadius: 6, height: 34 }}
               onClick={(evt: any) => {
+                const { name, isPrivate } = form.actions.submit();
                 evt.stopPropagation();
-                const peopleList: string[] = [ship?.patp!];
-                // roomsApp.setView('room');
-                RoomsActions.setView('room');
-                // roomsApp.startRoom({
-                //   id: `${ship?.patp}/new-room`,
-                //   title: 'New Room',  // TODO insert title
-                //   host: ship?.patp!,
-                //   provider: ship?.patp!,  // TODO get this from space host
-                //   // @ts-ignore
-                //   people: peopleList,
-                //   private: false,
-                //   cursors: true,
-                // });
+                RoomsActions.createRoom(
+                  `${ship?.patp}/${camelToSnake(name)}-${
+                    new Date().getTime() / 1000
+                  }`,
+                  isPrivate ? 'private' : 'public',
+                  name,
+                  true
+                );
               }}
             >
               Start

@@ -78,7 +78,7 @@
       ['id' %s rid.upd]
       ['kickedBy' %s (scot %p ship.upd)]
       ==
-    %chat
+    %chat 
       %-  pairs
       :~
       ['from' %s (scot %p from.upd)]
@@ -87,7 +87,6 @@
     ==
   ++  view
     |=  viw=^view
-    ~&  >  %libroomsviw
     ^-  json
     %+  frond  %rooms-view
     %-  pairs
@@ -95,7 +94,6 @@
     :-  -.viw
     ?-  -.viw
     %full
-      ~&  >>>  %full
       %-  pairs
       :~
       :-  %my-room
@@ -106,7 +104,6 @@
         [%s (scot %p u.provider.viw)]
       ==
     %present
-      ~&  >>>  %present
       (set-ship:encode ships.viw)
     ==
   --
@@ -116,7 +113,6 @@
   ++  room
     |=  =^room
     ^-  json
-    ~&  >>>  %encoderoom
     %-  pairs
     :~
     ['id' %s rid.room]
@@ -178,7 +174,6 @@
       (su ;~(pfix sig fed:ag))
     :: ::
     ++  create
-      ~&  >  [%create jon]
       %-  ot
       :~  [%rid so]
           [%access access]

@@ -1,4 +1,5 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { Grid, Flex, Icons, Text, TextButton } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
@@ -25,9 +26,14 @@ export const Assemblies: FC<AssemblyListProps> = observer(
     const { windowColor } = desktop.theme;
     const [muted, setMuted] = useState(false);
     const { roomsApp } = useTrayApps();
-    const { selected, rooms } = roomsApp;
+    const knownRoomsMap = roomsApp.knownRooms;
+    const knownRooms = roomsApp.list;
     const amHosting =
-    rooms.findIndex((a: any) => a.host === ship?.patp) !== -1;
+      knownRooms.findIndex((a: any) => a.host === ship?.patp) !== -1;
+
+    useEffect(() => {
+      RoomsActions.requestAllRooms();
+    }, []);
 
     return (
       <Grid.Column
@@ -65,7 +71,7 @@ export const Assemblies: FC<AssemblyListProps> = observer(
               disabled={amHosting}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                RoomsActions.setView('new-assembly')
+                RoomsActions.setView('new-assembly');
               }}
             >
               Create
@@ -73,7 +79,7 @@ export const Assemblies: FC<AssemblyListProps> = observer(
           </Flex>
         </Titlebar>
         <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
-          {rooms.length === 0 && (
+          {knownRooms.length === 0 && (
             <Flex
               flex={1}
               flexDirection="column"
@@ -89,20 +95,32 @@ export const Assemblies: FC<AssemblyListProps> = observer(
               </Text>
             </Flex>
           )}
-          {rooms.map((room: RoomsModelType, index: number) => {
+          {knownRooms.map((room: RoomsModelType, index: number) => {
             return (
               <AssemblyRow
-                key={`${room.title}-${index}`}
-                id={room.id}
-                title={room.title}
-                host={room.host}
-                people={room.people}
-                cursors={room.cursors}
-                private={room.private}
-                onClick={(evt: any) => {
+                key={`${room!.title}-${index}`}
+                id={room!.id}
+                title={room!.title}
+                provider={room!.provider}
+                present={room!.present}
+                cursors={room!.cursors}
+                access={room!.access}
+                onClick={async (evt: any) => {
                   evt.stopPropagation();
-                  roomsApp.setSelected(room);
-                  RoomsActions.setView('room')
+                  if (roomsApp.liveRoom?.id === room.id) {
+                    console.log('changeview');
+                    RoomsActions.setView('room');
+                  } else if (room.present.includes(ship!.patp)) {
+                    console.log('setlive');
+                    RoomsActions.setLiveRoom(toJS(room));
+                    RoomsActions.setView('room');
+                  } else {
+                    console.log('joining room');
+
+                    await RoomsActions.joinRoom(room.id);
+                    RoomsActions.setView('room');
+                    await RoomsActions.requestAllRooms();
+                  }
                 }}
               />
             );

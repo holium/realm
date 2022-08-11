@@ -7,6 +7,7 @@ import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { AssemblyRow } from 'renderer/apps/Assembly/components/AssemblyRow';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
 
 type AssemblyTrayProps = {};
 
@@ -17,7 +18,7 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
     const { desktop, ship } = useServices();
     // TODO ship.cookie
     // ship
-//
+    //
     const {
       activeApp,
       roomsApp, // add an action for setProvider, setCookie
@@ -53,14 +54,14 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
         );
         // TODO hacky fix for positioning issue with larger button
         setTrayAppCoords({
-          left: roomsApp.live ? left + 4 : left,
-          bottom: roomsApp.live ? bottom - 2 : bottom,
+          left: roomsApp.liveRoom ? left + 4 : left,
+          bottom: roomsApp.liveRoom ? bottom - 2 : bottom,
         });
         setTrayAppDimensions(dimensions);
+        // RoomsActions.requestAllRooms();
         setActiveApp('rooms-tray');
-        if (roomsApp.live) {
-          roomsApp.setSelected(roomsApp.live);
-          roomsApp.setView('room');
+        if (roomsApp.liveRoom) {
+          RoomsActions.setView('room');
         }
       },
       [activeApp, anchorOffset, position, dimensions]
@@ -77,11 +78,11 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
         position="relative"
         onClick={onButtonClick}
       >
-        {roomsApp.live ? (
+        {roomsApp.liveRoom ? (
           <Flex style={{ pointerEvents: 'none' }}>
             <AssemblyRow
               tray
-              {...roomsApp.live}
+              {...roomsApp.liveRoom}
               rightChildren={
                 <Icons
                   // mb="2px"

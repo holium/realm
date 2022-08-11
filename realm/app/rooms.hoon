@@ -119,6 +119,7 @@
       ::
       :: this assumes that a given ship
       ::   is only in one room.
+      :: TODO leave all old rooms, update all old rooms
       =/  =rid:store
         =/  looms  ~(val by rooms)
         |-

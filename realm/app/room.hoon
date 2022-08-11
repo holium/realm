@@ -38,14 +38,13 @@
 ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-
-    ~&  >  %peekekekekeekek
     ?+    path  (on-peek:def path)
     ::
       [%x ~]
         ``rooms-view+!>([%full my-room provider])
       [%x %present ~]
         :: TODO tall form?
+        ::
         ?~  my-room
           ``rooms-view+!>([%present *(set ship)])
         ``rooms-view+!>([%present present.u.my-room])
@@ -53,7 +52,6 @@
 ++  on-watch
   |=  =path
   ^-  (quip card _this)
-  ~&  >  %watchchchc12312312312312
   ?+    path
     (on-watch:def path)
       [%room %local ~]
@@ -216,6 +214,7 @@
       ::
       :: look up room by @p
       :: TODO move this to lib
+      ~&  >  [rooms]
       =/  rum=(unit room:store)
         =/  looms  ~(tap in rooms)
         |-
@@ -228,6 +227,7 @@
         $(looms t.looms)
       ?~  rum  abet
       :: found my room
+      ~&  >  [rum]
       =.  my-room  [~ u.rum]
       abet
     ::

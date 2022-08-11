@@ -18,7 +18,7 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from './components/CommButton';
 import { VoiceAnalyzer } from './components/VoiceVisualizer';
 import { Speaker } from './components/Speaker';
-import {Urbit} from '@urbit/http-api';
+import { Urbit } from '@urbit/http-api';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 
 export type BaseAssemblyProps = {
@@ -32,61 +32,28 @@ export type BaseAssemblyProps = {
 const urb = new Urbit('', '');
 urb.ship = window.ship;
 
-
 export const Room: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
     const { ship, desktop } = useServices();
     const { roomsApp } = useTrayApps();
-    const { people } = roomsApp.selected!;
 
     const [audio, setAudio] = useState<MediaStream | null>(null);
 
     const { dockColor, windowColor, inputColor } = desktop.theme;
 
-    /*
-    const [roomSub, setRoomSub] = useState(0);
-
-    useEffect(() => {
-      if (!urb || roomSub) {
-        return;
-      }
-      urb.url = ship.url;
-      urb.subscribe({
-            app: "room",
-            path: "/room/local",
-            event: handleRoomSub,
-            quit: subFail,
-            err: subFail
-        })
-        .then((subscriptionId) => {
-          setRoomSub(subscriptionId);
-          });
-    }, [urb, ship, roomSub]);
-
-      // unsub on window close or refresh
-      useEffect(() => {
-        window.addEventListener("beforeunload", unsubFunc);
-        return () => {
-          window.removeEventListener("beforeunload", unsubFunc);
-        };
-      }, [roomSub]);
-      //
-      const unsubFunc = () => {
-        urb.unsubscribe(roomSub);
-        urb.delete();
-      };
-
-      function handleRoomSub(update:any) {
-        console.log("room update:")
-        console.log(update)
-      };
-
-    function subFail() {
-        console.log("fail!")
-      };
-      */
-
+    // TODO exit routine
+    // // logout on window close or refresh
+    // useEffect(() => {
+    //   window.addEventListener("beforeunload", logout);
+    //   return () => {
+    //     window.removeEventListener("beforeunload", logout);
+    //   };
+    // }, []);
+    // //
+    // const logout = () => {
+    //   RoomsActions.logout();
+    // };
 
     const getMicrophone = async () => {
       const audioMedia = await navigator.mediaDevices.getUserMedia({
@@ -102,11 +69,18 @@ export const Room: FC<BaseAssemblyProps> = observer(
     };
 
     useEffect(() => {
-      console.log("room innit??")
       window.electron.app.askForMicrophone().then((hasMic: any) => {
         console.log('hasMic', hasMic);
       });
     }, []);
+
+    useEffect(() => {
+      console.log('view:room init');
+      if (!roomsApp.liveRoom) RoomsActions.setView('list');
+    }, [roomsApp.liveRoom]);
+
+    if (!roomsApp.liveRoom) return <div />;
+    const { present, id } = roomsApp.liveRoom;
 
     return (
       <Grid.Column
@@ -137,7 +111,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                RoomsActions.setView('list')
+                RoomsActions.setView('list');
                 // assemblyApp.setView('list');
               }}
             >
@@ -154,7 +128,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                   // textTransform: 'uppercase',
                 }}
               >
-                {roomsApp.selected?.title}
+                {roomsApp.liveRoom?.title}
               </Text>
             </Flex>
           </Flex>
@@ -182,7 +156,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
             // flexWrap="wrap"
             alignItems="center"
           >
-            {people.map((person: string, index: number) => (
+            {present!.map((person: string, index: number) => (
               <Speaker key={person} person={person} audio={audio} />
             ))}
           </Flex>
@@ -242,7 +216,11 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
-                  // assemblyApp.leaveRoom(ship!.patp!);
+                  if (roomsApp.isCreator(ship!.patp!, id)) {
+                    RoomsActions.deleteRoom(id);
+                  } else {
+                    RoomsActions.leaveRoom(id);
+                  }
                 }}
               >
                 <Icons name="LoginLine" />

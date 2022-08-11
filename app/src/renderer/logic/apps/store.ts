@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { applyPatch, Instance, types } from 'mobx-state-tree';
+import { applyPatch, Instance, types, onSnapshot } from 'mobx-state-tree';
 
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 
@@ -47,23 +47,33 @@ export const TrayAppStore = types
     },
   }));
 
+const loadSnapshot = () => {
+  const localStore = localStorage.getItem('trayStore');
+  if (localStore) return JSON.parse(localStore);
+  return {};
+};
+
+const persistedState = loadSnapshot();
+
 export const trayStore = TrayAppStore.create({
   activeApp: null,
-  coords: {
+  coords: persistedState.coords || {
     left: 0,
     bottom: 0,
   },
-  dimensions: {
+  dimensions: persistedState.dimensions || {
     width: 200,
     height: 200,
   },
   roomsApp: {
     currentView: 'list',
-    selected: undefined,
-    rooms: [],
+    // rooms: [], TODO
   },
 });
 
+onSnapshot(trayStore, (snapshot) => {
+  localStorage.setItem('trayStore', JSON.stringify(snapshot));
+});
 // -------------------------------
 // Create core context
 // -------------------------------
