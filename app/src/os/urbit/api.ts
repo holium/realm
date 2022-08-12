@@ -293,7 +293,7 @@ export class Urbit extends EventEmitter {
             const funcs = this.outstandingSubscriptions.get(data.id);
             try {
               // @ts-expect-error
-              funcs.event(data.json);
+              funcs.event(data.json, data.id);
             } catch (e) {
               console.error('Failed to call subscription event callback', e);
             }

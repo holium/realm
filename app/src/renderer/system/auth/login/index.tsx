@@ -40,7 +40,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   // Setting up options menu
   const menuWidth = 180;
   const config = useMenu(optionsRef, {
-    orientation: 'bottom-left',
+    orientation: 'left',
     padding: 6,
     menuWidth,
   });

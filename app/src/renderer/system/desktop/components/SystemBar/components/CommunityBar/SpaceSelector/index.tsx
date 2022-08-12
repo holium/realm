@@ -24,9 +24,9 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
     const dividerBg = useMemo(
       () =>
         mode === 'dark'
-          ? rgba(lighten(0.2, dockColor), 0.3)
-          : rgba(lighten(0.2, dockColor), 0.3),
-      [desktop.theme]
+          ? rgba(darken(0.2, dockColor), 0.3)
+          : rgba(lighten(0.4, dockColor), 0.6),
+      [desktop.theme.mode]
     );
 
     const dimensions = {
@@ -109,7 +109,16 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
             </Flex>
           </TrayButton>
         )}
-        {ship && <Divider customBg={dividerBg} ml={2} mr={2} />}
+        {ship && (
+          <Divider
+            initial={{ backgroundColor: dividerBg }}
+            animate={{ backgroundColor: dividerBg }}
+            transition={{ backgroundColor: { duration: 0.5 } }}
+            customBg={dividerBg}
+            ml={2}
+            mr={2}
+          />
+        )}
       </Flex>
     );
   }

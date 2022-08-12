@@ -12,81 +12,95 @@ type MenuOrientation =
 export type { MenuOrientation };
 
 export const calculateAnchorPoint = (
-  event: any,
+  event: PointerEvent,
   orientation: MenuOrientation,
   padding = 12,
   menuWidth: number,
-  menuHeight: number,
-  position: 'above' | 'below'
+  menuHeight?: number,
+  position?: 'above' | 'below',
+  adaptive?: boolean // should there be some variance in the anchor point location within a range
 ) => {
   let x: number;
   let y: number;
-  // console.log('node', event, event.clientX, event.clientY, event.target);
-  switch (orientation) {
-    case 'right':
-      return {
-        x: event.srcElement.offsetLeft + event.clientX + padding,
-        y: event.srcElement.offsetTop,
-      };
-    case 'left':
-      x = event.srcElement.offsetLeft - event.clientX + padding;
-      if (menuWidth) {
-        x = x - menuWidth;
-      }
-      return {
-        x,
-        y: event.srcElement.offsetTop,
-      };
-    case 'bottom-left':
-      // [ offset left
-      x = event.srcElement.offsetLeft + event.clientX - padding;
-      if (menuWidth) {
-        x = x - menuWidth;
-      }
-      return {
-        x,
-        y: event.srcElement.offsetTop + event.clientY - padding,
-      };
-    case 'bottom-right':
-      x = event.srcElement.offsetLeft - event.clientX;
-      if (menuWidth) {
-        x = x - menuWidth;
-      }
-      return {
-        x,
-        y: event.srcElement.offsetTop + event.clientY + padding,
-      };
-    case 'top':
-      return {
-        x: event.srcElement.offsetLeft,
-        y: event.srcElement.offsetTop - event.clientY + padding,
-      };
+  if (event.target instanceof HTMLElement) {
+    const clickX = event.x;
+    const clickY = event.y;
+    const offsetX = event.offsetX;
+    const offsetY = event.offsetY;
+    const targetElementHeight = event.target.clientHeight;
+    const targetElementWidth = event.target.clientHeight;
 
-    case 'top-left':
-      x = event.clientX;
-      if (menuWidth) {
-        x = x - menuWidth + event.offsetX;
-      }
-      y = event.srcElement.offsetTop + event.srcElement.clientHeight;
-      if (menuHeight) {
-        y = y;
-      }
-      return {
-        x,
-        y,
-      };
-    case 'bottom':
-      return {
-        x: event.srcElement.offsetLeft,
-        y: event.srcElement.offsetTop + event.clientY + padding,
-      };
+    const targetX = event.target.offsetLeft;
+    const targetY = event.target.offsetHeight;
 
-    default:
-      let pointerY = event.clientY;
-      if (position === 'above') {
-        pointerY = pointerY - menuHeight;
-      }
-      // pointer or default
-      return { x: event.clientX + padding, y: pointerY + padding };
+    // console.log(clickX, offsetX, event);
+    switch (orientation) {
+      case 'right':
+        return {
+          x: event.target.offsetLeft + event.clientX + padding,
+          y: event.target.offsetTop,
+        };
+      case 'left':
+        x = clickX - offsetX;
+        y = clickY - offsetY;
+        if (menuWidth) {
+          x = x - menuWidth;
+        }
+        return {
+          x: x - padding,
+          y: y - padding,
+        };
+      case 'bottom-left':
+        x = clickX - offsetX;
+        y = clickY + (targetElementHeight - offsetY);
+
+        return {
+          x: x - padding,
+          y: y - padding,
+        };
+      case 'bottom-right':
+        x = event.target.offsetLeft - event.clientX;
+        if (menuWidth) {
+          x = x - menuWidth;
+        }
+        return {
+          x,
+          y: event.target.offsetTop + event.clientY + padding,
+        };
+      case 'top':
+        return {
+          x: event.target.offsetLeft,
+          y: event.target.offsetTop - event.clientY + padding,
+        };
+
+      case 'top-left':
+        x = event.clientX;
+        if (menuWidth) {
+          x = x - menuWidth + event.offsetX;
+        }
+        y = event.target.offsetTop + event.target.clientHeight;
+        if (menuHeight) {
+          y = y;
+        }
+        return {
+          x,
+          y,
+        };
+      case 'bottom':
+        return {
+          x: event.target.offsetLeft,
+          y: event.target.offsetTop + event.clientY + padding,
+        };
+
+      default:
+        let pointerY = event.clientY;
+        if (position === 'above') {
+          pointerY = pointerY - menuHeight!;
+        }
+        // pointer or default
+        return { x: event.clientX + padding, y: pointerY + padding };
+    }
+  } else {
+    return { x: 0, y: 0 };
   }
 };

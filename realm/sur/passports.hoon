@@ -16,10 +16,10 @@
 ::
 ::  $passport: track space membership and other metadata
 +$  passport
-   $:  =roles:membership
-       alias=cord
-       status=?(%invited %joined %marooned %unknown)
-   ==
+  $:  =roles:membership
+      alias=cord
+      status=status:membership
+  ==
 ::
 ::  $passports: passports (access) to spaces within Realm
 +$  passports      (map ship passport)
@@ -53,14 +53,17 @@
   ==
 ::
 +$  reaction
-  $%  [%pong =ship timestamp=@da]
-      [%add path=space-path:spaces =ship =person =passport]
+  $%  [%all =districts]
+      [%members path=space-path:spaces =passports]
   ==
 ::
 ::  Scry views
 ::
 +$  view
   $%  [%people =people]
-      [%passports =passports]
+      [%members =passports]
+      [%member =passport]
+      [%districts =districts]
+      [%is-member is-member=?]
   ==
 --

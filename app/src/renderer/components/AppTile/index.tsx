@@ -13,7 +13,7 @@ import { ThemeType } from 'renderer/theme';
 const sizes = {
   sm: 32,
   md: 48,
-  lg: 88,
+  lg: 120,
   xl: 148,
   xxl: 210,
 };
@@ -86,6 +86,7 @@ interface AppTileProps {
   app: AppModelType | any;
   variants?: any;
   isVisible?: boolean;
+  isAnimated?: boolean;
   tileSize: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 }
 
@@ -100,9 +101,10 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     allowContextMenu,
     isPinned,
     open,
+    isAnimated,
     onAppClick,
   } = props;
-  // const { theme } = useMst();
+
   const tileRef = useRef(null);
 
   return useMemo(() => {
@@ -144,14 +146,30 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
-          whileHover={{
-            scale: 1 + scales[tileSize] / 2,
-            boxShadow: boxShadowHover,
-          }}
-          whileTap={{
-            scale: 1 - scales[tileSize],
-            boxShadow: boxShadowHover,
-          }}
+          {...(isAnimated
+            ? {
+                whileHover: {
+                  scale: 1 + scales[tileSize] / 2,
+                  boxShadow: boxShadowHover,
+                },
+                whileTap: {
+                  scale: 1 - scales[tileSize],
+                  boxShadow: boxShadowHover,
+                },
+              }
+            : {})}
+          // whileHover={
+          //   !isAnimated
+          //     ? {
+          //         scale: 1 + scales[tileSize] / 2,
+          //         boxShadow: boxShadowHover,
+          //       }
+          //     : {}
+          // }
+          // whileTap={{
+          //   scale: 1 - scales[tileSize],
+          //   boxShadow: boxShadowHover,
+          // }}
           animate={{
             boxShadow: boxShadowStyle,
           }}
@@ -285,4 +303,5 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
 AppTile.defaultProps = {
   tileSize: 'md',
   allowContextMenu: false,
+  isAnimated: true,
 };

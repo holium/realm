@@ -124,7 +124,7 @@ export interface Thread<Action> {
 export type Action = 'poke' | 'subscribe' | 'ack' | 'unsubscribe' | 'delete';
 
 export interface PokeHandlers {
-  onSuccess?: () => void;
+  onSuccess?: (id?: number) => void;
   onError?: (e: any) => void;
 }
 
@@ -149,7 +149,7 @@ export interface SubscriptionInterface {
   /**
    * Handle %fact
    */
-  event?(data: any): void;
+  event?(data: any, id: string): void;
   /**
    * Handle %kick
    */

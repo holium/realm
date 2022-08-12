@@ -44,6 +44,7 @@ export const WebApp = types.model('WebApp', {
   id: types.identifier,
   title: types.string,
   color: types.string,
+  info: types.maybe(types.string),
   type: types.optional(types.string, 'web'),
   icon: types.maybeNull(types.string),
   href: types.string,

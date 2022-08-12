@@ -23,13 +23,15 @@ import {
   CursorEvent,
   RealmMultiplayerInterface,
 } from './system/desktop/components/Multiplayer/types';
+import { ShellActions } from './logic/actions/shell';
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
-  const { desktop, shell} = useServices();
-  // const shipLoaded = ship?.loggedIn;
+  const { desktop, shell } = useServices();
+
   const themeMode = desktop.theme.mode;
 
+  // ShellActions.closeDialog();
   const shellMemo = useMemo(
     () => (booted ? <Shell /> : <div>Booting...</div>),
     [booted]
@@ -50,7 +52,6 @@ export const App: FC = observer(() => {
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}
-
           <ServiceProvider value={servicesStore}>
             {mouseMemo}
             {shellMemo}

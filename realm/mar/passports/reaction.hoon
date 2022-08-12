@@ -1,16 +1,15 @@
 /+  *passports
 ::
-|_  react=reaction
+|_  rct=reaction
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  react
-  ++  json  (reaction:enjs react)
+  ++  noun  rct
+  ++  json  (reaction:enjs rct)
   --
 ::
 ++  grab
   |%
   ++  noun  reaction
-  ++  json  reaction:dejs
   --
 --

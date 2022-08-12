@@ -31,6 +31,7 @@ import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
+import { MemberRole, MemberStatus } from 'os/types';
 
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
@@ -95,9 +96,9 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       {}
     );
     const [permissionMap, setPermissionMap] = useState<{
-      [patp: string]: [Roles];
+      [patp: string]: { roles: [MemberRole]; status: MemberStatus };
     }>({
-      [ship!.patp]: ['owner'],
+      [ship!.patp]: { roles: ['owner'], status: 'host' },
     });
 
     const setWorkspaceState = (obj: any) => {
@@ -112,7 +113,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
     useEffect(() => {
       setWorkspaceState({
         members: {
-          [ship!.patp]: ['owner'],
+          [ship!.patp]: { roles: ['owner'], status: 'host' },
         },
       });
       selectedPatp.add(ship!.patp);
@@ -124,12 +125,13 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       selectedPatp.add(patp);
       setSelected(new Set(selectedPatp));
       setNicknameMap({ ...nicknameMap, [patp]: nickname || '' });
-      setPermissionMap({
+      const newMembers: any = {
         ...permissionMap,
-        [patp]: patp === ship!.patp ? ['owner'] : ['member'],
-      });
+        [patp]: { roles: ['member'], status: 'invited' },
+      };
+      setPermissionMap(newMembers);
       setWorkspaceState({
-        members: permissionMap,
+        members: newMembers,
       });
     };
 
@@ -182,7 +184,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 customBg={windowColor}
                 textColor={textColor}
                 iconColor={iconColor}
-                selected={permissionMap[patp][0]}
+                selected={permissionMap[patp].roles[0]}
                 disabled={isOur}
                 options={[
                   { label: 'Initiate', value: 'initiate' },
@@ -192,7 +194,10 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                   { label: 'Owner', value: 'owner', hidden: true },
                 ]}
                 onClick={(selected: Roles) => {
-                  setPermissionMap({ ...permissionMap, [patp]: [selected] });
+                  setPermissionMap({
+                    ...permissionMap,
+                    [patp]: { roles: [selected], status: 'invited' },
+                  });
                 }}
               />
               {!isOur && (

@@ -1,12 +1,12 @@
 /-  store=spaces
 /+  *spaces
 ::
-|_  view=view:store
+|_  vi=view:store
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  view
-  ++  json  (view:enjs view)
+  ++  noun    vi
+  ++  json    (view:enjs vi)
   --
 ::
 ++  grab
