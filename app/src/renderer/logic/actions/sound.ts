@@ -8,8 +8,7 @@ available sound bites:
 'dm-notify'
 'dm-send'
 */
-const playAudio = (src) => {
-  console.log(`sound.playStartup called: '${src}'`);
+const playAudio = (src: string) => {
   if (window.audio) {
     window.audio.src = src;
   } else {
@@ -27,10 +26,28 @@ export const SoundActions = {
   playLogout: async () => {
     playAudio('/sounds/logout.wav');
   },
-  playSystemNotification: async () => {},
-  playError: async () => {},
-  playDMNotify: async () => {},
+  playSystemNotification: async () => {
+    playAudio('/sounds/system-notify.wav');
+  },
+  playError: async () => {
+    playAudio('/sounds/error.wav');
+  },
+  playDMNotify: async () => {
+    playAudio('/sounds/dm-received.wav');
+  },
   playDMSend: async () => {
-    playAudio('/sounds/dm_sent.wav');
+    playAudio('/sounds/dm-sent.wav');
+  },
+  playCall: async () => {
+    playAudio('/sounds/voice-ring.wav');
+  },
+  playHangup: async () => {
+    playAudio('/sounds/voice-hang-up.wav');
+  },
+  playRoomEnter: async () => {
+    playAudio('/sounds/room-enter.wav');
+  },
+  playRoomLeave: async () => {
+    playAudio('/sounds/room-leave.wav');
   },
 };

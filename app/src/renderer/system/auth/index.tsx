@@ -13,17 +13,12 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
   const { hasWallpaper, firstTime } = props;
   const [addShip, setAddShip] = useState(false);
 
-  console.log('rendering auth: ', firstTime)
-
   return (
     <Flex height="100vh" alignItems="center" justifyContent="center">
       {firstTime || addShip ? (
-        <Onboarding />
+        <Onboarding firstTime={firstTime} exit={() => setAddShip(false)} />
       ) : (
-        <Login
-          hasWallpaper={hasWallpaper}
-          addShip={() => setAddShip(true)}
-        />
+        <Login hasWallpaper={hasWallpaper} addShip={() => setAddShip(true)} />
       )}
     </Flex>
   );

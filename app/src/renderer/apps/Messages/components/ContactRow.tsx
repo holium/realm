@@ -8,6 +8,7 @@ import { ChatType } from 'os/services/ship/models/dms';
 import { Message } from './Message';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type DMContact = {
   theme: ThemeModelType;
@@ -101,7 +102,10 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     const type = Object.keys(lastMessage)[0];
     subTitle = <Message preview type={type} content={lastMessage} />;
   }
-
+  const contactMetadata = ShipActions.getContact(dm.contact).then((val) =>
+    console.log(val)
+  );
+  // console.log(contactMetadata);
   return (
     <Row
       pending={dm.pending}

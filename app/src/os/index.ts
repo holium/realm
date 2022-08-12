@@ -111,11 +111,15 @@ export class Realm extends EventEmitter {
     let spaces = null;
     let desktop = null;
     let shell = null;
+    let membership = null;
+    let bazaar = null;
     if (this.session) {
       ship = this.services.ship.snapshot;
       spaces = this.services.spaces.snapshot;
       desktop = this.services.desktop.snapshot;
       shell = this.services.shell.snapshot;
+      bazaar = this.services.spaces.bazaarSnapshot;
+      membership = this.services.spaces.membershipSnapshot;
     }
     this.services.identity.auth.setLoader('loaded');
     return {
@@ -125,7 +129,8 @@ export class Realm extends EventEmitter {
       spaces,
       desktop,
       shell,
-      bazaar: this.services.spaces.bazaarSnapshot,
+      bazaar,
+      membership,
       loggedIn: this.session ? true : false,
     };
   }
@@ -135,9 +140,11 @@ export class Realm extends EventEmitter {
   }
 
   connect(session: ISession) {
+    console.log('os - connect()');
     this.conduit = new Urbit(session.url, session.ship, session.cookie);
     this.conduit.open();
     this.conduit.onOpen = () => {
+      console.log('os - connect() - conduit.onOpen()');
       this.onLogin();
     };
     this.conduit.onRetry = () => console.log('on retry');
@@ -162,11 +169,12 @@ export class Realm extends EventEmitter {
   }
 
   async onLogin() {
+    const sessionPatp = this.session?.ship!;
     const ship: ShipModelType = await this.services.ship.subscribe(
-      this.session?.ship!,
+      sessionPatp,
       this.session
     );
-    await this.services.spaces.load(this.session?.ship!, ship);
+    await this.services.spaces.load(sessionPatp, ship);
     this.services.identity.auth.setLoader('loaded');
     this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.auth.on-log-in', toJS(ship));

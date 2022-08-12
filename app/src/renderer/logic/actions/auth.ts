@@ -16,13 +16,11 @@ export const AuthActions = {
     return await window.electron.os.auth.setOrder(newOrder);
   },
   login: async (ship: string, password: string) => {
-    await window.electron.os.auth.login(ship, password);
-    SoundActions.playLogin();
+    return await window.electron.os.auth.login(ship, password);
   },
   logout: async (ship: string) => {
-    await window.electron.os.auth.logout(ship);
     SoundActions.playLogout();
-    return;
+    return await window.electron.os.auth.logout(ship);
   },
   resetPassword: async (ship: string, password: string) => {
     // try {

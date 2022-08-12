@@ -29,6 +29,7 @@ interface IPersonRow {
   };
   showPassport?: boolean; // show profile popover
   contextMenuOptions?: MenuItemProps[];
+  children?: any;
 }
 
 export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
@@ -42,6 +43,7 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
     style,
     rowBg,
     contextMenuOptions,
+    children,
   } = props;
   const { textColor, windowColor } = props.theme!;
   const rowRef = useRef(null);
@@ -147,6 +149,7 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
             <Text fontSize={2}>{patp}</Text>
           )}
         </Flex>
+        {children}
       </Row>
     </Flex>
   );

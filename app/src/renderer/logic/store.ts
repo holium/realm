@@ -1,4 +1,4 @@
-import { BazaarModel } from './../../os/services/spaces/models/bazaar';
+import { BazaarStore } from './../../os/services/spaces/models/bazaar';
 import { DesktopActions } from './actions/desktop';
 import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
@@ -20,6 +20,8 @@ import { AuthStore } from '../../os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel } from '../../os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
+import { MembershipStore } from 'os/services/spaces/models/members';
+import { SoundActions } from './actions/sound';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -37,7 +39,8 @@ export const Services = types
     onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
-    bazaar: BazaarModel,
+    bazaar: BazaarStore,
+    membership: MembershipStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -68,6 +71,7 @@ const services = Services.create({
     spaces: undefined,
   },
   bazaar: bazaarSnapshot || {},
+  membership: {},
 });
 
 export const servicesStore = services;
@@ -124,6 +128,9 @@ OSActions.onBoot().then((response: any) => {
     key: 'ships',
     model: response.auth,
   });
+  if (response.auth.firstTime) {
+    SoundActions.playStartup();
+  }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
     coreStore.setLoggedIn(true);
@@ -140,6 +147,9 @@ OSActions.onBoot().then((response: any) => {
   }
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
+  }
+  if (response.membership) {
+    applySnapshot(servicesStore.membership, response.membership);
   }
   coreStore.setBooted();
 });
@@ -165,6 +175,7 @@ onSnapshot(servicesStore, (snapshot) => {
 
 // Auth events
 window.electron.os.auth.onLogin((_event: any) => {
+  SoundActions.playLogin();
   coreStore.setLoggedIn(true);
   ShellActions.setBlur(false);
 });
@@ -189,7 +200,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.onboarding, value.patch);
     }
     if (value.resource === 'spaces') {
-      console.log('spaces patch', value.patch);
       applyPatch(servicesStore.spaces, value.patch);
     }
     if (value.resource === 'ship') {
@@ -200,6 +210,9 @@ window.electron.os.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'shell') {
       applyPatch(servicesStore.shell, value.patch);
+    }
+    if (value.resource === 'membership') {
+      applyPatch(servicesStore.membership, value.patch);
     }
   }
   if (value.response === 'initial') {
@@ -216,8 +229,11 @@ window.electron.os.onEffect((_event: any, value: any) => {
       // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
-      console.log('initial', value.model);
-      applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
+      applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
+      applySnapshot(
+        servicesStore.membership,
+        castToSnapshot(value.model.membership)
+      );
     }
   }
 });

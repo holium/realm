@@ -277,7 +277,6 @@
 ++  core  .
 ++  this  .
 ::
-
 ::
 ::  $handle-add: add a new person to the person store, while
 ::    also adding a new space entry to track ship/role relationships
@@ -410,15 +409,21 @@
       ==
     ::
     ::  HOST
-    ::
+    ?>  =(our.bowl src.bowl)        ::  Dont invite yourself 
     =/  passports                   (~(gut by membership.state) path `passports:store`[~])
-    =.  passports                   (~(put by passports) [ship [roles=(silt `(list role:membership-store)`~[role]) alias='' status=%invited]])
+    =/  new-member 
+      [
+        roles=(silt `(list role:membership-store)`~[role]) 
+        alias='' 
+        status=%invited
+      ]
+    =.  passports                   (~(put by passports) [ship new-member])
     =.  membership.state            (~(put by membership.state) [path passports])
     =.  outgoing.invitations.state  (set-outgoing:core path ship new-invite)
     =/  watch-paths                 [/all /members/(scot %p ship.path)/(scot %tas space.path) ~]              
     :_  state
     :~  [%pass / %agent [ship dap.bowl] %poke invite-action+!>([%invited path new-invite])]     ::  Send invite request to invited
-        [%give %fact watch-paths invite-reaction+!>([%invite-sent path ship new-invite])]            ::  Notify watchers
+        [%give %fact watch-paths invite-reaction+!>([%invite-sent path ship new-invite new-member])]            ::  Notify watchers
     ==
   ::
   ::  handles the case when an invite is received
@@ -529,7 +534,7 @@
   ==
   ::
   ++  on-sent
-    |=  [path=space-path:spaces =ship =invite:invite]
+    |=  [path=space-path:spaces =ship =invite:invite =passport:store]
     ^-  (quip card _state)
     =/  passes                      (~(gut by membership.state) path `passports:store`[~])
     =.  passes                      (~(put by passes) [ship [roles=(silt `(list role:membership-store)`~[role.invite]) alias='' status=%invited]])

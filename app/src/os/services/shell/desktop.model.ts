@@ -5,6 +5,7 @@ import { toJS } from 'mobx';
 import { getInitialWindowDimensions } from './lib/window-manager';
 import { NativeAppList } from 'renderer/apps';
 import { ThemeModel, ThemeModelType } from './theme.model';
+import { rgba } from 'polished';
 
 // const Grid = types.model({
 //   width: types.enumeration(['1', '2', '3']),
@@ -67,8 +68,7 @@ export const DesktopStore = types
       windowColor: '#f0ecec',
       mode: 'light',
       textColor: '#261f1f',
-      iconColor: '#333333',
-      mouseColor: '#4E9EFD',
+      iconColor: rgba('#333333', 0.6),
     }),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
@@ -104,7 +104,7 @@ export const DesktopStore = types
     setTheme(newTheme: ThemeModelType) {
       self.theme = clone(newTheme);
     },
-    setMouseColor(newMouseColor: string) {
+    setMouseColor(newMouseColor: string = '#4E9EFD') {
       self.mouseColor = newMouseColor;
     },
     setHomePane(isHome: boolean) {

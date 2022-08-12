@@ -11,6 +11,7 @@ import {
   TextButton,
   Checkbox,
 } from 'renderer/components';
+import { SoundActions } from 'renderer/logic/actions/sound';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -101,6 +102,7 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 const peopleList: string[] = [ship?.patp!];
+                SoundActions.playRoomEnter();
                 assemblyApp.setView('room');
                 assemblyApp.startRoom({
                   id: `${ship?.patp}/new-room`,

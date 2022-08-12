@@ -30,7 +30,7 @@
   ==
 
 +$  reaction
-  $%  [%invite-sent path=space-path:spc =ship =invite]
+  $%  [%invite-sent path=space-path:spc =ship =invite =passport:pprt]
       [%invite-accepted path=space-path:spc =ship =passport:pprt]
       [%kicked path=space-path:spc =ship]
   ==

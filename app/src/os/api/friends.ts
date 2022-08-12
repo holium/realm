@@ -95,7 +95,7 @@ export const FriendsApi = {
       app: 'friends',
       path: `/all`,
       event: async (data: any) => {
-        console.log(data);
+        // console.log(data);
         if (data['friends']) {
           // applySnapshot(state.friends.all, castToSnapshot(data['friends']));
           state.friends.initial(data['friends']);

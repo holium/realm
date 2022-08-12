@@ -1,10 +1,8 @@
-import { ISession } from './../index';
-import { quickPoke } from '../lib/poke';
+import { MembershipType } from './../services/spaces/models/members';
 import { Urbit } from './../urbit/api';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
-// import { cleanNounColor } from '../lib/color';
 
 const pendingRequests: { [key: string]: (data?: any) => any } = {};
 
@@ -16,32 +14,10 @@ export const SpacesApi = {
     });
     return response.spaces;
   },
-  getInvitations: async (conduit: Urbit) => {
-    const response = await conduit.scry({
-      app: 'spaces',
-      path: `/invitations`, // the spaces scry is at the root of the path
-    });
-    return response.invitations;
-  },
-  getMembers: async (conduit: Urbit, path: SpacePath) => {
-    const response = await conduit.scry({
-      app: 'spaces',
-      path: `${path}/members`, // the spaces scry is at the root of the path
-    });
-    return response.members;
-  },
-  getFriends: async (conduit: Urbit) => {
-    const response = await conduit.scry({
-      app: 'spaces',
-      path: `/friends`, // the spaces scry is at the root of the path
-    });
-    return response.friends;
-  },
   createSpace: async (
     conduit: Urbit,
     payload: { slug: string; payload: any; members: any }
   ): Promise<SpacePath> => {
-    console.log(payload);
     await conduit.poke({
       app: 'spaces',
       mark: 'spaces-action',
@@ -143,17 +119,22 @@ export const SpacesApi = {
     });
     return response;
   },
-  watchUpdates: (conduit: Urbit, state: SpacesStoreType): void => {
+  watchUpdates: (
+    conduit: Urbit,
+    state: SpacesStoreType,
+    membersState: MembershipType
+  ): void => {
     conduit.subscribe({
       app: 'spaces',
       path: `/updates`,
       event: async (data: any, id: string) => {
-        console.log(data);
         if (data['spaces-reaction']) {
-          handleSpacesReactions(data['spaces-reaction'], state, id);
-        }
-        if (data['invite-reaction']) {
-          handleInviteReactions(data['invite-reaction'], state, id);
+          handleSpacesReactions(
+            data['spaces-reaction'],
+            state,
+            membersState,
+            id
+          );
         }
       },
       err: () => console.log('Subscription rejected'),
@@ -165,16 +146,17 @@ export const SpacesApi = {
 const handleSpacesReactions = (
   data: any,
   state: SpacesStoreType,
+  membersState: MembershipType,
   id: string
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log(data['initial']);
       state.initialReaction(data['initial']);
       break;
     case 'add':
       const newSpace = state.addSpace(data['add']);
+      membersState.addMemberMap(newSpace, data['add'].members);
       if (pendingRequests['spaces-action-add']) {
         pendingRequests['spaces-action-add'](newSpace);
         pendingRequests['spaces-action-add'] = () => {};
@@ -189,32 +171,9 @@ const handleSpacesReactions = (
       break;
     case 'remove':
       const deleted = state.deleteSpace(data['remove']);
+      membersState.removeMemberMap(deleted);
       if (pendingRequests['spaces-action-remove'])
         pendingRequests['spaces-action-remove'](deleted);
-      break;
-    default:
-      // unknown
-      break;
-  }
-};
-
-const handleInviteReactions = (
-  data: any,
-  state: SpacesStoreType,
-  id: string
-) => {
-  console.log(data);
-  const reaction: string = Object.keys(data)[0];
-  console.log(reaction);
-  switch (reaction) {
-    case 'invite-sent':
-      console.log(data['invite-sent']);
-      break;
-    case 'invite-accepted':
-      console.log(data['invite-accepted']);
-      break;
-    case 'kicked':
-      console.log(data['kicked']);
       break;
     default:
       // unknown

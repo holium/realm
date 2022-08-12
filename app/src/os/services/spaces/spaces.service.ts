@@ -11,21 +11,20 @@ import {
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DocketMap, SpacesStore, SpacesStoreType } from './models/spaces';
-import { MembershipStore } from './models/members';
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-// import { FriendsApi } from '../../api/friends';
-import { FriendsType, FriendsStore } from '../ship/models/friends';
-import { BazaarModel } from './models/bazaar';
+import { BazaarStore } from './models/bazaar';
 import { PassportsApi } from '../../api/passports';
 import { InvitationsModel } from './models/invitations';
+import { loadMembersFromDisk } from './passports';
+import { loadBazaarFromDisk } from './bazaar';
 
 type SpaceModels = {
   bazaar?: any;
-  members?: any;
+  membership?: any;
   invitations?: any;
   // friends: FriendsType;
 };
@@ -40,13 +39,7 @@ export class SpacesService extends BaseService {
       outgoing: {},
       incoming: {},
     }),
-    bazaar: BazaarModel.create({
-      pinned: [],
-      endorsed: {},
-      installed: {},
-    }),
-    members: MembershipStore.create({ spaces: {} }),
-    // friends: FriendsStore.create({ all: {} }),
+    bazaar: BazaarStore.create({}),
   };
 
   handlers = {
@@ -75,8 +68,12 @@ export class SpacesService extends BaseService {
     unpinApp: (path: string, appId: string) => {
       return ipcRenderer.invoke('realm.spaces.unpin-app', path, appId);
     },
-    setPinnedOrder: (newOrder: any[]) => {
-      return ipcRenderer.invoke('realm.spaces.set-pinned-order', newOrder);
+    setPinnedOrder: (path: string, newOrder: any[]) => {
+      return ipcRenderer.invoke(
+        'realm.spaces.set-pinned-order',
+        path,
+        newOrder
+      );
     },
     createSpace: (form: any) => {
       return ipcRenderer.invoke('realm.spaces.create-space', form);
@@ -117,48 +114,48 @@ export class SpacesService extends BaseService {
     return this.models.bazaar ? getSnapshot(this.models.bazaar) : null;
   }
 
+  get membershipSnapshot() {
+    return this.models.membership ? getSnapshot(this.models.membership) : null;
+  }
+
   async load(patp: string, ship: ShipModelType) {
     this.db = new Store({
-      name: `realm.spaces.${patp}`,
+      name: 'spaces',
+      cwd: `realm.${patp}`,
       accessPropertiesByDotNotation: true,
     });
 
     let persistedState: SpacesStoreType = this.db.store;
     this.state = SpacesStore.create(castToSnapshot(persistedState));
+    // Load sub-models
+    this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
+    this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
+    // Temporary setup
+    this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
-    this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
     // Get the initial scry
-    // TODO for some reason the initial selected reference is undefined so you cant
-    // TODO reload to the same space you logged out from
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
     this.state!.initialScry(spaces, persistedState, patp);
     this.state!.selected &&
       this.core.services.desktop.setTheme(this.state!.selected?.theme);
 
+    this.state.setLoader('loaded');
     // initial sync effect
     const syncEffect = {
-      model: getSnapshot(this.state!),
+      model: {
+        spaces: getSnapshot(this.state!),
+        membership: getSnapshot(this.models.membership),
+      },
       resource: 'spaces',
       key: null,
       response: 'initial',
     };
 
-    this.state.setLoader('loaded');
     this.core.onEffect(syncEffect);
 
     // set up snapshotting
     onSnapshot(this.state, (snapshot) => {
       this.db!.store = castToSnapshot(snapshot);
-    });
-
-    // Start patching after we've initialized the state
-    onPatch(this.models.bazaar, (patch) => {
-      const patchEffect = {
-        patch,
-        resource: 'bazaar',
-        response: 'patch',
-      };
-      this.core.onEffect(patchEffect);
     });
 
     // Start patching after we've initialized the state
@@ -172,8 +169,12 @@ export class SpacesService extends BaseService {
     });
 
     // Subscribe to sync updates
-    SpacesApi.watchUpdates(this.core.conduit!, this.state);
-    PassportsApi.watchMembers(this.core.conduit!, this.models.members);
+    SpacesApi.watchUpdates(
+      this.core.conduit!,
+      this.state,
+      this.models.membership
+    );
+    PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
   }
   // ***********************************************************
   // ************************ SPACES ***************************
@@ -237,7 +238,7 @@ export class SpacesService extends BaseService {
       message: string;
     }
   ) {
-    const response = await SpacesApi.sendInvite(
+    const response = await PassportsApi.inviteMember(
       this.core.conduit!,
       path,
       payload
@@ -247,7 +248,7 @@ export class SpacesService extends BaseService {
   }
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    return await SpacesApi.kickMember(this.core.conduit!, path, patp);
+    return await PassportsApi.kickMember(this.core.conduit!, path, patp);
   }
 
   // // ***********************************************************
@@ -275,34 +276,32 @@ export class SpacesService extends BaseService {
   // ************************ BAZAAR ***************************
   // ***********************************************************
   async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    const space = this.state!.getSpaceByPath(path)!;
     console.log('pinning');
-    console.log(space);
-    this.models.bazaar.pinApp(appId);
+    console.log(path);
+    console.log(this.models.bazaar.getBazaar(path));
+    this.models.bazaar.getBazaar(path).pinApp(appId);
     return;
   }
 
   async unpinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    this.models.bazaar.unpinApp(appId);
+    console.log(path);
+    console.log(this.models.bazaar.getBazaar(path));
+    this.models.bazaar.getBazaar(path).unpinApp(appId);
     return;
   }
 
-  setPinnedOrder(_event: IpcMainInvokeEvent, order: any[]) {
-    this.models.bazaar.setPinnedOrder(order);
+  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
+    this.models.bazaar.getBazaar(path).setPinnedOrder(order);
   }
 
-  async setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
-    const space = this.state?.getSpaceByPath(spacePath);
-    if (space) {
-      const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
-      const response = await SpacesApi.updateSpace(this.core.conduit!, {
-        path: space.path,
-        payload: { theme: snakeify(newTheme) },
-      });
-      console.log('wallpaper set response, ', response);
-      return newTheme;
-    }
-    // todo handle errors better
-    return null;
+  setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
+    const space = this.state!.getSpaceByPath(spacePath)!;
+
+    const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
+    SpacesApi.updateSpace(this.core.conduit!, {
+      path: space.path,
+      payload: { theme: snakeify(newTheme) },
+    });
+    return newTheme;
   }
 }

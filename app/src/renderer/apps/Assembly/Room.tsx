@@ -18,6 +18,7 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from './components/CommButton';
 import { VoiceAnalyzer } from './components/VoiceVisualizer';
 import { Speaker } from './components/Speaker';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 export type BaseAssemblyProps = {
   theme: ThemeModelType;
@@ -189,6 +190,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
+                  SoundActions.playRoomLeave();
                   assemblyApp.leaveRoom(ship!.patp!);
                 }}
               >

@@ -79,15 +79,16 @@
       :-  %invite-sent
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%ship s+(scot %p ship.path.rct)]
+          [%ship s+(scot %p ship.rct)]
           [%invite (invite:encode invite.rct)]
+          [%member (memb:encode passport.rct)]
       ==
       ::
         %invite-accepted
       :-  %invite-accepted
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%ship s+(scot %p ship.path.rct)]
+          [%ship s+(scot %p ship.rct)]
           [%member (memb:encode passport.rct)]
       ==
       ::

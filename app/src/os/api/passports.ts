@@ -1,9 +1,4 @@
-import {
-  applySnapshot,
-  IJsonPatch,
-  applyPatch,
-  getSnapshot,
-} from 'mobx-state-tree';
+import { applySnapshot } from 'mobx-state-tree';
 import { Urbit } from './../urbit/api';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { MemberRole, Patp, SpacePath } from '../types';
@@ -75,35 +70,46 @@ export const PassportsApi = {
       path: `/all`,
       event: async (data: any) => {
         console.log(data);
-        if (data['all']) {
-          applySnapshot(state.spaces, data['all']);
-          // applySnapshot(state.initial(data[members]))
-          // Object.keys(data['members']).forEach((spaceKey: string) => {
-          //   const space = state.spaces.get(spaceKey)!;
-          //   if (space) {
-          //     console.log(spaceKey, space);
-          //     const members = data['members'][spaceKey];
-          //     applySnapshot(space.members, {
-          //       all: members,
-          //     });
-          //   }
-          // });
+        if (data['members']) {
+          state.initial(data['members']);
         }
-        // if (data['friend']) {
-        //   const patp = data['friend'].ship;
-        //   const update = data['friend'].friend;
-        //   const patches: IJsonPatch[] = Object.keys(update).map(
-        //     (key: string) => ({
-        //       op: 'replace',
-        //       path: `/${patp}/${key}`,
-        //       value: update[key],
-        //     })
-        //   );
-        //   applyPatch(state.friends.all, patches);
-        // }
+        if (data['invite-reaction']) {
+          handleInviteReactions(data['invite-reaction'], state);
+        }
       },
       err: () => console.log('Subscription rejected'),
       quit: () => console.log('Kicked from subscription'),
     });
   },
+};
+
+const handleInviteReactions = (
+  data: any,
+  state: MembershipType,
+  id?: string
+) => {
+  // console.log(data);
+  const reaction: string = Object.keys(data)[0];
+  // console.log(reaction);
+  switch (reaction) {
+    case 'invite-sent':
+      const sentPayload = data['invite-sent'];
+      state.addMember(sentPayload.path, sentPayload.ship, sentPayload.member);
+      break;
+    case 'invite-accepted':
+      const acceptedPayload = data['invite-accepted'];
+      state.updateMember(
+        acceptedPayload.path,
+        acceptedPayload.ship,
+        acceptedPayload.member
+      );
+      break;
+    case 'kicked':
+      const kickedPayload = data['kicked'];
+      state.removeMember(kickedPayload.path, kickedPayload.ship);
+      break;
+    default:
+      // unknown
+      break;
+  }
 };

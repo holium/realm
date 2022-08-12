@@ -236,27 +236,27 @@ const AppSearchApp = (props) => {
   const isOur = spaces.selected?.type === 'our';
   useEffect(() => {
     console.log('AppSearch: useEffect called => %o', spaces.selected?.path);
-    if (spaces.selected?.path) {
-      if (isOur) {
-        BazaarActions.getAllies().then((allies: any) => {
-          let data = Object.entries(allies).map(([key, value], index) => ({
-            id: key,
-            name: key,
-          }));
-          console.log(data);
-          setData(data);
-        });
-      } else {
-        BazaarActions.getApps(spaces.selected?.path).then((apps: any) => {
-          let data = Object.entries(apps).map(([key, value], index) => ({
-            id: key,
-            name: key,
-          }));
-          console.log(data);
-          setData(data);
-        });
-      }
-    }
+    // if (spaces.selected?.path) {
+    //   if (isOur) {
+    //     BazaarActions.getAllies().then((allies: any) => {
+    //       let data = Object.entries(allies).map(([key, value], index) => ({
+    //         id: key,
+    //         name: key,
+    //       }));
+    //       console.log(data);
+    //       setData(data);
+    //     });
+    //   } else {
+    //     BazaarActions.getApps(spaces.selected?.path).then((apps: any) => {
+    //       let data = Object.entries(apps).map(([key, value], index) => ({
+    //         id: key,
+    //         name: key,
+    //       }));
+    //       console.log(data);
+    //       setData(data);
+    //     });
+    //   }
+    // }
   }, [spaces.selected?.path]);
 
   return (
