@@ -1,9 +1,4 @@
-import { BazaarStore } from './../../os/services/spaces/models/bazaar';
-import { DesktopActions } from './actions/desktop';
-import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
-import { OSActions } from './actions/os';
-
 import {
   applyPatch,
   castToSnapshot,
@@ -13,14 +8,17 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { DesktopStore } from '../../os/services/shell/desktop.model';
+import { DesktopStore } from 'os/services/shell/desktop.model';
 import { ShellStore } from 'os/services/shell/shell.model';
-import { SpacesStore } from '../../os/services/spaces/models/spaces';
-import { AuthStore } from '../../os/services/identity/auth.model';
+import { SpacesStore } from 'os/services/spaces/models/spaces';
+import { BazaarStore } from 'os/services/spaces/models/bazaar';
+import { AuthStore } from 'os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
-import { ShipModel } from '../../os/services/ship/models/ship';
+import { ShipModel } from 'os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
 import { MembershipStore } from 'os/services/spaces/models/members';
+import { LoaderModel } from 'os/services/common.model';
+import { OSActions } from './actions/os';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');

@@ -102,9 +102,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     const type = Object.keys(lastMessage)[0];
     subTitle = <Message preview type={type} content={lastMessage} />;
   }
-  const contactMetadata = ShipActions.getContact(dm.contact).then((val) =>
-    console.log(val)
-  );
+  // const contactMetadata = ShipActions.getContact(dm.contact);
   // console.log(contactMetadata);
   return (
     <Row

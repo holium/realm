@@ -346,9 +346,10 @@ export class ShipService extends BaseService {
     return await FriendsApi.removeFriend(this.core.conduit!, patp);
   }
   // ---
-  getContact(_event: IpcMessageEvent, ship: string): any {
+  getContact(_event: IpcMainInvokeEvent, ship: string): any {
     const patp = ship.includes('~') ? ship : `~${ship}`;
-    return this.state?.contacts.getContactAvatarMetadata(patp);
+    const contact = this.state?.contacts.getContactAvatarMetadata(patp);
+    return contact;
   }
   getMetadata(_event: any, path: string): any {
     return this.metadataStore['graph'][path];

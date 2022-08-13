@@ -1,89 +1,67 @@
 import { FC, useEffect } from 'react';
-import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import { toJS } from 'mobx';
-import { Flex, Text, Box, AppTile } from 'renderer/components';
+
+import { Box, AppTile, Icons } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 const AppEmpty = styled(Box)`
   border-radius: 16px;
-  border: 2px dotted white;
+  /* border: 2px dotted white; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
   transition: 0.2s ease;
+  background: ${rgba('#FBFBFB', 0.4)};
   &:hover {
     transition: 0.2s ease;
-    background: ${rgba('#FFFFFF', 0.12)};
+    background: ${rgba('#FFFFFF', 0.5)};
   }
 `;
 
 type SuiteAppProps = {
   space: SpaceModelType;
   highlightColor?: string;
-  app?: AppModelType;
+  app?: any; // AppModelType;
+  isAdmin?: boolean;
 };
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
-  const { app, space } = props;
+  const { app, space, isAdmin } = props;
   if (app) {
     return (
       <AppTile
-        tileSize="xxl"
+        tileSize="xl"
         app={app}
-        // allowContextMenu
+        allowContextMenu={isAdmin}
         contextMenu={
-          [
-            // {
-            //   label: isAppPinned ? 'Unpin app' : 'Pin to taskbar',
-            //   onClick: (evt: any) => {
-            //     evt.stopPropagation();
-            //     isAppPinned
-            //       ? SpacesActions.unpinApp(spacePath, app.id)
-            //       : SpacesActions.pinApp(spacePath, app.id);
-            //   },
-            // },
-            // {
-            //   label: 'App info',
-            //   disabled: true,
-            //   onClick: (evt: any) => {
-            //     // evt.stopPropagation();
-            //     console.log('open app info');
-            //   },
-            // },
-            // {
-            //   label: 'Uninstall app',
-            //   section: 2,
-            //   disabled: true,
-            //   onClick: (evt: any) => {
-            //     // evt.stopPropagation();
-            //     console.log('start uninstall');
-            //   },
-            // },
-          ]
+          isAdmin
+            ? [
+                {
+                  label: 'Remove from suite',
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    // BazaarActions.removeFromAppSuite(space.path, app.id);
+                  },
+                },
+              ]
+            : undefined
         }
-        variants={{
-          hidden: {
-            opacity: 0,
-            top: 30,
-            transition: { top: 3, opacity: 1 },
-          },
-          show: {
-            opacity: 1,
-            top: 0,
-            transition: { top: 3, opacity: 1, background: { duration: 0.25 } },
-          },
-          exit: { opacity: 0, top: 100 },
-        }}
         onAppClick={(selectedApp: AppModelType) => {
+          // QUESTION: should this open the app listing or the actual app?
           DesktopActions.openAppWindow(space.path, toJS(selectedApp));
           DesktopActions.setHomePane(false);
         }}
       />
     );
   }
-  return <AppEmpty height={148} width={148}></AppEmpty>;
+  return (
+    <AppEmpty height={148} width={148}>
+      <Icons size={24} name="Plus" fill="#FFFFFF" opacity={0.4} />
+    </AppEmpty>
+  );
 };

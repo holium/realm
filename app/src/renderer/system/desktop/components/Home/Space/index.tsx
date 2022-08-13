@@ -2,13 +2,15 @@ import { FC, useEffect, useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
-import { Flex } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 
 import { SpaceTitlebar } from './Titlebar';
 import { AppSuite } from './AppSuite';
 import { RecommendedApps } from './Recommended';
 import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
+import { AppGrid } from '../Ship/AppGrid';
+import { sampleSuite } from './sample-suite';
 
 type HomePaneProps = {
   isOpen?: boolean;
@@ -18,7 +20,7 @@ type SidebarType = 'members' | null;
 
 export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const { isOpen } = props;
-  const { desktop, spaces, membership } = useServices();
+  const { desktop, spaces, membership, bazaar } = useServices();
   const currentSpace = spaces.selected;
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
@@ -54,6 +56,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
     );
   }, [sidebar, members]);
   if (!currentSpace) return null;
+
   const headerWidth = '50%';
   const paneWidth = '50%';
   return (
@@ -75,6 +78,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           gap={12}
           mt={40}
           mb={46}
+          minWidth={810}
           width={headerWidth}
           flexDirection="row"
           justifyContent="space-between"
@@ -84,6 +88,8 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
             space={currentSpace}
             theme={desktop.theme}
             membersCount={members.length}
+            showAppGrid={appGrid}
+            showMembers={sidebar === 'members'}
             onToggleApps={() => {
               showAppGrid(!appGrid);
             }}
@@ -92,56 +98,77 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
             }}
           />
         </Flex>
+
         <Flex
           flexGrow={1}
           flexDirection="row"
           justifyContent="space-between"
           gap={36}
+          minWidth={810}
           width={paneWidth}
         >
-          <Flex
-            flex={4}
-            flexGrow={1}
-            position="relative"
-            flexDirection="column"
-            gap={16}
-            mb="180px"
-            initial="hidden"
-            animate={isOpen ? 'show' : 'exit'}
-            exit="hidden"
-            variants={{
-              hidden: {
-                opacity: 0,
-                transition: {
-                  opacity: 0.3,
-                  staggerChildren: 0,
-                  delayChildren: 0,
+          {appGrid && (
+            <Flex flexDirection="column" justifyContent="flex-start" gap={20}>
+              <Text variant="h3" fontWeight={500}>
+                Your Apps
+              </Text>
+              <Flex
+                style={{ position: 'relative' }}
+                gap={16}
+                width="810px"
+                mb="180px"
+                flexWrap="wrap"
+                flexDirection="row"
+              >
+                <AppGrid isOpen tileSize="xl" />
+              </Flex>
+            </Flex>
+          )}
+          {!appGrid && (
+            <Flex
+              flex={4}
+              flexGrow={1}
+              position="relative"
+              flexDirection="column"
+              gap={16}
+              mb="180px"
+              initial="hidden"
+              animate={isOpen ? 'show' : 'exit'}
+              exit="hidden"
+              variants={{
+                hidden: {
+                  opacity: 0,
+                  transition: {
+                    opacity: 0.3,
+                    staggerChildren: 0,
+                    delayChildren: 0,
+                  },
                 },
-              },
-              show: {
-                opacity: 1,
-                x: sidebar ? -80 : 0,
-                transition: {
-                  x: { duration: 0.25 },
-                  opacity: 0.3,
-                  staggerChildren: 0.1,
-                  delayChildren: 0.1,
+                show: {
+                  opacity: 1,
+                  x: sidebar ? -80 : 0,
+                  transition: {
+                    x: { duration: 0.25 },
+                    opacity: 0.3,
+                    staggerChildren: 0.1,
+                    delayChildren: 0.1,
+                  },
                 },
-              },
-              exit: {
-                opacity: 0,
-                transition: {
-                  opacity: 0.3,
-                  staggerChildren: 0,
-                  delayChildren: 0,
+                exit: {
+                  opacity: 0,
+                  transition: {
+                    opacity: 0.3,
+                    staggerChildren: 0,
+                    delayChildren: 0,
+                  },
                 },
-              },
-            }}
-          >
-            <AppSuite space={currentSpace} />
-            <RecommendedApps />
-            <RecentActivity />
-          </Flex>
+              }}
+            >
+              <AppSuite space={currentSpace} suite={sampleSuite} />
+              <RecommendedApps />
+              <RecentActivity />
+            </Flex>
+          )}
           {sidebarComponent}
         </Flex>
       </Flex>

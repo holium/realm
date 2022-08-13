@@ -34,27 +34,26 @@ const sampleApps = [
     license: 'MIT',
   },
   {
-    id: 'campfire',
-    title: 'Campfire',
-    info: 'Hang out with your friends. Voice and video chat by Holium.',
-    color: '#ffc179',
+    id: 'chess',
+    title: 'Chess',
+    info: 'Fully peer-to-peer chess over Urbit',
+    color: '#ffffff',
     type: 'urbit',
-    image:
-      'https://raw.githubusercontent.com/datryn-ribdun/urbit-webrtc/master/campfire/logo.svg',
+    image: 'https://peekabooo.icu/images/finmep-chess.svg',
     href: {
       glob: {
-        base: 'campfire',
+        base: 'chess',
         'glob-reference': {
           location: {
-            ames: '~dister-dister-datryn-ribdun',
+            http: 'https://peekabooo.icu/globs/chess/glob-0v3.3n0s3.36rnr.racns.d87rd.42bhb.glob',
           },
-          hash: '0vibu41.fj3s4.s7p7a.1lgc8.62pav',
+          hash: '0v3.3n0s3.36rnr.racns.d87rd.42bhb',
         },
       },
     },
-    version: '0.1.3',
-    website: 'https://github.com/datryn-ribdun/urbit-webrtc',
-    license: 'MIT',
+    version: '0.9.1',
+    website: 'https://github.com/ashelkovnykov/urbit-chess',
+    license: 'GPL3',
   },
 ];
 
