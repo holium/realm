@@ -77,7 +77,6 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     spaces.selected!.path,
                     selectedApp.id
                   );
-                  // desktop.setActive(selectedApp.id);
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,

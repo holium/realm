@@ -49,7 +49,6 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
           )}
         </Flex>
       </Flex>
-
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
           <PassportButton

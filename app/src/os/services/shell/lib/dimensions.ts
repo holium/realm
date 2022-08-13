@@ -5,6 +5,10 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     width: 1200,
     height: 1000,
   },
+  ['campfire']: {
+    width: 1200,
+    height: 1000,
+  },
   ['escape']: {
     width: 1200,
     height: 900,

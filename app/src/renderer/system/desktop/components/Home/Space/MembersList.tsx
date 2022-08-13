@@ -29,7 +29,7 @@ interface IMembersList {
 
 export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
   const { members } = props;
-  const { desktop, spaces } = useServices();
+  const { desktop, spaces, ship } = useServices();
 
   const { textColor, windowColor } = desktop.theme;
 
@@ -60,13 +60,15 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
       person = initiatesOnly[index];
     }
 
+    const contact = ship!.contacts.getContactAvatarMetadata(person.patp);
+
     return (
       <PersonRow
         patp={person!.patp}
-        nickname={person!.nickname}
-        sigilColor={person!.color}
-        avatar={person!.avatar}
-        description={person!.description}
+        nickname={contact.nickname || person.nickname}
+        sigilColor={contact.color || person.color}
+        avatar={contact.avatar || person.avatar}
+        description={contact.bio || person.description}
         listId="member-list"
         rowBg={rowBg}
         style={{ ...style }}
@@ -94,24 +96,25 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
 
   //
   const showHint = members.length === 0;
-  return (
-    <>
-      <Flex
-        mt={18}
-        height={admins.length === 0 ? 60 : 24 + admins.length * 42}
-        flexDirection="column"
-      >
-        <Text
-          style={{ textTransform: 'uppercase' }}
-          fontSize={1}
-          fontWeight={600}
-          opacity={0.6}
-          ml="2px"
-          mb="4px"
+  return useMemo(
+    () => (
+      <>
+        <Flex
+          mt={18}
+          height={admins.length === 0 ? 60 : 24 + admins.length * 42}
+          flexDirection="column"
         >
-          Admins
-        </Text>
-        {/* {admins.length === 0 && (
+          <Text
+            style={{ textTransform: 'uppercase' }}
+            fontSize={1}
+            fontWeight={600}
+            opacity={0.6}
+            ml="2px"
+            mb="4px"
+          >
+            Admins
+          </Text>
+          {/* {admins.length === 0 && (
           <Flex
             flexDirection="column"
             justifyContent="center"
@@ -123,65 +126,58 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
             </Text>
           </Flex>
         )} */}
-        <AutoSizer>
-          {({ height, width }: { height: number; width: number }) => (
-            <List
-              className="List"
-              height={height}
-              itemCount={admins.length}
-              itemSize={40}
-              width={width}
-            >
-              {(pinProps: { index: number; style: any }) =>
-                RowRenderer(pinProps, 'admin')
-              }
-            </List>
-          )}
-        </AutoSizer>
-      </Flex>
-      <Flex
-        mt={18}
-        height={24 + membersOnly.length * 42}
-        flexDirection="column"
-      >
-        <Text
-          style={{ textTransform: 'uppercase' }}
-          fontSize={1}
-          fontWeight={600}
-          opacity={0.6}
-          ml="2px"
-          mb="4px"
-        >
-          Members
-        </Text>
-        {showHint && (
-          <Flex
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
+          <List
             height={40}
+            itemSize={40}
+            width="100%"
+            itemCount={admins.length}
           >
-            <Text fontSize={2} opacity={0.5}>
-              No members added
-            </Text>
-          </Flex>
-        )}
-        <AutoSizer>
-          {({ height, width }: { height: number; width: number }) => (
-            <List
-              className="List"
-              height={height}
-              itemCount={membersOnly.length}
-              itemSize={44}
-              width={width}
+            {(pinProps: { index: number; style: any }) =>
+              RowRenderer(pinProps, 'admin')
+            }
+          </List>
+        </Flex>
+        <Flex
+          mt={18}
+          height={24 + membersOnly.length * 42}
+          flexDirection="column"
+        >
+          <Text
+            style={{ textTransform: 'uppercase' }}
+            fontSize={1}
+            fontWeight={600}
+            opacity={0.6}
+            ml="2px"
+            mb="4px"
+          >
+            Members
+          </Text>
+          {showHint && (
+            <Flex
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              height={40}
             >
-              {(pinProps: { index: number; style: any }) =>
-                RowRenderer(pinProps, 'member')
-              }
-            </List>
+              <Text fontSize={2} opacity={0.5}>
+                No members added
+              </Text>
+            </Flex>
           )}
-        </AutoSizer>
-      </Flex>
-    </>
+
+          <List
+            height={40}
+            itemSize={40}
+            width="100%"
+            itemCount={membersOnly.length}
+          >
+            {(pinProps: { index: number; style: any }) =>
+              RowRenderer(pinProps, 'member')
+            }
+          </List>
+        </Flex>
+      </>
+    ),
+    [membersOnly.length, admins.length]
   );
 });

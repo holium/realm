@@ -1,6 +1,6 @@
 import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { lighten, rgba } from 'polished';
+import { lighten, rgba, darken } from 'polished';
 import { Flex, Box, Text, ContextMenu } from '..';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { toJS } from 'mobx';
@@ -75,6 +75,7 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
+export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 interface AppTileProps {
   isPinned?: boolean;
   contextPosition?: 'above' | 'below';
@@ -87,7 +88,7 @@ interface AppTileProps {
   variants?: any;
   isVisible?: boolean;
   isAnimated?: boolean;
-  tileSize: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  tileSize: AppTileSize;
 }
 
 export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
@@ -121,12 +122,16 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
     const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
     if (isAppGrid) {
       // @ts-ignore
+      const appColor = app.color;
       title = (
         <Text
           position="absolute"
-          style={{ mixBlendMode: 'hard-light' }}
-          left="1.7rem"
-          bottom="1.7rem"
+          // style={{ mixBlendMode: 'hard-light' }}
+          left="1.5rem"
+          padding=".2rem"
+          borderRadius={4}
+          backgroundColor={app.image && appColor}
+          bottom="1.5rem"
           fontWeight={500}
           fontSize={2}
           color={textColor}
@@ -158,18 +163,6 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
                 },
               }
             : {})}
-          // whileHover={
-          //   !isAnimated
-          //     ? {
-          //         scale: 1 + scales[tileSize] / 2,
-          //         boxShadow: boxShadowHover,
-          //       }
-          //     : {}
-          // }
-          // whileTap={{
-          //   scale: 1 - scales[tileSize],
-          //   boxShadow: boxShadowHover,
-          // }}
           animate={{
             boxShadow: boxShadowStyle,
           }}
@@ -205,14 +198,18 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
-          whileHover={{
-            scale: 1 + scales[tileSize] / 2,
-            boxShadow: boxShadowHover,
-          }}
-          whileTap={{
-            scale: 1 - scales[tileSize],
-            boxShadow: boxShadowHover,
-          }}
+          {...(isAnimated
+            ? {
+                whileHover: {
+                  scale: 1 + scales[tileSize] / 2,
+                  boxShadow: boxShadowHover,
+                },
+                whileTap: {
+                  scale: 1 - scales[tileSize],
+                  boxShadow: boxShadowHover,
+                },
+              }
+            : {})}
           animate={{
             boxShadow: boxShadowStyle,
           }}
@@ -234,14 +231,18 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
-          whileHover={{
-            scale: 1 + scales[tileSize] / 2,
-            boxShadow: boxShadowHover,
-          }}
-          whileTap={{
-            scale: 1 - scales[tileSize],
-            boxShadow: boxShadowHover,
-          }}
+          {...(isAnimated
+            ? {
+                whileHover: {
+                  scale: 1 + scales[tileSize] / 2,
+                  boxShadow: boxShadowHover,
+                },
+                whileTap: {
+                  scale: 1 - scales[tileSize],
+                  boxShadow: boxShadowHover,
+                },
+              }
+            : {})}
           animate={{
             boxShadow: boxShadowStyle,
           }}
@@ -266,7 +267,7 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
         ref={tileRef}
         variants={variants}
         onClick={(evt: any) => {
-          // evt.stopPropagation();
+          evt.stopPropagation();
           onAppClick && onAppClick(app);
         }}
         className="app-dock-icon"
@@ -288,7 +289,6 @@ export const AppTile: FC<AppTileProps> = (props: AppTileProps) => {
           </Portal>
         )}
         {graphic}
-
         <TileHighlight
           layoutId="active-app"
           isSelected={selected}

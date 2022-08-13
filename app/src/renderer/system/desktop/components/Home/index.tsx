@@ -7,6 +7,7 @@ import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { AppGrid } from './Ship/AppGrid';
 import { SpaceHome } from './Space';
+import { OurHome } from './Ship';
 
 type HomeWindowProps = {};
 
@@ -45,7 +46,7 @@ export const HomePane: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         exit={{ opacity: 0 }}
       >
         {/* TODO make app grid not reanimate when switching around */}
-        {isOur && <AppGrid isOpen={isOpen} />}
+        {isOur && <OurHome isOpen={isOpen} />}
         {!isOur && <SpaceHome isOpen={isOpen} />}
       </HomeWindow>
     </AnimatePresence>
