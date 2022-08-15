@@ -141,18 +141,51 @@
         (welp (flop caz) cards)
       abet
     ++  set-provider
-      |=  =ship
-      :: leave my room if im setting a new provider
-      :: TODO if leave, send an exit
-      ::  for now, we depend on the frontend for this housekeeping
+      |=  new-provider=ship
+      :: ignore if provider not new
+      ::
+      :: if provider is null, dont crash
+      :: if u.provider = new-provider, crash
+      ?<  .=
+        ?~  provider  +(new-provider)
+          u.provider
+        new-provider
+      ::
+      :: save old stuff
+      =/  old-room
+          my-room
+      =/  old-provider=(unit ship)
+        ?~  provider  ~
+        provider
+      ::
+      :: exit room locally
       =?  my-room
           ?~  provider  |
           ?!
           =(u.provider ship)
         ~
+      ::
+      :: set new provider
       =.  provider
-        [~ ship]
-      `state
+        [~ new-provider]
+      ::
+      :: exit room remotely
+      ::  (if applicable)
+      ?~  old-room
+        `state
+      ::
+      ?~  old-provider
+        `state
+      ::
+      :: exit room remotely
+      =*  dad
+        u.old-provider
+      :_  state
+      :~
+        %+  poke:pass:agentio
+          [dad server:lib]
+          rooms-action+!>([%exit ~])
+      ==
     :: ::
     :: ::
     ++  fwd-to-provider
@@ -214,7 +247,6 @@
       ::
       :: look up room by @p
       :: TODO move this to lib
-      ~&  >  [rooms]
       =/  rum=(unit room:store)
         =/  looms  ~(tap in rooms)
         |-
