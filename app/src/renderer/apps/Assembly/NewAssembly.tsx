@@ -1,7 +1,7 @@
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useState } from 'react';
 import {
   Flex,
   Grid,
@@ -11,6 +11,7 @@ import {
   Input,
   TextButton,
   Checkbox,
+  Spinner,
 } from 'renderer/components';
 import * as yup from 'yup';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
@@ -63,6 +64,7 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
     const { desktop, ship } = useServices();
+    const [loading, setLoading] = useState(false);
 
     const { dockColor, windowColor, inputColor } = desktop.theme;
 
@@ -142,22 +144,23 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
               showBackground
               textColor="#0FC383"
               highlightColor="#0FC383"
-              disabled={!form.computed.isValid}
+              disabled={!form.computed.isValid || loading}
               style={{ borderRadius: 6, height: 34 }}
               onClick={(evt: any) => {
+                setLoading(true);
                 const { name, isPrivate } = form.actions.submit();
                 evt.stopPropagation();
                 RoomsActions.createRoom(
-                  `${ship?.patp}/${camelToSnake(name)}-${
-                    new Date().getTime() / 1000
-                  }`,
+                  `${ship?.patp}/${name}/${new Date().getTime()}`,
                   isPrivate ? 'private' : 'public',
                   name,
                   true
-                );
+                ).then((value) => {
+                  setLoading(false);
+                });
               }}
             >
-              Start
+              {loading ? <Spinner size={0} /> : 'Start'}
             </TextButton>
           </Flex>
           <Flex mt={2} justifyContent="flex-start">

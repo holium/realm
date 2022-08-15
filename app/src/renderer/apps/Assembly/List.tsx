@@ -1,7 +1,14 @@
 import { FC, useState, useEffect } from 'react';
 import { toJS } from 'mobx';
-import { observer } from 'mobx-react';
-import { Grid, Flex, Icons, Text, TextButton } from 'renderer/components';
+import { observer, Provider } from 'mobx-react';
+import {
+  Grid,
+  Flex,
+  Icons,
+  Text,
+  TextButton,
+  IconButton,
+} from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Row } from 'renderer/components/NewRow';
 import { AssemblyRow } from './components/AssemblyRow';
@@ -10,6 +17,8 @@ import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
+import { rgba } from 'polished';
+import { fontSize } from 'styled-system';
 
 export type AssemblyListProps = {
   theme: ThemeModelType;
@@ -26,13 +35,15 @@ export const Assemblies: FC<AssemblyListProps> = observer(
     const { windowColor } = desktop.theme;
     const [muted, setMuted] = useState(false);
     const { roomsApp } = useTrayApps();
-    const knownRoomsMap = roomsApp.knownRooms;
+    // const knownRoomsMap = roomsApp.knownRooms;
     const knownRooms = roomsApp.list;
+    const inviteColor = '#F08735';
     const amHosting =
       knownRooms.findIndex((a: any) => a.host === ship?.patp) !== -1;
 
     useEffect(() => {
       RoomsActions.requestAllRooms();
+      RoomsActions.getProvider();
     }, []);
 
     return (
@@ -65,6 +76,26 @@ export const Assemblies: FC<AssemblyListProps> = observer(
             >
               Rooms
             </Text>
+
+            {roomsApp.provider !== '' && roomsApp.provider !== ship!.patp && (
+              <Flex className="realm-cursor-hover" justifyContent="center">
+                <IconButton
+                  ml={2}
+                  color={'#000000'}
+                  opacity={0.5}
+                  onClick={(evt: any) => {
+                    evt.stopPropagation();
+                    // TODO set to current spacehost
+                    RoomsActions.setProvider(ship!.patp!);
+                  }}
+                >
+                  <Icons name="Logout" />
+                </IconButton>
+                <Text opacity={0.5} fontSize={2}>
+                  {roomsApp.provider}
+                </Text>
+              </Flex>
+            )}
           </Flex>
           <Flex ml={1} pl={2} pr={2}>
             <TextButton
@@ -79,6 +110,51 @@ export const Assemblies: FC<AssemblyListProps> = observer(
           </Flex>
         </Titlebar>
         <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
+          {roomsApp.invitesList.map((value: any) => (
+            <Row
+              noHover
+              key={`${value.id}-invite`}
+              baseBg={rgba(inviteColor, 0.12)}
+              customBg={rgba(inviteColor, 0.16)}
+            >
+              <Flex
+                width="100%"
+                alignItems="center"
+                justifyContent="space-between"
+                className="realm-cursor-hover"
+              >
+                <Text color={inviteColor} fontWeight={500} fontSize={2}>
+                  Invite: {value.id} - {value.invitedBy}
+                </Text>
+
+                <Flex gap={4}>
+                  <IconButton
+                    color={inviteColor}
+                    // backgroundColor={rgba(inviteColor, 0.24)}
+                    // hoverFill={rgba('#D0384E', 0.24)}
+                    onClick={(evt: any) => {
+                      evt.stopPropagation();
+                      RoomsActions.acceptInvite(value.id);
+                    }}
+                  >
+                    <Icons name="Plus" />
+                  </IconButton>
+                  <IconButton
+                    color={'#D0384E'}
+                    // hoverFill={rgba('#D0384E', 0.24)}
+                    // backgroundColor={rgba('#D0384E', 0.24)}
+                    onClick={(evt: any) => {
+                      evt.stopPropagation();
+                      console.log('clicked');
+                      RoomsActions.dismissInvite(value.id);
+                    }}
+                  >
+                    <Icons name="Close" />
+                  </IconButton>
+                </Flex>
+              </Flex>
+            </Row>
+          ))}
           {knownRooms.length === 0 && (
             <Flex
               flex={1}
@@ -107,15 +183,30 @@ export const Assemblies: FC<AssemblyListProps> = observer(
                 access={room!.access}
                 onClick={async (evt: any) => {
                   evt.stopPropagation();
-                  if (roomsApp.liveRoom?.id === room.id) {
-                    console.log('changeview');
+                  if (!roomsApp.isRoomValid(room!.id)) {
+                    console.log('invalid room!');
+                    // TODO this check doesnt catch bad state
+                  } else if (roomsApp.isLiveRoom(room!.id)) {
                     RoomsActions.setView('room');
                   } else if (room.present.includes(ship!.patp)) {
-                    console.log('setlive');
                     RoomsActions.setLiveRoom(toJS(room));
                     RoomsActions.setView('room');
                   } else {
-                    console.log('joining room');
+                    if (
+                      // our old room was created by us
+                      roomsApp.liveRoom! &&
+                      roomsApp.isCreator(ship!.patp!, roomsApp.liveRoom.id)
+                    ) {
+                      // conditionally delete old room
+                      RoomsActions.deleteRoom(roomsApp.liveRoom.id);
+                    }
+                    // if (
+                    //   // if this room is strange
+                    //   room.provider !== roomsApp.provider
+                    // ) {
+                    //   // unset aka "forget"
+                    //   RoomsActions.unsetKnownRoom(room.id);
+                    // }
 
                     await RoomsActions.joinRoom(room.id);
                     RoomsActions.setView('room');

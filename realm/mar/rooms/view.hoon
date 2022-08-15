@@ -7,7 +7,6 @@
   |%
   ++  noun  viw
   ++  json  
-    ~&  >  %vewivewivewi
     (view:enjs viw)
   --
 ::

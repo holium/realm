@@ -65,7 +65,7 @@ export const trayStore = TrayAppStore.create({
     width: 200,
     height: 200,
   },
-  roomsApp: {
+  roomsApp: persistedState.roomsApp || {
     currentView: 'list',
     // rooms: [], TODO
   },
@@ -90,6 +90,12 @@ export function useTrayApps() {
 }
 
 window.electron.os.onEffect((_event: any, value: any) => {
+  if (value.response === 'initial') {
+    if (value.resource === 'rooms') {
+      console.log('yo');
+      applyPatch(trayStore.roomsApp, value.model);
+    }
+  }
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);

@@ -6,6 +6,7 @@ import {
   tryReference,
   applySnapshot,
 } from 'mobx-state-tree';
+import { toJS } from 'mobx';
 import { Patp } from 'os/urbit/types';
 import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
 import { RoomsApi } from '../../api/rooms';
@@ -14,6 +15,14 @@ export const DmAppState = types.model('DmAppState', {
   current: types.string,
   state: types.model({}),
 });
+
+export const RoomInvite = types.model('RoomInvite', {
+  id: types.string,
+  provider: types.string,
+  invitedBy: types.string,
+  path: types.maybe(types.string),
+});
+export type RoomInviteType = Instance<typeof RoomInvite>;
 
 export const RoomsModel = types
   .model('RoomsModel', {
@@ -30,7 +39,6 @@ export const RoomsModel = types
   })
   .actions((self) => ({
     kickShip(patp: Patp) {
-      console.log('kicking ship from room', patp);
       self.present.remove(patp);
       self.whitelist.remove(patp);
     },
@@ -48,19 +56,45 @@ export const RoomsAppState = types
     currentView: types.enumeration(['list', 'room', 'new-assembly']),
     liveRoom: types.safeReference(RoomsModel),
     knownRooms: types.map(RoomsModel),
+    invites: types.map(RoomInvite),
+    ourPatp: types.maybe(types.string),
+    provider: types.maybe(types.string),
   })
   .views((self) => ({
     get list() {
       return Array.from(self.knownRooms.values());
     },
+    get invitesList() {
+      return Array.from(self.invites.values());
+    },
     isCreator(patp: Patp, roomId: string) {
       return self.knownRooms.get(roomId)?.creator === patp;
     },
+    isRoomValid(roomId: string) {
+      let room = self.knownRooms.get(roomId);
+      if (!room) return false;
+      return true;
+    },
+    isLiveRoom(roomId: string) {
+      let room = self.knownRooms.get(roomId);
+      if (!room) return false;
+      if (!self.liveRoom) return false;
+      return room.id === self.liveRoom.id;
+    },
   }))
   .actions((self) => ({
+    handleInvite(invite: RoomInviteType) {
+      self.invites.set(invite.id, RoomInvite.create(invite));
+    },
+    acceptInvite(invite: RoomInviteType) {
+      self.invites.delete(invite.id);
+      self.currentView = 'room';
+    },
+    dismissInvite(id: string) {
+      self.invites.delete(id);
+    },
     // Page nav
     setView(view: 'list' | 'room' | 'new-assembly') {
-      console.log('setting view bitch', view);
       self.currentView = view;
     },
     // Update handlers
@@ -69,66 +103,55 @@ export const RoomsAppState = types
     // setInvited
     // setKicked
     // newChat
+    handleRoomUpdate(room: RoomsModelType) {
+      // console.log('inside handleRoomUpdate');
+      // set room view if we just created this room
+      let knownRoom = self.knownRooms.get(room.id);
+      if (!knownRoom && room.creator === self.ourPatp) {
+        this.setLiveRoom(room);
+        this.setView('room');
+      } else {
+        this.setLiveRoom(room);
+      }
+    },
     setLiveRoom(room: RoomsModelType) {
-      console.log('inside setLiveRoom');
-      // console.log(room);
-      // self.knownRooms.unshift(room)
-      // self.knownRooms.unshift(room);
-      // applySnapshot(self.knownRooms.)
       self.knownRooms.set(room.id, room);
       self.liveRoom = self.knownRooms.get(room.id);
-      // self.currentView = 'room';
     },
     unsetLiveRoom() {
       self.liveRoom = undefined;
       self.currentView = 'list';
-      // self.currentView = 'room';
+    },
+    unsetKnownRoom(id: string) {
+      self.knownRooms.delete(id);
+    },
+    setProvider(provider: Patp) {
+      self.provider = provider;
     },
     enterRoom() {
-      // self.liveRoom = undefined;
       self.currentView = 'room';
-      // self.currentView = 'room';
     },
     setKnownRooms(rooms: RoomsModelType[]) {
-      // try cast, castToSnapshot (makes json version of the model)
+      // console.log('setting known rooms', rooms);
+      if (!rooms) {
+        console.log('no rooms?!?');
+        self.knownRooms.clear();
+        return;
+      }
       const roomMap = rooms.reduce((rMap: any, room: any) => {
         rMap[room.id] = room;
         return rMap;
       }, {});
-
-      console.log('known', roomMap);
-
       applySnapshot(self.knownRooms, roomMap);
-      // self.knownRooms.clear();
-      // rooms.forEach((room: RoomsModelType) => {
-      //   self.knownRooms.set(room.id, room);
-      // });
     },
     removeSelf(roomId: string, patp: string) {
       self.knownRooms.get(roomId)?.present.remove(patp);
     },
-    setSelected(selected: RoomsModelType) {
-      // const room = self.knownRooms.find(
-      //   (a: RoomsModelType) => a!.title === selected!.title
-      // );
-      const selectedRoom = self.knownRooms.get(selected.id);
-      if (!selectedRoom) return;
-      self.liveRoom = selectedRoom;
-      self.currentView = 'room';
-    },
-    // startRoom(newRoomData: RoomsModelType) {
-    //   const newRoom = RoomsModel.create(newRoomData);
-    //   // self.knownRooms.unshift(newRoom);
-    //   self.liveRoom = newRoom;
-    // },
-    leaveRoom(ourShip: string) {
-      //   if (ourShip === self.selected?.host) {
-      //     self.knownRooms.remove(self.selected!);
-      //   }
-      // TODO send %exit poke
-      console.log('inside leaveRoom');
+    leaveRoom() {
+      if (self.liveRoom) {
+        self.knownRooms.delete(self.liveRoom.id);
+      }
       self.liveRoom = undefined;
-      // TODO better naming / notify somehow
       self.currentView = 'list';
     },
     kickRoom(patp: Patp, roomId: string) {

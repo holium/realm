@@ -75,7 +75,6 @@ export const Room: FC<BaseAssemblyProps> = observer(
     }, []);
 
     useEffect(() => {
-      console.log('view:room init');
       if (!roomsApp.liveRoom) RoomsActions.setView('list');
     }, [roomsApp.liveRoom]);
 
@@ -175,6 +174,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
+                  RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
                 }}
               >
                 <Icons name="UserAdd" />
@@ -205,7 +205,6 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
-                  // assemblyApp.testAction();
                 }}
               />
             </Flex>
@@ -213,7 +212,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
               <IconButton
                 className="realm-cursor-hover"
                 size={26}
-                customBg={dockColor}
+                customBg={dockColor} // TODO color red if we are room creator
                 onClick={(evt: any) => {
                   evt.stopPropagation();
                   if (roomsApp.isCreator(ship!.patp!, id)) {

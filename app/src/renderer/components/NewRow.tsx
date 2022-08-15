@@ -12,6 +12,7 @@ type RowProps = {
   pending?: boolean;
   noHover?: boolean;
   gap?: number;
+  baseBg?: string;
 };
 
 export const Row = styled(motion.div)<RowProps>`
@@ -21,6 +22,7 @@ export const Row = styled(motion.div)<RowProps>`
   display: flex;
   flex-direction: row;
   align-items: center;
+  background-color: ${(props: RowProps) => props.baseBg};
   transition: ${(props: RowProps) => props.theme.transition};
   ${(props: RowProps) =>
     css`

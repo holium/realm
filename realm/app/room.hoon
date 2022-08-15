@@ -145,14 +145,18 @@
       abet
     ++  set-provider
       |=  new-provider=ship
-      :: ignore if provider not new
+      :: there is some ugliness in this gate
+      :: because we need to preserve
+      :: `provider`s inferred type as (unit ship)
       ::
-      :: if provider is null, dont crash
-      :: if u.provider = new-provider, crash
-      ?<  .=
-        ?~  provider  +(new-provider)
-          u.provider
-        new-provider
+      ::
+      :: return if same provider
+      ?:  .=
+          new-provider
+          ?~  provider  +(new-provider)
+            u.provider
+          ::
+        `state
       ::
       :: save old stuff
       =/  old-room
@@ -210,7 +214,6 @@
   =.  cards
     :-  (publish-local upd)
     cards
-  ~&  >  ["UPDATE: " upd]
   ?-  -.upd
     %room      (room +.upd)
     %rooms     (rooms +.upd)
@@ -238,7 +241,6 @@
       :: this can do a lot to enforce consensus
       :: =======
       ?>  is-provider
-      ~&  >  ["room: got an update"]
       =.  my-room
         [~ room]
       abet
@@ -262,7 +264,6 @@
         $(looms t.looms)
       ?~  rum  abet
       :: found my room
-      ~&  >  [rum]
       =.  my-room  [~ u.rum]
       abet
     ::
@@ -270,6 +271,8 @@
       |=  [provider=ship =rid:store =ship]
       :: ?>  is-provider :: TODO needed?
       :: ?>  is-friend   :: TODO needed?
+      ~&  >  :-  %invited
+        [provider rid ship]
       abet
     ::
     ++  kicked

@@ -8,6 +8,7 @@ import {
 } from '../services/tray/rooms.model';
 import { saturate } from 'polished';
 import { m } from 'framer-motion';
+import { Patp } from '@urbit/api';
 
 export const RoomsApi = {
   /**
@@ -54,6 +55,14 @@ export const RoomsApi = {
     return response;
   },
 
+  getProvider: async (conduit: Urbit) => {
+    const response = await conduit.scry({
+      app: 'room',
+      path: '/provider',
+    });
+    return response;
+  },
+
   requestAllRooms: (conduit: Urbit) => {
     conduit.poke({
       app: 'room',
@@ -68,8 +77,6 @@ export const RoomsApi = {
       mark: 'rooms-action',
       json: { 'set-provider': patp },
     });
-    console.log('setProvider');
-    console.log(response);
     return;
   },
 
@@ -102,7 +109,7 @@ export const RoomsApi = {
         },
       },
     });
-    console.log('create');
+    // console.log('create');
     console.log(response);
     return;
   },
@@ -134,6 +141,18 @@ export const RoomsApi = {
     });
     return;
   },
+  invite: async (conduit: Urbit, roomId: string, patp: Patp) => {
+    conduit.poke({
+      app: 'room',
+      mark: 'rooms-action',
+      json: {
+        invite: {
+          rid: roomId,
+          ship: patp,
+        },
+      },
+    });
+  },
 
   /**
    * watchUpdates: subscribes and handles responses
@@ -144,45 +163,42 @@ export const RoomsApi = {
   watchUpdates: (
     conduit: Urbit,
     state: RoomsAppStateType,
-    onKick: () => void
+    onKick: () => void // TODO
   ): void => {
-    console.log(conduit.ship);
-    console.log('watching room app');
     conduit.subscribe({
       app: 'room',
       path: `/room/local`,
       event: async (data: any) => {
-        console.log('room update', data);
         let update = data['rooms-update'];
         if (!update) return;
         if (update['room']) {
-          console.log('setting live room');
           //
-          state.setLiveRoom(update['room']);
+          // console.log('room update', update['room']);
+
+          state.handleRoomUpdate(update['room']);
         } else if (update['rooms']) {
-          console.log('rooms');
+          // console.log('rooms');
           state.setKnownRooms(update['rooms']);
-          // TODO update knownRooms
         } else if (update['invited']) {
-          console.log('invited');
-          // TODO
+          state.handleInvite(update['invited']);
         } else if (update['kicked']) {
-          console.log('kicked', update['kicked']);
+          // console.log('kicked', update['kicked']);
           //   state.leaveRoom()
           const roomId = update['kicked'].id;
           state.kickRoom(`~${conduit.ship!}`, roomId);
           //   state.requestAllRooms();
+
           // TODO
         } else if (update['chat']) {
-          console.log('chat');
+          // console.log('chat');
         }
       },
 
-      err: () => console.log('Subscription rejected'),
+      err: () => console.log('app/room/hoon Subscription rejected'),
       quit: () => {
         // TODO attempt to resubscribe
         // watchUpdates(conduit, state)
-        console.log('Kicked from subscription');
+        console.log('Kicked from app/room/hoon subscription');
       },
     });
   },
