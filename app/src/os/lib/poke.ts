@@ -6,7 +6,11 @@ export const quickPoke = async (
   ship: string,
   data: { app: string; mark: string; json: any },
   credentials: { url: string; cookie: string },
-  response?: { path?: string; mark?: string; op?: 'add' | 'replace' | 'remove' }
+  response?: {
+    path: string;
+    mark: string;
+    op: 'add' | 'replace' | 'remove' | string;
+  }
 ) => {
   const { url, cookie } = credentials;
   let path: string | undefined = undefined;
@@ -20,27 +24,17 @@ export const quickPoke = async (
       conduit.on('ready', async () => {
         let messageId;
         if (path) {
+          console.log('path', path);
           messageId = await conduit.subscribe({
             app: data.app,
             path: path!,
             event: (data: any) => {
               const effectType: EffectKeyType = Object.keys(
-                data['spaces-reaction']
+                data[response!.mark]
               )[0];
               if (effectType === response!.op) {
                 resolve(data);
               }
-              // switch (effectType) {
-              //   case 'add':
-              //     console.log(data['spaces-reaction']['add']);
-              //     break;
-              //   case 'replace':
-              //     console.log('in response', data);
-              //     console.log(data['spaces-reaction']['replace']);
-              //     break;
-              //   case 'remove':
-              //     break;
-              // }
             },
             err: () => console.log('Subscription rejected'),
             quit: () => console.log('Kicked from subscription'),

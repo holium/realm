@@ -4,6 +4,7 @@
 ::  A space is a higher level concept above a %landscape group.
 /-  membership
 |%
+::
 +$  token
   $:  chain=?(%ethereum %uqbar)
       contract=@t
@@ -25,11 +26,7 @@
       wallpaper=@t
   ==
 ::
-+$  space-name     cord  :: should be a unique name to the ship
-+$  space-path     [ship=ship space=space-name]
-+$  space-type     ?(%group %space %our)
-+$  archetype      ?(%home %lodge %creator-dao %service-dao %investment-dao)
-+$  space-access   ?(%public %antechamber %private)
++$  spaces              (map space-path space)
 +$  space
   $:  path=space-path
       name=space-name
@@ -41,8 +38,12 @@
       theme=theme
       updated-at=@da
   ==
++$  space-name     cord  :: should be a unique name to the ship
++$  space-path     [ship=ship space=space-name]
++$  space-type     ?(%group %space %our)
++$  archetype      ?(%home %lodge %creator-dao %service-dao %investment-dao)
++$  space-access   ?(%public %antechamber %private)
 ::
-+$  spaces  (map space-path space)
 ::
 ::  Poke actions
 ::
@@ -50,6 +51,8 @@
   $%  [%add slug=@t payload=add-payload members=members:membership]
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
+      [%join path=space-path]
+      [%kicked path=space-path ship=ship]
   ==
 ::
 +$  add-payload
@@ -71,16 +74,18 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces =membership:membership]
-      [%add =space =members:membership]
+  $%  [%initial =spaces]
+      [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]
+      [%space path=space-path =space]
   ==
 ::
 ::  Scry views
 ::
-+$  view
-  $%  [%space =space]
-      [%spaces =spaces]
++$  view :: rename to effects
+  $%  [%spaces =spaces]  
+      [%space =space]
   ==
+::
 --

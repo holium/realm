@@ -17,7 +17,6 @@ const DragBar = styled.div`
   top: 0;
   right: 0;
   --webkit-app-region: drag;
-  app-region: drag;
 `;
 
 function useWindowSize() {
@@ -90,6 +89,7 @@ const BgImage = ({
   const imageLoaded = () => {
     setImageLoading(false);
   };
+
   return useMemo(
     () => (
       <AnimatePresence>
@@ -101,10 +101,11 @@ const BgImage = ({
           onLoad={imageLoaded}
           animate={{
             opacity: 1,
-            filter: blurred ? 'blur(24px)' : 'blur(0px)',
+            filter: blurred ? `blur(24px)` : 'blur(0px)',
+            // transition:
           }}
           transition={{
-            opacity: { duration: 1 },
+            opacity: { duration: 0.5 },
           }}
         />
       </AnimatePresence>

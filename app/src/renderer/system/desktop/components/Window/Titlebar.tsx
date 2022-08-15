@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
@@ -34,10 +35,10 @@ export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   height: ${(props: TitlebarStyleProps) => (props.isAppWindow ? 30 : 50)}px;
   padding: 0 4px 0
     ${(props: TitlebarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
-  -webkit-transform: translate3d(0, 0, 0);
-  -webkit-transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  -webkit-perspective: 1000;
+  --webkit-transform: translate3d(0, 0, 0);
+  --webkit-transform: translateZ(0);
+  --webkit-backface-visibility: hidden;
+  --webkit-perspective: 1000;
   will-change: transform;
   ${(props: TitlebarStyleProps) => css`
     background: ${props.customBg};
@@ -83,7 +84,7 @@ type TitlebarProps = {
   children?: React.ReactNode;
 };
 
-export const Titlebar = (props: TitlebarProps) => {
+export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
   const {
     children,
     showDevToolsToggle,
@@ -104,22 +105,6 @@ export const Titlebar = (props: TitlebarProps) => {
     hasBlur,
   } = props;
   const { windowColor, iconColor } = props.theme;
-
-  // const onDevTools = () => {
-  //   const webview: any = document.getElementById(
-  //     `${props.app!.id}-urbit-webview`
-  //   );
-  //   webview.isDevToolsOpened()
-  //     ? webview.closeDevTools()
-  //     : webview.openDevTools();
-  // };
-
-  // const closeDevTools = () => {
-  //   const webview: any = document.getElementById(
-  //     `${props.app!.id}-urbit-webview`
-  //   );
-  //   webview && webview.isReady() && webview.closeDevTools();
-  // };
 
   let titleSection: any;
   if (props.app) {

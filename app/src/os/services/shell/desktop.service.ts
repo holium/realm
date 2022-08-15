@@ -100,7 +100,8 @@ export class DesktopService extends BaseService {
 
   async load(patp: string, mouseColor: string) {
     this.db = new Store({
-      name: `realm.desktop.${patp}`,
+      name: 'desktop',
+      cwd: `realm.${patp}`, // base folder
       accessPropertiesByDotNotation: true,
     });
 
@@ -166,7 +167,11 @@ export class DesktopService extends BaseService {
   }
   openAppWindow(_event: any, spaceId: string, selectedApp: any) {
     let { desktopDimensions, isFullscreen } = this.core.services.shell;
-    const newWindow = this.state!.openBrowserWindow(selectedApp, desktopDimensions as any, isFullscreen as boolean);
+    const newWindow = this.state!.openBrowserWindow(
+      selectedApp,
+      desktopDimensions as any,
+      isFullscreen as boolean
+    );
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials!;
 

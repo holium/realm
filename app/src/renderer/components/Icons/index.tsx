@@ -1,3 +1,4 @@
+import { motion, SVGMotionProps } from 'framer-motion';
 import React, { forwardRef, useState } from 'react';
 import styled from 'styled-components';
 import {
@@ -26,14 +27,14 @@ export type IconProps = SpaceProps &
   HeightProps;
 const SvgComponent = forwardRef<
   SVGSVGElement,
-  React.SVGProps<SVGSVGElement> & {
+  SVGMotionProps<SVGSVGElement> & {
     name: IconPathsType;
     title?: string;
   }
 >(({ title, name, ...props }, svgRef) => {
   const [titleId] = useState(() => (title ? uuid() : undefined));
   return (
-    <svg
+    <motion.svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       width={props.width || '1em'}
@@ -46,8 +47,9 @@ const SvgComponent = forwardRef<
       {...props}
     >
       {title ? <title id={titleId}>{title}</title> : null}
+      {/* @ts-ignore */}
       {paths[name]}
-    </svg>
+    </motion.svg>
   );
 });
 

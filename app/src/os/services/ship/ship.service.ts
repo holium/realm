@@ -1,4 +1,9 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import {
+  ipcMain,
+  IpcMainInvokeEvent,
+  IpcMessageEvent,
+  ipcRenderer,
+} from 'electron';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -13,8 +18,7 @@ import {
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { ShipModelType, ShipModel } from './models/ship';
-import { MSTAction } from '../../types';
-import axios from 'axios';
+import { MSTAction, Patp } from '../../types';
 import { ContactApi } from '../../api/contacts';
 import { DmApi } from '../../api/dms';
 import { DocketApi } from '../../api/docket';
@@ -22,6 +26,12 @@ import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
 import { RoomsService } from '../tray/rooms.service';
+import { FriendsApi } from '../../api/friends';
+import { FriendsStore, FriendsType } from './models/friends';
+
+type ShipModels = {
+  friends: FriendsType;
+};
 
 /**
  * ShipService
@@ -30,6 +40,9 @@ export class ShipService extends BaseService {
   private db?: Store<ShipModelType>;
   private state?: ShipModelType;
   private ourGroups: any[] = [];
+  private models: ShipModels = {
+    friends: FriendsStore.create({ all: {} }),
+  };
   private metadataStore: {
     groups: { [key: string]: any };
     graph: { [key: string]: any };
@@ -42,10 +55,15 @@ export class ShipService extends BaseService {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.send-dm': this.sendDm,
     'realm.ship.get-metadata': this.getMetadata,
+    'realm.ship.get-contact': this.getContact,
     'realm.ship.accept-dm-request': this.acceptDm,
     'realm.ship.decline-dm-request': this.declineDm,
     'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
+    'realm.ship.get-friends': this.getFriends,
+    'realm.ship.add-friend': this.addFriend,
+    'realm.ship.edit-friend': this.editFriend,
+    'realm.ship.remove-friend': this.removeFriend,
   };
 
   static preload = {
@@ -64,6 +82,9 @@ export class ShipService extends BaseService {
     getMetadata: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-metadata', path);
     },
+    getContact: (ship: string) => {
+      return ipcRenderer.invoke('realm.ship.get-contact', ship);
+    },
     acceptDm: (toShip: string) => {
       return ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
     },
@@ -79,6 +100,19 @@ export class ShipService extends BaseService {
     removeDm: (ship: string, index: any) => {
       return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
     },
+    getFriends: () => {
+      return ipcRenderer.invoke('realm.ship.get-friends');
+    },
+    addFriend: async (patp: Patp) =>
+      ipcRenderer.invoke('realm.ship.add-friend', patp),
+    //
+    editFriend: async (
+      patp: Patp,
+      payload: { pinned: boolean; tags: string[] }
+    ) => ipcRenderer.invoke('realm.ship.edit-friend', patp, payload),
+    //
+    removeFriend: async (patp: Patp) =>
+      ipcRenderer.invoke('realm.ship.remove-friend', patp),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -99,8 +133,8 @@ export class ShipService extends BaseService {
     return new Promise<ShipModelType>((resolve, reject) => {
       // TODO password protect data
       this.db = new Store<ShipModelType>({
-        name: `realm.ship.${ship}`,
-        accessPropertiesByDotNotation: true,
+        name: 'ship',
+        cwd: `realm.${ship}`,
       });
       let persistedState: ShipModelType = this.db.store;
 
@@ -128,9 +162,12 @@ export class ShipService extends BaseService {
         docket: persistedState.docket
           ? castToSnapshot(persistedState.docket)
           : {},
+        friends: persistedState.friends
+          ? castToSnapshot(persistedState.friends)
+          : {},
       });
 
-      this.core.services.desktop.load(ship, this.state.color!);
+      this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
       onSnapshot(this.state, (snapshot: any) => {
         this.db!.store = snapshot;
@@ -169,6 +206,21 @@ export class ShipService extends BaseService {
       } catch {
         console.log('Subscription failed');
       }
+
+      // onPatch(this.models.friends, (patch) => {
+      //   // send patches to UI store
+      //   const patchEffect = {
+      //     patch,
+      //     resource: 'friends',
+      //     key: ship,
+      //     response: 'patch',
+      //   };
+      //   this.core.onEffect(patchEffect);
+      // });
+
+      // this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
+
+      FriendsApi.watchFriends(this.core.conduit!, this.state);
 
       ContactApi.getContact(ship, this.core.credentials!).then((value: any) => {
         this.state?.setOurMetadata(value);
@@ -279,6 +331,31 @@ export class ShipService extends BaseService {
   // ------------------------------------------
   // ------------ Action handlers -------------
   // ------------------------------------------
+  //
+  async getFriends(_event: IpcMainInvokeEvent) {
+    return await FriendsApi.getFriends(this.core.conduit!);
+  }
+  //
+  async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+    return await FriendsApi.addFriend(this.core.conduit!, patp);
+  }
+  //
+  async editFriend(
+    _event: IpcMainInvokeEvent,
+    patp: Patp,
+    payload: { pinned: boolean; tags: string[] }
+  ) {
+    return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
+  }
+  async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
+    return await FriendsApi.removeFriend(this.core.conduit!, patp);
+  }
+  // ---
+  getContact(_event: IpcMainInvokeEvent, ship: string): any {
+    const patp = ship.includes('~') ? ship : `~${ship}`;
+    const contact = this.state?.contacts.getContactAvatarMetadata(patp);
+    return contact;
+  }
   getMetadata(_event: any, path: string): any {
     return this.metadataStore['graph'][path];
   }

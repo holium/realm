@@ -29,7 +29,6 @@ type ProfileProps = {
 export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
   const { ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
-  const { auth } = identity;
   let [batteryLevel, setBatteryLevel] = useState(0);
   const { dimensions } = props;
   const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
@@ -39,14 +38,14 @@ export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
 
   // const bgHover = darken(0.05, backgroundColor);
 
-  useEffect(() => {
-    // @ts-ignore
-    navigator.getBattery().then((battery: any) => {
-      const level = battery.level;
-      // console.log(battery);
-      setBatteryLevel(level);
-    });
-  }, []);
+  // useEffect(() => {
+  // @ts-ignore
+  // navigator.getBattery().then((battery: any) => {
+  //   const level = battery.level;
+  //   // console.log(battery);
+  //   setBatteryLevel(level);
+  // });
+  // }, []);
 
   const openSettingsApp = () => {
     DesktopActions.openAppWindow('', nativeApps['os-settings']);

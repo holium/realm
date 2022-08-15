@@ -1,8 +1,4 @@
-import { DesktopActions } from './actions/desktop';
-import { LoaderModel } from '../../os/services/common.model';
 import { createContext, useContext } from 'react';
-import { OSActions } from './actions/os';
-
 import {
   applyPatch,
   castToSnapshot,
@@ -12,13 +8,17 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { DesktopStore } from '../../os/services/shell/desktop.model';
+import { DesktopStore } from 'os/services/shell/desktop.model';
 import { ShellStore } from 'os/services/shell/shell.model';
-import { SpacesStore } from '../../os/services/spaces/models/spaces';
-import { AuthStore } from '../../os/services/identity/auth.model';
+import { SpacesStore } from 'os/services/spaces/models/spaces';
+import { BazaarStore } from 'os/services/spaces/models/bazaar';
+import { AuthStore } from 'os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
-import { ShipModel } from '../../os/services/ship/models/ship';
+import { ShipModel } from 'os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
+import { MembershipStore } from 'os/services/spaces/models/members';
+import { LoaderModel } from 'os/services/common.model';
+import { OSActions } from './actions/os';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -28,18 +28,16 @@ const loadSnapshot = (serviceKey: string) => {
 
 export const Services = types
   .model('ServicesStore', {
-    // shell: types.model('ShellStore', {
-    //   desktop: DesktopStore,
-    // }),
     desktop: DesktopStore,
     shell: ShellStore,
-
     identity: types.model('identity', {
       auth: AuthStore,
     }),
     onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
+    bazaar: BazaarStore,
+    membership: MembershipStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -52,6 +50,7 @@ export const Services = types
 
 const desktopSnapshot = loadSnapshot('desktop');
 const shellSnapshot = loadSnapshot('shell');
+const bazaarSnapshot = loadSnapshot('bazaar');
 
 const services = Services.create({
   desktop: desktopSnapshot || {},
@@ -59,7 +58,7 @@ const services = Services.create({
   identity: {
     auth: {
       loader: { state: 'initial' },
-      firstTime: true
+      firstTime: true,
     },
   },
   onboarding: {},
@@ -68,6 +67,8 @@ const services = Services.create({
     loader: { state: 'initial' },
     spaces: undefined,
   },
+  bazaar: bazaarSnapshot || {},
+  membership: {},
 });
 
 export const servicesStore = services;
@@ -130,13 +131,19 @@ OSActions.onBoot().then((response: any) => {
     ShellActions.setBlur(false);
   }
   if (response.onboarding) {
-    applySnapshot(servicesStore.onboarding, castToSnapshot(response.onboarding));
+    applySnapshot(
+      servicesStore.onboarding,
+      castToSnapshot(response.onboarding)
+    );
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
   }
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
+  }
+  if (response.membership) {
+    applySnapshot(servicesStore.membership, response.membership);
   }
   coreStore.setBooted();
 });
@@ -179,11 +186,13 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
     }
+    if (value.resource === 'bazaar') {
+      applyPatch(servicesStore.bazaar, value.patch);
+    }
     if (value.resource === 'onboarding') {
       applyPatch(servicesStore.onboarding, value.patch);
     }
     if (value.resource === 'spaces') {
-      console.log('spaces patch', value.patch);
       applyPatch(servicesStore.spaces, value.patch);
     }
     if (value.resource === 'ship') {
@@ -195,10 +204,16 @@ window.electron.os.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applyPatch(servicesStore.shell, value.patch);
     }
+    if (value.resource === 'membership') {
+      applyPatch(servicesStore.membership, value.patch);
+    }
   }
   if (value.response === 'initial') {
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
+    }
+    if (value.resource === 'bazaar') {
+      applySnapshot(servicesStore.bazaar, value.model);
     }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);
@@ -207,7 +222,11 @@ window.electron.os.onEffect((_event: any, value: any) => {
       // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
-      applySnapshot(servicesStore.spaces, castToSnapshot(value.model));
+      applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
+      applySnapshot(
+        servicesStore.membership,
+        castToSnapshot(value.model.membership)
+      );
     }
   }
 });

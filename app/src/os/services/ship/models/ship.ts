@@ -11,6 +11,7 @@ import { LoaderModel } from '../../common.model';
 import { Chat, ChatMessage, ChatMessageType, ChatStore, ChatType } from './dms';
 import { ContactStore } from './contacts';
 import { DocketStore } from './docket';
+import { FriendsStore } from './friends';
 
 export const ShipModel = types
   .model('ShipModel', {
@@ -26,6 +27,7 @@ export const ShipModel = types
     chat: ChatStore,
     contacts: ContactStore,
     docket: DocketStore,
+    friends: types.optional(FriendsStore, { all: {} }),
   })
   .views((self) => ({
     get isLoaded() {

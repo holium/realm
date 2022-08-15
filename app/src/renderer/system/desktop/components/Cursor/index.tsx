@@ -4,7 +4,7 @@ import { m, motion } from 'framer-motion';
 import styled from 'styled-components';
 
 import { useEventListener } from './useEventListener';
-import IsDevice from './IsDevice';
+import IsDevice from './isDevice';
 
 export type Vec2 = { x: number; y: number };
 

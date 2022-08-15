@@ -11,7 +11,6 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { ShellStoreType, ShellStore } from './shell.model';
 
-
 export class ShellService extends BaseService {
   private db?: Store<ShellStoreType>; // for persistance
   private state?: ShellStoreType; // for state management
@@ -22,7 +21,7 @@ export class ShellService extends BaseService {
     'realm.shell.open-dialog': this.openDialog,
     'realm.shell.close-dialog': this.closeDialog,
     'realm.shell.next-dialog': this.nextDialog,
-    'realm.shell.setIsMouseInWebview': this.setIsMouseInWebview
+    'realm.shell.setIsMouseInWebview': this.setIsMouseInWebview,
   };
 
   static preload = {
@@ -49,15 +48,18 @@ export class ShellService extends BaseService {
       return ipcRenderer.invoke('realm.shell.set-fullscreen', isFullscreen);
     },
     setIsMouseInWebview(mouseInWebview: boolean) {
-      return ipcRenderer.invoke('realm.shell.setIsMouseInWebview', mouseInWebview);
-    }
+      return ipcRenderer.invoke(
+        'realm.shell.setIsMouseInWebview',
+        mouseInWebview
+      );
+    },
   };
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
     this.db = new Store({
-      name: `realm.shell`,
+      name: `realm.shell`, // TODO add windowId here
       accessPropertiesByDotNotation: true,
     });
 
@@ -76,7 +78,6 @@ export class ShellService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
-
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
