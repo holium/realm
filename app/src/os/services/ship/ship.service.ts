@@ -17,6 +17,7 @@ import {
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
+import EncryptedStore from './encryptedStore';
 import { ShipModelType, ShipModel } from './models/ship';
 import { MSTAction, Patp } from '../../types';
 import { ContactApi } from '../../api/contacts';
@@ -39,7 +40,7 @@ type ShipModels = {
  * ShipService
  */
 export class ShipService extends BaseService {
-  private db?: Store<ShipModelType>;
+  private db?: Store<ShipModelType> | EncryptedStore<ShipModelType>;
   private state?: ShipModelType;
   private ourGroups: any[] = [];
   private models: ShipModels = {
@@ -136,11 +137,23 @@ export class ShipService extends BaseService {
 
   async subscribe(ship: string, shipInfo: any) {
     return new Promise<ShipModelType>((resolve, reject) => {
+<<<<<<< HEAD
       // TODO password protect data
       this.db = new Store<ShipModelType>({
         name: 'ship',
         cwd: `realm.${ship}`,
       });
+=======
+      const storeParams = {
+        name: `realm.ship.${ship}`,
+        secretKey: this.core.passwords.getPassword(ship)!,
+        accessPropertiesByDotNotation: true,
+      };
+      this.db = process.env.NODE_ENV === 'development'
+        ? new Store<ShipModelType>(storeParams)
+        : new EncryptedStore<ShipModelType>(storeParams);
+
+>>>>>>> 2d6fd16 (use encrypted store for ships in prod)
       let persistedState: ShipModelType = this.db.store;
 
       // TODO set up multiple ships properly
@@ -304,10 +317,15 @@ export class ShipService extends BaseService {
       contacts: { ourPatp: ship.patp },
       docket: {},
     });
-    this.db = new Store<ShipModelType>({
+
+    const storeParams = {
       name: `realm.ship.${ship.patp}`,
+      secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
-    });
+    };
+    this.db = process.env.NODE_ENV === 'development'
+      ? new Store<ShipModelType>(storeParams)
+      : new EncryptedStore<ShipModelType>(storeParams);
 
     this.db.store = newShip;
     return newShip;
