@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import { ipcMain, ipcRenderer, safeStorage } from 'electron';
 import Store from 'electron-store';
 import {
   clone,
@@ -7,7 +7,7 @@ import {
   getSnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-
+import bcrypt from 'bcryptjs';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import {
@@ -315,8 +315,8 @@ export class OnboardingService extends BaseService {
   }
 
   async setPassword(_event: any, password: string) {
-    // TODO store password hash
-    console.log('placeholder: saving password...');
+    let encryptedPassword = safeStorage.encryptString(password).toString('base64');
+    this.state.setEncryptedPassword(encryptedPassword);
   }
 
   async installRealm(_event: any, ship: string) {
@@ -329,12 +329,16 @@ export class OnboardingService extends BaseService {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
 
+    let decryptedPassword = safeStorage.decryptString(Buffer.from(this.state.encryptedPassword!, 'base64'));
+    this.core.passwords.setPassword(this.state.ship.patp, decryptedPassword);
+    let passwordHash = await bcrypt.hash(decryptedPassword, 12);
+
     const ship = clone(this.state.ship);
-    const authShip = AuthShip.create({ ...ship, id: `auth${ship.patp}` });
+    const authShip = AuthShip.create({ ...ship, id: `auth${ship.patp}`, passwordHash });
 
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setFirstTime();
-    this.core.services.shell.closeDialog(null);
     this.core.services.ship.storeNewShip(authShip);
+    this.core.services.shell.closeDialog(null);
   }
 }

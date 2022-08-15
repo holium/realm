@@ -6,12 +6,12 @@ import {
   getSnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
+import bcrypt from 'bcryptjs';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import axios from 'axios';
-import crypto from 'crypto';
 
 /**
  * AuthService
@@ -119,8 +119,16 @@ export class AuthService extends BaseService {
     return this.db.get(`ships.auth${ship}`);
   }
 
-  login(_event: any, ship: string, password: string) {
-    this.state.login(`auth${ship}`);
+  async login(_event: any, ship: string, password: string): Promise<boolean> {
+    let shipId = `auth${ship}`;
+
+    let passwordHash = this.state.getPasswordHash(shipId);
+    let passwordCorrect = await  bcrypt.compare(password, passwordHash);
+    if (!passwordCorrect) return false;
+
+    this.core.passwords.setPassword(ship, password);
+    this.state.login(shipId);
+
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
     this.core.services.shell.setBlur(null, false);
 
@@ -131,10 +139,13 @@ export class AuthService extends BaseService {
       url,
       cookie,
     });
+
+    return true;
   }
 
   logout(_event: any, ship: string) {
     this.core.clearSession();
+    this.core.passwords.clearPassword(ship);
     this.core.services.ship.logout();
   }
 
