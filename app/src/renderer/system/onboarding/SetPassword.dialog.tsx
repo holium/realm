@@ -17,6 +17,7 @@ import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
 export const SetPassword: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
@@ -29,8 +30,7 @@ export const SetPassword: FC<BaseDialogProps> = observer(
 
     const passwordForm = useForm({
       async onSubmit({ values }) {
-        console.log('submitting...');
-        console.log(values);
+        await OnboardingActions.setPassword(values.password);
         props.onNext && props.onNext();
       }
     });
@@ -159,9 +159,6 @@ export const SetPassword: FC<BaseDialogProps> = observer(
             <TextButton
               onClick={passwordForm.actions.submit}
               disabled={passwordForm.computed.isError}
-              // onClick={(evt: any) => {
-              //   next();
-              // }}
             >
               Next
             </TextButton>
