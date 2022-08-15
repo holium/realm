@@ -105,6 +105,10 @@
       ==
     %present
       (set-ship:encode ships.viw)
+    %whitelist
+      (set-ship:encode ships.viw)
+    %provider
+      (unit-ship:encode who.viw)
     ==
   --
 ++  encode
@@ -137,6 +141,12 @@
       ~(tap in ships)
       |=  her=@p
       [%s (scot %p her)]
+++  unit-ship
+    |=  who=(unit @p)
+    ^-  json
+    ?~  who
+      ~
+    [%s (scot %p u.who)]
   --
 ::
 ++  dejs

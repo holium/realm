@@ -52,8 +52,9 @@
           provider=(unit ship)
       ==
     [%present ships=(set ship)]
-    :: TODO
-    :: [%whitelist ships=(set ship)]
+    [%whitelist ships=(set ship)]
+    ::
+    [%provider who=(unit ship)]
   ==
 ::
 :: actions for hitting the provider.

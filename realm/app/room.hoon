@@ -48,6 +48,9 @@
         ?~  my-room
           ``rooms-view+!>([%present *(set ship)])
         ``rooms-view+!>([%present present.u.my-room])
+      ::
+      [%x %provider ~]
+        ``rooms-view+!>([%provider provider])
     ==
 ++  on-watch
   |=  =path
