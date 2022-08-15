@@ -137,13 +137,6 @@ export class ShipService extends BaseService {
 
   async subscribe(ship: string, shipInfo: any) {
     return new Promise<ShipModelType>((resolve, reject) => {
-<<<<<<< HEAD
-      // TODO password protect data
-      this.db = new Store<ShipModelType>({
-        name: 'ship',
-        cwd: `realm.${ship}`,
-      });
-=======
       const storeParams = {
         name: `realm.ship.${ship}`,
         secretKey: this.core.passwords.getPassword(ship)!,
@@ -153,7 +146,6 @@ export class ShipService extends BaseService {
         ? new Store<ShipModelType>(storeParams)
         : new EncryptedStore<ShipModelType>(storeParams);
 
->>>>>>> 2d6fd16 (use encrypted store for ships in prod)
       let persistedState: ShipModelType = this.db.store;
 
       // TODO set up multiple ships properly
