@@ -1,5 +1,6 @@
 import { FC, useRef } from 'react';
 import { Portal } from 'renderer/system/dialog/Portal';
+import { clan } from 'urbit-ob';
 import {
   ContextMenu,
   Flex,
@@ -55,9 +56,19 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
     padding: 0,
     menuWidth,
   });
+
   const { anchorPoint, show, setShow } = config;
 
+  const idClass = clan(patp);
   const id = `${listId}-${patp}`;
+  let patpSanitized = patp;
+  if (idClass === 'moon') {
+    const moonTokens = patpSanitized.split('-');
+    patpSanitized = `~${moonTokens[2]}^${moonTokens[3]}`;
+  }
+  if (idClass === 'comet') {
+    // TODO sanitize comet
+  }
   return (
     <Flex key={id} style={{ position: 'relative', ...style }}>
       {contextMenuOptions && (
@@ -125,6 +136,7 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
           gap={10}
           flexDirection="row"
           alignItems="center"
+          flex={1}
           style={{ pointerEvents: 'none' }}
         >
           <Box>
@@ -136,18 +148,20 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
               color={[sigilColor || '#000000', 'white']}
             />
           </Box>
-          {nickname ? (
-            <>
-              <Text fontSize={2}>
-                {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-              </Text>
-              <Text fontSize={2} opacity={0.7}>
-                {patp}
-              </Text>
-            </>
-          ) : (
-            <Text fontSize={2}>{patp}</Text>
-          )}
+          <Flex flex={1} justifyContent="space-between">
+            {nickname ? (
+              <>
+                <Text fontSize={2}>
+                  {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
+                </Text>
+                <Text fontSize={2} opacity={0.7}>
+                  {patpSanitized}
+                </Text>
+              </>
+            ) : (
+              <Text fontSize={2}>{patp}</Text>
+            )}
+          </Flex>
         </Flex>
         {children}
       </Row>

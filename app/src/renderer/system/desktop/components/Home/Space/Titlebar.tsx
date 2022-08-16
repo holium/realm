@@ -15,18 +15,30 @@ type SpaceTitlebarProps = {
   space: SpaceModelType;
   membersCount: number;
   theme: ThemeModelType;
+  showAppGrid: boolean;
+  showMembers: boolean;
   onMemberClick: (evt: MouseEvent) => void;
   onToggleApps: (evt: MouseEvent) => void;
 };
 
 export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
   (props: SpaceTitlebarProps) => {
-    const { space, membersCount, theme, onMemberClick, onToggleApps } = props;
+    const {
+      space,
+      membersCount,
+      theme,
+      showAppGrid,
+      showMembers,
+      onMemberClick,
+      onToggleApps,
+    } = props;
 
     const iconHoverColor = useMemo(
       () => rgba(darken(0.03, theme.iconColor), 0.1),
       [theme.windowColor]
     );
+
+    const highlightColor = '#4E9EFD';
 
     return (
       <Flex width="100%">
@@ -63,7 +75,7 @@ export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
             <IconButton
               size={3}
               customBg={iconHoverColor}
-              color={theme.iconColor}
+              color={showAppGrid ? highlightColor : theme.iconColor}
               onClick={onToggleApps}
             >
               <Icons name="AppGrid" size="22px" />
@@ -71,7 +83,7 @@ export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
             <IconButton
               size={3}
               customBg={iconHoverColor}
-              color={theme.iconColor}
+              color={showMembers ? highlightColor : theme.iconColor}
               onClick={onMemberClick}
             >
               <Icons name="Members" size="22px" />
