@@ -32,7 +32,7 @@
     ]
   new-space
 ::
-::  json 
+::  json
 ::
 ++  enjs
   =,  enjs:format
@@ -78,6 +78,14 @@
           [%space (spc:encode space.rct)]
           :: [%members (membs:encode members.rct)]
       ==
+
+    ::
+        %member-added
+      :-  %member-added
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%ship s+(scot %p ship.path.rct)]
+      ==
     ==
   ::
   ++  view :: encodes for on-peek
@@ -118,7 +126,7 @@
     ++  joined-space
       %-  ot
       :~  [%path pth]
-          :: [%space de-space]
+          [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
     ++  de-space
@@ -260,7 +268,7 @@
     --
   --
 ::
-::  
+::
 ::
 ++  encode
   =,  enjs:format
@@ -292,7 +300,7 @@
     %+  turn  ~(tap by members)
     |=  [=^ship =member:member-store]
     ^-  [cord json]
-    [(scot %p ship) (memb member)] 
+    [(scot %p ship) (memb member)]
   ::
   ++  memb
     |=  =member:member-store

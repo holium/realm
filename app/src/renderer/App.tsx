@@ -15,14 +15,10 @@ import {
 } from './logic/store';
 
 import { Mouse } from './system/desktop/components/Mouse';
-import * as RealmMultiplayer from '../../../playground/ui/src/lib/realm-multiplayer';
+import * as RealmMultiplayer from '@holium/realm-multiplayer';
 import { Presences } from './system/desktop/components/Multiplayer/Presences';
 import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
-import {
-  CursorEvent,
-  RealmMultiplayerInterface,
-} from './system/desktop/components/Multiplayer/types';
 import { ShellActions } from './logic/actions/shell';
 
 export const App: FC = observer(() => {
@@ -82,13 +78,13 @@ function MultiplayerMouse() {
 function Cursors() {
   const { api } = useContext(
     RealmMultiplayer.Context as React.Context<{
-      api: RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
+      api: RealmMultiplayer.RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
     }>
   );
   const { shell } = useServices();
   useEffect(() => {
     api?.send({
-      event: CursorEvent.Leave,
+      event: RealmMultiplayer.CursorEvent.Leave,
     });
   }, [shell.isMouseInWebview]);
   return <Presences />;

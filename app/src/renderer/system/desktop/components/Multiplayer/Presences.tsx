@@ -20,8 +20,9 @@ import {
   CursorUpPayload,
   CursorOutPayload,
   PresenceStateSyncPayload,
-} from './types';
-import { Ship } from '../../../../../../../playground/ui/src/lib/realm-multiplayer/hooks';
+  Ship,
+} from '@holium/realm-multiplayer';
+// import { Ship } from '@holium/realm-multiplayer/hooks';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 

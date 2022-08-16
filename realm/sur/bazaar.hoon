@@ -60,7 +60,7 @@
   ==
 ::  $app-index: index of app ids. used to perform fast lookups
 ::   into the apps 'directory' when scrying
-+$  app-index     (map app-id app-entry)
++$  app-index     (map app-id app)
 +$  space-apps    (map space-path:spaces app-index)
 :: +$  pinned        (map space-path:spaces (set @tas))
 :: +$  recommended   (map space-path:spaces (set @tas))
@@ -83,9 +83,8 @@
   ==
 ::
 +$  reaction
-  $%  [%initial path=space-path:spaces =app]
-      [%add path=space-path:spaces =app]
-      [%remove path=space-path:spaces =app-id]
+  $%  [%initial =space-apps]
+      [%space-apps =space-path:spaces =app-index]
   ==
 ::
 ::  Scry views

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { RealmMultiplayerInterface } from "../../../../../app/src/renderer/system/desktop/components/Multiplayer/types";
+import { RealmMultiplayerInterface } from "./types";
 
 interface RealmMultiplayerContextState {
   ship?: any;

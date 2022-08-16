@@ -1,12 +1,13 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { SendPartial } from "../../../../../app/src/renderer/system/desktop/components/Multiplayer/multiplayer";
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
+  SendPartial,
   BaseRealmPayload,
   PresenceStatePayload,
   PresenceStateSyncPayload,
   RealmEvent,
-} from "../../../../../app/src/renderer/system/desktop/components/Multiplayer/types";
-import { RealmMultiplayerContext } from "./Provider";
+  Ship,
+} from './types';
+import { RealmMultiplayerContext } from './Provider';
 
 export function useChannel<T extends BaseRealmPayload>(
   event: string,
@@ -31,13 +32,8 @@ export function useChannel<T extends BaseRealmPayload>(
   return send;
 }
 
-export interface Ship {
-  color: string;
-  patp: string;
-}
-
 export function useShips() {
-  return usePresence("ship");
+  return usePresence('ship');
 }
 
 export function usePresence(key: string) {
