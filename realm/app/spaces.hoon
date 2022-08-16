@@ -125,8 +125,8 @@
             `this
           %fact
             ?+    p.cage.sign  (on-agent:def wire sign)
-                %spaces-reaction      
-              =^  cards  state 
+                %spaces-reaction
+              =^  cards  state
                 (spaces-reaction:core !<(=reaction:store q.cage.sign))
               [cards this]
             ==
@@ -147,16 +147,16 @@
       ::
           %fact
             ?+    p.cage.sign     (on-agent:def wire sign)
-                %invite-reaction       
-              =^  cards  state 
+                %invite-reaction
+              =^  cards  state
                 (invite-reaction:core !<(=reaction:invite-store q.cage.sign))
               [cards this]
             ::
-                %passports-reaction    
-              =^  cards  state 
+                %passports-reaction
+              =^  cards  state
                 (passports-reaction:core !<(=reaction:passports-store q.cage.sign))
               [cards this]
-                
+
             ==
         ==
     ==
@@ -207,7 +207,7 @@
     ?:  =(old updated)        :: if the old type equals new
         [~ state]             :: return state unchanged
     =.  updated-at.updated    now.bowl
-    =/  watch-paths           [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]              
+    =/  watch-paths           [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
     =.  spaces.state          (~(put by spaces.state) path updated)
     :_  state
     (spaces:send-reaction [%replace updated] watch-paths)
@@ -230,26 +230,27 @@
       [~ state]
     =/  deleted             (~(got by spaces.state) path)
     =.  spaces.state        (~(del by spaces.state) path.deleted)
-    =/  watch-paths         [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]    
-    :_  state          
+    =/  watch-paths         [/updates /our /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
+    :_  state
     (spaces:send-reaction [%remove path] watch-paths)
   ::
   ++  handle-kicked
     |=  [path=space-path:store =ship]
     ^-  (quip card _state)
     ?:  =(our.bowl ship)  :: we are kicked
-      =.  spaces.state        (~(del by spaces.state) path)        
+      =.  spaces.state        (~(del by spaces.state) path)
       =/  watch-path          /spaces/(scot %p ship.path)/(scot %tas space.path)
       :_  state
       :~  [%give %fact [/updates /our ~] spaces-reaction+!>([%remove path])]  ::  notify our watches
-      == 
+      ==
     `state
   ::
   ++  handle-joined
-    |=  [path=space-path:store]
+    |=  [path=space-path:store =ship]
     ^-  (quip card _state)
     :_  state
     :~  [%pass /spaces %agent [ship.path dap.bowl] %watch /spaces/(scot %p ship.path)/(scot %tas space.path)]
+        [%give %fact [/updates /our ~] spaces-reaction+!>([%member-added path ship])]  ::  notify our watches
     ==
   ::
   --
@@ -264,6 +265,7 @@
     %replace        (on-replace +.rct)
     %remove         (on-remove +.rct)
     %space          (on-space-initial +.rct)
+    %member-added   `state
   ==
   ::
   ++  on-initial
@@ -364,7 +366,7 @@
   =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
   ?>  ?=(%member -.member)
   ~&  >  [member]
-  ::  
+  ::
   :: =/  member        (~(got by (~(got by membership.state) space-path)) ship)
   :: (~(has in roles.member) role)
   %.y
