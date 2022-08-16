@@ -20,6 +20,7 @@ import { VoiceAnalyzer } from './components/VoiceVisualizer';
 import { Speaker } from './components/Speaker';
 import { Urbit } from '@urbit/http-api';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 export type BaseAssemblyProps = {
   theme: ThemeModelType;
@@ -218,6 +219,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                   if (roomsApp.isCreator(ship!.patp!, id)) {
                     RoomsActions.deleteRoom(id);
                   } else {
+                      SoundActions.playRoomLeave();
                     RoomsActions.leaveRoom(id);
                   }
                 }}

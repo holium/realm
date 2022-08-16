@@ -19,6 +19,7 @@ import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
 import { rgba } from 'polished';
 import { fontSize } from 'styled-system';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 export type AssemblyListProps = {
   theme: ThemeModelType;

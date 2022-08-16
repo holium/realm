@@ -17,6 +17,7 @@ import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel } from 'os/services/ship/models/ship';
 import { ShellActions } from './actions/shell';
 import { MembershipStore } from 'os/services/spaces/models/members';
+import { SoundActions } from './actions/sound';
 import { LoaderModel } from 'os/services/common.model';
 import { OSActions } from './actions/os';
 
@@ -125,6 +126,9 @@ OSActions.onBoot().then((response: any) => {
     key: 'ships',
     model: response.auth,
   });
+  if (response.auth.firstTime) {
+    SoundActions.playStartup();
+  }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
     coreStore.setLoggedIn(true);

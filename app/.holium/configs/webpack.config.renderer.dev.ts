@@ -93,6 +93,13 @@ const configuration: webpack.Configuration = {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
+      // {
+      //   test: /\.(wav)$/i,
+      //   type: 'asset/resource',
+      //   // generator: {
+      //   //   filename: 'sounds/[name]',
+      //   // },
+      // },
     ],
   },
   plugins: [
@@ -155,10 +162,11 @@ const configuration: webpack.Configuration = {
     port,
     compress: true,
     hot: true,
-    headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': "GET,POST,OPTIONS,DELETE,PUT" },
-    static: {
-      publicPath: '/',
-    },
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    // static: {
+    // publicPath: '/',
+    // },
+    static: ['media'],
     historyApiFallback: {
       verbose: true,
     },

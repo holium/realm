@@ -57,7 +57,7 @@ export const ContactApi = {
                     },
                   },
                 });
-                console.log(response);
+                // console.log(response);
                 resolve(response);
               });
             } catch (err) {

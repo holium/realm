@@ -15,6 +15,7 @@ import {
 } from 'renderer/components';
 import * as yup from 'yup';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
+import { SoundActions } from 'renderer/logic/actions/sound';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -150,6 +151,7 @@ export const NewAssembly: FC<BaseAssemblyProps> = observer(
                 setLoading(true);
                 const { name, isPrivate } = form.actions.submit();
                 evt.stopPropagation();
+                SoundActions.playRoomEnter();
                 RoomsActions.createRoom(
                   `${ship?.patp}/${name}/${new Date().getTime()}`,
                   isPrivate ? 'private' : 'public',
