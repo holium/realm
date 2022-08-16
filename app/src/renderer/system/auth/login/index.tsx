@@ -1,4 +1,4 @@
-import { useRef, FC, useEffect } from 'react';
+import { useRef, FC, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
@@ -38,6 +38,9 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
 
+  const [loading, setLoading] = useState(false);
+  const [incorrectPassword, setIncorrectPassword] = useState(false);
+
   // Setting up options menu
   const menuWidth = 180;
   const config = useMenu(optionsRef, {
@@ -70,15 +73,17 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       wrapperRef.current.blur();
     }
   };
-  const clickSubmit = (event: any) => {
+  const clickSubmit = async (event: any) => {
     event.stopPropagation();
-    AuthActions.login(
-      pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
-    )
-      .catch((err) => console.warn(err))
-      .then(() => SoundActions.playLogin());
+
+    setLoading(true);
+    let loggedIn = await AuthActions.login(pendingShip!.patp, passwordRef!.current!.value);
+    if (!loggedIn) {
+      setIncorrectPassword(true);
+      setLoading(false);
+    } else {
+      SoundActions.playLogin();
+    }
   };
 
   let colorProps = null;
@@ -218,7 +223,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                             }}
                           />
                         </Menu>
-                        {auth.loader.isLoading ? (
+                        {auth.loader.isLoading || loading ? (
                           <Flex
                             justifyContent="center"
                             alignItems="center"
@@ -242,6 +247,9 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     }
                   />
                 </Flex>
+                <Text mt={2} style={{ visibility: incorrectPassword ? undefined : 'hidden' }} variant="body">
+                  Incorrect password.
+                </Text>
               </Flex>
             </Flex>
           </Flex>
