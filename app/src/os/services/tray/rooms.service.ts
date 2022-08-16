@@ -139,7 +139,7 @@ export class RoomsService extends BaseService {
     // this.state?.setLiveRoom(room!);
     // this.state?.setView('room');
   }
-  setView(_event: any, view: 'list' | 'room' | 'new-assembly') {
+  setView(_event: any, view: 'list' | 'room' | 'new-room') {
     this.state?.setView(view);
   }
   setLiveRoom(_event: any, room: RoomsModelType) {

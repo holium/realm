@@ -57,15 +57,15 @@ const persistedState = loadSnapshot();
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,
-  coords: persistedState.coords || {
+  coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
   },
-  dimensions: persistedState.dimensions || {
+  dimensions: (persistedState && persistedState.dimensions) || {
     width: 200,
     height: 200,
   },
-  roomsApp: persistedState.roomsApp || {
+  roomsApp: (persistedState && persistedState.roomsApp) || {
     currentView: 'list',
     // rooms: [], TODO
   },
