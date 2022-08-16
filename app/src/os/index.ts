@@ -9,7 +9,6 @@ import { cleanPath, fromPathString } from './lib/action';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
-import { BazaarService } from './services/spaces/bazaar.service';
 import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
@@ -36,7 +35,6 @@ export class Realm extends EventEmitter {
     spaces: SpacesService;
     desktop: DesktopService;
     shell: ShellService;
-    bazaar: BazaarService;
   };
   readonly holiumClient: HoliumAPI;
 
@@ -65,7 +63,6 @@ export class Realm extends EventEmitter {
     desktop: DesktopService.preload,
     shell: ShellService.preload,
     onboarding: OnboardingService.preload,
-    bazaar: BazaarService.preload,
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -91,7 +88,6 @@ export class Realm extends EventEmitter {
       spaces: new SpacesService(this),
       desktop: new DesktopService(this),
       shell: new ShellService(this),
-      bazaar: new BazaarService(this),
     };
 
     this.holiumClient = new HoliumAPI();
@@ -140,11 +136,9 @@ export class Realm extends EventEmitter {
   }
 
   connect(session: ISession) {
-    console.log('os - connect()');
     this.conduit = new Urbit(session.url, session.ship, session.cookie);
     this.conduit.open();
     this.conduit.onOpen = () => {
-      console.log('os - connect() - conduit.onOpen()');
       this.onLogin();
     };
     this.conduit.onRetry = () => console.log('on retry');

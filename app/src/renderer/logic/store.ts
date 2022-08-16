@@ -173,7 +173,6 @@ onSnapshot(servicesStore, (snapshot) => {
 
 // Auth events
 window.electron.os.auth.onLogin((_event: any) => {
-  SoundActions.playLogin();
   coreStore.setLoggedIn(true);
   ShellActions.setBlur(false);
 });

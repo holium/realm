@@ -21,6 +21,7 @@ import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 type LoginProps = {
   addShip: () => void;
@@ -75,7 +76,9 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
-    ).catch((err) => console.warn(err));
+    )
+      .catch((err) => console.warn(err))
+      .then(() => SoundActions.playLogin());
   };
 
   let colorProps = null;
