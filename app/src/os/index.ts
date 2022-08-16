@@ -15,6 +15,7 @@ import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
 import HoliumAPI from './api/holium';
 import { RoomsService } from './services/tray/rooms.service';
+import PasswordStore from './lib/passwordStore';
 
 export interface ISession {
   ship: string;
@@ -38,6 +39,7 @@ export class Realm extends EventEmitter {
     shell: ShellService;
   };
   readonly holiumClient: HoliumAPI;
+  readonly passwords: PasswordStore;
 
   readonly handlers = {
     'realm.boot': this.boot,
@@ -95,6 +97,7 @@ export class Realm extends EventEmitter {
     };
 
     this.holiumClient = new HoliumAPI();
+    this.passwords = new PasswordStore();
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
