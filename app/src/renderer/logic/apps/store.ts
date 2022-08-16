@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import { Instance, types } from 'mobx-state-tree';
 import { AssemblyAppState } from './assembly';
+import { WalletStore } from 'renderer/apps/Wallet/store';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -33,6 +34,7 @@ export const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     assemblyApp: AssemblyAppState,
+    walletApp: WalletStore,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -55,6 +57,12 @@ export const trayStore = TrayAppStore.create({
   dimensions: {
     width: 200,
     height: 200,
+  },
+  walletApp: {
+    network: 'ethereum',
+    currentView: 'ethereum:list',
+    ethereum: {},
+    bitcoin: {},
   },
   assemblyApp: {
     currentView: 'list',

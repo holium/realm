@@ -6,9 +6,10 @@
     "playground/ui"
   ],
   "scripts": {
-    "start": "yarn workspace @holium/realm start"
-  },
-  "devDependencies": {
-    "electron": "19.0.0"
+    "start": "yarn workspace @holium/realm start",
+    "realm:install": "yarn workspace @holium/realm install",
+    "realm:add": "yarn workspace @holium/realm add",
+    "realm:build": "yarn workspace @holium/realm build",
+    "realm:package": "yarn workspace @holium/realm package"
   }
 }

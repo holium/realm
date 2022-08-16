@@ -2,7 +2,7 @@ import { AssemblyApp } from 'renderer/apps/Assembly';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
 import { AccountTrayApp } from 'renderer/apps/Account';
 import { MessagesTrayApp } from 'renderer/apps/Messages';
-import { WalletTrayApp } from 'renderer/apps/Wallet';
+import { WalletApp } from 'renderer/apps/Wallet';
 
 export type ViewRenderers = {
   [key: string]: {
@@ -24,6 +24,6 @@ export const trayAppRenderers: ViewRenderers = {
     component: (props: any) => <MessagesTrayApp {...props} />,
   },
   'wallet-tray': {
-    component: (props: any) => <WalletTrayApp {...props} />,
+    component: (props: any) => <WalletApp {...props} />,
   },
 };

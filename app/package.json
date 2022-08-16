@@ -2,6 +2,7 @@
   "name": "@holium/realm",
   "version": "0.0.1",
   "description": "A desktop environment for Urbit",
+  "private": "true",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.main.prod.ts",
@@ -229,6 +230,7 @@
     "electron-log": "^4.4.6",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
+    "ethers": "^5.6.9",
     "eventsource": "^2.0.0",
     "extract-colors": "^1.1.22",
     "framer-motion": "^6.2.10",
@@ -276,5 +278,10 @@
       }
     ],
     "singleQuote": true
+  },
+  "workspaces": {
+    "nohoist": [
+      "electron"
+    ]
   }
 }
