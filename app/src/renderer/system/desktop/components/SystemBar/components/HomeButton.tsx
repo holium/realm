@@ -10,8 +10,7 @@ import { rgba } from 'polished';
 type HomeButton = {};
 
 export const HomeButton: FC<HomeButton> = observer(() => {
-  const { ship, shell } = useServices();
-  const { desktop } = shell;
+  const { ship, desktop } = useServices();
 
   const { dockColor, textColor } = useMemo(
     () => ({
@@ -32,8 +31,8 @@ export const HomeButton: FC<HomeButton> = observer(() => {
     x.set(event.clientX - rect.left);
     y.set(event.clientY - rect.top);
   }
+  console.log('show Home Pane in home button', desktop.showHomePane);
   const onHome = () => {
-    // DesktopActions.setBlur(!desktop.isBlurred);
     DesktopActions.setHomePane(!desktop.showHomePane);
   };
 

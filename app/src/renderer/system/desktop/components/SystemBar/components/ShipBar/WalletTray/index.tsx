@@ -1,4 +1,5 @@
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useMemo } from 'react';
+import { darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
 
 import { IconButton, Icons } from 'renderer/components';
@@ -24,6 +25,11 @@ export const WalletTray: FC<WalletTrayProps> = observer(
     const { dockColor, textColor } = theme;
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
       useTrayApps();
+
+    const iconHoverColor = useMemo(
+      () => rgba(darken(0.05, theme.dockColor), 0.5),
+      [theme.windowColor]
+    );
 
     const onButtonClick = useCallback(
       (evt: any) => {
@@ -52,7 +58,7 @@ export const WalletTray: FC<WalletTrayProps> = observer(
       <IconButton
         id="wallet-tray-icon"
         size={28}
-        customBg={dockColor}
+        customBg={iconHoverColor}
         color={textColor}
         whileTap={{ scale: 0.95 }}
         transition={{ scale: 0.1 }}

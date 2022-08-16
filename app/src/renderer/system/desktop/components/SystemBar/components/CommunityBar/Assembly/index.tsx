@@ -1,4 +1,5 @@
-import { FC, createRef, useCallback } from 'react';
+import { FC, createRef, useCallback, useMemo } from 'react';
+import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
 import { Flex, IconButton, Icons } from 'renderer/components';
 import { observer } from 'mobx-react';
@@ -14,7 +15,7 @@ const iconSize = 28;
 
 export const AssemblyTray: FC<AssemblyTrayProps> = observer(
   (props: AssemblyTrayProps) => {
-    const { shell } = useServices();
+    const { desktop } = useServices();
 
     const {
       activeApp,
@@ -23,7 +24,7 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
       setTrayAppCoords,
       setTrayAppDimensions,
     } = useTrayApps();
-    const { dockColor, textColor } = shell.desktop.theme;
+    const { dockColor, textColor } = desktop.theme;
     const roomsButtonRef = createRef<HTMLButtonElement>();
 
     const dimensions = {
@@ -64,6 +65,11 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
       [activeApp, anchorOffset, position, dimensions]
     );
 
+    const iconHoverColor = useMemo(
+      () => rgba(darken(0.05, desktop.theme.dockColor), 0.5),
+      [desktop.theme.windowColor]
+    );
+
     return (
       <motion.div
         id="rooms-tray-icon"
@@ -96,7 +102,7 @@ export const AssemblyTray: FC<AssemblyTrayProps> = observer(
             id="rooms-tray-icon"
             ref={roomsButtonRef}
             size={iconSize}
-            customBg={dockColor}
+            customBg={iconHoverColor}
             color={textColor}
             mt="2px"
             // mb="-2px"

@@ -293,7 +293,7 @@ export class Urbit extends EventEmitter {
             const funcs = this.outstandingSubscriptions.get(data.id);
             try {
               // @ts-expect-error
-              funcs.event(data.json);
+              funcs.event(data.json, data.id);
             } catch (e) {
               console.error('Failed to call subscription event callback', e);
             }
@@ -378,7 +378,10 @@ export class Urbit extends EventEmitter {
         signal: this.abort.signal,
       });
       // console.log(response);
-      if (response.statusText !== 'ok') {
+      if (
+        response.statusText !== 'ok' &&
+        (response.status < 199 || response.status >= 300)
+      ) {
         throw new Error('Failed to PUT channel');
       }
       if (!this.sseClientInitialized) {

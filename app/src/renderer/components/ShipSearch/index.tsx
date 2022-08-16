@@ -22,7 +22,7 @@ interface ShipSearchProps {
   search: string;
   selected: Set<string>;
   customBg?: string;
-  onSelected: (ship: [string, string?]) => void;
+  onSelected: (ship: [string, string?], metadata?: any) => void;
 }
 
 interface IAutoCompleteBox {
@@ -54,8 +54,8 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
   (props: ShipSearchProps) => {
     const { search, isDropdown, selected, customBg, heightOffset, onSelected } =
       props;
-    const { shell, ship } = useServices();
-    const { mode, dockColor, windowColor } = shell.desktop.theme;
+    const { desktop, ship } = useServices();
+    const { mode, dockColor, windowColor } = desktop.theme;
     const contacts = ship ? Array.from(ship?.contacts.rolodex.entries()) : [];
     const isAddingDisabled = selected.size > 0;
 
@@ -78,12 +78,11 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
         <div style={style}>
           <Row
             key={contact[0]}
-            // noHover
             style={{ justifyContent: 'space-between' }}
             customBg={customBg}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              isDropdown && onSelected([contact[0], nickname]);
+              isDropdown && onSelected([contact[0], nickname], contact[1]);
             }}
           >
             <Flex gap={10} flexDirection="row" alignItems="center">
@@ -111,7 +110,6 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
                 <IconButton
                   luminosity={mode}
                   customBg={dockColor}
-                  // customBg={customBg}
                   size={24}
                   canFocus
                   isDisabled={isAddingDisabled}
@@ -184,6 +182,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
           }}
           animate={{
             opacity: isOpen ? 1 : 0,
+            visibility: isOpen ? 'visible' : 'hidden',
             y: 0,
             height: results.length < 10 ? results.length * resultHeight : 400,
             transition: {

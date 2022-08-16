@@ -32,7 +32,7 @@
     ]
   new-space
 ::
-::  json 
+::  json
 ::
 ++  enjs
   =,  enjs:format
@@ -49,7 +49,7 @@
       :-  %initial
       %-  pairs
       :~  [%spaces (spaces-map:encode spaces.rct)]
-          [%membership (membership-map:encode membership.rct)]
+          :: [%membership (membership-map:encode membership.rct)]
       ==
     ::
         %add
@@ -70,83 +70,41 @@
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
+    ::
+        %space
+      :-  %space
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%space (spc:encode space.rct)]
+          :: [%members (membs:encode members.rct)]
+      ==
+
+    ::
+        %member-added
+      :-  %member-added
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%ship s+(scot %p ship.path.rct)]
+      ==
     ==
   ::
   ++  view :: encodes for on-peek
-    |=  view=^view
+    |=  vi=^view
     ^-  json
     %-  pairs
     :_  ~
     ^-  [cord json]
-    ?-  -.view
+    :-  -.vi
+    ?-  -.vi
+      ::
         %space
-      [%space (spc:encode space.view)]
-    ::
+      (spc:encode space.vi)
+      ::
         %spaces
-      [%spaces (spaces-map:encode spaces.view)]
+      (spaces-map:encode spaces.vi)
     ==
   --
-++  encode
-  =,  enjs:format
-  |%
-  ++  spaces-map
-    |=  =spaces:store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by spaces)
-    |=  [pth=space-path:store space=space:store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-    ^-  [cord json]
-    [spc-path (spc space)]
-  ::
-  ++  membership-map
-    |=  =membership:member-store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by membership)
-    |=  [pth=space-path:store members=members:member-store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-    ^-  [cord json]
-    [spc-path (membs members)]
-  ::
-  ++  membs
-    |=  =members:member-store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by members)
-    |=  [=^ship =roles:member-store]
-    ^-  [cord json]
-    [(scot %p ship) [%a (turn ~(tap in roles) |=(rol=role:member-store s+(scot %tas rol)))]] 
-  ::
-  ++  spc
-    |=  =space
-    ^-  json
-    %-  pairs:enjs:format
-    :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
-        ['name' s+name.space]
-        ['type' s+type.space]
-        ['picture' s+picture.space]
-        ['color' s+color.space]
-        ['theme' (thm theme.space)]
-        ['updatedAt' (time updated-at.space)]
-    ==
-  ::
-  ++  thm
-    |=  =theme
-    ^-  json
-    %-  pairs:enjs:format
-    :~
-      ['mode' s+(scot %tas mode.theme)]
-      ['backgroundColor' s+background-color.theme]
-      ['accentColor' s+accent-color.theme]
-      ['inputColor' s+input-color.theme]
-      ['dockColor' s+dock-color.theme]
-      ['iconColor' s+icon-color.theme]
-      ['textColor' s+text-color.theme]
-      ['windowColor' s+window-color.theme]
-      ['wallpaper' s+wallpaper.theme]
-    ==
-  --
+
 ::
 ++  dejs
   =,  dejs:format
@@ -161,19 +119,46 @@
       :~  [%add add-space]
           [%update update-space]
           [%remove remove-space]
+          [%join joined-space]
+          [%kicked kicked]
+      ==
+    ::
+    ++  joined-space
+      %-  ot
+      :~  [%path pth]
+          [%ship (su ;~(pfix sig fed:ag))]
+      ==
+    ::
+    ++  de-space
+      %-  ot
+      :~  [%path pth]
+          [%name so]
+          [%type space-type]
+          [%access access]
+          [%picture so]
+          [%color so]
+          [%archetype archetype]
+          [%theme thm]
+          [%updated-at di]
       ==
     ::
     ++  add-space
       %-  ot
       :~  [%slug so]
           [%payload add-payload]
-          [%members (op ;~(pfix sig fed:ag) (as rol))]
+          [%members (op ;~(pfix sig fed:ag) memb)]
       ==
     ::
     ++  update-space
       %-  ot
       :~  [%path pth]
           [%payload edit-payload]
+      ==
+    ::
+    ++  kicked
+      %-  ot
+      :~  [%path pth]
+          [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
     ++  remove-space
@@ -216,6 +201,13 @@
           [%text-color so]
           [%window-color so]
           [%wallpaper so]
+      ==
+    ::
+    ++  memb
+      %-  ot
+      :~  [%roles (as rol)]
+          [%status status]
+          :: [%pinned bo]
       ==
     ::
     ++  theme-mode
@@ -264,7 +256,88 @@
       ?:  =('antechamber' p.json)         %antechamber
       ?:  =('private' p.json)             %private
       !!
+    ::
+    ++  status
+      |=  =json
+      ^-  status:member-store
+      ?>  ?=(%s -.json)
+      ?:  =('invited' p.json)     %invited
+      ?:  =('joined' p.json)      %joined
+      ?:  =('host' p.json)        %host
+      !!
     --
   --
+::
+::
+::
+++  encode
+  =,  enjs:format
+  |%
+  ++  spaces-map
+    |=  =spaces:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by spaces)
+    |=  [pth=space-path:store space=space:store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (spc space)]
   ::
+  ++  membership-map
+    |=  =membership:member-store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by membership)
+    |=  [pth=space-path:store members=members:member-store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (membs members)]
+  ::
+  ++  membs
+    |=  =members:member-store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by members)
+    |=  [=^ship =member:member-store]
+    ^-  [cord json]
+    [(scot %p ship) (memb member)]
+  ::
+  ++  memb
+    |=  =member:member-store
+    ^-  json
+    %-  pairs
+    :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
+        ['status' s+(scot %tas status.member)]
+        :: ['pinned' b+pinned.member]
+    ==
+  ::
+  ++  spc
+    |=  =space
+    ^-  json
+    %-  pairs
+    :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
+        ['name' s+name.space]
+        ['type' s+type.space]
+        ['picture' s+picture.space]
+        ['color' s+color.space]
+        ['theme' (thm theme.space)]
+        ['updatedAt' (time updated-at.space)]
+    ==
+  ::
+  ++  thm
+    |=  =theme
+    ^-  json
+    %-  pairs
+    :~
+      ['mode' s+(scot %tas mode.theme)]
+      ['backgroundColor' s+background-color.theme]
+      ['accentColor' s+accent-color.theme]
+      ['inputColor' s+input-color.theme]
+      ['dockColor' s+dock-color.theme]
+      ['iconColor' s+icon-color.theme]
+      ['textColor' s+text-color.theme]
+      ['windowColor' s+window-color.theme]
+      ['wallpaper' s+wallpaper.theme]
+    ==
+  --
 --

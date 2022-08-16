@@ -19,18 +19,15 @@ import * as RealmMultiplayer from '@holium/realm-multiplayer';
 import { Presences } from './system/desktop/components/Multiplayer/Presences';
 import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
-import {
-  CursorEvent,
-  RealmMultiplayerInterface,
-} from '@holium/realm-multiplayer';
+import { ShellActions } from './logic/actions/shell';
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
-  const { shell } = useServices();
-  const { desktop } = shell;
-  // const shipLoaded = ship?.loggedIn;
+  const { desktop, shell } = useServices();
+
   const themeMode = desktop.theme.mode;
 
+  // ShellActions.closeDialog();
   const shellMemo = useMemo(
     () => (booted ? <Shell /> : <div>Booting...</div>),
     [booted]
@@ -38,12 +35,12 @@ export const App: FC = observer(() => {
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
-        hide={desktop.isMouseInWebview}
+        hide={shell.isMouseInWebview}
         cursorColor={desktop.mouseColor}
         animateOut={false}
       />
     );
-  }, [desktop.mouseColor, desktop.isMouseInWebview]);
+  }, [desktop.mouseColor, shell.isMouseInWebview]);
 
   return (
     <CoreProvider value={coreStore}>
@@ -51,7 +48,6 @@ export const App: FC = observer(() => {
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}
-
           <ServiceProvider value={servicesStore}>
             {mouseMemo}
             {shellMemo}
@@ -82,15 +78,15 @@ function MultiplayerMouse() {
 function Cursors() {
   const { api } = useContext(
     RealmMultiplayer.Context as React.Context<{
-      api: RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
+      api: RealmMultiplayer.RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
     }>
   );
   const { shell } = useServices();
   useEffect(() => {
     api?.send({
-      event: CursorEvent.Leave,
+      event: RealmMultiplayer.CursorEvent.Leave,
     });
-  }, [shell.desktop.isMouseInWebview]);
+  }, [shell.isMouseInWebview]);
   return <Presences />;
 }
 

@@ -31,10 +31,12 @@ export const ContactStore = types
     },
     getContactAvatarMetadata(patp: string) {
       const contact = self.rolodex.get(patp);
+      // console.log(toJS(contact));
       return {
         color: contact?.color,
         avatar: contact?.avatar,
         nickname: contact?.nickname,
+        bio: contact?.bio,
       };
     },
   }))
@@ -58,7 +60,6 @@ export const ContactStore = types
       if (json['contact-update'].initial) {
         const contactMap = new Map<string, ContactModelType>();
         const contacts = json['contact-update'].initial.rolodex;
-        // console.log(contacts);
         Object.keys(contacts).forEach((patp: string) => {
           const newContact: ContactModelType = contacts[patp];
           contactMap.set(patp, {
@@ -67,7 +68,6 @@ export const ContactStore = types
           });
         });
         self.rolodex.merge(contactMap);
-        // console.log(toJS(self.rolodex.get('~lomder-librun')));
       }
       // ------------------
       // ------ edit ------

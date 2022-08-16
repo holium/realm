@@ -14,8 +14,7 @@ const View = styled.div<{ hasTitleBar?: boolean }>``;
 
 export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
   const { window, isResizing } = props;
-  const { ship, shell } = useServices();
-  const { desktop } = shell;
+  const { shell, ship, desktop } = useServices();
   const webViewRef = useRef<any>(null);
   const elementRef = useRef(null);
 
@@ -70,8 +69,8 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
         partition={webData.development ? 'persist:dev-webview' : 'web-webview'}
         preload={`file://${desktop.appviewPreload}`}
         src={webData.url}
-        onMouseEnter={() => desktop.setIsMouseInWebview(true)}
-        onMouseLeave={() => desktop.setIsMouseInWebview(false)}
+        onMouseEnter={() => shell.setIsMouseInWebview(true)}
+        onMouseLeave={() => shell.setIsMouseInWebview(false)}
         style={{
           background: lighten(0.04, desktop.theme.windowColor),
           width: 'inherit',

@@ -2,11 +2,10 @@ import { FC, useMemo } from 'react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { WindowManager } from './WindowManager';
-import { AppGrid } from './components/AppGrid';
+import { HomePane } from './components/Home';
 // import { useMst } from 'renderer/logic/store';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
-import { DialogManager } from '../dialog/DialogManager';
 
 type OSFrameProps = {
   hasLoaded?: boolean;
@@ -16,24 +15,16 @@ type OSFrameProps = {
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
   const { hasLoaded } = props;
-  const { shell } = useServices();
-  const { desktop } = shell;
-
-  const DialogLayer = useMemo(
-    () => <DialogManager dialogId={desktop.dialogId} />,
-    [desktop.dialogId]
-  );
+  const { desktop } = useServices();
 
   return hasLoaded ? (
     <Fill>
       <Layer zIndex={0}>
         <WindowManager isOpen={!desktop.showHomePane} />
-        {/* <WindowManager isOpen /> */}
       </Layer>
       <Layer zIndex={1}>
-        {desktop.showHomePane && <AppGrid isOpen={desktop.showHomePane} />}
+        {desktop.showHomePane && <HomePane isOpen={desktop.showHomePane} />}
       </Layer>
-      <Layer zIndex={2}>{DialogLayer}</Layer>
       <Layer zIndex={12}>
         <Bottom size={58}>
           <SystemBar />

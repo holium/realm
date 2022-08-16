@@ -6,14 +6,12 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
-  applySnapshot,
   clone,
   cast,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { AppModelType } from '../ship/models/docket';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
 import { ThemeModelType } from './theme.model';
 
@@ -39,8 +37,6 @@ export class DesktopService extends BaseService {
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
-    'realm.desktop.set-desktop-dimensions': this.setDesktopDimensions,
-    'realm.desktop.set-blur': this.setBlur,
     'realm.desktop.set-home-pane': this.setHomePane,
     'realm.desktop.set-app-dimensions': this.setAppDimensions,
     'realm.desktop.set-mouse-color': this.setMouseColor,
@@ -48,10 +44,6 @@ export class DesktopService extends BaseService {
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
     'realm.desktop.close-app-window': this.closeAppWindow,
-    'realm.desktop.open-dialog': this.openDialog,
-    'realm.desktop.close-dialog': this.closeDialog,
-    'realm.desktop.next-dialog': this.nextDialog,
-    'realm.desktop.previous-dialog': this.previousDialog,
   };
 
   static preload = {
@@ -67,21 +59,11 @@ export class DesktopService extends BaseService {
         wallpaper
       );
     },
-    setBlur: (blurred: boolean) => {
-      return ipcRenderer.invoke('realm.desktop.set-blur', blurred);
-    },
     setHomePane: (isHome: boolean) => {
       return ipcRenderer.invoke('realm.desktop.set-home-pane', isHome);
     },
     setActive: (spaceId: string, appId: string) => {
       return ipcRenderer.invoke('realm.desktop.set-active', spaceId, appId);
-    },
-    setDesktopDimensions: (width: number, height: number) => {
-      return ipcRenderer.invoke(
-        'realm.desktop.set-desktop-dimensions',
-        width,
-        height
-      );
     },
     setAppDimensions: (
       windowId: any,
@@ -105,23 +87,6 @@ export class DesktopService extends BaseService {
     closeAppWindow: (spaceId: string, app: any) => {
       return ipcRenderer.invoke('realm.desktop.close-app-window', spaceId, app);
     },
-    openDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.desktop.open-dialog', dialogId);
-    },
-    nextDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.desktop.next-dialog', dialogId);
-    },
-    previousDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.desktop.next-dialog', dialogId);
-    },
-    closeDialog: () => {
-      return ipcRenderer.invoke('realm.desktop.close-dialog');
-    },
-    // setFullscreen(isFullscreen: boolean) {
-    //   console.log('realm.desktop.set-fullscreen');
-    //   return ipcRenderer.invoke('realm.desktop.set-fullscreen', isFullscreen);
-    //   // ipcRenderer.on('realm.desktop.set-fullscreen', callback);
-    // },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -135,7 +100,8 @@ export class DesktopService extends BaseService {
 
   async load(patp: string, mouseColor: string) {
     this.db = new Store({
-      name: `realm.desktop.${patp}`,
+      name: 'desktop',
+      cwd: `realm.${patp}`, // base folder
       accessPropertiesByDotNotation: true,
     });
 
@@ -162,26 +128,6 @@ export class DesktopService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  setFullscreen(_event: any, isFullscreen: boolean) {
-    this.state?.setFullscreen(isFullscreen);
-  }
-
-  openDialog(_event: any, dialogId: string) {
-    this.state?.closeDialog(); // must close old dialogs first
-    this.state?.openDialog(dialogId);
-  }
-
-  nextDialog(_event: any, dialogId: string) {
-    this.state?.openDialog(dialogId);
-  }
-
-  previousDialog(_event: any, dialogId: string) {
-    this.state?.openDialog(dialogId);
-  }
-
-  closeDialog(_event: any) {
-    this.state?.closeDialog();
-  }
   async changeWallpaper(
     _event: any,
     spaceId: string,
@@ -193,21 +139,17 @@ export class DesktopService extends BaseService {
       color,
       wallpaper
     );
-    this.state?.closeDialog();
+    this.core.services.shell.closeDialog(null);
     newTheme && this.state?.setTheme(cast(newTheme)!);
     return toJS(newTheme);
   }
 
   setActive(_event: any, spaceId: string, appId: string) {
     this.state?.setActive(appId);
-    // this.state?.activeWindow =
   }
   setHomePane(_event: any, isHome: boolean) {
     this.state?.setHomePane(isHome);
-    this.state?.setIsBlurred(isHome);
-  }
-  setBlur(_event: any, blurred: boolean) {
-    this.state?.setIsBlurred(blurred);
+    this.core.services.shell.setBlur(null, isHome);
   }
 
   setMouseColor(_event: any, mouseColor: string) {
@@ -215,11 +157,6 @@ export class DesktopService extends BaseService {
   }
   setTheme(theme: ThemeModelType) {
     this.state?.setTheme(clone(theme)!);
-    // if (this.state?.theme.wallpaper !== theme.wallpaper) {
-    // }
-  }
-  setDesktopDimensions(_event: any, width: number, height: number) {
-    this.state?.setDesktopDimensions(width, height);
   }
   setAppDimensions(
     _event: any,
@@ -229,7 +166,13 @@ export class DesktopService extends BaseService {
     this.state?.setDimensions(windowId, dimensions);
   }
   openAppWindow(_event: any, spaceId: string, selectedApp: any) {
-    const newWindow = this.state!.openBrowserWindow(selectedApp);
+    let { desktopDimensions, isFullscreen } = this.core.services.shell;
+    const newWindow = this.state!.openBrowserWindow(
+      selectedApp,
+      desktopDimensions as any,
+      isFullscreen as boolean
+    );
+    this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials!;
 
     if (

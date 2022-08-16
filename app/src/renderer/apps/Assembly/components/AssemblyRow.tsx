@@ -18,9 +18,9 @@ export const AssemblyRow: FC<AssemblyRowProps> = observer(
   (props: AssemblyRowProps) => {
     const { tray, title, host, people, cursors, onClick, rightChildren } =
       props;
-    const { shell, ship } = useServices();
+    const { desktop, ship } = useServices();
 
-    const { mode, dockColor, windowColor } = shell.desktop.theme;
+    const { mode, dockColor, windowColor } = desktop.theme;
 
     let peopleText = 'people';
     if (people.length === 1) {

@@ -8,6 +8,7 @@ import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { SelectRow } from '../components/SelectionRow';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 export const Wrapper = styled(motion.div)`
   position: absolute;
@@ -31,13 +32,13 @@ const groups: any[] = [
 
 export const CreateSpaceModal: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { shell } = useServices();
-    const { windowColor } = shell.desktop.theme;
+    const { desktop } = useServices();
+    const { windowColor } = desktop.theme;
     const { workflowState, setState } = props;
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
-      SpacesActions.getOurGroups().then((ourGroups) => {
+      ShipActions.getOurGroups().then((ourGroups) => {
         setGroups(ourGroups);
         setLoading(false);
       });

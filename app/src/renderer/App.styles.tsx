@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, css } from 'styled-components';
 import { ThemeType } from './theme';
 
 type StyleProps = {
@@ -12,12 +12,18 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     cursor: none !important;
     font-family: "Rubik", sans-serif;
   }
-  
+
   :root {
-    --blur-enabled: ${(props: StyleProps) =>
-      props.blur ? 'blur(16px)' : 'none'};
+    ${(props: StyleProps) => css`
+      --blur-enabled: ${props.blur ? 'blur(16px)' : 'none'};
+      --border-color: ${props.theme.colors.ui.borderColor};
+      --background-color: ${props.theme.colors.bg.primary};
+      --transition-fast: ${props.theme.transitionFast};
+      --transition: ${props.theme.transition};
+      --text-color: ${props.theme.colors.text.primary};
+    `}
   }
-  
+
   body {
     background-color: ${(props) => props.theme.colors.bg.body};
     transition: background-color 1s ease;
@@ -26,7 +32,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     width: 100vw;
     margin: 0;
   }
-  
+
   li {
     list-style: none;
   }

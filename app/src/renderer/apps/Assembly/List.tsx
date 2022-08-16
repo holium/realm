@@ -8,6 +8,7 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { AssemblyModelType } from 'renderer/logic/apps/assembly';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 export type AssemblyListProps = {
   theme: ThemeModelType;
@@ -20,8 +21,8 @@ export type AssemblyListProps = {
 export const Assemblies: FC<AssemblyListProps> = observer(
   (props: AssemblyListProps) => {
     const { dimensions } = props;
-    const { ship, shell } = useServices();
-    const { windowColor } = shell.desktop.theme;
+    const { ship, desktop } = useServices();
+    const { windowColor } = desktop.theme;
     const [muted, setMuted] = useState(false);
     const { assemblyApp } = useTrayApps();
     const { selected, assemblies } = assemblyApp;
@@ -100,6 +101,9 @@ export const Assemblies: FC<AssemblyListProps> = observer(
                 private={room.private}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
+                  if (room.id !== assemblyApp?.live?.id) {
+                    SoundActions.playRoomEnter();
+                  }
                   assemblyApp.setSelected(room);
                   assemblyApp.setView('room');
                 }}

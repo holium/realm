@@ -18,6 +18,7 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from './components/CommButton';
 import { VoiceAnalyzer } from './components/VoiceVisualizer';
 import { Speaker } from './components/Speaker';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 export type BaseAssemblyProps = {
   theme: ThemeModelType;
@@ -30,13 +31,13 @@ export type BaseAssemblyProps = {
 export const Room: FC<BaseAssemblyProps> = observer(
   (props: BaseAssemblyProps) => {
     const { dimensions } = props;
-    const { ship, shell } = useServices();
+    const { ship, desktop } = useServices();
     const { assemblyApp } = useTrayApps();
     const { people } = assemblyApp.selected!;
 
     const [audio, setAudio] = useState<MediaStream | null>(null);
 
-    const { dockColor, windowColor, inputColor } = shell.desktop.theme;
+    const { dockColor, windowColor, inputColor } = desktop.theme;
 
     const getMicrophone = async () => {
       const audioMedia = await navigator.mediaDevices.getUserMedia({
@@ -189,6 +190,7 @@ export const Room: FC<BaseAssemblyProps> = observer(
                 customBg={dockColor}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
+                  SoundActions.playRoomLeave();
                   assemblyApp.leaveRoom(ship!.patp!);
                 }}
               >

@@ -1,13 +1,15 @@
 import { useEffect, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { calculateAnchorPoint } from 'os/lib/anchor-point';
+import { calculateAnchorPoint, MenuOrientation } from 'os/lib/anchor-point';
 
 const useContextMenu = (
   containerId: string,
   ref: any,
   menuRef: any,
   height: number,
-  position?: any
+  position?: any,
+  orientation?: MenuOrientation,
+  adaptive?: boolean
 ) => {
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
   const [show, setShow] = useState(false);
@@ -23,12 +25,13 @@ const useContextMenu = (
         setAnchorPoint(
           calculateAnchorPoint(
             event,
-            'pointer',
+            orientation || 'pointer',
             2,
             event.target.clientWidth,
             height,
-            position
-          )
+            position,
+            adaptive
+          )!
         );
         setShow(true);
       } else {

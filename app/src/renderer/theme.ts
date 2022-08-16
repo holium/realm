@@ -47,7 +47,7 @@ export const letterSpacings = {
   tracked: '0.04em',
 };
 
-export const space = [0, 4, 8, 12, 16, 20, 24, 28, 32];
+export const space = [0, 4, 8, 12, 16, 20, 24, 28, 32, 64];
 export const sizes = [8, 16, 24, 32, 64, 128, 256, 512, 768, 1024, 1536];
 
 export const breakpoints = ['40em', '56em', '64em'];

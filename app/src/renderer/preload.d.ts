@@ -7,6 +7,7 @@ declare global {
       app: AppPreloadType;
       os: OSPreloadType;
     };
+    audio: any;
   }
 }
 

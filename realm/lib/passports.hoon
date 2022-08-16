@@ -8,7 +8,7 @@
 ::   synch's contacts from contact-store.
 ::
 ::
-/-  sur=passports
+/-  sur=passports, spcs=spaces, frens-sur=friends
 =<  [sur .]
 =,  sur
 |%
@@ -20,6 +20,23 @@
 ++  enjs
   =,  enjs:format
   |%
+  ++  reaction
+    |=  rct=^reaction
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    ?-  -.rct
+        %members
+      :-  %members
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%members (passes:encode passports.rct)]
+      ==
+        %all
+      [%members (dists:encode districts.rct)]
+    ==
+  ::
   ++  action
     |=  act=^action
     ^-  json
@@ -52,6 +69,7 @@
         %ping
       :-  %ping
       (pairs [%msg ?~(msg.act ~ s+(need msg.act))]~)
+    ::
     ==
   ::
   ++  pth
@@ -92,9 +110,18 @@
     ?-  -.view
         %people
       [%people (peeps:encode people.view)]
-    ::
-        %passports
-      [%passports (passes:encode passports.view)]
+      ::
+        %members
+      [%members (passes:encode passports.view)]
+      ::
+        %member
+      [%member (pass:encode passport.view)]
+      ::
+        %is-member
+      [%is-member b+is-member.view]
+      ::
+        %districts
+      [%districts (dists:encode districts.view)]
     ==
   --
 ::
@@ -111,6 +138,23 @@
       :~  [%add add-passport]
           [%remove remove-passport]
           [%edit edit-passport]
+      ==
+    ::
+    ++  add-friend
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+      ==
+    ::
+    ++  edit-friend
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+          [%pinned bo]
+          [%tags (as cord)]
+      ==
+    ::
+    ++  remove-friend
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
     ++  add-passport
@@ -164,9 +208,22 @@
       !!
     --
   --
+::
+::
+::
 ++  encode
   =,  enjs:format
   |%
+  ++  dists
+    |=  =districts
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by districts)
+    |=  [pth=space-path:spcs =passports]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))  
+    ^-  [cord json]
+    [spc-path (passes passports)]
+  ::
   ++  peeps
     |=  =people
     ^-  json
@@ -175,6 +232,15 @@
     |=  [=^ship =person]
     ^-  [cord json]
     [(scot %p ship) (pers person)]
+  ::
+  ++  frens
+    |=  =friends:frens-sur
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by friends)
+    |=  [=^ship =friend:frens-sur]
+    ^-  [cord json]
+    [(scot %p ship) (fren friend)]
   ::
   ++  passes
     |=  =passports
@@ -193,6 +259,15 @@
       ['last-known-active' ?~(last-known-active.person ~ (time u.last-known-active.person))]
     ==
   ::
+  ++  fren
+    |=  =friend:frens-sur
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['pinned' b+pinned.friend]
+        ['tags' [%a (turn ~(tap in tags.friend) |=(tag=cord s+tag))]]
+        ['mutual' b+mutual.friend]
+    ==
+  ::
   ++  pass
     |=  =passport
     ^-  json
@@ -200,11 +275,21 @@
     :~
       ['alias' s+alias.passport]
       ['roles' (rols roles.passport)]
+      ['status' s+(scot %tas status.passport)]
     ==
   ::
   ++  rols
     |=  =roles:membership
     ^-  json
     [%a (turn ~(tap in roles) |=(rol=role:membership s+(scot %tas rol)))]
+  ::
+  ++  is-mem
+    |=  is=?
+    ^-  json
+    %-  pairs
+    :~
+      ['is-member' b+is]
+    ==
+  ::
   --
 --

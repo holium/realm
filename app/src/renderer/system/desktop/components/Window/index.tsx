@@ -7,8 +7,7 @@ import styled from 'styled-components';
 import { ThemeType } from '../../../../theme';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import {
-  WindowModelProps,
-  WindowModelType,
+  WindowModelProps
 } from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
@@ -23,7 +22,6 @@ import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogView } from '../../../dialog/Dialog/Dialog';
-
 import {
   DialogTitlebar,
   DialogTitlebarProps,
@@ -57,8 +55,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
     const { theme, window, desktopRef } = props;
     const { textColor, windowColor } = theme;
-    const { shell } = useServices();
-    const { desktop } = shell;
+    const { shell, desktop } = useServices();
 
     const [unmaximize, setUnmaximize] = useState<
       | {
@@ -117,7 +114,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           height: mHeight.get(),
           width: mWidth.get(),
         });
-        const offset = desktop.isFullscreen ? 0 : 30;
+        const offset = shell.isFullscreen ? 0 : 30;
         // @ts-ignore
         const desktopDims = desktopRef.current!.getBoundingClientRect();
         mX.set(0);
@@ -138,7 +135,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           height: mHeight.get(),
           width: mWidth.get(),
         });
-    }, [desktop.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
+    }, [shell.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
 
     const onDragStop = () => {
       setIsDragging(false);
@@ -197,6 +194,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         hasBorder={!hideTitlebarBorder}
         showDevToolsToggle={showDevToolsToggle}
         // shareable
+        zIndex={window.zIndex}
         dragControls={dragControls}
         onDevTools={onDevTools}
         onDragStart={() => onDragStart()}
@@ -239,6 +237,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             noTitlebar={noTitlebar}
             hasBorder={!hideTitlebarBorder}
             showDevToolsToggle={showDevToolsToggle}
+            zIndex={window.zIndex}
             // shareable
             dragControls={dragControls}
             onDevTools={onDevTools}

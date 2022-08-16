@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { variant } from 'styled-system';
+import { variant, space, layout } from 'styled-system';
 import type { ThemeType } from '../theme';
 import {
   TypographyFunctionsProps,
@@ -106,6 +106,8 @@ const textVariants = variant({
 });
 
 export const Text = styled(motion.p)<TextProps>`
+  ${space}
+  ${layout}
   ${textVariants}
   ${typographyFunctions};
   ${(props) =>
@@ -120,6 +122,24 @@ export const Text = styled(motion.p)<TextProps>`
     `}
 `;
 
+export const Anchor = styled(motion.a)<TextProps>`
+  ${textVariants}
+  ${(props) =>
+    props.fontByName &&
+    css`
+      font-family: ${props.theme.fontByName[props.fontByName]};
+    `};
+  ${(props) =>
+    props.fontByType &&
+    css`
+      font-family: ${props.theme.fonts[props.fontByType]};
+    `}
+`;
+
 Text.defaultProps = {
+  variant: 'inherit',
+};
+
+Anchor.defaultProps = {
   variant: 'inherit',
 };

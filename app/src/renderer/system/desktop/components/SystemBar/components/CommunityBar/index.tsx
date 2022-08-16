@@ -11,8 +11,7 @@ import { rgba } from 'polished';
 type CommunityBarProps = {};
 
 export const CommunityBar: FC<CommunityBarProps> = observer(() => {
-  const { shell } = useServices();
-  const { desktop } = shell;
+  const { desktop } = useServices();
 
   const { dockColor } = useMemo(
     () => ({

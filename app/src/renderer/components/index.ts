@@ -1,4 +1,3 @@
-import { IconPathsType } from './Icons/icons';
 export * from './Box';
 export * from './Card';
 export * from './Column';
@@ -34,3 +33,6 @@ export * from './Skeleton';
 export * from './NFTBadge';
 export * from './Crest';
 export * from './ShipSearch';
+export * from './People';
+export * from './SpacePicture';
+export * from './AppTile';

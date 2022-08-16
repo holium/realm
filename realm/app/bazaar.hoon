@@ -5,7 +5,7 @@
 ::
 ::  Should watch and sync data with %treaty and %docket under /garden.
 ::
-/-  store=bazaar, docket, sp-sur=spaces, membership-store=membership, hark=hark-store, passport-store=passports
+/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passports-store=passports
 /+  dbug, default-agent
 |%
 +$  card  card:agent:gall
@@ -15,7 +15,6 @@
 +$  state-0
   $:  %0
       =membership:membership-store
-      =installed-apps:store
       =space-apps:store
   ==
 --
@@ -32,7 +31,7 @@
 ++  on-init
   ^-  (quip card _this)
   ::  scry docket for charges
-  =/  jon=json  .^(json %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/json)
+  :: =/  jon=json  .^(json %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/json)
   ::  convert charges json to charge data type (defined in docket)
   :: =/  charges  (charges:dejs:format jon)
   :: :_  this(charges charges)
@@ -58,8 +57,26 @@
   |=  =path
   ^-  (quip card _this)
   =^  cards  state
-  ?+  path            (on-watch:def path)
-    [%updates @ ~]    (bind:su:core i.t.path)
+  ?+  path              (on-watch:def path)
+    ::
+    [%updates ~]
+      ::  only host should get all updates
+      ?>  (is-host:core src.bowl)
+      (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
+    ::
+    [%bazaar @ @ ~]
+      :: The space level watch subscription
+      =/  host        `@p`(slav %p i.t.path)
+      =/  space-pth   `@t`i.t.t.path
+      ~&  >  [i.t.path host space-pth src.bowl]
+      :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
+      ::  recommends crash on permission check or other failure
+      ?>  (check-member:security:core [host space-pth] src.bowl)
+      =/  pth         [our.bowl space-pth]
+      =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
+      =/  apps        (~(got by space-apps.state) pth)
+      (bazaar:send-reaction:core [%space-apps pth apps] paths)
+    ::
     [%response ~]     ~
   ==
   [cards this]
@@ -113,7 +130,7 @@
     [%spaces ~]
       ?+    -.sign  (on-agent:def wire sign)
         %watch-ack
-          ?~  p.sign  `this
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to spaces" ~)  `this
           ~&  >>>  "{<dap.bowl>}: spaces subscription failed"
           `this
     ::
@@ -125,17 +142,17 @@
     ::
         %fact
           ?+    p.cage.sign  (on-agent:def wire sign)
-              %spaces-reaction
-                =^  cards  state
-                  (on:sp:core !<(=reaction:sp-sur q.cage.sign))
-                [cards this]
+                %spaces-reaction
+              =^  cards  state
+                (spaces-reaction:core !<(=reaction:spaces-store q.cage.sign))
+              [cards this]
           ==
       ==
 
     [%docket ~]
       ?+    -.sign  (on-agent:def wire sign)
         %watch-ack
-          ?~  p.sign  `this
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to docket" ~)  `this
           ~&  >>>  "{<dap.bowl>}: docket/charges subscription failed"
           `this
     ::
@@ -153,6 +170,7 @@
                 [cards this]
           ==
       ==
+
   ==
 ::
 ++  on-arvo   |=([wire sign-arvo] !!)
@@ -168,17 +186,29 @@
     |=  =action:store
     ^-  (quip card _state)
     ?-  -.action
+      %pin         (pin +.action)
+      %recommend   (rec +.action)
       %add         (add +.action)
       %remove      (rem +.action)
     ==
   ::
+  ++  pin
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  rec
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    `state
+  ::
   ++  add
-    |=  [path=space-path:sp-sur =sample:store]
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
   ::
   ++  rem
-    |=  [path=space-path:sp-sur =sample:store]
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
   --
@@ -213,69 +243,75 @@
     ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
     `state
   --
-::  spaces arms
-++  sp
-  |%
-  ++  on
-    |=  =reaction:sp-sur
-    ^-  (quip card _state)
-    ?-  -.reaction
-      %initial  (ini +.reaction)
-      %add      (add +.reaction)
-      %replace  (rep +.reaction)
-      %remove   (rem +.reaction)
-    ==
+::
+++  spaces-reaction
+  |=  [rct=reaction:spaces-store]
+  ^-  (quip card _state)
+  |^
+  ?-  -.rct
+    %initial        (on-initial +.rct)
+    %add            (on-add +.rct)
+    %replace        (on-replace +.rct)
+    %remove         (on-remove +.rct)
+    %space          (on-space-initial +.rct)
+    %member-added   (on-member-added +.rct)
+  ==
   ::
-  ++  ini
-    |=  [sps=spaces:sp-sur mems=membership:membership-store]
+  ++  on-initial
+    |=  [spaces=spaces:spaces-store]
     ^-  (quip card _state)
-    =/  cards=(list card)
-    %-  ~(rep by sps)
-    |=  [[path=space-path:sp-sur =space:sp-sur] acc=(list card)]
-      %-  weld
-      :-  acc  ^-  (list card)
-      :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
-      ==
-    :_  state(membership mems)
-    cards
+    :: =/  cards=(list card)
+    :: %-  ~(rep by sps)
+    :: |=  [[path=space-path:spaces-store =space:spaces-store] acc=(list card)]
+    ::   %-  weld
+    ::   :-  acc  ^-  (list card)
+    ::   :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
+    ::   ==
+    :: :_  state(membership mems)
+    :: cards
+    `state
   ::
-  ++  add
-    |=  [=space:sp-sur =members:membership-store]
-    ^-  (quip card _state)
-    =/  key  [ship.path.space space.path.space]
-    :_  state(membership (~(put by membership.state) key members))
-    :~  [%pass /bazaar/(scot %tas space.path.space) %agent [our.bowl dap.bowl] %watch /updates]
-    ==
-  ::
-  ::  $rep: not sure what to do here. could try and get existing space
-  ::    and delete that from map, then re-add this new space, but what to
-  ::    do about missing membership info?
-  ++  rep
-    |=  [=space:sp-sur]
+  ++  on-add
+    |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
     `state
   ::
-  ++  rem
-    |=  [path=space-path:sp-sur]
+  ++  on-replace
+    |=  [space=space:spaces-store]
     ^-  (quip card _state)
-    =/  key  [ship.path space.path]
-    :_  state(membership (~(del by membership.state) key))
-    :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %leave ~]
-    ==
+    `state
+  ::
+  ++  on-remove
+    |=  [path=space-path:spaces-store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-space-initial
+    |=  [path=space-path:spaces-store space=space:spaces-store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-member-added
+    |=  [path=space-path:spaces-store =ship]
+    ^-  (quip card _state)
+    :: ?:  ?|  =(our.bowl ship.path)
+    ::         =(ship ship.path)
+    ::     ==  `state
+    %-  (slog leaf+"{<dap.bowl>}: on-member-added:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
+    `state
+    :: :~  [%pass /passports %agent [ship.path %passports] %watch /members/(scot %p ship.path)/(scot %tas space.path)]
+    :: ==
   --
-::  subscription (watch) handling
-++  su
+::
+++  send-reaction
   |%
   ::
-  ::  $bi: bind. check that remote is a valid space member. if
-  ::    member allow subscription.
-  ++  bind
-    |=  [space=cord]
+  ++  bazaar
+    |=  [payload=reaction:store paths=(list path)]
     ^-  (quip card _state)
-    :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
-    ::  recommends crash on permission check or other failure
-    ?.  (check-member:security:core space src.bowl)  !!
-    `state
+    :_  state
+    :~  [%give %fact paths bazaar-reaction+!>(payload)]
+    ==
   --
 ::
 ::  $security. member/permission checks
@@ -284,12 +320,12 @@
   ::  $check-member - check for member existence and 'joined' status
   ::    add additional security as needed
   ++  check-member
-    |=  [space=cord =ship]
-    =/  members  (~(get by membership.state) [our.bowl space])
+    |=  [path=space-path:spaces-store =ship]
+    =/  members  (~(get by membership.state) path)
     ?~  members  %.n
     =/  member  (~(get by u.members) ship)
     ?~  member  %.n
-    =/  passport  .^(passport:passport-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/passport/[space]/noun)
+    =/  passport  .^(passport:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/passport/[space.path]/noun)
     ?:(=(status.passport 'joined') %.y %.n)
   --
 ::
@@ -377,4 +413,8 @@
 ::       !!
 ::     --
 ::   --
+::
+++  is-host
+  |=  [=ship]
+  =(our.bowl ship)
 --

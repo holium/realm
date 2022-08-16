@@ -7,6 +7,21 @@ A desktop environment for Urbit.
 In order to run Urbit locally, you will need to create a local fake ship. Once these ships are
 created, you can then go to [`/app/README.md`](/app/README.md) to get started with Realm.
 
+### Yarn link@holium/realm-multiplayer
+
+To setup the workspace, do the following:
+
+```zsh
+cd lib/multiplayer
+yarn link
+
+cd app
+yarn link "@holium/realm-multiplayer"
+
+cd playground/ui
+yarn link "@holium/realm-multiplayer"
+```
+
 ### Fake ships and Urbit
 
 ```zsh
@@ -76,19 +91,4 @@ Now, you want to start your dev ship `zod`.
 
 ```zsh
 ./urbit zod
-```
-
-### Yarn linking
-
-To setup the workspace, do the following:
-
-```zsh
-cd lib/multiplayer
-yarn link
-
-cd app
-yarn link "@holium/realm-multiplayer"
-
-cd playground/ui
-yarn link "@holium/realm-multiplayer"
 ```

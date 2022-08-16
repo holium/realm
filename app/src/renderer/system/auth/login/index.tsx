@@ -21,18 +21,18 @@ import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { SoundActions } from 'renderer/logic/actions/sound';
 
 type LoginProps = {
   addShip: () => void;
-  continueSignup: (ship: any) => void;
   hasWallpaper?: boolean;
 };
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, shell, ship } = useServices();
+  const { identity, desktop, ship } = useServices();
   const { auth } = identity;
-  const { theme } = shell.desktop;
+  const { theme } = desktop;
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -41,7 +41,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   // Setting up options menu
   const menuWidth = 180;
   const config = useMenu(optionsRef, {
-    orientation: 'bottom-left',
+    orientation: 'left',
     padding: 6,
     menuWidth,
   });
@@ -72,11 +72,13 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   };
   const clickSubmit = (event: any) => {
     event.stopPropagation();
-    window.electron.os.auth.login(
+    AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
-    );
+    )
+      .catch((err) => console.warn(err))
+      .then(() => SoundActions.playLogin());
   };
 
   let colorProps = null;
