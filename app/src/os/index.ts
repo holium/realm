@@ -136,11 +136,9 @@ export class Realm extends EventEmitter {
   }
 
   connect(session: ISession) {
-    console.log('os - connect()');
     this.conduit = new Urbit(session.url, session.ship, session.cookie);
     this.conduit.open();
     this.conduit.onOpen = () => {
-      console.log('os - connect() - conduit.onOpen()');
       this.onLogin();
     };
     this.conduit.onRetry = () => console.log('on retry');

@@ -31,7 +31,7 @@ export const ContactStore = types
     },
     getContactAvatarMetadata(patp: string) {
       const contact = self.rolodex.get(patp);
-      console.log(toJS(contact));
+      // console.log(toJS(contact));
       return {
         color: contact?.color,
         avatar: contact?.avatar,

@@ -53,7 +53,7 @@
   ::
   ++  on-poke
     |=  [=mark =vase]
-    ^-  (quip card _this)    
+    ^-  (quip card _this)
     :: ?>  (team:title our.bowl src.bowl) :: is our ship or moon
     |^
     =^  cards  state
@@ -91,12 +91,12 @@
     ^-  (quip card _this)
     =/  cards=(list card)
       ?+    path      (on-watch:def path)
-          [%updates ~]  
+          [%updates ~]
         ::  only host should get all updates
         ?>  (is-host:core src.bowl)
         (spaces:send-reaction [%initial spaces.state] [/updates ~])
         ::
-          [%our ~]                      
+          [%our ~]
           ::  only host should get our updates
         ?>  (is-host:core src.bowl)
         [~]
@@ -347,7 +347,7 @@
   |%
   ++  member
     |=  [rct=reaction:store paths=(list path)]
-    ^-  (list card)      
+    ^-  (list card)
     [%give %fact paths spaces-reaction+!>(rct)]~
   ::
   ++  spaces
