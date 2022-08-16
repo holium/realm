@@ -142,7 +142,7 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               setLoading(true);
               const { name, isPrivate } = form.actions.submit();
               evt.stopPropagation();
-              SoundActions.playRoomEnter();
+              // SoundActions.playRoomEnter();
               RoomsActions.createRoom(
                 `${ship?.patp}/${name}/${new Date().getTime()}`,
                 isPrivate ? 'private' : 'public',

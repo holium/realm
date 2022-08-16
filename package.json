@@ -12,8 +12,5 @@
     "build:playground": "yarn workspace @holium/playground build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
     "start": "yarn workspace @holium/realm start"
-  },
-  "devDependencies": {
-    "electron": "19.0.0"
   }
 }

@@ -1,7 +1,14 @@
 import { createContext, useContext } from 'react';
-import { applyPatch, Instance, types, onSnapshot } from 'mobx-state-tree';
+import {
+  applyPatch,
+  Instance,
+  types,
+  onSnapshot,
+  onAction,
+} from 'mobx-state-tree';
 
 import { RoomsAppState } from 'os/services/tray/rooms.model';
+import { SoundActions } from '../actions/sound';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -69,6 +76,21 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
     // rooms: [], TODO
   },
+});
+
+// onAction(trayStore, (call) => {
+//   console.log(call);
+// });
+// Watch actions for sound trigger
+onAction(trayStore.roomsApp, (call) => {
+  const patchArg = call.args![0][0];
+  if (patchArg.path === '/liveRoom') {
+    if (patchArg.op === 'replace') {
+      patchArg.value
+        ? SoundActions.playRoomEnter()
+        : SoundActions.playRoomLeave();
+    }
+  }
 });
 
 onSnapshot(trayStore, (snapshot) => {

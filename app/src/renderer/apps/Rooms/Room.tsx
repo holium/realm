@@ -208,9 +208,9 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (roomsApp.isCreator(ship!.patp!, id)) {
+                  // SoundActions.playRoomLeave();
                   RoomsActions.deleteRoom(id);
                 } else {
-                  SoundActions.playRoomLeave();
                   RoomsActions.leaveRoom(id);
                 }
               }}
