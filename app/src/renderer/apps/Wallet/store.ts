@@ -11,7 +11,7 @@ export const constructSampleWallet = async () => {
   //   'wisdom buzz alcohol cover hour subway bamboo nut strike crop tape duck'
   // );
   const hdWallet = realmWallet.importHDWallet(
-    'wisdom buzz alcohol cover hour subway bamboo nut strike crop tape duck',
+    'carry poem leisure coffee issue urban save evolve catch hammer simple unknown',
     0
   );
 
@@ -85,16 +85,28 @@ export const WalletStore = types
       'ethereum:detail',
       'ethereum:transaction',
       'ethereum:settings',
+      'bitcoin:list',
     ]),
     bitcoin: types.maybe(BitcoinStore),
     ethereum: EthStore,
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
-      if (network === 'ethereum') self.ethereum.initial(wallets);
+      if (network === 'ethereum') {
+        self.ethereum.initial(wallets);
+        self.currentView = 'ethereum:list';
+      } else {
+        //  self.bitcoin.initial(wallets);
+        self.currentView = 'bitcoin:list';
+      }
       // if (network === 'bitcoin') self.bitcoin.initial(wallets);
     },
     setNetwork(network: 'bitcoin' | 'ethereum') {
       self.network = network;
+      if (network === 'ethereum') {
+        self.currentView = 'ethereum:list';
+      } else {
+        self.currentView = 'bitcoin:list';
+      }
     },
   }));
