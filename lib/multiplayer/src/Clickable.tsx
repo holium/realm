@@ -1,10 +1,4 @@
-import React, {
-  MouseEventHandler,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { MouseEventHandler, useContext, useEffect, useRef } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { RealmMultiplayerContext } from "./Provider";
 import {
@@ -14,7 +8,7 @@ import {
   CursorOutPayload,
   CursorOverPayload,
   CursorUpPayload,
-} from "../../../../../app/src/renderer/system/desktop/components/Multiplayer/types";
+} from "./types";
 
 interface Props {
   asChild?: boolean;

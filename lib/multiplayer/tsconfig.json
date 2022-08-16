@@ -9,21 +9,20 @@
     "strict": true,
     "pretty": true,
     "sourceMap": true,
-    "baseUrl": "./src/",
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    "baseUrl": "src",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "outDir": "release/app/dist",
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "noImplicitAny": false,
-    "noImplicitReturns": false,
-    "noImplicitThis": false
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true
   },
-  "include": ["./src"]
+  "include": ["src"]
 }
