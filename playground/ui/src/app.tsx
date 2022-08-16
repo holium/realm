@@ -2,9 +2,9 @@ import React, { FC, useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet, Link } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./logic/store";
-import * as RealmMultiplayer from "./lib/realm-multiplayer";
-import { useShips, useChannel } from "./lib/realm-multiplayer";
-import { BaseRealmPayload } from "../../../app/src/renderer/system/desktop/components/Multiplayer/types";
+import * as RealmMultiplayer from "@holium/realm-multiplayer";
+import { useShips, useChannel } from "@holium/realm-multiplayer";
+import { BaseRealmPayload } from "@holium/realm-multiplayer";
 import { Editor } from "./components/Editor";
 
 type IProps = {

@@ -1,13 +1,13 @@
 // Functions that manage multiplayer
 
-import { ShipModelType } from 'renderer/logic/ship/store';
 import {
   RealmMultiplayerInterface,
   AnyPayload,
   PresenceStatePayload,
   RealmEvent,
   PresenceStateSyncPayload,
-} from './types';
+  MultiplayerShipType,
+} from '@holium/realm-multiplayer';
 
 let socket: WebSocket | undefined;
 
@@ -18,7 +18,7 @@ const subscriptions: Record<EventKey, Set<Function>> = {};
 type PresenceStateKey = string;
 type SessionId = string;
 const presenceStates: Record<PresenceStateKey, Record<SessionId, object>> = {};
-let ship: ShipModelType | undefined;
+let ship: MultiplayerShipType | undefined;
 
 // initialize websocket connection, join an initial room, and set up subscriptions dispatch
 export const init: RealmMultiplayerInterface['init'] = ({

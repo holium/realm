@@ -1,53 +1,129 @@
-::  sur/rooms.hoon
-::  Defines the types for the webrtc rooms in Realm.
-
-/-  membership, spaces
-|%
-:: 
-::  we may handle the participant status via webrtc only
+:: rooms is a whitelisting utility
 ::
 ::
-+$  participants   (set ship)
-+$  room-access    ?(%public %private)
-+$  room
-  $:  id=@t                 ::  hashed value used for unique room
-      title=cord            ::  the title of the room
-      host=space-type       ::  who the host is
-      access=room-access    ::  is this room publicly shared or private invites
-      =participants         ::  
-  ==
-
-+$  space-rooms     (map space-path:spaces room)
+:: a ship can only be in one room at a time
+::    this could be extended, but i kinda like it
+::    it simplifies some use cases, but makes others impossible
+::    and something like this needs to be radically simple for other apps to use
 ::
-::  Poke actions
+:: other apps can use ROOM
+:: to configure arbitrarily permissioned
+:: p2p comms
+::
+:: e.g.
+:: pokur
+:: webrtc group calls
+:: shared documents
+:: club penguin ;)
+::
+:: the intended use is for other agents to
+::   simply scry out %present or %whitelist
+::   and block pokes from ships who are not in the set
+::
+:: :: :: :: ::
+::
+::  PROVIDER
+::  app/rooms/hoon
 ::  
-::  %create: a host creates a room
-::  %join: a ship joins a room (should check if invited depending on access)
-::  %leave: a ship leave a room (should end the room if the host leaves)
-::  %kick: only the host can kick a ship from the room
+::  CLIENT
+::  app/room/hoon
 ::
+/-  spaces
+|%
++$  rid       @t
++$  title     cord
++$  capacity  @ud
++$  access    ?(%public %private)
++$  room
+  $:  =rid
+      provider=ship
+      creator=ship
+      =access
+      =title
+      present=(set ship)
+      whitelist=(set ship)  :: only used if access is %private
+      capacity=@ud
+      space=(unit cord)     :: space-path is provider/space-name
+  ==
+::
++$  view
+  $%  $:  %full
+          my-room=(unit room)
+          provider=(unit ship)
+      ==
+    [%present ships=(set ship)]
+    [%whitelist ships=(set ship)]
+    ::
+    [%provider who=(unit ship)]
+  ==
+::
+:: actions for hitting the provider.
+:: user   -> client
+:: agent  -> client
+:: client -> server
 +$  action
-  $%  [%create path=space-path:spaces payload=room-add]
-      [%join path=space-path:spaces id=@t]
-      [%leave path=space-path:spaces id=@t] 
-      [%kick path=space-path:spaces id=@t participant=ship]
+  $%  [%set-provider =ship]          :: whose %rooms agent
+      [%logout ~]                    :: set provider to null
+      ::
+      [%enter =rid]
+      [%exit ~]
+      [%create =rid =access =title enter=?]
+      [%set-title =rid =title]
+      [%set-access =rid =access]
+      [%set-capacity =rid =capacity]
+      [%set-space =rid space=cord]
+      [%invite =rid =ship]
+      :: TODO? [%invite-ships =rid ships=(set ship)]
+      :: TODO? [%promote =rid =ship]  :: add to whitelist
+      [%kick =rid =ship]
+      [%delete =rid]
+      [%request =rid]   :: request latest info on a room
+      [%request-all ~]  :: request all info on all rooms
+      :: TODO? %request-space =space-path:spaces  
+      ::
+      [%chat =cord]
   ==
 ::
-+$  room-add
-  $:  title=space-name
-      host=space-type
-      access=room-access
-      =participants
+:: updates
+:: server -> client
+:: client -> user
+:: client -> client  (just %chat)
++$  update
+  $%  
+    ::
+    :: updates from provider
+    :: app/rooms -> app/room
+      [%room =room]
+      [%rooms rooms=(set room)]
+    ::
+      [%invited provider=ship =rid =ship]
+      [%kicked provider=ship =rid =ship]  
+    ::
+    :: chat is thrown in as an after thought.
+    ::   its a simple example of using the (set ship) as a whitelist
+    ::   and it makes sure every room comes with a group chat by default
+    ::
+    :: updates from peers in my room
+    :: come in as pokes, denied unless they are from someone in my room
+    :: app/room -> app/room
+      [%chat from=ship content=cord]
+    ==
+::
+:: server actions
++$  server-action
+  $%  [%set-online online=?]
+      [%ban =ship]
+      [%unban =ship]
+      [%ban-set ships=(set ship)]
+      [%unban-set ships=(set ship)]
+      [%unban-all ~]
   ==
 ::
-::  Reaction via watch paths
+:: i tell provider what room im in
+:: provider tells subs what room everyone is in
 ::
-+$  reaction
-  $%  [%initial path=space-path:spaces =space-rooms]
-      [%room-add path=space-path:spaces =room]
-      [%room-ended path=space-path:spaces id=@t]
-      [%participant-joined path=space-path id=@t participant=ship]
-      [%participant-left path=space-path id=@t participant=ship]
-      [%participant-kicked path=space-path id=@t participant=ship]
-  ==
+:: everyone keeps a copy of their room, from their provider
+::
+:: local copy is used to whitelist
+::
 --

@@ -1,7 +1,14 @@
 import { createContext, useContext } from 'react';
-import { Instance, types } from 'mobx-state-tree';
-import { AssemblyAppState } from './assembly';
+import {
+  applyPatch,
+  Instance,
+  types,
+  onSnapshot,
+  onAction,
+} from 'mobx-state-tree';
 import { WalletStore } from 'renderer/apps/Wallet/store';
+import { RoomsAppState } from 'os/services/tray/rooms.model';
+import { SoundActions } from '../actions/sound';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -33,7 +40,7 @@ export const TrayAppStore = types
     ),
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
-    assemblyApp: AssemblyAppState,
+    roomsApp: RoomsAppState,
     walletApp: WalletStore,
   })
   .actions((self) => ({
@@ -48,13 +55,21 @@ export const TrayAppStore = types
     },
   }));
 
+const loadSnapshot = () => {
+  const localStore = localStorage.getItem('trayStore');
+  if (localStore) return JSON.parse(localStore);
+  return {};
+};
+
+const persistedState = loadSnapshot();
+
 export const trayStore = TrayAppStore.create({
   activeApp: null,
-  coords: {
+  coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
   },
-  dimensions: {
+  dimensions: (persistedState && persistedState.dimensions) || {
     width: 200,
     height: 200,
   },
@@ -64,28 +79,30 @@ export const trayStore = TrayAppStore.create({
     ethereum: {},
     bitcoin: {},
   },
-  assemblyApp: {
+  roomsApp: (persistedState && persistedState.roomsApp) || {
     currentView: 'list',
-    selected: undefined,
-    // live: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
-    assemblies: [
-      // {
-      //   id: '~labruc-dillyx-lomder-librun/room/daily-work-chat',
-      //   title: 'Daily work chat',
-      //   host: '~labruc-dillyx-lomder-librun',
-      //   people: [
-      //     '~labruc-dillyx-lomder-librun',
-      //     '~lomder-librun',
-      //     '~lodlev-migdev',
-      //     '~bus',
-      //   ],
-      //   cursors: true,
-      //   private: false,
-      // },
-    ],
+    // rooms: [], TODO
   },
 });
 
+// onAction(trayStore, (call) => {
+//   console.log(call);
+// });
+// Watch actions for sound trigger
+onAction(trayStore.roomsApp, (call) => {
+  const patchArg = call.args![0][0];
+  if (patchArg.path === '/liveRoom') {
+    if (patchArg.op === 'replace') {
+      patchArg.value
+        ? SoundActions.playRoomEnter()
+        : SoundActions.playRoomLeave();
+    }
+  }
+});
+
+onSnapshot(trayStore, (snapshot) => {
+  localStorage.setItem('trayStore', JSON.stringify(snapshot));
+});
 // -------------------------------
 // Create core context
 // -------------------------------
@@ -100,3 +117,22 @@ export function useTrayApps() {
   }
   return store;
 }
+
+window.electron.os.onEffect((_event: any, value: any) => {
+  if (value.response === 'initial') {
+    if (value.resource === 'rooms') {
+      console.log('yo');
+      applyPatch(trayStore.roomsApp, value.model);
+    }
+  }
+  if (value.response === 'patch') {
+    if (value.resource === 'rooms') {
+      applyPatch(trayStore.roomsApp, value.patch);
+    }
+  }
+  // if (value.response === 'initial') {
+  //   if (value.resource === 'auth') {
+  //     // authState.authStore.initialSync(value);
+  //   }
+  // }
+});

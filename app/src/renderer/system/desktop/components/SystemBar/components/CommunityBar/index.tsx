@@ -5,7 +5,7 @@ import { SpaceSelector } from './SpaceSelector';
 import { AppDock } from './AppDock';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { AssemblyTray } from './Assembly';
+import { RoomTray } from './Rooms';
 import { rgba } from 'polished';
 
 type CommunityBarProps = {};
@@ -35,7 +35,7 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
         <AppDock />
       </Flex>
       <Flex>
-        <AssemblyTray />
+        <RoomTray />
       </Flex>
     </SystemBarStyle>
   );
