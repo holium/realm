@@ -241,8 +241,8 @@ const hostingProviderDialogs: DialogRenderers = {
       dimensions: {
         x: 0,
         y: 0,
-        width: 460,
-        height: 500,
+        width: 750,
+        height: 550,
       },
     },
   },

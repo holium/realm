@@ -5,17 +5,16 @@ import UrbitSVG from '../../../../assets/urbit.svg';
 import {
   Box,
   Sigil,
-  Grid,
   Text,
   Flex,
   Icons,
   Button,
 } from 'renderer/components';
+import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { transparentize } from 'polished';
 
 interface SelectPlanProps extends BaseDialogProps {
@@ -24,140 +23,100 @@ interface SelectPlanProps extends BaseDialogProps {
 
 const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
   let [subscribeLoading, setSubscribeLoading] = useState(false);
+  let [tier, setTier] = useState('monthly');
   let { onboarding } = useServices();
   let planet = onboarding.planet!;
 
-  const panelBackground = darken(0.02, props.theme.windowColor);
-  const panelBorder = `1px solid ${transparentize(0.9, '#000000')}`;
+  const panelBackground = darken(0.02, props.theme!.windowColor);
+  const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
+  const bulletIconColor = transparentize(0.1, props.theme!.iconColor);
+  const selectedBackground = transparentize(0.8, theme.light.colors.brand.primary);
+  const selectedBorder = `2px solid ${transparentize( 0.3, theme.light.colors.brand.primary)}`;
 
   async function subscribe() {
     setSubscribeLoading(true);
-    await OnboardingActions.prepareCheckout();
+    await OnboardingActions.prepareCheckout(tier);
     setSubscribeLoading(false);
-    console.log('done loading, on nextttt');
     props.onNext && props.onNext();
   }
 
-  async function previous() {
-    OnboardingActions.setStep(OnboardingStep.ACCESS_CODE);
-  }
+  const PlanetPreview = () => (
+    <Flex flexDirection="column" justifyContent="center" alignItems="center">
+      <Box height={48} width={48} mb={12}>
+        <Sigil
+          color={['black', 'white']}
+          simple={false}
+          size={48}
+          patp={planet.patp!}
+        />
+      </Box>
+      <Text> {planet.patp!} </Text>
+    </Flex>
+  );
 
-  return (
-    <Grid.Column noGutter lg={12} xl={12}>
-      <Flex
+  const HostingFeature = (props: any) => (
+    <Flex pb={10} flexDirection="row">
+      <Icons
+        mr={14}
+        color={bulletIconColor}
+        name="CheckCircle"
+      />
+      <Text variant="body">{props.children}</Text>
+    </Flex>
+  );
+
+  const SubscriptionTier = (props: any) => (
+    <Box
+        background={props.selected ? selectedBackground : panelBackground}
+        border={props.selected ? selectedBorder : panelBorder}
+        borderRadius={6}
+        padding={3}
+        display="flex"
         width="100%"
-        height="100%"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="space-around"
+        mt={props.mt}
+        onClick={props.onClick}
       >
-        <Flex
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Box height={48} width={48} mb={12}>
-            <Sigil
-              color={['black', 'white']}
-              simple={false}
-              size={48}
-              patp={planet.patp!}
-            />
-          </Box>
-          <Text> {planet.patp!} </Text>
+      <Flex width="100%" flexDirection="column" alignItems="center">
+        <Flex width="100%" justifyContent="space-between">
+          <Text variant="h6" mb={2}>
+            {props.title}
+          </Text>
+          <Text textAlign="center" variant="h5">
+            {props.price}
+          </Text>
         </Flex>
-        <Box
-          mb={2}
-          height={290}
-          width={275}
-          background={panelBackground}
-          border={panelBorder}
-          borderRadius={18}
-        >
-          <Flex
-            pt={20}
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Flex flexDirection="column" justifyContent="center">
-              <Text variant="h5" mb={2}>
-                Planet hosting
-              </Text>
-              <Text
-                textAlign="center"
-                fontSize={14}
-                color={transparentize(0.5, props.theme.iconColor)}
-              >
-                $30/month
-              </Text>
-            </Flex>
-            <Flex
-              pt={24}
-              pl={20}
-              mb={18}
-              width={256}
-              flexDirection="column"
-              alignItems="left"
-              justifyContent="center"
-            >
-              <Flex pb={10} flexDirection="row">
-                <Icons
-                  mr={14}
-                  color={transparentize(0.5, props.theme.iconColor)}
-                  name="CheckCircle"
-                />
-                <Text variant="body"> Backups </Text>
-              </Flex>
-              <Flex pb={10} flexDirection="row">
-                <Icons
-                  mr={14}
-                  color={transparentize(0.5, props.theme.iconColor)}
-                  name="CheckCircle"
-                />
-                <Text variant="body"> Automatic OTA updates </Text>
-              </Flex>
-              <Flex pb={10} flexDirection="row">
-                <Icons
-                  mr={14}
-                  color={transparentize(0.5, props.theme.iconColor)}
-                  name="CheckCircle"
-                />
-                <Text variant="body"> Customer support </Text>
-              </Flex>
-              <Flex pb={10} mr={4} flexDirection="row">
-                <Icons
-                  mr={14}
-                  color={transparentize(0.5, props.theme.iconColor)}
-                  name="CheckCircle"
-                />
-                <Text variant="body">2GB block storage included</Text>
-              </Flex>
-            </Flex>
-            <Flex
-              px={20}
-              width="100%"
-              flexDirection="row"
-              justifyContent="space-between"
-            >
-              <Button
-                variant="custom"
-                background={darken(0.04, panelBackground)}
-                border={panelBorder}
-                onClick={previous}
-                color={props.theme.textColor}
-              >
-                Invite code
-              </Button>
-              <Button isLoading={subscribeLoading} onClick={subscribe}>
-                {' '}
-                Subscribe{' '}
-              </Button>
-            </Flex>
-          </Flex>
+        <Box mt={1}>
+          <Text variant="body" color={bulletIconColor}>
+            {props.children}
+          </Text>
         </Box>
       </Flex>
-    </Grid.Column>
+    </Box>
+  )
+
+  return (
+    <>
+      <Flex width="100%" height="100%" flexDirection="row">
+        <Box flex={2} display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+          <PlanetPreview />
+          <Flex pt={72} flexDirection="column" alignItems="left" justifyContent="center">
+            <HostingFeature> Backups </HostingFeature>
+            <HostingFeature> Automatic OTA updates </HostingFeature>
+            <HostingFeature> Customer support </HostingFeature>
+            <HostingFeature> 2GB block storage included </HostingFeature>
+          </Flex>
+        </Box>
+        <Flex flex={3} px={50} flexDirection="column" justifyContent="center">
+          <SubscriptionTier title="Monthly subscription" price="$16/month" selected={tier === 'monthly'} onClick={() => setTier('monthly')}>
+            Pay monthly and own your planet after you first three payments.
+          </SubscriptionTier>
+          <SubscriptionTier mt={56} title="Yearly subscription" price="$160/year" selected={tier === 'yearly'} onClick={() => setTier('yearly')}>
+            Pay annually and own your planet immediately upon purchase.
+          </SubscriptionTier>
+        </Flex>
+      </Flex>
+      <Button position="absolute" top={495} left={640} isLoading={subscribeLoading} onClick={subscribe}>Subscribe</Button>
+    </>
   );
 });
 
