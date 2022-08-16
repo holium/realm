@@ -1,4 +1,4 @@
-import { AssemblyApp } from 'renderer/apps/Assembly';
+import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
 import { AccountTrayApp } from 'renderer/apps/Account';
 import { MessagesTrayApp } from 'renderer/apps/Messages';
@@ -12,7 +12,7 @@ export type ViewRenderers = {
 
 export const trayAppRenderers: ViewRenderers = {
   'rooms-tray': {
-    component: (props: any) => <AssemblyApp {...props} />,
+    component: (props: any) => <RoomApp {...props} />,
   },
   'spaces-tray': {
     component: (props: any) => <SpacesTrayApp {...props} />,

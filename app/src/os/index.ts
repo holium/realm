@@ -14,6 +14,7 @@ import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
 import HoliumAPI from './api/holium';
+import { RoomsService } from './services/tray/rooms.service';
 
 export interface ISession {
   ship: string;
@@ -63,6 +64,9 @@ export class Realm extends EventEmitter {
     desktop: DesktopService.preload,
     shell: ShellService.preload,
     onboarding: OnboardingService.preload,
+    tray: {
+      rooms: RoomsService.preload
+    }
   };
 
   constructor(mainWindow: BrowserWindow) {
