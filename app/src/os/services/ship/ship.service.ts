@@ -27,6 +27,8 @@ import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
 import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
+import { NotificationsApi } from '../../api/notifications';
+import { NotificationsStore, NotificationsType } from './models/notifications';
 
 type ShipModels = {
   friends: FriendsType;
@@ -62,6 +64,7 @@ export class ShipService extends BaseService {
     'realm.ship.add-friend': this.addFriend,
     'realm.ship.edit-friend': this.editFriend,
     'realm.ship.remove-friend': this.removeFriend,
+    'realm.ship.get-notifications': this.getNotifications,
   };
 
   static preload = {
@@ -111,6 +114,8 @@ export class ShipService extends BaseService {
     //
     removeFriend: async (patp: Patp) =>
       ipcRenderer.invoke('realm.ship.remove-friend', patp),
+    getNotifications: async (timestamp: number, length: number) =>
+      ipcRenderer.invoke('realm.ship.get-notifications', timestamp, length),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -248,6 +253,9 @@ export class ShipService extends BaseService {
       // register dm update handler
       DmApi.updates(this.core.conduit!, this.state);
       DmApi.graphUpdates(this.core.conduit!, this.state);
+
+      // register hark-store update handler
+      NotificationsApi.watch(this.core.conduit!, this.state);
 
       // load initial dms
       this.getDMs().then((response) => {
@@ -407,5 +415,11 @@ export class ShipService extends BaseService {
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;
     console.log('removingDM', ourShip, toShip, removeIndex);
+  }
+  async getNotifications(_event: any, timestamp: number, length: number) {
+    console.log('getNotifications: %o, %o', timestamp, length);
+    const timeboxes = this.state?.notifications.timeboxes();
+    console.log(timeboxes);
+    return timeboxes;
   }
 }

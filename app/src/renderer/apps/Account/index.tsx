@@ -17,6 +17,7 @@ import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from 'renderer/logic/apps/store';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type ProfileProps = {
   theme: ThemeModelType;
@@ -26,10 +27,49 @@ type ProfileProps = {
   };
 };
 
+const renderNotification = (entry: any, index: number) => {
+  console.log(entry);
+  return (
+    <Text key={index} opacity={0.3}>
+      {entry.timebox.notifications[0].body[0].title[0]}
+    </Text>
+  );
+};
+
+const renderNotifications = (entries: any[]) => {
+  if (entries.length === 0) {
+    return (
+      <Flex flex={1} mb="36px" justifyContent="center" alignItems="center">
+        <Text opacity={0.3}>No notifications</Text>
+      </Flex>
+    );
+  } else {
+    return (
+      <Flex
+        flex={1}
+        style={{ margin: 8 }}
+        mb="36px"
+        justifyContent="left"
+        alignItems="left"
+      >
+        {entries.map(
+          (item, index) =>
+            item.timebox.notifications.length > 0 && (
+              <Text key={index} opacity={0.3}>
+                {item.timebox.notifications[0].body[0].title[0].text}
+              </Text>
+            )
+        )}
+      </Flex>
+    );
+  }
+};
+
 export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
   const { ship, identity } = useServices();
   const { setActiveApp } = useTrayApps();
   let [batteryLevel, setBatteryLevel] = useState(0);
+  const [notifications, setNotifications] = useState([]);
   const { dimensions } = props;
   const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
 
@@ -46,6 +86,12 @@ export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
   //   setBatteryLevel(level);
   // });
   // }, []);
+  useEffect(() => {
+    ShipActions.getNotifications(Date.now() * 1000, 10).then((items: any) => {
+      console.log(items);
+      setNotifications(items);
+    });
+  }, []);
 
   const openSettingsApp = () => {
     DesktopActions.openAppWindow('', nativeApps['os-settings']);
@@ -127,9 +173,7 @@ export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
           </IconButton>
         </Flex>
       </Flex>
-      <Flex flex={1} mb="36px" justifyContent="center" alignItems="center">
-        <Text opacity={0.3}>No notifications</Text>
-      </Flex>
+      {renderNotifications(notifications)}
       {/* Footer */}
       <Flex
         position="absolute"

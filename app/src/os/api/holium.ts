@@ -42,8 +42,8 @@ export class HoliumAPI {
     return data.planets;
   }
 
-  async prepareCheckout(accountId: string, patp: string) {
-    let { data } = await client.post(`accounts/${accountId}/prepare-checkout?patp=${patp}`);
+  async prepareCheckout(accountId: string, patp: string, tier: string) {
+    let { data } = await client.post(`accounts/${accountId}/prepare-checkout?patp=${patp}&tier=${tier}`);
     return { clientSecret: data.clientSecret };
   }
 

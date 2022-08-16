@@ -1,3 +1,4 @@
+import { SoundActions } from './sound';
 export const OSActions = {
   onBoot: async () => {
     return await window.electron.os.boot();

@@ -1,4 +1,4 @@
-import { FC, useMemo, useState, useLayoutEffect } from 'react';
+import { FC, useMemo, useState, useLayoutEffect, useEffect } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
@@ -9,6 +9,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { BackgroundImage, BackgroundFill } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
+import { SoundActions } from '../logic/actions/sound';
 
 const DragBar = styled.div`
   position: absolute;
@@ -45,6 +46,14 @@ export const Shell: FC = observer(() => {
     () => <DialogManager dialogId={shell.dialogId} />,
     [shell.dialogId]
   );
+
+  // useEffect(() => {
+  //   if (ship?.loader.isLoaded) {
+  //     SoundActions.playStartup();
+  //   } else {
+  //     SoundActions.playLogout();
+  //   }
+  // }, [ship?.loader.isLoaded]);
 
   const shipLoaded = ship?.loader.isLoaded;
   return (
