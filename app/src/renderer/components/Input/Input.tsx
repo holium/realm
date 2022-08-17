@@ -31,6 +31,7 @@ type BaseInputProps = {
   as?: 'input' | 'textarea';
   /** Icon or ‘Interactive Icon’ adornment to apply to the left of the content area */
   leftIcon?: JSX.Element;
+  leftLabel?: string;
   leftInteractive?: boolean;
   /** Icon or ‘Interactive Icon’ adornment to apply to the right of the content area */
   rightIcon?: JSX.Element;
@@ -235,6 +236,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
     const {
       as,
       leftIcon,
+      leftLabel,
       leftInteractive,
       rightIcon,
       rightInteractive,
@@ -285,6 +287,11 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
           >
             {leftIcon}
           </LeftIcon>
+        )}
+        {leftLabel && leftLabel !== 'none' && (
+          <Text color="#639DF6" fontWeight="bold" marginRight={2}>
+            {leftLabel}
+          </Text>
         )}
         <ContentArea
           as={as}

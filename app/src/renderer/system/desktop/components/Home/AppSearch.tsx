@@ -1,11 +1,53 @@
 import { useEffect, useState } from 'react';
-import { styled, keyframes } from '@stitches/react';
+import styled, { css } from 'styled-components';
+import { styled as stitch, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { isValidPatp } from 'urbit-ob';
-import { Input } from 'renderer/components';
+import { Input, Flex, Box, Text, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { BazaarActions } from 'renderer/logic/actions/bazaar';
-import { InviteMembers } from 'renderer/apps/Spaces/Workflow/InviteMembers';
+import { toJS } from 'mobx';
+import MenuItemStyle from 'renderer/components/MenuItem/MenuItem.styles';
+
+const sizes = {
+  sm: 32,
+  md: 48,
+  lg: 120,
+  xl: 148,
+  xxl: 210,
+};
+
+const radius = {
+  sm: 4,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 20,
+};
+
+const scales = {
+  sm: 0.07,
+  md: 0.05,
+  lg: 0.07,
+  xl: 0.05,
+  xxl: 0.02,
+};
+
+interface TileStyleProps {}
+const TileStyle = styled(Box)<TileStyleProps>`
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  img {
+    --webkit-user-select: none;
+    --khtml-user-select: none;
+    --moz-user-select: none;
+    --o-user-select: none;
+    user-select: none;
+  }
+`;
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },
@@ -26,7 +68,7 @@ const slideLeftAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateX(2px)' },
   '100%': { opacity: 1, transform: 'translateX(0)' },
 });
-const StyledContent = styled(PopoverPrimitive.Content, {
+const StyledContent = stitch(PopoverPrimitive.Content, {
   borderRadius: 6,
   padding: 20,
   width: 500,
@@ -49,10 +91,6 @@ const StyledContent = styled(PopoverPrimitive.Content, {
   },
 });
 
-const StyledArrow = styled(PopoverPrimitive.Arrow, {
-  fill: 'white',
-});
-
 function Content({ children, ...props }) {
   return (
     <PopoverPrimitive.Portal>
@@ -71,36 +109,101 @@ function Content({ children, ...props }) {
   );
 }
 
-function renderDevs() {
-  let store = localStorage.getItem('~zod/garden/recents-store');
-  if (!store)
-    return (
-      <Text>{`'~zod/garden/recents-store' not found in local storage...`}</Text>
-    );
-  return store.state.recentDevs.map((item, index) => <Text>{item}</Text>);
+function renderDevs(devs: any) {
+  if (devs.length === 0) {
+    return <Text color="#ababab">{`No recent devs`}</Text>;
+  }
+  return devs?.map((item, index) => (
+    <div key={index}>
+      <Flex flexDirection="row" alignItems="center" gap={8}>
+        <TileStyle
+          id={index}
+          onContextMenu={(evt: any) => {
+            evt.stopPropagation();
+          }}
+          minWidth={sizes.sm}
+          style={{
+            borderRadius: radius.sm,
+            overflow: 'hidden',
+          }}
+          height={sizes.sm}
+          width={sizes.sm}
+          backgroundColor={item.color || '#F2F3EF'}
+        >
+          {item.image && (
+            <img
+              style={{ pointerEvents: 'none' }}
+              draggable="false"
+              height={sizes.sm}
+              width={sizes.sm}
+              key={item.title}
+              src={item.image}
+            />
+          )}
+          {item.icon && <Icons name={item.icon} height={12} width={12} />}
+        </TileStyle>
+        <Text>{item.id}</Text>
+      </Flex>
+    </div>
+  ));
 }
 
-function renderApps() {
-  let store = localStorage.getItem('~zod/garden/recents-store');
-  if (!store)
-    return (
-      <Text>{`'~zod/garden/recents-store' not found in local storage...`}</Text>
-    );
-  return store.state.recentApps.map((item, index) => <Text>{item}</Text>);
+function renderApps(apps: any) {
+  if (apps.length === 0) {
+    return <Text color="#ababab">{`No recent apps`}</Text>;
+  }
+  apps?.map((item) => console.log(toJS(item)));
+  return apps?.map((app, index) => (
+    <div key={index}>
+      <Flex flexDirection="row" alignItems="center" gap={8}>
+        <TileStyle
+          id={index}
+          onContextMenu={(evt: any) => {
+            evt.stopPropagation();
+          }}
+          minWidth={sizes.sm}
+          style={{
+            borderRadius: radius.sm,
+            overflow: 'hidden',
+          }}
+          height={sizes.sm}
+          width={sizes.sm}
+          backgroundColor={app.color || '#F2F3EF'}
+        >
+          {app.image && (
+            <img
+              style={{ pointerEvents: 'none' }}
+              draggable="false"
+              height={sizes.sm}
+              width={sizes.sm}
+              key={app.title}
+              src={app.image}
+            />
+          )}
+          {app.icon && <Icons name={app.icon} height={12} width={12} />}
+        </TileStyle>
+        <Text>{app.id}</Text>
+      </Flex>
+    </div>
+  ));
 }
 
-function renderStart() {
+const renderStart = (bazaar: any) => {
   return (
     <>
-      <Flex css={{ flexDirection: 'column', gap: 10 }}>
-        <Text bold>Recent Apps</Text>
-        <Flex css={{ flexDirection: 'column', gap: 2 }}>{renderApps()}</Flex>
-        <Text bold>Recent Developers</Text>
-        <Flex css={{ flexDirection: 'column', gap: 2 }}>{renderDevs()}</Flex>
+      <Flex flexDirection="column" gap={10}>
+        <Text fontWeight="bold">Recent Apps</Text>
+        <Flex flexDirection="column" gap={12}>
+          {renderApps(bazaar.recentApps)}
+        </Flex>
+        <Text fontWeight="bold">Recent Developers</Text>
+        <Flex flexDirection="column" gap={4}>
+          {renderDevs(bazaar.recentDevs)}
+        </Flex>
       </Flex>
     </>
   );
-}
+};
 
 const renderProviders = (data: Array, searchString) => {
   return data
@@ -123,19 +226,27 @@ function renderShipSearch(data, searchString) {
   );
 }
 
-const renderAppSearch = (ship: string) => {
+const renderDevAppSearch = (ship: string) => {
   return (
     <>
-      <Flex css={{ flexDirection: 'column', gap: 10 }}>
-        <Text bold css={{ marginBottom: 10 }}>
-          {`Software developed by ${ship}...`}
-        </Text>
+      <Flex flexDirection="column" gap={10}>
+        <Text fontWeight={'bold'}>{`Software developed by ${ship}...`}</Text>
       </Flex>
     </>
   );
 };
 
-const StyledClose = styled(PopoverPrimitive.Close, {
+const renderAppSearch = () => {
+  return (
+    <>
+      <Flex flexDirection="column" gap={10}>
+        <Text fontWeight={'bold'}>{`Installed Apps`}</Text>
+      </Flex>
+    </>
+  );
+};
+
+const StyledClose = stitch(PopoverPrimitive.Close, {
   all: 'unset',
   fontFamily: 'inherit',
   borderRadius: '100%',
@@ -160,80 +271,23 @@ export const PopoverContent = Content;
 export const PopoverClose = StyledClose;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
-// Your app...
-const Flex = styled('div', { display: 'flex' });
-
-const IconButton = styled('button', {
-  all: 'unset',
-  fontFamily: 'inherit',
-  borderRadius: '100%',
-  height: 35,
-  width: 35,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: '#00FF00',
-  backgroundColor: 'white',
-  boxShadow: `0 2px 10px #000000`,
-  '&:hover': { backgroundColor: '#00FF00' },
-  '&:focus': { boxShadow: `0 0 0 2px black` },
-});
-const Fieldset = styled('fieldset', {
-  all: 'unset',
-  display: 'flex',
-  gap: 20,
-  alignItems: 'center',
-});
-
-const Label = styled('label', {
-  fontSize: 13,
-  color: '#00FF00',
-  width: 75,
-});
-
-// const Input = styled('input', {
-//   all: 'unset',
-//   width: '100%',
-//   display: 'inline-flex',
-//   alignItems: 'center',
-//   justifyContent: 'center',
-//   flex: '1',
-//   borderRadius: 4,
-//   padding: '0 10px',
-//   fontSize: 13,
-//   lineHeight: 1,
-//   color: '#00FF00',
-//   boxShadow: `0 0 0 1px #00FF00`,
-//   height: 25,
-
-//   '&:focus': { boxShadow: `0 0 0 2px #00FF00` },
-// });
-
-const Text = styled('div', {
-  margin: 0,
-  color: '#ababab',
-  fontSize: 15,
-  lineHeight: '19px',
-  variants: {
-    faded: {
-      true: { color: '#ababab' },
-    },
-    bold: {
-      true: { fontWeight: 500 },
-    },
-  },
-});
-
 const AppSearchApp = (props) => {
   const { space } = props;
-  const { spaces } = useServices();
+  const { ship, spaces, bazaar } = useServices();
   const [data, setData] = useState([]);
   const [searchMode, setSearchMode] = useState('none');
   const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
   const [searchString, setSearchString] = useState('');
-  const [searchPlaceholder, setSearchPlaceholder] = useState('Search');
+  const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
   const isOur = spaces.selected?.type === 'our';
+  const currentBazaar = spaces.selected
+    ? bazaar.getBazaar(spaces.selected?.path)
+    : null;
+  console.log('current bazaar => %o', {
+    path: spaces.selected?.path,
+    currentBazaar,
+  });
   useEffect(() => {
     console.log('AppSearch: useEffect called => %o', spaces.selected?.path);
     // if (spaces.selected?.path) {
@@ -266,6 +320,8 @@ const AppSearchApp = (props) => {
         console.log(open);
         if (!open) {
           setSearchMode('none');
+          setSelectedShip('');
+          setSearchPlaceholder('Search...');
         }
       }}
       modal={false}
@@ -286,6 +342,11 @@ const AppSearchApp = (props) => {
             paddingLeft: 12,
             paddingRight: 16,
           }}
+          leftLabel={
+            searchMode === 'ship-search' && selectedShip !== ''
+              ? `Apps by ${selectedShip}:`
+              : 'none'
+          }
           // rightIcon={
           //   <Flex>
           //     <Icons name="Search" size="18px" opacity={0.5} />
@@ -294,9 +355,7 @@ const AppSearchApp = (props) => {
           value={searchString}
           onKeyDown={(evt: any) => {
             if (evt.key === 'Enter' && isValidPatp(searchString)) {
-              setSearchPlaceholder(
-                [searchString, ': Search for apps...'].join(' ')
-              );
+              setSearchPlaceholder('Search...');
               setSelectedShip(searchString);
               setSearchString('');
             } else if (evt.key === 'Escape') {
@@ -308,7 +367,11 @@ const AppSearchApp = (props) => {
           onChange={(e: any) => {
             setSearchString(e.target.value);
             if (e.target.value) {
-              setSearchMode('ship-search');
+              if (e.target.value[0] === '~') {
+                setSearchMode('ship-search');
+              } else {
+                setSearchMode('app-search');
+              }
             } else {
               setSearchMode('start');
             }
@@ -316,7 +379,7 @@ const AppSearchApp = (props) => {
           // onClick={() => triggerSearch(!toggle)}
           onFocus={() => {
             if (selectedShip) {
-              setSearchMode('app-search');
+              setSearchMode('dev-app-search');
               setSearchModeArgs([selectedShip]);
             } else if (searchString) {
               setSearchMode('ship-search');
@@ -331,9 +394,11 @@ const AppSearchApp = (props) => {
         />
       </PopoverAnchor>
       <PopoverContent sideOffset={5}>
-        {searchMode === 'start' && renderStart()}
+        {searchMode === 'start' && renderStart(currentBazaar)}
         {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
-        {searchMode === 'app-search' && renderAppSearch(searchModeArgs[0])}
+        {searchMode === 'dev-app-search' &&
+          renderDevAppSearch(searchModeArgs[0])}
+        {searchMode === 'app-search' && renderAppSearch()}
       </PopoverContent>
     </Popover>
   );

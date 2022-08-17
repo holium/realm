@@ -191,6 +191,7 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.identity.auth, value.patch);
     }
     if (value.resource === 'bazaar') {
+      console.log('bazaar patch %o', value.patch);
       applyPatch(servicesStore.bazaar, value.patch);
     }
     if (value.resource === 'onboarding') {
@@ -217,6 +218,7 @@ window.electron.os.onEffect((_event: any, value: any) => {
       servicesStore.setShip(ShipModel.create(value.model));
     }
     if (value.resource === 'bazaar') {
+      console.log('bazaar initial patch %o', value.model);
       applySnapshot(servicesStore.bazaar, value.model);
     }
     if (value.resource === 'auth') {

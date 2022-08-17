@@ -54,6 +54,10 @@ export class SpacesService extends BaseService {
     'realm.spaces.members.kick-member': this.kickMember,
     'realm.spaces.bazaar.get-apps': this.getApps,
     'realm.spaces.bazaar.get-allies': this.getAllies,
+    'realm.spaces.bazaar.add-recent-app': this.addRecentApp,
+    'realm.spaces.bazaar.get-recent-apps': this.getRecentApps,
+    'realm.spaces.bazaar.add-recent-dev': this.addRecentDev,
+    'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
   };
 
   static preload = {
@@ -96,6 +100,19 @@ export class SpacesService extends BaseService {
     //
     kickMember: async (path: string, patp: string) =>
       ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
+    //
+    getApps: async (path: SpacePath) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path),
+    getAllies: async (path: SpacePath) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
+    getRecentApps: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-recent-apps'),
+    addRecentApp: async (path: SpacePath, appId: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-recent-app', path, appId),
+    getRecentDevs: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
+    addRecentDev: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -273,16 +290,38 @@ export class SpacesService extends BaseService {
   // async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
   //   return await FriendsApi.removeFriend(this.core.conduit!, patp);
   // }
+  //
+
   // ***********************************************************
   // ************************ BAZAAR ***************************
   // ***********************************************************
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath) {
     const apps = await BazaarApi.getApps(this.core.conduit!, path);
-    this.state.models.apps(path, apps);
+    this.models.bazaar.apps(path, apps);
     return apps;
   }
   async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
     return await BazaarApi.getAllies(this.core.conduit!, path);
+  }
+  async getRecentApps(_event: IpcMainInvokeEvent) {
+    return this.models.bazaar.getRecentApps();
+  }
+  async addRecentApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return this.models.bazaar.getBazaar(spacePath).addRecentApp(appId);
+  }
+  async addRecentDev(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    shipId: string
+  ) {
+    return this.models.bazaar.getBazaar(spacePath).addRecentDev(shipId);
+  }
+  async getRecentDevs(_event: IpcMainInvokeEvent) {
+    return this.models.bazaar.getRecentDevs();
   }
 
   async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {

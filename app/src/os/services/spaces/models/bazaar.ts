@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 import { types, castToSnapshot, Instance } from 'mobx-state-tree';
 import { SpacePath } from 'os/types';
 import { NativeAppList } from '../../../../renderer/apps';
@@ -13,6 +12,8 @@ export const BazaarModel = types
     pinned: types.array(types.string),
     endorsed: DocketMap, // recommended
     installed: DocketMap, // registered
+    recentsApps: types.array(types.string),
+    recentsDevs: types.array(types.string),
   })
   .views((self) => ({
     get pinnedApps() {
@@ -20,6 +21,18 @@ export const BazaarModel = types
       return [...Array.from(self.installed!.values()), ...NativeAppList]
         .filter((app: any) => self.pinned.includes(app.id))
         .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
+    },
+    get recentApps() {
+      const recents = self.recentsApps;
+      return [...Array.from(self.installed!.values()), ...NativeAppList]
+        .filter((app: any) => recents.includes(app.id))
+        .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
+    },
+    get recentDevs() {
+      const recents = self.recentsDevs;
+      return [...Array.from(self.installed!.values()), ...NativeAppList]
+        .filter((app: any) => recents.includes(app.id))
+        .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
     isAppPinned(appId: string) {
       return self.pinned.includes(appId);
@@ -45,6 +58,28 @@ export const BazaarModel = types
     setPinnedOrder(newOrder: any) {
       self.pinned = newOrder;
     },
+    addRecentApp(appId: string) {
+      // keep no more than 5 recent app entries
+      if (self.recentsApps.length >= 5) {
+        self.recentsApps.pop();
+      }
+      // move the app up to the top if it already exists in the list
+      const idx = self.recentsApps.findIndex((item) => item === appId);
+      if (idx !== -1) self.recentsApps.splice(idx, 1);
+      // add app to front of list
+      self.recentsApps.splice(0, 0, appId);
+    },
+    addRecentDev(shipId: string) {
+      // keep no more than 5 recent app entries
+      if (self.recentsDevs.length >= 5) {
+        self.recentsDevs.pop();
+      }
+      // move the app up to the top if it already exists in the list
+      const idx = self.recentsDevs.findIndex((item) => item === shipId);
+      if (idx !== -1) self.recentsDevs.splice(idx, 1);
+      // add app to front of list
+      self.recentsDevs.splice(0, 0, shipId);
+    },
   }));
 export type BazaarModelType = Instance<typeof BazaarModel>;
 
@@ -56,19 +91,6 @@ export const BazaarStore = types
     getBazaar(path: string) {
       return self.spaces.get(path);
     },
-    // get pinnedApps() {
-    //   const pins = self.pinned;
-    //   return [...Array.from(self.installed!.values()), ...NativeAppList]
-    //     .filter((app: any) => self.pinned.includes(app.id))
-    //     .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
-    // },
-    // isAppPinned(appId: string) {
-    //   return self.pinned.includes(appId);
-    // },
-    // getAppData(appId: string) {
-    //   const apps = Array.from(self.installed.values());
-    //   return [...apps, ...NativeAppList].find((app: any) => app.id === appId);
-    // },
   }))
   .actions((self) => ({
     our(ourPath: string, shipApps: any) {
@@ -78,19 +100,6 @@ export const BazaarStore = types
       });
       self.spaces.set(ourPath, ourBazaar);
     },
-    apps(spacePath: SpacePath, apps: any) {
-      const spaceBazaar = BazaarModel.create({
-        pinned: [],
-        installed: apps,
-      });
-      self.spaces.set(spacePath, spaceBazaar);
-    },
-    // initial(shipApps: any) {
-    //   self.installed = shipApps;
-    // },
-    // loadPins(pins: string[]) {
-    //   self.pinned = castToSnapshot(pins);
-    // },
   }));
 
 export type BazaarStoreType = Instance<typeof BazaarStore>;
