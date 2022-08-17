@@ -182,7 +182,10 @@ function renderApps(apps: any) {
           )}
           {app.icon && <Icons name={app.icon} height={12} width={12} />}
         </TileStyle>
-        <Text>{app.id}</Text>
+        <Flex flexDirection="column">
+          <Text fontWeight={'bold'}>{app.title}</Text>
+          <Text color={'#888888'}>{app.info}</Text>
+        </Flex>
       </Flex>
     </div>
   ));
@@ -191,13 +194,22 @@ function renderApps(apps: any) {
 const renderStart = (bazaar: any) => {
   return (
     <>
-      <Flex flexDirection="column" gap={10}>
-        <Text fontWeight="bold">Recent Apps</Text>
+      <Flex flexDirection="column" gap={12}>
+        <Text color={'#8f8f8f'} fontWeight={500}>
+          Recent Apps
+        </Text>
         <Flex flexDirection="column" gap={12}>
           {renderApps(bazaar.recentApps)}
         </Flex>
-        <Text fontWeight="bold">Recent Developers</Text>
-        <Flex flexDirection="column" gap={4}>
+      </Flex>
+      <div style={{ marginTop: '12px', marginBottom: '12px' }}>
+        <hr style={{ backgroundColor: '#dadada', height: '1px', border: 0 }} />
+      </div>
+      <Flex flexDirection="column" gap={12}>
+        <Text color={'#8f8f8f'} fontWeight={500}>
+          Recent Developers
+        </Text>
+        <Flex flexDirection="column" gap={12}>
           {renderDevs(bazaar.recentDevs)}
         </Flex>
       </Flex>
@@ -214,11 +226,11 @@ const renderProviders = (data: Array, searchString) => {
 function renderShipSearch(data, searchString) {
   return (
     <>
-      <Flex css={{ flexDirection: 'column', gap: 10 }}>
-        <Text bold css={{ marginBottom: 10 }}>
+      <Flex flexDirection="column" gap={10}>
+        <Text color={'#8f8f8f'} fontWeight={500}>
           Searching Software Providers
         </Text>
-        <Flex css={{ flexDirection: 'column', gap: 2 }}>
+        <Flex flexDirection="column" gap={2}>
           {renderProviders(data, searchString)}
         </Flex>
       </Flex>
