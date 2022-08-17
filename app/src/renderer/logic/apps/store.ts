@@ -114,7 +114,6 @@ export function useTrayApps() {
 window.electron.os.onEffect((_event: any, value: any) => {
   if (value.response === 'initial') {
     if (value.resource === 'rooms') {
-      console.log('yo');
       applyPatch(trayStore.roomsApp, value.model);
     }
   }

@@ -1,12 +1,14 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Grid, Text, Flex, Icons, Sigil } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
-import { rgba } from 'polished';
+import { rgba, darken } from 'polished';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
+import { useTrayApps } from 'renderer/logic/apps/store';
+import { id } from 'ethers/lib/utils';
 
 type RoomRowProps = Partial<RoomsModelType> & {
   tray?: boolean;
@@ -15,28 +17,33 @@ type RoomRowProps = Partial<RoomsModelType> & {
 };
 
 export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
-  const { tray, title, creator, present, cursors, onClick, rightChildren } =
+  const { id, tray, title, present, creator, cursors, onClick, rightChildren } =
     props;
   const { desktop, ship } = useServices();
+  const { roomsApp } = useTrayApps();
 
   const { mode, dockColor, windowColor } = desktop.theme;
+
+  const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
 
   let peopleText = 'people';
   if (present!.length === 1) {
     peopleText = 'person';
   }
-
+  // const creator = roomsApp.liveRoom?.creator;
   let peopleNoHost = present!.filter((person: string) => person !== ship?.patp);
   let titleText = title;
   if (titleText!.length > 16 && tray) {
     titleText = titleText!.substring(0, 16) + '...';
   }
+  const isLive = roomsApp.liveRoom?.id === id;
 
   return (
     <Row
       small={tray}
       className="realm-cursor-hover"
-      customBg={windowColor}
+      baseBg={!tray && isLive ? bgColor : undefined}
+      customBg={isLive ? bgColor : windowColor}
       {...(onClick
         ? { onClick: (evt: any) => onClick(evt) }
         : { style: { pointerEvents: 'none' } })}
@@ -54,11 +61,12 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
           </Text>
           {!tray && (
             <Flex flexDirection="row">
-              <Icons mr={1} opacity={0.5} name="Friends" />
+              {isLive && <Icons mr={1} color="#4E9EFD" name="RoomSpeaker" />}
+              {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text opacity={0.5} fontWeight={400} fontSize={2}>
-                {present!.length} {peopleText}{' '}
-                {present!.includes(ship!.patp) && ` - (You)`}
-                {/* {creator! === ship?.patp && `  -  Hosting`} */}
+                {creator === ship!.patp ? 'You' : creator}
+                {/* {present!.length} {peopleText}{' '} */}
+                {/* {present!.includes(ship!.patp) && ` - (You)`} */}
               </Text>
             </Flex>
           )}

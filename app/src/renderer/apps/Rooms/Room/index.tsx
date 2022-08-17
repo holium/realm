@@ -15,10 +15,9 @@ import {
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { CommButton } from './components/CommButton';
-import { VoiceAnalyzer } from './components/VoiceVisualizer';
-import { Speaker } from './components/Speaker';
-import { Urbit } from '@urbit/http-api';
+import { CommButton } from '../components/CommButton';
+// import { VoiceAnalyzer } from '../components/VoiceVisualizer';
+import { Speaker } from '../components/Speaker';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { SoundActions } from 'renderer/logic/actions/sound';
 export type BaseRoomProps = {
@@ -29,8 +28,6 @@ export type BaseRoomProps = {
   };
 };
 
-const urb = new Urbit('', '');
-urb.ship = window.ship;
 export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
   const { ship, desktop } = useServices();
@@ -66,11 +63,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
     setAudio(null);
   };
 
-  useEffect(() => {
-    window.electron.app.askForMicrophone().then((hasMic: any) => {
-      console.log('hasMic', hasMic);
-    });
-  }, []);
+  // useEffect(() => {
+  //   window.electron.app.askForMicrophone().then((hasMic: any) => {
+  //    console.log('hasMic', hasMic);
+  //   });
+  // }, []);
 
   useEffect(() => {
     if (!roomsApp.liveRoom) RoomsActions.setView('list');
@@ -103,7 +100,6 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             onClick={(evt: any) => {
               evt.stopPropagation();
               RoomsActions.setView('list');
-              // roomApp.setView('list');
             }}
           >
             <Icons name="ArrowLeftLine" />
@@ -116,7 +112,6 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               style={{
                 wordWrap: 'normal',
                 textOverflow: 'ellipsis',
-                // textTransform: 'uppercase',
               }}
             >
               {roomsApp.liveRoom?.title}

@@ -8,6 +8,7 @@ import {
   Text,
   TextButton,
   IconButton,
+  InnerNotification,
 } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Row } from 'renderer/components/NewRow';
@@ -20,6 +21,7 @@ import { RoomsModelType } from 'os/services/tray/rooms.model';
 import { rgba } from 'polished';
 import { fontSize } from 'styled-system';
 import { SoundActions } from 'renderer/logic/actions/sound';
+import { ProviderSelector } from './components/ProviderSelector';
 export type RoomListProps = {
   theme: ThemeModelType;
   dimensions: {
@@ -43,6 +45,8 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
     RoomsActions.requestAllRooms();
     RoomsActions.getProvider();
   }, []);
+
+  const notif = false;
 
   return (
     <Grid.Column
@@ -103,49 +107,60 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
       </Titlebar>
       <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
         {roomsApp.invitesList.map((value: any) => (
-          <Row
-            noHover
-            key={`${value.id}-invite`}
-            baseBg={rgba(inviteColor, 0.12)}
-            customBg={rgba(inviteColor, 0.16)}
-          >
-            <Flex
-              width="100%"
-              alignItems="center"
-              justifyContent="space-between"
-              className="realm-cursor-hover"
-            >
-              <Text color={inviteColor} fontWeight={500} fontSize={2}>
-                Invite: {value.id} - {value.invitedBy}
-              </Text>
+          <InnerNotification
+            id={value.id}
+            title={value.id}
+            seedColor="#F08735"
+            subtitle={`Sent by: ${value.invitedBy}`}
+            actionText="Accept"
+            onAction={(id: string) => {
+              console.log('accepting invite', id);
+              RoomsActions.acceptInvite(value.id);
+            }}
+            onDismiss={(id: string) => {
+              console.log('removing invite', id);
+              RoomsActions.dismissInvite(value.id);
+            }}
+          />
+          // <Row
+          //   noHover
+          //   key={`${value.id}-invite`}
+          //   baseBg={rgba(inviteColor, 0.12)}
+          //   customBg={rgba(inviteColor, 0.16)}
+          // >
+          //   <Flex
+          //     width="100%"
+          //     alignItems="center"
+          //     justifyContent="space-between"
+          //     className="realm-cursor-hover"
+          //   >
+          //     <Text color={inviteColor} fontWeight={500} fontSize={2}>
+          //       Invite: {value.id} - {value.invitedBy}
+          //     </Text>
 
-              <Flex gap={4}>
-                <IconButton
-                  color={inviteColor}
-                  // backgroundColor={rgba(inviteColor, 0.24)}
-                  // hoverFill={rgba('#D0384E', 0.24)}
-                  onClick={(evt: any) => {
-                    evt.stopPropagation();
-                    RoomsActions.acceptInvite(value.id);
-                  }}
-                >
-                  <Icons name="Plus" />
-                </IconButton>
-                <IconButton
-                  color={'#D0384E'}
-                  // hoverFill={rgba('#D0384E', 0.24)}
-                  // backgroundColor={rgba('#D0384E', 0.24)}
-                  onClick={(evt: any) => {
-                    evt.stopPropagation();
-                    console.log('clicked');
-                    RoomsActions.dismissInvite(value.id);
-                  }}
-                >
-                  <Icons name="Close" />
-                </IconButton>
-              </Flex>
-            </Flex>
-          </Row>
+          //     <Flex gap={4}>
+          //       <IconButton
+          //         color={inviteColor}
+          //         onClick={(evt: any) => {
+          //           evt.stopPropagation();
+          //           RoomsActions.acceptInvite(value.id);
+          //         }}
+          //       >
+          //         <Icons name="Plus" />
+          //       </IconButton>
+          //       <IconButton
+          //         color={'#D0384E'}
+          //         onClick={(evt: any) => {
+          //           evt.stopPropagation();
+          //           console.log('clicked');
+          //           RoomsActions.dismissInvite(value.id);
+          //         }}
+          //       >
+          //         <Icons name="Close" />
+          //       </IconButton>
+          //     </Flex>
+          //   </Flex>
+          // </Row>
         ))}
         {knownRooms.length === 0 && (
           <Flex
@@ -172,6 +187,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
               provider={room!.provider}
               present={room!.present}
               cursors={room!.cursors}
+              creator={room!.creator}
               access={room!.access}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
@@ -192,14 +208,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
                     // conditionally delete old room
                     RoomsActions.deleteRoom(roomsApp.liveRoom.id);
                   }
-                  // if (
-                  //   // if this room is strange
-                  //   room.provider !== roomsApp.provider
-                  // ) {
-                  //   // unset aka "forget"
-                  //   RoomsActions.unsetKnownRoom(room.id);
-                  // }
-
                   await RoomsActions.joinRoom(room.id);
                   RoomsActions.setView('room');
                   await RoomsActions.requestAllRooms();
@@ -208,6 +216,31 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
             />
           );
         })}
+      </Flex>
+      {notif && (
+        <Flex flexDirection="column" width="100%">
+          <InnerNotification
+            id={'~lomder-librun/hacker-room'}
+            title="Hacker Room"
+            seedColor="#F08735"
+            subtitle="Sent by: ~lomder-librun"
+            actionText="Accept"
+            onAction={(id: string) => {
+              console.log('accepting invite', id);
+            }}
+            onDismiss={(id: string) => {
+              console.log('removing invite', id);
+            }}
+          />
+        </Flex>
+      )}
+      <Flex mt={3} pb={4} justifyContent="flex-end">
+        <ProviderSelector
+          seedColor={windowColor}
+          onClick={() => {
+            console.log('show provider setup');
+          }}
+        />
       </Flex>
     </Grid.Column>
   );

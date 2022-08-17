@@ -100,6 +100,13 @@ export class RoomsService extends BaseService {
       ourPatp: `~${core.conduit!.ship}`,
     });
 
+    const patchEffect = {
+      model: getSnapshot(this.state),
+      resource: 'rooms',
+      response: 'initial',
+    };
+    this.core.onEffect(patchEffect);
+
     onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
@@ -108,13 +115,6 @@ export class RoomsService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
-
-    const patchEffect = {
-      model: getSnapshot(this.state),
-      resource: 'rooms',
-      response: 'initial',
-    };
-    this.core.onEffect(patchEffect);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
