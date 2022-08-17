@@ -10,14 +10,14 @@ import {
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { DocketMap, SpacesStore, SpacesStoreType } from './models/spaces';
+import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-import { BazaarStore } from './models/bazaar';
 import { PassportsApi } from '../../api/passports';
+import { BazaarApi } from '../../api/bazaar';
 import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
@@ -39,7 +39,6 @@ export class SpacesService extends BaseService {
       outgoing: {},
       incoming: {},
     }),
-    bazaar: BazaarStore.create({}),
   };
 
   handlers = {
@@ -53,6 +52,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.get-members': this.getMembers,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
+    'realm.spaces.bazaar.get-apps': this.getApps,
+    'realm.spaces.bazaar.get-allies': this.getAllies,
   };
 
   static preload = {
@@ -275,6 +276,15 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   // ************************ BAZAAR ***************************
   // ***********************************************************
+  async getApps(_event: IpcMainInvokeEvent, path: SpacePath) {
+    const apps = await BazaarApi.getApps(this.core.conduit!, path);
+    this.state.models.apps(path, apps);
+    return apps;
+  }
+  async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
+    return await BazaarApi.getAllies(this.core.conduit!, path);
+  }
+
   async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
     console.log('pinning');
     console.log(path);

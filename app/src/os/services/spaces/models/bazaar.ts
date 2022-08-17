@@ -1,5 +1,6 @@
 import { toJS } from 'mobx';
 import { types, castToSnapshot, Instance } from 'mobx-state-tree';
+import { SpacePath } from 'os/types';
 import { NativeAppList } from '../../../../renderer/apps';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 
@@ -76,6 +77,13 @@ export const BazaarStore = types
         installed: shipApps,
       });
       self.spaces.set(ourPath, ourBazaar);
+    },
+    apps(spacePath: SpacePath, apps: any) {
+      const spaceBazaar = BazaarModel.create({
+        pinned: [],
+        installed: apps,
+      });
+      self.spaces.set(spacePath, spaceBazaar);
     },
     // initial(shipApps: any) {
     //   self.installed = shipApps;
