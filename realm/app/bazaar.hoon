@@ -6,46 +6,54 @@
 ::  Should watch and sync data with %treaty and %docket under /garden.
 ::
 /-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passports-store=passports
-/+  dbug, default-agent
-|%
-+$  card  card:agent:gall
-+$  versioned-state
-    $%  state-0
+/+  verb, dbug, default-agent
+=>
+  |%
+  +$  card  card:agent:gall
+  +$  versioned-state
+      $%  state-0
+      ==
+  +$  state-0
+    $:  %0
+        =membership:membership-store
+        =space-apps:store
+        charges=(map desk charge:docket)
     ==
-+$  state-0
-  $:  %0
-      =membership:membership-store
-      =space-apps:store
-      charges=(map desk charge:docket)
-  ==
---
+  --
 =|  state-0
 =*  state  -
-%-  agent:dbug
-^-  agent:gall
 =<
+%+  verb  &
+%-  agent:dbug
 |_  =bowl:gall
 +*  this  .
-    def   ~(. (default-agent this %.n) bowl)
+    def   ~(. (default-agent this %|) bowl)
     core   ~(. +> [bowl ~])
 ::
 ++  on-init
   ^-  (quip card _this)
   ::  scry docket for charges
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
-  ~&  >>  "{<dap.bowl>}: {<charge-update>}"
   ?>  ?=([%initial *] charge-update)
-  ::  convert charges json to charge data type (defined in docket)
-  :: =/  charges  (charges:dejs:format jon)
+  ~&  >>  "{<dap.bowl>}: {<initial.charge-update>}"
   :_  this(charges initial.charge-update)
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
       [%pass /bazaar %agent [our.bowl %bazaar] %watch /updates]
   ==
-
-++  on-save   !>(~)
-++  on-load   |=(vase `..on-init)
+::
+++  on-save
+  ^-  vase
+  !>(state)
+::
+++  on-load
+  |=  old-state=vase
+  ^-  (quip card:agent:gall agent:gall)
+  =/  old  !<(versioned-state old-state)
+  ?-  -.old
+    %0  `this(state old)
+  ==
 ::
 ++  on-poke
   |=  [=mark =vase]
@@ -209,6 +217,7 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  core  .
+++  this  .
 ::
 ++  action
   |%
