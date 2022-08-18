@@ -105,34 +105,22 @@
       =/  =ship       (slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
       =/  which  i.t.t.t.t.path
-      ~&  >>  "{<ship>}, {<space-pth>}, {<which>}"
       ?+  which  ``json+!>(~)
         ::
         %all
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] ~)])
         ::
         %pinned
-        ``json+!>(~)
-          :: =/  apps  (~(get by pinned.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%pinned u.apps]))
+        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %pinned))])
         ::
         %recommended
-        ``json+!>(~)
-          :: =/  apps  (~(get by recommended.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%recommended u.apps]))
+        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %recommended))])
         ::
         %suite
-        ``json+!>(~)
-          :: =/  apps  (~(get by suite.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%suite u.apps]))
+        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %suite))])
         ::
-        :: %installed
-        ::   =/  apps  (~(get by suite.space-apps.state) [ship space-pth])
-        ::   ?~  apps      ``json+!>(~)
-        ::   ``json+!>((view:enjs:core [%installed u.apps]))
+        %installed
+        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %installed))])
       ==
   ==
 ::
