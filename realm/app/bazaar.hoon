@@ -60,7 +60,7 @@
   ^-  (quip card _this)
   =^  cards  state
   ?+  mark  (on-poke:def mark vase)
-    %app-store-action  (on:action:core !<(action:store vase))
+    %bazaar-action  (on:action:core !<(action:store vase))
   ==
   [cards this]
 ::
@@ -109,17 +109,7 @@
       ?+  which  ``json+!>(~)
         ::
         %all
-          =/  apps  (~(got by space-apps.state) [ship space-pth])
-          =/  apps=app-index:store
-          %-  ~(rep by apps)
-          |=  [[=app-id:store =app-entry:store] acc=app-index:store]
-            =/  charge  (~(get by charges.state) app-id)
-            =.  tags.app-entry
-              ?~  charge
-                tags.app-entry
-              (~(put in tags.app-entry) %installed)
-            (~(put by acc) app-id app-entry)
-        ``bazaar-view+!>([%apps apps])
+        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] ~)])
         ::
         %pinned
         ``json+!>(~)
@@ -254,22 +244,22 @@
   ++  lik
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    `state
+    `state(space-apps (mod-tag path app-id %add %recommended))
   ::
   ++  dislik
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    `state
+    `state(space-apps (mod-tag path app-id %rem %recommended))
   ::
   ++  ste-add
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    `state
+    `state(space-apps (mod-tag path app-id %add %suite))
   ::
   ++  ste-rem
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    `state
+    `state(space-apps (mod-tag path app-id %rem %suite))
   ::
   ++  mod-tag
     |=  [path=space-path:spaces-store =app-id:store mod=@tas =tag:store]
@@ -283,6 +273,28 @@
       ==
     =/  apps  (~(put by apps) app-id app)
     (~(put by space-apps.state) path apps)
+  --
+::
+++  apps
+  |%
+  ++  view
+    |=  [path=space-path:spaces-store tag=(unit tag:store)]
+    ^-  =app-index:store
+    =/  apps  (~(got by space-apps.state) path)
+    %-  ~(rep by apps)
+    |=  [[=app-id:store =app-entry:store] acc=app-index:store]
+      :: skip if filter is neither %all nor the app tagged with tag
+      ?.  ?|  =(tag ~)
+              ?&  !=(tag ~)
+                  (~(has in tags.app-entry) (need tag))
+              ==
+          ==  acc
+      =/  charge  (~(get by charges.state) app-id)
+      =.  tags.app-entry
+        ?~  charge
+          tags.app-entry
+        (~(put in tags.app-entry) %installed)
+      (~(put by acc) app-id app-entry)
   --
 ::  bazaar reactions
 ++  bazaar-reaction
