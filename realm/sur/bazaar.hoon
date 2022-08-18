@@ -50,7 +50,8 @@
 +$  app-entry
       :: $rank: can be used for sorting apps; and simultaneously
       ::   (in the case of recommended apps) represent the # of "likes"
-  $:  rank=@u
+  $:  =ship
+      rank=@u
       =tags
   ==
 ::
@@ -60,7 +61,7 @@
   ==
 ::  $app-index: index of app ids. used to perform fast lookups
 ::   into the apps 'directory' when scrying
-+$  app-index     (map app-id app)
++$  app-index     (map app-id app-entry)
 +$  space-apps    (map space-path:spaces app-index)
 :: +$  pinned        (map space-path:spaces (set @tas))
 :: +$  recommended   (map space-path:spaces (set @tas))

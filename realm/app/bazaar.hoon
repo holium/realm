@@ -35,7 +35,7 @@
   ::  scry docket for charges
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
   ?>  ?=([%initial *] charge-update)
-  ~&  >>  "{<dap.bowl>}: {<initial.charge-update>}"
+  %-  (slog leaf+"{<dap.bowl>}: docket sync" ~)
   :_  this(charges initial.charge-update)
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
@@ -109,9 +109,17 @@
       ?+  which  ``json+!>(~)
         ::
         %all
-          :: =/  jon=json  .^(json %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/json)
-          :: =/  apps  (~(got by space-apps.state) [ship space-pth])
-        ``json+!>(~)
+          =/  apps  (~(got by space-apps.state) [ship space-pth])
+          =/  apps=app-index:store
+          %-  ~(rep by apps)
+          |=  [[=app-id:store =app-entry:store] acc=app-index:store]
+            =/  charge  (~(get by charges.state) app-id)
+            =.  tags.app-entry
+              ?~  charge
+                tags.app-entry
+              (~(put in tags.app-entry) %installed)
+            (~(put by acc) app-id app-entry)
+        ``bazaar-view+!>([%apps apps])
         ::
         %pinned
         ``json+!>(~)
@@ -388,82 +396,6 @@
     =/  passport  .^(passport:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/passport/[space.path]/noun)
     ?:(=(status.passport 'joined') %.y %.n)
   --
-::
-:: ++  dejs
-::   =,  dejs:format
-::   |%
-::   ++  charge-update
-::     |=  jon=json
-::     ^-  charge-update:docket
-::     =<  (decode jon)
-::     |%
-::     ++  decode
-::       %-  of
-::       :~  [%initial initial]
-::           [%add-charge add-charge]
-::           [%del-charge del-charge]
-::       ==
-::     ::
-::     ++  initial
-::       %-  om
-::       :~  [%desk so]
-::           [%charge chrg]
-::       ==
-::     ::
-::     ++  add-charge
-::       %-  ot
-::       :~  [%desk so]
-::           [%charge chrg]
-::       ==
-::     ::
-::     ++  chrg
-::       %-  ot
-::       :~  [%docket dkt]
-::           [%chad chd]
-::       ==
-::     ::
-::     ++  dkt
-::       %-  ot
-::       :~  [%title so]
-::           [%info so]
-::           [%color nu]
-::           [%href hr]
-::           [%image (un so)]
-::           [%version ver]
-::           [%website so]
-::           [%license so]
-::       ==
-::     ::
-::     ++  hr
-::       %-  of
-::       :~  [%glob glb]
-::           [%site so]
-::       ==
-::     ::
-::     ++  chd
-::       %-  of
-::       :~  [%install ul]
-::           [%glob glb]
-::           [%site ul]
-::           [%install ul]
-::           [%suspend (un glb)]
-::           [%hung so]
-::       ==
-::     ::
-::     ++  glb
-::       %-  om
-::       :~  [%path so]
-::           [%mime so]
-::       ==
-::     ::
-::     ++  ver
-::       %-  ot
-::       :~  [%major ni]
-::           [%minor ni]
-::           [%patch ni]
-::       ==
-::     --
-::   --
 ::
 ++  is-host
   |=  [=ship]
