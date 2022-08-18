@@ -36,7 +36,11 @@
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
   ?>  ?=([%initial *] charge-update)
   %-  (slog leaf+"{<dap.bowl>}: docket sync" ~)
-  :_  this(charges initial.charge-update)
+  =/  apps=app-index:store  (convert:charges:core initial.charge-update)
+  =/  our-space  [our.bowl 'our']
+  =.  charges.state      initial.charge-update
+  =.  space-apps.state   (~(put by space-apps.state) our-space apps)
+  :_  this
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
@@ -413,6 +417,21 @@
     :~  [%give %fact paths bazaar-reaction+!>(payload)]
     ==
   --
+::
+++  charges
+  |%
+  ::
+  ++  convert
+    |=  [charges=(map desk charge:docket)]
+    ^-  app-index:store
+    %-  ~(rep by charges)
+    |=  [[=desk =charge:docket] acc=app-index:store]
+      =|  app=app-entry:store
+      =.  ship.app  our.bowl
+      =.  tags.app  (~(put in tags.app) %installed)
+      (~(put by acc) desk app)
+  --
+
 ::
 ::  $security. member/permission checks
 ++  security
