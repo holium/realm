@@ -104,11 +104,15 @@
     [%x @ @ %apps @ ~]
       =/  =ship       (slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-      =/  which  i.t.t.t.t.path
+      =/  which  `@tas`i.t.t.t.t.path
+      ~&  >>  "{<[ship space-pth which]>}"
       ?+  which  ``json+!>(~)
         ::
         %all
-        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] ~)])
+                ~&  >>  "%all"
+        =/  apps  (view:apps:core [ship space-pth] ~)
+        ?~  apps  ``json+!>(~)
+        ``bazaar-view+!>([%apps apps])
         ::
         %pinned
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %pinned))])
@@ -267,10 +271,12 @@
   |%
   ++  view
     |=  [path=space-path:spaces-store tag=(unit tag:store)]
-    ^-  =app-index:store
+    ^-  (unit app-index:store)
+    ?.  (~(has by space-apps.state) path)  ~
     =/  apps  (~(got by space-apps.state) path)
+    =/  result=app-index:store
     %-  ~(rep by apps)
-    |=  [[=app-id:store =app-entry:store] acc=app-index:store]
+    |:  [[=app-id:store =app-entry:store] acc=`app-index:store`~]
       :: skip if filter is neither %all nor the app tagged with tag
       ?.  ?|  =(tag ~)
               ?&  !=(tag ~)
@@ -283,6 +289,7 @@
           tags.app-entry
         (~(put in tags.app-entry) %installed)
       (~(put by acc) app-id app-entry)
+    ?~(result ~ (some result))
   --
 ::  bazaar reactions
 ++  bazaar-reaction

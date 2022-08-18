@@ -28,10 +28,11 @@ type SuiteAppProps = {
   highlightColor?: string;
   app?: any; // AppModelType;
   isAdmin?: boolean;
+  onClick?: (e: React.MouseEvent<any, MouseEvent>, app: any) => void;
 };
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
-  const { app, space, isAdmin } = props;
+  const { app, space, isAdmin, onClick } = props;
   if (app) {
     return (
       <AppTile
@@ -60,7 +61,11 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
     );
   }
   return (
-    <AppEmpty height={148} width={148}>
+    <AppEmpty
+      height={148}
+      width={148}
+      onClick={(e) => onClick && onClick(e, undefined)}
+    >
       <Icons size={24} name="Plus" fill="#FFFFFF" opacity={0.4} />
     </AppEmpty>
   );

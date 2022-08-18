@@ -93,6 +93,6 @@
 ::  Scry views
 ::
 +$  view
-  $%  [which=@tas apps=(list app-view)]
+  $%  [apps=app-index]
   ==
 --

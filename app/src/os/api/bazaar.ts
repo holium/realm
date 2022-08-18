@@ -10,9 +10,9 @@ export const BazaarApi = {
     //  [host]/~/scry/bazaar/~zod/my-space/apps.json
     const response = await conduit.scry({
       app: 'bazaar',
-      path: `${path}/apps`, // the spaces scry is at the root of the path
+      path: `${path}/apps/all`, // the spaces scry is at the root of the path
     });
-    return response.apps;
+    return response?.apps || {};
   },
   getTreaties: async (conduit: Urbit, patp: string) => {
     //  [host]/~/scry/treaty/treaties/~bus.json
