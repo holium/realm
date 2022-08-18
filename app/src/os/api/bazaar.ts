@@ -1,6 +1,9 @@
 import { Urbit } from './../urbit/api';
 import { SpacePath } from '../types';
 import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { docketInstall } from '@urbit/api';
+import { quickPoke } from '../lib/poke';
+import { ISession } from '../';
 
 export const BazaarApi = {
   getApps: async (conduit: Urbit, path: SpacePath) => {
@@ -18,6 +21,14 @@ export const BazaarApi = {
       path: `/treaties/${patp}`, // the spaces scry is at the root of the path
     });
     return response.ini;
+  },
+  installDocket: async (
+    ourShip: string,
+    ship: string,
+    desk: string,
+    credentials: ISession
+  ) => {
+    return quickPoke(ourShip, docketInstall(ship, desk), credentials);
   },
   // leverage treaty /allies scry for now. allies are technically ship specific,
   //   so consider adding to ship service; however, thought it would be easier to

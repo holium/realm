@@ -298,6 +298,15 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   // ************************ BAZAAR ***************************
   // ***********************************************************
+  async installDocket(_event: any, ship: string, desk: string) {
+    return await BazaarApi.installDocket(
+      this.core.conduit?.ship!,
+      ship,
+      desk,
+      this.core.credentials!
+    );
+  }
+
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath) {
     return await BazaarApi.getApps(this.core.conduit!, path);
   }
