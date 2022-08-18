@@ -54,6 +54,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.members.kick-member': this.kickMember,
     'realm.spaces.bazaar.get-apps': this.getApps,
     'realm.spaces.bazaar.get-allies': this.getAllies,
+    'realm.spaces.bazaar.get-treaties': this.getTreaties,
     'realm.spaces.bazaar.add-recent-app': this.addRecentApp,
     'realm.spaces.bazaar.get-recent-apps': this.getRecentApps,
     'realm.spaces.bazaar.add-recent-dev': this.addRecentDev,
@@ -105,6 +106,8 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path),
     getAllies: async (path: SpacePath) =>
       ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
+    getTreaties: async (patp: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-treaties', patp),
     getRecentApps: async () =>
       ipcRenderer.invoke('realm.spaces.bazaar.get-recent-apps'),
     addRecentApp: async (path: SpacePath, appId: string) =>
@@ -302,6 +305,9 @@ export class SpacesService extends BaseService {
   }
   async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
     return await BazaarApi.getAllies(this.core.conduit!, path);
+  }
+  async getTreaties(_event: IpcMainInvokeEvent, patp: string) {
+    return await BazaarApi.getTreaties(this.core.conduit!, patp);
   }
   async getRecentApps(_event: IpcMainInvokeEvent) {
     return this.models.bazaar.getRecentApps();

@@ -14,6 +14,7 @@ export const BazaarModel = types
     installed: DocketMap, // registered
     recentsApps: types.array(types.string),
     recentsDevs: types.array(types.string),
+    allies: types.array(types.string),
   })
   .views((self) => ({
     get pinnedApps() {
@@ -79,6 +80,9 @@ export const BazaarModel = types
       if (idx !== -1) self.recentsDevs.splice(idx, 1);
       // add app to front of list
       self.recentsDevs.splice(0, 0, shipId);
+    },
+    setAllies(items: string[]) {
+      self.allies.splice(0, 0, ...items);
     },
   }));
 export type BazaarModelType = Instance<typeof BazaarModel>;

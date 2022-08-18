@@ -3,10 +3,10 @@ import styled, { css } from 'styled-components';
 import { styled as stitch, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { isValidPatp } from 'urbit-ob';
-import { Input, Flex, Box, Text, Icons } from 'renderer/components';
+import { Input, Flex, Box, Text, Icons, Sigil } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { toJS } from 'mobx';
-import MenuItemStyle from 'renderer/components/MenuItem/MenuItem.styles';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 const sizes = {
   sm: 32,
@@ -152,7 +152,6 @@ function renderApps(apps: any) {
   if (apps.length === 0) {
     return <Text color="#ababab">{`No recent apps`}</Text>;
   }
-  apps?.map((item) => console.log(toJS(item)));
   return apps?.map((app, index) => (
     <div key={index}>
       <Flex flexDirection="row" alignItems="center" gap={8}>
@@ -180,10 +179,10 @@ function renderApps(apps: any) {
               src={app.image}
             />
           )}
-          {app.icon && <Icons name={app.icon} height={12} width={12} />}
+          {app.icon && <Icons name={app.icon} height={16} width={16} />}
         </TileStyle>
         <Flex flexDirection="column">
-          <Text fontWeight={'bold'}>{app.title}</Text>
+          <Text fontWeight={500}>{app.title}</Text>
           <Text color={'#888888'}>{app.info}</Text>
         </Flex>
       </Flex>
@@ -217,20 +216,31 @@ const renderStart = (bazaar: any) => {
   );
 };
 
-const renderProviders = (data: Array, searchString) => {
+const renderProviders = (data: Array<any>, searchString: string) => {
   return data
     .filter((item) => item.name.startsWith(searchString))
-    .map((item, index) => <Text>{item.name}</Text>);
+    .map((item, index) => (
+      <Flex key={index} flexDirection="row" alignItems="center" gap={8}>
+        <Sigil
+          simple
+          size={28}
+          avatar={item.avatar}
+          patp={item.name}
+          color={[item.sigilColor || '#000000', 'white']}
+        />
+        <Text>{item.name}</Text>
+      </Flex>
+    ));
 };
 
-function renderShipSearch(data, searchString) {
+function renderShipSearch(data: Array<any>, searchString: string) {
   return (
     <>
-      <Flex flexDirection="column" gap={10}>
+      <Flex flexDirection="column" gap={12}>
         <Text color={'#8f8f8f'} fontWeight={500}>
           Searching Software Providers
         </Text>
-        <Flex flexDirection="column" gap={2}>
+        <Flex flexDirection="column" gap={12}>
           {renderProviders(data, searchString)}
         </Flex>
       </Flex>
@@ -238,11 +248,58 @@ function renderShipSearch(data, searchString) {
   );
 }
 
-const renderDevAppSearch = (ship: string) => {
+const renderDevApps = (apps: Array<any>) => {
+  if (apps.length === 0) {
+    return <Text color="#ababab">{`No apps found`}</Text>;
+  }
+  return apps?.map((app, index) => (
+    <div key={index}>
+      <Flex flexDirection="row" alignItems="center" gap={8}>
+        <TileStyle
+          onContextMenu={(evt: any) => {
+            evt.stopPropagation();
+          }}
+          minWidth={sizes.sm}
+          style={{
+            borderRadius: radius.sm,
+            overflow: 'hidden',
+          }}
+          height={sizes.sm}
+          width={sizes.sm}
+          backgroundColor={app.color || '#F2F3EF'}
+        >
+          {app.image && (
+            <img
+              style={{ pointerEvents: 'none' }}
+              draggable="false"
+              height={sizes.sm}
+              width={sizes.sm}
+              key={app.title}
+              src={app.image}
+            />
+          )}
+          {app.icon && <Icons name={app.icon} height={16} width={16} />}
+        </TileStyle>
+        <Flex flexDirection="column">
+          <Text fontWeight={500}>{app.title}</Text>
+          <Text color={'#888888'}>{app.info}</Text>
+        </Flex>
+      </Flex>
+    </div>
+  ));
+};
+
+const renderDevAppSearch = (ship: string, data: Array<any>) => {
   return (
     <>
       <Flex flexDirection="column" gap={10}>
-        <Text fontWeight={'bold'}>{`Software developed by ${ship}...`}</Text>
+        <Text
+          fontWeight={500}
+          color={'#8f8f8f'}
+        >{`Software developed by ${ship}...`}</Text>
+        <Flex flexDirection="column" gap={12}>
+          {renderDevApps(data)}
+        </Flex>
       </Flex>
     </>
   );
@@ -284,8 +341,7 @@ export const PopoverClose = StyledClose;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
 const AppSearchApp = (props) => {
-  const { space } = props;
-  const { ship, spaces, bazaar } = useServices();
+  const { spaces, bazaar } = useServices();
   const [data, setData] = useState([]);
   const [searchMode, setSearchMode] = useState('none');
   const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
@@ -296,40 +352,39 @@ const AppSearchApp = (props) => {
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
-  console.log('current bazaar => %o', {
-    path: spaces.selected?.path,
-    currentBazaar,
-  });
   useEffect(() => {
     console.log('AppSearch: useEffect called => %o', spaces.selected?.path);
-    // if (spaces.selected?.path) {
-    //   if (isOur) {
-    //     BazaarActions.getAllies().then((allies: any) => {
-    //       let data = Object.entries(allies).map(([key, value], index) => ({
-    //         id: key,
-    //         name: key,
-    //       }));
-    //       console.log(data);
-    //       setData(data);
-    //     });
-    //   } else {
-    //     BazaarActions.getApps(spaces.selected?.path).then((apps: any) => {
-    //       let data = Object.entries(apps).map(([key, value], index) => ({
-    //         id: key,
-    //         name: key,
-    //       }));
-    //       console.log(data);
-    //       setData(data);
-    //     });
-    //   }
-    // }
-  }, [spaces.selected?.path]);
+    if (searchMode === 'ship-search') {
+      SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {
+        let data = Object.entries(allies).map(([key, value], index) => ({
+          id: key,
+          name: key,
+        }));
+        setData(data);
+      });
+    } else if (searchMode === 'dev-app-search') {
+      SpacesActions.getTreaties(searchModeArgs[0]).then((items: any) => {
+        let data = Object.entries(items).map(([key, value], index) => ({
+          id: key,
+          name: key,
+        }));
+        setData(data);
+      });
+    } else if (searchMode === 'app-search') {
+      SpacesActions.getApps(spaces.selected?.path).then((items: any) => {
+        let data = Object.entries(items).map(([key, value], index) => ({
+          id: key,
+          name: key,
+        }));
+        setData(data);
+      });
+    }
+  }, [searchMode, spaces.selected?.path]);
 
   return (
     <Popover
       open={searchMode !== 'none'}
       onOpenChange={(open) => {
-        console.log(open);
         if (!open) {
           setSearchMode('none');
           setSelectedShip('');
@@ -355,7 +410,7 @@ const AppSearchApp = (props) => {
             paddingRight: 16,
           }}
           leftLabel={
-            searchMode === 'ship-search' && selectedShip !== ''
+            searchMode === 'dev-app-search' && selectedShip !== ''
               ? `Apps by ${selectedShip}:`
               : 'none'
           }
@@ -367,8 +422,10 @@ const AppSearchApp = (props) => {
           value={searchString}
           onKeyDown={(evt: any) => {
             if (evt.key === 'Enter' && isValidPatp(searchString)) {
+              setSearchMode('dev-app-search');
               setSearchPlaceholder('Search...');
               setSelectedShip(searchString);
+              setSearchModeArgs([searchString]);
               setSearchString('');
             } else if (evt.key === 'Escape') {
               setSearchPlaceholder('Search...');
@@ -396,7 +453,6 @@ const AppSearchApp = (props) => {
             } else if (searchString) {
               setSearchMode('ship-search');
             } else {
-              console.log('starting search...');
               setSearchMode('start');
             }
           }}
@@ -409,7 +465,7 @@ const AppSearchApp = (props) => {
         {searchMode === 'start' && renderStart(currentBazaar)}
         {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
         {searchMode === 'dev-app-search' &&
-          renderDevAppSearch(searchModeArgs[0])}
+          renderDevAppSearch(searchModeArgs[0], data)}
         {searchMode === 'app-search' && renderAppSearch()}
       </PopoverContent>
     </Popover>

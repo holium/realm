@@ -4,11 +4,20 @@ import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 export const BazaarApi = {
   getApps: async (conduit: Urbit, path: SpacePath) => {
+    //  [host]/~/scry/bazaar/~zod/my-space/apps.json
     const response = await conduit.scry({
       app: 'bazaar',
-      path: '/all', // the spaces scry is at the root of the path
+      path: `${path}/apps`, // the spaces scry is at the root of the path
     });
     return response.apps;
+  },
+  getTreaties: async (conduit: Urbit, patp: string) => {
+    //  [host]/~/scry/treaty/treaties/~bus.json
+    const response = await conduit.scry({
+      app: 'treaty',
+      path: `/treaties/${patp}`, // the spaces scry is at the root of the path
+    });
+    return response.ini;
   },
   // leverage treaty /allies scry for now. allies are technically ship specific,
   //   so consider adding to ship service; however, thought it would be easier to
