@@ -7,6 +7,8 @@ export interface HostingPlanet {
   patp: string
   sigil: string
   booted: boolean
+  priceMonthly: number
+  priceAnnual: number
 }
 
 export interface HostingPurchasedShip {

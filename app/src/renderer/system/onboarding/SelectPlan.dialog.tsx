@@ -107,10 +107,10 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
           </Flex>
         </Box>
         <Flex flex={3} px={50} flexDirection="column" justifyContent="center">
-          <SubscriptionTier title="Monthly subscription" price="$16/month" selected={billingPeriod === 'monthly'} onClick={() => setBillingPeriod('monthly')}>
+          <SubscriptionTier title="Monthly subscription" price={`$${planet.priceMonthly}/month`} selected={billingPeriod === 'monthly'} onClick={() => setBillingPeriod('monthly')}>
             Pay monthly and own your planet after you first three payments.
           </SubscriptionTier>
-          <SubscriptionTier mt={56} title="Annual subscription" price="$160/year" selected={billingPeriod === 'annual'} onClick={() => setBillingPeriod('annual')}>
+          <SubscriptionTier mt={56} title="Annual subscription" price={`$${planet.priceAnnual}/year`} selected={billingPeriod === 'annual'} onClick={() => setBillingPeriod('annual')}>
             Pay annually and own your planet immediately upon purchase.
           </SubscriptionTier>
         </Flex>
