@@ -39,6 +39,7 @@
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+      [%pass /bazaar %agent [our.bowl %bazaar] %watch /updates]
   ==
 
 ++  on-save   !>(~)
@@ -171,6 +172,28 @@
           ==
       ==
 
+    [%bazaar ~]
+      ?+    -.sign  (on-agent:def wire sign)
+        %watch-ack
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to bazaar/updates" ~)  `this
+          ~&  >>>  "{<dap.bowl>}: bazaar/updates subscription failed"
+          `this
+    ::
+        %kick
+          ~&  >  "{<dap.bowl>}: bazaar/updates kicked us, resubscribing..."
+          :_  this
+          :~  [%pass /bazaar %agent [our.bowl %bazaar] %watch /updates]
+          ==
+    ::
+        %fact
+          ?+    p.cage.sign  (on-agent:def wire sign)
+              %bazaar-reaction
+                =^  cards  state
+                  (bazaar-reaction:core !<(=reaction:store q.cage.sign))
+                [cards this]
+          ==
+      ==
+
   ==
 ::
 ++  on-arvo   |=([wire sign-arvo] !!)
@@ -212,6 +235,27 @@
     ^-  (quip card _state)
     `state
   --
+::  bazaar reactions
+++  bazaar-reaction
+  |=  [rct=reaction:store]
+  ^-  (quip card _state)
+  |^
+  ?-  -.rct
+    %initial        (on-initial +.rct)
+    %space-apps     (on-space-apps +.rct)
+  ==
+  ::
+  ++  on-initial
+    |=  [=space-apps:store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-space-apps
+    |=  [=space-path:spaces-store =app-index:store]
+    ^-  (quip card _state)
+    `state
+  --
+
 ::  charge arms
 ++  ch
   |%

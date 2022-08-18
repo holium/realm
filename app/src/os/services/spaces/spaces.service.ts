@@ -299,9 +299,7 @@ export class SpacesService extends BaseService {
   // ************************ BAZAAR ***************************
   // ***********************************************************
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath) {
-    const apps = await BazaarApi.getApps(this.core.conduit!, path);
-    this.models.bazaar.apps(path, apps);
-    return apps;
+    return await BazaarApi.getApps(this.core.conduit!, path);
   }
   async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
     return await BazaarApi.getAllies(this.core.conduit!, path);
