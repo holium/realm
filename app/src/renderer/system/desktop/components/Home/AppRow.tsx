@@ -42,7 +42,7 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
-export const AppRow = (props) => (
+export const AppRow = ({ app }) => (
   <Flex flexDirection="row" alignItems="center" gap={8}>
     <TileStyle
       onContextMenu={(evt: any) => {
@@ -55,23 +55,23 @@ export const AppRow = (props) => (
       }}
       height={sizes.sm}
       width={sizes.sm}
-      backgroundColor={props.app.color || '#F2F3EF'}
+      backgroundColor={app.color || '#F2F3EF'}
     >
-      {props.app.image && (
+      {app.image && (
         <img
           style={{ pointerEvents: 'none' }}
           draggable="false"
           height={sizes.sm}
           width={sizes.sm}
-          key={props.app.title}
-          src={props.app.image}
+          key={app.title}
+          src={app.image}
         />
       )}
-      {props.app.icon && <Icons name={props.app.icon} height={16} width={16} />}
+      {app.icon && <Icons name={app.icon} height={16} width={16} />}
     </TileStyle>
     <Flex flexDirection="column">
-      <Text fontWeight={500}>{props.app.title}</Text>
-      <Text color={'#888888'}>{props.app.info}</Text>
+      <Text fontWeight={500}>{app.title}</Text>
+      <Text color={'#888888'}>{app.info}</Text>
     </Flex>
   </Flex>
 );
