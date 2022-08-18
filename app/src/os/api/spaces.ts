@@ -138,7 +138,7 @@ export const SpacesApi = {
         }
       },
       err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      quit: () => console.log('Kicked from subscription spaces'),
     });
   },
 };

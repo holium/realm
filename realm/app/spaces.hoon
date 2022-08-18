@@ -1,5 +1,6 @@
-/-  store=spaces, membership-store=membership, invite-store=invite, hark=hark-store, passports-store=passports
-/+  default-agent, verb, dbug, agentio, lib=spaces, inv-lib=invite
+/-  store=spaces, membership-store=membership, invite-store=invite, 
+    hark=hark-store, passports-store=passports, resource
+/+  default-agent, verb, dbug, agentio, lib=spaces, inv-lib=invite, grp=groups
 ^-  agent:gall
 ::
 ::  %spaces [realm]:
@@ -76,6 +77,12 @@
       ::
       ::  ~/scry/spaces/all.json
         [%x %all ~]    ``spaces-view+!>([%spaces spaces.state])
+      ::
+      ::  ~/scry/spaces/groups.json
+        [%x %groups ~]    
+      =/  groups   (our-groups:grp our.bowl now.bowl) ::.^(,(set resource) %gy /(scot %p our.bowl)/group-store/(scot %da now.bowl)/groups)
+      :: ~&  >  [groups]
+      ``groups-view+!>([%groups groups])
       :: ::
       :: ::
       ::  ~/scry/spaces/~fes/our.json
@@ -105,7 +112,7 @@
           :: The space level watch subscription
         =/  host        `@p`(slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
-        ~&  >  [i.t.path host space-pth src.bowl]
+        :: ~&  >  [i.t.path host space-pth src.bowl]
         :: ?>  (check-member:core [host space-pth] src.bowl)     ::  only members should subscribe
         =/  space        (~(got by spaces.state) [host space-pth])
         (member:send-reaction [%space [host space-pth] space] [/spaces/(scot %p host)/(scot %tas space-pth) ~])
@@ -335,7 +342,7 @@
   ++  on-all
     |=  [=districts:passports-store]
     ^-  (quip card _state)
-    ~&  >  [districts]
+    :: ~&  >  [districts]
     `state
   :: ::
   ++  on-members
@@ -362,10 +369,10 @@
 ++  has-auth
   |=  [path=space-path:store =ship =role:membership-store]
   ::  TODO scry passports
-  ~&  >  [path ship role]
+  :: ~&  >  [path ship role]
   =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
   ?>  ?=(%member -.member)
-  ~&  >  [member]
+  :: ~&  >  [member]
   ::
   :: =/  member        (~(got by (~(got by membership.state) space-path)) ship)
   :: (~(has in roles.member) role)
@@ -376,7 +383,7 @@
   ^-  ?
   =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
   ?>  ?=(%is-member -.member)
-  ~&  >  ['is member' is-member.member]
+  :: ~&  >  ['is member' is-member.member]
   is-member.member
 ::
 ++  is-host

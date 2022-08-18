@@ -21,6 +21,9 @@ import { PassportsApi } from '../../api/passports';
 import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
+import { RoomsApi } from '../../api/rooms';
+
+const getHost = (path: string) => path.split('/')[1];
 
 type SpaceModels = {
   bazaar?: any;
@@ -175,7 +178,14 @@ export class SpacesService extends BaseService {
       this.models.membership
     );
     PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
+    //
+    // setting provider to current space host
+    this.core.services.ship.rooms!.setProvider(
+      null,
+      getHost(this.state.selected!.path)
+    );
   }
+
   // ***********************************************************
   // ************************ SPACES ***************************
   // ***********************************************************
@@ -221,6 +231,11 @@ export class SpacesService extends BaseService {
   setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
     this.core.services.desktop.setTheme(selected?.theme!);
+    // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
+    // setting provider to current space host
+    const spaceHost = getHost(this.state!.selected!.path);
+    // if (currentRoomProvider !== spaceHost)
+    this.core.services.ship.rooms!.setProvider(null, spaceHost);
   }
   // ***********************************************************
   // *********************** MEMBERS ***************************

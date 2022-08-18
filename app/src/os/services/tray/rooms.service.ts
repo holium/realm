@@ -18,7 +18,7 @@ import {
 import { Patp } from '@urbit/api';
 
 export class RoomsService extends BaseService {
-  private state?: RoomsAppStateType; // for state management
+  state?: RoomsAppStateType; // for state management
   handlers = {
     'realm.tray.rooms.join-room': this.joinRoom,
     'realm.tray.rooms.create-room': this.createRoom,
@@ -91,13 +91,18 @@ export class RoomsService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
-    // this.core.conduit!.desk = 'realm';
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-ignore
+      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
+  }
 
+  async onLogin(ship: string) {
     this.state = RoomsAppState.create({
       currentView: 'list',
       knownRooms: {},
       invites: {},
-      ourPatp: `~${core.conduit!.ship}`,
+      ourPatp: ship,
     });
 
     const patchEffect = {
@@ -116,15 +121,7 @@ export class RoomsService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
-      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
-    });
-
     RoomsApi.watchUpdates(this.core.conduit!, this.state!, () => {});
-    //
-    // TODO set provider to current space host?
-    RoomsApi.setProvider(this.core.conduit!, '~' + this.core.conduit!.ship!);
   }
 
   get snapshot() {
@@ -135,9 +132,6 @@ export class RoomsService extends BaseService {
     let room = this.state?.knownRooms.get(roomId);
     if (!room) return;
     await RoomsApi.joinRoom(this.core.conduit!, roomId);
-    // let room = this.state?.knownRooms.get(roomId);
-    // this.state?.setLiveRoom(room!);
-    // this.state?.setView('room');
   }
   setView(_event: any, view: 'list' | 'room' | 'new-room') {
     this.state?.setView(view);
@@ -147,14 +141,15 @@ export class RoomsService extends BaseService {
   }
   setProvider(_event: any, patp: Patp) {
     RoomsApi.setProvider(this.core.conduit!, patp);
+    this.state?.setProvider(patp);
   }
   async leaveRoom(_event: any, roomId: string) {
     await RoomsApi.leaveRoom(this.core.conduit!, roomId, this.state!);
     this.state?.leaveRoom();
-    // RoomsApi.requestAllRooms(this.core.conduit!);
   }
   async deleteRoom(_event: any, roomId: string) {
-    await RoomsApi.deleteRoom(this.core.conduit!, roomId, this.state!);
+    RoomsApi.deleteRoom(this.core.conduit!, roomId, this.state!);
+    this.state!.deleteRoom(roomId);
   }
   async unsetKnownRoom(_event: any, roomId: string) {
     this.state?.unsetKnownRoom(roomId);
@@ -169,7 +164,6 @@ export class RoomsService extends BaseService {
     // TODO this sequence would benefit from more metadata from the backend.
     // its difficult to verify the success of these calls
     //
-    // await RoomsApi.leaveRoom(this.core.conduit!, invite.id, this.state!);
     this.state?.leaveRoom();
     //
     await RoomsApi.setProvider(this.core.conduit!, invite.provider);
@@ -180,21 +174,31 @@ export class RoomsService extends BaseService {
   requestAllRooms(_event: any) {
     RoomsApi.requestAllRooms(this.core.conduit!);
   }
-  createRoom(
+  async createRoom(
     _event: any,
     roomId: string,
     access: string,
     title: string,
     enter: boolean
   ) {
-    RoomsApi.createRoom(this.core.conduit!, roomId, access, title, enter);
+    return RoomsApi.createRoom(
+      this.core.conduit!,
+      roomId,
+      access,
+      title,
+      enter
+    );
   }
   async getProvider(_event: any) {
     let res = await RoomsApi.getProvider(this.core.conduit!);
-    this.state?.setProvider(res['rooms-view'].provider);
+    return res['rooms-view'];
   }
   async invite(_event: any, roomId: string, patp: Patp) {
     RoomsApi.invite(this.core.conduit!, roomId, patp);
+  }
+
+  onLogout() {
+    this.state = undefined;
   }
   // this.state?.setIsMouseInWebview(mouseInWebview);
 }

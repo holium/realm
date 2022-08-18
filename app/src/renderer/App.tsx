@@ -2,7 +2,7 @@ import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
-import { FC, useContext, useEffect, useMemo } from 'react';
+import { FC, useContext, useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { theme } from './theme';
 import {
@@ -24,6 +24,7 @@ import { ShellActions } from './logic/actions/shell';
 export const App: FC = observer(() => {
   const { booted } = useCore();
   const { desktop, shell } = useServices();
+  const styleRef = useRef(null);
 
   const themeMode = desktop.theme.mode;
 

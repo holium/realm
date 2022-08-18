@@ -1,26 +1,22 @@
 import { FC, useState, useEffect } from 'react';
 import { toJS } from 'mobx';
-import { observer, Provider } from 'mobx-react';
+import { observer } from 'mobx-react';
 import {
   Grid,
   Flex,
   Icons,
   Text,
   TextButton,
-  IconButton,
   InnerNotification,
+  Tooltip,
 } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { Row } from 'renderer/components/NewRow';
 import { RoomRow } from './components/RoomRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
-import { rgba } from 'polished';
-import { fontSize } from 'styled-system';
-import { SoundActions } from 'renderer/logic/actions/sound';
 import { ProviderSelector } from './components/ProviderSelector';
 export type RoomListProps = {
   theme: ThemeModelType;
@@ -46,8 +42,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
     RoomsActions.getProvider();
   }, []);
 
-  const notif = false;
-
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -72,26 +66,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           >
             Rooms
           </Text>
-
-          {roomsApp.provider !== '' && roomsApp.provider !== ship!.patp && (
-            <Flex className="realm-cursor-hover" justifyContent="center">
-              <IconButton
-                ml={2}
-                color={'#000000'}
-                opacity={0.5}
-                onClick={(evt: any) => {
-                  evt.stopPropagation();
-                  // TODO set to current spacehost
-                  RoomsActions.setProvider(ship!.patp!);
-                }}
-              >
-                <Icons name="Logout" />
-              </IconButton>
-              <Text opacity={0.5} fontSize={2}>
-                {roomsApp.provider}
-              </Text>
-            </Flex>
-          )}
         </Flex>
         <Flex ml={1} pl={2} pr={2}>
           <TextButton
@@ -106,62 +80,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         </Flex>
       </Titlebar>
       <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
-        {roomsApp.invitesList.map((value: any) => (
-          <InnerNotification
-            id={value.id}
-            title={value.id}
-            seedColor="#F08735"
-            subtitle={`Sent by: ${value.invitedBy}`}
-            actionText="Accept"
-            onAction={(id: string) => {
-              console.log('accepting invite', id);
-              RoomsActions.acceptInvite(value.id);
-            }}
-            onDismiss={(id: string) => {
-              console.log('removing invite', id);
-              RoomsActions.dismissInvite(value.id);
-            }}
-          />
-          // <Row
-          //   noHover
-          //   key={`${value.id}-invite`}
-          //   baseBg={rgba(inviteColor, 0.12)}
-          //   customBg={rgba(inviteColor, 0.16)}
-          // >
-          //   <Flex
-          //     width="100%"
-          //     alignItems="center"
-          //     justifyContent="space-between"
-          //     className="realm-cursor-hover"
-          //   >
-          //     <Text color={inviteColor} fontWeight={500} fontSize={2}>
-          //       Invite: {value.id} - {value.invitedBy}
-          //     </Text>
-
-          //     <Flex gap={4}>
-          //       <IconButton
-          //         color={inviteColor}
-          //         onClick={(evt: any) => {
-          //           evt.stopPropagation();
-          //           RoomsActions.acceptInvite(value.id);
-          //         }}
-          //       >
-          //         <Icons name="Plus" />
-          //       </IconButton>
-          //       <IconButton
-          //         color={'#D0384E'}
-          //         onClick={(evt: any) => {
-          //           evt.stopPropagation();
-          //           console.log('clicked');
-          //           RoomsActions.dismissInvite(value.id);
-          //         }}
-          //       >
-          //         <Icons name="Close" />
-          //       </IconButton>
-          //     </Flex>
-          //   </Flex>
-          // </Row>
-        ))}
         {knownRooms.length === 0 && (
           <Flex
             flex={1}
@@ -217,30 +135,39 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           );
         })}
       </Flex>
-      {notif && (
+      {roomsApp.invitesList.map((value: any) => (
         <Flex flexDirection="column" width="100%">
           <InnerNotification
-            id={'~lomder-librun/hacker-room'}
-            title="Hacker Room"
+            id={value.id}
+            title={value.id}
             seedColor="#F08735"
-            subtitle="Sent by: ~lomder-librun"
+            subtitle={`Sent by: ${value.invitedBy}`}
             actionText="Accept"
             onAction={(id: string) => {
               console.log('accepting invite', id);
+              RoomsActions.acceptInvite(value.id);
             }}
             onDismiss={(id: string) => {
               console.log('removing invite', id);
+              RoomsActions.dismissInvite(value.id);
             }}
           />
         </Flex>
-      )}
+      ))}
+
       <Flex mt={3} pb={4} justifyContent="flex-end">
-        <ProviderSelector
-          seedColor={windowColor}
-          onClick={() => {
-            console.log('show provider setup');
-          }}
-        />
+        <Tooltip
+          id="room-provider"
+          placement="top"
+          content="This is your room provider."
+        >
+          <ProviderSelector
+            seedColor={windowColor}
+            onClick={() => {
+              console.log('show provider setup');
+            }}
+          />
+        </Tooltip>
       </Flex>
     </Grid.Column>
   );

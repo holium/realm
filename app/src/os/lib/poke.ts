@@ -37,7 +37,7 @@ export const quickPoke = async (
               }
             },
             err: () => console.log('Subscription rejected'),
-            quit: () => console.log('Kicked from subscription'),
+            quit: () => console.log('Kicked from subscription quick poke'),
           });
         }
         messageId = await conduit.poke(data);

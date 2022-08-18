@@ -31,7 +31,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
     x.set(event.clientX - rect.left);
     y.set(event.clientY - rect.top);
   }
-  console.log('show Home Pane in home button', desktop.showHomePane);
+
   const onHome = () => {
     DesktopActions.setHomePane(!desktop.showHomePane);
   };

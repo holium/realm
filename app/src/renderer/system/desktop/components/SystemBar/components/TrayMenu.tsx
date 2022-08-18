@@ -38,9 +38,9 @@ const Wrapper = styled(motion.div)`
 
 export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
   z-index: 4;
-  -webkit-backface-visibility: hidden;
-  -webkit-transform: translate3d(0, 0, 0);
-  -webkit-perspective: 1000;
+  --webkit-backface-visibility: hidden;
+  --webkit-transform: translate3d(0, 0, 0);
+  --webkit-perspective: 1000;
   backface-visibility: hidden;
   perspective: 1000;
   transform: translate3d(0, 0, 0);
@@ -50,7 +50,7 @@ export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
 export const TrayMenu = (props: TrayMenuProps) => {
   const { id, style, content, dimensions, coords } = props;
 
-  const { setActiveApp } = useTrayApps();
+  const { setActiveApp, activeApp } = useTrayApps();
 
   let body = content;
   const handleClickOutside = (event: any) => {
@@ -82,7 +82,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
   }, [id]);
 
   return (
-    <TrayMenuWrapper id={`${id}`} data-visible={id} style={style}>
+    <TrayMenuWrapper id={id} data-visible={id} style={style}>
       <Portal>
         <AnimatePresence>
           {id && (
@@ -96,7 +96,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
                 height: dimensions.height,
               }}
               animate={{
-                opacity: 1,
+                opacity: activeApp ? 1 : 0,
                 y: 0,
                 width: dimensions.width,
                 height: dimensions.height,

@@ -65,8 +65,8 @@ export class Realm extends EventEmitter {
     shell: ShellService.preload,
     onboarding: OnboardingService.preload,
     tray: {
-      rooms: RoomsService.preload
-    }
+      rooms: RoomsService.preload,
+    },
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -113,6 +113,8 @@ export class Realm extends EventEmitter {
     let shell = null;
     let membership = null;
     let bazaar = null;
+    let rooms = null;
+
     if (this.session) {
       ship = this.services.ship.snapshot;
       spaces = this.services.spaces.snapshot;
@@ -120,6 +122,7 @@ export class Realm extends EventEmitter {
       shell = this.services.shell.snapshot;
       bazaar = this.services.spaces.bazaarSnapshot;
       membership = this.services.spaces.membershipSnapshot;
+      rooms = this.services.ship.roomSnapshot;
     }
     this.services.identity.auth.setLoader('loaded');
     return {
@@ -131,6 +134,7 @@ export class Realm extends EventEmitter {
       shell,
       bazaar,
       membership,
+      rooms,
       loggedIn: this.session ? true : false,
     };
   }

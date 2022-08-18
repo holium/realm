@@ -5,10 +5,12 @@ import {
   types,
   onSnapshot,
   onAction,
+  applySnapshot,
 } from 'mobx-state-tree';
 
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import { SoundActions } from '../actions/sound';
+import { OSActions } from '../actions/os';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -72,17 +74,18 @@ export const trayStore = TrayAppStore.create({
     width: 200,
     height: 200,
   },
-  roomsApp: (persistedState && persistedState.roomsApp) || {
+  roomsApp: {
     currentView: 'list',
-    // rooms: [], TODO
   },
+  // roomsApp: (persistedState && persistedState.roomsApp) || {
+  //   currentView: 'list',
+  //   // rooms: [], TODO
+  // },
 });
 
-// onAction(trayStore, (call) => {
-//   console.log(call);
-// });
 // Watch actions for sound trigger
 onAction(trayStore.roomsApp, (call) => {
+  if (call.name === '@APPLY_SNAPSHOT') return;
   const patchArg = call.args![0][0];
   if (patchArg.path === '/liveRoom') {
     if (patchArg.op === 'replace') {
@@ -96,6 +99,7 @@ onAction(trayStore.roomsApp, (call) => {
 onSnapshot(trayStore, (snapshot) => {
   localStorage.setItem('trayStore', JSON.stringify(snapshot));
 });
+
 // -------------------------------
 // Create core context
 // -------------------------------
@@ -111,20 +115,18 @@ export function useTrayApps() {
   return store;
 }
 
-window.electron.os.onEffect((_event: any, value: any) => {
-  if (value.response === 'initial') {
-    if (value.resource === 'rooms') {
-      applyPatch(trayStore.roomsApp, value.model);
-    }
+// After boot, set the initial data
+OSActions.onBoot().then((response: any) => {
+  if (response.rooms) {
+    applySnapshot(trayStore.roomsApp, response.rooms);
   }
+});
+
+// Listen for all patches
+window.electron.os.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
     }
   }
-  // if (value.response === 'initial') {
-  //   if (value.resource === 'auth') {
-  //     // authState.authStore.initialSync(value);
-  //   }
-  // }
 });

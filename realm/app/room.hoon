@@ -4,7 +4,7 @@
 /-  store=rooms
 /+  lib=rooms
 /+  dbug, default-agent
-/+  agentio
+:: /+  agentio
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -102,10 +102,11 @@
   ^-  (set card)
   %-  ~(run in here)
     |=  =ship
-    %+  poke:pass:agentio
-        [ship client:lib]
-        :-  %rooms-update
-        !>  upd
+    :: %+  poke:pass:agentio
+    [%pass / %agent [ship client:lib] %poke %rooms-update !>(upd)]
+        :: [ship client:lib]
+        :: :-  %rooms-update
+        :: !>  upd
 ::
 ++  action
   |=  [act=action:store]
@@ -129,9 +130,10 @@
       =.  provider  ~
       :_  state
       :~
-        %+  poke:pass:agentio
-          [dad server:lib]
-          rooms-action+!>([%exit ~])
+        [%pass / %agent [dad server:lib] %poke rooms-action+!>([%exit ~])]
+        :: %+  poke:pass:agentio
+        ::   [dad server:lib]
+        ::   rooms-action+!>([%exit ~])
       ==
     ++  chat
     :: fwd to peers
@@ -145,6 +147,7 @@
       abet
     ++  set-provider
       |=  new-provider=ship
+      :: ~&  >>  ['setting provider' new-provider]
       :: there is some ugliness in this gate
       :: because we need to preserve
       :: `provider`s inferred type as (unit ship)
@@ -189,9 +192,10 @@
         u.old-provider
       :_  state
       :~
-        %+  poke:pass:agentio
-          [dad server:lib]
-          rooms-action+!>([%exit ~])
+        [%pass /rooms %agent [dad server:lib] %poke rooms-action+!>([%exit ~])]
+        :: %+  poke:pass:agentio
+        ::   [dad server:lib]
+        ::   rooms-action+!>([%exit ~])
       ==
     :: ::
     :: ::
@@ -199,11 +203,13 @@
       |=  [act=action:store]
       ?~  provider  !!
       =*  dad  u.provider
+      :: ~&  >>  ['fwd to provider' -.act]
       :_  state
       :~
-        %+  poke:pass:agentio
-          [dad server:lib]
-          rooms-action+!>(act)
+        [%pass /rooms %agent [dad server:lib] %poke rooms-action+!>(act)]
+        :: %+  poke:pass:agentio
+        ::   [dad server:lib]
+        ::   rooms-action+!>(act)
       ==
   --
 ::
@@ -296,15 +302,16 @@
       ^-  (set card)
       %-  ~(run in here)
         |=  =ship
-        %+  poke:pass:agentio
-            [ship client:lib]
-            :-  %rooms-update
-            !>  upd
+        [%pass /room %agent [ship client:lib] %poke %rooms-update !>(upd)]
+        :: %+  poke:pass:agentio
+        ::     [ship client:lib]
+        ::     :-  %rooms-update
+        ::     !>  upd
     ::
     ++  publish-local
       |=  [upd=update:store]
       ^-  card
-      [%give %fact [/room/local]~ %rooms-update !>(upd)]
+      [%give %fact [/room/local ~] %rooms-update !>(upd)]
     ::
     ++  is-provider
       ^-  ?

@@ -5,7 +5,7 @@
 ::
 /-  store=rooms, spaces
 /+  lib=rooms
-/+  dbug, default-agent, agentio
+/+  dbug, default-agent ::, agentio
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -229,10 +229,11 @@
         (insert room)
       :_  state
       :-
-      %+  poke:pass:agentio
-          [invited client:lib]
-          :-  %rooms-update
-          !>  [%invited our.bowl rid src.bowl]
+      [%pass /room %agent [invited client:lib] %poke %rooms-update !>([%invited our.bowl rid src.bowl])]
+      :: %+  poke:pass:agentio
+      ::     [invited client:lib]
+      ::     :-  %rooms-update
+      ::     !>  [%invited our.bowl rid src.bowl]
       (bump-room room)
     ::
     ++  kick
@@ -248,10 +249,11 @@
         (insert room)
       :_  state
       :-
-      %+  poke:pass:agentio
-          [kicked client:lib]
-          :-  %rooms-update
-          !>  [%kicked our.bowl rid src.bowl]
+      [%pass /room %agent [kicked client:lib] %poke %rooms-update !>([%kicked our.bowl rid src.bowl])]
+      :: %+  poke:pass:agentio
+      ::     [kicked client:lib]
+      ::     :-  %rooms-update
+      ::     !>  [%kicked our.bowl rid src.bowl]
       (bump-room room)
     ::
     ++  delete
@@ -280,10 +282,11 @@
       ::
       :_  state
       :~
-      %+  poke:pass:agentio
-        [src.bowl client:lib]
-        :-  %rooms-update
-        !>  [%room room]
+      [%pass /room %agent [src.bowl client:lib] %poke %rooms-update !>([%room room])]
+      :: %+  poke:pass:agentio
+      ::   [src.bowl client:lib]
+      ::   :-  %rooms-update
+      ::   !>  [%room room]
       ==
     ::
     ++  request-all
@@ -315,10 +318,11 @@
       ::
       :_  state
       :~
-      %+  poke:pass:agentio
-        [src.bowl client:lib]
-        :-  %rooms-update
-        !>  [%rooms rooms-set]
+        [%pass /room %agent [src.bowl client:lib] %poke %rooms-update !>([%rooms rooms-set])]
+      :: %+  poke:pass:agentio
+      ::   [src.bowl client:lib]
+      ::   :-  %rooms-update
+      ::   !>  [%rooms rooms-set]
       ==
     ::
     ::  utilities
@@ -331,10 +335,11 @@
       ^-  (set card)
       %-  ~(run in present.room)
         |=  =ship
-        %+  poke:pass:agentio
-            [ship client:lib]
-            :-  %rooms-update
-            !>  upd
+        [%pass /room %agent [ship client:lib] %poke %rooms-update !>(upd)]
+        :: %+  poke:pass:agentio
+        ::     [ship client:lib]
+        ::     :-  %rooms-update
+        ::     !>  upd
     ++  kick-room
       |=  =room:store
       %+  update-room

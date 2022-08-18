@@ -78,7 +78,7 @@ export const PassportsApi = {
         }
       },
       err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      quit: () => console.log('Kicked from subscription passport'),
     });
   },
 };

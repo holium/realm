@@ -1,25 +1,21 @@
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import {
-  Flex,
-  Grid,
-  IconButton,
-  Icons,
-  Text,
-  Input,
-  TextButton,
-  Checkbox,
-  Sigil,
-} from 'renderer/components';
+import { rgba } from 'polished';
+import { toJS } from 'mobx';
+import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from '../components/CommButton';
 // import { VoiceAnalyzer } from '../components/VoiceVisualizer';
-import { Speaker } from '../components/Speaker';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
-import { SoundActions } from 'renderer/logic/actions/sound';
+import { pluralize } from 'renderer/logic/lib/text';
+import { VoiceView } from './Voice';
+import { RoomChat } from './Chat';
+import { RoomInvite } from './Invite';
+import { RoomInfo } from './Info';
+
 export type BaseRoomProps = {
   theme: ThemeModelType;
   dimensions: {
@@ -28,28 +24,23 @@ export type BaseRoomProps = {
   };
 };
 
+const roomViews: any = {
+  voice: (props: any) => <VoiceView {...props} />,
+  invite: null,
+  info: null,
+};
+
+type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
+
 export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
   const { ship, desktop } = useServices();
   const { roomsApp } = useTrayApps();
 
-  const [audio, setAudio] = useState<MediaStream | null>(null);
-
   const { dockColor, windowColor, inputColor } = desktop.theme;
+  const [roomView, setRoomView] = useState<RoomViews>('voice');
 
-  // TODO exit routine
-  // // logout on window close or refresh
-  // useEffect(() => {
-  //   window.addEventListener("beforeunload", logout);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", logout);
-  //   };
-  // }, []);
-  // //
-  // const logout = () => {
-  //   RoomsActions.logout();
-  // };
-
+  const [audio, setAudio] = useState<MediaStream | null>(null);
   const getMicrophone = async () => {
     const audioMedia = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -69,13 +60,25 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   //   });
   // }, []);
 
+  // TODO exit routine
+  // // logout on window close or refresh
+  // useEffect(() => {
+  //   window.addEventListener("beforeunload", logout);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", logout);
+  //   };
+  // }, []);
+  // //
+
+  // const RoomView = roomViews[roomView];
+
   useEffect(() => {
     if (!roomsApp.liveRoom) RoomsActions.setView('list');
   }, [roomsApp.liveRoom]);
 
   if (!roomsApp.liveRoom) return <div />;
   const { present, id } = roomsApp.liveRoom;
-
+  // console.log(toJS(roomsApp.liveRoom));
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -104,21 +107,46 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           >
             <Icons name="ArrowLeftLine" />
           </IconButton>
-          <Flex flexDirection="column">
+          <Flex ml={2} flexDirection="column">
             <Text
-              ml={2}
-              fontSize={3}
-              fontWeight={500}
+              fontSize={2}
+              fontWeight={600}
               style={{
                 wordWrap: 'normal',
                 textOverflow: 'ellipsis',
+                textTransform: 'uppercase',
               }}
             >
               {roomsApp.liveRoom?.title}
             </Text>
+            <Flex>
+              <Text fontSize={2} fontWeight={400} opacity={0.7}>
+                {roomsApp.liveRoom?.creator}
+              </Text>
+              <Text mx="6px" fontSize={2} fontWeight={400} opacity={0.7}>
+                •
+              </Text>
+              <Text fontSize={2} fontWeight={400} opacity={0.7}>
+                {`${roomsApp.liveRoom?.present.length} ${pluralize(
+                  'participant',
+                  roomsApp.liveRoom?.present.length
+                )}`}
+              </Text>
+            </Flex>
           </Flex>
         </Flex>
-        <Flex ml={1} pl={2} pr={2}>
+        <Flex gap={12} ml={1} pl={2} pr={2}>
+          <IconButton
+            className="realm-cursor-hover"
+            size={26}
+            customBg={dockColor}
+            onClick={(evt: any) => {
+              evt.stopPropagation();
+              RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
+            }}
+          >
+            <Icons name="UserAdd" />
+          </IconButton>
           <IconButton
             className="realm-cursor-hover"
             size={26}
@@ -132,20 +160,16 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           </IconButton>
         </Flex>
       </Titlebar>
-      <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
-        {/* <Text mt="2px" fontSize={2} opacity={0.5} fontWeight={400}>
-            {roomApp.selected?.host}
-          </Text> */}
-        <Flex
-          flex={2}
-          flexDirection="row"
-          // flexWrap="wrap"
-          alignItems="center"
-        >
-          {present!.map((person: string, index: number) => (
-            <Speaker key={person} person={person} audio={audio} />
-          ))}
-        </Flex>
+      <Flex
+        position="relative"
+        style={{ marginTop: 54 }}
+        flex={1}
+        flexDirection="column"
+      >
+        {roomView === 'voice' && <VoiceView present={present} audio={audio} />}
+        {roomView === 'chat' && <RoomChat />}
+        {roomView === 'invite' && <RoomInvite />}
+        {roomView === 'info' && <RoomInfo />}
         <Flex
           pb={16}
           pl={1}
@@ -158,13 +182,19 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             <IconButton
               className="realm-cursor-hover"
               size={26}
+              color={rgba('#E56262', 0.7)}
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
+                if (roomsApp.isCreator(ship!.patp!, id)) {
+                  // SoundActions.playRoomLeave();
+                  RoomsActions.deleteRoom(id);
+                } else {
+                  RoomsActions.leaveRoom(id);
+                }
               }}
             >
-              <Icons name="UserAdd" />
+              <Icons name="RoomLeave" />
             </IconButton>
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
@@ -199,18 +229,15 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             <IconButton
               className="realm-cursor-hover"
               size={26}
-              customBg={dockColor} // TODO color red if we are room creator
+              customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                if (roomsApp.isCreator(ship!.patp!, id)) {
-                  // SoundActions.playRoomLeave();
-                  RoomsActions.deleteRoom(id);
-                } else {
-                  RoomsActions.leaveRoom(id);
-                }
+                roomView === 'chat'
+                  ? setRoomView('voice')
+                  : setRoomView('chat');
               }}
             >
-              <Icons name="LoginLine" />
+              <Icons name="Chat3" />
             </IconButton>
           </Flex>
         </Flex>

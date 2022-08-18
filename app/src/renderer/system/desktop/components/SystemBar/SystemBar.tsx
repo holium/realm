@@ -41,10 +41,7 @@ export const SystemBar: FC<SystemBarProps> = observer(
                 backgroundColor={windowColor}
                 textColor={textColor}
               >
-                <TrayAppView
-                  theme={desktop.theme}
-                  dimensions={dimensions}
-                />
+                <TrayAppView theme={desktop.theme} dimensions={dimensions} />
               </MiniApp>
             }
           />

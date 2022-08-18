@@ -52,7 +52,7 @@ export class ShipService extends BaseService {
     groups: {},
     graph: {},
   };
-  private rooms?: RoomsService;
+  rooms?: RoomsService;
   handlers = {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.send-dm': this.sendDm,
@@ -128,6 +128,7 @@ export class ShipService extends BaseService {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
     this.subscribe = this.subscribe.bind(this);
+    this.rooms = new RoomsService(core);
   }
 
   get snapshot() {
@@ -206,24 +207,12 @@ export class ShipService extends BaseService {
             this.state?.contacts.setInitial(data);
           },
           err: () => console.log('Subscription rejected'),
-          quit: () => console.log('Kicked from subscription'),
+          quit: () =>
+            console.log('Kicked from subscription contact-store /all'),
         });
       } catch {
         console.log('Subscription failed');
       }
-
-      // onPatch(this.models.friends, (patch) => {
-      //   // send patches to UI store
-      //   const patchEffect = {
-      //     patch,
-      //     resource: 'friends',
-      //     key: ship,
-      //     response: 'patch',
-      //   };
-      //   this.core.onEffect(patchEffect);
-      // });
-
-      // this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
 
       FriendsApi.watchFriends(this.core.conduit!, this.state);
 
@@ -231,25 +220,6 @@ export class ShipService extends BaseService {
         this.state?.setOurMetadata(value);
       });
 
-      MetadataApi.syncGroupMetadata(
-        this.core.conduit!,
-        this.metadataStore
-      ).then(async () => {
-        const groupMetadata = Object.values(this.metadataStore.groups).reduce(
-          (groupMap, group) => {
-            return {
-              ...groupMap,
-              [group.resource]: group,
-            };
-          },
-          {}
-        );
-        this.ourGroups = await GroupsApi.getOur(
-          this.core.conduit!,
-          groupMetadata
-        );
-        // console.log(this.ourGroups);
-      });
       MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
 
       // register dm update handler
@@ -269,10 +239,16 @@ export class ShipService extends BaseService {
         this.state?.loader.set('loaded');
         resolve(this.state!);
       });
-      
-      this.rooms = new RoomsService(this.core);
-      
+
+      this.rooms?.onLogin(ship);
+
+      // this.rooms = new RoomsService(this.core);
+      // this.rooms.setProvider(null, '~' + this.core.conduit!.ship!);
     });
+  }
+
+  get roomSnapshot() {
+    return this.rooms?.snapshot;
   }
 
   async init(ship: string) {
@@ -288,6 +264,7 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
+    this.rooms?.onLogout();
     this.core.mainWindow.webContents.send('realm.auth.on-log-out');
   }
 
@@ -323,17 +300,7 @@ export class ShipService extends BaseService {
   }
 
   async getOurGroups(_event: any): Promise<any> {
-    // const groupMetadata = Object.values(this.metadataStore.groups).reduce(
-    //   (groupMap, group) => {
-    //     return {
-    //       ...groupMap,
-    //       [group.resource]: group,
-    //     };
-    //   },
-    //   {}
-    // );
-
-    return this.ourGroups; // await GroupsApi.getOur(this.core.conduit!, groupMetadata);
+    return await GroupsApi.getOur(this.core.conduit!);
   }
 
   // ------------------------------------------

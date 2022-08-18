@@ -97,6 +97,12 @@ export const RoomsApi = {
     enter: boolean
   ) => {
     // TODO add to roomapp state after poke???
+    console.log({
+      rid: roomId,
+      access: access,
+      title: title,
+      enter: enter,
+    });
     const response = await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
@@ -108,9 +114,15 @@ export const RoomsApi = {
           enter: enter,
         },
       },
+      onSuccess: () => {
+        console.log('rooms-create-success');
+      },
+      onError: (err) => {
+        console.error('rooms-create', err);
+      },
     });
     // console.log('create');
-    console.log(response);
+    // console.log(response);
     return;
   },
 
@@ -119,12 +131,17 @@ export const RoomsApi = {
     roomId: string,
     state: RoomsAppStateType
   ) => {
+    console.log('leaving room');
     const response = await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: { exit: null },
       onSuccess: () => {
+        console.log('rooms-leave-success');
         state.removeSelf(roomId, `~${conduit.ship!}`);
+      },
+      onError: (err) => {
+        console.error('rooms-leave', err);
       },
     });
     return;
@@ -169,12 +186,11 @@ export const RoomsApi = {
       app: 'room',
       path: `/room/local`,
       event: async (data: any) => {
+        // console.log(data);
         let update = data['rooms-update'];
         if (!update) return;
         if (update['room']) {
           //
-          // console.log('room update', update['room']);
-
           state.handleRoomUpdate(update['room']);
         } else if (update['rooms']) {
           // console.log('rooms');

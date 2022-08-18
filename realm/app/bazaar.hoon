@@ -68,7 +68,7 @@
       :: The space level watch subscription
       =/  host        `@p`(slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-      ~&  >  [i.t.path host space-pth src.bowl]
+      :: ~&  >  [i.t.path host space-pth src.bowl]
       :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
       ::  recommends crash on permission check or other failure
       ?>  (check-member:security:core [host space-pth] src.bowl)

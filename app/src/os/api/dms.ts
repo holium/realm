@@ -54,7 +54,7 @@ export const DmApi = {
         }
       },
       err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      quit: () => console.log('Kicked from subscription dm-hook-action'),
     });
   },
   graphUpdates: (conduit: Urbit, shipState: ShipModelType) => {
@@ -73,7 +73,8 @@ export const DmApi = {
         }
       },
       err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      quit: () =>
+        console.log('Kicked from subscription graph-store /updates dm-inbox'),
     });
   },
   sendDM: async (

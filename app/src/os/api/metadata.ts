@@ -19,7 +19,10 @@ export const MetadataApi = {
           resolve(null);
         },
         err: () => reject('Subscription rejected'),
-        quit: () => console.log('Kicked from subscription'),
+        quit: () =>
+          console.log(
+            'Kicked from subscription metadata-store /app-name/groups'
+          ),
       });
     });
   },
@@ -36,7 +39,8 @@ export const MetadataApi = {
         }
       },
       err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      quit: () =>
+        console.log('Kicked from subscription metadata-store /app-name/graph'),
     });
   },
 };

@@ -163,6 +163,15 @@ export const RoomsAppState = types
       self.liveRoom = undefined;
       // TODO some info toast saying your were kicked / host left
     },
+    deleteRoom(roomId: string) {
+      if (roomId === self.liveRoom?.id) {
+        self.liveRoom = undefined;
+        self.knownRooms.delete(roomId);
+        self.currentView = 'list';
+      } else {
+        self.knownRooms.delete(roomId);
+      }
+    },
   }));
 
 export type RoomsAppStateType = Instance<typeof RoomsAppState>;

@@ -38,7 +38,7 @@ export const DocketApi = {
         err: () => {
           reject('Subscription rejected');
         },
-        quit: () => console.log('Kicked from subscription'),
+        quit: () => console.log('Kicked from subscription /treaty'),
       });
     });
     // conduit.subscribe({

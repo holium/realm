@@ -46,6 +46,7 @@ const checkboxIconStyles = css<{ error?: Boolean }>`
 
 const CheckboxUnchecked = styled(Icons)`
   display: none;
+  border-radius: 2px;
 
   input:checked ~ & {
     display: block;

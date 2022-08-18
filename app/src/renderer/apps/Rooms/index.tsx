@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react';
+// import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { FC } from 'react';
 import { useTrayApps } from 'renderer/logic/apps/store';

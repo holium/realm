@@ -248,7 +248,7 @@
       ::
           %kick
             ~&  >  "{<dap.bowl>}: passports kicked us, resubscribing..."
-            ~&  >  [sign]
+            :: ~&  >  [sign]
             :_  this
             :~  [%pass /passports %agent [our.bowl %spaces] %watch /all]
             ==

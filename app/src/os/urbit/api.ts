@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 
 import axios from 'axios';
@@ -21,7 +21,7 @@ import {
 } from './types';
 import { hexString } from './utils';
 import { SendAction, RealmAction } from './action-types';
-
+setMaxListeners(20);
 /**
  * A class for interacting with an urbit ship, given its URL and code
  */
@@ -92,7 +92,7 @@ export class Urbit extends EventEmitter {
   /**
    * number of consecutive errors in connecting to the eventsource
    */
-  private errorCount = 0;
+  private errorCount = 4;
 
   // @ts-expect-error
   onError?: (error: any) => void = null;
@@ -251,8 +251,6 @@ export class Urbit extends EventEmitter {
         }
 
         const parsedEvent = JSON.parse(event.data);
-        // console.log(event);
-        // console.log('Received SSE: ', parsedEvent);
         if (!parsedEvent.id) return;
         this.lastEventId = parseInt(parsedEvent.id, 10);
         if (this.lastEventId - this.lastAcknowledgedEventId > 20) {
