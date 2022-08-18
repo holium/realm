@@ -1,4 +1,64 @@
 ::
+++  dejs
+  =,  dejs:format
+  |%
+  ++  action
+    |=  jon=json
+    ^-  ^action
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~  [%pin dat]
+          [%unpin dat]
+          [%like dat]
+          [%dislike dat]
+          [%suite-add dat]
+          [%suite-remove dat]
+      ==
+    ::
+    ++  dat
+      %-  ot
+      :~  [%path pth]
+          [%app-id so]
+      ==
+    ::
+    ++  pth
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+          [%space so]
+      ==
+    --
+  --
+::
+::
+::  json
+::
+++  enjs
+  =,  enjs:format
+  |%
+  ++  reaction
+    |=  rct=^reaction
+    ^-  json
+    %+  frond  %bazaar-reaction
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    ?-  -.rct
+        %initial
+      :-  %initial
+      %-  pairs
+      :~  [%space-apps (space-apps:encode space-apps.rct)]
+      ==
+    ::
+        %space-apps
+      :-  %space-apps
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%app-index (apidx app-index.rct)]
+      ==
+    ==
+  --
 ::  json
 ::
 ++  enjs
@@ -22,6 +82,16 @@
 ++  encode
   =,  enjs:format
   |%
+  ++  space-apps
+    |=  =space-apps:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by space-apps)
+    |=  [pth=space-path:store =app-index:store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (apidx app-index)]
+  ::
   ++  apidx
     |=  =app-index:store
     ^-  json

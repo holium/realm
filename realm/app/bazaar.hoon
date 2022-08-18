@@ -233,31 +233,56 @@
     |=  =action:store
     ^-  (quip card _state)
     ?-  -.action
-      %pin         (pin +.action)
-      %recommend   (rec +.action)
-      %add         (add +.action)
-      %remove      (rem +.action)
+      %pin           (pin +.action)
+      %unpin         (unpin +.action)
+      %like          (lik +.action)
+      %dislike       (dislik +.action)
+      %suite-add     (ste-add +.action)
+      %suite-remove  (ste-rem +.action)
     ==
   ::
   ++  pin
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    `state
+    `state(space-apps (mod-tag path app-id %add %pinned))
   ::
-  ++  rec
+  ++  unpin
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    `state(space-apps (mod-tag path app-id %rem %pinned))
+  ::
+  ++  lik
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
   ::
-  ++  add
+  ++  dislik
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
   ::
-  ++  rem
+  ++  ste-add
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
+  ::
+  ++  ste-rem
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  mod-tag
+    |=  [path=space-path:spaces-store =app-id:store mod=@tas =tag:store]
+    ^-  space-apps:store
+    =/  apps  (~(got by space-apps.state) path)
+    =/  app  (~(got by apps) app-id)
+    =.  tags.app
+      ?+  mod  tags.app
+        %add  (~(put in tags.app) tag)
+        %rem  (~(del in tags.app) tag)
+      ==
+    =/  apps  (~(put by apps) app-id app)
+    (~(put by space-apps.state) path apps)
   --
 ::  bazaar reactions
 ++  bazaar-reaction
