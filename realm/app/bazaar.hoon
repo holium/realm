@@ -109,14 +109,13 @@
       =/  =ship       (slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
       =/  which  `@tas`i.t.t.t.t.path
-      ~&  >>  "{<[ship space-pth which]>}"
       ?+  which  ``json+!>(~)
         ::
         %all
-                ~&  >>  "%all"
         =/  apps  (view:apps:core [ship space-pth] ~)
         ?~  apps  ``json+!>(~)
-        ``bazaar-view+!>([%apps apps])
+        =/  res  ``bazaar-view+!>([%apps u.apps])
+        res
         ::
         %pinned
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %pinned))])

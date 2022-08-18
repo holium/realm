@@ -1,12 +1,12 @@
 /-  store=bazaar
 /+  *bazaar
 ::
-|_  vw=view:store
+|_  vi=view:store
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun    vw
-  ++  json    (view:enjs vw)
+  ++  noun    vi
+  ++  json    (view:enjs vi)
   --
 ::
 ++  grab

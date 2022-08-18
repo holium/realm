@@ -51,7 +51,7 @@
       :: $rank: can be used for sorting apps; and simultaneously
       ::   (in the case of recommended apps) represent the # of "likes"
   $:  =ship
-      rank=@u
+      rank=@ta
       =tags
   ==
 ::
@@ -93,6 +93,6 @@
 ::  Scry views
 ::
 +$  view
-  $%  [apps=app-index]
+  $%  [%apps =app-index]
   ==
 --

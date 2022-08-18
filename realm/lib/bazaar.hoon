@@ -1,3 +1,7 @@
+/-  store=bazaar, spaces-store=spaces
+=<  [store .]
+=,  store
+|%
 ::
 ++  dejs
   =,  dejs:format
@@ -54,28 +58,22 @@
         %space-apps
       :-  %space-apps
       %-  pairs
-      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%app-index (apidx app-index.rct)]
+      :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
+          [%app-index (apidx:encode app-index.rct)]
       ==
     ==
-  --
-::  json
-::
-++  enjs
-  =,  enjs:format
-  |%
   ::
   ++  view :: encodes for on-peek
-    |=  vw=^view
+    |=  vi=view:store
     ^-  json
     %-  pairs
     :_  ~
     ^-  [cord json]
-    :-  -.vw
-    ?-  -.vw
+    :-  -.vi
+    ?-  -.vi
       ::
         %apps
-      (apidx:encode apps.vw)
+      (apidx:encode app-index.vi)
     ==
   --
 ::
@@ -87,7 +85,7 @@
     ^-  json
     %-  pairs
     %+  turn  ~(tap by space-apps)
-    |=  [pth=space-path:store =app-index:store]
+    |=  [pth=space-path:spaces-store =app-index:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [spc-path (apidx app-index)]
@@ -98,7 +96,6 @@
     %-  pairs
     %+  turn  ~(tap by app-index)
     |=  [=app-id:store =app-entry:store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [app-id (apntry app-entry)]
   ::
@@ -106,8 +103,9 @@
     |=  =app-entry:store
     ^-  json
     %-  pairs
-    :~  ['ship' s+(cord "{<ship.app-entry>}")]
-        ['rank' ni+rank.app-entry]
+    :~  ['ship' s+(scot %p ship.app-entry)]
+        ['rank' n+rank.app-entry]
         ['tags' a+(turn ~(tap in tags.app-entry) |=(tg=tag:store s+(scot %tas tg)))]
     ==
   --
+--
