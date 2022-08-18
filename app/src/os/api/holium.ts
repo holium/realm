@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseURL = process.env.HOLIUM_API_BASEURL || `http://localhost:7000`;
+const baseURL =`https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
 const client = axios.create({ baseURL });
 
 export interface HostingPlanet {
@@ -42,8 +42,8 @@ export class HoliumAPI {
     return data.planets;
   }
 
-  async prepareCheckout(accountId: string, patp: string, tier: string) {
-    let { data } = await client.post(`accounts/${accountId}/prepare-checkout?patp=${patp}&tier=${tier}`);
+  async prepareCheckout(accountId: string, patp: string, billingPeriod: string) {
+    let { data } = await client.post(`accounts/${accountId}/prepare-checkout?patp=${patp}&billingPeriod=${billingPeriod}`);
     return { clientSecret: data.clientSecret };
   }
 
