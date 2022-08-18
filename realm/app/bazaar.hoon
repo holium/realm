@@ -16,6 +16,7 @@
   $:  %0
       =membership:membership-store
       =space-apps:store
+      charges=(map desk charge:docket)
   ==
 --
 =|  state-0
@@ -31,11 +32,11 @@
 ++  on-init
   ^-  (quip card _this)
   ::  scry docket for charges
-  :: =/  jon=json  .^(json %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/json)
+  =/  jon=json  .^(json %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/json)
   ::  convert charges json to charge data type (defined in docket)
-  :: =/  charges  (charges:dejs:format jon)
-  :: :_  this(charges charges)
-  :_  this
+  =/  charges  (charges:dejs:format jon)
+  :_  this(charges charges)
+  :: :_  this
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
@@ -89,7 +90,7 @@
   ^-  (unit (unit cage))
   ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|installed].json
+    ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|installed|all].json
     ::
     [%x @ @ %apps @ ~]
       =/  =ship       (slav %p i.t.path)
@@ -97,6 +98,11 @@
       =/  which  i.t.t.t.t.path
       ~&  >>  "{<ship>}, {<space-pth>}, {<which>}"
       ?+  which  ``json+!>(~)
+        ::
+        %all
+          =/  jon=json  .^(json %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/json)
+          =/  apps  (~(got by space-apps.state) [ship space-pth])
+        ``json+!(~)
         ::
         %pinned
         ``json+!>(~)
@@ -373,90 +379,81 @@
     ?:(=(status.passport 'joined') %.y %.n)
   --
 ::
-:: ++  dejs
-::   =,  dejs:format
-::   |%
-::   ++  charge-update
-::     |=  jon=json
-::     ^-  ^charge-update:docket
-::     =<  (decode jon)
-::     |%
-::     ++  decode
-::       %-  of
-::       :~  [%initial initial]
-::           [%add-charge add-charge]
-::           [%del-charge del-charge]
-::       ==
-::     ::
-::     ++  initial
-
-::     ::
-::     ++  add-charge
-::       %-  ot
-::       :~  [%desk so]
-::           [%charge chrg]
-::       ==
-::     ::
-::     ++  remove-passport
-::       %-  ot
-::       :~  [%path pth]
-::           [%ship (su ;~(pfix sig fed:ag))]
-::       ==
-::     ::
-::     ++  chrg
-::       %-  ot
-::       :~  [%docket dkt]
-::           [%chad chd]
-::       ==
-::     ::
-::     ++  dkt
-::       %-  ot
-::       :~  [%title so]
-::           [%info so]
-::           [%color nu]
-::           [%href hr]
-::           [%image (un so)]
-::           [%version ]
-::     ++  chd
-::     ::
-::     ++  edit-passport
-::       %-  ot
-::       :~  [%path pth]
-::           [%ship (su ;~(pfix sig fed:ag))]
-::           [%payload payl]
-::       ==
-::     ::
-::     ++  payl
-::       |=  jon=json
-::       ^-  payload
-::       =/  data  ?:(?=([%o *] jon) p.jon ~)
-::       =/  result=payload
-::       %-  ~(rep by data)
-::       |=  [[key=@tas jon=json] obj=payload]
-::       ?+  key  obj
-::          %alias         (~(put in obj) [%alias (so jon)])
-::          %add-roles     (~(put in obj) [%add-roles ((as rol) jon)])
-::          %remove-roles  (~(put in obj) [%remove-roles ((as rol) jon)])
-::       ==
-::       result
-::     ::
-::     ++  pth
-::       %-  ot
-::       :~  [%ship (su ;~(pfix sig fed:ag))]
-::           [%space so]
-::       ==
-::     ::
-::     ++  rol
-::       |=  =json
-::       ^-  role:membership
-::       ?>  ?=(%s -.json)
-::       ?:  =('initiate' p.json)   %initiate
-::       ?:  =('member' p.json)     %member
-::       ?:  =('admin' p.json)      %admin
-::       ?:  =('owner' p.json)      %owner
-::       !!
-::     --
-::   --
+++  dejs
+  =,  dejs:format
+  |%
+  ++  charge-update
+    |=  jon=json
+    ^-  charge-update:docket
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~  [%initial initial]
+          [%add-charge add-charge]
+          [%del-charge del-charge]
+      ==
+    ::
+    ++  initial
+      %-  om
+      :~  [%desk so]
+          [%charge chrg]
+      ==
+    ::
+    ++  add-charge
+      %-  ot
+      :~  [%desk so]
+          [%charge chrg]
+      ==
+    ::
+    ++  chrg
+      %-  ot
+      :~  [%docket dkt]
+          [%chad chd]
+      ==
+    ::
+    ++  dkt
+      %-  ot
+      :~  [%title so]
+          [%info so]
+          [%color nu]
+          [%href hr]
+          [%image (un so)]
+          [%version ver]
+          [%website so]
+          [%license so]
+      ==
+    ::
+    ++  hr
+      %-  of
+      :~  [%glob glb]
+          [%site so]
+      ==
+    ::
+    ++  chd
+      %-  of
+      :~  [%install ul]
+          [%glob glb]
+          [%site ul]
+          [%install ul]
+          [%suspend (un glb)]
+          [%hung so]
+      ==
+    ::
+    ++  glb
+      %-  om
+      :~  [%path so]
+          [%mime so]
+      ==
+    ::
+    ++  ver
+      %-  ot
+      :~  [%major ni]
+          [%minor ni]
+          [%patch ni]
+      ==
+    --
+  --
 ::
 ++  is-host
   |=  [=ship]
