@@ -11,6 +11,7 @@ import {
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import { SoundActions } from '../actions/sound';
 import { OSActions } from '../actions/os';
+import { Room } from 'renderer/apps/Rooms/lib/room';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -115,10 +116,16 @@ export function useTrayApps() {
   return store;
 }
 
+export const LiveRoom = new Room(trayStore.roomsApp.ourPatp!);
+
 // After boot, set the initial data
 OSActions.onBoot().then((response: any) => {
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);
+    if (trayStore.roomsApp.liveRoom) {
+      const { ourPatp, liveRoom } = trayStore.roomsApp;
+      LiveRoom.connect(ourPatp!, liveRoom);
+    }
   }
 });
 

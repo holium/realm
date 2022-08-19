@@ -30,6 +30,7 @@ import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { NotificationsApi } from '../../api/notifications';
 import { NotificationsStore, NotificationsType } from './models/notifications';
+import { SlipService } from '../slip.service';
 
 type ShipModels = {
   friends: FriendsType;
@@ -52,7 +53,9 @@ export class ShipService extends BaseService {
     groups: {},
     graph: {},
   };
-  rooms?: RoomsService;
+  private services: { slip?: SlipService } = {};
+  rooms: RoomsService;
+
   handlers = {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.send-dm': this.sendDm,
@@ -128,6 +131,7 @@ export class ShipService extends BaseService {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
     this.subscribe = this.subscribe.bind(this);
+    this.services.slip = new SlipService(core);
     this.rooms = new RoomsService(core);
   }
 
@@ -240,8 +244,8 @@ export class ShipService extends BaseService {
         resolve(this.state!);
       });
 
+      this.services.slip?.subscribe();
       this.rooms?.onLogin(ship);
-
       // this.rooms = new RoomsService(this.core);
       // this.rooms.setProvider(null, '~' + this.core.conduit!.ship!);
     });

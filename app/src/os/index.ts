@@ -1,3 +1,4 @@
+import { SlipService } from './services/slip.service';
 import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
@@ -23,7 +24,7 @@ export interface ISession {
 }
 
 export class Realm extends EventEmitter {
-  conduit?: Urbit;
+  conduit!: Urbit;
   readonly mainWindow: BrowserWindow;
   private session?: ISession;
   private db: Store<ISession>;
@@ -64,6 +65,7 @@ export class Realm extends EventEmitter {
     desktop: DesktopService.preload,
     shell: ShellService.preload,
     onboarding: OnboardingService.preload,
+    slip: SlipService.preload,
     tray: {
       rooms: RoomsService.preload,
     },
