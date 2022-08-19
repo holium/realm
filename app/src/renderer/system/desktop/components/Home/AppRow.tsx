@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Flex, Text, Icons, Box } from 'renderer/components';
+import { Flex, Text, Icons, Box, Button } from 'renderer/components';
 
 const sizes = {
   sm: 32,
@@ -42,7 +42,7 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
-export const AppRow = ({ caption, app }) =>
+export const AppRow = ({ caption, app, onClick }) =>
   app ? (
     <Flex flexDirection="row" alignItems="center" gap={8}>
       <TileStyle
@@ -70,10 +70,18 @@ export const AppRow = ({ caption, app }) =>
         )}
         {app.icon && <Icons name={app.icon} height={16} width={16} />}
       </TileStyle>
-      <Flex flexDirection="column">
+      <Flex flexDirection="column" flex={1}>
         <Text fontWeight={500}>{app.title}</Text>
         <Text color={'#888888'}>{app.info}</Text>
       </Flex>
+      <div style={{ whiteSpace: 'nowrap' }}>
+        <Button
+          borderRadius={6}
+          onClick={(e) => onClick && onClick(e, 'suite-add', app)}
+        >
+          Add to Suite
+        </Button>
+      </div>
     </Flex>
   ) : (
     <Text>{caption} not installed</Text>

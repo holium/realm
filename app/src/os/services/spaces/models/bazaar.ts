@@ -7,6 +7,15 @@ export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
 
+const BazaarApp = types.model({
+  id: types.string,
+  tags: types.array(types.string),
+});
+// .views((self) => ({
+//   get apps
+// }))
+// .actions((self) => ({}));
+
 export const BazaarModel = types
   .model({
     pinned: types.array(types.string),
@@ -15,6 +24,7 @@ export const BazaarModel = types
     recentsApps: types.array(types.string),
     recentsDevs: types.array(types.string),
     allies: types.array(types.string),
+    apps: types.map(BazaarApp),
   })
   .views((self) => ({
     get pinnedApps() {
@@ -80,6 +90,23 @@ export const BazaarModel = types
       if (idx !== -1) self.recentsDevs.splice(idx, 1);
       // add app to front of list
       self.recentsDevs.splice(0, 0, shipId);
+    },
+    addAppTag(appId: string, tag: string) {
+      let app = self.apps.get(appId);
+      if (app) {
+        if (app.tags.includes(tag)) return;
+        app.tags.push(tag);
+        self.apps.set(appId, app);
+      }
+    },
+    removeAppTag(appId: string, tag: string) {
+      let app = self.apps.get(appId);
+      if (app) {
+        let idx = app.tags.findIndex((item) => item === tag);
+        if (idx === -1) return;
+        app.tags.splice(idx, 1);
+        self.apps.set(appId, app);
+      }
     },
     setAllies(items: string[]) {
       self.allies.splice(0, 0, ...items);

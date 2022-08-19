@@ -77,6 +77,11 @@ function Content({ children, ...props }) {
   );
 }
 
+const onAppsAction = (action: string, app: any) => {
+  console.log('onAppsAction => %o', { action, app });
+  SpacesActions.addAppTag(app, 'suite');
+};
+
 // Exports
 export const Popover = PopoverPrimitive.Root;
 export const PopoverTrigger = PopoverPrimitive.Trigger;
@@ -148,7 +153,11 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
             {apps.length === 0 && <Text color={'#ababab'}>No apps found</Text>}
             {apps.map((item, index) => (
               <div key={index}>
-                <AppRow caption={item.desk} app={item.detail?.docket} />
+                <AppRow
+                  caption={item.desk}
+                  app={item.detail?.docket}
+                  onClick={(e, action, app) => onAppsAction(action, app)}
+                />
               </div>
             ))}
           </Flex>

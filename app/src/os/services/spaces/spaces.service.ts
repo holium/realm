@@ -59,6 +59,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.get-recent-apps': this.getRecentApps,
     'realm.spaces.bazaar.add-recent-dev': this.addRecentDev,
     'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
+    'realm.spaces.bazaar.add-app-tag': this.addAppTag,
+    'realm.spaces.bazaar.remove-app-tag': this.removeAppTag,
   };
 
   static preload = {
@@ -116,6 +118,10 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
     addRecentDev: async () =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
+    addAppTag: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-app-tag'),
+    removeAppTag: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.remove-app-tag'),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -335,6 +341,36 @@ export class SpacesService extends BaseService {
   }
   async getRecentDevs(_event: IpcMainInvokeEvent) {
     return this.models.bazaar.getRecentDevs();
+  }
+
+  async addAppTag(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string,
+    tag: string
+  ) {
+    return await BazaarApi.addAppTag(
+      this.core.conduit!,
+      spacePath,
+      appId,
+      tag,
+      this.core.credentials!
+    );
+  }
+
+  async removeAppTag(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string,
+    tag: string
+  ) {
+    return await BazaarApi.removeAppTag(
+      this.core.conduit!,
+      spacePath,
+      appId,
+      tag,
+      this.core.credentials!
+    );
   }
 
   async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {

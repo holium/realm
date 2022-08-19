@@ -1,6 +1,6 @@
 import { Urbit } from '../urbit/api';
 import { ShipModelType } from '../services/ship/models/ship';
-var util = require('util');
+// var util = require('util');
 import { decToUd, unixToDa } from '@urbit/api';
 
 export const NotificationsApi = {
@@ -9,10 +9,10 @@ export const NotificationsApi = {
       app: 'hark-store',
       path: '/updates',
       event: async (data: any) => {
-        console.log(`hark-store: ${util.inspect(data, false, 10, true)}`);
+        // console.log(`hark-store: ${util.inspect(data, false, 10, true)}`);
         if (data.more) {
           shipState.notifications.initial(data.more);
-          console.log(shipState.notifications.list);
+          // console.log(shipState.notifications.list);
         }
       },
       err: () => console.log('Subscription rejected'),
