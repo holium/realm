@@ -14,19 +14,34 @@
     |%
     ++  decode
       %-  of
-      :~  [%pin dat]
-          [%unpin dat]
-          [%like dat]
-          [%dislike dat]
-          [%suite-add dat]
-          [%suite-remove dat]
+      :~  [%add-tag add-tag]
+          [%remove-tag rem-tag]
       ==
     ::
-    ++  dat
+    ++  add-tag
       %-  ot
       :~  [%path pth]
           [%app-id so]
+          [%tag tg]
+          [%rank (mu ni)]
       ==
+    ::
+    ++  rem-tag
+      %-  ot
+      :~  [%path pth]
+          [%app-id so]
+          [%tag tg]
+      ==
+    ::
+    ++  tg
+      |=  =json
+      ^-  tag:store
+      ?>  ?=(%s -.json)
+      ?:  =('pinned' p.json)              %pinned
+      ?:  =('recommended' p.json)         %recommended
+      ?:  =('suite' p.json)               %suite
+      ?:  =('installed' p.json)           %installed
+      !!
     ::
     ++  pth
       %-  ot
@@ -117,7 +132,12 @@
     %+  turn  ~(tap by ranks)
     |=  [=tag:store rank=@ud]
     ^-  [cord json]
-    [`@tas`tag s+(cord "{<rank>}")]
+    ?-  tag
+      %pinned       ['pinned' n+(cord "{<rank>}")]
+      %recommended  ['recommended' n+(cord "{<rank>}")]
+      %suite        ['suite' n+(cord "{<rank>}")]
+      %installed    ['installed' n+(cord "{<rank>}")]
+    ==
   :: ::
   :: ++  dkt
   ::   |=  d=docket:docket

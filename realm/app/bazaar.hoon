@@ -117,9 +117,11 @@
         ``bazaar-view+!>([%apps u.apps])
         ::
         %pinned
-        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %pinned))])
+        =/  apps  (view:apps:core [ship space-pth] (some %pinned))
+        ?~  apps  ``json+!>(~)
+        ``bazaar-view+!>([%apps u.apps])
         ::
-        %recommended
+        %recommended220
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %recommended))])
         ::
         %suite
@@ -230,7 +232,7 @@
     =/  app  (~(got by apps) app-id)
     =.  tags.app  (~(put in tags.app) tag)
     ::  only update rank if requested (not null value)
-    =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
+    :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
     =/  apps  (~(put by apps) app-id app)
     `state(space-apps (~(put by space-apps.state) path apps))
   ::

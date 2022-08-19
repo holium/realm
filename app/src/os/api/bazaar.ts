@@ -24,7 +24,8 @@ export const BazaarApi = {
       }
     });
     const sorted = Object.entries(appMap).sort(
-      (a, b) => _.toInteger(a[1].rank) - _.toInteger(b[1].rank)
+      (a, b) =>
+        _.toInteger(a[1].default?.rank) - _.toInteger(b[1].default?.rank)
     );
     return Object.fromEntries(sorted);
   },
