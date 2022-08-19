@@ -43,15 +43,17 @@
       [%web =web-app]
   ==
 ::
-+$  tag  ?(%pinned %recommended %suite %installed)
-+$  tags  (set tag)
++$  tag     ?(%pinned %recommended %suite %installed)
++$  tags    (set tag)
++$  ranks   (map tag @ud)
+
 ::  $app-entry: app metadata common to all apps and
 ::    used for resolution
 +$  app-entry
       :: $rank: can be used for sorting apps; and simultaneously
       ::   (in the case of recommended apps) represent the # of "likes"
   $:  =ship
-      rank=@ud
+      =ranks
       =tags
       docket=(unit docket:docket)
   ==

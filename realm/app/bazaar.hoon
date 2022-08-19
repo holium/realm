@@ -230,7 +230,7 @@
     =/  app  (~(got by apps) app-id)
     =.  tags.app  (~(put in tags.app) tag)
     ::  only update rank if requested (not null value)
-    =.  rank.app  ?~(rank rank.app u.rank)
+    =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
     =/  apps  (~(put by apps) app-id app)
     `state(space-apps (~(put by space-apps.state) path apps))
   ::

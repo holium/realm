@@ -105,10 +105,19 @@
     ^-  json
     %-  pairs
     :~  ['ship' s+(scot %p ship.app-entry)]
-        ['rank' s+(crip "{<rank.app-entry>}")]
+        ['ranks' (rnks ranks.app-entry)]
         ['tags' a+(turn ~(tap in tags.app-entry) |=(tg=tag:store s+(scot %tas tg)))]
         ['docket' ?~(docket.app-entry ~ (docket:enjs:docket-lib u.docket.app-entry))]
     ==
+  ::
+  ++  rnks
+    |=  =ranks:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by ranks)
+    |=  [=tag:store rank=@ud]
+    ^-  [cord json]
+    [`@tas`tag s+(cord "{<rank>}")]
   :: ::
   :: ++  dkt
   ::   |=  d=docket:docket
