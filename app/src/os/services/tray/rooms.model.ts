@@ -9,7 +9,6 @@ import {
 import { toJS } from 'mobx';
 import { Patp } from 'os/urbit/types';
 import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
-import { RoomsApi } from '../../api/rooms';
 
 export const DmAppState = types.model('DmAppState', {
   current: types.string,

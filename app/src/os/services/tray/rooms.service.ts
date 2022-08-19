@@ -86,6 +86,8 @@ export class RoomsService extends BaseService {
     invite: (roomId: string, patp: Patp) => {
       return ipcRenderer.invoke('realm.tray.rooms.invite', roomId, patp);
     },
+    onRoomStream: (callback: any) =>
+      ipcRenderer.on('realm.on-rooms-stream', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -132,6 +134,7 @@ export class RoomsService extends BaseService {
     let room = this.state?.knownRooms.get(roomId);
     if (!room) return;
     await RoomsApi.joinRoom(this.core.conduit!, roomId);
+    // Start rooms
   }
   setView(_event: any, view: 'list' | 'room' | 'new-room') {
     this.state?.setView(view);

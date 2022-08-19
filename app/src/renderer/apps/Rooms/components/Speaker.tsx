@@ -14,7 +14,6 @@ import {
 } from 'renderer/components';
 import { useTrayApps } from 'renderer/logic/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { VoiceAnalyzer } from './VoiceVisualizer';
 
 interface ISpeaker {
   person: string;
@@ -50,7 +49,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
         {!hasVoice && <Icons ml={1} name="MicOff" size={18} opacity={0.3} />}
       </Text>
       {hasVoice ? (
-        <VoiceAnalyzer audio={audio} />
+        <div>speaking</div>
       ) : (
         <Flex height={30}>
           {/* <Icons name="MicOff" size={18} opacity={0.3} /> */}
