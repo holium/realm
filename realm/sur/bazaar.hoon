@@ -51,8 +51,9 @@
       :: $rank: can be used for sorting apps; and simultaneously
       ::   (in the case of recommended apps) represent the # of "likes"
   $:  =ship
-      rank=@ta
+      rank=@ud
       =tags
+      docket=(unit docket:docket)
   ==
 ::
 +$  app-view

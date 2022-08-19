@@ -114,8 +114,7 @@
         %all
         =/  apps  (view:apps:core [ship space-pth] ~)
         ?~  apps  ``json+!>(~)
-        =/  res  ``bazaar-view+!>([%apps u.apps])
-        res
+        ``bazaar-view+!>([%apps u.apps])
         ::
         %pinned
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %pinned))])
@@ -287,10 +286,11 @@
               ==
           ==  acc
       =/  charge  (~(get by charges.state) app-id)
-      =.  tags.app-entry
-        ?~  charge
-          tags.app-entry
-        (~(put in tags.app-entry) %installed)
+      =/  app-entry
+        ?~  charge  app-entry
+        =.  tags.app-entry  (~(put in tags.app-entry) %installed)
+        =.  docket.app-entry  (some docket.u.charge)
+        app-entry
       (~(put by acc) app-id app-entry)
     ?~(result ~ (some result))
   --

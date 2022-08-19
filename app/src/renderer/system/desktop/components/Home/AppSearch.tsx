@@ -74,7 +74,7 @@ function renderDevs(devs: any) {
   }
   return devs?.map((item, index) => (
     <div key={index}>
-      <AppRow app={item} />
+      <AppRow caption={item.title} app={item} />
     </div>
   ));
 }
@@ -85,7 +85,7 @@ function renderApps(apps: any) {
   }
   return apps?.map((app, index) => (
     <div key={index}>
-      <AppRow app={app} />
+      <AppRow caption={app.title} app={app} />
     </div>
   ));
 }

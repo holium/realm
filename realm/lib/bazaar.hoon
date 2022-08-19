@@ -1,4 +1,5 @@
-/-  store=bazaar, spaces-store=spaces
+/-  store=bazaar, spaces-store=spaces, docket
+/+  docket-lib=docket
 =<  [store .]
 =,  store
 |%
@@ -104,8 +105,42 @@
     ^-  json
     %-  pairs
     :~  ['ship' s+(scot %p ship.app-entry)]
-        ['rank' n+rank.app-entry]
+        ['rank' s+(crip "{<rank.app-entry>}")]
         ['tags' a+(turn ~(tap in tags.app-entry) |=(tg=tag:store s+(scot %tas tg)))]
+        ['docket' ?~(docket.app-entry ~ (docket:enjs:docket-lib u.docket.app-entry))]
     ==
+  :: ::
+  :: ++  dkt
+  ::   |=  d=docket:docket
+  ::   ^-  json
+  ::   %-  pairs
+  ::   :~  title+s+title.d
+  ::       info+s+info.d
+  ::       color+s+(scot %ux color.d)
+  ::       href+(href href.d)
+  ::       image+?~(image.d ~ s+u.image.d)
+  ::       version+(version version.d)
+  ::       license+s+license.d
+  ::       website+s+website.d
+  ::   ==
+  :: ::
+  :: ++  href
+  ::   |=  h=href:docket
+  ::   %+  frond  -.h
+  ::   ?-    -.h
+  ::       %site  s+(spat path.h)
+  ::       %glob
+  ::     %-  pairs
+  ::     :~  base+s+base.h
+  ::         glob-reference+(glob-reference glob-reference.h)
+  ::     ==
+  ::   ==
+  :: ::
+  :: ++  version
+  ::   |=  v=version:docket
+  ::   ^-  json
+  ::   :-  %s
+  ::   %-  crip
+  ::   "{(num major.v)}.{(num minor.v)}.{(num patch.v)}"
   --
 --

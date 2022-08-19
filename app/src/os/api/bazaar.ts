@@ -4,6 +4,7 @@ import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { docketInstall } from '@urbit/api';
 import { quickPoke } from '../lib/poke';
 import { ISession } from '../';
+import { cleanNounColor } from '../lib/color';
 
 export const BazaarApi = {
   getApps: async (conduit: Urbit, path: SpacePath) => {
@@ -12,7 +13,14 @@ export const BazaarApi = {
       app: 'bazaar',
       path: `${path}/apps/all`, // the spaces scry is at the root of the path
     });
-    return response?.apps || {};
+    const appMap = response.apps || {};
+    Object.keys(appMap).forEach((appKey: string) => {
+      if (appMap[appKey].docket) {
+        const appColor = appMap[appKey].docket.color;
+        appMap[appKey].docket.color = appColor && cleanNounColor(appColor);
+      }
+    });
+    return appMap;
   },
   getTreaties: async (conduit: Urbit, patp: string) => {
     //  [host]/~/scry/treaty/treaties/~bus.json

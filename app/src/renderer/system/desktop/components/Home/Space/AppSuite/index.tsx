@@ -94,9 +94,10 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
 
   useEffect(() => {
     SpacesActions.getApps(`/${patp}/our`).then((items: any) => {
+      console.log(items);
       let apps: any[] = Object.entries(items).map(([key, value], index) => ({
-        id: key,
-        name: key,
+        desk: key,
+        detail: value,
       }));
       setApps(apps || []);
     });
@@ -147,7 +148,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
             {apps.length === 0 && <Text color={'#ababab'}>No apps found</Text>}
             {apps.map((item, index) => (
               <div key={index}>
-                <AppRow app={item} />
+                <AppRow caption={item.desk} app={item.detail?.docket} />
               </div>
             ))}
           </Flex>
