@@ -140,9 +140,9 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
         <PopoverAnchor asChild>
           <div style={{ width: '100%', height: '1px' }}></div>
         </PopoverAnchor>
-        <PopoverContent sideOffset={5}>
+        <PopoverContent sideOffset={-60} style={{ width: '50em' }}>
           <Flex flexDirection={'column'} gap={10}>
-            <Text variant="h3" fontWeight={500}>
+            <Text variant="h5" fontWeight={500}>
               Installed Apps
             </Text>
             {apps.length === 0 && <Text color={'#ababab'}>No apps found</Text>}

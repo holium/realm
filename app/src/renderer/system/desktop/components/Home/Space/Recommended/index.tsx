@@ -67,16 +67,22 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
         <Text variant="h3" fontWeight={500}>
           Recommended Apps
         </Text>
-        <Flex flex={2} flexWrap="wrap">
-          {sampleApps.map((app: any) => {
-            console.log(app);
+
+        {([].length === 0 && (
+          <Text variant="h6">
+            No recommendations. Start liking apps in this space to show them
+            here!
+          </Text>
+        )) ||
+          [].map((app: any) => {
             return (
-              <Flex key={app.id} flex={1}>
-                <AppPreview app={app} />
+              <Flex flex={2} flexWrap="wrap">
+                <Flex key={app.id} flex={1}>
+                  <AppPreview app={app} />
+                </Flex>
               </Flex>
             );
           })}
-        </Flex>
       </Flex>
     );
   }

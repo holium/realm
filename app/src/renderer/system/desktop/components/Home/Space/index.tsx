@@ -164,11 +164,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite
-                patp={ship?.patp}
-                space={currentSpace}
-                suite={sampleSuite}
-              />
+              <AppSuite patp={ship?.patp} space={currentSpace} suite={[]} />
               <RecommendedApps />
               <RecentActivity />
             </Flex>
