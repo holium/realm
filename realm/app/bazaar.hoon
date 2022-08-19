@@ -217,56 +217,33 @@
     |=  =action:store
     ^-  (quip card _state)
     ?-  -.action
-      %pin           (pin +.action)
-      %unpin         (unpin +.action)
-      %like          (lik +.action)
-      %dislike       (dislik +.action)
-      %suite-add     (ste-add +.action)
-      %suite-remove  (ste-rem +.action)
+      %add-tag           (add-tag +.action)
+      %remove-tag        (rem-tag +.action)
     ==
   ::
-  ++  pin
-    |=  [path=space-path:spaces-store =app-id:store]
+  ++  add-tag
+    |=  [path=space-path:spaces-store =app-id:store =tag:store rank=(unit @ud)]
     ^-  (quip card _state)
-    `state(space-apps (mod-tag path app-id %add %pinned))
-  ::
-  ++  unpin
-    |=  [path=space-path:spaces-store =app-id:store]
-    ^-  (quip card _state)
-    `state(space-apps (mod-tag path app-id %rem %pinned))
-  ::
-  ++  lik
-    |=  [path=space-path:spaces-store =app-id:store]
-    ^-  (quip card _state)
-    `state(space-apps (mod-tag path app-id %add %recommended))
-  ::
-  ++  dislik
-    |=  [path=space-path:spaces-store =app-id:store]
-    ^-  (quip card _state)
-    `state(space-apps (mod-tag path app-id %rem %recommended))
-  ::
-  ++  ste-add
-    |=  [path=space-path:spaces-store =app-id:store]
-    ^-  (quip card _state)
-    `state(space-apps (mod-tag path app-id %add %suite))
-  ::
-  ++  ste-rem
-    |=  [path=space-path:spaces-store =app-id:store]
-    ^-  (quip card _state)
-    `state(space-apps (mod-tag path app-id %rem %suite))
-  ::
-  ++  mod-tag
-    |=  [path=space-path:spaces-store =app-id:store mod=@tas =tag:store]
-    ^-  space-apps:store
+    ::  installed tags are managed by bazaar agent
+    ?>  !?=(%installed tag)
     =/  apps  (~(got by space-apps.state) path)
     =/  app  (~(got by apps) app-id)
-    =.  tags.app
-      ?+  mod  tags.app
-        %add  (~(put in tags.app) tag)
-        %rem  (~(del in tags.app) tag)
-      ==
+    =.  tags.app  (~(put in tags.app) tag)
+    ::  only update rank if requested (not null value)
+    =.  rank.app  ?~(rank rank.app u.rank)
     =/  apps  (~(put by apps) app-id app)
-    (~(put by space-apps.state) path apps)
+    `state(space-apps (~(put by space-apps.state) path apps))
+  ::
+  ++  rem-tag
+    |=  [path=space-path:spaces-store =app-id:store =tag:store]
+    ^-  (quip card _state)
+    ::  installed tags are managed by bazaar agent
+    ?>  !?=(%installed tag)
+    =/  apps  (~(got by space-apps.state) path)
+    =/  app  (~(got by apps) app-id)
+    =.  tags.app  (~(del in tags.app) tag)
+    =/  apps  (~(put by apps) app-id app)
+    `state(space-apps (~(put by space-apps.state) path apps))
   --
 ::
 ++  apps

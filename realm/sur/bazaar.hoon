@@ -78,12 +78,8 @@
 :: +$  activity
 ::
 +$  action
-  $%  [%pin path=space-path:spaces =app-id]
-      [%unpin path=space-path:spaces =app-id]
-      [%like path=space-path:spaces =app-id]
-      [%dislike path=space-path:spaces =app-id]
-      [%suite-add path=space-path:spaces =app-id]
-      [%suite-remove path=space-path:spaces =app-id]
+  $%  [%add-tag path=space-path:spaces =app-id =tag rank=(unit @ud)]
+      [%remove-tag path=space-path:spaces =app-id =tag]
   ==
 ::
 +$  reaction
