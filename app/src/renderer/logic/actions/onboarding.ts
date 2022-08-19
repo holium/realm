@@ -27,8 +27,8 @@ export const OnboardingActions = {
     return await window.electron.os.onboarding.selectPlanet(planet);
   },
 
-  prepareCheckout: async(tier: string) => {
-    return await window.electron.os.onboarding.prepareCheckout(tier);
+  prepareCheckout: async(billingPeriod: string) => {
+    return await window.electron.os.onboarding.prepareCheckout(billingPeriod);
   },
 
   completeCheckout: async() => {

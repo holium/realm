@@ -28,7 +28,9 @@ export enum OnboardingStep {
 export const PlanetModel = types
   .model({
     patp: types.string,
-    booted: types.boolean
+    booted: types.boolean,
+    priceMonthly: types.number,
+    priceAnnual: types.number
   })
 
 export const AccessCodeModel = types
