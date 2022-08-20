@@ -24,6 +24,14 @@ export const EthList: FC<EthListProps> = observer((props: EthListProps) => {
   const onAddWallet = () => {};
   const list = walletApp.ethereum.list;
   useEffect(() => {
+    const walletAgent = new RealmWalletAgent(walletApp);
+    /*const walletAgent = new RealmWalletAgent();
+    walletAgent.subscribeToWallets((wallet: any) => {
+      walletApp.ethereum.updateWallet(wallet);
+    }
+    walletAgent.subscribeToTransactions((transaction: any) => {
+      walletApp.ethereum.updateWallet(wallet);
+    });*/
     constructSampleWallet().then((wallets) => {
       walletApp.setInitial('ethereum', wallets);
     });

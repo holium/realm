@@ -1,4 +1,5 @@
 import { applySnapshot, castToSnapshot, types } from 'mobx-state-tree';
+import { type } from 'os';
 import { RealmWallet, Wallet } from './lib/wallet';
 
 export const wallet: Wallet | null = null;
@@ -56,9 +57,19 @@ const EthWallet = types.model('EthWallet', {
   ),
 });
 
+const EthTransaction = types
+  .model('EthTransaction', {
+    status: types.string,
+    from: types.string,
+    toShip: types.maybe(types.string),
+    toAddress: types.maybe(types.string),
+    amount: types.string,
+  })
+
 const EthStore = types
   .model('EthStore', {
     wallets: types.map(EthWallet),
+    transactions: types.map(EthTransaction)
   })
   .views((self) => ({
     get list() {
@@ -75,6 +86,14 @@ const EthStore = types
     initial(wallets: any) {
       applySnapshot(self.wallets, wallets);
     },
+    // pokes
+    setEthProvider(url: string) {
+
+    },
+    // updates
+    applyWalletUpdate(wallet: any) {
+      self.wallets.put(wallet);
+    }
   }));
 
 export const WalletStore = types
