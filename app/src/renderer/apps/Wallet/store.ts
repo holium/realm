@@ -93,6 +93,9 @@ const EthStore = types
     // updates
     applyWalletUpdate(wallet: any) {
       self.wallets.put(wallet);
+    },
+    applyTransactionUpdate(transaction: any) {
+      self.transactions.put(transaction);
     }
   }));
 

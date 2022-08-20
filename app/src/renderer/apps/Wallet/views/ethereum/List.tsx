@@ -9,6 +9,7 @@ import { Wallet } from '../../lib/wallet';
 import { constructSampleWallet } from '../../store';
 import { WalletCard } from '../common/WalletCard';
 import { AnimatePresence, AnimateSharedLayout } from 'framer-motion';
+import { RealmEthWalletAgent } from 'js/src/realm-wallet-eth';
 
 interface EthListProps {}
 
@@ -24,13 +25,24 @@ export const EthList: FC<EthListProps> = observer((props: EthListProps) => {
   const onAddWallet = () => {};
   const list = walletApp.ethereum.list;
   useEffect(() => {
-    const walletAgent = new RealmWalletAgent(walletApp);
-    /*const walletAgent = new RealmWalletAgent();
-    walletAgent.subscribeToWallets((wallet: any) => {
-      walletApp.ethereum.updateWallet(wallet);
-    }
+    const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
+    const walletAgent = new RealmEthWalletAgent(mnemonic);
+    walletAgent.setUp("zod");
+/*    walletAgent.subscribeToWallets((wallet: any) => {
+      console.log('wallet', wallet);
+      walletApp.ethereum.applyWalletUpdate(wallet);
+    })
+    walletAgent.getWallets().then((wallets: any) => {
+      console.log('wallets', wallets);
+//      walletApp.ethereum.setWallets(wallets);
+    });
     walletAgent.subscribeToTransactions((transaction: any) => {
-      walletApp.ethereum.updateWallet(wallet);
+      console.log('transaction', transaction);
+      walletApp.ethereum.applyTransactionUpdate(transaction);
+    })
+    walletAgent.getTransactions().then((transactions: any) => {
+      console.log('transactions', transactions);
+//      walletApp.ethereum.setTransactions(transactions);
     });*/
     constructSampleWallet().then((wallets) => {
       walletApp.setInitial('ethereum', wallets);
