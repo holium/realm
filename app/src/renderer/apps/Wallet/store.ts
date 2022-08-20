@@ -43,7 +43,7 @@ const BitcoinStore = types
     },
   }));
 
-const EthWallet = types.model('BitcoinWallet', {
+const EthWallet = types.model('EthWallet', {
   network: types.string,
   address: types.string,
   balance: types.string,
