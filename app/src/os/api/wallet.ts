@@ -80,7 +80,7 @@ export const WalletApi = {
       quit: () => console.log('Kicked from subscription'),
     });
   },
-  getTransactions: async (conduit: Urbit, transaction: any) => {
+  getTransactions: async (conduit: Urbit) => {
     return await conduit.scry({
       app: 'wallet',
       path: '/transactions',

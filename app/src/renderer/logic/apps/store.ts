@@ -6,7 +6,7 @@ import {
   onSnapshot,
   onAction,
 } from 'mobx-state-tree';
-import { WalletStore } from 'renderer/apps/Wallet/store';
+import { WalletStore } from 'os/services/tray/wallet.model'
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import { SoundActions } from '../actions/sound';
 
@@ -73,7 +73,7 @@ export const trayStore = TrayAppStore.create({
     width: 200,
     height: 200,
   },
-  walletApp: {
+  walletApp: (persistedState && persistedState.walletApp) || {
     network: 'ethereum',
     currentView: 'ethereum:list',
     ethereum: {},
@@ -100,6 +100,10 @@ onAction(trayStore.roomsApp, (call) => {
   }
 });
 
+onAction(trayStore.walletApp, (call) => {
+
+})
+
 onSnapshot(trayStore, (snapshot) => {
   localStorage.setItem('trayStore', JSON.stringify(snapshot));
 });
@@ -124,10 +128,17 @@ window.electron.os.onEffect((_event: any, value: any) => {
       console.log('yo');
       applyPatch(trayStore.roomsApp, value.model);
     }
+    else if (value.resource === 'wallet') {
+      console.log('wallet yo');
+      applyPatch(trayStore.walletApp, value.model);
+    }
   }
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
+    }
+    else if (value.resource === 'wallet') {
+      applyPatch(trayStore.walletApp, value.patch);
     }
   }
   // if (value.response === 'initial') {

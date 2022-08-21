@@ -26,6 +26,7 @@ import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
 import { RoomsService } from '../tray/rooms.service';
+import { WalletService } from '../tray/wallet.service';
 import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { NotificationsApi } from '../../api/notifications';
@@ -53,6 +54,7 @@ export class ShipService extends BaseService {
     graph: {},
   };
   private rooms?: RoomsService;
+  private wallet?: WalletService;
   handlers = {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.send-dm': this.sendDm,
@@ -271,6 +273,8 @@ export class ShipService extends BaseService {
       });
       
       this.rooms = new RoomsService(this.core);
+      console.log('wallet service initialized');
+      this.wallet = new WalletService(this.core);
       
     });
   }

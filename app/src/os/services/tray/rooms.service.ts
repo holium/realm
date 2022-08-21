@@ -117,6 +117,7 @@ export class RoomsService extends BaseService {
     this.core.onEffect(patchEffect);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
+      console.log('binding rooms handlers');
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });

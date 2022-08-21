@@ -15,6 +15,7 @@ import { toJS } from 'mobx';
 import { ShipModelType } from './services/ship/models/ship';
 import HoliumAPI from './api/holium';
 import { RoomsService } from './services/tray/rooms.service';
+import { WalletService } from './services/tray/wallet.service';
 
 export interface ISession {
   ship: string;
@@ -65,7 +66,8 @@ export class Realm extends EventEmitter {
     shell: ShellService.preload,
     onboarding: OnboardingService.preload,
     tray: {
-      rooms: RoomsService.preload
+      rooms: RoomsService.preload,
+      wallet: WalletService.preload,
     }
   };
 
