@@ -61,7 +61,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
           </Text>
           {!tray && (
             <Flex flexDirection="row">
-              {isLive && <Icons mr={1} color="#4E9EFD" name="RoomSpeaker" />}
+              {/* {isLive && <Icons mr={1} color="#4E9EFD" name="RoomSpeaker" />} */}
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text opacity={0.5} fontWeight={400} fontSize={2}>
                 {creator === ship!.patp ? 'You' : creator}

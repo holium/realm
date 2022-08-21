@@ -1,10 +1,18 @@
 export enum ParticipantEvent {
-  StateUpdate = 'stateUpdate',
-  CursorUpdate = 'cursorUpdate',
+  Failed = 'failed',
+  New = 'new',
+  Closed = 'closed',
   Disconnected = 'disconnected',
   Connecting = 'connecting',
   Connected = 'connected',
   Reconnecting = 'reconnecting',
+  StateUpdate = 'stateUpdate',
+  CursorUpdate = 'cursorUpdate',
+  AudioStreamAdded = 'audioStreamAdded',
+  AudioStreamRemoved = 'audioStreamRemoved',
+  MuteToggled = 'muteToggled',
+  CursorToggled = 'cursorToggled',
+
   // Connected = 'connected',
   // Disconnected = 'disconnected',
   // Resuming = 'resuming',
@@ -15,4 +23,13 @@ export enum ParticipantEvent {
   // MediaTrackAdded = 'mediaTrackAdded',
   // ActiveSpeakersUpdate = 'activeSpeakersUpdate',
   // DataPacketReceived = 'dataPacketReceived',
+}
+
+export enum PeerConnectionState {
+  Disconnected = 'disconnected',
+  Connecting = 'connecting',
+  Connected = 'connected',
+  Failed = 'failed',
+  New = 'new',
+  Closed = 'closed',
 }

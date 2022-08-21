@@ -4,6 +4,8 @@ import { Patp } from 'os/types';
 import type TypedEmitter from 'typed-emitter';
 import { isValidPatp, patp2dec } from 'urbit-ob';
 import { CursorPayload, StatePayload } from '@holium/realm-multiplayer';
+import { DisconnectReason } from '../room/types';
+import { ParticipantEvent } from './events';
 
 export enum ConnectionState {
   Disconnected = 'disconnected',
@@ -19,14 +21,21 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
   isMuted: boolean = false;
   isCursorSharing: boolean = false;
   isSpeaking: boolean = false;
-  tracks: MediaStreamTrack[];
-  connectionState: ConnectionState = ConnectionState.Disconnected;
 
   constructor(patp: string) {
     super();
     this.patp = patp;
     this.patpId = patp2dec(patp);
-    this.tracks = [];
+  }
+
+  toggleMuted() {
+    this.isMuted = !this.isMuted;
+    this.emit('muteToggled', this.isMuted);
+  }
+
+  toggleCursors() {
+    this.isCursorSharing = !this.isCursorSharing;
+    this.emit('cursorToggled', this.isCursorSharing);
   }
 
   sendSignal(
@@ -40,10 +49,19 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
 }
 
 export type ParticipantEventCallbacks = {
-  connecting: () => void;
+  // PeerConnectionState
   connected: () => void;
+  disconnected: (reason?: DisconnectReason) => void;
+  failed: () => void;
+  new: () => void;
+  closed: () => void;
+  // Custom
+  connecting: () => void;
   reconnecting: () => void;
-  disconnected: () => void;
+  audioStreamAdded: (stream: MediaStream) => void;
   cursorUpdate: (payload: CursorPayload) => void;
   stateUpdate: (payload: StatePayload) => void;
+  //
+  cursorToggled: (isCursorSharing: boolean) => void;
+  muteToggled: (isMuted: boolean) => void;
 };

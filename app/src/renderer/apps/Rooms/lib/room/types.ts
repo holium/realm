@@ -93,90 +93,12 @@ export interface SpeakerInfo {
   active: boolean;
 }
 
-export enum ConnectionState {
-  Disconnected = 'disconnected',
-  Connecting = 'connecting',
+export enum RoomState {
+  Starting = 'starting',
+  Started = 'started',
+  Ended = 'ended',
   Connected = 'connected',
-  Reconnecting = 'reconnecting',
+  Disconnected = 'disconnected',
+  Added = 'added',
+  Kicked = 'kicked',
 }
-
-export type RoomEventCallbacks = {
-  reconnecting: () => void;
-  reconnected: () => void;
-  disconnected: (reason?: DisconnectReason) => void;
-  connectionStateChanged: (state: ConnectionState) => void;
-  mediaDevicesChanged: () => void;
-
-  /** @deprecated stateChanged has been renamed to connectionStateChanged */
-  // stateChanged: (state: ConnectionState) => void;
-  // connectionStateChanged: (state: ConnectionState) => void;
-  // participantConnected: (participant: RemoteParticipant) => void;
-  // participantDisconnected: (participant: RemoteParticipant) => void;
-  // trackPublished: (
-  //   publication: RemoteTrackPublication,
-  //   participant: RemoteParticipant
-  // ) => void;
-  // trackSubscribed: (
-  //   track: RemoteTrack,
-  //   publication: RemoteTrackPublication,
-  //   participant: RemoteParticipant
-  // ) => void;
-  // trackSubscriptionFailed: (
-  //   trackSid: string,
-  //   participant: RemoteParticipant
-  // ) => void;
-  // trackUnpublished: (
-  //   publication: RemoteTrackPublication,
-  //   participant: RemoteParticipant
-  // ) => void;
-  // trackUnsubscribed: (
-  //   track: RemoteTrack,
-  //   publication: RemoteTrackPublication,
-  //   participant: RemoteParticipant
-  // ) => void;
-  // trackMuted: (publication: TrackPublication, participant: Participant) => void;
-  // trackUnmuted: (
-  //   publication: TrackPublication,
-  //   participant: Participant
-  // ) => void;
-  // localTrackPublished: (
-  //   publication: LocalTrackPublication,
-  //   participant: LocalParticipant
-  // ) => void;
-  // localTrackUnpublished: (
-  //   publication: LocalTrackPublication,
-  //   participant: LocalParticipant
-  // ) => void;
-  // participantMetadataChanged: (
-  //   metadata: string | undefined,
-  //   participant: RemoteParticipant | LocalParticipant
-  // ) => void;
-  // participantPermissionsChanged: (
-  //   prevPermissions: ParticipantPermission,
-  //   participant: RemoteParticipant | LocalParticipant
-  // ) => void;
-  // activeSpeakersChanged: (speakers: Array<Participant>) => void;
-  // roomMetadataChanged: (metadata: string) => void;
-  // dataReceived: (
-  //   payload: Uint8Array,
-  //   participant?: RemoteParticipant,
-  //   kind?: DataPacket_Kind
-  // ) => void;
-  // connectionQualityChanged: (
-  //   quality: ConnectionQuality,
-  //   participant: Participant
-  // ) => void;
-  // mediaDevicesError: (error: Error) => void;
-  // trackStreamStateChanged: (
-  //   publication: RemoteTrackPublication,
-  //   streamState: Track.StreamState,
-  //   participant: RemoteParticipant
-  // ) => void;
-  // trackSubscriptionPermissionChanged: (
-  //   publication: RemoteTrackPublication,
-  //   status: TrackPublication.SubscriptionStatus,
-  //   participant: RemoteParticipant
-  // ) => void;
-  // audioPlaybackChanged: (playing: boolean) => void;
-  // signalConnected: () => void;
-};

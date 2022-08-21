@@ -20,6 +20,7 @@ import { Presences } from './system/desktop/components/Multiplayer/Presences';
 import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
 import { ShellActions } from './logic/actions/shell';
+import { LiveRoom } from './apps/store';
 
 export const App: FC = observer(() => {
   const { booted } = useCore();
@@ -42,6 +43,12 @@ export const App: FC = observer(() => {
       />
     );
   }, [desktop.mouseColor, shell.isMouseInWebview]);
+
+  useEffect(() => {
+    () => {
+      LiveRoom.reset();
+    };
+  }, []);
 
   return (
     <CoreProvider value={coreStore}>

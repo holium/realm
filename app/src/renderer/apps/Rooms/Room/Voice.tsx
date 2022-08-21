@@ -12,7 +12,7 @@ export const VoiceView: FC<VoiceViewProps> = ({
   audio,
 }: VoiceViewProps) => {
   return (
-    <Flex flex={2} flexDirection="row" alignItems="center">
+    <Flex flex={2} gap={8} flexDirection="row" alignItems="center">
       {present.map((person: string, index: number) => (
         <Speaker key={person} person={person} audio={audio} />
       ))}

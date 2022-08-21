@@ -1,4 +1,4 @@
-import { ParticipantEvent } from './../helpers/events';
+import { ParticipantEvent, PeerConnectionState } from './events';
 import { Patp } from 'os/types';
 import { MutableRefObject } from 'react';
 import { ConnectionState, Participant } from '.';
@@ -11,76 +11,44 @@ const DATA_CHANNEL_LABEL = '_peerdata';
 
 export class RemoteParticipant extends Participant {
   private peerConn: RTCPeerConnection;
+  private audioRef!: HTMLAudioElement;
+  private audioStream?: MediaStream;
   private dataChannel!: RTCDataChannel;
   private dataChannelSub?: RTCDataChannel;
   private waitInterval?: number;
+
+  get connectionState(): RTCPeerConnectionState {
+    return this.peerConn.connectionState;
+  }
+
   constructor(patp: Patp, config: RTCConfiguration) {
     super(patp);
     this.peerConn = new RTCPeerConnection();
     this.peerConn.setConfiguration(config);
-
-    const sendAwaitingOffer = async () => {
-      this.connectionState !== ConnectionState.Connected &&
-        this.sendSignal(this.patp, 'awaiting-offer', '');
-    };
-
     // @ts-ignore
-    this.waitInterval = setInterval(sendAwaitingOffer, 5000);
-
-    this.peerConn.addEventListener('connectionstatechange', (event: Event) => {
-      // @ts-ignore
-      if (event.currentTarget.connectionState === ConnectionState.Connected) {
-        console.log('peers connected!');
-        this.emit(ParticipantEvent.Connected);
-      }
-      // @ts-ignore
-      if (event.currentTarget.connectionState === ConnectionState.Connecting) {
-        console.log('peers connecting!');
-        this.emit(ParticipantEvent.Connecting);
-      }
-      if (
-        // @ts-ignore
-        event.currentTarget.connectionState === ConnectionState.Disconnected
-      ) {
-        console.log('peers Disconnected!');
-        this.emit(ParticipantEvent.Disconnected);
-      }
-      if (
-        // @ts-ignore
-        event.currentTarget.connectionState === ConnectionState.Reconnecting
-      ) {
-        console.log('peers Reconnecting!');
-        this.emit(ParticipantEvent.Reconnecting);
-      }
-    });
-
-    this.peerConn.addEventListener('icecandidate', (e) => {
-      if (e.candidate === null) return;
-      let can = JSON.stringify(e.candidate!.toJSON());
-      this.sendSignal(this.patp, 'ice-candidate', can);
-    });
-
-    this.peerConn.onicegatheringstatechange = (event: Event) => {
-      if (!event) return;
-      if (!event.target) return;
-      if (!(event.target instanceof RTCPeerConnection)) return;
-      let connection: RTCPeerConnection = event.target;
-      switch (connection.iceGatheringState!) {
-        case 'gathering':
-          /* collection of candidates has begun */
-          console.log('gathering');
-          break;
-        case 'complete':
-          /* collection of candidates is finished */
-          console.log('complete');
-          // this.waitInterval;
-          break;
-      }
-    };
-    this.peerConn.addEventListener('negotiationneeded', async (e) => {
-      console.log('negneeded');
-    });
+    this.waitInterval = setInterval(this.sendAwaitingOffer, 5000);
+    // Bind all listeners to this
+    this.onTrack = this.onTrack.bind(this);
+    this.onConnectionChange = this.onConnectionChange.bind(this);
+    this.onIceCandidate = this.onIceCandidate.bind(this);
+    this.onGathering = this.onGathering.bind(this);
+    this.onNegotiation = this.onNegotiation.bind(this);
+    this.onIceError = this.onIceError.bind(this);
   }
+
+  toggleMuted() {
+    this.isMuted = !this.isMuted;
+  }
+
+  toggleCursors() {
+    this.isCursorSharing = !this.isCursorSharing;
+  }
+
+  sendAwaitingOffer = async () => {
+    this.connectionState !== PeerConnectionState.Connecting &&
+      this.connectionState !== PeerConnectionState.Connected;
+    this.sendSignal(this.patp, 'awaiting-offer', '');
+  };
 
   /**
    * registerAudio
@@ -90,14 +58,27 @@ export class RemoteParticipant extends Participant {
    * @param audioRef
    */
   async registerAudio(audioRef: HTMLAudioElement) {
-    this.peerConn.addEventListener('track', async (event) => {
-      const [remoteStream] = event.streams;
-      console.log('got remote stream');
-      audioRef.setAttribute('id', `voice-stream-${this.patp}`);
-      audioRef.setAttribute('autoPlay', '');
-      audioRef.srcObject = remoteStream;
-      this.connectionState = ConnectionState.Connected;
-    });
+    this.audioRef = audioRef;
+
+    // Clear any previous listeners
+    this.peerConn.ontrack = null;
+    this.peerConn.onconnectionstatechange = null;
+    this.peerConn.onicecandidate = null;
+    this.peerConn.onicecandidateerror = null;
+    this.peerConn.onicegatheringstatechange = null;
+    this.peerConn.onnegotiationneeded = null;
+    this.peerConn.ondatachannel = null;
+
+    // Register new listeners
+    this.peerConn.ontrack = this.onTrack;
+    this.peerConn.onconnectionstatechange = this.onConnectionChange;
+    this.peerConn.onicecandidate = this.onIceCandidate;
+    this.peerConn.onicecandidateerror = this.onIceError;
+    this.peerConn.onicegatheringstatechange = this.onGathering;
+    this.peerConn.onnegotiationneeded = this.onNegotiation;
+    this.peerConn.ondatachannel = (event: RTCDataChannelEvent) => {
+      console.log(event);
+    };
   }
 
   /**
@@ -111,14 +92,10 @@ export class RemoteParticipant extends Participant {
    */
   async handleSlip(slipData: any, ourPatpId: number) {
     const isOfferer = ourPatpId < this.patpId;
-    console.log('handle slip', this.patpId, ourPatpId);
-
-    if (!isOfferer) {
-      console.log('we be hittin that fool with awaitings');
-    }
 
     if (slipData['awaiting-offer'] !== undefined) {
       console.log('awaiting-offer');
+
       if (!isOfferer) return;
       if (this.peerConn.connectionState !== 'new') return;
       const offer = await this.peerConn.createOffer({
@@ -137,14 +114,12 @@ export class RemoteParticipant extends Participant {
       });
     } else if (slipData['offer']) {
       // the caller does not receive offers
-      if (isOfferer) return;
       clearInterval(this.waitInterval);
+      if (isOfferer) return;
       console.log('offer');
       await this.peerConn.setRemoteDescription(slipData['offer']);
-
       const answer = await this.peerConn.createAnswer();
       await this.peerConn.setLocalDescription(answer);
-
       this.sendSignal(this.patp, 'answer', this.peerConn.localDescription);
     } else if (slipData['answer']) {
       console.log('answer');
@@ -153,9 +128,86 @@ export class RemoteParticipant extends Participant {
       if (!isOfferer) {
         return;
       }
-      this.createDataChannel();
       await this.peerConn.setRemoteDescription(slipData['answer']);
     }
+  }
+
+  // -----------------------------------------------------------------------------------
+  // --------------------------------- Event handlers ----------------------------------
+  // -----------------------------------------------------------------------------------
+  async onTrack(event: RTCTrackEvent) {
+    const [remoteStream] = event.streams;
+    this.audioRef.setAttribute('id', `voice-stream-${this.patp}`);
+    this.audioRef.setAttribute('autoPlay', '');
+    this.audioRef.srcObject = remoteStream;
+    this.toggleMuted();
+    // this.audioStream = remoteStream;
+    this.emit(ParticipantEvent.AudioStreamAdded, remoteStream);
+  }
+
+  onConnectionChange(event: Event) {
+    if (
+      // @ts-ignore
+      event.currentTarget.connectionState === PeerConnectionState.Connected
+    ) {
+      console.log('peers connected!');
+      this.emit(PeerConnectionState.Connected);
+    }
+    if (
+      // @ts-ignore
+      event.currentTarget.connectionState === PeerConnectionState.Connecting
+    ) {
+      console.log('peers connecting!');
+      this.emit(PeerConnectionState.Connecting);
+    }
+    if (
+      // @ts-ignore
+      event.currentTarget.connectionState === PeerConnectionState.Disconnected
+    ) {
+      console.log('peers Disconnected!');
+      this.emit(PeerConnectionState.Disconnected);
+      this.audioStream = undefined;
+    }
+    if (
+      // @ts-ignore
+      event.currentTarget.connectionState === PeerConnectionState.Failed
+    ) {
+      console.log('peer connect failed!');
+      this.emit(PeerConnectionState.Failed);
+      this.audioStream = undefined;
+    }
+  }
+
+  onIceCandidate(event: RTCPeerConnectionIceEvent) {
+    if (event.candidate === null) return;
+    let can = JSON.stringify(event.candidate!.toJSON());
+    this.sendSignal(this.patp, 'ice-candidate', can);
+  }
+
+  onIceError(event: Event) {
+    console.log('ice candidate error', event);
+  }
+
+  onGathering(event: Event) {
+    if (!event) return;
+    if (!event.target) return;
+    if (!(event.target instanceof RTCPeerConnection)) return;
+    let connection: RTCPeerConnection = event.target;
+    switch (connection.iceGatheringState!) {
+      case 'gathering':
+        /* collection of candidates has begun */
+        console.log('gathering');
+        break;
+      case 'complete':
+        /* collection of candidates is finished */
+        console.log('complete');
+        // this.waitInterval;
+        break;
+    }
+  }
+
+  async onNegotiation(event: Event) {
+    console.log('negneeded');
   }
 
   /**

@@ -63,8 +63,6 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   // }, []);
   // //
 
-  // const RoomView = roomViews[roomView];
-
   useEffect(() => {
     if (!roomsApp.liveRoom) RoomsActions.setView('list');
   }, [roomsApp.liveRoom]);
