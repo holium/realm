@@ -1,39 +1,34 @@
-import { FC, useMemo, useState, useLayoutEffect, useEffect } from 'react';
+import {
+  FC,
+  useMemo,
+  useState,
+  useLayoutEffect,
+  useEffect,
+  useRef,
+  Ref,
+  RefObject,
+} from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
-import { useServices } from 'renderer/logic/store';
+import { coreStore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { BackgroundImage, BackgroundFill } from './system.styles';
+import {
+  BackgroundImage,
+  BackgroundFill,
+  DimensionMeasurement,
+  DragBar,
+} from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
-import { SoundActions } from '../logic/actions/sound';
-
-const DragBar = styled.div`
-  position: absolute;
-  height: 22px;
-  left: 0;
-  top: 0;
-  right: 0;
-  --webkit-app-region: drag;
-`;
-
-function useWindowSize() {
-  useLayoutEffect(() => {
-    function updateSize() {
-      ShellActions.setDesktopDimensions(window.innerWidth, window.innerHeight);
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-}
+import { useWindowSize } from '../logic/lib/measure';
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();
-  useWindowSize();
+  const windowRef = useRef(null);
+  useWindowSize(windowRef);
 
   const isFullscreen = shell.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
@@ -47,30 +42,26 @@ export const Shell: FC = observer(() => {
     [shell.dialogId]
   );
 
-  // useEffect(() => {
-  //   if (ship?.loader.isLoaded) {
-  //     SoundActions.playStartup();
-  //   } else {
-  //     SoundActions.playLogout();
-  //   }
-  // }, [ship?.loader.isLoaded]);
-
   const shipLoaded = ship?.loader.isLoaded;
+  const isResuming = coreStore.resuming;
   return (
     <ViewPort>
+      <DimensionMeasurement id="dimensions" ref={windowRef} />
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {shipLoaded ? (
+        {shipLoaded && (
           <Desktop
             hasLoaded={shipLoaded}
             hasWallpaper={true}
             isFullscreen={isFullscreen}
           />
-        ) : (
+        )}
+        {!shipLoaded && !isResuming && (
           <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
         )}
+        {!shipLoaded && isResuming && <div></div>}
       </BackgroundFill>
     </ViewPort>
   );

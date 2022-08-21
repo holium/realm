@@ -9,8 +9,8 @@ import {
 } from 'mobx-state-tree';
 
 import { RoomsAppState } from 'os/services/tray/rooms.model';
-import { SoundActions } from '../actions/sound';
-import { OSActions } from '../actions/os';
+import { SoundActions } from '../logic/actions/sound';
+import { OSActions } from '../logic/actions/os';
 import { Room } from 'renderer/apps/Rooms/lib/room';
 
 const TrayAppCoords = types.model({
@@ -116,10 +116,10 @@ export function useTrayApps() {
   return store;
 }
 
-export const LiveRoom = new Room(trayStore.roomsApp.ourPatp!);
+export const LiveRoom = new Room();
 
 // After boot, set the initial data
-OSActions.onBoot().then((response: any) => {
+OSActions.onBoot((_event: any, response: any) => {
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);
     if (trayStore.roomsApp.liveRoom) {
@@ -130,7 +130,7 @@ OSActions.onBoot().then((response: any) => {
 });
 
 // Listen for all patches
-window.electron.os.onEffect((_event: any, value: any) => {
+OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);

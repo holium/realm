@@ -12,7 +12,7 @@ import {
   Checkbox,
   Sigil,
 } from 'renderer/components';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 
 interface ISpeaker {

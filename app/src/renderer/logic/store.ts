@@ -1,3 +1,4 @@
+import { AuthActions } from './actions/auth';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
@@ -92,8 +93,8 @@ export function useServices() {
 export const CoreStore = types
   .model({
     loader: types.optional(LoaderModel, { state: 'initial' }),
-    started: types.optional(types.boolean, false),
     booted: types.optional(types.boolean, false),
+    resuming: types.optional(types.boolean, false),
     onboarded: types.optional(types.boolean, false),
     loggedIn: types.optional(types.boolean, false),
   })
@@ -101,8 +102,8 @@ export const CoreStore = types
     setOnboarded() {
       self.onboarded = true;
     },
-    start() {
-      self.started = true;
+    setResuming() {
+      self.resuming = true;
     },
     setBooted() {
       self.booted = true;
@@ -120,8 +121,8 @@ export const coreStore = CoreStore.create();
 
 coreStore.reset(); // need to reset coreStore for proper boot sequence
 
-// After boot, set the initial data
-OSActions.onBoot().then((response: any) => {
+// Trigger boot sequence and set initial data
+OSActions.boot().then((response: any) => {
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
@@ -171,21 +172,31 @@ onSnapshot(servicesStore, (snapshot) => {
   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
 });
 
-// Auth events
-window.electron.os.auth.onLogin((_event: any) => {
+// --------------------------------------
+// ------------ Auth events -------------
+// --------------------------------------
+AuthActions.onLogin((_event: any) => {
   coreStore.setLoggedIn(true);
   ShellActions.setBlur(false);
 });
 
-// Auth events
-window.electron.os.auth.onLogout((_event: any) => {
+AuthActions.onLogout((_event: any) => {
+  SoundActions.playLogout();
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
   ShellActions.setBlur(true);
 });
 
-// Effect events
-window.electron.os.onEffect((_event: any, value: any) => {
+// --------------------------------------
+// ---------- Effects listener ----------
+// --------------------------------------
+OSActions.onEffect((_event: any, value: any) => {
+  if (value.response === 'status') {
+    if (value.data === 'boot:resuming') {
+      coreStore.setResuming();
+    }
+  }
+
   if (value.response === 'patch') {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
@@ -212,6 +223,7 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.membership, value.patch);
     }
   }
+
   if (value.response === 'initial') {
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));

@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { Patp } from 'os/types';
 import type TypedEmitter from 'typed-emitter';
 import { isValidPatp, patp2dec } from 'urbit-ob';
-import { RemoteParticipant } from './remote';
+import { CursorPayload, StatePayload } from '@holium/realm-multiplayer';
 
 export enum ConnectionState {
   Disconnected = 'disconnected',
@@ -35,14 +35,15 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
     payload: any
   ) {
     const json = { [kind]: payload };
-    console.log('sending payload', json);
     SlipActions.sendSlip([to], JSON.stringify(json));
-  }
-
-  isCali(peer: RemoteParticipant) {
-    console.log(this.patp, this.patpId, peer.patp, peer.patpId);
-    return this.patpId < peer.patpId;
   }
 }
 
-export type ParticipantEventCallbacks = {};
+export type ParticipantEventCallbacks = {
+  connecting: () => void;
+  connected: () => void;
+  reconnecting: () => void;
+  disconnected: () => void;
+  cursorUpdate: (payload: CursorPayload) => void;
+  stateUpdate: (payload: StatePayload) => void;
+};

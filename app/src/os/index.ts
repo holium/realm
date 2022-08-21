@@ -59,6 +59,7 @@ export class Realm extends EventEmitter {
       return ipcRenderer.invoke('core:send-action', action);
     },
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
+    onBoot: (callback: any) => ipcRenderer.on('realm.on-boot', callback),
     auth: AuthService.preload,
     ship: ShipService.preload,
     spaces: SpacesService.preload,
@@ -118,6 +119,10 @@ export class Realm extends EventEmitter {
     let rooms = null;
 
     if (this.session) {
+      this.onEffect({
+        response: 'status',
+        data: 'boot:resuming',
+      });
       ship = this.services.ship.snapshot;
       spaces = this.services.spaces.snapshot;
       desktop = this.services.desktop.snapshot;
@@ -127,7 +132,7 @@ export class Realm extends EventEmitter {
       rooms = this.services.ship.roomSnapshot;
     }
     this.services.identity.auth.setLoader('loaded');
-    return {
+    const bootPayload = {
       auth: this.services.identity.auth.snapshot,
       onboarding: this.services.onboarding.snapshot,
       ship,
@@ -139,6 +144,9 @@ export class Realm extends EventEmitter {
       rooms,
       loggedIn: this.session ? true : false,
     };
+    // Send boot payload to any listeners
+    this.onBoot(bootPayload);
+    return bootPayload;
   }
 
   get credentials() {
@@ -146,9 +154,11 @@ export class Realm extends EventEmitter {
   }
 
   connect(session: ISession) {
+    console.log('connecting');
     this.conduit = new Urbit(session.url, session.ship, session.cookie);
     this.conduit.open();
     this.conduit.onOpen = () => {
+      console.log('logged in');
       this.onLogin();
     };
     this.conduit.onRetry = () => console.log('on retry');
@@ -207,6 +217,15 @@ export class Realm extends EventEmitter {
    */
   onEffect(data: any): void {
     this.mainWindow.webContents.send('realm.on-effect', data);
+  }
+
+  /**
+   * Sends boot data to client store
+   *
+   * @param data
+   */
+  onBoot(data: any): void {
+    this.mainWindow.webContents.send('realm.on-boot', data);
   }
 }
 

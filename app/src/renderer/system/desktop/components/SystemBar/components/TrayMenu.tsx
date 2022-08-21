@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
 import { Portal } from 'renderer/system/dialog/Portal';
-import { TrayAppKeys, useTrayApps } from 'renderer/logic/apps/store';
+import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 
 export type TrayMenuProps = {
   id: TrayAppKeys;

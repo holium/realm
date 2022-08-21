@@ -1,4 +1,5 @@
 import { Participant } from './../participant/index';
+import { toJS } from 'mobx';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
 /**
  * Room
@@ -13,9 +14,10 @@ import type TypedEmitter from 'typed-emitter';
 import { LocalParticipant } from '../participant/local';
 import { RemoteParticipant } from '../participant/remote';
 import { ConnectionState, RoomEventCallbacks } from './types';
+import { ParticipantEvent } from '../helpers/events';
 
 const peerConnectionConfig = {
-  iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }],
+  iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
 };
 
 export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallbacks>) {
@@ -37,12 +39,11 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
       if (this.state !== ConnectionState.Disconnected) {
         const peer = this.participants.get(slip.from);
         peer?.handleSlip(slip.data, this.our.patpId);
-        // this.participants.get(slip.from).
       } else {
         console.log('you dont need this for Rooms');
       }
     });
-    console.log(room);
+    console.log(toJS(room));
     room.present.forEach((peer: Patp) => {
       if (peer === this.our.patp) return;
       const remote = new RemoteParticipant(peer, peerConnectionConfig);
@@ -60,9 +61,14 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     const audioEl = document.createElement('audio');
     mount.appendChild(audioEl);
     peer.registerAudio(audioEl);
+
+    // peer.(audioEl);
     if (!isOfferer) {
       this.our.sendSignal(peer.patp, 'awaiting-offer', '');
     }
+    peer.on(ParticipantEvent.Connected, () => {
+      console.log('WE ARE CONNECTED BRUH');
+    });
     // else {
     //   //   // wait for their call
     // }

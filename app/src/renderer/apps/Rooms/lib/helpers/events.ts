@@ -1,0 +1,18 @@
+export enum ParticipantEvent {
+  StateUpdate = 'stateUpdate',
+  CursorUpdate = 'cursorUpdate',
+  Disconnected = 'disconnected',
+  Connecting = 'connecting',
+  Connected = 'connected',
+  Reconnecting = 'reconnecting',
+  // Connected = 'connected',
+  // Disconnected = 'disconnected',
+  // Resuming = 'resuming',
+  // Resumed = 'resumed',
+  // Restarting = 'restarting',
+  // Restarted = 'restarted',
+  // SignalResumed = 'signalResumed',
+  // MediaTrackAdded = 'mediaTrackAdded',
+  // ActiveSpeakersUpdate = 'activeSpeakersUpdate',
+  // DataPacketReceived = 'dataPacketReceived',
+}

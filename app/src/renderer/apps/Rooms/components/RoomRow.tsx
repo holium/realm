@@ -7,7 +7,7 @@ import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
 import { rgba, darken } from 'polished';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { id } from 'ethers/lib/utils';
 
 type RoomRowProps = Partial<RoomsModelType> & {

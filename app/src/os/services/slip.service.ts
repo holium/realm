@@ -72,7 +72,7 @@ export class SlipService extends EventEmitter {
   }
 
   handleSlip(slip: any) {
-    console.log(slip);
+    // console.log(slip);
     if (!slip['slip-action']) return;
     if (!slip['slip-action']['slip']) return;
     slip = slip['slip-action']['slip'];

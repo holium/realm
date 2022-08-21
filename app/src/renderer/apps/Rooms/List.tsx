@@ -14,7 +14,7 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { RoomRow } from './components/RoomRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
 import { ProviderSelector } from './components/ProviderSelector';

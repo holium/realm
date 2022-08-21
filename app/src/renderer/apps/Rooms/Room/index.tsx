@@ -4,11 +4,10 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
 import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from '../components/CommButton';
-// import { VoiceAnalyzer } from '../components/VoiceVisualizer';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { pluralize } from 'renderer/logic/lib/text';
 import { VoiceView } from './Voice';
@@ -22,12 +21,6 @@ export type BaseRoomProps = {
     height: number;
     width: number;
   };
-};
-
-const roomViews: any = {
-  voice: (props: any) => <VoiceView {...props} />,
-  invite: null,
-  info: null,
 };
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { rgba, darken } from 'polished';
 import { Flex, Icons, Text } from 'renderer/components';
 import { ThemeType } from 'renderer/theme';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 
