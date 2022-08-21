@@ -83,7 +83,13 @@ export const EthStore = types
     },
     // updates
     applyWalletUpdate(wallet: any) {
-      self.wallets.put(wallet);
+      const walletObj = {
+        network: 'ethereum',
+        address: wallet.wallet.address,
+        balance: wallet.wallet.balance.toString(),
+      };
+      self.wallets.set(wallet.key, EthWallet.create(walletObj));
+      console.log('success');
     },
     applyTransactionUpdate(transaction: any) {
       self.transactions.put(transaction);

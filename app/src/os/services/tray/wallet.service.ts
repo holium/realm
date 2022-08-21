@@ -37,8 +37,6 @@ export class WalletService extends BaseService {
 
     // this.core.conduit!.desk = 'realm';
     const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
-    // TODO: problem with ethers here
-//    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
 
     this.state = WalletStore.create({
@@ -64,13 +62,14 @@ export class WalletService extends BaseService {
     this.core.onEffect(patchEffect);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      console.log('binding wallet service');
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
 
     WalletApi.subscribeToWallets(this.core.conduit!, (wallet: any) => {
-      this.state!.ethereum.applyWalletUpdate(wallet);
+      if (wallet.network === 'ethereum') {
+        this.state!.ethereum.applyWalletUpdate(wallet);
+      }
     })
   }
 

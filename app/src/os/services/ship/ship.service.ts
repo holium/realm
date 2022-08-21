@@ -273,7 +273,7 @@ export class ShipService extends BaseService {
       });
       
       this.rooms = new RoomsService(this.core);
-      console.log('wallet service initialized');
+      console.log('ialized');
       this.wallet = new WalletService(this.core);
       
     });

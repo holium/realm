@@ -129,7 +129,6 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(trayStore.roomsApp, value.model);
     }
     else if (value.resource === 'wallet') {
-      console.log('wallet yo');
       applyPatch(trayStore.walletApp, value.model);
     }
   }
