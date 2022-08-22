@@ -4,7 +4,7 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
 import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
+import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from '../components/CommButton';
@@ -14,6 +14,7 @@ import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { RoomInfo } from './Info';
+import { handleLocalEvents } from '../listeners';
 
 export type BaseRoomProps = {
   theme: ThemeModelType;
@@ -32,20 +33,33 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
 
   const { dockColor, windowColor, inputColor } = desktop.theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
+  const [ourState, setOurState] = useState({
+    muted: false,
+    cursor: true,
+  });
 
   const [audio, setAudio] = useState<MediaStream | null>(null);
-  const getMicrophone = async () => {
-    const audioMedia = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false,
-    });
-    setAudio(audioMedia);
-  };
 
-  const stopMicrophone = () => {
-    audio?.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-    setAudio(null);
-  };
+  useEffect(() => {
+    handleLocalEvents(setOurState, LiveRoom.our);
+  }, []);
+
+  // const getMicrophone = async () => {
+  //   LiveRoom.our.audio?.unmute();
+  //   const track = await LiveRoom.our.setMicrophoneEnabled(true);
+  //   console.log(track);
+  //   // const audioMedia = await navigator.mediaDevices.getUserMedia({
+  //   //   audio: true,
+  //   //   video: false,
+  //   // });
+  //   // setAudio(audioMedia);
+  // };
+
+  // const stopMicrophone = () => {
+  //   LiveRoom.our.audio?.mute();
+  //   audio?.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+  //   setAudio(null);
+  // };
 
   // useEffect(() => {
   //   window.electron.app.askForMicrophone().then((hasMic: any) => {
@@ -68,7 +82,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   }, [roomsApp.liveRoom]);
 
   if (!roomsApp.liveRoom) return <div />;
-  const { present, id } = roomsApp.liveRoom;
+  const { present, id, creator } = roomsApp.liveRoom;
   // console.log(toJS(roomsApp.liveRoom));
   return (
     <Grid.Column
@@ -157,7 +171,9 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         flex={1}
         flexDirection="column"
       >
-        {roomView === 'voice' && <VoiceView present={present} audio={audio} />}
+        {roomView === 'voice' && (
+          <VoiceView host={creator} present={present} audio={audio} />
+        )}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
         {roomView === 'info' && <RoomInfo />}
@@ -190,14 +206,16 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
-              icon={audio ? 'MicOn' : 'MicOff'}
+              icon={ourState.muted ? 'MicOff' : 'MicOn'}
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                if (audio) {
-                  stopMicrophone();
+                console.log(LiveRoom.our.audio);
+                if (ourState.muted) {
+                  console.log('unmuting time');
+                  LiveRoom.our.audioStream?.unmute();
                 } else {
-                  getMicrophone();
+                  LiveRoom.our.audioStream?.mute();
                 }
               }}
             />

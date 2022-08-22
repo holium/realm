@@ -86,8 +86,8 @@ export class RoomsService extends BaseService {
     invite: (roomId: string, patp: Patp) => {
       return ipcRenderer.invoke('realm.tray.rooms.invite', roomId, patp);
     },
-    onRoomStream: (callback: any) =>
-      ipcRenderer.on('realm.on-rooms-stream', callback),
+    onRoomUpdate: (callback: any) =>
+      ipcRenderer.on('realm.on-room-update', callback),
   };
 
   constructor(core: Realm, options: any = {}) {

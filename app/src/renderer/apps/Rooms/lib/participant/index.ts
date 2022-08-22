@@ -6,6 +6,10 @@ import { isValidPatp, patp2dec } from 'urbit-ob';
 import { CursorPayload, StatePayload } from '@holium/realm-multiplayer';
 import { DisconnectReason } from '../room/types';
 import { ParticipantEvent } from './events';
+import { RoomsModelType } from 'os/services/tray/rooms.model';
+import { LocalTrack, Track } from '../track';
+import { RemoteParticipant } from './remote';
+import { Room } from '../room';
 
 export enum ConnectionState {
   Disconnected = 'disconnected',
@@ -21,11 +25,14 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
   isMuted: boolean = false;
   isCursorSharing: boolean = false;
   isSpeaking: boolean = false;
+  room: Room;
+  audio?: LocalTrack;
 
-  constructor(patp: string) {
+  constructor(patp: string, room: Room) {
     super();
     this.patp = patp;
     this.patpId = patp2dec(patp);
+    this.room = room;
   }
 
   toggleMuted() {
@@ -45,6 +52,16 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
   ) {
     const json = { [kind]: payload };
     SlipActions.sendSlip([to], JSON.stringify(json));
+  }
+
+  /**
+   * Finds the first track that matches the source filter, for example, getting
+   * the user's camera track with getTrackBySource(Track.Source.Camera).
+   * @param source
+   * @returns
+   */
+  getTracks(): LocalTrack | MediaStreamTrack | undefined {
+    return this.audio;
   }
 }
 

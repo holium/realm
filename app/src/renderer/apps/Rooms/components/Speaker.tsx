@@ -1,5 +1,6 @@
 import { FC, useRef, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import BeatLoader from 'react-spinners/BeatLoader';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import styled, { css } from 'styled-components';
 import {
@@ -16,22 +17,36 @@ import { LiveRoom } from 'renderer/apps/store';
 import { RemoteParticipant } from '../lib/participant/remote';
 import { PeerConnectionState } from '../lib/participant/events';
 import { rgba, darken } from 'polished';
+import { handleLocalEvents, handleRemoteEvents } from '../listeners';
 
 interface ISpeaker {
   person: string;
   audio: any;
+  type: 'host' | 'speaker' | 'listener';
 }
 
+const speakerType = {
+  host: 'Host',
+  speaker: 'Speaker',
+  listener: 'Listener',
+};
+
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
-  const { person, audio } = props;
+  const { person, audio, type } = props;
   const { ship, desktop } = useServices();
   const speakerRef = useRef<any>(null);
-
+  const isOur = person === ship?.patp;
   const [peerState, setPeerState] = useState<RTCPeerConnectionState>('new');
   // const [peer, setPeer] = useState<RemoteParticipant | undefined>();
   const [isStarted, setIsStarted] = useState(false);
   const metadata = ship?.contacts.getContactAvatarMetadata(person);
-  const hasVoice = audio && person === ship?.patp;
+
+  // const hasVoice = audio && person === ship?.patp;
+  const [ourState, setOurState] = useState({
+    muted: false,
+    cursor: true,
+  });
+
   let name = metadata?.nickname || person;
   const livePeer = LiveRoom.participants.get(person);
 
@@ -65,15 +80,34 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   }, []);
 
   useEffect(() => {
-    if (person === ship?.patp) {
+    if (isOur) {
       setPeerState(PeerConnectionState.Connected);
+      handleLocalEvents(setOurState, LiveRoom.our);
     } else {
       const livePeer = LiveRoom.participants.get(person);
       handleRemoteEvents(setPeerState, livePeer);
     }
   }, [isStarted]);
 
-  if (name.length > 18) name = `${name.substring(0, 18)}...`;
+  if (name.length > 17) name = `${name.substring(0, 17)}...`;
+  const textColor =
+    peerState !== PeerConnectionState.Failed ? 'initial' : '#FD4E4E';
+
+  const textProps = {
+    color: textColor,
+  };
+
+  let sublabel = <Sublabel {...textProps}>{speakerType[type]}</Sublabel>;
+  if (peerState === PeerConnectionState.Failed)
+    sublabel = <Sublabel {...textProps}>Failed</Sublabel>;
+  if (
+    peerState === PeerConnectionState.New ||
+    peerState === PeerConnectionState.Connecting
+  )
+    sublabel = <BeatLoader size={6} speedMultiplier={0.65} />;
+
+  if (peerState === PeerConnectionState.Disconnected)
+    sublabel = <Sublabel {...textProps}>Bad connection</Sublabel>;
 
   return (
     <>
@@ -83,79 +117,71 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
         ref={speakerRef}
         hoverBg={darken(0.04, desktop.theme.windowColor)}
         key={person}
-        gap={12}
+        gap={4}
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
         width={'100%'}
       >
-        <Sigil
-          clickable={false}
-          opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-          borderRadiusOverride="6px"
-          simple
-          size={36}
-          avatar={metadata && metadata.avatar}
-          patp={person}
-          color={[(metadata && metadata.color) || '#000000', 'white']}
-        />
-        <Text
+        <Flex
           style={{ pointerEvents: 'none' }}
-          opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-          color={
-            peerState !== PeerConnectionState.Failed ? 'initial' : '#FD4E4E'
-          }
+          flexDirection="column"
           alignItems="center"
-          height={20}
-          fontSize={3}
-          fontWeight={500}
+          gap={10}
         >
-          {name}
-          {!hasVoice && <Icons ml={1} name="MicOff" size={18} opacity={0.3} />}
-        </Text>
-        {hasVoice ? (
-          <Flex height={30}></Flex>
-        ) : (
-          <Flex height={30}>
-            {/* <Icons name="MicOff" size={18} opacity={0.3} /> */}
+          <Sigil
+            clickable={false}
+            opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
+            borderRadiusOverride="6px"
+            simple
+            size={36}
+            avatar={metadata && metadata.avatar}
+            patp={person}
+            color={[(metadata && metadata.color) || '#000000', 'white']}
+          />
+          <Text
+            style={{ pointerEvents: 'none' }}
+            opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
+            color={textColor}
+            alignItems="center"
+            // height={20}
+            fontSize={2}
+            fontWeight={500}
+          >
+            {name}
+          </Text>
+        </Flex>
+        <Flex
+          opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
+          gap={4}
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+          style={{ pointerEvents: 'none' }}
+        >
+          <Flex style={{ pointerEvents: 'none' }}>
+            {isOur && ourState.muted && (
+              <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
+            )}
           </Flex>
+          {sublabel}
+        </Flex>
+        {type !== 'host' && (
+          <ContextMenu
+            isComponentContext
+            textColor={desktop.theme.textColor}
+            customBg={rgba(desktop.theme.windowColor, 0.9)}
+            containerId={`room-speaker-${person}`}
+            parentRef={speakerRef}
+            style={{ minWidth: 180 }}
+            position="below"
+            menu={contextMenuItems}
+          />
         )}
-        <ContextMenu
-          isComponentContext
-          textColor={desktop.theme.textColor}
-          customBg={rgba(desktop.theme.windowColor, 0.9)}
-          containerId={`room-speaker-${person}`}
-          parentRef={speakerRef}
-          style={{ minWidth: 180 }}
-          position="below"
-          menu={contextMenuItems}
-        />
       </SpeakerWrapper>
     </>
   );
 });
-
-const handleRemoteEvents = (
-  setState: (state: RTCPeerConnectionState) => void,
-  participant?: RemoteParticipant
-) => {
-  console.log('participant, speaker', participant);
-  if (!participant) return;
-  setState(participant.connectionState);
-  console.log('listening for remote events');
-  participant.on('connected', () => {
-    setState('connected');
-  });
-  participant.on('disconnected', () => {
-    setState('disconnected');
-  });
-  participant.on('connecting', () => {
-    setState('connecting');
-  });
-  participant.on('failed', () => {
-    setState('failed');
-  });
-};
 
 type SpeakerStyle = FlexProps & { hoverBg: string };
 
@@ -167,4 +193,11 @@ const SpeakerWrapper = styled(Flex)<SpeakerStyle>`
     transition: 0.25s ease;
     background-color: ${(props: SpeakerStyle) => props.hoverBg};
   }
+`;
+
+const Sublabel = styled(Text)`
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.5;
+  pointer-events: none;
 `;

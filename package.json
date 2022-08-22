@@ -11,6 +11,7 @@
     "build:app": "yarn workspace @holium/playground build",
     "build:playground": "yarn workspace @holium/playground build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
-    "start": "yarn workspace @holium/realm start"
+    "start": "yarn workspace @holium/realm start",
+    "add:realm": "yarn workspace @holium/realm add -W"
   }
 }

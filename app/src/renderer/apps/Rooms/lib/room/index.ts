@@ -26,6 +26,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   state: RoomState = RoomState.Disconnected;
   our!: LocalParticipant;
   participants: Map<Patp, RemoteParticipant>;
+  roomConfig!: RoomsModelType;
 
   constructor() {
     super();
@@ -44,23 +45,19 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
   connect(our: Patp, room: RoomsModelType) {
     this.state = RoomState.Starting;
-    this.our = new LocalParticipant(our);
+    this.roomConfig = room;
+    this.our = new LocalParticipant(our, this);
+    this.our.connect();
     window.electron.os.slip.onSlip((_event: any, slip: SlipType) => {
       // console.log('got slapped', slip.from, slip.data);
       if (this.state !== RoomState.Disconnected) {
         const peer = this.participants.get(slip.from);
         peer?.handleSlip(slip.data, this.our.patpId);
-      } else {
-        console.log('you dont need this for Rooms');
       }
     });
 
     room.present.forEach((peer: Patp) => {
       if (peer === this.our.patp) return;
-      // const remote = new RemoteParticipant(peer, peerConnectionConfig);
-      // this.participants.set(peer, remote);
-      // this.registerListeners(remote);
-      // this.addParticipant(remote);
       this.newParticipant(peer);
     });
 
@@ -68,7 +65,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   newParticipant(peer: Patp) {
-    const remote = new RemoteParticipant(peer, peerConnectionConfig);
+    const remote = new RemoteParticipant(peer, peerConnectionConfig, this);
     this.participants.set(peer, remote);
     this.registerListeners(remote);
     this.connectParticipant(remote);
@@ -77,6 +74,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   // new peer joined
   connectParticipant(peer: RemoteParticipant) {
     // Call or listen
+    peer.emit(ParticipantEvent.Connecting);
     const isOfferer = this.our.patpId < peer.patpId;
     const mount = document.getElementById('audio-root')!;
     let peerAudioEl: any = document.getElementById(`voice-stream-${peer.patp}`);
@@ -95,9 +93,11 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   registerListeners(peer: RemoteParticipant) {
-    peer.removeAllListeners();
+    // peer.removeAllListeners();
     peer.on(ParticipantEvent.Connected, () => {
-      console.log('WE ARE CONNECTED BRUH');
+      console.log('WE ARE CONNECTED -> start streaming to them');
+      // peer.publish
+      this.our.streamTracks(peer);
     });
     peer.on(ParticipantEvent.Disconnected, () => {
       console.log('try to reconnect');

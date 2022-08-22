@@ -3,6 +3,9 @@ import { Patp } from 'os/types';
 import { MutableRefObject } from 'react';
 import { ConnectionState, Participant } from '.';
 import { DataPacket } from '../helpers/data-packet';
+import { RoomsModelType } from 'os/services/tray/rooms.model';
+import { LocalTrack } from '../track';
+import { Room } from '../room';
 
 // const lossyDataChannel = '_lossy';
 // const dataChannel = '_reliable';
@@ -16,13 +19,15 @@ export class RemoteParticipant extends Participant {
   private dataChannel!: RTCDataChannel;
   private dataChannelSub?: RTCDataChannel;
   private waitInterval?: number;
+  publish: any;
+  private sender?: RTCRtpSender;
 
   get connectionState(): RTCPeerConnectionState {
     return this.peerConn.connectionState;
   }
 
-  constructor(patp: Patp, config: RTCConfiguration) {
-    super(patp);
+  constructor(patp: Patp, config: RTCConfiguration, room: Room) {
+    super(patp, room);
     this.peerConn = new RTCPeerConnection();
     this.peerConn.setConfiguration(config);
     // @ts-ignore
@@ -49,6 +54,15 @@ export class RemoteParticipant extends Participant {
       this.connectionState !== PeerConnectionState.Connected;
     this.sendSignal(this.patp, 'awaiting-offer', '');
   };
+
+  async streamAudioTrack(track: MediaStreamTrack) {
+    this.sender = this.peerConn.addTrack(track);
+  }
+
+  async replaceAudioTrack(track: MediaStreamTrack) {
+    this.sender && this.peerConn.removeTrack(this.sender);
+    this.sender = this.peerConn.addTrack(track);
+  }
 
   /**
    * registerAudio
@@ -95,7 +109,6 @@ export class RemoteParticipant extends Participant {
 
     if (slipData['awaiting-offer'] !== undefined) {
       console.log('awaiting-offer');
-
       if (!isOfferer) return;
       if (this.peerConn.connectionState !== 'new') return;
       const offer = await this.peerConn.createOffer({
