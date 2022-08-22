@@ -78,6 +78,7 @@
     [%updates ~]
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
+      ~&  >>  "{<dap.bowl>}: subscribing to /updates"
       (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
     ::
     [%bazaar @ @ ~]
@@ -126,7 +127,9 @@
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %recommended))])
         ::
         %suite
-        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %suite))])
+        =/  apps  (view:apps:core [ship space-pth] (some %suite))
+        ?~  apps  ``json+!>(~)
+        ``bazaar-view+!>([%apps u.apps])
         ::
         %installed
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %installed))])
@@ -225,18 +228,19 @@
     ==
   ::
   ++  add-tag
-    |=  [path=space-path:spaces-store] ::  =app-id:store =tag:store] :: rank=(unit @ud)]
+    |=  [path=space-path:spaces-store =app-id:store =tag:store rank=(unit @ud)]
     ^-  (quip card _state)
     ::  installed tags are managed by bazaar agent
-    :: ?>  !?=(%installed tag)
-    :: =/  apps  (~(got by space-apps.state) path)
-    :: =/  app  (~(got by apps) app-id)
-    :: =.  tags.app  (~(put in tags.app) tag)
-    :: ::  only update rank if requested (not null value)
-    :: :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
-    :: =/  apps  (~(put by apps) app-id app)
-    :: `state(space-apps (~(put by space-apps.state) path apps))
-    `state
+    ?>  !?=(%installed tag)
+    =/  apps  (~(got by space-apps.state) path)
+    =/  app  (~(got by apps) app-id)
+    =.  tags.app  (~(put in tags.app) tag)
+    ::  only update rank if requested (not null value)
+    :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
+    =/  apps  (~(put by apps) app-id app)
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    :: :_  state(space-apps (~(put by space-apps.state) path apps))
+    (bazaar:send-reaction [%add-tag path app-id tag] [/updates /our ~])
   ::
   ++  rem-tag
     |=  [path=space-path:spaces-store =app-id:store =tag:store]
@@ -283,6 +287,7 @@
   ?-  -.rct
     %initial        (on-initial +.rct)
     %space-apps     (on-space-apps +.rct)
+    %add-tag        (on-add-tag +.rct)
   ==
   ::
   ++  on-initial
@@ -292,6 +297,11 @@
   ::
   ++  on-space-apps
     |=  [=space-path:spaces-store =app-index:store]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-add-tag
+    |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
     ^-  (quip card _state)
     `state
   --

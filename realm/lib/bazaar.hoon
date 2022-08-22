@@ -10,7 +10,6 @@
   ++  action
     |=  jon=json
     ^-  ^action
-    ~&  >>  "{<jon>}"
     =<  (decode jon)
     |%
     ++  decode
@@ -22,9 +21,9 @@
     ++  add-tag
       %-  ot
       :~  [%path pth]
-          :: [%app-id so]
-          :: [%tag tg]
-          :: [%rank (mu ni)]
+          [%app-id so]
+          [%tag tg]
+          [%rank (mu ni)]
       ==
     ::
     ++  rem-tag
@@ -77,6 +76,15 @@
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
           [%app-index (apidx:encode app-index.rct)]
+      ==
+    ::
+        %add-tag
+      :-  %add-tag
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%app-id s+app-id.rct]
+          [%tag s+(scot %tas tag.rct)]
+          :: [%rank ~]
       ==
     ==
   ::

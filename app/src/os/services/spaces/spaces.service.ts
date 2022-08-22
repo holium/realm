@@ -118,8 +118,8 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
     addRecentDev: async () =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
-    addAppTag: async (path: string, appId: string, tag: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.add-app-tag'),
+    addAppTag: async (path: SpacePath, appId: string, tag: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-app-tag', path, appId, tag),
     removeAppTag: async () =>
       ipcRenderer.invoke('realm.spaces.bazaar.remove-app-tag'),
   };
@@ -202,6 +202,8 @@ export class SpacesService extends BaseService {
       this.models.membership
     );
     PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
+    // Subscribe to sync updates
+    BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
   }
   // ***********************************************************
   // ************************ SPACES ***************************

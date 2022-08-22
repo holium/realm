@@ -70,7 +70,9 @@ function Content({ children, ...props }) {
 
 const onAppsAction = (space: string, action: string, app: any) => {
   console.log('onAppsAction => %o', { action, app });
-  SpacesActions.addAppTag(space, app.id, 'suite');
+  SpacesActions.addAppTag(space, app.id, 'suite').then((data) => {
+    console.log('addAppTag response => %o', data);
+  });
 };
 
 function renderDevs(space: string, devs: any) {
@@ -375,8 +377,7 @@ const AppSearchApp = (props) => {
         />
       </PopoverAnchor>
       <PopoverContent sideOffset={5}>
-        {currentBazaar &&
-          searchMode === 'start' &&
+        {searchMode === 'start' &&
           renderStart(spaces.selected?.path, currentBazaar)}
         {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
         {searchMode === 'dev-app-search' &&

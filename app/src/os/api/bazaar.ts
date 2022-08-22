@@ -10,11 +10,15 @@ import _ from 'lodash';
 const pendingRequests: { [key: string]: (data?: any) => any } = {};
 
 export const BazaarApi = {
-  getApps: async (conduit: Urbit, path: SpacePath) => {
+  getApps: async (
+    conduit: Urbit,
+    path: SpacePath,
+    tag: string | undefined = undefined
+  ) => {
     //  [host]/~/scry/bazaar/~zod/my-space/apps.json
     const response = await conduit.scry({
       app: 'bazaar',
-      path: `${path}/apps/all`, // the spaces scry is at the root of the path
+      path: `${path}/apps/${tag || 'all'}`, // the spaces scry is at the root of the path
     });
     const appMap = response.apps || {};
     Object.keys(appMap).forEach((appKey: string) => {
@@ -61,21 +65,26 @@ export const BazaarApi = {
     appId: string,
     tag: string
   ) => {
-    console.log('addAppTag => %o', { conduit, path, appId, tag });
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
     await conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
         'add-tag': {
-          path: path,
-          // 'app-id': appId,
-          // tag: tag,
-          // rank: null,
+          path: pathObj,
+          'app-id': appId,
+          tag: tag,
+          rank: null,
         },
       },
     });
     return new Promise((resolve) => {
       pendingRequests['bazaar-action-add-app-tag'] = (data: any) => {
+        console.log('resolving add-app-tag request');
         resolve(data);
       };
     });
@@ -108,6 +117,7 @@ export const BazaarApi = {
       app: 'bazaar',
       path: `/updates`,
       event: async (data: any, id: string) => {
+        console.log(data);
         if (data['bazaar-reaction']) {
           handleBazaarReactions(data['bazaar-reaction'], state, id);
         }
@@ -123,17 +133,20 @@ const handleBazaarReactions = (
   state: BazaarStoreType,
   id: string
 ) => {
+  console.log(data);
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
       // state.initialReaction(data['initial']);
       break;
-    case 'tag-added':
+    case 'add-tag':
       {
-        let detail = data['tag-added'];
+        let detail = data['add-tag'];
         console.log(detail);
         // @ts-ignore
-        state.getBazaar(detail.path).addAppTag(detail.appId, detail.tag);
+        state
+          .getBazaar(detail['space-path'])
+          .addAppTag(detail.appId, detail.tag);
         if (pendingRequests['bazaar-action-add-app-tag']) {
           pendingRequests['bazaar-action-add-app-tag'](detail);
           pendingRequests['bazaar-action-add-app-tag'] = () => {};

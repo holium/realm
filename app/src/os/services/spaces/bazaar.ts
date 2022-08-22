@@ -1,6 +1,7 @@
 import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
 import { BazaarStore, BazaarStoreType } from './models/bazaar';
 import Store from 'electron-store';
+import { toJS } from 'mobx';
 
 export const loadBazaarFromDisk = (
   patp: string,
@@ -12,6 +13,7 @@ export const loadBazaarFromDisk = (
   });
   let persistedState: BazaarStoreType = persisted.store;
   const model = BazaarStore.create(castToSnapshot(persistedState));
+  console.log('model => %o', toJS(model));
 
   onSnapshot(model, (snapshot) => {
     persisted.store = castToSnapshot(snapshot);
