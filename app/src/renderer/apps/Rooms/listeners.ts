@@ -31,7 +31,6 @@ export const handleRemoteEvents = (
     setState('disconnected');
   });
   participant.on('connecting', () => {
-    console.log('connecting agian', participant);
     setState('connecting');
   });
   participant.on('failed', () => {

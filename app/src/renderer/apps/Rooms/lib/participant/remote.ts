@@ -124,6 +124,7 @@ export class RemoteParticipant extends Participant {
       this.sendSignal(this.patp, 'offer', this.peerConn.localDescription);
     } else if (slipData['ice-candidate']) {
       console.log('ice-candidate');
+      if (!this.peerConn.remoteDescription) return;
       let iceCand = JSON.parse(slipData['ice-candidate']);
       await this.peerConn.addIceCandidate({
         candidate: iceCand.candidate,
