@@ -268,7 +268,6 @@ const AppSearchApp = (props) => {
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
   useEffect(() => {
-    console.log('AppSearch: useEffect called => %o', spaces.selected?.path);
     if (searchMode === 'ship-search') {
       SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {
         let data = Object.entries(allies).map(([key, value], index) => ({

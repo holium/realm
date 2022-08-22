@@ -368,7 +368,8 @@
   ++  on-add
     |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
-    `state
+    ~&  >>  "{<dap.bowl>}: space added {<[space members]>}"
+    `state(space-apps (~(put by space-apps.state) path.space ~), membership (~(put by membership.state) path.space members))
   ::
   ++  on-replace
     |=  [space=space:spaces-store]

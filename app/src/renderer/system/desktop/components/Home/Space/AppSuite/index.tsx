@@ -77,9 +77,11 @@ function Content({ children, ...props }) {
   );
 }
 
-const onAppsAction = (action: string, app: any) => {
-  console.log('onAppsAction => %o', { action, app });
-  SpacesActions.addAppTag(app, 'suite');
+const onAppsAction = (path: string, appId: string, tag: any) => {
+  console.log('onAppsAction => %o', { path, appId, tag });
+  SpacesActions.addAppTag(path, appId, tag).then((result) =>
+    console.log('onAppsAction => %o', result)
+  );
 };
 
 // Exports
@@ -156,7 +158,9 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
                 <AppRow
                   caption={item.desk}
                   app={item.detail?.docket}
-                  onClick={(e, action, app) => onAppsAction(action, app)}
+                  onClick={(e, action, app) =>
+                    onAppsAction(space.path, app.href?.glob?.base, 'suite')
+                  }
                 />
               </div>
             ))}
