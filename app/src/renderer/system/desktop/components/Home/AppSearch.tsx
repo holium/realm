@@ -68,29 +68,42 @@ function Content({ children, ...props }) {
   );
 }
 
-function renderDevs(devs: any) {
+const onAppsAction = (space: string, action: string, app: any) => {
+  console.log('onAppsAction => %o', { action, app });
+  SpacesActions.addAppTag(space, app.id, 'suite');
+};
+
+function renderDevs(space: string, devs: any) {
   if (devs.length === 0) {
     return <Text color="#ababab">{`No recent devs`}</Text>;
   }
   return devs?.map((item, index) => (
     <div key={index}>
-      <AppRow caption={item.title} app={item} />
+      <AppRow
+        caption={item.title}
+        app={item}
+        onClick={(e, action, app) => onAppsAction(space, action, app)}
+      />
     </div>
   ));
 }
 
-function renderApps(apps: any) {
+function renderApps(space: string, apps: any) {
   if (apps.length === 0) {
     return <Text color="#ababab">{`No recent apps`}</Text>;
   }
   return apps?.map((app, index) => (
     <div key={index}>
-      <AppRow caption={app.title} app={app} />
+      <AppRow
+        caption={app.title}
+        app={app}
+        onClick={(e, action, app) => onAppsAction(space, action, app)}
+      />
     </div>
   ));
 }
 
-const renderStart = (bazaar: any) => {
+const renderStart = (space: string, bazaar: any) => {
   return (
     <>
       <Flex flexDirection="column" gap={12}>
@@ -98,7 +111,7 @@ const renderStart = (bazaar: any) => {
           Recent Apps
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderApps(bazaar.recentApps)}
+          {renderApps(space, bazaar.recentApps)}
         </Flex>
       </Flex>
       <div style={{ marginTop: '12px', marginBottom: '12px' }}>
@@ -109,7 +122,7 @@ const renderStart = (bazaar: any) => {
           Recent Developers
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderDevs(bazaar.recentDevs)}
+          {renderDevs(space, bazaar.recentDevs)}
         </Flex>
       </Flex>
     </>
@@ -362,7 +375,9 @@ const AppSearchApp = (props) => {
         />
       </PopoverAnchor>
       <PopoverContent sideOffset={5}>
-        {searchMode === 'start' && renderStart(currentBazaar)}
+        {currentBazaar &&
+          searchMode === 'start' &&
+          renderStart(spaces.selected?.path, currentBazaar)}
         {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
         {searchMode === 'dev-app-search' &&
           renderDevAppSearch(searchModeArgs[0], data)}

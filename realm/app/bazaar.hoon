@@ -62,6 +62,7 @@
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
+  ~&  >>  "{<dap.bowl>}: {<[mark vase]>}"
   =^  cards  state
   ?+  mark  (on-poke:def mark vase)
     %bazaar-action  (on:action:core !<(action:store vase))
@@ -224,17 +225,18 @@
     ==
   ::
   ++  add-tag
-    |=  [path=space-path:spaces-store =app-id:store =tag:store rank=(unit @ud)]
+    |=  [path=space-path:spaces-store] ::  =app-id:store =tag:store] :: rank=(unit @ud)]
     ^-  (quip card _state)
     ::  installed tags are managed by bazaar agent
-    ?>  !?=(%installed tag)
-    =/  apps  (~(got by space-apps.state) path)
-    =/  app  (~(got by apps) app-id)
-    =.  tags.app  (~(put in tags.app) tag)
-    ::  only update rank if requested (not null value)
-    :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
-    =/  apps  (~(put by apps) app-id app)
-    `state(space-apps (~(put by space-apps.state) path apps))
+    :: ?>  !?=(%installed tag)
+    :: =/  apps  (~(got by space-apps.state) path)
+    :: =/  app  (~(got by apps) app-id)
+    :: =.  tags.app  (~(put in tags.app) tag)
+    :: ::  only update rank if requested (not null value)
+    :: :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
+    :: =/  apps  (~(put by apps) app-id app)
+    :: `state(space-apps (~(put by space-apps.state) path apps))
+    `state
   ::
   ++  rem-tag
     |=  [path=space-path:spaces-store =app-id:store =tag:store]

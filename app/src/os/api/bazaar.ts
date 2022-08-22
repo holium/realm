@@ -61,14 +61,16 @@ export const BazaarApi = {
     appId: string,
     tag: string
   ) => {
+    console.log('addAppTag => %o', { conduit, path, appId, tag });
     await conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
         'add-tag': {
           path: path,
-          appId: appId,
-          tag: tag,
+          // 'app-id': appId,
+          // tag: tag,
+          // rank: null,
         },
       },
     });

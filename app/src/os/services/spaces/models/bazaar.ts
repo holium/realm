@@ -120,6 +120,7 @@ export const BazaarStore = types
   })
   .views((self) => ({
     getBazaar(path: string) {
+      console.log('getBazaar => %o', path);
       return self.spaces.get(path);
     },
   }))

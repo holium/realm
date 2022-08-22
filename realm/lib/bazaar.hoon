@@ -10,6 +10,7 @@
   ++  action
     |=  jon=json
     ^-  ^action
+    ~&  >>  "{<jon>}"
     =<  (decode jon)
     |%
     ++  decode
@@ -21,9 +22,9 @@
     ++  add-tag
       %-  ot
       :~  [%path pth]
-          [%app-id so]
-          [%tag tg]
-          [%rank (mu ni)]
+          :: [%app-id so]
+          :: [%tag tg]
+          :: [%rank (mu ni)]
       ==
     ::
     ++  rem-tag

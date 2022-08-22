@@ -80,7 +80,7 @@
 :: +$  activity
 ::
 +$  action
-  $%  [%add-tag path=space-path:spaces =app-id =tag rank=(unit @ud)]
+  $%  [%add-tag path=space-path:spaces] :: =app-id =tag] :: rank=(unit @ud)]
       [%remove-tag path=space-path:spaces =app-id =tag]
   ==
 ::
