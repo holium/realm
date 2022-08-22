@@ -83,7 +83,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
       mount.appendChild(peerAudioEl);
     }
     peer.registerAudio(peerAudioEl);
-    console.log(peer);
     if (isLower) {
       console.log('we are ready');
       peer.sendAwaitingOffer();

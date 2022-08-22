@@ -18,7 +18,7 @@ export class RemoteParticipant extends Participant {
   private audioStream?: MediaStream;
   private dataChannel!: RTCDataChannel;
   private dataChannelSub?: RTCDataChannel;
-  private waitInterval?: number;
+  private timer?: any;
   publish: any;
   private sender?: RTCRtpSender;
 
@@ -52,8 +52,8 @@ export class RemoteParticipant extends Participant {
   sendAwaitingOffer = async () => {
     console.log('sending ready');
     this.sendSignal(this.patp, 'awaiting-offer', '');
-    setTimeout(this.sendAwaitingOffer, 5000);
     // @ts-ignore
+    this.timer = setTimeout(this.sendAwaitingOffer, 5000);
     // this.waitInterval = setInterval(this.sendAwaitingOffer, 5000);
   };
 
@@ -112,14 +112,15 @@ export class RemoteParticipant extends Participant {
     if (this.connectionState === PeerConnectionState.Connected) return;
     if (slipData['awaiting-offer'] !== undefined) {
       // Higher patp sends this offer, lower returns
-      console.log('awaiting-offer');
       if (isLower) return;
+      console.log('got awaiting-offer');
       // if (this.peerConn.connectionState !== 'new') return;
       const offer = await this.peerConn.createOffer({
         offerToReceiveAudio: true,
-        offerToReceiveVideo: true,
+        // offerToReceiveVideo: true,
       });
       await this.peerConn.setLocalDescription(offer);
+      console.log('sending offer');
       this.sendSignal(this.patp, 'offer', this.peerConn.localDescription);
     } else if (slipData['ice-candidate']) {
       console.log('ice-candidate');
@@ -130,23 +131,25 @@ export class RemoteParticipant extends Participant {
         sdpMLineIndex: iceCand.sdpMLineIndex,
       });
     } else if (slipData['offer']) {
-      clearTimeout(this.waitInterval);
+      clearTimeout(this.timer);
       // isHigher skips this logic
       if (!isLower) return;
       // isLower gets offer they were awaiting
-      console.log('offer');
+      console.log('got offer');
       await this.peerConn.setRemoteDescription(slipData['offer']);
       const answer = await this.peerConn.createAnswer();
       await this.peerConn.setLocalDescription(answer);
       // isLower sends answer
+      console.log('sending answer');
       this.sendSignal(this.patp, 'answer', this.peerConn.localDescription);
     } else if (slipData['answer']) {
-      console.log('answer');
+      // console.log('answer');
+      this.timer = undefined;
       // isHigher receives answers
-      this.waitInterval = undefined;
       if (isLower) {
         return;
       }
+      console.log('got answer');
       await this.peerConn.setRemoteDescription(slipData['answer']);
     }
   }
