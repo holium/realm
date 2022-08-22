@@ -50,11 +50,7 @@ export class RemoteParticipant extends Participant {
   }
 
   sendAwaitingOffer = async () => {
-    if (
-      this.connectionState !== PeerConnectionState.Connecting &&
-      this.connectionState !== PeerConnectionState.Connected
-    )
-      return;
+    console.log('sending ready');
     this.sendSignal(this.patp, 'awaiting-offer', '');
     setTimeout(this.sendAwaitingOffer, 5000);
     // @ts-ignore
@@ -113,12 +109,12 @@ export class RemoteParticipant extends Participant {
   async handleSlip(slipData: any, ourPatpId: number) {
     const isLower = ourPatpId < this.patpId;
     console.log('slip', isLower, this.peerConn.connectionState);
-    if (this.connectionState !== PeerConnectionState.Connected) return;
+    if (this.connectionState === PeerConnectionState.Connected) return;
     if (slipData['awaiting-offer'] !== undefined) {
       // Higher patp sends this offer, lower returns
       console.log('awaiting-offer');
       if (isLower) return;
-      if (this.peerConn.connectionState !== 'new') return;
+      // if (this.peerConn.connectionState !== 'new') return;
       const offer = await this.peerConn.createOffer({
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
