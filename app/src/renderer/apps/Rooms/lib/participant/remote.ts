@@ -50,11 +50,15 @@ export class RemoteParticipant extends Participant {
   }
 
   sendAwaitingOffer = async () => {
-    this.connectionState !== PeerConnectionState.Connecting &&
-      this.connectionState !== PeerConnectionState.Connected;
+    if (
+      this.connectionState !== PeerConnectionState.Connecting &&
+      this.connectionState !== PeerConnectionState.Connected
+    )
+      return;
     this.sendSignal(this.patp, 'awaiting-offer', '');
+    setTimeout(this.sendAwaitingOffer, 5000);
     // @ts-ignore
-    this.waitInterval = setInterval(this.sendAwaitingOffer, 5000);
+    // this.waitInterval = setInterval(this.sendAwaitingOffer, 5000);
   };
 
   async streamAudioTrack(track: MediaStreamTrack) {
@@ -109,6 +113,7 @@ export class RemoteParticipant extends Participant {
   async handleSlip(slipData: any, ourPatpId: number) {
     const isLower = ourPatpId < this.patpId;
     console.log('slip', isLower, this.peerConn.connectionState);
+    if (this.connectionState !== PeerConnectionState.Connected) return;
     if (slipData['awaiting-offer'] !== undefined) {
       // Higher patp sends this offer, lower returns
       console.log('awaiting-offer');
@@ -129,7 +134,7 @@ export class RemoteParticipant extends Participant {
         sdpMLineIndex: iceCand.sdpMLineIndex,
       });
     } else if (slipData['offer']) {
-      clearInterval(this.waitInterval);
+      clearTimeout(this.waitInterval);
       // isHigher skips this logic
       if (!isLower) return;
       // isLower gets offer they were awaiting
