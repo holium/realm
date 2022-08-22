@@ -60,8 +60,8 @@ export class OnboardingService extends BaseService {
       return ipcRenderer.invoke('realm.onboarding.getAvailablePlanets');
     },
 
-    prepareCheckout(tier: string) {
-      return ipcRenderer.invoke('realm.onboarding.prepareCheckout', tier);
+    prepareCheckout(billingPeriod: string) {
+      return ipcRenderer.invoke('realm.onboarding.prepareCheckout', billingPeriod);
     },
 
     completeCheckout() {
@@ -190,15 +190,15 @@ export class OnboardingService extends BaseService {
     return { invalid: accessCode ? false : true, accessCode };
   }
 
-  async prepareCheckout(_event: any, tier: string) {
-    if (!['monthly', 'yearly'].includes(tier))
-      throw new Error('invalid subscription tier');
+  async prepareCheckout(_event: any, billingPeriod: string) {
+    if (!['monthly', 'annual'].includes(billingPeriod))
+      throw new Error('invalid billing period');
 
     const { auth } = this.core.services.identity;
     let { clientSecret } = await this.core.holiumClient.prepareCheckout(
       auth.accountId!,
       this.state.planet!.patp,
-      tier
+      billingPeriod
     );
     auth.setClientSecret(clientSecret);
     return clientSecret;
