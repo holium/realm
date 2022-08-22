@@ -75,7 +75,8 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   connectParticipant(peer: RemoteParticipant) {
     // Call or listen
     peer.emit(ParticipantEvent.Connecting);
-    const isOfferer = this.our.patpId < peer.patpId;
+    const isLower = this.our.patpId < peer.patpId;
+    console.log(this.our.patpId, peer.patpId);
     const mount = document.getElementById('audio-root')!;
     let peerAudioEl: any = document.getElementById(`voice-stream-${peer.patp}`);
     if (!peerAudioEl) {
@@ -83,7 +84,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
       mount.appendChild(peerAudioEl);
     }
     peer.registerAudio(peerAudioEl);
-    if (!isOfferer) {
+    if (isLower) {
       this.our.sendSignal(peer.patp, 'awaiting-offer', '');
     }
   }

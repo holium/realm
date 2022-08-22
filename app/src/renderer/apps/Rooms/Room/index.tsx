@@ -83,6 +83,10 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
 
   if (!roomsApp.liveRoom) return <div />;
   const { present, id, creator } = roomsApp.liveRoom;
+  const creatorStr =
+    roomsApp.liveRoom?.creator.length > 14
+      ? `${roomsApp.liveRoom?.creator.substring(0, 14)}...`
+      : roomsApp.liveRoom?.creator;
   // console.log(toJS(roomsApp.liveRoom));
   return (
     <Grid.Column
@@ -126,7 +130,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             </Text>
             <Flex>
               <Text fontSize={2} fontWeight={400} opacity={0.7}>
-                {roomsApp.liveRoom?.creator}
+                {creatorStr}
               </Text>
               <Text mx="6px" fontSize={2} fontWeight={400} opacity={0.7}>
                 •

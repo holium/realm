@@ -91,7 +91,9 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
   const textColor =
-    peerState !== PeerConnectionState.Failed ? 'initial' : '#FD4E4E';
+    peerState !== PeerConnectionState.Failed
+      ? desktop.theme.textColor
+      : '#FD4E4E';
 
   const textProps = {
     color: textColor,

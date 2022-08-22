@@ -31,7 +31,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
 
     const dimensions = {
       height: 500,
-      width: 380,
+      width: 340,
     };
 
     const position = 'top-right';

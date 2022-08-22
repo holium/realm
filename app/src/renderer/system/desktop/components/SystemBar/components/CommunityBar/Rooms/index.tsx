@@ -30,7 +30,7 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
 
   const dimensions = {
     height: 500,
-    width: 360,
+    width: 380,
   };
 
   const position = 'top-left';

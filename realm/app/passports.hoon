@@ -64,7 +64,7 @@
         status=%host
       ]
     =/  our-members  (malt `(list (pair ship passport:store))`~[[our.bowl our-member]])
-    =/  initial-mem   `districts:store`(malt `(list (pair space-path:spaces passports:store))`~[[[~fes 'our'] our-members]])
+    =/  initial-mem   `districts:store`(malt `(list (pair space-path:spaces passports:store))`~[[[our.bowl 'our'] our-members]])
     =.  membership.state          initial-mem
     :_  this
     ::  %watch: get the initial contact list and watch for updates
