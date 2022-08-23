@@ -32,7 +32,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     this.participants = new Map();
     this.sendSlip = sendSlip;
 
-    console.log('this.sendSlip', this.sendSlip);
     // We need to make this observable so the React component can get updates
     makeObservable(this, {
       state: observable,
@@ -60,7 +59,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   onSlip(slip: SlipType) {
-    console.log('on slip');
+    // console.log('on slip');
     // console.log('got slapped', slip.from, slip.data);
     if (this.state !== RoomState.Disconnected) {
       const peer = this.participants.get(slip.from);
@@ -80,7 +79,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     // Call or listen
     peer.emit(ParticipantEvent.Connecting);
     const isLower = this.our.patpId < peer.patpId;
-    console.log('isLower', isLower);
+    // console.log('isLower', isLower);
     const mount = document.getElementById('audio-root')!;
     let peerAudioEl: any = document.getElementById(`voice-stream-${peer.patp}`);
     if (!peerAudioEl) {

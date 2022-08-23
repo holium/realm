@@ -214,7 +214,6 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                console.log(LiveRoom.our.audio);
                 if (ourState.muted) {
                   console.log('unmuting time');
                   LiveRoom.our?.unmuteAudioTracks();

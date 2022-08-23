@@ -52,10 +52,12 @@ export class LocalParticipant extends Participant {
         // this.audioTracks.set(track.trackName, track);
         track.on(TrackEvent.Muted, () => {
           console.log('in local participant, muting');
+          track.track?.detach();
           this.emit(ParticipantEvent.MuteToggled, true);
         });
         track.on(TrackEvent.Unmuted, () => {
           console.log('in local participant, unmuting');
+          track.track?.attach();
           this.emit(ParticipantEvent.MuteToggled, false);
         });
       }
@@ -211,7 +213,7 @@ export class LocalParticipant extends Participant {
       //   mediaStreamTrack,
       //   Track.Kind.Audio
       // );
-      let track = new LocalAudioTrack(mediaStreamTrack, constraints, true);
+      let track = new LocalAudioTrack(mediaStreamTrack, constraints);
       track.source = Track.Source.Microphone;
       track.mediaStream = stream;
       return track;

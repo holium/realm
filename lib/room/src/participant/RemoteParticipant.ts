@@ -16,9 +16,11 @@ export enum DataChannel {
   Info = 1,
   Cursor = 2,
 }
-const DATA_CHANNEL_LABEL = '_peerdata';
 
+const RetryLimit = 10;
 export class RemoteParticipant extends Participant {
+  isLower?: boolean; // if the remote particpant is lower, they are recieving
+  volume: number = 1;
   private peerConn: RTCPeerConnection;
   private audioRef!: HTMLAudioElement;
   private dataChannel!: RTCDataChannel;
@@ -29,6 +31,7 @@ export class RemoteParticipant extends Participant {
   private timer?: any;
   private sender?: RTCRtpSender;
   publish: any;
+  private retryAttempts: number = 0;
 
   get connectionState(): RTCPeerConnectionState {
     return this.peerConn.connectionState;
@@ -38,7 +41,6 @@ export class RemoteParticipant extends Participant {
     super(patp, room);
     this.peerConn = new RTCPeerConnection();
     this.peerConn.setConfiguration(config);
-    // this.dataChannel = this.peerConn.createDataChannel(DATA_CHANNEL_LABEL);
     this.config = config;
 
     this.tracks = new Map();
@@ -46,6 +48,9 @@ export class RemoteParticipant extends Participant {
     this.videoTracks = new Map();
 
     this.sendAwaitingOffer = this.sendAwaitingOffer.bind(this);
+    this.createDataChannel = this.createDataChannel.bind(this);
+    this.handleDataMessage = this.handleDataMessage.bind(this);
+    this.handleDataError = this.handleDataError.bind(this);
 
     // Bind all listeners to this
     this.onTrack = this.onTrack.bind(this);
@@ -64,11 +69,44 @@ export class RemoteParticipant extends Participant {
     this.isCursorSharing = !this.isCursorSharing;
   }
 
+  setCursors(isSharing: boolean) {
+    this.isCursorSharing = isSharing;
+  }
+
+  /**
+   * sets the volume on the participant's microphone track
+   * if no track exists the volume will be applied when the microphone track is added
+   */
+  setVolume(volume: number) {
+    this.volume = volume;
+    const audioPublication = this.getTrack(Track.Source.Microphone);
+    if (audioPublication && audioPublication.track) {
+      (audioPublication.track as RemoteAudioTrack).setVolume(volume);
+    }
+  }
+
+  /**
+   * gets the volume on the participant's microphone track
+   */
+  getVolume() {
+    const audioPublication = this.getTrack(Track.Source.Microphone);
+    if (audioPublication && audioPublication.track) {
+      return (audioPublication.track as RemoteAudioTrack).getVolume();
+    }
+    return this.volume;
+  }
+
   sendAwaitingOffer = async () => {
     console.log('sending ready');
     this.sendSignal(this.patp, 'awaiting-offer', '');
     // @ts-ignore
     this.timer = setTimeout(this.sendAwaitingOffer, 5000);
+    this.retryAttempts = this.retryAttempts + 1;
+    if (this.retryAttempts > RetryLimit) {
+      clearTimeout(this.timer);
+      this.retryAttempts = 0;
+      this.emit(ParticipantEvent.Failed);
+    }
     // this.waitInterval = setInterval(this.sendAwaitingOffer, 5000);
   };
 
@@ -112,12 +150,22 @@ export class RemoteParticipant extends Participant {
     this.peerConn.onicecandidateerror = this.onIceError;
     this.peerConn.onicegatheringstatechange = this.onGathering;
     this.peerConn.onnegotiationneeded = this.onNegotiation;
-    this.peerConn.ondatachannel = (event: RTCDataChannelEvent) => {
-      console.log('data channel', event);
+    this.peerConn.ondatachannel = (evt: RTCDataChannelEvent) => {
+      console.log(evt.channel);
+      evt.channel.send(JSON.stringify({ type: 'connected', data: null }));
+      // evt.channel.onmessage = handleReceiveMessage;
+      // evt.channel.onopen = handleReceiveChannelStatusChange;
+      // evt.channel.onclose = handleReceiveChannelStatusChange;
+      this.dataChannel = evt.channel;
+      this.dataChannel.onmessage = this.handleDataMessage;
+      this.dataChannel.onopen = (evt: any) => {
+        console.log('data channel open');
+      };
+      this.dataChannel.onclose = (evt: any) => {
+        console.log('data channel closed');
+      };
     };
-    this.peerConn.onsignalingstatechange = (ev: Event) => {
-      console.log('signal', ev);
-    };
+
     // this.peerConn.sctp
   }
 
@@ -131,12 +179,13 @@ export class RemoteParticipant extends Participant {
    * @returns
    */
   async handleSlip(slipData: any, ourPatpId: number) {
-    const isLower = ourPatpId < this.patpId;
+    this.isLower = ourPatpId < this.patpId;
     if (this.peerConn.connectionState === PeerConnectionState.Connected) return;
     if (slipData['awaiting-offer'] !== undefined) {
       // Higher patp sends this offer, lower returns
-      if (isLower) return;
+      if (this.isLower) return;
       console.log('got awaiting-offer');
+      this.createDataChannel(); // the higher patp will create a data channel
       // if (this.peerConn.connectionState !== 'new') return;
       const offer = await this.peerConn.createOffer({
         offerToReceiveAudio: true,
@@ -146,8 +195,8 @@ export class RemoteParticipant extends Participant {
       console.log('sending offer');
       this.sendSignal(this.patp, 'offer', this.peerConn.localDescription);
     } else if (slipData['ice-candidate']) {
-      console.log('ice-candidate');
       if (!this.peerConn.remoteDescription) return;
+      console.log('ice-candidate');
       let iceCand = JSON.parse(slipData['ice-candidate']);
       await this.peerConn.addIceCandidate({
         candidate: iceCand.candidate,
@@ -158,7 +207,7 @@ export class RemoteParticipant extends Participant {
       clearTimeout(this.timer);
       this.timer = undefined;
       // isHigher skips this logic
-      if (!isLower) return;
+      if (!this.isLower) return;
       // isLower gets offer they were awaiting
       console.log('got offer');
       await this.peerConn.setRemoteDescription(slipData['offer']);
@@ -171,7 +220,7 @@ export class RemoteParticipant extends Participant {
       // console.log('answer');
       this.timer = undefined;
       // isHigher receives answers
-      if (isLower) {
+      if (this.isLower) {
         return;
       }
       console.log('got answer');
@@ -217,8 +266,12 @@ export class RemoteParticipant extends Participant {
   updateOurInfo(info: { patp: Patp; muted: boolean; cursor: boolean }) {
     console.log(this.dataChannel.readyState);
     // this.peerConn.
-    if (this.dataChannel.readyState === 'open')
-      this.dataChannel.send(JSON.stringify(info));
+    if (this.dataChannel && this.dataChannel.readyState === 'open') {
+      console.log('sending data update');
+      this.dataChannel.send(
+        JSON.stringify({ type: 'participant-metadata', data: info })
+      );
+    }
   }
 
   protected addTrackPublication(publication: RemoteTrackPublication) {
@@ -257,12 +310,16 @@ export class RemoteParticipant extends Participant {
   }
 
   onConnectionChange(event: Event) {
+    console.log(event);
     if (
       // @ts-ignore
       event.currentTarget.connectionState === PeerConnectionState.Connected
     ) {
       console.log('peers connected!');
       this.emit(PeerConnectionState.Connected);
+      if (!this.isLower) {
+        console.log('creating data channel', this.patp);
+      }
     }
     if (
       // @ts-ignore
@@ -327,7 +384,7 @@ export class RemoteParticipant extends Participant {
   }
 
   async onNegotiation(event: Event) {
-    console.log('negneeded');
+    console.log('negneeded', event);
   }
 
   /**
@@ -335,7 +392,6 @@ export class RemoteParticipant extends Participant {
    *
    * Creates and listens for peer data
    *
-   * @param audioRef
    */
   createDataChannel() {
     // clear old data channel callbacks if recreate
@@ -346,16 +402,18 @@ export class RemoteParticipant extends Participant {
     }
 
     try {
-      this.dataChannel = this.peerConn.createDataChannel(DATA_CHANNEL_LABEL);
+      this.dataChannel = this.peerConn.createDataChannel(
+        this.room.roomConfig.id
+      );
+      // console.log(this.dataChannel);
     } catch (e) {
       console.error(e);
     }
     // this.peerConn.nego
     // create data channels
-    console.log('cerating data channel', this.dataChannel);
+    // console.log('cerating data channel', this.dataChannel);
     this.dataChannel.onopen = (ev: Event) => {
-      console.log('data channel openeed');
-      this.dataChannel.send('test');
+      // this.dataChannel.send('test');
     };
     this.dataChannel.onmessage = this.handleDataMessage;
     this.dataChannel.onerror = this.handleDataError;
@@ -364,14 +422,27 @@ export class RemoteParticipant extends Participant {
   private handleDataMessage = async (message: MessageEvent) => {
     console.log(message);
     // decode
-    let buffer: ArrayBuffer | undefined;
-    if (message.data instanceof ArrayBuffer) {
-      buffer = message.data;
-    } else if (message.data instanceof Blob) {
-      buffer = await message.data.arrayBuffer();
+    let buffer: { type: DataChannelUpdate; data: any };
+    if (typeof message.data === 'string') {
+      buffer = JSON.parse(message.data);
     } else {
       console.error('unsupported data type', message.data);
       return;
+    }
+    if (buffer.type === 'participant-metadata') {
+      const data = buffer.data as ParticipantUpdate;
+      console.log('participant-update', buffer);
+      // const peer = this.room.participants.get(data.patp)!;
+      this.audioTracks.forEach((publication: RemoteTrackPublication) => {
+        if (data.muted) {
+          publication.handleMuted();
+          this.emit(ParticipantEvent.TrackMuted, publication.audioTrack);
+        } else {
+          publication.handleUnmuted();
+          this.emit(ParticipantEvent.TrackUnmuted, publication.audioTrack);
+        }
+        this.setCursors(data.cursor);
+      });
     }
     // const dp = DataPacket.decode(new Uint8Array(buffer));
     // if (dp.value?.$case === 'cursor') {
@@ -398,3 +469,7 @@ export class RemoteParticipant extends Participant {
     this.peerConn.setConfiguration(this.config);
   }
 }
+
+export type DataChannelUpdate = 'participant-metadata' | 'connected';
+
+export type ParticipantUpdate = { patp: Patp; muted: boolean; cursor: boolean };
