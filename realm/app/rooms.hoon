@@ -100,9 +100,16 @@
           %+  lth
           (lent ~(tap in present.room))
           capacity.room
+      ?:  :: ignore if user already in room
+          (~(has in present.room) src.bowl)
+          `state
       ::  access granted
       :: leave old room
+      :: TODO update the other members of the old rooms
       =.  rooms
+        :: TODO get intersection
+        ::  bump all rooms of intersection
+        ::   with %exit src.bowl
         (leave-rooms:lib rooms src.bowl)
       :: join room
       =.  present.room
@@ -110,7 +117,7 @@
       =.  rooms
         (insert room)
       :_  state
-      (bump-room room)
+      (bump-room room)  :: TODO bump with %enter src.bowl
     ::
     ++  exit
       ::

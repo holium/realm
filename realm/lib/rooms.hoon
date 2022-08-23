@@ -13,6 +13,7 @@
   :: this enforces cleanliness
   |=  [rooms=(map rid room) =ship]
   ^-  (map rid room)
+  :: TODO should this return bump %exit =ship cards?
   =/  looms  ~(val by rooms)
   :: create list of rooms to use |-
   :: -

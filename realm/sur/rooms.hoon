@@ -88,12 +88,18 @@
 :: server -> client
 :: client -> user
 :: client -> client  (just %chat)
++$  update-diff
+  $%  [%enter =ship]
+      [%exit =ship]
+      [%other ~]
+  ==
+::
 +$  update
   $%  
     ::
     :: updates from provider
     :: app/rooms -> app/room
-      [%room =room]
+      [%room =room diff=update-diff]
       [%rooms rooms=(set room)]
     ::
       [%invited provider=ship =rid =ship]

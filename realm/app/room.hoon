@@ -40,6 +40,11 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
+    :: EXAMPLE SCRY FROM DOJO
+    :: > =store -build-file /=realm=/sur/rooms/hoon
+    :: > .^(view:store %gx /=room=/present/rooms-view)
+    ::  [%present ships={~bus}]
+    ::
       [%x ~]
         ``rooms-view+!>([%full my-room provider])
       [%x %present ~]
