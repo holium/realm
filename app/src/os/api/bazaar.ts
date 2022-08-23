@@ -98,14 +98,20 @@ export const BazaarApi = {
     appId: string,
     tag: string
   ) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
     await conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
         'remove-tag': {
-          path: path,
-          appId: appId,
+          path: pathObj,
+          'app-id': appId,
           tag: tag,
+          rank: null,
         },
       },
     });

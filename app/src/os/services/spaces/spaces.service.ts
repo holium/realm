@@ -120,8 +120,13 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
     addAppTag: async (path: SpacePath, appId: string, tag: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-app-tag', path, appId, tag),
-    removeAppTag: async () =>
-      ipcRenderer.invoke('realm.spaces.bazaar.remove-app-tag'),
+    removeAppTag: async (path: SpacePath, appId: string, tag: string) =>
+      ipcRenderer.invoke(
+        'realm.spaces.bazaar.remove-app-tag',
+        path,
+        appId,
+        tag
+      ),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -366,8 +371,7 @@ export class SpacesService extends BaseService {
       this.core.conduit!,
       spacePath,
       appId,
-      tag,
-      this.core.credentials!
+      tag
     );
   }
 

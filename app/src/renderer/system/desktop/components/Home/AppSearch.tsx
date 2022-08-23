@@ -111,7 +111,7 @@ function renderDevs(space: string, devs: any) {
       <AppRow
         caption={item.title}
         app={item}
-        actionRenderer={() => actionRenderer(space, item)}
+        // actionRenderer={() => actionRenderer(space, item)}
         // onClick={(e, action, app) => onAppsAction(space, action, app)}
       />
     </div>
@@ -127,7 +127,7 @@ function renderApps(space: string, apps: any) {
       <AppRow
         caption={app.title}
         app={app}
-        actionRenderer={() => actionRenderer(space, app)}
+        // actionRenderer={() => actionRenderer(space, app)}
         // onClick={(e, action, app) => onAppsAction(space, action, app)}
       />
     </div>

@@ -45,8 +45,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             onClick: (evt: any) => {
               evt.stopPropagation();
               isAppPinned
-                ? SpacesActions.unpinApp(spacePath, app.id)
-                : SpacesActions.pinApp(spacePath, app.id);
+                ? SpacesActions.removeAppTag(spacePath, app.id, 'pinned')
+                : SpacesActions.addAppTag(spacePath, app.id, 'pinned');
             },
           },
           {
