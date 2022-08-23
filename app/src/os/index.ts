@@ -65,8 +65,8 @@ export class Realm extends EventEmitter {
     shell: ShellService.preload,
     onboarding: OnboardingService.preload,
     tray: {
-      rooms: RoomsService.preload
-    }
+      rooms: RoomsService.preload,
+    },
   };
 
   constructor(mainWindow: BrowserWindow) {

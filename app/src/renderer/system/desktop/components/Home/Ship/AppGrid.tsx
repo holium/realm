@@ -17,13 +17,15 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
   const { ship, spaces, bazaar } = useServices();
 
-  const apps: any = ship
-    ? [...ship!.apps, ...NativeAppList]
-    : [...NativeAppList];
+  // const apps: any = ship
+  //   ? [...ship!.apps, ...NativeAppList]
+  //   : [...NativeAppList];
 
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
+
+  const apps: any = currentBazaar?.allApps;
 
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;
@@ -81,6 +83,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           }
         }
         onAppClick={(selectedApp: AppModelType) => {
+          console.log(selectedApp);
           SpacesActions.addRecentApp(spaces.selected!.path, selectedApp.id);
           DesktopActions.openAppWindow(
             spaces.selected!.path,

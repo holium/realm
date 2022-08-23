@@ -127,12 +127,67 @@
   ++  apntry
     |=  =app-entry:store
     ^-  json
-    %-  pairs
-    :~  ['ship' s+(scot %p ship.app-entry)]
+    =/  meta=(list [cord json])
+    :~  [%id s+id.app-entry]
+        ['ship' s+(scot %p ship.app-entry)]
         ['ranks' (rnks ranks.app-entry)]
         ['tags' a+(turn ~(tap in tags.app-entry) |=(tg=tag:store s+(scot %tas tg)))]
-        ['docket' ?~(docket.app-entry ~ (docket:enjs:docket-lib u.docket.app-entry))]
+        :: ['docket' (dkt docket.app-entry)]
     ==
+    =/  data=(list [cord json])
+    :~  title+s+title.docket.app-entry
+    info+s+info.docket.app-entry
+    color+s+(scot %ux color.docket.app-entry)
+    href+(href href.docket.app-entry)
+    image+?~(image.docket.app-entry ~ s+u.image.docket.app-entry)
+    version+(version version.docket.app-entry)
+    license+s+license.docket.app-entry
+    website+s+website.docket.app-entry
+    ==
+    %-  pairs
+    (weld meta data)
+  ::
+  ++  href
+    |=  h=href:docket
+    %+  frond  -.h
+    ?-    -.h
+        %site  s+(spat path.h)
+        %glob
+      %-  pairs
+      :~  base+s+base.h
+          glob-reference+(glob-reference glob-reference.h)
+      ==
+    ==
+  ::
+  ++  glob-reference
+    |=  ref=glob-reference:docket
+    %-  pairs
+    :~  hash+s+(scot %uv hash.ref)
+        location+(glob-location location.ref)
+    ==
+  ::
+  ++  glob-location
+    |=  loc=glob-location:docket
+    ^-  json
+    %+  frond  -.loc
+    ?-  -.loc
+      %http  s+url.loc
+      %ames  s+(scot %p ship.loc)
+    ==
+      ::
+  ++  version
+    |=  v=version:docket
+    ^-  json
+    :-  %s
+    %-  crip
+    "{(num major.v)}.{(num minor.v)}.{(num patch.v)}"
+  ::
+  ++  num
+    |=  a=@u
+    ^-  ^tape
+    =/  p=json  (numb a)
+    ?>  ?=(%n -.p)
+    (trip p.p)
   ::
   ++  rnks
     |=  =ranks:store
@@ -147,6 +202,14 @@
       %suite        ['suite' n+(cord "{<rank>}")]
       %installed    ['installed' n+(cord "{<rank>}")]
     ==
+  ::
+  :: ++  dkt
+  ::   |=  [d=(unit [=app-id:store =docket:docket])]
+  ::   ^-  json
+  ::   ?~  d  ~
+  ::   =/  dk  (docket:enjs:docket-lib docket.u.d)
+  ::   ?>  ?=([%o *] dk)
+  ::   (~(put by p.dk) %id s+app-id.u.d)
   :: ::
   :: ++  dkt
   ::   |=  d=docket:docket

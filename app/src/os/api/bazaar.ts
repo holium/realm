@@ -1,6 +1,9 @@
 import { Urbit } from './../urbit/api';
 import { SpacePath } from '../types';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
+import {
+  BazaarModelType,
+  BazaarStoreType,
+} from 'os/services/spaces/models/bazaar';
 import { docketInstall } from '@urbit/api';
 import { quickPoke } from '../lib/poke';
 import { ISession } from '../';
@@ -137,6 +140,7 @@ const handleBazaarReactions = (
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
+      state.initial(data['initial']);
       // state.initialReaction(data['initial']);
       break;
     case 'add-tag':

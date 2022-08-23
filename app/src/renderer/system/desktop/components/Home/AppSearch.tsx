@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react';
 import { styled as stitch, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { isValidPatp } from 'urbit-ob';
-import { Input, Flex, Box, Text, Icons, Sigil } from 'renderer/components';
+import {
+  Input,
+  Flex,
+  Box,
+  Text,
+  Icons,
+  Sigil,
+  Button,
+} from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { toJS } from 'mobx';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -70,10 +78,29 @@ function Content({ children, ...props }) {
 
 const onAppsAction = (space: string, action: string, app: any) => {
   console.log('onAppsAction => %o', { action, app });
-  SpacesActions.addAppTag(space, app.id, 'suite').then((data) => {
+  SpacesActions.addAppTag(space, app.id, action).then((data) => {
     console.log('addAppTag response => %o', data);
   });
 };
+
+const actionRenderer = (space: string, app: any) => (
+  <>
+    <Button
+      borderRadius={6}
+      onClick={(e) => onAppsAction(space, 'pinned', app)}
+    >
+      Pin
+    </Button>
+
+    <Button
+      style={{ marginLeft: 5 }}
+      borderRadius={6}
+      onClick={(e) => onAppsAction(space, 'recommend', app)}
+    >
+      Like
+    </Button>
+  </>
+);
 
 function renderDevs(space: string, devs: any) {
   if (devs.length === 0) {
@@ -84,7 +111,8 @@ function renderDevs(space: string, devs: any) {
       <AppRow
         caption={item.title}
         app={item}
-        onClick={(e, action, app) => onAppsAction(space, action, app)}
+        actionRenderer={() => actionRenderer(space, item)}
+        // onClick={(e, action, app) => onAppsAction(space, action, app)}
       />
     </div>
   ));
@@ -99,7 +127,8 @@ function renderApps(space: string, apps: any) {
       <AppRow
         caption={app.title}
         app={app}
-        onClick={(e, action, app) => onAppsAction(space, action, app)}
+        actionRenderer={() => actionRenderer(space, app)}
+        // onClick={(e, action, app) => onAppsAction(space, action, app)}
       />
     </div>
   ));
@@ -267,6 +296,7 @@ const AppSearchApp = (props) => {
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
+  console.log('currentBazaar => %o', currentBazaar);
   useEffect(() => {
     if (searchMode === 'ship-search') {
       SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {

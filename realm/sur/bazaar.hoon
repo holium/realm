@@ -52,10 +52,11 @@
 +$  app-entry
       :: $rank: can be used for sorting apps; and simultaneously
       ::   (in the case of recommended apps) represent the # of "likes"
-  $:  =ship
+  $:  id=app-id
+      =ship
       =ranks
       =tags
-      docket=(unit docket:docket)
+      =docket:docket
   ==
 ::
 +$  app-view

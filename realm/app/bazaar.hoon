@@ -79,7 +79,9 @@
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
       ~&  >>  "{<dap.bowl>}: subscribing to /updates"
-      (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
+      =/  apps  initial:apps:core
+      :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
+      (bazaar:send-reaction:core [%initial apps] [/updates ~])
     ::
     [%bazaar @ @ ~]
       :: The space level watch subscription
@@ -123,7 +125,7 @@
         ?~  apps  ``json+!>(~)
         ``bazaar-view+!>([%apps u.apps])
         ::
-        %recommended220
+        %recommended
         ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %recommended))])
         ::
         %suite
@@ -256,6 +258,14 @@
 ::
 ++  apps
   |%
+  ++  initial
+    ^-  space-apps:store
+    %-  ~(rep by space-apps:state)
+    |:  [[=space-path:spaces-store =app-index:store] acc=`space-apps:store`~]
+    =/  apps  (view space-path ~)
+    ?~  apps  acc
+    (~(put by acc) space-path u.apps)
+  ::
   ++  view
     |=  [path=space-path:spaces-store tag=(unit tag:store)]
     ^-  (unit app-index:store)
@@ -274,7 +284,10 @@
       =/  app-entry
         ?~  charge  app-entry
         =.  tags.app-entry  (~(put in tags.app-entry) %installed)
-        =.  docket.app-entry  (some docket.u.charge)
+        =.  docket.app-entry  docket.u.charge
+        :: =.  id.docket.app-entry  app-id
+        :: =.  docket.docket.app-entry  docket.u.charge
+        :: =.  docket.app-entry  (some [id=app-id docket.u.charge])
         app-entry
       (~(put by acc) app-id app-entry)
     ?~(result ~ (some result))
@@ -368,7 +381,6 @@
   ++  on-add
     |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: space added {<[space members]>}"
     `state(space-apps (~(put by space-apps.state) path.space ~), membership (~(put by membership.state) path.space members))
   ::
   ++  on-replace
@@ -379,7 +391,7 @@
   ++  on-remove
     |=  [path=space-path:spaces-store]
     ^-  (quip card _state)
-    `state
+    `state(space-apps (~(del by space-apps.state) path), membership (~(del by membership.state) path))
   ::
   ++  on-space-initial
     |=  [path=space-path:spaces-store space=space:spaces-store]
@@ -389,13 +401,13 @@
   ++  on-member-added
     |=  [path=space-path:spaces-store =ship]
     ^-  (quip card _state)
-    :: ?:  ?|  =(our.bowl ship.path)
-    ::         =(ship ship.path)
-    ::     ==  `state
+    ?:  ?|  =(our.bowl ship.path)
+            =(ship ship.path)
+        ==  `state
     %-  (slog leaf+"{<dap.bowl>}: on-member-added:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
-    `state
-    :: :~  [%pass /passports %agent [ship.path %passports] %watch /members/(scot %p ship.path)/(scot %tas space.path)]
-    :: ==
+    :_  state
+    :~  [%pass /passports %agent [ship.path %passports] %watch /members/(scot %p ship.path)/(scot %tas space.path)]
+    ==
   --
 ::
 ++  send-reaction
@@ -418,6 +430,7 @@
     %-  ~(rep by charges)
     |=  [[=desk =charge:docket] acc=app-index:store]
       =|  app=app-entry:store
+      =.  id.app    desk
       =.  ship.app  our.bowl
       =.  tags.app  (~(put in tags.app) %installed)
       (~(put by acc) desk app)

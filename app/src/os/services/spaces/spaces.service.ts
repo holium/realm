@@ -146,6 +146,7 @@ export class SpacesService extends BaseService {
   }
 
   async load(patp: string, ship: ShipModelType) {
+    console.log('hi');
     this.db = new Store({
       name: 'spaces',
       cwd: `realm.${patp}`,
@@ -158,7 +159,7 @@ export class SpacesService extends BaseService {
     this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
     // Temporary setup
-    this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
+    // this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
     // Get the initial scry
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
@@ -332,6 +333,7 @@ export class SpacesService extends BaseService {
     spacePath: SpacePath,
     appId: string
   ) {
+    console.log('addRecentApp => %o', { spacePath, appId });
     return this.models.bazaar.getBazaar(spacePath).addRecentApp(appId);
   }
   async addRecentDev(

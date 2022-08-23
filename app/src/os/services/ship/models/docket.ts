@@ -26,7 +26,7 @@ export const Glob = types.model({
 });
 
 export const DocketApp = types.model('DocketApp', {
-  id: types.identifier,
+  // id: types.identifier,
   title: types.string,
   info: types.string,
   color: types.string,

@@ -42,7 +42,7 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
-export const AppRow = ({ caption, app, onClick }) =>
+export const AppRow = ({ caption, app, actionRenderer }) =>
   app ? (
     <Flex flexDirection="row" alignItems="center" gap={8}>
       <TileStyle
@@ -74,14 +74,9 @@ export const AppRow = ({ caption, app, onClick }) =>
         <Text fontWeight={500}>{app.title}</Text>
         <Text color={'#888888'}>{app.info}</Text>
       </Flex>
-      <div style={{ whiteSpace: 'nowrap' }}>
-        <Button
-          borderRadius={6}
-          onClick={(e) => onClick && onClick(e, 'suite-add', app)}
-        >
-          Add to Suite
-        </Button>
-      </div>
+      {actionRenderer && (
+        <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer()}</div>
+      )}
     </Flex>
   ) : (
     <Text>{caption} not installed</Text>

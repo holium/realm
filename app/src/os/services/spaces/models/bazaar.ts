@@ -1,16 +1,55 @@
-import { types, castToSnapshot, Instance } from 'mobx-state-tree';
+import {
+  types,
+  applySnapshot,
+  castToSnapshot,
+  Instance,
+} from 'mobx-state-tree';
+import { cleanNounColor } from '../../../lib/color';
 import { SpacePath } from 'os/types';
 import { NativeAppList } from '../../../../renderer/apps';
 import { DocketApp, WebApp } from '../../ship/models/docket';
+import { toJS } from 'mobx';
+import { contextIsolated } from 'process';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
 
-const BazaarApp = types.model({
-  id: types.string,
-  tags: types.array(types.string),
+export const Glob = types.model({
+  site: types.maybe(types.string),
+  glob: types.maybe(
+    types.model({
+      base: types.string,
+      'glob-reference': types.model({
+        location: types.model({
+          http: types.maybe(types.string),
+          ames: types.maybe(types.string),
+        }),
+        hash: types.string,
+      }),
+    })
+  ),
 });
+
+const AppTypes = types.enumeration(['urbit', 'web', 'native']);
+
+const BazaarApp = types.model({
+  id: types.identifier,
+  ship: types.string,
+  tags: types.array(types.string),
+  ranks: types.model({}),
+  title: types.string,
+  info: types.string,
+  color: types.string,
+  type: types.optional(AppTypes, 'urbit'),
+  image: types.maybeNull(types.string),
+  href: Glob,
+  version: types.string,
+  website: types.string,
+  license: types.string,
+});
+export type BazaarAppType = Instance<typeof BazaarApp>;
+
 // .views((self) => ({
 //   get apps
 // }))
@@ -27,15 +66,15 @@ export const BazaarModel = types
     apps: types.map(BazaarApp),
   })
   .views((self) => ({
+    get allApps() {
+      return Array.from(self.apps!.values());
+    },
     get pinnedApps() {
-      const pins = self.pinned;
-      return [...Array.from(self.installed!.values()), ...NativeAppList]
-        .filter((app: any) => self.pinned.includes(app.id))
-        .sort((a, b) => pins.indexOf(a.id) - pins.indexOf(b.id));
+      return this.getAppsByTag('pinned');
     },
     get recentApps() {
       const recents = self.recentsApps;
-      return [...Array.from(self.installed!.values()), ...NativeAppList]
+      return [...Array.from(self.apps!.values()), ...NativeAppList]
         .filter((app: any) => recents.includes(app.id))
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
@@ -49,25 +88,18 @@ export const BazaarModel = types
       return self.pinned.includes(appId);
     },
     getAppData(appId: string) {
-      const apps = Array.from(self.installed.values());
+      const apps = Array.from(self.apps!.values());
       return [...apps, ...NativeAppList].find((app: any) => app.id === appId);
+    },
+    getAppsByTag(tag: string) {
+      const apps = Array.from(self.apps!.values());
+      const result = apps.filter((app: any) => app.tags.includes(tag));
+      return result || [];
     },
   }))
   .actions((self) => ({
-    initial(shipApps: any) {
-      self.installed = shipApps;
-    },
-    loadPins(pins: string[]) {
-      self.pinned = castToSnapshot(pins);
-    },
-    pinApp(appId: string) {
-      self.pinned.push(appId);
-    },
-    unpinApp(appId: string) {
-      self.pinned.remove(appId);
-    },
-    setPinnedOrder(newOrder: any) {
-      self.pinned = newOrder;
+    addApp(app: BazaarAppType) {
+      self.apps.set(app.id, app);
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
@@ -116,6 +148,9 @@ export type BazaarModelType = Instance<typeof BazaarModel>;
 
 export const BazaarStore = types
   .model({
+    // all apps installed on the local ship (our)
+    // ourApps: types.map(BazaarApp),
+    // space => app metadata for space specific app data
     spaces: types.map(BazaarModel),
   })
   .views((self) => ({
@@ -124,7 +159,24 @@ export const BazaarStore = types
     },
   }))
   .actions((self) => ({
+    initial(apps: any) {
+      console.log('loading bazaar initial => %o', apps);
+      // applySnapshot(self.spaces, apps['space-apps']);
+      const catalog = apps['space-apps'];
+      for (const spacePath in catalog) {
+        const spaceApps = catalog[spacePath];
+        let bazaar = BazaarModel.create({});
+        for (const desk in spaceApps) {
+          const app = spaceApps[desk];
+          const appColor = app.color;
+          app.color = appColor && cleanNounColor(appColor);
+          bazaar.addApp(app);
+        }
+        self.spaces.set(spacePath, bazaar);
+      }
+    },
     our(ourPath: string, shipApps: any) {
+      console.log('our => %o', { ourPath, shipApps });
       const ourBazaar = BazaarModel.create({
         pinned: [],
         installed: shipApps,
