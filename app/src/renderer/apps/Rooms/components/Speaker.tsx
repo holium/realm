@@ -14,8 +14,7 @@ import {
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { LiveRoom } from 'renderer/apps/store';
-import { RemoteParticipant } from '../lib/participant/remote';
-import { PeerConnectionState } from '../lib/participant/events';
+import { PeerConnectionState } from '@holium/realm-room';
 import { rgba, darken } from 'polished';
 import { handleLocalEvents, handleRemoteEvents } from '../listeners';
 

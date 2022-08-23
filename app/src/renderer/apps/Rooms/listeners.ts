@@ -1,5 +1,4 @@
-import { LocalParticipant } from './lib/participant/local';
-import { RemoteParticipant } from './lib/participant/remote';
+import { LocalParticipant, RemoteParticipant } from '@holium/realm-room';
 
 export const handleLocalEvents = (
   setState: (state: { muted: boolean; cursor: boolean }) => void,

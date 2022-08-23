@@ -1,4 +1,4 @@
-import { Patp } from 'os/types';
+import { Patp } from 'types';
 
 export enum TrackType {
   AUDIO = 0,

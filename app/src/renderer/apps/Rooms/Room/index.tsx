@@ -217,9 +217,9 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                 console.log(LiveRoom.our.audio);
                 if (ourState.muted) {
                   console.log('unmuting time');
-                  LiveRoom.our.audioStream?.unmute();
+                  LiveRoom.our?.unmuteAudioTracks();
                 } else {
-                  LiveRoom.our.audioStream?.mute();
+                  LiveRoom.our?.muteAudioTracks();
                 }
               }}
             />

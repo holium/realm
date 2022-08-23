@@ -1,32 +1,25 @@
 import { EventEmitter } from 'events';
-import { LocalTrack } from '.';
+import { LocalTrack } from './LocalTrack';
 // import log from '../../logger';
 // import type { TrackInfo } from '../../proto/livekit_models';
 import { TrackEvent } from './events';
 // import LocalAudioTrack from './LocalAudioTrack';
 // import RemoteAudioTrack from './RemoteAudioTrack';
-import { Track, TrackInfo } from './options';
+import { TrackInfo } from './options';
+import type { Track } from './Track';
 
 export class TrackPublication extends EventEmitter {
   kind: Track.Kind;
-
   trackName: string;
-
   trackSid: Track.SID;
-
-  track?: LocalTrack;
-
+  track?: Track;
   source: Track.Source;
-
   /** MimeType of the published track */
   mimeType?: string;
-
   /** dimension of the original published stream, video-only */
   dimensions?: Track.Dimensions;
-
   /** true if track was simulcasted to server, video-only */
   simulcasted?: boolean;
-
   /** @internal */
   trackInfo?: TrackInfo;
 
@@ -37,11 +30,11 @@ export class TrackPublication extends EventEmitter {
     this.kind = kind;
     this.trackSid = id;
     this.trackName = name;
-    this.source = Track.Source.Unknown;
+    this.source = Source.Unknown;
   }
 
   /** @internal */
-  setTrack(track?: LocalTrack) {
+  setTrack(track?: Track) {
     if (this.track) {
       this.track.off(TrackEvent.Muted, this.handleMuted);
       this.track.off(TrackEvent.Unmuted, this.handleUnmuted);
@@ -92,7 +85,7 @@ export class TrackPublication extends EventEmitter {
     this.source = info.source;
     console.log(info);
     this.mimeType = info.mimeType;
-    if (this.kind === Track.Kind.Video && info.width > 0) {
+    if (this.kind === Kind.Video && info.width > 0) {
       this.dimensions = {
         width: info.width,
         height: info.height,
@@ -110,4 +103,18 @@ export namespace TrackPublication {
     NotAllowed = 'not_allowed',
     Unsubscribed = 'unsubscribed',
   }
+}
+
+enum Kind {
+  Audio = 'audio',
+  Video = 'video',
+  Unknown = 'unknown',
+}
+
+enum Source {
+  Camera = 'camera',
+  Microphone = 'microphone',
+  ScreenShare = 'screen_share',
+  ScreenShareAudio = 'screen_share_audio',
+  Unknown = 'unknown',
 }

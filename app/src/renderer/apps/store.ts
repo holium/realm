@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import { Room } from '@holium/realm-room';
 import {
   applyPatch,
   Instance,
@@ -8,10 +9,12 @@ import {
   applySnapshot,
 } from 'mobx-state-tree';
 
+import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
-import { Room } from 'renderer/apps/Rooms/lib/room';
+import { Patp } from 'os/types';
+import { SlipType } from 'os/services/slip.service';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -116,7 +119,13 @@ export function useTrayApps() {
   return store;
 }
 
-export const LiveRoom = new Room();
+export const LiveRoom = new Room((to: Patp[], data: any) => {
+  SlipActions.sendSlip(to, data);
+});
+
+SlipActions.onSlip((_event: Event, slip: SlipType) => {
+  LiveRoom.onSlip(slip);
+});
 
 // After boot, set the initial data
 OSActions.onBoot((_event: any, response: any) => {

@@ -1,9 +1,9 @@
-import { LocalTrack } from '.';
+import { LocalTrack } from './LocalTrack';
 import { TrackEvent } from './events';
 import { Track, TrackInfo, TrackPublishOptions } from './options';
 import { TrackPublication } from './TrackPublication';
 
-export default class LocalTrackPublication extends TrackPublication {
+export class LocalTrackPublication extends TrackPublication {
   track?: LocalTrack = undefined;
 
   options?: TrackPublishOptions;

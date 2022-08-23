@@ -1,12 +1,7 @@
-import { RemoteParticipant } from './../participant/remote';
-import Queue from 'async-await-queue';
 import { EventEmitter } from 'events';
-import { TrackEvent } from './events';
 import type TypedEventEmitter from 'typed-emitter';
-import { AudioCaptureOptions } from './options';
-import { getEmptyAudioStreamTrack } from './utils';
-import { Patp } from 'os/types';
-import { DEFAULT_AUDIO_CONSTRAINTS } from '../participant/local';
+import { TrackEvent } from './events';
+import { isFireFox, isSafari, isWeb } from '../utils';
 
 const BACKGROUND_REACTION_DELAY = 5000;
 
@@ -14,40 +9,55 @@ const BACKGROUND_REACTION_DELAY = 5000;
 // Safari tracks which audio elements have been "blessed" by the user.
 const recycledElements: Array<HTMLAudioElement> = [];
 
-export class LocalTrack extends (EventEmitter as new () => TypedEventEmitter<TrackEventCallbacks>) {
-  sid?: Track.SID;
+export class Track extends (EventEmitter as new () => TypedEventEmitter<TrackEventCallbacks>) {
   kind: Track.Kind;
-  attachedElements: HTMLMediaElement[] = [];
-  isMuted: boolean = false;
-  source: Track.Source;
-  mediaStream?: MediaStream;
-  streamState: Track.StreamState = Track.StreamState.Active;
-  peers: Map<Patp, RemoteParticipant>;
-  protected _mediaStreamTrack: MediaStreamTrack;
-  protected _mediaStreamID: string;
-  protected isInBackground: boolean;
-  private backgroundTimeout: ReturnType<typeof setTimeout> | undefined;
-  protected _currentBitrate: number = 0;
-  protected _isUpstreamPaused: boolean = false;
-  protected muteQueue: Queue;
 
-  constructor(
-    peers: Map<Patp, RemoteParticipant>,
-    mediaTrack: MediaStreamTrack,
-    kind: Track.Kind
-  ) {
+  attachedElements: HTMLMediaElement[] = [];
+
+  isMuted: boolean = false;
+
+  source: Track.Source;
+
+  /**
+   * sid is set after track is published to server, or if it's a remote track
+   */
+  sid?: Track.SID;
+
+  /**
+   * @internal
+   */
+  mediaStream?: MediaStream;
+
+  /**
+   * indicates current state of stream
+   */
+  streamState: Track.StreamState = Track.StreamState.Active;
+
+  protected _mediaStreamTrack: MediaStreamTrack;
+
+  protected _mediaStreamID: string;
+
+  protected isInBackground: boolean;
+
+  private backgroundTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  protected _currentBitrate: number = 0;
+
+  protected constructor(mediaTrack: MediaStreamTrack, kind: Track.Kind) {
     super();
     this.kind = kind;
     this._mediaStreamTrack = mediaTrack;
     this._mediaStreamID = mediaTrack.id;
-    this.source = Track.Source.Microphone;
-    this.muteQueue = new Queue();
-    this.peers = peers;
-    this.isInBackground = document.visibilityState === 'hidden';
-    document.addEventListener(
-      'visibilitychange',
-      this.appVisibilityChangedListener
-    );
+    this.source = Track.Source.Unknown;
+    if (isWeb()) {
+      this.isInBackground = document.visibilityState === 'hidden';
+      document.addEventListener(
+        'visibilitychange',
+        this.appVisibilityChangedListener
+      );
+    } else {
+      this.isInBackground = false;
+    }
   }
 
   /** current receive bits per second */
@@ -68,125 +78,15 @@ export class LocalTrack extends (EventEmitter as new () => TypedEventEmitter<Tra
     return this._mediaStreamID;
   }
 
-  async mute(): Promise<LocalTrack> {
-    await this.muteQueue.run(async () => {
-      this._mediaStreamTrack.stop();
-    });
-    this.isMuted = true;
-    this.emit('muted');
-    return this;
-  }
+  /**
+   * creates a new HTMLAudioElement or HTMLVideoElement, attaches to it, and returns it
+   */
+  attach(): HTMLMediaElement;
 
-  async unmute(): Promise<LocalTrack> {
-    await this.muteQueue.run(async () => {
-      if (this.source === Track.Source.Microphone) {
-        console.log('reacquiring mic track');
-        await this.restartTrack();
-      }
-    });
-    this.isMuted = false;
-    this.emit('unmuted');
-    return this;
-  }
-
-  async restartTrack(options?: AudioCaptureOptions) {
-    let constraints: MediaTrackConstraints | undefined;
-    if (options) {
-      const streamConstraints = { audio: options };
-      if (typeof streamConstraints.audio !== 'boolean') {
-        constraints = streamConstraints.audio;
-      }
-    }
-    await this.restart(constraints);
-  }
-
-  // protected async restart(
-  //   constraints?: MediaTrackConstraints
-  // ): Promise<LocalTrack> {
-  //   const track = await super.restart(constraints);
-  //   this.checkForSilence();
-  //   return track;
-  // }
-
-  protected async restart(
-    constraints?: MediaTrackConstraints
-  ): Promise<LocalTrack> {
-    const streamConstraints: MediaStreamConstraints = {
-      audio: false,
-    };
-
-    streamConstraints.audio = DEFAULT_AUDIO_CONSTRAINTS;
-
-    // detach
-    this.attachedElements.forEach((el) => {
-      detachTrack(this._mediaStreamTrack, el);
-    });
-    this._mediaStreamTrack.removeEventListener('ended', this.handleEnded);
-    // on Safari, the old audio track must be stopped before attempting to acquire
-    // the new track, otherwise the new track will stop with
-    // 'A MediaStreamTrack ended due to a capture failure`
-    this._mediaStreamTrack.stop();
-
-    // create new track and attach
-    const mediaStream = await navigator.mediaDevices.getUserMedia(
-      streamConstraints
-    );
-    const newTrack = mediaStream.getTracks()[0];
-    newTrack.addEventListener('ended', this.handleEnded);
-
-    if (this.peers) {
-      this.peers.forEach(async (peer: RemoteParticipant) => {
-        await peer.replaceAudioTrack(newTrack);
-      });
-      // Track can be restarted after it's unpublished
-    }
-
-    this._mediaStreamTrack = newTrack;
-
-    await this.resumeUpstream();
-
-    this.attachedElements.forEach((el) => {
-      attachToElement(newTrack, el);
-    });
-
-    this.mediaStream = mediaStream;
-    return this;
-  }
-
-  private handleEnded = () => {
-    this.emit(TrackEvent.Ended, this);
-  };
-
-  async pauseUpstream() {
-    this.muteQueue.run(async () => {
-      if (this._isUpstreamPaused === true) {
-        return;
-      }
-      this._isUpstreamPaused = true;
-      this.emit(TrackEvent.UpstreamPaused, this);
-      const emptyTrack = getEmptyAudioStreamTrack();
-      const pausePromises = Array.from(this.peers.values()).map(
-        (peer: RemoteParticipant) => peer.streamAudioTrack(emptyTrack)
-      );
-      await Promise.all(pausePromises);
-    });
-  }
-
-  async resumeUpstream() {
-    this.muteQueue.run(async () => {
-      if (this._isUpstreamPaused === false) {
-        return;
-      }
-      this._isUpstreamPaused = false;
-      this.emit(TrackEvent.UpstreamResumed, this);
-      const pausePromises = Array.from(this.peers.values()).map(
-        (peer: RemoteParticipant) =>
-          peer.streamAudioTrack(this._mediaStreamTrack)
-      );
-      await Promise.all(pausePromises);
-    });
-  }
-
+  /**
+   * attaches track to an existing HTMLAudioElement or HTMLVideoElement
+   */
+  attach(element: HTMLMediaElement): HTMLMediaElement;
   attach(element?: HTMLMediaElement): HTMLMediaElement {
     let elementType = 'audio';
     if (this.kind === Track.Kind.Video) {
@@ -205,7 +105,7 @@ export class LocalTrack extends (EventEmitter as new () => TypedEventEmitter<Tra
         }
       }
       if (!element) {
-        element = <HTMLMediaElement>document.createElement(elementType);
+        element = document.createElement(elementType) as HTMLMediaElement;
       }
     }
 
@@ -237,6 +137,13 @@ export class LocalTrack extends (EventEmitter as new () => TypedEventEmitter<Tra
   /**
    * Detaches from all attached elements
    */
+  detach(): HTMLMediaElement[];
+
+  /**
+   * Detach from a single element
+   * @param element
+   */
+  detach(element: HTMLMediaElement): HTMLMediaElement;
   detach(element?: HTMLMediaElement): HTMLMediaElement | HTMLMediaElement[] {
     // detach from a single element
     if (element) {
@@ -265,10 +172,12 @@ export class LocalTrack extends (EventEmitter as new () => TypedEventEmitter<Tra
 
   stop() {
     this._mediaStreamTrack.stop();
-    document.removeEventListener(
-      'visibilitychange',
-      this.appVisibilityChangedListener
-    );
+    if (isWeb()) {
+      document.removeEventListener(
+        'visibilitychange',
+        this.appVisibilityChangedListener
+      );
+    }
   }
 
   protected enable() {
@@ -342,6 +251,27 @@ export function attachToElement(
     mediaStream.addTrack(track);
   }
 
+  // avoid flicker
+  if (element.srcObject !== mediaStream) {
+    element.srcObject = mediaStream;
+    if ((isSafari() || isFireFox()) && element instanceof HTMLVideoElement) {
+      // Firefox also has a timing issue where video doesn't actually get attached unless
+      // performed out-of-band
+      // Safari 15 has a bug where in certain layouts, video element renders
+      // black until the page is resized or other changes take place.
+      // Resetting the src triggers it to render.
+      // https://developer.apple.com/forums/thread/690523
+      setTimeout(() => {
+        element.srcObject = mediaStream;
+        // Safari 15 sometimes fails to start a video
+        // when the window is backgrounded before the first frame is drawn
+        // manually calling play here seems to fix that
+        element.play().catch(() => {
+          /* do nothing */
+        });
+      }, 0);
+    }
+  }
   element.autoplay = true;
   if (element instanceof HTMLVideoElement) {
     element.playsInline = true;

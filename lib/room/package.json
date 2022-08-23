@@ -1,0 +1,49 @@
+{
+  "name": "@holium/realm-room",
+  "version": "0.1.0",
+  "author": "trent@holium.com",
+  "license": "MIT",
+  "description": "A lib for that manages media streams via RTCPeerConnections.",
+  "main": "dist/holium-realm-room.cjs.js",
+  "module": "dist/holium-realm-room.esm.js",
+  "typings": "dist/holium-realm-room.cjs.d.ts",
+  "scripts": {
+    "tsc": "tsc",
+    "prepare": "yarn build",
+    "prebuild:prod": "yarn clean",
+    "dev": "preconstruct dev",
+    "build": "preconstruct build",
+    "build:prod": "preconstruct build"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "preconstruct": {
+    "globals": {
+      "mobx": "mobx"
+    }
+  },
+  "peerDependencies": {
+    "mobx": "^6.5.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.18.6",
+    "@preconstruct/cli": "^2.2.1",
+    "ts-node": "^10.9.1",
+    "tsc": "^2.0.4"
+  },
+  "dependencies": {
+    "async-await-queue": "^1.2.1",
+    "babel-loader": "^8.2.5",
+    "protobufjs": "^7.0.0",
+    "ts-debounce": "^4.0.0",
+    "typescript": "^4.7.4",
+    "urbit-ob": "^5.0.1"
+  }
+}

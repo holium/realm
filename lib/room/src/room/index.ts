@@ -1,8 +1,3 @@
-import { Participant } from './../participant/index';
-import { toJS } from 'mobx';
-import { RoomsModelType } from 'os/services/tray/rooms.model';
-import { action, makeObservable, observable, runInAction } from 'mobx';
-
 /**
  * Room
  *
@@ -10,13 +5,16 @@ import { action, makeObservable, observable, runInAction } from 'mobx';
  * participants can stream various track types to the rooms participants.
  */
 import { EventEmitter } from 'events';
-import { SlipType } from 'os/services/slip.service';
-import { Patp } from 'os/types';
 import type TypedEmitter from 'typed-emitter';
-import { LocalParticipant } from '../participant/local';
-import { RemoteParticipant } from '../participant/remote';
+import { action, makeObservable, observable } from 'mobx';
+import { LocalParticipant } from '../participant/LocalParticipant';
+import {
+  DataChannel,
+  RemoteParticipant,
+} from '../participant/RemoteParticipant';
 import { RoomState } from './types';
 import { ParticipantEvent } from '../participant/events';
+import { Patp, RoomsModelType, SlipType } from '../types';
 
 const peerConnectionConfig = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
@@ -27,10 +25,14 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   our!: LocalParticipant;
   participants: Map<Patp, RemoteParticipant>;
   roomConfig!: RoomsModelType;
+  sendSlip: (to: Patp[], data: any) => void;
 
-  constructor() {
+  constructor(sendSlip: (to: Patp[], data: any) => void) {
     super();
     this.participants = new Map();
+    this.sendSlip = sendSlip;
+
+    console.log('this.sendSlip', this.sendSlip);
     // We need to make this observable so the React component can get updates
     makeObservable(this, {
       state: observable,
@@ -48,13 +50,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     this.roomConfig = room;
     this.our = new LocalParticipant(our, this);
     this.our.connect();
-    window.electron.os.slip.onSlip((_event: any, slip: SlipType) => {
-      // console.log('got slapped', slip.from, slip.data);
-      if (this.state !== RoomState.Disconnected) {
-        const peer = this.participants.get(slip.from);
-        peer?.handleSlip(slip.data, this.our.patpId);
-      }
-    });
 
     room.present.forEach((peer: Patp) => {
       if (peer === this.our.patp) return;
@@ -62,6 +57,15 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     });
 
     this.emit(RoomState.Started);
+  }
+
+  onSlip(slip: SlipType) {
+    console.log('on slip');
+    // console.log('got slapped', slip.from, slip.data);
+    if (this.state !== RoomState.Disconnected) {
+      const peer = this.participants.get(slip.from);
+      peer?.handleSlip(slip.data, this.our.patpId);
+    }
   }
 
   newParticipant(peer: Patp) {
@@ -76,6 +80,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     // Call or listen
     peer.emit(ParticipantEvent.Connecting);
     const isLower = this.our.patpId < peer.patpId;
+    console.log('isLower', isLower);
     const mount = document.getElementById('audio-root')!;
     let peerAudioEl: any = document.getElementById(`voice-stream-${peer.patp}`);
     if (!peerAudioEl) {
@@ -86,7 +91,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     if (isLower) {
       console.log('we are ready');
       peer.sendAwaitingOffer();
-      // this.our.sendSignal(peer.patp, 'awaiting-offer', '');
     }
   }
 
@@ -99,7 +103,9 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     peer.on(ParticipantEvent.Connected, () => {
       console.log('WE ARE CONNECTED -> start streaming to them');
       // peer.publish
-      this.our.streamTracks(peer);
+      // peer.createDataChannel(DataChannel.Info);
+      console.log(peer);
+      // this.our.streamTracks(peer);
     });
     peer.on(ParticipantEvent.Disconnected, () => {
       console.log('try to reconnect');

@@ -1,26 +1,34 @@
+import { debounce } from 'ts-debounce';
 import { ParticipantEvent, PeerConnectionState } from './events';
-import { Patp } from 'os/types';
-import { MutableRefObject } from 'react';
-import { ConnectionState, Participant } from '.';
+import { Participant } from './Participant';
 import { DataPacket } from '../helpers/data-packet';
-import { RoomsModelType } from 'os/services/tray/rooms.model';
-import { LocalTrack } from '../track';
 import { Room } from '../room';
+import { Patp } from '../types';
+import { LocalTrack } from '../track/LocalTrack';
+import LocalAudioTrack from '../track/LocalAudioTrack';
+import RemoteTrackPublication from '../track/RemoteTrackPublication';
+import { Track } from '../track/Track';
+import RemoteAudioTrack from '../track/RemoteAudioTrack';
 
 // const lossyDataChannel = '_lossy';
 // const dataChannel = '_reliable';
-
+export enum DataChannel {
+  Info = 1,
+  Cursor = 2,
+}
 const DATA_CHANNEL_LABEL = '_peerdata';
 
 export class RemoteParticipant extends Participant {
   private peerConn: RTCPeerConnection;
   private audioRef!: HTMLAudioElement;
-  private audioStream?: MediaStream;
   private dataChannel!: RTCDataChannel;
-  private dataChannelSub?: RTCDataChannel;
+  audioTracks: Map<string, RemoteTrackPublication>;
+  videoTracks: Map<string, RemoteTrackPublication>;
+  tracks: Map<string, RemoteTrackPublication>;
+  config: RTCConfiguration;
   private timer?: any;
-  publish: any;
   private sender?: RTCRtpSender;
+  publish: any;
 
   get connectionState(): RTCPeerConnectionState {
     return this.peerConn.connectionState;
@@ -30,6 +38,13 @@ export class RemoteParticipant extends Participant {
     super(patp, room);
     this.peerConn = new RTCPeerConnection();
     this.peerConn.setConfiguration(config);
+    // this.dataChannel = this.peerConn.createDataChannel(DATA_CHANNEL_LABEL);
+    this.config = config;
+
+    this.tracks = new Map();
+    this.audioTracks = new Map();
+    this.videoTracks = new Map();
+
     this.sendAwaitingOffer = this.sendAwaitingOffer.bind(this);
 
     // Bind all listeners to this
@@ -57,8 +72,12 @@ export class RemoteParticipant extends Participant {
     // this.waitInterval = setInterval(this.sendAwaitingOffer, 5000);
   };
 
-  async streamAudioTrack(track: MediaStreamTrack) {
-    this.sender = this.peerConn.addTrack(track);
+  async streamAudioTrack(track: LocalAudioTrack) {
+    const audioTrack = track as LocalAudioTrack;
+    this.sender = this.peerConn.addTrack(
+      audioTrack.mediaStreamTrack,
+      audioTrack.mediaStream!
+    );
   }
 
   async replaceAudioTrack(track: MediaStreamTrack) {
@@ -75,6 +94,7 @@ export class RemoteParticipant extends Participant {
    */
   async registerAudio(audioRef: HTMLAudioElement) {
     this.audioRef = audioRef;
+    this.audioRef.setAttribute('id', `voice-${this.patp}`);
 
     // Clear any previous listeners
     this.peerConn.ontrack = null;
@@ -93,8 +113,12 @@ export class RemoteParticipant extends Participant {
     this.peerConn.onicegatheringstatechange = this.onGathering;
     this.peerConn.onnegotiationneeded = this.onNegotiation;
     this.peerConn.ondatachannel = (event: RTCDataChannelEvent) => {
-      console.log(event);
+      console.log('data channel', event);
     };
+    this.peerConn.onsignalingstatechange = (ev: Event) => {
+      console.log('signal', ev);
+    };
+    // this.peerConn.sctp
   }
 
   /**
@@ -108,8 +132,7 @@ export class RemoteParticipant extends Participant {
    */
   async handleSlip(slipData: any, ourPatpId: number) {
     const isLower = ourPatpId < this.patpId;
-    console.log('slip', isLower, this.peerConn.connectionState);
-    if (this.connectionState === PeerConnectionState.Connected) return;
+    if (this.peerConn.connectionState === PeerConnectionState.Connected) return;
     if (slipData['awaiting-offer'] !== undefined) {
       // Higher patp sends this offer, lower returns
       if (isLower) return;
@@ -133,6 +156,7 @@ export class RemoteParticipant extends Participant {
       });
     } else if (slipData['offer']) {
       clearTimeout(this.timer);
+      this.timer = undefined;
       // isHigher skips this logic
       if (!isLower) return;
       // isLower gets offer they were awaiting
@@ -160,12 +184,76 @@ export class RemoteParticipant extends Participant {
   // -----------------------------------------------------------------------------------
   async onTrack(event: RTCTrackEvent) {
     const [remoteStream] = event.streams;
-    this.audioRef.setAttribute('id', `voice-stream-${this.patp}`);
-    this.audioRef.setAttribute('autoPlay', '');
-    this.audioRef.srcObject = remoteStream;
-    this.toggleMuted();
+    remoteStream.getTracks().forEach((track: MediaStreamTrack) => {
+      const remotePub = new RemoteTrackPublication(
+        Track.Kind.Audio,
+        remoteStream.id,
+        `${this.patp}-audio`
+      );
+      remotePub.setTrack(
+        new RemoteAudioTrack(track, remotePub.trackSid, event.receiver)
+      );
+      this.tracks.set(remotePub.trackName, remotePub);
+      this.audioTracks.set(remotePub.trackName, remotePub);
+      remotePub.track?.attach(this.audioRef);
+      remotePub.setSubscribed(true);
+      remotePub.setEnabled(true);
+    });
+
+    this.audioTracks.forEach((remotePub: RemoteTrackPublication) => {
+      remotePub.track?.on('muted', (track: RemoteAudioTrack) => {
+        console.log(this.patp, `${track.sid} has muted`);
+      });
+      remotePub.track?.on('unmuted', (track: RemoteAudioTrack) => {
+        console.log(this.patp, `${track.sid} has unmuted`);
+      });
+    });
+
+    // this.toggleMuted();
     // this.audioStream = remoteStream;
     this.emit(ParticipantEvent.AudioStreamAdded, remoteStream);
+  }
+
+  updateOurInfo(info: { patp: Patp; muted: boolean; cursor: boolean }) {
+    console.log(this.dataChannel.readyState);
+    // this.peerConn.
+    if (this.dataChannel.readyState === 'open')
+      this.dataChannel.send(JSON.stringify(info));
+  }
+
+  protected addTrackPublication(publication: RemoteTrackPublication) {
+    super.addTrackPublication(publication);
+
+    // // register action events
+    // publication.on(
+    //   TrackEvent.UpdateSettings,
+    //   (settings: UpdateTrackSettings) => {
+    //     log.debug('send update settings', settings);
+    //     this.signalClient.sendUpdateTrackSettings(settings);
+    //   }
+    // );
+    // publication.on(TrackEvent.UpdateSubscription, (sub: UpdateSubscription) => {
+    //   sub.participantTracks.forEach((pt) => {
+    //     pt.participantSid = this.sid;
+    //   });
+    //   this.signalClient.sendUpdateSubscription(sub);
+    // });
+    // publication.on(
+    //   TrackEvent.SubscriptionPermissionChanged,
+    //   (status: TrackPublication.SubscriptionStatus) => {
+    //     this.emit(
+    //       ParticipantEvent.TrackSubscriptionPermissionChanged,
+    //       publication,
+    //       status
+    //     );
+    //   }
+    // );
+    // publication.on(TrackEvent.Subscribed, (track: RemoteTrack) => {
+    //   this.emit(ParticipantEvent.TrackSubscribed, track, publication);
+    // });
+    // publication.on(TrackEvent.Unsubscribed, (previousTrack: RemoteTrack) => {
+    //   this.emit(ParticipantEvent.TrackUnsubscribed, previousTrack, publication);
+    // });
   }
 
   onConnectionChange(event: Event) {
@@ -189,7 +277,7 @@ export class RemoteParticipant extends Participant {
     ) {
       console.log('peers Disconnected!');
       this.emit(PeerConnectionState.Disconnected);
-      this.audioStream = undefined;
+      this.audioRef.parentElement?.removeChild(this.audioRef);
     }
     if (
       // @ts-ignore
@@ -197,7 +285,16 @@ export class RemoteParticipant extends Participant {
     ) {
       console.log('peer connect failed!');
       this.emit(PeerConnectionState.Failed);
-      this.audioStream = undefined;
+      this.audioRef.parentElement?.removeChild(this.audioRef);
+    }
+    if (
+      // @ts-ignore
+      event.currentTarget.connectionState === PeerConnectionState.Closed
+    ) {
+      console.log('peer connect closed!');
+      this.reset();
+      this.emit(PeerConnectionState.Closed);
+      this.audioRef.parentElement?.removeChild(this.audioRef);
     }
   }
 
@@ -240,24 +337,32 @@ export class RemoteParticipant extends Participant {
    *
    * @param audioRef
    */
-  private createDataChannel() {
-    this.peerConn.createDataChannel('realm:remote-cursor');
-
+  createDataChannel() {
     // clear old data channel callbacks if recreate
     if (this.dataChannel) {
       this.dataChannel.onmessage = null;
       this.dataChannel.onerror = null;
+      this.dataChannel.onopen = null;
     }
 
+    try {
+      this.dataChannel = this.peerConn.createDataChannel(DATA_CHANNEL_LABEL);
+    } catch (e) {
+      console.error(e);
+    }
+    // this.peerConn.nego
     // create data channels
-    this.dataChannel = this.peerConn.createDataChannel(DATA_CHANNEL_LABEL, {
-      ordered: true,
-    });
+    console.log('cerating data channel', this.dataChannel);
+    this.dataChannel.onopen = (ev: Event) => {
+      console.log('data channel openeed');
+      this.dataChannel.send('test');
+    };
     this.dataChannel.onmessage = this.handleDataMessage;
     this.dataChannel.onerror = this.handleDataError;
   }
 
   private handleDataMessage = async (message: MessageEvent) => {
+    console.log(message);
     // decode
     let buffer: ArrayBuffer | undefined;
     if (message.data instanceof ArrayBuffer) {
@@ -268,10 +373,10 @@ export class RemoteParticipant extends Participant {
       console.error('unsupported data type', message.data);
       return;
     }
-    const dp = DataPacket.decode(new Uint8Array(buffer));
-    if (dp.value?.$case === 'cursor') {
-      this.emit(ParticipantEvent.CursorUpdate, dp.value?.data);
-    }
+    // const dp = DataPacket.decode(new Uint8Array(buffer));
+    // if (dp.value?.$case === 'cursor') {
+    //   this.emit(ParticipantEvent.CursorUpdate, dp.value?.data);
+    // }
   };
 
   private handleDataError = (event: Event) => {
@@ -287,4 +392,9 @@ export class RemoteParticipant extends Participant {
       console.error(`Unknown DataChannel Error on ${channel.label}`, event);
     }
   };
+
+  reset() {
+    this.peerConn = new RTCPeerConnection();
+    this.peerConn.setConfiguration(this.config);
+  }
 }

@@ -12,6 +12,13 @@ export enum ParticipantEvent {
   AudioStreamRemoved = 'audioStreamRemoved',
   MuteToggled = 'muteToggled',
   CursorToggled = 'cursorToggled',
+  TrackMuted = 'trackMuted',
+  TrackUnmuted = 'trackUnmuted',
+  LocalTrackPublished = 'localTrackPublished',
+  LocalTrackUnpublished = 'localTrackUnpublished',
+  ParticipantMetadataChanged = 'participantMetadataChanged',
+  IsSpeakingChanged = 'isSpeakingChanged',
+  ConnectionQualityChanged = 'connectionQualityChanged',
 
   // Connected = 'connected',
   // Disconnected = 'disconnected',
