@@ -93,6 +93,20 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 app={app}
                 selected={selected}
                 open={open}
+                onAppClick={(evt: any) => {
+                  const selectedApp = app;
+                  if (desktop.isOpenWindow(selectedApp.id)) {
+                    DesktopActions.setActive(
+                      spaces.selected!.path,
+                      selectedApp.id
+                    );
+                  } else {
+                    DesktopActions.openAppWindow(
+                      spaces.selected!.path,
+                      toJS(selectedApp)
+                    );
+                  }
+                }}
                 contextMenu={[
                   {
                     label: 'Unpin',

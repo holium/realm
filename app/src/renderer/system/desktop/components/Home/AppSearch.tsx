@@ -198,37 +198,7 @@ const renderDevApps = (apps: Array<any>) => {
   }
   return apps?.map((app, index) => (
     <div key={index}>
-      <Flex flexDirection="row" alignItems="center" gap={8}>
-        <TileStyle
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          minWidth={sizes.sm}
-          style={{
-            borderRadius: radius.sm,
-            overflow: 'hidden',
-          }}
-          height={sizes.sm}
-          width={sizes.sm}
-          backgroundColor={app.color || '#F2F3EF'}
-        >
-          {app.image && (
-            <img
-              style={{ pointerEvents: 'none' }}
-              draggable="false"
-              height={sizes.sm}
-              width={sizes.sm}
-              key={app.title}
-              src={app.image}
-            />
-          )}
-          {app.icon && <Icons name={app.icon} height={16} width={16} />}
-        </TileStyle>
-        <Flex flexDirection="column">
-          <Text fontWeight={500}>{app.title}</Text>
-          <Text color={'#888888'}>{app.info}</Text>
-        </Flex>
-      </Flex>
+      <AppRow caption={app.title} app={app} />
     </div>
   ));
 };
@@ -296,7 +266,6 @@ const AppSearchApp = (props) => {
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
-  console.log('currentBazaar => %o', currentBazaar);
   useEffect(() => {
     if (searchMode === 'ship-search') {
       SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {

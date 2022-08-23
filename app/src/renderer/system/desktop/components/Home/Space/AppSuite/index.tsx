@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { Flex, Text, Box } from 'renderer/components';
+import { Flex, Text, Button } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { SuiteApp } from './App';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -77,12 +77,23 @@ function Content({ children, ...props }) {
   );
 }
 
-const onAppsAction = (path: string, appId: string, tag: any) => {
+const onAppsAction = (path: string, appId: string, tag: any, rank: number) => {
   console.log('onAppsAction => %o', { path, appId, tag });
   SpacesActions.addAppTag(path, appId, tag).then((result) =>
     console.log('onAppsAction => %o', result)
   );
 };
+
+const actionRenderer = (space: string, app: any, rank: number) => (
+  <>
+    <Button
+      borderRadius={6}
+      onClick={(e) => onAppsAction(space, app.detail?.id, 'suite', rank)}
+    >
+      Add to Suite
+    </Button>
+  </>
+);
 
 // Exports
 export const Popover = PopoverPrimitive.Root;
@@ -148,22 +159,36 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
           <div style={{ width: '100%', height: '1px' }}></div>
         </PopoverAnchor>
         <PopoverContent sideOffset={-60} style={{ width: '50em' }}>
-          <Flex flexDirection={'column'} gap={10}>
-            <Text variant="h5" fontWeight={500}>
+          <Flex flexDirection={'column'}>
+            <Text variant="h6" fontWeight={500} color={'#ababab'}>
               Installed Apps
             </Text>
-            {apps.length === 0 && <Text color={'#ababab'}>No apps found</Text>}
-            {apps.map((item, index) => (
-              <div key={index}>
-                <AppRow
-                  caption={item.desk}
-                  app={item.detail?.docket}
-                  onClick={(e, action, app) =>
-                    onAppsAction(space.path, app.href?.glob?.base, 'suite')
-                  }
-                />
-              </div>
-            ))}
+            <div style={{ marginTop: '2px', marginBottom: '2px' }}>
+              <hr
+                style={{ backgroundColor: '#dadada', height: '1px', border: 0 }}
+              />
+            </div>
+            {(apps.length === 0 && (
+              <Text color={'#ababab'}>No apps found</Text>
+            )) || (
+              <Flex flexDirection={'column'} gap={10}>
+                {apps.map((item, index) => (
+                  <div key={index}>
+                    <AppRow
+                      caption={item.desk}
+                      app={item.detail!}
+                      actionRenderer={() =>
+                        actionRenderer(
+                          `/${space.path.split('/')[1]}/our`,
+                          item,
+                          index
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </Flex>
+            )}
           </Flex>
         </PopoverContent>
       </Popover>

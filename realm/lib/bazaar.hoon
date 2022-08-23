@@ -86,6 +86,15 @@
           [%tag s+(scot %tas tag.rct)]
           :: [%rank ~]
       ==
+    ::
+        %remove-tag
+      :-  %remove-tag
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%app-id s+app-id.rct]
+          [%tag s+(scot %tas tag.rct)]
+          :: [%rank ~]
+      ==
     ==
   ::
   ++  view :: encodes for on-peek

@@ -13,28 +13,27 @@ import _ from 'lodash';
 const pendingRequests: { [key: string]: (data?: any) => any } = {};
 
 export const BazaarApi = {
-  getApps: async (
-    conduit: Urbit,
-    path: SpacePath,
-    tag: string | undefined = undefined
-  ) => {
+  getApps: async (conduit: Urbit, path: SpacePath, tag: string = 'all') => {
     //  [host]/~/scry/bazaar/~zod/my-space/apps.json
     const response = await conduit.scry({
       app: 'bazaar',
-      path: `${path}/apps/${tag || 'all'}`, // the spaces scry is at the root of the path
+      path: `${path}/apps/${tag}`, // the spaces scry is at the root of the path
     });
+    console.log('getApps before => %o', response.apps);
     const appMap = response.apps || {};
     Object.keys(appMap).forEach((appKey: string) => {
-      if (appMap[appKey].docket) {
-        const appColor = appMap[appKey].docket.color;
-        appMap[appKey].docket.color = appColor && cleanNounColor(appColor);
+      if (appMap[appKey].color) {
+        const appColor = appMap[appKey].color;
+        appMap[appKey].color = appColor && cleanNounColor(appColor);
       }
     });
-    const sorted = Object.entries(appMap).sort(
-      (a, b) =>
-        _.toInteger(a[1].default?.rank) - _.toInteger(b[1].default?.rank)
-    );
-    return Object.fromEntries(sorted);
+    // const sorted = Object.entries(appMap).sort(
+    //   (a, b) =>
+    //     _.toInteger(a[1].default?.rank) - _.toInteger(b[1].default?.rank)
+    // );
+    // return Object.fromEntries(sorted);
+    console.log('getApp after => %o', appMap);
+    return appMap;
   },
   getTreaties: async (conduit: Urbit, patp: string) => {
     //  [host]/~/scry/treaty/treaties/~bus.json
@@ -111,12 +110,12 @@ export const BazaarApi = {
           path: pathObj,
           'app-id': appId,
           tag: tag,
-          rank: null,
         },
       },
     });
     return new Promise((resolve) => {
-      pendingRequests['bazaar-action-add-remove-tag'] = (data: any) => {
+      pendingRequests['bazaar-action-remove-app-tag'] = (data: any) => {
+        console.log('resolving bazaar-action-remove-app-tag');
         resolve(data);
       };
     });
@@ -156,22 +155,28 @@ const handleBazaarReactions = (
         // @ts-ignore
         state
           .getBazaar(detail['space-path'])
-          .addAppTag(detail.appId, detail.tag);
+          .addAppTag(detail['app-id'], detail.tag);
         if (pendingRequests['bazaar-action-add-app-tag']) {
           pendingRequests['bazaar-action-add-app-tag'](detail);
           pendingRequests['bazaar-action-add-app-tag'] = () => {};
         }
       }
       break;
-    case 'tag-removed':
+    case 'remove-tag':
       {
-        const detail = data['tag-removed'];
-        console.log(detail);
+        const detail = data['remove-tag'];
+        console.log('removing app tag => %o', {
+          path: detail['space-path'],
+          appId: detail['app-id'],
+          tag: detail.tag,
+        });
         // @ts-ignore
-        state.getBazaar(detail.path).removeAppTag(detail.appId, detail.tag);
-        if (pendingRequests['bazaar-action-add-remove-tag']) {
-          pendingRequests['bazaar-action-add-remove-tag'](detail);
-          pendingRequests['bazaar-action-add-remove-tag'] = () => {};
+        state
+          .getBazaar(detail['space-path'])
+          .removeAppTag(detail['app-id'], detail.tag);
+        if (pendingRequests['bazaar-action-remove-app-tag']) {
+          pendingRequests['bazaar-action-remove-app-tag'](detail);
+          pendingRequests['bazaar-action-remove-app-tag'] = () => {};
         }
       }
       break;

@@ -234,6 +234,7 @@
     ^-  (quip card _state)
     ::  installed tags are managed by bazaar agent
     ?>  !?=(%installed tag)
+    ~&  >>  "{<dap.bowl>}: {<[path app-id tag rank]>}"
     =/  apps  (~(got by space-apps.state) path)
     =/  app  (~(got by apps) app-id)
     =.  tags.app  (~(put in tags.app) tag)
@@ -253,7 +254,9 @@
     =/  app  (~(got by apps) app-id)
     =.  tags.app  (~(del in tags.app) tag)
     =/  apps  (~(put by apps) app-id app)
-    `state(space-apps (~(put by space-apps.state) path apps))
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    (bazaar:send-reaction [%remove-tag path app-id tag] [/updates /our ~])
+    :: `state(space-apps (~(put by space-apps.state) path apps))
   --
 ::
 ++  apps
@@ -301,6 +304,7 @@
     %initial        (on-initial +.rct)
     %space-apps     (on-space-apps +.rct)
     %add-tag        (on-add-tag +.rct)
+    %remove-tag     (on-rem-tag +.rct)
   ==
   ::
   ++  on-initial
@@ -314,6 +318,11 @@
     `state
   ::
   ++  on-add-tag
+    |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-rem-tag
     |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
     ^-  (quip card _state)
     `state
