@@ -15,6 +15,7 @@ const pendingRequests: { [key: string]: (data?: any) => any } = {};
 export const BazaarApi = {
   getApps: async (conduit: Urbit, path: SpacePath, tag: string = 'all') => {
     //  [host]/~/scry/bazaar/~zod/my-space/apps.json
+    console.log(`${path}/apps/${tag} => %`);
     const response = await conduit.scry({
       app: 'bazaar',
       path: `${path}/apps/${tag}`, // the spaces scry is at the root of the path
@@ -120,6 +121,58 @@ export const BazaarApi = {
       };
     });
   },
+  addToSuite: async (
+    conduit: Urbit,
+    path: SpacePath,
+    appId: string,
+    rank: number
+  ) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    await conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'suite-add': {
+          path: pathObj,
+          'app-id': appId,
+          rank: rank,
+        },
+      },
+    });
+    return new Promise((resolve) => {
+      pendingRequests['bazaar-action-suite-add'] = (data: any) => {
+        console.log('resolving add-to-suite request');
+        resolve(data);
+      };
+    });
+  },
+  removeFromSuite: async (conduit: Urbit, path: SpacePath, appId: string) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    await conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'suite-remove': {
+          path: pathObj,
+          'app-id': appId,
+        },
+      },
+    });
+    return new Promise((resolve) => {
+      pendingRequests['bazaar-action-suite-remove'] = (data: any) => {
+        console.log('resolving suite-remove request');
+        resolve(data);
+      };
+    });
+  },
   watchUpdates: (conduit: Urbit, state: BazaarStoreType): void => {
     conduit.subscribe({
       app: 'bazaar',
@@ -147,6 +200,13 @@ const handleBazaarReactions = (
     case 'initial':
       state.initial(data['initial']);
       // state.initialReaction(data['initial']);
+      break;
+    case 'space-added':
+      {
+        let detail = data['add-tag'];
+        console.log(detail);
+        state.createBazaar(detail['path']);
+      }
       break;
     case 'add-tag':
       {
@@ -177,6 +237,39 @@ const handleBazaarReactions = (
         if (pendingRequests['bazaar-action-remove-app-tag']) {
           pendingRequests['bazaar-action-remove-app-tag'](detail);
           pendingRequests['bazaar-action-remove-app-tag'] = () => {};
+        }
+      }
+      break;
+    case 'suite-add':
+      {
+        const detail = data['suite-add'];
+        console.log('suite-add => %o', {
+          path: detail['space-path'],
+          appId: detail['app-id'],
+          rank: detail.rank,
+        });
+        // @ts-ignore
+        state
+          .getBazaar(detail['space-path'])
+          .addToSuite(detail['app-id'], detail.rank);
+        if (pendingRequests['bazaar-action-suite-add']) {
+          pendingRequests['bazaar-action-suite-add'](detail);
+          pendingRequests['bazaar-action-suite-add'] = () => {};
+        }
+      }
+      break;
+    case 'suite-remove':
+      {
+        const detail = data['suite-remove'];
+        console.log('suite-remove => %o', {
+          path: detail['space-path'],
+          appId: detail['app-id'],
+        });
+        // @ts-ignore
+        state.getBazaar(detail['space-path']).removeFromSuite(detail['app-id']);
+        if (pendingRequests['bazaar-action-suite-remove']) {
+          pendingRequests['bazaar-action-suite-remove'](detail);
+          pendingRequests['bazaar-action-suite-remove'] = () => {};
         }
       }
       break;

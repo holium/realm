@@ -3,6 +3,7 @@ import { Urbit } from './../urbit/api';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
+import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 const pendingRequests: { [key: string]: (data?: any) => any } = {};
 
@@ -122,7 +123,8 @@ export const SpacesApi = {
   watchUpdates: (
     conduit: Urbit,
     state: SpacesStoreType,
-    membersState: MembershipType
+    membersState: MembershipType,
+    bazaarState: BazaarStoreType
   ): void => {
     conduit.subscribe({
       app: 'spaces',
@@ -133,6 +135,7 @@ export const SpacesApi = {
             data['spaces-reaction'],
             state,
             membersState,
+            bazaarState,
             id
           );
         }
@@ -147,6 +150,7 @@ const handleSpacesReactions = (
   data: any,
   state: SpacesStoreType,
   membersState: MembershipType,
+  bazaarState: BazaarStoreType,
   id: string
 ) => {
   const reaction: string = Object.keys(data)[0];
@@ -157,6 +161,7 @@ const handleSpacesReactions = (
     case 'add':
       const newSpace = state.addSpace(data['add']);
       membersState.addMemberMap(newSpace, data['add'].members);
+      bazaarState.addBazaar(newSpace);
       if (pendingRequests['spaces-action-add']) {
         pendingRequests['spaces-action-add'](newSpace);
         pendingRequests['spaces-action-add'] = () => {};

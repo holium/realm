@@ -79,7 +79,7 @@ function Content({ children, ...props }) {
 
 const onAppsAction = (path: string, appId: string, tag: any, rank: number) => {
   console.log('onAppsAction => %o', { path, appId, tag });
-  SpacesActions.addAppTag(path, appId, tag).then((result) =>
+  SpacesActions.addToSuite(path, appId, rank).then((result) =>
     console.log('onAppsAction => %o', result)
   );
 };
@@ -102,22 +102,39 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
-  const { patp, space, suite } = props;
+  const { patp, space } = props;
   const [searchMode, setSearchMode] = useState('none');
+  const [suite, setSuite] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
-
-  const emptyArr = [...Array(5 - suite.length).keys()];
+  const [suiteIndex, setSuiteIndex] = useState(-1);
+  const [emptyArr, setEmptyArr] = useState<any[]>([]);
 
   console.log(suite, emptyArr);
 
   useEffect(() => {
-    SpacesActions.getApps(`/${patp}/our`).then((items: any) => {
+    SpacesActions.getApps(`/${patp}/our`, 'all').then((items: any) => {
       console.log(items);
       let apps: any[] = Object.entries(items).map(([key, value], index) => ({
         desk: key,
         detail: value,
       }));
       setApps(apps || []);
+    });
+    SpacesActions.getApps(space.path, 'suite').then((items: any) => {
+      console.log(items);
+      let apps: any[] = Object.entries(items).map(([key, value], index) => ({
+        desk: key,
+        detail: value,
+      }));
+      // @ts-ignore
+      const suite = Array(5).fill(undefined);
+      console.log('suite => %o', suite);
+      apps.forEach((app, index) =>
+        suite.splice(app.detail?.ranks?.suite, 1, app.detail!)
+      );
+      console.log(suite);
+      setSuite(suite || []);
+      setEmptyArr([...Array(5 - suite.length).keys()]);
     });
   }, [space.path]);
 
@@ -135,15 +152,29 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
         position="relative"
         justifyContent="space-between"
       >
-        {suite.map((app: number, index: number) => (
-          <SuiteApp key={index} space={space} app={app} />
-        ))}
+        {suite.map(
+          (app: any, index: number) =>
+            (app && <SuiteApp key={index} space={space} app={app} />) || (
+              <SuiteApp
+                key={index}
+                space={space}
+                app={undefined}
+                onClick={(e) => {
+                  setSearchMode('app-search');
+                  setSuiteIndex(index);
+                }}
+              />
+            )
+        )}
         {emptyArr.map((el: number, index: number) => (
           <SuiteApp
             key={index + suite.length}
             space={space}
             app={undefined}
-            onClick={(e) => setSearchMode('app-search')}
+            onClick={(e) => {
+              setSearchMode('app-search');
+              setSuiteIndex(index);
+            }}
           />
         ))}
       </Flex>
@@ -178,11 +209,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
                       caption={item.desk}
                       app={item.detail!}
                       actionRenderer={() =>
-                        actionRenderer(
-                          `/${space.path.split('/')[1]}/our`,
-                          item,
-                          index
-                        )
+                        actionRenderer(space.path, item, suiteIndex)
                       }
                     />
                   </div>

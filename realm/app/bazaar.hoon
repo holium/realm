@@ -117,24 +117,28 @@
         ::
         %all
         =/  apps  (view:apps:core [ship space-pth] ~)
-        ?~  apps  ``json+!>(~)
+        ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
         %pinned
         =/  apps  (view:apps:core [ship space-pth] (some %pinned))
-        ?~  apps  ``json+!>(~)
+        ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
         %recommended
-        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %recommended))])
+        =/  apps  (view:apps:core [ship space-pth] (some %recommended))
+        ?~  apps  ``json+!>([%a ~]) :: empty array
+        ``bazaar-view+!>([%apps u.apps])
         ::
         %suite
         =/  apps  (view:apps:core [ship space-pth] (some %suite))
-        ?~  apps  ``json+!>(~)
+        ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
         %installed
-        ``bazaar-view+!>([%apps (view:apps:core [ship space-pth] (some %installed))])
+        =/  apps  (view:apps:core [ship space-pth] (some %installed))
+        ?~  apps  ``json+!>([%a ~]) :: empty array
+        ``bazaar-view+!>([%apps u.apps])
       ==
   ==
 ::
@@ -227,6 +231,8 @@
     ?-  -.action
       %add-tag           (add-tag +.action)
       %remove-tag        (rem-tag +.action)
+      %suite-add         (suite-add +.action)
+      %suite-remove      (suite-remove +.action)
     ==
   ::
   ++  add-tag
@@ -234,7 +240,6 @@
     ^-  (quip card _state)
     ::  installed tags are managed by bazaar agent
     ?>  !?=(%installed tag)
-    ~&  >>  "{<dap.bowl>}: {<[path app-id tag rank]>}"
     =/  apps  (~(got by space-apps.state) path)
     =/  app  (~(got by apps) app-id)
     =.  tags.app  (~(put in tags.app) tag)
@@ -257,6 +262,36 @@
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     (bazaar:send-reaction [%remove-tag path app-id tag] [/updates /our ~])
     :: `state(space-apps (~(put by space-apps.state) path apps))
+  ::
+  ++  suite-add
+    |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: {<[path app-id rank]>}"
+    ::  apps are added to a space's suite thru this ship's installed apps
+    =/  charge                    (~(got by charges.state) app-id)
+    =/  apps                      (~(got by space-apps.state) path)
+    ?:  (~(has by apps) app-id)   !!
+    =|  app=app-entry:store
+    =.  id.app                    app-id
+    =.  ship.app                  our.bowl
+    =.  tags.app                  (~(put in tags.app) %suite)
+    =/  rank                      ?~(rank (lent ~(val by apps)) u.rank)
+    =.  suite.ranks.app           rank
+    =.  docket.app                docket.charge
+    =/  apps                      (~(put by apps) app-id app)
+    =.  space-apps.state          (~(put by space-apps.state) path apps)
+    ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
+    (bazaar:send-reaction [%suite-add path app-id rank] [/updates /our ~])
+  ::
+  ++  suite-remove
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    =/  apps                (~(got by space-apps.state) path)
+    =/  app                 (~(got by apps) app-id)
+    =.  tags.app            (~(del in tags.app) %suite)
+    =/  apps                (~(put by apps) app-id app)
+    =.  space-apps.state    (~(put by space-apps.state) path apps)
+    (bazaar:send-reaction [%suite-remove path app-id] [/updates /our ~])
   --
 ::
 ++  apps
@@ -305,6 +340,8 @@
     %space-apps     (on-space-apps +.rct)
     %add-tag        (on-add-tag +.rct)
     %remove-tag     (on-rem-tag +.rct)
+    %suite-add      (on-suite-add +.rct)
+    %suite-remove   (on-suite-rem +.rct)
   ==
   ::
   ++  on-initial
@@ -324,6 +361,16 @@
   ::
   ++  on-rem-tag
     |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-suite-add
+    |=  [path=space-path:spaces-store =app-id:store rank=@ud]
+    ^-  (quip card _state)
+    `state
+  ::
+  ++  on-suite-rem
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     `state
   --
@@ -390,7 +437,9 @@
   ++  on-add
     |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
-    `state(space-apps (~(put by space-apps.state) path.space ~), membership (~(put by membership.state) path.space members))
+    =.  space-apps.state  (~(put by space-apps.state) path.space ~)
+    =.  membership.state  (~(put by membership.state) path.space members)
+    `state
   ::
   ++  on-replace
     |=  [space=space:spaces-store]
@@ -442,6 +491,7 @@
       =.  id.app    desk
       =.  ship.app  our.bowl
       =.  tags.app  (~(put in tags.app) %installed)
+      =.  ranks.app  [0 0 0 0]
       (~(put by acc) desk app)
   --
 

@@ -1,15 +1,7 @@
-import {
-  types,
-  applySnapshot,
-  castToSnapshot,
-  Instance,
-} from 'mobx-state-tree';
+import { types, Instance } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-import { SpacePath } from 'os/types';
 import { NativeAppList } from '../../../../renderer/apps';
 import { DocketApp, WebApp } from '../../ship/models/docket';
-import { toJS } from 'mobx';
-import { contextIsolated } from 'process';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -31,13 +23,20 @@ export const Glob = types.model({
   ),
 });
 
+const AppRankModel = types.model({
+  default: types.number,
+  pinned: types.number,
+  recommended: types.number,
+  suite: types.number,
+});
+
 const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 
 const BazaarApp = types.model({
   id: types.identifier,
   ship: types.string,
   tags: types.array(types.string),
-  ranks: types.model({}),
+  ranks: AppRankModel,
   title: types.string,
   info: types.string,
   color: types.string,
@@ -144,6 +143,12 @@ export const BazaarModel = types
         self.apps.set(appId, app);
       }
     },
+    addToSuite(appId: string, rank: number) {
+      console.log('addToSuite...');
+      this.addAppTag(appId, 'suite');
+      this.setAppRank(appId, 'suite', rank);
+    },
+    setAppRank(appId: string, tag: string, rank: number) {},
     setAllies(items: string[]) {
       self.allies.splice(0, 0, ...items);
     },
@@ -169,7 +174,7 @@ export const BazaarStore = types
       const catalog = apps['space-apps'];
       for (const spacePath in catalog) {
         const spaceApps = catalog[spacePath];
-        let bazaar = BazaarModel.create({});
+        const bazaar = BazaarModel.create({});
         for (const desk in spaceApps) {
           const app = spaceApps[desk];
           const appColor = app.color;
@@ -178,6 +183,10 @@ export const BazaarStore = types
         }
         self.spaces.set(spacePath, bazaar);
       }
+    },
+    addBazaar(path: string) {
+      console.log('addBazaar => %o', path);
+      self.spaces.set(path, BazaarModel.create({}));
     },
     our(ourPath: string, shipApps: any) {
       console.log('our => %o', { ourPath, shipApps });

@@ -45,7 +45,14 @@
 ::
 +$  tag     ?(%pinned %recommended %suite %installed)
 +$  tags    (set tag)
-+$  ranks   (map tag @ud)
+::
+::  $ranks - each app gets a rank (ordinal) relative to a
+::   "grouping" (pinned/recommended/suite)
+::  0th rank => default ordinal when not relative to a grouping
+::  1st rank => ordinal relative to pinned
+::  2nd rank => ordinal relative to recommended
+::  3rd rank => ordinal relative to suite
++$  ranks   [default=@ud pinned=@ud recommended=@ud suite=@ud]
 
 ::  $app-entry: app metadata common to all apps and
 ::    used for resolution
@@ -83,6 +90,8 @@
 +$  action
   $%  [%add-tag path=space-path:spaces =app-id =tag rank=(unit @ud)]
       [%remove-tag path=space-path:spaces =app-id =tag]
+      [%suite-add path=space-path:spaces =app-id rank=(unit @ud)]
+      [%suite-remove path=space-path:spaces =app-id]
   ==
 ::
 +$  reaction
@@ -90,6 +99,8 @@
       [%space-apps =space-path:spaces =app-index]
       [%add-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
       [%remove-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
+      [%suite-add path=space-path:spaces =app-id rank=@ud]
+      [%suite-remove path=space-path:spaces =app-id]
   ==
 ::
 ::  Scry views

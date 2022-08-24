@@ -16,6 +16,8 @@
       %-  of
       :~  [%add-tag add-tag]
           [%remove-tag rem-tag]
+          [%suite-add suite-add]
+          [%suite-remove suite-remove]
       ==
     ::
     ++  add-tag
@@ -31,6 +33,19 @@
       :~  [%path pth]
           [%app-id so]
           [%tag tg]
+      ==
+    ::
+    ++  suite-add
+      %-  ot
+      :~  [%path pth]
+          [%app-id so]
+          [%rank (mu ni)]
+      ==
+    ::
+    ++  suite-remove
+      %-  ot
+      :~  [%path pth]
+          [%app-id so]
       ==
     ::
     ++  tg
@@ -94,6 +109,21 @@
           [%app-id s+app-id.rct]
           [%tag s+(scot %tas tag.rct)]
           :: [%rank ~]
+      ==
+    ::
+        %suite-add
+      :-  %suite-add
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%app-id s+app-id.rct]
+          [%rank n+(crip "{<rank.rct>}")]
+      ==
+    ::
+        %suite-remove
+      :-  %suite-remove
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%app-id s+app-id.rct]
       ==
     ==
   ::
@@ -202,15 +232,20 @@
     |=  =ranks:store
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by ranks)
-    |=  [=tag:store rank=@ud]
-    ^-  [cord json]
-    ?-  tag
-      %pinned       ['pinned' n+(cord "{<rank>}")]
-      %recommended  ['recommended' n+(cord "{<rank>}")]
-      %suite        ['suite' n+(cord "{<rank>}")]
-      %installed    ['installed' n+(cord "{<rank>}")]
+    :~  [%default n+(crip "{<default.ranks>}")]
+        [%pinned n+(crip "{<pinned.ranks>}")]
+        [%recommended n+(crip "{<recommended.ranks>}")]
+        [%suite n+(crip "{<suite.ranks>}")]
     ==
+    :: %+  turn  ~(tap by ranks)
+    :: |=  [=tag:store rank=@ud]
+    :: ^-  [cord json]
+    :: ?-  tag
+    ::   %pinned       ['pinned' n+(cord "{<rank>}")]
+    ::   %recommended  ['recommended' n+(cord "{<rank>}")]
+    ::   %suite        ['suite' n+(cord "{<rank>}")]
+    ::   %installed    ['installed' n+(cord "{<rank>}")]
+    :: ==
   ::
   :: ++  dkt
   ::   |=  [d=(unit [=app-id:store =docket:docket])]

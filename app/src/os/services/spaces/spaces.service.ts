@@ -61,6 +61,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
     'realm.spaces.bazaar.add-app-tag': this.addAppTag,
     'realm.spaces.bazaar.remove-app-tag': this.removeAppTag,
+    'realm.spaces.bazaar.suite-add': this.addToSuite,
+    'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
   };
 
   static preload = {
@@ -104,8 +106,8 @@ export class SpacesService extends BaseService {
     kickMember: async (path: string, patp: string) =>
       ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
     //
-    getApps: async (path: SpacePath) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path),
+    getApps: async (path: SpacePath, tag: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path, tag),
     getAllies: async (path: SpacePath) =>
       ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
     getTreaties: async (patp: string) =>
@@ -127,6 +129,10 @@ export class SpacesService extends BaseService {
         appId,
         tag
       ),
+    addToSuite: async (path: SpacePath, appId: string, rank: number) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
+    removeFromSuite: async (path: SpacePath, appId: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -205,7 +211,8 @@ export class SpacesService extends BaseService {
     SpacesApi.watchUpdates(
       this.core.conduit!,
       this.state,
-      this.models.membership
+      this.models.membership,
+      this.models.bazaar
     );
     PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
     // Subscribe to sync updates
@@ -321,8 +328,8 @@ export class SpacesService extends BaseService {
     );
   }
 
-  async getApps(_event: IpcMainInvokeEvent, path: SpacePath) {
-    return await BazaarApi.getApps(this.core.conduit!, path);
+  async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
+    return await BazaarApi.getApps(this.core.conduit!, path, tag);
   }
   async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
     return await BazaarApi.getAllies(this.core.conduit!, path);
@@ -372,6 +379,34 @@ export class SpacesService extends BaseService {
       spacePath,
       appId,
       tag
+    );
+  }
+
+  async addToSuite(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string,
+    rank: number
+  ) {
+    const result = await BazaarApi.addToSuite(
+      this.core.conduit!,
+      spacePath,
+      appId,
+      rank
+    );
+    console.log('addToSuite => %o', result);
+    return result;
+  }
+
+  async removeFromSuite(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return await BazaarApi.removeFromSuite(
+      this.core.conduit!,
+      spacePath,
+      appId
     );
   }
 
