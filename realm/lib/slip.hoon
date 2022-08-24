@@ -22,6 +22,12 @@
       %-  pairs
       :~
       ['from' %s (scot %p from.act)]
+      ['time' (sect time.act)]
+      :-  'path'
+        :-   %a
+          %+  turn  path.act
+            |=  tas=@tas
+            [%s tas]
       ['data' %s data.act]
       ==
     %slop
@@ -32,6 +38,12 @@
           %+  turn  to.act
             |=  her=@p
             [%s (scot %p her)]
+        ['time' (sect time.act)]
+        :-  'path'
+        :-   %a
+          %+  turn  path.act
+            |=  tas=@tas
+            [%s tas]
         ['data' %s data.act]
       ==
     ==
@@ -55,12 +67,18 @@
     :: ::
     ++  slip
       %-  ot
-      :~  [%from patp]
+      :~  
+          [%from patp]
+          [%time di]
+          [%path (ar so)]
           [%data so]
       ==
     ++  slop
       %-  ot
-      :~  [%to (ar patp)]
+      :~  
+          [%to (ar patp)]
+          [%time di]
+          [%path (ar so)]
           [%data so]
       ==
     --
