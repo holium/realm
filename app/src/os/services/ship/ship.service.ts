@@ -231,7 +231,7 @@ export class ShipService extends BaseService {
       DmApi.graphUpdates(this.core.conduit!, this.state);
 
       // register hark-store update handler
-      NotificationsApi.watch(this.core.conduit!, this.state);
+      // NotificationsApi.watch(this.core.conduit!, this.state);
 
       // load initial dms
       this.getDMs().then((response) => {

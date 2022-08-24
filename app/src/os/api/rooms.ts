@@ -99,12 +99,7 @@ export const RoomsApi = {
     enter: boolean
   ) => {
     // TODO add to roomapp state after poke???
-    console.log({
-      rid: roomId,
-      access: access,
-      title: title,
-      enter: enter,
-    });
+
     const response = await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
@@ -194,6 +189,7 @@ export const RoomsApi = {
         if (!update) return;
         if (update['room']) {
           const { diff, room } = update['room'];
+          console.log(update['room']);
           // Send diff as event to renderer
           if (diff) onDiff(diff, room);
           state.handleRoomUpdate(room, diff);
