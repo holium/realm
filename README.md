@@ -21,6 +21,7 @@ yarn link "@holium/realm-multiplayer"
 
 cd playground/ui
 yarn build
+yarn link
 
 cd app
 yarn link "@holium/realm-multiplayer"
