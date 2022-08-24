@@ -40,6 +40,11 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
+    :: EXAMPLE SCRY FROM DOJO
+    :: > =store -build-file /=realm=/sur/rooms/hoon
+    :: > .^(view:store %gx /=room=/present/rooms-view)
+    ::  [%present ships={~bus}]
+    ::
       [%x ~]
         ``rooms-view+!>([%full my-room provider])
       [%x %present ~]
@@ -240,7 +245,7 @@
       abet
     ::
     ++  room
-      |=  =room:store
+      |=  [=room:store diff=update-diff:store]
       ::  TODO
       ::  if not my provider:
       ::    reply with [%exit ~] action
@@ -274,15 +279,19 @@
       abet
     ::
     ++  invited
-      |=  [provider=ship =rid:store =ship]
-      :: ?>  is-provider :: TODO needed?
+      |=  [provider=ship =rid:store =title:store =ship]
+      ::
+      :: should there be some kind of scry to friends
+      :: to prevent spam invites?
       :: ?>  is-friend   :: TODO needed?
-      ~&  >  :-  %invited
+      ~&  >  :-  %room-invited
         [provider rid ship]
       abet
     ::
     ++  kicked
-      |=  [provider=ship =rid:store =ship]
+      |=  [provider=ship =rid:store =title:store =ship]
+      ~&  >  :-  %room-kicked
+        [provider rid ship]
       ?>  is-provider
       =.  my-room  ~
       abet

@@ -88,16 +88,22 @@
 :: server -> client
 :: client -> user
 :: client -> client  (just %chat)
++$  update-diff
+  $%  [%enter =ship]
+      [%exit =ship]
+      [%other ~]
+  ==
+::
 +$  update
   $%  
     ::
     :: updates from provider
     :: app/rooms -> app/room
-      [%room =room]
+      [%room =room diff=update-diff]
       [%rooms rooms=(set room)]
     ::
-      [%invited provider=ship =rid =ship]
-      [%kicked provider=ship =rid =ship]  
+      [%invited provider=ship =rid =title =ship]
+      [%kicked provider=ship =rid =title =ship]  
     ::
     :: chat is thrown in as an after thought.
     ::   its a simple example of using the (set ship) as a whitelist
