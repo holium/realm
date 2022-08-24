@@ -45,14 +45,32 @@
     :: > .^(view:store %gx /=room=/present/rooms-view)
     ::  [%present ships={~bus}]
     ::
+    :: example scry (simple)
+    ::    (doesnt require sur/rooms/hoon)
+    :: 
+    :: .^((set ship) %gx /=room=/present/simple/noun)
+    :: or
+    :: .^((set ship) %gx /(scot %p our)/room/(scot %da now)/present/simple/noun)
+    ::
       [%x ~]
         ``rooms-view+!>([%full my-room provider])
       [%x %present ~]
         :: TODO tall form?
         ::
+        :: rooms-view is a general mar for these scries.
+        ::
         ?~  my-room
           ``rooms-view+!>([%present *(set ship)])
         ``rooms-view+!>([%present present.u.my-room])
+      ::
+      :: no custom mark needed
+      :: no sur needed
+      :: just returns a (set ship)
+      :: cant encode as json
+      [%x %present %simple ~]
+         ?~  my-room
+            ``noun+!>(*(set ship))
+          ``noun+!>(present.u.my-room)
       ::
       [%x %provider ~]
         ``rooms-view+!>([%provider provider])
