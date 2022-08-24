@@ -19,11 +19,16 @@ import { isFireFox } from '../utils';
 export type Handshake = 'awaiting-offer' | 'offer' | 'ice-candidate' | 'answer';
 
 export const DEFAULT_AUDIO_CONSTRAINTS = {
-  channelCount: 1,
-  sampleRate: 16000,
+  channelCount: {
+    ideal: 2,
+    min: 1,
+  },
+  sampleRate: 48000,
   sampleSize: 16,
   volume: 1,
   noiseSuppresion: true,
+  // echoCancellation: false,
+  // autoGainControl: true,
 };
 
 export class LocalParticipant extends Participant {
