@@ -58,6 +58,13 @@ export const RoomsAppState = types
     invites: types.map(RoomInvite),
     ourPatp: types.maybe(types.string),
     provider: types.maybe(types.string),
+    controls: types.optional(
+      types.model({
+        muted: types.boolean,
+        cursors: types.boolean,
+      }),
+      { muted: false, cursors: false }
+    ),
   })
   .views((self) => ({
     get list() {
@@ -82,6 +89,12 @@ export const RoomsAppState = types
     },
   }))
   .actions((self) => ({
+    setMuted(muted: boolean) {
+      self.controls.muted = muted;
+    },
+    setCursors(cursors: boolean) {
+      self.controls.cursors = cursors;
+    },
     handleInvite(invite: RoomInviteType) {
       self.invites.set(invite.id, RoomInvite.create(invite));
     },

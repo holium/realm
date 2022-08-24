@@ -16,11 +16,18 @@ import { useServices } from 'renderer/logic/store';
 import { LiveRoom } from 'renderer/apps/store';
 import { PeerConnectionState } from '@holium/realm-room';
 import { rgba, darken } from 'polished';
-import { handleLocalEvents, handleRemoteEvents } from '../listeners';
+import {
+  handleLocalEvents,
+  handleRemoteEvents,
+  handleRemoteUpdate,
+} from '../listeners';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
 
 interface ISpeaker {
   person: string;
   audio: any;
+  muted?: boolean;
+  cursors?: boolean;
   type: 'host' | 'speaker' | 'listener';
 }
 
@@ -33,18 +40,19 @@ const speakerType = {
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   const { person, audio, type } = props;
   const { ship, desktop } = useServices();
+  const { roomsApp } = useTrayApps();
   const speakerRef = useRef<any>(null);
   const isOur = person === ship?.patp;
   const [peerState, setPeerState] = useState<RTCPeerConnectionState>('new');
+  const [peerMetadata, setPeerMetadata] = useState<any>({
+    muted: false,
+    cursor: false,
+  });
   // const [peer, setPeer] = useState<RemoteParticipant | undefined>();
   const [isStarted, setIsStarted] = useState(false);
   const metadata = ship?.contacts.getContactAvatarMetadata(person);
 
-  // const hasVoice = audio && person === ship?.patp;
-  const [ourState, setOurState] = useState({
-    muted: false,
-    cursor: true,
-  });
+  const { muted, cursor } = roomsApp.controls;
 
   let name = metadata?.nickname || person;
   const livePeer = LiveRoom.participants.get(person);
@@ -55,7 +63,6 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       label: 'Reconnect',
       disabled: livePeer?.connectionState === 'connected',
       onClick: (evt: any) => {
-        console.log(livePeer);
         livePeer && LiveRoom.reconnectPeer(livePeer);
         evt.stopPropagation();
         // DesktopActions.toggleDevTools();
@@ -85,10 +92,11 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   useEffect(() => {
     if (isOur) {
       setPeerState(PeerConnectionState.Connected);
-      handleLocalEvents(setOurState, LiveRoom.our);
+      // handleLocalEvents(RoomsActions., LiveRoom.our);
     } else {
       const livePeer = LiveRoom.participants.get(person);
       handleRemoteEvents(setPeerState, livePeer);
+      handleRemoteUpdate(setPeerMetadata, livePeer);
     }
   }, [isStarted]);
 
@@ -165,9 +173,23 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
           style={{ pointerEvents: 'none' }}
         >
           <Flex style={{ pointerEvents: 'none' }}>
-            {isOur && ourState.muted && (
-              <Icons fill={textColor} name="MicOff" size={15} opacity={0.5} />
-            )}
+            {isOur
+              ? muted && (
+                  <Icons
+                    fill={textColor}
+                    name="MicOff"
+                    size={15}
+                    opacity={0.5}
+                  />
+                )
+              : peerMetadata.muted && (
+                  <Icons
+                    fill={textColor}
+                    name="MicOff"
+                    size={15}
+                    opacity={0.5}
+                  />
+                )}
           </Flex>
           {sublabel}
         </Flex>

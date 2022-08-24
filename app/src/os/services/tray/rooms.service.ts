@@ -33,6 +33,8 @@ export class RoomsService extends BaseService {
     'realm.tray.rooms.get-provider': this.getProvider,
     'realm.tray.rooms.set-provider': this.setProvider,
     'realm.tray.rooms.invite': this.invite,
+    'realm.tray.rooms.set-muted': this.setMuted,
+    'realm.tray.rooms.set-cursor': this.setCursors,
   };
 
   static preload = {
@@ -55,6 +57,12 @@ export class RoomsService extends BaseService {
     },
     setView: (view: string) => {
       return ipcRenderer.invoke('realm.tray.rooms.set-view', view);
+    },
+    setMuted: (muted: boolean) => {
+      return ipcRenderer.invoke('realm.tray.rooms.set-muted', muted);
+    },
+    setCursors: (cursor: boolean) => {
+      return ipcRenderer.invoke('realm.tray.rooms.set-cursor', cursor);
     },
     setLiveRoom: (room: RoomsModelType) => {
       return ipcRenderer.invoke('realm.tray.rooms.set-live', room);
@@ -148,6 +156,12 @@ export class RoomsService extends BaseService {
   }
   setView(_event: any, view: 'list' | 'room' | 'new-room') {
     this.state?.setView(view);
+  }
+  setMuted(_event: any, muted: boolean) {
+    this.state?.setMuted(muted);
+  }
+  setCursors(_event: any, cursors: boolean) {
+    this.state?.setCursors(cursors);
   }
   setLiveRoom(_event: any, room: RoomsModelType) {
     this.state?.setLiveRoom(room);

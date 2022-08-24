@@ -137,10 +137,7 @@ export class RemoteParticipant extends Participant {
    *
    * @param audioRef
    */
-  async registerAudio(audioRef: HTMLAudioElement) {
-    audioRef.setAttribute('id', `voice-${this.patp}`);
-    this.audioRef = audioRef;
-
+  async registerAudio() {
     // Clear any previous listeners
     this.peerConn.ontrack = null;
     this.peerConn.onconnectionstatechange = null;
@@ -270,7 +267,6 @@ export class RemoteParticipant extends Participant {
     console.log(this.dataChannel.readyState);
     // this.peerConn.
     if (this.dataChannel && this.dataChannel.readyState === 'open') {
-      console.log('sending data update');
       this.dataChannel.send(
         JSON.stringify({ type: 'participant-metadata', data: info })
       );
@@ -313,7 +309,7 @@ export class RemoteParticipant extends Participant {
     ) {
       console.log('peers Disconnected!');
       this.emit(PeerConnectionState.Disconnected);
-      this.audioRef.parentElement?.removeChild(this.audioRef);
+      // this.audioRef.parentElement?.removeChild(this.audioRef);
     }
     if (
       // @ts-ignore
@@ -321,7 +317,7 @@ export class RemoteParticipant extends Participant {
     ) {
       console.log('peer connect failed!');
       this.emit(PeerConnectionState.Failed);
-      this.audioRef.parentElement?.removeChild(this.audioRef);
+      // this.audioRef.parentElement?.removeChild(this.audioRef);
     }
     if (
       // @ts-ignore
@@ -330,7 +326,7 @@ export class RemoteParticipant extends Participant {
       console.log('peer connect closed!');
       this.reset();
       this.emit(PeerConnectionState.Closed);
-      this.audioRef.parentElement?.removeChild(this.audioRef);
+      // this.audioRef.parentElement?.removeChild(this.audioRef);
     }
   }
 
@@ -457,10 +453,10 @@ export class RemoteParticipant extends Participant {
       remotePub.removeAllListeners();
       console.log('cleainign', this.patp, remotePub.kind, this.audioLevel);
       if (remotePub.kind === Track.Kind.Audio) {
-        const toRemove = document.getElementById(`voice-${this.patp}`)!;
-        const audioRoot = toRemove?.parentElement!;
-        console.log('removing audio tag', toRemove, audioRoot);
-        audioRoot.removeChild(toRemove);
+        // const toRemove = document.getElementById(`voice-${this.patp}`)!;
+        // const audioRoot = toRemove?.parentElement!;
+        // console.log('removing audio tag', toRemove, audioRoot);
+        // audioRoot.removeChild(toRemove);
       }
       this.unpublishTrack(remotePub.trackSid, true);
     });

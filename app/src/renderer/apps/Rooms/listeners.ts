@@ -1,16 +1,17 @@
 import { LocalParticipant, RemoteParticipant } from '@holium/realm-room';
 
 export const handleLocalEvents = (
-  setState: (state: { muted: boolean; cursor: boolean }) => void,
+  setMuted: (muted: boolean) => void,
+  setCursors: (cursor: boolean) => void,
   our?: LocalParticipant
 ) => {
   our?.on('muteToggled', (isMuted: boolean) => {
     console.log('mutedToggled', isMuted);
-    setState({ muted: isMuted, cursor: our.isCursorSharing });
+    setMuted(isMuted);
   });
   our?.on('cursorToggled', (isCursorSharing: boolean) => {
     console.log('cursorToggled', isCursorSharing);
-    setState({ muted: our.isMuted, cursor: isCursorSharing });
+    setCursors(isCursorSharing);
   });
 };
 
@@ -31,5 +32,20 @@ export const handleRemoteEvents = (
   });
   participant.on('failed', () => {
     setState('failed');
+  });
+};
+
+export const handleRemoteUpdate = (
+  setState: (state: { muted: boolean; cursor: boolean }) => void,
+  peer?: RemoteParticipant
+) => {
+  if (!peer) return;
+  console.log(peer);
+  peer.on('trackMuted', (track: any) => {
+    console.log('track muted');
+    setState({ muted: true, cursor: peer.isCursorSharing });
+  });
+  peer.on('trackUnmuted', (track: any) => {
+    setState({ muted: false, cursor: peer.isCursorSharing });
   });
 };

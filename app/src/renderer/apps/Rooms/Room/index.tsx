@@ -33,15 +33,16 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
 
   const { dockColor, windowColor, inputColor } = desktop.theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const [ourState, setOurState] = useState({
-    muted: false,
-    cursor: true,
-  });
-
-  const [audio, setAudio] = useState<MediaStream | null>(null);
+  const { muted, cursor } = roomsApp.controls;
+  // const [muted, setMuted] = useState(false);
+  // const [cursors, setCursors] = useState(true);
 
   useEffect(() => {
-    handleLocalEvents(setOurState, LiveRoom.our);
+    handleLocalEvents(
+      RoomsActions.setMuted,
+      RoomsActions.setCursors,
+      LiveRoom.our
+    );
   }, []);
 
   // const getMicrophone = async () => {
@@ -176,7 +177,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         flexDirection="column"
       >
         {roomView === 'voice' && (
-          <VoiceView host={creator} present={present} audio={audio} />
+          <VoiceView host={creator} present={present} audio={null} />
         )}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
@@ -211,14 +212,17 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
-              icon={ourState.muted ? 'MicOff' : 'MicOn'}
+              icon={muted ? 'MicOff' : 'MicOn'}
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                if (ourState.muted) {
+                if (muted) {
                   console.log('unmuting time');
+                  console.log(LiveRoom.our);
                   LiveRoom.our?.unmuteAudioTracks();
                 } else {
+                  console.log('muting time');
+                  console.log(LiveRoom.our);
                   LiveRoom.our?.muteAudioTracks();
                 }
               }}
@@ -230,13 +234,13 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                 evt.stopPropagation();
               }}
             />
-            <CommButton
+            {/* <CommButton
               icon="HeadphoneLine"
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
               }}
-            />
+            /> */}
           </Flex>
           <Flex alignItems="center">
             <IconButton

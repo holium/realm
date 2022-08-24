@@ -137,13 +137,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     peer.emit(ParticipantEvent.Connecting);
     const isLower = this.our.patpId < peer.patpId;
     // console.log('isLower', isLower);
-    const mount = document.getElementById('audio-root')!;
-    let peerAudioEl: any = document.getElementById(`voice-stream-${peer.patp}`);
-    if (!peerAudioEl) {
-      peerAudioEl = document.createElement('audio');
-      mount.appendChild(peerAudioEl);
-    }
-    peer.registerAudio(peerAudioEl);
+    peer.registerAudio();
     if (isLower) {
       console.log('we are ready');
       peer.sendAwaitingOffer();
@@ -157,7 +151,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   registerListeners(peer: RemoteParticipant) {
-    // peer.removeAllListeners();
     peer.on(ParticipantEvent.Connected, () => {
       console.log('WE ARE CONNECTED -> start streaming to them');
       // peer.publish
@@ -172,6 +165,16 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
         this.removePeerAudio(peer.patp);
         console.log('awaiting offer again');
         this.connectParticipant(peer);
+      }
+    });
+    peer.on(ParticipantEvent.Failed, () => {
+      console.log('try to reconnect');
+      if (this.participants.has(peer.patp)) {
+        // if the peer is still in the room,
+        this.removePeerAudio(peer.patp);
+        console.log('peer connection failed');
+        // console.log('awaiting offer again');
+        // this.connectParticipant(peer);
       }
     });
     peer.on(ParticipantEvent.Connecting, () => {
