@@ -77,24 +77,6 @@ function Content({ children, ...props }) {
   );
 }
 
-const onAppsAction = (path: string, appId: string, tag: any, rank: number) => {
-  console.log('onAppsAction => %o', { path, appId, tag });
-  SpacesActions.addToSuite(path, appId, rank).then((result) =>
-    console.log('onAppsAction => %o', result)
-  );
-};
-
-const actionRenderer = (space: string, app: any, rank: number) => (
-  <>
-    <Button
-      borderRadius={6}
-      onClick={(e) => onAppsAction(space, app.detail?.id, 'suite', rank)}
-    >
-      Add to Suite
-    </Button>
-  </>
-);
-
 // Exports
 export const Popover = PopoverPrimitive.Root;
 export const PopoverTrigger = PopoverPrimitive.Trigger;
@@ -107,9 +89,29 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   const [suite, setSuite] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
   const [suiteIndex, setSuiteIndex] = useState(-1);
-  const [emptyArr, setEmptyArr] = useState<any[]>([]);
 
-  console.log(suite, emptyArr);
+  console.log('AppSuite => rendering...');
+
+  const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
+    console.log('onAppsAction => %o', { path, id: app.id, tag });
+    SpacesActions.addToSuite(path, app.id, rank).then((result) => {
+      console.log('onAppsAction => %o', result);
+      suite.splice(result.rank, 1, app);
+      setSuite(suite);
+      setSearchMode('none');
+    });
+  };
+
+  const actionRenderer = (space: string, app: any, rank: number) => (
+    <>
+      <Button
+        borderRadius={6}
+        onClick={(e) => onAppsAction(space, app.detail!, 'suite', rank)}
+      >
+        Add to Suite
+      </Button>
+    </>
+  );
 
   useEffect(() => {
     SpacesActions.getApps(`/${patp}/our`, 'all').then((items: any) => {
@@ -133,8 +135,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
         suite.splice(app.detail?.ranks?.suite, 1, app.detail!)
       );
       console.log(suite);
-      setSuite(suite || []);
-      setEmptyArr([...Array(5 - suite.length).keys()]);
+      setSuite(suite);
     });
   }, [space.path]);
 
@@ -166,7 +167,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
               />
             )
         )}
-        {emptyArr.map((el: number, index: number) => (
+        {/* {emptyArr.map((el: number, index: number) => (
           <SuiteApp
             key={index + suite.length}
             space={space}
@@ -176,7 +177,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
               setSuiteIndex(index);
             }}
           />
-        ))}
+        ))} */}
       </Flex>
       <Popover
         open={searchMode !== 'none'}
@@ -185,6 +186,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
             setSearchMode('none');
           }
         }}
+        modal={false}
       >
         <PopoverAnchor asChild>
           <div style={{ width: '100%', height: '1px' }}></div>

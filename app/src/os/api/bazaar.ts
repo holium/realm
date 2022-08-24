@@ -42,7 +42,14 @@ export const BazaarApi = {
       app: 'treaty',
       path: `/treaties/${patp}`, // the spaces scry is at the root of the path
     });
-    return response.ini;
+    const appMap = response.ini || {};
+    Object.keys(appMap).forEach((appKey: string) => {
+      if (appMap[appKey].color) {
+        const appColor = appMap[appKey].color;
+        appMap[appKey].color = appColor && cleanNounColor(appColor);
+      }
+    });
+    return appMap;
   },
   installDocket: async (
     ourShip: string,
@@ -200,13 +207,6 @@ const handleBazaarReactions = (
     case 'initial':
       state.initial(data['initial']);
       // state.initialReaction(data['initial']);
-      break;
-    case 'space-added':
-      {
-        let detail = data['add-tag'];
-        console.log(detail);
-        state.createBazaar(detail['path']);
-      }
       break;
     case 'add-tag':
       {

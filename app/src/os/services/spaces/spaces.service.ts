@@ -395,7 +395,10 @@ export class SpacesService extends BaseService {
       rank
     );
     console.log('addToSuite => %o', result);
-    return result;
+    return new Promise((resolve) => {
+      resolve(result);
+    });
+    // return result;
   }
 
   async removeFromSuite(

@@ -204,6 +204,7 @@ const renderDevApps = (apps: Array<any>) => {
 };
 
 const renderDevAppSearch = (ship: string, data: Array<any>) => {
+  console.log('renderDevAppSearch => %o', { ship, data });
   return (
     <>
       <Flex flexDirection="column" gap={10}>
@@ -277,10 +278,11 @@ const AppSearchApp = (props) => {
       });
     } else if (searchMode === 'dev-app-search') {
       SpacesActions.getTreaties(searchModeArgs[0]).then((items: any) => {
-        let data = Object.entries(items).map(([key, value], index) => ({
-          id: key,
-          name: key,
+        const data = Object.entries(items).map(([key, value], index) => ({
+          ...value,
+          id: value.desk,
         }));
+        console.log('treaties => %o', toJS(data));
         setData(data);
       });
     } else if (searchMode === 'app-search') {
