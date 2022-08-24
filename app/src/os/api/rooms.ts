@@ -9,6 +9,7 @@ import {
 import { saturate } from 'polished';
 import { m } from 'framer-motion';
 import { Patp } from '@urbit/api';
+import { RoomDiff } from '../services/tray/rooms.service';
 
 export const RoomsApi = {
   /**
@@ -176,11 +177,12 @@ export const RoomsApi = {
    *
    * @param conduit the conduit instance
    * @param state the state-tree
+   * @param onDiff a callback for passing diffs to the room lib
    */
   watchUpdates: (
     conduit: Urbit,
     state: RoomsAppStateType,
-    onKick: () => void // TODO
+    onDiff: (diff: RoomDiff, room: RoomsModelType) => void
   ): void => {
     conduit.subscribe({
       app: 'room',
@@ -190,8 +192,10 @@ export const RoomsApi = {
         let update = data['rooms-update'];
         if (!update) return;
         if (update['room']) {
-          //
-          state.handleRoomUpdate(update['room']);
+          const { diff, room } = update['room'];
+          // Send diff as event to renderer
+          if (diff) onDiff(diff, room);
+          state.handleRoomUpdate(room, diff);
         } else if (update['rooms']) {
           // console.log('rooms');
           state.setKnownRooms(update['rooms']);

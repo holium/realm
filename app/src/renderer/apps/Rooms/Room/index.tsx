@@ -203,6 +203,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                 } else {
                   RoomsActions.leaveRoom(id);
                 }
+                LiveRoom.leave();
               }}
             >
               <Icons name="RoomLeave" />

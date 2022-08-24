@@ -92,13 +92,3 @@ export interface SpeakerInfo {
   /** true if speaker is currently active */
   active: boolean;
 }
-
-export enum RoomState {
-  Starting = 'starting',
-  Started = 'started',
-  Ended = 'ended',
-  Connected = 'connected',
-  Disconnected = 'disconnected',
-  Added = 'added',
-  Kicked = 'kicked',
-}

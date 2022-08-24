@@ -14,7 +14,6 @@ import { ViewPort, Layer } from 'react-spaces';
 import { coreStore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import {
   BackgroundImage,
   BackgroundFill,

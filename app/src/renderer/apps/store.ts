@@ -10,11 +10,14 @@ import {
 } from 'mobx-state-tree';
 
 import { SlipActions } from './../logic/actions/slip';
-import { RoomsAppState } from 'os/services/tray/rooms.model';
+import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
 import { SlipType } from 'os/services/slip.service';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
+import { RoomDiff } from 'os/services/tray/rooms.service';
+import { IpcMessageEvent } from 'electron';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -87,19 +90,6 @@ export const trayStore = TrayAppStore.create({
   // },
 });
 
-// Watch actions for sound trigger
-onAction(trayStore.roomsApp, (call) => {
-  if (call.name === '@APPLY_SNAPSHOT') return;
-  const patchArg = call.args![0][0];
-  if (patchArg.path === '/liveRoom') {
-    if (patchArg.op === 'replace') {
-      patchArg.value
-        ? SoundActions.playRoomEnter()
-        : SoundActions.playRoomLeave();
-    }
-  }
-});
-
 onSnapshot(trayStore, (snapshot) => {
   localStorage.setItem('trayStore', JSON.stringify(snapshot));
 });
@@ -119,6 +109,7 @@ export function useTrayApps() {
   return store;
 }
 
+// Set up room listeners
 export const LiveRoom = new Room((to: Patp[], data: any) => {
   SlipActions.sendSlip(to, data);
 });
@@ -127,13 +118,44 @@ SlipActions.onSlip((_event: Event, slip: SlipType) => {
   LiveRoom.onSlip(slip);
 });
 
+RoomsActions.onRoomUpdate(
+  (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
+    console.log('room diff in renderer', diff);
+    LiveRoom.onDiff(diff, room);
+  }
+);
+
+// Watch actions for sound trigger
+onAction(trayStore, (call) => {
+  if (call.path === '/roomsApp') {
+    if (call.name === '@APPLY_SNAPSHOT') return;
+    const patchArg = call.args![0][0];
+    if (patchArg.path === '/liveRoom') {
+      if (patchArg.op === 'replace') {
+        patchArg.value
+          ? SoundActions.playRoomEnter()
+          : SoundActions.playRoomLeave();
+        if (patchArg.value) {
+          // Entering or switching room
+          const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
+          console.log('etnering and switching to conenect');
+          if (room) LiveRoom.connect(room);
+        }
+      }
+    }
+  }
+});
+
 // After boot, set the initial data
 OSActions.onBoot((_event: any, response: any) => {
+  LiveRoom.init(response.ship.patp!);
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);
     if (trayStore.roomsApp.liveRoom) {
-      const { ourPatp, liveRoom } = trayStore.roomsApp;
-      LiveRoom.connect(ourPatp!, liveRoom);
+      const { liveRoom } = trayStore.roomsApp;
+      if (liveRoom) {
+        LiveRoom.connect(liveRoom);
+      }
     }
   }
 });

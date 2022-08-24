@@ -10,6 +10,8 @@ import { TrackEvent } from '../track/events';
 import { TrackPublication } from '../track';
 import LocalTrackPublication from '../track/LocalTrackPublication';
 import { Track } from '../track/Track';
+import RemoteTrackPublication from '../track/RemoteTrackPublication';
+import RemoteTrack from '../track/RemoteTrack';
 
 export enum ConnectionState {
   Disconnected = 'disconnected',
@@ -36,6 +38,7 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
   tracks: Map<string, any>;
   audioTracks: Map<string, any>;
   videoTracks: Map<string, any>;
+  lastSpokeAt?: Date | undefined;
   private _connectionQuality: ConnectionQuality = ConnectionQuality.Unknown;
 
   constructor(patp: string, room: Room) {
@@ -119,6 +122,30 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
     return undefined;
   }
 
+  /** @internal */
+  setIsSpeaking(speaking: boolean) {
+    if (speaking === this.isSpeaking) {
+      return;
+    }
+    this.isSpeaking = speaking;
+    if (speaking) {
+      this.lastSpokeAt = new Date();
+    }
+    this.emit(ParticipantEvent.IsSpeakingChanged, speaking);
+  }
+
+  // /** @internal */
+  // setConnectionQuality(q: ProtoQuality) {
+  //   const prevQuality = this._connectionQuality;
+  //   this._connectionQuality = qualityFromProto(q);
+  //   if (prevQuality !== this._connectionQuality) {
+  //     this.emit(
+  //       ParticipantEvent.ConnectionQualityChanged,
+  //       this._connectionQuality
+  //     );
+  //   }
+  // }
+
   protected addTrackPublication(publication: TrackPublication) {
     // forward publication driven events
     publication.on(TrackEvent.Muted, () => {
@@ -159,6 +186,7 @@ export type ParticipantEventCallbacks = {
   connecting: () => void;
   reconnecting: () => void;
   audioStreamAdded: (stream: MediaStream) => void;
+  audioStreamRemoved: (stream: MediaStream) => void;
   cursorUpdate: (payload: CursorPayload) => void;
   stateUpdate: (payload: StatePayload) => void;
   //
@@ -167,5 +195,19 @@ export type ParticipantEventCallbacks = {
   //
   trackMuted: (publication: TrackPublication) => void;
   trackUnmuted: (publication: TrackPublication) => void;
+  // Local (our)
   localTrackPublished: (publication: LocalTrackPublication) => void;
+  localTrackUnpublished: (publication: LocalTrackPublication) => void;
+  // Remote (other)
+  trackSubscribed: (
+    track: RemoteTrack,
+    publication: RemoteTrackPublication
+  ) => void;
+  trackUnsubscribed: (
+    previousTrack: RemoteTrack,
+    publication: RemoteTrackPublication
+  ) => void;
+  trackPublished: (publication: RemoteTrackPublication) => void;
+  trackUnpublished: (publication: RemoteTrackPublication) => void;
+  isSpeakingChanged: (speaking: boolean) => void;
 };

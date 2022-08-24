@@ -12,9 +12,16 @@ import {
   DataChannel,
   RemoteParticipant,
 } from '../participant/RemoteParticipant';
-import { RoomState } from './types';
+import { RoomState } from '../types';
 import { ParticipantEvent } from '../participant/events';
-import { Patp, RoomsModelType, SlipType } from '../types';
+import {
+  EnterDiff,
+  ExitDiff,
+  DiffType,
+  Patp,
+  RoomsModelType,
+  SlipType,
+} from '../types';
 
 const peerConnectionConfig = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
@@ -44,11 +51,25 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     });
   }
 
-  connect(our: Patp, room: RoomsModelType) {
+  init(our: Patp) {
+    this.state = RoomState.Starting;
+    this.our = new LocalParticipant(our, this);
+  }
+
+  connect(room: RoomsModelType) {
     this.state = RoomState.Starting;
     this.roomConfig = room;
-    this.our = new LocalParticipant(our, this);
+    if (!this.our) {
+      throw new Error('You must run init() before connecting');
+      // this.our = new LocalParticipant(our, this);
+    }
     this.our.connect();
+    this.our.on(ParticipantEvent.LocalTrackPublished, (pub: any) => {
+      console.log(ParticipantEvent.LocalTrackPublished, pub);
+    });
+    this.our.on(ParticipantEvent.LocalTrackUnpublished, (pub: any) => {
+      console.log(ParticipantEvent.LocalTrackUnpublished, pub);
+    });
 
     room.present.forEach((peer: Patp) => {
       if (peer === this.our.patp) return;
@@ -58,12 +79,48 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     this.emit(RoomState.Started);
   }
 
+  leave() {
+    this.state = RoomState.Disconnected;
+    this.our.disconnect();
+    this.participants.forEach((peer: RemoteParticipant) => {
+      this.kickParticipant(peer.patp);
+    });
+    this.removeAllListeners();
+  }
+
+  reconnectPeer(peer: Patp) {
+    this.participants.get(peer)?.reconnect();
+  }
+
   onSlip(slip: SlipType) {
-    // console.log('on slip');
-    // console.log('got slapped', slip.from, slip.data);
     if (this.state !== RoomState.Disconnected) {
       const peer = this.participants.get(slip.from);
       peer?.handleSlip(slip.data, this.our.patpId);
+    }
+  }
+
+  onDiff(roomDiff: DiffType, room: RoomsModelType) {
+    // Cast to types
+    let enterDiff = roomDiff as EnterDiff;
+    let exitDiff = roomDiff as ExitDiff;
+    // check if type has enter
+    if (enterDiff.enter) {
+      if (enterDiff.enter === this.our.patp) {
+        // We have created a room or have entered a room
+        this.connect(room);
+        return;
+      }
+      console.log('add participant', enterDiff.enter);
+      this.newParticipant(enterDiff.enter);
+    }
+    // check if type has exit
+    if (exitDiff.exit) {
+      if (exitDiff.exit === this.our.patp) {
+        console.log('we should leave the room and unsub');
+        this.disconnect();
+      }
+      console.log('remove participant', exitDiff.exit);
+      this.kickParticipant(exitDiff.exit);
     }
   }
 
@@ -93,8 +150,10 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     }
   }
 
-  kickParticipant(peer: Patp) {
-    console.log(peer);
+  async kickParticipant(peer: Patp) {
+    await this.participants.get(peer)?.cleanup();
+    this.participants.delete(peer);
+    console.log('after kicked', this.participants);
   }
 
   registerListeners(peer: RemoteParticipant) {
@@ -121,17 +180,34 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     peer.on(ParticipantEvent.AudioStreamAdded, (remoteStream: MediaStream) => {
       console.log('audiostream', remoteStream);
     });
+
+    // ----
+    peer.on(ParticipantEvent.AudioStreamAdded, (event: any) => {
+      console.log(ParticipantEvent.AudioStreamAdded);
+    });
+    peer.on(ParticipantEvent.AudioStreamRemoved, (event: any) => {
+      console.log(ParticipantEvent.AudioStreamRemoved);
+    });
+    peer.on(ParticipantEvent.CursorUpdate, (event: any) => {
+      console.log(ParticipantEvent.CursorUpdate);
+    });
+    peer.on(ParticipantEvent.StateUpdate, (event: any) => {
+      console.log(ParticipantEvent.StateUpdate);
+    });
+    peer.on(ParticipantEvent.StateUpdate, (event: any) => {
+      console.log(ParticipantEvent.StateUpdate);
+    });
+    peer.on(ParticipantEvent.TrackMuted, (event: any) => {
+      console.log(ParticipantEvent.TrackMuted);
+    });
+    peer.on(ParticipantEvent.TrackUnmuted, (event: any) => {
+      console.log(ParticipantEvent.TrackUnmuted);
+    });
   }
 
   removePeerAudio(patp: Patp) {
     const peerAudio = document.getElementById(`voice-stream-${patp}`);
     peerAudio && document.getElementById('audio-root')?.removeChild(peerAudio);
-  }
-
-  reset() {
-    this.participants.forEach((peer: RemoteParticipant) => {
-      this.removePeerAudio(peer.patp);
-    });
   }
 
   disconnect() {

@@ -9,7 +9,6 @@ import { detectSilence } from './utils';
 export default class LocalAudioTrack extends LocalTrack {
   /** @internal */
   stopOnMute: boolean = false;
-
   private prevStats?: AudioSenderStats;
 
   constructor(

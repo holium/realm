@@ -102,14 +102,20 @@ export const RoomsAppState = types
     // setInvited
     // setKicked
     // newChat
-    handleRoomUpdate(room: RoomsModelType) {
-      // console.log('inside handleRoomUpdate');
+    handleRoomUpdate(room: RoomsModelType, diff: any) {
       // set room view if we just created this room
       let knownRoom = self.knownRooms.get(room.id);
+
       if (!knownRoom && room.creator === self.ourPatp) {
         this.setLiveRoom(room);
         this.setView('room');
       } else {
+        // if (diff.enter) {
+        //   room.present.push(diff.enter);
+        // }
+        // if (diff.exit) {
+        //   room.present.remove(diff.exit);
+        // }
         this.setLiveRoom(room);
       }
     },

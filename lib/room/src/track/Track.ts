@@ -2,6 +2,8 @@ import { EventEmitter } from 'events';
 import type TypedEventEmitter from 'typed-emitter';
 import { TrackEvent } from './events';
 import { isFireFox, isSafari, isWeb } from '../utils';
+import RemoteTrackPublication from './RemoteTrackPublication';
+import RemoteTrack from './RemoteTrack';
 
 const BACKGROUND_REACTION_DELAY = 5000;
 
@@ -11,11 +13,8 @@ const recycledElements: Array<HTMLAudioElement> = [];
 
 export class Track extends (EventEmitter as new () => TypedEventEmitter<TrackEventCallbacks>) {
   kind: Track.Kind;
-
   attachedElements: HTMLMediaElement[] = [];
-
   isMuted: boolean = false;
-
   source: Track.Source;
 
   /**
@@ -34,13 +33,9 @@ export class Track extends (EventEmitter as new () => TypedEventEmitter<TrackEve
   streamState: Track.StreamState = Track.StreamState.Active;
 
   protected _mediaStreamTrack: MediaStreamTrack;
-
   protected _mediaStreamID: string;
-
   protected isInBackground: boolean;
-
   private backgroundTimeout: ReturnType<typeof setTimeout> | undefined;
-
   protected _currentBitrate: number = 0;
 
   protected constructor(mediaTrack: MediaStreamTrack, kind: Track.Kind) {
@@ -225,75 +220,6 @@ export class Track extends (EventEmitter as new () => TypedEventEmitter<TrackEve
   }
 }
 
-/** @internal */
-export function attachToElement(
-  track: MediaStreamTrack,
-  element: HTMLMediaElement
-) {
-  let mediaStream: MediaStream;
-  if (element.srcObject instanceof MediaStream) {
-    mediaStream = element.srcObject;
-  } else {
-    mediaStream = new MediaStream();
-  }
-
-  // check if track matches existing track
-  let existingTracks: MediaStreamTrack[];
-  if (track.kind === 'audio') {
-    existingTracks = mediaStream.getAudioTracks();
-  } else {
-    existingTracks = mediaStream.getVideoTracks();
-  }
-  if (!existingTracks.includes(track)) {
-    existingTracks.forEach((et) => {
-      mediaStream.removeTrack(et);
-    });
-    mediaStream.addTrack(track);
-  }
-
-  // avoid flicker
-  if (element.srcObject !== mediaStream) {
-    element.srcObject = mediaStream;
-    if ((isSafari() || isFireFox()) && element instanceof HTMLVideoElement) {
-      // Firefox also has a timing issue where video doesn't actually get attached unless
-      // performed out-of-band
-      // Safari 15 has a bug where in certain layouts, video element renders
-      // black until the page is resized or other changes take place.
-      // Resetting the src triggers it to render.
-      // https://developer.apple.com/forums/thread/690523
-      setTimeout(() => {
-        element.srcObject = mediaStream;
-        // Safari 15 sometimes fails to start a video
-        // when the window is backgrounded before the first frame is drawn
-        // manually calling play here seems to fix that
-        element.play().catch(() => {
-          /* do nothing */
-        });
-      }, 0);
-    }
-  }
-  element.autoplay = true;
-  if (element instanceof HTMLVideoElement) {
-    element.playsInline = true;
-  }
-}
-
-/** @internal */
-export function detachTrack(
-  track: MediaStreamTrack,
-  element: HTMLMediaElement
-) {
-  if (element.srcObject instanceof MediaStream) {
-    const mediaStream = element.srcObject;
-    mediaStream.removeTrack(track);
-    if (mediaStream.getTracks().length > 0) {
-      element.srcObject = mediaStream;
-    } else {
-      element.srcObject = null;
-    }
-  }
-}
-
 export namespace Track {
   export enum Kind {
     Audio = 'audio',
@@ -321,6 +247,76 @@ export namespace Track {
   }
 }
 
+/** @internal */
+export function attachToElement(
+  track: MediaStreamTrack,
+  element: HTMLMediaElement
+) {
+  let mediaStream: MediaStream;
+  if (element.srcObject instanceof MediaStream) {
+    mediaStream = element.srcObject;
+  } else {
+    mediaStream = new MediaStream();
+  }
+
+  // check if track matches existing track
+  let existingTracks: MediaStreamTrack[];
+  if (track.kind === 'audio') {
+    existingTracks = mediaStream.getAudioTracks();
+  } else {
+    existingTracks = mediaStream.getVideoTracks();
+  }
+  if (!existingTracks.includes(track)) {
+    existingTracks.forEach((et) => {
+      mediaStream.removeTrack(et);
+    });
+    mediaStream.addTrack(track);
+  }
+
+  //  avoid flicker
+  if (element.srcObject !== mediaStream) {
+    element.srcObject = mediaStream;
+    if ((isSafari() || isFireFox()) && element instanceof HTMLVideoElement) {
+      // Firefox also has a timing issue where video doesn't actually get attached unless
+      // performed out-of-band
+      // Safari 15 has a bug where in certain layouts, video element renders
+      // black until the page is resized or other changes take place.
+      // Resetting the src triggers it to render.
+      // https://developer.apple.com/forums/thread/690523
+      setTimeout(() => {
+        element.srcObject = mediaStream;
+        // Safari 15 sometimes fails to start a video
+        // when the window is backgrounded before the first frame is drawn
+        // manually calling play here seems to fix that
+        element.play().catch(() => {
+          /* do nothing */
+        });
+      }, 0);
+    }
+  }
+  // TODO autoplay
+  element.autoplay = true;
+  if (element instanceof HTMLVideoElement) {
+    element.playsInline = true;
+  }
+}
+
+/** @internal */
+export function detachTrack(
+  track: MediaStreamTrack,
+  element: HTMLMediaElement
+) {
+  if (element.srcObject instanceof MediaStream) {
+    const mediaStream = element.srcObject;
+    mediaStream.removeTrack(track);
+    if (mediaStream.getTracks().length > 0) {
+      element.srcObject = mediaStream;
+    } else {
+      element.srcObject = null;
+    }
+  }
+}
+
 export type TrackEventCallbacks = {
   message: () => void;
   muted: (track?: any) => void;
@@ -337,4 +333,9 @@ export type TrackEventCallbacks = {
   elementDetached: (element: HTMLMediaElement) => void;
   upstreamPaused: (track: any) => void;
   upstreamResumed: (track: any) => void;
+  subscribed: (track: RemoteTrack, publication: RemoteTrackPublication) => void;
+  unsubscribed: (
+    previousTrack: RemoteTrack,
+    publication: RemoteTrackPublication
+  ) => void;
 };

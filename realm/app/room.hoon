@@ -65,7 +65,7 @@
       [%room %local ~]
     :_  this
       ?~  my-room  ~
-      [%give %fact [/room/local]~ %rooms-update !>([%room u.my-room])]~
+      [%give %fact [/room/local]~ %rooms-update !>([%room u.my-room [%other ~]])]~
   ==
 ++  on-poke
   |=  [=mark =vase]

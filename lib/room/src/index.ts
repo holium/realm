@@ -14,4 +14,4 @@ export { LocalTrack } from './track';
 
 export type { ConnectionState } from './participant/Participant';
 
-export { PeerConnectionState } from './types';
+export { PeerConnectionState, RoomState } from './types';

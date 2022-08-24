@@ -1,10 +1,12 @@
 export enum ParticipantEvent {
-  Failed = 'failed',
-  New = 'new',
-  Closed = 'closed',
+  // PeerConnectionState
   Disconnected = 'disconnected',
   Connecting = 'connecting',
   Connected = 'connected',
+  Failed = 'failed',
+  New = 'new',
+  Closed = 'closed',
+  // ParticipantEvents
   Reconnecting = 'reconnecting',
   StateUpdate = 'stateUpdate',
   CursorUpdate = 'cursorUpdate',
@@ -19,7 +21,10 @@ export enum ParticipantEvent {
   ParticipantMetadataChanged = 'participantMetadataChanged',
   IsSpeakingChanged = 'isSpeakingChanged',
   ConnectionQualityChanged = 'connectionQualityChanged',
-
+  TrackUnpublished = 'trackUnpublished',
+  TrackPublished = 'trackPublished',
+  TrackSubscribed = 'trackSubscribed',
+  TrackUnsubscribed = 'trackUnsubscribed',
   // Connected = 'connected',
   // Disconnected = 'disconnected',
   // Resuming = 'resuming',

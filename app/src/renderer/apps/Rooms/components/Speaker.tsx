@@ -56,12 +56,16 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       disabled: livePeer?.connectionState === 'connected',
       onClick: (evt: any) => {
         console.log(livePeer);
-        livePeer && LiveRoom.connectParticipant(livePeer);
+        livePeer && LiveRoom.reconnectPeer(livePeer);
         evt.stopPropagation();
         // DesktopActions.toggleDevTools();
       },
     },
-    {
+  ];
+
+  if (type !== 'host') {
+    contextMenuItems.push({
+      // @ts-ignore
       style: { color: '#FD4E4E' },
       id: `room-speaker-${person}-kick`,
       label: 'Kick',
@@ -69,8 +73,8 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       onClick: (evt: any) => {
         LiveRoom.kickParticipant(person);
       },
-    },
-  ];
+    });
+  }
 
   useEffect(() => {
     LiveRoom.on('started', () => {
@@ -167,7 +171,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
           </Flex>
           {sublabel}
         </Flex>
-        {type !== 'host' && (
+        {person !== ship?.patp && (
           <ContextMenu
             isComponentContext
             textColor={desktop.theme.textColor}

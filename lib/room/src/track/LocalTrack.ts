@@ -14,11 +14,8 @@ export class LocalTrack extends Track {
   codec?: VideoCodec;
 
   protected constraints: MediaTrackConstraints;
-
   protected reacquireTrack: boolean;
-
   protected providedByUser: boolean;
-
   protected muteQueue: Queue;
 
   protected constructor(

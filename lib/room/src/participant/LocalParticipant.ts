@@ -47,24 +47,36 @@ export class LocalParticipant extends Participant {
     const tracks = (await this.setMicrophoneEnabled(
       true
     )) as LocalTrackPublication[];
-    tracks.forEach((track: LocalTrackPublication) => {
-      if (track.kind === Track.Kind.Audio) {
-        // this.audioTracks.set(track.trackName, track);
-        track.on(TrackEvent.Muted, () => {
-          console.log('in local participant, muting');
-          track.track?.detach();
-          this.emit(ParticipantEvent.MuteToggled, true);
-        });
-        track.on(TrackEvent.Unmuted, () => {
-          console.log('in local participant, unmuting');
-          track.track?.attach();
-          this.emit(ParticipantEvent.MuteToggled, false);
-        });
-      }
-      // this.tracks.set(track.trackName, track);
-    });
-
+    // There could be a case where we've already added and connect is called again
+    if (tracks) {
+      tracks.forEach((track: LocalTrackPublication) => {
+        if (track.kind === Track.Kind.Audio) {
+          // this.audioTracks.set(track.trackName, track);
+          track.on(TrackEvent.Muted, () => {
+            console.log('in local participant, muting');
+            track.track?.detach();
+            this.emit(ParticipantEvent.MuteToggled, true);
+          });
+          track.on(TrackEvent.Unmuted, () => {
+            console.log('in local participant, unmuting');
+            track.track?.attach();
+            this.emit(ParticipantEvent.MuteToggled, false);
+          });
+        }
+      });
+    }
     this.isLoaded = true;
+  }
+
+  disconnect() {
+    this.tracks.forEach((track: LocalTrackPublication) => {
+      track.removeAllListeners();
+      track.track?.detach();
+    });
+    this.audioTracks = new Map();
+    this.videoTracks = new Map();
+    this.tracks = new Map();
+    this.removeAllListeners();
   }
 
   muteAudioTracks() {
@@ -213,7 +225,10 @@ export class LocalParticipant extends Participant {
       //   mediaStreamTrack,
       //   Track.Kind.Audio
       // );
-      let track = new LocalAudioTrack(mediaStreamTrack, constraints);
+      let track = new LocalAudioTrack(
+        mediaStreamTrack,
+        mergedConstraints.audio
+      );
       track.source = Track.Source.Microphone;
       track.mediaStream = stream;
       return track;
@@ -237,7 +252,7 @@ export class LocalParticipant extends Participant {
     if (track instanceof MediaStreamTrack) {
       switch (track.kind) {
         case 'audio':
-          track = new LocalAudioTrack(track, undefined, true);
+          track = new LocalAudioTrack(track, DEFAULT_AUDIO_CONSTRAINTS, true);
           break;
         default:
           throw new Error(`unsupported MediaStreamTrack kind ${track.kind}`);
@@ -301,7 +316,7 @@ export class LocalParticipant extends Participant {
     const publication = new LocalTrackPublication(
       Track.Kind.Audio,
       // @ts-ignore
-      { sid: track.sid!, name: 'our-audio' },
+      { sid: track.id, source: track.source, name: 'our-audio' },
       track
     );
     // save options for when it needs to be republished again

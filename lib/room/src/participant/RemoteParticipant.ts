@@ -5,10 +5,12 @@ import { DataPacket } from '../helpers/data-packet';
 import { Room } from '../room';
 import { Patp } from '../types';
 import { LocalTrack } from '../track/LocalTrack';
+import { TrackEvent } from '../track/events';
 import LocalAudioTrack from '../track/LocalAudioTrack';
 import RemoteTrackPublication from '../track/RemoteTrackPublication';
 import { Track } from '../track/Track';
 import RemoteAudioTrack from '../track/RemoteAudioTrack';
+import RemoteTrack from '../track/RemoteTrack';
 
 // const lossyDataChannel = '_lossy';
 // const dataChannel = '_reliable';
@@ -118,6 +120,11 @@ export class RemoteParticipant extends Participant {
     );
   }
 
+  async removeAudioTrack() {
+    console.log('removing audio track', this.sender);
+    this.sender && this.peerConn.removeTrack(this.sender);
+  }
+
   async replaceAudioTrack(track: MediaStreamTrack) {
     this.sender && this.peerConn.removeTrack(this.sender);
     this.sender = this.peerConn.addTrack(track);
@@ -131,8 +138,8 @@ export class RemoteParticipant extends Participant {
    * @param audioRef
    */
   async registerAudio(audioRef: HTMLAudioElement) {
+    audioRef.setAttribute('id', `voice-${this.patp}`);
     this.audioRef = audioRef;
-    this.audioRef.setAttribute('id', `voice-${this.patp}`);
 
     // Clear any previous listeners
     this.peerConn.ontrack = null;
@@ -151,11 +158,7 @@ export class RemoteParticipant extends Participant {
     this.peerConn.onicegatheringstatechange = this.onGathering;
     this.peerConn.onnegotiationneeded = this.onNegotiation;
     this.peerConn.ondatachannel = (evt: RTCDataChannelEvent) => {
-      console.log(evt.channel);
       evt.channel.send(JSON.stringify({ type: 'connected', data: null }));
-      // evt.channel.onmessage = handleReceiveMessage;
-      // evt.channel.onopen = handleReceiveChannelStatusChange;
-      // evt.channel.onclose = handleReceiveChannelStatusChange;
       this.dataChannel = evt.channel;
       this.dataChannel.onmessage = this.handleDataMessage;
       this.dataChannel.onopen = (evt: any) => {
@@ -244,7 +247,7 @@ export class RemoteParticipant extends Participant {
       );
       this.tracks.set(remotePub.trackName, remotePub);
       this.audioTracks.set(remotePub.trackName, remotePub);
-      remotePub.track?.attach(this.audioRef);
+      remotePub.track?.attach();
       remotePub.setSubscribed(true);
       remotePub.setEnabled(true);
     });
@@ -277,36 +280,12 @@ export class RemoteParticipant extends Participant {
   protected addTrackPublication(publication: RemoteTrackPublication) {
     super.addTrackPublication(publication);
 
-    // // register action events
-    // publication.on(
-    //   TrackEvent.UpdateSettings,
-    //   (settings: UpdateTrackSettings) => {
-    //     log.debug('send update settings', settings);
-    //     this.signalClient.sendUpdateTrackSettings(settings);
-    //   }
-    // );
-    // publication.on(TrackEvent.UpdateSubscription, (sub: UpdateSubscription) => {
-    //   sub.participantTracks.forEach((pt) => {
-    //     pt.participantSid = this.sid;
-    //   });
-    //   this.signalClient.sendUpdateSubscription(sub);
-    // });
-    // publication.on(
-    //   TrackEvent.SubscriptionPermissionChanged,
-    //   (status: TrackPublication.SubscriptionStatus) => {
-    //     this.emit(
-    //       ParticipantEvent.TrackSubscriptionPermissionChanged,
-    //       publication,
-    //       status
-    //     );
-    //   }
-    // );
-    // publication.on(TrackEvent.Subscribed, (track: RemoteTrack) => {
-    //   this.emit(ParticipantEvent.TrackSubscribed, track, publication);
-    // });
-    // publication.on(TrackEvent.Unsubscribed, (previousTrack: RemoteTrack) => {
-    //   this.emit(ParticipantEvent.TrackUnsubscribed, previousTrack, publication);
-    // });
+    publication.on(TrackEvent.Subscribed, (track: RemoteTrack) => {
+      this.emit(ParticipantEvent.TrackSubscribed, track, publication);
+    });
+    publication.on(TrackEvent.Unsubscribed, (previousTrack: RemoteTrack) => {
+      this.emit(ParticipantEvent.TrackUnsubscribed, previousTrack, publication);
+    });
   }
 
   onConnectionChange(event: Event) {
@@ -373,18 +352,18 @@ export class RemoteParticipant extends Participant {
     switch (connection.iceGatheringState!) {
       case 'gathering':
         /* collection of candidates has begun */
-        console.log('gathering');
+        // console.log('gathering');
         break;
       case 'complete':
         /* collection of candidates is finished */
-        console.log('complete');
+        // console.log('complete');
         // this.waitInterval;
         break;
     }
   }
 
   async onNegotiation(event: Event) {
-    console.log('negneeded', event);
+    // console.log('negneeded', event);
   }
 
   /**
@@ -431,7 +410,6 @@ export class RemoteParticipant extends Participant {
     }
     if (buffer.type === 'participant-metadata') {
       const data = buffer.data as ParticipantUpdate;
-      console.log('participant-update', buffer);
       // const peer = this.room.participants.get(data.patp)!;
       this.audioTracks.forEach((publication: RemoteTrackPublication) => {
         if (data.muted) {
@@ -467,6 +445,63 @@ export class RemoteParticipant extends Participant {
   reset() {
     this.peerConn = new RTCPeerConnection();
     this.peerConn.setConfiguration(this.config);
+  }
+
+  reconnect() {
+    this.peerConn.restartIce();
+  }
+
+  async cleanup() {
+    this.tracks.forEach((remotePub: RemoteTrackPublication) => {
+      remotePub.track?.detach(this.audioRef);
+      remotePub.removeAllListeners();
+      console.log('cleainign', this.patp, remotePub.kind, this.audioLevel);
+      if (remotePub.kind === Track.Kind.Audio) {
+        const toRemove = document.getElementById(`voice-${this.patp}`)!;
+        const audioRoot = toRemove?.parentElement!;
+        console.log('removing audio tag', toRemove, audioRoot);
+        audioRoot.removeChild(toRemove);
+      }
+      this.unpublishTrack(remotePub.trackSid, true);
+    });
+    this.tracks.clear();
+    this.audioTracks.clear();
+    this.videoTracks.clear();
+    await this.removeAudioTrack();
+    this.removeAllListeners();
+    this.peerConn.close();
+  }
+
+  /** @internal */
+  unpublishTrack(sid: Track.SID, sendUnpublish?: boolean) {
+    const publication = this.tracks.get(sid) as RemoteTrackPublication;
+    if (!publication) {
+      return;
+    }
+
+    this.tracks.delete(sid);
+
+    // remove from the right type map
+    switch (publication.kind) {
+      case Track.Kind.Audio:
+        this.audioTracks.delete(sid);
+        break;
+      case Track.Kind.Video:
+        this.videoTracks.delete(sid);
+        break;
+      default:
+        break;
+    }
+
+    // also send unsubscribe, if track is actively subscribed
+    const { track } = publication;
+    if (track) {
+      track.stop();
+      publication.setTrack(undefined);
+    }
+    if (sendUnpublish) {
+      this.emit(ParticipantEvent.TrackUnpublished, publication);
+    }
   }
 }
 

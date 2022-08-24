@@ -83,7 +83,6 @@ export class TrackPublication extends EventEmitter {
     this.trackSid = info.sid;
     this.trackName = info.name;
     this.source = info.source;
-    console.log(info);
     this.mimeType = info.mimeType;
     if (this.kind === Kind.Video && info.width > 0) {
       this.dimensions = {
@@ -93,7 +92,6 @@ export class TrackPublication extends EventEmitter {
       this.simulcasted = info.simulcast;
     }
     this.trackInfo = info;
-    console.log('update publication info', { info });
   }
 }
 

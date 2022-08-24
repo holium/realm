@@ -123,7 +123,17 @@ export class RoomsService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    RoomsApi.watchUpdates(this.core.conduit!, this.state!, () => {});
+    RoomsApi.watchUpdates(
+      this.core.conduit!,
+      this.state!,
+      (diff: RoomDiff, room: RoomsModelType) => {
+        this.core.mainWindow.webContents.send(
+          'realm.on-room-update',
+          diff,
+          room
+        );
+      }
+    );
   }
 
   get snapshot() {
@@ -205,3 +215,5 @@ export class RoomsService extends BaseService {
   }
   // this.state?.setIsMouseInWebview(mouseInWebview);
 }
+
+export type RoomDiff = { enter: Patp } | { exit: Patp };

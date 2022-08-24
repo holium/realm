@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { WindowManager } from './WindowManager';
@@ -6,6 +6,7 @@ import { HomePane } from './components/Home';
 // import { useMst } from 'renderer/logic/store';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
+import { LiveRoom } from 'renderer/apps/store';
 
 type OSFrameProps = {
   hasLoaded?: boolean;
@@ -16,6 +17,12 @@ type OSFrameProps = {
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
   const { hasLoaded } = props;
   const { desktop } = useServices();
+
+  useEffect(() => {
+    () => {
+      LiveRoom.leave();
+    };
+  }, []);
 
   return hasLoaded ? (
     <Fill>
