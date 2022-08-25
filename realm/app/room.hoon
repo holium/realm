@@ -14,6 +14,7 @@
   $:  %0
       my-room=(unit room:store)
       provider=(unit ship)
+      outstanding-request=_|
   ==
 --
 %-  agent:dbug
@@ -140,12 +141,28 @@
     %logout         logout
     %exit           (exit act)
     %chat           (chat +.act)
+    %request        (request act)
+    %request-all    (request-all act)
     %set-provider   (set-provider +.act)
   ==
   ::
     ++  exit
       |=  act=action:store
       =.  my-room  ~
+      (fwd-to-provider act)
+    ++  request
+      |=  act=action:store
+      :: disabled for now because
+      :: client UI can't clearly tell the difference between a requested room and an updated room.
+      :: also its not clearly useful for the realm UI.
+      ::
+      `state
+    ++  request-all
+      |=  act=action:store
+      ?:  outstanding-request
+        :: ~&  >>>  'room request blocked. still awaiting response to a previous request.'
+        `state
+      =.  outstanding-request  &
       (fwd-to-provider act)
     ++  logout
       =/  dad       +.provider
@@ -201,6 +218,9 @@
       :: set new provider
       =.  provider
         [~ new-provider]
+      ::
+      :: reset outstanding-request
+      =.  outstanding-request  |
       ::
       :: exit room remotely
       ::  (if applicable)
@@ -277,6 +297,7 @@
     ++  rooms
       |=  rooms=(set room:store)
       ?>  is-provider
+      =.  outstanding-request  |
       :: find and update my-room
       ::
       :: look up room by @p
