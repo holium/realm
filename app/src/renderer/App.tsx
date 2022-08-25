@@ -51,7 +51,7 @@ export const App: FC = observer(() => {
           <ServiceProvider value={servicesStore}>
             {mouseMemo}
             {shellMemo}
-            <MultiplayerMouse />
+            {/* <MultiplayerMouse /> */}
             <div id="portal-root" />
           </ServiceProvider>
         </MotionConfig>

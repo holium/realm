@@ -1,16 +1,16 @@
-/-  store=spaces
+/-  store=invite
 /+  *invite
 ::
-|_  invite-view=invite-view:store
+|_  invite-view=view:store
 ++  grad  %noun
 ++  grow
   |%
   ++  noun  invite-view
-  ++  json  (invite-view:enjs invite-view)
+  ++  json  (view:enjs invite-view)
   --
 ::
 ++  grab
   |%
-  ++  noun  invite-view:store
+  ++  noun  view:store
   --
 --

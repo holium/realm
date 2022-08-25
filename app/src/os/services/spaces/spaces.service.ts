@@ -18,7 +18,7 @@ import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
 import { BazaarStore } from './models/bazaar';
 import { PassportsApi } from '../../api/passports';
-import { InvitationsModel } from './models/invitations';
+// import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
 import { RoomsApi } from '../../api/rooms';
@@ -38,10 +38,10 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
-    invitations: InvitationsModel.create({
-      outgoing: {},
-      incoming: {},
-    }),
+    // invitations: InvitationsModel.create({
+    //   outgoing: {},
+    //   incoming: {},
+    // }),
     bazaar: BazaarStore.create({}),
   };
 
@@ -135,7 +135,6 @@ export class SpacesService extends BaseService {
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
     // Temporary setup
     this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
-
     // Get the initial scry
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
     this.state!.initialScry(spaces, persistedState, patp);

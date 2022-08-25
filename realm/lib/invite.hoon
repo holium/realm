@@ -110,8 +110,7 @@
     ?-  -.view
         %invitations
       :-  %invitations
-      %-  pairs
-      :~  [%invites (invitations:encode invites.view)]
+      (invitations:encode invites.view)
       ==
     ==
   --

@@ -13,6 +13,13 @@ export const PassportsApi = {
     });
     return response.members;
   },
+  getVisas: async (conduit: Urbit) => {
+    const response = await conduit.scry({
+      app: 'passports',
+      path: 'visas', // the spaces scry is at the root of the path
+    });
+    return response.invitations;
+  },
   /**
    * inviteMember: invite a member to a space
    *

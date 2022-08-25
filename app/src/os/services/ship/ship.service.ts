@@ -31,9 +31,12 @@ import { FriendsStore, FriendsType } from './models/friends';
 import { NotificationsApi } from '../../api/notifications';
 import { NotificationsStore, NotificationsType } from './models/notifications';
 import { SlipService } from '../slip.service';
+import { VisaModel, VisaModelType } from '../spaces/models/invitations';
+import { PassportsApi } from '../../api/passports';
 
 type ShipModels = {
   friends: FriendsType;
+  invitations: VisaModelType;
 };
 
 /**
@@ -45,6 +48,10 @@ export class ShipService extends BaseService {
   private ourGroups: any[] = [];
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
+    invitations: VisaModel.create({
+      outgoing: {},
+      incoming: {},
+    }),
   };
   private metadataStore: {
     groups: { [key: string]: any };
@@ -140,7 +147,7 @@ export class ShipService extends BaseService {
   }
 
   async subscribe(ship: string, shipInfo: any) {
-    return new Promise<ShipModelType>((resolve, reject) => {
+    return new Promise<ShipModelType>(async (resolve, reject) => {
       // TODO password protect data
       this.db = new Store<ShipModelType>({
         name: 'ship',
@@ -243,6 +250,9 @@ export class ShipService extends BaseService {
         this.state?.loader.set('loaded');
         resolve(this.state!);
       });
+
+      const invitations = await PassportsApi.getVisas(this.core.conduit!);
+      this.models.invitations.initial(invitations);
 
       this.services.slip?.subscribe();
       this.rooms?.onLogin(ship);

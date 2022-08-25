@@ -125,6 +125,12 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
+    ::  ~/scry/passports/visas.json
+    [%x %visas ~]
+      :: =/  visas   (~(got by invitations.state) [host space-pth])
+      :: ?~  passports      ``json+!>(~)
+      ``invite-view+!>([%invitations invitations.state])
+    ::
     ::  ~/scry/passports/~zod/our/members.json
       [%x @ @ %members ~]
         =/  host        `@p`(slav %p i.t.path)
