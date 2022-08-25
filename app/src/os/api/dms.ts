@@ -6,6 +6,7 @@ import { patp2dec } from 'urbit-ob';
 import { ShipModelType } from '../services/ship/models/ship';
 import { PostType } from '../types';
 import { ISession } from '../';
+import { ChatStoreType } from '../services/ship/models/dms';
 
 export const DmApi = {
   getDMs: async (ship: string, conduit: Urbit) => {
@@ -15,8 +16,9 @@ export const DmApi = {
     });
     return response['graph-update']['add-graph']['graph'];
   },
-  updates: (conduit: Urbit, shipState: ShipModelType) => {
-    conduit.subscribe({
+  updates: (conduit: Urbit, chatStore: ChatStoreType): Promise<number> => {
+    const ship = `~${conduit.ship}`;
+    return conduit.subscribe({
       app: 'dm-hook',
       path: '/updates',
       event: async (data: any) => {
@@ -27,7 +29,7 @@ export const DmApi = {
           switch (action) {
             case 'pendings':
               const pendings: string[] = payload;
-              shipState.chat.setPendingDms(pendings);
+              chatStore.setPendingDms(pendings);
               break;
             case 'screen':
               // console.log('screen set');
@@ -38,14 +40,14 @@ export const DmApi = {
               const acceptedContact = `~${payload.accept}`;
               const response = await conduit.scry({
                 app: 'graph-store',
-                path: `/graph/${shipState.patp}/dm-inbox/${acceptedContact}`,
+                path: `/graph/${ship}/dm-inbox/${acceptedContact}`,
               });
-              const chat = shipState.chat.dms.get(acceptedContact);
+              const chat = chatStore.dms.get(acceptedContact);
               chat?.setDm(response['graph-update']['add-graph']['graph']);
               break;
             case 'decline':
               const declinedContact = `~${payload.decline}`;
-              shipState.chat.dms.delete(declinedContact);
+              chatStore.dms.delete(declinedContact);
               break;
             default:
               console.log('action', action);
@@ -57,8 +59,8 @@ export const DmApi = {
       quit: () => console.log('Kicked from subscription'),
     });
   },
-  graphUpdates: (conduit: Urbit, shipState: ShipModelType) => {
-    conduit.subscribe({
+  graphUpdates: (conduit: Urbit, chatStore: ChatStoreType): Promise<number> => {
+    return conduit.subscribe({
       app: 'graph-store',
       path: `/updates`,
       event: async (data: any) => {
@@ -66,7 +68,7 @@ export const DmApi = {
           const { resource, nodes } = data['graph-update']['add-nodes'];
           if (resource.name === 'dm-inbox') {
             const { post } = Object.values<{ post: PostType }>(nodes)[0];
-            const chatModel = shipState.chat.dms.get(post.author);
+            const chatModel = chatStore.dms.get(post.author);
             chatModel?.setDm(post);
             return;
           }

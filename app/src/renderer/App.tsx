@@ -19,10 +19,8 @@ import * as RealmMultiplayer from '@holium/realm-multiplayer';
 import { Presences } from './system/desktop/components/Multiplayer/Presences';
 import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
-import { ShellActions } from './logic/actions/shell';
-
 export const App: FC = observer(() => {
-  const { booted } = useCore();
+  const { booted, resuming } = useCore();
   const { desktop, shell } = useServices();
 
   const themeMode = desktop.theme.mode;
@@ -30,8 +28,10 @@ export const App: FC = observer(() => {
   // ShellActions.closeDialog();
   const shellMemo = useMemo(
     () => (booted ? <Shell /> : <div>Booting...</div>),
-    [booted]
+    [booted, resuming]
   );
+
+  // console.log('resuming', resuming);
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
@@ -51,7 +51,7 @@ export const App: FC = observer(() => {
           <ServiceProvider value={servicesStore}>
             {mouseMemo}
             {shellMemo}
-            <MultiplayerMouse />
+            {/* <MultiplayerMouse /> */}
             <div id="portal-root" />
           </ServiceProvider>
         </MotionConfig>

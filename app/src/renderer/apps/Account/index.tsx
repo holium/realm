@@ -88,7 +88,7 @@ export const AccountTrayApp: FC<ProfileProps> = (props: ProfileProps) => {
   // }, []);
   useEffect(() => {
     ShipActions.getNotifications(Date.now() * 1000, 10).then((items: any) => {
-      console.log(items);
+      // console.log(items);
       setNotifications(items);
     });
   }, []);

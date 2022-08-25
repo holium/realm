@@ -12,9 +12,9 @@ import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
-import { ShipModelType } from './services/ship/models/ship';
 import HoliumAPI from './api/holium';
 import { RoomsService } from './services/tray/rooms.service';
+import { getSnapshot } from 'mobx-state-tree';
 
 export interface ISession {
   ship: string;
@@ -24,6 +24,7 @@ export interface ISession {
 
 export class Realm extends EventEmitter {
   conduit?: Urbit;
+  private conduitOpen: boolean = false;
   readonly mainWindow: BrowserWindow;
   private session?: ISession;
   private db: Store<ISession>;
@@ -58,6 +59,7 @@ export class Realm extends EventEmitter {
       return ipcRenderer.invoke('core:send-action', action);
     },
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
+    onBoot: (callback: any) => ipcRenderer.on('realm.on-boot', callback),
     auth: AuthService.preload,
     ship: ShipService.preload,
     spaces: SpacesService.preload,
@@ -65,14 +67,16 @@ export class Realm extends EventEmitter {
     shell: ShellService.preload,
     onboarding: OnboardingService.preload,
     tray: {
-      rooms: RoomsService.preload
-    }
+      rooms: RoomsService.preload,
+    },
   };
 
   constructor(mainWindow: BrowserWindow) {
     super();
     this.mainWindow = mainWindow;
     this.onEffect = this.onEffect.bind(this);
+    this.onBoot = this.onBoot.bind(this);
+    this.onLogin = this.onLogin.bind(this);
     // Load session data
     this.db = new Store({
       name: 'realm.session',
@@ -80,6 +84,7 @@ export class Realm extends EventEmitter {
       fileExtension: 'lock',
     });
     if (this.db.size > 0) {
+      this.conduitOpen = false;
       this.setSession(this.db.store);
     }
     // Create an instance of all services
@@ -113,16 +118,25 @@ export class Realm extends EventEmitter {
     let shell = null;
     let membership = null;
     let bazaar = null;
+    let rooms = null;
+    let models = {};
+
     if (this.session) {
+      this.onEffect({
+        response: 'status',
+        data: 'boot:resuming',
+      });
       ship = this.services.ship.snapshot;
+      models = this.services.ship.modelSnapshots;
+      // chat = this.services.ship.models
       spaces = this.services.spaces.snapshot;
       desktop = this.services.desktop.snapshot;
       shell = this.services.shell.snapshot;
       bazaar = this.services.spaces.bazaarSnapshot;
       membership = this.services.spaces.membershipSnapshot;
+      rooms = this.services.ship.roomSnapshot;
     }
-    this.services.identity.auth.setLoader('loaded');
-    return {
+    const bootPayload = {
       auth: this.services.identity.auth.snapshot,
       onboarding: this.services.onboarding.snapshot,
       ship,
@@ -131,8 +145,14 @@ export class Realm extends EventEmitter {
       shell,
       bazaar,
       membership,
+      rooms,
+      models,
       loggedIn: this.session ? true : false,
     };
+    // Send boot payload to any listeners
+    this.onBoot(bootPayload);
+    this.services.identity.auth.setLoader('loaded');
+    return bootPayload;
   }
 
   get credentials() {
@@ -143,7 +163,10 @@ export class Realm extends EventEmitter {
     this.conduit = new Urbit(session.url, session.ship, session.cookie);
     this.conduit.open();
     this.conduit.onOpen = () => {
-      this.onLogin();
+      if (!this.conduitOpen) {
+        this.onLogin();
+      }
+      this.conduitOpen = true;
     };
     this.conduit.onRetry = () => console.log('on retry');
     this.conduit.onError = (err) => console.log('on err', err);
@@ -161,21 +184,26 @@ export class Realm extends EventEmitter {
   }
 
   clearSession(): void {
-    this.session = undefined;
-    this.db.clear();
     this.conduit?.reset();
+    this.conduit = undefined;
+    this.db.clear();
+    this.session = undefined;
+    this.conduitOpen = false;
   }
 
   async onLogin() {
     const sessionPatp = this.session?.ship!;
-    const ship: ShipModelType = await this.services.ship.subscribe(
+    const { ship, models } = await this.services.ship.subscribe(
       sessionPatp,
       this.session
     );
-    await this.services.spaces.load(sessionPatp, ship);
+    await this.services.spaces.load(sessionPatp, models.docket);
     this.services.identity.auth.setLoader('loaded');
     this.services.onboarding.reset();
-    this.mainWindow.webContents.send('realm.auth.on-log-in', toJS(ship));
+    this.mainWindow.webContents.send('realm.auth.on-log-in', {
+      ship: getSnapshot(ship),
+      models,
+    });
   }
 
   /**
@@ -201,6 +229,15 @@ export class Realm extends EventEmitter {
    */
   onEffect(data: any): void {
     this.mainWindow.webContents.send('realm.on-effect', data);
+  }
+
+  /**
+   * Sends boot data to client store
+   *
+   * @param data
+   */
+  onBoot(data: any): void {
+    this.mainWindow.webContents.send('realm.on-boot', data);
   }
 }
 

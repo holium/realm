@@ -91,14 +91,26 @@ export class RoomsService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
-    // this.core.conduit!.desk = 'realm';
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-ignore
+      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
+  }
 
+  async onLogin(ship: string) {
     this.state = RoomsAppState.create({
       currentView: 'list',
       knownRooms: {},
       invites: {},
-      ourPatp: `~${core.conduit!.ship}`,
+      ourPatp: ship,
     });
+
+    const patchEffect = {
+      model: getSnapshot(this.state),
+      resource: 'rooms',
+      response: 'initial',
+    };
+    this.core.onEffect(patchEffect);
 
     onPatch(this.state, (patch) => {
       const patchEffect = {
@@ -109,22 +121,17 @@ export class RoomsService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    const patchEffect = {
-      model: getSnapshot(this.state),
-      resource: 'rooms',
-      response: 'initial',
-    };
-    this.core.onEffect(patchEffect);
-
-    Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
-      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
-    });
-
     RoomsApi.watchUpdates(this.core.conduit!, this.state!, () => {});
-    //
+
     // TODO set provider to current space host?
     RoomsApi.setProvider(this.core.conduit!, '~' + this.core.conduit!.ship!);
+  }
+
+  removeHandlers() {
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-ignore
+      ipcMain.removeHandler(handlerName);
+    });
   }
 
   get snapshot() {

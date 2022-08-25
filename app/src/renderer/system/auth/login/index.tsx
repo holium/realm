@@ -76,9 +76,8 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
-    )
-      .catch((err) => console.warn(err))
-      .then(() => SoundActions.playLogin());
+    ).catch((err) => console.warn(err));
+    // .then(() => SoundActions.playLogin());
   };
 
   let colorProps = null;

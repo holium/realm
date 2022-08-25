@@ -20,7 +20,7 @@ export const DocketApi = {
     stateTree: any,
     conduit: Urbit,
     metadataStore: any
-  ) => {
+  ): Promise<number> => {
     const { apps } = stateTree;
 
     const key = `${ship}/${desk}`;

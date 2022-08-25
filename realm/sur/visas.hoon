@@ -37,6 +37,7 @@
 ::
 +$  view
   $%  [%invitations invites=invitations]
+      [%incoming invites=incoming-invitations]
   ==
 ::
 --

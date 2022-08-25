@@ -3,6 +3,7 @@ import { Urbit } from './../urbit/api';
 import { FriendsType } from '../services/ship/models/friends';
 import { Patp } from '../types';
 import { applySnapshot, castToSnapshot } from 'mobx-state-tree';
+import { Conduit } from '../urbit/api-2';
 
 export const FriendsApi = {
   /**
@@ -90,29 +91,41 @@ export const FriendsApi = {
    * @param conduit the conduit instance
    * @param state the state-tree
    */
-  watchFriends: (conduit: Urbit, state: ShipModelType): void => {
-    conduit.subscribe({
+  watchFriends: (
+    conduit: Urbit,
+    friendsStore: FriendsType
+  ): Promise<number> => {
+    // const RealmAPI = new Conduit(
+    //   conduit.url,
+    //   conduit.ship!,
+    //   conduit.cookie,
+    //   'realm'
+    // );
+    // RealmAPI.init();
+
+    // return 0;
+    return conduit.subscribe({
       app: 'friends',
       path: `/all`,
       event: async (data: any) => {
         // console.log(data);
         if (data['friends']) {
           // applySnapshot(state.friends.all, castToSnapshot(data['friends']));
-          state.friends.initial(data['friends']);
+          friendsStore.initial(data['friends']);
         }
         if (data['friend']) {
           const patp = data['friend'].ship;
           const update = data['friend'].friend;
-          state.friends.update(patp, update);
+          friendsStore.update(patp, update);
         }
         if (data['new-friend']) {
           const patp = data['new-friend'].ship;
           const friend = data['new-friend'].friend;
-          state.friends.add(patp, friend);
+          friendsStore.add(patp, friend);
         }
         if (data['bye-friend']) {
           const patp = data['bye-friend'].ship;
-          state.friends.remove(patp);
+          friendsStore.remove(patp);
         }
       },
       err: () => console.log('Subscription rejected'),

@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 
 import axios from 'axios';
@@ -21,12 +21,12 @@ import {
 } from './types';
 import { hexString } from './utils';
 import { SendAction, RealmAction } from './action-types';
-
+setMaxListeners(20);
 /**
  * A class for interacting with an urbit ship, given its URL and code
  */
 export class Urbit extends EventEmitter {
-  private url: string = '';
+  url: string = '';
   /**
    * UID will be used for the channel: The current unix time plus a random hex string
    */
@@ -87,7 +87,7 @@ export class Urbit extends EventEmitter {
   /**
    * If verbose, logs output eagerly.
    */
-  verbose?: boolean;
+  verbose?: boolean = false;
 
   /**
    * number of consecutive errors in connecting to the eventsource
@@ -250,14 +250,14 @@ export class Urbit extends EventEmitter {
           console.log('Received SSE: ', event);
         }
 
-        const parsedEvent = JSON.parse(event.data);
-        // console.log(event);
-        // console.log('Received SSE: ', parsedEvent);
-        if (!parsedEvent.id) return;
-        this.lastEventId = parseInt(parsedEvent.id, 10);
-        if (this.lastEventId - this.lastAcknowledgedEventId > 20) {
-          this.ack(this.lastEventId);
+        const eventId = parseInt(event.id, 10);
+        if (eventId - this.lastAcknowledgedEventId > 20) {
+          this.ack(eventId);
         }
+        // this.lastEventId = parseInt(parsedEvent.id, 10);
+        // if (this.lastEventId - this.lastAcknowledgedEventId > 20) {
+        //   this.ack(this.lastEventId);
+        // }
 
         if (event.data && JSON.parse(event.data)) {
           const data: any = JSON.parse(event.data);
@@ -343,8 +343,14 @@ export class Urbit extends EventEmitter {
     this.uid = `${Math.floor(Date.now() / 1000)}-${hexString(6)}`;
     this.lastEventId = 0;
     this.lastAcknowledgedEventId = 0;
+    // Array.from(this.outstandingSubscriptions.keys()).forEach(
+    //   (subId: number) => {
+    //     this.unsubscribe(subId);
+    //   }
+    // );
     this.outstandingSubscriptions = new Map();
     this.outstandingPokes = new Map();
+    this.removeAllListeners();
     this.sseClientInitialized = false;
   }
 
@@ -530,18 +536,14 @@ export class Urbit extends EventEmitter {
    */
   delete() {
     // if (isBrowser) {
-    //   navigator.sendBeacon(
-    //     this.channelUrl,
-    //     JSON.stringify([
-    //       {
-    //         action: 'delete',
-    //       },
-    //     ])
-    //   );
-    // } else {
-    //   // TODO
-    //   // this.sendMessage('delete');
-    // }
+    return this.sendJSONtoChannel({
+      id: this.getEventId(),
+      action: 'delete',
+    })
+      .then((res) => {
+        console.log('deleted', res);
+      })
+      .catch((err) => console.log('delete err', err));
   }
 
   /**

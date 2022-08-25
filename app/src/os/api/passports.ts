@@ -11,6 +11,7 @@ export const PassportsApi = {
       app: 'passports',
       path: `${path}/members`, // the spaces scry is at the root of the path
     });
+    // console.log(response.members);
     return response.members;
   },
   /**
@@ -69,7 +70,6 @@ export const PassportsApi = {
       app: 'passports',
       path: `/all`,
       event: async (data: any) => {
-        // console.log(data);
         if (data['members']) {
           state.initial(data['members']);
         }

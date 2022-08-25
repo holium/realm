@@ -80,6 +80,10 @@ export class AuthService extends BaseService {
     });
   }
 
+  get loggedIn() {
+    return this.state.isLoaded;
+  }
+
   get snapshot() {
     return getSnapshot(this.state);
   }
