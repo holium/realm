@@ -1,4 +1,4 @@
-import { Urbit } from './../urbit/api';
+import { Conduit } from '@holium/conduit';
 import { quickPoke } from '../lib/poke';
 import { toJS } from 'mobx';
 import { createPost } from '@urbit/api';
@@ -9,19 +9,19 @@ import { ISession } from '../';
 import { ChatStoreType } from '../services/ship/models/dms';
 
 export const DmApi = {
-  getDMs: async (ship: string, conduit: Urbit) => {
+  getDMs: async (ship: string, conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'graph-store',
       path: `/graph/${ship}/dm-inbox`,
     });
     return response['graph-update']['add-graph']['graph'];
   },
-  updates: (conduit: Urbit, chatStore: ChatStoreType): Promise<number> => {
+  updates: (conduit: Conduit, chatStore: ChatStoreType): Promise<any> => {
     const ship = `~${conduit.ship}`;
-    return conduit.subscribe({
+    return conduit.watch({
       app: 'dm-hook',
       path: '/updates',
-      event: async (data: any) => {
+      onEvent: async (data: any) => {
         if (data['dm-hook-action']) {
           const [action, payload] = Object.entries<any>(
             data['dm-hook-action']
@@ -55,15 +55,15 @@ export const DmApi = {
           }
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  graphUpdates: (conduit: Urbit, chatStore: ChatStoreType): Promise<number> => {
-    return conduit.subscribe({
+  graphUpdates: (conduit: Conduit, chatStore: ChatStoreType): Promise<any> => {
+    return conduit.watch({
       app: 'graph-store',
       path: `/updates`,
-      event: async (data: any) => {
+      onEvent: async (data: any) => {
         if (data['graph-update']) {
           const { resource, nodes } = data['graph-update']['add-nodes'];
           if (resource.name === 'dm-inbox') {
@@ -74,8 +74,8 @@ export const DmApi = {
           }
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   },
   sendDM: async (

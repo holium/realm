@@ -32,6 +32,6 @@ export type SubscribeParams = {
 
 export type SubscribeCallbacks = {
   onQuit?: (id: number) => void;
-  onEvent?: (data: any) => void;
+  onEvent?: (data: any, id?: number) => void;
   onError?: (e: any) => void;
 };

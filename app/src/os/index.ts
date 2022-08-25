@@ -2,7 +2,8 @@ import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
 // ---
-import Urbit from './urbit/api';
+// import Urbit from './urbit/api';
+import { Conduit } from '@holium/conduit';
 import { AuthService } from './services/identity/auth.service';
 import { MSTAction } from './types';
 import { cleanPath, fromPathString } from './lib/action';
@@ -23,7 +24,7 @@ export interface ISession {
 }
 
 export class Realm extends EventEmitter {
-  conduit?: Urbit;
+  conduit?: Conduit;
   private conduitOpen: boolean = false;
   readonly mainWindow: BrowserWindow;
   private session?: ISession;
@@ -159,17 +160,27 @@ export class Realm extends EventEmitter {
     return this.session;
   }
 
-  connect(session: ISession) {
-    this.conduit = new Urbit(session.url, session.ship, session.cookie);
-    this.conduit.open();
-    this.conduit.onOpen = () => {
-      if (!this.conduitOpen) {
-        this.onLogin();
-      }
-      this.conduitOpen = true;
-    };
-    this.conduit.onRetry = () => console.log('on retry');
-    this.conduit.onError = (err) => console.log('on err', err);
+  async connect(session: ISession) {
+    if (this.conduit) await this.conduit.closeChannel();
+    this.conduit = new Conduit(
+      session.url,
+      session.ship.substring(1),
+      session.cookie,
+      'realm'
+    );
+    this.conduit.init().then(() => {
+      this.onLogin();
+    });
+    // this.conduit = new Urbit(session.url, session.ship, session.cookie);
+    // this.conduit.open();
+    // this.conduit.onOpen = () => {
+    //   if (!this.conduitOpen) {
+    //     this.onLogin();
+    //   }
+    //   this.conduitOpen = true;
+    // };
+    // this.conduit.onRetry = () => console.log('on retry');
+    // this.conduit.onError = (err) => console.log('on err', err);
   }
 
   setSession(session: ISession): void {
@@ -184,7 +195,7 @@ export class Realm extends EventEmitter {
   }
 
   clearSession(): void {
-    this.conduit?.reset();
+    this.conduit?.closeChannel();
     this.conduit = undefined;
     this.db.clear();
     this.session = undefined;

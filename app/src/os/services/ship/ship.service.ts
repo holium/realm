@@ -215,14 +215,14 @@ export class ShipService extends BaseService {
     try {
       await new Promise<ShipModelType>(async (resolve, reject) => {
         try {
-          this.subscriptions.contacts = await this.core.conduit!.subscribe({
+          await this.core.conduit!.watch({
             app: 'contact-store',
             path: '/all',
-            event: (data: any) => {
+            onEvent: (data: any) => {
               this.models.contacts!.setInitial(data);
             },
-            err: () => console.log('Subscription rejected'),
-            quit: () => console.log('Kicked from subscription'),
+            onError: () => console.log('Subscription rejected'),
+            onQuit: () => console.log('Kicked from subscription'),
           });
         } catch {
           console.log('Subscription failed');
@@ -233,11 +233,9 @@ export class ShipService extends BaseService {
           this.models.friends
         );
 
-        ContactApi.getContact(ship, this.core.credentials!).then(
-          (value: any) => {
-            this.state!.setOurMetadata(value);
-          }
-        );
+        ContactApi.getContact(this.core.conduit!, ship).then((value: any) => {
+          this.state!.setOurMetadata(value);
+        });
 
         this.subscriptions.metadata = await MetadataApi.syncGraphMetadata(
           this.core.conduit!,

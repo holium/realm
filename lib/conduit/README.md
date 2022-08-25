@@ -1,7 +1,3 @@
-# @holium/realm/multiplayer
+# @holium/conduit
 
-The JS lib for developers to use in order to leverage the shared cursor feature set.
-
-## Setup
-
-<-- here -->
+A better SSE event handler for node

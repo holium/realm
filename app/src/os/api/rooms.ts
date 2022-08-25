@@ -1,13 +1,5 @@
-import { ShipModelType } from './../services/ship/models/ship';
-import { Urbit } from './../urbit/api';
-import { applySnapshot, castToReferenceSnapshot, cast } from 'mobx-state-tree';
-import {
-  RoomsAppStateType,
-  RoomsModel,
-  RoomsModelType,
-} from '../services/tray/rooms.model';
-import { saturate } from 'polished';
-import { m } from 'framer-motion';
+import { Conduit } from '@holium/conduit';
+import { RoomsAppStateType } from '../services/tray/rooms.model';
 import { Patp } from '@urbit/api';
 
 export const RoomsApi = {
@@ -33,7 +25,7 @@ export const RoomsApi = {
   //     // return response;
   //   },
 
-  getPresent: async (conduit: Urbit) => {
+  getPresent: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'room',
       path: '/present',
@@ -44,7 +36,7 @@ export const RoomsApi = {
     return response;
   },
 
-  getFull: async (conduit: Urbit) => {
+  getFull: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'room',
       path: '',
@@ -55,7 +47,7 @@ export const RoomsApi = {
     return response;
   },
 
-  getProvider: async (conduit: Urbit) => {
+  getProvider: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'room',
       path: '/provider',
@@ -63,7 +55,7 @@ export const RoomsApi = {
     return response;
   },
 
-  requestAllRooms: (conduit: Urbit) => {
+  requestAllRooms: (conduit: Conduit) => {
     conduit.poke({
       app: 'room',
       mark: 'rooms-action',
@@ -71,7 +63,7 @@ export const RoomsApi = {
     });
   },
 
-  setProvider: async (conduit: Urbit, patp: string) => {
+  setProvider: async (conduit: Conduit, patp: string) => {
     const response = await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
@@ -80,7 +72,7 @@ export const RoomsApi = {
     return;
   },
 
-  joinRoom: async (conduit: Urbit, roomId: string) => {
+  joinRoom: async (conduit: Conduit, roomId: string) => {
     const response = await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
@@ -90,7 +82,7 @@ export const RoomsApi = {
   },
 
   createRoom: async (
-    conduit: Urbit,
+    conduit: Conduit,
     roomId: string,
     access: string,
     title: string,
@@ -115,7 +107,7 @@ export const RoomsApi = {
   },
 
   leaveRoom: async (
-    conduit: Urbit,
+    conduit: Conduit,
     roomId: string,
     state: RoomsAppStateType
   ) => {
@@ -130,7 +122,7 @@ export const RoomsApi = {
     return;
   },
   deleteRoom: async (
-    conduit: Urbit,
+    conduit: Conduit,
     roomId: string,
     state: RoomsAppStateType
   ) => {
@@ -141,7 +133,7 @@ export const RoomsApi = {
     });
     return;
   },
-  invite: async (conduit: Urbit, roomId: string, patp: Patp) => {
+  invite: async (conduit: Conduit, roomId: string, patp: Patp) => {
     conduit.poke({
       app: 'room',
       mark: 'rooms-action',
@@ -161,14 +153,14 @@ export const RoomsApi = {
    * @param state the state-tree
    */
   watchUpdates: (
-    conduit: Urbit,
+    conduit: Conduit,
     state: RoomsAppStateType,
     onKick: () => void // TODO
   ): void => {
-    conduit.subscribe({
+    conduit.watch({
       app: 'room',
       path: `/room/local`,
-      event: async (data: any) => {
+      onEvent: async (data: any) => {
         let update = data['rooms-update'];
         if (!update) return;
         if (update['room']) {
@@ -194,8 +186,8 @@ export const RoomsApi = {
         }
       },
 
-      err: () => console.log('app/room/hoon Subscription rejected'),
-      quit: () => {
+      onError: () => console.log('app/room/hoon Subscription rejected'),
+      onQuit: () => {
         // TODO attempt to resubscribe
         // watchUpdates(conduit, state)
         console.log('Kicked from app/room/hoon subscription');

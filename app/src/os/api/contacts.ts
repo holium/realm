@@ -1,18 +1,13 @@
-import { ISession } from '../';
-import { Urbit } from '../urbit/api';
+import { Conduit } from '@holium/conduit';
 import { cleanNounColor, removeHash } from '../lib/color';
 
 export const ContactApi = {
-  getContact: async (ship: string, credentials: ISession) => {
-    const { url, cookie } = credentials;
+  getContact: async (conduit: Conduit, ship: string) => {
     try {
-      const conduit = new Urbit(url, ship, cookie);
-
       const response = await conduit.scry({
         app: 'contact-store',
         path: `/contact/${ship}`,
       });
-      conduit.delete();
 
       const contact = response['contact-update']?.add.contact;
 
@@ -25,15 +20,12 @@ export const ContactApi = {
       throw err;
     }
   },
-  saveContact: async (ship: string, credentials: ISession, data: any) => {
-    const { url, cookie } = credentials;
+  saveContact: async (conduit: Conduit, ship: string, data: any) => {
     const preparedData: any = {
       nickname: data.nickname,
       color: removeHash(data.color),
       avatar: data.avatar || '',
     };
-    const conduit = new Urbit(url, ship, cookie);
-    conduit.open();
     const editJson = Object.keys(preparedData).map((updateKey: string) => ({
       key: updateKey,
       data: preparedData[updateKey],
@@ -43,30 +35,26 @@ export const ContactApi = {
         (edit: any) =>
           new Promise(async (resolve, reject) => {
             try {
-              conduit.on('ready', async () => {
-                const response = await conduit.poke({
-                  app: 'contact-store',
-                  mark: 'contact-update-0',
-                  json: {
-                    ['edit']: {
-                      ship,
-                      'edit-field': {
-                        [edit.key]: edit.data,
-                      },
-                      timestamp: Date.now(),
+              const response = await conduit.poke({
+                app: 'contact-store',
+                mark: 'contact-update-0',
+                json: {
+                  ['edit']: {
+                    ship,
+                    'edit-field': {
+                      [edit.key]: edit.data,
                     },
+                    timestamp: Date.now(),
                   },
-                });
-                // console.log(response);
-                resolve(response);
+                },
               });
+              resolve(response);
             } catch (err) {
               reject(err);
             }
           })
       )
     );
-    conduit.delete();
     return {
       nickname: preparedData.nickname,
       color: `#${preparedData.color}`,

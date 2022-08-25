@@ -61,7 +61,10 @@ export class OnboardingService extends BaseService {
     },
 
     prepareCheckout(billingPeriod: string) {
-      return ipcRenderer.invoke('realm.onboarding.prepareCheckout', billingPeriod);
+      return ipcRenderer.invoke(
+        'realm.onboarding.prepareCheckout',
+        billingPeriod
+      );
     },
 
     completeCheckout() {
@@ -271,12 +274,8 @@ export class OnboardingService extends BaseService {
 
     console.log('get profile', castToSnapshot(this.state.ship));
 
-    const { url, cookie, patp } = this.state.ship;
-    const ourProfile = await ContactApi.getContact(patp, {
-      ship: patp,
-      url,
-      cookie: cookie!,
-    });
+    const { patp } = this.state.ship;
+    const ourProfile = await ContactApi.getContact(this.core.conduit!, patp);
 
     this.state.ship.setContactMetadata(ourProfile);
     return ourProfile;
@@ -304,8 +303,8 @@ export class OnboardingService extends BaseService {
     console.log('creds', credentials);
 
     const updatedProfile = await ContactApi.saveContact(
+      this.core.conduit!,
       patp,
-      credentials,
       profileData
     );
 

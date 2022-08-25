@@ -12,6 +12,9 @@ import {
   SubscribeParams,
 } from './types';
 
+// For now, set it to 20
+setMaxListeners(20);
+
 /**
  * Conduit
  *
@@ -135,7 +138,7 @@ export class Conduit extends EventEmitter {
           //
           case 'diff':
             if (this.watches.has(eventId)) {
-              this.watches.get(eventId)!.onEvent!(parsedData);
+              this.watches.get(eventId)!.onEvent!(parsedData.json, eventId);
             }
             const json = parsedData.json;
             const mark = parsedData.mark;

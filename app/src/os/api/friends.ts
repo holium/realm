@@ -1,9 +1,6 @@
-import { ShipModelType } from './../services/ship/models/ship';
-import { Urbit } from './../urbit/api';
+import { Conduit } from '@holium/conduit';
 import { FriendsType } from '../services/ship/models/friends';
 import { Patp } from '../types';
-import { applySnapshot, castToSnapshot } from 'mobx-state-tree';
-import { Conduit } from '../urbit/api-2';
 
 export const FriendsApi = {
   /**
@@ -13,7 +10,7 @@ export const FriendsApi = {
    * @returns Promise<{ [patp: Patp]: FriendsType }>
    */
   getFriends: async (
-    conduit: Urbit
+    conduit: Conduit
   ): Promise<{ [patp: Patp]: FriendsType }> => {
     const response = await conduit.scry({
       app: 'friends',
@@ -28,7 +25,7 @@ export const FriendsApi = {
    * @param patp  i.e. ~zod, ~lomder-librun
    * @returns
    */
-  addFriend: async (conduit: Urbit, patp: Patp) => {
+  addFriend: async (conduit: Conduit, patp: Patp) => {
     const response = await conduit.poke({
       app: 'friends',
       mark: 'friends-action',
@@ -49,7 +46,7 @@ export const FriendsApi = {
    * @returns
    */
   editFriend: async (
-    conduit: Urbit,
+    conduit: Conduit,
     patp: Patp,
     payload: { pinned: boolean; tags: string[] }
   ) => {
@@ -73,7 +70,7 @@ export const FriendsApi = {
    * @param patp  i.e. ~zod, ~lomder-librun
    * @returns
    */
-  removeFriend: async (conduit: Urbit, patp: Patp) => {
+  removeFriend: async (conduit: Conduit, patp: Patp) => {
     const response = await conduit.poke({
       app: 'friends',
       mark: 'friends-action',
@@ -91,23 +88,11 @@ export const FriendsApi = {
    * @param conduit the conduit instance
    * @param state the state-tree
    */
-  watchFriends: (
-    conduit: Urbit,
-    friendsStore: FriendsType
-  ): Promise<number> => {
-    // const RealmAPI = new Conduit(
-    //   conduit.url,
-    //   conduit.ship!,
-    //   conduit.cookie,
-    //   'realm'
-    // );
-    // RealmAPI.init();
-
-    // return 0;
-    return conduit.subscribe({
+  watchFriends: (conduit: Conduit, friendsStore: FriendsType): Promise<any> => {
+    return conduit.watch({
       app: 'friends',
       path: `/all`,
-      event: async (data: any) => {
+      onEvent: async (data: any) => {
         // console.log(data);
         if (data['friends']) {
           // applySnapshot(state.friends.all, castToSnapshot(data['friends']));
@@ -128,8 +113,8 @@ export const FriendsApi = {
           friendsStore.remove(patp);
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   },
 };
