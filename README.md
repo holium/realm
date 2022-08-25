@@ -13,12 +13,17 @@ To setup the workspace, do the following:
 
 ```zsh
 cd lib/multiplayer
+yarn build
 yarn link
 
 cd app
 yarn link "@holium/realm-multiplayer"
 
 cd playground/ui
+yarn build
+yarn link
+
+cd app
 yarn link "@holium/realm-multiplayer"
 ```
 
