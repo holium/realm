@@ -171,6 +171,10 @@ export class Realm extends EventEmitter {
     this.conduit.init().then(() => {
       this.onLogin();
     });
+    const conduitRef = this.conduit;
+    this.mainWindow.on('close', function () {
+      conduitRef.closeChannel();
+    });
     // this.conduit = new Urbit(session.url, session.ship, session.cookie);
     // this.conduit.open();
     // this.conduit.onOpen = () => {

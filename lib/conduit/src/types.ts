@@ -16,7 +16,7 @@ export type PokeParams = {
 
 export type PokeCallbacks = {
   onSuccess?: (id: number) => void;
-  onReaction?: (data: any) => void;
+  onReaction?: (data: any, mark?: string) => void;
   onError?: (e: any) => void;
 };
 
@@ -32,6 +32,6 @@ export type SubscribeParams = {
 
 export type SubscribeCallbacks = {
   onQuit?: (id: number) => void;
-  onEvent?: (data: any, id?: number) => void;
+  onEvent?: (data: any, id?: number, mark?: string) => void;
   onError?: (e: any) => void;
 };

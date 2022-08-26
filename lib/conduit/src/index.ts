@@ -29,7 +29,7 @@ export class Conduit extends EventEmitter {
   desk: 'realm' | string;
   pokes: Map<number, PokeCallbacks>;
   watches: Map<number, SubscribeCallbacks>;
-  reactions: Map<ReactionPath, (data: any) => void>;
+  reactions: Map<ReactionPath, (data: any, mark: string) => void>;
   private abort = new AbortController();
   private uid: string = `${Math.floor(Date.now() / 1000)}-realm`;
 
@@ -137,15 +137,15 @@ export class Conduit extends EventEmitter {
             break;
           //
           case 'diff':
-            if (this.watches.has(eventId)) {
-              this.watches.get(eventId)!.onEvent!(parsedData.json, eventId);
-            }
             const json = parsedData.json;
             const mark = parsedData.mark;
+            if (this.watches.has(eventId)) {
+              this.watches.get(eventId)!.onEvent!(json, eventId, mark);
+            }
             const reaction = Object.keys(json)[0];
             const maybeReactionPath = `${mark}.${reaction}`;
             if (this.reactions.has(maybeReactionPath)) {
-              this.reactions.get(maybeReactionPath)!(parsedData);
+              this.reactions.get(maybeReactionPath)!(parsedData.json, mark);
               this.reactions.delete(maybeReactionPath);
             }
             break;

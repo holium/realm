@@ -24,10 +24,10 @@ export const SpacesApi = {
           add: payload,
         },
         reaction: 'spaces-reaction.add',
-        onReaction(data) {
-          resolve(data);
+        onReaction: (data: any) => {
+          resolve(data.add.space.path);
         },
-        onError(e) {
+        onError: (e) => {
           reject(e);
         },
       });
@@ -53,10 +53,10 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.replace',
-        onReaction(data) {
+        onReaction: (data) => {
           resolve(data);
         },
-        onError(e) {
+        onError: (e) => {
           reject(e);
         },
       });
@@ -78,10 +78,10 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.delete',
-        onReaction(data) {
+        onReaction: (data) => {
           resolve(data);
         },
-        onError(e) {
+        onError: (e) => {
           reject(e);
         },
       });
@@ -137,9 +137,10 @@ export const SpacesApi = {
     conduit.watch({
       app: 'spaces',
       path: `/updates`,
-      onEvent: async (data: any) => {
-        if (data['spaces-reaction']) {
-          handleSpacesReactions(data['spaces-reaction'], state, membersState);
+      onEvent: async (data: any, _id: number, mark: string) => {
+        console.log(mark, data);
+        if (mark === 'spaces-reaction') {
+          handleSpacesReactions(data, state, membersState);
         }
       },
       onError: () => console.log('Subscription rejected'),
