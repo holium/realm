@@ -105,6 +105,7 @@ export class RoomsService extends BaseService {
       knownRooms: {},
       invites: {},
       ourPatp: ship,
+      outstandingRequest: false,
     });
 
     const patchEffect = {
@@ -184,8 +185,9 @@ export class RoomsService extends BaseService {
     await RoomsApi.joinRoom(this.core.conduit!, invite.id);
     this.state?.acceptInvite(invite);
   }
-  requestAllRooms(_event: any) {
-    RoomsApi.requestAllRooms(this.core.conduit!);
+  async requestAllRooms(_event: any) {
+    await RoomsApi.requestAllRooms(this.core.conduit!);
+    this.state?.didRequest();
   }
   async createRoom(
     _event: any,

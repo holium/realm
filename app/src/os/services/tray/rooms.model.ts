@@ -55,6 +55,7 @@ export const RoomsAppState = types
     currentView: types.enumeration(['list', 'room', 'new-room']),
     liveRoom: types.safeReference(RoomsModel),
     knownRooms: types.map(RoomsModel),
+    outstandingRequest: types.maybe(types.boolean),
     invites: types.map(RoomInvite),
     ourPatp: types.maybe(types.string),
     provider: types.maybe(types.string),
@@ -79,6 +80,9 @@ export const RoomsAppState = types
       if (!room) return false;
       if (!self.liveRoom) return false;
       return room.id === self.liveRoom.id;
+    },
+    get isLoadingList() {
+      return self.outstandingRequest;
     },
   }))
   .actions((self) => ({
@@ -106,6 +110,8 @@ export const RoomsAppState = types
       // set room view if we just created this room
       let knownRoom = self.knownRooms.get(room.id);
 
+      //
+      // TODOO diff for newly created room
       if (!knownRoom && room.creator === self.ourPatp) {
         this.setLiveRoom(room);
         this.setView('room');
@@ -132,6 +138,7 @@ export const RoomsAppState = types
     },
     setProvider(provider: Patp) {
       self.provider = provider;
+      self.outstandingRequest = false;
     },
     enterRoom() {
       self.currentView = 'room';
@@ -148,6 +155,7 @@ export const RoomsAppState = types
         return rMap;
       }, {});
       applySnapshot(self.knownRooms, roomMap);
+      self.outstandingRequest = false;
     },
     removeSelf(roomId: string, patp: string) {
       self.knownRooms.get(roomId)?.present.remove(patp);
@@ -176,6 +184,12 @@ export const RoomsAppState = types
       } else {
         self.knownRooms.delete(roomId);
       }
+    },
+    didRequest() {
+      self.outstandingRequest = true;
+    },
+    gotResponse() {
+      self.outstandingRequest = true;
     },
   }));
 
