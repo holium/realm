@@ -80,6 +80,11 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         </Flex>
       </Titlebar>
       <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
+        {roomsApp.isLoadingList && (
+          <Flex>
+            <Text>loading...</Text>
+          </Flex>
+        )}
         {knownRooms.length === 0 && (
           <Flex
             flex={1}

@@ -64,12 +64,13 @@ export const RoomsApi = {
     return response;
   },
 
-  requestAllRooms: (conduit: Urbit) => {
-    conduit.poke({
+  requestAllRooms: async (conduit: Urbit) => {
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: { 'request-all': null },
     });
+    return;
   },
 
   setProvider: async (conduit: Urbit, patp: string) => {
@@ -199,6 +200,7 @@ export const RoomsApi = {
         } else if (update['rooms']) {
           // console.log('rooms');
           state.setKnownRooms(update['rooms']);
+          // state.gotResponse();
         } else if (update['invited']) {
           state.handleInvite(update['invited']);
         } else if (update['kicked']) {

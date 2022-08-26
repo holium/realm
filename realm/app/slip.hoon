@@ -68,29 +68,77 @@
   ^-  (quip card _state)
   |^
   ?-  -.act
-      %slip     (slip act)
+      %slip     (slip +.act)
       %slop     (slop +.act)
   ==
   ::
     ++  slip
-      |=  [slip=action:store]
+      |=  [from=ship time=@da =path data=cord]
+      ::
+      :: TODO?
+      :: maybe getting a slip from yourself should be prohibited
       :: ?<  =(src.bowl our.bowl)
-      ?>  (data-limit data.slip)
-      ~&  >  :-  %got-slip
-                  slip
+      ::
+      ::  we dont care who the slip claims to be from
+      ::  we just care who the slip is actually from
+      =.  from  src.bowl
+      ::
+      :: enforce data limit
+      ?.  (data-limit data)
+        ~&  >>>  ['oversized slip from' from]
+        `state
+      ::
+      :: enforce room participation
+      =/  room-path
+        /(scot %p our.bowl)/room/(scot %da now.bowl)/present/simple/noun
+      =/  present
+        .^((set ship) %gx room-path)
+      ?.  (~(has in present) from)
+        ~&  >>>  ['foreign slip from' from]
+        `state
+      ::
+      :: enforce an ames TTL of 2 minutes
+      ?.  (lte now.bowl (add time max-latency))
+        ~&  >>>  ['old slip from' from]
+        `state
+      ::
+      :: slip is accepted
+      ~&  >  :-
+          %got-slip
+          [from time path data]
+      ::
       :_  state
       :~
-      (give-slip slip)
+      (give-slip [%slip from time path data])
       ==
     ::
     ++  slop
-      |=  [to=(list ship) data=cord]
+      |=  [to=(list ship) time=@da =path data=cord]
+      ::
+      ::  only we can send outbound lol
+      ::  keep this line of code in
       ?>  =(src.bowl our.bowl)
-      ?>  (data-limit data)
+      ::
+      :: enforce data limit
+      ?.  (data-limit data)
+        ~&  >>>  ['oversized slop']
+          `state
+      ::
+      :: assert the time isnt in the future
+      ?.  (lte time now.bowl)
+        ~&  >>>  ['future time: (time, now)' time now.bowl]
+        `state
+      :: 
+      :: TODO should time be set here or from the slop origin?
+      ::
+      ::
       =/  slip=action:store
         :-  %slip
         :-  our.bowl
+        :-  time
+        :-  path
             data
+      ::
       :_  state
       (poke-slop to slip)
   --
@@ -109,6 +157,7 @@
   |=  [slip=action:store]
   ^-  card
   [%give %fact [/slip/local]~ %slip-action !>(slip)]
+::
 ++  data-limit
   |=  [data=cord]
   ^-  ?
@@ -122,7 +171,10 @@
   :: and this limit should really be
   :: smaller
   ::
-  (lte (lent (trip data)) 9.999)
+  (lte (lent (trip data)) max-data-size)
+::
+++  max-data-size  9.999
+++  max-latency    ~m2
 ::
 --
 

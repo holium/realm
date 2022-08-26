@@ -14,6 +14,7 @@
   $:  %0
       my-room=(unit room:store)
       provider=(unit ship)
+      outstanding-request=_|
   ==
 --
 %-  agent:dbug
@@ -45,14 +46,32 @@
     :: > .^(view:store %gx /=room=/present/rooms-view)
     ::  [%present ships={~bus}]
     ::
+    :: example scry (simple)
+    ::    (doesnt require sur/rooms/hoon)
+    :: 
+    :: .^((set ship) %gx /=room=/present/simple/noun)
+    :: or
+    :: .^((set ship) %gx /(scot %p our)/room/(scot %da now)/present/simple/noun)
+    ::
       [%x ~]
         ``rooms-view+!>([%full my-room provider])
       [%x %present ~]
         :: TODO tall form?
         ::
+        :: rooms-view is a general mar for these scries.
+        ::
         ?~  my-room
           ``rooms-view+!>([%present *(set ship)])
         ``rooms-view+!>([%present present.u.my-room])
+      ::
+      :: no custom mark needed
+      :: no sur needed
+      :: just returns a (set ship)
+      :: cant encode as json
+      [%x %present %simple ~]
+         ?~  my-room
+            ``noun+!>(*(set ship))
+          ``noun+!>(present.u.my-room)
       ::
       [%x %provider ~]
         ``rooms-view+!>([%provider provider])
@@ -122,12 +141,28 @@
     %logout         logout
     %exit           (exit act)
     %chat           (chat +.act)
+    %request        (request act)
+    %request-all    (request-all act)
     %set-provider   (set-provider +.act)
   ==
   ::
     ++  exit
       |=  act=action:store
       =.  my-room  ~
+      (fwd-to-provider act)
+    ++  request
+      |=  act=action:store
+      :: disabled for now because
+      :: client UI can't clearly tell the difference between a requested room and an updated room.
+      :: also its not clearly useful for the realm UI.
+      ::
+      `state
+    ++  request-all
+      |=  act=action:store
+      ?:  outstanding-request
+        :: ~&  >>>  'room request blocked. still awaiting response to a previous request.'
+        `state
+      =.  outstanding-request  &
       (fwd-to-provider act)
     ++  logout
       =/  dad       +.provider
@@ -183,6 +218,9 @@
       :: set new provider
       =.  provider
         [~ new-provider]
+      ::
+      :: reset outstanding-request
+      =.  outstanding-request  |
       ::
       :: exit room remotely
       ::  (if applicable)
@@ -259,6 +297,7 @@
     ++  rooms
       |=  rooms=(set room:store)
       ?>  is-provider
+      =.  outstanding-request  |
       :: find and update my-room
       ::
       :: look up room by @p

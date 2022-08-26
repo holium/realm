@@ -11,7 +11,9 @@ import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import { Patp } from '../types';
 
 export type SlipType = {
+  time: Number;
   from: Patp;
+  path: string[];
   data: any;
 };
 
@@ -55,16 +57,24 @@ export class SlipService extends EventEmitter {
     this.slipId = null;
   }
 
-  async sendSlip(_event: IpcMainInvokeEvent, to: Patp[], data: any) {
+  async sendSlip(
+    _event: IpcMainInvokeEvent,
+    to: Patp[],
+    // path: string[],
+    data: any
+  ) {
     // If for some reason we are not connected
     if (!this.slipId) await this.subscribe();
+    let now = Date.now();
     // Poke slip
     this.core.conduit.poke({
       app: 'slip',
       mark: 'slip-action',
       json: {
         slop: {
+          time: now,
           to: to,
+          path: [''],
           data: data,
         },
       },
@@ -83,7 +93,7 @@ export class SlipService extends EventEmitter {
       console.log(e);
       data = slip.data;
     }
-    this.latest = { from: slip.from, data };
+    this.latest = { time: slip.time, from: slip.from, path: slip.path, data };
     this.onSlip(this.latest);
   }
 
