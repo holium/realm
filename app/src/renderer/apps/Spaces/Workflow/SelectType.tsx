@@ -57,7 +57,6 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
         <>
           {groups.length ? (
             groups.map((data: any) => {
-              console.log(data);
               const groupKey = data.path.split('/')[2];
               const title = data.name || groupKey;
               const subtitle = `${data.memberCount} ${

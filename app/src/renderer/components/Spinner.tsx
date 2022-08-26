@@ -36,7 +36,8 @@ const SimpleSpinner = styled.div`
   height: 48px;
   border: ${(props: any) => (props.size < 2 ? 1 : 5)}px solid
     ${(props) => rgba(props.theme.colors.ui.secondary, 0.2)};
-  border-bottom-color: ${(props) => props.theme.colors.brand.secondary};
+  border-bottom-color: ${(props) =>
+    props.color || props.theme.colors.brand.secondary};
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;

@@ -7,8 +7,8 @@ import {
   applySnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { Patp } from 'os/urbit/types';
 import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
+import { Patp } from 'os/types';
 
 export const DmAppState = types.model('DmAppState', {
   current: types.string,

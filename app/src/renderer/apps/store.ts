@@ -169,3 +169,9 @@ OSActions.onEffect((_event: any, value: any) => {
     }
   }
 });
+// After boot, set the initial data
+OSActions.onBoot((_event: any, response: any) => {
+  if (response.rooms) {
+    applySnapshot(trayStore.roomsApp, response.rooms);
+  }
+});

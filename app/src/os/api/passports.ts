@@ -1,22 +1,20 @@
-import { applySnapshot } from 'mobx-state-tree';
-import { Urbit } from './../urbit/api';
-import { SpacesStoreType } from '../services/spaces/models/spaces';
+import { Conduit } from '@holium/conduit';
 import { MemberRole, Patp, SpacePath } from '../types';
-import { MembershipType, MembersType } from '../services/spaces/models/members';
-// import { cleanNounColor } from '../lib/color';
+import { MembershipType } from '../services/spaces/models/members';
 
 export const PassportsApi = {
-  getMembers: async (conduit: Urbit, path: SpacePath) => {
+  getMembers: async (conduit: Conduit, path: SpacePath) => {
     const response = await conduit.scry({
       app: 'passports',
       path: `${path}/members`, // the spaces scry is at the root of the path
     });
+    // console.log(response.members);
     return response.members;
   },
-  getVisas: async (conduit: Urbit) => {
+  getVisas: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'passports',
-      path: 'visas', // the spaces scry is at the root of the path
+      path: '/visas', // the spaces scry is at the root of the path
     });
     return response.invitations;
   },
@@ -30,7 +28,7 @@ export const PassportsApi = {
    * @returns
    */
   inviteMember: async (
-    conduit: Urbit,
+    conduit: Conduit,
     path: SpacePath,
     payload: { patp: Patp; role: MemberRole; message: string }
   ) => {
@@ -53,7 +51,7 @@ export const PassportsApi = {
     });
     return response;
   },
-  kickMember: async (conduit: Urbit, path: SpacePath, patp: Patp) => {
+  kickMember: async (conduit: Conduit, path: SpacePath, patp: Patp) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
@@ -71,12 +69,11 @@ export const PassportsApi = {
     });
     return response;
   },
-  watchMembers: (conduit: Urbit, state: MembershipType): void => {
-    conduit.subscribe({
+  watchMembers: (conduit: Conduit, state: MembershipType): void => {
+    conduit.watch({
       app: 'passports',
       path: `/all`,
-      event: async (data: any) => {
-        // console.log(data);
+      onEvent: async (data: any) => {
         if (data['members']) {
           state.initial(data['members']);
         }
@@ -84,8 +81,9 @@ export const PassportsApi = {
           handleInviteReactions(data['invite-reaction'], state);
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription passport'),
+
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   },
 };

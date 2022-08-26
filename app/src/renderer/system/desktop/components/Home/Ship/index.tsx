@@ -17,7 +17,7 @@ type OurHomeProps = {
 
 export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   const { isOpen } = props;
-  const { desktop, ship } = useServices();
+  const { friends, desktop, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const sidebarComponent = useMemo(() => {
@@ -42,7 +42,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
         )}
       </AnimatePresence>
     );
-  }, [sidebar, ship!.friends.all]);
+  }, [sidebar, friends.all]);
 
   const highlightColor = '#4E9EFD';
 

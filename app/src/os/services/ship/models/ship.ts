@@ -8,9 +8,6 @@ import {
   destroy,
 } from 'mobx-state-tree';
 import { LoaderModel } from '../../common.model';
-import { Chat, ChatMessage, ChatMessageType, ChatStore, ChatType } from './dms';
-import { ContactStore } from './contacts';
-import { DocketStore } from './docket';
 import { FriendsStore } from './friends';
 import { NotificationsStore } from './notifications';
 
@@ -25,11 +22,10 @@ export const ShipModel = types
     loggedIn: types.optional(types.boolean, false),
     wallpaper: types.maybeNull(types.string),
     loader: types.optional(LoaderModel, { state: 'initial' }),
-    chat: ChatStore,
-    contacts: ContactStore,
-    docket: DocketStore,
-    friends: types.optional(FriendsStore, { all: {} }),
-    notifications: types.optional(NotificationsStore, { more: [] }),
+    // chat: ChatStore,
+    // contacts: ContactStore,
+    // docket: DocketStore,
+    // notifications: types.optional(NotificationsStore, { more: [] }),
   })
   .views((self) => ({
     get isLoaded() {
@@ -38,9 +34,9 @@ export const ShipModel = types
     get isLoading() {
       return self.loader.isLoading;
     },
-    get apps() {
-      return Array.from(self.docket.apps.values());
-    },
+    // get apps() {
+    //   return Array.from(self.docket.apps.values());
+    // },
   }))
   .actions((self) => ({
     initialSync: (syncEffect: {
@@ -50,7 +46,7 @@ export const ShipModel = types
       // Apply persisted snapshot
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
-      self.chat.loader.set('loaded');
+      // self.chat.loader.set('loaded');
     },
     setOurMetadata: (metadata: {
       nickname: string;
@@ -61,58 +57,58 @@ export const ShipModel = types
       self.nickname = metadata.nickname;
       self.color = metadata.color;
     },
-    setDMs: (ship: string, dmGraph: any) => {
-      const strippedShip = ship.substring(1);
-      const dmMap = new Map<string, ChatType>();
-      Object.values(dmGraph).forEach((chat: any) => {
-        let lastSent = 0;
-        const dmContacts: string[] = [];
-        const messages: ChatMessageType[] = [];
-        Object.values(chat.children).forEach(({ post }: any) => {
-          if (!post.author) {
-            // handles cases of no author?
-            return;
-          }
-          if (
-            post.author !== strippedShip &&
-            !dmContacts.includes(post.author)
-          ) {
-            dmContacts.push(post.author);
-          }
-          if (post['time-sent'] > lastSent) {
-            lastSent = post['time-sent'];
-          }
-          post.contents.forEach((content: any) => {
-            const type = Object.keys(content)[0];
-            let string: any = content[type];
-            if (type === 'code') {
-              string = string;
-            }
-            messages.push(
-              ChatMessage.create({
-                type,
-                author: post.author,
-                timeSent: post['time-sent'],
-                // @ts-expect-error suck it
-                content: { [type]: string },
-                position: post.author !== strippedShip ? 'left' : 'right',
-              })
-            );
-          });
-        });
-        const contact = dmContacts.join(',');
-        messages.sort((a, b) => b.timeSent - a.timeSent);
-        if (contact) {
-          // TODO get the name of an non-responsive user another way
-          // applySnapshot()
-          dmMap.set(contact, Chat.create({ contact, lastSent, messages }));
-        }
-      });
-      // console.log(dmGraph);
-      self.chat = ChatStore.create(
-        castToSnapshot({ loader: { state: 'loaded' }, dms: dmMap })
-      );
-    },
+    // setDMs: (ship: string, dmGraph: any) => {
+    //   const strippedShip = ship.substring(1);
+    //   const dmMap = new Map<string, ChatType>();
+    //   Object.values(dmGraph).forEach((chat: any) => {
+    //     let lastSent = 0;
+    //     const dmContacts: string[] = [];
+    //     const messages: ChatMessageType[] = [];
+    //     Object.values(chat.children).forEach(({ post }: any) => {
+    //       if (!post.author) {
+    //         // handles cases of no author?
+    //         return;
+    //       }
+    //       if (
+    //         post.author !== strippedShip &&
+    //         !dmContacts.includes(post.author)
+    //       ) {
+    //         dmContacts.push(post.author);
+    //       }
+    //       if (post['time-sent'] > lastSent) {
+    //         lastSent = post['time-sent'];
+    //       }
+    //       post.contents.forEach((content: any) => {
+    //         const type = Object.keys(content)[0];
+    //         let string: any = content[type];
+    //         if (type === 'code') {
+    //           string = string;
+    //         }
+    //         messages.push(
+    //           ChatMessage.create({
+    //             type,
+    //             author: post.author,
+    //             timeSent: post['time-sent'],
+    //             // @ts-expect-error suck it
+    //             content: { [type]: string },
+    //             position: post.author !== strippedShip ? 'left' : 'right',
+    //           })
+    //         );
+    //       });
+    //     });
+    //     const contact = dmContacts.join(',');
+    //     messages.sort((a, b) => b.timeSent - a.timeSent);
+    //     if (contact) {
+    //       // TODO get the name of an non-responsive user another way
+    //       // applySnapshot()
+    //       dmMap.set(contact, Chat.create({ contact, lastSent, messages }));
+    //     }
+    //   });
+    //   // console.log(dmGraph);
+    //   self.chat = ChatStore.create(
+    //     castToSnapshot({ loader: { state: 'loaded' }, dms: dmMap })
+    //   );
+    // },
   }));
 
 export type ShipModelType = Instance<typeof ShipModel>;

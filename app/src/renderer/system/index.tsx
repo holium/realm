@@ -11,7 +11,8 @@ import {
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
-import { coreStore, useServices } from 'renderer/logic/store';
+
+import { useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
 import {
@@ -19,13 +20,16 @@ import {
   BackgroundFill,
   DimensionMeasurement,
   DragBar,
+  ResumingOverlay,
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
-import { useWindowSize } from '../logic/lib/measure';
+import { useWindowSize } from 'renderer/logic/lib/measure';
+import { Flex, Spinner } from 'renderer/components';
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();
+  const { resuming } = useCore();
   const windowRef = useRef(null);
   useWindowSize(windowRef);
 
@@ -42,7 +46,16 @@ export const Shell: FC = observer(() => {
   );
 
   const shipLoaded = ship?.loader.isLoaded;
-  const isResuming = coreStore.resuming;
+
+  const GUI = shipLoaded ? (
+    <Desktop
+      hasLoaded={shipLoaded}
+      hasWallpaper={true}
+      isFullscreen={isFullscreen}
+    />
+  ) : (
+    <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
+  );
   return (
     <ViewPort>
       <DimensionMeasurement id="dimensions" ref={windowRef} />
@@ -50,17 +63,12 @@ export const Shell: FC = observer(() => {
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {shipLoaded && (
-          <Desktop
-            hasLoaded={shipLoaded}
-            hasWallpaper={true}
-            isFullscreen={isFullscreen}
-          />
+        {resuming && (
+          <ResumingOverlay>
+            <Spinner color="#ffffff" size={4} />
+          </ResumingOverlay>
         )}
-        {!shipLoaded && !isResuming && (
-          <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
-        )}
-        {!shipLoaded && isResuming && <div></div>}
+        {!resuming && GUI}
       </BackgroundFill>
     </ViewPort>
   );

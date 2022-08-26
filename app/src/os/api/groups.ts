@@ -1,5 +1,4 @@
-import { Urbit } from './../urbit/api';
-// import { cleanNounColor } from '../lib/color';
+import { Conduit } from '@holium/conduit';
 
 export const GroupsApi = {
   /**
@@ -8,7 +7,7 @@ export const GroupsApi = {
    * @param conduit the conduit instance
    * @returns Promise<{ [path: GroupPath]: GroupSpace }>
    */
-  getOur: async (conduit: Urbit): Promise<{ [path: string]: any }> => {
+  getOur: async (conduit: Conduit): Promise<{ [path: string]: any }> => {
     const response = await conduit.scry({
       app: 'spaces',
       path: '/groups', // the spaces scry is at the root of the path

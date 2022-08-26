@@ -144,6 +144,12 @@ export class RoomsService extends BaseService {
       }
     );
   }
+  removeHandlers() {
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-ignore
+      ipcMain.removeHandler(handlerName);
+    });
+  }
 
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;

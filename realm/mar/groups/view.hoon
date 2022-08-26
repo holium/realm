@@ -2,12 +2,12 @@
 /+  *groups
 
 ::
-|_  group-view=view:store
+|_  view=view:store
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  group-view
-  ++  json  (view:enjs group-view)
+  ++  noun  view
+  ++  json  (view:enjs view)
   --
 ::
 ++  grab

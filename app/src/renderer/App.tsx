@@ -15,23 +15,23 @@ import {
 } from './logic/store';
 
 import { Mouse } from './system/desktop/components/Mouse';
-import * as RealmMultiplayer from '@holium/realm-multiplayer';
-import { Presences } from './system/desktop/components/Multiplayer/Presences';
-import { api } from './system/desktop/components/Multiplayer/multiplayer';
-import { LiveRoom } from './apps/store';
+
+// import * as RealmMultiplayer from '@holium/realm-multiplayer';
+// import { Presences } from './system/desktop/components/Multiplayer/Presences';
+// import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
 export const App: FC = observer(() => {
-  const { booted } = useCore();
+  const { booted, resuming } = useCore();
   const { desktop, shell } = useServices();
   // const styleRef = useRef(null);
 
   const themeMode = desktop.theme.mode;
 
-  // ShellActions.closeDialog();
   const shellMemo = useMemo(
     () => (booted ? <Shell /> : <div>Booting...</div>),
-    [booted]
+    [booted, resuming]
   );
+
   const mouseMemo = useMemo(() => {
     return (
       <Mouse
@@ -60,34 +60,34 @@ export const App: FC = observer(() => {
   );
 });
 
-function MultiplayerMouse() {
-  const { ship, spaces } = useServices();
-  if (!ship?.isLoaded) return null;
+// function MultiplayerMouse() {
+//   const { ship, spaces } = useServices();
+//   if (!ship?.isLoaded) return null;
 
-  return (
-    <RealmMultiplayer.Provider
-      api={api}
-      ship={ship}
-      channel={spaces.selected?.path}
-    >
-      <Cursors />
-    </RealmMultiplayer.Provider>
-  );
-}
+//   return (
+//     <RealmMultiplayer.Provider
+//       api={api}
+//       ship={ship}
+//       channel={spaces.selected?.path}
+//     >
+//       <Cursors />
+//     </RealmMultiplayer.Provider>
+//   );
+// }
 
-function Cursors() {
-  const { api } = useContext(
-    RealmMultiplayer.Context as React.Context<{
-      api: RealmMultiplayer.RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
-    }>
-  );
-  const { shell } = useServices();
-  useEffect(() => {
-    api?.send({
-      event: RealmMultiplayer.CursorEvent.Leave,
-    });
-  }, [shell.isMouseInWebview]);
-  return <Presences />;
-}
+// function Cursors() {
+//   const { api } = useContext(
+//     RealmMultiplayer.Context as React.Context<{
+//       api: RealmMultiplayer.RealmMultiplayerInterface; // idk why typescript made me manually type this, maybe yarn workspace related
+//     }>
+//   );
+//   const { shell } = useServices();
+//   useEffect(() => {
+//     api?.send({
+//       event: RealmMultiplayer.CursorEvent.Leave,
+//     });
+//   }, [shell.isMouseInWebview]);
+//   return <Presences />;
+// }
 
 export default App;

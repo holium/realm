@@ -4,7 +4,8 @@
   "workspaces": [
     "app",
     "lib/multiplayer",
-    "playground/ui"
+    "lib/conduit",
+    "lib/room"
   ],
   "scripts": {
     "build": "yarn build:multiplayer && yarn build:playground && yarn build:app",

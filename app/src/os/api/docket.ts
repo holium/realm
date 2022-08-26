@@ -1,8 +1,8 @@
-import { Urbit } from './../urbit/api';
+import { Conduit } from '@holium/conduit';
 import { cleanNounColor } from '../lib/color';
 
 export const DocketApi = {
-  getApps: async (conduit: Urbit) => {
+  getApps: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'docket',
       path: '/charges',
@@ -18,9 +18,9 @@ export const DocketApi = {
     ship: string,
     desk: string,
     stateTree: any,
-    conduit: Urbit,
+    conduit: Conduit,
     metadataStore: any
-  ) => {
+  ): Promise<number> => {
     const { apps } = stateTree;
 
     const key = `${ship}/${desk}`;
@@ -28,17 +28,17 @@ export const DocketApi = {
       return apps[key];
     }
     return new Promise((resolve, reject) => {
-      conduit.subscribe({
+      conduit.watch({
         app: 'treaty',
         path: `/treaty/${key}`,
-        event: (data: any) => {
+        onEvent: (data: any) => {
           resolve(data);
           metadataStore[key] = data;
         },
-        err: () => {
+        onError: () => {
           reject('Subscription rejected');
         },
-        quit: () => console.log('Kicked from subscription /treaty'),
+        onQuit: () => console.log('Kicked from subscription'),
       });
     });
     // conduit.subscribe({

@@ -40,7 +40,6 @@
   ++  reaction
     |=  rct=^reaction
     ^-  json
-    %+  frond  %spaces-reaction
     %-  pairs
     :_  ~
     ^-  [cord json]

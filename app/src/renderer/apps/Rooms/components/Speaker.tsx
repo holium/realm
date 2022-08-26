@@ -39,7 +39,7 @@ const speakerType = {
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   const { person, audio, type } = props;
-  const { ship, desktop } = useServices();
+  const { ship, desktop, contacts } = useServices();
   const { roomsApp } = useTrayApps();
   const speakerRef = useRef<any>(null);
   const isOur = person === ship?.patp;
@@ -50,9 +50,9 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   });
   // const [peer, setPeer] = useState<RemoteParticipant | undefined>();
   const [isStarted, setIsStarted] = useState(false);
-  const metadata = ship?.contacts.getContactAvatarMetadata(person);
+  const metadata = contacts.getContactAvatarMetadata(person);
 
-  const { muted, cursor } = roomsApp.controls;
+  const { muted } = roomsApp.controls;
 
   let name = metadata?.nickname || person;
   const livePeer = LiveRoom.participants.get(person);
@@ -65,7 +65,6 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       onClick: (evt: any) => {
         livePeer && LiveRoom.reconnectPeer(livePeer);
         evt.stopPropagation();
-        // DesktopActions.toggleDevTools();
       },
     },
   ];

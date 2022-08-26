@@ -1,14 +1,6 @@
-export const OSActions = {
-  boot: async () => {
-    return await window.electron.os.boot();
-  },
-  onBoot: (callback: any) => {
-    return window.electron.os.onBoot(callback);
-  },
-  onEffect: (callback: any) => {
-    return window.electron.os.onEffect(callback);
-  },
-  applyAction: async (action: any) => {
-    return await window.electron.os.applyAction(action);
-  },
-};
+import { OSPreloadType } from 'os/preload';
+
+/**
+ * SpacesActions for interfacing with core process
+ */
+export const OSActions: OSPreloadType = window.electron.os;
