@@ -45,10 +45,10 @@ export class AuthService extends BaseService {
     getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
     removeShip: (ship: string) =>
       ipcRenderer.invoke('realm.auth.remove-ship', ship),
-    onLogin: (callback: any) =>
-      ipcRenderer.on('realm.auth.on-log-in', callback),
-    onLogout: (callback: any) =>
-      ipcRenderer.on('realm.auth.on-log-out', callback),
+    // onLogin: (callback: any) =>
+    //   ipcRenderer.on('realm.auth.on-log-in', callback),
+    // onLogout: (callback: any) =>
+    //   ipcRenderer.on('realm.auth.on-log-out', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -137,8 +137,8 @@ export class AuthService extends BaseService {
     });
   }
 
-  logout(_event: any, ship: string) {
-    this.core.clearSession();
+  async logout(_event: any, ship: string) {
+    await this.core.clearSession();
     this.core.services.ship.logout();
   }
 

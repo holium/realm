@@ -16,6 +16,7 @@ import {
   BackgroundImage,
   BackgroundFill,
   DimensionMeasurement,
+  ResumingOverlay,
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
@@ -48,7 +49,6 @@ export const Shell: FC = observer(() => {
     () => <DialogManager dialogId={shell.dialogId} />,
     [shell.dialogId]
   );
-  // console.log(resuming);
 
   const shipLoaded = ship?.loader.isLoaded;
   const GUI = shipLoaded ? (
@@ -68,9 +68,9 @@ export const Shell: FC = observer(() => {
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
         {resuming && (
-          <Flex width="100%" height="100vh">
+          <ResumingOverlay>
             <Spinner size={2} />
-          </Flex>
+          </ResumingOverlay>
         )}
         {!resuming && GUI}
         {/* {!resuming && shipLoaded && (

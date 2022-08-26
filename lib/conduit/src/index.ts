@@ -2,11 +2,14 @@ import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 import axios from 'axios';
 import {
-  Actions,
+  Action,
+  ConduitState,
+  Message,
   Patp,
   PokeCallbacks,
   PokeParams,
   ReactionPath,
+  Responses,
   Scry,
   SubscribeCallbacks,
   SubscribeParams,
@@ -18,80 +21,74 @@ setMaxListeners(20);
 /**
  * Conduit
  *
- * SSE library for interfacing with Urbit
+ * SSE library for interfacing with Urbit.
  */
 export class Conduit extends EventEmitter {
   private url: string = '';
   private prevMsgId: number = 0;
-  private sse: EventSource | undefined;
-  cookie: string;
-  ship?: string | null;
-  desk: 'realm' | string;
-  pokes: Map<number, PokeCallbacks>;
-  watches: Map<number, SubscribeCallbacks>;
+  private lastAckId: number = 0;
+  cookie!: string;
+  ship!: string | null;
+  pokes: Map<number, PokeParams & PokeCallbacks>;
+  watches: Map<number, SubscribeParams & SubscribeCallbacks>;
   reactions: Map<ReactionPath, (data: any, mark: string) => void>;
+  retryTimeout: any = 0;
+  reconnectTimeout: any = 0;
+  status: ConduitState = ConduitState.Disconnected;
   private abort = new AbortController();
-  private uid: string = `${Math.floor(Date.now() / 1000)}-realm`;
+  private uid: string = this.generateUID();
+  private sse: EventSource | undefined;
 
-  constructor(url: string, ship: string, cookie: string, desk: string) {
+  constructor() {
     super();
-    this.url = url;
-    this.ship = ship;
-    this.cookie = cookie;
-    this.desk = desk;
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
   }
 
-  private get headers() {
-    return {
-      'Content-Type': 'application/json',
-      Cookie: this.cookie,
-    };
+  generateUID() {
+    return `${Math.floor(Date.now() / 1000)}-realm`;
   }
 
-  private get channelUrl(): string {
-    return `${this.url}/~/channel/${this.uid}`;
+  updateStatus(status: ConduitState) {
+    this.status = status;
+    this.emit(status);
   }
 
-  nextMsgId() {
-    let next = this.prevMsgId + 1;
-    this.prevMsgId = next;
-    return next;
+  /**
+   *
+   * @param ship i.e. lomder-librun without the ~
+   * @returns
+   */
+  async init(url: string, ship: Patp, cookie: string): Promise<void> {
+    this.url = url;
+    this.ship = ship;
+    this.cookie = cookie;
+    this.uid = this.generateUID();
+    // console.log(this.channelUrl)
+
+    await this.startSSE();
+
+    // console.log(`opening channel ${this.channelUrl}`);
   }
 
-  static async fetchCookie(
-    url: string,
-    code: Patp
-  ): Promise<string | undefined> {
-    let cookie;
-    try {
-      const response = await axios.put(`${url}/~/login`, {
-        method: 'put',
-        body: `password=${code}`,
-        credentials: 'include',
-      });
-      cookie = response.headers['set-cookie']![0];
-    } catch (err: any) {
-      console.error(err);
-    } finally {
-      return cookie;
+  async startSSE(): Promise<void> {
+    if (this.status === ConduitState.Connected) {
+      return Promise.resolve();
     }
-  }
-
-  async init(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      if (this.sse) {
-        console.warn('sse already exists. Only one per session.');
-        return;
-      }
-
+    if (this.prevMsgId === 0) {
       await this.poke({
         app: 'hood',
         mark: 'helm-hi',
         json: 'Opening API channel',
       });
+      return;
+    }
+
+    this.updateStatus(ConduitState.Initialized);
+
+    return new Promise(async (resolve, reject) => {
+      // console.log(this.channelUrl);
 
       this.sse = new EventSource(this.channelUrl, {
         headers: { Cookie: this.cookie },
@@ -99,8 +96,10 @@ export class Conduit extends EventEmitter {
 
       this.sse.onopen = async (response) => {
         if (response.type === 'open') {
+          this.updateStatus(ConduitState.Connected);
           resolve();
         } else {
+          this.updateStatus(ConduitState.Failed);
           reject(new Error('failed to open sse'));
         }
       };
@@ -108,30 +107,35 @@ export class Conduit extends EventEmitter {
       this.sse.onmessage = async (event: MessageEvent) => {
         const parsedData = JSON.parse(event.data);
         const eventId = parseInt(parsedData.id, 10);
-        this.ack(eventId);
-        const type = parsedData.response as Actions;
+        const type = parsedData.response as Responses;
+        if (eventId - this.lastAckId > 20) {
+          this.ack(eventId);
+        }
         switch (type) {
           case 'poke':
             if (this.pokes.has(eventId)) {
               const handler = this.pokes.get(eventId);
               if (parsedData.ok && handler) {
-                handler.onSuccess!(eventId);
+                // @ts-ignore
+                handler.onSuccess();
               } else if (parsedData.err && handler) {
-                handler.onError!(eventId);
+                // @ts-ignore
+                handler.onError!(parsedData.err);
               } else {
                 console.error(new Error('poke sse error'));
               }
-              this.pokes.delete(eventId);
             }
+            this.pokes.delete(eventId);
             break;
           //
           case 'subscribe':
             if (parsedData.err) {
-              if (this.pokes.has(eventId)) {
-                const handler = this.pokes.get(eventId);
-                handler && handler.onError!(parsedData.err);
+              const watchHandler = this.watches.get(eventId);
+              if (watchHandler) {
+                watchHandler.onError!(eventId, parsedData.err);
+              } else {
+                console.error(new Error('watch sse error'));
               }
-              console.error('watch err', parsedData.err);
               this.watches.delete(eventId);
             }
             break;
@@ -151,10 +155,10 @@ export class Conduit extends EventEmitter {
             break;
           // quit
           case 'quit':
-            console.log('on quit');
+            console.log('on quit', eventId);
             if (this.watches.has(eventId)) {
-              this.watches.get(eventId)!.onQuit!(parsedData);
-              this.watches.delete(eventId);
+              const reconnectSub = this.watches.get(eventId);
+              reconnectSub!.onQuit!(parsedData);
             }
             break;
           //
@@ -164,6 +168,16 @@ export class Conduit extends EventEmitter {
             break;
         }
       };
+      this.sse.onerror = async (error) => {
+        console.log('sse error', error);
+        this.updateStatus(ConduitState.Disconnected);
+        await this.closeChannel();
+        this.reconnectToChannel();
+      };
+      this.sse.addEventListener('close', () => {
+        console.log('e');
+        throw new Error('Ship unexpectedly closed the connection');
+      });
     });
   }
 
@@ -175,27 +189,40 @@ export class Conduit extends EventEmitter {
   async poke(
     params: PokeParams & PokeCallbacks
   ): Promise<number | any | undefined> {
-    const handlers: PokeCallbacks = {
+    const handlers: PokeParams & PokeCallbacks = {
       onSuccess: (_id) => {},
-      onError: (_err) => {},
+      onError: (_id, _err) => {},
       ...params,
     };
-    const message = {
-      id: this.nextMsgId(),
-      action: 'poke',
-      ship: this.ship,
-      reaction: params.reaction,
+    const message: Message = {
+      id: this.nextMsgId,
+      action: Action.Poke,
+      ship: this.ship!,
       app: params.app,
       mark: params.mark,
       json: params.json,
     };
-    this.pokes.set(message.id, handlers);
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }
-    this.postToChannel(message).then((msgId) => {
-      return msgId;
-    });
+    // Properly waiting
+    const [_req, res] = await Promise.all([
+      this.postToChannel(message),
+      new Promise((resolve, reject) => {
+        this.pokes.set(message.id, {
+          onSuccess: () => {
+            handlers.onSuccess!(message.id);
+            resolve(message.id);
+          },
+          onError: (err) => {
+            handlers.onError!(message.id, err);
+            reject(err);
+          },
+          ...params,
+        });
+      }),
+    ]);
+    return res;
   }
 
   /**
@@ -204,22 +231,22 @@ export class Conduit extends EventEmitter {
    * @param params
    */
   async watch(params: SubscribeParams & SubscribeCallbacks) {
-    const handlers: SubscribeCallbacks = {
+    const handlers: SubscribeParams & SubscribeCallbacks = {
       onEvent: (_data) => {},
       onQuit: (_id) => {},
-      onError: (_err) => {},
+      onError: (_id, _err) => {},
       ...params,
     };
-    const message = {
-      id: this.nextMsgId(),
-      action: 'subscribe',
-      ship: this.ship,
+    const message: Message = {
+      id: this.nextMsgId,
+      action: Action.Subscribe,
+      ship: this.ship!,
       app: params.app,
       path: params.path,
     };
     this.watches.set(message.id, handlers);
-    this.postToChannel(message).then((msgId) => {
-      return msgId;
+    this.postToChannel(message).then(() => {
+      return message.id;
     });
   }
 
@@ -243,9 +270,6 @@ export class Conduit extends EventEmitter {
       console.log(err);
     }
   }
-  /**************************************************************/
-  /******************** Internal functions **********************/
-  /**************************************************************/
 
   /**
    * ack
@@ -254,12 +278,72 @@ export class Conduit extends EventEmitter {
    * @returns
    */
   private async ack(eventId: number): Promise<number | void> {
-    const message = {
-      action: 'ack',
+    this.lastAckId = eventId;
+    const message: Message = {
+      id: this.nextMsgId,
+      action: Action.Ack,
       'event-id': eventId,
     };
     await this.postToChannel(message);
     return eventId;
+  }
+
+  /**************************************************************/
+  /************************** Getters ***************************/
+  /**************************************************************/
+  private get headers() {
+    return {
+      'Content-Type': 'application/json',
+      Cookie: this.cookie,
+    };
+  }
+
+  private get channelUrl(): string {
+    return `${this.url}/~/channel/${this.uid}`;
+  }
+
+  private get nextMsgId() {
+    let next = this.prevMsgId + 1;
+    this.prevMsgId = next;
+    return next;
+  }
+
+  /**************************************************************/
+  /******************** Internal functions **********************/
+  /**************************************************************/
+
+  // TODO perhaps store a map for resubscribing
+  private async resubscribe(
+    eventId: number,
+    params: SubscribeParams & SubscribeCallbacks
+  ) {
+    this.watches.delete(eventId);
+    console.log(`attempting re-subscribed to ${params?.app}${params?.path}`);
+    if (this.retryTimeout !== 0) clearTimeout(this.retryTimeout);
+    this.watch(params!)
+      .then(() => console.log(`re-subscribed to ${params?.app}${params?.path}`))
+      .catch((e) => {
+        this.retryTimeout = setTimeout(() => {
+          this.resubscribe(eventId, params);
+        }, 2000);
+      });
+  }
+
+  /**
+   * TODO add a limit here
+   */
+  private async reconnectToChannel() {
+    if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
+
+    this.startSSE()
+      .then(() => console.log(`reconnected to channel ${this.channelUrl}`))
+      .catch(() => {
+        (function (conduit: Conduit) {
+          conduit.reconnectTimeout = setTimeout(() => {
+            conduit.startSSE();
+          }, 2000);
+        })(this);
+      });
   }
 
   /**
@@ -268,8 +352,7 @@ export class Conduit extends EventEmitter {
    * @param body
    * @returns
    */
-  private async postToChannel(body: any) {
-    // console.log(body);
+  private async postToChannel(body: Message): Promise<void> {
     try {
       const response = await axios.put(this.channelUrl, [body], {
         headers: this.headers,
@@ -278,10 +361,12 @@ export class Conduit extends EventEmitter {
       if (response.statusText !== 'ok') {
         throw new Error('Poke failed');
       }
-    } catch (e) {
-      console.log('poke failed');
+      if (this.status !== ConduitState.Initialized) {
+        await this.startSSE();
+      }
+    } catch (e: any) {
+      console.log('poke failed', e);
     }
-    return body.id;
   }
 
   /**
@@ -290,34 +375,51 @@ export class Conduit extends EventEmitter {
    * @returns
    */
   async closeChannel(): Promise<void> {
-    // Lets go ahead and cleanup all the unacked pokes we have
-    await Promise.all(
-      Array.from(this.pokes.keys()).map((msgId: number) => {
-        this.ack(msgId);
-        this.pokes.delete(msgId);
-        console.log('unacked', msgId);
-      })
-    );
-    // Go through all subscriptions and unsubscribe before deleting channel
-    await Promise.all(
-      Array.from(this.watches.keys()).map((watchId: number) =>
-        this.postToChannel({
-          id: this.nextMsgId(),
-          action: 'unsubscribe',
-          subscription: watchId,
-        })
-      )
-    );
-    const deleteMessage = {
-      id: this.nextMsgId(),
-      action: 'delete',
-    };
+    const res = await this.postToChannel({
+      id: this.nextMsgId,
+      action: Action.Delete,
+    });
 
-    const res = await this.postToChannel(deleteMessage);
-    this.watches = new Map();
+    // Reset to 0
+    this.prevMsgId = 0;
     this.pokes = new Map();
+    this.watches = new Map();
     this.reactions = new Map();
+    this.abort.abort();
+    this.abort = new AbortController();
     this.sse?.close();
+    this.sse = undefined;
+    this.updateStatus(ConduitState.Disconnected);
     return res;
   }
+
+  /**
+   * fetchCookie
+   *
+   * Should be used when not connected to a channel to retrieve a cookie
+   *
+   * @param url
+   * @param code
+   * @returns
+   */
+  static async fetchCookie(
+    url: string,
+    code: Patp
+  ): Promise<string | undefined> {
+    let cookie;
+    try {
+      const response = await axios.put(`${url}/~/login`, {
+        method: 'put',
+        body: `password=${code}`,
+        credentials: 'include',
+      });
+      cookie = response.headers['set-cookie']![0];
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      return cookie;
+    }
+  }
 }
+
+export { ConduitState };

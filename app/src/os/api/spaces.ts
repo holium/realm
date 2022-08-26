@@ -27,7 +27,7 @@ export const SpacesApi = {
         onReaction: (data: any) => {
           resolve(data.add.space.path);
         },
-        onError: (e) => {
+        onError: (e: any) => {
           reject(e);
         },
       });
@@ -53,10 +53,10 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.replace',
-        onReaction: (data) => {
+        onReaction: (data: any) => {
           resolve(data);
         },
-        onError: (e) => {
+        onError: (e: any) => {
           reject(e);
         },
       });
@@ -78,10 +78,10 @@ export const SpacesApi = {
           },
         },
         reaction: 'spaces-reaction.delete',
-        onReaction: (data) => {
+        onReaction: (data: any) => {
           resolve(data);
         },
-        onError: (e) => {
+        onError: (e: any) => {
           reject(e);
         },
       });
@@ -137,14 +137,14 @@ export const SpacesApi = {
     conduit.watch({
       app: 'spaces',
       path: `/updates`,
-      onEvent: async (data: any, _id: number, mark: string) => {
-        console.log(mark, data);
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        // console.log(mark, data);
         if (mark === 'spaces-reaction') {
           handleSpacesReactions(data, state, membersState);
         }
       },
       onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
+      onQuit: () => console.log('Kicked from subscription %spaces'),
     });
   },
 };

@@ -29,8 +29,6 @@ export type BaseRoomProps = {
   };
 };
 
-const urb = new Urbit('', '');
-urb.ship = window.ship;
 export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
   const { ship, desktop } = useServices();

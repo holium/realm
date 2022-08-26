@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Realm } from '../os';
+import { osPreload } from '../os/preload';
 
 const appPreload = {
   setFullscreen(callback: any) {
@@ -31,5 +31,5 @@ export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
   app: appPreload,
-  os: Realm.preload,
+  os: osPreload,
 });

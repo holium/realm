@@ -195,8 +195,6 @@ export class ShipService extends BaseService {
     this.models.docket = loadDocketFromDisk(ship, this.core.onEffect);
     this.models.friends = loadFriendsFromDisk(ship, this.core.onEffect);
 
-    // this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
-
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
     onSnapshot(this.state, (snapshot: any) => {
@@ -214,6 +212,7 @@ export class ShipService extends BaseService {
 
     try {
       await new Promise<ShipModelType>(async (resolve, reject) => {
+        // TODO rewrite the contact store logic
         try {
           await this.core.conduit!.watch({
             app: 'contact-store',
@@ -228,65 +227,51 @@ export class ShipService extends BaseService {
           console.log('Subscription failed');
         }
 
-        this.subscriptions.friends = await FriendsApi.watchFriends(
-          this.core.conduit!,
-          this.models.friends
-        );
+        FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
 
         ContactApi.getContact(this.core.conduit!, ship).then((value: any) => {
           this.state!.setOurMetadata(value);
         });
 
-        this.subscriptions.metadata = await MetadataApi.syncGraphMetadata(
-          this.core.conduit!,
-          this.metadataStore
-        );
+        MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
 
         // register dm update handler
-        this.subscriptions.dms = await DmApi.updates(
-          this.core.conduit!,
-          this.models.chat!
-        );
-        this.subscriptions.graphDms = await DmApi.graphUpdates(
-          this.core.conduit!,
-          this.models.chat!
-        );
+        DmApi.updates(this.core.conduit!, this.models.chat!);
+        DmApi.graphUpdates(this.core.conduit!, this.models.chat!);
 
         // register hark-store update handler
         // TODO commenting out for now
         // NotificationsApi.watch(this.core.conduit!, this.state);
-
-        DocketApi.getApps(this.core.conduit!).then((apps) => {
-          this.models.docket.setInitial(apps);
-          this.state!.loader.set('loaded');
-          console.log('resolving');
-          resolve(this.state!);
-        });
 
         // load initial dms
         this.getDMs().then((response) => {
           this.models.chat?.setDMs(ship, response, this.models.contacts);
           // this.state!.chat.setDMs(ship, response);
         });
+        DocketApi.getApps(this.core.conduit!).then((apps) => {
+          this.models.docket.setInitial(apps);
+          this.state!.loader.set('loaded');
+          resolve(this.state!);
+        });
 
         this.rooms?.onLogin(ship);
       });
 
-      // 2. Register patches
-      onPatch(this.state, (patch) => {
-        // send patches to UI store
-        const patchEffect = {
-          patch,
-          resource: 'ship',
-          key: ship,
-          response: 'patch',
-        };
-        this.core.onEffect(patchEffect);
-      });
       // return ship state
     } catch (err) {
       console.error(err);
     }
+    // 2. Register patches
+    onPatch(this.state, (patch) => {
+      // send patches to UI store
+      const patchEffect = {
+        patch,
+        resource: 'ship',
+        key: ship,
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
     return { ship: this.state, models: this.modelSnapshots };
   }
 
@@ -308,7 +293,7 @@ export class ShipService extends BaseService {
     console.log('logging out');
     this.db = undefined;
     this.state = undefined;
-    this.core.mainWindow.webContents.send('realm.auth.on-log-out');
+    this.core.mainWindow.webContents.send('realm.on-logout');
   }
 
   storeNewShip(ship: AuthShipType): ShipModelType {

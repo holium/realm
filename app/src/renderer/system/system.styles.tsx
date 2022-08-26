@@ -14,6 +14,20 @@ export const DimensionMeasurement = styled.div`
   width: 100%;
 `;
 
+export const ResumingOverlay = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  width: 100%;
+`;
+
 export const BackgroundWrap = styled(motion.div)`
   user-select: none;
   position: fixed;

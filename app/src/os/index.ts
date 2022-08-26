@@ -2,8 +2,7 @@ import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
 // ---
-// import Urbit from './urbit/api';
-import { Conduit } from '@holium/conduit';
+import { Conduit, ConduitState } from '@holium/conduit';
 import { AuthService } from './services/identity/auth.service';
 import { MSTAction } from './types';
 import { cleanPath, fromPathString } from './lib/action';
@@ -25,7 +24,7 @@ export interface ISession {
 
 export class Realm extends EventEmitter {
   conduit?: Conduit;
-  private conduitOpen: boolean = false;
+  private isResuming: boolean = false;
   readonly mainWindow: BrowserWindow;
   private session?: ISession;
   private db: Store<ISession>;
@@ -61,15 +60,12 @@ export class Realm extends EventEmitter {
     },
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
     onBoot: (callback: any) => ipcRenderer.on('realm.on-boot', callback),
-    auth: AuthService.preload,
-    ship: ShipService.preload,
-    spaces: SpacesService.preload,
-    desktop: DesktopService.preload,
-    shell: ShellService.preload,
-    onboarding: OnboardingService.preload,
-    tray: {
-      rooms: RoomsService.preload,
-    },
+    onLogin: (callback: any) => ipcRenderer.on('realm.on-login', callback),
+    onConnected: (callback: any) =>
+      ipcRenderer.on('realm.on-connected', callback),
+    onConnectionStatus: (callback: any) =>
+      ipcRenderer.on('realm.on-connection-status', callback),
+    onLogout: (callback: any) => ipcRenderer.on('realm.on-logout', callback),
   };
 
   constructor(mainWindow: BrowserWindow) {
@@ -77,7 +73,8 @@ export class Realm extends EventEmitter {
     this.mainWindow = mainWindow;
     this.onEffect = this.onEffect.bind(this);
     this.onBoot = this.onBoot.bind(this);
-    this.onLogin = this.onLogin.bind(this);
+    this.onConduit = this.onConduit.bind(this);
+
     // Load session data
     this.db = new Store({
       name: 'realm.session',
@@ -85,7 +82,7 @@ export class Realm extends EventEmitter {
       fileExtension: 'lock',
     });
     if (this.db.size > 0) {
-      this.conduitOpen = false;
+      this.isResuming = true;
       this.setSession(this.db.store);
     }
     // Create an instance of all services
@@ -106,6 +103,17 @@ export class Realm extends EventEmitter {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
+
+    // Setup mainWindow event handling
+    // this.mainWindow.on('restore', async () => {
+    //   await this.conduit?.closeChannel();
+    //   this.conduit = undefined;
+    // });
+    // when closing for any reason, crash, user clicks close etc.
+    this.mainWindow.on('close', async () => {
+      await this.conduit?.closeChannel();
+      this.conduit = undefined;
+    });
   }
 
   static start(mainWindow: BrowserWindow) {
@@ -123,10 +131,6 @@ export class Realm extends EventEmitter {
     let models = {};
 
     if (this.session) {
-      this.onEffect({
-        response: 'status',
-        data: 'boot:resuming',
-      });
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       // chat = this.services.ship.models
@@ -161,20 +165,19 @@ export class Realm extends EventEmitter {
   }
 
   async connect(session: ISession) {
-    if (this.conduit) await this.conduit.closeChannel();
-    this.conduit = new Conduit(
+    console.log(this.conduit?.status);
+    if (!this.conduit) {
+      this.conduit = new Conduit();
+      this.handleConnectionStatus(this.conduit);
+    }
+    // wait for the init function to resolve
+    await this.conduit.init(
       session.url,
       session.ship.substring(1),
-      session.cookie,
-      'realm'
+      session.cookie
     );
-    this.conduit.init().then(() => {
-      this.onLogin();
-    });
-    const conduitRef = this.conduit;
-    this.mainWindow.on('close', function () {
-      conduitRef.closeChannel();
-    });
+    this.onConduit();
+
     // this.conduit = new Urbit(session.url, session.ship, session.cookie);
     // this.conduit.open();
     // this.conduit.onOpen = () => {
@@ -198,27 +201,30 @@ export class Realm extends EventEmitter {
     return this.db.store;
   }
 
-  clearSession(): void {
-    this.conduit?.closeChannel();
+  async clearSession(): Promise<void> {
+    await this.conduit?.closeChannel();
     this.conduit = undefined;
     this.db.clear();
     this.session = undefined;
-    this.conduitOpen = false;
   }
 
-  async onLogin() {
+  async onConduit() {
     const sessionPatp = this.session?.ship!;
     const { ship, models } = await this.services.ship.subscribe(
       sessionPatp,
       this.session
     );
     await this.services.spaces.load(sessionPatp, models.docket);
-    this.services.identity.auth.setLoader('loaded');
     this.services.onboarding.reset();
-    this.mainWindow.webContents.send('realm.auth.on-log-in', {
+    if (!this.isResuming) {
+      this.mainWindow.webContents.send('realm.on-login');
+    }
+    this.mainWindow.webContents.send('realm.on-connected', {
       ship: getSnapshot(ship),
       models,
     });
+    this.services.identity.auth.setLoader('loaded');
+    this.isResuming = false;
   }
 
   /**
@@ -254,8 +260,39 @@ export class Realm extends EventEmitter {
   onBoot(data: any): void {
     this.mainWindow.webContents.send('realm.on-boot', data);
   }
+
+  /**
+   * Relays the current connection status to renderer
+   *
+   * @param conduit
+   */
+  handleConnectionStatus(conduit: Conduit) {
+    conduit.on(ConduitState.Connecting, () => {
+      this.mainWindow.webContents.send(
+        'realm.on-connection-status',
+        ConduitState.Connecting
+      );
+    });
+    conduit.on(ConduitState.Connected, () => {
+      this.mainWindow.webContents.send(
+        'realm.on-connection-status',
+        ConduitState.Connected
+      );
+    });
+    conduit.on(ConduitState.Disconnected, () => {
+      this.mainWindow.webContents.send(
+        'realm.on-connection-status',
+        ConduitState.Disconnected
+      );
+    });
+    conduit.on(ConduitState.Failed, () => {
+      console.log('failed');
+      this.mainWindow.webContents.send(
+        'realm.on-connection-status',
+        ConduitState.Failed
+      );
+    });
+  }
 }
 
 export default Realm;
-
-export type OSPreloadType = typeof Realm.preload;

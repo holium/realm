@@ -20,7 +20,6 @@ import { MembershipStore } from 'os/services/spaces/models/members';
 import { SoundActions } from './actions/sound';
 import { LoaderModel } from 'os/services/common.model';
 import { OSActions } from './actions/os';
-import { IpcMainEvent, IpcRendererEvent } from 'electron';
 import { DocketStore } from 'os/services/ship/models/docket';
 import { ChatStore } from 'os/services/ship/models/dms';
 import { ContactStore } from 'os/services/ship/models/contacts';
@@ -209,11 +208,12 @@ onSnapshot(servicesStore, (snapshot) => {
   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
 });
 
-// Auth events
-window.electron.os.auth.onLogin(
+OSActions.onLogin((_event: any) => {
+  SoundActions.playLogin();
+});
+
+OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    // console.log('onLogin handler');
-    // @ts-ignore
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(initials.models.contacts!)
@@ -224,33 +224,25 @@ window.electron.os.auth.onLogin(
     );
     applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
     applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat!));
-    // applySnapshot(servicesStore.ship, castToSnapshot(initials.ship));
-    servicesStore.setShip(ShipModel.create(initials.ship));
-    coreStore.setLoggedIn(true);
-    SoundActions.playLogin();
 
+    servicesStore.setShip(ShipModel.create(initials.ship));
+
+    coreStore.setLoggedIn(true);
     ShellActions.setBlur(false);
     coreStore.setResuming(false);
   }
 );
 
 // Auth events
-window.electron.os.auth.onLogout((_event: any) => {
-  // OSActions.logout()
-  // console.log('logout');
+OSActions.onLogout((_event: any) => {
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
   ShellActions.setBlur(true);
+  SoundActions.playLogout();
 });
 
 // Effect events
 OSActions.onEffect((_event: any, value: any) => {
-  // if (value.response === 'status') {
-  //   if (value.data === 'boot:resuming') {
-  //     // console.log('on Resuming...');
-  //     coreStore.setResuming(true);
-  //   }
-  // }
   if (value.response === 'patch') {
     if (value.resource === 'auth') {
       applyPatch(servicesStore.identity.auth, value.patch);
