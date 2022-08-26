@@ -26,11 +26,13 @@ yarn link "@holium/realm-multiplayer"
 
 ```zsh
 cd lib/conduit
+
 yarn build
 yarn link
 
 cd app
 yarn link "@holium/conduit"
+
 ```
 
 ### Fake ships and Urbit
