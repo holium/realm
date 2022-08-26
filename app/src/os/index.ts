@@ -42,21 +42,14 @@ export class Realm extends EventEmitter {
 
   readonly handlers = {
     'realm.boot': this.boot,
-    'realm.apply-action': this.applyAction,
   };
 
   static preload = {
     boot: () => {
       return ipcRenderer.invoke('realm.boot');
     },
-    applyAction: (action: any) => {
-      return ipcRenderer.invoke('realm.apply-action', action);
-    },
     install: (ship: string) => {
       return ipcRenderer.invoke('core:install-realm', ship);
-    },
-    sendAction: (action: any) => {
-      return ipcRenderer.invoke('core:send-action', action);
     },
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
     onBoot: (callback: any) => ipcRenderer.on('realm.on-boot', callback),
@@ -165,7 +158,6 @@ export class Realm extends EventEmitter {
   }
 
   async connect(session: ISession) {
-    console.log(this.conduit?.status);
     if (!this.conduit) {
       this.conduit = new Conduit();
       this.handleConnectionStatus(this.conduit);
@@ -177,17 +169,6 @@ export class Realm extends EventEmitter {
       session.cookie
     );
     this.onConduit();
-
-    // this.conduit = new Urbit(session.url, session.ship, session.cookie);
-    // this.conduit.open();
-    // this.conduit.onOpen = () => {
-    //   if (!this.conduitOpen) {
-    //     this.onLogin();
-    //   }
-    //   this.conduitOpen = true;
-    // };
-    // this.conduit.onRetry = () => console.log('on retry');
-    // this.conduit.onError = (err) => console.log('on err', err);
   }
 
   setSession(session: ISession): void {
@@ -228,22 +209,6 @@ export class Realm extends EventEmitter {
   }
 
   /**
-   *
-   * Handles root level store actions from the client
-   *
-   * @param _event
-   * @param action
-   */
-  async applyAction(_event: any, action: MSTAction): Promise<void> {
-    const servicePath = cleanPath(action.path);
-    // @ts-ignore
-    // this.services[servicePath] //.applyAction(action);
-    const service = fromPathString(servicePath, this.services);
-    service.applyAction(action);
-    // console.log(service);
-  }
-
-  /**
    * Sends effect data to client store
    *
    * @param data
@@ -267,31 +232,23 @@ export class Realm extends EventEmitter {
    * @param conduit
    */
   handleConnectionStatus(conduit: Conduit) {
-    conduit.on(ConduitState.Connecting, () => {
-      this.mainWindow.webContents.send(
-        'realm.on-connection-status',
-        ConduitState.Connecting
-      );
-    });
-    conduit.on(ConduitState.Connected, () => {
-      this.mainWindow.webContents.send(
-        'realm.on-connection-status',
-        ConduitState.Connected
-      );
-    });
-    conduit.on(ConduitState.Disconnected, () => {
-      this.mainWindow.webContents.send(
-        'realm.on-connection-status',
-        ConduitState.Disconnected
-      );
-    });
+    conduit.on(ConduitState.Initialized, () =>
+      this.sendConnectionStatus(ConduitState.Initialized)
+    );
+    conduit.on(ConduitState.Connected, () =>
+      this.sendConnectionStatus(ConduitState.Connected)
+    );
+    conduit.on(ConduitState.Disconnected, () =>
+      this.sendConnectionStatus(ConduitState.Disconnected)
+    );
     conduit.on(ConduitState.Failed, () => {
       console.log('failed');
-      this.mainWindow.webContents.send(
-        'realm.on-connection-status',
-        ConduitState.Failed
-      );
+      this.sendConnectionStatus(ConduitState.Failed);
     });
+  }
+
+  sendConnectionStatus(status: ConduitState) {
+    this.mainWindow.webContents.send('realm.on-connection-status', status);
   }
 }
 

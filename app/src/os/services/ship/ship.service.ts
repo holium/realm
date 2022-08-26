@@ -290,7 +290,6 @@ export class ShipService extends BaseService {
   }
 
   logout() {
-    console.log('logging out');
     this.db = undefined;
     this.state = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
@@ -383,11 +382,11 @@ export class ShipService extends BaseService {
   async acceptDm(_event: any, toShip: string) {
     const ourShip = this.state?.patp!;
     console.log('acceptingDM', toShip);
-    return await DmApi.acceptDm(ourShip, toShip, this.core.credentials!);
+    return await DmApi.acceptDm(this.core.conduit!, toShip);
   }
   async declineDm(_event: any, toShip: string) {
     const ourShip = this.state?.patp!;
-    return await DmApi.acceptDm(ourShip, toShip, this.core.credentials!);
+    return await DmApi.declineDm(this.core.conduit!, toShip);
   }
   async sendDm(_event: any, toShip: string, contents: any[]) {
     const ourShip = this.state?.patp!;
@@ -400,12 +399,7 @@ export class ShipService extends BaseService {
     //   // const dm = this.state?.chat.dms.get(toShip)!;
     //   // dm.sendDm(contents);
     // }
-    return await DmApi.sendDM(
-      ourShip,
-      toShip,
-      contents,
-      this.core.credentials!
-    );
+    return await DmApi.sendDM(this.core.conduit!, ourShip, toShip, contents);
   }
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;

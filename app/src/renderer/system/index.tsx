@@ -69,7 +69,7 @@ export const Shell: FC = observer(() => {
       <BackgroundFill hasWallpaper={hasWallpaper}>
         {resuming && (
           <ResumingOverlay>
-            <Spinner size={2} />
+            <Spinner color="#ffffff" size={4} />
           </ResumingOverlay>
         )}
         {!resuming && GUI}

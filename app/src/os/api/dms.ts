@@ -1,9 +1,6 @@
 import { Conduit } from '@holium/conduit';
-import { quickPoke } from '../lib/poke';
-import { toJS } from 'mobx';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
-import { ShipModelType } from '../services/ship/models/ship';
 import { PostType } from '../types';
 import { ISession } from '../';
 import { ChatStoreType } from '../services/ship/models/dms';
@@ -79,10 +76,10 @@ export const DmApi = {
     });
   },
   sendDM: async (
+    conduit: Conduit,
     ourShip: string,
     toShip: string, // how do you define the to ship?
-    contents: any[],
-    credentials: ISession
+    contents: any[]
   ) => {
     const post = createPost(
       ourShip.substring(1),
@@ -105,9 +102,9 @@ export const DmApi = {
         },
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
-  acceptDm: async (ourShip: string, toShip: string, credentials: ISession) => {
+  acceptDm: async (conduit: Conduit, toShip: string) => {
     console.log('accepting dm');
     const payload = {
       app: 'dm-hook',
@@ -116,9 +113,9 @@ export const DmApi = {
         accept: `~${toShip}`,
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
-  declineDm: async (ourShip: string, toShip: string, credentials: ISession) => {
+  declineDm: async (conduit: Conduit, toShip: string) => {
     const payload = {
       app: 'dm-hook',
       mark: 'dm-hook-action',
@@ -126,12 +123,11 @@ export const DmApi = {
         decline: `~${toShip}`,
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
   setScreen: async (
-    ourShip: string,
-    screen: boolean, // should we screen dms from randos
-    credentials: { url: string; cookie: string }
+    conduit: Conduit,
+    screen: boolean // should we screen dms from randos
   ) => {
     const payload = {
       app: 'dm-hook',
@@ -140,7 +136,7 @@ export const DmApi = {
         screen,
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
   // getNewest(`~${window.ship}`, 'dm-inbox', 100, `/${patp2dec(ship)}`);
   // const aUpdated = a.startsWith('~')
