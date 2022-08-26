@@ -9,7 +9,7 @@ import {
 
 const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 
-export const Glob = types.model({
+export const Glob = types.model('Glob', {
   site: types.maybe(types.string),
   glob: types.maybe(
     types.model({
@@ -57,7 +57,7 @@ export const AppModel = types.union({ eager: false }, DocketApp, WebApp);
 export type AppModelType = Instance<typeof AppModel>;
 
 export const DocketStore = types
-  .model({
+  .model('DocketStore', {
     // loader: Loader
     apps: types.map(DocketApp),
   })
@@ -107,6 +107,8 @@ export const DocketStore = types
       applySnapshot(self.apps, preparedApps);
     },
   }));
+export type DocketStoreType = Instance<typeof DocketStore>;
+
 // /**
 //  * Install a foreign desk
 //  */

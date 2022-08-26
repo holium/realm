@@ -56,8 +56,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
-  const { ship } = useServices();
-  const chatData = ship?.chat.dms.get(selectedChat.contact)!;
+  const { ship, dms } = useServices();
+  const chatData = dms.dms.get(selectedChat.contact)!;
 
   const [rows, setRows] = useState(1);
 

@@ -27,14 +27,14 @@ export const Onboarding: FC<OnboardingProps> = observer(
 
     return (
       <Flex position="absolute" bottom={40} left={40}>
-        <IconButton
+        {/* <IconButton
           onClick={() => {
             ShellActions.closeDialog();
             props.exit();
           }}
         >
           <Icons name="ArrowLeftLine" />
-        </IconButton>
+        </IconButton> */}
       </Flex>
     );
   }

@@ -27,11 +27,11 @@ type IProps = {
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
-  const { ship } = useServices();
+  const { dms } = useServices();
   const { inputColor, textColor, iconColor, dockColor, windowColor, mode } =
     theme;
 
-  const chat = ship!.chat;
+  const chat = dms;
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}

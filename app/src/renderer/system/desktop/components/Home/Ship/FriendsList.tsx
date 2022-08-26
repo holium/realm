@@ -14,7 +14,7 @@ interface IFriendsList {
 
 export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   const { friends } = props;
-  const { desktop, ship } = useServices();
+  const { desktop, ship, contacts } = useServices();
 
   const { textColor, windowColor } = desktop.theme;
 
@@ -73,7 +73,7 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
       ];
     }
 
-    const contact = ship!.contacts.getContactAvatarMetadata(person.patp);
+    const contact = contacts.getContactAvatarMetadata(person.patp);
 
     return (
       <PersonRow

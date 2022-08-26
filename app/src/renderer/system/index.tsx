@@ -1,15 +1,27 @@
-import { FC, useMemo, useState, useLayoutEffect, useEffect } from 'react';
+import {
+  FC,
+  useMemo,
+  useState,
+  useLayoutEffect,
+  useEffect,
+  useRef,
+} from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
-import { useServices } from 'renderer/logic/store';
+import { useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { BackgroundImage, BackgroundFill } from './system.styles';
+import {
+  BackgroundImage,
+  BackgroundFill,
+  DimensionMeasurement,
+  ResumingOverlay,
+} from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
-import { SoundActions } from '../logic/actions/sound';
+import { useWindowSize } from 'renderer/logic/lib/measure';
+import { Flex, Spinner } from 'renderer/components';
 
 const DragBar = styled.div`
   position: absolute;
@@ -20,20 +32,11 @@ const DragBar = styled.div`
   --webkit-app-region: drag;
 `;
 
-function useWindowSize() {
-  useLayoutEffect(() => {
-    function updateSize() {
-      ShellActions.setDesktopDimensions(window.innerWidth, window.innerHeight);
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-}
-
 export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();
-  useWindowSize();
+  const { resuming } = useCore();
+  const windowRef = useRef(null);
+  useWindowSize(windowRef);
 
   const isFullscreen = shell.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
@@ -47,30 +50,39 @@ export const Shell: FC = observer(() => {
     [shell.dialogId]
   );
 
-  // useEffect(() => {
-  //   if (ship?.loader.isLoaded) {
-  //     SoundActions.playStartup();
-  //   } else {
-  //     SoundActions.playLogout();
-  //   }
-  // }, [ship?.loader.isLoaded]);
-
   const shipLoaded = ship?.loader.isLoaded;
+  const GUI = shipLoaded ? (
+    <Desktop
+      hasLoaded={shipLoaded}
+      hasWallpaper={true}
+      isFullscreen={isFullscreen}
+    />
+  ) : (
+    <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
+  );
   return (
     <ViewPort>
+      <DimensionMeasurement id="dimensions" ref={windowRef} />
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {shipLoaded ? (
+        {resuming && (
+          <ResumingOverlay>
+            <Spinner color="#ffffff" size={4} />
+          </ResumingOverlay>
+        )}
+        {!resuming && GUI}
+        {/* {!resuming && shipLoaded && (
           <Desktop
             hasLoaded={shipLoaded}
             hasWallpaper={true}
             isFullscreen={isFullscreen}
           />
-        ) : (
-          <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
         )}
+        {!resuming && !shipLoaded && (
+          <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
+        )} */}
       </BackgroundFill>
     </ViewPort>
   );

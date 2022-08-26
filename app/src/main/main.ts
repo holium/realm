@@ -116,6 +116,7 @@ const createWindow = async () => {
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
+
   // RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
@@ -127,7 +128,13 @@ const createWindow = async () => {
   mainWindow.maximize();
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
-    mainWindow?.webContents.setZoomFactor(1.1);
+    mainWindow?.webContents.setZoomFactor(1.0);
+    // process.once('SIGKILL', async (code) => {
+    //   console.log('SIGKILL received...', code);
+    //   await realm.conduit?.closeChannel();
+    //   console.log('conduit killed..');
+    // });
+
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
