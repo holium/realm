@@ -1,6 +1,6 @@
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import {
   Action,
   ConduitState,
@@ -358,15 +358,31 @@ export class Conduit extends EventEmitter {
         headers: this.headers,
         signal: this.abort.signal,
       });
-      if (response.statusText !== 'ok') {
+      if (response.status > 300 && response.status < 200) {
         throw new Error('Poke failed');
       }
       if (this.status !== ConduitState.Initialized) {
         await this.startSSE();
       }
     } catch (e: any) {
-      console.log('poke failed', e);
+      // console.log('poke failed', e);
+      const err = e as AxiosError;
+      if (err.code === 'ECONNREFUSED') {
+        // if we cannot connect to the ship, cleanup
+        this.failGracefully();
+      }
     }
+  }
+
+  failGracefully() {
+    this.prevMsgId = 0;
+    this.pokes = new Map();
+    this.watches = new Map();
+    this.reactions = new Map();
+    this.abort = new AbortController();
+    this.sse?.close();
+    this.sse = undefined;
+    this.updateStatus(ConduitState.Failed);
   }
 
   /**

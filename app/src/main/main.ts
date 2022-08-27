@@ -102,6 +102,7 @@ const createWindow = async () => {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
+      sandbox: false,
       // nodeIntegrationInSubFrames: true,
       // sandbox: true,
       // nodeIntegrationInWorker: true,

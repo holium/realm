@@ -90,8 +90,9 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     tabIndex={1}
                     name="patp"
                     placeholder="~sampel-palnet"
+                    borderColor="input.borderColor"
                     defaultValue={urbitId.state.value}
-                    error={!urbitId.computed.isDirty || urbitId.computed.error}
+                    // error={!urbitId.computed.isDirty || urbitId.computed.error}
                     onChange={(e: any) =>
                       urbitId.actions.onChange(e.target.value)
                     }
@@ -112,7 +113,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     name="url"
                     placeholder="https://my-ship.host.com"
                     defaultValue={shipUrl.state.value}
-                    error={!shipUrl.computed.isDirty || shipUrl.computed.error}
+                    // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
                     onChange={(e: any) =>
                       shipUrl.actions.onChange(e.target.value)
                     }
@@ -133,9 +134,9 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     name="code"
                     placeholder="sample-micsev-bacmug-moldex"
                     defaultValue={accessKey.state.value}
-                    error={
-                      !accessKey.computed.isDirty || accessKey.computed.error
-                    }
+                    // error={
+                    //   !accessKey.computed.isDirty || accessKey.computed.error
+                    // }
                     onChange={(e: any) =>
                       accessKey.actions.onChange(e.target.value)
                     }

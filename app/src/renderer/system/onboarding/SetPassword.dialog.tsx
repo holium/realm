@@ -117,7 +117,7 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   name="password"
                   type="password"
                   placeholder="***************"
-                  error={!password.computed.isDirty || password.computed.error}
+                  // error={!password.computed.isDirty || password.computed.error}
                   onChange={(e: any) =>
                     password.actions.onChange(e.target.value)
                   }
@@ -132,10 +132,10 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   name="confirm-password"
                   type="password"
                   placeholder="***************"
-                  error={
-                    !confirmPassword.computed.isDirty ||
-                    confirmPassword.computed.error
-                  }
+                  // error={
+                  //   !confirmPassword.computed.isDirty ||
+                  //   confirmPassword.computed.error
+                  // }
                   onChange={(e: any) =>
                     confirmPassword.actions.onChange(e.target.value)
                   }

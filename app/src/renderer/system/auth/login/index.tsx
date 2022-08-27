@@ -1,4 +1,4 @@
-import { useRef, FC, useEffect } from 'react';
+import { useRef, FC, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
@@ -16,6 +16,7 @@ import {
   Menu,
   MenuItem,
   Spinner,
+  FormControl,
 } from 'renderer/components';
 import { ShipSelector } from './ShipSelector';
 import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
@@ -24,7 +25,7 @@ import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
-import { ConduitState } from '@holium/conduit';
+import { ConduitState } from '@holium/conduit/src/types';
 
 type LoginProps = {
   addShip: () => void;
@@ -36,6 +37,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { identity, desktop, ship } = useServices();
   const { auth } = identity;
   const { theme } = desktop;
+  const [hasFailed, setHasFailed] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -55,19 +57,29 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 
   useEffect(() => {
     OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
-      console.log('conn status', status);
+      if (status === ConduitState.Failed) {
+        setHasFailed(true);
+      }
     });
   }, []);
 
   useEffect(() => {
-    // Set the wallpaper on load
-    !theme &&
-      pendingShip &&
-      DesktopActions.changeWallpaper(
-        pendingShip?.patp!,
-        pendingShip?.wallpaper || DEFAULT_WALLPAPER
-      );
-  }, [pendingShip !== null]);
+    setHasFailed(false);
+    if (passwordRef.current) {
+      const passInput = passwordRef.current as HTMLInputElement;
+      passInput.value = '';
+    }
+  }, [pendingShip]);
+
+  // useEffect(() => {
+  //   // Set the wallpaper on load
+  //   !theme &&
+  //     pendingShip &&
+  //     DesktopActions.changeWallpaper(
+  //       pendingShip?.patp!,
+  //       pendingShip?.wallpaper || DEFAULT_WALLPAPER
+  //     );
+  // }, [pendingShip !== null]);
 
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
@@ -81,6 +93,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   };
   const clickSubmit = (event: any) => {
     event.stopPropagation();
+    setHasFailed(false);
     AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
@@ -159,7 +172,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     </Text>
                   )}
                 </Flex>
-                <Flex mt={isVertical ? 2 : 0} gap={12} alignItems="center">
+                <Flex
+                  mt={isVertical ? 2 : 0}
+                  gap={12}
+                  flexDirection="column"
+                  alignItems="center"
+                >
                   <Input
                     ref={passwordRef}
                     wrapperRef={wrapperRef}
@@ -169,18 +187,19 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     autoFocus
                     autoCorrect="false"
                     bgOpacity={hasWallpaper ? 0.3 : 1}
-                    borderColor={
-                      hasWallpaper ? 'input.borderHover' : 'input.borderColor'
-                    }
+                    // borderColor={
+                    //   hasWallpaper ? 'input.borderHover' : 'input.borderColor'
+                    // }
                     wrapperStyle={{
                       borderRadius: 8,
-                      minWidth: isVertical ? 300 : 260,
+                      width: isVertical ? 320 : 260,
                     }}
                     placeholder="Password"
                     fontSize={16}
                     name="password"
                     type="password"
                     rightInteractive
+                    error={hasFailed}
                     onKeyDown={submitPassword}
                     rightIcon={
                       <Flex gap={4} justifyContent="center" alignItems="center">
@@ -232,7 +251,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                             </Portal>
                           )}
                         </AnimatePresence>
-                        {auth.loader.isLoading ? (
+                        {auth.loader.isLoading && !hasFailed ? (
                           <Flex
                             justifyContent="center"
                             alignItems="center"
@@ -244,6 +263,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                         ) : (
                           <IconButton
                             ref={submitRef}
+                            error={hasFailed}
                             luminosity={theme?.mode}
                             size={24}
                             canFocus
@@ -255,6 +275,14 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                       </Flex>
                     }
                   />
+
+                  <FormControl.Error
+                    style={{ height: 15 }}
+                    textShadow="1px 1px #00000080"
+                  >
+                    {hasFailed &&
+                      'Connection to your ship has been refused: ECONNREFUSED'}
+                  </FormControl.Error>
                 </Flex>
               </Flex>
             </Flex>

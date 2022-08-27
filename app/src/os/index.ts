@@ -163,13 +163,19 @@ export class Realm extends EventEmitter {
       this.conduit = new Conduit();
       this.handleConnectionStatus(this.conduit);
     }
-    // wait for the init function to resolve
-    await this.conduit.init(
-      session.url,
-      session.ship.substring(1),
-      session.cookie
-    );
-    this.onConduit();
+    try {
+      // wait for the init function to resolve
+      await this.conduit.init(
+        session.url,
+        session.ship.substring(1),
+        session.cookie
+      );
+    } catch (e) {
+      console.log(e);
+      this.clearSession();
+    } finally {
+      this.onConduit();
+    }
   }
 
   setSession(session: ISession): void {
@@ -243,7 +249,8 @@ export class Realm extends EventEmitter {
       this.sendConnectionStatus(ConduitState.Disconnected)
     );
     conduit.on(ConduitState.Failed, () => {
-      console.log('failed');
+      this.services.identity.auth.setLoader('error');
+      this.isResuming = false;
       this.sendConnectionStatus(ConduitState.Failed);
     });
   }
