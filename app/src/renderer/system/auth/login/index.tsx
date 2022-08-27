@@ -1,6 +1,7 @@
 import { useRef, FC, useEffect } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
+import { AnimatePresence } from 'framer-motion';
 import { toJS } from 'mobx';
 import {
   Flex,
@@ -21,7 +22,7 @@ import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { SoundActions } from 'renderer/logic/actions/sound';
+import Portal from 'renderer/system/dialog/Portal';
 
 type LoginProps = {
   addShip: () => void;
@@ -41,7 +42,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   // Setting up options menu
   const menuWidth = 180;
   const config = useMenu(optionsRef, {
-    orientation: 'left',
+    orientation: 'bottom-left',
     padding: 6,
     menuWidth,
   });
@@ -181,42 +182,48 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           luminosity={theme?.mode}
                           opacity={1}
                           onClick={(evt: any) => {
-                            !show && setShow && setShow(true);
+                            setShow(true);
                           }}
                         >
                           <Icons name="MoreHorizontal" />
                         </IconButton>
-                        <Menu
-                          id={`${pendingShip.patp}-user-menu`}
-                          customBg={theme.windowColor}
-                          style={{
-                            top: anchorPoint && anchorPoint.y + 8,
-                            left: anchorPoint && anchorPoint.x + 10,
-                            visibility: show ? 'visible' : 'hidden',
-                            width: menuWidth,
-                          }}
-                          isOpen={show}
-                          onClose={() => {
-                            setShow(false);
-                          }}
-                        >
-                          <MenuItem
-                            data-prevent-context-close={false}
-                            label="Reset password"
-                            customBg={theme.windowColor}
-                            onClick={() => {
-                              console.log('do reset form');
-                            }}
-                          />
-                          <MenuItem
-                            label="Remove ship"
-                            customBg={theme.windowColor}
-                            mt={1}
-                            onClick={() => {
-                              AuthActions.removeShip(pendingShip.patp);
-                            }}
-                          />
-                        </Menu>
+                        <AnimatePresence>
+                          {show && (
+                            <Portal>
+                              <Menu
+                                id={`${pendingShip.patp}-user-menu`}
+                                customBg={theme.windowColor}
+                                style={{
+                                  top: anchorPoint && anchorPoint.y + 9,
+                                  left: anchorPoint && anchorPoint.x + 6,
+                                  visibility: show ? 'visible' : 'hidden',
+                                  width: menuWidth,
+                                }}
+                                isOpen={show}
+                                onClose={(evt) => {
+                                  setShow(false);
+                                }}
+                              >
+                                <MenuItem
+                                  data-prevent-context-close={false}
+                                  label="Reset password"
+                                  customBg={theme.windowColor}
+                                  onClick={() => {
+                                    console.log('do reset form');
+                                  }}
+                                />
+                                <MenuItem
+                                  label="Remove ship"
+                                  customBg={theme.windowColor}
+                                  mt={1}
+                                  onClick={(_evt: any) => {
+                                    AuthActions.removeShip(pendingShip.patp);
+                                  }}
+                                />
+                              </Menu>
+                            </Portal>
+                          )}
+                        </AnimatePresence>
                         {auth.loader.isLoading ? (
                           <Flex
                             justifyContent="center"

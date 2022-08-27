@@ -1,12 +1,4 @@
-import {
-  FC,
-  useMemo,
-  useState,
-  useLayoutEffect,
-  useEffect,
-  useRef,
-} from 'react';
-import styled from 'styled-components';
+import { FC, useMemo, useState, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 import { useCore, useServices } from 'renderer/logic/store';
@@ -17,20 +9,12 @@ import {
   BackgroundFill,
   DimensionMeasurement,
   ResumingOverlay,
+  DragBar,
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
 import { useWindowSize } from 'renderer/logic/lib/measure';
-import { Flex, Spinner } from 'renderer/components';
-
-const DragBar = styled.div`
-  position: absolute;
-  height: 22px;
-  left: 0;
-  top: 0;
-  right: 0;
-  --webkit-app-region: drag;
-`;
+import { Spinner } from 'renderer/components';
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();

@@ -104,6 +104,7 @@ export class Realm extends EventEmitter {
     // });
     // when closing for any reason, crash, user clicks close etc.
     this.mainWindow.on('close', async () => {
+      this.services.shell.closeDialog(null);
       await this.conduit?.closeChannel();
       this.conduit = undefined;
     });

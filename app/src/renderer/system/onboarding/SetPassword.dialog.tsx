@@ -13,7 +13,6 @@ import {
   Flex,
   TextButton,
 } from 'renderer/components';
-import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -29,10 +28,8 @@ export const SetPassword: FC<BaseDialogProps> = observer(
 
     const passwordForm = useForm({
       async onSubmit({ values }) {
-        console.log('submitting...');
-        console.log(values);
         props.onNext && props.onNext();
-      }
+      },
     });
 
     const password = useField({
@@ -49,8 +46,8 @@ export const SetPassword: FC<BaseDialogProps> = observer(
       validate: (confirm) => {
         return password.state.value === confirm
           ? { parsed: confirm }
-          : { error: 'Passwords must match.' }
-      }
+          : { error: 'Passwords must match.' };
+      },
     });
 
     return (

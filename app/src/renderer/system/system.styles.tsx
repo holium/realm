@@ -4,6 +4,15 @@ import { Fill } from 'react-spaces';
 
 import { ThemeType } from '../theme';
 
+export const DragBar = styled.div`
+  position: absolute;
+  height: 22px;
+  left: 0;
+  top: 0;
+  right: 0;
+  --webkit-app-region: drag;
+`;
+
 export const DimensionMeasurement = styled.div`
   position: absolute;
   left: 0;

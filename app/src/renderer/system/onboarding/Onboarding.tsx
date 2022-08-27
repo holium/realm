@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { Flex, IconButton, Icons } from 'renderer/components';
+import { Flex } from 'renderer/components';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
 type OnboardingProps = {
@@ -22,8 +22,7 @@ export const Onboarding: FC<OnboardingProps> = observer(
       return () => {
         ShellActions.closeDialog();
       };
-    }),
-      [];
+    }, []);
 
     return (
       <Flex position="absolute" bottom={40} left={40}>

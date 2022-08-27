@@ -1,8 +1,9 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex } from 'renderer/components';
 import { Login } from './login';
 import { Onboarding } from 'renderer/system/onboarding/Onboarding';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 
 type LoginProps = {
   hasWallpaper?: boolean;
@@ -12,6 +13,13 @@ type LoginProps = {
 export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
   const { hasWallpaper, firstTime } = props;
   const [addShip, setAddShip] = useState(false);
+
+  useEffect(() => {
+    // This is an event that is fired when onboarding is completed
+    OnboardingActions.onExit(() => {
+      setAddShip(false);
+    });
+  }, []);
 
   return (
     <Flex height="100vh" alignItems="center" justifyContent="center">

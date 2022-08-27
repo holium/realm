@@ -1,19 +1,6 @@
-import {
-  ipcMain,
-  IpcMainInvokeEvent,
-  IpcMessageEvent,
-  ipcRenderer,
-} from 'electron';
+import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-  IStateTreeNode,
-  IAnyModelType,
-  IType,
-} from 'mobx-state-tree';
+import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
@@ -65,13 +52,6 @@ export class ShipService extends BaseService {
     contacts: undefined,
     docket: DocketStore.create({ apps: {} }),
     chat: undefined,
-  };
-  private subscriptions: ShipSubscriptions = {
-    contacts: 0,
-    friends: 0,
-    metadata: 0,
-    dms: 0,
-    graphDms: 0,
   };
   private metadataStore: {
     graph: { [key: string]: any };
@@ -254,7 +234,8 @@ export class ShipService extends BaseService {
           resolve(this.state!);
         });
 
-        this.rooms?.onLogin(ship);
+        // TODO turning off rooms for now
+        // this.rooms?.onLogin(ship);
       });
 
       // return ship state

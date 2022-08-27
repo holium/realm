@@ -6,9 +6,7 @@ import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import {
-  WindowModelProps
-} from 'os/services/shell/desktop.model';
+import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
 import { WebView } from './WebView';
@@ -266,7 +264,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
       const onCloseDialog = dialogRenderers[window.id].onClose;
       const onOpenDialog = dialogRenderers[window.id].onOpen;
       useEffect(() => {
-        console.log('opening dialog');
         // trigger onOpen only once
         onOpenDialog && onOpenDialog();
       }, []);

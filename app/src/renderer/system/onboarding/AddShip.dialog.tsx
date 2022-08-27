@@ -26,7 +26,6 @@ export const AddShip: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const shipForm = useForm({
       async onSubmit({ values }: any) {
-        console.log('submittingggg');
         await OnboardingActions.addShip(values);
 
         props.setState &&
