@@ -23,6 +23,8 @@ import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import Portal from 'renderer/system/dialog/Portal';
+import { OSActions } from 'renderer/logic/actions/os';
+import { ConduitState } from '@holium/conduit';
 
 type LoginProps = {
   addShip: () => void;
@@ -50,6 +52,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 
   const pendingShip = auth.currentShip;
   const shipName = pendingShip?.nickname || pendingShip?.patp;
+
+  useEffect(() => {
+    OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
+      console.log('conn status', status);
+    });
+  }, []);
 
   useEffect(() => {
     // Set the wallpaper on load
