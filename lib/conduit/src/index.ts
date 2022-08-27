@@ -205,6 +205,7 @@ export class Conduit extends EventEmitter {
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }
+    console.log(params)
     // Properly waiting
     const [_req, res] = await Promise.all([
       this.postToChannel(message),
@@ -358,7 +359,7 @@ export class Conduit extends EventEmitter {
         headers: this.headers,
         signal: this.abort.signal,
       });
-      if (response.statusText !== 'ok') {
+      if (response.status > 300 && response.status < 200) {
         throw new Error('Poke failed');
       }
       if (this.status !== ConduitState.Initialized) {
