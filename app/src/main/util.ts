@@ -3,6 +3,7 @@ import { URL } from 'url';
 import path from 'path';
 
 export let resolveHtmlPath: (htmlFileName: string) => string;
+export let resolveMediaPath: (mediaFileName: string) => string;
 
 if (process.env.NODE_ENV === 'development') {
   const port = process.env.PORT || 1212;
@@ -14,5 +15,8 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   resolveHtmlPath = (htmlFileName: string) => {
     return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
+  };
+  resolveMediaPath = (htmlFileName: string) => {
+    return `file://${path.resolve(__dirname, '../../media/', htmlFileName)}`;
   };
 }

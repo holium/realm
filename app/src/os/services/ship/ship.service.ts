@@ -387,7 +387,7 @@ export class ShipService extends BaseService {
     console.log('removingDM', ourShip, toShip, removeIndex);
   }
   async getNotifications(_event: any, timestamp: number, length: number) {
-    console.log('getNotifications: %o, %o', timestamp, length);
+    // console.log('getNotifications: %o, %o', timestamp, length);
     // const timeboxes = this.state?.notifications.timeboxes();
     // console.log(timeboxes);
     return [];

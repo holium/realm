@@ -94,3 +94,17 @@ Layer 1: WindowManager
 Layer 2: SystemBar
 Layer 3: TrayMenus
 Layer 4: Modals, ContextMenu, Tooltips, Popovers
+
+## Packaging for release
+
+Running the below command will place the build output at `/release/build`.
+
+```zsh
+yarn package
+```
+
+If you include `DEBUG_PROD=true` you can open dev tools and check for errors.
+
+```zsh
+npx cross-env DEBUG_PROD=true yarn package
+```

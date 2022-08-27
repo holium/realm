@@ -97,7 +97,7 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     acceptFirstMouse: true,
-    paintWhenInitiallyHidden: true,
+    // paintWhenInitiallyHidden: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
@@ -130,11 +130,6 @@ const createWindow = async () => {
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
     mainWindow?.webContents.setZoomFactor(1.0);
-    // process.once('SIGKILL', async (code) => {
-    //   console.log('SIGKILL received...', code);
-    //   await realm.conduit?.closeChannel();
-    //   console.log('conduit killed..');
-    // });
 
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
