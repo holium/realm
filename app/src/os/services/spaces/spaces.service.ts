@@ -391,17 +391,12 @@ export class SpacesService extends BaseService {
     appId: string,
     rank: number
   ) {
-    const result = await BazaarApi.addToSuite(
+    return await BazaarApi.addToSuite(
       this.core.conduit!,
       spacePath,
       appId,
       rank
     );
-    console.log('addToSuite => %o', result);
-    return new Promise((resolve) => {
-      resolve(result);
-    });
-    // return result;
   }
 
   async removeFromSuite(

@@ -1,18 +1,13 @@
+import { Conduit } from '@holium/conduit';
 import { Urbit } from './../urbit/api';
 import { SpacePath } from '../types';
-import {
-  BazaarModelType,
-  BazaarStoreType,
-} from 'os/services/spaces/models/bazaar';
+import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { allyShip, docketInstall } from '@urbit/api';
-import { ISession } from '../';
 import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
 
-const pendingRequests: { [key: string]: (data?: any) => any } = {};
-
 export const BazaarApi = {
-  getApps: async (conduit: Urbit, path: SpacePath, tag: string = 'all') => {
+  getApps: async (conduit: Conduit, path: SpacePath, tag: string = 'all') => {
     //  [host]/~/scry/bazaar/~zod/my-space/apps.json
     console.log(`${path}/apps/${tag} => %`);
     const response = await conduit.scry({
@@ -35,7 +30,7 @@ export const BazaarApi = {
     console.log('getApp after => %o', appMap);
     return appMap;
   },
-  getTreaties: async (conduit: Urbit, patp: string) => {
+  getTreaties: async (conduit: Conduit, patp: string) => {
     //  [host]/~/scry/treaty/treaties/~bus.json
     const response = await conduit.scry({
       app: 'treaty',
@@ -50,7 +45,7 @@ export const BazaarApi = {
     });
     return appMap;
   },
-  addAlly: async (conduit: Urbit, ship: string) => {
+  addAlly: async (conduit: Conduit, ship: string) => {
     await conduit.poke(allyShip(ship));
     return new Promise((resolve) => {
       pendingRequests['bazaar-action-add-treaty'] = (data: any) => {
@@ -71,7 +66,7 @@ export const BazaarApi = {
   // leverage treaty /allies scry for now. allies are technically ship specific,
   //   so consider adding to ship service; however, thought it would be easier to
   //   maintain knowing all app related functions are managed by Bazaar service
-  getAllies: async (conduit: Urbit, path: SpacePath) => {
+  getAllies: async (conduit: Conduit, path: SpacePath) => {
     const response = await conduit.scry({
       app: 'treaty',
       path: '/allies', // the spaces scry is at the root of the path
@@ -109,7 +104,7 @@ export const BazaarApi = {
     });
   },
   removeAppTag: async (
-    conduit: Urbit,
+    conduit: Conduit,
     path: SpacePath,
     appId: string,
     tag: string
@@ -138,7 +133,7 @@ export const BazaarApi = {
     });
   },
   addToSuite: async (
-    conduit: Urbit,
+    conduit: Conduit,
     path: SpacePath,
     appId: string,
     rank: number
@@ -159,14 +154,8 @@ export const BazaarApi = {
         },
       },
     });
-    return new Promise((resolve) => {
-      pendingRequests['bazaar-action-suite-add'] = (data: any) => {
-        console.log('resolving add-to-suite request');
-        resolve(data);
-      };
-    });
   },
-  removeFromSuite: async (conduit: Urbit, path: SpacePath, appId: string) => {
+  removeFromSuite: async (conduit: Conduit, path: SpacePath, appId: string) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
@@ -189,57 +178,53 @@ export const BazaarApi = {
       };
     });
   },
-  loadTreaties: (conduit: Urbit, state: BazaarStoreType): void => {},
-  watchUpdates: (conduit: Urbit, state: BazaarStoreType): void => {
-    // get the scoop on new app installations
-    conduit.subscribe({
+  loadTreaties: (conduit: Conduit, state: BazaarStoreType): void => {},
+  watchUpdates: (conduit: Conduit, state: BazaarStoreType): void => {
+    console.log('watching docket/charges...');
+    conduit.watch({
       app: 'docket',
       path: `/charges`,
-      event: async (data: any, id: string) => {
-        console.log('docket/charges => %o', data);
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log(mark, data);
+        // if (mark === 'bazaar-reaction') {
+        //   handleSpacesReactions(data, state, membersState, bazaarState);
+        // }
       },
-      err: () => console.log('subscription [docket/charges] rejected'),
-      quit: () => console.log('kicked from [docket/charges] subscription'),
+      onError: () => console.log('subscription [docket/charges] rejected'),
+      onQuit: () => console.log('kicked from subscription [docket/charges]'),
     });
-    // get the scoop on new app installations
-    conduit.subscribe({
+    console.log('watching treaty/treaties...');
+    conduit.watch({
       app: 'treaty',
       path: `/treaties`,
-      event: async (data: any, id: string) => {
-        console.log('treaty/treaties => %o', data);
-        if (data.hasOwnProperty('add')) {
-          state.addTreaty(data.add);
-          if (pendingRequests['bazaar-action-add-treaty']) {
-            pendingRequests['bazaar-action-add-treaty'](data);
-            pendingRequests['bazaar-action-add-treaty'] = () => {};
-          }
-        }
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log(mark, data);
+        // if (mark === 'bazaar-reaction') {
+        //   handleSpacesReactions(data, state, membersState, bazaarState);
+        // }
       },
-      err: () => console.log('subscription [docket/charges] rejected'),
-      quit: () => console.log('kicked from [docket/charges] subscription'),
+      onError: () => console.log('subscription [treaty/treaties] rejected'),
+      onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
     });
-    conduit.subscribe({
+    console.log('watching bazaar/updates...');
+    conduit.watch({
       app: 'bazaar',
       path: `/updates`,
-      event: async (data: any, id: string) => {
-        console.log(data);
-        if (data['bazaar-reaction']) {
-          handleBazaarReactions(data['bazaar-reaction'], state, id);
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log(mark, data);
+        if (mark === 'bazaar-reaction') {
+          handleBazaarReactions(data[mark], state);
         }
       },
-      err: () => console.log('subscription [bazaar/updates] rejected'),
-      quit: () => console.log('kicked from [bazaar/updates] subscription'),
+      onError: () => console.log('subscription [bazaar/updates] rejected'),
+      onQuit: () => console.log('kicked from subscription [bazaar/updates]'),
     });
   },
 };
 
-const handleBazaarReactions = (
-  data: any,
-  state: BazaarStoreType,
-  id: string
-) => {
-  console.log(data);
+const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
+  console.log(reaction);
   switch (reaction) {
     case 'initial':
       state.initial(data['initial']);
@@ -253,10 +238,6 @@ const handleBazaarReactions = (
         state
           .getBazaar(detail['space-path'])
           .addAppTag(detail['app-id'], detail.tag);
-        if (pendingRequests['bazaar-action-add-app-tag']) {
-          pendingRequests['bazaar-action-add-app-tag'](detail);
-          pendingRequests['bazaar-action-add-app-tag'] = () => {};
-        }
       }
       break;
     case 'remove-tag':
@@ -271,10 +252,6 @@ const handleBazaarReactions = (
         state
           .getBazaar(detail['space-path'])
           .removeAppTag(detail['app-id'], detail.tag);
-        if (pendingRequests['bazaar-action-remove-app-tag']) {
-          pendingRequests['bazaar-action-remove-app-tag'](detail);
-          pendingRequests['bazaar-action-remove-app-tag'] = () => {};
-        }
       }
       break;
     case 'suite-add':
@@ -289,10 +266,6 @@ const handleBazaarReactions = (
         state
           .getBazaar(detail['space-path'])
           .addToSuite(detail['app-id'], detail.rank);
-        if (pendingRequests['bazaar-action-suite-add']) {
-          pendingRequests['bazaar-action-suite-add'](detail);
-          pendingRequests['bazaar-action-suite-add'] = () => {};
-        }
       }
       break;
     case 'suite-remove':
@@ -304,10 +277,6 @@ const handleBazaarReactions = (
         });
         // @ts-ignore
         state.getBazaar(detail['space-path']).removeFromSuite(detail['app-id']);
-        if (pendingRequests['bazaar-action-suite-remove']) {
-          pendingRequests['bazaar-action-suite-remove'](detail);
-          pendingRequests['bazaar-action-suite-remove'] = () => {};
-        }
       }
       break;
     default:

@@ -7,7 +7,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 
-const AppTypes = types.enumeration(['urbit', 'web', 'native']);
+export const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 
 export const Glob = types.model('Glob', {
   site: types.maybe(types.string),

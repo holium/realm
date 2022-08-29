@@ -1,27 +1,11 @@
 import { types, Instance } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
 import { NativeAppList } from '../../../../renderer/apps';
-import { DocketApp, WebApp } from '../../ship/models/docket';
+import { DocketApp, WebApp, Glob, AppTypes } from '../../ship/models/docket';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
-
-export const Glob = types.model({
-  site: types.maybe(types.string),
-  glob: types.maybe(
-    types.model({
-      base: types.string,
-      'glob-reference': types.model({
-        location: types.model({
-          http: types.maybe(types.string),
-          ames: types.maybe(types.string),
-        }),
-        hash: types.string,
-      }),
-    })
-  ),
-});
 
 const AppRankModel = types.model({
   default: types.number,
@@ -29,8 +13,6 @@ const AppRankModel = types.model({
   recommended: types.number,
   suite: types.number,
 });
-
-const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 
 const BazaarApp = types.model({
   id: types.identifier,
@@ -48,11 +30,6 @@ const BazaarApp = types.model({
   license: types.string,
 });
 export type BazaarAppType = Instance<typeof BazaarApp>;
-
-// .views((self) => ({
-//   get apps
-// }))
-// .actions((self) => ({}));
 
 export const BazaarModel = types
   .model({
