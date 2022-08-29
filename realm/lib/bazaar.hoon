@@ -75,7 +75,7 @@
   ++  reaction
     |=  rct=^reaction
     ^-  json
-    %+  frond  %bazaar-reaction
+    :: %+  frond  %bazaar-reaction
     %-  pairs
     :_  ~
     ^-  [cord json]

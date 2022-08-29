@@ -2,7 +2,7 @@
 ::
 ::  Friend list management within Realm
 ::
-/-  store=friends, spaces, invite, membership-store=membership, hark=hark-store, resource
+/-  store=friends, spaces, membership-store=membership, hark=hark-store, resource
 /+  dbug, default-agent, resource, lib=friends
 |%
 +$  card  card:agent:gall
@@ -57,7 +57,7 @@
     ^-  (quip card _this)
     =/  cards=(list card)
       ?+    path      (on-watch:def path)
-          [%all ~]  
+          [%all ~]
         ::  only host should get all updates
         ?>  =(our.bowl src.bowl)
         (send-reaction [%friends friends.state] [/all ~])
@@ -111,8 +111,8 @@
       :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%yes-fren ~])]  :: confirms you are mutual fren
           [%give %fact [/all ~] friends-reaction+!>([%new-friend ship added-fren])]
       ==
-  ::  If the fren is not added yet 
-  =/  fren    
+  ::  If the fren is not added yet
+  =/  fren
     [
       pinned=%.n
       tags=(silt `(list cord)`[~])
@@ -149,7 +149,7 @@
   ^-  (quip card _state)
   ?<  =(our.bowl src.bowl)              ::  we can't be-fren ourselves
   =/  is-added    (~(has by friends.state) ship)
-  =/  fren    
+  =/  fren
     [
       pinned=%.n
       tags=(silt `(list cord)`[~])

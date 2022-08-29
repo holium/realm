@@ -46,21 +46,31 @@ export const BazaarApi = {
     return appMap;
   },
   addAlly: async (conduit: Conduit, ship: string) => {
-    await conduit.poke(allyShip(ship));
-    return new Promise((resolve) => {
-      pendingRequests['bazaar-action-add-treaty'] = (data: any) => {
-        console.log('resolving bazaar-action-add-treaty poke');
-        resolve(data);
-      };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        ...allyShip(ship),
+        reaction: 'bazaar-reaction.add-tag',
+        onReaction: (data: any) => {
+          resolve(data['add-tag']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   installDocket: async (conduit: Urbit, ship: string, desk: string) => {
-    await conduit.poke(docketInstall(ship, desk));
-    return new Promise((resolve) => {
-      pendingRequests['bazaar-action-install-docket'] = (data: any) => {
-        console.log('resolving bazaar-action-install-docket poke');
-        resolve(data);
-      };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        ...docketInstall(ship, desk),
+        reaction: 'bazaar-reaction.add-tag',
+        onReaction: (data: any) => {
+          resolve(data['add-tag']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   // leverage treaty /allies scry for now. allies are technically ship specific,
@@ -84,23 +94,26 @@ export const BazaarApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    await conduit.poke({
-      app: 'bazaar',
-      mark: 'bazaar-action',
-      json: {
-        'add-tag': {
-          path: pathObj,
-          'app-id': appId,
-          tag: tag,
-          rank: null,
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'add-tag': {
+            path: pathObj,
+            'app-id': appId,
+            tag: tag,
+            rank: null,
+          },
         },
-      },
-    });
-    return new Promise((resolve) => {
-      pendingRequests['bazaar-action-add-app-tag'] = (data: any) => {
-        console.log('resolving add-app-tag request');
-        resolve(data);
-      };
+        reaction: 'bazaar-reaction.add-tag',
+        onReaction: (data: any) => {
+          resolve(data['add-tag']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   removeAppTag: async (
@@ -114,22 +127,25 @@ export const BazaarApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    await conduit.poke({
-      app: 'bazaar',
-      mark: 'bazaar-action',
-      json: {
-        'remove-tag': {
-          path: pathObj,
-          'app-id': appId,
-          tag: tag,
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'remove-tag': {
+            path: pathObj,
+            'app-id': appId,
+            tag: tag,
+          },
         },
-      },
-    });
-    return new Promise((resolve) => {
-      pendingRequests['bazaar-action-remove-app-tag'] = (data: any) => {
-        console.log('resolving bazaar-action-remove-app-tag');
-        resolve(data);
-      };
+        reaction: 'bazaar-reaction.remove-tag',
+        onReaction: (data: any) => {
+          resolve(data['remove-tag']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   addToSuite: async (
@@ -143,16 +159,25 @@ export const BazaarApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    await conduit.poke({
-      app: 'bazaar',
-      mark: 'bazaar-action',
-      json: {
-        'suite-add': {
-          path: pathObj,
-          'app-id': appId,
-          rank: rank,
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'suite-add': {
+            path: pathObj,
+            'app-id': appId,
+            rank: rank,
+          },
         },
-      },
+        reaction: 'bazaar-reaction.suite-add',
+        onReaction: (data: any) => {
+          resolve(data['suite-add']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   removeFromSuite: async (conduit: Conduit, path: SpacePath, appId: string) => {
@@ -161,21 +186,24 @@ export const BazaarApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    await conduit.poke({
-      app: 'bazaar',
-      mark: 'bazaar-action',
-      json: {
-        'suite-remove': {
-          path: pathObj,
-          'app-id': appId,
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'suite-add': {
+            path: pathObj,
+            'app-id': appId,
+          },
         },
-      },
-    });
-    return new Promise((resolve) => {
-      pendingRequests['bazaar-action-suite-remove'] = (data: any) => {
-        console.log('resolving suite-remove request');
-        resolve(data);
-      };
+        reaction: 'bazaar-reaction.suite-remove',
+        onReaction: (data: any) => {
+          resolve(data['suite-remove']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   loadTreaties: (conduit: Conduit, state: BazaarStoreType): void => {},
@@ -213,7 +241,7 @@ export const BazaarApi = {
       onEvent: async (data: any, _id?: number, mark?: string) => {
         console.log(mark, data);
         if (mark === 'bazaar-reaction') {
-          handleBazaarReactions(data[mark], state);
+          handleBazaarReactions(data, state);
         }
       },
       onError: () => console.log('subscription [bazaar/updates] rejected'),
@@ -223,8 +251,8 @@ export const BazaarApi = {
 };
 
 const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
+  console.log('handleBazaarReactions => %o', data);
   const reaction: string = Object.keys(data)[0];
-  console.log(reaction);
   switch (reaction) {
     case 'initial':
       state.initial(data['initial']);
