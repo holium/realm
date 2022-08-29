@@ -7,6 +7,7 @@
   |=  [our=ship now=@da]
   ^-  (list group-space)
   =/  group-paths     .^((set resource) %gy /(scot %p our)/group-store/(scot %da now)/groups)
+  ~&  >>  group-paths
   ::  now find ours
   =/  hosted=(list resource)
   %+  skim  ~(tap by group-paths)

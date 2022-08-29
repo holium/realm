@@ -27,11 +27,11 @@ type IProps = {
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
-  const { dms } = useServices();
+  const { courier } = useServices();
   const { inputColor, textColor, iconColor, dockColor, windowColor, mode } =
     theme;
 
-  const chat = dms;
+  const chat = courier;
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -141,8 +141,8 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
                   </Text>
                 </Flex>
               )}
-              {chat!.list.map((dm: any) => (
-                <Box ml={1} mr={1} display="block" key={dm.contact}>
+              {courier!.list.map((dm: any) => (
+                <Box ml={1} mr={1} display="block" key={dm.to}>
                   <ContactRow
                     theme={theme}
                     dm={dm}

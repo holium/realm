@@ -1,8 +1,8 @@
-import { RefObject, useLayoutEffect } from 'react';
+import { RefObject, useLayoutEffect, useEffect } from 'react';
 import { ShellActions } from '../actions/shell';
 
 export function useWindowSize(windowRef: RefObject<HTMLDivElement>) {
-  useLayoutEffect(() => {
+  useEffect(() => {
     const updateSize = () => {
       if (!windowRef.current) return;
       const dims = windowRef.current.getBoundingClientRect();

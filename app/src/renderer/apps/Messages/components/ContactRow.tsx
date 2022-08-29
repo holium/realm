@@ -4,15 +4,18 @@ import { rgba, lighten, darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 import { Sigil, Flex, Box, Text, TextButton } from 'renderer/components';
-import { ChatType } from 'os/services/ship/models/dms';
+import { DMPreviewType } from 'os/services/ship/models/courier';
 import { Message } from './Message';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { cleanNounColor } from 'os/lib/color';
+import moment from 'moment';
+import { fromNow } from '../helpers/time';
 
 type DMContact = {
   theme: ThemeModelType;
-  dm: ChatType;
+  dm: DMPreviewType;
   onClick: (evt: any) => void;
 };
 
@@ -60,14 +63,14 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
   if (dm.pending) {
     const onAccept = (evt: any) => {
       evt.stopPropagation();
-      DmActions.acceptDm(dm.contact).then((response: any) => {
+      DmActions.acceptDm(dm.to).then((response: any) => {
         console.log('accept ContactRow response', response);
       });
       console.log('accepting');
     };
     const onDecline = (evt: any) => {
       evt.stopPropagation();
-      DmActions.declineDm(dm.contact).then((response: any) => {
+      DmActions.declineDm(dm.to).then((response: any) => {
         console.log('response', response);
       });
       console.log('rejecting');
@@ -98,12 +101,13 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       </Flex>
     );
   } else {
-    const lastMessage = dm.messages[0].contents[0];
+    const lastMessage = dm.lastMessage[0];
     const type = Object.keys(lastMessage)[0];
     subTitle = <Message preview type={type} content={lastMessage} />;
   }
-  // const contactMetadata = ShipActions.getContact(dm.contact);
-  // console.log(contactMetadata);
+
+  const unread = false;
+
   return (
     <Row
       pending={dm.pending}
@@ -111,20 +115,44 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       customBg={theme.windowColor}
       onClick={(evt: any) => !dm.pending && onClick(evt)}
     >
-      <Box opacity={dm.pending ? 0.5 : 1}>
-        <Sigil
-          simple
-          size={28}
-          avatar={dm.avatar}
-          patp={dm.contact}
-          color={[dm.sigilColor || '#000000', 'white']}
-        />
-      </Box>
-      <Flex flexDirection="column" flex={1}>
-        <Text opacity={dm.pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
-          {dm.contact}
+      <Flex flex={1} gap={10}>
+        <Box mt="2px" opacity={dm.pending ? 0.5 : 1}>
+          <Sigil
+            simple
+            size={28}
+            avatar={dm.metadata.avatar}
+            patp={dm.to}
+            color={[dm.metadata.color || '#000000', 'white']}
+          />
+        </Box>
+        <Flex flexDirection="column" flex={1}>
+          <Text opacity={dm.pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
+            {dm.to}
+          </Text>
+          {subTitle}
+        </Flex>
+      </Flex>
+      <Flex gap={2} flexDirection="column" alignItems="flex-end" flexGrow={0}>
+        <Text opacity={0.3} fontSize={2}>
+          {fromNow(dm.lastTimeSent)}
         </Text>
-        {subTitle}
+        <Flex
+          px="10px"
+          py="1px"
+          justifyContent="center"
+          alignItems="center"
+          width="fit-content"
+          borderRadius={12}
+          height={20}
+          minWidth={12}
+          background={unread ? '#569BE2' : 'transparent'}
+        >
+          {unread && (
+            <Text fontSize={2} color="white" fontWeight={500}>
+              1
+            </Text>
+          )}
+        </Flex>
       </Flex>
     </Row>
   );

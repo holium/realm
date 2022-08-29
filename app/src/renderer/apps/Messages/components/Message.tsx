@@ -16,7 +16,6 @@ import {
 import { motion } from 'framer-motion';
 import { Flex, Text, LinkPreview, Mention } from 'renderer/components';
 import { TextParsed } from './TextContent';
-// import { LinkPreview } from '@dhaiwat10/react-link-preview';
 
 import { toJS } from 'mobx';
 import { getReferenceView, getTextFromContent } from '../helpers/parser';

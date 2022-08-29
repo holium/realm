@@ -34,16 +34,22 @@ export const DmApi = {
               // console.log(data);
               break;
             case 'accept':
-              const acceptedContact = `~${payload.accept}`;
+              console.log('accept', payload);
+              const acceptedContact = `~${payload}`;
               const response = await conduit.scry({
                 app: 'graph-store',
                 path: `/graph/${ship}/dm-inbox/${acceptedContact}`,
               });
+              // console.log('accept', response);
               const chat = chatStore.dms.get(acceptedContact);
-              chat?.setDm(response['graph-update']['add-graph']['graph']);
+              chat?.setDm(
+                conduit.ship!,
+                response['graph-update']['add-graph']['graph']
+              );
               break;
             case 'decline':
-              const declinedContact = `~${payload.decline}`;
+              console.log('decline', payload);
+              const declinedContact = `~${payload}`;
               chatStore.dms.delete(declinedContact);
               break;
             default:
@@ -61,14 +67,15 @@ export const DmApi = {
       app: 'graph-store',
       path: `/updates`,
       onEvent: async (data: any) => {
+        console.log('graph update', data['graph-update']);
         if (data['graph-update']) {
-          const { resource, nodes } = data['graph-update']['add-nodes'];
-          if (resource.name === 'dm-inbox') {
-            const { post } = Object.values<{ post: PostType }>(nodes)[0];
-            const chatModel = chatStore.dms.get(post.author);
-            chatModel?.setDm(post);
-            return;
-          }
+          // const { resource, nodes } = data['graph-update']['add-nodes'];
+          // if (resource.name === 'dm-inbox') {
+          //   const { post } = Object.values<{ post: PostType }>(nodes)[0];
+          //   const chatModel = chatStore.dms.get(post.author);
+          //   chatModel?.setDm(conduit.ship!, post);
+          //   return;
+          // }
         }
       },
       onError: () => console.log('Subscription rejected'),

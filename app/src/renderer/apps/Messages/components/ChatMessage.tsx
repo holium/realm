@@ -16,7 +16,7 @@ export type MessageType = {
 };
 
 type IProps = {
-  theme?: ThemeModelType;
+  theme: ThemeModelType;
   our: string;
   ourColor: string;
   message: MessageType;
@@ -24,7 +24,7 @@ type IProps = {
 
 export const ChatMessage: FC<IProps> = (props: IProps) => {
   const { theme, our, ourColor, message } = props;
-  const primaryBubble = our === `~${message.author}`;
+  const primaryBubble = our === message.author;
   const color = primaryBubble ? 'white' : undefined;
 
   //
@@ -48,10 +48,10 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
 
   const referenceColor = useMemo(
     () =>
-      theme!.mode === 'light'
+      theme.mode === 'light'
         ? darken(0.075, theme!.windowColor)
         : theme!.windowColor,
-    [theme?.windowColor]
+    [theme.windowColor]
   );
 
   const isMention = messageTypes.includes('mention');
@@ -64,9 +64,16 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
     >
       <Bubble
         primary={primaryBubble}
-        customBg={primaryBubble ? ourColor : lighten(0.1, theme!.windowColor)}
+        customBg={
+          primaryBubble
+            ? ourColor
+            : theme.mode === 'dark'
+            ? lighten(0.1, theme.windowColor)
+            : darken(0.05, theme.windowColor)
+        }
       >
         <Flex
+          mb={1}
           flexDirection={isMention ? 'row' : 'column'}
           gap={isMention ? 1 : 4}
           style={{
@@ -94,7 +101,7 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
         </Flex>
 
         {/* TODO detect if time is today, yesterday or full */}
-        <Text mt={2} color={color} textAlign="right" fontSize={1} opacity={0.4}>
+        <Text color={color} textAlign="right" fontSize={1} opacity={0.4}>
           {displayDate(message.timeSent)}
         </Text>
       </Bubble>

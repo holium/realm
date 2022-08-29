@@ -512,7 +512,7 @@
   |^
   ?-  -.rct
     %all            (on-all +.rct)
-    %members         (on-members +.rct)
+    %members        (on-members +.rct)
   ==
   ::
   ++  on-all

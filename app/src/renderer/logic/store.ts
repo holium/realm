@@ -25,6 +25,7 @@ import { ChatStore } from 'os/services/ship/models/dms';
 import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
+import { CourierStore } from 'os/services/ship/models/courier';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -46,6 +47,7 @@ export const Services = types
     membership: MembershipStore,
     docket: DocketStore,
     dms: ChatStore,
+    courier: CourierStore,
     contacts: ContactStore,
     friends: FriendsStore,
   })
@@ -81,6 +83,7 @@ const services = Services.create({
   membership: {},
   docket: {},
   dms: {},
+  courier: {},
   contacts: { ourPatp: '' },
   friends: {},
 });
@@ -145,6 +148,7 @@ OSActions.onBoot((_event: any, response: any) => {
     SoundActions.playStartup();
   }
   if (response.models && response.ship) {
+    console.log(response.models);
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(response.models.contacts!)
@@ -155,6 +159,10 @@ OSActions.onBoot((_event: any, response: any) => {
     );
     applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
     applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
+    applySnapshot(
+      servicesStore.courier,
+      castToSnapshot(response.models.courier!)
+    );
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
@@ -276,6 +284,9 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'dms') {
       applyPatch(servicesStore.dms, value.patch);
+    }
+    if (value.resource === 'courier') {
+      applyPatch(servicesStore.courier, value.patch);
     }
   }
   if (value.response === 'initial') {

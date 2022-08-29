@@ -1,10 +1,12 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import S3Client from 'renderer/logic/s3/S3Client';
 
 type ChatProps = {
   theme: ThemeModelType;
@@ -25,6 +27,21 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
   const { dimensions } = props;
   const [currentView, setCurrentView] = useState<ChatViewType>('dm-list');
   const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [s3Config, setS3Config] = useState<any>();
+  // const [s3Client, setS3Client] = useState<any>();
+
+  // useEffect(() => {
+  //   ShipActions.getS3Bucket().then((response) => {
+  //     setS3Config(response);
+  //     setS3Client(
+  //       new S3Client({
+  //         credentials: response.credentials,
+  //         endpoint: response.credentials.endpoint,
+  //         signatureVersion: 'v4',
+  //       })
+  //     );
+  //   });
+  // }, []);
 
   const headerSize = 50;
   let viewSwitcher: React.ReactElement;
@@ -87,6 +104,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           height={dimensions.height}
           dimensions={dimensions}
           theme={props.theme}
+          // s3Client={s3Client}
           selectedChat={selectedChat}
           setSelectedChat={(chat: any) => {
             if (!chat) setCurrentView('dm-list');
