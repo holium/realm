@@ -15,7 +15,7 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
-  const { ship, spaces, bazaar } = useServices();
+  const { docket, spaces, bazaar } = useServices();
 
   // const apps: any = ship
   //   ? [...ship!.apps, ...NativeAppList]

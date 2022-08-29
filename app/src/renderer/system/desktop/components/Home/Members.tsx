@@ -1,5 +1,5 @@
 import { FC, useRef, useMemo, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react';
 import { createField, createForm } from 'mobx-easy-form';
 import { isValidPatp } from 'urbit-ob';
 import styled from 'styled-components';
@@ -73,7 +73,7 @@ export const createPeopleForm = (
 
 export const Members: FC<IMembers> = observer((props: IMembers) => {
   const { our } = props;
-  const { desktop, spaces, ship, membership } = useServices();
+  const { desktop, spaces, friends, membership } = useServices();
   const searchRef = useRef(null);
 
   const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
@@ -223,7 +223,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           }}
         />
       </Flex>
-      {our && <FriendsList friends={ship!.friends.list} />}
+      {our && <FriendsList friends={friends.list} />}
       {!our && (
         <MembersList
           members={membership.getMembersList(spaces.selected!.path)}

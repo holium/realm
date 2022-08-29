@@ -1,5 +1,6 @@
-/-  store=spaces, membership-store=membership, invite-store=invite, hark=hark-store, passports-store=passports
-/+  default-agent, verb, dbug, agentio, lib=spaces, inv-lib=invite
+/-  store=spaces, membership-store=membership, invite-store=visas, hark=hark-store, 
+      passports-store=passports
+/+  default-agent, verb, dbug, agentio, lib=spaces, inv-lib=visas, grp=groups
 ^-  agent:gall
 ::
 ::  %spaces [realm]:
@@ -76,6 +77,12 @@
       ::
       ::  ~/scry/spaces/all.json
         [%x %all ~]    ``spaces-view+!>([%spaces spaces.state])
+      ::
+      ::  ~/scry/spaces/groups.json
+        [%x %groups ~]    
+      =/  groups   (our-groups:grp our.bowl now.bowl)
+      :: ~&  >  [groups]
+      ``groups-view+!>([%groups groups])
       :: ::
       :: ::
       ::  ~/scry/spaces/~fes/our.json
@@ -335,7 +342,6 @@
   ++  on-all
     |=  [=districts:passports-store]
     ^-  (quip card _state)
-    ~&  >  [districts]
     `state
   :: ::
   ++  on-members

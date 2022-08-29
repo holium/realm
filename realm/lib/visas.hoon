@@ -1,9 +1,9 @@
-/-  store=invite, spaces-store=spaces, member-store=membership, passport-store=passports
+/-  store=visas, spaces-store=spaces, member-store=membership, passport-store=passports
 /+  spaces-lib=spaces
 =<  [store .]
 =,  store
 |%
-++  new-invite
+++  new-visa
   |=  [path=space-path:spaces-store inviter=ship =ship =role:membership =space:spaces-store message=@t invited-at=@da]
   ^-  invite:store
   =/  new-invite
@@ -109,10 +109,11 @@
     ^-  [cord json]
     ?-  -.view
         %invitations
-      :-  %invitations
-      %-  pairs
-      :~  [%invites (invitations:encode invites.view)]
-      ==
+      [%invitations (invitations:encode invites.view)]
+      ::
+        %incoming
+      [%invites (incoming-map:encode invites.view)]
+      ::
     ==
   --
 ::

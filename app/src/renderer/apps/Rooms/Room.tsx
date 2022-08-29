@@ -18,7 +18,6 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from './components/CommButton';
 import { VoiceAnalyzer } from './components/VoiceVisualizer';
 import { Speaker } from './components/Speaker';
-import { Urbit } from '@urbit/http-api';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { SoundActions } from 'renderer/logic/actions/sound';
 export type BaseRoomProps = {
@@ -29,8 +28,6 @@ export type BaseRoomProps = {
   };
 };
 
-const urb = new Urbit('', '');
-urb.ship = window.ship;
 export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
   const { ship, desktop } = useServices();

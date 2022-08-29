@@ -1,4 +1,4 @@
-/+  *invite
+/+  *visas
 ::
 |_  rct=reaction
 ++  grad  %noun

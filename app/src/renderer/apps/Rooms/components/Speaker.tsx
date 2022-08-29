@@ -23,8 +23,8 @@ interface ISpeaker {
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   const { person, audio } = props;
-  const { ship } = useServices();
-  const metadata = ship?.contacts.getContactAvatarMetadata(person);
+  const { ship, contacts } = useServices();
+  const metadata = contacts.getContactAvatarMetadata(person);
   const hasVoice = audio && person === ship?.patp;
   let name = metadata?.nickname || person;
   if (name.length > 18) name = `${name.substring(0, 18)}...`;

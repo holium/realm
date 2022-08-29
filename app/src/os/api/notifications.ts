@@ -1,25 +1,25 @@
-import { Urbit } from '../urbit/api';
+import { Conduit } from '@holium/conduit';
 import { ShipModelType } from '../services/ship/models/ship';
 // var util = require('util');
 import { decToUd, unixToDa } from '@urbit/api';
 
 export const NotificationsApi = {
-  watch: (conduit: Urbit, shipState: ShipModelType) => {
-    conduit.subscribe({
+  watch: (conduit: Conduit, shipState: ShipModelType) => {
+    conduit.watch({
       app: 'hark-store',
       path: '/updates',
-      event: async (data: any) => {
-        // console.log(`hark-store: ${util.inspect(data, false, 10, true)}`);
+      onEvent: async (data: any) => {
+        console.log(`hark-store: ${util.inspect(data, false, 10, true)}`);
         if (data.more) {
-          shipState.notifications.initial(data.more);
+          // shipState.notifications.initial(data.more);
           // console.log(shipState.notifications.list);
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  getRange: async (conduit: Urbit, timestamp: number, length: number) => {
+  getRange: async (conduit: Conduit, timestamp: number, length: number) => {
     const da = decToUd(unixToDa(timestamp).toString());
     const response = await conduit.scry({
       app: 'hark-store',

@@ -139,7 +139,7 @@ export const ChatMessage = types.union(
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
 export const Chat = types
-  .model({
+  .model('Chat', {
     id: types.maybe(types.string),
     contact: types.string,
     sigilColor: types.maybeNull(types.string),
@@ -182,10 +182,9 @@ export const Chat = types
         })
       );
     },
-    sendDm(contents: any) {
+    sendDm(patp: string, contents: any) {
       self.loader.set('loading');
-      const ship: ShipModelType = getParent(self, 3);
-      const author = ship.patp.substring(1);
+      const author = patp.substring(1);
       const post = createPost(
         author,
         contents,
@@ -234,7 +233,7 @@ export const Chat = types
 export type ChatType = Instance<typeof Chat>;
 
 export const ChatStore = types
-  .model({
+  .model('ChatStore', {
     dms: types.map(Chat),
     loader: types.optional(LoaderModel, { state: 'initial' }),
   })
@@ -270,7 +269,7 @@ export const ChatStore = types
       });
     },
     // TODO clean up how contact names are derived
-    setDMs: (ship: string, dmGraph: any) => {
+    setDMs: (ship: string, dmGraph: any, contactsModel: any) => {
       const strippedShip = ship.substring(1);
       // console.log(dmGraph);
       Object.entries(dmGraph).forEach((chat: [string, any]) => {
@@ -311,10 +310,9 @@ export const ChatStore = types
         if (contact) {
           if (dmContacts.length === 1) {
             // get contact avatar info
-            const avatarMetadata = getParentOfType(
-              self,
-              ShipModel
-            ).contacts.getContactAvatarMetadata(`~${contact}`);
+            const avatarMetadata = contactsModel.getContactAvatarMetadata(
+              `~${contact}`
+            );
             // Set chat data
             self.dms.set(
               contact,
@@ -336,3 +334,5 @@ export const ChatStore = types
       });
     },
   }));
+
+export type ChatStoreType = Instance<typeof ChatStore>;

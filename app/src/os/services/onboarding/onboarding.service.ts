@@ -19,10 +19,12 @@ import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
+import { Conduit } from '@holium/conduit';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
   private state: OnboardingStoreType; // for state management
+  private conduit?: Conduit;
 
   handlers = {
     'realm.onboarding.setStep': this.setStep,
@@ -41,6 +43,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setPassword': this.setPassword,
     'realm.onboarding.installRealm': this.installRealm,
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
+    'realm.onboarding.exit': this.exit,
   };
 
   static preload = {
@@ -61,7 +64,10 @@ export class OnboardingService extends BaseService {
     },
 
     prepareCheckout(billingPeriod: string) {
-      return ipcRenderer.invoke('realm.onboarding.prepareCheckout', billingPeriod);
+      return ipcRenderer.invoke(
+        'realm.onboarding.prepareCheckout',
+        billingPeriod
+      );
     },
 
     completeCheckout() {
@@ -111,6 +117,13 @@ export class OnboardingService extends BaseService {
     completeOnboarding() {
       return ipcRenderer.invoke('realm.onboarding.completeOnboarding');
     },
+
+    exitOnboarding() {
+      return ipcRenderer.invoke('realm.onboarding.exit');
+    },
+
+    onExit: (callback: any) =>
+      ipcRenderer.on('realm.onboarding.on-exit', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -143,6 +156,11 @@ export class OnboardingService extends BaseService {
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
+
+    this.core.mainWindow.on('close', async () => {
+      await this.conduit?.closeChannel();
+      this.conduit = undefined;
     });
   }
 
@@ -266,17 +284,16 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
+    if (!this.conduit) {
+      this.conduit = new Conduit();
+    }
+    const { url, patp, cookie } = this.state.ship!;
+    await this.conduit.init(url, patp.substring(1), cookie!);
+
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 
-    console.log('get profile', castToSnapshot(this.state.ship));
-
-    const { url, cookie, patp } = this.state.ship;
-    const ourProfile = await ContactApi.getContact(patp, {
-      ship: patp,
-      url,
-      cookie: cookie!,
-    });
+    const ourProfile = await ContactApi.getContact(this.conduit!, patp);
 
     this.state.ship.setContactMetadata(ourProfile);
     return ourProfile;
@@ -294,18 +311,11 @@ export class OnboardingService extends BaseService {
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
 
-    const { url, cookie, patp } = this.state.ship!;
-    const credentials = {
-      ship: patp,
-      url,
-      cookie: cookie!,
-    };
-
-    console.log('creds', credentials);
+    const { patp } = this.state.ship!;
 
     const updatedProfile = await ContactApi.saveContact(
+      this.conduit!,
       patp,
-      credentials,
       profileData
     );
 
@@ -336,5 +346,15 @@ export class OnboardingService extends BaseService {
     this.core.services.identity.auth.setFirstTime();
     this.core.services.shell.closeDialog(null);
     this.core.services.ship.storeNewShip(authShip);
+
+    // Close onboarding conduit
+    await this.conduit?.closeChannel();
+    this.conduit = undefined;
+    this.exit();
+    this.core.mainWindow.webContents.send('realm.onboarding.on-exit');
+  }
+
+  exit(_event?: any) {
+    this.core.mainWindow.webContents.send('realm.onboarding.on-exit');
   }
 }

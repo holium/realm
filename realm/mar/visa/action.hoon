@@ -1,4 +1,4 @@
-/+  *invite
+/+  *visas
 ::
 |_  act=action
 ++  grad  %noun

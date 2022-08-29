@@ -1,6 +1,6 @@
-import React, { MouseEventHandler, useContext, useEffect, useRef } from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { RealmMultiplayerContext } from "./Provider";
+import React, { MouseEventHandler, useContext, useEffect, useRef } from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { RealmMultiplayerContext } from './Provider';
 import {
   CursorClickPayload,
   CursorDownPayload,
@@ -8,7 +8,7 @@ import {
   CursorOutPayload,
   CursorOverPayload,
   CursorUpPayload,
-} from "./types";
+} from './types';
 
 interface Props {
   asChild?: boolean;
@@ -38,7 +38,7 @@ export function Clickable({
   const { api } = useContext(RealmMultiplayerContext);
   const ref = useRef<any>(null);
   const Component =
-    asChild && React.isValidElement(props.children) ? Slot : "button";
+    asChild && React.isValidElement(props.children) ? Slot : 'button';
 
   // trigger onOther_ events
   useEffect(() => {
@@ -46,7 +46,7 @@ export function Clickable({
     const unsub = [
       api.subscribe<CursorClickPayload>(CursorEvent.Click, (payload) => {
         if (payload.target !== id) return;
-        const ships = api.getPresenceState("ship");
+        const ships = api.getPresenceState('ship');
         onOtherClick?.(ships[payload.id].patp);
         // Trigger fake click
         (ref.current as HTMLElement)?.click();
@@ -54,25 +54,25 @@ export function Clickable({
 
       api.subscribe<CursorOverPayload>(CursorEvent.Over, (payload) => {
         if (payload.target !== id) return;
-        const ships = api.getPresenceState("ship");
+        const ships = api.getPresenceState('ship');
         onOtherOver?.(ships[payload.id].patp);
       }),
 
       api.subscribe<CursorDownPayload>(CursorEvent.Down, (payload) => {
         if (payload.target !== id) return;
-        const ships = api.getPresenceState("ship");
+        const ships = api.getPresenceState('ship');
         onOtherDown?.(ships[payload.id].patp);
       }),
 
       api.subscribe<CursorUpPayload>(CursorEvent.Up, (payload) => {
         if (payload.target !== id) return;
-        const ships = api.getPresenceState("ship");
+        const ships = api.getPresenceState('ship');
         onOtherUp?.(ships[payload.id].patp);
       }),
 
       api.subscribe<CursorOutPayload>(CursorEvent.Out, (payload) => {
         if (payload.target !== id) return;
-        const ships = api.getPresenceState("ship");
+        const ships = api.getPresenceState('ship');
         onOtherOut?.(ships[payload.id].patp);
       }),
     ];

@@ -1,14 +1,12 @@
+import { Conduit } from '@holium/conduit';
 import { MembershipType } from './../services/spaces/models/members';
-import { Urbit } from './../urbit/api';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 
-const pendingRequests: { [key: string]: (data?: any) => any } = {};
-
 export const SpacesApi = {
-  getSpaces: async (conduit: Urbit) => {
+  getSpaces: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'spaces',
       path: '/all', // the spaces scry is at the root of the path
@@ -16,24 +14,28 @@ export const SpacesApi = {
     return response.spaces;
   },
   createSpace: async (
-    conduit: Urbit,
+    conduit: Conduit,
     payload: { slug: string; payload: any; members: any }
   ): Promise<SpacePath> => {
-    await conduit.poke({
-      app: 'spaces',
-      mark: 'spaces-action',
-      json: {
-        add: payload,
-      },
-    });
-    return new Promise((resolve) => {
-      pendingRequests['spaces-action-add'] = (data: any) => {
-        resolve(data);
-      };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          add: payload,
+        },
+        reaction: 'spaces-reaction.add',
+        onReaction: (data: any) => {
+          resolve(data.add.space.path);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   updateSpace: async (
-    conduit: Urbit,
+    conduit: Conduit,
     payload: { path: SpacePath; payload: any }
   ) => {
     const pathArr = payload.path.split('/');
@@ -41,45 +43,53 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    const response = await conduit.poke({
-      app: 'spaces',
-      mark: 'spaces-action',
-      json: {
-        update: {
-          path: pathObj,
-          payload: snakeify(payload.payload),
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          update: {
+            path: pathObj,
+            payload: snakeify(payload.payload),
+          },
         },
-      },
-    });
-    return new Promise((resolve) => {
-      pendingRequests['spaces-action-replace'] = () => {
-        resolve(response);
-      };
+        reaction: 'spaces-reaction.replace',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
-  deleteSpace: async (conduit: Urbit, payload: { path: SpacePath }) => {
+  deleteSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    await conduit.poke({
-      app: 'spaces',
-      mark: 'spaces-action',
-      json: {
-        remove: {
-          path: pathObj,
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          remove: {
+            path: pathObj,
+          },
         },
-      },
-    });
-    return new Promise((resolve) => {
-      pendingRequests['spaces-action-remove'] = (data: any) => {
-        resolve(data);
-      };
+        reaction: 'spaces-reaction.delete',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
     });
   },
   sendInvite: async (
-    conduit: Urbit,
+    conduit: Conduit,
     path: SpacePath,
     payload: { patp: Patp; role: MemberRole; message: string }
   ) => {
@@ -102,7 +112,7 @@ export const SpacesApi = {
     });
     return response;
   },
-  kickMember: async (conduit: Urbit, path: SpacePath, patp: Patp) => {
+  kickMember: async (conduit: Conduit, path: SpacePath, patp: Patp) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
@@ -121,27 +131,22 @@ export const SpacesApi = {
     return response;
   },
   watchUpdates: (
-    conduit: Urbit,
+    conduit: Conduit,
     state: SpacesStoreType,
     membersState: MembershipType,
     bazaarState: BazaarStoreType
   ): void => {
-    conduit.subscribe({
+    conduit.watch({
       app: 'spaces',
       path: `/updates`,
-      event: async (data: any, id: string) => {
-        if (data['spaces-reaction']) {
-          handleSpacesReactions(
-            data['spaces-reaction'],
-            state,
-            membersState,
-            bazaarState,
-            id
-          );
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        // console.log(mark, data);
+        if (mark === 'spaces-reaction') {
+          handleSpacesReactions(data, state, membersState, bazaarState);
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription %spaces'),
     });
   },
 };
@@ -150,8 +155,7 @@ const handleSpacesReactions = (
   data: any,
   state: SpacesStoreType,
   membersState: MembershipType,
-  bazaarState: BazaarStoreType,
-  id: string
+  bazaarState: BazaarStoreType
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
@@ -162,23 +166,13 @@ const handleSpacesReactions = (
       const newSpace = state.addSpace(data['add']);
       membersState.addMemberMap(newSpace, data['add'].members);
       bazaarState.addBazaar(newSpace);
-      if (pendingRequests['spaces-action-add']) {
-        pendingRequests['spaces-action-add'](newSpace);
-        pendingRequests['spaces-action-add'] = () => {};
-      }
       break;
     case 'replace':
       state.updateSpace(data['replace']);
-      if (pendingRequests['spaces-action-replace']) {
-        pendingRequests['spaces-action-replace']();
-        pendingRequests['spaces-action-replace'] = () => {};
-      }
       break;
     case 'remove':
       const deleted = state.deleteSpace(data['remove']);
       membersState.removeMemberMap(deleted);
-      if (pendingRequests['spaces-action-remove'])
-        pendingRequests['spaces-action-remove'](deleted);
       break;
     default:
       // unknown

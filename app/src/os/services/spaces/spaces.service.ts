@@ -6,6 +6,7 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
+  ModelSnapshotType,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -21,6 +22,7 @@ import { BazaarApi } from '../../api/bazaar';
 import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
+import { DocketStoreType, DocketStore } from '../ship/models/docket';
 
 type SpaceModels = {
   bazaar?: any;
@@ -162,8 +164,7 @@ export class SpacesService extends BaseService {
     return this.models.membership ? getSnapshot(this.models.membership) : null;
   }
 
-  async load(patp: string, ship: ShipModelType) {
-    console.log('hi');
+  async load(patp: string, docket: any) {
     this.db = new Store({
       name: 'spaces',
       cwd: `realm.${patp}`,
@@ -327,12 +328,7 @@ export class SpacesService extends BaseService {
   // ************************ BAZAAR ***************************
   // ***********************************************************
   async installDocket(_event: any, ship: string, desk: string) {
-    return await BazaarApi.installDocket(
-      this.core.conduit?.ship!,
-      ship,
-      desk,
-      this.core.credentials!
-    );
+    return await BazaarApi.installDocket(this.core.conduit?.ship!, ship, desk);
   }
 
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {

@@ -54,14 +54,14 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
   (props: ShipSearchProps) => {
     const { search, isDropdown, selected, customBg, heightOffset, onSelected } =
       props;
-    const { desktop, ship } = useServices();
+    const { desktop, ship, contacts } = useServices();
     const { mode, dockColor, windowColor } = desktop.theme;
-    const contacts = ship ? Array.from(ship?.contacts.rolodex.entries()) : [];
+    const contactsList = ship ? Array.from(contacts.rolodex.entries()) : [];
     const isAddingDisabled = selected.size > 0;
 
     const results = useMemo<Array<[string, ContactModelType]>>(
-      () => searchPatpOrNickname(search, contacts, selected, ship?.patp),
-      [search, contacts, selected]
+      () => searchPatpOrNickname(search, contactsList, selected, ship?.patp),
+      [search, contactsList, selected]
     );
 
     const isOpen = useMemo(

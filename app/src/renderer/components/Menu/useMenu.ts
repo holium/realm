@@ -25,12 +25,13 @@ export const useMenu = (
         );
         setShow(true);
       } else {
+        console.log('handling');
         event.preventDefault();
         event.stopPropagation();
         // setShow(false);
       }
     },
-    [setShow, setAnchorPoint]
+    [setShow, setAnchorPoint, show]
   );
 
   useEffect(() => {
