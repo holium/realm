@@ -112,7 +112,12 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     label: 'Unpin',
                     onClick: (evt: any) => {
                       evt.stopPropagation();
-                      SpacesActions.unpinApp(spaces.selected?.path!, app.id);
+                      SpacesActions.removeAppTag(
+                        spaces.selected?.path!,
+                        app.id,
+                        'pinned'
+                      );
+                      // SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                     },
                   },
                   {
@@ -178,7 +183,12 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   label: 'Unpin',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    SpacesActions.unpinApp(spaces.selected?.path!, app.id);
+                    SpacesActions.removeAppTag(
+                      spaces.selected?.path!,
+                      app.id,
+                      'pinned'
+                    );
+                    // SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                   },
                 },
                 {

@@ -4,8 +4,7 @@ import {
   BazaarModelType,
   BazaarStoreType,
 } from 'os/services/spaces/models/bazaar';
-import { docketInstall } from '@urbit/api';
-import { quickPoke } from '../lib/poke';
+import { allyShip, docketInstall } from '@urbit/api';
 import { ISession } from '../';
 import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
@@ -51,13 +50,23 @@ export const BazaarApi = {
     });
     return appMap;
   },
-  installDocket: async (
-    ourShip: string,
-    ship: string,
-    desk: string,
-    credentials: ISession
-  ) => {
-    return quickPoke(ourShip, docketInstall(ship, desk), credentials);
+  addAlly: async (conduit: Urbit, ship: string) => {
+    await conduit.poke(allyShip(ship));
+    return new Promise((resolve) => {
+      pendingRequests['bazaar-action-add-treaty'] = (data: any) => {
+        console.log('resolving bazaar-action-add-treaty poke');
+        resolve(data);
+      };
+    });
+  },
+  installDocket: async (conduit: Urbit, ship: string, desk: string) => {
+    await conduit.poke(docketInstall(ship, desk));
+    return new Promise((resolve) => {
+      pendingRequests['bazaar-action-install-docket'] = (data: any) => {
+        console.log('resolving bazaar-action-install-docket poke');
+        resolve(data);
+      };
+    });
   },
   // leverage treaty /allies scry for now. allies are technically ship specific,
   //   so consider adding to ship service; however, thought it would be easier to
@@ -180,7 +189,35 @@ export const BazaarApi = {
       };
     });
   },
+  loadTreaties: (conduit: Urbit, state: BazaarStoreType): void => {},
   watchUpdates: (conduit: Urbit, state: BazaarStoreType): void => {
+    // get the scoop on new app installations
+    conduit.subscribe({
+      app: 'docket',
+      path: `/charges`,
+      event: async (data: any, id: string) => {
+        console.log('docket/charges => %o', data);
+      },
+      err: () => console.log('subscription [docket/charges] rejected'),
+      quit: () => console.log('kicked from [docket/charges] subscription'),
+    });
+    // get the scoop on new app installations
+    conduit.subscribe({
+      app: 'treaty',
+      path: `/treaties`,
+      event: async (data: any, id: string) => {
+        console.log('treaty/treaties => %o', data);
+        if (data.hasOwnProperty('add')) {
+          state.addTreaty(data.add);
+          if (pendingRequests['bazaar-action-add-treaty']) {
+            pendingRequests['bazaar-action-add-treaty'](data);
+            pendingRequests['bazaar-action-add-treaty'] = () => {};
+          }
+        }
+      },
+      err: () => console.log('subscription [docket/charges] rejected'),
+      quit: () => console.log('kicked from [docket/charges] subscription'),
+    });
     conduit.subscribe({
       app: 'bazaar',
       path: `/updates`,
@@ -190,8 +227,8 @@ export const BazaarApi = {
           handleBazaarReactions(data['bazaar-reaction'], state, id);
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      err: () => console.log('subscription [bazaar/updates] rejected'),
+      quit: () => console.log('kicked from [bazaar/updates] subscription'),
     });
   },
 };

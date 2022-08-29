@@ -1,5 +1,10 @@
-import styled from 'styled-components';
+import { useRef, useMemo } from 'react';
+import styled, { css } from 'styled-components';
+import { motion } from 'framer-motion';
+import { rgba, darken, lighten } from 'polished';
+import { useServices } from 'renderer/logic/store';
 import { Flex, Text, Icons, Box, Button } from 'renderer/components';
+import { ThemeType } from '../../../../theme';
 
 const sizes = {
   sm: 32,
@@ -42,42 +47,92 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
-export const AppRow = ({ caption, app, actionRenderer }) =>
-  app ? (
-    <Flex flexDirection="row" alignItems="center" gap={8}>
-      <TileStyle
-        onContextMenu={(evt: any) => {
-          evt.stopPropagation();
-        }}
-        minWidth={sizes.sm}
-        style={{
-          borderRadius: radius.sm,
-          overflow: 'hidden',
-        }}
-        height={sizes.sm}
-        width={sizes.sm}
-        backgroundColor={app.color || '#F2F3EF'}
+type RowProps = {
+  theme: ThemeType;
+  selected?: boolean;
+  customBg: string;
+};
+
+export const AppRowStyle = styled(motion.div)<RowProps>`
+  height: 48px;
+  position: relative;
+  border-radius: 8px;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: row;
+  overflow: visible;
+  align-items: center;
+  transition: ${(props: RowProps) => props.theme.transition};
+  ${(props: RowProps) =>
+    props.selected
+      ? css`
+          background-color: ${darken(0.03, props.customBg)};
+        `
+      : css`
+          &:hover {
+            transition: ${(props: RowProps) => props.theme.transition};
+            background-color: ${props.customBg
+              ? darken(0.025, props.customBg)
+              : 'inherit'};
+          }
+        `}
+`;
+
+export const AppRow = ({ caption, app, onClick, actionRenderer }) => {
+  const { desktop } = useServices();
+  const { theme } = desktop;
+  const rowRef = useRef<any>(null);
+  const currentTheme = useMemo(() => theme, [theme]);
+  return app ? (
+    <AppRowStyle
+      id={`app-row-${app.id}`}
+      ref={rowRef}
+      className="realm-cursor-hover"
+      customBg={currentTheme.windowColor}
+      // onContextMenu={(evt: any) => evt.stopPropagation()}
+    >
+      <Flex
+        flexDirection="row"
+        alignItems="center"
+        gap={8}
+        style={{ width: '100%' }}
+        onClick={(e) => onClick && onClick(app)}
       >
-        {app.image && (
-          <img
-            style={{ pointerEvents: 'none' }}
-            draggable="false"
-            height={sizes.sm}
-            width={sizes.sm}
-            key={app.title}
-            src={app.image}
-          />
+        <TileStyle
+          onContextMenu={(evt: any) => {
+            evt.stopPropagation();
+          }}
+          minWidth={sizes.sm}
+          style={{
+            borderRadius: radius.sm,
+            overflow: 'hidden',
+          }}
+          height={sizes.sm}
+          width={sizes.sm}
+          backgroundColor={app.color || '#F2F3EF'}
+        >
+          {app.image && (
+            <img
+              style={{ pointerEvents: 'none' }}
+              draggable="false"
+              height={sizes.sm}
+              width={sizes.sm}
+              key={app.title}
+              src={app.image}
+            />
+          )}
+          {app.icon && <Icons name={app.icon} height={16} width={16} />}
+        </TileStyle>
+        <Flex flexDirection="column" flex={1}>
+          <Text fontWeight={500}>{app.title}</Text>
+          <Text color={'#888888'}>{app.info}</Text>
+        </Flex>
+        {actionRenderer && (
+          <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer()}</div>
         )}
-        {app.icon && <Icons name={app.icon} height={16} width={16} />}
-      </TileStyle>
-      <Flex flexDirection="column" flex={1}>
-        <Text fontWeight={500}>{app.title}</Text>
-        <Text color={'#888888'}>{app.info}</Text>
       </Flex>
-      {actionRenderer && (
-        <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer()}</div>
-      )}
-    </Flex>
+    </AppRowStyle>
   ) : (
     <Text>{caption} not installed</Text>
   );
+};

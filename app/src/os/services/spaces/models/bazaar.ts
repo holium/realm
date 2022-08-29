@@ -63,6 +63,7 @@ export const BazaarModel = types
     recentsDevs: types.array(types.string),
     allies: types.array(types.string),
     apps: types.map(BazaarApp),
+    treaties: types.array(types.string),
   })
   .views((self) => ({
     get allApps() {
@@ -161,6 +162,7 @@ export const BazaarStore = types
     // ourApps: types.map(BazaarApp),
     // space => app metadata for space specific app data
     spaces: types.map(BazaarModel),
+    treaties: types.array(types.string),
   })
   .views((self) => ({
     getBazaar(path: string) {
@@ -183,6 +185,12 @@ export const BazaarStore = types
         }
         self.spaces.set(spacePath, bazaar);
       }
+    },
+    addTreaty(treaty: any) {
+      self.treaties.push(`${treaty.ship}/${treaty.desk}`);
+    },
+    initialTreaties(treaties: any) {
+      self.treaties.splice(0, 0, treaties);
     },
     addBazaar(path: string) {
       console.log('addBazaar => %o', path);

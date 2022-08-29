@@ -63,6 +63,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.remove-app-tag': this.removeAppTag,
     'realm.spaces.bazaar.suite-add': this.addToSuite,
     'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
+    'realm.spaces.bazaar.install-app': this.installApp,
+    'realm.spaces.bazaar.add-ally': this.addAlly,
   };
 
   static preload = {
@@ -133,6 +135,10 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
     removeFromSuite: async (path: SpacePath, appId: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
+    installApp: async (app: any) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.install-app', app),
+    addAlly: async (ship: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -216,6 +222,7 @@ export class SpacesService extends BaseService {
     );
     PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
     // Subscribe to sync updates
+    BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
     BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
   }
   // ***********************************************************
@@ -411,6 +418,18 @@ export class SpacesService extends BaseService {
       spacePath,
       appId
     );
+  }
+
+  async installApp(_event: IpcMainInvokeEvent, app: any) {
+    return await BazaarApi.installDocket(
+      this.core.conduit!,
+      app.ship,
+      app.desk
+    );
+  }
+
+  async addAlly(_event: IpcMainInvokeEvent, ship: any) {
+    return await BazaarApi.addAlly(this.core.conduit!, ship);
   }
 
   async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {

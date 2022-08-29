@@ -15,6 +15,8 @@ import { useServices } from 'renderer/logic/store';
 import { toJS } from 'mobx';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { AppRow } from './AppRow';
+import { setEnvironmentData } from 'worker_threads';
+import { BazaarApi } from 'os/api/bazaar';
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },
@@ -161,20 +163,23 @@ const renderStart = (space: string, bazaar: any) => {
 };
 
 const renderProviders = (data: Array<any>, searchString: string) => {
-  return data
-    .filter((item) => item.name.startsWith(searchString))
-    .map((item, index) => (
-      <Flex key={index} flexDirection="row" alignItems="center" gap={8}>
-        <Sigil
-          simple
-          size={28}
-          avatar={item.avatar}
-          patp={item.name}
-          color={[item.sigilColor || '#000000', 'white']}
-        />
-        <Text>{item.name}</Text>
-      </Flex>
-    ));
+  return (
+    data &&
+    data
+      .filter((item) => item.name.startsWith(searchString))
+      .map((item, index) => (
+        <Flex key={index} flexDirection="row" alignItems="center" gap={8}>
+          <Sigil
+            simple
+            size={28}
+            avatar={item.avatar}
+            patp={item.name}
+            color={[item.sigilColor || '#000000', 'white']}
+          />
+          <Text>{item.name}</Text>
+        </Flex>
+      ))
+  );
 };
 
 function renderShipSearch(data: Array<any>, searchString: string) {
@@ -191,34 +196,6 @@ function renderShipSearch(data: Array<any>, searchString: string) {
     </>
   );
 }
-
-const renderDevApps = (apps: Array<any>) => {
-  if (apps.length === 0) {
-    return <Text color="#ababab">{`No apps found`}</Text>;
-  }
-  return apps?.map((app, index) => (
-    <div key={index}>
-      <AppRow caption={app.title} app={app} />
-    </div>
-  ));
-};
-
-const renderDevAppSearch = (ship: string, data: Array<any>) => {
-  console.log('renderDevAppSearch => %o', { ship, data });
-  return (
-    <>
-      <Flex flexDirection="column" gap={10}>
-        <Text
-          fontWeight={500}
-          color={'#8f8f8f'}
-        >{`Software developed by ${ship}...`}</Text>
-        <Flex flexDirection="column" gap={12}>
-          {renderDevApps(data)}
-        </Flex>
-      </Flex>
-    </>
-  );
-};
 
 const renderAppSearch = () => {
   return (
@@ -257,13 +234,14 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 
 const AppSearchApp = (props) => {
   const { spaces, bazaar } = useServices();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any>(undefined);
   const [searchMode, setSearchMode] = useState('none');
   const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
   const [searchString, setSearchString] = useState('');
   const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
   const isOur = spaces.selected?.type === 'our';
+  const self = this;
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
@@ -277,13 +255,16 @@ const AppSearchApp = (props) => {
         setData(data);
       });
     } else if (searchMode === 'dev-app-search') {
-      SpacesActions.getTreaties(searchModeArgs[0]).then((items: any) => {
-        const data = Object.entries(items).map(([key, value], index) => ({
-          ...value,
-          id: value.desk,
-        }));
-        console.log('treaties => %o', toJS(data));
-        setData(data);
+      console.log('adding treaty => %o', selectedShip);
+      SpacesActions.addAlly(selectedShip).then((result) => {
+        console.log('addTreaty response => %o', result);
+        SpacesActions.getTreaties(searchModeArgs[0]).then((items: any) => {
+          const data = Object.entries(items).map(([key, value], index) => ({
+            ...value,
+            id: value.desk,
+          }));
+          setData(data);
+        });
       });
     } else if (searchMode === 'app-search') {
       SpacesActions.getApps(spaces.selected?.path).then((items: any) => {
@@ -295,6 +276,56 @@ const AppSearchApp = (props) => {
       });
     }
   }, [searchMode, spaces.selected?.path]);
+
+  const renderDevApps = (apps: Array<any>) => {
+    if (apps.length === 0) {
+      return <Text color="#ababab">{`No apps found`}</Text>;
+    }
+    return apps?.map((app, index) => (
+      <div key={index}>
+        <AppRow
+          caption={app.title}
+          app={app}
+          onClick={(app) => {
+            setData(app);
+            setSearchMode('app-summary');
+          }}
+        />
+      </div>
+    ));
+  };
+
+  const renderDevAppSearch = (ship: string, data: Array<any>) => {
+    return (
+      <>
+        <Flex flexDirection="column" gap={10}>
+          <Text
+            fontWeight={500}
+            color={'#8f8f8f'}
+          >{`Software developed by ${ship}...`}</Text>
+          <Flex flexDirection="column" gap={12}>
+            {renderDevApps(data)}
+          </Flex>
+        </Flex>
+      </>
+    );
+  };
+
+  const installApp = (app: any) => {
+    console.log('installApp => %o', app);
+    SpacesActions.installApp(app);
+  };
+
+  const renderAppSummary = (app: any) => {
+    return (
+      <>
+        <Flex flexDirection="column" gap={10}>
+          <Text fontWeight={'bold'}>{app.title}</Text>
+          <Button onClick={(e) => installApp(app)}>Install</Button>
+        </Flex>
+      </>
+    );
+  };
 
   return (
     <Popover
@@ -383,6 +414,7 @@ const AppSearchApp = (props) => {
         {searchMode === 'dev-app-search' &&
           renderDevAppSearch(searchModeArgs[0], data)}
         {searchMode === 'app-search' && renderAppSearch()}
+        {searchMode === 'app-summary' && renderAppSummary(data)}
       </PopoverContent>
     </Popover>
   );
