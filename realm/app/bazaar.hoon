@@ -21,7 +21,7 @@
     $:  %0
         =membership:membership-store
         =space-apps:store
-        charges=(map desk charge:docket)
+        :: charges=(map desk charge:docket)
     ==
   --
 =|  state-0
@@ -279,7 +279,7 @@
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: {<[path app-id rank]>}"
     ::  apps are added to a space's suite thru this ship's installed apps
-    =/  charge                    (~(got by charges.state) app-id)
+    :: =/  charge                    (~(got by charges.state) app-id)
     =/  apps                      (~(got by space-apps.state) path)
     ?:  (~(has by apps) app-id)   !!
     =|  app=app-entry:store

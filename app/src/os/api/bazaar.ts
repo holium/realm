@@ -334,6 +334,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
 const handleDocketReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
+    // case 'add-charge':
+    //   state.add
+    //   break;
     // docket/charges => {
     //   mark: 'charge-update',
     //   data: {
@@ -382,7 +385,10 @@ const handleTreatyReactions = (data: any, state: BazaarStoreType) => {
     //   }
     // }
     case 'add':
-      state.initialTreaties(data['add']);
+      state.addTreaty(data.add);
+      break;
+    case 'ini':
+      state.initialTreaties(data.ini);
       break;
     default:
       // unknown
@@ -398,7 +404,11 @@ const handleAllyReactions = (data: any, state: BazaarStoreType) => {
     //   data: { new: { alliance: [ '~bus/hello', [length]: 1 ], ship: '~bus' } }
     // }
     case 'new':
-      state.addAlly(data['new']);
+      const jon = data.new;
+      // don't try to add the ally if it already exists, you may get %kicked
+      if (!state.hasAlly(jon)) {
+        state.addAlly(jon);
+      }
       break;
     default:
       // unknown

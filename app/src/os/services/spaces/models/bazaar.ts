@@ -2,6 +2,7 @@ import { types, Instance } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
 import { NativeAppList } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob, AppTypes } from '../../ship/models/docket';
+import { SelectRow } from 'renderer/apps/Spaces/components/SelectionRow';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -140,7 +141,33 @@ export const BazaarStore = types
     // ourApps: types.map(BazaarApp),
     // space => app metadata for space specific app data
     spaces: types.map(BazaarModel),
-    treaties: types.array(types.string),
+    treaties: types.map(
+      types.model({
+        key: types.identifier,
+        cass: types.model({
+          da: types.string,
+        }),
+        image: types.string,
+        title: types.string,
+        license: types.string,
+        version: types.string,
+        desk: types.string,
+        website: types.string,
+        ship: types.string,
+        href: types.model({
+          glob: Glob,
+        }),
+        hash: types.string,
+        color: types.string,
+        info: types.string,
+      })
+    ),
+    allies: types.map(
+      types.model({
+        alliance: types.identifier,
+        ship: types.string,
+      })
+    ),
   })
   .views((self) => ({
     getBazaar(path: string) {
@@ -163,11 +190,29 @@ export const BazaarStore = types
         self.spaces.set(spacePath, bazaar);
       }
     },
+    hasAlly(ally: any) {
+      return self.allies.has(ally.alliance[0]);
+    },
+    addAlly(ally: any) {
+      self.allies.add(ally.alliance[0], ally.ship);
+    },
     addTreaty(treaty: any) {
-      self.treaties.push(`${treaty.ship}/${treaty.desk}`);
+      // self.treaties.push(`${treaty.ship}/${treaty.desk}`);
+      const key = `${treaty.ship}/${treaty.desk}`;
+      self.treaties.set(key, {
+        ...treaty,
+        key: key,
+      });
     },
     initialTreaties(treaties: any) {
-      self.treaties.splice(0, 0, treaties);
+      for (const key in treaties) {
+        const val = treaties[key];
+        self.treaties.set(key, {
+          ...val,
+          key: key,
+        });
+      }
+      // self.treaties.splice(0, 0, treaties);
     },
     addBazaar(path: string) {
       console.log('addBazaar => %o', path);
