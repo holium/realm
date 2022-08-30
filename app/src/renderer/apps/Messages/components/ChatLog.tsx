@@ -2,15 +2,16 @@ import { FC, useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import ScrollView from 'react-inverted-scrollview';
 import { ChatMessage } from './ChatMessage';
-import { ChatMessageType } from 'os/services/ship/models/courier';
+import { GraphDMType } from 'os/services/ship/models/courier';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/logic/apps/store';
-import { Flex, IconButton, Icons } from 'renderer/components';
+import { Flex, IconButton, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 interface ChatLogProps {
-  messages: ChatMessageType[];
+  loading: boolean;
+  messages: GraphDMType[];
 }
 
 // TODO make our own scrollbar
@@ -21,7 +22,7 @@ const Log = styled(Flex)`
 `;
 
 export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
-  const { messages } = props;
+  const { loading, messages } = props;
   const { dimensions } = useTrayApps();
   const { ship, desktop } = useServices();
   const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
@@ -30,20 +31,20 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
 
   let scrollView = useRef<any>(null);
 
-  const handleScroll = ({
-    scrollTop,
-    scrollBottom,
-  }: {
-    scrollTop: any;
-    scrollBottom: any;
-  }) => {
-    if (scrollBottom > 200) {
-      setShowJumpBtn(true);
-    } else {
-      setShowJumpBtn(false);
-    }
-    // console.log({ scrollTop, scrollBottom });
-  };
+  // const handleScroll = ({
+  //   scrollTop,
+  //   scrollBottom,
+  // }: {
+  //   scrollTop: any;
+  //   scrollBottom: any;
+  // }) => {
+  //   if (scrollBottom > 200) {
+  //     setShowJumpBtn(true);
+  //   } else {
+  //     setShowJumpBtn(false);
+  //   }
+  //   // console.log({ scrollTop, scrollBottom });
+  // };
 
   const scrollToBottom = () => {
     if (!scrollView) return;
@@ -54,7 +55,21 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
     scrollView.current?.scrollToBottom();
   }, [scrollView]);
 
-  return (
+  const isBlank = !loading && messages.length === 0;
+
+  return isBlank ? (
+    <Flex
+      height={dimensions.height}
+      width="100%"
+      alignContent="center"
+      justifyContent="center"
+      flexDirection="column"
+    >
+      <Text textAlign="center" opacity={0.3} fontSize={3}>
+        No messages
+      </Text>
+    </Flex>
+  ) : (
     <Log
       id="scrollableDiv"
       gap={2}
@@ -65,7 +80,6 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
       alignContent="center"
       flexDirection="column-reverse"
     >
-      {/*Put the scroll bar always on the bottom*/}
       <InfiniteScroll
         dataLength={messages.length}
         next={() => {
@@ -74,10 +88,10 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
         style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
         inverse={true} //
         hasMore={true}
-        loader={<h4>Loading...</h4>}
+        loader={<div></div>}
         scrollableTarget="scrollableDiv"
       >
-        <Flex style={{ minHeight: 58 }} />
+        <Flex style={{ height: 58 }} />
         {messages.map((message: any, index: number) => (
           <ChatMessage
             key={`${message.index}-${message.timeSent}-${index}`}
@@ -88,7 +102,10 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
           />
           // <div key={index}>div - #{index}</div>
         ))}
+        <Flex style={{ height: 58 }} />
       </InfiniteScroll>
+
+      {/*Put the scroll bar always on the bottom*/}
 
       {/* <ScrollView
         width={dimensions.width}

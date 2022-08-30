@@ -3,7 +3,7 @@
 ::  A thin agent that interfaces with various chat stores
 ::
 /-  store=courier, post, graph-store
-/+  dbug, default-agent, lib=courier
+/+  dbug, default-agent, lib=courier, hook=dm-hook
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -33,8 +33,40 @@
     ==
   ++  on-save   !>(~)
   ++  on-load   |=(vase `..on-init)
+  :: ++  on-poke
+  ::   |=  [=mark =vase]
+  ::   ^-  (quip card _this)
+  ::   ?+  mark  (on-poke:def mark vase)
+  ::     %dm-hook-action     
+  ::   [%pass / %agent [our.bowl %dm-hook] %poke %dm-hook-action !<(action:hook vase)]~
+  ::   ==
+    :: [cards this]
+  :: ++  on-poke
+  ::   |=  [=mark =vase]
+  ::   ^-  (quip card _this)
+  ::   |^
+  ::   ?+  mark  (on-poke:def mark vase)
+  ::       %dm-hook-action
+  ::     =+  !<(=action:hook vase)
+  ::     =^  cards  state
+  ::     :~ 
+  ::       [%pass / %agent [our.bowl %dm-hook] %poke %dm-hook-action action]
+  ::     ==
+  ::   ==
+  ::     [cards this]
   ++  on-poke   |=(cage !!)
-  ++  on-watch  |=(path !!)
+  :: ++  on-watch  |=(path !!)
+  ++  on-watch
+    |=  =path
+    ^-  (quip card _this)
+    =/  cards=(list card)
+      ?+    path      (on-watch:def path)
+          [%updates ~]
+        ?>  =(our.bowl src.bowl)
+        =/  dm-previews   (gen-list:gs-dms:lib our.bowl now.bowl)
+        [%give %fact [/updates ~] courier-reaction+!>([%previews dm-previews])]~
+      ==
+    [cards this]
   ::
   ++  on-peek
     |=  =path
@@ -64,7 +96,6 @@
     
     ==
   ::
-  :: ++  on-agent    on-agent:def
   ++  on-agent 
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
@@ -74,16 +105,42 @@
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: spaces subscription failed"
+            ~&  >>>  "{<dap.bowl>}: graph-store subscription failed"
             `this
+          %kick
+            ~&  >  "{<dap.bowl>}: graph-store kicked us, resubscribing..."
+            :_  this
+            :~  
+              [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
+            ==
           %fact
             ?+    p.cage.sign  (on-agent:def wire sign)
                 %graph-update-3
               =^  cards  state
-                (graph-dm !<(=update:graph-store q.cage.sign))
+                (graph-dm !<(=update:graph-store q.cage.sign) our.bowl now.bowl)
               [cards this]
             ==
         ==
+      :: [%dm-hook ~]
+      ::   ?+    -.sign  (on-agent:def wire sign)
+      ::     %watch-ack
+      ::       ?~  p.sign  `this
+      ::       ~&  >>>  "{<dap.bowl>}: dm-hook subscription failed"
+      ::       `this
+      ::     %kick
+      ::       ~&  >  "{<dap.bowl>}: dm-hook kicked us, resubscribing..."
+      ::       :_  this
+      ::       :~  
+      ::         [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
+      ::       ==
+      ::     %fact
+      ::       ?+    p.cage.sign  (on-agent:def wire sign)
+      ::           %graph-update-3
+      ::         =^  cards  state
+      ::           (graph-dm !<(=update:graph-store q.cage.sign) our.bowl now.bowl)
+      ::         [cards this]
+      ::       ==
+      ::   ==
     ==
   ::
   ++  on-leave    on-leave:def
@@ -95,37 +152,26 @@
 ::
 |_  [=bowl:gall cards=(list card)]
 ::
+++  this  .
 ++  core  .
 ++  graph-dm
-  |=  [upd=update:graph-store]
+  |=  [upd=update:graph-store our=ship now=@da]
   ^-  (quip card _state)
   |^
   ?+  -.q.upd   `state
     %add-nodes
       ?:  =(name.resource.+.q.upd %dm-inbox)
-      :: is dm-inbox
-      =/  dm-posts      ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
-      ~&  >>  ['is dm inbox' dm-posts]
-      :: ~&  >>  ['is dm inbox' (map-to-dms:gs-dms:lib dm-posts)]
-      :: (convert-dm-node:gs-dms:lib )
+        :: is dm-inbox
+        =/  dm            ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
+        =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
+        =/  ship-dec      (snag 0 p.dm-node)
+        =/  index         (snag 1 p.dm-node)
+        =/  new-dm        (gen-received-dm:gs-dms:lib ship-dec index q.dm-node our now)
+        :_  state
+        [%give %fact [/updates ~] courier-reaction+!>([%dm-received new-dm])]~
+      :: else 
       `state
-    :: else 
-    `state
-    :: %add-nodes
-    :: ~&  >>  [name.resource.+.q.upd]
-    :: `state
   ==
-    :: ?:  =(name.resource.+.q.upd %dm-inbox)
-    ::   :: is dm-inbox
-    ::   ~&  >>  ['is dm inbox' name.resource.+.q.upd]
-    :: :: else 
-    :: `state
-  ::
-  :: ++  on-initial
-  ::   |=  [spaces=spaces:store]
-  ::   ^-  (quip card _state)
-  ::   `state
-  :: ::
   --
 
 --

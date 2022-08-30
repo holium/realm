@@ -1,6 +1,10 @@
 import { Instance, types, applySnapshot } from 'mobx-state-tree';
+import { createPost } from '@urbit/api';
+import { patp2dec } from 'urbit-ob';
+import { Patp } from 'os/types';
 import { cleanNounColor } from '../../../lib/color';
 import { LoaderModel } from '../../common.model';
+import moment from 'moment';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -39,6 +43,8 @@ export const MessageContent = types.union(
     }),
   })
 );
+
+export type ContentsType = Instance<typeof MessageContent>;
 
 export const ChatMessage = types.union(
   { eager: false },
@@ -121,6 +127,7 @@ export const GraphDM = types.model({
   index: types.maybe(types.string),
   author: types.string,
   timeSent: types.number,
+  pending: types.optional(types.boolean, false),
   contents: types.array(MessageContent),
 });
 
@@ -132,27 +139,63 @@ const ContactMetadata = types.model({
   nickname: types.maybeNull(types.string),
 });
 
-const DMLog = types.model('DMLog', {
-  path: types.string,
-  to: types.string,
-  type: types.enumeration(['group', 'dm']),
-  source: types.enumeration(['graph-store', 'chatstead']),
-  messages: types.array(GraphDM),
-  metadata: ContactMetadata,
-});
+const DMLog = types
+  .model('DMLog', {
+    // path: types.string,
+    to: types.string,
+    type: types.enumeration(['group', 'dm', 'pending']),
+    source: types.enumeration(['graph-store', 'chatstead']),
+    messages: types.array(GraphDM),
+    metadata: ContactMetadata,
+    outgoing: types.array(GraphDM),
+  })
+  .views((self) => ({
+    get list() {
+      return Array.from(self.messages.values());
+    },
+  }))
+  .actions((self) => ({
+    receiveDM: (dm: GraphDMType) => {
+      // console.log(dm);
+      self.messages.unshift(dm);
+    },
+    sendDM: (patp: Patp, contents: any) => {
+      const author = patp.substring(1);
+      const post = createPost(author, contents, `/${patp2dec(self.to)}`);
+      // console.log(post);
+      self.outgoing.unshift(
+        GraphDM.create({
+          index: post.index,
+          author: author,
+          pending: true,
+          timeSent: post['time-sent'],
+          // @ts-expect-error
+          contents: post.contents,
+        })
+      );
+    },
+  }));
 
 export type DMLogType = Instance<typeof DMLog>;
 
-const DMPreview = types.model('DmPreview', {
-  path: types.string,
-  to: types.string,
-  type: types.enumeration(['group', 'dm']),
-  source: types.enumeration(['graph-store', 'chatstead']),
-  lastTimeSent: types.number,
-  lastMessage: types.array(MessageContent),
-  metadata: ContactMetadata,
-  pending: types.optional(types.boolean, false),
-});
+const DMPreview = types
+  .model('DmPreview', {
+    // path: types.string,
+    to: types.string,
+    type: types.enumeration(['group', 'dm', 'pending']),
+    source: types.enumeration(['graph-store', 'chatstead']),
+    lastTimeSent: types.number,
+    lastMessage: types.array(MessageContent),
+    metadata: ContactMetadata,
+    pending: types.optional(types.boolean, false),
+    isNew: types.optional(types.boolean, false),
+  })
+  .actions((self) => ({
+    receiveDM: (dm: GraphDMType) => {
+      self.lastMessage = dm.contents;
+      self.lastTimeSent = dm.timeSent;
+    },
+  }));
 
 export type DMPreviewType = Instance<typeof DMPreview>;
 
@@ -172,6 +215,7 @@ export const CourierStore = types
   }))
   .actions((self) => ({
     setPreviews: (dmPreviews: any) => {
+      // console.log(dmPreviews);
       Object.keys(dmPreviews).forEach((key: string) => {
         const preview: any = dmPreviews[key];
         preview.metadata.color = cleanNounColor(preview.metadata.color);
@@ -179,8 +223,64 @@ export const CourierStore = types
       applySnapshot(self.previews, dmPreviews);
       self.loader.set('loaded');
     },
+    draftNew: (patps: Patp[], metadata: any[]) => {
+      const type = patps.length === 1 ? 'dm' : 'group';
+      if (type === 'dm') {
+        self.dms.set(
+          patps[0],
+          DMLog.create({
+            to: patps[0],
+            type: type,
+            source: 'graph-store',
+            messages: [],
+            metadata: ContactMetadata.create(metadata[0] || {}),
+            outgoing: [],
+          })
+        );
+        self.previews.set(
+          patps[0],
+          DMPreview.create({
+            to: patps[0],
+            type: type,
+            source: 'graph-store',
+            lastTimeSent: moment().unix() * 1000,
+            lastMessage: [{ text: 'Drafting...' }],
+            metadata: ContactMetadata.create(metadata[0] || {}),
+            pending: false,
+            isNew: true,
+          })
+        );
+        return self.previews.get(patps[0]);
+      } else {
+        // is group
+        return;
+      }
+    },
     setDMLog: (dmLog: DMLogType) => {
       self.dms.set(dmLog.to, dmLog);
+    },
+    setReceivedDM: (dmLog: DMLogType) => {
+      if (self.dms.has(dmLog.to)) {
+        // if the received message already has a log entry
+        const newMessage = dmLog.messages[0];
+        self.dms.get(dmLog.to)?.receiveDM(newMessage);
+        self.previews.get(dmLog.to)?.receiveDM(newMessage);
+      } else {
+        // set a new log entry
+        self.dms.set(dmLog.to, dmLog);
+        self.previews.set(
+          dmLog.to,
+          DMPreview.create({
+            to: dmLog.to,
+            type: dmLog.type,
+            source: dmLog.source,
+            lastTimeSent: dmLog.messages[0].timeSent,
+            lastMessage: dmLog.messages[0].contents,
+            metadata: dmLog.metadata,
+            pending: false,
+          })
+        );
+      }
     },
   }));
 

@@ -148,7 +148,6 @@ OSActions.onBoot((_event: any, response: any) => {
     SoundActions.playStartup();
   }
   if (response.models && response.ship) {
-    console.log(response.models);
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(response.models.contacts!)
@@ -157,12 +156,12 @@ OSActions.onBoot((_event: any, response: any) => {
       servicesStore.friends,
       castToSnapshot(response.models.friends)
     );
-    applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
-    applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
     applySnapshot(
       servicesStore.courier,
       castToSnapshot(response.models.courier!)
     );
+    applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
+    applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
@@ -222,6 +221,10 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
+    // applySnapshot(
+    //   servicesStore.courier,
+    //   castToSnapshot(initials.models.courier!)
+    // );
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(initials.models.contacts!)
@@ -290,6 +293,9 @@ OSActions.onEffect((_event: any, value: any) => {
     }
   }
   if (value.response === 'initial') {
+    if (value.resource === 'courier') {
+      applySnapshot(servicesStore.courier, value.model);
+    }
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }

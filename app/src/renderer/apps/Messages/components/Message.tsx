@@ -57,8 +57,8 @@ export const Message: FC<DMContact> = (props: DMContact) => {
     let message: string = getTextFromContent(type, content);
     if (preview) {
       message = message.split(/(\r\n|\n|\r)/gm)[0]; // takes only the first line of a multi-line message
-      if (message.length > 39) {
-        message = message.substring(0, 40) + '...';
+      if (message.length > 27) {
+        message = message.substring(0, 28) + '...';
       }
       setMessageComponent(<Text fontSize={2}>{message}</Text>);
     } else {
@@ -113,7 +113,7 @@ export const Message: FC<DMContact> = (props: DMContact) => {
           break;
       }
     }
-  }, []);
+  }, [content]);
 
   return useMemo(
     () => (

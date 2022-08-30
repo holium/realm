@@ -7,6 +7,7 @@ import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import S3Client from 'renderer/logic/s3/S3Client';
+import { DMPreviewType } from 'os/services/ship/models/courier';
 
 type ChatProps = {
   theme: ThemeModelType;
@@ -26,7 +27,9 @@ type ChatViewType = 'dm-list' | 'dm-chat' | 'new-chat' | 'loading';
 export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
   const { dimensions } = props;
   const [currentView, setCurrentView] = useState<ChatViewType>('dm-list');
-  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [selectedChat, setSelectedChat] = useState<DMPreviewType | undefined>(
+    undefined
+  );
   const [s3Config, setS3Config] = useState<any>();
   // const [s3Client, setS3Client] = useState<any>();
 
@@ -73,7 +76,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           onBack={() => {
             setCurrentView('dm-list');
           }}
-          onCreateNewDm={(newDm: any) => {
+          onCreateNewDm={(newDm: DMPreviewType) => {
             setSelectedChat(newDm);
             setCurrentView('dm-chat');
           }}
@@ -105,7 +108,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           dimensions={dimensions}
           theme={props.theme}
           // s3Client={s3Client}
-          selectedChat={selectedChat}
+          selectedChat={selectedChat!}
           setSelectedChat={(chat: any) => {
             if (!chat) setCurrentView('dm-list');
             setSelectedChat(chat);

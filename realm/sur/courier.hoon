@@ -3,7 +3,7 @@
 /-  *post
 |%
 
-+$  chat-type  ?(%group %dm)
++$  chat-type  ?(%group %dm %pending)
 +$  source  ?(%graph-store %chatstead)
 ::
 ::  $message: a generalized message structure for Realm
@@ -34,7 +34,7 @@
 ::
 +$  chat
   $:  
-    path=cord     :: Can be either a group dm association or single dm-inbox graph association
+    :: path=cord     :: Can be either a group dm association or single dm-inbox graph association
     to=ship
     type=chat-type
     =source
@@ -57,13 +57,14 @@
 :: +$  chat-previews     (map ship message-preview)
 +$  chat-previews     (list message-preview)
 +$  message-preview
-  $:  path=cord     
-      to=ship
-      type=chat-type
-      =source
-      last-time-sent=@da
-      last-message=(list content)
-      metadata=contact-mtd
+  $:  
+    :: path=cord     
+    to=ship
+    type=chat-type
+    =source
+    last-time-sent=@da
+    last-message=(list content)
+    metadata=contact-mtd
   ==
 ::
 ::  %contact-store
@@ -92,7 +93,8 @@
 ::
 +$  reaction
   $%  
-      [%load-dms =ship]   ::  loads a list of all dms
+      [%previews =chat-previews]    ::  loads a list of all dms
+      [%dm-received =chat]          ::  a newly received dm-message
   ==
 ::
 ::  Scry views

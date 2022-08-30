@@ -1,4 +1,9 @@
-import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
+import {
+  castToSnapshot,
+  getSnapshot,
+  onPatch,
+  onSnapshot,
+} from 'mobx-state-tree';
 import { CourierStore, CourierStoreType } from '../models/courier';
 import Store from 'electron-store';
 
@@ -29,6 +34,14 @@ export const loadCourierFromDisk = (
     };
     onEffect(patchEffect);
   });
+
+  // Send initial
+  const patchEffect = {
+    model: getSnapshot(model),
+    resource: 'courier',
+    response: 'initial',
+  };
+  onEffect(patchEffect);
 
   return model;
 };

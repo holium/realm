@@ -27,7 +27,6 @@
   +*  this  .
       def   ~(. (default-agent this %|) bowl)
       core  ~(. +> [bowl ~])
-      io    ~(. agentio bowl)
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -175,7 +174,6 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  core  .
-++  io    .
 ++  this  .
 ::
 ++  spaces-action
@@ -372,6 +370,7 @@
   =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
   ?>  ?=(%member -.member)
   ~&  >  [member]
+  ::
   ::
   :: =/  member        (~(got by (~(got by membership.state) space-path)) ship)
   :: (~(has in roles.member) role)

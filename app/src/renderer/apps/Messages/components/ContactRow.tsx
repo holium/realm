@@ -1,16 +1,20 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba, lighten, darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
-import { Sigil, Flex, Box, Text, TextButton } from 'renderer/components';
+import {
+  Sigil,
+  Flex,
+  Box,
+  Text,
+  TextButton,
+  Spinner,
+} from 'renderer/components';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { Message } from './Message';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { cleanNounColor } from 'os/lib/color';
-import moment from 'moment';
 import { fromNow } from '../helpers/time';
 
 type DMContact = {
@@ -59,46 +63,41 @@ export const MessagePreview = styled(motion.div)`
 export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
   // const { ship } = useShip();
-  let subTitle;
-  if (dm.pending) {
-    const onAccept = (evt: any) => {
-      evt.stopPropagation();
-      DmActions.acceptDm(dm.to).then((response: any) => {
-        console.log('accept ContactRow response', response);
-      });
-      console.log('accepting');
-    };
-    const onDecline = (evt: any) => {
-      evt.stopPropagation();
-      DmActions.declineDm(dm.to).then((response: any) => {
-        console.log('response', response);
-      });
-      console.log('rejecting');
-    };
+  const pending = dm.type === 'pending';
+  const [acceptLoading, setAcceptLoading] = useState(false);
+  const [rejectLoading, setRejectLoading] = useState(false);
 
+  let subTitle;
+  const onAccept = (evt: any) => {
+    evt.stopPropagation();
+    setAcceptLoading(true);
+    DmActions.acceptDm(dm.to)
+      .then((response: any) => {
+        console.log('accept ContactRow response', response);
+        setAcceptLoading(false);
+      })
+      .catch(() => {
+        setAcceptLoading(false);
+      });
+    console.log('accepting');
+  };
+  const onDecline = (evt: any) => {
+    evt.stopPropagation();
+    setRejectLoading(true);
+    DmActions.declineDm(dm.to)
+      .then((response: any) => {
+        console.log('response', response);
+        setRejectLoading(false);
+      })
+      .catch(() => {
+        setRejectLoading(false);
+      });
+    console.log('rejecting');
+  };
+
+  if (pending) {
     subTitle = (
-      <Flex
-        flex={1}
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <Message
-          preview
-          type={'text'}
-          content={{ text: 'has invited you to a DM' }}
-        />
-        <Flex gap={4} flexDirection="row" alignItems="center">
-          <TextButton
-            highlightColor="#EC415A"
-            textColor="#EC415A"
-            onClick={onDecline}
-          >
-            Reject
-          </TextButton>
-          <TextButton onClick={onAccept}>Accept</TextButton>
-        </Flex>
-      </Flex>
+      <Message preview type="text" content={{ text: 'invited you to chat' }} />
     );
   } else {
     const lastMessage = dm.lastMessage[0];
@@ -110,13 +109,13 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
 
   return (
     <Row
-      pending={dm.pending}
-      className={dm.pending ? '' : 'realm-cursor-hover'}
+      pending={pending}
+      className={pending ? '' : 'realm-cursor-hover'}
       customBg={theme.windowColor}
-      onClick={(evt: any) => !dm.pending && onClick(evt)}
+      onClick={(evt: any) => !pending && onClick(evt)}
     >
       <Flex flex={1} gap={10}>
-        <Box mt="2px" opacity={dm.pending ? 0.5 : 1}>
+        <Box mt="2px" opacity={pending ? 0.6 : 1}>
           <Sigil
             simple
             size={28}
@@ -126,34 +125,62 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
           />
         </Box>
         <Flex flexDirection="column" flex={1}>
-          <Text opacity={dm.pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
+          <Text opacity={pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
             {dm.to}
           </Text>
           {subTitle}
         </Flex>
       </Flex>
-      <Flex gap={2} flexDirection="column" alignItems="flex-end" flexGrow={0}>
-        <Text opacity={0.3} fontSize={2}>
-          {fromNow(dm.lastTimeSent)}
-        </Text>
+      {pending ? (
         <Flex
-          px="10px"
-          py="1px"
-          justifyContent="center"
+          flex={1}
+          flexDirection="row"
           alignItems="center"
+          justifyContent="flex-end"
           width="fit-content"
-          borderRadius={12}
-          height={20}
-          minWidth={12}
-          background={unread ? '#569BE2' : 'transparent'}
         >
-          {unread && (
-            <Text fontSize={2} color="white" fontWeight={500}>
-              1
-            </Text>
-          )}
+          {/* <Message
+            preview
+            type={'text'}
+            content={{ text: 'has invited you to a DM' }}
+          /> */}
+          <Flex gap={4} flexDirection="row" alignItems="center">
+            <TextButton
+              highlightColor="#EC415A"
+              textColor="#EC415A"
+              onClick={onDecline}
+            >
+              {rejectLoading ? <Spinner size={0} /> : 'Reject'}
+            </TextButton>
+            <TextButton onClick={onAccept}>
+              {acceptLoading ? <Spinner size={0} /> : 'Accept'}
+            </TextButton>
+          </Flex>
         </Flex>
-      </Flex>
+      ) : (
+        <Flex gap={2} flexDirection="column" alignItems="flex-end" flexGrow={0}>
+          <Text opacity={0.3} fontSize={2}>
+            {fromNow(dm.lastTimeSent)}
+          </Text>
+          <Flex
+            px="10px"
+            py="1px"
+            justifyContent="center"
+            alignItems="center"
+            width="fit-content"
+            borderRadius={12}
+            height={20}
+            minWidth={12}
+            background={unread ? '#569BE2' : 'transparent'}
+          >
+            {unread && (
+              <Text fontSize={2} color="white" fontWeight={500}>
+                1
+              </Text>
+            )}
+          </Flex>
+        </Flex>
+      )}
     </Row>
   );
 };

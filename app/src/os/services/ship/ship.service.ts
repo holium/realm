@@ -28,6 +28,7 @@ import { loadDocketFromDisk } from './stores/docket';
 import { loadFriendsFromDisk } from './stores/friends';
 import { CourierApi } from '../../api/courier';
 import { CourierStoreType } from './models/courier';
+import { toJS } from 'mobx';
 
 export type ShipModels = {
   friends: FriendsType;
@@ -59,11 +60,12 @@ export class ShipService extends BaseService {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.get-dm-log': this.getDMLog,
     'realm.ship.send-dm': this.sendDm,
+    'realm.ship.draft-dm': this.draftNewDm,
+    'realm.ship.accept-dm-request': this.acceptDm,
+    'realm.ship.decline-dm-request': this.declineDm,
     'realm.ship.get-s3-bucket': this.getS3Bucket,
     'realm.ship.get-metadata': this.getMetadata,
     'realm.ship.get-contact': this.getContact,
-    'realm.ship.accept-dm-request': this.acceptDm,
-    'realm.ship.decline-dm-request': this.declineDm,
     'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
     'realm.ship.get-friends': this.getFriends,
@@ -109,6 +111,9 @@ export class ShipService extends BaseService {
     },
     sendDm: (toShip: string, content: any) => {
       return ipcRenderer.invoke('realm.ship.send-dm', toShip, content);
+    },
+    draftDm: (patps: Patp[], metadata: any[]) => {
+      return ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
     },
     removeDm: (ship: string, index: any) => {
       return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
@@ -224,18 +229,12 @@ export class ShipService extends BaseService {
 
         // register dm update handler
         DmApi.updates(this.core.conduit!, this.models.chat!);
-        DmApi.graphUpdates(this.core.conduit!, this.models.chat!);
+        CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
 
         // register hark-store update handler
         // TODO commenting out for now
         // NotificationsApi.watch(this.core.conduit!, this.state);
 
-        // load initial dms
-        this.getDMs().then((response) => {
-          this.models.courier?.setPreviews(response);
-          // this.models.courier?.setDMs(ship, response, this.models.contacts);
-          // this.state!.chat.setDMs(ship, response);
-        });
         DocketApi.getApps(this.core.conduit!).then((apps) => {
           this.models.docket.setInitial(apps);
           this.state!.loader.set('loaded');
@@ -261,6 +260,7 @@ export class ShipService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
+
     return { ship: this.state, models: this.modelSnapshots };
   }
 
@@ -281,6 +281,11 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
+    this.models.chat = undefined;
+    this.models.contacts = undefined;
+    this.models.courier = undefined;
+    // this.models.docket = undefined;
+    // this.models.friends = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
   }
 
@@ -367,22 +372,27 @@ export class ShipService extends BaseService {
   }
 
   async getDMLog(_event: any, ship: Patp) {
-    return await CourierApi.getDMLog(ship, this.core.conduit!);
+    const dmLog = await CourierApi.getDMLog(ship, this.core.conduit!);
+    this.models.courier?.setDMLog(dmLog);
+    return dmLog;
   }
 
   async acceptDm(_event: any, toShip: string) {
-    const ourShip = this.state?.patp!;
     console.log('acceptingDM', toShip);
-    return await DmApi.acceptDm(this.core.conduit!, toShip);
+    return await CourierApi.acceptDm(this.core.conduit!, toShip);
   }
   async declineDm(_event: any, toShip: string) {
-    const ourShip = this.state?.patp!;
-    return await DmApi.declineDm(this.core.conduit!, toShip);
+    console.log('rejectingDM', toShip);
+    return await CourierApi.declineDm(this.core.conduit!, toShip);
+  }
+  async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
+    const draft = this.models.courier?.draftNew(patps, metadata);
+    return toJS(draft);
   }
   async sendDm(_event: any, toShip: string, contents: any[]) {
     const ourShip = this.state?.patp!;
-    const dm = this.models.chat?.dms.get(toShip)!;
-    dm.sendDm(this.state!.patp, contents);
+    const dmLog = this.models.courier?.dms.get(toShip)!;
+    dmLog.sendDM(this.state!.patp, contents);
     // TODO fix send new dm
     // if (this.state?.chat.dms.get(toShip)) {
     // } else {
@@ -390,7 +400,12 @@ export class ShipService extends BaseService {
     //   // const dm = this.state?.chat.dms.get(toShip)!;
     //   // dm.sendDm(contents);
     // }
-    return await DmApi.sendDM(this.core.conduit!, ourShip, toShip, contents);
+    return await CourierApi.sendDM(
+      this.core.conduit!,
+      ourShip,
+      toShip,
+      contents
+    );
   }
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;
