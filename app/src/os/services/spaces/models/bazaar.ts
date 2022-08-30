@@ -141,6 +141,7 @@ export const BazaarStore = types
     // ourApps: types.map(BazaarApp),
     // space => app metadata for space specific app data
     spaces: types.map(BazaarModel),
+    apps: types.map(BazaarApp),
     treaties: types.map(
       types.model({
         key: types.identifier,
@@ -189,6 +190,12 @@ export const BazaarStore = types
         }
         self.spaces.set(spacePath, bazaar);
       }
+    },
+    addApp(app: any) {
+      self.apps.set(app.id, app);
+    },
+    removeApp(app: any) {
+      self.apps.remove(app.id);
     },
     hasAlly(ally: any) {
       return self.allies.has(ally.alliance[0]);

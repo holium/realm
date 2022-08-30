@@ -207,42 +207,6 @@ export const BazaarApi = {
   loadTreaties: (conduit: Conduit, state: BazaarStoreType): void => {},
   watchUpdates: (conduit: Conduit, state: BazaarStoreType): void => {
     conduit.watch({
-      app: 'docket',
-      path: `/charges`,
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('docket/charges => %o', { mark, data });
-        if (mark === 'charge-update') {
-          handleDocketReactions(data, state);
-        }
-      },
-      onError: () => console.log('subscription [docket/charges] rejected'),
-      onQuit: () => console.log('kicked from subscription [docket/charges]'),
-    });
-    conduit.watch({
-      app: 'treaty',
-      path: `/treaties`,
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('treaty/treaties => %o', { mark, data });
-        if (mark === 'treaty-update-0') {
-          handleTreatyReactions(data, state);
-        }
-      },
-      onError: () => console.log('subscription [treaty/treaties] rejected'),
-      onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
-    });
-    conduit.watch({
-      app: 'treaty',
-      path: `/allies`,
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('treaty/allies => %o', { mark, data });
-        if (mark === 'ally-update-0') {
-          handleAllyReactions(data, state);
-        }
-      },
-      onError: () => console.log('subscription [treaty/treaties] rejected'),
-      onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
-    });
-    conduit.watch({
       app: 'bazaar',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
@@ -272,9 +236,21 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'treaty-removed':
       break;
-    case 'app-added':
+    case 'app-installed':
+      {
+        let detail = data['app-installed'];
+        console.log(detail);
+        // @ts-ignore
+        state.addApp(detail);
+      }
       break;
-    case 'app-removed':
+    case 'app-uninstalled':
+      {
+        let detail = data['app-uninstalled'];
+        console.log(detail);
+        // @ts-ignore
+        state.removeApp(detail);
+      }
       break;
     case 'add-tag':
       {
@@ -323,91 +299,6 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         });
         // @ts-ignore
         state.getBazaar(detail['space-path']).removeFromSuite(detail['app-id']);
-      }
-      break;
-    default:
-      // unknown
-      break;
-  }
-};
-
-const handleDocketReactions = (data: any, state: BazaarStoreType) => {
-  const reaction: string = Object.keys(data)[0];
-  switch (reaction) {
-    // case 'add-charge':
-    //   state.add
-    //   break;
-    // docket/charges => {
-    //   mark: 'charge-update',
-    //   data: {
-    //     'add-charge': {
-    //       desk: 'hello',
-    //       charge: {
-    //         image: 'https://media.urbit.org/guides/additional/dist/wut.svg',
-    //         title: 'Hello',
-    //         license: 'MIT',
-    //         version: '0.0.1',
-    //         website: 'https://developers.urbit.org/guides/additional/dist/guide',
-    //         href: { glob: [Object] },
-    //         chad: { glob: null },
-    //         color: '0x81.88c9',
-    //         info: 'A simple hello world app.'
-    //       }
-    //     }
-    //   }
-    // }
-    default:
-      // unknown
-      break;
-  }
-};
-
-const handleTreatyReactions = (data: any, state: BazaarStoreType) => {
-  const reaction: string = Object.keys(data)[0];
-  switch (reaction) {
-    // treaty/treaties => {
-    //   mark: 'treaty-update-0',
-    //   data: {
-    //     add: {
-    //       cass: { da: '~2022.8.30..03.58.44..aa63' },
-    //       image: 'https://media.urbit.org/guides/additional/dist/wut.svg',
-    //       title: 'Hello',
-    //       license: 'MIT',
-    //       version: '0.0.1',
-    //       desk: 'hello',
-    //       website: 'https://developers.urbit.org/guides/additional/dist/guide',
-    //       ship: '~bus',
-    //       href: { glob: { 'glob-reference': [Object], base: 'hello' } },
-    //       hash: '0v1b.gfkkd.52qip.tsuc6.ajbnc.hoeg6.jp911.1ufg3.f38bd.vv31n.k6tl3',
-    //       color: '0x81.88c9',
-    //       info: 'A simple hello world app.'
-    //     }
-    //   }
-    // }
-    case 'add':
-      state.addTreaty(data.add);
-      break;
-    case 'ini':
-      state.initialTreaties(data.ini);
-      break;
-    default:
-      // unknown
-      break;
-  }
-};
-
-const handleAllyReactions = (data: any, state: BazaarStoreType) => {
-  const reaction: string = Object.keys(data)[0];
-  switch (reaction) {
-    // treaty/allies => {
-    //   mark: 'ally-update-0',
-    //   data: { new: { alliance: [ '~bus/hello', [length]: 1 ], ship: '~bus' } }
-    // }
-    case 'new':
-      const jon = data.new;
-      // don't try to add the ally if it already exists, you may get %kicked
-      if (!state.hasAlly(jon)) {
-        state.addAlly(jon);
       }
       break;
     default:

@@ -9,7 +9,9 @@
 ::   in (new apps, treaties, allies) are handled here in this agent and relayed to UI
 ::   over /updates path
 ::
-/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passports-store=passports
+/-  store=bazaar, docket, spaces-store=spaces
+/-  membership-store=membership, hark=hark-store, passports-store=passports
+/-  treaty
 /+  verb, dbug, default-agent
 =>
   |%
@@ -19,7 +21,7 @@
       ==
   +$  state-0
     $:  %0
-        =membership:membership-store
+        :: =membership:membership-store
         =space-apps:store
         :: charges=(map desk charge:docket)
     ==
@@ -48,6 +50,8 @@
   :_  this
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
+      [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
+      [%pass /allies %agent [our.bowl %treaty] %watch /allies]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
       [%pass /bazaar %agent [our.bowl %bazaar] %watch /updates]
   ==
@@ -92,15 +96,12 @@
       :: The space level watch subscription
       =/  host        `@p`(slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-      ~&  >  "/bazaar/{<host>}/{<space-pth>} [subscription] => {<[i.t.path host space-pth src.bowl]>}"
       :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
       ::  recommends crash on permission check or other failure
       ?>  (check-member:security:core [host space-pth] src.bowl)
-      ~&  >  "/bazaar/{<host>}/{<space-pth>} [subscription] => passed security check"
       =/  pth         [our.bowl space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
       =/  apps        (~(got by space-apps.state) pth)
-      ~&  >  "/bazaar/{<host>}/{<space-pth>} [subscription] => {<apps>}"
       (bazaar:send-reaction:core [%space-apps pth apps] paths)
     ::
     [%response ~]     ~
@@ -200,6 +201,50 @@
               %charge-update
                 =^  cards  state
                   (on:ch:core !<(=charge-update:docket q.cage.sign))
+                [cards this]
+          ==
+      ==
+
+    [%treaties ~]
+      ?+    -.sign  (on-agent:def wire sign)
+        %watch-ack
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /treaties" ~)  `this
+          ~&  >>>  "{<dap.bowl>}: /treaties subscription failed"
+          `this
+    ::
+        %kick
+          ~&  >  "{<dap.bowl>}: /treaties kicked us, resubscribing..."
+          :_  this
+          :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          ==
+    ::
+        %fact
+          ?+    p.cage.sign  (on-agent:def wire sign)
+              %treaty-update-0
+                =^  cards  state
+                  (treaty-update:core !<(=update:treaty:treaty q.cage.sign))
+                [cards this]
+          ==
+      ==
+
+    [%allies ~]
+      ?+    -.sign  (on-agent:def wire sign)
+        %watch-ack
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /allies" ~)  `this
+          ~&  >>>  "{<dap.bowl>}: /allies subscription failed"
+          `this
+    ::
+        %kick
+          ~&  >  "{<dap.bowl>}: /allies kicked us, resubscribing..."
+          :_  this
+          :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          ==
+    ::
+        %fact
+          ?+    p.cage.sign  (on-agent:def wire sign)
+              %ally-update-0
+                =^  cards  state
+                  (ally-update:core !<(=update:ally:treaty q.cage.sign))
                 [cards this]
           ==
       ==
@@ -393,7 +438,71 @@
     ^-  (quip card _state)
     `state
   --
-
+::
+++  treaty-update
+  |=  [upd=update:treaty:treaty]
+  ^-  (quip card _state)
+  |^
+  ?-  -.upd
+    %ini       (on-ini +.upd)
+    %add       (on-add +.upd)
+    %del       (on-del +.upd)
+  ==
+  ::
+  ++  on-ini
+    |=  [init=(map [=ship =desk] =treaty:treaty)]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: treaty-update [on-initial] => {<init>}"
+    `state
+  ::
+  ++  on-add
+    |=  [=treaty:treaty]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
+    `state
+  ::
+  ++  on-del
+    |=  [=ship =desk]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: treaty-update [on-del] => {<[ship desk]>}"
+    `state
+  --
+::
+++  ally-update
+  |=  [upd=update:ally:treaty]
+  ^-  (quip card _state)
+  |^
+  ?-  -.upd
+    %ini       (on-ini +.upd)
+    %new       (on-new +.upd)
+    %add       (on-add +.upd)
+    %del       (on-del +.upd)
+  ==
+  ::
+  ++  on-ini
+    |=  [init=(map ship alliance:treaty)]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-initial] => {<init>}"
+    `state
+  ::
+  ++  on-new
+    |=  [=ship =alliance:treaty]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
+    `state
+  ::
+  ++  on-add
+    |=  [=ship]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
+    `state
+  ::
+  ++  on-del
+    |=  [=ship]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-del] => {<[ship]>}"
+    `state
+  --
 ::  charge arms
 ++  ch
   |%
@@ -459,7 +568,7 @@
     |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
     =.  space-apps.state  (~(put by space-apps.state) path.space ~)
-    =.  membership.state  (~(put by membership.state) path.space members)
+    :: =.  membership.state  (~(put by membership.state) path.space members)
     `state
   ::
   ++  on-replace
@@ -470,7 +579,7 @@
   ++  on-remove
     |=  [path=space-path:spaces-store]
     ^-  (quip card _state)
-    `state(space-apps (~(del by space-apps.state) path), membership (~(del by membership.state) path))
+    `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
   ::
   ++  on-new-space
     |=  [path=space-path:spaces-store space=space:spaces-store]
@@ -522,12 +631,11 @@
   ::    add additional security as needed
   ++  check-member
     |=  [path=space-path:spaces-store =ship]
-    =/  members  (~(get by membership.state) path)
-    ?~  members  %.n
-    =/  member  (~(get by u.members) ship)
-    ?~  member  %.n
+    :: =/  members  (~(get by membership.state) path)
+    :: ?~  members  %.n
+    :: =/  member  (~(get by u.members) ship)
+    :: ?~  member  %.n
     =/  vw  .^(view:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
-    ~&  >  "{<dap.bowl>}: passports scry result => {<vw>}"
     ?>  ?=([%member *] vw)
     ?:(=(status.passport.vw 'joined') %.y %.n)
   --
