@@ -92,13 +92,15 @@
       :: The space level watch subscription
       =/  host        `@p`(slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-      ~&  >  [i.t.path host space-pth src.bowl]
+      ~&  >  "/bazaar/{<host>}/{<space-pth>} [subscription] => {<[i.t.path host space-pth src.bowl]>}"
       :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
       ::  recommends crash on permission check or other failure
       ?>  (check-member:security:core [host space-pth] src.bowl)
+      ~&  >  "/bazaar/{<host>}/{<space-pth>} [subscription] => passed security check"
       =/  pth         [our.bowl space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
       =/  apps        (~(got by space-apps.state) pth)
+      ~&  >  "/bazaar/{<host>}/{<space-pth>} [subscription] => {<apps>}"
       (bazaar:send-reaction:core [%space-apps pth apps] paths)
     ::
     [%response ~]     ~
@@ -436,8 +438,7 @@
     %add            (on-add +.rct)
     %replace        (on-replace +.rct)
     %remove         (on-remove +.rct)
-    %space          (on-space-initial +.rct)
-    %member-added   (on-member-added +.rct)
+    %new-space      (on-new-space +.rct)
   ==
   ::
   ++  on-initial
@@ -471,20 +472,17 @@
     ^-  (quip card _state)
     `state(space-apps (~(del by space-apps.state) path), membership (~(del by membership.state) path))
   ::
-  ++  on-space-initial
+  ++  on-new-space
     |=  [path=space-path:spaces-store space=space:spaces-store]
     ^-  (quip card _state)
-    `state
-  ::
-  ++  on-member-added
-    |=  [path=space-path:spaces-store =ship]
-    ^-  (quip card _state)
-    ?:  ?|  =(our.bowl ship.path)
-            =(ship ship.path)
-        ==  `state
-    %-  (slog leaf+"{<dap.bowl>}: on-member-added:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
+    :: ?:  ?|  =(our.bowl ship.path)
+    ::         =(ship ship.path)
+    ::     ==  `state
+    ::  no need to subscribe to our own ship's bazaar. we're already getting all updates
+    ?:  =(our.bowl ship.path)  `state
+    %-  (slog leaf+"{<dap.bowl>}: on-space-initial:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
     :_  state
-    :~  [%pass /passports %agent [ship.path %passports] %watch /members/(scot %p ship.path)/(scot %tas space.path)]
+    :~  [%pass /bazaar %agent [ship.path %bazaar] %watch /bazaar/(scot %p ship.path)/(scot %tas space.path)]
     ==
   --
 ::
@@ -528,8 +526,10 @@
     ?~  members  %.n
     =/  member  (~(get by u.members) ship)
     ?~  member  %.n
-    =/  passport  .^(passport:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/passport/[space.path]/noun)
-    ?:(=(status.passport 'joined') %.y %.n)
+    =/  vw  .^(view:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
+    ~&  >  "{<dap.bowl>}: passports scry result => {<vw>}"
+    ?>  ?=([%member *] vw)
+    ?:(=(status.passport.vw 'joined') %.y %.n)
   --
 ::
 ++  is-host

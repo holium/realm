@@ -1,4 +1,4 @@
-/-  store=spaces, membership-store=membership, invite-store=visas, hark=hark-store, 
+/-  store=spaces, membership-store=membership, invite-store=visas, hark=hark-store,
       passports-store=passports
 /+  default-agent, verb, dbug, agentio, lib=spaces, inv-lib=visas, grp=groups
 ^-  agent:gall
@@ -79,7 +79,7 @@
         [%x %all ~]    ``spaces-view+!>([%spaces spaces.state])
       ::
       ::  ~/scry/spaces/groups.json
-        [%x %groups ~]    
+        [%x %groups ~]
       =/  groups   (our-groups:grp our.bowl now.bowl)
       :: ~&  >  [groups]
       ``groups-view+!>([%groups groups])
@@ -115,7 +115,7 @@
         ~&  >  [i.t.path host space-pth src.bowl]
         :: ?>  (check-member:core [host space-pth] src.bowl)     ::  only members should subscribe
         =/  space        (~(got by spaces.state) [host space-pth])
-        (member:send-reaction [%space [host space-pth] space] [/spaces/(scot %p host)/(scot %tas space-pth) ~])
+        (member:send-reaction [%new-space [host space-pth] space] [/spaces/(scot %p host)/(scot %tas space-pth) ~])
       ==
     [cards this]
   ::
@@ -154,21 +154,27 @@
       ::
           %fact
             ?+    p.cage.sign     (on-agent:def wire sign)
-                %invite-reaction
-              =^  cards  state
-                (invite-reaction:core !<(=reaction:invite-store q.cage.sign))
-              [cards this]
             ::
                 %passports-reaction
               =^  cards  state
                 (passports-reaction:core !<(=reaction:passports-store q.cage.sign))
               [cards this]
-
+            ::
+                %visa-reaction
+              =^  cards  state
+                (visa-reaction:core !<(=reaction:invite-store q.cage.sign))
+              [cards this]
             ==
         ==
     ==
   ++  on-arvo   |=([wire sign-arvo] !!)
-  ++  on-fail   |=([term tang] `..on-init)
+  ::
+  ++  on-fail
+    |=  [=term =tang]
+    ^-  (quip card _this)
+    %-  (slog leaf+"error in {<dap.bowl>}" >term< tang)
+    `this
+  ::
   ++  on-leave  |=(path `..on-init)
   --
 ::
@@ -257,7 +263,6 @@
     ^-  (quip card _state)
     :_  state
     :~  [%pass /spaces %agent [ship.path dap.bowl] %watch /spaces/(scot %p ship.path)/(scot %tas space.path)]
-        [%give %fact [/updates /our ~] spaces-reaction+!>([%member-added path ship])]  ::  notify our watches
     ==
   ::
   --
@@ -271,8 +276,7 @@
     %add            (on-add +.rct)
     %replace        (on-replace +.rct)
     %remove         (on-remove +.rct)
-    %space          (on-space-initial +.rct)
-    %member-added   `state
+    %new-space      (on-new-space +.rct)
   ==
   ::
   ++  on-initial
@@ -296,20 +300,23 @@
     =.  spaces.state          (~(del by spaces.state) path)
     `state
   ::
-  ++  on-space-initial
+  ++  on-new-space
     |=  [path=space-path:store space=space:store]
     ^-  (quip card _state)
     =.  spaces.state          (~(put by spaces.state) [path space])
-    `state
+    :_  state
+    (spaces:send-reaction [%new-space path space] [/updates ~])
   ::
   --
-
-++  invite-reaction
+::
+++  visa-reaction
   |=  [rct=reaction:invite-store]
   ^-  (quip card _state)
   |^
   ?-  -.rct
-    %invite-sent        `state
+    %invite-sent
+      ~&  >  "{<dap.bowl>}: visa-reaction [invite-sent] => {<rct>}"
+      `state
     %invite-accepted    (on-accepted +.rct)
     %kicked             (on-kicked +.rct)
   ==
@@ -317,6 +324,7 @@
   ++  on-kicked
     |=  [path=space-path:store =ship]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: visa-reaction [kicked] => {<rct>}"
     ?:  (is-host:core ship.path) ::  we are the host, so will kick the member from spaces
       :_  state
       [%give %kick ~[/spaces/(scot %p ship.path)/(scot %tas space.path)] (some ship)]~
@@ -326,6 +334,7 @@
   ++  on-accepted
     |=  [path=space-path:store =ship =passport:passports-store]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: visa-reaction [invite-accepted] => {<rct>}"
     `state
   ::
   --
