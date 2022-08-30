@@ -218,6 +218,7 @@ export const BazaarApi = {
         // if (mark === 'bazaar-reaction') {
         //   handleSpacesReactions(data, state, membersState, bazaarState);
         // }
+        conduit.closeChannel();
       },
       onError: () => console.log('subscription [docket/charges] rejected'),
       onQuit: () => console.log('kicked from subscription [docket/charges]'),
@@ -231,6 +232,7 @@ export const BazaarApi = {
         // if (mark === 'bazaar-reaction') {
         //   handleSpacesReactions(data, state, membersState, bazaarState);
         // }
+        conduit.closeChannel();
       },
       onError: () => console.log('subscription [treaty/treaties] rejected'),
       onQuit: () => console.log('kicked from subscription [treaty/treaties]'),

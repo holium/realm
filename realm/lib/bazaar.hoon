@@ -130,7 +130,7 @@
       :-  %app-installed
       %-  pairs
       :~  [%desk s+desk.rct]
-          [%docket (dkt docket.rct)]
+          [%docket (pairs (dkt:encode docket.rct))]
       ==
     ::
         %app-uninstalled
@@ -213,8 +213,7 @@
             href+s+href.web-app.app.app-view
         ==
       ::
-      %urbit
-        (dkt docket.app.app-view)
+      %urbit  (dkt docket.app.app-view)
       ::
       %missing  ~
     ==
