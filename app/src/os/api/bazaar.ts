@@ -8,12 +8,10 @@ import _ from 'lodash';
 export const BazaarApi = {
   getApps: async (conduit: Conduit, path: SpacePath, tag: string = 'all') => {
     //  [host]/~/scry/bazaar/~zod/my-space/apps.json
-    console.log(`${path}/apps/${tag} => %`);
     const response = await conduit.scry({
       app: 'bazaar',
       path: `${path}/apps/${tag}`, // the spaces scry is at the root of the path
     });
-    console.log('getApps before => %o', response.apps);
     const appMap = response.apps || {};
     Object.keys(appMap).forEach((appKey: string) => {
       if (appMap[appKey].color) {
@@ -26,7 +24,6 @@ export const BazaarApi = {
     //     _.toInteger(a[1].default?.rank) - _.toInteger(b[1].default?.rank)
     // );
     // return Object.fromEntries(sorted);
-    console.log('getApp after => %o', appMap);
     return appMap;
   },
   getTreaties: async (conduit: Conduit, patp: string) => {
@@ -209,40 +206,47 @@ export const BazaarApi = {
   },
   loadTreaties: (conduit: Conduit, state: BazaarStoreType): void => {},
   watchUpdates: (conduit: Conduit, state: BazaarStoreType): void => {
-    console.log('watching docket/charges...');
     conduit.watch({
       app: 'docket',
       path: `/charges`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(mark, data);
-        // if (mark === 'bazaar-reaction') {
-        //   handleSpacesReactions(data, state, membersState, bazaarState);
-        // }
-        conduit.closeChannel();
+        console.log('docket/charges => %o', { mark, data });
+        if (mark === 'charge-update') {
+          handleDocketReactions(data, state);
+        }
       },
       onError: () => console.log('subscription [docket/charges] rejected'),
       onQuit: () => console.log('kicked from subscription [docket/charges]'),
     });
-    console.log('watching treaty/treaties...');
     conduit.watch({
       app: 'treaty',
       path: `/treaties`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(mark, data);
-        // if (mark === 'bazaar-reaction') {
-        //   handleSpacesReactions(data, state, membersState, bazaarState);
-        // }
-        conduit.closeChannel();
+        console.log('treaty/treaties => %o', { mark, data });
+        if (mark === 'treaty-update-0') {
+          handleTreatyReactions(data, state);
+        }
       },
       onError: () => console.log('subscription [treaty/treaties] rejected'),
       onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
     });
-    console.log('watching bazaar/updates...');
+    conduit.watch({
+      app: 'treaty',
+      path: `/allies`,
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log('treaty/allies => %o', { mark, data });
+        if (mark === 'ally-update-0') {
+          handleAllyReactions(data, state);
+        }
+      },
+      onError: () => console.log('subscription [treaty/treaties] rejected'),
+      onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
+    });
     conduit.watch({
       app: 'bazaar',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(mark, data);
+        console.log('bazaar/updates => %o', { mark, data });
         if (mark === 'bazaar-reaction') {
           handleBazaarReactions(data, state);
         }
@@ -320,6 +324,81 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         // @ts-ignore
         state.getBazaar(detail['space-path']).removeFromSuite(detail['app-id']);
       }
+      break;
+    default:
+      // unknown
+      break;
+  }
+};
+
+const handleDocketReactions = (data: any, state: BazaarStoreType) => {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
+    // docket/charges => {
+    //   mark: 'charge-update',
+    //   data: {
+    //     'add-charge': {
+    //       desk: 'hello',
+    //       charge: {
+    //         image: 'https://media.urbit.org/guides/additional/dist/wut.svg',
+    //         title: 'Hello',
+    //         license: 'MIT',
+    //         version: '0.0.1',
+    //         website: 'https://developers.urbit.org/guides/additional/dist/guide',
+    //         href: { glob: [Object] },
+    //         chad: { glob: null },
+    //         color: '0x81.88c9',
+    //         info: 'A simple hello world app.'
+    //       }
+    //     }
+    //   }
+    // }
+    default:
+      // unknown
+      break;
+  }
+};
+
+const handleTreatyReactions = (data: any, state: BazaarStoreType) => {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
+    // treaty/treaties => {
+    //   mark: 'treaty-update-0',
+    //   data: {
+    //     add: {
+    //       cass: { da: '~2022.8.30..03.58.44..aa63' },
+    //       image: 'https://media.urbit.org/guides/additional/dist/wut.svg',
+    //       title: 'Hello',
+    //       license: 'MIT',
+    //       version: '0.0.1',
+    //       desk: 'hello',
+    //       website: 'https://developers.urbit.org/guides/additional/dist/guide',
+    //       ship: '~bus',
+    //       href: { glob: { 'glob-reference': [Object], base: 'hello' } },
+    //       hash: '0v1b.gfkkd.52qip.tsuc6.ajbnc.hoeg6.jp911.1ufg3.f38bd.vv31n.k6tl3',
+    //       color: '0x81.88c9',
+    //       info: 'A simple hello world app.'
+    //     }
+    //   }
+    // }
+    case 'add':
+      state.initialTreaties(data['add']);
+      break;
+    default:
+      // unknown
+      break;
+  }
+};
+
+const handleAllyReactions = (data: any, state: BazaarStoreType) => {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
+    // treaty/allies => {
+    //   mark: 'ally-update-0',
+    //   data: { new: { alliance: [ '~bus/hello', [length]: 1 ], ship: '~bus' } }
+    // }
+    case 'new':
+      state.addAlly(data['new']);
       break;
     default:
       // unknown

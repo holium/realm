@@ -149,10 +149,8 @@ export const BazaarStore = types
   }))
   .actions((self) => ({
     initial(apps: any) {
-      console.log('loading bazaar initial => %o', apps);
       // applySnapshot(self.spaces, apps['space-apps']);
       const catalog = apps['space-apps'];
-      console.log('catalog => %o', catalog);
       for (const spacePath in catalog) {
         const spaceApps = catalog[spacePath];
         const bazaar = BazaarModel.create({});
@@ -160,10 +158,8 @@ export const BazaarStore = types
           const app = spaceApps[desk];
           const appColor = app.color;
           app.color = appColor && cleanNounColor(appColor);
-          console.log('adding app %o to bazaar => %o', desk, app);
           bazaar.addApp(app);
         }
-        console.log('bazaar.allApps => %o', bazaar.allApps);
         self.spaces.set(spacePath, bazaar);
       }
     },
