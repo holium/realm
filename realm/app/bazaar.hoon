@@ -3,7 +3,11 @@
 ::
 ::  A store for metadata on app dockets per Realm space.
 ::
-::  Should watch and sync data with %treaty and %docket under /garden.
+::  notes: we currently do not store docket detail in bazaar (by design).
+::   instead, docket info is scried and relayed to UI on initial bazaar subscription.
+::   to simplify the UI and minimize subscriptions, those app events UI is interested
+::   in (new apps, treaties, allies) are handled here in this agent and relayed to UI
+::   over /updates path
 ::
 /-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passports-store=passports
 /+  verb, dbug, default-agent
@@ -347,12 +351,14 @@
   ^-  (quip card _state)
   |^
   ?-  -.rct
-    %initial        (on-initial +.rct)
-    %space-apps     (on-space-apps +.rct)
-    %add-tag        (on-add-tag +.rct)
-    %remove-tag     (on-rem-tag +.rct)
-    %suite-add      (on-suite-add +.rct)
-    %suite-remove   (on-suite-rem +.rct)
+    %initial          (on-initial +.rct)
+    %space-apps       (on-space-apps +.rct)
+    %add-tag          (on-add-tag +.rct)
+    %remove-tag       (on-rem-tag +.rct)
+    %suite-add        (on-suite-add +.rct)
+    %suite-remove     (on-suite-rem +.rct)
+    %app-installed    `state
+    %app-uninstalled  `state
   ==
   ::
   ++  on-initial
@@ -409,13 +415,16 @@
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
-    `state
+    :: only if done (head is %glob). see garden/sur/docket.hoon for more details
+    ?+  -.chad.charge  `state
+      %glob  (bazaar:send-reaction:core [%app-installed desk docket.charge] [/updates ~])
+    ==
   ::
   ++  rem
     |=  [=desk]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
-    `state
+    (bazaar:send-reaction:core [%app-uninstalled desk] [/updates ~])
   --
 ::
 ++  spaces-reaction

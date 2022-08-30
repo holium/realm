@@ -45,11 +45,13 @@ export const BazaarApi = {
     return appMap;
   },
   addAlly: async (conduit: Conduit, ship: string) => {
+    console.log('addAlly [os] => %o', ship);
     return new Promise((resolve, reject) => {
       conduit.poke({
         ...allyShip(ship),
         reaction: 'bazaar-reaction.add-tag',
         onReaction: (data: any) => {
+          console.log('addAlly [os] onReaction => %o', data);
           resolve(data['add-tag']);
         },
         onError: (e: any) => {
@@ -255,6 +257,18 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'initial':
       state.initial(data['initial']);
       // state.initialReaction(data['initial']);
+      break;
+    case 'ally-added':
+      break;
+    case 'ally-removed':
+      break;
+    case 'treaty-added':
+      break;
+    case 'treaty-removed':
+      break;
+    case 'app-added':
+      break;
+    case 'app-removed':
       break;
     case 'add-tag':
       {

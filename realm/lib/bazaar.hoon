@@ -125,6 +125,19 @@
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%app-id s+app-id.rct]
       ==
+    ::
+        %app-installed
+      :-  %app-installed
+      %-  pairs
+      :~  [%desk s+desk.rct]
+          [%docket (dkt docket.rct)]
+      ==
+    ::
+        %app-uninstalled
+      :-  %app-uninstalled
+      %-  pairs
+      :~  [%desk s+desk.rct]
+      ==
     ==
   ::
   ++  view :: encodes for on-peek
@@ -201,15 +214,7 @@
         ==
       ::
       %urbit
-        :~  title+s+title.docket.app.app-view
-            info+s+info.docket.app.app-view
-            color+s+(scot %ux color.docket.app.app-view)
-            href+(href href.docket.app.app-view)
-            image+?~(image.docket.app.app-view ~ s+u.image.docket.app.app-view)
-            version+(version version.docket.app.app-view)
-            license+s+license.docket.app.app-view
-            website+s+website.docket.app.app-view
-        ==
+        (dkt docket.app.app-view)
       ::
       %missing  ~
     ==
@@ -233,6 +238,19 @@
         ['ship' s+(scot %p ship.app-entry)]
         ['ranks' (rnks ranks.app-entry)]
         ['tags' a+(turn ~(tap in tags.app-entry) |=(tg=tag:store s+(scot %tas tg)))]
+    ==
+  ::
+  ++  dkt
+    |=  =docket:docket
+    ^-  (list [cord json])
+    :~  title+s+title.docket
+        info+s+info.docket
+        color+s+(scot %ux color.docket)
+        href+(href href.docket)
+        image+?~(image.docket ~ s+u.image.docket)
+        version+(version version.docket)
+        license+s+license.docket
+        website+s+website.docket
     ==
   ::
   ++  href

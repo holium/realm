@@ -116,6 +116,8 @@
       [%remove-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
       [%suite-add path=space-path:spaces =app-id rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
+      [%app-installed =desk =docket:docket]
+      [%app-uninstalled =desk]
   ==
 ::
 ::  Scry views

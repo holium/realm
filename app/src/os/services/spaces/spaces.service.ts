@@ -110,7 +110,7 @@ export class SpacesService extends BaseService {
     kickMember: async (path: string, patp: string) =>
       ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
     //
-    getApps: async (path: SpacePath, tag: string) =>
+    getApps: async (path: SpacePath, tag: string = 'all') =>
       ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path, tag),
     getAllies: async (path: SpacePath) =>
       ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
