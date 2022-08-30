@@ -9,6 +9,7 @@ import {
 import { toJS } from 'mobx';
 import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
 import { Patp } from 'os/types';
+import { TypedSchema } from 'yup/lib/util/types';
 
 export const DmAppState = types.model('DmAppState', {
   current: types.string,
@@ -17,6 +18,7 @@ export const DmAppState = types.model('DmAppState', {
 
 export const RoomInvite = types.model('RoomInvite', {
   id: types.string,
+  title: types.string,
   provider: types.string,
   invitedBy: types.string,
   path: types.maybe(types.string),
@@ -47,8 +49,20 @@ export const RoomsModel = types
 // https://mobx-state-tree.js.org/tips/inheritance
 //
 
+
 //
 export type RoomsModelType = Instance<typeof RoomsModel>;
+
+
+export const ChatModel = types.model('ChatModel', {
+  index: types.integer,
+  author: types.string,
+  contents: types.string,
+  isRightAligned: types.boolean,
+  timeReceived: types.integer,
+});
+export type ChatModelType = Instance<typeof ChatModel>;
+
 
 export const RoomsAppState = types
   .model('RoomsAppState', {
@@ -59,6 +73,7 @@ export const RoomsAppState = types
     invites: types.map(RoomInvite),
     ourPatp: types.maybe(types.string),
     provider: types.maybe(types.string),
+    chatData: types.map(ChatModel),
     controls: types.optional(
       types.model({
         muted: types.boolean,
@@ -91,6 +106,9 @@ export const RoomsAppState = types
     get isLoadingList() {
       return self.outstandingRequest;
     },
+    get chats() {
+      return Array.from(self.chatData.values());
+    }
   }))
   .actions((self) => ({
     setMuted(muted: boolean) {
@@ -141,6 +159,7 @@ export const RoomsAppState = types
     setLiveRoom(room: RoomsModelType) {
       self.knownRooms.set(room.id, room);
       self.liveRoom = self.knownRooms.get(room.id);
+      self.chatData.clear();
     },
     unsetLiveRoom() {
       self.liveRoom = undefined;
@@ -151,7 +170,6 @@ export const RoomsAppState = types
     },
     setProvider(provider: Patp) {
       self.provider = provider;
-      self.outstandingRequest = false;
     },
     enterRoom() {
       self.currentView = 'room';
@@ -168,7 +186,6 @@ export const RoomsAppState = types
         return rMap;
       }, {});
       applySnapshot(self.knownRooms, roomMap);
-      self.outstandingRequest = false;
     },
     removeSelf(roomId: string, patp: string) {
       self.knownRooms.get(roomId)?.present.remove(patp);
@@ -199,11 +216,37 @@ export const RoomsAppState = types
       }
     },
     didRequest() {
+      // track outbound requestAll and corresponding inbound rooms update
       self.outstandingRequest = true;
     },
     gotResponse() {
-      self.outstandingRequest = true;
+      // track outbound requestAll and corresponding inbound rooms update
+      self.outstandingRequest = false;
     },
+    appendOurChat(our: Patp, contents: string) {
+      let time = Date.now();
+      let chat : ChatModelType = {
+        author: our,
+        index: time,
+        timeReceived: time,
+        contents: contents,
+        isRightAligned: true,
+      }
+
+      self.chatData.set(String(time), chat);
+    },
+    handleInboundChat(from:Patp, contents:string) {
+      let time = Date.now();
+      let chat : ChatModelType = {
+        author: from,
+        index: time,
+        timeReceived: time,
+        contents: contents,
+        isRightAligned: false,
+      }
+
+      self.chatData.set(String(time), chat);
+    }
   }));
 
 export type RoomsAppStateType = Instance<typeof RoomsAppState>;

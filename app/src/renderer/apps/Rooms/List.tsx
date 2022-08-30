@@ -9,6 +9,8 @@ import {
   TextButton,
   InnerNotification,
   Tooltip,
+  IconButton,
+  Spinner,
 } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { RoomRow } from './components/RoomRow';
@@ -66,6 +68,9 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           >
             Rooms
           </Text>
+          {roomsApp.isLoadingList && (
+           <Spinner pl={2} size={0} />
+           )}
         </Flex>
         <Flex ml={1} pl={2} pr={2}>
           <TextButton
@@ -80,11 +85,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         </Flex>
       </Titlebar>
       <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
-        {roomsApp.isLoadingList && (
-          <Flex>
-            <Text>loading...</Text>
-          </Flex>
-        )}
+        
         {knownRooms.length === 0 && (
           <Flex
             flex={1}
@@ -141,10 +142,10 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         })}
       </Flex>
       {roomsApp.invitesList.map((value: any) => (
-        <Flex flexDirection="column" width="100%">
+        <Flex key={value.id} flexDirection="column" width="100%">
           <InnerNotification
             id={value.id}
-            title={value.id}
+            title={value.title}
             seedColor="#F08735"
             subtitle={`Sent by: ${value.invitedBy}`}
             actionText="Accept"
@@ -159,8 +160,14 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           />
         </Flex>
       ))}
-
-      <Flex mt={3} pb={4} justifyContent="flex-end">
+      <Flex mt={3} pb={4} justifyContent="flex-start">
+        <IconButton
+          onClick={() => {
+              RoomsActions.requestAllRooms();
+            }}
+        >
+          <Icons opacity={0.8} name="Refresh" size={26} mr={2} />
+        </IconButton>
         <Tooltip
           id="room-provider"
           placement="top"
@@ -174,6 +181,8 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           />
         </Tooltip>
       </Flex>
+
+      
     </Grid.Column>
   );
 });

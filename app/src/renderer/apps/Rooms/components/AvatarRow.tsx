@@ -9,12 +9,12 @@ interface AvatarRowProps {
 
 export const AvatarRow: FC<AvatarRowProps> = (props: AvatarRowProps) => {
   const { people, backgroundColor } = props;
-  const { ship } = useServices();
+  const { contacts } = useServices();
 
   return (
     <Flex flexDirection="row" alignItems="center">
       {people.map((person: string, index: number) => {
-        const metadata = ship?.contacts.getContactAvatarMetadata(person);
+        const metadata = contacts.getContactAvatarMetadata(person);
         return (
           <Box
             style={{

@@ -80,7 +80,7 @@ export class Conduit extends EventEmitter {
       await this.poke({
         app: 'hood',
         mark: 'helm-hi',
-        json: 'Opening API channel',
+        json: 'Opening Realm API channel',
       });
       return;
     }
@@ -108,8 +108,9 @@ export class Conduit extends EventEmitter {
         const parsedData = JSON.parse(event.data);
         const eventId = parseInt(parsedData.id, 10);
         const type = parsedData.response as Responses;
-        if (eventId - this.lastAckId > 20) {
-          this.ack(eventId);
+        const lastEventId = parseInt(event.lastEventId, 10);
+        if (lastEventId - this.lastAckId > 20) {
+          this.ack(lastEventId);
         }
         switch (type) {
           case 'poke':

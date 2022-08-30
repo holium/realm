@@ -33,7 +33,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
 
   const { dockColor, windowColor, inputColor } = desktop.theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const { muted, cursor } = roomsApp.controls;
+  const { muted } = roomsApp.controls;
   // const [muted, setMuted] = useState(false);
   // const [cursors, setCursors] = useState(true);
 
@@ -130,12 +130,12 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               {roomsApp.liveRoom?.title}
             </Text>
             <Flex>
-              <Text fontSize={2} fontWeight={400} opacity={0.7}>
+              {/* <Text fontSize={2} fontWeight={400} opacity={0.7}>
                 {creatorStr}
               </Text>
               <Text mx="6px" fontSize={2} fontWeight={400} opacity={0.7}>
                 •
-              </Text>
+              </Text> */}
               <Text fontSize={2} fontWeight={400} opacity={0.7}>
                 {`${roomsApp.liveRoom?.present.length} ${pluralize(
                   'participant',

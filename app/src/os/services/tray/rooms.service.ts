@@ -35,6 +35,7 @@ export class RoomsService extends BaseService {
     'realm.tray.rooms.invite': this.invite,
     'realm.tray.rooms.set-muted': this.setMuted,
     'realm.tray.rooms.set-cursor': this.setCursors,
+    'realm.tray.rooms.send-chat': this.sendChat,
   };
 
   static preload = {
@@ -93,6 +94,9 @@ export class RoomsService extends BaseService {
     },
     invite: (roomId: string, patp: Patp) => {
       return ipcRenderer.invoke('realm.tray.rooms.invite', roomId, patp);
+    },
+    sendChat: (ourPatP: Patp, chat: string) => {
+      return ipcRenderer.invoke('realm.tray.rooms.send-chat', ourPatP, chat);
     },
     onRoomUpdate: (callback: any) =>
       ipcRenderer.on('realm.on-room-update', callback),
@@ -205,9 +209,17 @@ export class RoomsService extends BaseService {
     await RoomsApi.joinRoom(this.core.conduit!, invite.id);
     this.state?.acceptInvite(invite);
   }
+  sendChat(_event: any, ourPatP: Patp, chat: string) {
+    RoomsApi.sendChat(this.core.conduit!, chat);
+    this.state?.appendOurChat(ourPatP, chat);
+  }
+  
   async requestAllRooms(_event: any) {
-    await RoomsApi.requestAllRooms(this.core.conduit!);
+    //
+    // track outstanding request to display loading state in List view
     this.state?.didRequest();
+
+    await RoomsApi.requestAllRooms(this.core.conduit!);
   }
   async createRoom(
     _event: any,
@@ -226,7 +238,10 @@ export class RoomsService extends BaseService {
   }
   async getProvider(_event: any) {
     let res = await RoomsApi.getProvider(this.core.conduit!);
-    return res['rooms-view'];
+    let provider = res['rooms-view']['provider']
+    if(provider === null) provider = undefined;
+    this.state?.setProvider(provider)
+    return provider;
   }
   async invite(_event: any, roomId: string, patp: Patp) {
     RoomsApi.invite(this.core.conduit!, roomId, patp);
