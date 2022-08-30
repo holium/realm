@@ -5,7 +5,7 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
-import { rgba, darken } from 'polished';
+import { rgba, darken, lighten } from 'polished';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { id } from 'ethers/lib/utils';
@@ -22,9 +22,12 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   const { desktop, ship } = useServices();
   const { roomsApp } = useTrayApps();
 
-  const { mode, dockColor, windowColor } = desktop.theme;
+  const { mode, dockColor, windowColor, accentColor } = desktop.theme;
 
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
+  const isLiveColor = useMemo(() => lighten(0.25, accentColor), [accentColor]);
+
+  
 
   let peopleText = 'people';
   if (present!.length === 1) {
@@ -42,7 +45,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     <Row
       small={tray}
       className="realm-cursor-hover"
-      baseBg={!tray && isLive ? bgColor : undefined}
+      baseBg={!tray && isLive ? isLiveColor : undefined}
       customBg={isLive ? bgColor : windowColor}
       {...(onClick
         ? { onClick: (evt: any) => onClick(evt) }
@@ -56,6 +59,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
         flexDirection="row"
       >
         <Flex width="-webkit-fill-available" gap={2} flexDirection="column">
+          {/* {(!tray && isLive) && <Icons name='CheckCircle'></Icons> */}
           <Text fontWeight={500} fontSize={tray ? '14px' : '15px'}>
             {titleText}
           </Text>

@@ -1,5 +1,5 @@
-import { FC } from 'react';
-import { Flex, Text, Input, TextButton, Spinner } from 'renderer/components';
+import { FC, useRef } from 'react';
+import { Flex, Text, Input, TextButton, Spinner, IconButton, Icons, Grid } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 
 import { useMemo, useState } from 'react';
@@ -11,14 +11,12 @@ import { ChatModelType } from 'os/services/tray/rooms.model';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useServices } from 'renderer/logic/store';
 import { lighten } from 'polished';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { Bubble } from 'renderer/apps/Messages/components/Bubble';
+import { RoomChatMessage } from './RoomChatMessage';
 
-
-interface RoomChatProps {
-}
-
-
+interface RoomChatProps {}
 
 export const chatForm = (
   defaults: any = {
@@ -49,20 +47,41 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   const { roomsApp } = useTrayApps();
   const { desktop, ship } = useServices();
 
+  const theme = desktop.theme;
 
+  const chatInputRef = useRef<HTMLInputElement>(null);
+  const chatGridRef = useRef(null);
 
-  const chats = roomsApp.chats;
-
-
+  const chats = roomsApp.chats.slice(0).reverse();
 
   const handleChat = (evt: any) => {
-    setLoading(true);
-    const { text } = form.actions.submit();
+    
+    evt.preventDefault();
     evt.stopPropagation();
-    console.log('sending chat:', text);
-    RoomsActions.sendChat(ship!.patp, text
+
+    if (chatInputRef.current === null) return;
+
+    let innerText = chatInputRef.current.value;
+
+    if (innerText === '') return;
+
+    setLoading(true);
+
+    console.log('sending chat:', innerText);
+
+    RoomsActions.sendChat(ship!.patp, innerText
     ).then(() => {
       setLoading(false);
+
+      // chatInputRef.current!.value = '';
+
+      // TODO appears to work without a problem
+      // but causes a mobx warning
+      // [MobX] Since strict-mode is enabled, changing (observed) observable values without using an action is not allowed. Tried to modify: ObservableObject@270.value
+      // text.state.value = '';
+      text.actions.onChange('');
+
+
     });
   };
 
@@ -79,38 +98,44 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
 
   return (
   <Flex flex={2} gap={16} p={2} flexDirection="row" alignItems="center">
-
-    <Flex style={{ marginTop: 58 }} flex={1} flexDirection="column">
-      {chats.length === 0 && (
+    <Flex flex={1} flexDirection="column">
+        <InfiniteScroll
+          dataLength={chats.length}
+          height={330}
+          next={() => {
+            console.log('load more');
+          } }
+          style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
+          inverse={true} //
+          hasMore={false}
+          loader={<h4>Loading...</h4>}
+          scrollableTarget="scrollableDiv"
+          >
+          {chats.length === 0 && (
           <Flex
             flex={1}
-            flexDirection="column"
+            flexDirection="row"
             justifyContent="center"
             alignItems="center"
-            mb={46}
+            // mb={46}
           >
-            <Text fontWeight={500} mb={2} opacity={0.5}>
+            <Text fontWeight={500} opacity={0.5}>
               No chat history
             </Text>
           </Flex>
-        )}
-        {chats.map((chat: ChatModelType, index: number) => (
-              // <ChatMessage
-              //   key={`${chat.index}-${chat.timeReceived}-${index}`}
-              //   theme={desktop.theme}
-              //   our={ship!.patp}
-              //   ourColor={ship!.color || '#569BE2'}
-              //   message={chatToMessageType(chat)}
-              // />
-              <Flex key={index} 
-                // primary={chat.isRightAligned}
-                // customBg={chat.isRightAligned ? ship?.color! : lighten(0.1, desktop.theme!.windowColor)}
-              >
-                <Text>{`${chat.author} : ${chat.contents}`}</Text>
-
-              {/* </Bubble> */}
-              </Flex>
+            )}
+          {chats.map((chat: ChatModelType, index: number) => (
+              <RoomChatMessage
+                key={chat.index}
+                chat={chat} 
+                // pack if last guy is the same as the current guy 
+                doesPack={ ((index < chats.length - 1) && chats[index+1].author === chat.author) }
+                            //     and the last guy isnt too old (2 minutes)
+                            // && (chats[index+1].timeReceived >= chat.timeReceived - 1000) }
+                />
             ))}
+        </InfiniteScroll>
+
         <Flex
           flexDirection="row"
           alignItems="center"
@@ -123,39 +148,42 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
             tabIndex={2}
             className="realm-cursor-text-cursor"
             type="text"
-            placeholder="..."
+            placeholder="whats up dawg"
             autoFocus
+            ref={chatInputRef}
             wrapperStyle={{
               cursor: 'none',
               borderRadius: 6,
-              // backgroundColor: inputColor,
+              backgroundColor: theme.inputColor,
             }}
             value={text.state.value}
+            // value={''}
             error={!text.computed.isDirty || text.computed.error}
             onChange={(e: any) => {
               text.actions.onChange(e.target.value);
             }}
-            onFocus={() => text.actions.onFocus()}
-            onBlur={() => text.actions.onBlur()}
-          />
-          <TextButton
-            tabIndex={2}
-            showBackground
-            textColor="#0FC383"
-            highlightColor="#0FC383"
-            disabled={!form.computed.isValid || loading}
-            style={{ borderRadius: 6, height: 34 }}
             onKeyDown={(evt: any) => {
               if (evt.key === 'Enter') {
                 handleChat(evt);
               }
             }}
-            onClick={(evt: any) => {
-              handleChat(evt);
-            }}
-          >
-            {loading ? <Spinner size={0} /> : 'Send'}
-          </TextButton>
+            onFocus={() => text.actions.onFocus()}
+            onBlur={() => text.actions.onBlur()}
+            rightIcon={
+              <Flex justifyContent="center" alignItems="center">
+                <IconButton
+                  luminosity={theme.mode}
+                  size={24}
+                  canFocus
+                  onClick={(evt: any) => {
+                    handleChat(evt);
+                  }}
+                >
+                   {loading ? <Spinner size={0} /> : <Icons opacity={0.5} name="ArrowRightLine" /> }
+                </IconButton>
+              </Flex>
+            }
+          />
         </Flex>
   </Flex>
   </Flex>
