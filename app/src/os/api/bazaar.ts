@@ -1,5 +1,4 @@
 import { Conduit } from '@holium/conduit';
-import { Urbit } from './../urbit/api';
 import { SpacePath } from '../types';
 import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { allyShip, docketInstall } from '@urbit/api';
@@ -251,7 +250,6 @@ export const BazaarApi = {
 };
 
 const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
-  console.log('handleBazaarReactions => %o', data);
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':

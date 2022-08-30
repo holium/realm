@@ -31,18 +31,28 @@
       image=cord
       =href
   ==
-
+::
 +$  web-app
   $:  id=app-id
       title=@t
       href=cord
   ==
-
+::
+:: +$  app
+::   $%  [%native =native-app]
+::       [%web =web-app]
+::   ==
+::
++$  app-type  ?(%native %web %urbit %missing)
+::  $app: for now , bazaar only supports %urbit apps combined
+::   with associated docket info. front-end should check app-type to determine
+::   the other data available in a payload
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
+      [%urbit =docket:docket]
+      [%missing ~]
   ==
-::
 +$  tag     ?(%pinned %recommended %suite %installed)
 +$  tags    (set tag)
 ::
@@ -53,7 +63,7 @@
 ::  2nd rank => ordinal relative to recommended
 ::  3rd rank => ordinal relative to suite
 +$  ranks   [default=@ud pinned=@ud recommended=@ud suite=@ud]
-
+::
 ::  $app-entry: app metadata common to all apps and
 ::    used for resolution
 +$  app-entry
@@ -63,23 +73,28 @@
       =ship
       =ranks
       =tags
-      =docket:docket
   ==
 ::
+::  $app-view: combines bazaar specific data (e.g. app-entry) with
+::    native/web/urbit data
 +$  app-view
-  $:  meta=app-entry
+  $:  =app-entry
       =app
   ==
+::  $app-views: like an app-index, but contains detail app data in addition
+::    to bazaar specific data
++$  app-views      (map app-id app-view)
 ::  $app-index: index of app ids. used to perform fast lookups
 ::   into the apps 'directory' when scrying
 +$  app-index     (map app-id app-entry)
 +$  space-apps    (map space-path:spaces app-index)
++$  space-apps-full    (map space-path:spaces app-views)
 :: +$  pinned        (map space-path:spaces (set @tas))
 :: +$  recommended   (map space-path:spaces (set @tas))
 :: +$  suite         (map space-path:spaces (set @tas))
 ::  $apps: @tas is id in the case of web apps, and
 ::    desk name in the case of native apps
-+$  apps  (map app-id app)
+:: +$  apps  (map app-id app)
 ::
 ::  $activity: recent activity. e.g. new recommended/pinned/suite app
 ::    changes (added/removed/modified), new members joined. new apps
@@ -95,7 +110,7 @@
   ==
 ::
 +$  reaction
-  $%  [%initial =space-apps]
+  $%  [%initial =space-apps-full]
       [%space-apps =space-path:spaces =app-index]
       [%add-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
       [%remove-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
@@ -106,6 +121,6 @@
 ::  Scry views
 ::
 +$  view
-  $%  [%apps =app-index]
+  $%  [%apps =app-views]
   ==
 --

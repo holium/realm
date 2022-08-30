@@ -83,7 +83,7 @@
         %initial
       :-  %initial
       %-  pairs
-      :~  [%space-apps (space-apps:encode space-apps.rct)]
+      :~  [%space-apps (space-apps-full:encode space-apps-full.rct)]
       ==
     ::
         %space-apps
@@ -137,13 +137,23 @@
     ?-  -.vi
       ::
         %apps
-      (apidx:encode app-index.vi)
+      (appvws:encode app-views.vi)
     ==
   --
 ::
 ++  encode
   =,  enjs:format
   |%
+  ++  space-apps-full
+    |=  =space-apps-full:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by space-apps-full)
+    |=  [pth=space-path:spaces-store =app-views:store]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (appvws app-views)]
+  ::
   ++  space-apps
     |=  =space-apps:store
     ^-  json
@@ -153,6 +163,58 @@
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [spc-path (apidx app-index)]
+  ::
+  ++  appvws
+    |=  =app-views:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by app-views)
+    |=  [=app-id:store =app-view:store]
+    ^-  [cord json]
+    [app-id (appvw app-view)]
+  ::
+  ++  appvw
+    |=  =app-view:store
+    ^-  json
+    =/  meta=(list [cord json])
+    :~  [%id s+id.app-entry.app-view]
+        ['ship' s+(scot %p ship.app-entry.app-view)]
+        ['ranks' (rnks ranks.app-entry.app-view)]
+        ['tags' a+(turn ~(tap in tags.app-entry.app-view) |=(tg=tag:store s+(scot %tas tg)))]
+    ==
+    =/  data=(list [cord json])
+    ?-  -.app.app-view
+      ::
+      %native
+        :~  desk+s+desk.native-app.app.app-view
+            title+s+title.native-app.app.app-view
+            info+s+info.native-app.app.app-view
+            color+s+(scot %ux color.native-app.app.app-view)
+            image+s+image.native-app.app.app-view
+            href+(href href.native-app.app.app-view)
+        ==
+      ::
+      %web
+        :~  id+s+id.web-app.app.app-view
+            title+s+title.web-app.app.app-view
+            href+s+href.web-app.app.app-view
+        ==
+      ::
+      %urbit
+        :~  title+s+title.docket.app.app-view
+            info+s+info.docket.app.app-view
+            color+s+(scot %ux color.docket.app.app-view)
+            href+(href href.docket.app.app-view)
+            image+?~(image.docket.app.app-view ~ s+u.image.docket.app.app-view)
+            version+(version version.docket.app.app-view)
+            license+s+license.docket.app.app-view
+            website+s+website.docket.app.app-view
+        ==
+      ::
+      %missing  ~
+    ==
+    %-  pairs
+    ?~  data  meta  (weld meta data)
   ::
   ++  apidx
     |=  =app-index:store
@@ -166,25 +228,12 @@
   ++  apntry
     |=  =app-entry:store
     ^-  json
-    =/  meta=(list [cord json])
+    %-  pairs
     :~  [%id s+id.app-entry]
         ['ship' s+(scot %p ship.app-entry)]
         ['ranks' (rnks ranks.app-entry)]
         ['tags' a+(turn ~(tap in tags.app-entry) |=(tg=tag:store s+(scot %tas tg)))]
-        :: ['docket' (dkt docket.app-entry)]
     ==
-    =/  data=(list [cord json])
-    :~  title+s+title.docket.app-entry
-    info+s+info.docket.app-entry
-    color+s+(scot %ux color.docket.app-entry)
-    href+(href href.docket.app-entry)
-    image+?~(image.docket.app-entry ~ s+u.image.docket.app-entry)
-    version+(version version.docket.app-entry)
-    license+s+license.docket.app-entry
-    website+s+website.docket.app-entry
-    ==
-    %-  pairs
-    (weld meta data)
   ::
   ++  href
     |=  h=href:docket
