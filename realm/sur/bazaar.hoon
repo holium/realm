@@ -83,12 +83,13 @@
   ==
 ::  $app-views: like an app-index, but contains detail app data in addition
 ::    to bazaar specific data
-+$  app-views      (map app-id app-view)
++$  app-views          (map app-id app-view)
 ::  $app-index: index of app ids. used to perform fast lookups
 ::   into the apps 'directory' when scrying
-+$  app-index     (map app-id app-entry)
-+$  space-apps    (map space-path:spaces app-index)
++$  app-index          (map app-id app-entry)
++$  space-apps         (map space-path:spaces app-index)
 +$  space-apps-full    (map space-path:spaces app-views)
++$  app-catalog        (map app-id app)
 :: +$  pinned        (map space-path:spaces (set @tas))
 :: +$  recommended   (map space-path:spaces (set @tas))
 :: +$  suite         (map space-path:spaces (set @tas))
@@ -111,7 +112,7 @@
 ::
 +$  reaction
   $%  [%initial =space-apps-full]
-      [%space-apps =space-path:spaces =app-index]
+      [%space-apps =space-path:spaces =app-views]
       [%add-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
       [%remove-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
       [%suite-add path=space-path:spaces =app-id rank=@ud]

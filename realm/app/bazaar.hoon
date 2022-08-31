@@ -22,6 +22,7 @@
   +$  state-0
     $:  %0
         :: =membership:membership-store
+        =app-catalog:store
         =space-apps:store
         :: charges=(map desk charge:docket)
     ==
@@ -41,11 +42,12 @@
   ::  scry docket for charges
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
   ?>  ?=([%initial *] charge-update)
-  :: %-  (slog leaf+"{<dap.bowl>}: docket sync" ~)
-  =/  apps=app-index:store  (convert:charges:core initial.charge-update)
-  =/  our-space  [our.bowl 'our']
-  :: =.  charges.state      initial.charge-update
-  =.  space-apps.state   (~(put by space-apps.state) our-space apps)
+  =/  apps=app-index:store  (index:apps:core initial.charge-update)
+  =/  our-space             [our.bowl 'our']
+  :: build slimmed down space specific app (metadata) from docket charges (installed apps)
+  =.  space-apps.state      (~(put by space-apps.state) our-space apps)
+  :: build robust app catalog from docket charges (installed apps)
+  =.  app-catalog.state     (catalog:apps:core initial.charge-update)
   :: ~&  >>>  "{<space-apps.state>}"
   :_  this
   :~  ::  listen for charge updates (docket/desk)
@@ -101,7 +103,7 @@
       ?>  (check-member:security:core [host space-pth] src.bowl)
       =/  pth         [our.bowl space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
-      =/  apps        (~(got by space-apps.state) pth)
+      =/  apps        (space-initial:apps:core pth)
       (bazaar:send-reaction:core [%space-apps pth apps] paths)
     ::
     [%response ~]     ~
@@ -356,15 +358,28 @@
   |%
   ++  initial
     ^-  space-apps-full:store
-    %-  ~(rep by space-apps:state)
     :: scry for now. if performance issues, move back to on-init maybe
     =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
     ?>  ?=([%initial *] charge-update)
     =/  charges=(map desk charge:docket)  initial.charge-update
+    %-  ~(rep by space-apps:state)
     |:  [[=space-path:spaces-store =app-index:store] acc=`space-apps-full:store`~]
     =/  apps  (view charges space-path ~)
     ?~  apps  acc
     (~(put by acc) space-path u.apps)
+  ::
+  ++  space-initial
+    |=  =space-path:spaces-store
+    ^-  app-views:store
+    =/  apps  (~(got by space-apps.state) space-path)
+    %-  ~(rep by apps)
+    |:  [[=app-id:store =app-entry:store] acc=`app-views:store`~]
+    =/  app  (~(get by app-catalog.state) app-id)
+    ?~  app  acc
+    =|  app-view=app-view:store
+    =.  app-entry.app-view  app-entry
+    =.  app.app-view        u.app
+    (~(put by acc) app-id app-view)
   ::
   ++  view
     |=  [charges=(map desk charge:docket) path=space-path:spaces-store tag=(unit tag:store)]
@@ -391,6 +406,26 @@
       =.  app.app-view             [%urbit docket.u.charge]
       (~(put by acc) app-id app-view)
     ?~(result ~ (some result))
+  ::
+  ++  catalog
+    |=  [charges=(map desk charge:docket)]
+    ^-  app-catalog:store
+    %-  ~(rep by charges)
+    |:  [[=desk =charge:docket] acc=`app-catalog:store`~]
+    (~(put by acc) desk [%urbit docket.charge])
+  ::
+  ++  index
+    |=  [charges=(map desk charge:docket)]
+    ^-  app-index:store
+    %-  ~(rep by charges)
+    |=  [[=desk =charge:docket] acc=app-index:store]
+      =|  app=app-entry:store
+      =.  id.app    desk
+      =.  ship.app  our.bowl
+      =.  tags.app  (~(put in tags.app) %installed)
+      =.  ranks.app  [0 0 0 0]
+      ~&  >>  "{<app>}"
+      (~(put by acc) desk app)
   --
 ::  bazaar reactions
 ++  bazaar-reaction
@@ -414,9 +449,17 @@
     `state
   ::
   ++  on-space-apps
-    |=  [=space-path:spaces-store =app-index:store]
+    |=  [=space-path:spaces-store =app-views:store]
     ^-  (quip card _state)
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-space-apps] => {<[space-path app-views]>}"
+    =/  result=[=app-catalog:store =app-index:store]
+    %-  ~(rep by app-views)
+    |=  [[=app-id:store =app-view:store] acc=[=app-catalog:store =app-index:store]]
+    =.  app-catalog.acc     (~(put by app-catalog.acc) app-id app.app-view)
+    =.  app-index.acc       (~(put by app-index.acc) app-id app-entry.app-view)
+    acc
+    =.  space-apps.state  (~(put by space-apps.state) space-path app-index.result)
+    `state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
   ::
   ++  on-add-tag
     |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
@@ -605,24 +648,6 @@
     :~  [%give %fact paths bazaar-reaction+!>(payload)]
     ==
   --
-::
-++  charges
-  |%
-  ::
-  ++  convert
-    |=  [charges=(map desk charge:docket)]
-    ^-  app-index:store
-    %-  ~(rep by charges)
-    |=  [[=desk =charge:docket] acc=app-index:store]
-      =|  app=app-entry:store
-      =.  id.app    desk
-      =.  ship.app  our.bowl
-      =.  tags.app  (~(put in tags.app) %installed)
-      =.  ranks.app  [0 0 0 0]
-      ~&  >>  "{<app>}"
-      (~(put by acc) desk app)
-  --
-
 ::
 ::  $security. member/permission checks
 ++  security

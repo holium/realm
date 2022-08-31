@@ -90,7 +90,7 @@
       :-  %space-apps
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
-          [%app-index (apidx:encode app-index.rct)]
+          [%app-views (appvws:encode app-views.rct)]
       ==
     ::
         %add-tag

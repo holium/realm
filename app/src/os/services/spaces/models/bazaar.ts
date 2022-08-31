@@ -179,6 +179,7 @@ export const BazaarStore = types
     initial(apps: any) {
       // applySnapshot(self.spaces, apps['space-apps']);
       const catalog = apps['space-apps'];
+      console.log('initial => %o', catalog);
       for (const spacePath in catalog) {
         const spaceApps = catalog[spacePath];
         const bazaar = BazaarModel.create({});
