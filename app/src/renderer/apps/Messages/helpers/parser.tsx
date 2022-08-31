@@ -3,6 +3,7 @@ import { Text, GroupLink } from 'renderer/components';
 import { AppLink } from 'renderer/components/Embeds/AppLink';
 import { TextParsed } from '../components/TextContent';
 import { cleanNounColor } from 'os/lib/color';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 export const getTextFromContent = (type: string, content: any) => {
   if (type === 'reference') {
@@ -21,35 +22,35 @@ export const getReferenceView = async (
   const referenceType: any = Object.keys(reference)[0];
   switch (referenceType) {
     case 'group':
-      window.electron.os.ship
-        .getMetadata(`${reference.group}/groups${reference.group}`)
-        .then((response: any) => {
-          if (response) {
-            setter(
-              <GroupLink
-                {...response.metadata}
-                textColor={textColor}
-                bgColor={embedColor}
-                description={null}
-                color={
-                  response.metadata.color
-                    ? cleanNounColor(response.metadata.color)
-                    : null
-                }
-              />
-            );
-          } else {
-            setter(
-              <GroupLink
-                textColor={textColor}
-                bgColor={embedColor}
-                title={reference.group.replace('/ship/', '')}
-                description="Could not load metadata"
-                color="#a1a1a1"
-              />
-            );
-          }
-        });
+      ShipActions.getMetadata(
+        `${reference.group}/groups${reference.group}`
+      ).then((response: any) => {
+        if (response) {
+          setter(
+            <GroupLink
+              {...response.metadata}
+              textColor={textColor}
+              bgColor={embedColor}
+              description={null}
+              color={
+                response.metadata.color
+                  ? cleanNounColor(response.metadata.color)
+                  : null
+              }
+            />
+          );
+        } else {
+          setter(
+            <GroupLink
+              textColor={textColor}
+              bgColor={embedColor}
+              title={reference.group.replace('/ship/', '')}
+              description="Could not load metadata"
+              color="#a1a1a1"
+            />
+          );
+        }
+      });
       setter(
         <GroupLink
           bgColor={embedColor}
@@ -63,9 +64,8 @@ export const getReferenceView = async (
 
       break;
     case 'app':
-      window.electron.os.ship
-        .getAppPreview(reference.app.ship, reference.app.desk)
-        .then((response: any) => {
+      ShipActions.getAppPreview(reference.app.ship, reference.app.desk).then(
+        (response: any) => {
           setter(
             <AppLink
               {...response}
@@ -74,7 +74,8 @@ export const getReferenceView = async (
               color={response.color ? cleanNounColor(response.color) : null}
             />
           );
-        });
+        }
+      );
       setter(
         <AppLink
           bgColor={embedColor}

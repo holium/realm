@@ -190,7 +190,7 @@ export class ShipService extends BaseService {
       loader: { state: 'initial' },
     });
 
-    // this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
+    this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
     this.models.courier = loadCourierFromDisk(
       ship,
       secretKey,

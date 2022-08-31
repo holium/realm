@@ -21,14 +21,15 @@ import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
 import MediaHelper from './helpers/media';
+import BrowserHelper from './helpers/browser';
 
 // Ad block
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
 
-ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-  blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
-});
+// ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+//   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
+// });
 
 export default class AppUpdater {
   constructor() {
@@ -123,6 +124,7 @@ const createWindow = async () => {
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners(mainWindow);
+  BrowserHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 

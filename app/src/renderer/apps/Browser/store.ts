@@ -1,6 +1,9 @@
 import { LoaderModel } from 'os/services/common.model';
 import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
+import { RealmActions } from 'renderer/logic/actions/main';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { nativeApps } from '..';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,
@@ -60,3 +63,9 @@ export function useBrowser() {
   }
   return store;
 }
+
+RealmActions.onBrowserOpen((_event: any, url: string) => {
+  DesktopActions.openAppWindow('', nativeApps['os-browser']).then(() =>
+    browserState.setCurrentTab(url)
+  );
+});
