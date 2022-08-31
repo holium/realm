@@ -3,11 +3,6 @@
 ::
 ::  A store for metadata on app dockets per Realm space.
 ::
-::  notes: we currently do not store docket detail in bazaar (by design).
-::   instead, docket info is scried and relayed to UI on initial bazaar subscription.
-::   to simplify the UI and minimize subscriptions, those app events UI is interested
-::   in (new apps, treaties, allies) are handled here in this agent and relayed to UI
-::   over /updates path
 ::
 /-  store=bazaar, docket, spaces-store=spaces
 /-  membership-store=membership, hark=hark-store, passports-store=passports
@@ -21,10 +16,8 @@
       ==
   +$  state-0
     $:  %0
-        :: =membership:membership-store
         =app-catalog:store
-        =space-apps:store
-        :: charges=(map desk charge:docket)
+        space-apps=space-apps-lite:store
     ==
   --
 =|  state-0
@@ -42,7 +35,7 @@
   ::  scry docket for charges
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
   ?>  ?=([%initial *] charge-update)
-  =/  apps=app-index:store  (index:apps:core initial.charge-update)
+  =/  apps=app-index-lite:store  (index:apps:core initial.charge-update)
   =/  our-space             [our.bowl 'our']
   :: build slimmed down space specific app (metadata) from docket charges (installed apps)
   =.  space-apps.state      (~(put by space-apps.state) our-space apps)
@@ -107,9 +100,10 @@
       :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
       ::  recommends crash on permission check or other failure
       ?>  (check-member:security:core [host space-pth] src.bowl)
-      =/  pth         [our.bowl space-pth]
+      =/  pth         [host space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
       =/  apps        (space-initial:apps:core pth)
+      ~&  >>  "{<dap.bowl>}: sending apps to subscribers => space-apps.state {<space-apps.state>}, {<[pth apps]>}"
       (bazaar:send-reaction:core [%space-apps pth apps] paths)
     ::
     [%response ~]     ~
@@ -308,7 +302,7 @@
     ?>  !?=(%installed tag)
     =/  apps  (~(got by space-apps.state) path)
     =/  app  (~(got by apps) app-id)
-    =.  tags.app  (~(put in tags.app) tag)
+    =.  tags.hdr.app  (~(put in tags.hdr.app) tag)
     ::  only update rank if requested (not null value)
     :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
     =/  apps  (~(put by apps) app-id app)
@@ -324,7 +318,7 @@
     ?>  !?=(%installed tag)
     =/  apps  (~(got by space-apps.state) path)
     =/  app  (~(got by apps) app-id)
-    =.  tags.app  (~(del in tags.app) tag)
+    =.  tags.hdr.app  (~(del in tags.hdr.app) tag)
     =/  apps  (~(put by apps) app-id app)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
@@ -337,16 +331,18 @@
     ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
-    =/  result=[apps=space-apps:store rank=@ud]  (add:suite path app-id rank)
-    =.  space-apps.state  apps.result
-    (bazaar:send-reaction [%suite-add path app-id rank.result] paths)
+    =/  app  (~(got by app-catalog.state) app-id)
+    `state
+    :: =/  result=[rank=@ud]  (add:suite:core path app (some rank))
+    :: ~&  >>  "space-apps.state => {<space-apps.state>}"
+    :: (bazaar:send-reaction [%suite-add path app rank.result] paths)
   ::
   ++  suite-remove
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     =/  apps                (~(got by space-apps.state) path)
     =/  app                 (~(got by apps) app-id)
-    =.  tags.app            (~(del in tags.app) %suite)
+    =.  tags.hdr.app        (~(del in tags.hdr.app) %suite)
     =/  apps                (~(put by apps) app-id app)
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
@@ -362,48 +358,50 @@
     ?>  ?=([%initial *] charge-update)
     =/  charges=(map desk charge:docket)  initial.charge-update
     %-  ~(rep by space-apps:state)
-    |:  [[=space-path:spaces-store =app-index:store] acc=`space-apps-full:store`~]
+    |:  [[=space-path:spaces-store =app-index-lite:store] acc=`space-apps-full:store`~]
     =/  apps  (view charges space-path ~)
     ?~  apps  acc
     (~(put by acc) space-path u.apps)
   ::
   ++  space-initial
     |=  =space-path:spaces-store
-    ^-  app-views:store
+    ^-  app-index-full:store
     =/  apps  (~(got by space-apps.state) space-path)
+    ~&  >  "space-initial apps => {<[space-path space-apps.state apps]>}"
     %-  ~(rep by apps)
-    |:  [[=app-id:store =app-entry:store] acc=`app-views:store`~]
-    =/  app  (~(get by app-catalog.state) app-id)
-    ?~  app  acc
-    =|  app-view=app-view:store
-    =.  app-entry.app-view  app-entry
-    =.  app.app-view        u.app
-    (~(put by acc) app-id app-view)
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
+    =/  app  (~(got by app-catalog.state) app-id)
+    =|  app-full=app-full:store
+    =.  id.app-full         app-id
+    =.  hdr.app-full        hdr.app-lite
+    =.  det.app-full        det.app
+    (~(put by acc) app-id app-full)
   ::
   ++  view
     |=  [charges=(map desk charge:docket) path=space-path:spaces-store tag=(unit tag:store)]
-    ^-  (unit app-views:store)
+    ^-  (unit app-index-full:store)
     ?.  (~(has by space-apps.state) path)  ~
     =/  apps  (~(got by space-apps.state) path)
-    =/  result=app-views:store
+    =/  result=app-index-full:store
     %-  ~(rep by apps)
-    |:  [[=app-id:store =app-entry:store] acc=`app-views:store`~]
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
       :: skip if filter is neither %all nor the app tagged with tag
       ?.  ?|  =(tag ~)
               ?&  !=(tag ~)
-                  (~(has in tags.app-entry) (need tag))
+                  (~(has in tags.hdr.app-lite) (need tag))
               ==
           ==  acc
       :: =/  charge  (~(get by charges.state) app-id)
       =/  charge  (~(get by charges) app-id)
-      =|  app-view=app-view:store
-      =.  app-entry.app-view       app-entry
+      =|  app-full=app-full:store
+      =.  id.app-full        app-id
+      =.  hdr.app-full       hdr.app-lite
       ?~  charge
-        =.  app.app-view           [%missing ~]
-        (~(put by acc) app-id app-view)
-      =.  tags.app-entry.app-view  (~(put in tags.app-entry.app-view) %installed)
-      =.  app.app-view             [%urbit docket.u.charge]
-      (~(put by acc) app-id app-view)
+        =.  det.app-full     [%missing ~]
+        (~(put by acc) app-id app-full)
+      =.  tags.hdr.app-full  (~(put in tags.hdr.app-full) %installed)
+      =.  det.app-full       [%urbit docket.u.charge]
+      (~(put by acc) app-id app-full)
     ?~(result ~ (some result))
   ::
   ++  catalog
@@ -411,19 +409,18 @@
     ^-  app-catalog:store
     %-  ~(rep by charges)
     |:  [[=desk =charge:docket] acc=`app-catalog:store`~]
-    (~(put by acc) desk [%urbit docket.charge])
+    (~(put by acc) desk [desk [%urbit docket.charge]])
   ::
   ++  index
     |=  [charges=(map desk charge:docket)]
-    ^-  app-index:store
+    ^-  app-index-lite:store
     %-  ~(rep by charges)
-    |=  [[=desk =charge:docket] acc=app-index:store]
-      =|  app=app-entry:store
-      =.  id.app    desk
-      =.  ship.app  our.bowl
-      =.  tags.app  (~(put in tags.app) %installed)
-      =.  ranks.app  [0 0 0 0]
-      ~&  >>  "{<app>}"
+    |=  [[=desk =charge:docket] acc=app-index-lite:store]
+      =|  app=app-lite:store
+      =.  id.app          desk
+      :: =.  ship.app  our.bowl
+      =.  tags.hdr.app    (~(put in tags.hdr.app) %installed)
+      =.  ranks.hdr.app   [0 0 0 0]
       (~(put by acc) desk app)
   --
 ::  bazaar reactions
@@ -450,23 +447,33 @@
   ::  this reaction comes in as a result of accepting an invitation
   ::   to a space and then subscribing to the space-path
   ++  on-space-apps
-    |=  [=space-path:spaces-store =app-views:store]
+    |=  [=space-path:spaces-store =app-index-full:store]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-space-apps] => {<[space-path app-views our.bowl src.bowl]>}"
+    ::  get all of 'our' installed apps on this ship, and compare it to the list of
+    ::   space apps to determine the installation status of the app
+    =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+    ?>  ?=([%initial *] charge-update)
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    =/  result=[=app-catalog:store =app-index:store]
-    %-  ~(rep by app-views)
-    |=  [[=app-id:store =app-view:store] acc=[=app-catalog:store =app-index:store]]
-    =.  app-catalog.acc     (~(put by app-catalog.acc) app-id app.app-view)
-    =.  app-index.acc       (~(put by app-index.acc) app-id app-entry.app-view)
+    =/  result=[=app-catalog:store =app-index-lite:store]
+    %-  ~(rep by app-index-full)
+    |=  [[=app-id:store =app-full:store] acc=[=app-catalog:store =app-index-lite:store]]
+    ::  is this app installed?
+    =/  updated-app-full
+      ?:  (~(has by initial.charge-update) app-id)
+        =.  tags.hdr.app-full  (~(put in tags.hdr.app-full) %installed)
+        app-full
+      =.  tags.hdr.app-full  (~(del in tags.hdr.app-full) %installed)
+      app-full
+    =.  app-catalog.acc      (~(put by app-catalog.acc) app-id [id=app-id det=det.updated-app-full])
+    =.  app-index-lite.acc   (~(put by app-index-lite.acc) app-id [id=app-id hdr=hdr.updated-app-full])
     acc
-    =.  space-apps.state    (~(put by space-apps.state) space-path app-index.result)
+    =.  space-apps.state    (~(put by space-apps.state) space-path app-index-lite.result)
     =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     :: :_  state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
     :: notify the UI of that we've accepted an invite to a new space and there
     ::   are apps available in this new space
-    (bazaar:send-reaction:core [%space-apps space-path app-views] [/updates ~])
+    (bazaar:send-reaction:core [%space-apps space-path app-index-full] [/updates ~])
   ::
   ++  on-add-tag
     |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
@@ -481,14 +488,14 @@
     `state
   ::
   ++  on-suite-add
-    |=  [path=space-path:spaces-store =app-id:store rank=@ud]
+    |=  [path=space-path:spaces-store =app-full:store rank=@ud]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-id rank]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full rank]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    =/  result=[=space-apps:store rank=@ud]  (add:suite path app-id (some rank))
-    =.  space-apps.state  space-apps.result
-    (bazaar:send-reaction:core [%suite-add path app-id rank.result] [/updates ~])
+    `state
+    :: =/  result=[rank=@ud]  (add:suite:core path app (some rank))
+    :: (bazaar:send-reaction:core [%suite-add path app rank.result] [/updates ~])
   ::
   ++  on-suite-rem
     |=  [path=space-path:spaces-store =app-id:store]
@@ -497,24 +504,33 @@
     `state
   --
 ::
-++  suite
-  |%
-  ++  add
-    |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
-    ^-  [=space-apps:store @ud]
-    ~&  >>  "{<dap.bowl>}: add:suite => {<[path app-id rank]>}"
-    =/  apps                      (~(got by space-apps.state) path)
-    ?:  (~(has by apps) app-id)   !!
-    =|  app=app-entry:store
-    =.  id.app                    app-id
-    =.  ship.app                  our.bowl
-    =.  tags.app                  (~(put in tags.app) %suite)
-    =/  rank                      ?~(rank (lent ~(val by apps)) u.rank)
-    =.  suite.ranks.app           rank
-    :: =.  dist.app                  [%urbit docket.charge]
-    =/  apps                      (~(put by apps) app-id app)
-    [(~(put by space-apps.state) path apps) rank]
-  --
+:: ++  suite
+::   |%
+::   ++  add
+::     |=  [path=space-path:spaces-store =app:store rank=(unit @ud)]
+::     ^-  @ud
+::     ::  check to see if we have this new app in this ship's catalog
+::     ::   if not add it
+::     =/  catalog-entry  (~(get by app-catalog.state) id.app)
+::     =/  updates=[=app-catalog:store installed=?]
+::     ?~  catalog-entry
+::       [(~(put by app-catalog.state) id.app app) %.n]
+::     [app-catalog.state %.y]
+::     =/  space-apps                      (~(got by space-apps.state) path)
+::     ?:  (~(has by space-apps) id.app)   !!
+::     =|  app-lite=app-lite:store
+::     =.  id.app-lite                    id.app-lite
+::     :: =.  ship.app-entry                  ship.path
+::     =.  tags.app-lite                  (~(put in tags.app-lite) %suite)
+::     =.  tags.app-lite  ?:(=(installed.updates %.y) (~(put in tags.app) %installed) tags.app)
+::     =/  rank                            ?~(rank (lent ~(val by apps)) u.rank)
+::     =.  suite.ranks.app-entry           rank
+::     =/  space-apps                      (~(put by space-apps) id.app-entry app-entry)
+::     ::  update state
+::     =.  space-apps.state                (~(put by space-apps.state) path apps)
+::     =.  app-catalog.state               app.catalog.updates
+::     rank
+::   --
 ::
 ++  treaty-update
   |=  [upd=update:treaty:treaty]
@@ -605,7 +621,7 @@
     ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
-      %glob  (bazaar:send-reaction:core [%app-installed desk docket.charge] [/updates ~])
+      %glob  (bazaar:send-reaction:core [%app-installed desk [desk [%urbit docket.charge]]] [/updates ~])
     ==
   ::
   ++  rem

@@ -24,7 +24,7 @@
 +$  app-id  @tas
 ::
 +$  native-app
-  $:  desk=app-id
+  $:  desk=@tas
       title=@t
       info=@t
       color=@ux
@@ -33,27 +33,14 @@
   ==
 ::
 +$  web-app
-  $:  id=app-id
-      title=@t
+  $:  title=@t
       href=cord
   ==
 ::
-:: +$  app
-::   $%  [%native =native-app]
-::       [%web =web-app]
-::   ==
-::
 +$  app-type  ?(%native %web %urbit %missing)
-::  $app: for now , bazaar only supports %urbit apps combined
-::   with associated docket info. front-end should check app-type to determine
-::   the other data available in a payload
-+$  app
-  $%  [%native =native-app]
-      [%web =web-app]
-      [%urbit =docket:docket]
-      [%missing ~]
-  ==
+::
 +$  tag     ?(%pinned %recommended %suite %installed)
+::
 +$  tags    (set tag)
 ::
 ::  $ranks - each app gets a rank (ordinal) relative to a
@@ -64,44 +51,34 @@
 ::  3rd rank => ordinal relative to suite
 +$  ranks   [default=@ud pinned=@ud recommended=@ud suite=@ud]
 ::
-::  $app-entry: app metadata common to all apps and
-::    used for resolution
-+$  app-entry
-      :: $rank: can be used for sorting apps; and simultaneously
-      ::   (in the case of recommended apps) represent the # of "likes"
-  $:  id=app-id
-      =ship
-      =ranks
+::  $app-header: space specific metadata
++$  app-header
+  $:  =ranks
       =tags
   ==
-::
-::  $app-view: combines bazaar specific data (e.g. app-entry) with
-::    native/web/urbit data
-+$  app-view
-  $:  =app-entry
-      =app
+::  $app-detail: space independent app detail
++$  app-detail
+  $%  [%native =native-app]
+      [%web =web-app]
+      [%urbit =docket:docket]
+      [%missing ~]
   ==
-::  $app-views: like an app-index, but contains detail app data in addition
-::    to bazaar specific data
-+$  app-views          (map app-id app-view)
-::  $app-index: index of app ids. used to perform fast lookups
-::   into the apps 'directory' when scrying
-+$  app-index          (map app-id app-entry)
-+$  space-apps         (map space-path:spaces app-index)
-+$  space-apps-full    (map space-path:spaces app-views)
-+$  app-catalog        (map app-id app)
-:: +$  pinned        (map space-path:spaces (set @tas))
-:: +$  recommended   (map space-path:spaces (set @tas))
-:: +$  suite         (map space-path:spaces (set @tas))
-::  $apps: @tas is id in the case of web apps, and
-::    desk name in the case of native apps
-:: +$  apps  (map app-id app)
 ::
-::  $activity: recent activity. e.g. new recommended/pinned/suite app
-::    changes (added/removed/modified), new members joined. new apps
-::    installed and made available to space (allow link to add
-::    newly installed app to board.bazaar type???)
-:: +$  activity
++$  app                     [id=app-id det=app-detail]
++$  app-lite                [id=app-id hdr=app-header]
++$  app-full                [id=app-id hdr=app-header det=app-detail]
+
++$  app-index-full          (map app-id app-full)
++$  app-index-lite          (map app-id app-lite)
++$  space-apps-lite         (map space-path:spaces app-index-lite)
++$  space-apps-full         (map space-path:spaces app-index-full)
+::
+::  $app-catalog: for efficiencies sake, this is the one "master" list of apps
+::    a ship is aware of; from the apps installed on the ship to apps 'imported'
+::    from remote spaces. this is to reduce memory req's for apps that are
+::    included across multiple spaces. [app-header] data is referenced to orient an
+::    app (tags/ranks) relative to a given space
++$  app-catalog             (map app-id app)
 ::
 +$  action
   $%  [%add-tag path=space-path:spaces =app-id =tag rank=(unit @ud)]
@@ -112,18 +89,18 @@
 ::
 +$  reaction
   $%  [%initial =space-apps-full]
-      [%space-apps =space-path:spaces =app-views]
-      [%add-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
-      [%remove-tag path=space-path:spaces =app-id =tag] :: rank=(unit @ud)]
-      [%suite-add path=space-path:spaces =app-id rank=@ud]
+      [%space-apps =space-path:spaces =app-index-full]
+      [%add-tag path=space-path:spaces =app-id =tag]
+      [%remove-tag path=space-path:spaces =app-id =tag]
+      [%suite-add path=space-path:spaces =app-full rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
-      [%app-installed =desk =docket:docket]
-      [%app-uninstalled =desk]
+      [%app-installed =app-id =app]
+      [%app-uninstalled =app-id]
   ==
 ::
 ::  Scry views
 ::
 +$  view
-  $%  [%apps =app-views]
+  $%  [%apps =app-index-full]
   ==
 --

@@ -90,7 +90,7 @@
       :-  %space-apps
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
-          [%app-views (appvws:encode app-views.rct)]
+          [%app-views (apidx:encode app-index.rct)]
       ==
     ::
         %add-tag
@@ -115,7 +115,7 @@
       :-  %suite-add
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%app-id s+app-id.rct]
+          [%app (pairs (app:encode app.rct))]
           [%rank n+(crip "{<rank.rct>}")]
       ==
     ::
@@ -177,6 +177,35 @@
     ^-  [cord json]
     [spc-path (apidx app-index)]
   ::
+  ++  app
+    |=  =app:store
+    ^-  (list [cord json])
+    =/  head=(list [cord json])
+    :~  [id+s+id.app]
+    ==
+    =/  detail=(list [cord json])
+    ?-  -.detail.app
+      ::
+      %native
+        :~  desk+s+desk.native-app.detail.app
+            title+s+title.native-app.detail.app
+            info+s+info.native-app.detail.app
+            color+s+(scot %ux color.native-app.detail.app)
+            image+s+image.native-app.detail.app
+            href+(href href.native-app.detail.app)
+        ==
+      ::
+      %web
+        :~  title+s+title.web-app.detail.app
+            href+s+href.web-app.detail.app
+        ==
+      ::
+      %urbit  (dkt docket.detail.app)
+      ::
+      %missing  ~
+    ==
+    ?~  detail  ~  (weld head detail)
+  ::
   ++  appvws
     |=  =app-views:store
     ^-  json
@@ -195,30 +224,9 @@
         ['ranks' (rnks ranks.app-entry.app-view)]
         ['tags' a+(turn ~(tap in tags.app-entry.app-view) |=(tg=tag:store s+(scot %tas tg)))]
     ==
-    =/  data=(list [cord json])
-    ?-  -.app.app-view
-      ::
-      %native
-        :~  desk+s+desk.native-app.app.app-view
-            title+s+title.native-app.app.app-view
-            info+s+info.native-app.app.app-view
-            color+s+(scot %ux color.native-app.app.app-view)
-            image+s+image.native-app.app.app-view
-            href+(href href.native-app.app.app-view)
-        ==
-      ::
-      %web
-        :~  id+s+id.web-app.app.app-view
-            title+s+title.web-app.app.app-view
-            href+s+href.web-app.app.app-view
-        ==
-      ::
-      %urbit  (dkt docket.app.app-view)
-      ::
-      %missing  ~
-    ==
+    =/  data=(list [cord json])  (app app.app-view)
     %-  pairs
-    ?~  data  meta  (weld meta data)
+    ?~  detail  meta  (weld meta data)
   ::
   ++  apidx
     |=  =app-index:store
