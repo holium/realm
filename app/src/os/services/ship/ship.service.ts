@@ -313,7 +313,8 @@ export class ShipService extends BaseService {
     });
 
     const storeParams = {
-      name: `realm.ship.${ship.patp}`,
+      name: 'ship',
+      cwd: `realm.${ship}`,
       secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
     };
@@ -328,7 +329,8 @@ export class ShipService extends BaseService {
 
   removeShip(patp: string) {
     const deletedShip = new Store<ShipModelType>({
-      name: `realm.ship.${patp}`,
+      name: 'ship',
+      cwd: `realm.${patp}`,
       accessPropertiesByDotNotation: true,
     });
     deletedShip.clear();
