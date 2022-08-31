@@ -75,7 +75,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
           /[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}$/,
           'Enter correct access key'
         )
-        .required('Please enter access key required'),
+        .required('Please enter access key'),
     });
 
     return (

@@ -160,7 +160,7 @@
     ++  request-all
       |=  act=action:store
       ?:  outstanding-request
-        :: ~&  >>>  'room request blocked. still awaiting response to a previous request.'
+        ~&  >>>  'room request blocked. still awaiting response to a previous request.'
         `state
       =.  outstanding-request  &
       (fwd-to-provider act)
@@ -199,6 +199,9 @@
           ?~  provider  +(new-provider)
             u.provider
           ::
+        ::
+        :: use this opportunity to reset outstanding request
+        =.  outstanding-request  |
         `state
       ::
       :: save old stuff
@@ -244,7 +247,9 @@
     :: ::
     ++  fwd-to-provider
       |=  [act=action:store]
-      ?~  provider  !!
+      ?~  provider
+        ~&  >>>  [%rooms-no-provider]
+        `state
       =*  dad  u.provider
       :: ~&  >>  ['fwd to provider' -.act]
       :_  state

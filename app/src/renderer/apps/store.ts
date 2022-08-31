@@ -83,7 +83,6 @@ export const trayStore = TrayAppStore.create({
   },
   roomsApp: {
     currentView: 'list',
-    // outstandingRequest: false,
   },
   // roomsApp: (persistedState && persistedState.roomsApp) || {
   //   currentView: 'list',
