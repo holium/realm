@@ -55,7 +55,6 @@
   ::   ==
   ::     [cards this]
   ++  on-poke   |=(cage !!)
-  :: ++  on-watch  |=(path !!)
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
@@ -173,6 +172,16 @@
         =/  ship-dec      (snag 0 p.dm-node)
         =/  index         (snag 1 p.dm-node)
         =/  new-dm        (received-dm:gs:lib ship-dec index q.dm-node our now)
+        :_  state
+        [%give %fact [/updates ~] courier-reaction+!>([%dm-received new-dm])]~
+      ::
+      ?:  (group-skim-gu:gs:lib resource.+.q.upd)
+        ::  is group dm
+        =/  dm            ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
+        =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
+        =/  entity        entity.resource.+.q.upd
+        =/  name          name.resource.+.q.upd
+        =/  new-dm        (received-grp-dm:gs:lib our now entity name q.dm-node)
         :_  state
         [%give %fact [/updates ~] courier-reaction+!>([%dm-received new-dm])]~
       :: else 

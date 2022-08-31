@@ -98,6 +98,19 @@
     =/  dms               (map-to-dms posts.glog)
     [path.glog to.glog %group %graph-store (flop dms) (silt mtd-set)]
   ::
+  ++  received-grp-dm
+    |=  [our=ship now=@da entity=ship name=cord =node:gra]
+    ^-  chat
+    =/  message             (node-to-dm node)
+    =/  path                (spat /(scot %p entity)/(cord name))
+    ::  find a better way to get a single contact
+    =/  rolo                .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
+    =/  contact             (form-contact-mtd rolo author.message)
+    [path (silt ~[author.message]) %group %graph-store [message ~] (silt ~[contact])]
+  :: 
+  ::
+  ::  Group DM helpers
+  ::
   ++  glog
     |=  [our=ship entity=ship name=term now=@da]
     ^-  [time=@da path=cord to=(set ship) posts=(map atom node:gra)]
@@ -120,6 +133,14 @@
       ?~  name-da   %.n   %.y
     %.n
   ::
+  ++  group-skim-gu  :: skim graph updates for a group dm
+    |=  [=resource]
+    =/  name      `cord`name.resource
+    =/  name-da   (slaw %da name)
+    ?~  name-da   
+      %.n   
+    %.y
+  ::
   ::  forms a single dm preview for the list view
   ::
   ++  form-dm-prevs
@@ -137,7 +158,7 @@
         =/  p     ^-(post p.post.node)
         [p]
     ::  Get the last post
-    =/  last              (rear posts)
+    =/  last              posts
     =/  contact           (form-contact-mtd rolo to-ship)
     =/  path              (spat /dm-inbox/(scot %p to-ship))
     [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last (silt ~[contact])]
@@ -180,7 +201,7 @@
     |=  [ship-dec=@ud idx=atom =node:gra our=ship now=@da]
     ^-  chat
     =/  to-ship             ^-(@p `@p`ship-dec)
-    =/  message             (node-to-dm idx node)
+    =/  message             (node-to-dm node)
     ::  for now we are going to include the contact data in a newly received dm
     ::  because it could possibly be a new dm and am not sure how to check for 
     ::  this yet
@@ -209,20 +230,14 @@
     =/  dms=(list graph-dm:sur)
     %+  turn  ~(tap by dm-posts)
       |=  [idx=atom node=node:gra]
-      (node-to-dm idx node)
+      (node-to-dm node)
     dms
   ::
   ++  node-to-dm
-    |=  [idx=atom node=node:gra]
+    |=  [node=node:gra]
     ^-  graph-dm:sur
     ?<  ?=(%| -.post.node)
     =/  p         ^-(post p.post.node)
-    :: =/  id      %+  roll  index.p
-    ::             |=  [cur=@ acc=@t]
-    ::             ^-  @t
-    ::             =/  num  `@u`cur
-    ::             (rap 2 acc '/' num ~)
-    :: ~&  >  id
     [index.p author.p time-sent.p contents.p]
   ::
   ++  index-to-str
