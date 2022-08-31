@@ -122,7 +122,7 @@ function renderDevs(space: string, devs: any) {
 
 function renderApps(space: string, apps: any) {
   if (apps.length === 0) {
-    return <Text color="#ababab">{`No recent apps`}</Text>;
+    return <Text color="#ababab">{`No apps found`}</Text>;
   }
   return apps?.map((app, index) => (
     <div key={index}>
@@ -197,11 +197,13 @@ function renderShipSearch(data: Array<any>, searchString: string) {
   );
 }
 
-const renderAppSearch = () => {
+const renderAppSearch = (apps: any) => {
+  console.log('apps => %o', apps);
   return (
     <>
       <Flex flexDirection="column" gap={10}>
         <Text fontWeight={'bold'}>{`Installed Apps`}</Text>
+        {renderApps('', apps)}
       </Flex>
     </>
   );
@@ -234,7 +236,7 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 
 const AppSearchApp = (props) => {
   const { spaces, bazaar } = useServices();
-  const [data, setData] = useState<any>(undefined);
+  const [data, setData] = useState<any>([]);
   const [searchMode, setSearchMode] = useState('none');
   const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
   const [searchString, setSearchString] = useState('');
@@ -245,6 +247,15 @@ const AppSearchApp = (props) => {
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
+  useEffect(() => {
+    if (searchMode === 'app-search') {
+      if (isOur) {
+        const apps = bazaar.findApps(searchString);
+        console.log(apps);
+        setData(apps);
+      }
+    }
+  }, [searchString]);
   useEffect(() => {
     if (searchMode === 'ship-search') {
       SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {
@@ -265,14 +276,6 @@ const AppSearchApp = (props) => {
           }));
           setData(data);
         });
-      });
-    } else if (searchMode === 'app-search') {
-      SpacesActions.getApps(spaces.selected?.path).then((items: any) => {
-        let data = Object.entries(items).map(([key, value], index) => ({
-          id: key,
-          name: key,
-        }));
-        setData(data);
       });
     }
   }, [searchMode, spaces.selected?.path]);
@@ -413,7 +416,7 @@ const AppSearchApp = (props) => {
         {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
         {searchMode === 'dev-app-search' &&
           renderDevAppSearch(searchModeArgs[0], data)}
-        {searchMode === 'app-search' && renderAppSearch()}
+        {searchMode === 'app-search' && renderAppSearch(data)}
         {searchMode === 'app-summary' && renderAppSummary(data)}
       </PopoverContent>
     </Popover>

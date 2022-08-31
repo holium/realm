@@ -187,10 +187,23 @@ export const BazaarStore = types
           const app = spaceApps[desk];
           const appColor = app.color;
           app.color = appColor && cleanNounColor(appColor);
+          if (spacePath.endsWith('/our')) {
+            self.apps.set(app.id, app);
+          }
           bazaar.addApp(app);
         }
         self.spaces.set(spacePath, bazaar);
       }
+    },
+    findApps(searchString: string) {
+      const matches = [];
+      const str = searchString.toLowerCase();
+      for (const app of self.apps) {
+        if (app[1].title.toLowerCase().startsWith(str)) {
+          matches.push(app[1]);
+        }
+      }
+      return matches;
     },
     addApp(app: any) {
       self.apps.set(app.id, app);

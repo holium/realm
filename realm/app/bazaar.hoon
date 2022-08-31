@@ -55,7 +55,7 @@
       [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
       [%pass /allies %agent [our.bowl %treaty] %watch /allies]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
-      [%pass /bazaar %agent [our.bowl %bazaar] %watch /updates]
+      [%pass /bazaar %agent [our.bowl %bazaar] %watch /our]
   ==
 ::
 ++  on-save
@@ -85,6 +85,12 @@
   ^-  (quip card _this)
   =^  cards  state
   ?+  path              (on-watch:def path)
+     :: agent updates
+    [%our ~]
+      ::  only host agent should get our updates
+      ?>  (is-host:core src.bowl)
+      ~&  >>  "{<dap.bowl>}: subscribing to /our"
+      `state
     ::
     [%updates ~]
       ::  only host should get all updates
@@ -307,7 +313,7 @@
     :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
     =/  apps  (~(put by apps) app-id app)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
-    =/  paths  [/updates /our /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     :: :_  state(space-apps (~(put by space-apps.state) path apps))
     (bazaar:send-reaction [%add-tag path app-id tag] paths)
   ::
@@ -321,7 +327,7 @@
     =.  tags.app  (~(del in tags.app) tag)
     =/  apps  (~(put by apps) app-id app)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
-    =/  paths  [/updates /our /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%remove-tag path app-id tag] paths)
     :: `state(space-apps (~(put by space-apps.state) path apps))
   ::
@@ -329,7 +335,7 @@
     |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
-    =/  paths  [/updates /our /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
     =/  result=[apps=space-apps:store rank=@ud]  (add:suite path app-id rank)
     =.  space-apps.state  apps.result
@@ -343,7 +349,7 @@
     =.  tags.app            (~(del in tags.app) %suite)
     =/  apps                (~(put by apps) app-id app)
     =.  space-apps.state    (~(put by space-apps.state) path apps)
-    =/  paths  [/updates /our /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%suite-remove path app-id] paths)
   --
 ::
@@ -446,9 +452,9 @@
   ++  on-space-apps
     |=  [=space-path:spaces-store =app-views:store]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-space-apps] => {<[space-path app-views our.bowl src.bowl]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-space-apps] => {<[space-path app-views our.bowl src.bowl]>}"
     =/  result=[=app-catalog:store =app-index:store]
     %-  ~(rep by app-views)
     |=  [[=app-id:store =app-view:store] acc=[=app-catalog:store =app-index:store]]
@@ -477,9 +483,9 @@
   ++  on-suite-add
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-id rank]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-id rank]>}"
     =/  result=[=space-apps:store rank=@ud]  (add:suite path app-id (some rank))
     =.  space-apps.state  space-apps.result
     (bazaar:send-reaction:core [%suite-add path app-id rank.result] [/updates ~])
