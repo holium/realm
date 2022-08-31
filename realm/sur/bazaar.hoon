@@ -68,9 +68,13 @@
 +$  app-lite                [id=app-id hdr=app-header]
 +$  app-full                [id=app-id hdr=app-header det=app-detail]
 
+::  various organizations of data (transient/ephemeral datasets)
+::   used to facilitate scrying and data transfers between other
+::   ships and local/remote agents
+::  note: of these 4 maps, only space-apps-lite is maintained in agent state
 +$  app-index-full          (map app-id app-full)
 +$  app-index-lite          (map app-id app-lite)
-+$  space-apps-lite         (map space-path:spaces app-index-lite)
++$  space-apps-lite         (map space-path:spaces app-index-lite)  :: INCLUDED IN AGENT STATE
 +$  space-apps-full         (map space-path:spaces app-index-full)
 ::
 ::  $app-catalog: for efficiencies sake, this is the one "master" list of apps
@@ -78,7 +82,7 @@
 ::    from remote spaces. this is to reduce memory req's for apps that are
 ::    included across multiple spaces. [app-header] data is referenced to orient an
 ::    app (tags/ranks) relative to a given space
-+$  app-catalog             (map app-id app)
++$  app-catalog             (map app-id app)  :: INCLUDED IN AGENT STATE
 ::
 +$  action
   $%  [%add-tag path=space-path:spaces =app-id =tag rank=(unit @ud)]
