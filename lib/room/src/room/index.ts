@@ -145,6 +145,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   async kickParticipant(peer: Patp) {
+    if (peer === this.our.patp) return;
     await this.participants.get(peer)?.cleanup();
     this.participants.delete(peer);
     console.log('after kicked', this.participants);

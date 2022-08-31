@@ -25,8 +25,8 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
 
   useEffect( () => {
     let dat = new Date(chat.timeReceived);
-    let hor = `${dat.getHours()}`;
-    let min = `${dat.getMinutes()}`;
+    let hor = `${dat.getHours()}`.padStart(2, '0');
+    let min = `${dat.getMinutes()}`.padStart(2, '0');
     let sec = `${dat.getSeconds()}`.padStart(2, '0');
 
     setTimeString(`${hor}:${min}:${sec}`);
@@ -37,7 +37,7 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
     key={chat.index}
     flexDirection="column"
     justifyContent="flex-end"
-    mt={doesPack ? 1 : 3}
+    mt={doesPack ? 1 : 4}
     mr={3}
     >
       {( !(chat.isRightAligned) && !(doesPack) ) &&

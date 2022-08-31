@@ -83,20 +83,24 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   }
 
   useEffect(() => {
+    if (isOur) {
+      setPeerState(PeerConnectionState.Connected);
+      // handleLocalEvents(RoomsActions., LiveRoom.our);
+    }
+
     LiveRoom.on('started', () => {
-      setIsStarted(isStarted);
+      console.log('setting isstarted!')
+      setIsStarted(true);
     });
   }, []);
 
   useEffect(() => {
-    if (isOur) {
-      setPeerState(PeerConnectionState.Connected);
-      // handleLocalEvents(RoomsActions., LiveRoom.our);
-    } else {
-      const livePeer = LiveRoom.participants.get(person);
-      handleRemoteEvents(setPeerState, livePeer);
-      handleRemoteUpdate(setPeerMetadata, livePeer);
-    }
+    
+    if(!isStarted) return;
+    const livePeer = LiveRoom.participants.get(person);
+    handleRemoteEvents(setPeerState, livePeer);
+    handleRemoteUpdate(setPeerMetadata, livePeer);
+    
   }, [isStarted]);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;

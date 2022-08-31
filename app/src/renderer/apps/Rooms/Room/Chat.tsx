@@ -72,15 +72,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
     RoomsActions.sendChat(ship!.patp, innerText
     ).then(() => {
       setLoading(false);
-
-      // chatInputRef.current!.value = '';
-
-      // TODO appears to work without a problem
-      // but causes a mobx warning
-      // [MobX] Since strict-mode is enabled, changing (observed) observable values without using an action is not allowed. Tried to modify: ObservableObject@270.value
-      // text.state.value = '';
       text.actions.onChange('');
-
 
     });
   };
@@ -100,6 +92,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   <Flex flex={2} gap={16} p={2} flexDirection="row" alignItems="center">
     <Flex flex={1} flexDirection="column">
         <InfiniteScroll
+          // TODO disable scroller
           dataLength={chats.length}
           height={330}
           next={() => {
@@ -109,19 +102,22 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
           inverse={true} //
           hasMore={false}
           loader={<h4>Loading...</h4>}
-          scrollableTarget="scrollableDiv"
+          // scrollableTarget="scrollableDiv"
           >
           {chats.length === 0 && (
           <Flex
             flex={1}
-            flexDirection="row"
+            flexDirection="column"
             justifyContent="center"
             alignItems="center"
             // mb={46}
           >
             <Text fontWeight={500} opacity={0.5}>
-              No chat history
+              No Chat History
             </Text>
+            {/* <Text opacity={0.5}>
+              There are no logs, and no guarantees.
+            </Text> */}
           </Flex>
             )}
           {chats.map((chat: ChatModelType, index: number) => (
@@ -151,6 +147,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
             placeholder="whats up dawg"
             autoFocus
             ref={chatInputRef}
+            spellCheck={false}
             wrapperStyle={{
               cursor: 'none',
               borderRadius: 6,

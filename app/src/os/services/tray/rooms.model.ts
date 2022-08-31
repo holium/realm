@@ -195,9 +195,9 @@ export const RoomsAppState = types
       self.knownRooms.get(roomId)?.present.remove(patp);
     },
     leaveRoom() {
-      if (self.liveRoom) {
-        self.knownRooms.delete(self.liveRoom.id);
-      }
+      // if (self.liveRoom) {
+      //   self.knownRooms.delete(self.liveRoom.id);
+      // }
       self.liveRoom = undefined;
       self.currentView = 'list';
     },

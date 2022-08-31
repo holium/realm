@@ -1,9 +1,9 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
-import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
+import { ContextMenu, Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
 import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -15,6 +15,9 @@ import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { RoomInfo } from './Info';
 import { handleLocalEvents } from '../listeners';
+import Portal from 'renderer/system/dialog/Portal';
+import { AnimatePresence } from 'framer-motion';
+import theme from 'renderer/theme';
 
 export type BaseRoomProps = {
   theme: ThemeModelType;
@@ -31,11 +34,13 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { ship, desktop } = useServices();
   const { roomsApp } = useTrayApps();
 
-  const { dockColor, windowColor, inputColor } = desktop.theme;
+  const { dockColor, windowColor, accentColor, inputColor, textColor } = desktop.theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const { muted } = roomsApp.controls;
   // const [muted, setMuted] = useState(false);
   // const [cursors, setCursors] = useState(true);
+
+  // const [displayInfo, setDisplayInfo] = useState(false);
 
   useEffect(() => {
     handleLocalEvents(
@@ -96,6 +101,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
       overflowY="hidden"
     >
       <Titlebar
+        
         hasBlur
         hasBorder={false}
         zIndex={5}
@@ -104,7 +110,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           windowColor,
         }}
       >
-        <Flex pl={3} pr={4} mr={3} justifyContent="center" alignItems="center">
+        <Flex pl={3} pr={4} mr={3}
+        justifyContent="center"
+        alignItems="center"
+        
+        >
           <IconButton
             className="realm-cursor-hover"
             size={26}
@@ -150,9 +160,14 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             className="realm-cursor-hover"
             size={26}
             customBg={dockColor}
+            color={roomView === 'invite' ? accentColor : undefined}
+
             onClick={(evt: any) => {
               evt.stopPropagation();
-              RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
+              roomView === 'invite'
+              ? setRoomView('voice')
+              : setRoomView('invite');
+              // RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
             }}
           >
             <Icons name="UserAdd" />
@@ -161,13 +176,17 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             className="realm-cursor-hover"
             size={26}
             style={{ cursor: 'none' }}
-            customBg={dockColor}
+            color={roomView === 'info' ? accentColor : undefined}
             onClick={(evt: any) => {
               evt.stopPropagation();
-            }}
+              console.log('clicked room info button' )
+              roomView === 'info'
+              ? setRoomView('voice')
+              : setRoomView('info');            }}
           >
             <Icons name="InfoCircle" />
           </IconButton>
+
         </Flex>
       </Titlebar>
       <Flex
@@ -247,6 +266,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               className="realm-cursor-hover"
               size={26}
               customBg={dockColor}
+              color={roomView === 'chat' ? accentColor : undefined}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 roomView === 'chat'

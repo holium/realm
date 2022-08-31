@@ -138,6 +138,7 @@ export const RoomsApi = {
       json: { exit: null },
       onSuccess: () => {
         console.log('rooms-leave-success');
+        state.unsetLiveRoom();
         state.removeSelf(roomId, `~${conduit.ship!}`);
       },
       onError: (err) => {
@@ -159,7 +160,7 @@ export const RoomsApi = {
     return;
   },
   invite: async (conduit: Conduit, roomId: string, patp: Patp) => {
-    conduit.poke({
+    await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: {
@@ -169,6 +170,7 @@ export const RoomsApi = {
         },
       },
     });
+    return;
   },
 
   /**
@@ -188,6 +190,7 @@ export const RoomsApi = {
       path: `/room/local`,
       onEvent: async (data: any) => {
         let update = data['rooms-update'];
+        console.log('rooms update', update)
         if (!update) return;
         if (update['room']) {
           const { diff, room } = update['room'];

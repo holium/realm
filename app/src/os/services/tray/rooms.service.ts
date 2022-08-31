@@ -182,8 +182,7 @@ export class RoomsService extends BaseService {
     this.state?.setProvider(patp);
   }
   async leaveRoom(_event: any, roomId: string) {
-    await RoomsApi.leaveRoom(this.core.conduit!, roomId, this.state!);
-    this.state?.leaveRoom();
+    RoomsApi.leaveRoom(this.core.conduit!, roomId, this.state!);
   }
   async deleteRoom(_event: any, roomId: string) {
     RoomsApi.deleteRoom(this.core.conduit!, roomId, this.state!);
@@ -244,7 +243,7 @@ export class RoomsService extends BaseService {
     return provider;
   }
   async invite(_event: any, roomId: string, patp: Patp) {
-    RoomsApi.invite(this.core.conduit!, roomId, patp);
+    return RoomsApi.invite(this.core.conduit!, roomId, patp);
   }
 
   onLogout() {
