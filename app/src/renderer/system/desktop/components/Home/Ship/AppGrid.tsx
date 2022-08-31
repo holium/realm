@@ -15,16 +15,16 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
-  const { ship, spaces, bazaar } = useServices();
+  const { docket, spaces, bazaar } = useServices();
 
-  const apps: any = ship
-    ? [...ship!.apps, ...NativeAppList]
+  const apps: any = docket
+    ? [...docket.list, ...NativeAppList]
     : [...NativeAppList];
 
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
-
+  // console.log(apps);
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;
     const isAppPinned =

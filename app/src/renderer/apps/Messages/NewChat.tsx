@@ -30,7 +30,7 @@ type IProps = {
 
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
-  const { ship } = useServices();
+  const { dms, contacts } = useServices();
   const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
   // const windowColor = useMemo(
   //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
@@ -50,12 +50,12 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
     (event: any) => {
       // if (event.keyCode === 13) {
       event.preventDefault();
-      const contacts = Array.from(selectedPatp.values());
+      const contactsList = Array.from(selectedPatp.values());
       let metadata: any;
-      if (ship?.contacts.getContactAvatarMetadata(contacts[0])) {
-        metadata = ship?.contacts.getContactAvatarMetadata(contacts[0]);
+      if (contacts.getContactAvatarMetadata(contactsList[0])) {
+        metadata = contacts.getContactAvatarMetadata(contactsList[0]);
       }
-      const newDm = ship?.chat.sendNewDm(contacts, metadata)!;
+      const newDm = dms.sendNewDm(contactsList, metadata)!;
       onCreateNewDm(newDm);
     },
     [selectedPatp]

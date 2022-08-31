@@ -97,11 +97,12 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     acceptFirstMouse: true,
-    paintWhenInitiallyHidden: true,
+    // paintWhenInitiallyHidden: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
+      sandbox: false,
       // nodeIntegrationInSubFrames: true,
       // sandbox: true,
       // nodeIntegrationInWorker: true,
@@ -116,6 +117,7 @@ const createWindow = async () => {
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
+
   // RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
@@ -127,7 +129,8 @@ const createWindow = async () => {
   mainWindow.maximize();
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
-    mainWindow?.webContents.setZoomFactor(1.1);
+    mainWindow?.webContents.setZoomFactor(1.0);
+
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }

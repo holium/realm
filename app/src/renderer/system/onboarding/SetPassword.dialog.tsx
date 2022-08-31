@@ -13,7 +13,6 @@ import {
   Flex,
   TextButton,
 } from 'renderer/components';
-import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -32,7 +31,7 @@ export const SetPassword: FC<BaseDialogProps> = observer(
       async onSubmit({ values }) {
         await OnboardingActions.setPassword(values.password);
         props.onNext && props.onNext();
-      }
+      },
     });
 
     const password = useField({
@@ -49,8 +48,8 @@ export const SetPassword: FC<BaseDialogProps> = observer(
       validate: (confirm) => {
         return password.state.value === confirm
           ? { parsed: confirm }
-          : { error: 'Passwords must match.' }
-      }
+          : { error: 'Passwords must match.' };
+      },
     });
 
     return (
@@ -120,7 +119,7 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   name="password"
                   type="password"
                   placeholder="***************"
-                  error={!password.computed.isDirty || password.computed.error}
+                  // error={!password.computed.isDirty || password.computed.error}
                   onChange={(e: any) =>
                     password.actions.onChange(e.target.value)
                   }
@@ -135,10 +134,10 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   name="confirm-password"
                   type="password"
                   placeholder="***************"
-                  error={
-                    !confirmPassword.computed.isDirty ||
-                    confirmPassword.computed.error
-                  }
+                  // error={
+                  //   !confirmPassword.computed.isDirty ||
+                  //   confirmPassword.computed.error
+                  // }
                   onChange={(e: any) =>
                     confirmPassword.actions.onChange(e.target.value)
                   }

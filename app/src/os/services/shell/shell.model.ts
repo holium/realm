@@ -1,7 +1,6 @@
 // import { osState, shipState } from './../store';
 import { types, Instance } from 'mobx-state-tree';
 
-
 export const ShellStore = types
   .model('ShellStore', {
     isBlurred: types.optional(types.boolean, true),

@@ -23,7 +23,7 @@ interface SelectPlanProps extends BaseDialogProps {
 
 const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
   let [subscribeLoading, setSubscribeLoading] = useState(false);
-  let [tier, setTier] = useState('monthly');
+  let [billingPeriod, setBillingPeriod] = useState('monthly');
   let { onboarding } = useServices();
   let planet = onboarding.planet!;
 
@@ -35,7 +35,7 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
 
   async function subscribe() {
     setSubscribeLoading(true);
-    await OnboardingActions.prepareCheckout(tier);
+    await OnboardingActions.prepareCheckout(billingPeriod);
     setSubscribeLoading(false);
     props.onNext && props.onNext();
   }
@@ -107,10 +107,10 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
           </Flex>
         </Box>
         <Flex flex={3} px={50} flexDirection="column" justifyContent="center">
-          <SubscriptionTier title="Monthly subscription" price="$16/month" selected={tier === 'monthly'} onClick={() => setTier('monthly')}>
+          <SubscriptionTier title="Monthly subscription" price={`$${planet.priceMonthly}/month`} selected={billingPeriod === 'monthly'} onClick={() => setBillingPeriod('monthly')}>
             Pay monthly and own your planet after you first three payments.
           </SubscriptionTier>
-          <SubscriptionTier mt={56} title="Yearly subscription" price="$160/year" selected={tier === 'yearly'} onClick={() => setTier('yearly')}>
+          <SubscriptionTier mt={56} title="Annual subscription" price={`$${planet.priceAnnual}/year`} selected={billingPeriod === 'annual'} onClick={() => setBillingPeriod('annual')}>
             Pay annually and own your planet immediately upon purchase.
           </SubscriptionTier>
         </Flex>

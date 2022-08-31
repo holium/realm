@@ -26,6 +26,7 @@ type IProps = {
   size?: number;
   luminosity?: 'light' | 'dark';
   theme: ThemeType;
+  error?: boolean | string;
   color?: string; // hacky fix for linting error
 } & SpaceProps &
   ColorProps &
@@ -148,6 +149,22 @@ export const IconButton = styled(styled(motion.button)<IProps>`
       &:hover {
         transform: translateZ(0);
         color: ${(props) => props.theme.colors.ui.disabled};
+        background-color: none;
+        border-color: none;
+      }
+    `}
+    ${(props) =>
+    props.error &&
+    css`
+      color: ${props.theme.colors.ui.intent.alert};
+      background-color: transparent;
+      border-color: transparent;
+      svg {
+        fill: ${props.theme.colors.ui.intent.alert};
+      }
+      &:hover {
+        transform: translateZ(0);
+        color: ${props.theme.colors.ui.intent.alert};
         background-color: none;
         border-color: none;
       }

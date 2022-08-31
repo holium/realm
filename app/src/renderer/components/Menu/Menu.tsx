@@ -65,7 +65,7 @@ export class Menu extends React.PureComponent<IProps, IState> {
         'data-prevent-menu-close'
       );
       if (clickedNode.nodeName === 'LI' || clickedNode.nodeName === 'BUTTON') {
-        !preventMenuClose && onClose();
+        !preventMenuClose && onClose(event);
       }
     }
   };
@@ -80,7 +80,7 @@ export class Menu extends React.PureComponent<IProps, IState> {
           opacity: 0,
         }}
         animate={{
-          opacity: 1,
+          opacity: isOpen ? 1 : 0,
           transition: {
             duration: 0.15,
           },

@@ -1,19 +1,6 @@
-import {
-  ipcMain,
-  IpcMainInvokeEvent,
-  IpcMessageEvent,
-  ipcRenderer,
-} from 'electron';
+import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-  IStateTreeNode,
-  IAnyModelType,
-  IType,
-} from 'mobx-state-tree';
+import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
@@ -31,26 +18,45 @@ import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { NotificationsApi } from '../../api/notifications';
 import { NotificationsStore, NotificationsType } from './models/notifications';
+import { ContactStore, ContactStoreType } from './models/contacts';
+import { DocketStore, DocketStoreType } from './models/docket';
+import { ChatStoreType, ChatStore } from './models/dms';
+import { loadDMsFromDisk } from './stores/dms';
+import { loadContactsFromDisk } from './stores/contacts';
+import { loadDocketFromDisk } from './stores/docket';
+import { loadFriendsFromDisk } from './stores/friends';
 
-type ShipModels = {
+export type ShipModels = {
   friends: FriendsType;
+  contacts?: ContactStoreType;
+  docket: DocketStoreType;
+  chat?: ChatStoreType;
 };
 
+type ShipSubscriptions = {
+  contacts: number;
+  friends: number;
+  metadata: number;
+  dms: number;
+  graphDms: number;
+};
+
+type SubscriptionKey = keyof ShipSubscriptions;
 /**
  * ShipService
  */
 export class ShipService extends BaseService {
   private db?: Store<ShipModelType> | EncryptedStore<ShipModelType>;
   private state?: ShipModelType;
-  private ourGroups: any[] = [];
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
+    contacts: undefined,
+    docket: DocketStore.create({ apps: {} }),
+    chat: undefined,
   };
   private metadataStore: {
-    groups: { [key: string]: any };
     graph: { [key: string]: any };
   } = {
-    groups: {},
     graph: {},
   };
   private rooms?: RoomsService;
@@ -128,156 +134,137 @@ export class ShipService extends BaseService {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
+    this.rooms = new RoomsService(core);
+
     this.subscribe = this.subscribe.bind(this);
   }
 
+  get modelSnapshots() {
+    return {
+      chat: this.models.chat ? getSnapshot(this.models.chat) : null,
+      docket: this.models.docket ? getSnapshot(this.models.docket) : null,
+      contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
+      friends: this.models.friends ? getSnapshot(this.models.friends) : null,
+    };
+  }
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
   }
 
   async subscribe(ship: string, shipInfo: any) {
-    return new Promise<ShipModelType>((resolve, reject) => {
-      const storeParams = {
-        name: `realm.ship.${ship}`,
-        secretKey: this.core.passwords.getPassword(ship)!,
-        accessPropertiesByDotNotation: true,
-      };
-      this.db = process.env.NODE_ENV === 'development'
+    //
+    const storeParams = {
+      name: `realm.ship.${ship}`,
+      secretKey: this.core.passwords.getPassword(ship)!,
+      accessPropertiesByDotNotation: true,
+    };
+    this.db =
+      process.env.NODE_ENV === 'development'
         ? new Store<ShipModelType>(storeParams)
         : new EncryptedStore<ShipModelType>(storeParams);
 
-      let persistedState: ShipModelType = this.db.store;
+    let persistedState: ShipModelType = this.db.store;
 
-      // TODO set up multiple ships properly
-      // this is the error
-      // (Object type: 'map<string, AnonymousModel>', Path upon death: '/ships/~0bus/docket/apps', Subpath: 'ballot', Action: '/ships/~0bus/docket/apps.@APPLY_SNAPSHOT()')
-      // console.log(this.currentShip);
-      this.state = ShipModel.create({
-        patp: ship,
-        url: persistedState.url || shipInfo.url,
-        wallpaper: persistedState.wallpaper || null,
-        color: persistedState.color || null,
-        nickname: persistedState.nickname || null,
-        avatar: persistedState.avatar || null,
-        cookie: persistedState.cookie || shipInfo.cookie,
-        loggedIn: true,
-        loader: { state: 'initial' },
-        // theme: castToSnapshot(persistedState.theme),
-        chat: persistedState.chat
-          ? castToSnapshot(persistedState.chat)
-          : { loader: { state: 'initial' } },
-        contacts: persistedState.contacts
-          ? castToSnapshot(persistedState.contacts)
-          : { ourPatp: ship },
-        docket: persistedState.docket
-          ? castToSnapshot(persistedState.docket)
-          : {},
-        friends: persistedState.friends
-          ? castToSnapshot(persistedState.friends)
-          : {},
+    // TODO set up multiple ships properly
+    this.state = ShipModel.create({
+      patp: ship,
+      url: persistedState.url || shipInfo.url,
+      wallpaper: persistedState.wallpaper || null,
+      color: persistedState.color || null,
+      nickname: persistedState.nickname || null,
+      avatar: persistedState.avatar || null,
+      cookie: persistedState.cookie || shipInfo.cookie,
+      loggedIn: true,
+      loader: { state: 'initial' },
+    });
+    this.models.chat = loadDMsFromDisk(ship, this.core.onEffect);
+    this.models.contacts = loadContactsFromDisk(ship, this.core.onEffect);
+    this.models.docket = loadDocketFromDisk(ship, this.core.onEffect);
+    this.models.friends = loadFriendsFromDisk(ship, this.core.onEffect);
+
+    this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
+
+    onSnapshot(this.state, (snapshot: any) => {
+      this.db!.store = snapshot;
+    });
+    // 1. Send initial snapshot
+    // const syncEffect = {
+    //   model: getSnapshot(this.state!),
+    //   resource: 'ship',
+    //   key: ship,
+    //   response: 'initial',
+    // };
+    // console.log(syncEffect);
+    // this.core.onEffect(syncEffect);
+
+    try {
+      await new Promise<ShipModelType>(async (resolve, reject) => {
+        // TODO rewrite the contact store logic
+        try {
+          await this.core.conduit!.watch({
+            app: 'contact-store',
+            path: '/all',
+            onEvent: (data: any) => {
+              this.models.contacts!.setInitial(data);
+            },
+            onError: () => console.log('Subscription rejected'),
+            onQuit: () => console.log('Kicked from subscription'),
+          });
+        } catch {
+          console.log('Subscription failed');
+        }
+
+        FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
+
+        ContactApi.getContact(this.core.conduit!, ship).then((value: any) => {
+          this.state!.setOurMetadata(value);
+        });
+
+        MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
+
+        // register dm update handler
+        DmApi.updates(this.core.conduit!, this.models.chat!);
+        DmApi.graphUpdates(this.core.conduit!, this.models.chat!);
+
+        // register hark-store update handler
+        // TODO commenting out for now
+        // NotificationsApi.watch(this.core.conduit!, this.state);
+
+        // load initial dms
+        this.getDMs().then((response) => {
+          this.models.chat?.setDMs(ship, response, this.models.contacts);
+          // this.state!.chat.setDMs(ship, response);
+        });
+        DocketApi.getApps(this.core.conduit!).then((apps) => {
+          this.models.docket.setInitial(apps);
+          this.state!.loader.set('loaded');
+          resolve(this.state!);
+        });
+
+        // TODO turning off rooms for now
+        // this.rooms?.onLogin(ship);
       });
 
-      this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
-
-      onSnapshot(this.state, (snapshot: any) => {
-        this.db!.store = snapshot;
-      });
-
-      const syncEffect = {
-        model: getSnapshot(this.state!),
+      // return ship state
+    } catch (err) {
+      console.error(err);
+    }
+    // 2. Register patches
+    onPatch(this.state, (patch) => {
+      // send patches to UI store
+      const patchEffect = {
+        patch,
         resource: 'ship',
         key: ship,
-        response: 'initial',
+        response: 'patch',
       };
-
-      this.core.onEffect(syncEffect);
-
-      onPatch(this.state, (patch) => {
-        // send patches to UI store
-        const patchEffect = {
-          patch,
-          resource: 'ship',
-          key: ship,
-          response: 'patch',
-        };
-        this.core.onEffect(patchEffect);
-      });
-
-      try {
-        this.core.conduit!.subscribe({
-          app: 'contact-store',
-          path: '/all',
-          event: (data: any) => {
-            this.state?.contacts.setInitial(data);
-          },
-          err: () => console.log('Subscription rejected'),
-          quit: () => console.log('Kicked from subscription'),
-        });
-      } catch {
-        console.log('Subscription failed');
-      }
-
-      // onPatch(this.models.friends, (patch) => {
-      //   // send patches to UI store
-      //   const patchEffect = {
-      //     patch,
-      //     resource: 'friends',
-      //     key: ship,
-      //     response: 'patch',
-      //   };
-      //   this.core.onEffect(patchEffect);
-      // });
-
-      // this.models.bazaar.initial(getSnapshot(ship.docket.apps) || {});
-
-      FriendsApi.watchFriends(this.core.conduit!, this.state);
-
-      ContactApi.getContact(ship, this.core.credentials!).then((value: any) => {
-        this.state?.setOurMetadata(value);
-      });
-
-      MetadataApi.syncGroupMetadata(
-        this.core.conduit!,
-        this.metadataStore
-      ).then(async () => {
-        const groupMetadata = Object.values(this.metadataStore.groups).reduce(
-          (groupMap, group) => {
-            return {
-              ...groupMap,
-              [group.resource]: group,
-            };
-          },
-          {}
-        );
-        this.ourGroups = await GroupsApi.getOur(
-          this.core.conduit!,
-          groupMetadata
-        );
-        // console.log(this.ourGroups);
-      });
-      MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
-
-      // register dm update handler
-      DmApi.updates(this.core.conduit!, this.state);
-      DmApi.graphUpdates(this.core.conduit!, this.state);
-
-      // register hark-store update handler
-      NotificationsApi.watch(this.core.conduit!, this.state);
-
-      // load initial dms
-      this.getDMs().then((response) => {
-        this.state?.chat.setDMs(ship, response);
-      });
-
-      DocketApi.getApps(this.core.conduit!).then((apps) => {
-        this.state?.docket.setInitial(apps);
-        this.state?.loader.set('loaded');
-        resolve(this.state!);
-      });
-      
-      this.rooms = new RoomsService(this.core);
-      
+      this.core.onEffect(patchEffect);
     });
+    return { ship: this.state, models: this.modelSnapshots };
+  }
+
+  get roomSnapshot() {
+    return this.rooms?.snapshot;
   }
 
   async init(ship: string) {
@@ -293,7 +280,7 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
-    this.core.mainWindow.webContents.send('realm.auth.on-log-out');
+    this.core.mainWindow.webContents.send('realm.on-logout');
   }
 
   storeNewShip(ship: AuthShipType): ShipModelType {
@@ -305,9 +292,9 @@ export class ShipService extends BaseService {
       color: ship.color || null,
       nickname: ship.nickname || null,
       avatar: ship.avatar || null,
-      chat: { loader: { state: 'initial' } },
-      contacts: { ourPatp: ship.patp },
-      docket: {},
+      // chat: { loader: { state: 'initial' } },
+      // contacts: { ourPatp: ship.patp },
+      // docket: {},
     });
 
     const storeParams = {
@@ -315,9 +302,10 @@ export class ShipService extends BaseService {
       secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
     };
-    this.db = process.env.NODE_ENV === 'development'
-      ? new Store<ShipModelType>(storeParams)
-      : new EncryptedStore<ShipModelType>(storeParams);
+    this.db =
+      process.env.NODE_ENV === 'development'
+        ? new Store<ShipModelType>(storeParams)
+        : new EncryptedStore<ShipModelType>(storeParams);
 
     this.db.store = newShip;
     return newShip;
@@ -333,17 +321,7 @@ export class ShipService extends BaseService {
   }
 
   async getOurGroups(_event: any): Promise<any> {
-    // const groupMetadata = Object.values(this.metadataStore.groups).reduce(
-    //   (groupMap, group) => {
-    //     return {
-    //       ...groupMap,
-    //       [group.resource]: group,
-    //     };
-    //   },
-    //   {}
-    // );
-
-    return this.ourGroups; // await GroupsApi.getOur(this.core.conduit!, groupMetadata);
+    return await GroupsApi.getOur(this.core.conduit!);
   }
 
   // ------------------------------------------
@@ -371,7 +349,7 @@ export class ShipService extends BaseService {
   // ---
   getContact(_event: IpcMainInvokeEvent, ship: string): any {
     const patp = ship.includes('~') ? ship : `~${ship}`;
-    const contact = this.state?.contacts.getContactAvatarMetadata(patp);
+    const contact = this.models.contacts?.getContactAvatarMetadata(patp);
     return contact;
   }
   getMetadata(_event: any, path: string): any {
@@ -382,7 +360,7 @@ export class ShipService extends BaseService {
     return await DocketApi.requestTreaty(
       ship,
       desk,
-      this.state?.docket,
+      this.models.docket,
       this.core.conduit!,
       this.metadataStore
     );
@@ -394,25 +372,20 @@ export class ShipService extends BaseService {
     }
     return await DmApi.getDMs(this.state?.patp!, this.core.conduit);
   }
-  // getGroupDMs = async () => {
-  //   if (!this.conduit) {
-  //     return;
-  //   }
-  //   return await DmApi.getGroupDMs(this.stateTree?.patp!, this.conduit);
-  // };
+
   async acceptDm(_event: any, toShip: string) {
     const ourShip = this.state?.patp!;
     console.log('acceptingDM', toShip);
-    return await DmApi.acceptDm(ourShip, toShip, this.core.credentials!);
+    return await DmApi.acceptDm(this.core.conduit!, toShip);
   }
   async declineDm(_event: any, toShip: string) {
     const ourShip = this.state?.patp!;
-    return await DmApi.acceptDm(ourShip, toShip, this.core.credentials!);
+    return await DmApi.declineDm(this.core.conduit!, toShip);
   }
   async sendDm(_event: any, toShip: string, contents: any[]) {
     const ourShip = this.state?.patp!;
-    const dm = this.state?.chat.dms.get(toShip)!;
-    dm.sendDm(contents);
+    const dm = this.models.chat?.dms.get(toShip)!;
+    dm.sendDm(this.state!.patp, contents);
     // TODO fix send new dm
     // if (this.state?.chat.dms.get(toShip)) {
     // } else {
@@ -420,21 +393,16 @@ export class ShipService extends BaseService {
     //   // const dm = this.state?.chat.dms.get(toShip)!;
     //   // dm.sendDm(contents);
     // }
-    return await DmApi.sendDM(
-      ourShip,
-      toShip,
-      contents,
-      this.core.credentials!
-    );
+    return await DmApi.sendDM(this.core.conduit!, ourShip, toShip, contents);
   }
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;
     console.log('removingDM', ourShip, toShip, removeIndex);
   }
   async getNotifications(_event: any, timestamp: number, length: number) {
-    console.log('getNotifications: %o, %o', timestamp, length);
-    const timeboxes = this.state?.notifications.timeboxes();
-    console.log(timeboxes);
-    return timeboxes;
+    // console.log('getNotifications: %o, %o', timestamp, length);
+    // const timeboxes = this.state?.notifications.timeboxes();
+    // console.log(timeboxes);
+    return [];
   }
 }

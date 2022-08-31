@@ -45,10 +45,10 @@ export class AuthService extends BaseService {
     getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
     removeShip: (ship: string) =>
       ipcRenderer.invoke('realm.auth.remove-ship', ship),
-    onLogin: (callback: any) =>
-      ipcRenderer.on('realm.auth.on-log-in', callback),
-    onLogout: (callback: any) =>
-      ipcRenderer.on('realm.auth.on-log-out', callback),
+    // onLogin: (callback: any) =>
+    //   ipcRenderer.on('realm.auth.on-log-in', callback),
+    // onLogout: (callback: any) =>
+    //   ipcRenderer.on('realm.auth.on-log-out', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -78,6 +78,10 @@ export class AuthService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
+  }
+
+  get loggedIn() {
+    return this.state.isLoaded;
   }
 
   get snapshot() {
@@ -121,10 +125,14 @@ export class AuthService extends BaseService {
 
   async login(_event: any, ship: string, password: string): Promise<boolean> {
     let shipId = `auth${ship}`;
+    this.state.setLoader('loading');
 
     let passwordHash = this.state.getPasswordHash(shipId);
-    let passwordCorrect = await  bcrypt.compare(password, passwordHash);
-    if (!passwordCorrect) return false;
+    let passwordCorrect = await bcrypt.compare(password, passwordHash);
+    if (!passwordCorrect) {
+      this.state.setLoader('error');
+      return false;
+    }
 
     this.core.passwords.setPassword(ship, password);
     this.state.login(shipId);
@@ -143,8 +151,8 @@ export class AuthService extends BaseService {
     return true;
   }
 
-  logout(_event: any, ship: string) {
-    this.core.clearSession();
+  async logout(_event: any, ship: string) {
+    await this.core.clearSession();
     this.core.passwords.clearPassword(ship);
     this.core.services.ship.logout();
   }
@@ -154,8 +162,10 @@ export class AuthService extends BaseService {
 
     this.state.setShip(newShip);
     newShip.setStatus('completed');
-    this.state.completeSignup(newShip.id);
+    console.log('completed');
 
+    this.state.completeSignup(newShip.id);
+    console.log('this.state.completeSignup(newShip.id);');
     return newShip;
   }
 

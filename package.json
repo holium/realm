@@ -4,13 +4,14 @@
   "workspaces": [
     "app",
     "lib/multiplayer",
-    "playground/ui"
+    "lib/conduit"
   ],
   "scripts": {
-    "build": "yarn build:multiplayer && yarn build:playground && yarn build:app",
-    "build:app": "yarn workspace @holium/playground build",
-    "build:playground": "yarn workspace @holium/playground build",
+    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:app",
+    "build:app": "yarn workspace @holium/realm build",
+    "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
-    "start": "yarn workspace @holium/realm start"
+    "start": "yarn workspace @holium/realm start",
+    "package": "yarn workspace @holium/realm package"
   }
 }
