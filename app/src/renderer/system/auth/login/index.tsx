@@ -19,10 +19,8 @@ import {
   FormControl,
 } from 'renderer/components';
 import { ShipSelector } from './ShipSelector';
-import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
@@ -34,7 +32,7 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, desktop, ship } = useServices();
+  const { identity, desktop } = useServices();
   const { auth } = identity;
   const { theme } = desktop;
   const [hasFailed, setHasFailed] = useState(false);
@@ -42,6 +40,9 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
+
+  const [loading, setLoading] = useState(false);
+  const [incorrectPassword, setIncorrectPassword] = useState(false);
 
   // Setting up options menu
   const menuWidth = 180;
@@ -71,16 +72,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     }
   }, [pendingShip]);
 
-  // useEffect(() => {
-  //   // Set the wallpaper on load
-  //   !theme &&
-  //     pendingShip &&
-  //     DesktopActions.changeWallpaper(
-  //       pendingShip?.patp!,
-  //       pendingShip?.wallpaper || DEFAULT_WALLPAPER
-  //     );
-  // }, [pendingShip !== null]);
-
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
       // @ts-expect-error typescript...
@@ -91,15 +82,21 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       wrapperRef.current.blur();
     }
   };
-  const clickSubmit = (event: any) => {
+  const clickSubmit = async (event: any) => {
     event.stopPropagation();
     setHasFailed(false);
-    AuthActions.login(
+    setLoading(true);
+    let loggedIn = await AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
-    ).catch((err) => console.warn(err));
-    // .then(() => SoundActions.playLogin());
+    );
+    if (!loggedIn) {
+      // @ts-expect-error
+      submitRef.current.blur();
+      setIncorrectPassword(true);
+      setLoading(false);
+    }
   };
 
   let colorProps = null;
@@ -187,9 +184,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     autoFocus
                     autoCorrect="false"
                     bgOpacity={hasWallpaper ? 0.3 : 1}
-                    // borderColor={
-                    //   hasWallpaper ? 'input.borderHover' : 'input.borderColor'
-                    // }
                     wrapperStyle={{
                       borderRadius: 8,
                       width: isVertical ? 320 : 260,
@@ -199,7 +193,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     name="password"
                     type="password"
                     rightInteractive
-                    error={hasFailed}
+                    error={hasFailed || incorrectPassword}
                     onKeyDown={submitPassword}
                     rightIcon={
                       <Flex gap={4} justifyContent="center" alignItems="center">
@@ -277,11 +271,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   />
 
                   <FormControl.Error
-                    style={{ height: 15 }}
-                    textShadow="1px 1px #00000080"
+                    style={{ height: 15, fontSize: 14 }}
+                    textShadow="0.5px 0.5px #080000"
                   >
                     {hasFailed &&
                       'Connection to your ship has been refused: ECONNREFUSED'}
+                    {incorrectPassword && 'Incorrect password.'}
                   </FormControl.Error>
                 </Flex>
               </Flex>

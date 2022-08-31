@@ -1,15 +1,22 @@
 import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
-import { ContactStore, ContactStoreType } from '../models/contacts';
 import Store from 'electron-store';
+import { ContactStore, ContactStoreType } from '../models/contacts';
+import EncryptedStore from '../encryptedStore';
 
 export const loadContactsFromDisk = (
   patp: string,
+  secretKey: string,
   onEffect: (patch: any) => void
 ) => {
-  const persisted = new Store<ContactStoreType>({
-    name: `contacts`,
-    cwd: `realm.${patp}`, // base folder
-  });
+  const baseParams = { name: `contacts`, cwd: `realm.${patp}` };
+  const persisted =
+    process.env.NODE_ENV === 'development'
+      ? new Store<ContactStoreType>(baseParams)
+      : new EncryptedStore<ContactStoreType>({
+          secretKey,
+          ...baseParams,
+        });
+
   let persistedState: ContactStoreType = persisted.store;
   const isEmpty = Object.keys(persistedState).length === 0;
   const model = ContactStore.create(
