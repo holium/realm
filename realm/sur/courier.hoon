@@ -9,7 +9,7 @@
 ::  $message: a generalized message structure for Realm
 ::
 +$  graph-dm
-  $:  index=cord     :: Can be either a group chat graph index or single dm-inbox graph index (or later chatstead)
+  $:  index=(list atom)     :: Can be either a group chat graph index or single dm-inbox graph index (or later chatstead)
       author=ship
       time-sent=@da
       contents=(list content)
@@ -19,7 +19,7 @@
 ::
 +$  chatstead-dm
   $:  
-    id=cord     
+    id=(list atom)    
     author=ship
     time-sent=@da
     contents=(list content)
@@ -34,12 +34,13 @@
 ::
 +$  chat
   $:  
-    :: path=cord     :: Can be either a group dm association or single dm-inbox graph association
-    to=ship
+    path=cord
+    :: index=(list atom)
+    to=(set ship)
     type=chat-type
     =source
     messages=(list graph-dm)
-    metadata=contact-mtd
+    metadata=(set contact-mtd)
   ==
 ::
 :: +$  paged-chat
@@ -58,13 +59,14 @@
 +$  chat-previews     (list message-preview)
 +$  message-preview
   $:  
-    :: path=cord     
-    to=ship
+    path=cord
+    :: index=(list atom)
+    to=(set ship)
     type=chat-type
     =source
     last-time-sent=@da
     last-message=(list content)
-    metadata=contact-mtd
+    metadata=(set contact-mtd)
   ==
 ::
 ::  %contact-store
@@ -106,4 +108,73 @@
       :: [%paged-chat =paged-chat]          ::  loads a windowed chat using offset and count
   ==
 ::
+::
+::  %group-store types
+::
++$  groups  (map resource group)
+::
++$  group-tag  ?(role-tag)
+::
++$  tag  $@(group-tag [app=term =resource tag=term])
+::
++$  role-tag
+  ?(%admin %moderator %janitor)
+::
++$  tags  (jug tag ship)
+::
++$  group
+  $:  members=(set ship)
+      =tags
+      =policy
+      hidden=?
+  ==
+
+::  $policy: access control for a group
+::
+++  policy
+  =<  policy
+  |%
+  ::
+  +$  policy
+    $%  invite
+        open
+    ==
+  ::  $diff: change group policy
+  +$  diff
+    $%  [%invite diff:invite]
+        [%open diff:open]
+        [%replace =policy]
+    ==
+  ::  $invite: allow only invited ships
+  ++  invite
+    =<  invite-policy
+    |%
+    ::
+    +$  invite-policy
+      [%invite pending=(set ship)]
+    ::  $diff: add or remove invites
+    ::
+    +$  diff
+      $%  [%add-invites invitees=(set ship)]
+          [%remove-invites invitees=(set ship)]
+      ==
+    --
+  ::  $open: allow all unbanned ships of approriate rank
+  ::
+  ++  open
+    =<  open-policy
+    |%
+    ::
+    +$  open-policy
+      [%open ban-ranks=(set rank:title) banned=(set ship)]
+    :: $diff: ban or allow ranks and ships
+    ::
+    +$  diff
+      $%  [%allow-ranks ranks=(set rank:title)]
+          [%ban-ranks ranks=(set rank:title)]
+          [%ban-ships ships=(set ship)]
+          [%allow-ships ships=(set ship)]
+      ==
+    --
+  --
 --

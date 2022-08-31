@@ -63,7 +63,7 @@
       ?+    path      (on-watch:def path)
           [%updates ~]
         ?>  =(our.bowl src.bowl)
-        =/  dm-previews   (gen-list:gs-dms:lib our.bowl now.bowl)
+        =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
         [%give %fact [/updates ~] courier-reaction+!>([%previews dm-previews])]~
       ==
     [cards this]
@@ -76,24 +76,30 @@
     ::  ~/scry/courier/dms.json
       [%x %dms ~]
         ?>  =(our.bowl src.bowl)
-        =/  dm-previews   (gen-list:gs-dms:lib our.bowl now.bowl)
+        =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
         ``courier-view+!>([%inbox dm-previews])
+    ::
+    ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
+      [%x %dms %group @ @ ~]
+        ?>  =(our.bowl src.bowl)
+        =/  entity       `@p`(slav %p i.t.t.t.path)
+        =/  timestamp    `@t`i.t.t.t.t.path
+        =/  dms           (grp-log:gs:lib our.bowl now.bowl entity timestamp)
+        ``courier-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev.json
       [%x %dms @ ~]
         ?>  =(our.bowl src.bowl)
         =/  to-ship       `@p`(slav %p i.t.t.path)
-        =/  dms           (gen-dms:gs-dms:lib our.bowl to-ship now.bowl)
+        =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
         ``courier-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev/paged/0/20.json
-    [%x %dms @ %paged @ @ ~]
-        ?>  =(our.bowl src.bowl)
-        =/  to-ship       `@p`(slav %p i.t.t.path)
-        =/  dms           (gen-dms:gs-dms:lib our.bowl to-ship now.bowl)
-        ``courier-view+!>([%dm-log dms])
-    ::
-    
+      :: [%x %dms @ %paged @ @ ~]
+      ::   ?>  =(our.bowl src.bowl)
+      ::   =/  to-ship       `@p`(slav %p i.t.t.path)
+      ::   =/  dms           (gen-dms:gs:lib our.bowl to-ship now.bowl)
+      ::   ``courier-view+!>([%dm-log dms])
     ==
   ::
   ++  on-agent 
@@ -166,7 +172,7 @@
         =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
         =/  ship-dec      (snag 0 p.dm-node)
         =/  index         (snag 1 p.dm-node)
-        =/  new-dm        (gen-received-dm:gs-dms:lib ship-dec index q.dm-node our now)
+        =/  new-dm        (received-dm:gs:lib ship-dec index q.dm-node our now)
         :_  state
         [%give %fact [/updates ~] courier-reaction+!>([%dm-received new-dm])]~
       :: else 
