@@ -448,6 +448,8 @@
     ^-  (quip card _state)
     `state
   ::
+  ::  this reaction comes in as a result of accepting an invitation
+  ::   to a space and then subscribing to the space-path
   ++  on-space-apps
     |=  [=space-path:spaces-store =app-views:store]
     ^-  (quip card _state)
@@ -458,8 +460,12 @@
     =.  app-catalog.acc     (~(put by app-catalog.acc) app-id app.app-view)
     =.  app-index.acc       (~(put by app-index.acc) app-id app-entry.app-view)
     acc
-    =.  space-apps.state  (~(put by space-apps.state) space-path app-index.result)
-    `state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
+    =.  space-apps.state    (~(put by space-apps.state) space-path app-index.result)
+    =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
+    :: :_  state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
+    :: notify the UI of that we've accepted an invite to a new space and there
+    ::   are apps available in this new space
+    (bazaar:send-reaction:core [%space-apps space-path app-views] [/updates ~])
   ::
   ++  on-add-tag
     |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
