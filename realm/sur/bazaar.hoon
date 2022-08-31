@@ -92,7 +92,7 @@
       [%space-apps =space-path:spaces =app-index-full]
       [%add-tag path=space-path:spaces =app-id =tag]
       [%remove-tag path=space-path:spaces =app-id =tag]
-      [%suite-add path=space-path:spaces =app-full rank=@ud]
+      [%suite-add path=space-path:spaces =app-full]
       [%suite-remove path=space-path:spaces =app-id]
       [%app-installed =app-id =app]
       [%app-uninstalled =app-id]

@@ -90,7 +90,7 @@
       :-  %space-apps
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
-          [%app-views (apidx:encode app-index.rct)]
+          [%app-index-full (app-index-full:encode app-index-full.rct)]
       ==
     ::
         %add-tag
@@ -115,8 +115,7 @@
       :-  %suite-add
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%app (pairs (app:encode app.rct))]
-          [%rank n+(crip "{<rank.rct>}")]
+          [%app-full (pairs (app-full:encode app.rct))]
       ==
     ::
         %suite-remove
@@ -129,8 +128,8 @@
         %app-installed
       :-  %app-installed
       %-  pairs
-      :~  [%desk s+desk.rct]
-          [%docket (pairs (dkt:encode docket.rct))]
+      :~  [%app-id s+app-id.rct]
+          [%app (pairs (dkt:encode app.rct))]
       ==
     ::
         %app-uninstalled
@@ -150,7 +149,7 @@
     ?-  -.vi
       ::
         %apps
-      (appvws:encode app-views.vi)
+      (app-index-full:encode app-index-full.vi)
     ==
   --
 ::
@@ -162,26 +161,28 @@
     ^-  json
     %-  pairs
     %+  turn  ~(tap by space-apps-full)
-    |=  [pth=space-path:spaces-store =app-views:store]
+    |=  [pth=space-path:spaces-store index=app-index-full:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
-    [spc-path (appvws app-views)]
+    [spc-path (app-index-full index)]
   ::
-  ++  space-apps
-    |=  =space-apps:store
+  ++  space-apps-lite
+    |=  =space-apps-lite:store
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by space-apps)
-    |=  [pth=space-path:spaces-store =app-index:store]
+    %+  turn  ~(tap by space-apps-lite)
+    |=  [pth=space-path:spaces-store index=app-index-lite:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
-    [spc-path (apidx app-index)]
+    [spc-path (app-index-lite index)]
   ::
-  ++  app
-    |=  =app:store
+  ++  app-full
+    |=  app=app-full:store
     ^-  (list [cord json])
     =/  head=(list [cord json])
     :~  [id+s+id.app]
+        ['ranks' (rnks ranks.app-entry.app-view)]
+        ['tags' a+(turn ~(tap in tags.app-entry.app-view) |=(tg=tag:store s+(scot %tas tg)))]
     ==
     =/  detail=(list [cord json])
     ?-  -.detail.app
@@ -206,45 +207,32 @@
     ==
     ?~  detail  ~  (weld head detail)
   ::
-  ++  appvws
-    |=  =app-views:store
+  ++  app-index-full
+    |=  =app-index-full:store
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by app-views)
-    |=  [=app-id:store =app-view:store]
+    %+  turn  ~(tap by app-index-full)
+    |=  [=app-id:store app=app-full:store]
     ^-  [cord json]
-    [app-id (appvw app-view)]
+    [app-id (app-full app)]
   ::
-  ++  appvw
-    |=  =app-view:store
-    ^-  json
-    =/  meta=(list [cord json])
-    :~  [%id s+id.app-entry.app-view]
-        ['ship' s+(scot %p ship.app-entry.app-view)]
-        ['ranks' (rnks ranks.app-entry.app-view)]
-        ['tags' a+(turn ~(tap in tags.app-entry.app-view) |=(tg=tag:store s+(scot %tas tg)))]
-    ==
-    =/  data=(list [cord json])  (app app.app-view)
-    %-  pairs
-    ?~  detail  meta  (weld meta data)
-  ::
-  ++  apidx
-    |=  =app-index:store
+  ++  app-index-lite
+    |=  =app-index-lite:store
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by app-index)
-    |=  [=app-id:store =app-entry:store]
+    %+  turn  ~(tap by app-index-lite)
+    |=  [=app-id:store app=app-lite:store]
     ^-  [cord json]
-    [app-id (apntry app-entry)]
+    [app-id (app-lite app)]
   ::
-  ++  apntry
-    |=  =app-entry:store
+  ++  app-lite
+    |=  app=app-lite:store
     ^-  json
     %-  pairs
-    :~  [%id s+id.app-entry]
-        ['ship' s+(scot %p ship.app-entry)]
-        ['ranks' (rnks ranks.app-entry)]
-        ['tags' a+(turn ~(tap in tags.app-entry) |=(tg=tag:store s+(scot %tas tg)))]
+    :~  [%id s+id.app]
+        :: ['ship' s+(scot %p ship.app-entry)]
+        ['ranks' (rnks ranks.hdr.app)]
+        ['tags' a+(turn ~(tap in tags.hdr.app) |=(tg=tag:store s+(scot %tas tg)))]
     ==
   ::
   ++  dkt

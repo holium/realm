@@ -488,9 +488,9 @@
     `state
   ::
   ++  on-suite-add
-    |=  [path=space-path:spaces-store =app-full:store rank=@ud]
+    |=  [path=space-path:spaces-store =app-full:store]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full rank]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
     `state
