@@ -32,7 +32,7 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, desktop, ship } = useServices();
+  const { identity, desktop } = useServices();
   const { auth } = identity;
   const { theme } = desktop;
   const [hasFailed, setHasFailed] = useState(false);

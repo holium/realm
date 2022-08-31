@@ -307,7 +307,6 @@ export class OnboardingService extends BaseService {
       avatar: string | null;
     }
   ) {
-    console.log('setting profile', profileData);
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
 

@@ -153,9 +153,11 @@ export class ShipService extends BaseService {
 
   async subscribe(ship: string, shipInfo: any) {
     //
+    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
     const storeParams = {
-      name: `realm.ship.${ship}`,
-      secretKey: this.core.passwords.getPassword(ship)!,
+      name: 'ship',
+      cwd: `realm.${ship}`,
+      secretKey,
       accessPropertiesByDotNotation: true,
     };
     this.db =
@@ -177,10 +179,23 @@ export class ShipService extends BaseService {
       loggedIn: true,
       loader: { state: 'initial' },
     });
-    this.models.chat = loadDMsFromDisk(ship, this.core.onEffect);
-    this.models.contacts = loadContactsFromDisk(ship, this.core.onEffect);
-    this.models.docket = loadDocketFromDisk(ship, this.core.onEffect);
-    this.models.friends = loadFriendsFromDisk(ship, this.core.onEffect);
+    this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
+    this.models.contacts = loadContactsFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
+    this.models.docket = loadDocketFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
+    this.models.friends = loadFriendsFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
+    secretKey = null;
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 

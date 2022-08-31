@@ -162,10 +162,8 @@ export class AuthService extends BaseService {
 
     this.state.setShip(newShip);
     newShip.setStatus('completed');
-    console.log('completed');
 
     this.state.completeSignup(newShip.id);
-    console.log('this.state.completeSignup(newShip.id);');
     return newShip;
   }
 
