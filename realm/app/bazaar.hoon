@@ -328,23 +328,12 @@
   ++  suite-add
     |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: {<[path app-id rank]>}"
-    ::  apps are added to a space's suite thru this ship's installed apps
-    :: =/  charge                    (~(got by charges.state) app-id)
-    =/  apps                      (~(got by space-apps.state) path)
-    ?:  (~(has by apps) app-id)   !!
-    =|  app=app-entry:store
-    =.  id.app                    app-id
-    =.  ship.app                  our.bowl
-    =.  tags.app                  (~(put in tags.app) %suite)
-    =/  rank                      ?~(rank (lent ~(val by apps)) u.rank)
-    =.  suite.ranks.app           rank
-    :: =.  dist.app                  [%urbit docket.charge]
-    =/  apps                      (~(put by apps) app-id app)
-    =.  space-apps.state          (~(put by space-apps.state) path apps)
+    ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
     =/  paths  [/updates /our /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
-    (bazaar:send-reaction [%suite-add path app-id rank] paths)
+    =/  result=[apps=space-apps:store rank=@ud]  (add:suite path app-id rank)
+    =.  space-apps.state  apps.result
+    (bazaar:send-reaction [%suite-add path app-id rank.result] paths)
   ::
   ++  suite-remove
     |=  [path=space-path:spaces-store =app-id:store]
@@ -488,14 +477,37 @@
   ++  on-suite-add
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
     ^-  (quip card _state)
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
     ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-id rank]>}"
-    `state
+    =/  result=[=space-apps:store rank=@ud]  (add:suite path app-id (some rank))
+    =.  space-apps.state  space-apps.result
+    (bazaar:send-reaction:core [%suite-add path app-id rank.result] [/updates ~])
   ::
   ++  on-suite-rem
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-id]>}"
     `state
+  --
+::
+++  suite
+  |%
+  ++  add
+    |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
+    ^-  [=space-apps:store @ud]
+    ~&  >>  "{<dap.bowl>}: add:suite => {<[path app-id rank]>}"
+    =/  apps                      (~(got by space-apps.state) path)
+    ?:  (~(has by apps) app-id)   !!
+    =|  app=app-entry:store
+    =.  id.app                    app-id
+    =.  ship.app                  our.bowl
+    =.  tags.app                  (~(put in tags.app) %suite)
+    =/  rank                      ?~(rank (lent ~(val by apps)) u.rank)
+    =.  suite.ranks.app           rank
+    :: =.  dist.app                  [%urbit docket.charge]
+    =/  apps                      (~(put by apps) app-id app)
+    [(~(put by space-apps.state) path apps) rank]
   --
 ::
 ++  treaty-update
