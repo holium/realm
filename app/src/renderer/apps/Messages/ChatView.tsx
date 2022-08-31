@@ -58,8 +58,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   const submitRef = useRef(null);
   const chatInputRef = useRef(null);
   const inputRef = useRef(null);
-  let scrollView = useRef<any>(null);
-  // const attachmentRef = useRef(null);
   const { selectedChat, setSelectedChat, height, theme, onSend } = props;
   const { iconColor, dockColor, textColor, windowColor, mode } = props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
@@ -156,9 +154,11 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     }
   };
 
-  useEffect(() => {
-    scrollView.current?.scrollToBottom();
-  }, [scrollView]);
+  // Only rerender when the data is different
+  const ChatLogMemo = useMemo(
+    () => <ChatLog loading={loading} messages={messages} />,
+    [messages]
+  );
 
   const inputHeight = 60;
   return (
@@ -240,7 +240,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           overflowY="auto"
           alignContent="center"
         >
-          <ChatLog loading={loading} messages={messages} />
+          {ChatLogMemo}
+          {/* <ChatLog loading={loading} messages={messages} /> */}
           <Flex
             position="absolute"
             bottom={0}

@@ -107,26 +107,6 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
 
       {/*Put the scroll bar always on the bottom*/}
 
-      {/* <ScrollView
-        width={dimensions.width}
-        height={dimensions.height}
-        ref={scrollView}
-        onScroll={handleScroll}
-        restoreScrollPositionOnUpdate
-      >
-        <Flex style={{ minHeight: 58 }} />
-
-        {chatData.list.map((message: MessageType, index: number) => (
-              <ChatMessage
-                key={`${message.index}-${message.timeSent}-${index}`}
-                theme={theme}
-                our={ship!.patp}
-                ourColor={ship!.color || '#569BE2'}
-                message={message}
-              />
-            ))}
-        <Flex style={{ minHeight: 58 }} />
-      </ScrollView> */}
       {showJumpBtn && (
         <Flex position="absolute" bottom={64} right={12}>
           {/* TODO make a circle bg for this */}

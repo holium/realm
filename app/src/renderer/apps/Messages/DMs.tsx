@@ -106,7 +106,6 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       >
         <Grid.Column
           gap={2}
-          mt={1}
           mb={3}
           pb={4}
           noGutter
@@ -148,7 +147,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
                 </Flex>
               )}
               {previews.map((dm: any) => (
-                <Box ml={1} mr={1} display="block" key={dm.to}>
+                <Box display="block" key={dm.to}>
                   <ContactRow
                     theme={theme}
                     dm={dm}
