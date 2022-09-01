@@ -253,8 +253,8 @@ const AppSearchApp = (props) => {
     }
   }, [searchString]);
   useEffect(() => {
-    setData([]);
     if (searchMode === 'ship-search') {
+      setData([]);
       // todo: move into bazaar "main" (no space specific) store
       //   see bazaar.allies
       SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {
@@ -265,6 +265,7 @@ const AppSearchApp = (props) => {
         setData(data);
       });
     } else if (searchMode === 'dev-app-search') {
+      setData([]);
       console.log('adding treaty => %o', selectedShip);
       SpacesActions.addAlly(selectedShip).then((result) => {
         console.log('addTreaty response => %o', result);

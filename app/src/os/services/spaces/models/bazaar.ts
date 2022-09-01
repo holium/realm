@@ -3,6 +3,7 @@ import { cleanNounColor } from '../../../lib/color';
 import { NativeAppList } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob, AppTypes } from '../../ship/models/docket';
 import { toJS } from 'mobx';
+import { Native } from '@stitches/react/types/css-util';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -41,7 +42,7 @@ export const BazaarModel = types
   .views((self) => ({
     get allApps() {
       console.log('BazaarModel.allApps => %o', Array.from(self.apps!.values()));
-      return Array.from(self.apps!.values());
+      return Array.from([...self.apps!.values(), ...NativeAppList]);
     },
     get suite() {
       return this.getAppsByTag('suite');
@@ -86,15 +87,16 @@ export const BazaarModel = types
       self.apps.set(app.id, app);
     },
     findApps(searchString: string) {
-      const matches = [];
+      // const matches = [];
       const str = searchString.toLowerCase();
-      console.log('searching for %o in %o...', searchString, toJS(self.apps));
-      for (const app of self.apps) {
-        if (app[1].title.toLowerCase().startsWith(str)) {
-          matches.push(app[1]);
-        }
-      }
-      return matches;
+      const apps = Array.from([...self.apps!.values(), ...NativeAppList]);
+      return apps.filter((item) => item.title.toLowerCase().startsWith(str));
+      // for (const app of self.allApps) {
+      //   if (app[1].title.toLowerCase().startsWith(str)) {
+      //     matches.push(app[1]);
+      //   }
+      // }
+      // return matches;
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
