@@ -24,11 +24,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     : null;
 
   const orderedList = useMemo(
-    () => (currentBazaar ? currentBazaar.pinnedApps! : []),
-    [
-      currentBazaar && currentBazaar.pinned,
-      currentBazaar && currentBazaar.pinnedApps,
-    ]
+    () => (currentBazaar ? currentBazaar.pinned! : []),
+    [currentBazaar && currentBazaar.pinned]
   );
 
   const pinnedApps = useMemo(() => {
@@ -143,13 +140,12 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.openAppIds,
     spaces.selected?.path,
     currentBazaar && currentBazaar.pinned,
-    currentBazaar && currentBazaar.pinnedApps,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       currentBazaar &&
-      currentBazaar.pinnedApps.findIndex(
+      currentBazaar.pinned.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );

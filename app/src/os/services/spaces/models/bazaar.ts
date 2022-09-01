@@ -44,10 +44,14 @@ export const BazaarModel = types
       console.log('BazaarModel.allApps => %o', Array.from(self.apps!.values()));
       return Array.from([...self.apps!.values(), ...NativeAppList]);
     },
+    // todo: sort by recommended rank (liked count)
+    get recommended() {
+      return this.getAppsByTag('recommended');
+    },
     get suite() {
       return this.getAppsByTag('suite');
     },
-    get pinnedApps() {
+    get pinned() {
       return this.getAppsByTag('pinned');
     },
     get recentApps() {
@@ -201,23 +205,6 @@ export const BazaarStore = types
         self.spaces.set(spacePath, bazaar);
       }
     },
-    findApps(searchString: string) {
-      const matches = [];
-      const str = searchString.toLowerCase();
-      console.log('searching for %o in %o...', searchString, toJS(self.apps));
-      for (const app of self.apps) {
-        if (app[1].title.toLowerCase().startsWith(str)) {
-          matches.push(app[1]);
-        }
-      }
-      return matches;
-    },
-    // addApp(app: any) {
-    //   self.apps.set(app.id, app);
-    // },
-    // removeApp(app: any) {
-    //   self.apps.delete(app.id);
-    // },
     hasAlly(ally: any) {
       return self.allies.has(ally.alliance[0]);
     },
@@ -240,7 +227,6 @@ export const BazaarStore = types
           key: key,
         });
       }
-      // self.treaties.splice(0, 0, treaties);
     },
     addBazaar(path: string) {
       console.log('addBazaar => %o', path);

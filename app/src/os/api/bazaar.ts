@@ -204,6 +204,116 @@ export const BazaarApi = {
       });
     });
   },
+  pinApp: async (
+    conduit: Conduit,
+    path: SpacePath,
+    appId: string,
+    rank: number | null
+  ) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          pin: {
+            path: pathObj,
+            'app-id': appId,
+            rank: rank,
+          },
+        },
+        reaction: 'bazaar-reaction.pin',
+        onReaction: (data: any) => {
+          resolve(data['pin']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  unpinApp: async (conduit: Conduit, path: SpacePath, appId: string) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          unpin: {
+            path: pathObj,
+            'app-id': appId,
+          },
+        },
+        reaction: 'bazaar-reaction.unpin',
+        onReaction: (data: any) => {
+          resolve(data['unpin']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  recommendApp: async (conduit: Conduit, path: SpacePath, appId: string) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          recommend: {
+            path: pathObj,
+            'app-id': appId,
+          },
+        },
+        reaction: 'bazaar-reaction.recommend',
+        onReaction: (data: any) => {
+          resolve(data['recommend']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  unrecommendApp: async (conduit: Conduit, path: SpacePath, appId: string) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          unrecommend: {
+            path: pathObj,
+            'app-id': appId,
+          },
+        },
+        reaction: 'bazaar-reaction.unrecommend',
+        onReaction: (data: any) => {
+          resolve(data['unrecommend']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
   loadTreaties: (conduit: Conduit, state: BazaarStoreType): void => {},
   watchUpdates: (conduit: Conduit, state: BazaarStoreType): void => {
     conduit.watch({
@@ -252,28 +362,40 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.removeApp(detail);
       }
       break;
-    case 'add-tag':
+    case 'pin':
       {
-        let detail = data['add-tag'];
-        console.log(detail);
+        const detail = data['pin'];
+        const space = Object.keys(detail)[0];
+        const app = detail[space];
         // @ts-ignore
-        state
-          .getBazaar(detail['space-path'])
-          .addAppTag(detail['app-id'], detail.tag);
+        state.getBazaar(space)?.addApp(app);
       }
       break;
-    case 'remove-tag':
+    case 'unpin':
       {
-        const detail = data['remove-tag'];
-        console.log('removing app tag => %o', {
-          path: detail['space-path'],
-          appId: detail['app-id'],
-          tag: detail.tag,
-        });
+        const detail = data['unpin'];
+        const space = Object.keys(detail)[0];
+        const app = detail[space];
         // @ts-ignore
-        state
-          .getBazaar(detail['space-path'])
-          .removeAppTag(detail['app-id'], detail.tag);
+        state.getBazaar(space)?.addApp(app);
+      }
+      break;
+    case 'recommend':
+      {
+        const detail = data['recommend'];
+        const space = Object.keys(detail)[0];
+        const app = detail[space];
+        // @ts-ignore
+        state.getBazaar(space)?.addApp(app);
+      }
+      break;
+    case 'unrecommend':
+      {
+        const detail = data['unrecommend'];
+        const space = Object.keys(detail)[0];
+        const app = detail[space];
+        // @ts-ignore
+        state.getBazaar(space)?.addApp(app);
       }
       break;
     case 'suite-add':
