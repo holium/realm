@@ -43,6 +43,9 @@ export const BazaarModel = types
       console.log('BazaarModel.allApps => %o', Array.from(self.apps!.values()));
       return Array.from(self.apps!.values());
     },
+    get suite() {
+      return this.getAppsByTag('suite');
+    },
     get pinnedApps() {
       return this.getAppsByTag('pinned');
     },
@@ -190,10 +193,6 @@ export const BazaarStore = types
           const app = spaceApps[desk];
           const appColor = app.color;
           app.color = appColor && cleanNounColor(appColor);
-          // if (spacePath.endsWith('/our')) {
-          //   console.log('adding app to catalog => %o', app);
-          //   self.apps.set(app.id, app);
-          // }
           bazaar.addApp(app);
         }
         self.spaces.set(spacePath, bazaar);

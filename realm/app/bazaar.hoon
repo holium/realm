@@ -328,6 +328,7 @@
     =/  app            (~(got by app-catalog.state) app-id)
     =/  space-apps                      (~(got by space-apps.state) path)
     ?:  (~(has by space-apps) id.app)   !!
+    =/  space-apps                    (remove-at-pos space-apps rank)
     =|  app-header=app-header:store
     =.  tags.app-header               (~(put in tags.app-header) %suite)
     =.  tags.app-header               (~(put in tags.app-header) %installed)
@@ -347,6 +348,20 @@
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%suite-remove path app-id] paths)
+  ::
+  ++  remove-at-pos
+    |=  [apps=app-index-lite:store rank=@ud]
+    :: ^-  app-index-lite:store
+    %-  ~(gas by `app-index-lite:store`~)
+    ^-  (list [=app-id:store =app-lite:store])
+    %-  skim
+    :-  ~(tap by apps)
+    |=  [[id=app-id:store [=app-id:store =app-header:store]]]
+    ::  if the app is part if this space's suite and at the same position
+    ::    as the one being added to the suite, remove
+    ?:  ?&  (~(has in tags.app-header) %suite)
+            =(suite.ranks.app-header rank)
+        ==  %.n  %.y
   --
 ::
 ++  apps

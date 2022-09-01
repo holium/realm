@@ -7,6 +7,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { styled, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { AppRow } from '../../AppRow';
+import { useServices } from 'renderer/logic/store';
 
 type AppSuiteProps = {
   patp: string;
@@ -85,12 +86,11 @@ export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   const { patp, space } = props;
+  const { ship, bazaar } = useServices();
   const [searchMode, setSearchMode] = useState('none');
   const [suite, setSuite] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
   const [suiteIndex, setSuiteIndex] = useState(-1);
-
-  console.log('AppSuite => rendering...');
 
   const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
     console.log('onAppsAction => %o', { path, id: app.id, tag });
@@ -106,7 +106,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
     <>
       <Button
         borderRadius={6}
-        onClick={(e) => onAppsAction(space, app.detail!, 'suite', rank)}
+        onClick={(e) => onAppsAction(space, app, 'suite', rank)}
       >
         Add to Suite
       </Button>
@@ -114,29 +114,16 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   );
 
   useEffect(() => {
-    SpacesActions.getApps(`/${patp}/our`, 'all').then((items: any) => {
-      console.log(items);
-      let apps: any[] = Object.entries(items).map(([key, value], index) => ({
-        desk: key,
-        detail: value,
-      }));
-      setApps(apps || []);
+    console.log('AppSuite useEffect => %o', {
+      ship: ship.patp,
+      path: space.path,
     });
-    SpacesActions.getApps(space.path, 'suite').then((items: any) => {
-      console.log(items);
-      let apps: any[] = Object.entries(items).map(([key, value], index) => ({
-        desk: key,
-        detail: value,
-      }));
-      // @ts-ignore
-      const suite = Array(5).fill(undefined);
-      console.log('suite => %o', suite);
-      apps.forEach((app, index) =>
-        suite.splice(app.detail?.ranks?.suite, 1, app.detail!)
-      );
-      console.log(suite);
-      setSuite(suite);
-    });
+    setApps(bazaar.getBazaar(`/${ship.patp}/our`).allApps);
+    // @ts-ignore
+    const suite = Array(5).fill(undefined);
+    const apps = bazaar.getBazaar(space.path).suite;
+    apps.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
+    setSuite(suite);
   }, [space.path]);
 
   return (
@@ -208,8 +195,8 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
                 {apps.map((item, index) => (
                   <div key={index}>
                     <AppRow
-                      caption={item.desk}
-                      app={item.detail!}
+                      caption={item.id}
+                      app={item}
                       actionRenderer={() =>
                         actionRenderer(space.path, item, suiteIndex)
                       }
