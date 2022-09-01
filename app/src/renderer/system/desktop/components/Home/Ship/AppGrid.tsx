@@ -31,6 +31,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
     const spacePath = spaces.selected?.path!;
     const isAppPinned =
       (currentBazaar && currentBazaar.isAppPinned(app.id)) || false;
+    const isNativeApp =
+      (currentBazaar && currentBazaar.isNativeApp(app.id)) || false;
     return (
       <AppTile
         key={app.title + index + 'grid'}
@@ -42,6 +44,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         contextMenu={[
           {
             label: isAppPinned ? 'Unpin app' : 'Pin to taskbar',
+            disabled: isNativeApp,
             onClick: (evt: any) => {
               evt.stopPropagation();
               isAppPinned

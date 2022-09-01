@@ -1,9 +1,7 @@
 import { types, Instance } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-import { NativeAppList } from '../../../../renderer/apps';
+import { NativeAppList, nativeApps } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob, AppTypes } from '../../ship/models/docket';
-import { toJS } from 'mobx';
-import { Native } from '@stitches/react/types/css-util';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -65,6 +63,9 @@ export const BazaarModel = types
       return [...Array.from(self.apps!.values()), ...NativeAppList]
         .filter((app: any) => recents.includes(app.id))
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
+    },
+    isNativeApp(appId: string) {
+      return nativeApps.hasOwnProperty(appId);
     },
     isAppPinned(appId: string) {
       const app = self.apps.get(appId);
