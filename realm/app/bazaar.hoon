@@ -358,6 +358,7 @@
     =.  suite.ranks.app-header        rank
     =.  space-apps                    (~(put by space-apps) app-id [app-id app-header])
     =.  space-apps.state              (~(put by space-apps.state) path space-apps)
+    ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id app-header det.app]]>}"
     (bazaar:send-reaction [%suite-add path [app-id app-header det.app]] paths)
   ::
   ++  rem-ste
