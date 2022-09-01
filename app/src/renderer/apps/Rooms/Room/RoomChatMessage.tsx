@@ -59,7 +59,7 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
           >
             <Bubble 
             primary={chat.isRightAligned}
-            customBg={chat.isRightAligned ? lighten(0.3, ship?.color!) : lighten(0.1, desktop.theme!.windowColor)}
+            customBg={chat.isRightAligned ? desktop.theme!.accentColor : lighten(0.1, desktop.theme!.windowColor)}
             >
                 <Text
                 color={theme.textColor}
