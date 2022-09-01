@@ -4,6 +4,7 @@ import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
+import EncryptedStore from './encryptedStore';
 import { ShipModelType, ShipModel } from './models/ship';
 import { MSTAction, Patp } from '../../types';
 import { ContactApi } from '../../api/contacts';
@@ -45,7 +46,7 @@ type SubscriptionKey = keyof ShipSubscriptions;
  * ShipService
  */
 export class ShipService extends BaseService {
-  private db?: Store<ShipModelType>;
+  private db?: Store<ShipModelType> | EncryptedStore<ShipModelType>;
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
@@ -151,11 +152,19 @@ export class ShipService extends BaseService {
   }
 
   async subscribe(ship: string, shipInfo: any) {
-    // TODO password protect data
-    this.db = new Store<ShipModelType>({
+    //
+    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    const storeParams = {
       name: 'ship',
       cwd: `realm.${ship}`,
-    });
+      secretKey,
+      accessPropertiesByDotNotation: true,
+    };
+    this.db =
+      process.env.NODE_ENV === 'development'
+        ? new Store<ShipModelType>(storeParams)
+        : new EncryptedStore<ShipModelType>(storeParams);
+
     let persistedState: ShipModelType = this.db.store;
 
     // TODO set up multiple ships properly
@@ -170,10 +179,23 @@ export class ShipService extends BaseService {
       loggedIn: true,
       loader: { state: 'initial' },
     });
-    this.models.chat = loadDMsFromDisk(ship, this.core.onEffect);
-    this.models.contacts = loadContactsFromDisk(ship, this.core.onEffect);
-    this.models.docket = loadDocketFromDisk(ship, this.core.onEffect);
-    this.models.friends = loadFriendsFromDisk(ship, this.core.onEffect);
+    this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
+    this.models.contacts = loadContactsFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
+    this.models.docket = loadDocketFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
+    this.models.friends = loadFriendsFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
+    secretKey = null;
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
@@ -289,10 +311,17 @@ export class ShipService extends BaseService {
       // contacts: { ourPatp: ship.patp },
       // docket: {},
     });
-    this.db = new Store<ShipModelType>({
-      name: `realm.ship.${ship.patp}`,
+
+    const storeParams = {
+      name: 'ship',
+      cwd: `realm.${ship}`,
+      secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
-    });
+    };
+    this.db =
+      process.env.NODE_ENV === 'development'
+        ? new Store<ShipModelType>(storeParams)
+        : new EncryptedStore<ShipModelType>(storeParams);
 
     this.db.store = newShip;
     return newShip;
@@ -300,7 +329,8 @@ export class ShipService extends BaseService {
 
   removeShip(patp: string) {
     const deletedShip = new Store<ShipModelType>({
-      name: `realm.ship.${patp}`,
+      name: 'ship',
+      cwd: `realm.${patp}`,
       accessPropertiesByDotNotation: true,
     });
     deletedShip.clear();

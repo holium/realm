@@ -1,15 +1,22 @@
 import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
-import { ChatStore, ChatStoreType } from '../models/dms';
 import Store from 'electron-store';
+import { ChatStore, ChatStoreType } from '../models/dms';
+import EncryptedStore from '../encryptedStore';
 
 export const loadDMsFromDisk = (
   patp: string,
+  secretKey: string,
   onEffect: (patch: any) => void
 ) => {
-  const persisted = new Store<ChatStoreType>({
-    name: `dms`,
-    cwd: `realm.${patp}`, // base folder
-  });
+  const baseParams = { name: 'dms', cwd: `realm.${patp}` };
+  const persisted =
+    process.env.NODE_ENV === 'development'
+      ? new Store<ChatStoreType>(baseParams)
+      : new EncryptedStore<ChatStoreType>({
+          secretKey,
+          ...baseParams,
+        });
+
   let persistedState: ChatStoreType = persisted.store;
   const isEmpty = Object.keys(persistedState).length === 0;
   const model = ChatStore.create(
