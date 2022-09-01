@@ -1,6 +1,7 @@
 import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
 import { BazaarStore, BazaarStoreType } from './models/bazaar';
 import Store from 'electron-store';
+import { toJS } from 'mobx';
 
 export const loadBazaarFromDisk = (
   patp: string,

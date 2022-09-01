@@ -341,7 +341,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                     ) : (
                       <IconButton
                         ref={submitRef}
-                        luminosity={mode}
+                        luminosity={mode as 'light' | 'dark'}
                         size={24}
                         canFocus={false}
                         onKeyDown={submitDm}

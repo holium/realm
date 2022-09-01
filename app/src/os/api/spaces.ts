@@ -3,6 +3,7 @@ import { MembershipType } from './../services/spaces/models/members';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
+import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -132,7 +133,8 @@ export const SpacesApi = {
   watchUpdates: (
     conduit: Conduit,
     state: SpacesStoreType,
-    membersState: MembershipType
+    membersState: MembershipType,
+    bazaarState: BazaarStoreType
   ): void => {
     conduit.watch({
       app: 'spaces',
@@ -140,7 +142,7 @@ export const SpacesApi = {
       onEvent: async (data: any, _id?: number, mark?: string) => {
         // console.log(mark, data);
         if (mark === 'spaces-reaction') {
-          handleSpacesReactions(data, state, membersState);
+          handleSpacesReactions(data, state, membersState, bazaarState);
         }
       },
       onError: () => console.log('Subscription rejected'),
@@ -152,7 +154,8 @@ export const SpacesApi = {
 const handleSpacesReactions = (
   data: any,
   state: SpacesStoreType,
-  membersState: MembershipType
+  membersState: MembershipType,
+  bazaarState: BazaarStoreType
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
@@ -162,6 +165,7 @@ const handleSpacesReactions = (
     case 'add':
       const newSpace = state.addSpace(data['add']);
       membersState.addMemberMap(newSpace, data['add'].members);
+      bazaarState.addBazaar(newSpace);
       break;
     case 'replace':
       state.updateSpace(data['replace']);

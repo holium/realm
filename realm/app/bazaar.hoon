@@ -3,53 +3,73 @@
 ::
 ::  A store for metadata on app dockets per Realm space.
 ::
-::  Should watch and sync data with %treaty and %docket under /garden.
 ::
-/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passports-store=passports
-/+  dbug, default-agent
-|%
-+$  card  card:agent:gall
-+$  versioned-state
-    $%  state-0
+/-  store=bazaar, docket, spaces-store=spaces
+/-  membership-store=membership, hark=hark-store, passports-store=passports
+/-  treaty
+/+  verb, dbug, default-agent
+=>
+  |%
+  +$  card  card:agent:gall
+  +$  versioned-state
+      $%  state-0
+      ==
+  +$  state-0
+    $:  %0
+        =app-catalog:store
+        space-apps=space-apps-lite:store
     ==
-+$  state-0
-  $:  %0
-      =membership:membership-store
-      =space-apps:store
-  ==
---
+  --
 =|  state-0
 =*  state  -
-%-  agent:dbug
-^-  agent:gall
 =<
+%+  verb  &
+%-  agent:dbug
 |_  =bowl:gall
 +*  this  .
-    def   ~(. (default-agent this %.n) bowl)
+    def   ~(. (default-agent this %|) bowl)
     core   ~(. +> [bowl ~])
 ::
 ++  on-init
   ^-  (quip card _this)
   ::  scry docket for charges
-  :: =/  jon=json  .^(json %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/json)
-  ::  convert charges json to charge data type (defined in docket)
-  :: =/  charges  (charges:dejs:format jon)
-  :: :_  this(charges charges)
+  =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+  ?>  ?=([%initial *] charge-update)
+  =/  apps=app-index-lite:store  (index:apps:core initial.charge-update)
+  =/  our-space             [our.bowl 'our']
+  :: build slimmed down space specific app (metadata) from docket charges (installed apps)
+  =.  space-apps.state      (~(put by space-apps.state) our-space apps)
+  :: build robust app catalog from docket charges (installed apps)
+  =.  app-catalog.state     (catalog:apps:core initial.charge-update)
+  :: ~&  >>>  "{<space-apps.state>}"
   :_  this
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
+      [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
+      [%pass /allies %agent [our.bowl %treaty] %watch /allies]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+      [%pass /bazaar %agent [our.bowl %bazaar] %watch /our]
   ==
-
-++  on-save   !>(~)
-++  on-load   |=(vase `..on-init)
+::
+++  on-save
+  ^-  vase
+  !>(state)
+::
+++  on-load
+  |=  old-state=vase
+  ^-  (quip card:agent:gall agent:gall)
+  =/  old  !<(versioned-state old-state)
+  ?-  -.old
+    %0  `this(state old)
+  ==
 ::
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
+  ~&  >>  "{<dap.bowl>}: {<[mark vase]>}"
   =^  cards  state
   ?+  mark  (on-poke:def mark vase)
-    %app-store-action  (on:action:core !<(action:store vase))
+    %bazaar-action  (on:action:core !<(action:store vase))
   ==
   [cards this]
 ::
@@ -58,23 +78,31 @@
   ^-  (quip card _this)
   =^  cards  state
   ?+  path              (on-watch:def path)
+     :: agent updates
+    [%our ~]
+      ::  only host agent should get our updates
+      ?>  (is-host:core src.bowl)
+      ~&  >>  "{<dap.bowl>}: subscribing to /our"
+      `state
     ::
     [%updates ~]
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
-      (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
+      =/  apps  initial:apps:core
+      ~&  >>  "{<dap.bowl>}: subscribing to /updates"
+      :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
+      (bazaar:send-reaction:core [%initial apps] [/updates ~])
     ::
     [%bazaar @ @ ~]
       :: The space level watch subscription
       =/  host        `@p`(slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-      ~&  >  [i.t.path host space-pth src.bowl]
       :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
       ::  recommends crash on permission check or other failure
       ?>  (check-member:security:core [host space-pth] src.bowl)
-      =/  pth         [our.bowl space-pth]
+      =/  pth         [host space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
-      =/  apps        (~(got by space-apps.state) pth)
+      =/  apps        (space-initial:apps:core pth)
       (bazaar:send-reaction:core [%space-apps pth apps] paths)
     ::
     [%response ~]     ~
@@ -86,39 +114,41 @@
 ++  on-peek
   |=  =path
   ^-  (unit (unit cage))
+
   ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|installed].json
+    ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|installed|all].json
     ::
     [%x @ @ %apps @ ~]
       =/  =ship       (slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-      =/  which  i.t.t.t.t.path
-      ~&  >>  "{<ship>}, {<space-pth>}, {<which>}"
+      =/  which  `@tas`i.t.t.t.t.path
       ?+  which  ``json+!>(~)
         ::
+        %all
+        =/  apps  (view:apps:core [ship space-pth] ~)
+        ?~  apps  ``json+!>([%a ~]) :: empty array
+        ``bazaar-view+!>([%apps u.apps])
+        ::
         %pinned
-        ``json+!>(~)
-          :: =/  apps  (~(get by pinned.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%pinned u.apps]))
+        =/  apps  (view:apps:core [ship space-pth] (some %pinned))
+        ?~  apps  ``json+!>([%a ~]) :: empty array
+        ``bazaar-view+!>([%apps u.apps])
         ::
         %recommended
-        ``json+!>(~)
-          :: =/  apps  (~(get by recommended.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%recommended u.apps]))
+        =/  apps  (view:apps:core [ship space-pth] (some %recommended))
+        ?~  apps  ``json+!>([%a ~]) :: empty array
+        ``bazaar-view+!>([%apps u.apps])
         ::
         %suite
-        ``json+!>(~)
-          :: =/  apps  (~(get by suite.space-apps.state) [ship space-pth])
-          :: ?~  apps      ``json+!>(~)
-          :: ``json+!>((view:enjs:core [%suite u.apps]))
+        =/  apps  (view:apps:core [ship space-pth] (some %suite))
+        ?~  apps  ``json+!>([%a ~]) :: empty array
+        ``bazaar-view+!>([%apps u.apps])
         ::
-        :: %installed
-        ::   =/  apps  (~(get by suite.space-apps.state) [ship space-pth])
-        ::   ?~  apps      ``json+!>(~)
-        ::   ``json+!>((view:enjs:core [%installed u.apps]))
+        %installed
+        =/  apps  (view:apps:core [ship space-pth] (some %installed))
+        ?~  apps  ``json+!>([%a ~]) :: empty array
+        ``bazaar-view+!>([%apps u.apps])
       ==
   ==
 ::
@@ -171,6 +201,72 @@
           ==
       ==
 
+    [%treaties ~]
+      ?+    -.sign  (on-agent:def wire sign)
+        %watch-ack
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /treaties" ~)  `this
+          ~&  >>>  "{<dap.bowl>}: /treaties subscription failed"
+          `this
+    ::
+        %kick
+          ~&  >  "{<dap.bowl>}: /treaties kicked us, resubscribing..."
+          :_  this
+          :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          ==
+    ::
+        %fact
+          ?+    p.cage.sign  (on-agent:def wire sign)
+              %treaty-update-0
+                =^  cards  state
+                  (treaty-update:core !<(=update:treaty:treaty q.cage.sign))
+                [cards this]
+          ==
+      ==
+
+    [%allies ~]
+      ?+    -.sign  (on-agent:def wire sign)
+        %watch-ack
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /allies" ~)  `this
+          ~&  >>>  "{<dap.bowl>}: /allies subscription failed"
+          `this
+    ::
+        %kick
+          ~&  >  "{<dap.bowl>}: /allies kicked us, resubscribing..."
+          :_  this
+          :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          ==
+    ::
+        %fact
+          ?+    p.cage.sign  (on-agent:def wire sign)
+              %ally-update-0
+                =^  cards  state
+                  (ally-update:core !<(=update:ally:treaty q.cage.sign))
+                [cards this]
+          ==
+      ==
+
+    [%bazaar ~]
+      ?+    -.sign  (on-agent:def wire sign)
+        %watch-ack
+          ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to bazaar/updates" ~)  `this
+          ~&  >>>  "{<dap.bowl>}: bazaar/updates subscription failed"
+          `this
+    ::
+        %kick
+          ~&  >  "{<dap.bowl>}: bazaar/updates kicked us, resubscribing..."
+          :_  this
+          :~  [%pass /bazaar %agent [our.bowl %bazaar] %watch /updates]
+          ==
+    ::
+        %fact
+          ?+    p.cage.sign  (on-agent:def wire sign)
+              %bazaar-reaction
+                =^  cards  state
+                  (bazaar-reaction:core !<(=reaction:store q.cage.sign))
+                [cards this]
+          ==
+      ==
+
   ==
 ::
 ++  on-arvo   |=([wire sign-arvo] !!)
@@ -179,6 +275,7 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  core  .
+++  this  .
 ::
 ++  action
   |%
@@ -186,30 +283,402 @@
     |=  =action:store
     ^-  (quip card _state)
     ?-  -.action
-      %pin         (pin +.action)
-      %recommend   (rec +.action)
-      %add         (add +.action)
-      %remove      (rem +.action)
+      %pin               (add-pin +.action)
+      %unpin             (rem-pin +.action)
+      %recommend         (add-rec +.action)
+      %unrecommend       (rem-rec +.action)
+      %suite-add         (add-ste +.action)
+      %suite-remove      (rem-ste +.action)
     ==
   ::
+  ++  add-pin
+    |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
+    ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps            (~(got by space-apps.state) path)
+    =/  app-lite             (~(got by apps) app-id)
+    =.  tags.hdr.app-lite     (~(put in tags.hdr.app-lite) %pinned)
+    =/  rank  ?~(rank (count-apps apps %pinned) u.rank)
+    =.  pinned.ranks.hdr.app-lite   rank
+    =/  apps  (pin apps app-lite)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    (bazaar:send-reaction [%pin path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  rem-pin
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps  (~(got by space-apps.state) path)
+    =/  app-lite   (~(got by apps) app-id)
+    =.  tags.hdr.app-lite  (~(del in tags.hdr.app-lite) %pinned)
+    =/  apps  (unpin apps app-lite)
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    (bazaar:send-reaction [%unpin path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  add-rec
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps                        (~(got by space-apps.state) path)
+    =/  app-lite                         (~(got by apps) app-id)
+    =.  tags.hdr.app-lite                (~(put in tags.hdr.app-lite) %recommended)
+    =.  recommended.ranks.hdr.app-lite   (add recommended.ranks.hdr.app-lite 1)
+    =/  apps                        (~(put by apps) app-id app-lite)
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    (bazaar:send-reaction [%recommend path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  rem-rec
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps  (~(got by space-apps.state) path)
+    =/  app-lite   (~(got by apps) app-id)
+    =.  tags.hdr.app-lite  (~(del in tags.hdr.app-lite) %recommended)
+    =.  recommended.ranks.hdr.app-lite  (sub recommended.ranks.hdr.app-lite 1)
+    =/  apps  (~(put by apps) app-id app-lite)
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    (bazaar:send-reaction [%unrecommend path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  add-ste
+    |=  [path=space-path:spaces-store =app-id:store rank=@ud]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  space-apps                    (~(got by space-apps.state) path)
+    =/  space-apps                    (remove-at-pos space-apps rank)
+    =|  app-header=app-header:store
+    =.  tags.app-header               (~(put in tags.app-header) %suite)
+    =.  tags.app-header               (~(put in tags.app-header) %installed)
+    =.  suite.ranks.app-header        rank
+    =.  space-apps                    (~(put by space-apps) app-id [app-id app-header])
+    =.  space-apps.state              (~(put by space-apps.state) path space-apps)
+    ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id app-header det.app]]>}"
+    (bazaar:send-reaction [%suite-add path [app-id app-header det.app]] paths)
+  ::
+  ++  rem-ste
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps                (~(got by space-apps.state) path)
+    =/  app-lite                 (~(got by apps) app-id)
+    =.  tags.hdr.app-lite        (~(del in tags.hdr.app-lite) %suite)
+    =/  apps                (~(put by apps) app-id app-lite)
+    =.  space-apps.state    (~(put by space-apps.state) path apps)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    (bazaar:send-reaction [%suite-remove path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  remove-at-pos
+    |=  [apps=app-index-lite:store rank=@ud]
+    :: ^-  app-index-lite:store
+    %-  ~(gas by `app-index-lite:store`~)
+    ^-  (list [=app-id:store =app-lite:store])
+    %-  skim
+    :-  ~(tap by apps)
+    |=  [[id=app-id:store [=app-id:store =app-header:store]]]
+    ::  if the app is part if this space's suite and at the same position
+    ::    as the one being added to the suite, remove
+    ?:  ?&  (~(has in tags.app-header) %suite)
+            =(suite.ranks.app-header rank)
+        ==  %.n  %.y
+  ::  count apps in the index that are tagged with tag
+  ++  count-apps
+    |=  [apps=app-index-lite:store =tag:store]
+    ^-  @ud
+    %-  ~(rep by apps)
+    |=  [[=app-id:store =app-lite:store] acc=@ud]
+    ?:  (~(has in tags.hdr.app-lite) tag)  (add acc 1)  acc
+  ::
   ++  pin
-    |=  [path=space-path:spaces-store =app-id:store]
+    |=  [apps=app-index-lite:store app=app-lite:store]
+    ^-  app-index-lite:store
+    %-  ~(rep by apps)
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-lite:store`~]
+      ?:  =(app-id id.app)  (~(put by acc) app-id app)
+      =/  updated-app
+      ?:  (gte pinned.ranks.hdr.app-lite pinned.ranks.hdr.app)
+        =.  pinned.ranks.hdr.app-lite  (add pinned.ranks.hdr.app-lite 1)
+        app-lite
+      app-lite
+      (~(put by acc) app-id updated-app)
+  ::
+  ++  unpin
+    |=  [apps=app-index-lite:store app=app-lite:store]
+    ^-  app-index-lite:store
+    %-  ~(rep by apps)
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-lite:store`~]
+      ::  skip the item we are unpinning
+      ?:  =(id.app app-id)  (~(put by acc) id.app app)
+      =/  updated-app
+      ?:  (lte pinned.ranks.hdr.app-lite pinned.ranks.hdr.app)
+        =.  pinned.ranks.hdr.app-lite  (sub pinned.ranks.hdr.app-lite 1)
+        app-lite
+      app-lite
+      (~(put by acc) app-id updated-app)
+  --
+::
+++  apps
+  |%
+  ++  initial
+    ^-  space-apps-full:store
+    :: scry for now. if performance issues, move back to on-init maybe
+    :: =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+    :: ?>  ?=([%initial *] charge-update)
+    :: =/  charges=(map desk charge:docket)  initial.charge-update
+    %-  ~(rep by space-apps:state)
+    |:  [[=space-path:spaces-store =app-index-lite:store] acc=`space-apps-full:store`~]
+    =/  apps  (view space-path ~)
+    ?~  apps  acc
+    (~(put by acc) space-path u.apps)
+  ::
+  ++  space-initial
+    |=  =space-path:spaces-store
+    ^-  app-index-full:store
+    =/  apps  (~(got by space-apps.state) space-path)
+    %-  ~(rep by apps)
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
+    =/  app  (~(got by app-catalog.state) app-id)
+    =|  app-full=app-full:store
+    =.  id.app-full         app-id
+    =.  hdr.app-full        hdr.app-lite
+    =.  det.app-full        det.app
+    (~(put by acc) app-id app-full)
+  ::
+  ++  view
+    |=  [path=space-path:spaces-store tag=(unit tag:store)]
+    ^-  (unit app-index-full:store)
+    ?.  (~(has by space-apps.state) path)  ~
+    =/  apps  (~(got by space-apps.state) path)
+    =/  result=app-index-full:store
+    %-  ~(rep by apps)
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
+      :: skip if filter is neither %all nor the app tagged with tag
+      ?.  ?|  =(tag ~)
+              ?&  !=(tag ~)
+                  (~(has in tags.hdr.app-lite) (need tag))
+              ==
+          ==  acc
+      :: =/  charge  (~(get by charges.state) app-id)
+      =/  app  (~(get by app-catalog.state) app-id)
+      =|  app-full=app-full:store
+      =.  id.app-full        app-id
+      =.  hdr.app-full       hdr.app-lite
+      ?~  app
+        =.  det.app-full     [%missing ~]
+        (~(put by acc) app-id app-full)
+      =.  tags.hdr.app-full  (~(put in tags.hdr.app-full) %installed)
+      =.  det.app-full      det.u.app
+      (~(put by acc) app-id app-full)
+    ?~(result ~ (some result))
+  ::
+  ++  catalog
+    |=  [charges=(map desk charge:docket)]
+    ^-  app-catalog:store
+    %-  ~(rep by charges)
+    |:  [[=desk =charge:docket] acc=`app-catalog:store`~]
+    (~(put by acc) desk [desk [%urbit docket.charge]])
+  ::
+  ++  index
+    |=  [charges=(map desk charge:docket)]
+    ^-  app-index-lite:store
+    %-  ~(rep by charges)
+    |=  [[=desk =charge:docket] acc=app-index-lite:store]
+      =|  app=app-lite:store
+      =.  id.app          desk
+      :: =.  ship.app  our.bowl
+      =.  tags.hdr.app    (~(put in tags.hdr.app) %installed)
+      =.  ranks.hdr.app   [0 0 0 0]
+      (~(put by acc) desk app)
+  --
+::  bazaar reactions
+++  bazaar-reaction
+  |=  [rct=reaction:store]
+  ^-  (quip card _state)
+  |^
+  ?-  -.rct
+    %initial          (on-initial +.rct)
+    %space-apps       (on-space-apps +.rct)
+    %pin              (on-pin +.rct)
+    %unpin            (on-unpin +.rct)
+    %recommend        (on-rec +.rct)
+    %unrecommend      (on-unrec +.rct)
+    %suite-add        (on-suite-add +.rct)
+    %suite-remove     (on-suite-rem +.rct)
+    %app-installed    `state
+    %app-uninstalled  `state
+  ==
+  ::
+  ++  on-initial
+    |=  [=space-apps-full:store]
     ^-  (quip card _state)
     `state
   ::
-  ++  rec
-    |=  [path=space-path:spaces-store =app-id:store]
+  ::  this reaction comes in as a result of accepting an invitation
+  ::   to a space and then subscribing to the space-path
+  ++  on-space-apps
+    |=  [=space-path:spaces-store =app-index-full:store]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: [on-space-apps] => {<app-index-full>}"
+    ::  get all of 'our' installed apps on this ship, and compare it to the list of
+    ::   space apps to determine the installation status of the app
+    =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+    ?>  ?=([%initial *] charge-update)
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  result=[=app-catalog:store =app-index-lite:store]
+    %-  ~(rep by app-index-full)
+    |=  [[=app-id:store =app-full:store] acc=[=app-catalog:store =app-index-lite:store]]
+    ::  is this app installed?
+    =/  updated-app-full
+      ?:  (~(has by initial.charge-update) app-id)
+        =.  tags.hdr.app-full  (~(put in tags.hdr.app-full) %installed)
+        app-full
+      =.  tags.hdr.app-full  (~(del in tags.hdr.app-full) %installed)
+      app-full
+    =.  app-catalog.acc      (~(put by app-catalog.acc) app-id [id=app-id det=det.updated-app-full])
+    =.  app-index-lite.acc   (~(put by app-index-lite.acc) app-id [id=app-id hdr=hdr.updated-app-full])
+    acc
+    =.  space-apps.state    (~(put by space-apps.state) space-path app-index-lite.result)
+    =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
+    :: :_  state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
+    :: notify the UI of that we've accepted an invite to a new space and there
+    ::   are apps available in this new space
+    (bazaar:send-reaction:core [%space-apps space-path app-index-full] [/updates ~])
+  ::
+  ++  on-pin
+    |=  [path=space-path:spaces-store =app-full:store]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full]>}"
     `state
   ::
-  ++  add
-    |=  [path=space-path:spaces-store =app-id:store]
+  ++  on-unpin
+    |=  [path=space-path:spaces-store =app-full:store]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full]>}"
     `state
   ::
-  ++  rem
-    |=  [path=space-path:spaces-store =app-id:store]
+  ++  on-rec
+    |=  [path=space-path:spaces-store =app-full:store]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
+    `state
+  ::
+  ++  on-unrec
+    |=  [path=space-path:spaces-store =app-full:store]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
+    `state
+  ::
+  ++  on-suite-add
+    |=  [path=space-path:spaces-store =app-full:store]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    `state
+  ::
+  ++  on-suite-rem
+    |=  [path=space-path:spaces-store =app-full:store]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
+    `state
+  --
+::
+:: ++  suite
+::   |%
+::   ++  add
+::     |=  [path=space-path:spaces-store =app:store rank=(unit @ud)]
+::     ^-  @ud
+::     ::  check to see if we have this new app in this ship's catalog
+::     ::   if not add it
+::     =/  catalog-entry  (~(get by app-catalog.state) id.app)
+::     =/  updates=[=app-catalog:store installed=?]
+::     ?~  catalog-entry
+::       [(~(put by app-catalog.state) id.app app) %.n]
+::     [app-catalog.state %.y]
+::     =/  space-apps                      (~(got by space-apps.state) path)
+::     ?:  (~(has by space-apps) id.app)   !!
+::     =|  app-lite=app-lite:store
+::     =.  id.app-lite                    id.app-lite
+::     :: =.  ship.app-entry                  ship.path
+::     =.  tags.app-lite                  (~(put in tags.app-lite) %suite)
+::     =.  tags.app-lite  ?:(=(installed.updates %.y) (~(put in tags.app) %installed) tags.app)
+::     =/  rank                            ?~(rank (lent ~(val by apps)) u.rank)
+::     =.  suite.ranks.app-entry           rank
+::     =/  space-apps                      (~(put by space-apps) id.app-entry app-entry)
+::     ::  update state
+::     =.  space-apps.state                (~(put by space-apps.state) path apps)
+::     =.  app-catalog.state               app.catalog.updates
+::     rank
+::   --
+::
+++  treaty-update
+  |=  [upd=update:treaty:treaty]
+  ^-  (quip card _state)
+  |^
+  ?-  -.upd
+    %ini       (on-ini +.upd)
+    %add       (on-add +.upd)
+    %del       (on-del +.upd)
+  ==
+  ::
+  ++  on-ini
+    |=  [init=(map [=ship =desk] =treaty:treaty)]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: treaty-update [on-initial] => {<init>}"
+    `state
+  ::
+  ++  on-add
+    |=  [=treaty:treaty]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
+    `state
+  ::
+  ++  on-del
+    |=  [=ship =desk]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: treaty-update [on-del] => {<[ship desk]>}"
+    `state
+  --
+::
+++  ally-update
+  |=  [upd=update:ally:treaty]
+  ^-  (quip card _state)
+  |^
+  ?-  -.upd
+    %ini       (on-ini +.upd)
+    %new       (on-new +.upd)
+    %add       (on-add +.upd)
+    %del       (on-del +.upd)
+  ==
+  ::
+  ++  on-ini
+    |=  [init=(map ship alliance:treaty)]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-initial] => {<init>}"
+    `state
+  ::
+  ++  on-new
+    |=  [=ship =alliance:treaty]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
+    `state
+  ::
+  ++  on-add
+    |=  [=ship]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
+    `state
+  ::
+  ++  on-del
+    |=  [=ship]
+    ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: ally-update [on-del] => {<[ship]>}"
     `state
   --
 ::  charge arms
@@ -235,13 +704,16 @@
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
-    `state
+    :: only if done (head is %glob). see garden/sur/docket.hoon for more details
+    ?+  -.chad.charge  `state
+      %glob  (bazaar:send-reaction:core [%app-installed desk [desk [%urbit docket.charge]]] [/updates ~])
+    ==
   ::
   ++  rem
     |=  [=desk]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
-    `state
+    (bazaar:send-reaction:core [%app-uninstalled desk] [/updates ~])
   --
 ::
 ++  spaces-reaction
@@ -253,8 +725,7 @@
     %add            (on-add +.rct)
     %replace        (on-replace +.rct)
     %remove         (on-remove +.rct)
-    %space          (on-space-initial +.rct)
-    %member-added   (on-member-added +.rct)
+    %new-space      (on-new-space +.rct)
   ==
   ::
   ++  on-initial
@@ -274,6 +745,8 @@
   ++  on-add
     |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
+    =.  space-apps.state  (~(put by space-apps.state) path.space ~)
+    :: =.  membership.state  (~(put by membership.state) path.space members)
     `state
   ::
   ++  on-replace
@@ -284,23 +757,20 @@
   ++  on-remove
     |=  [path=space-path:spaces-store]
     ^-  (quip card _state)
-    `state
+    `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
   ::
-  ++  on-space-initial
+  ++  on-new-space
     |=  [path=space-path:spaces-store space=space:spaces-store]
-    ^-  (quip card _state)
-    `state
-  ::
-  ++  on-member-added
-    |=  [path=space-path:spaces-store =ship]
     ^-  (quip card _state)
     :: ?:  ?|  =(our.bowl ship.path)
     ::         =(ship ship.path)
     ::     ==  `state
-    %-  (slog leaf+"{<dap.bowl>}: on-member-added:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
-    `state
-    :: :~  [%pass /passports %agent [ship.path %passports] %watch /members/(scot %p ship.path)/(scot %tas space.path)]
-    :: ==
+    ::  no need to subscribe to our own ship's bazaar. we're already getting all updates
+    ?:  =(our.bowl ship.path)  `state
+    %-  (slog leaf+"{<dap.bowl>}: on-space-initial:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
+    :_  state
+    :~  [%pass /bazaar %agent [ship.path %bazaar] %watch /bazaar/(scot %p ship.path)/(scot %tas space.path)]
+    ==
   --
 ::
 ++  send-reaction
@@ -321,98 +791,14 @@
   ::    add additional security as needed
   ++  check-member
     |=  [path=space-path:spaces-store =ship]
-    =/  members  (~(get by membership.state) path)
-    ?~  members  %.n
-    =/  member  (~(get by u.members) ship)
-    ?~  member  %.n
-    =/  passport  .^(passport:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/passport/[space.path]/noun)
-    ?:(=(status.passport 'joined') %.y %.n)
+    :: =/  members  (~(get by membership.state) path)
+    :: ?~  members  %.n
+    :: =/  member  (~(get by u.members) ship)
+    :: ?~  member  %.n
+    =/  vw  .^(view:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
+    ?>  ?=([%member *] vw)
+    ?:(=(status.passport.vw 'joined') %.y %.n)
   --
-::
-:: ++  dejs
-::   =,  dejs:format
-::   |%
-::   ++  charge-update
-::     |=  jon=json
-::     ^-  ^charge-update:docket
-::     =<  (decode jon)
-::     |%
-::     ++  decode
-::       %-  of
-::       :~  [%initial initial]
-::           [%add-charge add-charge]
-::           [%del-charge del-charge]
-::       ==
-::     ::
-::     ++  initial
-
-::     ::
-::     ++  add-charge
-::       %-  ot
-::       :~  [%desk so]
-::           [%charge chrg]
-::       ==
-::     ::
-::     ++  remove-passport
-::       %-  ot
-::       :~  [%path pth]
-::           [%ship (su ;~(pfix sig fed:ag))]
-::       ==
-::     ::
-::     ++  chrg
-::       %-  ot
-::       :~  [%docket dkt]
-::           [%chad chd]
-::       ==
-::     ::
-::     ++  dkt
-::       %-  ot
-::       :~  [%title so]
-::           [%info so]
-::           [%color nu]
-::           [%href hr]
-::           [%image (un so)]
-::           [%version ]
-::     ++  chd
-::     ::
-::     ++  edit-passport
-::       %-  ot
-::       :~  [%path pth]
-::           [%ship (su ;~(pfix sig fed:ag))]
-::           [%payload payl]
-::       ==
-::     ::
-::     ++  payl
-::       |=  jon=json
-::       ^-  payload
-::       =/  data  ?:(?=([%o *] jon) p.jon ~)
-::       =/  result=payload
-::       %-  ~(rep by data)
-::       |=  [[key=@tas jon=json] obj=payload]
-::       ?+  key  obj
-::          %alias         (~(put in obj) [%alias (so jon)])
-::          %add-roles     (~(put in obj) [%add-roles ((as rol) jon)])
-::          %remove-roles  (~(put in obj) [%remove-roles ((as rol) jon)])
-::       ==
-::       result
-::     ::
-::     ++  pth
-::       %-  ot
-::       :~  [%ship (su ;~(pfix sig fed:ag))]
-::           [%space so]
-::       ==
-::     ::
-::     ++  rol
-::       |=  =json
-::       ^-  role:membership
-::       ?>  ?=(%s -.json)
-::       ?:  =('initiate' p.json)   %initiate
-::       ?:  =('member' p.json)     %member
-::       ?:  =('admin' p.json)      %admin
-::       ?:  =('owner' p.json)      %owner
-::       !!
-::     --
-::   --
 ::
 ++  is-host
   |=  [=ship]

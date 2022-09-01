@@ -24,11 +24,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     : null;
 
   const orderedList = useMemo(
-    () => (currentBazaar ? currentBazaar.pinnedApps! : []),
-    [
-      currentBazaar && currentBazaar.pinned,
-      currentBazaar && currentBazaar.pinnedApps,
-    ]
+    () => (currentBazaar ? currentBazaar.pinned! : []),
+    [currentBazaar && currentBazaar.pinned]
   );
 
   const pinnedApps = useMemo(() => {
@@ -93,6 +90,20 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 app={app}
                 selected={selected}
                 open={open}
+                onAppClick={(evt: any) => {
+                  const selectedApp = app;
+                  if (desktop.isOpenWindow(selectedApp.id)) {
+                    DesktopActions.setActive(
+                      spaces.selected!.path,
+                      selectedApp.id
+                    );
+                  } else {
+                    DesktopActions.openAppWindow(
+                      spaces.selected!.path,
+                      toJS(selectedApp)
+                    );
+                  }
+                }}
                 contextMenu={[
                   {
                     label: 'Unpin',
@@ -124,13 +135,12 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.openAppIds,
     spaces.selected?.path,
     currentBazaar && currentBazaar.pinned,
-    currentBazaar && currentBazaar.pinnedApps,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       currentBazaar &&
-      currentBazaar.pinnedApps.findIndex(
+      currentBazaar.pinned.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );
@@ -164,7 +174,12 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   label: 'Unpin',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    SpacesActions.unpinApp(spaces.selected?.path!, app.id);
+                    SpacesActions.removeAppTag(
+                      spaces.selected?.path!,
+                      app.id,
+                      'pinned'
+                    );
+                    // SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                   },
                 },
                 {

@@ -8,6 +8,7 @@ import { Flex, Input, Icons, IconButton, Sigil } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
+import AppSearchApp from '../AppSearch';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -85,27 +86,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
               />
             )}
           </Flex>
-          <Input
-            flex={8}
-            className="realm-cursor-text-cursor"
-            type="text"
-            placeholder="Search for apps..."
-            bgOpacity={0.3}
-            borderColor={'input.borderHover'}
-            bg="bg.blendedBg"
-            wrapperStyle={{
-              borderRadius: 25,
-              height: 40,
-              width: 500,
-              paddingLeft: 12,
-              paddingRight: 16,
-            }}
-            rightIcon={
-              <Flex>
-                <Icons name="Search" size="18px" opacity={0.5} />
-              </Flex>
-            }
-          />
+          <AppSearchApp />
           <Flex flex={1} justifyContent="flex-end">
             <IconButton
               size={3}

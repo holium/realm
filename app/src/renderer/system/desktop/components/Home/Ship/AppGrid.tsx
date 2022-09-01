@@ -17,18 +17,24 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
   const { docket, spaces, bazaar } = useServices();
 
-  const apps: any = docket
-    ? [...docket.list, ...NativeAppList]
-    : [...NativeAppList];
+  // const [apps, setApps] = useState([])
+
+  // const apps: any = ship
+  //   ? [...ship!.apps, ...NativeAppList]
+  //   : [...NativeAppList];
 
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
-  // console.log(apps);
+
+  const apps: any = currentBazaar?.allApps;
+
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;
     const isAppPinned =
       (currentBazaar && currentBazaar.isAppPinned(app.id)) || false;
+    const isNativeApp =
+      (currentBazaar && currentBazaar.isNativeApp(app.id)) || false;
     return (
       <AppTile
         key={app.title + index + 'grid'}
@@ -40,6 +46,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         contextMenu={[
           {
             label: isAppPinned ? 'Unpin app' : 'Pin to taskbar',
+            disabled: isNativeApp,
             onClick: (evt: any) => {
               evt.stopPropagation();
               isAppPinned
@@ -81,6 +88,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           }
         }
         onAppClick={(selectedApp: AppModelType) => {
+          console.log(selectedApp);
+          SpacesActions.addRecentApp(spaces.selected!.path, selectedApp.id);
           DesktopActions.openAppWindow(
             spaces.selected!.path,
             toJS(selectedApp)
