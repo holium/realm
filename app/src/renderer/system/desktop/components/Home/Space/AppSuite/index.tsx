@@ -123,6 +123,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
     const suite = Array(5).fill(undefined);
     const apps = bazaar.getBazaar(space.path).suite;
     apps.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
+    console.log(suite);
     setSuite(suite);
   }, [space.path]);
 

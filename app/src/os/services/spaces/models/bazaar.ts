@@ -80,6 +80,9 @@ export const BazaarModel = types
   }))
   .actions((self) => ({
     addApp(app: BazaarAppType) {
+      const appColor = app.color;
+      app.color = appColor && cleanNounColor(appColor);
+      console.log('addApp => %o', app);
       self.apps.set(app.id, app);
     },
     findApps(searchString: string) {
@@ -191,8 +194,6 @@ export const BazaarStore = types
         const bazaar = BazaarModel.create({});
         for (const desk in spaceApps) {
           const app = spaceApps[desk];
-          const appColor = app.color;
-          app.color = appColor && cleanNounColor(appColor);
           bazaar.addApp(app);
         }
         self.spaces.set(spacePath, bazaar);

@@ -253,7 +253,10 @@ const AppSearchApp = (props) => {
     }
   }, [searchString]);
   useEffect(() => {
+    setData([]);
     if (searchMode === 'ship-search') {
+      // todo: move into bazaar "main" (no space specific) store
+      //   see bazaar.allies
       SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {
         let data = Object.entries(allies).map(([key, value], index) => ({
           id: key,
@@ -396,7 +399,11 @@ const AppSearchApp = (props) => {
               setSearchMode('dev-app-search');
               setSearchModeArgs([selectedShip]);
             } else if (searchString) {
-              setSearchMode('ship-search');
+              if (searchString.startsWith('~')) {
+                setSearchMode('ship-search');
+              } else {
+                setSearchMode('app-search');
+              }
             } else {
               setSearchMode('start');
             }

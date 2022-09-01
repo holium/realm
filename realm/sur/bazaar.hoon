@@ -85,8 +85,10 @@
 +$  app-catalog             (map app-id app)  :: INCLUDED IN AGENT STATE
 ::
 +$  action
-  $%  [%add-tag path=space-path:spaces =app-id =tag rank=(unit @ud)]
-      [%remove-tag path=space-path:spaces =app-id =tag]
+  $%  [%pin path=space-path:spaces =app-id rank=(unit @ud)]
+      [%unpin path=space-path:spaces =app-id]
+      [%recommend path=space-path:spaces =app-id]
+      [%unrecommend path=space-path:spaces =app-id]
       [%suite-add path=space-path:spaces =app-id rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
   ==
@@ -94,10 +96,12 @@
 +$  reaction
   $%  [%initial =space-apps-full]
       [%space-apps =space-path:spaces =app-index-full]
-      [%add-tag path=space-path:spaces =app-id =tag]
-      [%remove-tag path=space-path:spaces =app-id =tag]
+      [%pin path=space-path:spaces =app-full]
+      [%unpin path=space-path:spaces =app-full]
+      [%recommend path=space-path:spaces =app-full]
+      [%unrecommend path=space-path:spaces =app-full]
       [%suite-add path=space-path:spaces =app-full]
-      [%suite-remove path=space-path:spaces =app-id]
+      [%suite-remove path=space-path:spaces =app-full]
       [%app-installed =app-id =app]
       [%app-uninstalled =app-id]
   ==

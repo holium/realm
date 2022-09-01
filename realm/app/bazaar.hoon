@@ -283,71 +283,94 @@
     |=  =action:store
     ^-  (quip card _state)
     ?-  -.action
-      %add-tag           (add-tag +.action)
-      %remove-tag        (rem-tag +.action)
-      %suite-add         (suite-add +.action)
-      %suite-remove      (suite-remove +.action)
+      %pin               (add-pin +.action)
+      %unpin             (rem-pin +.action)
+      %recommend         (add-rec +.action)
+      %unrecommend       (rem-rec +.action)
+      %suite-add         (add-ste +.action)
+      %suite-remove      (rem-ste +.action)
     ==
   ::
-  ++  add-tag
-    |=  [path=space-path:spaces-store =app-id:store =tag:store rank=(unit @ud)]
+  ++  add-pin
+    |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
     ^-  (quip card _state)
-    ::  installed tags are managed by bazaar agent
-    ?>  !?=(%installed tag)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps            (~(got by space-apps.state) path)
+    =/  app-lite             (~(got by apps) app-id)
+    =.  tags.hdr.app-lite     (~(put in tags.hdr.app-lite) %pinned)
+    =/  rank  ?~(rank (count-apps apps %pinned) u.rank)
+    =.  pinned.ranks.hdr.app-lite   rank
+    =/  apps  (pin apps app-lite)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    (bazaar:send-reaction [%pin path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  rem-pin
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
     =/  apps  (~(got by space-apps.state) path)
-    =/  app  (~(got by apps) app-id)
-    =.  tags.hdr.app  (~(put in tags.hdr.app) tag)
-    ::  only update rank if requested (not null value)
-    :: =.  ranks.app  ?~(rank ranks.app (~(put in ranks.app) tag u.rank))
-    =/  apps  (~(put by apps) app-id app)
+    =/  app-lite   (~(got by apps) app-id)
+    =.  tags.hdr.app-lite  (~(del in tags.hdr.app-lite) %pinned)
+    =/  apps  (unpin apps app-lite)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    :: :_  state(space-apps (~(put by space-apps.state) path apps))
-    (bazaar:send-reaction [%add-tag path app-id tag] paths)
+    (bazaar:send-reaction [%unpin path [app-id hdr.app-lite det.app]] paths)
   ::
-  ++  rem-tag
-    |=  [path=space-path:spaces-store =app-id:store =tag:store]
+  ++  add-rec
+    |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    ::  installed tags are managed by bazaar agent
-    ?>  !?=(%installed tag)
-    =/  apps  (~(got by space-apps.state) path)
-    =/  app  (~(got by apps) app-id)
-    =.  tags.hdr.app  (~(del in tags.hdr.app) tag)
-    =/  apps  (~(put by apps) app-id app)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps                        (~(got by space-apps.state) path)
+    =/  app-lite                         (~(got by apps) app-id)
+    =.  tags.hdr.app-lite                (~(put in tags.hdr.app-lite) %recommended)
+    =.  recommended.ranks.hdr.app-lite   (add recommended.ranks.hdr.app-lite 1)
+    =/  apps                        (~(put by apps) app-id app-lite)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%remove-tag path app-id tag] paths)
-    :: `state(space-apps (~(put by space-apps.state) path apps))
+    (bazaar:send-reaction [%recommend path [app-id hdr.app-lite det.app]] paths)
   ::
-  ++  suite-add
+  ++  rem-rec
+    |=  [path=space-path:spaces-store =app-id:store]
+    ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  apps  (~(got by space-apps.state) path)
+    =/  app-lite   (~(got by apps) app-id)
+    =.  tags.hdr.app-lite  (~(del in tags.hdr.app-lite) %recommended)
+    =.  recommended.ranks.hdr.app-lite  (sub recommended.ranks.hdr.app-lite 1)
+    =/  apps  (~(put by apps) app-id app-lite)
+    =.  space-apps.state  (~(put by space-apps.state) path apps)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    (bazaar:send-reaction [%unrecommend path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  add-ste
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
     =/  app            (~(got by app-catalog.state) app-id)
-    =/  space-apps                      (~(got by space-apps.state) path)
-    ?:  (~(has by space-apps) id.app)   !!
+    =/  space-apps                    (~(got by space-apps.state) path)
     =/  space-apps                    (remove-at-pos space-apps rank)
     =|  app-header=app-header:store
     =.  tags.app-header               (~(put in tags.app-header) %suite)
     =.  tags.app-header               (~(put in tags.app-header) %installed)
     =.  suite.ranks.app-header        rank
-
     =.  space-apps                    (~(put by space-apps) app-id [app-id app-header])
     =.  space-apps.state              (~(put by space-apps.state) path space-apps)
     (bazaar:send-reaction [%suite-add path [app-id app-header det.app]] paths)
   ::
-  ++  suite-remove
+  ++  rem-ste
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
+    =/  app            (~(got by app-catalog.state) app-id)
     =/  apps                (~(got by space-apps.state) path)
-    =/  app                 (~(got by apps) app-id)
-    =.  tags.hdr.app        (~(del in tags.hdr.app) %suite)
-    =/  apps                (~(put by apps) app-id app)
+    =/  app-lite                 (~(got by apps) app-id)
+    =.  tags.hdr.app-lite        (~(del in tags.hdr.app-lite) %suite)
+    =/  apps                (~(put by apps) app-id app-lite)
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%suite-remove path app-id] paths)
+    (bazaar:send-reaction [%suite-remove path [app-id hdr.app-lite det.app]] paths)
   ::
   ++  remove-at-pos
     |=  [apps=app-index-lite:store rank=@ud]
@@ -362,6 +385,40 @@
     ?:  ?&  (~(has in tags.app-header) %suite)
             =(suite.ranks.app-header rank)
         ==  %.n  %.y
+  ::  count apps in the index that are tagged with tag
+  ++  count-apps
+    |=  [apps=app-index-lite:store =tag:store]
+    ^-  @ud
+    %-  ~(rep by apps)
+    |=  [[=app-id:store =app-lite:store] acc=@ud]
+    ?:  (~(has in tags.hdr.app-lite) tag)  (add acc 1)  acc
+  ::
+  ++  pin
+    |=  [apps=app-index-lite:store app=app-lite:store]
+    ^-  app-index-lite:store
+    %-  ~(rep by apps)
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-lite:store`~]
+      ?:  =(app-id id.app)  (~(put by acc) app-id app)
+      =/  updated-app
+      ?:  (gte pinned.ranks.hdr.app-lite pinned.ranks.hdr.app)
+        =.  pinned.ranks.hdr.app-lite  (add pinned.ranks.hdr.app-lite 1)
+        app-lite
+      app-lite
+      (~(put by acc) app-id updated-app)
+  ::
+  ++  unpin
+    |=  [apps=app-index-lite:store app=app-lite:store]
+    ^-  app-index-lite:store
+    %-  ~(rep by apps)
+    |:  [[=app-id:store =app-lite:store] acc=`app-index-lite:store`~]
+      ::  skip the item we are unpinning
+      ?:  =(id.app app-id)  (~(put by acc) id.app app)
+      =/  updated-app
+      ?:  (lte pinned.ranks.hdr.app-lite pinned.ranks.hdr.app)
+        =.  pinned.ranks.hdr.app-lite  (sub pinned.ranks.hdr.app-lite 1)
+        app-lite
+      app-lite
+      (~(put by acc) app-id updated-app)
   --
 ::
 ++  apps
@@ -445,8 +502,10 @@
   ?-  -.rct
     %initial          (on-initial +.rct)
     %space-apps       (on-space-apps +.rct)
-    %add-tag          (on-add-tag +.rct)
-    %remove-tag       (on-rem-tag +.rct)
+    %pin              (on-pin +.rct)
+    %unpin            (on-unpin +.rct)
+    %recommend        (on-rec +.rct)
+    %unrecommend      (on-unrec +.rct)
     %suite-add        (on-suite-add +.rct)
     %suite-remove     (on-suite-rem +.rct)
     %app-installed    `state
@@ -490,16 +549,28 @@
     ::   are apps available in this new space
     (bazaar:send-reaction:core [%space-apps space-path app-index-full] [/updates ~])
   ::
-  ++  on-add-tag
-    |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
+  ++  on-pin
+    |=  [path=space-path:spaces-store =app-full:store]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-add-tag] => {<[path app-id tag]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full]>}"
     `state
   ::
-  ++  on-rem-tag
-    |=  [path=space-path:spaces-store =app-id:store =tag:store] :: rank=(unit @ud)]
+  ++  on-unpin
+    |=  [path=space-path:spaces-store =app-full:store]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-rem-tag] => {<[path app-id tag]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full]>}"
+    `state
+  ::
+  ++  on-rec
+    |=  [path=space-path:spaces-store =app-full:store]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
+    `state
+  ::
+  ++  on-unrec
+    |=  [path=space-path:spaces-store =app-full:store]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
     `state
   ::
   ++  on-suite-add
@@ -511,9 +582,9 @@
     `state
   ::
   ++  on-suite-rem
-    |=  [path=space-path:spaces-store =app-id:store]
+    |=  [path=space-path:spaces-store =app-full:store]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-id]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
     `state
   --
 ::

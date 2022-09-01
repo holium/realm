@@ -93,22 +93,39 @@
           [%app-index-full (app-index-full:encode app-index-full.rct)]
       ==
     ::
-        %add-tag
-      :-  %add-tag
+        %pin
+      :-  %pin
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%app-id s+app-id.rct]
-          [%tag s+(scot %tas tag.rct)]
-          :: [%rank ~]
+          [%app-full (app-full:encode app-full.rct)]
       ==
     ::
-        %remove-tag
-      :-  %remove-tag
+        %unpin
+      :-  %unpin
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%app-id s+app-id.rct]
-          [%tag s+(scot %tas tag.rct)]
-          :: [%rank ~]
+          [%app-full (app-full:encode app-full.rct)]
+      ==
+    ::
+        %suite-add
+      :-  %suite-add
+      %-  pairs
+      :~  ::[%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
+      ==
+    ::
+        %recommend
+      :-  %recommend
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%app-full (app-full:encode app-full.rct)]
+      ==
+    ::
+        %unrecommend
+      :-  %unrecommend
+      %-  pairs
+      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%app-full (app-full:encode app-full.rct)]
       ==
     ::
         %suite-add
