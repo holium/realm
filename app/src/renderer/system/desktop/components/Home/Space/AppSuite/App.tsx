@@ -7,6 +7,8 @@ import { Box, AppTile, Icons } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { BazaarApi } from 'os/api/bazaar';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 const AppEmpty = styled(Box)`
   border-radius: 16px;
@@ -46,7 +48,7 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
                   label: 'Remove from suite',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    // BazaarActions.removeFromAppSuite(space.path, app.id);
+                    SpacesActions.removeFromSuite(space.path, app.id);
                   },
                 },
               ]

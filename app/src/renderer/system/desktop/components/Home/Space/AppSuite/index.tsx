@@ -86,7 +86,7 @@ export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   const { patp, space } = props;
-  const { ship, bazaar } = useServices();
+  const { ship, bazaar, identity } = useServices();
   const [searchMode, setSearchMode] = useState('none');
   const [suite, setSuite] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
@@ -143,7 +143,9 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
       >
         {suite.map(
           (app: any, index: number) =>
-            (app && <SuiteApp key={index} space={space} app={app} />) || (
+            (app && (
+              <SuiteApp key={index} isAdmin={true} space={space} app={app} />
+            )) || (
               <SuiteApp
                 key={index}
                 space={space}

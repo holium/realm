@@ -189,7 +189,7 @@ export const BazaarApi = {
         app: 'bazaar',
         mark: 'bazaar-action',
         json: {
-          'suite-add': {
+          'suite-remove': {
             path: pathObj,
             'app-id': appId,
           },
@@ -409,13 +409,11 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'suite-remove':
       {
+        console.log('suite-remove [reaction] => %o', data);
         const detail = data['suite-remove'];
-        console.log('suite-remove => %o', {
-          path: detail['space-path'],
-          appId: detail['app-id'],
-        });
-        // @ts-ignore
-        state.getBazaar(detail['space-path']).removeFromSuite(detail['app-id']);
+        const space = Object.keys(detail)[0];
+        const appId = detail[space].id;
+        state.getBazaar(space)?.removeAppTag(appId, 'suite');
       }
       break;
     default:
