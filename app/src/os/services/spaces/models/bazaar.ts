@@ -39,7 +39,6 @@ export const BazaarModel = types
   })
   .views((self) => ({
     get allApps() {
-      console.log('BazaarModel.allApps => %o', Array.from(self.apps!.values()));
       return Array.from([...self.apps!.values(), ...NativeAppList]);
     },
     // todo: sort by recommended rank (liked count)
@@ -85,7 +84,6 @@ export const BazaarModel = types
     addApp(app: BazaarAppType) {
       const appColor = app.color;
       app.color = appColor && cleanNounColor(appColor);
-      console.log('addApp => %o', app);
       self.apps.set(app.id, app);
     },
     findApps(searchString: string) {

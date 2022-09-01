@@ -66,6 +66,7 @@ function Content({ children, ...props }) {
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
+          // @ts-ignore
           document.activeElement?.blur();
           e.preventDefault();
         }}
@@ -78,31 +79,31 @@ function Content({ children, ...props }) {
   );
 }
 
-const onAppsAction = (space: string, action: string, app: any) => {
-  console.log('onAppsAction => %o', { action, app });
-  SpacesActions.addAppTag(space, app.id, action).then((data) => {
-    console.log('addAppTag response => %o', data);
-  });
-};
+// const onAppsAction = (space: string, action: string, app: any) => {
+//   console.log('onAppsAction => %o', { action, app });
+//   SpacesActions.addAppTag(space, app.id, action).then((data) => {
+//     console.log('addAppTag response => %o', data);
+//   });
+// };
 
-const actionRenderer = (space: string, app: any) => (
-  <>
-    <Button
-      borderRadius={6}
-      onClick={(e) => onAppsAction(space, 'pinned', app)}
-    >
-      Pin
-    </Button>
+// const actionRenderer = (space: string, app: any) => (
+//   <>
+//     <Button
+//       borderRadius={6}
+//       onClick={(e) => onAppsAction(space, 'pinned', app)}
+//     >
+//       Pin
+//     </Button>
 
-    <Button
-      style={{ marginLeft: 5 }}
-      borderRadius={6}
-      onClick={(e) => onAppsAction(space, 'recommend', app)}
-    >
-      Like
-    </Button>
-  </>
-);
+//     <Button
+//       style={{ marginLeft: 5 }}
+//       borderRadius={6}
+//       onClick={(e) => onAppsAction(space, 'recommend', app)}
+//     >
+//       Like
+//     </Button>
+//   </>
+// );
 
 function renderDevs(space: string, devs: any) {
   if (devs.length === 0) {
@@ -140,7 +141,7 @@ const renderStart = (space: string, bazaar: any) => {
   return (
     <>
       <Flex flexDirection="column" gap={12}>
-        <Text color={'#8f8f8f'} fontWeight={500}>
+        <Text color="text.secondary" fontWeight={500}>
           Recent Apps
         </Text>
         <Flex flexDirection="column" gap={12}>
@@ -234,7 +235,14 @@ export const PopoverContent = Content;
 export const PopoverClose = StyledClose;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
-const AppSearchApp = (props) => {
+interface AppSearchProps {
+  theme: {
+    textColor: string;
+    windowColor: string;
+  };
+}
+
+const AppSearchApp = (props: AppSearchProps) => {
   const { spaces, bazaar } = useServices();
   const [data, setData] = useState<any>([]);
   const [searchMode, setSearchMode] = useState('none');
@@ -242,9 +250,11 @@ const AppSearchApp = (props) => {
   const [searchString, setSearchString] = useState('');
   const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
-  const currentBazaar = spaces.selected
-    ? bazaar.getBazaar(spaces.selected?.path)
-    : null;
+
+  const spacePath: string = spaces.selected?.path!;
+
+  const currentBazaar = spaces.selected ? bazaar.getBazaar(spacePath) : null;
+
   useEffect(() => {
     if (searchMode === 'app-search') {
       const apps = currentBazaar?.findApps(searchString);
@@ -257,7 +267,7 @@ const AppSearchApp = (props) => {
       setData([]);
       // todo: move into bazaar "main" (no space specific) store
       //   see bazaar.allies
-      SpacesActions.getAllies(spaces.selected?.path).then((allies: any) => {
+      SpacesActions.getAllies(spacePath).then((allies: any) => {
         let data = Object.entries(allies).map(([key, value], index) => ({
           id: key,
           name: key,
@@ -278,7 +288,7 @@ const AppSearchApp = (props) => {
         });
       });
     }
-  }, [searchMode, spaces.selected?.path]);
+  }, [searchMode, spacePath]);
 
   const renderDevApps = (apps: Array<any>) => {
     if (apps.length === 0) {
@@ -289,7 +299,7 @@ const AppSearchApp = (props) => {
         <AppRow
           caption={app.title}
           app={app}
-          onClick={(app) => {
+          onClick={(app: any) => {
             setData(app);
             setSearchMode('app-summary');
           }}
@@ -415,8 +425,7 @@ const AppSearchApp = (props) => {
         />
       </PopoverAnchor>
       <PopoverContent sideOffset={5}>
-        {searchMode === 'start' &&
-          renderStart(spaces.selected?.path, currentBazaar)}
+        {searchMode === 'start' && renderStart(spacePath, currentBazaar)}
         {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
         {searchMode === 'dev-app-search' &&
           renderDevAppSearch(searchModeArgs[0], data)}
