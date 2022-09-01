@@ -157,8 +157,9 @@ export const RoomsAppState = types
       }
     },
     setLiveRoom(room: RoomsModelType) {
+      
       self.knownRooms.set(room.id, room);
-      if(self.liveRoom && self.liveRoom.id !== room.id) {
+      if(!self.liveRoom || self.liveRoom.id !== room.id) {
         // clear chat data if a new room
         // todo maybe this logic has a better home elsewhere
         self.chatData.clear();

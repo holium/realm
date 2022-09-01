@@ -89,7 +89,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   // }
 
   return (
-  <Flex flex={2} gap={16} p={2} flexDirection="row" alignItems="center">
+  <Flex flex={2} gap={16} flexDirection="row" alignItems="center">
     <Flex flex={1} flexDirection="column">
         <InfiniteScroll
           // TODO disable scroller
@@ -136,6 +136,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
           flexDirection="row"
           alignItems="center"
           mt={2}
+          mx={3}
           style={{
             gap: 8,
           }}

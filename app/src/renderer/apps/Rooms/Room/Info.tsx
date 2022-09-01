@@ -16,6 +16,7 @@ export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
   const theme = desktop.theme;
 
   const rowGap = 16
+  
 
   return (
     
@@ -33,6 +34,7 @@ export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
           paddingBottom: 16,
           paddingTop: 16,
           maxHeight:300,
+          maxWidth:300,
           // TODO border?
           // borderColor: theme.textColor,
           // borderStyle: 'solid',
@@ -40,6 +42,13 @@ export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
         }}
         >
         <Grid.Column gap={rowGap}>
+          {/* TODO there are UI problems here that are out of my league.
+            tabular stuff hasnt been fully thought through yet.
+            specifically there are nuances with wrapping long strings (room id and moon/comet @ps)
+            and maintaining the grids vertical + horizontal alignment. temp solution is just to scroll,
+            but thats pretty ugly.
+            ~bacwyl-samweg
+             */}
           <Text>Room ID:</Text>
           <Text>Creator:</Text>
 

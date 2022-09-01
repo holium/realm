@@ -113,6 +113,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
               cursors={room!.cursors}
               creator={room!.creator}
               access={room!.access}
+              capacity={room!.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
                 if (!roomsApp.isRoomValid(room!.id)) {
@@ -164,6 +165,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         <IconButton
           onClick={() => {
               RoomsActions.requestAllRooms();
+              RoomsActions.refreshLocalRoom();
             }}
         >
           <Icons opacity={0.8} name="Refresh" size={26} mr={2} />

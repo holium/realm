@@ -116,8 +116,8 @@ export const RoomInvite: FC<InviteRoomProps> = observer((props: InviteRoomProps)
   });
 
   return (
-    <Flex flexDirection="column" flex={1} gap={4} p={2}  alignItems="flex-start">
-      <Flex flexDirection="row" gap={4}>
+    <Flex flexDirection="column" flex={2} gap={4} p={2} alignItems="flex-start">
+      <Flex flexDirection="row" gap={4} width="100%" >
         <Input
             tabIndex={2}
             className="realm-cursor-text-cursor"
@@ -146,26 +146,27 @@ export const RoomInvite: FC<InviteRoomProps> = observer((props: InviteRoomProps)
             }}
             onFocus={() => invitePatp.actions.onFocus()}
             onBlur={() => invitePatp.actions.onBlur()}
-           />
-           <Flex justifyContent="center" alignItems="center">
-              <TextButton
-                style={{ padding: '6px 10px', borderRadius: 6, height: 35, }}
-                showBackground
-                textColor="#0FC383"
-                highlightColor="#0FC383"
-                disabled={!inviteForm.computed.isValid}
-                onClick={(evt: any) => {
-                  evt.preventDefault();
-                  evt.stopPropagation();
-                  inviteForm.actions.submit();
-                }}
-              >
-                  {loading ? <Spinner mx={2} size={0} /> : <Text>Invite</Text> }
-              </TextButton>
-            </Flex>
+          />
+          <Flex justifyContent="center" alignItems="center">
+            <TextButton
+              tabIndex={2}
+              style={{ padding: '6px 10px', borderRadius: 6, height: 35, }}
+              showBackground
+              textColor="#0FC383"
+              highlightColor="#0FC383"
+              disabled={!inviteForm.computed.isValid}
+              onClick={(evt: any) => {
+                evt.preventDefault();
+                evt.stopPropagation();
+                inviteForm.actions.submit();
+              }}
+            >
+                {loading ? <Spinner mx={2} size={0} /> : <Text>Invite</Text> }
+            </TextButton>
           </Flex>
+      </Flex>
           
-          <Flex flexDirection='column' gap={4}>
+          <Flex flexDirection='column' gap={4} width="100%" maxHeight="300px" overflowY={"scroll"} overflowX={"hidden"}>
           {invited.map((patp: string, index: number) => {
             return (
               <Flex key={`room-invited-${patp}-${index}`} mt={4}

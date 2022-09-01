@@ -93,6 +93,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
     roomsApp.liveRoom?.creator.length > 14
       ? `${roomsApp.liveRoom?.creator.substring(0, 14)}...`
       : roomsApp.liveRoom?.creator;
+
+      let peopleText = 'people';
+      if (present!.length === 1) {
+        peopleText = 'person';
+      }
   // console.log(toJS(roomsApp.liveRoom));
   return (
     <Grid.Column
@@ -139,6 +144,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             >
               {roomsApp.liveRoom?.title}
             </Text>
+             
             <Flex>
               {/* <Text fontSize={2} fontWeight={400} opacity={0.7}>
                 {creatorStr}
@@ -147,10 +153,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                 •
               </Text> */}
               <Text fontSize={2} fontWeight={400} opacity={0.7}>
-                {`${roomsApp.liveRoom?.present.length} ${pluralize(
-                  'participant',
-                  roomsApp.liveRoom?.present.length
-                )}`}
+                {`${roomsApp.liveRoom?.present.length} ${peopleText}`}
               </Text>
             </Flex>
           </Flex>
@@ -213,7 +216,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             <IconButton
               className="realm-cursor-hover"
               size={26}
-              color={rgba('#E56262', 0.7)}
+              color={roomsApp.isCreator(ship!.patp!, id) ? rgba('#E56262', 0.7) : undefined }
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();

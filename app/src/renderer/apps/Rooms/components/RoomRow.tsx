@@ -68,9 +68,14 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
               {/* {isLive && <Icons mr={1} color="#4E9EFD" name="RoomSpeaker" />} */}
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text opacity={0.5} fontWeight={400} fontSize={2}>
-                {creator === ship!.patp ? 'You' : creator}
-                {/* {present!.length} {peopleText}{' '} */}
+              {present!.length} {peopleText}{' '}
                 {/* {present!.includes(ship!.patp) && ` - (You)`} */}
+              </Text>
+              <Text ml={2} opacity={0.5} fontWeight={200} fontSize={2}>
+
+                {/* {creator === ship!.patp ? '(You)' : ''} */}
+
+                {present!.includes(ship!.patp) && ` - (You)`}
               </Text>
             </Flex>
           )}
