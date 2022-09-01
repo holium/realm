@@ -24,7 +24,7 @@ export const CourierApi = {
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
-        console.log(data);
+        // console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
@@ -47,18 +47,15 @@ export const CourierApi = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  // Pending dms
   sendDM: async (
     conduit: Conduit,
     ourShip: string,
-    toShip: string, // how do you define the to ship?
+    path: string, // i.e. /dm-inbox/~dev
     contents: any[]
   ) => {
-    const post = createPost(
-      ourShip.substring(1),
-      contents,
-      `/${patp2dec(`~${toShip}`)}`
-    );
+    const to = path.split('/')[2];
+
+    const post = createPost(ourShip.substring(1), contents, `/${patp2dec(to)}`);
 
     const payload = {
       app: 'dm-hook',
@@ -75,6 +72,36 @@ export const CourierApi = {
         },
       },
     };
+    return await conduit.poke(payload);
+  },
+  // Pending dms
+  sendGroupDM: async (
+    conduit: Conduit,
+    ourShip: string,
+    path: string, // i.e. /~fes/~2022.8.31..18.41.37
+    contents: any[]
+  ) => {
+    const split = path.split('/');
+    const host = split[1];
+    const timestamp = split[2];
+    const post = createPost(ourShip.substring(1), contents);
+
+    const payload = {
+      app: 'graph-store',
+      mark: `graph-update-3`,
+      json: {
+        'add-nodes': {
+          resource: { ship: host, name: timestamp },
+          nodes: {
+            [post.index]: {
+              post,
+              children: null,
+            },
+          },
+        },
+      },
+    };
+    // console.log(payload.json, post);
     return await conduit.poke(payload);
   },
   acceptDm: async (conduit: Conduit, toShip: string) => {

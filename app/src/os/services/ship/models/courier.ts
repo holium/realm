@@ -2,6 +2,7 @@ import { Instance, types, applySnapshot } from 'mobx-state-tree';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from 'os/types';
+import { toJS } from 'mobx';
 import { cleanNounColor } from '../../../lib/color';
 import { LoaderModel } from '../../common.model';
 import moment from 'moment';
@@ -139,11 +140,51 @@ const ContactMetadata = types.model({
   nickname: types.maybeNull(types.string),
 });
 
+const GroupLog = types
+  .model('GroupLog', {
+    path: types.string,
+    to: types.array(types.string),
+    type: types.enumeration(['group']),
+    source: types.enumeration(['graph-store', 'chatstead']),
+    messages: types.array(GraphDM),
+    metadata: types.array(ContactMetadata),
+    outgoing: types.array(GraphDM),
+  })
+  .views((self) => ({
+    get list() {
+      return Array.from(self.messages.values());
+    },
+  }))
+  .actions((self) => ({
+    receiveDM: (dm: GraphDMType) => {
+      // console.log(dm);
+      self.messages.unshift(dm);
+      // self.outgoing
+    },
+    sendDM: (patp: Patp, contents: any) => {
+      const author = patp.substring(1);
+      const split = self.path.split('/');
+      const host = split[1];
+      const post = createPost(author, contents, `/${patp2dec(host)}`);
+      self.outgoing.unshift(
+        GraphDM.create({
+          index: post.index,
+          author: author,
+          pending: true,
+          timeSent: post['time-sent'],
+          // @ts-expect-error
+          contents: post.contents,
+        })
+      );
+    },
+  }));
+export type GroupLogType = Instance<typeof GroupLog>;
+
 const DMLog = types
   .model('DMLog', {
-    // path: types.string,
+    path: types.string,
     to: types.string,
-    type: types.enumeration(['group', 'dm', 'pending']),
+    type: types.enumeration(['dm', 'pending']),
     source: types.enumeration(['graph-store', 'chatstead']),
     messages: types.array(GraphDM),
     metadata: ContactMetadata,
@@ -162,7 +203,6 @@ const DMLog = types
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
       const post = createPost(author, contents, `/${patp2dec(self.to)}`);
-      // console.log(post);
       self.outgoing.unshift(
         GraphDM.create({
           index: post.index,
@@ -178,11 +218,15 @@ const DMLog = types
 
 export type DMLogType = Instance<typeof DMLog>;
 
-const DMPreview = types
-  .model('DmPreview', {
-    // path: types.string,
+const CourierLog = types.union({ eager: true }, DMLog, GroupLog);
+
+export type CourierLogType = Instance<typeof CourierLog>;
+
+const PreviewDM = types
+  .model('PreviewDM', {
+    path: types.string,
     to: types.string,
-    type: types.enumeration(['group', 'dm', 'pending']),
+    type: types.enumeration(['dm', 'pending']),
     source: types.enumeration(['graph-store', 'chatstead']),
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
@@ -197,11 +241,38 @@ const DMPreview = types
     },
   }));
 
+export type PreviewDMType = Instance<typeof PreviewDM>;
+
+const PreviewGroupDM = types
+  .model('PreviewGroupDM', {
+    path: types.string,
+    to: types.array(types.string),
+    type: types.enumeration(['group']),
+    source: types.enumeration(['graph-store', 'chatstead']),
+    lastTimeSent: types.number,
+    lastMessage: types.array(MessageContent),
+    metadata: types.array(ContactMetadata),
+    pending: types.optional(types.boolean, false),
+    isNew: types.optional(types.boolean, false),
+  })
+  .actions((self) => ({
+    receiveDM: (dm: GraphDMType) => {
+      // add the sender
+      dm.contents.unshift({ mention: dm.author });
+      self.lastMessage = dm.contents;
+      self.lastTimeSent = dm.timeSent;
+    },
+  }));
+
+export type PreviewGroupDMType = Instance<typeof PreviewGroupDM>;
+
+const DMPreview = types.union({ eager: true }, PreviewDM, PreviewGroupDM);
+
 export type DMPreviewType = Instance<typeof DMPreview>;
 
 export const CourierStore = types
   .model('CourierStore', {
-    dms: types.map(DMLog),
+    dms: types.map(CourierLog),
     previews: types.map(DMPreview),
     loader: types.optional(LoaderModel, { state: 'initial' }),
   })
@@ -218,7 +289,13 @@ export const CourierStore = types
       // console.log(dmPreviews);
       Object.keys(dmPreviews).forEach((key: string) => {
         const preview: any = dmPreviews[key];
-        preview.metadata.color = cleanNounColor(preview.metadata.color);
+        if (preview.type === 'group') {
+          preview.metadata.forEach((mtd: any) => {
+            mtd.color = cleanNounColor(mtd.color);
+          });
+        } else {
+          preview.metadata.color = cleanNounColor(preview.metadata.color);
+        }
       });
       applySnapshot(self.previews, dmPreviews);
       self.loader.set('loaded');
@@ -229,6 +306,7 @@ export const CourierStore = types
         self.dms.set(
           patps[0],
           DMLog.create({
+            path: `/dm-inbox/${patps[0]}`,
             to: patps[0],
             type: type,
             source: 'graph-store',
@@ -240,8 +318,9 @@ export const CourierStore = types
         self.previews.set(
           patps[0],
           DMPreview.create({
+            path: `/dm-inbox/${patps[0]}`,
             to: patps[0],
-            type: type,
+            type: 'type',
             source: 'graph-store',
             lastTimeSent: moment().unix() * 1000,
             lastMessage: [{ text: 'Drafting...' }],
@@ -257,20 +336,21 @@ export const CourierStore = types
       }
     },
     setDMLog: (dmLog: DMLogType) => {
-      self.dms.set(dmLog.to, dmLog);
+      self.dms.set(dmLog.path, dmLog);
     },
     setReceivedDM: (dmLog: DMLogType) => {
-      if (self.dms.has(dmLog.to)) {
+      if (self.dms.has(dmLog.path)) {
         // if the received message already has a log entry
         const newMessage = dmLog.messages[0];
-        self.dms.get(dmLog.to)?.receiveDM(newMessage);
-        self.previews.get(dmLog.to)?.receiveDM(newMessage);
+        self.dms.get(dmLog.path)?.receiveDM(newMessage);
+        self.previews.get(dmLog.path)?.receiveDM(newMessage);
       } else {
         // set a new log entry
-        self.dms.set(dmLog.to, dmLog);
+        self.dms.set(dmLog.path, dmLog);
         self.previews.set(
           dmLog.to,
           DMPreview.create({
+            path: dmLog.path,
             to: dmLog.to,
             type: dmLog.type,
             source: dmLog.source,

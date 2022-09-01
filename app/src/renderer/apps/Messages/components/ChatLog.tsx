@@ -11,6 +11,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 
 interface ChatLogProps {
   loading: boolean;
+  isGroup: boolean;
   messages: GraphDMType[];
 }
 
@@ -22,7 +23,7 @@ const Log = styled(Flex)`
 `;
 
 export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
-  const { loading, messages } = props;
+  const { loading, messages, isGroup } = props;
   const { dimensions } = useTrayApps();
   const { ship, desktop } = useServices();
   const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
@@ -94,6 +95,7 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
         <Flex style={{ height: 58 }} />
         {messages.map((message: any, index: number) => (
           <ChatMessage
+            showAuthor={isGroup}
             key={`${message.index}-${message.timeSent}-${index}`}
             theme={desktop.theme}
             our={ship!.patp}

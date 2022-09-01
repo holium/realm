@@ -158,7 +158,7 @@
         =/  p     ^-(post p.post.node)
         [p]
     ::  Get the last post
-    =/  last              posts
+    =/  last              (rear posts)
     =/  contact           (form-contact-mtd rolo to-ship)
     =/  path              (spat /dm-inbox/(scot %p to-ship))
     [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last (silt ~[contact])]
@@ -357,7 +357,7 @@
     :~ 
         ['avatar' ?~(avatar.mtd ~ s+u.avatar.mtd)]
         ['nickname' s+nickname.mtd]
-        ['color' s+(scot %ux color.mtd)]
+        ['color' s+(scot %ux color.mtd)]  ::  todo convert this to hex string here
     ==
   ::
   ++  index

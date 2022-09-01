@@ -422,23 +422,26 @@ export class ShipService extends BaseService {
     const draft = this.models.courier?.draftNew(patps, metadata);
     return toJS(draft);
   }
-  async sendDm(_event: any, toShip: string, contents: any[]) {
+  async sendDm(_event: any, path: string, contents: any[]) {
     const ourShip = this.state?.patp!;
-    const dmLog = this.models.courier?.dms.get(toShip)!;
+    const dmLog = this.models.courier?.dms.get(path)!;
     dmLog.sendDM(this.state!.patp, contents);
-    // TODO fix send new dm
-    // if (this.state?.chat.dms.get(toShip)) {
-    // } else {
-    //   // this.state?.chat.sendNewDm([toShip], this.con)
-    //   // const dm = this.state?.chat.dms.get(toShip)!;
-    //   // dm.sendDm(contents);
-    // }
-    return await CourierApi.sendDM(
-      this.core.conduit!,
-      ourShip,
-      toShip,
-      contents
-    );
+
+    if (dmLog.type === 'group') {
+      return await CourierApi.sendGroupDM(
+        this.core.conduit!,
+        ourShip,
+        path,
+        contents
+      );
+    } else {
+      return await CourierApi.sendDM(
+        this.core.conduit!,
+        ourShip,
+        path,
+        contents
+      );
+    }
   }
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;

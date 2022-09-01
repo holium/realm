@@ -1,6 +1,7 @@
 import { FC, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba, lighten, darken } from 'polished';
+import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 import {
@@ -11,11 +12,17 @@ import {
   TextButton,
   Spinner,
 } from 'renderer/components';
-import { DMPreviewType } from 'os/services/ship/models/courier';
+import {
+  DMPreviewType,
+  PreviewDMType,
+  PreviewGroupDMType,
+} from 'os/services/ship/models/courier';
 import { Message } from './Message';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
+import { GroupSigil } from './GroupSigil';
+import { Patp } from 'os/types';
 
 type DMContact = {
   theme: ThemeModelType;
@@ -60,6 +67,8 @@ export const MessagePreview = styled(motion.div)`
   user-select: text;
 `;
 
+const getNickname = (patp: Patp, metadata: any[]) => {};
+
 export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
   // const { ship } = useShip();
@@ -67,42 +76,94 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
 
-  let subTitle;
-  const onAccept = (evt: any) => {
-    evt.stopPropagation();
-    setAcceptLoading(true);
-    DmActions.acceptDm(dm.to)
-      .then((response: any) => {
-        console.log('accept ContactRow response', response);
-        setAcceptLoading(false);
-      })
-      .catch(() => {
-        setAcceptLoading(false);
-      });
-    console.log('accepting');
-  };
-  const onDecline = (evt: any) => {
-    evt.stopPropagation();
-    setRejectLoading(true);
-    DmActions.declineDm(dm.to)
-      .then((response: any) => {
-        console.log('response', response);
-        setRejectLoading(false);
-      })
-      .catch(() => {
-        setRejectLoading(false);
-      });
-    console.log('rejecting');
-  };
+  let onAccept,
+    onDecline,
+    subTitle,
+    sigil,
+    to: string,
+    dmModel: PreviewDMType,
+    groupModel: PreviewGroupDMType;
 
-  if (pending) {
-    subTitle = (
-      <Message preview type="text" content={{ text: 'invited you to chat' }} />
+  if (dm.type === 'group') {
+    groupModel = dm as PreviewGroupDMType;
+    to = Array.from(groupModel.to).join(', ');
+    sigil = (
+      <GroupSigil
+        path={groupModel.path}
+        patps={groupModel.to}
+        metadata={groupModel.metadata}
+      />
     );
-  } else {
-    const lastMessage = dm.lastMessage[0];
-    const type = Object.keys(lastMessage)[0];
+    let type = 'text',
+      lastMessage;
+    if (dm.lastMessage.length > 0) {
+      let lastSender = dm.lastMessage[0];
+      lastMessage = dm.lastMessage[1];
+      type = Object.keys(lastMessage)[0];
+      // @ts-ignore
+      lastMessage = { text: `${lastSender.mention}: ${lastMessage[type]}` };
+    } else {
+      lastMessage = { text: 'No messages yet' };
+    }
     subTitle = <Message preview type={type} content={lastMessage} />;
+  } else {
+    dmModel = dm as PreviewDMType;
+    to = dmModel.to;
+    sigil = (
+      <Box mt="2px" opacity={pending ? 0.6 : 1}>
+        <Sigil
+          simple
+          size={28}
+          avatar={dmModel.metadata.avatar}
+          patp={dmModel.to}
+          color={[dmModel.metadata.color || '#000000', 'white']}
+        />
+      </Box>
+    );
+    onAccept = (evt: any) => {
+      evt.stopPropagation();
+      setAcceptLoading(true);
+      DmActions.acceptDm(dmModel.to)
+        .then((response: any) => {
+          console.log('accept ContactRow response', response);
+          setAcceptLoading(false);
+        })
+        .catch(() => {
+          setAcceptLoading(false);
+        });
+      console.log('accepting');
+    };
+    onDecline = (evt: any) => {
+      evt.stopPropagation();
+      setRejectLoading(true);
+      DmActions.declineDm(dmModel.to)
+        .then((response: any) => {
+          console.log('response', response);
+          setRejectLoading(false);
+        })
+        .catch(() => {
+          setRejectLoading(false);
+        });
+      console.log('rejecting');
+    };
+    if (pending) {
+      subTitle = (
+        <Message
+          preview
+          type="text"
+          content={{ text: 'invited you to chat' }}
+        />
+      );
+    } else {
+      let lastMessage = dm.lastMessage[0];
+      let type = 'text';
+      if (lastMessage) {
+        type = Object.keys(lastMessage)[0];
+      } else {
+        lastMessage = { text: 'No messages yet' };
+      }
+      subTitle = <Message preview type={type} content={lastMessage} />;
+    }
   }
 
   const unread = false;
@@ -115,18 +176,10 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       onClick={(evt: any) => !pending && onClick(evt)}
     >
       <Flex flex={1} gap={10}>
-        <Box mt="2px" opacity={pending ? 0.6 : 1}>
-          <Sigil
-            simple
-            size={28}
-            avatar={dm.metadata.avatar}
-            patp={dm.to}
-            color={[dm.metadata.color || '#000000', 'white']}
-          />
-        </Box>
+        {sigil}
         <Flex flexDirection="column" flex={1}>
           <Text opacity={pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
-            {dm.to}
+            {to}
           </Text>
           {subTitle}
         </Flex>

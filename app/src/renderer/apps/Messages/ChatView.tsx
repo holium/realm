@@ -30,7 +30,11 @@ import { createDmForm } from './forms/chatForm';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { DmActions } from 'renderer/logic/actions/chat';
-import { DMPreviewType } from 'os/services/ship/models/courier';
+import {
+  DMPreviewType,
+  PreviewDMType,
+  PreviewGroupDMType,
+} from 'os/services/ship/models/courier';
 import { ChatLog } from './components/ChatLog';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import S3Client from 'renderer/logic/s3/S3Client';
@@ -39,6 +43,7 @@ import {
   useFileUpload,
 } from 'renderer/logic/lib/useFileUpload';
 import { SoundActions } from 'renderer/logic/actions/sound';
+import { GroupSigil } from './components/GroupSigil';
 
 type IProps = {
   theme: ThemeModelType;
@@ -65,18 +70,18 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   const [isSending, setIsSending] = useState(false);
   const [loading, setLoading] = useState(false);
   const { courier } = useServices();
-  const messages = courier.dms.get(selectedChat.to)?.messages || [];
-
+  const messages = courier.dms.get(selectedChat.path)?.messages || [];
+  const resetLoading = () => setLoading(false);
   useEffect(() => {
     if (!selectedChat.isNew) {
       setLoading(true);
-      ShipActions.getDMLog(selectedChat.to)
-        .then(() => {
-          setLoading(false);
-        })
-        .catch(() => {
-          setLoading(false);
-        });
+      let path = selectedChat.path.substring(1);
+      if (selectedChat.type === 'group') {
+        path = `group/${path}`;
+      } else {
+        path = `${path.split('/')[1]}`;
+      }
+      ShipActions.getDMLog(path).then(resetLoading).catch(resetLoading);
     }
     // when unmounted
     return () => {
@@ -134,7 +139,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         const formData = dmForm.actions.submit();
         const dmMessageContent = formData['dm-message'];
         setIsSending(true);
-        DmActions.sendDm(selectedChat.to, dmMessageContent)
+
+        DmActions.sendDm(selectedChat.path, dmMessageContent)
           .then((res) => {
             setIsSending(false);
             SoundActions.playDMSend();
@@ -153,10 +159,44 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
       chatInputRef.current.rows = chatInputRef.current.rows + 1;
     }
   };
+  let sigil: any,
+    to: string,
+    dmModel: PreviewDMType,
+    groupModel: PreviewGroupDMType;
+
+  if (selectedChat.type === 'group') {
+    groupModel = selectedChat as PreviewGroupDMType;
+    to = Array.from(groupModel.to).join(', ');
+    sigil = (
+      <GroupSigil
+        path={groupModel.path}
+        patps={groupModel.to}
+        metadata={groupModel.metadata}
+      />
+    );
+  } else {
+    dmModel = selectedChat as PreviewDMType;
+    to = dmModel.to;
+    sigil = (
+      <Sigil
+        simple
+        size={28}
+        avatar={dmModel.metadata.avatar}
+        patp={dmModel.to}
+        color={[dmModel.metadata.color || '#000000', 'white']}
+      />
+    );
+  }
 
   // Only rerender when the data is different
   const ChatLogMemo = useMemo(
-    () => <ChatLog loading={loading} messages={messages} />,
+    () => (
+      <ChatLog
+        loading={loading}
+        messages={messages}
+        isGroup={selectedChat.type === 'group'}
+      />
+    ),
     [messages]
   );
 
@@ -192,17 +232,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           </IconButton>
         </Flex>
         <Flex flex={1} gap={10} alignItems="center" flexDirection="row">
-          <Box>
-            <Sigil
-              simple
-              size={28}
-              avatar={selectedChat.metadata.avatar}
-              patp={selectedChat.to}
-              color={[selectedChat.metadata.color || '#000000', 'white']}
-            />
-          </Box>
+          <Box>{sigil}</Box>
           <Text fontSize={3} fontWeight={500}>
-            {selectedChat.to}
+            {to}
           </Text>
         </Flex>
         <Flex pl={2} pr={2}>
