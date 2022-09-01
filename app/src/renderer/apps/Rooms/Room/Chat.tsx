@@ -98,7 +98,10 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
           next={() => {
             console.log('load more');
           } }
-          style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
+          style={{ marginLeft: '12px',
+                   display: 'flex',
+                   flexDirection: 'column-reverse'
+                  }} //To put endMessage and loader to the top.
           inverse={true} //
           hasMore={false}
           loader={<h4>Loading...</h4>}
