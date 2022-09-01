@@ -242,18 +242,14 @@ const AppSearchApp = (props) => {
   const [searchString, setSearchString] = useState('');
   const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
-  const isOur = spaces.selected?.type === 'our';
-  const self = this;
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
   useEffect(() => {
     if (searchMode === 'app-search') {
-      if (isOur) {
-        const apps = bazaar.findApps(searchString);
-        console.log(apps);
-        setData(apps);
-      }
+      const apps = currentBazaar?.findApps(searchString);
+      console.log(apps);
+      setData(apps);
     }
   }, [searchString]);
   useEffect(() => {

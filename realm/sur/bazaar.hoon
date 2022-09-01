@@ -87,7 +87,7 @@
 +$  action
   $%  [%add-tag path=space-path:spaces =app-id =tag rank=(unit @ud)]
       [%remove-tag path=space-path:spaces =app-id =tag]
-      [%suite-add path=space-path:spaces =app-id rank=(unit @ud)]
+      [%suite-add path=space-path:spaces =app-id rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
   ==
 ::

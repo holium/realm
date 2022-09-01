@@ -2,7 +2,7 @@ import { types, Instance } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
 import { NativeAppList } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob, AppTypes } from '../../ship/models/docket';
-import { SelectRow } from 'renderer/apps/Spaces/components/SelectionRow';
+import { toJS } from 'mobx';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -17,7 +17,7 @@ const AppRankModel = types.model({
 
 const BazaarApp = types.model({
   id: types.identifier,
-  ship: types.string,
+  // ship: types.string,
   tags: types.array(types.string),
   ranks: AppRankModel,
   title: types.string,
@@ -34,14 +34,9 @@ export type BazaarAppType = Instance<typeof BazaarApp>;
 
 export const BazaarModel = types
   .model({
-    pinned: types.array(types.string),
-    endorsed: DocketMap, // recommended
-    installed: DocketMap, // registered
     recentsApps: types.array(types.string),
     recentsDevs: types.array(types.string),
-    allies: types.array(types.string),
     apps: types.map(BazaarApp),
-    treaties: types.array(types.string),
   })
   .views((self) => ({
     get allApps() {
@@ -59,7 +54,7 @@ export const BazaarModel = types
     },
     get recentDevs() {
       const recents = self.recentsDevs;
-      return [...Array.from(self.installed!.values()), ...NativeAppList]
+      return [...Array.from(self.apps!.values()), ...NativeAppList]
         .filter((app: any) => recents.includes(app.id))
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
@@ -83,6 +78,17 @@ export const BazaarModel = types
   .actions((self) => ({
     addApp(app: BazaarAppType) {
       self.apps.set(app.id, app);
+    },
+    findApps(searchString: string) {
+      const matches = [];
+      const str = searchString.toLowerCase();
+      console.log('searching for %o in %o...', searchString, toJS(self.apps));
+      for (const app of self.apps) {
+        if (app[1].title.toLowerCase().startsWith(str)) {
+          matches.push(app[1]);
+        }
+      }
+      return matches;
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
@@ -129,9 +135,6 @@ export const BazaarModel = types
       this.setAppRank(appId, 'suite', rank);
     },
     setAppRank(appId: string, tag: string, rank: number) {},
-    setAllies(items: string[]) {
-      self.allies.splice(0, 0, ...items);
-    },
   }));
 export type BazaarModelType = Instance<typeof BazaarModel>;
 
@@ -141,7 +144,7 @@ export const BazaarStore = types
     // ourApps: types.map(BazaarApp),
     // space => app metadata for space specific app data
     spaces: types.map(BazaarModel),
-    apps: types.map(BazaarApp),
+    // apps: types.map(BazaarApp),
     treaties: types.map(
       types.model({
         key: types.identifier,
@@ -187,9 +190,10 @@ export const BazaarStore = types
           const app = spaceApps[desk];
           const appColor = app.color;
           app.color = appColor && cleanNounColor(appColor);
-          if (spacePath.endsWith('/our')) {
-            self.apps.set(app.id, app);
-          }
+          // if (spacePath.endsWith('/our')) {
+          //   console.log('adding app to catalog => %o', app);
+          //   self.apps.set(app.id, app);
+          // }
           bazaar.addApp(app);
         }
         self.spaces.set(spacePath, bazaar);
@@ -198,6 +202,7 @@ export const BazaarStore = types
     findApps(searchString: string) {
       const matches = [];
       const str = searchString.toLowerCase();
+      console.log('searching for %o in %o...', searchString, toJS(self.apps));
       for (const app of self.apps) {
         if (app[1].title.toLowerCase().startsWith(str)) {
           matches.push(app[1]);
@@ -205,17 +210,17 @@ export const BazaarStore = types
       }
       return matches;
     },
-    addApp(app: any) {
-      self.apps.set(app.id, app);
-    },
-    removeApp(app: any) {
-      self.apps.remove(app.id);
-    },
+    // addApp(app: any) {
+    //   self.apps.set(app.id, app);
+    // },
+    // removeApp(app: any) {
+    //   self.apps.delete(app.id);
+    // },
     hasAlly(ally: any) {
       return self.allies.has(ally.alliance[0]);
     },
     addAlly(ally: any) {
-      self.allies.add(ally.alliance[0], ally.ship);
+      self.allies.set(ally.alliance[0], ally.ship);
     },
     addTreaty(treaty: any) {
       // self.treaties.push(`${treaty.ship}/${treaty.desk}`);
@@ -238,14 +243,6 @@ export const BazaarStore = types
     addBazaar(path: string) {
       console.log('addBazaar => %o', path);
       self.spaces.set(path, BazaarModel.create({}));
-    },
-    our(ourPath: string, shipApps: any) {
-      console.log('our => %o', { ourPath, shipApps });
-      const ourBazaar = BazaarModel.create({
-        pinned: [],
-        installed: shipApps,
-      });
-      self.spaces.set(ourPath, ourBazaar);
     },
   }));
 

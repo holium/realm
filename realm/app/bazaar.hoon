@@ -103,7 +103,6 @@
       =/  pth         [host space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
       =/  apps        (space-initial:apps:core pth)
-      ~&  >>  "{<dap.bowl>}: sending apps to subscribers => space-apps.state {<space-apps.state>}, {<[pth apps]>}"
       (bazaar:send-reaction:core [%space-apps pth apps] paths)
     ::
     [%response ~]     ~
@@ -116,11 +115,6 @@
   |=  =path
   ^-  (unit (unit cage))
 
-    :: scry for now. if performance issues, move back to on-init maybe
-    =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
-    ?>  ?=([%initial *] charge-update)
-    =/  charges=(map desk charge:docket)  initial.charge-update
-
   ?+    path  (on-peek:def path)
     ::
     ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|installed|all].json
@@ -132,27 +126,27 @@
       ?+  which  ``json+!>(~)
         ::
         %all
-        =/  apps  (view:apps:core charges [ship space-pth] ~)
+        =/  apps  (view:apps:core [ship space-pth] ~)
         ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
         %pinned
-        =/  apps  (view:apps:core charges [ship space-pth] (some %pinned))
+        =/  apps  (view:apps:core [ship space-pth] (some %pinned))
         ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
         %recommended
-        =/  apps  (view:apps:core charges [ship space-pth] (some %recommended))
+        =/  apps  (view:apps:core [ship space-pth] (some %recommended))
         ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
         %suite
-        =/  apps  (view:apps:core charges [ship space-pth] (some %suite))
+        =/  apps  (view:apps:core [ship space-pth] (some %suite))
         ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
         %installed
-        =/  apps  (view:apps:core charges [ship space-pth] (some %installed))
+        =/  apps  (view:apps:core [ship space-pth] (some %installed))
         ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
       ==
@@ -326,16 +320,22 @@
     :: `state(space-apps (~(put by space-apps.state) path apps))
   ::
   ++  suite-add
-    |=  [path=space-path:spaces-store =app-id:store rank=(unit @ud)]
+    |=  [path=space-path:spaces-store =app-id:store rank=@ud]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
-    =/  app  (~(got by app-catalog.state) app-id)
-    `state
-    :: =/  result=[rank=@ud]  (add:suite:core path app (some rank))
-    :: ~&  >>  "space-apps.state => {<space-apps.state>}"
-    :: (bazaar:send-reaction [%suite-add path app rank.result] paths)
+    =/  app            (~(got by app-catalog.state) app-id)
+    =/  space-apps                      (~(got by space-apps.state) path)
+    ?:  (~(has by space-apps) id.app)   !!
+    =|  app-header=app-header:store
+    =.  tags.app-header               (~(put in tags.app-header) %suite)
+    =.  tags.app-header               (~(put in tags.app-header) %installed)
+    =.  suite.ranks.app-header        rank
+
+    =.  space-apps                    (~(put by space-apps) app-id [app-id app-header])
+    =.  space-apps.state              (~(put by space-apps.state) path space-apps)
+    (bazaar:send-reaction [%suite-add path [app-id app-header det.app]] paths)
   ::
   ++  suite-remove
     |=  [path=space-path:spaces-store =app-id:store]
@@ -354,12 +354,12 @@
   ++  initial
     ^-  space-apps-full:store
     :: scry for now. if performance issues, move back to on-init maybe
-    =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
-    ?>  ?=([%initial *] charge-update)
-    =/  charges=(map desk charge:docket)  initial.charge-update
+    :: =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+    :: ?>  ?=([%initial *] charge-update)
+    :: =/  charges=(map desk charge:docket)  initial.charge-update
     %-  ~(rep by space-apps:state)
     |:  [[=space-path:spaces-store =app-index-lite:store] acc=`space-apps-full:store`~]
-    =/  apps  (view charges space-path ~)
+    =/  apps  (view space-path ~)
     ?~  apps  acc
     (~(put by acc) space-path u.apps)
   ::
@@ -367,7 +367,6 @@
     |=  =space-path:spaces-store
     ^-  app-index-full:store
     =/  apps  (~(got by space-apps.state) space-path)
-    ~&  >  "space-initial apps => {<[space-path space-apps.state apps]>}"
     %-  ~(rep by apps)
     |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
     =/  app  (~(got by app-catalog.state) app-id)
@@ -378,7 +377,7 @@
     (~(put by acc) app-id app-full)
   ::
   ++  view
-    |=  [charges=(map desk charge:docket) path=space-path:spaces-store tag=(unit tag:store)]
+    |=  [path=space-path:spaces-store tag=(unit tag:store)]
     ^-  (unit app-index-full:store)
     ?.  (~(has by space-apps.state) path)  ~
     =/  apps  (~(got by space-apps.state) path)
@@ -392,15 +391,15 @@
               ==
           ==  acc
       :: =/  charge  (~(get by charges.state) app-id)
-      =/  charge  (~(get by charges) app-id)
+      =/  app  (~(get by app-catalog.state) app-id)
       =|  app-full=app-full:store
       =.  id.app-full        app-id
       =.  hdr.app-full       hdr.app-lite
-      ?~  charge
+      ?~  app
         =.  det.app-full     [%missing ~]
         (~(put by acc) app-id app-full)
       =.  tags.hdr.app-full  (~(put in tags.hdr.app-full) %installed)
-      =.  det.app-full       [%urbit docket.u.charge]
+      =.  det.app-full      det.u.app
       (~(put by acc) app-id app-full)
     ?~(result ~ (some result))
   ::
@@ -449,6 +448,7 @@
   ++  on-space-apps
     |=  [=space-path:spaces-store =app-index-full:store]
     ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: [on-space-apps] => {<app-index-full>}"
     ::  get all of 'our' installed apps on this ship, and compare it to the list of
     ::   space apps to determine the installation status of the app
     =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
@@ -494,8 +494,6 @@
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
     `state
-    :: =/  result=[rank=@ud]  (add:suite:core path app (some rank))
-    :: (bazaar:send-reaction:core [%suite-add path app rank.result] [/updates ~])
   ::
   ++  on-suite-rem
     |=  [path=space-path:spaces-store =app-id:store]

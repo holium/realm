@@ -248,7 +248,7 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.identity.auth, value.patch);
     }
     if (value.resource === 'bazaar') {
-      console.log('patch => %o', value);
+      console.log('patch huh => %o', value);
       applyPatch(servicesStore.bazaar, value.patch);
     }
     if (value.resource === 'onboarding') {
@@ -284,7 +284,7 @@ OSActions.onEffect((_event: any, value: any) => {
       servicesStore.setShip(ShipModel.create(value.model));
     }
     if (value.resource === 'bazaar') {
-      console.log('patch => %o', value);
+      console.log('patch huh => %o', value);
       applySnapshot(servicesStore.bazaar, value.model);
     }
     if (value.resource === 'auth') {

@@ -279,15 +279,10 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'suite-add':
       {
         const detail = data['suite-add'];
-        console.log('suite-add => %o', {
-          path: detail['space-path'],
-          appId: detail['app-id'],
-          rank: detail.rank,
-        });
+        const space = Object.keys(detail)[0];
+        const app = detail[space];
         // @ts-ignore
-        state
-          .getBazaar(detail['space-path'])
-          .addToSuite(detail['app-id'], detail.rank);
+        state.getBazaar(space)?.addApp(app);
       }
       break;
     case 'suite-remove':

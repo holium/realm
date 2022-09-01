@@ -39,7 +39,7 @@
       %-  ot
       :~  [%path pth]
           [%app-id so]
-          [%rank (mu ni)]
+          [%rank ni]
       ==
     ::
     ++  suite-remove
@@ -114,8 +114,8 @@
         %suite-add
       :-  %suite-add
       %-  pairs
-      :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%app-full (pairs (app-full:encode app.rct))]
+      :~  ::[%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
       ==
     ::
         %suite-remove
@@ -129,13 +129,13 @@
       :-  %app-installed
       %-  pairs
       :~  [%app-id s+app-id.rct]
-          [%app (pairs (dkt:encode app.rct))]
+          [%app (pairs (app-detail:encode det.app.rct))]
       ==
     ::
         %app-uninstalled
       :-  %app-uninstalled
       %-  pairs
-      :~  [%desk s+desk.rct]
+      :~  [%app-id s+app-id.rct]
       ==
     ==
   ::
@@ -176,35 +176,39 @@
     ^-  [cord json]
     [spc-path (app-index-lite index)]
   ::
+  ++  app-detail
+    |=  =app-detail:store
+    ^-  (list [cord json])
+    ?-  -.app-detail
+      ::
+      %native
+        :~  desk+s+desk.native-app.app-detail
+            title+s+title.native-app.app-detail
+            info+s+info.native-app.app-detail
+            color+s+(scot %ux color.native-app.app-detail)
+            image+s+image.native-app.app-detail
+            href+(href href.native-app.app-detail)
+        ==
+      ::
+      %web
+        :~  title+s+title.web-app.app-detail
+            href+s+href.web-app.app-detail
+        ==
+      ::
+      %urbit  (dkt docket.app-detail)
+      ::
+      %missing  ~
+    ==
+  ::
   ++  app-full
     |=  app=app-full:store
     ^-  (list [cord json])
     =/  head=(list [cord json])
     :~  [id+s+id.app]
-        ['ranks' (rnks ranks.app-entry.app-view)]
-        ['tags' a+(turn ~(tap in tags.app-entry.app-view) |=(tg=tag:store s+(scot %tas tg)))]
+        ['ranks' (rnks ranks.hdr.app)]
+        ['tags' a+(turn ~(tap in tags.hdr.app) |=(tg=tag:store s+(scot %tas tg)))]
     ==
-    =/  detail=(list [cord json])
-    ?-  -.detail.app
-      ::
-      %native
-        :~  desk+s+desk.native-app.detail.app
-            title+s+title.native-app.detail.app
-            info+s+info.native-app.detail.app
-            color+s+(scot %ux color.native-app.detail.app)
-            image+s+image.native-app.detail.app
-            href+(href href.native-app.detail.app)
-        ==
-      ::
-      %web
-        :~  title+s+title.web-app.detail.app
-            href+s+href.web-app.detail.app
-        ==
-      ::
-      %urbit  (dkt docket.detail.app)
-      ::
-      %missing  ~
-    ==
+    =/  detail=(list [cord json])  (app-detail:encode det.app)
     ?~  detail  ~  (weld head detail)
   ::
   ++  app-index-full
@@ -214,7 +218,7 @@
     %+  turn  ~(tap by app-index-full)
     |=  [=app-id:store app=app-full:store]
     ^-  [cord json]
-    [app-id (app-full app)]
+    [app-id (pairs (app-full:encode app))]
   ::
   ++  app-index-lite
     |=  =app-index-lite:store
