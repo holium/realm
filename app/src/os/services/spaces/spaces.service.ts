@@ -45,8 +45,6 @@ export class SpacesService extends BaseService {
 
   handlers = {
     'realm.spaces.set-selected': this.setSelected,
-    'realm.spaces.pin-app': this.pinApp,
-    'realm.spaces.unpin-app': this.unpinApp,
     'realm.spaces.set-pinned-order': this.setPinnedOrder,
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
@@ -61,8 +59,10 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.get-recent-apps': this.getRecentApps,
     'realm.spaces.bazaar.add-recent-dev': this.addRecentDev,
     'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
-    'realm.spaces.bazaar.add-app-tag': this.addAppTag,
-    'realm.spaces.bazaar.remove-app-tag': this.removeAppTag,
+    'realm.spaces.bazaar.pin-app': this.pinApp,
+    'realm.spaces.bazaar.unpin-app': this.unpinApp,
+    'realm.spaces.bazaar.recommend-app': this.recommendApp,
+    'realm.spaces.bazaar.unrecommend-app': this.unrecommendApp,
     'realm.spaces.bazaar.suite-add': this.addToSuite,
     'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
     'realm.spaces.bazaar.install-app': this.installApp,
@@ -76,11 +76,22 @@ export class SpacesService extends BaseService {
     selectSpace: (spaceId: string) => {
       return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
-    pinApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.spaces.pin-app', path, appId);
+    pinApp: (path: string, appId: string, rank: number | null = null) => {
+      return ipcRenderer.invoke(
+        'realm.spaces.bazaar.pin-app',
+        path,
+        appId,
+        rank
+      );
     },
     unpinApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.spaces.unpin-app', path, appId);
+      return ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
+    },
+    recommendApp: (path: string, appId: string) => {
+      return ipcRenderer.invoke('realm.spaces.recommend-app', path, appId);
+    },
+    unrecommendApp: (path: string, appId: string) => {
+      return ipcRenderer.invoke('realm.spaces.unrecommend-app', path, appId);
     },
     setPinnedOrder: (path: string, newOrder: any[]) => {
       return ipcRenderer.invoke(
@@ -124,15 +135,6 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
     addRecentDev: async () =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
-    addAppTag: async (path: SpacePath, appId: string, tag: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.add-app-tag', path, appId, tag),
-    removeAppTag: async (path: SpacePath, appId: string, tag: string) =>
-      ipcRenderer.invoke(
-        'realm.spaces.bazaar.remove-app-tag',
-        path,
-        appId,
-        tag
-      ),
     addToSuite: async (path: SpacePath, appId: string, rank: number) =>
       ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
     removeFromSuite: async (path: SpacePath, appId: string) =>
@@ -362,27 +364,37 @@ export class SpacesService extends BaseService {
     return this.models.bazaar.getRecentDevs();
   }
 
-  async addAppTag(
+  async pinApp(
     _event: IpcMainInvokeEvent,
     spacePath: SpacePath,
     appId: string,
-    tag: string
+    rank: number | null
   ) {
-    return await BazaarApi.addAppTag(this.core.conduit!, spacePath, appId, tag);
+    return await BazaarApi.pinApp(this.core.conduit!, spacePath, appId, rank);
   }
 
-  async removeAppTag(
+  async unpinApp(
     _event: IpcMainInvokeEvent,
     spacePath: SpacePath,
-    appId: string,
-    tag: string
+    appId: string
   ) {
-    return await BazaarApi.removeAppTag(
-      this.core.conduit!,
-      spacePath,
-      appId,
-      tag
-    );
+    return await BazaarApi.unpinApp(this.core.conduit!, spacePath, appId);
+  }
+
+  async recommendApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return await BazaarApi.recommendApp(this.core.conduit!, spacePath, appId);
+  }
+
+  async unrecommendApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return await BazaarApi.unrecommendApp(this.core.conduit!, spacePath, appId);
   }
 
   async addToSuite(
@@ -421,21 +433,6 @@ export class SpacesService extends BaseService {
 
   async addAlly(_event: IpcMainInvokeEvent, ship: any) {
     return await BazaarApi.addAlly(this.core.conduit!, ship);
-  }
-
-  async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    console.log('pinning');
-    console.log(path);
-    console.log(this.models.bazaar.getBazaar(path));
-    this.models.bazaar.getBazaar(path).pinApp(appId);
-    return;
-  }
-
-  async unpinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    console.log(path);
-    console.log(this.models.bazaar.getBazaar(path));
-    this.models.bazaar.getBazaar(path).unpinApp(appId);
-    return;
   }
 
   setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {

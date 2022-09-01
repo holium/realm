@@ -67,11 +67,8 @@ export const BazaarModel = types
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
     isAppPinned(appId: string) {
-      return (
-        this.getAppsByTag('pinned').findIndex((item) =>
-          item.tags.includes('pinned')
-        ) !== -1
-      );
+      const app = self.apps.get(appId);
+      return app?.tags.includes('pinned');
     },
     getAppData(appId: string) {
       const apps = Array.from(self.apps!.values());
