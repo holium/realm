@@ -89,7 +89,7 @@
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
       =/  apps  initial:apps:core
-      ~&  >>  "{<dap.bowl>}: subscribing to /updates"
+      ~&  >  "{<dap.bowl>}: sending out {<[apps]>} to UI..."
       :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
       (bazaar:send-reaction:core [%initial apps] [/updates ~])
     ::
@@ -298,14 +298,14 @@
     =/  app            (~(got by app-catalog.state) app-id)
     =/  apps            (~(got by space-apps.state) path)
     =/  app-lite             (~(got by index.apps) app-id)
-    =.  tags.hdr.app-lite     (~(put in tags.hdr.app-lite) %pinned)
+    =.  tags.sieve.app-lite     (~(put in tags.sieve.app-lite) %pinned)
     =/  rank  ?~(rank (count-apps index.apps %pinned) u.rank)
-    =.  pinned.ranks.hdr.app-lite   rank
+    =.  pinned.ranks.sieve.app-lite   rank
     =.  index.apps  (pin index.apps app-lite)
     =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned))
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     =.  space-apps.state  (~(put by space-apps.state) path apps)
-    (bazaar:send-reaction [%pin path [app-id hdr.app-lite det.app] pinned.sorts.apps] paths)
+    (bazaar:send-reaction [%pin path [app-id sieve.app-lite app] pinned.sorts.apps] paths)
   ::
   ++  rem-pin
     |=  [path=space-path:spaces-store =app-id:store]
@@ -313,12 +313,12 @@
     =/  app            (~(got by app-catalog.state) app-id)
     =/  apps  (~(got by space-apps.state) path)
     =/  app-lite   (~(got by index.apps) app-id)
-    =.  tags.hdr.app-lite  (~(del in tags.hdr.app-lite) %pinned)
+    =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %pinned)
     =.  index.apps  (unpin index.apps app-lite)
     =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned))
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%unpin path [app-id hdr.app-lite det.app] pinned.sorts.apps] paths)
+    (bazaar:send-reaction [%unpin path [app-id sieve.app-lite app] pinned.sorts.apps] paths)
   ::
   ++  set-pin-order
     |=  [path=space-path:spaces-store ord=(list app-id:store)]
@@ -338,12 +338,13 @@
     =/  app            (~(got by app-catalog.state) app-id)
     =/  apps                        (~(got by space-apps.state) path)
     =/  app-lite                         (~(got by index.apps) app-id)
-    =.  tags.hdr.app-lite                (~(put in tags.hdr.app-lite) %recommended)
-    =.  recommended.ranks.hdr.app-lite   (add recommended.ranks.hdr.app-lite 1)
+    =.  tags.sieve.app-lite                (~(put in tags.sieve.app-lite) %recommended)
+    =.  recommended.ranks.sieve.app-lite   (add recommended.ranks.sieve.app-lite 1)
     =.  index.apps                        (~(put by index.apps) app-id app-lite)
+    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended))
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%recommend path [app-id hdr.app-lite det.app]] paths)
+    (bazaar:send-reaction [%recommend path [app-id sieve.app-lite app] recommended.sorts.apps] paths)
   ::
   ++  rem-rec
     |=  [path=space-path:spaces-store =app-id:store]
@@ -351,12 +352,13 @@
     =/  app            (~(got by app-catalog.state) app-id)
     =/  apps  (~(got by space-apps.state) path)
     =/  app-lite   (~(got by index.apps) app-id)
-    =.  tags.hdr.app-lite  (~(del in tags.hdr.app-lite) %recommended)
-    =.  recommended.ranks.hdr.app-lite  (sub recommended.ranks.hdr.app-lite 1)
+    =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %recommended)
+    =.  recommended.ranks.sieve.app-lite  (sub recommended.ranks.sieve.app-lite 1)
     =.  index.apps  (~(put by index.apps) app-id app-lite)
+    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended))
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%unrecommend path [app-id hdr.app-lite det.app]] paths)
+    (bazaar:send-reaction [%unrecommend path [app-id sieve.app-lite app] recommended.sorts.apps] paths)
   ::
   ++  add-ste
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
@@ -365,16 +367,17 @@
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
     =/  app            (~(got by app-catalog.state) app-id)
-    =/  space-apps                    (~(got by space-apps.state) path)
-    =.  index.space-apps                    (remove-at-pos index.space-apps rank)
-    =|  app-header=app-header:store
-    =.  tags.app-header               (~(put in tags.app-header) %suite)
-    =.  tags.app-header               (~(put in tags.app-header) %installed)
-    =.  suite.ranks.app-header        rank
-    =.  index.space-apps                    (~(put by index.space-apps) app-id [app-id app-header])
-    =.  space-apps.state              (~(put by space-apps.state) path space-apps)
-    ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id app-header det.app]]>}"
-    (bazaar:send-reaction [%suite-add path [app-id app-header det.app]] paths)
+    =/  apps                    (~(got by space-apps.state) path)
+    =.  index.apps                    (remove-at-pos index.apps rank)
+    =|  sieve=sieve:store
+    =.  tags.sieve               (~(put in tags.sieve) %suite)
+    =.  tags.sieve               (~(put in tags.sieve) %installed)
+    =.  suite.ranks.sieve        rank
+    =.  index.apps                    (~(put by index.apps) app-id [app-id sieve])
+    =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite))
+    =.  space-apps.state              (~(put by space-apps.state) path apps)
+    ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id sieve app]]>}"
+    (bazaar:send-reaction [%suite-add path [app-id sieve app] suite.sorts.apps] paths)
   ::
   ++  rem-ste
     |=  [path=space-path:spaces-store =app-id:store]
@@ -382,11 +385,12 @@
     =/  app            (~(got by app-catalog.state) app-id)
     =/  apps                (~(got by space-apps.state) path)
     =/  app-lite                 (~(got by index.apps) app-id)
-    =.  tags.hdr.app-lite        (~(del in tags.hdr.app-lite) %suite)
+    =.  tags.sieve.app-lite        (~(del in tags.sieve.app-lite) %suite)
     =.  index.apps                (~(put by index.apps) app-id app-lite)
+    =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite))
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%suite-remove path [app-id hdr.app-lite det.app]] paths)
+    (bazaar:send-reaction [%suite-remove path [app-id sieve.app-lite app] suite.sorts.apps] paths)
   ::
   ++  extract-apps
     |=  [=app-index-lite:store =tag:store]
@@ -394,7 +398,7 @@
     %-  skim
     :-  ~(tap by app-index-lite)
     |=  [=app-id:store =app-lite:store]
-    ?:  (~(has in tags.hdr.app-lite) tag)  %.y  %.n
+    ?:  (~(has in tags.sieve.app-lite) tag)  %.y  %.n
   ::
   ++  sort-apps
     |=  [apps=(list [=app-id:store =app-lite:store])]
@@ -404,7 +408,7 @@
       %-  sort
       :-  apps
       |=  [a=[=app-id:store =app-lite:store] b=[=app-id:store =app-lite:store]]
-      (lth pinned.ranks.hdr.app-lite.a pinned.ranks.hdr.app-lite.b)
+      (lth pinned.ranks.sieve.app-lite.a pinned.ranks.sieve.app-lite.b)
     |=  [=app-id:store =app-lite:store]
     app-id
   ::
@@ -415,11 +419,11 @@
     ^-  (list [=app-id:store =app-lite:store])
     %-  skim
     :-  ~(tap by apps)
-    |=  [[id=app-id:store [=app-id:store =app-header:store]]]
+    |=  [[id=app-id:store [=app-id:store =sieve:store]]]
     ::  if the app is part if this space's suite and at the same position
     ::    as the one being added to the suite, remove
-    ?:  ?&  (~(has in tags.app-header) %suite)
-            =(suite.ranks.app-header rank)
+    ?:  ?&  (~(has in tags.sieve) %suite)
+            =(suite.ranks.sieve rank)
         ==  %.n  %.y
   ::  count apps in the index that are tagged with tag
   ++  count-apps
@@ -427,7 +431,7 @@
     ^-  @ud
     %-  ~(rep by apps)
     |=  [[=app-id:store =app-lite:store] acc=@ud]
-    ?:  (~(has in tags.hdr.app-lite) tag)  (add acc 1)  acc
+    ?:  (~(has in tags.sieve.app-lite) tag)  (add acc 1)  acc
   ::
   ++  pin
     |=  [apps=app-index-lite:store app=app-lite:store]
@@ -436,8 +440,8 @@
     |:  [[=app-id:store =app-lite:store] acc=`app-index-lite:store`~]
       ?:  =(app-id id.app)  (~(put by acc) app-id app)
       =/  updated-app
-      ?:  (gte pinned.ranks.hdr.app-lite pinned.ranks.hdr.app)
-        =.  pinned.ranks.hdr.app-lite  (add pinned.ranks.hdr.app-lite 1)
+      ?:  (gte pinned.ranks.sieve.app-lite pinned.ranks.sieve.app)
+        =.  pinned.ranks.sieve.app-lite  (add pinned.ranks.sieve.app-lite 1)
         app-lite
       app-lite
       (~(put by acc) app-id updated-app)
@@ -450,8 +454,8 @@
       ::  skip the item we are unpinning
       ?:  =(id.app app-id)  (~(put by acc) id.app app)
       =/  updated-app
-      ?:  (gth pinned.ranks.hdr.app-lite pinned.ranks.hdr.app)
-        =.  pinned.ranks.hdr.app-lite  (sub pinned.ranks.hdr.app-lite 1)
+      ?:  (gth pinned.ranks.sieve.app-lite pinned.ranks.sieve.app)
+        =.  pinned.ranks.sieve.app-lite  (sub pinned.ranks.sieve.app-lite 1)
         app-lite
       app-lite
       (~(put by acc) app-id updated-app)
@@ -469,7 +473,6 @@
     |:  [[=space-path:spaces-store [=app-index-lite:store =sorts:store]] acc=`space-apps-full:store`~]
     =/  apps  (view space-path ~)
     ?~  apps  acc
-    ~&  >  "{<dap.bowl>}: sending out {<sorts>} to UI..."
     (~(put by acc) space-path [u.apps sorts])
   ::
   ++  space-initial
@@ -481,8 +484,8 @@
     =/  app  (~(got by app-catalog.state) app-id)
     =|  app-full=app-full:store
     =.  id.app-full         app-id
-    =.  hdr.app-full        hdr.app-lite
-    =.  det.app-full        det.app
+    =.  sieve.app-full      sieve.app-lite
+    =.  pkg.app-full        app
     (~(put by acc) app-id app-full)
   ::
   ++  view
@@ -496,19 +499,19 @@
       :: skip if filter is neither %all nor the app tagged with tag
       ?.  ?|  =(tag ~)
               ?&  !=(tag ~)
-                  (~(has in tags.hdr.app-lite) (need tag))
+                  (~(has in tags.sieve.app-lite) (need tag))
               ==
           ==  acc
       :: =/  charge  (~(get by charges.state) app-id)
       =/  app  (~(get by app-catalog.state) app-id)
       =|  app-full=app-full:store
       =.  id.app-full        app-id
-      =.  hdr.app-full       hdr.app-lite
+      =.  sieve.app-full     sieve.app-lite
       ?~  app
-        =.  det.app-full     [%missing ~]
+        =.  pkg.app-full     [%missing ~]
         (~(put by acc) app-id app-full)
-      =.  tags.hdr.app-full  (~(put in tags.hdr.app-full) %installed)
-      =.  det.app-full      det.u.app
+      =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
+      =.  pkg.app-full      u.app
       (~(put by acc) app-id app-full)
     ?~(result ~ (some result))
   ::
@@ -517,7 +520,7 @@
     ^-  app-catalog:store
     %-  ~(rep by charges)
     |:  [[=desk =charge:docket] acc=`app-catalog:store`~]
-    (~(put by acc) desk [desk [%urbit docket.charge]])
+    (~(put by acc) desk [%urbit docket.charge])
   ::
   ++  index
     |=  [charges=(map desk charge:docket)]
@@ -527,8 +530,8 @@
       =|  app=app-lite:store
       =.  id.app          desk
       :: =.  ship.app  our.bowl
-      =.  tags.hdr.app    (~(put in tags.hdr.app) %installed)
-      =.  ranks.hdr.app   [0 0 0]
+      =.  tags.sieve.app    (~(put in tags.sieve.app) %installed)
+      =.  ranks.sieve.app   [0 0 0]
       (~(put by acc) desk app)
   --
 ::  bazaar reactions
@@ -546,6 +549,7 @@
     %unrecommend      (on-unrec +.rct)
     %suite-add        (on-suite-add +.rct)
     %suite-remove     (on-suite-rem +.rct)
+    %set-suite-order  (on-set-suite-order +.rct)
     %app-installed    `state
     %app-uninstalled  `state
   ==
@@ -573,12 +577,12 @@
     ::  is this app installed?
     =/  updated-app-full
       ?:  (~(has by initial.charge-update) app-id)
-        =.  tags.hdr.app-full  (~(put in tags.hdr.app-full) %installed)
+        =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
         app-full
-      =.  tags.hdr.app-full  (~(del in tags.hdr.app-full) %installed)
+      =.  tags.sieve.app-full  (~(del in tags.sieve.app-full) %installed)
       app-full
-    =.  app-catalog.acc      (~(put by app-catalog.acc) app-id [id=app-id det=det.updated-app-full])
-    =.  app-index-lite.acc   (~(put by app-index-lite.acc) app-id [id=app-id hdr=hdr.updated-app-full])
+    =.  app-catalog.acc      (~(put by app-catalog.acc) app-id pkg.updated-app-full)
+    =.  app-index-lite.acc   (~(put by app-index-lite.acc) app-id [app-id sieve.updated-app-full])
     acc
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result *sorts:store])
     =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
@@ -606,19 +610,19 @@
     `state
   ::
   ++  on-rec
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
     ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
     `state
   ::
   ++  on-unrec
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
     ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
     `state
   ::
   ++  on-suite-add
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
     ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
@@ -626,9 +630,15 @@
     `state
   ::
   ++  on-suite-rem
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
     ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
+    `state
+  ::
+  ++  on-set-suite-order
+    |=  [path=space-path:spaces-store ord=(list app-id:store)]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [set-suite-order] => {<[path ord]>}"
     `state
   --
 ::
@@ -749,7 +759,7 @@
     ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
-      %glob  (bazaar:send-reaction:core [%app-installed desk [desk [%urbit docket.charge]]] [/updates ~])
+      %glob  (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge]] [/updates ~])
     ==
   ::
   ++  rem

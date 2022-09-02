@@ -145,7 +145,7 @@ const renderStart = (space: string, bazaar: any) => {
           Recent Apps
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderApps(space, bazaar.recentApps)}
+          {renderApps(space, bazaar.recentAppList)}
         </Flex>
       </Flex>
       <div style={{ marginTop: '12px', marginBottom: '12px' }}>

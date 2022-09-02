@@ -126,32 +126,38 @@
         %recommend
       :-  %recommend
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
       ==
     ::
         %unrecommend
       :-  %unrecommend
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
       ==
     ::
         %suite-add
       :-  %suite-add
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
       ==
     ::
         %suite-remove
       :-  %suite-remove
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      ==
+    ::
+        %set-suite-order
+      :-  %set-suite-order
+      %-  pairs
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (srt:encode ord.rct))]
       ==
     ::
         %app-installed
       :-  %app-installed
       %-  pairs
       :~  [%app-id s+app-id.rct]
-          [%app (pairs (app-detail:encode det.app.rct))]
+          [%app (pairs (app-detail:encode app.rct))]
       ==
     ::
         %app-uninstalled
@@ -219,25 +225,25 @@
     (pairs (weld (lite-app-index index) (app-sorts sorts)))
   ::
   ++  app-detail
-    |=  =app-detail:store
+    |=  =app:store
     ^-  (list [cord json])
-    ?-  -.app-detail
+    ?-  -.app
       ::
       %native
-        :~  desk+s+desk.native-app.app-detail
-            title+s+title.native-app.app-detail
-            info+s+info.native-app.app-detail
-            color+s+(scot %ux color.native-app.app-detail)
-            image+s+image.native-app.app-detail
-            href+(href href.native-app.app-detail)
+        :~  desk+s+desk.native-app.app
+            title+s+title.native-app.app
+            info+s+info.native-app.app
+            color+s+(scot %ux color.native-app.app)
+            image+s+image.native-app.app
+            href+(href href.native-app.app)
         ==
       ::
       %web
-        :~  title+s+title.web-app.app-detail
-            href+s+href.web-app.app-detail
+        :~  title+s+title.web-app.app
+            href+s+href.web-app.app
         ==
       ::
-      %urbit  (dkt docket.app-detail)
+      %urbit  (dkt docket.app)
       ::
       %missing  ~
     ==
@@ -253,10 +259,10 @@
     ^-  (list [cord json])
     =/  head=(list [cord json])
     :~  [id+s+id.app]
-        ['ranks' (rnks ranks.hdr.app)]
-        ['tags' a+(turn ~(tap in tags.hdr.app) |=(tg=tag:store s+(scot %tas tg)))]
+        ['ranks' (rnks ranks.sieve.app)]
+        ['tags' a+(turn ~(tap in tags.sieve.app) |=(tg=tag:store s+(scot %tas tg)))]
     ==
-    =/  detail=(list [cord json])  (app-detail:encode det.app)
+    =/  detail=(list [cord json])  (app-detail:encode pkg.app)
     ?~  detail  ~  (weld head detail)
   ::
   ++  full-app-index
@@ -281,8 +287,8 @@
     %-  pairs
     :~  [%id s+id.app]
         :: ['ship' s+(scot %p ship.app-entry)]
-        ['ranks' (rnks ranks.hdr.app)]
-        ['tags' a+(turn ~(tap in tags.hdr.app) |=(tg=tag:store s+(scot %tas tg)))]
+        ['ranks' (rnks ranks.sieve.app)]
+        ['tags' a+(turn ~(tap in tags.sieve.app) |=(tg=tag:store s+(scot %tas tg)))]
     ==
   ::
   ++  dkt

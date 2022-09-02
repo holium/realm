@@ -31,14 +31,12 @@ const BazaarApp = types.model({
 export type BazaarAppType = Instance<typeof BazaarApp>;
 
 export const BazaarModel = types
-  .model({
-    recentsApps: types.array(types.string),
-    recentsDevs: types.array(types.string),
-    sorts: types.model({
-      pinned: types.array(types.string),
-      recommended: types.array(types.string),
-      suite: types.array(types.string),
-    }),
+  .model('BazaarModel', {
+    recentApps: types.array(types.string),
+    recentDevs: types.array(types.string),
+    pinned: types.array(types.string),
+    recommended: types.array(types.string),
+    suite: types.array(types.string),
     apps: types.map(BazaarApp),
   })
   .views((self) => ({
@@ -46,26 +44,29 @@ export const BazaarModel = types
       return Array.from([...self.apps!.values(), ...NativeAppList]);
     },
     // todo: sort by recommended rank (liked count)
-    get recommended() {
-      return this.getAppsByTag('recommended');
-    },
-    get suite() {
-      return this.getAppsByTag('suite');
-    },
-    get pinned() {
-      console.log('pinned => %o', self.sorts.pinned);
-      return self.sorts.pinned.map((appId, index) => ({
+    get recommendedApps() {
+      return self.recommended.map((appId, index) => ({
         ...self.apps.get(appId),
       }));
     },
-    get recentApps() {
-      const recents = self.recentsApps;
+    get suiteApps() {
+      return self.suite.map((appId, index) => ({
+        ...self.apps.get(appId),
+      }));
+    },
+    get pinnedApps() {
+      return self.pinned.map((appId, index) => ({
+        ...self.apps.get(appId),
+      }));
+    },
+    get recentAppList() {
+      const recents = self.recentApps;
       return [...Array.from(self.apps!.values()), ...NativeAppList]
         .filter((app: any) => recents.includes(app.id))
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
-    get recentDevs() {
-      const recents = self.recentsDevs;
+    get recentDevList() {
+      const recents = self.recentDevs;
       return [...Array.from(self.apps!.values()), ...NativeAppList]
         .filter((app: any) => recents.includes(app.id))
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
@@ -76,18 +77,15 @@ export const BazaarModel = types
     isAppPinned(appId: string) {
       return self.pinned.includes(appId);
     },
-    getAppData(appId: string) {
-      const apps = Array.from(self.apps!.values());
-      return [...apps, ...NativeAppList].find((app: any) => app.id === appId);
-    },
-    getAppsByTag(tag: string) {
-      const apps = Array.from(self.apps!.values());
-      const result = apps.filter((app: any) => app.tags.includes(tag));
-      return result || [];
-    },
   }))
   .actions((self) => ({
     addApp(app: BazaarAppType) {
+      const appColor = app.color;
+      app.color = appColor && cleanNounColor(appColor);
+      self.apps.set(app.id, app);
+    },
+    updateApp(app: BazaarAppType) {
+      console.log('updating app => %o', app);
       const appColor = app.color;
       app.color = appColor && cleanNounColor(appColor);
       self.apps.set(app.id, app);
@@ -105,29 +103,29 @@ export const BazaarModel = types
       // return matches;
     },
     setPinnedApps(apps: any) {
-      self.sorts.pinned.replace(apps);
+      self.pinned.replace(apps);
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
-      if (self.recentsApps.length >= 5) {
-        self.recentsApps.pop();
+      if (self.recentApps.length >= 5) {
+        self.recentApps.pop();
       }
       // move the app up to the top if it already exists in the list
-      const idx = self.recentsApps.findIndex((item) => item === appId);
-      if (idx !== -1) self.recentsApps.splice(idx, 1);
+      const idx = self.recentApps.findIndex((item) => item === appId);
+      if (idx !== -1) self.recentApps.splice(idx, 1);
       // add app to front of list
-      self.recentsApps.splice(0, 0, appId);
+      self.recentApps.splice(0, 0, appId);
     },
     addRecentDev(shipId: string) {
       // keep no more than 5 recent app entries
-      if (self.recentsDevs.length >= 5) {
-        self.recentsDevs.pop();
+      if (self.recentDevs.length >= 5) {
+        self.recentDevs.pop();
       }
       // move the app up to the top if it already exists in the list
-      const idx = self.recentsDevs.findIndex((item) => item === shipId);
-      if (idx !== -1) self.recentsDevs.splice(idx, 1);
+      const idx = self.recentDevs.findIndex((item) => item === shipId);
+      if (idx !== -1) self.recentDevs.splice(idx, 1);
       // add app to front of list
-      self.recentsDevs.splice(0, 0, shipId);
+      self.recentDevs.splice(0, 0, shipId);
     },
     addAppTag(appId: string, tag: string) {
       let app = self.apps.get(appId);
@@ -146,12 +144,6 @@ export const BazaarModel = types
         self.apps.set(appId, app);
       }
     },
-    addToSuite(appId: string, rank: number) {
-      console.log('addToSuite...');
-      this.addAppTag(appId, 'suite');
-      this.setAppRank(appId, 'suite', rank);
-    },
-    setAppRank(appId: string, tag: string, rank: number) {},
   }));
 export type BazaarModelType = Instance<typeof BazaarModel>;
 
@@ -197,13 +189,14 @@ export const BazaarStore = types
   }))
   .actions((self) => ({
     initial(apps: any) {
-      // applySnapshot(self.spaces, apps['space-apps']);
       const catalog = apps['space-apps'];
-      console.log('initial => %o', catalog);
+      console.log('catalog => %o', catalog);
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
         const bazaar = BazaarModel.create({
-          sorts: entry.sorts,
+          pinned: entry.sorts.pinned,
+          recommended: entry.sorts.recommended,
+          suite: entry.sorts.suite,
         });
         for (const desk in entry.apps) {
           const app = entry.apps[desk];

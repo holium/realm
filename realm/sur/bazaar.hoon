@@ -54,22 +54,29 @@
 :: +$  ranks   [default=@ud pinned=@ud recommended=@ud suite=@ud]
 +$  ranks   [pinned=@ud recommended=@ud suite=@ud]
 ::
-::  $app-header: space specific metadata
-+$  app-header
+::  $sieve: space specific metadata
++$  sieve
   $:  =ranks
       =tags
   ==
+
+:: +$  sieve
+::   $:  mesh=?(%pinned %recommended %suite)
+::       rank=@ud
+::       order=(list app-id)
+::       tags=(set tag)
+::   ==
 ::  $app-detail: space independent app detail
-+$  app-detail
++$  app
   $%  [%native =native-app]
       [%web =web-app]
       [%urbit =docket:docket]
       [%missing ~]
   ==
 ::
-+$  app                     [id=app-id det=app-detail]
-+$  app-lite                [id=app-id hdr=app-header]
-+$  app-full                [id=app-id hdr=app-header det=app-detail]
+:: +$  app                     [=app]
++$  app-lite                [id=app-id =sieve]
++$  app-full                [id=app-id =sieve pkg=app]
 
 ::  various organizations of data (transient/ephemeral datasets)
 ::   used to facilitate scrying and data transfers between other
@@ -108,10 +115,11 @@
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]
       [%set-pin-order path=space-path:spaces ord=(list app-id)]
-      [%recommend path=space-path:spaces =app-full]
-      [%unrecommend path=space-path:spaces =app-full]
-      [%suite-add path=space-path:spaces =app-full]
-      [%suite-remove path=space-path:spaces =app-full]
+      [%recommend path=space-path:spaces =app-full ord=(list app-id)]
+      [%unrecommend path=space-path:spaces =app-full ord=(list app-id)]
+      [%suite-add path=space-path:spaces =app-full ord=(list app-id)]
+      [%suite-remove path=space-path:spaces =app-full ord=(list app-id)]
+      [%set-suite-order path=space-path:spaces ord=(list app-id)]
       [%app-installed =app-id =app]
       [%app-uninstalled =app-id]
   ==

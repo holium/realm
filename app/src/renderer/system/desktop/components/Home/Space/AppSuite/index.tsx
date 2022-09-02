@@ -86,7 +86,7 @@ export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   const { patp, space } = props;
-  const { ship, bazaar, identity } = useServices();
+  const { spaces, ship, bazaar, identity } = useServices();
   const [searchMode, setSearchMode] = useState('none');
   const [suite, setSuite] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
@@ -95,8 +95,9 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
     console.log('onAppsAction => %o', { path, id: app.id, tag });
     SpacesActions.addToSuite(path, app.id, rank).then((result) => {
-      console.log('onAppsAction => %o', result);
-      suite.splice(result.rank, 1, app);
+      console.log('addToSuite response => %o', result);
+      const app = result[space.path];
+      suite.splice(app.ranks.suite, 1, app);
       setSuite(suite);
       setSearchMode('none');
     });
@@ -121,7 +122,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
     setApps(bazaar.getBazaar(`/${ship.patp}/our`).allApps);
     // @ts-ignore
     const suite = Array(5).fill(undefined);
-    const apps = bazaar.getBazaar(space.path).suite;
+    const apps = bazaar.getBazaar(space.path).suiteApps;
     apps.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
     console.log(suite);
     setSuite(suite);
