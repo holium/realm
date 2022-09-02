@@ -3,7 +3,7 @@
 ::  Chat message lib within Realm. Mostly handles [de]serialization
 ::    to/from json from types stored in courier sur.
 ::
-/-  sur=courier, gra=graph-store, *post, *resource, contact-store, dm-hook, mtd=metadata-store
+/-  sur=courier, gra=graph-store, *post, *resource, contact-store, dm-hook, mtd=metadata-store, inv=invite-store
 /+  res=resource
 =<  [sur .]
 =,  sur
@@ -49,6 +49,9 @@
     ^-  (list message-preview)
     =/  assoc          .^(associations:mtd %gx /(scot %p our)/metadata-store/(scot %da now)/associations/noun)
     =/  group-dms      (skim ~(val by assoc) skim-grp-dms)
+    ::  TODO check invite store
+    =/  graph-invites  (need .^((unit invitatory:inv) %gx /(scot %p our)/invite-store/(scot %da now)/invitatory/graph/noun))
+    ~&  >  graph-invites
     =/  dms-list=(list message-preview)
     %+  turn  group-dms
       |=  ass=association:mtd

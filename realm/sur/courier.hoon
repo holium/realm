@@ -3,7 +3,7 @@
 /-  *post
 |%
 
-+$  chat-type  ?(%group %dm %pending)
++$  chat-type  ?(%group %dm %pending %group-pending)
 +$  source  ?(%graph-store %chatstead)
 ::
 ::  $message: a generalized message structure for Realm

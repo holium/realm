@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { createPost } from '@urbit/api';
+import { createPost, Post } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { CourierStoreType } from '../services/ship/models/courier';
 import { Patp } from '../types';
@@ -47,15 +47,10 @@ export const CourierApi = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  sendDM: async (
-    conduit: Conduit,
-    ourShip: string,
-    path: string, // i.e. /dm-inbox/~dev
-    contents: any[]
-  ) => {
-    const to = path.split('/')[2];
+  sendDM: async (conduit: Conduit, ourShip: string, post: Post) => {
+    // const to = path.split('/')[2];
 
-    const post = createPost(ourShip.substring(1), contents, `/${patp2dec(to)}`);
+    // const post = createPost(ourShip.substring(1), contents, `/${patp2dec(to)}`);
 
     const payload = {
       app: 'dm-hook',
@@ -77,14 +72,13 @@ export const CourierApi = {
   // Pending dms
   sendGroupDM: async (
     conduit: Conduit,
-    ourShip: string,
     path: string, // i.e. /~fes/~2022.8.31..18.41.37
-    contents: any[]
+    post: Post
   ) => {
     const split = path.split('/');
     const host = split[1];
     const timestamp = split[2];
-    const post = createPost(ourShip.substring(1), contents);
+    // const post = createPost(ourShip.substring(1), contents);
 
     const payload = {
       app: 'graph-store',

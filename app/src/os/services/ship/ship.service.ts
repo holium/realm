@@ -425,21 +425,15 @@ export class ShipService extends BaseService {
   async sendDm(_event: any, path: string, contents: any[]) {
     const ourShip = this.state?.patp!;
     const dmLog = this.models.courier?.dms.get(path)!;
-    dmLog.sendDM(this.state!.patp, contents);
+    const post = dmLog.sendDM(this.state!.patp, contents);
 
     if (dmLog.type === 'group') {
-      return await CourierApi.sendGroupDM(
-        this.core.conduit!,
-        ourShip,
-        path,
-        contents
-      );
+      return await CourierApi.sendGroupDM(this.core.conduit!, path, post);
     } else {
       return await CourierApi.sendDM(
         this.core.conduit!,
-        ourShip,
-        path,
-        contents
+        this.state!.patp,
+        post
       );
     }
   }

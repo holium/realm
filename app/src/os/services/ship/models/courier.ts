@@ -144,7 +144,7 @@ const GroupLog = types
   .model('GroupLog', {
     path: types.string,
     to: types.array(types.string),
-    type: types.enumeration(['group']),
+    type: types.enumeration(['group', 'group-pending']),
     source: types.enumeration(['graph-store', 'chatstead']),
     messages: types.array(GraphDM),
     metadata: types.array(ContactMetadata),
@@ -163,9 +163,7 @@ const GroupLog = types
     },
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
-      const split = self.path.split('/');
-      const host = split[1];
-      const post = createPost(author, contents, `/${patp2dec(host)}`);
+      const post = createPost(author, contents);
       self.outgoing.unshift(
         GraphDM.create({
           index: post.index,
@@ -176,6 +174,7 @@ const GroupLog = types
           contents: post.contents,
         })
       );
+      return post;
     },
   }));
 export type GroupLogType = Instance<typeof GroupLog>;
@@ -213,6 +212,7 @@ const DMLog = types
           contents: post.contents,
         })
       );
+      return post;
     },
   }));
 
