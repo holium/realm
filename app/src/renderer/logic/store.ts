@@ -283,10 +283,6 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }
-    if (value.resource === 'bazaar') {
-      console.log('patch huh => %o', value);
-      applySnapshot(servicesStore.bazaar, value.model);
-    }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);
     }
@@ -299,6 +295,7 @@ OSActions.onEffect((_event: any, value: any) => {
         servicesStore.membership,
         castToSnapshot(value.model.membership)
       );
+      applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
     }
   }
 });

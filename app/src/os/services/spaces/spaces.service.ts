@@ -193,6 +193,7 @@ export class SpacesService extends BaseService {
       model: {
         spaces: getSnapshot(this.state!),
         membership: getSnapshot(this.models.membership),
+        bazaar: getSnapshot(this.models.bazaar),
       },
       resource: 'spaces',
       key: null,

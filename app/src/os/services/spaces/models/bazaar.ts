@@ -7,8 +7,8 @@ export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
 
-const AppRankModel = types.model({
-  default: types.number,
+const AppRankModel = types.model('AppRankModel', {
+  default: types.maybe(types.number),
   pinned: types.number,
   recommended: types.number,
   suite: types.number,

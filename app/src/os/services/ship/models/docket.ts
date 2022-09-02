@@ -91,7 +91,6 @@ export const DocketStore = types
             id = app.href.glob!.base!;
           }
           const appTile = DocketApp.create({
-            id,
             title: app.title,
             info: app.info,
             color: app.color,
