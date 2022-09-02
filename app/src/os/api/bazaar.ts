@@ -368,7 +368,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.addApp(app);
+        state.getBazaar(space)?.setPinnedApps(app.sort);
       }
       break;
     case 'unpin':
@@ -377,7 +377,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.addApp(app);
+        state.getBazaar(space)?.setPinnedApps(app.sort);
       }
       break;
     case 'recommend':

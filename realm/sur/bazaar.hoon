@@ -77,8 +77,8 @@
 ::  note: of these 4 maps, only space-apps-lite is maintained in agent state
 +$  app-index-full          (map app-id app-full)
 +$  app-index-lite          (map app-id app-lite)
-+$  space-apps-lite         (map space-path:spaces app-index-lite)  :: INCLUDED IN AGENT STATE
-+$  space-apps-full         (map space-path:spaces app-index-full)
++$  space-apps-lite         (map space-path:spaces [index=app-index-lite =sorts])  :: INCLUDED IN AGENT STATE
++$  space-apps-full         (map space-path:spaces [index=app-index-full =sorts])
 
 :: +$  pinned-apps             (map space-path:spaces (map app-id @ud))
 :: +$  recommended-apps        (map space-path:spaces (map app-id @ud))

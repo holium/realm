@@ -8,7 +8,6 @@ export const DocketMap = types.map(
 );
 
 const AppRankModel = types.model({
-  default: types.number,
   pinned: types.number,
   recommended: types.number,
   suite: types.number,
@@ -35,6 +34,11 @@ export const BazaarModel = types
   .model({
     recentsApps: types.array(types.string),
     recentsDevs: types.array(types.string),
+    sorts: types.model({
+      pinned: types.array(types.string),
+      recommended: types.array(types.string),
+      suite: types.array(types.string),
+    }),
     apps: types.map(BazaarApp),
   })
   .views((self) => ({
@@ -49,7 +53,10 @@ export const BazaarModel = types
       return this.getAppsByTag('suite');
     },
     get pinned() {
-      return this.getAppsByTag('pinned');
+      console.log('pinned => %o', self.sorts.pinned);
+      return self.sorts.pinned.map((appId, index) => ({
+        ...self.apps.get(appId),
+      }));
     },
     get recentApps() {
       const recents = self.recentsApps;
@@ -67,8 +74,7 @@ export const BazaarModel = types
       return nativeApps.hasOwnProperty(appId);
     },
     isAppPinned(appId: string) {
-      const app = self.apps.get(appId);
-      return app?.tags.includes('pinned');
+      return self.pinned.includes(appId);
     },
     getAppData(appId: string) {
       const apps = Array.from(self.apps!.values());
@@ -97,6 +103,9 @@ export const BazaarModel = types
       //   }
       // }
       // return matches;
+    },
+    setPinnedApps(apps: any) {
+      self.sorts.pinned.replace(apps);
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
@@ -192,10 +201,12 @@ export const BazaarStore = types
       const catalog = apps['space-apps'];
       console.log('initial => %o', catalog);
       for (const spacePath in catalog) {
-        const spaceApps = catalog[spacePath];
-        const bazaar = BazaarModel.create({});
-        for (const desk in spaceApps) {
-          const app = spaceApps[desk];
+        const entry = catalog[spacePath];
+        const bazaar = BazaarModel.create({
+          sorts: entry.sorts,
+        });
+        for (const desk in entry.apps) {
+          const app = entry.apps[desk];
           bazaar.addApp(app);
         }
         self.spaces.set(spacePath, bazaar);
