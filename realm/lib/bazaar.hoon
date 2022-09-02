@@ -108,13 +108,19 @@
         %pin
       :-  %pin
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
       ==
     ::
         %unpin
       :-  %unpin
       %-  pairs
-      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (app-full:encode app-full.rct))]
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (weld (app-full:encode app-full.rct) (srt:encode ord.rct)))]
+      ==
+    ::
+        %set-pin-order
+      :-  %set-pin-order
+      %-  pairs
+      :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (srt:encode ord.rct))]
       ==
     ::
         %recommend
@@ -216,6 +222,12 @@
       %missing  ~
     ==
   ::
+  ++  srt
+    |=  ord=(list app-id)
+    ^-  (list [cord json])
+    :~  [%sort a+(turn ord |=(=app-id:store s+app-id))]
+    ==
+  ::
   ++  app-full
     |=  app=app-full:store
     ^-  (list [cord json])
@@ -314,8 +326,7 @@
     |=  =ranks:store
     ^-  json
     %-  pairs
-    :~  [%default n+(crip "{<default.ranks>}")]
-        [%pinned n+(crip "{<pinned.ranks>}")]
+    :~  [%pinned n+(crip "{<pinned.ranks>}")]
         [%recommended n+(crip "{<recommended.ranks>}")]
         [%suite n+(crip "{<suite.ranks>}")]
     ==

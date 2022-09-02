@@ -43,13 +43,16 @@
 ::
 +$  tags    (set tag)
 ::
++$  sorts   [pinned=(list app-id) recommended=(list app-id) suite=(list app-id)]
+::
 ::  $ranks - each app gets a rank (ordinal) relative to a
 ::   "grouping" (pinned/recommended/suite)
 ::  0th rank => default ordinal when not relative to a grouping
 ::  1st rank => ordinal relative to pinned
 ::  2nd rank => ordinal relative to recommended
 ::  3rd rank => ordinal relative to suite
-+$  ranks   [default=@ud pinned=@ud recommended=@ud suite=@ud]
+:: +$  ranks   [default=@ud pinned=@ud recommended=@ud suite=@ud]
++$  ranks   [pinned=@ud recommended=@ud suite=@ud]
 ::
 ::  $app-header: space specific metadata
 +$  app-header
@@ -76,6 +79,10 @@
 +$  app-index-lite          (map app-id app-lite)
 +$  space-apps-lite         (map space-path:spaces app-index-lite)  :: INCLUDED IN AGENT STATE
 +$  space-apps-full         (map space-path:spaces app-index-full)
+
+:: +$  pinned-apps             (map space-path:spaces (map app-id @ud))
+:: +$  recommended-apps        (map space-path:spaces (map app-id @ud))
+:: +$  suite-apps              (map space-path:spaces (map app-id @ud))
 ::
 ::  $app-catalog: for efficiencies sake, this is the one "master" list of apps
 ::    a ship is aware of; from the apps installed on the ship to apps 'imported'
@@ -87,6 +94,8 @@
 +$  action
   $%  [%pin path=space-path:spaces =app-id rank=(unit @ud)]
       [%unpin path=space-path:spaces =app-id]
+      :: bulk pin ordering to facilitate efficiency/ease in UI
+      [%set-pin-order path=space-path:spaces =(list app-id)]
       [%recommend path=space-path:spaces =app-id]
       [%unrecommend path=space-path:spaces =app-id]
       [%suite-add path=space-path:spaces =app-id rank=@ud]
@@ -96,8 +105,9 @@
 +$  reaction
   $%  [%initial =space-apps-full]
       [%space-apps =space-path:spaces =app-index-full]
-      [%pin path=space-path:spaces =app-full]
-      [%unpin path=space-path:spaces =app-full]
+      [%pin path=space-path:spaces =app-full ord=(list app-id)]
+      [%unpin path=space-path:spaces =app-full ord=(list app-id)]
+      [%set-pin-order path=space-path:spaces ord=(list app-id)]
       [%recommend path=space-path:spaces =app-full]
       [%unrecommend path=space-path:spaces =app-full]
       [%suite-add path=space-path:spaces =app-full]
