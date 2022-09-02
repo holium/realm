@@ -2,7 +2,7 @@
 ::
 ::  A thin agent that interfaces with various chat stores
 ::
-/-  store=courier, post, graph-store
+/-  store=courier, post, graph-store, *post, *resource
 /+  dbug, default-agent, lib=courier, hook=dm-hook
 |%
 +$  card  card:agent:gall
@@ -54,7 +54,18 @@
   ::     ==
   ::   ==
   ::     [cards this]
-  ++  on-poke   |=(cage !!)
+  ++  on-poke   ::|=(cage !!)
+    |=  [=mark =vase]
+    ^-  (quip card _this)
+    ~&  >  [mark]
+    |^
+    =^  cards  state
+    ?+  mark  (on-poke:def mark vase)
+      %courier-action    (on-action:core !<(action:store vase))
+    ==
+    [cards this]
+  --
+  ::
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
@@ -159,7 +170,42 @@
 ::
 ++  this  .
 ++  core  .
-++  graph-dm
+::
+++  on-action 
+  |=  [act=action:store]
+  ^-  (quip card _state)
+  ~&  >  act
+  |^
+  ?-  -.act      
+    :: %accept-dm          `state
+    :: %decline-dm         `state
+    :: %pendings           `state
+    :: %screen             `state
+    %create-group-dm    (create-group-dm +.act)
+    %send-dm            (send-dm +.act)
+    :: %send-group-dm      (send-group-dm +.act)
+  ==
+  ::
+  ++  create-group-dm
+    |=  [ships=(set ship)]
+    ^-  (quip card _state)
+    ~&  >>  [ships]
+    `state
+    ::
+  ++  send-dm
+    |=  [=ship =post]
+    ^-  (quip card _state)
+    ~&  >>  [ship post]
+    `state
+  ::
+  ++  send-group-dm
+    |=  [=resource =post]
+    ^-  (quip card _state)
+    `state
+  ::
+  --
+
+++  graph-dm    ::  Handles graph-store updates
   |=  [upd=update:graph-store our=ship now=@da]
   ^-  (quip card _state)
   |^

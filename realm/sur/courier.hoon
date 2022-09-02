@@ -1,6 +1,6 @@
 ::  courier [realm]
 ::
-/-  *post
+/-  *post, *resource
 |%
 
 +$  chat-type  ?(%group %dm %pending %group-pending)
@@ -87,10 +87,13 @@
 ::
 +$  action
   $%  
-      [%accept-dm =ship]
-      [%decline-dm =ship]
-      [%pendings ships=(set ship)]
-      [%screen screen=?]
+      :: [%accept-dm =ship]
+      :: [%decline-dm =ship]
+      :: [%pendings ships=(set ship)]
+      :: [%screen screen=?]
+      [%create-group-dm ships=(set ship)]
+      [%send-dm =ship =post]
+      :: [%send-group-dm =resource =post]
   ==
 ::
 +$  reaction

@@ -131,7 +131,7 @@ const createWindow = async () => {
   mainWindow.maximize();
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
-    mainWindow?.webContents.setZoomFactor(1.1);
+    mainWindow?.webContents.setZoomFactor(1.0);
 
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');

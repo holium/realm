@@ -247,7 +247,7 @@ const PreviewGroupDM = types
   .model('PreviewGroupDM', {
     path: types.string,
     to: types.array(types.string),
-    type: types.enumeration(['group']),
+    type: types.enumeration(['group', 'group-pending']),
     source: types.enumeration(['graph-store', 'chatstead']),
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
@@ -289,7 +289,7 @@ export const CourierStore = types
       // console.log(dmPreviews);
       Object.keys(dmPreviews).forEach((key: string) => {
         const preview: any = dmPreviews[key];
-        if (preview.type === 'group') {
+        if (preview.type === 'group' || preview.type === 'group-pending') {
           preview.metadata.forEach((mtd: any) => {
             mtd.color = cleanNounColor(mtd.color);
           });

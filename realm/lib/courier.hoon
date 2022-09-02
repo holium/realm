@@ -49,14 +49,30 @@
     ^-  (list message-preview)
     =/  assoc          .^(associations:mtd %gx /(scot %p our)/metadata-store/(scot %da now)/associations/noun)
     =/  group-dms      (skim ~(val by assoc) skim-grp-dms)
-    ::  TODO check invite store
-    =/  graph-invites  (need .^((unit invitatory:inv) %gx /(scot %p our)/invite-store/(scot %da now)/invitatory/graph/noun))
-    ~&  >  graph-invites
     =/  dms-list=(list message-preview)
     %+  turn  group-dms
       |=  ass=association:mtd
       (grp-prev our ass now rolo)
-    dms-list
+        ::  TODO check invite store
+    =/  graph-invites  (need .^((unit invitatory:inv) %gx /(scot %p our)/invite-store/(scot %da now)/invitatory/graph/noun))
+    =/  group-invs     (skim ~(val by graph-invites) skim-grp-inv)
+    =/  group-dm-invs=(list message-preview)
+    %+  turn  group-invs
+      |=  inv=invite:inv
+      (grp-inv our inv now rolo)
+    ~&  >  [group-dm-invs]
+    [(weld dms-list group-dm-invs)]
+    :: dms-list
+    ::
+    ++  grp-inv
+      |=  [our=ship inv=invite:inv now=@da rolo=rolodex:sur]
+      ^-  message-preview
+      =/  ginv          (ginv our inv now)
+      =/  mtd-set=(list contact-mtd)
+      %+  turn  ~(tap in to.ginv)
+        |=  cont=@p
+        (form-contact-mtd rolo cont)
+      [path.ginv to.ginv %group-pending %graph-store time.ginv [~] (silt mtd-set)]
     ::
     ++  grp-prev
       |=  [our=ship ass=association:mtd now=@da rolo=rolodex:sur]
@@ -127,6 +143,22 @@
     ?>  ?=(%add-graph -.+.node)
     =/  post-graph       ^-((map atom node:gra) graph.+.+.node)
     [dm-name group-path to-set post-graph]
+  ::
+  ++  ginv
+    |=  [our=ship inv=invite:inv now=@da]
+    ^-  [time=@da path=cord to=(set ship) posts=(map atom node:gra)]
+    =/  entity          entity.resource.inv
+    =/  dm-name         (need (slaw %da name.resource.inv))
+    =/  group-name      `cord`name.resource.inv
+    =/  group-path      (spat /(scot %p entity)/(cord group-name))
+    =/  to-set          (silt ~[entity ship.inv recipient.inv])
+    [dm-name group-path to-set [~]]
+  ::
+  ++  skim-grp-inv
+    |=  inv=invite:inv
+    =/  name      `cord`name.resource.inv
+    =/  name-da   (slaw %da name)
+    ?~  name-da   %.n   %.y
   ::
   ++  skim-grp-dms
     |=  ass=association:mtd
@@ -279,6 +311,38 @@
         %dm-received
       (dm-log:encode chat.vi)
     ==
+  ::
+  :: ++  action
+    :: |=  act=^action
+    :: ^-  json
+    :: %+  frond  %courier-action
+    :: %-  pairs
+    :: :_  ~
+    :: ^-  [cord json]
+    :: ?-  -.act
+    :: ::
+    ::     %create-group-dm
+    ::   :-  %create-group-dm
+    ::   %-  pairs
+    ::   :~  [%ships a+(turn ~(tap in ships.act) |=(shp=@p s+(scot %p shp)))]
+    ::   ==
+    :: ::
+    :: ::     %edit-friend
+    :: ::   :-  %edit-friend
+    :: ::   %-  pairs
+    :: ::   :~  [%ship s+(scot %p ship.act)]
+    :: ::       [%pinned [%b pinned.act]]
+    :: ::       [%tags [%a (turn ~(tap in tags.act) |=(tag=cord s+tag))]]
+    :: ::   ==
+    :: :: ::
+    :: ::     %remove-friend
+    :: ::   :-  %remove-friend
+    :: ::   %-  pairs
+    :: ::   :~  [%ship s+(scot %p ship.act)]
+    :: ::   ==
+    :: ::
+    :: ==
+  ::
   ++  view :: encodes for on-peek
     |=  vi=view:sur
     ^-  json
@@ -296,6 +360,116 @@
     ==
   --
 ::
+++  dejs
+  =,  dejs:format
+  |%
+  ++  action
+    |=  jon=json
+    ^-  action:sur
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~  [%create-group-dm cr-gp-dm]
+          [%send-dm dm]
+          :: [%send-group-dm gp-dm]
+      ==
+    ::
+    ++  cr-gp-dm
+      %-  ot
+      :~  [%ships (as (su ;~(pfix sig fed:ag)))]
+      ==
+    ::
+    ++  dm
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+          [%post pst]
+      ==
+    ::
+    ++  gp-dm
+      %-  ot
+      :~  
+          [%resource dejs:res]
+          [%post pst]
+      ==
+    ::
+    ++  pst
+      %-  ot
+      :~  [%author (su ;~(pfix sig fed:ag))]
+          [%index index]
+          [%time-sent di]
+          [%contents (ar content)]
+          [%hash (mu nu)]
+          [%signatures (as signature)]
+      ==
+    ::
+    ++  signature
+      %-  ot
+      :~  [%hash nu]
+          [%ship (su ;~(pfix sig fed:ag))]
+          [%life ni]
+      ==
+    ::
+    ++  index  (su ;~(pfix fas (more fas dem)))
+    ++  content
+      %-  of
+      :~  [%mention (su ;~(pfix sig fed:ag))]
+          [%text so]
+          [%url so]
+          [%reference reference]
+          [%code eval]
+      ==
+    ::
+    ++  reference
+      |^
+      %-  of
+      :~  graph+graph
+          group+dejs-path:res
+          app+app
+      ==
+      ::
+      ++  graph
+        %-  ot
+        :~  group+dejs-path:res
+            graph+dejs-path:res
+            index+index
+        ==
+      ::
+      ++  app
+        %-  ot
+        :~  ship+(su ;~(pfix sig fed:ag))
+            desk+so
+            path+pa
+        ==
+      --
+    ::
+    ++  tang 
+      |=  jon=^json
+      ^-  ^tang
+      ?>  ?=(%a -.jon)
+      %-  zing
+      %+  turn
+        p.jon
+      |=  jo=^json
+      ^-  (list tank)
+      ?>  ?=(%a -.jo)
+      %+  turn
+        p.jo
+      |=  j=^json
+      ?>  ?=(%s -.j)
+      ^-  tank
+      leaf+(trip p.j)
+    ::
+    ++  eval
+      %-  ot
+      :~  expression+so
+          output+tang
+      ==
+    ::
+    ::
+    --
+  --
+::
 ++  encode
   =,  enjs:format
   |%
@@ -311,11 +485,19 @@
     |=  cha=message-preview
     ^-  json
     =/  to-field    
-      ?:  =(%group type.cha)  
+      ?:  
+        ?| 
+          =(%group type.cha) 
+          =(%group-pending type.cha)
+        ==
         a+(turn ~(tap in to.cha) |=(shp=@p s+(scot %p shp)))
       s+(scot %p (rear ~(tap in to.cha)))
     =/  mtd-field    
-      ?:  =(%group type.cha)  
+      ?:  
+        ?| 
+          =(%group type.cha) 
+          =(%group-pending type.cha)
+        ==
         a+(turn ~(tap in metadata.cha) mtd)
       (mtd (rear ~(tap in metadata.cha)))
     %-  pairs

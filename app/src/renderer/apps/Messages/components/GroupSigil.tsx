@@ -27,6 +27,12 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   };
   let rowOne: any[] = [];
   let rowTwo: any[] = [];
+  if (len === 2) {
+    rowOne = [
+      sigilInfo(patps[0], metadata[0]),
+      sigilInfo(patps[1], metadata[1]),
+    ];
+  }
   if (len === 3) {
     rowOne = [sigilInfo(patps[0], metadata[0])];
     rowTwo = [
@@ -54,14 +60,17 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
       height={40}
       width={40}
       alignItems="center"
+      justifyContent="center"
       flexDirection="column"
     >
       <Flex gap={2} flex={2} justifyContent="center" alignItems="center">
         {rowOne.map(renderSigil)}
       </Flex>
-      <Flex gap={2} flex={2} justifyContent="center" alignItems="center">
-        {rowTwo.map(renderSigil)}
-      </Flex>
+      {rowTwo.length > 0 && (
+        <Flex gap={2} flex={2} justifyContent="center" alignItems="center">
+          {rowTwo.map(renderSigil)}
+        </Flex>
+      )}
     </Flex>
   );
 };

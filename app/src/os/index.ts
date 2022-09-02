@@ -261,7 +261,9 @@ export class Realm extends EventEmitter {
   }
 
   sendConnectionStatus(status: ConduitState) {
-    this.mainWindow.webContents.send('realm.on-connection-status', status);
+    if (!this.mainWindow.isDestroyed()) {
+      this.mainWindow.webContents.send('realm.on-connection-status', status);
+    }
   }
 }
 
