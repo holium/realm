@@ -16,6 +16,7 @@
       ==
   +$  state-0
     $:  %0
+        =sorts:store
         =app-catalog:store
         space-apps=space-apps-lite:store
     ==
@@ -285,6 +286,7 @@
     ?-  -.action
       %pin               (add-pin +.action)
       %unpin             (rem-pin +.action)
+      %set-pin-order     (set-pin-order +.action)
       %recommend         (add-rec +.action)
       %unrecommend       (rem-rec +.action)
       %suite-add         (add-ste +.action)
@@ -301,9 +303,10 @@
     =/  rank  ?~(rank (count-apps apps %pinned) u.rank)
     =.  pinned.ranks.hdr.app-lite   rank
     =/  apps  (pin apps app-lite)
+    =.  pinned.sorts.state     (sort-apps (extract-apps apps %pinned))
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     =.  space-apps.state  (~(put by space-apps.state) path apps)
-    (bazaar:send-reaction [%pin path [app-id hdr.app-lite det.app]] paths)
+    (bazaar:send-reaction [%pin path [app-id hdr.app-lite det.app] pinned.sorts.state] paths)
   ::
   ++  rem-pin
     |=  [path=space-path:spaces-store =app-id:store]
@@ -315,8 +318,18 @@
     =/  apps  (unpin apps app-lite)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%unpin path [app-id hdr.app-lite det.app]] paths)
+    (bazaar:send-reaction [%unpin path [app-id hdr.app-lite det.app] pinned.sorts.state] paths)
   ::
+  ++  set-pin-order
+    |=  [path=space-path:spaces-store ord=(list app-id:store)]
+    ^-  (quip card _state)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    =.  pinned.sorts.state  ord
+    (bazaar:send-reaction [%set-pin-order path ord] paths)
+  ::
+  ::  $add-rec: note that recommending an app potentially changes the order
+  ::    of the app in the recommendations list; therefore the new order (ord)
+  ::    will be included in the reaction to account for changes in position
   ++  add-rec
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
@@ -326,6 +339,7 @@
     =.  tags.hdr.app-lite                (~(put in tags.hdr.app-lite) %recommended)
     =.  recommended.ranks.hdr.app-lite   (add recommended.ranks.hdr.app-lite 1)
     =/  apps                        (~(put by apps) app-id app-lite)
+    :: =/  recommended.sorts.state     (sort-apps apps)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%recommend path [app-id hdr.app-lite det.app]] paths)
@@ -372,6 +386,26 @@
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%suite-remove path [app-id hdr.app-lite det.app]] paths)
+  ::
+  ++  extract-apps
+    |=  [=app-index-lite:store =tag:store]
+    ^-  (list [=app-id:store =app-lite:store])
+    %-  skim
+    :-  ~(tap by app-index-lite)
+    |=  [=app-id:store =app-lite:store]
+    ?:  (~(has in tags.hdr.app-lite) tag)  %.y  %.n
+  ::
+  ++  sort-apps
+    |=  [apps=(list [=app-id:store =app-lite:store])]
+    ^-  (list app-id:store)
+    %-  turn
+      :-
+      %-  sort
+      :-  apps
+      |=  [a=[=app-id:store =app-lite:store] b=[=app-id:store =app-lite:store]]
+      (lth pinned.ranks.hdr.app-lite.a pinned.ranks.hdr.app-lite.b)
+    |=  [=app-id:store =app-lite:store]
+    app-id
   ::
   ++  remove-at-pos
     |=  [apps=app-index-lite:store rank=@ud]
@@ -492,7 +526,7 @@
       =.  id.app          desk
       :: =.  ship.app  our.bowl
       =.  tags.hdr.app    (~(put in tags.hdr.app) %installed)
-      =.  ranks.hdr.app   [0 0 0 0]
+      =.  ranks.hdr.app   [0 0 0]
       (~(put by acc) desk app)
   --
 ::  bazaar reactions
@@ -505,6 +539,7 @@
     %space-apps       (on-space-apps +.rct)
     %pin              (on-pin +.rct)
     %unpin            (on-unpin +.rct)
+    %set-pin-order    (on-set-pin-order +.rct)
     %recommend        (on-rec +.rct)
     %unrecommend      (on-unrec +.rct)
     %suite-add        (on-suite-add +.rct)
@@ -551,15 +586,21 @@
     (bazaar:send-reaction:core [%space-apps space-path app-index-full] [/updates ~])
   ::
   ++  on-pin
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full ord]>}"
     `state
   ::
   ++  on-unpin
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full ord]>}"
+    `state
+  ::
+  ++  on-set-pin-order
+    |=  [path=space-path:spaces-store ord=(list app-id:store)]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [set-pin-order] => {<[path ord]>}"
     `state
   ::
   ++  on-rec
