@@ -12,7 +12,9 @@ export const loadBazaarFromDisk = (
     cwd: `realm.${patp}`, // base folder
   });
   let persistedState: BazaarStoreType = persisted.store;
-  const model = BazaarStore.create(castToSnapshot(persistedState));
+  const model = BazaarStore.create(
+    castToSnapshot(persistedState) || { spaces: {}, treaties: {}, allies: {} }
+  );
 
   onSnapshot(model, (snapshot) => {
     persisted.store = castToSnapshot(snapshot);

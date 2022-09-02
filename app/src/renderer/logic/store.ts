@@ -176,6 +176,9 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.membership) {
     applySnapshot(servicesStore.membership, response.membership);
   }
+  if (response.bazaar) {
+    applySnapshot(servicesStore.bazaar, response.bazaar);
+  }
   // console.log(response.ship)
   if (!response.ship) {
     // if we haven't logged in, set false for auth page
