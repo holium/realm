@@ -14,11 +14,11 @@ type MiniAppStyleProps = {
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
   backdrop-filter: var(--blur-enabled);
-  -webkit-transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000;
-  -webkit-backface-visibility: hidden;
-  -webkit-perspective: 1000;
+  --webkit-transform: translateZ(0);
+  --webkit-backface-visibility: hidden;
+  --webkit-perspective: 1000;
   transform: translateZ(0);
   width: 270px;
   box-shadow: ${(props: MiniAppStyleProps) => props.theme.elevations.two};

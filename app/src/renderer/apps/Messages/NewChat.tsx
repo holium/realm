@@ -19,25 +19,21 @@ import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
+import { DMPreviewType } from 'os/services/ship/models/courier';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type IProps = {
   theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onBack: () => void;
-  onCreateNewDm: (newDmKey: any) => void;
+  onCreateNewDm: (newDmKey: DMPreviewType) => void;
 };
 
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
-  const { dms, contacts } = useServices();
+  const { courier, contacts } = useServices();
   const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
-  // const windowColor = useMemo(
-  //   () => rgba(lighten(0.225, props.theme.windowColor), 0.8),
-  //   [props.theme.windowColor]
-  // );
-
-  // const { newChatForm, urbitId } = createNewChatForm();
 
   const [patp, setPatp] = useState<string>('');
 
@@ -47,7 +43,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
   );
 
   const submitNewChat = useCallback(
-    (event: any) => {
+    async (event: any) => {
       // if (event.keyCode === 13) {
       event.preventDefault();
       const contactsList = Array.from(selectedPatp.values());
@@ -55,7 +51,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
       if (contacts.getContactAvatarMetadata(contactsList[0])) {
         metadata = contacts.getContactAvatarMetadata(contactsList[0]);
       }
-      const newDm = dms.sendNewDm(contactsList, metadata)!;
+      const newDm = await ShipActions.draftDm(contactsList, [metadata]);
       onCreateNewDm(newDm);
     },
     [selectedPatp]
@@ -210,14 +206,18 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
               marginRight: 8,
               width: 'calc(100% - 16px)',
               borderRadius: 9,
-              backgroundColor: inputColor,
+              borderColor: 'transparent',
+              backgroundColor:
+                theme.mode === 'dark'
+                  ? lighten(0.1, windowColor)
+                  : darken(0.055, windowColor),
             }}
           />
         </FormControl.Field>
         {contactArray}
         <Flex pl={2} pr={2} flex={1} flexDirection="column">
           <ShipSearch
-            heightOffset={90}
+            heightOffset={50}
             search={patp}
             selected={selectedPatp}
             customBg={windowColor}

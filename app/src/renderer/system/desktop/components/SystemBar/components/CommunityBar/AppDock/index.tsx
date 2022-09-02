@@ -20,7 +20,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     [desktop.theme]
   );
   const currentBazaar = spaces.selected
-    ? bazaar.getBazaar(spaces.selected?.path)
+    ? bazaar.getBazaar(spaces.selected?.path!)
     : null;
 
   const orderedList = useMemo(

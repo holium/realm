@@ -1,3 +1,4 @@
+import { S3Api } from './../../api/s3';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
@@ -22,26 +23,22 @@ import { ContactStore, ContactStoreType } from './models/contacts';
 import { DocketStore, DocketStoreType } from './models/docket';
 import { ChatStoreType, ChatStore } from './models/dms';
 import { loadDMsFromDisk } from './stores/dms';
+import { loadCourierFromDisk } from './stores/courier';
 import { loadContactsFromDisk } from './stores/contacts';
 import { loadDocketFromDisk } from './stores/docket';
 import { loadFriendsFromDisk } from './stores/friends';
+import { CourierApi } from '../../api/courier';
+import { CourierStoreType } from './models/courier';
+import { toJS } from 'mobx';
 
 export type ShipModels = {
   friends: FriendsType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
+  courier?: CourierStoreType;
 };
 
-type ShipSubscriptions = {
-  contacts: number;
-  friends: number;
-  metadata: number;
-  dms: number;
-  graphDms: number;
-};
-
-type SubscriptionKey = keyof ShipSubscriptions;
 /**
  * ShipService
  */
@@ -62,11 +59,14 @@ export class ShipService extends BaseService {
   private rooms?: RoomsService;
   handlers = {
     'realm.ship.get-dms': this.getDMs,
+    'realm.ship.get-dm-log': this.getDMLog,
     'realm.ship.send-dm': this.sendDm,
-    'realm.ship.get-metadata': this.getMetadata,
-    'realm.ship.get-contact': this.getContact,
+    'realm.ship.draft-dm': this.draftNewDm,
     'realm.ship.accept-dm-request': this.acceptDm,
     'realm.ship.decline-dm-request': this.declineDm,
+    'realm.ship.get-s3-bucket': this.getS3Bucket,
+    'realm.ship.get-metadata': this.getMetadata,
+    'realm.ship.get-contact': this.getContact,
     'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
     'realm.ship.get-friends': this.getFriends,
@@ -86,14 +86,20 @@ export class ShipService extends BaseService {
     getAppPreview: (ship: string, desk: string) => {
       return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
     },
-    getDMs: () => {
-      return ipcRenderer.invoke('realm.ship.get-dms');
-    },
     getMetadata: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-metadata', path);
     },
+    getS3Bucket: () => {
+      return ipcRenderer.invoke('realm.ship.get-s3-bucket');
+    },
     getContact: (ship: string) => {
       return ipcRenderer.invoke('realm.ship.get-contact', ship);
+    },
+    getDMs: () => {
+      return ipcRenderer.invoke('realm.ship.get-dms');
+    },
+    getDMLog: (toShip: string) => {
+      return ipcRenderer.invoke('realm.ship.get-dm-log', toShip);
     },
     acceptDm: (toShip: string) => {
       return ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
@@ -106,6 +112,9 @@ export class ShipService extends BaseService {
     },
     sendDm: (toShip: string, content: any) => {
       return ipcRenderer.invoke('realm.ship.send-dm', toShip, content);
+    },
+    draftDm: (patps: Patp[], metadata: any[]) => {
+      return ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
     },
     removeDm: (ship: string, index: any) => {
       return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
@@ -142,6 +151,7 @@ export class ShipService extends BaseService {
   get modelSnapshots() {
     return {
       chat: this.models.chat ? getSnapshot(this.models.chat) : null,
+      courier: this.models.courier ? getSnapshot(this.models.courier) : null,
       docket: this.models.docket ? getSnapshot(this.models.docket) : null,
       contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
@@ -179,7 +189,13 @@ export class ShipService extends BaseService {
       loggedIn: true,
       loader: { state: 'initial' },
     });
+
     this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
+    this.models.courier = loadCourierFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
     this.models.contacts = loadContactsFromDisk(
       ship,
       secretKey,
@@ -239,17 +255,12 @@ export class ShipService extends BaseService {
 
         // register dm update handler
         DmApi.updates(this.core.conduit!, this.models.chat!);
-        DmApi.graphUpdates(this.core.conduit!, this.models.chat!);
+        CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
 
         // register hark-store update handler
         // TODO commenting out for now
         // NotificationsApi.watch(this.core.conduit!, this.state);
 
-        // load initial dms
-        this.getDMs().then((response) => {
-          this.models.chat?.setDMs(ship, response, this.models.contacts);
-          // this.state!.chat.setDMs(ship, response);
-        });
         DocketApi.getApps(this.core.conduit!).then((apps) => {
           this.models.docket.setInitial(apps);
           this.state!.loader.set('loaded');
@@ -275,6 +286,7 @@ export class ShipService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
+
     return { ship: this.state, models: this.modelSnapshots };
   }
 
@@ -295,6 +307,11 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
+    this.models.chat = undefined;
+    this.models.contacts = undefined;
+    this.models.courier = undefined;
+    // this.models.docket = undefined;
+    // this.models.friends = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
   }
 
@@ -307,9 +324,6 @@ export class ShipService extends BaseService {
       color: ship.color || null,
       nickname: ship.nickname || null,
       avatar: ship.avatar || null,
-      // chat: { loader: { state: 'initial' } },
-      // contacts: { ourPatp: ship.patp },
-      // docket: {},
     });
 
     const storeParams = {
@@ -328,13 +342,13 @@ export class ShipService extends BaseService {
   }
 
   removeShip(patp: string) {
+    // TODO clean out the folder here.
     const deletedShip = new Store<ShipModelType>({
       name: 'ship',
       cwd: `realm.${patp}`,
       accessPropertiesByDotNotation: true,
     });
     deletedShip.clear();
-    // this.stateTree.deleteShip(patp);
   }
 
   async getOurGroups(_event: any): Promise<any> {
@@ -387,34 +401,63 @@ export class ShipService extends BaseService {
     if (!this.core.conduit) {
       return;
     }
-    return await DmApi.getDMs(this.state?.patp!, this.core.conduit);
+    return await CourierApi.getDMList(this.core.conduit);
+  }
+
+  async getDMLog(_event: any, ship: Patp) {
+    const dmLog = await CourierApi.getDMLog(ship, this.core.conduit!);
+    this.models.courier?.setDMLog(dmLog);
+    return dmLog;
   }
 
   async acceptDm(_event: any, toShip: string) {
-    const ourShip = this.state?.patp!;
     console.log('acceptingDM', toShip);
-    return await DmApi.acceptDm(this.core.conduit!, toShip);
+    return await CourierApi.acceptDm(this.core.conduit!, toShip);
   }
   async declineDm(_event: any, toShip: string) {
-    const ourShip = this.state?.patp!;
-    return await DmApi.declineDm(this.core.conduit!, toShip);
+    console.log('rejectingDM', toShip);
+    return await CourierApi.declineDm(this.core.conduit!, toShip);
   }
-  async sendDm(_event: any, toShip: string, contents: any[]) {
+  async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
+    const draft = this.models.courier?.draftNew(patps, metadata);
+    return toJS(draft);
+  }
+  async sendDm(_event: any, path: string, contents: any[]) {
     const ourShip = this.state?.patp!;
-    const dm = this.models.chat?.dms.get(toShip)!;
-    dm.sendDm(this.state!.patp, contents);
-    // TODO fix send new dm
-    // if (this.state?.chat.dms.get(toShip)) {
-    // } else {
-    //   // this.state?.chat.sendNewDm([toShip], this.con)
-    //   // const dm = this.state?.chat.dms.get(toShip)!;
-    //   // dm.sendDm(contents);
-    // }
-    return await DmApi.sendDM(this.core.conduit!, ourShip, toShip, contents);
+    const dmLog = this.models.courier?.dms.get(path)!;
+    dmLog.sendDM(this.state!.patp, contents);
+
+    if (dmLog.type === 'group') {
+      return await CourierApi.sendGroupDM(
+        this.core.conduit!,
+        ourShip,
+        path,
+        contents
+      );
+    } else {
+      return await CourierApi.sendDM(
+        this.core.conduit!,
+        ourShip,
+        path,
+        contents
+      );
+    }
   }
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;
     console.log('removingDM', ourShip, toShip, removeIndex);
+  }
+
+  async getS3Bucket(_event: any) {
+    const [credentials, configuration] = await Promise.all([
+      S3Api.getCredentials(this.core.conduit!),
+      S3Api.getConfiguration(this.core.conduit!),
+    ]);
+
+    return {
+      credentials,
+      configuration,
+    };
   }
   async getNotifications(_event: any, timestamp: number, length: number) {
     // console.log('getNotifications: %o, %o', timestamp, length);

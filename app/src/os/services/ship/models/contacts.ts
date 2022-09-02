@@ -73,7 +73,8 @@ export const ContactStore = types
       // ------ edit ------
       // ------------------
       if (json['contact-update'].edit) {
-        console.log('edit... ', toJS(json['contact-update'].edit));
+        // TODO
+        // console.log('edit... ', toJS(json['contact-update'].edit));
       }
     },
   }));

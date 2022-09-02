@@ -78,7 +78,19 @@ export const AppRowStyle = styled(motion.div)<RowProps>`
         `}
 `;
 
-export const AppRow = ({ caption, app, onClick, actionRenderer }) => {
+interface AppRowProps {
+  caption: string;
+  app: any;
+  onClick: (app: any) => void;
+  actionRenderer?: any;
+}
+
+export const AppRow = ({
+  caption,
+  app,
+  onClick,
+  actionRenderer,
+}: AppRowProps) => {
   const { desktop } = useServices();
   const { theme } = desktop;
   const rowRef = useRef<any>(null);
@@ -125,7 +137,17 @@ export const AppRow = ({ caption, app, onClick, actionRenderer }) => {
         </TileStyle>
         <Flex flexDirection="column" flex={1}>
           <Text fontWeight={500}>{app.title}</Text>
-          <Text color={'#888888'}>{app.info}</Text>
+          <Text
+            width={404}
+            style={{
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+            }}
+            color={'#888888'}
+          >
+            {app.info}
+          </Text>
         </Flex>
         {actionRenderer && (
           <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer()}</div>

@@ -21,7 +21,8 @@
 ::
 ::
 +$  action
-  $%  [%add-friend =ship]
+  $%  
+      [%add-friend =ship]
       [%edit-friend =ship pinned=? tags=friend-tags]
       [%remove-friend =ship]
       ::  Poke friend actions
@@ -31,7 +32,8 @@
   ==
 ::
 +$  reaction
-  $%  [%friends =friends]
+  $%  
+      [%friends =friends]
       [%friend =ship =friend]     ::  reacts when on update to existing friend
       [%new-friend =ship =friend] ::  reacts when a new friend is addedd
       [%bye-friend =ship]         ::  reacts when a friend is removed 
@@ -40,6 +42,8 @@
 ::  Scry views
 ::
 +$  view
-  $%  [%friends =friends]
+  $%  
+      [%friends =friends]
   ==
+::
 --

@@ -39,7 +39,7 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
       alignItems="center"
     >
       <Flex gap={10} justifyContent="center" alignItems="center">
-        <IconButton
+        {/* <IconButton
           size={28}
           customBg={dockColor}
           color={textColor}
@@ -51,11 +51,11 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
               opacity={voiceOn ? 1 : 0.6}
             />
           </motion.div>
-        </IconButton>
+        </IconButton> */}
         <WalletTray theme={desktop.theme} />
         <MessagesTray theme={desktop.theme} />
         <AccountTray theme={desktop.theme} />
-        {/* <TrayClock /> */}
+        <TrayClock />
       </Flex>
     </SystemBarStyle>
   );

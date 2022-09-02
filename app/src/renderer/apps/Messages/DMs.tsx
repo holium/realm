@@ -27,11 +27,15 @@ type IProps = {
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
-  const { dms } = useServices();
+  const { courier } = useServices();
   const { inputColor, textColor, iconColor, dockColor, windowColor, mode } =
     theme;
-
-  const chat = dms;
+  const previews = useMemo(() => {
+    return Array.from(courier.previews.values()).sort((a, b) => {
+      // @ts-ignore
+      return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
+    });
+  }, [courier.previews]);
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -68,9 +72,11 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             wrapperStyle={{
               cursor: 'none',
               borderRadius: 9,
-              backgroundColor: inputColor,
-
-              // borderColor: rgba(backgroundColor, 0.7),
+              borderColor: 'transparent',
+              backgroundColor:
+                theme.mode === 'dark'
+                  ? lighten(0.1, windowColor)
+                  : darken(0.055, windowColor),
             }}
           />
         </Flex>
@@ -100,7 +106,6 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       >
         <Grid.Column
           gap={2}
-          mt={1}
           mb={3}
           pb={4}
           noGutter
@@ -108,14 +113,14 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           height={height}
           overflowY="auto"
         >
-          {chat.loader.isLoading ? (
+          {courier.loader.isLoading ? (
             <Flex flex={1} alignItems="center" justifyContent="center">
               <Spinner size={2} />
             </Flex>
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {chat!.list.length === 0 && (
+              {previews.length === 0 && (
                 <Flex
                   flex={1}
                   flexDirection="column"
@@ -141,8 +146,8 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
                   </Text>
                 </Flex>
               )}
-              {chat!.list.map((dm: any) => (
-                <Box ml={1} mr={1} display="block" key={dm.contact}>
+              {previews.map((dm: any) => (
+                <Box display="block" key={dm.to}>
                   <ContactRow
                     theme={theme}
                     dm={dm}

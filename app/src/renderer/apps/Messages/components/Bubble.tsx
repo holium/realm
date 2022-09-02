@@ -22,17 +22,17 @@ export const Bubble = styled(motion.div)<BubbleProps>`
   box-sizing: content-box;
   background: ${(props: BubbleProps) =>
     props.customBg || props.theme.colors.bg.blendedBg};
-  border-radius: 12px;
+  border-radius: 19px;
   ${(props: BubbleProps) =>
     props.primary
       ? css`
           border-bottom-right-radius: 0px;
         `
       : css`
-          border-bottom-left-radius: 0px;
+          border-top-left-radius: 0px;
         `}
 
-  padding: 8px;
+  padding: 8px 12px;
   line-height: 16px;
   white-space: pre-wrap;
   word-wrap: break-word;

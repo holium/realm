@@ -25,6 +25,7 @@ import { ChatStore } from 'os/services/ship/models/dms';
 import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
+import { CourierStore } from 'os/services/ship/models/courier';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -46,6 +47,7 @@ export const Services = types
     membership: MembershipStore,
     docket: DocketStore,
     dms: ChatStore,
+    courier: CourierStore,
     contacts: ContactStore,
     friends: FriendsStore,
   })
@@ -81,6 +83,7 @@ const services = Services.create({
   membership: {},
   docket: {},
   dms: {},
+  courier: {},
   contacts: { ourPatp: '' },
   friends: {},
 });
@@ -153,6 +156,10 @@ OSActions.onBoot((_event: any, response: any) => {
       servicesStore.friends,
       castToSnapshot(response.models.friends)
     );
+    applySnapshot(
+      servicesStore.courier,
+      castToSnapshot(response.models.courier!)
+    );
     applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
     applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
   }
@@ -217,6 +224,10 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
+    // applySnapshot(
+    //   servicesStore.courier,
+    //   castToSnapshot(initials.models.courier!)
+    // );
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(initials.models.contacts!)
@@ -281,8 +292,14 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'dms') {
       applyPatch(servicesStore.dms, value.patch);
     }
+    if (value.resource === 'courier') {
+      applyPatch(servicesStore.courier, value.patch);
+    }
   }
   if (value.response === 'initial') {
+    if (value.resource === 'courier') {
+      applySnapshot(servicesStore.courier, value.model);
+    }
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }
@@ -293,6 +310,7 @@ OSActions.onEffect((_event: any, value: any) => {
       // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
+      applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
       applySnapshot(
         servicesStore.membership,

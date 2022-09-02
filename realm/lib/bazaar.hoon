@@ -102,7 +102,7 @@
       :-  %space-apps
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
-          [%app-index-full (app-index-full:encode app-index-full.rct)]
+          [%app-index-full (pairs (full-app-index:encode app-index-full.rct))]
       ==
     ::
         %pin
@@ -171,7 +171,7 @@
     ?-  -.vi
       ::
         %apps
-      (app-index-full:encode app-index-full.vi)
+      (pairs (full-app-index:encode app-index-full.vi))
     ==
   --
 ::
@@ -183,20 +183,40 @@
     ^-  json
     %-  pairs
     %+  turn  ~(tap by space-apps-full)
-    |=  [pth=space-path:spaces-store index=app-index-full:store]
+    |=  [pth=space-path:spaces-store catalog=[=app-index-full:store =sorts:store]]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
-    [spc-path (app-index-full index)]
+    [spc-path (apps-full catalog)]
+  ::
+  ++  apps-full
+    |=  [index=app-index-full:store =sorts:store]
+    ^-  json
+    %-  pairs
+    :~  [%apps (pairs (full-app-index index))]
+        [%sorts (pairs (app-sorts sorts))]
+    ==
+  ::
+  ++  app-sorts
+    |=  =sorts:store
+    ^-  (list [cord json])
+    :~  [pinned+a+(turn pinned.sorts |=(=app-id:store s+app-id))]
+        [recommended+a+(turn recommended.sorts |=(=app-id:store s+app-id))]
+        [suite+a+(turn suite.sorts |=(=app-id:store s+app-id))]
+    ==
   ::
   ++  space-apps-lite
     |=  =space-apps-lite:store
     ^-  json
     %-  pairs
     %+  turn  ~(tap by space-apps-lite)
-    |=  [pth=space-path:spaces-store index=app-index-lite:store]
+    |=  [pth=space-path:spaces-store catalog=[=app-index-lite:store =sorts:store]]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
-    [spc-path (app-index-lite index)]
+    [spc-path (apps-lite catalog)]
+  ::
+  ++  apps-lite
+    |=  [index=app-index-lite:store =sorts:store]
+    (pairs (weld (lite-app-index index) (app-sorts sorts)))
   ::
   ++  app-detail
     |=  =app-detail:store
@@ -239,19 +259,17 @@
     =/  detail=(list [cord json])  (app-detail:encode det.app)
     ?~  detail  ~  (weld head detail)
   ::
-  ++  app-index-full
+  ++  full-app-index
     |=  =app-index-full:store
-    ^-  json
-    %-  pairs
+    ^-  (list [cord json])
     %+  turn  ~(tap by app-index-full)
     |=  [=app-id:store app=app-full:store]
     ^-  [cord json]
     [app-id (pairs (app-full:encode app))]
   ::
-  ++  app-index-lite
+  ++  lite-app-index
     |=  =app-index-lite:store
-    ^-  json
-    %-  pairs
+    ^-  (list [cord json])
     %+  turn  ~(tap by app-index-lite)
     |=  [=app-id:store app=app-lite:store]
     ^-  [cord json]

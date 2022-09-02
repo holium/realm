@@ -37,7 +37,7 @@ export const RecentActivity: FC<RecentActivityProps> = observer(
         <Text variant="h3" fontWeight={500}>
           Recent Activity
         </Text>
-        <Text variant="h6">
+        <Text variant="h6" opacity={0.4}>
           No recent activity. Interact with this space to see recent activity in
           action!
         </Text>
