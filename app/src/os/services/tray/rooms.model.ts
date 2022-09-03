@@ -157,8 +157,9 @@ export const RoomsAppState = types
       }
     },
     setLiveRoom(room: RoomsModelType) {
+      
       self.knownRooms.set(room.id, room);
-      if(self.liveRoom && self.liveRoom.id !== room.id) {
+      if(!self.liveRoom || self.liveRoom.id !== room.id) {
         // clear chat data if a new room
         // todo maybe this logic has a better home elsewhere
         self.chatData.clear();
@@ -195,9 +196,9 @@ export const RoomsAppState = types
       self.knownRooms.get(roomId)?.present.remove(patp);
     },
     leaveRoom() {
-      if (self.liveRoom) {
-        self.knownRooms.delete(self.liveRoom.id);
-      }
+      // if (self.liveRoom) {
+      //   self.knownRooms.delete(self.liveRoom.id);
+      // }
       self.liveRoom = undefined;
       self.currentView = 'list';
     },

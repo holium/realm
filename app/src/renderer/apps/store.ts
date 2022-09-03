@@ -138,7 +138,7 @@ onAction(trayStore, (call) => {
         if (patchArg.value) {
           // Entering or switching room
           const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
-          console.log('etnering and switching to conenect');
+          console.log('entering and switching to connect');
           if (room) LiveRoom.connect(room);
         }
       }

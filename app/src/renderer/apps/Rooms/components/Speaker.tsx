@@ -83,20 +83,28 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   }
 
   useEffect(() => {
+    if (isOur) {
+      setPeerState(PeerConnectionState.Connected);
+      // handleLocalEvents(RoomsActions., LiveRoom.our);
+    }
+
+    // this is getting set every 0th frame that <Speaker/> is rendered.
+    // meaning: whenever the room voice view is opened, it does this logic over again
+    // as a result, electron produces a warning for too many eventlisteners.
+    // MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 started listeners added. Use emitter.setMaxListeners() to increase limit
     LiveRoom.on('started', () => {
-      setIsStarted(isStarted);
+      console.log('setting isstarted!')
+      setIsStarted(true);
     });
   }, []);
 
   useEffect(() => {
-    if (isOur) {
-      setPeerState(PeerConnectionState.Connected);
-      // handleLocalEvents(RoomsActions., LiveRoom.our);
-    } else {
-      const livePeer = LiveRoom.participants.get(person);
-      handleRemoteEvents(setPeerState, livePeer);
-      handleRemoteUpdate(setPeerMetadata, livePeer);
-    }
+    
+    if(!isStarted) return;
+    const livePeer = LiveRoom.participants.get(person);
+    handleRemoteEvents(setPeerState, livePeer);
+    handleRemoteUpdate(setPeerMetadata, livePeer);
+    
   }, [isStarted]);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;

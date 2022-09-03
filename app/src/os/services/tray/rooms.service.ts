@@ -28,6 +28,7 @@ export class RoomsService extends BaseService {
     'realm.tray.rooms.set-live': this.setLiveRoom,
     'realm.tray.rooms.unset-known-room': this.unsetKnownRoom,
     'realm.tray.rooms.request-rooms': this.requestAllRooms,
+    'realm.tray.rooms.refresh-local-room': this.refreshLocalRoom,
     'realm.tray.rooms.dismiss-invite': this.dismissInvite,
     'realm.tray.rooms.accept-invite': this.acceptInvite,
     'realm.tray.rooms.get-provider': this.getProvider,
@@ -94,6 +95,9 @@ export class RoomsService extends BaseService {
     },
     invite: (roomId: string, patp: Patp) => {
       return ipcRenderer.invoke('realm.tray.rooms.invite', roomId, patp);
+    },
+    refreshLocalRoom: () => {
+      return ipcRenderer.invoke('realm.tray.rooms.refresh-local-room');
     },
     sendChat: (ourPatP: Patp, chat: string) => {
       return ipcRenderer.invoke('realm.tray.rooms.send-chat', ourPatP, chat);
@@ -182,8 +186,7 @@ export class RoomsService extends BaseService {
     this.state?.setProvider(patp);
   }
   async leaveRoom(_event: any, roomId: string) {
-    await RoomsApi.leaveRoom(this.core.conduit!, roomId, this.state!);
-    this.state?.leaveRoom();
+    RoomsApi.leaveRoom(this.core.conduit!, roomId, this.state!);
   }
   async deleteRoom(_event: any, roomId: string) {
     RoomsApi.deleteRoom(this.core.conduit!, roomId, this.state!);
@@ -244,7 +247,32 @@ export class RoomsService extends BaseService {
     return provider;
   }
   async invite(_event: any, roomId: string, patp: Patp) {
-    RoomsApi.invite(this.core.conduit!, roomId, patp);
+    return RoomsApi.invite(this.core.conduit!, roomId, patp);
+  }
+
+  //
+  // scry latest state from room client agent
+  // apply it to room model state representation.
+  async refreshLocalRoom(_event: any) {
+      let res = await RoomsApi.getFull(this.core.conduit!);
+      
+      let full = res['rooms-view']['full']
+      let room = full['my-room']
+      if(room === null) {
+        // room is null.
+        // this update can come from a scry to the room client agent
+        this.state?.unsetLiveRoom();
+      } else {
+        this.state?.setLiveRoom(room);
+      }
+
+      let provider = full['provider']
+      if(provider === null) {
+        this.state?.setProvider('~'+this.core?.conduit?.ship!);
+      } else {
+        this.state?.setProvider(full['provider']);
+      }
+
   }
 
   onLogout() {

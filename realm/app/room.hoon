@@ -329,7 +329,7 @@
       :: to prevent spam invites?
       :: ?>  is-friend   :: TODO needed?
       ~&  >  :-  %room-invited
-        [provider rid ship]
+        [rid [%provider provider] [%invitedby ship]]
       abet
     ::
     ++  kicked

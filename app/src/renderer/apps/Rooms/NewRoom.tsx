@@ -17,6 +17,7 @@ import * as yup from 'yup';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
+import { useTrayApps } from '../store';
 
 export const createRoomForm = (
   defaults: any = {
@@ -34,7 +35,19 @@ export const createRoomForm = (
     id: 'name',
     form,
     initialValue: defaults.name || '',
-    validationSchema: yup.string().required('Name is required'),
+    // validationSchema: yup.string().required('Name is required'),
+    validate: (name: string) => {
+      // if (addedShips.includes(patp)) {
+      //   return { error: 'Already added', parsed: undefined };
+      // }
+
+      if (name.length > 1 && name.length < 20 && /^[a-zA-Z0-9- ]*$/.test(name)) {
+        return { error: undefined, parsed: name };
+      }
+      
+
+      return { error: 'Invalid Name', parsed: undefined };
+    },
   });
 
   const isPrivate = createField({
@@ -60,6 +73,7 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
   const { desktop, ship } = useServices();
   const [loading, setLoading] = useState(false);
+  const { roomsApp } = useTrayApps();
 
   const { dockColor, windowColor, inputColor } = desktop.theme;
 
@@ -70,7 +84,7 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     RoomsActions.createRoom(
-      `${ship?.patp}/${name}/${new Date().getTime()}`,
+      `${roomsApp.provider}/${name}/${new Date().getTime()}`,
       isPrivate ? 'private' : 'public',
       name,
       true
@@ -141,6 +155,11 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             error={!name.computed.isDirty || name.computed.error}
             onChange={(e: any) => {
               name.actions.onChange(e.target.value);
+            }}
+            onKeyDown={(evt: any) => {
+              if (evt.key === 'Enter') {
+                createRoom(evt);
+              }
             }}
             onFocus={() => name.actions.onFocus()}
             onBlur={() => name.actions.onBlur()}
