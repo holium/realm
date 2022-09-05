@@ -26,7 +26,7 @@ export const EthList: FC<EthListProps> = observer((props: EthListProps) => {
   const onAddWallet = () => {};
   const list = walletApp.ethereum.list;
   useEffect(() => {
-    constructSampleWallet().then(wallets => console.log(wallets));
+    // constructSampleWallet().then(wallets => console.log(wallets));
     WalletActions.setXpub();
   })
   // return

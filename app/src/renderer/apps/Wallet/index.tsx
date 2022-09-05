@@ -8,8 +8,9 @@ import { EthTransaction } from './views/ethereum/Transaction';
 
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
-import { constructSampleWallet } from './store';
+import { constructSampleWallet, wallet } from './store';
 import { Flex } from 'renderer/components';
+import { WalletActions } from '../../logic/actions/wallet';
 
 export const WalletViews: { [key: string]: any } = {
   'bitcoin:list': (props: any) => <div />,
@@ -24,7 +25,9 @@ export const WalletViews: { [key: string]: any } = {
 export const WalletApp: FC<any> = observer((props: any) => {
   const { desktop } = useServices();
   const { walletApp } = useTrayApps();
-  const onAddWallet = () => {};
+  const onAddWallet = () => {
+    WalletActions.createWallet('~zod', walletApp.network);
+  };
 
   const View = WalletViews[walletApp.currentView];
   return (

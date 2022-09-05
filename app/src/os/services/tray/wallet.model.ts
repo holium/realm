@@ -4,6 +4,7 @@ import {
   types,
   Instance,
 } from 'mobx-state-tree';
+import { networkInterfaces } from 'os';
 
 const BitcoinWallet = types.model('BitcoinWallet', {
   network: types.string,
@@ -26,6 +27,15 @@ const BitcoinStore = types
     initial(wallets: any) {
       applySnapshot(self.wallets, wallets);
     },
+    // updates
+    applyWalletUpdate(wallet: any) {
+      const walletObj = {
+        network: 'bitcoin',
+        address: wallet.wallet.address,
+        balance: wallet.wallet.balance.toString(),
+      };
+      self.wallets.set(wallet.key, EthWallet.create(walletObj));
+    }
   }));
 
 const EthWallet = types.model('EthWallet', {
@@ -75,7 +85,15 @@ export const EthStore = types
   }))
   .actions((self) => ({
     initial(wallets: any) {
-      applySnapshot(self.wallets, wallets);
+      const ethWallets = wallets.ethereum;
+      Object.entries(ethWallets).forEach(([key, wallet]) => {
+        ethWallets[key] = {
+          network: 'ethereum',
+          balance: wallet.balance,
+          address: wallet.address,
+        }
+      })
+      applySnapshot(self.wallets, ethWallets);
     },
     // pokes
     setEthProvider(url: string) {
@@ -89,7 +107,6 @@ export const EthStore = types
         balance: wallet.wallet.balance.toString(),
       };
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
-      console.log('success');
     },
     applyTransactionUpdate(transaction: any) {
       self.transactions.put(transaction);
@@ -106,7 +123,7 @@ export const WalletStore = types
       'ethereum:settings',
       'bitcoin:list',
     ]),
-    bitcoin: types.maybe(BitcoinStore),
+    bitcoin: BitcoinStore,
     ethereum: EthStore,
   })
   .actions((self) => ({

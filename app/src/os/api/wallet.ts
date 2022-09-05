@@ -38,12 +38,26 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  enqueueTransaction: async (conduit: Urbit, transaction: any) => {
+  createWallet: async (conduit: Urbit, sender: string, network: string) => {
+    const payload = {
+      app: 'wallet',
+      mark: 'wallet-action',
+      json: {
+        'create-wallet': {
+          sndr: sender,
+          network: network,
+        }
+      }
+    };
+    await conduit.poke(payload);
+  },
+  enqueueTransaction: async (conduit: Urbit, network: string, transaction: any) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
       json: {
         'enqueue-transaction': {
+          network: network,
           transaction: transaction,
         }
       },
