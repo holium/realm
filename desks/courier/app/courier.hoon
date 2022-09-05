@@ -59,7 +59,7 @@
           [%updates ~]
         ?>  =(our.bowl src.bowl)
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
-        [%give %fact [/updates ~] courier-reaction+!>([%previews dm-previews])]~
+        [%give %fact [/updates ~] graph-dm-reaction+!>([%previews dm-previews])]~
       ==
     [cards this]
   ::
@@ -72,7 +72,7 @@
       [%x %dms ~]
         ?>  =(our.bowl src.bowl)
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
-        ``courier-view+!>([%inbox dm-previews])
+        ``graph-dm-view+!>([%inbox dm-previews])
     ::
     ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
       [%x %dms %group @ @ ~]
@@ -80,21 +80,21 @@
         =/  entity       `@p`(slav %p i.t.t.t.path)
         =/  timestamp    `@t`i.t.t.t.t.path
         =/  dms           (grp-log:gs:lib our.bowl now.bowl entity timestamp)
-        ``courier-view+!>([%dm-log dms])
+        ``graph-dm-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev.json
       [%x %dms @ ~]
         ?>  =(our.bowl src.bowl)
         =/  to-ship       `@p`(slav %p i.t.t.path)
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
-        ``courier-view+!>([%dm-log dms])
+        ``graph-dm-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev/paged/0/20.json
       :: [%x %dms @ %paged @ @ ~]
       ::   ?>  =(our.bowl src.bowl)
       ::   =/  to-ship       `@p`(slav %p i.t.t.path)
       ::   =/  dms           (gen-dms:gs:lib our.bowl to-ship now.bowl)
-      ::   ``courier-view+!>([%dm-log dms])
+      ::   ``graph-dm-view+!>([%dm-log dms])
     ==
   ::
   ++  on-agent 
@@ -219,6 +219,18 @@
       ==
     =/  met-action=action:met
       [%add rid.action graph+rid.action metadatum]
+    ::  create group-dm-created preview
+    =/  to-set        (~(put in ships) our.bowl)
+    =/  mtd-set       (get-metadata:gs:lib to-set our.bowl now.bowl)
+    =/  new-grp-prev  [
+          path=(spat /(scot %p entity.rid.action)/(cord name.rid.action))
+          to=(~(put in ships) our.bowl)
+          type=%group
+          source=%graph-store
+          last-time-sent=now.bowl
+          last-message=[~]
+          metadata=(silt mtd-set)
+      ]
     :_  state
     :~ 
         [%pass / %agent [our.bowl %graph-store] %poke graph-update-3+!>(update)]
@@ -228,7 +240,9 @@
         [%pass / %agent [our.bowl %contact-push-hook] %poke push-hook-action+!>([%add rid.action])]
         [%pass / %agent [our.bowl %metadata-push-hook] %poke push-hook-action+!>([%add rid.action])]
         [%pass / %agent [our.bowl %metadata-push-hook] %poke metadata-update-2+!>(met-action)]
+        [%pass / %agent [our.bowl %group-push-hook] %poke push-hook-action+!>([%add rid.action])]
         [%pass / %agent [our.bowl %invite-hook] %poke invite-action+!>(inv-action)]
+        [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview:store`new-grp-prev])]
     ==
     ::
   ++  send-dm
@@ -270,7 +284,7 @@
         =/  index         (snag 1 p.dm-node)
         =/  new-dm        (received-dm:gs:lib ship-dec index q.dm-node our now)
         :_  state
-        [%give %fact [/updates ~] courier-reaction+!>([%dm-received new-dm])]~
+        [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
       ::
       ?:  (group-skim-gu:gs:lib resource.+.q.upd)
         ::  is group dm
@@ -280,12 +294,22 @@
         =/  name          name.resource.+.q.upd
         =/  new-dm        (received-grp-dm:gs:lib our now entity name q.dm-node)
         :_  state
-        [%give %fact [/updates ~] courier-reaction+!>([%dm-received new-dm])]~
+        [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
       :: else 
       `state
     %add-graph
       ::  TODO new graph invites
       ~&  >>  ['add graph' upd]
+      :: [%add-graph
+      ::   p=~2022.9.5..19.36.10..46ff
+      ::     q
+      ::   [ %add-graph
+      ::     resource=[entity=~dev name=%~2022.9.5..19.36.10]
+      ::     graph={}
+      ::     mark=[~ %graph-validator-chat]
+      ::     overwrite=%.y
+      ::   ]
+      :: ]
       `state
   ==
   --

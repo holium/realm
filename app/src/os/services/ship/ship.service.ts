@@ -28,7 +28,7 @@ import { loadContactsFromDisk } from './stores/contacts';
 import { loadDocketFromDisk } from './stores/docket';
 import { loadFriendsFromDisk } from './stores/friends';
 import { CourierApi } from '../../api/courier';
-import { CourierStoreType } from './models/courier';
+import { CourierStoreType, PreviewGroupDMType } from './models/courier';
 import { toJS } from 'mobx';
 
 export type ShipModels = {
@@ -419,22 +419,35 @@ export class ShipService extends BaseService {
     return await CourierApi.declineDm(this.core.conduit!, toShip);
   }
   async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
-    const draft = this.models.courier?.draftNew(patps, metadata);
+    let draft: any;
+    if (patps.length > 1) {
+      const reaction: any = await CourierApi.createGroupDM(
+        this.core.conduit!,
+        patps
+      );
+      console.log(reaction);
+      draft = this.models.courier?.draftGroupDM(
+        reaction['group-dm-created'] as PreviewGroupDMType
+      );
+      console.log(draft);
+    } else {
+      // single dm
+      draft = this.models.courier?.draftDM(patps, metadata);
+    }
     return toJS(draft);
   }
+  // async draftGroupDm(_event: any, patps: Patp[], metadata: any[]) {
+  //   const draft = this.models.courier?.draftNew(patps, metadata);
+  //   return toJS(draft);
+  // }
   async sendDm(_event: any, path: string, contents: any[]) {
-    const ourShip = this.state?.patp!;
     const dmLog = this.models.courier?.dms.get(path)!;
     const post = dmLog.sendDM(this.state!.patp, contents);
 
     if (dmLog.type === 'group') {
       return await CourierApi.sendGroupDM(this.core.conduit!, path, post);
     } else {
-      return await CourierApi.sendDM(
-        this.core.conduit!,
-        this.state!.patp,
-        post
-      );
+      return await CourierApi.sendDM(this.core.conduit!, path, post);
     }
   }
   async removeDm(_event: any, toShip: string, removeIndex: any) {

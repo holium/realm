@@ -98,8 +98,9 @@
 ::
 +$  reaction
   $%  
-      [%previews =chat-previews]    ::  loads a list of all dms
-      [%dm-received =chat]          ::  a newly received dm-message
+      [%previews =chat-previews]              ::  loads a list of all dms
+      [%dm-received =chat]                    ::  a newly received dm-message
+      [%group-dm-created =message-preview]  ::  a newly created group dm
   ==
 ::
 ::  Scry views

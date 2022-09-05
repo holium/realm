@@ -301,40 +301,55 @@ export const CourierStore = types
       applySnapshot(self.previews, dmPreviews);
       self.loader.set('loaded');
     },
-    draftNew: (patps: Patp[], metadata: any[]) => {
-      const type = patps.length === 1 ? 'dm' : 'group';
-      if (type === 'dm') {
-        self.dms.set(
-          patps[0],
-          DMLog.create({
-            path: `/dm-inbox/${patps[0]}`,
-            to: patps[0],
-            type: type,
-            source: 'graph-store',
-            messages: [],
-            metadata: ContactMetadata.create(metadata[0] || {}),
-            outgoing: [],
-          })
-        );
-        self.previews.set(
-          patps[0],
-          DMPreview.create({
-            path: `/dm-inbox/${patps[0]}`,
-            to: patps[0],
-            type: 'type',
-            source: 'graph-store',
-            lastTimeSent: moment().unix() * 1000,
-            lastMessage: [{ text: 'Drafting...' }],
-            metadata: ContactMetadata.create(metadata[0] || {}),
-            pending: false,
-            isNew: true,
-          })
-        );
-        return self.previews.get(patps[0]);
-      } else {
-        // is group
-        return;
-      }
+    draftDM: (patps: Patp[], metadata: any[]) => {
+      const path = `/dm-inbox/${patps[0]}`;
+      self.dms.set(
+        path,
+        DMLog.create({
+          path: `/dm-inbox/${patps[0]}`,
+          to: patps[0],
+          type: 'dm',
+          source: 'graph-store',
+          messages: [],
+          metadata: ContactMetadata.create(metadata[0] || {}),
+          outgoing: [],
+        })
+      );
+      self.previews.set(
+        path,
+        DMPreview.create({
+          path: `/dm-inbox/${patps[0]}`,
+          to: patps[0],
+          type: 'dm',
+          source: 'graph-store',
+          lastTimeSent: moment().unix() * 1000,
+          lastMessage: [{ text: 'Drafting...' }],
+          metadata: ContactMetadata.create(metadata[0] || {}),
+          pending: false,
+          isNew: true,
+        })
+      );
+      return self.previews.get(patps[0]);
+    },
+    draftGroupDM: (preview: PreviewGroupDMType) => {
+      preview.metadata.forEach((mtd: any) => {
+        mtd.color = cleanNounColor(mtd.color);
+      });
+      self.previews.set(
+        preview.path,
+        DMPreview.create({
+          path: preview.path,
+          to: preview.to,
+          type: preview.type,
+          source: preview.source,
+          lastTimeSent: preview.lastTimeSent,
+          lastMessage: preview.lastMessage,
+          metadata: preview.metadata,
+          pending: false,
+          isNew: true,
+        })
+      );
+      return self.previews.get(preview.path);
     },
     setDMLog: (dmLog: DMLogType) => {
       self.dms.set(dmLog.path, dmLog);

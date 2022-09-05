@@ -64,23 +64,16 @@
       ++  grp-inv         ::  generates group dm invite previews
         |=  [our=ship inv=invite:inv now=@da rolo=rolodex:sur]
         ^-  message-preview
-        =/  ginv          (ginv our inv now)
-        =/  mtd-set=(list contact-mtd)
-        %+  turn  ~(tap in to.ginv)
-          |=  cont=@p
-          (form-contact-mtd rolo cont)
+        =/  ginv                (ginv our inv now)
+        =/  mtd-set             (get-metadata to.ginv our now)
         [path.ginv to.ginv %group-pending %graph-store time.ginv [~] (silt mtd-set)]
       ::
       ++  grp-prev        ::  generates group dm log previews
         |=  [our=ship ass=association:mtd now=@da rolo=rolodex:sur]
         ^-  message-preview
-        =/  glog          (glog our entity.group.ass name.group.ass now)
-
+        =/  glog                (glog our entity.group.ass name.group.ass now)
         ::  get contact metadata set
-        =/  mtd-set=(list contact-mtd)
-        %+  turn  ~(tap in to.glog)
-          |=  cont=@p
-          (form-contact-mtd rolo cont)
+        =/  mtd-set             (get-metadata to.glog our now)
         ::
         ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
           [path.glog to.glog %group %graph-store time.glog [~] (silt mtd-set)]
@@ -101,17 +94,13 @@
   ++  grp-log             ::  generates the group dm log metadata
     |=  [our=ship now=@da entity=ship name=cord]
     ^-  chat
-    =/  glog            (glog our entity name now)
-    =/  rolo            .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
-    =/  mtd-set=(list contact-mtd)
-      %+  turn  ~(tap in to.glog)
-        |=  cont=@p
-        (form-contact-mtd rolo cont)
+    =/  glog                (glog our entity name now)
+    =/  mtd-set             (get-metadata to.glog our now)
     ::
     ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
       [path.glog to.glog %group %graph-store [~] (silt mtd-set)]
     ::
-    =/  dms               (map-to-dms posts.glog)
+    =/  dms                 (map-to-dms posts.glog)
     [path.glog to.glog %group %graph-store (flop dms) (silt mtd-set)]
   ::
   ++  received-grp-dm       ::  handes a newly received graph-update-3 group dm
@@ -121,15 +110,19 @@
     =/  path                (spat /(scot %p entity)/(cord name))
     =/  group               (need .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity)/(cord name)/noun))
     ?>  ?=(%invite -.policy.group)
-    =/  to-set          (~(gas in members.group) ~(tap in pending.policy.group))
-    ::  find a better way to get a single contact
-    =/  rolo                .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
-    =/  mtd-set=(list contact-mtd)
-      %+  turn  ~(tap in to-set)
-        |=  cont=@p
-        (form-contact-mtd rolo cont)
+    =/  to-set              (~(gas in members.group) ~(tap in pending.policy.group))
+    =/  mtd-set             (get-metadata to-set our now)
     ::
     [path to-set %group %graph-store [message ~] (silt mtd-set)]
+  ::
+  ++  get-metadata
+    |=  [to=(set ship) our=@p now=@da]
+    =/  rolo      .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
+    =/  mtd-set=(list contact-mtd)
+      %+  turn  ~(tap in to)
+        |=  cont=@p
+        (form-contact-mtd rolo cont)
+    mtd-set
   :: 
   ::  Group DM helpers
   ::
@@ -405,6 +398,9 @@
       ::
         %dm-received
       (dm-log:encode chat.vi)
+      ::
+        %group-dm-created
+      (preview:encode message-preview.vi)
     ==
   ::
   :: ++  action

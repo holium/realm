@@ -21,6 +21,7 @@ import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { DmActions } from 'renderer/logic/actions/chat';
 
 type IProps = {
   theme: ThemeModelType;
@@ -51,6 +52,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
       if (contacts.getContactAvatarMetadata(contactsList[0])) {
         metadata = contacts.getContactAvatarMetadata(contactsList[0]);
       }
+      //
       const newDm = await ShipActions.draftDm(contactsList, [metadata]);
       onCreateNewDm(newDm);
     },
