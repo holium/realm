@@ -51,7 +51,7 @@ export const CourierApi = {
     // const to = path.split('/')[2];
 
     // const post = createPost(ourShip.substring(1), contents, `/${patp2dec(to)}`);
-
+    // console.log(post);
     const payload = {
       app: 'dm-hook',
       mark: `graph-update-3`,
@@ -78,6 +78,7 @@ export const CourierApi = {
     const split = path.split('/');
     const host = split[1];
     const timestamp = split[2];
+    console.log('group dm => %o', post);
     // const post = createPost(ourShip.substring(1), contents);
 
     const payload = {

@@ -5,7 +5,7 @@
 ::
 ::  Should watch and sync data with %treaty and %docket under /garden.
 ::
-/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, hark=hark-store, passports-store=passports
+/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, passports-store=passports
 /+  dbug, default-agent
 |%
 +$  card  card:agent:gall

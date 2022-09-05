@@ -3,16 +3,14 @@
 ::  Chat message lib within Realm. Mostly handles [de]serialization
 ::    to/from json from types stored in courier sur.
 ::
-/-  sur=courier, gra=graph-store, *post, *resource, contact-store, dm-hook, mtd=metadata-store, inv=invite-store
+/-  sur=courier, gra=graph-store, *post, *resource, contact-store, dm-hook, 
+    mtd=metadata-store, inv=invite-store, graph-view
 /+  res=resource
 =<  [sur .]
 =,  sur
 |%
 ::
-+$  g-pth     [@p cord]
-+$  g-list    (list g-pth)
-::
-++  gs          ::  converts dms from graph-store dm-inbox
+++  gs   ::  converts dms from graph-store dm-inbox
   |%
   ::
   ::  DM list handlers
@@ -41,67 +39,66 @@
     =/  single-dms      (weld prev-list pen-list)
     =/  group-dms       (grp-dm-prevs our now rolo)
     [(weld single-dms group-dms)]
-  ::
-  ::  Performs all the scries needed to build a group dm preview for the list view
-  ::
-  ++  grp-dm-prevs
-    |=  [our=ship now=@da rolo=rolodex:sur]
-    ^-  (list message-preview)
-    =/  assoc          .^(associations:mtd %gx /(scot %p our)/metadata-store/(scot %da now)/associations/noun)
-    =/  group-dms      (skim ~(val by assoc) skim-grp-dms)
-    =/  dms-list=(list message-preview)
-    %+  turn  group-dms
-      |=  ass=association:mtd
-      (grp-prev our ass now rolo)
-        ::  TODO check invite store
-    =/  graph-invites  (need .^((unit invitatory:inv) %gx /(scot %p our)/invite-store/(scot %da now)/invitatory/graph/noun))
-    =/  group-invs     (skim ~(val by graph-invites) skim-grp-inv)
-    =/  group-dm-invs=(list message-preview)
-    %+  turn  group-invs
-      |=  inv=invite:inv
-      (grp-inv our inv now rolo)
-    ~&  >  [group-dm-invs]
-    [(weld dms-list group-dm-invs)]
-    :: dms-list
     ::
-    ++  grp-inv
-      |=  [our=ship inv=invite:inv now=@da rolo=rolodex:sur]
-      ^-  message-preview
-      =/  ginv          (ginv our inv now)
-      =/  mtd-set=(list contact-mtd)
-      %+  turn  ~(tap in to.ginv)
-        |=  cont=@p
-        (form-contact-mtd rolo cont)
-      [path.ginv to.ginv %group-pending %graph-store time.ginv [~] (silt mtd-set)]
+    ::  Performs all the scries needed to build a group dm preview for the list view
     ::
-    ++  grp-prev
-      |=  [our=ship ass=association:mtd now=@da rolo=rolodex:sur]
-      ^-  message-preview
-      =/  glog          (glog our entity.group.ass name.group.ass now)
+    ++  grp-dm-prevs        ::  generates group dm previews
+      |=  [our=ship now=@da rolo=rolodex:sur]
+      ^-  (list message-preview)
+      =/  assoc          .^(associations:mtd %gx /(scot %p our)/metadata-store/(scot %da now)/associations/noun)
+      =/  group-dms      (skim ~(val by assoc) skim-grp-dms)
+      =/  dms-list=(list message-preview)
+      %+  turn  group-dms
+        |=  ass=association:mtd
+        (grp-prev our ass now rolo)
+          ::  TODO check invite store
+      =/  graph-invites  (need .^((unit invitatory:inv) %gx /(scot %p our)/invite-store/(scot %da now)/invitatory/graph/noun))
+      =/  group-invs     (skim ~(val by graph-invites) skim-grp-inv)
+      =/  group-dm-invs=(list message-preview)
+      %+  turn  group-invs
+        |=  inv=invite:inv
+        (grp-inv our inv now rolo)
+      :: ~&  >  [group-dm-invs]
+      [(weld dms-list group-dm-invs)]
+      ::
+      ++  grp-inv         ::  generates group dm invite previews
+        |=  [our=ship inv=invite:inv now=@da rolo=rolodex:sur]
+        ^-  message-preview
+        =/  ginv          (ginv our inv now)
+        =/  mtd-set=(list contact-mtd)
+        %+  turn  ~(tap in to.ginv)
+          |=  cont=@p
+          (form-contact-mtd rolo cont)
+        [path.ginv to.ginv %group-pending %graph-store time.ginv [~] (silt mtd-set)]
+      ::
+      ++  grp-prev        ::  generates group dm log previews
+        |=  [our=ship ass=association:mtd now=@da rolo=rolodex:sur]
+        ^-  message-preview
+        =/  glog          (glog our entity.group.ass name.group.ass now)
 
-      ::  get contact metadata set
-      =/  mtd-set=(list contact-mtd)
-      %+  turn  ~(tap in to.glog)
-        |=  cont=@p
-        (form-contact-mtd rolo cont)
-      ::
-      ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
-        [path.glog to.glog %group %graph-store time.glog [~] (silt mtd-set)]
-      ::
-      =/  posts=(list post:gra)
-      %+  turn  ~(val by posts.glog)
-        |=  [node=node:gra]
-        ?<  ?=(%| -.post.node)
-        =/  p     ^-(post p.post.node)
-        [p]
-      ::  Get the last post
-      =/  last              (rear posts)
-      ::  Add a mention so we know who posted the last message
-      =/  contents          (weld [[%mention author.last] ~] contents.last)
-      [path.glog to.glog %group %graph-store time-sent.last contents (silt mtd-set)]
+        ::  get contact metadata set
+        =/  mtd-set=(list contact-mtd)
+        %+  turn  ~(tap in to.glog)
+          |=  cont=@p
+          (form-contact-mtd rolo cont)
+        ::
+        ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
+          [path.glog to.glog %group %graph-store time.glog [~] (silt mtd-set)]
+        ::
+        =/  posts=(list post:gra)
+        %+  turn  ~(val by posts.glog)
+          |=  [node=node:gra]
+          ?<  ?=(%| -.post.node)
+          =/  p     ^-(post p.post.node)
+          [p]
+        ::  Get the last post
+        =/  last              (rear posts)
+        ::  Add a mention so we know who posted the last message
+        =/  contents          (weld [[%mention author.last] ~] contents.last)
+        [path.glog to.glog %group %graph-store time-sent.last contents (silt mtd-set)]
+    ::
   ::
-  ::
-  ++  grp-log
+  ++  grp-log             ::  generates the group dm log metadata
     |=  [our=ship now=@da entity=ship name=cord]
     ^-  chat
     =/  glog            (glog our entity name now)
@@ -117,20 +114,48 @@
     =/  dms               (map-to-dms posts.glog)
     [path.glog to.glog %group %graph-store (flop dms) (silt mtd-set)]
   ::
-  ++  received-grp-dm
+  ++  received-grp-dm       ::  handes a newly received graph-update-3 group dm
     |=  [our=ship now=@da entity=ship name=cord =node:gra]
     ^-  chat
     =/  message             (node-to-dm node)
     =/  path                (spat /(scot %p entity)/(cord name))
+    =/  group               (need .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity)/(cord name)/noun))
+    ?>  ?=(%invite -.policy.group)
+    =/  to-set          (~(gas in members.group) ~(tap in pending.policy.group))
     ::  find a better way to get a single contact
     =/  rolo                .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
-    =/  contact             (form-contact-mtd rolo author.message)
-    [path (silt ~[author.message]) %group %graph-store [message ~] (silt ~[contact])]
+    =/  mtd-set=(list contact-mtd)
+      %+  turn  ~(tap in to-set)
+        |=  cont=@p
+        (form-contact-mtd rolo cont)
+    ::
+    [path to-set %group %graph-store [message ~] (silt mtd-set)]
   :: 
-  ::
   ::  Group DM helpers
   ::
-  ++  glog
+  ++  new-group-dm
+    |=  [our=ship now=@da ships=(set ship)]
+    ^-  action:graph-view
+    =/  title=(list cord)
+    %+  turn  ~(tap in ships)
+      |=  [ship=@p]
+      `cord`(scot %p ship)
+    =.  title         (into title 0 `cord`(scot %p our))
+    =.  title         (join ', ' title)
+    =/  dm-name       `@tas`(crip (oust [19 6] (scow %da now)))
+    =/  create  [
+      %create
+      rid=`resource`[entity=our name=dm-name]
+      title=(crip title)
+      description=`@t`''
+      mark=(some %graph-validator-chat)
+      associated=[%policy [%invite pending=ships]]
+      module='chat'
+    ]
+    [^-(action:graph-view create)]
+    
+  
+  ++  glog    ::  generates the group dm log metadata
     |=  [our=ship entity=ship name=term now=@da]
     ^-  [time=@da path=cord to=(set ship) posts=(map atom node:gra)]
     =/  dm-name         (need (slaw %da name))
@@ -144,7 +169,7 @@
     =/  post-graph       ^-((map atom node:gra) graph.+.+.node)
     [dm-name group-path to-set post-graph]
   ::
-  ++  ginv
+  ++  ginv    ::  generates parses a group invite for metadata
     |=  [our=ship inv=invite:inv now=@da]
     ^-  [time=@da path=cord to=(set ship) posts=(map atom node:gra)]
     =/  entity          entity.resource.inv
@@ -154,13 +179,13 @@
     =/  to-set          (silt ~[entity ship.inv recipient.inv])
     [dm-name group-path to-set [~]]
   ::
-  ++  skim-grp-inv
+  ++  skim-grp-inv    ::  used for skimming out group dm invites from invite-store
     |=  inv=invite:inv
     =/  name      `cord`name.resource.inv
     =/  name-da   (slaw %da name)
     ?~  name-da   %.n   %.y
   ::
-  ++  skim-grp-dms
+  ++  skim-grp-dms    ::  used for skimming out group dm resources from group-store 
     |=  ass=association:mtd
     ?:  =(%graph -.config.metadatum.ass)
       =/  name      `cord`name.group.ass
@@ -168,7 +193,7 @@
       ?~  name-da   %.n   %.y
     %.n
   ::
-  ++  group-skim-gu  :: skim graph updates for a group dm
+  ++  group-skim-gu  :: used for skimming out group dm resources from graph-update-3 updates
     |=  [=resource]
     =/  name      `cord`name.resource
     =/  name-da   (slaw %da name)
@@ -288,8 +313,78 @@
   ++  skim-dms
     |=  [el=[ship-dec=@ud node=node:gra] key-dec=@ud]
     =(ship-dec.el key-dec)
+  ::
+  ::  Needed to hash group-dms
+  ::
+  ++  jael-scry
+    |*  [=mold our=ship desk=term now=time =path]
+    .^  mold
+      %j
+      (scot %p our)
+      desk
+      (scot %da now)
+      path
+    ==
+  ::
+  ++  sign
+    |=  [our=ship now=time =hash]
+    ^-  signature:signatures
+    =+  (jael-scry ,=life our %life now /(scot %p our))
+    =+  (jael-scry ,=ring our %vein now /(scot %ud life))
+    :+  `@ux`(sign:as:(nol:nu:crub:crypto ring) hash)
+      our
+    life
+  ::
+  ++  add-hash-to-node
+    |=  [our=@p now=@da =node:gra]
+    ^-  [node:gra]
+    ?>  ?=(%& -.post.node)
+    =/  p  p.post.node
+    =/  =hash:gra  
+      =-  `@ux`(sham -)
+      :^  ~
+          author.p
+        time-sent.p
+      contents.p
+    ::
+    =/  hash-node  %_  node
+      hash.p.post  `hash
+    ::
+        signatures.p.post
+      %-  ~(gas in *signatures:gra)
+      [(sign our now hash)]~
+    ::
+        children
+        [%empty ~]
+      ==
+    [post.hash-node [%empty ~]]
+  ::
+  :: ++  add-hash-to-node
+  ::   =|  parent-hash=(unit hash:gra)
+  ::   |=  [our=@p now=@da =index:gra =node:gra]
+  ::   :: ^-  [index:gra node:gra]
+  ::   =*  loop  $
+  ::   :-  index
+  ::   ?>  ?=(%& -.post.node)
+  ::   =*  p  p.post.node
+  ::   =/  =hash:gra
+  ::   `@ux`(sham -)
+  ::     :^  author.p
+  ::       time-sent.p
+  ::     contents.p
+  ::   ::
+  ::   %_  node
+  ::     hash.p.post  `hash
+  ::   ::
+  ::       signatures.p.post
+  ::     %-  ~(gas in *signatures:gra)
+  ::     [(sign our now hash)]~
+  ::   ::
+  ::       children
+  ::       [%empty ~]
+  ::     ==
+  :: ::
   --
-
 ::
 ::  JSON
 ::
@@ -372,7 +467,7 @@
       %-  of
       :~  [%create-group-dm cr-gp-dm]
           [%send-dm dm]
-          :: [%send-group-dm gp-dm]
+          [%send-group-dm gp-dm]
       ==
     ::
     ++  cr-gp-dm

@@ -93,7 +93,7 @@
       :: [%screen screen=?]
       [%create-group-dm ships=(set ship)]
       [%send-dm =ship =post]
-      :: [%send-group-dm =resource =post]
+      [%send-group-dm =resource =post]
   ==
 ::
 +$  reaction

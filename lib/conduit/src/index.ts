@@ -13,6 +13,7 @@ import {
   Scry,
   SubscribeCallbacks,
   SubscribeParams,
+  Thread,
 } from './types';
 
 // For now, set it to 20
@@ -264,6 +265,29 @@ export class Conduit extends EventEmitter {
         `${this.url}/~/scry/${app}${path}.json`,
         {
           headers: this.headers,
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * thread
+   *
+   * @param params
+   * @returns
+   */
+  async thread(params: Thread<Action>): Promise<any> {
+    const { inputMark, outputMark, threadName, body, desk } = params;
+
+    try {
+      const response = await axios.post(
+        `${this.url}/spider/${desk}/${inputMark}/${threadName}/${outputMark}.json`,
+        {
+          headers: this.headers,
+          body,
         }
       );
       return response.data;

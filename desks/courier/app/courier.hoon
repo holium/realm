@@ -2,7 +2,7 @@
 ::
 ::  A thin agent that interfaces with various chat stores
 ::
-/-  store=courier, post, graph-store, *post, *resource
+/-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store
 /+  dbug, default-agent, lib=courier, hook=dm-hook
 |%
 +$  card  card:agent:gall
@@ -16,6 +16,7 @@
 =|  state-0
 =*  state  -
 %-  agent:dbug
+:: =/  tid         (scot %ta 'group-dm_0v6.cqlt2.4o96j.6fq0u.dv85g.v3tco')
 :: ^-  agent:gall
 =<
   %-  agent:dbug
@@ -26,42 +27,26 @@
   ::
   ++  on-init
     ^-  (quip card _this)
+    :: =/  ta-now            `@ta`(scot %da now.bowl)  
+    :: =/  start-args       [~ `tid [p=our.bowl q=%landscape r=da+now.bowl] %graph-create !>(~)]
     :_  this
     ::  %watch: all incoming dms and convert to our simple structure
     :~  
       [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
+      :: [%pass /group-dm-thread %agent [our.bowl %spider] %watch /thread-result/[tid]]
+      :: [%pass /thread/[ta-now] %agent [our.bowl %spider] %poke %spider-start !>(start-args)]
     ==
   ++  on-save   !>(~)
   ++  on-load   |=(vase `..on-init)
-  :: ++  on-poke
-  ::   |=  [=mark =vase]
-  ::   ^-  (quip card _this)
-  ::   ?+  mark  (on-poke:def mark vase)
-  ::     %dm-hook-action     
-  ::   [%pass / %agent [our.bowl %dm-hook] %poke %dm-hook-action !<(action:hook vase)]~
-  ::   ==
-    :: [cards this]
-  :: ++  on-poke
-  ::   |=  [=mark =vase]
-  ::   ^-  (quip card _this)
-  ::   |^
-  ::   ?+  mark  (on-poke:def mark vase)
-  ::       %dm-hook-action
-  ::     =+  !<(=action:hook vase)
-  ::     =^  cards  state
-  ::     :~ 
-  ::       [%pass / %agent [our.bowl %dm-hook] %poke %dm-hook-action action]
-  ::     ==
-  ::   ==
-  ::     [cards this]
-  ++  on-poke   ::|=(cage !!)
+  ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
-    ~&  >  [mark]
+    :: ~&  >  [mark]
     |^
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %courier-action    (on-action:core !<(action:store vase))
+      %graph-dm-action    (on-graph-action:core !<(action:store vase))
+      :: %next-dm-action    (on-action:core !<(action:store vase))
     ==
     [cards this]
   --
@@ -133,7 +118,7 @@
             ?+    p.cage.sign  (on-agent:def wire sign)
                 %graph-update-3
               =^  cards  state
-                (graph-dm !<(=update:graph-store q.cage.sign) our.bowl now.bowl)
+                (on-graph-update !<(=update:graph-store q.cage.sign) now.bowl our.bowl)
               [cards this]
             ==
         ==
@@ -157,6 +142,25 @@
       ::         [cards this]
       ::       ==
       ::   ==
+      :: [%thread ~]
+      ::   ?+    -.sign  (on-agent:def wire sign)
+      ::     %poke-ack
+      ::       ?~  p.sign
+      ::         %-  (slog leaf+"Thread started successfully" ~)
+      ::         `this
+      ::       %-  (slog leaf+"Thread failed to start" u.p.sign)
+      ::       `this
+      ::   ==
+      ::
+      :: [%group-dm-thread ~]
+      ::   ?+    -.sign  (on-agent:def wire sign)
+      ::     %fact
+      ::       ?+   p.cage.sign  `this
+      ::         %thread-fail
+      ::           ~&  >>>  ['thread failedddd' q.cage.sign]
+      ::         `this
+      ::       ==
+      ::   ==
     ==
   ::
   ++  on-leave    on-leave:def
@@ -171,42 +175,89 @@
 ++  this  .
 ++  core  .
 ::
-++  on-action 
+++  on-graph-action
   |=  [act=action:store]
   ^-  (quip card _state)
-  ~&  >  act
   |^
   ?-  -.act      
     :: %accept-dm          `state
     :: %decline-dm         `state
     :: %pendings           `state
     :: %screen             `state
-    %create-group-dm    (create-group-dm +.act)
-    %send-dm            (send-dm +.act)
-    :: %send-group-dm      (send-group-dm +.act)
+    %create-group-dm       (create-group-dm +.act)
+    %send-dm               (send-dm +.act)
+    %send-group-dm         (send-group-dm +.act)
   ==
   ::
-  ++  create-group-dm
+  ++  create-group-dm     ::  should be in a thread, but for now its here
     |=  [ships=(set ship)]
     ^-  (quip card _state)
-    ~&  >>  [ships]
-    `state
+    =/  action     (new-group-dm:gs:lib our.bowl now.bowl ships)
+    ?>  ?=(%create -.action)
+    =/  =update:graph-store     [now.bowl %add-graph rid.action *graph:graph-store mark.action %.y]
+    ?>  ?=(%policy -.associated.action)
+    =/  associated              associated.action
+    ?>  ?=(%invite -.policy.associated)
+    =/  inv-action=action:inv
+      :^  %invites  %graph  (shaf %graph-uid eny.bowl)
+      ^-  multi-invite:inv
+      :*  our.bowl
+          %graph-push-hook
+          rid.action
+          pending.policy.associated
+          description.action
+      ==
+    =/  =metadatum:met
+      %*  .  *metadatum:met
+        title         title.action
+        description   description.action
+        date-created  now.bowl
+        creator       our.bowl
+        config        [%graph module.action]
+        preview       %.n
+        hidden        %.n
+      ==
+    =/  met-action=action:met
+      [%add rid.action graph+rid.action metadatum]
+    :_  state
+    :~ 
+        [%pass / %agent [our.bowl %graph-store] %poke graph-update-3+!>(update)]
+        [%pass / %agent [our.bowl %graph-push-hook] %poke push-hook-action+!>([%add rid.action])]
+        [%pass / %agent [our.bowl %group-store] %poke group-update-0+!>([%add-group rid.action policy.associated %.y])]
+        [%pass / %agent [our.bowl %group-store] %poke group-update-0+!>([%add-members rid.action (~(put in ships) our.bowl)])]
+        [%pass / %agent [our.bowl %contact-push-hook] %poke push-hook-action+!>([%add rid.action])]
+        [%pass / %agent [our.bowl %metadata-push-hook] %poke push-hook-action+!>([%add rid.action])]
+        [%pass / %agent [our.bowl %metadata-push-hook] %poke metadata-update-2+!>(met-action)]
+        [%pass / %agent [our.bowl %invite-hook] %poke invite-action+!>(inv-action)]
+    ==
     ::
   ++  send-dm
     |=  [=ship =post]
     ^-  (quip card _state)
-    ~&  >>  [ship post]
-    `state
+    =/  dm-nodes  `(map index node:graph-store)`[~]
+    =.  dm-nodes  (~(put by dm-nodes) index.post [[%.y p=[post]] [%empty ~]])
+    =/  upd-act   `update:graph-store`[now.bowl [%add-nodes [our.bowl %dm-inbox] dm-nodes]]
+    :_  state
+    :~ 
+        [%pass / %agent [our.bowl %dm-hook] %poke graph-update-3+!>(upd-act)]
+    ==
   ::
   ++  send-group-dm
     |=  [=resource =post]
     ^-  (quip card _state)
-    `state
+    =/  hashed-node   (add-hash-to-node:gs:lib our.bowl now.bowl [[%.y p=[post]] [%empty ~]])
+    =/  dm-nodes      `(map index node:graph-store)`[~]
+    =.  dm-nodes      (~(put by dm-nodes) index.post hashed-node)
+    =/  upd-act   `update:graph-store`[now.bowl [%add-nodes resource dm-nodes]]
+    :_  state
+    :~ 
+        [%pass / %agent [our.bowl %graph-push-hook] %poke graph-update-3+!>(upd-act)]
+    ==
   ::
   --
 
-++  graph-dm    ::  Handles graph-store updates
-  |=  [upd=update:graph-store our=ship now=@da]
+++  on-graph-update    ::  Handles graph-store updates
+  |=  [upd=update:graph-store now=@da our=ship]
   ^-  (quip card _state)
   |^
   ?+  -.q.upd   `state
@@ -231,6 +282,10 @@
         :_  state
         [%give %fact [/updates ~] courier-reaction+!>([%dm-received new-dm])]~
       :: else 
+      `state
+    %add-graph
+      ::  TODO new graph invites
+      ~&  >>  ['add graph' upd]
       `state
   ==
   --

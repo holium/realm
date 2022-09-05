@@ -2,8 +2,8 @@
 ::
 ::  Friend list management within Realm
 ::
-/-  store=friends, spaces, membership-store=membership, hark=hark-store, resource
-/+  dbug, default-agent, resource, lib=friends
+/-  store=friends, spaces, membership-store=membership
+/+  dbug, default-agent, lib=friends
 |%
 +$  card  card:agent:gall
 +$  versioned-state

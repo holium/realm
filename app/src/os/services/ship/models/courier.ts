@@ -1,4 +1,4 @@
-import { Instance, types, applySnapshot } from 'mobx-state-tree';
+import { Instance, types, applySnapshot, cast } from 'mobx-state-tree';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from 'os/types';
@@ -257,9 +257,10 @@ const PreviewGroupDM = types
   })
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {
+      console.log(dm);
       // add the sender
-      dm.contents.unshift({ mention: dm.author });
-      self.lastMessage = dm.contents;
+      // @ts-ignore
+      self.lastMessage = [{ mention: dm.author }, ...dm.contents];
       self.lastTimeSent = dm.timeSent;
     },
   }));
