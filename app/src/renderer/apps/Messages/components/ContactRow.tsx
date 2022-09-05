@@ -23,6 +23,7 @@ import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';
 import { Patp } from 'os/types';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type DMContact = {
   theme: ThemeModelType;
@@ -114,27 +115,27 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       evt.stopPropagation();
       setAcceptLoading(true);
 
-      // DmActions.acceptDm(dmModel.to)
-      //   .then((response: any) => {
-      //     console.log('accept ContactRow response', response);
-      //     setAcceptLoading(false);
-      //   })
-      //   .catch(() => {
-      //     setAcceptLoading(false);
-      //   });
+      ShipActions.acceptGroupDm(groupModel.path)
+        .then((response: any) => {
+          console.log('accept ContactRow response', response);
+          setAcceptLoading(false);
+        })
+        .catch(() => {
+          setAcceptLoading(false);
+        });
       console.log('accepting group dm');
     };
     onDecline = (evt: any) => {
       evt.stopPropagation();
       setRejectLoading(true);
-      // DmActions.declineDm(dmModel.to)
-      //   .then((response: any) => {
-      //     console.log('response', response);
-      //     setRejectLoading(false);
-      //   })
-      //   .catch(() => {
-      //     setRejectLoading(false);
-      //   });
+      ShipActions.declineDm(groupModel.path)
+        .then((response: any) => {
+          console.log('response', response);
+          setRejectLoading(false);
+        })
+        .catch(() => {
+          setRejectLoading(false);
+        });
       console.log('rejecting group dm');
     };
   } else {

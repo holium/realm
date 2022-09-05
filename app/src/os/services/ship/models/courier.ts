@@ -6,6 +6,7 @@ import { toJS } from 'mobx';
 import { cleanNounColor } from '../../../lib/color';
 import { LoaderModel } from '../../common.model';
 import moment from 'moment';
+import { type } from 'os';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -231,6 +232,7 @@ const PreviewDM = types
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: ContactMetadata,
+    inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
   })
@@ -252,6 +254,7 @@ const PreviewGroupDM = types
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: types.array(ContactMetadata),
+    inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
   })

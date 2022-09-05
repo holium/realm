@@ -35,7 +35,7 @@ export const CourierApi = {
             store.setReceivedDM(payload);
             break;
           case 'group-dm-created':
-            console.log('group-dm-created', payload);
+            // console.log('group-dm-created', payload);
             // if()
             // store.setReceivedDM(payload);
             break;
@@ -123,7 +123,34 @@ export const CourierApi = {
       app: 'dm-hook',
       mark: 'dm-hook-action',
       json: {
-        decline: toShip,
+        reject: toShip,
+      },
+    };
+    return await conduit.poke(payload);
+  },
+  acceptGroupDm: async (conduit: Conduit, inviteId: string) => {
+    const payload = {
+      app: 'invite-store',
+      mark: 'invite-action',
+      json: {
+        accept: {
+          term: 'graph',
+          uid: inviteId,
+        },
+      },
+    };
+    console.log('accepting dm', payload);
+    return await conduit.poke(payload);
+  },
+  declineGroupDm: async (conduit: Conduit, inviteId: string) => {
+    const payload = {
+      app: 'invite-store',
+      mark: 'invite-action',
+      json: {
+        decline: {
+          term: 'graph',
+          uid: inviteId,
+        },
       },
     };
     return await conduit.poke(payload);

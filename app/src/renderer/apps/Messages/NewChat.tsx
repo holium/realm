@@ -12,6 +12,7 @@ import {
   Box,
   Badge,
   Tag,
+  Spinner,
 } from 'renderer/components';
 import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/shell/theme.model';
@@ -35,7 +36,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
   const { courier, contacts } = useServices();
   const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
-
+  const [loading, setLoading] = useState(false);
   const [patp, setPatp] = useState<string>('');
 
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
@@ -53,7 +54,9 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         metadata = contacts.getContactAvatarMetadata(contactsList[0]);
       }
       //
+      setLoading(true);
       const newDm = await ShipActions.draftDm(contactsList, [metadata]);
+      setLoading(false);
       onCreateNewDm(newDm);
     },
     [selectedPatp]
@@ -189,7 +192,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         marginTop={headerOffset}
         overflowY="hidden"
         height={height}
-        style={{ backgroundColor: windowColor }}
+        style={{ backgroundColor: windowColor, position: 'relative' }}
       >
         <FormControl.Field>
           <Input
@@ -216,6 +219,19 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
             }}
           />
         </FormControl.Field>
+        {loading && (
+          <Flex
+            left={0}
+            right={0}
+            top={0}
+            bottom={0}
+            alignItems="center"
+            justifyContent="center"
+            position="absolute"
+          >
+            <Spinner size={1} />
+          </Flex>
+        )}
         {contactArray}
         <Flex pl={2} pr={2} flex={1} flexDirection="column">
           <ShipSearch

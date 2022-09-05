@@ -35,7 +35,6 @@
 +$  chat
   $:  
     path=cord
-    :: index=(list atom)
     to=(set ship)
     type=chat-type
     =source
@@ -60,13 +59,13 @@
 +$  message-preview
   $:  
     path=cord
-    :: index=(list atom)
     to=(set ship)
     type=chat-type
     =source
     last-time-sent=@da
     last-message=(list content)
     metadata=(set contact-mtd)
+    invite-id=(unit @uvH)
   ==
 ::
 ::  %contact-store

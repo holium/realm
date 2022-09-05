@@ -230,6 +230,7 @@
           last-time-sent=now.bowl
           last-message=[~]
           metadata=(silt mtd-set)
+          invite-hash=~
       ]
     :_  state
     :~ 

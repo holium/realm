@@ -53,20 +53,21 @@
         (grp-prev our ass now rolo)
           ::  TODO check invite store
       =/  graph-invites  (need .^((unit invitatory:inv) %gx /(scot %p our)/invite-store/(scot %da now)/invitatory/graph/noun))
-      =/  group-invs     (skim ~(val by graph-invites) skim-grp-inv)
+      =/  group-invs     (skim ~(tap by graph-invites) skim-grp-inv)
       =/  group-dm-invs=(list message-preview)
       %+  turn  group-invs
-        |=  inv=invite:inv
-        (grp-inv our inv now rolo)
+        |=  [hash=@uvH inv=invite:inv]
+        (grp-inv our inv now rolo hash)
       :: ~&  >  [group-dm-invs]
       [(weld dms-list group-dm-invs)]
       ::
       ++  grp-inv         ::  generates group dm invite previews
-        |=  [our=ship inv=invite:inv now=@da rolo=rolodex:sur]
+        |=  [our=ship inv=invite:inv now=@da rolo=rolodex:sur hash=@uvH]
         ^-  message-preview
+        :: ~&  >  inv
         =/  ginv                (ginv our inv now)
         =/  mtd-set             (get-metadata to.ginv our now)
-        [path.ginv to.ginv %group-pending %graph-store time.ginv [~] (silt mtd-set)]
+        [path.ginv to.ginv %group-pending %graph-store time.ginv [~] (silt mtd-set) (some hash)]
       ::
       ++  grp-prev        ::  generates group dm log previews
         |=  [our=ship ass=association:mtd now=@da rolo=rolodex:sur]
@@ -76,7 +77,7 @@
         =/  mtd-set             (get-metadata to.glog our now)
         ::
         ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
-          [path.glog to.glog %group %graph-store time.glog [~] (silt mtd-set)]
+          [path.glog to.glog %group %graph-store time.glog [~] (silt mtd-set) ~] 
         ::
         =/  posts=(list post:gra)
         %+  turn  ~(val by posts.glog)
@@ -88,7 +89,7 @@
         =/  last              (rear posts)
         ::  Add a mention so we know who posted the last message
         =/  contents          (weld [[%mention author.last] ~] contents.last)
-        [path.glog to.glog %group %graph-store time-sent.last contents (silt mtd-set)]
+        [path.glog to.glog %group %graph-store time-sent.last contents (silt mtd-set) ~]
     ::
   ::
   ++  grp-log             ::  generates the group dm log metadata
@@ -173,7 +174,7 @@
     [dm-name group-path to-set [~]]
   ::
   ++  skim-grp-inv    ::  used for skimming out group dm invites from invite-store
-    |=  inv=invite:inv
+    |=  [hash=@uvH inv=invite:inv]
     =/  name      `cord`name.resource.inv
     =/  name-da   (slaw %da name)
     ?~  name-da   %.n   %.y
@@ -214,7 +215,7 @@
     =/  last              (rear posts)
     =/  contact           (form-contact-mtd rolo to-ship)
     =/  path              (spat /dm-inbox/(scot %p to-ship))
-    [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last (silt ~[contact])]
+    [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last (silt ~[contact]) ~]
   ::
   ::  Pending dms
   ::
@@ -222,7 +223,7 @@
     |=  [=ship now=@da rolo=rolodex:sur]
     ^-  message-preview
     =/  path              (spat /dm-inbox/(scot %p ship))
-    [path (silt ~[ship]) %pending %graph-store now [~] (silt ~[(form-contact-mtd rolo ship)])]
+    [path (silt ~[ship]) %pending %graph-store now [~] (silt ~[(form-contact-mtd rolo ship)]) ~]
   ::
   ::
   ::
@@ -591,6 +592,10 @@
         ==
         a+(turn ~(tap in metadata.cha) mtd)
       (mtd (rear ~(tap in metadata.cha)))
+    =/  invite-id
+      ?:  =(%group-pending type.cha)
+        s+(scot %uv (need invite-id.cha))
+      ~
     %-  pairs
     :~  
         ['path' s+path.cha]
@@ -601,6 +606,7 @@
         ['lastTimeSent' (time last-time-sent.cha)]
         ['lastMessage' a+(turn last-message.cha content)]
         ['metadata' mtd-field]
+        ['inviteId' invite-id]
     ==
   ::
   ++  dm-log
