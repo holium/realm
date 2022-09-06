@@ -1,6 +1,7 @@
-import { useRef, FC, useEffect } from 'react';
+import { useRef, FC, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
+import { AnimatePresence } from 'framer-motion';
 import { toJS } from 'mobx';
 import {
   Flex,
@@ -15,13 +16,14 @@ import {
   Menu,
   MenuItem,
   Spinner,
+  FormControl,
 } from 'renderer/components';
 import { ShipSelector } from './ShipSelector';
-import { DEFAULT_WALLPAPER } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { SoundActions } from 'renderer/logic/actions/sound';
+import Portal from 'renderer/system/dialog/Portal';
+import { OSActions } from 'renderer/logic/actions/os';
+import { ConduitState } from '@holium/conduit/src/types';
 
 type LoginProps = {
   addShip: () => void;
@@ -30,18 +32,22 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, desktop, ship } = useServices();
+  const { identity, desktop } = useServices();
   const { auth } = identity;
   const { theme } = desktop;
+  const [hasFailed, setHasFailed] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
 
+  const [loading, setLoading] = useState(false);
+  const [incorrectPassword, setIncorrectPassword] = useState(false);
+
   // Setting up options menu
   const menuWidth = 180;
   const config = useMenu(optionsRef, {
-    orientation: 'left',
+    orientation: 'bottom-left',
     padding: 6,
     menuWidth,
   });
@@ -51,14 +57,20 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const shipName = pendingShip?.nickname || pendingShip?.patp;
 
   useEffect(() => {
-    // Set the wallpaper on load
-    !theme &&
-      pendingShip &&
-      DesktopActions.changeWallpaper(
-        pendingShip?.patp!,
-        pendingShip?.wallpaper || DEFAULT_WALLPAPER
-      );
-  }, [pendingShip !== null]);
+    OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
+      if (status === ConduitState.Failed) {
+        setHasFailed(true);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    setHasFailed(false);
+    if (passwordRef.current) {
+      const passInput = passwordRef.current as HTMLInputElement;
+      passInput.value = '';
+    }
+  }, [pendingShip]);
 
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
@@ -70,15 +82,21 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       wrapperRef.current.blur();
     }
   };
-  const clickSubmit = (event: any) => {
+  const clickSubmit = async (event: any) => {
     event.stopPropagation();
-    AuthActions.login(
+    setHasFailed(false);
+    setLoading(true);
+    let loggedIn = await AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
       passwordRef!.current!.value
-    )
-      .catch((err) => console.warn(err))
-      .then(() => SoundActions.playLogin());
+    );
+    if (!loggedIn) {
+      // @ts-expect-error
+      submitRef.current.blur();
+      setIncorrectPassword(true);
+      setLoading(false);
+    }
   };
 
   let colorProps = null;
@@ -151,7 +169,12 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     </Text>
                   )}
                 </Flex>
-                <Flex mt={isVertical ? 2 : 0} gap={12} alignItems="center">
+                <Flex
+                  mt={isVertical ? 2 : 0}
+                  gap={12}
+                  flexDirection="column"
+                  alignItems="center"
+                >
                   <Input
                     ref={passwordRef}
                     wrapperRef={wrapperRef}
@@ -161,18 +184,16 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     autoFocus
                     autoCorrect="false"
                     bgOpacity={hasWallpaper ? 0.3 : 1}
-                    borderColor={
-                      hasWallpaper ? 'input.borderHover' : 'input.borderColor'
-                    }
                     wrapperStyle={{
                       borderRadius: 8,
-                      minWidth: isVertical ? 300 : 260,
+                      width: isVertical ? 320 : 260,
                     }}
                     placeholder="Password"
                     fontSize={16}
                     name="password"
                     type="password"
                     rightInteractive
+                    error={hasFailed || incorrectPassword}
                     onKeyDown={submitPassword}
                     rightIcon={
                       <Flex gap={4} justifyContent="center" alignItems="center">
@@ -182,43 +203,49 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           luminosity={theme?.mode}
                           opacity={1}
                           onClick={(evt: any) => {
-                            !show && setShow && setShow(true);
+                            setShow(true);
                           }}
                         >
                           <Icons name="MoreHorizontal" />
                         </IconButton>
-                        <Menu
-                          id={`${pendingShip.patp}-user-menu`}
-                          customBg={theme.windowColor}
-                          style={{
-                            top: anchorPoint && anchorPoint.y + 8,
-                            left: anchorPoint && anchorPoint.x + 10,
-                            visibility: show ? 'visible' : 'hidden',
-                            width: menuWidth,
-                          }}
-                          isOpen={show}
-                          onClose={() => {
-                            setShow(false);
-                          }}
-                        >
-                          <MenuItem
-                            data-prevent-context-close={false}
-                            label="Reset password"
-                            customBg={theme.windowColor}
-                            onClick={() => {
-                              console.log('do reset form');
-                            }}
-                          />
-                          <MenuItem
-                            label="Remove ship"
-                            customBg={theme.windowColor}
-                            mt={1}
-                            onClick={() => {
-                              AuthActions.removeShip(pendingShip.patp);
-                            }}
-                          />
-                        </Menu>
-                        {auth.loader.isLoading ? (
+                        <AnimatePresence>
+                          {show && (
+                            <Portal>
+                              <Menu
+                                id={`${pendingShip.patp}-user-menu`}
+                                customBg={theme.windowColor}
+                                style={{
+                                  top: anchorPoint && anchorPoint.y + 9,
+                                  left: anchorPoint && anchorPoint.x + 6,
+                                  visibility: show ? 'visible' : 'hidden',
+                                  width: menuWidth,
+                                }}
+                                isOpen={show}
+                                onClose={(evt) => {
+                                  setShow(false);
+                                }}
+                              >
+                                <MenuItem
+                                  data-prevent-context-close={false}
+                                  label="Reset password"
+                                  customBg={theme.windowColor}
+                                  onClick={() => {
+                                    console.log('do reset form');
+                                  }}
+                                />
+                                <MenuItem
+                                  label="Remove ship"
+                                  customBg={theme.windowColor}
+                                  mt={1}
+                                  onClick={(_evt: any) => {
+                                    AuthActions.removeShip(pendingShip.patp);
+                                  }}
+                                />
+                              </Menu>
+                            </Portal>
+                          )}
+                        </AnimatePresence>
+                        {auth.loader.isLoading && !hasFailed ? (
                           <Flex
                             justifyContent="center"
                             alignItems="center"
@@ -230,6 +257,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                         ) : (
                           <IconButton
                             ref={submitRef}
+                            error={hasFailed}
                             luminosity={theme?.mode}
                             size={24}
                             canFocus
@@ -241,6 +269,15 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                       </Flex>
                     }
                   />
+
+                  <FormControl.Error
+                    style={{ height: 15, fontSize: 14 }}
+                    textShadow="0.5px 0.5px #080000"
+                  >
+                    {hasFailed &&
+                      'Connection to your ship has been refused: ECONNREFUSED'}
+                    {incorrectPassword && 'Incorrect password.'}
+                  </FormControl.Error>
                 </Flex>
               </Flex>
             </Flex>

@@ -26,6 +26,7 @@ type IProps = {
   size?: number;
   luminosity?: 'light' | 'dark';
   theme: ThemeType;
+  error?: boolean | string;
   color?: string; // hacky fix for linting error
 } & SpaceProps &
   ColorProps &
@@ -33,7 +34,7 @@ type IProps = {
   SizeProps &
   TypographyProps;
 
-export const IconButton = styled(styled(motion.button)<IProps>`
+export const IconButton = styled(motion.button)<IProps>`
   border: 1px solid transparent;
   background-color: transparent;
   display: inline-flex;
@@ -152,16 +153,24 @@ export const IconButton = styled(styled(motion.button)<IProps>`
         border-color: none;
       }
     `}
-`)<IProps>(
-  {
-    // '&:hover': {
-    //   // @ts-expect-error stupid
-    //   backgroundColor: (props: IProps) =>
-    //     props.customBg ? darken(0.22, props.customBg) : 'initial',
-    // },
-  },
-  compose(space, size, color, layout, typography)
-);
+    ${(props) =>
+    props.error &&
+    css`
+      color: ${props.theme.colors.ui.intent.alert};
+      background-color: transparent;
+      border-color: transparent;
+      svg {
+        fill: ${props.theme.colors.ui.intent.alert};
+      }
+      &:hover {
+        transform: translateZ(0);
+        color: ${props.theme.colors.ui.intent.alert};
+        background-color: none;
+        border-color: none;
+      }
+    `}
+    ${compose(space, size, color, layout, typography)}
+`;
 
 IconButton.defaultProps = {
   size: 24,

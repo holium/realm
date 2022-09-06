@@ -21,14 +21,15 @@ import FullscreenHelper from './helpers/fullscreen';
 import WebviewHelper from './helpers/webview';
 import DevHelper from './helpers/dev';
 import MediaHelper from './helpers/media';
+import BrowserHelper from './helpers/browser';
 
 // Ad block
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
 
-ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-  blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
-});
+// ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+//   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
+// });
 
 export default class AppUpdater {
   constructor() {
@@ -97,11 +98,12 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     acceptFirstMouse: true,
-    paintWhenInitiallyHidden: true,
+    // paintWhenInitiallyHidden: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
+      sandbox: false,
       // nodeIntegrationInSubFrames: true,
       // sandbox: true,
       // nodeIntegrationInWorker: true,
@@ -116,18 +118,21 @@ const createWindow = async () => {
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
+
   // RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners(mainWindow);
+  BrowserHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.maximize();
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
-    mainWindow?.webContents.setZoomFactor(1.1);
+    mainWindow?.webContents.setZoomFactor(1.0);
+
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }

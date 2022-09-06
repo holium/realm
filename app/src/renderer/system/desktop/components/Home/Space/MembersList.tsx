@@ -29,7 +29,7 @@ interface IMembersList {
 
 export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
   const { members } = props;
-  const { desktop, spaces, ship } = useServices();
+  const { desktop, spaces, ship, contacts } = useServices();
 
   const { textColor, windowColor } = desktop.theme;
 
@@ -60,7 +60,7 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
       person = initiatesOnly[index];
     }
 
-    const contact = ship!.contacts.getContactAvatarMetadata(person.patp);
+    const contact = contacts.getContactAvatarMetadata(person.patp);
 
     return (
       <PersonRow

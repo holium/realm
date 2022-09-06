@@ -1,4 +1,3 @@
-import { SoundActions } from './sound';
 /**
  * AuthActions for interfacing with core process
  */
@@ -19,7 +18,6 @@ export const AuthActions = {
     return await window.electron.os.auth.login(ship, password);
   },
   logout: async (ship: string) => {
-    SoundActions.playLogout();
     return await window.electron.os.auth.logout(ship);
   },
   resetPassword: async (ship: string, password: string) => {

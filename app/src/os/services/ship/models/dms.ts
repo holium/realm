@@ -10,7 +10,7 @@ import {
 import { LoaderModel } from '../../common.model';
 import { ShipModelType, ShipModel } from './ship';
 import { patp2dec, patp } from 'urbit-ob';
-import { PostType } from '../../../types';
+import { Patp, PostType } from '../../../types';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -139,7 +139,7 @@ export const ChatMessage = types.union(
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
 export const Chat = types
-  .model({
+  .model('Chat', {
     id: types.maybe(types.string),
     contact: types.string,
     sigilColor: types.maybeNull(types.string),
@@ -155,17 +155,15 @@ export const Chat = types
     },
   }))
   .actions((self) => ({
-    setDm: (post: PostType) => {
-      const ship: ShipModelType = getParent(self, 3);
+    setDm: (ship: string, post: PostType) => {
       let lastSent = 0;
-      const strippedShip = ship.patp.substring(1);
       const dmContacts: string[] = [];
 
       if (!post.author) {
         // handles cases of no author?
         return;
       }
-      if (post.author !== strippedShip && !dmContacts.includes(post.author)) {
+      if (post.author !== ship && !dmContacts.includes(post.author)) {
         dmContacts.push(post.author);
       }
       if (post['time-sent'] > lastSent) {
@@ -178,14 +176,13 @@ export const Chat = types
           author: post.author,
           timeSent: post['time-sent'],
           contents: post.contents,
-          position: post.author !== strippedShip ? 'left' : 'right',
+          position: post.author !== ship ? 'left' : 'right',
         })
       );
     },
-    sendDm(contents: any) {
+    sendDm(patp: string, contents: any) {
       self.loader.set('loading');
-      const ship: ShipModelType = getParent(self, 3);
-      const author = ship.patp.substring(1);
+      const author = patp.substring(1);
       const post = createPost(
         author,
         contents,
@@ -234,7 +231,7 @@ export const Chat = types
 export type ChatType = Instance<typeof Chat>;
 
 export const ChatStore = types
-  .model({
+  .model('ChatStore', {
     dms: types.map(Chat),
     loader: types.optional(LoaderModel, { state: 'initial' }),
   })
@@ -270,7 +267,7 @@ export const ChatStore = types
       });
     },
     // TODO clean up how contact names are derived
-    setDMs: (ship: string, dmGraph: any) => {
+    setDMs: (ship: string, dmGraph: any, contactsModel: any) => {
       const strippedShip = ship.substring(1);
       // console.log(dmGraph);
       Object.entries(dmGraph).forEach((chat: [string, any]) => {
@@ -311,10 +308,9 @@ export const ChatStore = types
         if (contact) {
           if (dmContacts.length === 1) {
             // get contact avatar info
-            const avatarMetadata = getParentOfType(
-              self,
-              ShipModel
-            ).contacts.getContactAvatarMetadata(`~${contact}`);
+            const avatarMetadata = contactsModel.getContactAvatarMetadata(
+              `~${contact}`
+            );
             // Set chat data
             self.dms.set(
               contact,
@@ -336,3 +332,5 @@ export const ChatStore = types
       });
     },
   }));
+
+export type ChatStoreType = Instance<typeof ChatStore>;

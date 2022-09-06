@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import { ipcMain, ipcRenderer, safeStorage } from 'electron';
 import Store from 'electron-store';
 import {
   clone,
@@ -7,7 +7,7 @@ import {
   getSnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-
+import bcrypt from 'bcryptjs';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import {
@@ -19,10 +19,12 @@ import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
+import { Conduit } from '@holium/conduit';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
   private state: OnboardingStoreType; // for state management
+  private conduit?: Conduit;
 
   handlers = {
     'realm.onboarding.setStep': this.setStep,
@@ -41,6 +43,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setPassword': this.setPassword,
     'realm.onboarding.installRealm': this.installRealm,
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
+    'realm.onboarding.exit': this.exit,
   };
 
   static preload = {
@@ -60,8 +63,11 @@ export class OnboardingService extends BaseService {
       return ipcRenderer.invoke('realm.onboarding.getAvailablePlanets');
     },
 
-    prepareCheckout(tier: string) {
-      return ipcRenderer.invoke('realm.onboarding.prepareCheckout', tier);
+    prepareCheckout(billingPeriod: string) {
+      return ipcRenderer.invoke(
+        'realm.onboarding.prepareCheckout',
+        billingPeriod
+      );
     },
 
     completeCheckout() {
@@ -111,6 +117,13 @@ export class OnboardingService extends BaseService {
     completeOnboarding() {
       return ipcRenderer.invoke('realm.onboarding.completeOnboarding');
     },
+
+    exitOnboarding() {
+      return ipcRenderer.invoke('realm.onboarding.exit');
+    },
+
+    onExit: (callback: any) =>
+      ipcRenderer.on('realm.onboarding.on-exit', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -143,6 +156,11 @@ export class OnboardingService extends BaseService {
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
+
+    this.core.mainWindow.on('close', async () => {
+      await this.conduit?.closeChannel();
+      this.conduit = undefined;
     });
   }
 
@@ -190,15 +208,15 @@ export class OnboardingService extends BaseService {
     return { invalid: accessCode ? false : true, accessCode };
   }
 
-  async prepareCheckout(_event: any, tier: string) {
-    if (!['monthly', 'yearly'].includes(tier))
-      throw new Error('invalid subscription tier');
+  async prepareCheckout(_event: any, billingPeriod: string) {
+    if (!['monthly', 'annual'].includes(billingPeriod))
+      throw new Error('invalid billing period');
 
     const { auth } = this.core.services.identity;
     let { clientSecret } = await this.core.holiumClient.prepareCheckout(
       auth.accountId!,
       this.state.planet!.patp,
-      tier
+      billingPeriod
     );
     auth.setClientSecret(clientSecret);
     return clientSecret;
@@ -266,17 +284,16 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
+    if (!this.conduit) {
+      this.conduit = new Conduit();
+    }
+    const { url, patp, cookie } = this.state.ship!;
+    await this.conduit.init(url, patp.substring(1), cookie!);
+
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 
-    console.log('get profile', castToSnapshot(this.state.ship));
-
-    const { url, cookie, patp } = this.state.ship;
-    const ourProfile = await ContactApi.getContact(patp, {
-      ship: patp,
-      url,
-      cookie: cookie!,
-    });
+    const ourProfile = await ContactApi.getContact(this.conduit!, patp);
 
     this.state.ship.setContactMetadata(ourProfile);
     return ourProfile;
@@ -290,22 +307,14 @@ export class OnboardingService extends BaseService {
       avatar: string | null;
     }
   ) {
-    console.log('setting profile', profileData);
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
 
-    const { url, cookie, patp } = this.state.ship!;
-    const credentials = {
-      ship: patp,
-      url,
-      cookie: cookie!,
-    };
-
-    console.log('creds', credentials);
+    const { patp } = this.state.ship!;
 
     const updatedProfile = await ContactApi.saveContact(
+      this.conduit!,
       patp,
-      credentials,
       profileData
     );
 
@@ -315,8 +324,10 @@ export class OnboardingService extends BaseService {
   }
 
   async setPassword(_event: any, password: string) {
-    // TODO store password hash
-    console.log('placeholder: saving password...');
+    let encryptedPassword = safeStorage
+      .encryptString(password)
+      .toString('base64');
+    this.state.setEncryptedPassword(encryptedPassword);
   }
 
   async installRealm(_event: any, ship: string) {
@@ -329,12 +340,32 @@ export class OnboardingService extends BaseService {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
 
+    let decryptedPassword = safeStorage.decryptString(
+      Buffer.from(this.state.encryptedPassword!, 'base64')
+    );
+    this.core.passwords.setPassword(this.state.ship.patp, decryptedPassword);
+    let passwordHash = await bcrypt.hash(decryptedPassword, 12);
+
     const ship = clone(this.state.ship);
-    const authShip = AuthShip.create({ ...ship, id: `auth${ship.patp}` });
+    const authShip = AuthShip.create({
+      ...ship,
+      id: `auth${ship.patp}`,
+      passwordHash,
+    });
 
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setFirstTime();
-    this.core.services.shell.closeDialog(null);
     this.core.services.ship.storeNewShip(authShip);
+    this.core.services.shell.closeDialog(null);
+
+    // Close onboarding conduit
+    await this.conduit?.closeChannel();
+    this.conduit = undefined;
+    this.exit();
+    this.core.mainWindow.webContents.send('realm.onboarding.on-exit');
+  }
+
+  exit(_event?: any) {
+    this.core.mainWindow.webContents.send('realm.onboarding.on-exit');
   }
 }

@@ -28,7 +28,9 @@ export enum OnboardingStep {
 export const PlanetModel = types
   .model({
     patp: types.string,
-    booted: types.boolean
+    booted: types.boolean,
+    priceMonthly: types.number,
+    priceAnnual: types.number
   })
 
 export const AccessCodeModel = types
@@ -73,7 +75,8 @@ export const OnboardingStore = types
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
     checkoutComplete: false,
-    accessCode: types.maybe(AccessCodeModel)
+    accessCode: types.maybe(AccessCodeModel),
+    encryptedPassword: types.maybe(types.string)
   })
   .actions((self) => ({
 
@@ -91,6 +94,10 @@ export const OnboardingStore = types
 
     setPlanet(planet: HostingPlanet) {
       self.planet = PlanetModel.create(planet)
+    },
+
+    setEncryptedPassword(passwordHash: string) {
+      self.encryptedPassword = passwordHash;
     },
 
     setShip: flow(function* (shipInfo: {
@@ -125,6 +132,7 @@ export const OnboardingStore = types
       self.agreedToDisclaimer = false;
       self.planet = undefined;
       self.ship = undefined;
+      self.encryptedPassword = undefined;
       self.currentStep = OnboardingStep.DISCLAIMER;
     }
   }));

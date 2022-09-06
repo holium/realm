@@ -6,6 +6,7 @@ import {
   onSnapshot,
   getSnapshot,
   castToSnapshot,
+  ModelSnapshotType,
 } from 'mobx-state-tree';
 
 import Realm from '../..';
@@ -21,6 +22,7 @@ import { PassportsApi } from '../../api/passports';
 import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
+import { DocketStoreType, DocketStore } from '../ship/models/docket';
 
 type SpaceModels = {
   bazaar?: any;
@@ -118,7 +120,7 @@ export class SpacesService extends BaseService {
     return this.models.membership ? getSnapshot(this.models.membership) : null;
   }
 
-  async load(patp: string, ship: ShipModelType) {
+  async load(patp: string, docket: any) {
     this.db = new Store({
       name: 'spaces',
       cwd: `realm.${patp}`,
@@ -131,7 +133,7 @@ export class SpacesService extends BaseService {
     this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
     // Temporary setup
-    this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
+    this.models.bazaar.our(`/${patp}/our`, docket.apps || {});
 
     // Get the initial scry
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);

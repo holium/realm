@@ -161,7 +161,7 @@ export const subscribe: RealmMultiplayerInterface['subscribe'] = (
   subscriptions[event].add(handler);
   // returns an unsubscribe function
   return () => {
-    subscriptions[event].delete(handler);
+    subscriptions[event] && subscriptions[event].delete(handler);
   };
 };
 

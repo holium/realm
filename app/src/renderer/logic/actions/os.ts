@@ -1,9 +1,6 @@
-import { SoundActions } from './sound';
-export const OSActions = {
-  onBoot: async () => {
-    return await window.electron.os.boot();
-  },
-  applyAction: async (action: any) => {
-    return await window.electron.os.applyAction(action);
-  },
-};
+import { OSPreloadType } from 'os/preload';
+
+/**
+ * SpacesActions for interfacing with core process
+ */
+export const OSActions: OSPreloadType = window.electron.os;

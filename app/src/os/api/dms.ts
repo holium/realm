@@ -1,25 +1,22 @@
-import { Urbit } from './../urbit/api';
-import { quickPoke } from '../lib/poke';
-import { toJS } from 'mobx';
+import { Conduit } from '@holium/conduit';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
-import { ShipModelType } from '../services/ship/models/ship';
-import { PostType } from '../types';
-import { ISession } from '../';
+import { ChatStoreType } from '../services/ship/models/dms';
 
 export const DmApi = {
-  getDMs: async (ship: string, conduit: Urbit) => {
+  getDMs: async (ship: string, conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'graph-store',
       path: `/graph/${ship}/dm-inbox`,
     });
     return response['graph-update']['add-graph']['graph'];
   },
-  updates: (conduit: Urbit, shipState: ShipModelType) => {
-    conduit.subscribe({
+  updates: (conduit: Conduit, chatStore: ChatStoreType): Promise<any> => {
+    const ship = `~${conduit.ship}`;
+    return conduit.watch({
       app: 'dm-hook',
       path: '/updates',
-      event: async (data: any) => {
+      onEvent: async (data: any) => {
         if (data['dm-hook-action']) {
           const [action, payload] = Object.entries<any>(
             data['dm-hook-action']
@@ -27,7 +24,7 @@ export const DmApi = {
           switch (action) {
             case 'pendings':
               const pendings: string[] = payload;
-              shipState.chat.setPendingDms(pendings);
+              chatStore.setPendingDms(pendings);
               break;
             case 'screen':
               // console.log('screen set');
@@ -35,17 +32,23 @@ export const DmApi = {
               // console.log(data);
               break;
             case 'accept':
-              const acceptedContact = `~${payload.accept}`;
+              console.log('accept', payload);
+              const acceptedContact = `~${payload}`;
               const response = await conduit.scry({
                 app: 'graph-store',
-                path: `/graph/${shipState.patp}/dm-inbox/${acceptedContact}`,
+                path: `/graph/${ship}/dm-inbox/${acceptedContact}`,
               });
-              const chat = shipState.chat.dms.get(acceptedContact);
-              chat?.setDm(response['graph-update']['add-graph']['graph']);
+              // console.log('accept', response);
+              const chat = chatStore.dms.get(acceptedContact);
+              chat?.setDm(
+                conduit.ship!,
+                response['graph-update']['add-graph']['graph']
+              );
               break;
             case 'decline':
-              const declinedContact = `~${payload.decline}`;
-              shipState.chat.dms.delete(declinedContact);
+              console.log('decline', payload);
+              const declinedContact = `~${payload}`;
+              chatStore.dms.delete(declinedContact);
               break;
             default:
               console.log('action', action);
@@ -53,34 +56,35 @@ export const DmApi = {
           }
         }
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  graphUpdates: (conduit: Urbit, shipState: ShipModelType) => {
-    conduit.subscribe({
-      app: 'graph-store',
-      path: `/updates`,
-      event: async (data: any) => {
-        if (data['graph-update']) {
-          const { resource, nodes } = data['graph-update']['add-nodes'];
-          if (resource.name === 'dm-inbox') {
-            const { post } = Object.values<{ post: PostType }>(nodes)[0];
-            const chatModel = shipState.chat.dms.get(post.author);
-            chatModel?.setDm(post);
-            return;
-          }
-        }
-      },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
-    });
-  },
+  // graphUpdates: (conduit: Conduit, chatStore: ChatStoreType): Promise<any> => {
+  //   return conduit.watch({
+  //     app: 'graph-store',
+  //     path: `/updates`,
+  //     onEvent: async (data: any) => {
+  //       console.log('graph update', data['graph-update']);
+  //       if (data['graph-update']) {
+  //         // const { resource, nodes } = data['graph-update']['add-nodes'];
+  //         // if (resource.name === 'dm-inbox') {
+  //         //   const { post } = Object.values<{ post: PostType }>(nodes)[0];
+  //         //   const chatModel = chatStore.dms.get(post.author);
+  //         //   chatModel?.setDm(conduit.ship!, post);
+  //         //   return;
+  //         // }
+  //       }
+  //     },
+  //     onError: () => console.log('Subscription rejected'),
+  //     onQuit: () => console.log('Kicked from subscription'),
+  //   });
+  // },
   sendDM: async (
+    conduit: Conduit,
     ourShip: string,
     toShip: string, // how do you define the to ship?
-    contents: any[],
-    credentials: ISession
+    contents: any[]
   ) => {
     const post = createPost(
       ourShip.substring(1),
@@ -103,9 +107,9 @@ export const DmApi = {
         },
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
-  acceptDm: async (ourShip: string, toShip: string, credentials: ISession) => {
+  acceptDm: async (conduit: Conduit, toShip: string) => {
     console.log('accepting dm');
     const payload = {
       app: 'dm-hook',
@@ -114,9 +118,9 @@ export const DmApi = {
         accept: `~${toShip}`,
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
-  declineDm: async (ourShip: string, toShip: string, credentials: ISession) => {
+  declineDm: async (conduit: Conduit, toShip: string) => {
     const payload = {
       app: 'dm-hook',
       mark: 'dm-hook-action',
@@ -124,12 +128,11 @@ export const DmApi = {
         decline: `~${toShip}`,
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
   setScreen: async (
-    ourShip: string,
-    screen: boolean, // should we screen dms from randos
-    credentials: { url: string; cookie: string }
+    conduit: Conduit,
+    screen: boolean // should we screen dms from randos
   ) => {
     const payload = {
       app: 'dm-hook',
@@ -138,7 +141,7 @@ export const DmApi = {
         screen,
       },
     };
-    return await quickPoke(ourShip, payload, credentials);
+    return await conduit.poke(payload);
   },
   // getNewest(`~${window.ship}`, 'dm-inbox', 100, `/${patp2dec(ship)}`);
   // const aUpdated = a.startsWith('~')

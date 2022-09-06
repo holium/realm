@@ -5,10 +5,12 @@ import {
   types,
   onSnapshot,
   onAction,
+  applySnapshot,
 } from 'mobx-state-tree';
 import { WalletStore } from 'os/services/tray/wallet.model'
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import { SoundActions } from '../actions/sound';
+import { OSActions } from '../actions/os';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -94,17 +96,17 @@ export const trayStore = TrayAppStore.create({
   },
 });
 
-// onAction(trayStore, (call) => {
-//   console.log(call);
-// });
 // Watch actions for sound trigger
-onAction(trayStore.roomsApp, (call) => {
-  const patchArg = call.args![0][0];
-  if (patchArg.path === '/liveRoom') {
-    if (patchArg.op === 'replace') {
-      patchArg.value
-        ? SoundActions.playRoomEnter()
-        : SoundActions.playRoomLeave();
+onAction(trayStore, (call) => {
+  if (call.path === '/roomsApp') {
+    if (call.name === '@APPLY_SNAPSHOT') return;
+    const patchArg = call.args![0][0];
+    if (patchArg.path === '/liveRoom') {
+      if (patchArg.op === 'replace') {
+        patchArg.value
+          ? SoundActions.playRoomEnter()
+          : SoundActions.playRoomLeave();
+      }
     }
   }
 });
@@ -131,16 +133,14 @@ export function useTrayApps() {
   return store;
 }
 
-window.electron.os.onEffect((_event: any, value: any) => {
-  if (value.response === 'initial') {
-    if (value.resource === 'rooms') {
-      console.log('yo');
-      applyPatch(trayStore.roomsApp, value.model);
-    }
-    else if (value.resource === 'wallet') {
-      applyPatch(trayStore.walletApp, value.model);
-    }
+// After boot, set the initial data
+OSActions.onBoot((_event: any, response: any) => {
+  if (response.rooms) {
+    applySnapshot(trayStore.roomsApp, response.rooms);
   }
+});
+
+window.electron.os.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
@@ -149,9 +149,4 @@ window.electron.os.onEffect((_event: any, value: any) => {
       applyPatch(trayStore.walletApp, value.patch);
     }
   }
-  // if (value.response === 'initial') {
-  //   if (value.resource === 'auth') {
-  //     // authState.authStore.initialSync(value);
-  //   }
-  // }
 });

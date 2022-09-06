@@ -57,33 +57,27 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
         <>
           {groups.length ? (
             groups.map((data: any) => {
-              const groupKey = data.group.split('/')[2];
-              const title = data.metadata.title || groupKey;
-              const subtitle = `${data.members.length} ${
-                data.members.length === 1 ? 'member' : 'members'
+              const groupKey = data.path.split('/')[2];
+              const title = data.name || groupKey;
+              const subtitle = `${data.memberCount} ${
+                data.memberCount === 1 ? 'member' : 'members'
               }`;
               return (
                 <SelectRow
-                  key={data.group}
-                  image={data.metadata.picture}
+                  key={groupKey}
+                  image={data.picture}
                   customBg={windowColor}
-                  title={data.metadata.title || groupKey}
+                  title={data.name || groupKey}
                   buttonText="Add Space"
                   subtitle={subtitle}
                   onButtonClick={(_evt: any) => {
                     setState &&
                       setState({
                         title,
-                        image: data.metadata.picture,
+                        image: data.picture,
                         subtitle,
                         type: 'group',
                       });
-                    // workflowState.set({
-                    //   title,
-                    //   image: data.metadata.picture,
-                    //   subtitle,
-                    //   type: 'group',
-                    // });
                     props.onNext && props.onNext(_evt);
                   }}
                 />

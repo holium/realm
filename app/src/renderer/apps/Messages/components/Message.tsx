@@ -16,7 +16,6 @@ import {
 import { motion } from 'framer-motion';
 import { Flex, Text, LinkPreview, Mention } from 'renderer/components';
 import { TextParsed } from './TextContent';
-// import { LinkPreview } from '@dhaiwat10/react-link-preview';
 
 import { toJS } from 'mobx';
 import { getReferenceView, getTextFromContent } from '../helpers/parser';
@@ -58,8 +57,8 @@ export const Message: FC<DMContact> = (props: DMContact) => {
     let message: string = getTextFromContent(type, content);
     if (preview) {
       message = message.split(/(\r\n|\n|\r)/gm)[0]; // takes only the first line of a multi-line message
-      if (message.length > 39) {
-        message = message.substring(0, 40) + '...';
+      if (message.length > 27) {
+        message = message.substring(0, 28) + '...';
       }
       setMessageComponent(<Text fontSize={2}>{message}</Text>);
     } else {
@@ -114,7 +113,7 @@ export const Message: FC<DMContact> = (props: DMContact) => {
           break;
       }
     }
-  }, []);
+  }, [content]);
 
   return useMemo(
     () => (

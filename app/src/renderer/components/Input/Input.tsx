@@ -82,7 +82,7 @@ export const InputWrapper = styled(Flex)`
       &:active {
         transition: ${(props) => props.theme.transition};
         outline: none;
-        border-color: ${(props) => props.theme.colors.brand.primary};
+        border-color: ${(props) => props.theme.colors.brand.primary} !important;
         &::placeholder {
           color: transparent;
         }
@@ -111,7 +111,17 @@ export const InputWrapper = styled(Flex)`
   ${(props) =>
     props.error &&
     css`
-      border-color: ${props.theme.colors.intent.alert};
+      border-color: ${props.theme.colors.ui.intent.alert};
+      &:focus,
+      &:focus-within,
+      &:active {
+        transition: ${(props) => props.theme.transition};
+        outline: none;
+        border-color: ${props.theme.colors.ui.intent.alert};
+        &::placeholder {
+          color: transparent;
+        }
+      }
     `}
 `;
 
@@ -257,6 +267,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
       wrapperRef,
       wrapperStyle,
     } = props;
+
     return (
       <InputWrapper
         alignItems="center"
@@ -275,6 +286,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
         flex={flex}
         style={wrapperStyle}
         isDisabled={disabled}
+        error={props.error}
         {...wrapperMotionProps}
       >
         {leftIcon && (

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Realm } from '../os';
+import { osPreload } from '../os/preload';
 
 const appPreload = {
   setFullscreen(callback: any) {
@@ -26,10 +26,13 @@ const appPreload = {
   toggleDevTools: () => {
     return ipcRenderer.invoke('toggle-devtools');
   },
+  onBrowserOpen(callback: any) {
+    ipcRenderer.on('realm.browser.open', callback);
+  },
 };
 export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
   app: appPreload,
-  os: Realm.preload,
+  os: osPreload,
 });
