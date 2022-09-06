@@ -8,6 +8,7 @@ import { networkInterfaces } from 'os';
 
 const BitcoinWallet = types.model('BitcoinWallet', {
   network: types.string,
+  path: types.string,
   address: types.string,
   balance: types.string,
   conversions: types.maybe(
@@ -25,12 +26,21 @@ const BitcoinStore = types
   })
   .actions((self) => ({
     initial(wallets: any) {
-      applySnapshot(self.wallets, wallets);
+      const btcWallets = wallets.bitcoin;
+      Object.entries(btcWallets).forEach(([key, wallet]) => {
+        btcWallets[key] = {
+          network: 'bitcoin',
+          balance: (wallet as any).balance.toString(),
+          address: (wallet as any).address,
+        }
+      })
+      applySnapshot(self.wallets, btcWallets);
     },
     // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
         network: 'bitcoin',
+        path: wallet.wallet.path,
         address: wallet.wallet.address,
         balance: wallet.wallet.balance.toString(),
       };
@@ -40,6 +50,7 @@ const BitcoinStore = types
 
 const EthWallet = types.model('EthWallet', {
   network: types.string,
+  path: types.string,
   address: types.string,
   balance: types.string,
   conversions: types.maybe(
@@ -89,20 +100,19 @@ export const EthStore = types
       Object.entries(ethWallets).forEach(([key, wallet]) => {
         ethWallets[key] = {
           network: 'ethereum',
-          balance: wallet.balance,
-          address: wallet.address,
+          path: (wallet as any).path,
+          balance: (wallet as any).balance.toString(),
+          address: (wallet as any).address,
         }
       })
       applySnapshot(self.wallets, ethWallets);
     },
     // pokes
-    setEthProvider(url: string) {
-
-    },
     // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
         network: 'ethereum',
+        path: wallet.wallet.path,
         address: wallet.wallet.address,
         balance: wallet.wallet.balance.toString(),
       };

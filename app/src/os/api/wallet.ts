@@ -1,12 +1,14 @@
+import { hashHostnameBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { Urbit } from './../urbit/api';
 
 export const WalletApi = {
-  setXpub: async (conduit: Urbit, xpub: string) => {
+  setXpub: async (conduit: Urbit, network: string, xpub: string) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
       json: {
         'set-xpub': {
+          network: network,
           xpub: xpub,
         }
       },
@@ -51,13 +53,14 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  enqueueTransaction: async (conduit: Urbit, network: string, transaction: any) => {
+  enqueueTransaction: async (conduit: Urbit, network: string, hash: any, transaction: any) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
       json: {
         'enqueue-transaction': {
           network: network,
+          hash: hash,
           transaction: transaction,
         }
       },
@@ -76,28 +79,26 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  getNeedsSigning: async (conduit: Urbit) => {
+  addSmartContact: async (conduit: Urbit, contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) => {
+    const payload = {
+      app: 'wallet',
+      mark: 'wallet-action',
+      json: {
+        'add-smart-contract': {
+          'contract-id': contractId,
+          'contract-type': contractType,
+          'name': name,
+          'address': contractAddress,
+          'wallet-index': walletIndex
+        }
+      }
+    }
+    await conduit.poke(payload);
+  },
+  getHistory: async (conduit: Urbit) => {
     return await conduit.scry({
       app: 'wallet',
-      path: '/needs-signing',
-    });
-  },
-  subscribeToNeedsSigning: async (conduit: Urbit, handler: (transaction: any) => void) => {
-    conduit.subscribe({
-      app: 'wallet',
-      path: '/needs-signing',
-      event: (data: any) => {
-        console.log('got needs-signing update')
-        handler(data);
-      },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
-    });
-  },
-  getTransactions: async (conduit: Urbit) => {
-    return await conduit.scry({
-      app: 'wallet',
-      path: '/transactions',
+      path: '/history'
     })
   },
   subscribeToTransactions(conduit: Urbit, handler: (transaction: any) => void) {

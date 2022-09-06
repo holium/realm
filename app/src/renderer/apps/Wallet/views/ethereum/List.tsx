@@ -9,7 +9,6 @@ import { Wallet } from '../../lib/wallet';
 import { constructSampleWallet } from '../../store';
 import { WalletCard } from '../common/WalletCard';
 import { AnimatePresence, AnimateSharedLayout } from 'framer-motion';
-import { RealmEthWalletAgent } from 'js/src/realm-wallet-eth';
 import { WalletActions } from '../../../../logic/actions/wallet';
 
 interface EthListProps {}
@@ -27,7 +26,7 @@ export const EthList: FC<EthListProps> = observer((props: EthListProps) => {
   const list = walletApp.ethereum.list;
   useEffect(() => {
     // constructSampleWallet().then(wallets => console.log(wallets));
-    WalletActions.setXpub();
+    WalletActions.setXpub('ethereum');
   })
   // return
   return (
