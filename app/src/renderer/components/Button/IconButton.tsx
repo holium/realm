@@ -34,7 +34,7 @@ type IProps = {
   SizeProps &
   TypographyProps;
 
-export const IconButton = styled(styled(motion.button)<IProps>`
+export const IconButton = styled(motion.button)<IProps>`
   border: 1px solid transparent;
   background-color: transparent;
   display: inline-flex;
@@ -169,16 +169,8 @@ export const IconButton = styled(styled(motion.button)<IProps>`
         border-color: none;
       }
     `}
-`)<IProps>(
-  {
-    // '&:hover': {
-    //   // @ts-expect-error stupid
-    //   backgroundColor: (props: IProps) =>
-    //     props.customBg ? darken(0.22, props.customBg) : 'initial',
-    // },
-  },
-  compose(space, size, color, layout, typography)
-);
+    ${compose(space, size, color, layout, typography)}
+`;
 
 IconButton.defaultProps = {
   size: 24,

@@ -1,8 +1,6 @@
 import { Conduit } from '@holium/conduit';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
-import { PostType } from '../types';
-import { ISession } from '../';
 import { ChatStoreType } from '../services/ship/models/dms';
 
 export const DmApi = {
@@ -34,16 +32,22 @@ export const DmApi = {
               // console.log(data);
               break;
             case 'accept':
-              const acceptedContact = `~${payload.accept}`;
+              console.log('accept', payload);
+              const acceptedContact = `~${payload}`;
               const response = await conduit.scry({
                 app: 'graph-store',
                 path: `/graph/${ship}/dm-inbox/${acceptedContact}`,
               });
+              // console.log('accept', response);
               const chat = chatStore.dms.get(acceptedContact);
-              chat?.setDm(response['graph-update']['add-graph']['graph']);
+              chat?.setDm(
+                conduit.ship!,
+                response['graph-update']['add-graph']['graph']
+              );
               break;
             case 'decline':
-              const declinedContact = `~${payload.decline}`;
+              console.log('decline', payload);
+              const declinedContact = `~${payload}`;
               chatStore.dms.delete(declinedContact);
               break;
             default:
@@ -56,25 +60,26 @@ export const DmApi = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  graphUpdates: (conduit: Conduit, chatStore: ChatStoreType): Promise<any> => {
-    return conduit.watch({
-      app: 'graph-store',
-      path: `/updates`,
-      onEvent: async (data: any) => {
-        if (data['graph-update']) {
-          const { resource, nodes } = data['graph-update']['add-nodes'];
-          if (resource.name === 'dm-inbox') {
-            const { post } = Object.values<{ post: PostType }>(nodes)[0];
-            const chatModel = chatStore.dms.get(post.author);
-            chatModel?.setDm(post);
-            return;
-          }
-        }
-      },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
-    });
-  },
+  // graphUpdates: (conduit: Conduit, chatStore: ChatStoreType): Promise<any> => {
+  //   return conduit.watch({
+  //     app: 'graph-store',
+  //     path: `/updates`,
+  //     onEvent: async (data: any) => {
+  //       console.log('graph update', data['graph-update']);
+  //       if (data['graph-update']) {
+  //         // const { resource, nodes } = data['graph-update']['add-nodes'];
+  //         // if (resource.name === 'dm-inbox') {
+  //         //   const { post } = Object.values<{ post: PostType }>(nodes)[0];
+  //         //   const chatModel = chatStore.dms.get(post.author);
+  //         //   chatModel?.setDm(conduit.ship!, post);
+  //         //   return;
+  //         // }
+  //       }
+  //     },
+  //     onError: () => console.log('Subscription rejected'),
+  //     onQuit: () => console.log('Kicked from subscription'),
+  //   });
+  // },
   sendDM: async (
     conduit: Conduit,
     ourShip: string,

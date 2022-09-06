@@ -63,12 +63,12 @@ export class ShellService extends BaseService {
       accessPropertiesByDotNotation: true,
     });
 
-    let persistedState: ShellStoreType = this.db.store;
-    this.state = ShellStore.create(castToSnapshot(persistedState));
-
-    onSnapshot(this.state, (snapshot) => {
-      this.db!.store = castToSnapshot(snapshot);
-    });
+    // let persistedState: ShellStoreType = this.db.store;
+    // this.state = ShellStore.create(castToSnapshot(persistedState));
+    this.state = ShellStore.create({});
+    // onSnapshot(this.state, (snapshot) => {
+    //   this.db!.store = castToSnapshot(snapshot);
+    // });
 
     onPatch(this.state, (patch) => {
       const patchEffect = {

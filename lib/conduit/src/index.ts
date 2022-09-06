@@ -13,6 +13,7 @@ import {
   Scry,
   SubscribeCallbacks,
   SubscribeParams,
+  Thread,
 } from './types';
 
 // For now, set it to 20
@@ -108,8 +109,9 @@ export class Conduit extends EventEmitter {
         const parsedData = JSON.parse(event.data);
         const eventId = parseInt(parsedData.id, 10);
         const type = parsedData.response as Responses;
-        if (eventId - this.lastAckId > 20) {
-          this.ack(eventId);
+        const lastEventId = parseInt(event.lastEventId, 10);
+        if (lastEventId - this.lastAckId > 20) {
+          this.ack(lastEventId);
         }
         switch (type) {
           case 'poke':
@@ -263,6 +265,29 @@ export class Conduit extends EventEmitter {
         `${this.url}/~/scry/${app}${path}.json`,
         {
           headers: this.headers,
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * thread
+   *
+   * @param params
+   * @returns
+   */
+  async thread(params: Thread<Action>): Promise<any> {
+    const { inputMark, outputMark, threadName, body, desk } = params;
+
+    try {
+      const response = await axios.post(
+        `${this.url}/spider/${desk}/${inputMark}/${threadName}/${outputMark}.json`,
+        {
+          headers: this.headers,
+          body,
         }
       );
       return response.data;

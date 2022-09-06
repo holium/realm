@@ -13,9 +13,13 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     font-family: "Rubik", sans-serif;
   }
 
+  #root{ 
+    height: inherit;
+    width: inherit;
+  }
   :root {
     ${(props: StyleProps) => css`
-      --blur-enabled: ${props.blur ? 'blur(16px)' : 'none'};
+      --blur-enabled: ${props.blur ? 'blur(24px)' : 'none'};
       --border-color: ${props.theme.colors.ui.borderColor};
       --background-color: ${props.theme.colors.bg.primary};
       --transition-fast: ${props.theme.transitionFast};

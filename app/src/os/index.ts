@@ -108,9 +108,9 @@ export class Realm extends EventEmitter {
     //   this.conduit = undefined;
     // });
     // when closing for any reason, crash, user clicks close etc.
-    this.mainWindow.on('close', async () => {
+    this.mainWindow.on('close', () => {
+      this.conduit?.closeChannel();
       this.services.shell.closeDialog(null);
-      await this.conduit?.closeChannel();
       this.conduit = undefined;
     });
   }
@@ -132,7 +132,6 @@ export class Realm extends EventEmitter {
     if (this.session) {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
-      // chat = this.services.ship.models
       spaces = this.services.spaces.snapshot;
       desktop = this.services.desktop.snapshot;
       shell = this.services.shell.snapshot;
@@ -208,14 +207,15 @@ export class Realm extends EventEmitter {
       this.session
     );
     await this.services.spaces.load(sessionPatp, models.docket);
+    // console.log(toJS(models.courier));
     this.services.onboarding.reset();
-    if (!this.isResuming) {
-      this.mainWindow.webContents.send('realm.on-login');
-    }
     this.mainWindow.webContents.send('realm.on-connected', {
       ship: getSnapshot(ship),
       models,
     });
+    if (!this.isResuming) {
+      this.mainWindow.webContents.send('realm.on-login');
+    }
     this.services.identity.auth.setLoader('loaded');
     this.isResuming = false;
   }
@@ -261,7 +261,9 @@ export class Realm extends EventEmitter {
   }
 
   sendConnectionStatus(status: ConduitState) {
-    this.mainWindow.webContents.send('realm.on-connection-status', status);
+    if (!this.mainWindow.isDestroyed()) {
+      this.mainWindow.webContents.send('realm.on-connection-status', status);
+    }
   }
 }
 

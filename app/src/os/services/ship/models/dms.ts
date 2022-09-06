@@ -10,7 +10,7 @@ import {
 import { LoaderModel } from '../../common.model';
 import { ShipModelType, ShipModel } from './ship';
 import { patp2dec, patp } from 'urbit-ob';
-import { PostType } from '../../../types';
+import { Patp, PostType } from '../../../types';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -155,17 +155,15 @@ export const Chat = types
     },
   }))
   .actions((self) => ({
-    setDm: (post: PostType) => {
-      const ship: ShipModelType = getParent(self, 3);
+    setDm: (ship: string, post: PostType) => {
       let lastSent = 0;
-      const strippedShip = ship.patp.substring(1);
       const dmContacts: string[] = [];
 
       if (!post.author) {
         // handles cases of no author?
         return;
       }
-      if (post.author !== strippedShip && !dmContacts.includes(post.author)) {
+      if (post.author !== ship && !dmContacts.includes(post.author)) {
         dmContacts.push(post.author);
       }
       if (post['time-sent'] > lastSent) {
@@ -178,7 +176,7 @@ export const Chat = types
           author: post.author,
           timeSent: post['time-sent'],
           contents: post.contents,
-          position: post.author !== strippedShip ? 'left' : 'right',
+          position: post.author !== ship ? 'left' : 'right',
         })
       );
     },

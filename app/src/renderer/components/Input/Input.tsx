@@ -82,7 +82,7 @@ export const InputWrapper = styled(Flex)`
       &:active {
         transition: ${(props) => props.theme.transition};
         outline: none;
-        border-color: ${(props) => props.theme.colors.brand.primary};
+        border-color: ${(props) => props.theme.colors.brand.primary} !important;
         &::placeholder {
           color: transparent;
         }
