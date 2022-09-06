@@ -2,7 +2,7 @@ import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Input, Text} from 'renderer/components';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { TwitterPicker } from 'react-color';
+import { SwatchesPicker, TwitterPicker } from 'react-color';
 import { useServices } from 'renderer/logic/store';
 
 // TODO a lot of this is taken from Spaces/Workflow/Details.tsx
@@ -11,21 +11,29 @@ import { useServices } from 'renderer/logic/store';
 const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 const isValidHexColor = (hex: string) => {
-  return hexRegex.test(`#${hex}`);
+  return hexRegex.test(`${hex}`);
 };
 
-export const ColorPicker: FC<any> = observer(() => {
+export type ColorPickerProps = {
+    initialColor: string,
+    swatches: string[],
+    onChange: (color : string) => void;
+  };
+
+export const ColorPicker: FC<ColorPickerProps> = observer((props: ColorPickerProps) => {
 
     const colorPickerRef = useRef(null);
 
-    const { desktop, ship, contacts } = useServices();
-    const { inputColor,accentColor } = desktop.theme;
+    // const { desktop, ship, contacts } = useServices();
+    // const { inputColor, accentColor } = desktop.theme;
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
-    const [validatedColor, setValidatedColor] = useState(accentColor);
+    const [validatedColor, setValidatedColor] = useState(props.initialColor);
 
     useEffect(() => {
         // TODO propogate to parent
+        props.onChange(validatedColor)
+        // console.log("NEW VALID COLOR")
     }, [validatedColor])
 
     return (
@@ -51,23 +59,26 @@ export const ColorPicker: FC<any> = observer(() => {
                     className="cursor-style"
                     color={validatedColor}
                     onChange={(newColor: { hex: string }) => {
-                    // color.actions.onChange(newColor.hex);
-                    // setWorkspaceState({
-                    //     color: newColor.hex,
-                    // });
-                    setValidatedColor(newColor.hex);
+                        // color.actions.onChange(newColor.hex);
+                        // setWorkspaceState({
+                        //     color: newColor.hex,
+                        // });
+                        if(isValidHexColor(newColor.hex)) {
+                            setValidatedColor(newColor.hex);
+                        }
                     }}
                     triangle="top-left"
-                    colors={[
-                    '#4E9EFD',
-                    '#FFFF00',
-                    '#00FF00',
-                    '#FF0000',
-                    '#52B278',
-                    '#D9682A',
-                    '#ff3399',
-                    '#8419D9',
-                    ]}
+                    colors={props.swatches}
+                    // colors={[
+                    // '#4E9EFD',
+                    // '#FFFF00',
+                    // '#00FF00',
+                    // '#FF0000',
+                    // '#52B278',
+                    // '#D9682A',
+                    // '#ff3399',
+                    // '#8419D9',
+                    // ]}
                 />
                 </ColorTilePopover>
             </Flex>

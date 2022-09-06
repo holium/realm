@@ -31,7 +31,7 @@ export const SystemPanel: FC<any> = observer(() => {
         System
       </Text>
 
-{/*     
+    {/*     
     <Text opacity={0.7} fontSize={3} fontWeight={500}>
       INTERFACE
     </Text>
@@ -80,7 +80,8 @@ export const SystemPanel: FC<any> = observer(() => {
               
           </Flex>
         <Flex mt={6} gap={6} justifyContent="flex-start">
-          <Checkbox defaultValue="true" mr={16} />
+          {/* TODO there is no way to set an initial value to this checkbox component */}
+          <Checkbox defaultValue='' mr={16} />
           <Text>Use profile color for cursor</Text>
         </Flex>
 
@@ -99,8 +100,8 @@ export const SystemPanel: FC<any> = observer(() => {
        <Flex mt={2} justifyContent="flex-start">
           <Checkbox mr={16} defaultValue="false" />
           <Flex flexDirection='column' justifyContent='center' gap={4}>
-          <Text>Disable OS System Sounds</Text>
-          <Text fontWeight='250'>These sounds play on login, logout, etc.</Text>
+        <Text>Disable OS System Sounds</Text>
+          <Text fontWeight='200'>These sounds play on login, logout, etc.</Text>
           </Flex>
         </Flex>
     </Card>

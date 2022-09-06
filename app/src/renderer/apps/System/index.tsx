@@ -43,14 +43,21 @@ export const SystemApp: FC<any> = observer(() => {
                 patp={person}
                 color={[(contact && contact.color) || '#000000', 'white']}
               />
-            <Text fontWeight={500}>
-              {ship!.patp}
-            </Text>
+            <Flex flexDirection='column' ml={2}>
+              
+              {ship!.nickname && 
+              <Text fontWeight={500}>
+              {ship!.nickname}
+              </Text>
+              }
+              <Text fontWeight={300}>
+                {ship!.patp}
+              </Text>
+            </Flex>
           </Flex>
 
 
-          <Flex width={'100%'}>
-            {/* search bar */}
+          {/* <Flex width={'100%'}>
             <Input
             className="realm-cursor-text-cursor"
             type="text"
@@ -68,7 +75,7 @@ export const SystemApp: FC<any> = observer(() => {
               </Flex>
             }
             />
-          </Flex>
+          </Flex> */}
 
           <Flex overflowY='scroll' flexDirection='row' minWidth={'100%'}>
             {/* menu / list  */}
