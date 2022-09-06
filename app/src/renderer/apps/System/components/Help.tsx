@@ -21,13 +21,14 @@ export const HelpPanel: FC<any> = observer(() => {
       <Text
         fontSize={8}
         fontWeight={600}
+        mb={6}
       >
         Help
       </Text>
 
     
     <Text opacity={0.7} fontSize={3} fontWeight={500}>
-      ???
+      Coming Soon
     </Text>
     <Card
         p="20px"

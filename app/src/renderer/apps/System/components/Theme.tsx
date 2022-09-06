@@ -53,8 +53,8 @@ export const ThemePanel: FC<any> = observer(() => {
 
       //
       if(values.customWallpaper !== '') {
+        customWallpaper.actions.onChange('');
         await DesktopActions.changeWallpaper(`/${ship!.patp!}/our`, values.customWallpaper)
-
       }
       else if(wpOption !== undefined) {
         await DesktopActions.changeWallpaper(`/${ship!.patp!}/our`, wpGallery[wpOption])
@@ -181,6 +181,8 @@ export const ThemePanel: FC<any> = observer(() => {
           </Text>
           
           {/* <ColorPicker /> */}
+
+          {/* TODO use colorpicker component */}
           
           <Flex position="relative" justifyContent="flex-end">
               <ColorTile

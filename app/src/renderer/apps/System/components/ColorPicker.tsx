@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useRef, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Input, Text} from 'renderer/components';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
@@ -24,10 +24,13 @@ export const ColorPicker: FC<any> = observer(() => {
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
     const [validatedColor, setValidatedColor] = useState(accentColor);
 
+    useEffect(() => {
+        // TODO propogate to parent
+    }, [validatedColor])
 
     return (
       
-            <Flex position="relative" justifyContent="flex-end">
+            <Flex position="relative">
                 <ColorTile
                 // id="space-color-tile"
                 size={26}

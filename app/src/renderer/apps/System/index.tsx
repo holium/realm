@@ -21,7 +21,7 @@ export const SystemApp: FC<any> = observer(() => {
   type SystemPanelType = 'system' | 'theme' | 'account' | 'about' | 'help' | undefined;
 
   const [systemPanel, setSystemPanelType] =
-          useState<SystemPanelType>('theme');
+          useState<SystemPanelType>('account');
 
 
   return (
