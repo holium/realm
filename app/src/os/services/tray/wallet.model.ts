@@ -1,3 +1,4 @@
+import { settings } from '@urbit/api';
 import {
   applySnapshot,
   castToSnapshot,
@@ -5,6 +6,12 @@ import {
   Instance,
 } from 'mobx-state-tree';
 import { networkInterfaces } from 'os';
+
+const Settings = types
+  .model('Settings', {
+    defaultIndex: types.integer,
+    provider: types.maybe(types.string),
+  })
 
 const BitcoinWallet = types.model('BitcoinWallet', {
   network: types.string,
@@ -23,6 +30,7 @@ const BitcoinWallet = types.model('BitcoinWallet', {
 const BitcoinStore = types
   .model('BitcoinStore', {
     wallets: types.map(BitcoinWallet),
+    settings: Settings,
   })
   .actions((self) => ({
     initial(wallets: any) {
@@ -71,17 +79,11 @@ const EthTransaction = types
     amount: types.string,
   })
 
-const EthSettings = types
-  .model('EthSettings', {
-    defaultIndex: types.integer,
-    creationMode: types.string,
-  })
-
 export const EthStore = types
   .model('EthStore', {
     wallets: types.map(EthWallet),
     transactions: types.map(EthTransaction),
-    settings: types.maybe(EthSettings)
+    settings: Settings
   })
   .views((self) => ({
     get list() {
@@ -120,6 +122,9 @@ export const EthStore = types
     },
     applyTransactionUpdate(transaction: any) {
       self.transactions.put(transaction);
+    },
+    setDefaultWallet(index: number) {
+      self.settings!.defaultIndex = index;
     }
   }));
 
@@ -135,6 +140,7 @@ export const WalletStore = types
     ]),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
+    creationMode: types.string
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {

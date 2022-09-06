@@ -29,19 +29,18 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.create-wallet': this.createWallet,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
-    'realm.tray.wallet.add-erc20': this.addERC20,
-    'realm.tray.wallet.add-erc721': this.addERC721,
+    'realm.tray.wallet.add-smart-contract': this.addSmartContract,
   };
 
   static preload = {
-    setXpub: (network: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-xpub', network);
+    setXpub: () => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
     },
-    setWalletCreationMode: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-wallet-creation-mode');
+    setWalletCreationMode: (mode: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-wallet-creation-mode', mode);
     },
-    changeDefaultWallet: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.change-default-wallet');
+    changeDefaultWallet: (network: string, index: number) => {
+      return ipcRenderer.invoke('realm.tray.wallet.change-default-wallet', network, index);
     },
     createWallet: (sender: string, network: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.create-wallet', sender, network);
@@ -52,12 +51,9 @@ export class WalletService extends BaseService {
     sendBitcoinTransaction: () => {
       return ipcRenderer.invoke('realm.tray.wallet.send-bitcoin-transaction')
     },
-    addERC20: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.add-erc20')
-    },
-    addERC721: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.add-erc721')
-    },
+    addSmartContract: (contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.add-smart-contract', contractId, contractType, name, contractAddress, walletIndex);
+    }
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -74,8 +70,17 @@ export class WalletService extends BaseService {
     this.state = WalletStore.create({
         network: 'ethereum',
         currentView: 'ethereum:list',
-        ethereum: {},
-        bitcoin: {}
+        ethereum: {
+          settings: {
+            defaultIndex: 0,
+          }
+        },
+        bitcoin: {
+          settings: {
+            defaultIndex: 0,
+          }
+        },
+        creationMode: 'default',
     });
 
     onPatch(this.state, (patch) => {
@@ -113,7 +118,10 @@ export class WalletService extends BaseService {
       this.state!.bitcoin.initial(wallets);
     });
     WalletApi.subscribeToTransactions(this.core.conduit!, (transaction: any) => {
-      console.log(transaction);
+      if (transaction.network == 'ethereum')
+        this.state!.ethereum.applyTransactionUpdate(transaction)
+//      else if (transaction.network == 'bitcoin')
+//        this.state!.bitcoin.applyTransactionUpdate(transaction);
     });
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
       console.log(history);
@@ -124,23 +132,27 @@ export class WalletService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async setXpub(_event: any, network: string) {
-    let path: string = '';
-    if (network == 'ethereum') {
-      path = "m/44'/60'/0'/0";
-    }
-    else if (network == 'bitcoin') {
-      path = "m/44'/0'/0'/0";
-    }
-    let xpub: string = this.privateKey.derivePath(path).neuter().extendedKey;
-    await WalletApi.setXpub(this.core.conduit!, network, xpub);
+  async setXpub(_event: any) {
+    const ethPath = "m/44'/60'/0'/0";
+    const btcPath = "m/44'/0'/0'/0";
+    let xpub: string = this.privateKey.derivePath(ethPath).neuter().extendedKey;
+    // eth
+    await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
+    // btc
+    xpub = this.privateKey.derivePath(btcPath).neuter().extendedKey;
+    await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
   async setWalletCreationMode(_event: any, mode: string) {
+    this.state!.creationMode = mode;
     await WalletApi.setWalletCreationMode(this.core.conduit!, mode);
   }
 
   async changeDefaultWallet(_event: any, network: string, index: number) {
+    if (network == 'ethereum')
+      this.state!.ethereum.settings.defaultIndex = index;
+    else if (network == 'bitcoin')
+      this.state!.bitcoin.settings.defaultIndex = index;
     await WalletApi.changeDefaultWallet(this.core.conduit!, network, index);
   }
 
@@ -166,12 +178,8 @@ export class WalletService extends BaseService {
     // await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
   }
 
-  async addERC20(_event: any, contractId: string, name: string, contractAddress: string, walletIndex: string) {
-    await WalletApi.addSmartContact(this.core.conduit!, contractId, 'erc20', name, contractAddress, walletIndex);
-  }
-
-  async addERC721(_event: any, contractId: string, name: string, contractAddress: string, walletIndex: string) {
-    await WalletApi.addSmartContact(this.core.conduit!, contractId, 'erc721', name, contractAddress, walletIndex);
+  async addSmartContract(_event: any, contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) {
+    await WalletApi.addSmartContact(this.core.conduit!, contractId, contractType, name, contractAddress, walletIndex);
   }
 
   /*
