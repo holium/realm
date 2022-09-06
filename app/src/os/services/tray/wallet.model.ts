@@ -126,6 +126,9 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
+    enqueueTransaction(transaction: any) {
+      self.transactions.put(transaction);
+    },
     // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
@@ -143,7 +146,7 @@ export const EthStore = types
         tx.status = "approved";
       else
         tx.status = "failed";
-      self.transactions.set(transaction.key, tx);
+//      self.transactions.set(transaction.key, tx);
     },
   }));
 

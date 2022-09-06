@@ -49,11 +49,11 @@ export class WalletService extends BaseService {
     createWallet: (sender: string, network: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.create-wallet', sender, network);
     },
-    sendEthereumTransaction: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.send-ethereum-transaction')
+    sendEthereumTransaction: (walletIndex: number, to: string, amount: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.send-ethereum-transaction', walletIndex, to, amount)
     },
-    sendBitcoinTransaction: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.send-bitcoin-transaction')
+    sendBitcoinTransaction: (walletIndex: number, to: string, amount: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.send-bitcoin-transaction', walletIndex, to, amount)
     },
     addSmartContract: (contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.add-smart-contract', contractId, contractType, name, contractAddress, walletIndex);
@@ -179,6 +179,7 @@ export class WalletService extends BaseService {
     const wallet = new ethers.Wallet(this.privateKey.derivePath("m/44'/60'/0'/0/" + walletIndex).privateKey);
     wallet.connect(this.ethProvider);
     const { hash } = await wallet.sendTransaction(tx);
+    this.state!.ethereum.enqueueTransaction(tx);
     await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
   }
 
