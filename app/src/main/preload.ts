@@ -26,6 +26,9 @@ const appPreload = {
   toggleDevTools: () => {
     return ipcRenderer.invoke('toggle-devtools');
   },
+  onBrowserOpen(callback: any) {
+    ipcRenderer.on('realm.browser.open', callback);
+  },
 };
 export type AppPreloadType = typeof appPreload;
 

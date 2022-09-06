@@ -64,12 +64,14 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
       </>
     );
   }
+
   return (
     <MenuItemStyle
       id={id}
       tabIndex={tabIndex}
       style={style}
       flex={1}
+      interaction
       highlightType={type}
       flexDirection="row"
       alignItems="center"

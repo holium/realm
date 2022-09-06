@@ -1,6 +1,6 @@
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import {
   Action,
   ConduitState,
@@ -13,6 +13,7 @@ import {
   Scry,
   SubscribeCallbacks,
   SubscribeParams,
+  Thread,
 } from './types';
 
 // For now, set it to 20
@@ -274,6 +275,29 @@ export class Conduit extends EventEmitter {
   }
 
   /**
+   * thread
+   *
+   * @param params
+   * @returns
+   */
+  async thread(params: Thread<Action>): Promise<any> {
+    const { inputMark, outputMark, threadName, body, desk } = params;
+
+    try {
+      const response = await axios.post(
+        `${this.url}/spider/${desk}/${inputMark}/${threadName}/${outputMark}.json`,
+        {
+          headers: this.headers,
+          body,
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
    * ack
    *
    * @param eventId
@@ -367,8 +391,24 @@ export class Conduit extends EventEmitter {
         await this.startSSE();
       }
     } catch (e: any) {
-      console.log('poke failed', e);
+      // console.log('poke failed', e);
+      const err = e as AxiosError;
+      if (err.code === 'ECONNREFUSED') {
+        // if we cannot connect to the ship, cleanup
+        this.failGracefully();
+      }
     }
+  }
+
+  failGracefully() {
+    this.prevMsgId = 0;
+    this.pokes = new Map();
+    this.watches = new Map();
+    this.reactions = new Map();
+    this.abort = new AbortController();
+    this.sse?.close();
+    this.sse = undefined;
+    this.updateStatus(ConduitState.Failed);
   }
 
   /**

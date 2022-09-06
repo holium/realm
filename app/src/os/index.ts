@@ -11,6 +11,8 @@ import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import HoliumAPI from './api/holium';
+import { RoomsService } from './services/tray/rooms.service';
+import PasswordStore from './lib/passwordStore';
 import { getSnapshot } from 'mobx-state-tree';
 
 export interface ISession {
@@ -36,6 +38,7 @@ export class Realm extends EventEmitter {
     shell: ShellService;
   };
   readonly holiumClient: HoliumAPI;
+  readonly passwords: PasswordStore;
 
   readonly handlers = {
     'realm.boot': this.boot,
@@ -89,6 +92,7 @@ export class Realm extends EventEmitter {
     };
 
     this.holiumClient = new HoliumAPI();
+    this.passwords = new PasswordStore();
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -101,8 +105,9 @@ export class Realm extends EventEmitter {
     //   this.conduit = undefined;
     // });
     // when closing for any reason, crash, user clicks close etc.
-    this.mainWindow.on('close', async () => {
-      await this.conduit?.closeChannel();
+    this.mainWindow.on('close', () => {
+      this.conduit?.closeChannel();
+      this.services.shell.closeDialog(null);
       this.conduit = undefined;
     });
   }
@@ -129,7 +134,6 @@ export class Realm extends EventEmitter {
       });
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
-      // chat = this.services.ship.models
       spaces = this.services.spaces.snapshot;
       desktop = this.services.desktop.snapshot;
       shell = this.services.shell.snapshot;
@@ -167,13 +171,19 @@ export class Realm extends EventEmitter {
       this.conduit = new Conduit();
       this.handleConnectionStatus(this.conduit);
     }
-    // wait for the init function to resolve
-    await this.conduit.init(
-      session.url,
-      session.ship.substring(1),
-      session.cookie
-    );
-    this.onConduit();
+    try {
+      // wait for the init function to resolve
+      await this.conduit.init(
+        session.url,
+        session.ship.substring(1),
+        session.cookie
+      );
+    } catch (e) {
+      console.log(e);
+      this.clearSession();
+    } finally {
+      this.onConduit();
+    }
   }
 
   setSession(session: ISession): void {
@@ -201,14 +211,15 @@ export class Realm extends EventEmitter {
       this.session
     );
     await this.services.spaces.load(sessionPatp, models.docket);
+    // console.log(toJS(models.courier));
     this.services.onboarding.reset();
-    if (!this.isResuming) {
-      this.mainWindow.webContents.send('realm.on-login');
-    }
     this.mainWindow.webContents.send('realm.on-connected', {
       ship: getSnapshot(ship),
       models,
     });
+    if (!this.isResuming) {
+      this.mainWindow.webContents.send('realm.on-login');
+    }
     this.services.identity.auth.setLoader('loaded');
     this.isResuming = false;
   }
@@ -247,13 +258,16 @@ export class Realm extends EventEmitter {
       this.sendConnectionStatus(ConduitState.Disconnected)
     );
     conduit.on(ConduitState.Failed, () => {
-      console.log('failed');
+      this.services.identity.auth.setLoader('error');
+      this.isResuming = false;
       this.sendConnectionStatus(ConduitState.Failed);
     });
   }
 
   sendConnectionStatus(status: ConduitState) {
-    this.mainWindow.webContents.send('realm.on-connection-status', status);
+    if (!this.mainWindow.isDestroyed()) {
+      this.mainWindow.webContents.send('realm.on-connection-status', status);
+    }
   }
 }
 

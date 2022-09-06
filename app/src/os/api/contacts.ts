@@ -30,31 +30,37 @@ export const ContactApi = {
       key: updateKey,
       data: preparedData[updateKey],
     }));
-    const [res1, res2, res3] = await Promise.all(
-      editJson.map(
-        (edit: any) =>
-          new Promise(async (resolve, reject) => {
-            try {
-              const response = await conduit.poke({
-                app: 'contact-store',
-                mark: 'contact-update-0',
-                json: {
-                  ['edit']: {
-                    ship,
-                    'edit-field': {
-                      [edit.key]: edit.data,
+    try {
+      await Promise.all(
+        editJson.map(
+          (edit: any) =>
+            new Promise(async (resolve, reject) => {
+              try {
+                const response = await conduit.poke({
+                  app: 'contact-store',
+                  mark: 'contact-update-0',
+                  json: {
+                    ['edit']: {
+                      ship,
+                      'edit-field': {
+                        [edit.key]: edit.data,
+                      },
+                      timestamp: Date.now(),
                     },
-                    timestamp: Date.now(),
                   },
-                },
-              });
-              resolve(response);
-            } catch (err) {
-              reject(err);
-            }
-          })
-      )
-    );
+                });
+                resolve(response);
+              } catch (err) {
+                reject(err);
+              }
+            })
+        )
+      );
+    } catch (e) {
+      console.error(e);
+      throw new Error('could not set profile data');
+    }
+
     return {
       nickname: preparedData.nickname,
       color: `#${preparedData.color}`,

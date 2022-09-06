@@ -24,7 +24,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
-  console.log(apps);
+  // console.log(apps);
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;
     const isAppPinned =

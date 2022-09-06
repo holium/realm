@@ -9,7 +9,7 @@ import {
 import { ThemeModel } from '../shell/theme.model';
 import { LoaderModel } from '../common.model';
 import { StepList } from '../common.model';
-import { Patp } from '../../urbit/types';
+import { Patp } from 'os/types';
 
 export const DEFAULT_WALLPAPER =
   'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
@@ -32,6 +32,7 @@ export const AuthShip = types
     }),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
+    passwordHash: types.maybeNull(types.string)
   })
   .actions((self) => ({
     setStatus(status: Instance<typeof StepList>) {
@@ -113,13 +114,17 @@ export const AuthStore = types
     setClientSecret: (secret: string) => {
       self.clientSecret = secret;
     },
+    getPasswordHash(id: string): string {
+      return self.ships.get(id)?.passwordHash!;
+    },
     completeSignup(id: string) {
       self.selected = self.ships.get(id);
       if (
-        self.order.findIndex((orderedShip: Patp) => orderedShip === id) !== -1
+        self.order.findIndex((orderedShip: Patp) => orderedShip === id) === -1
       ) {
-        self.order.push(id);
+        self.order.push(id.toString());
       }
+      return;
     },
     setShip(newShip: AuthShipType) {
       self.ships.set(newShip.id, newShip);
@@ -128,10 +133,15 @@ export const AuthStore = types
       self.selected = newShip;
     },
     deleteShip(patp: string) {
+      // set first ship
+      // todo handle case where you remove all ships
       self.selected = self.ships.get(self.order[0]);
+      // remove ship from order list
       self.order.splice(
-        self.order.findIndex((value: string) => value === `auth${patp}`)
+        self.order.findIndex((value: string) => value === `auth${patp}`),
+        1
       );
+      // delete ship
       self.ships.delete(`auth${patp}`);
     },
     clearSelected() {

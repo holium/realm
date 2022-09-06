@@ -8,8 +8,10 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
-import { Patp } from 'os/types';
+
 import { TypedSchema } from 'yup/lib/util/types';
+import { RoomsApi } from '../../api/rooms';
+import { Patp } from 'os/types';
 
 export const DmAppState = types.model('DmAppState', {
   current: types.string,

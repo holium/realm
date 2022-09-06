@@ -38,6 +38,7 @@ const speakerType = {
 };
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
+<<<<<<< HEAD
   const { person, audio, type } = props;
   const { ship, desktop, contacts } = useServices();
   const { roomsApp } = useTrayApps();
@@ -54,6 +55,12 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
 
   const { muted } = roomsApp.controls;
 
+=======
+  const { person, audio } = props;
+  const { ship, contacts } = useServices();
+  const metadata = contacts.getContactAvatarMetadata(person);
+  const hasVoice = audio && person === ship?.patp;
+>>>>>>> main
   let name = metadata?.nickname || person;
   const livePeer = LiveRoom.participants.get(person);
 

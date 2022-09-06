@@ -1,15 +1,23 @@
 import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
-import { DocketStore, DocketStoreType } from '../models/docket';
 import Store from 'electron-store';
+import { DocketStore, DocketStoreType } from '../models/docket';
+import EncryptedStore from '../encryptedStore';
 
 export const loadDocketFromDisk = (
   patp: string,
+  secretKey: string,
+
   onEffect: (patch: any) => void
 ) => {
-  const persisted = new Store<DocketStoreType>({
-    name: `docket`,
-    cwd: `realm.${patp}`, // base folder
-  });
+  const baseParams = { name: 'docket', cwd: `realm.${patp}` };
+  const persisted =
+    process.env.NODE_ENV === 'development'
+      ? new Store<DocketStoreType>(baseParams)
+      : new EncryptedStore<DocketStoreType>({
+          secretKey,
+          ...baseParams,
+        });
+
   let persistedState: DocketStoreType = persisted.store;
   const isEmpty = Object.keys(persistedState).length === 0;
   const model = DocketStore.create(

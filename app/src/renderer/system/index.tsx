@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   FC,
   useMemo,
@@ -9,6 +10,9 @@ import {
   RefObject,
 } from 'react';
 import styled from 'styled-components';
+=======
+import { FC, useMemo, useState, useRef } from 'react';
+>>>>>>> main
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 
@@ -21,11 +25,16 @@ import {
   DimensionMeasurement,
   DragBar,
   ResumingOverlay,
+  DragBar,
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
 import { useWindowSize } from 'renderer/logic/lib/measure';
+<<<<<<< HEAD
 import { Flex, Spinner } from 'renderer/components';
+=======
+import { Spinner } from 'renderer/components';
+>>>>>>> main
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();
