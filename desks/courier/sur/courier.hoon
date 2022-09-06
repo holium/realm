@@ -39,7 +39,7 @@
     type=chat-type
     =source
     messages=(list graph-dm)
-    metadata=(set contact-mtd)
+    metadata=(list contact-mtd)
   ==
 ::
 :: +$  paged-chat
@@ -64,7 +64,7 @@
     =source
     last-time-sent=@da
     last-message=(list content)
-    metadata=(set contact-mtd)
+    metadata=(list contact-mtd)
     invite-id=(unit @uvH)
   ==
 ::

@@ -63,7 +63,6 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
   );
 
   const onShipSelected = (contact: [string, string?]) => {
-    console.log('selecting', contact);
     const patp = contact[0];
     const nickname = contact[1];
     // const pendingAdd = selectedPatp;
@@ -71,6 +70,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
     setSelected(new Set(selectedPatp));
     selectedNickname.add(nickname ? nickname : '');
     setSelectedNickname(new Set(selectedNickname));
+    setPatp('');
   };
 
   const onShipRemove = (contact: [string, string?]) => {
@@ -224,12 +224,16 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
             left={0}
             right={0}
             top={0}
-            bottom={0}
+            bottom={50}
+            flexDirection="column"
             alignItems="center"
             justifyContent="center"
             position="absolute"
           >
             <Spinner size={1} />
+            <Text mt={3} opacity={0.4}>
+              {selectedPatp.size > 1 ? 'Creating group chat...' : ''}
+            </Text>
           </Flex>
         )}
         {contactArray}

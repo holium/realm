@@ -66,18 +66,18 @@
         ^-  message-preview
         :: ~&  >  inv
         =/  ginv                (ginv our inv now)
-        =/  mtd-set             (get-metadata to.ginv our now)
-        [path.ginv to.ginv %group-pending %graph-store time.ginv [~] (silt mtd-set) (some hash)]
+        =/  mtd-list            (get-metadata to.ginv our now)
+        [path.ginv to.ginv %group-pending %graph-store time.ginv [~] mtd-list (some hash)]
       ::
       ++  grp-prev        ::  generates group dm log previews
         |=  [our=ship ass=association:mtd now=@da rolo=rolodex:sur]
         ^-  message-preview
         =/  glog                (glog our entity.group.ass name.group.ass now)
         ::  get contact metadata set
-        =/  mtd-set             (get-metadata to.glog our now)
+        =/  mtd-list            (get-metadata to.glog our now)
         ::
         ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
-          [path.glog to.glog %group %graph-store time.glog [~] (silt mtd-set) ~] 
+          [path.glog to.glog %group %graph-store time.glog [~] mtd-list ~] 
         ::
         =/  posts=(list post:gra)
         %+  turn  ~(val by posts.glog)
@@ -89,20 +89,20 @@
         =/  last              (rear posts)
         ::  Add a mention so we know who posted the last message
         =/  contents          (weld [[%mention author.last] ~] contents.last)
-        [path.glog to.glog %group %graph-store time-sent.last contents (silt mtd-set) ~]
+        [path.glog to.glog %group %graph-store time-sent.last contents mtd-list ~]
     ::
   ::
   ++  grp-log             ::  generates the group dm log metadata
     |=  [our=ship now=@da entity=ship name=cord]
     ^-  chat
     =/  glog                (glog our entity name now)
-    =/  mtd-set             (get-metadata to.glog our now)
+    =/  mtd-list            (get-metadata to.glog our now)
     ::
     ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
-      [path.glog to.glog %group %graph-store [~] (silt mtd-set)]
+      [path.glog to.glog %group %graph-store [~] mtd-list]
     ::
     =/  dms                 (map-to-dms posts.glog)
-    [path.glog to.glog %group %graph-store (flop dms) (silt mtd-set)]
+    [path.glog to.glog %group %graph-store (flop dms) mtd-list]
   ::
   ++  received-grp-dm       ::  handes a newly received graph-update-3 group dm
     |=  [our=ship now=@da entity=ship name=cord =node:gra]
@@ -112,18 +112,18 @@
     =/  group               (need .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity)/(cord name)/noun))
     ?>  ?=(%invite -.policy.group)
     =/  to-set              (~(gas in members.group) ~(tap in pending.policy.group))
-    =/  mtd-set             (get-metadata to-set our now)
+    =/  mtd-list            (get-metadata to-set our now)
     ::
-    [path to-set %group %graph-store [message ~] (silt mtd-set)]
+    [path to-set %group %graph-store [message ~] mtd-list]
   ::
   ++  get-metadata
     |=  [to=(set ship) our=@p now=@da]
     =/  rolo      .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
-    =/  mtd-set=(list contact-mtd)
+    =/  mtd-list=(list contact-mtd)
       %+  turn  ~(tap in to)
         |=  cont=@p
         (form-contact-mtd rolo cont)
-    mtd-set
+    mtd-list
   :: 
   ::  Group DM helpers
   ::
@@ -158,6 +158,7 @@
     =/  group-path      (spat /(scot %p entity)/(cord group-name))
     ?>  ?=(%invite -.policy.group)
     =/  to-set          (~(gas in members.group) ~(tap in pending.policy.group))
+    :: ~&  >  [entity to-set]
     =/  node            .^(update:gra %gx /(scot %p our)/graph-store/(scot %da now)/graph/(scot %p entity)/(scot %da dm-name)/noun)   
     ?>  ?=(%add-graph -.+.node)
     =/  post-graph       ^-((map atom node:gra) graph.+.+.node)
@@ -215,7 +216,7 @@
     =/  last              (rear posts)
     =/  contact           (form-contact-mtd rolo to-ship)
     =/  path              (spat /dm-inbox/(scot %p to-ship))
-    [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last (silt ~[contact]) ~]
+    [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last ~[contact] ~]
   ::
   ::  Pending dms
   ::
@@ -223,7 +224,7 @@
     |=  [=ship now=@da rolo=rolodex:sur]
     ^-  message-preview
     =/  path              (spat /dm-inbox/(scot %p ship))
-    [path (silt ~[ship]) %pending %graph-store now [~] (silt ~[(form-contact-mtd rolo ship)]) ~]
+    [path (silt ~[ship]) %pending %graph-store now [~] ~[(form-contact-mtd rolo ship)] ~]
   ::
   ::
   ::
@@ -249,7 +250,7 @@
     =/  rolo                .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
     =/  contact             (form-contact-mtd rolo to-ship)
     =/  path                (spat /dm-inbox/(scot %p to-ship))
-    [path (silt ~[to-ship]) %dm %graph-store (flop dms) (silt ~[contact])]
+    [path (silt ~[to-ship]) %dm %graph-store (flop dms) ~[contact]]
   ::
   ++  received-dm
     |=  [ship-dec=@ud idx=atom =node:gra our=ship now=@da]
@@ -262,7 +263,7 @@
     =/  rolo                .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
     =/  contact             (form-contact-mtd rolo to-ship)
     =/  path                (spat /dm-inbox/(scot %p to-ship))
-    [path (silt ~[to-ship]) %dm %graph-store [message ~] (silt ~[contact])]
+    [path (silt ~[to-ship]) %dm %graph-store [message ~] ~[contact]]
   :: 
   ++  form-contact-mtd
     |=  [rolo=rolodex:sur =ship]
@@ -353,31 +354,6 @@
       ==
     [post.hash-node [%empty ~]]
   ::
-  :: ++  add-hash-to-node
-  ::   =|  parent-hash=(unit hash:gra)
-  ::   |=  [our=@p now=@da =index:gra =node:gra]
-  ::   :: ^-  [index:gra node:gra]
-  ::   =*  loop  $
-  ::   :-  index
-  ::   ?>  ?=(%& -.post.node)
-  ::   =*  p  p.post.node
-  ::   =/  =hash:gra
-  ::   `@ux`(sham -)
-  ::     :^  author.p
-  ::       time-sent.p
-  ::     contents.p
-  ::   ::
-  ::   %_  node
-  ::     hash.p.post  `hash
-  ::   ::
-  ::       signatures.p.post
-  ::     %-  ~(gas in *signatures:gra)
-  ::     [(sign our now hash)]~
-  ::   ::
-  ::       children
-  ::       [%empty ~]
-  ::     ==
-  :: ::
   --
 ::
 ::  JSON
@@ -403,37 +379,6 @@
         %group-dm-created
       (preview:encode message-preview.vi)
     ==
-  ::
-  :: ++  action
-    :: |=  act=^action
-    :: ^-  json
-    :: %+  frond  %courier-action
-    :: %-  pairs
-    :: :_  ~
-    :: ^-  [cord json]
-    :: ?-  -.act
-    :: ::
-    ::     %create-group-dm
-    ::   :-  %create-group-dm
-    ::   %-  pairs
-    ::   :~  [%ships a+(turn ~(tap in ships.act) |=(shp=@p s+(scot %p shp)))]
-    ::   ==
-    :: ::
-    :: ::     %edit-friend
-    :: ::   :-  %edit-friend
-    :: ::   %-  pairs
-    :: ::   :~  [%ship s+(scot %p ship.act)]
-    :: ::       [%pinned [%b pinned.act]]
-    :: ::       [%tags [%a (turn ~(tap in tags.act) |=(tag=cord s+tag))]]
-    :: ::   ==
-    :: :: ::
-    :: ::     %remove-friend
-    :: ::   :-  %remove-friend
-    :: ::   %-  pairs
-    :: ::   :~  [%ship s+(scot %p ship.act)]
-    :: ::   ==
-    :: ::
-    :: ==
   ::
   ++  view :: encodes for on-peek
     |=  vi=view:sur
@@ -590,8 +535,8 @@
           =(%group type.cha) 
           =(%group-pending type.cha)
         ==
-        a+(turn ~(tap in metadata.cha) mtd)
-      (mtd (rear ~(tap in metadata.cha)))
+        a+(turn metadata.cha mtd)
+      (mtd (rear metadata.cha))
     =/  invite-id
       ?:  =(%group-pending type.cha)
         s+(scot %uv (need invite-id.cha))
@@ -618,8 +563,8 @@
       s+(scot %p (rear ~(tap in to.cha)))
     =/  mtd-field    
       ?:  =(%group type.cha)  
-        a+(turn ~(tap in metadata.cha) mtd)
-      (mtd (rear ~(tap in metadata.cha)))
+        a+(turn metadata.cha mtd)
+      (mtd (rear metadata.cha))
     %-  pairs
     :~ 
       ['path' s+path.cha]

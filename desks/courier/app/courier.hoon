@@ -221,7 +221,7 @@
       [%add rid.action graph+rid.action metadatum]
     ::  create group-dm-created preview
     =/  to-set        (~(put in ships) our.bowl)
-    =/  mtd-set       (get-metadata:gs:lib to-set our.bowl now.bowl)
+    =/  mtd-list      (get-metadata:gs:lib to-set our.bowl now.bowl)
     =/  new-grp-prev  [
           path=(spat /(scot %p entity.rid.action)/(cord name.rid.action))
           to=(~(put in ships) our.bowl)
@@ -229,7 +229,7 @@
           source=%graph-store
           last-time-sent=now.bowl
           last-message=[~]
-          metadata=(silt mtd-set)
+          metadata=mtd-list
           invite-hash=~
       ]
     :_  state

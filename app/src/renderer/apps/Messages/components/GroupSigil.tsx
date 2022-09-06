@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { Flex, Sigil } from 'renderer/components';
+import { toJS } from 'mobx';
 import { Patp } from 'os/types';
 
 interface GroupSigilProps {
@@ -75,7 +76,7 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   );
 };
 
-const sigilInfo = (patp: Patp, metadata: any) => {
+const sigilInfo = (patp: Patp, metadata?: any) => {
   return {
     patp,
     ...metadata,
