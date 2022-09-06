@@ -228,12 +228,14 @@
   ::
   ::
   ::
+  ::  /~/scry/graph-store/graph/~lomder-librun/dm-inbox/node/siblings/newest/lone/100/4.880.309.json
   ++  dm-log
     |=  [our=ship to-ship=ship now=@da]
     ^-  chat 
     =/  ship-dec            `@ud`to-ship
     ::  first get dm-inbox to get total node count
     =/  dm-inbox            .^(update:gra %gx /(scot %p our)/graph-store/(scot %da now)/graph/(scot %p our)/dm-inbox/noun)
+    :: =/  dm-inbox            .^(update:gra %gx /(scot %p our)/graph-store/(scot %da now)/graph/(scot %p our)/dm-inbox/node/siblings/newest/lone/5/(scot %ud ship-dec))
     ?>  ?=(%add-graph -.+.dm-inbox)
     =/  dm-graph            `(map @ud node:gra)`graph.+.+.dm-inbox
     ::  TODO for some reason the got by wont find certain @ud keys but will if listified (need to find way to typecast map keys)

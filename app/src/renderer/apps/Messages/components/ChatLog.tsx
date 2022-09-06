@@ -93,8 +93,9 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
         scrollableTarget="scrollableDiv"
       >
         <Flex style={{ height: 58 }} />
-        {messages.map((message: any, index: number) => (
+        {messages.map((message: GraphDMType, index: number) => (
           <ChatMessage
+            isSending={message.pending}
             showAuthor={isGroup}
             key={`${message.index}-${message.timeSent}-${index}`}
             theme={desktop.theme}

@@ -70,7 +70,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   const [isSending, setIsSending] = useState(false);
   const [loading, setLoading] = useState(false);
   const { courier } = useServices();
-  const messages = courier.dms.get(selectedChat.path)?.messages || [];
+  const dmLog = courier.dms.get(selectedChat.path);
+  const messages = dmLog?.messages || [];
   const resetLoading = () => setLoading(false);
   useEffect(() => {
     if (!selectedChat.isNew) {
@@ -140,14 +141,15 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         const dmMessageContent = formData['dm-message'];
         setIsSending(true);
 
+        SoundActions.playDMSend();
+        // @ts-ignore
+        chatInputRef.current.value = '';
+        // @ts-ignore
+        chatInputRef.current.focus();
+
         DmActions.sendDm(selectedChat.path, dmMessageContent)
           .then((res) => {
             setIsSending(false);
-            SoundActions.playDMSend();
-            // @ts-ignore
-            chatInputRef.current.value = '';
-            // @ts-ignore
-            chatInputRef.current.focus();
           })
           .catch((err) => {
             console.error('dm send error', err);
@@ -341,7 +343,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                     ) : (
                       <IconButton
                         ref={submitRef}
-                        luminosity={mode}
+                        luminosity={mode as 'light' | 'dark' | undefined}
                         size={24}
                         canFocus={false}
                         onKeyDown={submitDm}

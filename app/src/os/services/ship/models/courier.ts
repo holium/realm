@@ -157,18 +157,26 @@ const GroupLog = types
     },
   }))
   .actions((self) => ({
-    receiveDM: (dm: GraphDMType) => {
-      // console.log(dm);
-      self.messages.unshift(dm);
-      // self.outgoing
+    receiveDM: (incomingDm: GraphDMType) => {
+      // for some reason the indexes are different after group dm send
+      const replaceIdx = self.messages.findIndex(
+        (outDm: GraphDMType) => outDm.timeSent === incomingDm.timeSent
+      );
+      if (replaceIdx >= 0) {
+        // a pending message we've already sent
+        self.messages[replaceIdx].index = incomingDm.index;
+        self.messages[replaceIdx].pending = false;
+      } else {
+        self.messages.unshift(incomingDm);
+      }
     },
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
       const post = createPost(author, contents);
-      self.outgoing.unshift(
+      self.messages.unshift(
         GraphDM.create({
           index: post.index,
-          author: author,
+          author: `~${author}`,
           pending: true,
           timeSent: post['time-sent'],
           // @ts-expect-error
@@ -196,23 +204,31 @@ const DMLog = types
     },
   }))
   .actions((self) => ({
-    receiveDM: (dm: GraphDMType) => {
-      // console.log(dm);
-      self.messages.unshift(dm);
+    receiveDM: (incomingDm: GraphDMType) => {
+      const replaceIdx = self.messages.findIndex(
+        (outDm: GraphDMType) => outDm.index === incomingDm.index
+      );
+      if (replaceIdx >= 0) {
+        // a pending message we've already sent
+        self.messages[replaceIdx].pending = false;
+      } else {
+        self.messages.unshift(incomingDm);
+      }
     },
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
       const post = createPost(author, contents, `/${patp2dec(self.to)}`);
-      self.outgoing.unshift(
+      self.messages.unshift(
         GraphDM.create({
           index: post.index,
-          author: author,
+          author: `~${author}`,
           pending: true,
           timeSent: post['time-sent'],
           // @ts-expect-error
           contents: post.contents,
         })
       );
+
       return post;
     },
   }));
@@ -260,7 +276,6 @@ const PreviewGroupDM = types
   })
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {
-      console.log(dm);
       // add the sender
       // @ts-ignore
       self.lastMessage = [{ mention: dm.author }, ...dm.contents];
@@ -315,7 +330,6 @@ export const CourierStore = types
           source: 'graph-store',
           messages: [],
           metadata: ContactMetadata.create(metadata[0] || {}),
-          outgoing: [],
         })
       );
       self.previews.set(
@@ -332,7 +346,7 @@ export const CourierStore = types
           isNew: true,
         })
       );
-      return self.previews.get(patps[0]);
+      return self.previews.get(path);
     },
     draftGroupDM: (preview: PreviewGroupDMType) => {
       preview.metadata.forEach((mtd: any) => {
@@ -350,6 +364,17 @@ export const CourierStore = types
           metadata: preview.metadata,
           pending: false,
           isNew: true,
+        })
+      );
+      self.dms.set(
+        preview.path,
+        GroupLog.create({
+          path: preview.path,
+          to: preview.to,
+          type: preview.type,
+          source: preview.source,
+          messages: [],
+          metadata: preview.metadata,
         })
       );
       return self.previews.get(preview.path);
