@@ -26,6 +26,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
+    'realm.tray.wallet.set-network-provider': this.setNetworkProvider,
     'realm.tray.wallet.create-wallet': this.createWallet,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
@@ -41,6 +42,9 @@ export class WalletService extends BaseService {
     },
     changeDefaultWallet: (network: string, index: number) => {
       return ipcRenderer.invoke('realm.tray.wallet.change-default-wallet', network, index);
+    },
+    setNetworkProvider: (network: string, provider: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-network-provider', network, provider);
     },
     createWallet: (sender: string, network: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.create-wallet', sender, network);
@@ -104,7 +108,6 @@ export class WalletService extends BaseService {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
 
-
     WalletApi.subscribeToWallets(this.core.conduit!, (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
@@ -154,6 +157,14 @@ export class WalletService extends BaseService {
     else if (network == 'bitcoin')
       this.state!.bitcoin.settings.defaultIndex = index;
     await WalletApi.changeDefaultWallet(this.core.conduit!, network, index);
+  }
+
+  async setNetworkProvider(_event: any, network: string, provider: string) {
+    if (network == 'ethereum')
+      this.state!.ethereum.settings.provider = provider;
+    else if (network == 'bitcoin')
+      this.state!.bitcoin.settings.provider = provider;
+    await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
   }
 
   async createWallet(_event: any, sender: string, network: string) {

@@ -44,6 +44,10 @@ const BitcoinStore = types
       })
       applySnapshot(self.wallets, btcWallets);
     },
+    // pokes
+    setProvider(provider: string) {
+      self.settings.provider = provider;
+    },
     // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
@@ -56,11 +60,19 @@ const BitcoinStore = types
     }
   }));
 
+const SmartContract = types.model('SmartContract', {
+  name: types.string,
+  address: types.string,
+  balance: types.maybe(types.number),
+  tokens: types.maybe(types.map(types.number)),
+});
+
 const EthWallet = types.model('EthWallet', {
   network: types.string,
   path: types.string,
   address: types.string,
   balance: types.string,
+  contracts: types.map(SmartContract),
   conversions: types.maybe(
     types.model({
       usd: types.maybe(types.string),
@@ -72,7 +84,7 @@ const EthWallet = types.model('EthWallet', {
 
 const EthTransaction = types
   .model('EthTransaction', {
-    status: types.string,
+    status: types.string, // pending, approved, failed
     from: types.string,
     toShip: types.maybe(types.string),
     toAddress: types.maybe(types.string),
@@ -110,6 +122,12 @@ export const EthStore = types
       applySnapshot(self.wallets, ethWallets);
     },
     // pokes
+    setProvider(provider: string) {
+      self.settings.provider = provider;
+    },
+    setDefaultWallet(index: number) {
+      self.settings!.defaultIndex = index;
+    },
     // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
@@ -117,15 +135,13 @@ export const EthStore = types
         path: wallet.wallet.path,
         address: wallet.wallet.address,
         balance: wallet.wallet.balance.toString(),
+        contracts: {},
       };
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     },
     applyTransactionUpdate(transaction: any) {
       self.transactions.put(transaction);
     },
-    setDefaultWallet(index: number) {
-      self.settings!.defaultIndex = index;
-    }
   }));
 
 export const WalletStore = types
@@ -161,6 +177,12 @@ export const WalletStore = types
         self.currentView = 'bitcoin:list';
       }
     },
+    setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
+      if (network == 'bitcoin')
+        self.bitcoin.setProvider(provider)
+      else if (network == 'ethereum')
+        self.ethereum.setProvider(provider);
+    }
   }));
 
 export type WalletStoreType = Instance<typeof WalletStore>;

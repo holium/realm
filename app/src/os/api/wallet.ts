@@ -40,6 +40,19 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
+  setNetworkProvider: async (conduit: Urbit, network: string, provider: string) => {
+    const payload = {
+      app: 'wallet',
+      mark: 'wallet-action',
+      json: {
+        'set-network-provider': {
+          network: network,
+          provider: provider,
+        }
+      }
+    }
+    await conduit.poke(payload);
+  },
   createWallet: async (conduit: Urbit, sender: string, network: string) => {
     const payload = {
       app: 'wallet',
