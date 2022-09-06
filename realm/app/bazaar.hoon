@@ -82,14 +82,12 @@
     [%our ~]
       ::  only host agent should get our updates
       ?>  (is-host:core src.bowl)
-      ~&  >>  "{<dap.bowl>}: subscribing to /our"
       `state
     ::
     [%updates ~]
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
       =/  apps  initial:apps:core
-      ~&  >  "{<dap.bowl>}: sending out {<[apps]>} to UI..."
       :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
       (bazaar:send-reaction:core [%initial apps] [/updates ~])
     ::
@@ -564,7 +562,6 @@
   ++  on-space-apps
     |=  [=space-path:spaces-store =app-index-full:store]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: [on-space-apps] => {<app-index-full>}"
     ::  get all of 'our' installed apps on this ship, and compare it to the list of
     ::   space apps to determine the installation status of the app
     =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
