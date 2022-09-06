@@ -76,8 +76,17 @@ export const trayStore = TrayAppStore.create({
   walletApp: (persistedState && persistedState.walletApp) || {
     network: 'ethereum',
     currentView: 'ethereum:list',
-    ethereum: {},
-    bitcoin: {},
+    ethereum: {
+      settings: {
+        defaultIndex: 0
+      }
+    },
+    bitcoin: {
+      settings: {
+        defaultIndex: 0
+      }
+    },
+    creationMode: 'default',
   },
   roomsApp: (persistedState && persistedState.roomsApp) || {
     currentView: 'list',

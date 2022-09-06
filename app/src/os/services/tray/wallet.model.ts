@@ -1,11 +1,9 @@
 import { settings } from '@urbit/api';
 import {
   applySnapshot,
-  castToSnapshot,
   types,
   Instance,
 } from 'mobx-state-tree';
-import { networkInterfaces } from 'os';
 
 const Settings = types
   .model('Settings', {
@@ -140,7 +138,12 @@ export const EthStore = types
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     },
     applyTransactionUpdate(transaction: any) {
-      self.transactions.put(transaction);
+      let tx = self.transactions.get(transaction.key)!;
+      if (transaction.status)
+        tx.status = "approved";
+      else
+        tx.status = "failed";
+      self.transactions.set(transaction.key, tx);
     },
   }));
 
