@@ -39,9 +39,9 @@ export const SystemApp: FC<any> = observer(() => {
                 borderRadiusOverride="4px"
                 simple
                 size={55}
-                avatar={contact && contact.avatar}
+                avatar={ship!.avatar}
                 patp={person}
-                color={[(contact && contact.color) || '#000000', 'white']}
+                color={[(ship!.color) || '#000000', 'white']}
               />
             <Flex flexDirection='column' ml={2}>
               

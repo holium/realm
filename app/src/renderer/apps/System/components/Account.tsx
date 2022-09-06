@@ -1,6 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card, Input, RadioGroup, TextButton} from 'renderer/components';
+import { Flex, Text, Card, Input, RadioGroup, TextButton, Spinner} from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ColorPicker } from './ColorPicker';
@@ -17,6 +17,8 @@ export const AccountPanel: FC<any> = observer(() => {
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
+  const [isLoading, setIsLoading] = useState(false);
+
     
   type avatarOptionType = 'color' | 'image' ;
 
@@ -25,11 +27,7 @@ export const AccountPanel: FC<any> = observer(() => {
 
 
   const profileForm = useForm({
-    async onSubmit({ values }: any) {
-
-      //
-      console.log('submit', values, avatarOption)
-      
+    async onSubmit({ values }: any) {      
 
       let profileData = {
         color: values.avatarColor,
@@ -41,13 +39,19 @@ export const AccountPanel: FC<any> = observer(() => {
         profileData.avatar = '';
       }
 
+      setIsLoading(true);
+
       await ShipActions.saveMyContact(profileData);
+
+
+      setIsLoading(false);
       // ShipActions.
       // ship!.avatar = values.avatarImage!;
       // ship!.color = values.avatarColor;
       // ship!.nickname = values.nickname;
 
     }
+
   });
 
   const avatarColorField = useField({
@@ -191,7 +195,9 @@ export const AccountPanel: FC<any> = observer(() => {
           
         </Flex>
 
-        <TextButton
+
+        {!isLoading && 
+          <TextButton
             style={{ fontWeight: 400 }}
             showBackground
             textColor={accentColor}
@@ -201,6 +207,11 @@ export const AccountPanel: FC<any> = observer(() => {
             >
                 Save
           </TextButton>
+        }
+
+          {isLoading && 
+            <Spinner size={1} />
+          }
 
         </Flex>
 

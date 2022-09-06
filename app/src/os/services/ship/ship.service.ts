@@ -376,11 +376,16 @@ export class ShipService extends BaseService {
   //
   async saveMyContact(_event:IpcMainInvokeEvent, profileData: any) {
 
+
     await ContactApi.saveContact(
       this.core.conduit!,
       this.state!.patp,
       profileData
     );
+
+    this.state?.setOurMetadata(profileData);
+
+
     return;
 
   }
