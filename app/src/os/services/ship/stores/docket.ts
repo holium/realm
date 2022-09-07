@@ -19,7 +19,7 @@ export const loadDocketFromDisk = (
         });
 
   let persistedState: DocketStoreType = persisted.store;
-  const isEmpty = Object.keys(persistedState).length === 0;
+  const isEmpty = !persistedState || Object.keys(persistedState).length === 0;
   const model = DocketStore.create(
     !isEmpty ? castToSnapshot(persistedState) : {}
   );

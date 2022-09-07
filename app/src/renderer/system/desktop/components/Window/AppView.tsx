@@ -106,6 +106,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           id={`${window.id}-urbit-webview`}
           partition="urbit-webview"
           preload={`file://${desktop.appviewPreload}`}
+          webpreferences="sandbox=false"
           src={appConfig.url}
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}

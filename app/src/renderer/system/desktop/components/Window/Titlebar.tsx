@@ -153,7 +153,7 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
       transition={{
         background: { duration: 0.25 },
       }}
-      customBg={windowColor!}
+      customBg={rgba(windowColor!, 0.9)}
       hasBorder={hasBorder!}
       isAppWindow={isAppWindow}
     >

@@ -20,7 +20,7 @@ export const DimensionMeasurement = styled.div`
   top: 0;
   bottom: 0;
   height: 100vh;
-  width: 100%;
+  width: 100vw;
 `;
 
 export const ResumingOverlay = styled.div`

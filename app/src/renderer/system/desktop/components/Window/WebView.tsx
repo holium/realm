@@ -69,6 +69,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
         partition={webData.development ? 'persist:dev-webview' : 'web-webview'}
         preload={`file://${desktop.appviewPreload}`}
         src={webData.url}
+        webpreferences="sandbox=false"
         onMouseEnter={() => shell.setIsMouseInWebview(true)}
         onMouseLeave={() => shell.setIsMouseInWebview(false)}
         style={{
