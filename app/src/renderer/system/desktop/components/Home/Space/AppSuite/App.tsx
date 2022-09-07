@@ -51,6 +51,13 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
                     onClick && onClick();
                   },
                 },
+                {
+                  label: 'Recommend this app',
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    SpacesActions.recommendApp(space.path, app.id);
+                  },
+                },
               ]
             : undefined
         }

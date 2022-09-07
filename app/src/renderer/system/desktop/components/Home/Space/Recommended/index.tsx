@@ -1,9 +1,8 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 import { AppPreview } from './AppPreview';
-import { AppModelType } from 'os/services/ship/models/docket';
 
 type RecommendedAppsProps = {
   isOpen?: boolean;
@@ -12,7 +11,18 @@ type RecommendedAppsProps = {
 export const RecommendedApps: FC<RecommendedAppsProps> = observer(
   (props: RecommendedAppsProps) => {
     const { isOpen } = props;
-    const { spaces } = useServices();
+    const [apps, setApps] = useState<any>([]);
+    const { spaces, bazaar } = useServices();
+
+    const currentSpace = spaces.selected;
+    const currentBazaar = bazaar.getBazaar(currentSpace.path);
+
+    useEffect(() => {
+      if (currentSpace) {
+        console.log('recommendedApps => %o', currentBazaar.recommendedApps);
+        setApps(currentBazaar.recommendedApps);
+      }
+    }, [currentSpace, currentBazaar.recommendedApps]);
 
     return (
       <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>
@@ -20,15 +30,15 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
           Recommended Apps
         </Text>
 
-        {([].length === 0 && (
+        {(apps.length === 0 && (
           <Text variant="h6" opacity={0.4}>
             No recommendations. Start liking apps in this space to show them
             here!
           </Text>
         )) ||
-          [].map((app: any) => {
+          apps.map((app: any) => {
             return (
-              <Flex flex={2} flexWrap="wrap">
+              <Flex flex={2} flexWrap="wrap" key={app.id}>
                 <Flex key={app.id} flex={1}>
                   <AppPreview app={app} />
                 </Flex>

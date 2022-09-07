@@ -45,7 +45,6 @@ export class SpacesService extends BaseService {
 
   handlers = {
     'realm.spaces.set-selected': this.setSelected,
-    'realm.spaces.set-pinned-order': this.setPinnedOrder,
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
@@ -61,6 +60,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
     'realm.spaces.bazaar.pin-app': this.pinApp,
     'realm.spaces.bazaar.unpin-app': this.unpinApp,
+    'realm.spaces.bazaar.set-pinned-order': this.setPinnedOrder,
     'realm.spaces.bazaar.recommend-app': this.recommendApp,
     'realm.spaces.bazaar.unrecommend-app': this.unrecommendApp,
     'realm.spaces.bazaar.suite-add': this.addToSuite,
@@ -88,14 +88,22 @@ export class SpacesService extends BaseService {
       return ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
     },
     recommendApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.spaces.recommend-app', path, appId);
+      return ipcRenderer.invoke(
+        'realm.spaces.bazaar.recommend-app',
+        path,
+        appId
+      );
     },
     unrecommendApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.spaces.unrecommend-app', path, appId);
+      return ipcRenderer.invoke(
+        'realm.spaces.bazaar.unrecommend-app',
+        path,
+        appId
+      );
     },
     setPinnedOrder: (path: string, newOrder: any[]) => {
       return ipcRenderer.invoke(
-        'realm.spaces.set-pinned-order',
+        'realm.spaces.bazaar.set-pinned-order',
         path,
         newOrder
       );

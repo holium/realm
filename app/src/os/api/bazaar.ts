@@ -439,6 +439,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.updateApp(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;
@@ -448,6 +449,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
+        state.getBazaar(space)?.updateApp(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;

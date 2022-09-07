@@ -120,7 +120,9 @@ export const BazaarModel = types
     updateApp(app: BazaarAppType) {
       console.log('updating app => %o', app);
       const appColor = app.color;
-      app.color = appColor && cleanNounColor(appColor);
+      if (app.type === 'urbit') {
+        app.color = appColor && cleanNounColor(appColor);
+      }
       self.apps.set(app.id, app);
     },
     findApps(searchString: string) {

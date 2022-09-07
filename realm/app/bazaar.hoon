@@ -333,7 +333,7 @@
     =/  rank  ?~(rank (count-apps index.apps %pinned) u.rank)
     =.  pinned.ranks.sieve.app-lite   rank
     =.  index.apps  (pin index.apps app-lite)
-    =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned))
+    =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned) %pinned %asc)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     (bazaar:send-reaction [%pin path [app-id sieve.app-lite app] pinned.sorts.apps] paths)
@@ -346,7 +346,7 @@
     =/  app-lite   (~(got by index.apps) app-id)
     =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %pinned)
     =.  index.apps  (unpin index.apps app-lite)
-    =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned))
+    =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned) %pinned %asc)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%unpin path [app-id sieve.app-lite app] pinned.sorts.apps] paths)
@@ -381,7 +381,7 @@
     =.  tags.sieve.app-lite                (~(put in tags.sieve.app-lite) %recommended)
     =.  recommended.ranks.sieve.app-lite   (add recommended.ranks.sieve.app-lite 1)
     =.  index.apps                        (~(put by index.apps) app-id app-lite)
-    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended))
+    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%recommend path [app-id sieve.app-lite app] recommended.sorts.apps] paths)
@@ -395,7 +395,7 @@
     =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %recommended)
     =.  recommended.ranks.sieve.app-lite  (sub recommended.ranks.sieve.app-lite 1)
     =.  index.apps  (~(put by index.apps) app-id app-lite)
-    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended))
+    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%unrecommend path [app-id sieve.app-lite app] recommended.sorts.apps] paths)
@@ -414,7 +414,7 @@
     =.  tags.sieve               (~(put in tags.sieve) %installed)
     =.  suite.ranks.sieve        rank
     =.  index.apps                    (~(put by index.apps) app-id [app-id sieve])
-    =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite))
+    =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite) %suite %asc)
     =.  space-apps.state              (~(put by space-apps.state) path apps)
     ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id sieve app]]>}"
     (bazaar:send-reaction [%suite-add path [app-id sieve app] suite.sorts.apps] paths)
@@ -427,7 +427,7 @@
     =/  app-lite                 (~(got by index.apps) app-id)
     =.  tags.sieve.app-lite        (~(del in tags.sieve.app-lite) %suite)
     =.  index.apps                (~(put by index.apps) app-id app-lite)
-    =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite))
+    =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite) %suite %asc)
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%suite-remove path [app-id sieve.app-lite app] suite.sorts.apps] paths)
@@ -441,14 +441,30 @@
     ?:  (~(has in tags.sieve.app-lite) tag)  %.y  %.n
   ::
   ++  sort-apps
-    |=  [apps=(list [=app-id:store =app-lite:store])]
+    |=  [apps=(list [=app-id:store =app-lite:store]) tag=?(%pinned %recommended %suite) dir=?(%asc %desc)]
     ^-  (list app-id:store)
     %-  turn
       :-
       %-  sort
       :-  apps
       |=  [a=[=app-id:store =app-lite:store] b=[=app-id:store =app-lite:store]]
-      (lth pinned.ranks.sieve.app-lite.a pinned.ranks.sieve.app-lite.b)
+      ?-  tag
+        %pinned
+          ?:  =(dir %asc)
+            (lth pinned.ranks.sieve.app-lite.a pinned.ranks.sieve.app-lite.b)
+          (gth pinned.ranks.sieve.app-lite.a pinned.ranks.sieve.app-lite.b)
+        ::s
+        %recommended
+          ?:  =(dir %asc)
+            (lth recommended.ranks.sieve.app-lite.a recommended.ranks.sieve.app-lite.b)
+          (gth recommended.ranks.sieve.app-lite.a recommended.ranks.sieve.app-lite.b)
+        ::
+        %suite
+          ?:  =(dir %asc)
+            (lth suite.ranks.sieve.app-lite.a suite.ranks.sieve.app-lite.b)
+          (gth suite.ranks.sieve.app-lite.a suite.ranks.sieve.app-lite.b)
+
+      ==
     |=  [=app-id:store =app-lite:store]
     app-id
   ::
