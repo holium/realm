@@ -23,7 +23,7 @@ export const loadCourierFromDisk = (
         });
 
   let persistedState: CourierStoreType = persisted.store;
-  const isEmpty = Object.keys(persistedState).length === 0;
+  const isEmpty = !persistedState || Object.keys(persistedState).length === 0;
   const model = CourierStore.create(
     !isEmpty ? castToSnapshot(persistedState) : {}
   );
