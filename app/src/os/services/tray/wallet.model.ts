@@ -4,6 +4,7 @@ import {
   types,
   Instance,
 } from 'mobx-state-tree';
+import { Patp } from 'os/types';
 
 const Settings = types
   .model('Settings', {
@@ -38,6 +39,7 @@ const BitcoinStore = types
           network: 'bitcoin',
           balance: (wallet as any).balance.toString(),
           address: (wallet as any).address,
+          contracts: {}
         }
       })
       applySnapshot(self.wallets, btcWallets);
@@ -117,7 +119,9 @@ export const EthStore = types
           address: (wallet as any).address,
         }
       })
+      console.log(ethWallets)
       applySnapshot(self.wallets, ethWallets);
+      console.log(self.wallets)
     },
     // pokes
     setProvider(provider: string) {
@@ -162,7 +166,8 @@ export const WalletStore = types
     ]),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
-    creationMode: types.string
+    creationMode: types.string,
+    ourPatp: types.maybe(types.string),
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {

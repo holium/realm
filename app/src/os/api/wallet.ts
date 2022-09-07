@@ -1,8 +1,8 @@
 import { hashHostnameBackward } from '@cliqz/adblocker/dist/types/src/request';
-import { Urbit } from './../urbit/api';
+import { Conduit } from '@holium/conduit';
 
 export const WalletApi = {
-  setXpub: async (conduit: Urbit, network: string, xpub: string) => {
+  setXpub: async (conduit: Conduit, network: string, xpub: string) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -15,7 +15,7 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setWalletCreationMode: async (conduit: Urbit, mode: string) => {
+  setWalletCreationMode: async (conduit: Conduit, mode: string) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -27,7 +27,7 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  changeDefaultWallet: async (conduit: Urbit, network: string, index: number) => {
+  changeDefaultWallet: async (conduit: Conduit, network: string, index: number) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -40,7 +40,7 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  setNetworkProvider: async (conduit: Urbit, network: string, provider: string) => {
+  setNetworkProvider: async (conduit: Conduit, network: string, provider: string) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -53,7 +53,7 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  createWallet: async (conduit: Urbit, sender: string, network: string) => {
+  createWallet: async (conduit: Conduit, sender: string, network: string) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -66,7 +66,7 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  enqueueTransaction: async (conduit: Urbit, network: string, hash: any, transaction: any) => {
+  enqueueTransaction: async (conduit: Conduit, network: string, hash: any, transaction: any) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -80,7 +80,7 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setTransactionPending: async (conduit: Urbit, transactionKey: any) => {
+  setTransactionPending: async (conduit: Conduit, transactionKey: any) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -92,7 +92,7 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  addSmartContact: async (conduit: Urbit, contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) => {
+  addSmartContact: async (conduit: Conduit, contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -108,38 +108,38 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  getHistory: async (conduit: Urbit) => {
+  getHistory: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'wallet',
       path: '/history'
     })
   },
-  subscribeToTransactions(conduit: Urbit, handler: (transaction: any) => void) {
-    conduit.subscribe({
+  subscribeToTransactions(conduit: Conduit, handler: (transaction: any) => void) {
+    conduit.watch({
       app: 'wallet',
       path: '/transactions',
-      event: (data: any) => {
+      onEvent: (data: any) => {
         handler(data);
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onErr: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  getWallets: async (conduit: Urbit) => {
+  getWallets: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'wallet',
       path: '/wallets',
     });
   },
-  subscribeToWallets: async (conduit: Urbit, handler: (transaction: any) => void) => {
-    conduit.subscribe({
+  subscribeToWallets: async (conduit: Conduit, handler: (transaction: any) => void) => {
+    conduit.watch({
       app: 'wallet',
       path: '/wallets',
-      event: (data: any) => {
+      onEvent: (data: any) => {
         handler(data);
       },
-      err: () => console.log('Subscription rejected'),
-      quit: () => console.log('Kicked from subscription'),
+      onErr: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
     });
   }
 }

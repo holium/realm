@@ -20,8 +20,8 @@ import { HDNode } from 'ethers/lib/utils';
 
 export class WalletService extends BaseService {
   private state?: WalletStoreType; // for state management
-  private privateKey: ethers.utils.HDNode;
-  private ethProvider: ethers.providers.JsonRpcProvider;
+  private privateKey?: ethers.utils.HDNode;
+  private ethProvider?: ethers.providers.JsonRpcProvider;
   handlers = {
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
@@ -63,7 +63,14 @@ export class WalletService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
-    // this.core.conduit!.desk = 'realm';
+    Object.keys(this.handlers).forEach((handlerName: any) => {
+      // @ts-ignore
+      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+    });
+  }
+
+  async onLogin(ship: string) {
+
     const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
     this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
 
@@ -85,6 +92,7 @@ export class WalletService extends BaseService {
           }
         },
         creationMode: 'default',
+        ourPatp: ship,
     });
 
     onPatch(this.state, (patch) => {
@@ -102,12 +110,6 @@ export class WalletService extends BaseService {
       response: 'initial',
     };
     this.core.onEffect(patchEffect);
-
-    Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
-      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
-    });
-
     WalletApi.subscribeToWallets(this.core.conduit!, (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
@@ -129,6 +131,7 @@ export class WalletService extends BaseService {
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
       console.log(history);
     });
+
   }
 
   get snapshot() {
@@ -138,11 +141,11 @@ export class WalletService extends BaseService {
   async setXpub(_event: any) {
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    let xpub: string = this.privateKey.derivePath(ethPath).neuter().extendedKey;
+    let xpub: string = this.privateKey!.derivePath(ethPath).neuter().extendedKey;
     // eth
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
-    xpub = this.privateKey.derivePath(btcPath).neuter().extendedKey;
+    xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
@@ -176,8 +179,8 @@ export class WalletService extends BaseService {
       to: to,
       value: ethers.utils.parseEther(amount),
     }
-    const wallet = new ethers.Wallet(this.privateKey.derivePath("m/44'/60'/0'/0/" + walletIndex).privateKey);
-    wallet.connect(this.ethProvider);
+    const wallet = new ethers.Wallet(this.privateKey!.derivePath("m/44'/60'/0'/0/" + walletIndex).privateKey);
+    wallet.connect(this.ethProvider!);
     const { hash } = await wallet.sendTransaction(tx);
     this.state!.ethereum.enqueueTransaction(tx);
     await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
@@ -185,7 +188,7 @@ export class WalletService extends BaseService {
 
   async sendBitcoinTransaction(_event: any, walletIndex: string, to: string, amount: string) {
     let sourceAddress = this.state!.bitcoin.wallets.get(walletIndex)!.address;
-    let privateKey = this.privateKey.derivePath("m/44'/0'/0'/0" + walletIndex).privateKey;
+    let privateKey = this.privateKey!.derivePath("m/44'/0'/0'/0" + walletIndex).privateKey;
     // let tx, hash = sendBitcoin(sourceAddress, to, amount, privateKey)
     // await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
   }

@@ -154,6 +154,7 @@ export class ShipService extends BaseService {
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
     this.rooms = new RoomsService(core);
+    this.wallet = new WalletService(core);
 
     this.subscribe = this.subscribe.bind(this);
   }
@@ -279,6 +280,7 @@ export class ShipService extends BaseService {
 
         // TODO turning off rooms for now
         // this.rooms?.onLogin(ship);
+        this.wallet?.onLogin(ship);
       });
 
       // return ship state
@@ -302,6 +304,10 @@ export class ShipService extends BaseService {
 
   get roomSnapshot() {
     return this.rooms?.snapshot;
+  }
+  
+  get walletSnapshot() {
+    return this.wallet?.snapshot;
   }
 
   async init(ship: string) {

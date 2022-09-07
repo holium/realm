@@ -13,8 +13,6 @@ import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import HoliumAPI from './api/holium';
-import { RoomsService } from './services/tray/rooms.service';
-import { WalletService } from './services/tray/wallet.service';
 
 import PasswordStore from './lib/passwordStore';
 
@@ -128,6 +126,7 @@ export class Realm extends EventEmitter {
     let membership = null;
     let bazaar = null;
     let rooms = null;
+    let wallet = null;
     let models = {};
 
     if (this.session) {
@@ -139,6 +138,7 @@ export class Realm extends EventEmitter {
       bazaar = this.services.spaces.bazaarSnapshot;
       membership = this.services.spaces.membershipSnapshot;
       rooms = this.services.ship.roomSnapshot;
+      wallet = this.services.ship.walletSnapshot;
     }
     const bootPayload = {
       auth: this.services.identity.auth.snapshot,
@@ -150,6 +150,7 @@ export class Realm extends EventEmitter {
       bazaar,
       membership,
       rooms,
+      wallet,
       models,
       loggedIn: this.session ? true : false,
     };
