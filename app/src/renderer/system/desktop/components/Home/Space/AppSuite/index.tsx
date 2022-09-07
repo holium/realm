@@ -9,6 +9,8 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { AppRow } from '../../AppRow';
 import { useServices } from 'renderer/logic/store';
 
+import { cleanNounColor } from 'os/lib/color';
+
 type AppSuiteProps = {
   patp: string;
   space: SpaceModelType;
@@ -96,10 +98,8 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
     console.log('onAppsAction => %o', { path, id: app.id, tag });
     SpacesActions.addToSuite(path, app.id, rank).then((result) => {
       console.log('addToSuite response => %o', result);
-      const app = result[space.path];
-      suite.splice(app.ranks.suite, 1, app);
-      setSuite(suite);
-      setSearchMode('none');
+      loadSuite();
+      // setSearchMode('none');
     });
   };
 
@@ -114,18 +114,24 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
     </>
   );
 
+  const loadSuite = () => {
+    // @ts-ignore
+    const suite = Array(5).fill(undefined);
+    const apps = bazaar.getBazaar(space.path).suiteApps;
+    apps.forEach((app, index) =>
+      suite.splice(app.ranks?.suite, 1, JSON.parse(JSON.stringify(app)))
+    );
+    console.log(suite);
+    setSuite(suite);
+  };
+
   useEffect(() => {
     console.log('AppSuite useEffect => %o', {
       ship: ship.patp,
       path: space.path,
     });
     setApps(bazaar.getBazaar(`/${ship.patp}/our`).allApps);
-    // @ts-ignore
-    const suite = Array(5).fill(undefined);
-    const apps = bazaar.getBazaar(space.path).suiteApps;
-    apps.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
-    console.log(suite);
-    setSuite(suite);
+    loadSuite();
   }, [space.path]);
 
   return (
@@ -145,7 +151,17 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
         {suite.map(
           (app: any, index: number) =>
             (app && (
-              <SuiteApp key={index} isAdmin={true} space={space} app={app} />
+              <SuiteApp
+                key={index}
+                isAdmin={true}
+                space={space}
+                app={app}
+                onClick={() => {
+                  SpacesActions.removeFromSuite(space.path, app.id).then(
+                    (result) => loadSuite()
+                  );
+                }}
+              />
             )) || (
               <SuiteApp
                 key={index}

@@ -48,7 +48,7 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
                   label: 'Remove from suite',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    SpacesActions.removeFromSuite(space.path, app.id);
+                    onClick && onClick();
                   },
                 },
               ]
@@ -56,7 +56,9 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
         }
         onAppClick={(selectedApp: AppModelType) => {
           // QUESTION: should this open the app listing or the actual app?
-          DesktopActions.openAppWindow(space.path, toJS(selectedApp));
+          // const app = toJS(selectedApp);
+          const app = JSON.parse(JSON.stringify(selectedApp));
+          DesktopActions.openAppWindow(space.path, app);
           DesktopActions.setHomePane(false);
         }}
       />

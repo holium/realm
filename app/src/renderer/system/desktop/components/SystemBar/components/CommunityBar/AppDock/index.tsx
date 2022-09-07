@@ -24,11 +24,12 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     : null;
 
   const orderedList = useMemo(
-    () => (currentBazaar ? currentBazaar.pinned! : []),
+    () => (currentBazaar ? currentBazaar.pinnedApps! : []),
     [currentBazaar && currentBazaar.pinned]
   );
 
   const pinnedApps = useMemo(() => {
+    console.log('pinnedApps updated. rerendering...');
     return (
       <Reorder.Group
         axis="x"
@@ -77,7 +78,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,
-                    toJS(selectedApp)
+                    JSON.parse(JSON.stringify(selectedApp))
                   );
                 }
               }}
@@ -134,13 +135,13 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.activeWindow?.id,
     desktop.openAppIds,
     spaces.selected?.path,
-    currentBazaar && currentBazaar.pinned,
+    currentBazaar && currentBazaar.pinnedApps,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       currentBazaar &&
-      currentBazaar.pinned.findIndex(
+      currentBazaar.pinnedApps.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );
@@ -174,12 +175,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   label: 'Unpin',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    SpacesActions.removeAppTag(
-                      spaces.selected?.path!,
-                      app.id,
-                      'pinned'
-                    );
-                    // SpacesActions.unpinApp(spaces.selected?.path!, app.id);
+                    SpacesActions.unpinApp(spaces.selected?.path!, app.id);
                   },
                 },
                 {

@@ -386,7 +386,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.addApp(app);
+        state.getBazaar(space)?.setRecommendedApps(app.sort);
       }
       break;
     case 'unrecommend':
@@ -395,7 +395,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.addApp(app);
+        state.getBazaar(space)?.setRecommendedApps(app.sort);
       }
       break;
     case 'suite-add':
@@ -404,7 +404,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.updateApp(app);
+        state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;
     case 'suite-remove':
@@ -412,8 +412,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         console.log('suite-remove [reaction] => %o', data);
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
-        const appId = detail[space].id;
-        state.getBazaar(space)?.removeAppTag(appId, 'suite');
+        const app = detail[space];
+        state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;
     default:

@@ -77,6 +77,11 @@ export const BazaarModel = types
     isAppPinned(appId: string) {
       return self.pinned.includes(appId);
     },
+    getAppData(appId: string) {
+      const all = [...Array.from(self.apps!.values()), ...NativeAppList];
+      const idx = all.findIndex((item) => item.id === appId);
+      return idx === -1 ? undefined : all[idx];
+    },
   }))
   .actions((self) => ({
     addApp(app: BazaarAppType) {
@@ -104,6 +109,12 @@ export const BazaarModel = types
     },
     setPinnedApps(apps: any) {
       self.pinned.replace(apps);
+    },
+    setSuiteApps(apps: any) {
+      self.suite.replace(apps);
+    },
+    setRecommendedApps(apps: any) {
+      self.recommended.replace(apps);
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
