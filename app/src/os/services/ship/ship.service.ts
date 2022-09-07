@@ -343,7 +343,7 @@ export class ShipService extends BaseService {
 
     const storeParams = {
       name: 'ship',
-      cwd: `realm.${ship}`,
+      cwd: `realm.${ship.patp}`,
       secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
     };

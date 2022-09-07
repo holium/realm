@@ -18,6 +18,7 @@ export default class EncryptedStore<T> {
     this.secretKey = safeStorage.encryptString(params.secretKey);
     this.db = new Store<{ data: string }>({
       name: params.name,
+      cwd: params.cwd,
       accessPropertiesByDotNotation: params?.accessPropertiesByDotNotation,
     });
     this._store = this.readEncryptedStore();
@@ -44,7 +45,7 @@ export default class EncryptedStore<T> {
 
   encryptData(data: any): string {
     return CryptoJS.AES.encrypt(
-      JSON.stringify(data),
+      JSON.stringify({ data }),
       safeStorage.decryptString(this.secretKey)
     ).toString();
   }
@@ -54,6 +55,6 @@ export default class EncryptedStore<T> {
       ciphertext,
       safeStorage.decryptString(this.secretKey)
     );
-    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8)).data;
   }
 }
