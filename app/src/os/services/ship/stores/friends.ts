@@ -18,7 +18,7 @@ export const loadFriendsFromDisk = (
         });
 
   let persistedState: FriendsType = persisted.store;
-  const isEmpty = Object.keys(persistedState).length === 0;
+  const isEmpty = !persistedState || Object.keys(persistedState).length === 0;
   const model = FriendsStore.create(
     !isEmpty ? castToSnapshot(persistedState) : { all: {} }
   );
