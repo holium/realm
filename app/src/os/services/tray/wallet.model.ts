@@ -5,6 +5,11 @@ import {
   Instance,
 } from 'mobx-state-tree';
 import { Patp } from 'os/types';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+
+const gweiToEther = (gwei: number) => {
+  return gwei / 1000000000;
+}
 
 const Settings = types
   .model('Settings', {
@@ -37,6 +42,7 @@ const BitcoinStore = types
       Object.entries(btcWallets).forEach(([key, wallet]) => {
         btcWallets[key] = {
           network: 'bitcoin',
+          path: (wallet as any).path,
           balance: (wallet as any).balance.toString(),
           address: (wallet as any).address,
           contracts: {}
@@ -56,7 +62,7 @@ const BitcoinStore = types
         address: wallet.wallet.address,
         balance: wallet.wallet.balance.toString(),
       };
-      self.wallets.set(wallet.key, EthWallet.create(walletObj));
+      self.wallets.set(wallet.key, BitcoinWallet.create(walletObj));
     }
   }));
 
@@ -115,13 +121,11 @@ export const EthStore = types
         ethWallets[key] = {
           network: 'ethereum',
           path: (wallet as any).path,
-          balance: (wallet as any).balance.toString(),
+          balance: gweiToEther((wallet as any).balance).toString(),
           address: (wallet as any).address,
         }
       })
-      console.log(ethWallets)
       applySnapshot(self.wallets, ethWallets);
-      console.log(self.wallets)
     },
     // pokes
     setProvider(provider: string) {
@@ -139,7 +143,7 @@ export const EthStore = types
         network: 'ethereum',
         path: wallet.wallet.path,
         address: wallet.wallet.address,
-        balance: wallet.wallet.balance.toString(),
+        balance: gweiToEther(wallet.wallet.balance).toString(),
         contracts: {},
       };
       self.wallets.set(wallet.key, EthWallet.create(walletObj));

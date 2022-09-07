@@ -132,6 +132,8 @@ export class WalletService extends BaseService {
       console.log(history);
     });
 
+    this.setNetworkProvider('realm.tray.wallet.set-network-provider', 'ethereum', 'http://127.0.0.1:8545');
+
   }
 
   get snapshot() {
@@ -164,9 +166,9 @@ export class WalletService extends BaseService {
 
   async setNetworkProvider(_event: any, network: string, provider: string) {
     if (network == 'ethereum')
-      this.state!.ethereum.settings.provider = provider;
+      this.state!.ethereum.setProvider(provider);
     else if (network == 'bitcoin')
-      this.state!.bitcoin.settings.provider = provider;
+      this.state!.bitcoin.setProvider(provider);
     await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
   }
 

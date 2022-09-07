@@ -218,8 +218,7 @@ export class ShipService extends BaseService {
       this.core.onEffect
     );
     this.models.friends = loadFriendsFromDisk(
-      ship,
-      secretKey,
+      ship, secretKey,
       this.core.onEffect
     );
     secretKey = null;
