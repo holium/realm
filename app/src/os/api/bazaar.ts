@@ -327,7 +327,7 @@ export const BazaarApi = {
         json: {
           'set-pin-order': {
             path: pathObj,
-            ord: order,
+            order: order,
           },
         },
         reaction: 'bazaar-reaction.set-pin-order',

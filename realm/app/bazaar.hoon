@@ -322,7 +322,16 @@
     |=  [path=space-path:spaces-store order=(list app-id:store)]
     ^-  (quip card _state)
     =/  apps            (~(got by space-apps.state) path)
-    =.  pinned.sorts.apps  order
+    =/  updated-apps
+    %-  roll
+    :-  order
+    |=  [=app-id:store acc=[index=(map =app-id:store =app-lite:store) rank=@ud]]
+    =/  app  (~(get by index.apps) app-id)
+    ?~  app  acc
+    =.  pinned.ranks.sieve.u.app   rank.acc
+    [(~(put by index.acc) app-id u.app) (add rank.acc 1)]
+    =.  index.apps          index.updated-apps
+    =.  pinned.sorts.apps   order
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%set-pin-order path order] paths)

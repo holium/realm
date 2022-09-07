@@ -39,7 +39,6 @@
     ++  set-pin-order
       %-  ot
       :~  [%path pth]
-          [%app-id so]
           [%order (ar so)]
       ==
     ::
