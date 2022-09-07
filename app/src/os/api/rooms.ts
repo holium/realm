@@ -190,11 +190,10 @@ export const RoomsApi = {
       path: `/room/local`,
       onEvent: async (data: any) => {
         let update = data['rooms-update'];
-        console.log('rooms update', update)
+        // console.log('rooms update', update)
         if (!update) return;
         if (update['room']) {
           const { diff, room } = update['room'];
-          // console.log(update['room']);
           // Send diff as event to renderer
           if (diff) onDiff(diff, room);
           state.handleRoomUpdate(room, diff);

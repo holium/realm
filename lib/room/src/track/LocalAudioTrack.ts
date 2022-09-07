@@ -2,9 +2,10 @@ import { TrackEvent } from './events';
 import { AudioSenderStats, computeBitrate, monitorFrequency } from '../stats';
 import { isWeb } from '../utils';
 import { LocalTrack } from './LocalTrack';
-import type { AudioCaptureOptions } from './options';
-import { Track } from './Track';
+import { AudioCaptureOptions } from './options';
+// import { Track } from './Track';
 import { detectSilence } from './utils';
+import { Track } from './Track';
 
 export default class LocalAudioTrack extends LocalTrack {
   /** @internal */
@@ -13,7 +14,7 @@ export default class LocalAudioTrack extends LocalTrack {
 
   constructor(
     mediaTrack: MediaStreamTrack,
-    constraints?: MediaTrackConstraints,
+    constraints: AudioCaptureOptions,
     userProvidedTrack = true
   ) {
     super(mediaTrack, Track.Kind.Audio, constraints, userProvidedTrack);
@@ -92,7 +93,7 @@ export default class LocalAudioTrack extends LocalTrack {
   }
 
   private monitorSender = async () => {
-    if (!this.sender) {
+    if (!this._sender) {
       this._currentBitrate = 0;
       return;
     }
@@ -116,11 +117,11 @@ export default class LocalAudioTrack extends LocalTrack {
   };
 
   async getSenderStats(): Promise<AudioSenderStats | undefined> {
-    if (!this.sender) {
+    if (!this._sender) {
       return undefined;
     }
 
-    const stats = await this.sender.getStats();
+    const stats = await this._sender.getStats();
     let audioStats: AudioSenderStats | undefined;
     stats.forEach((v) => {
       if (v.type === 'outbound-rtp') {

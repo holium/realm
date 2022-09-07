@@ -1,35 +1,41 @@
-import { TrackSource, TrackType } from '../room/types';
+import { TrackSource } from '../room/types';
+import { Track } from './Track';
 
-export namespace Track {
-  export enum Kind {
-    Audio = 'audio',
-    Video = 'video',
-    Unknown = 'unknown',
-  }
-  export type SID = string;
-  export enum Source {
-    Camera = 'camera',
-    Microphone = 'microphone',
-    ScreenShare = 'screen_share',
-    ScreenShareAudio = 'screen_share_audio',
-    Unknown = 'unknown',
-  }
+// export namespace Track {
+//   export enum Kind {
+//     Audio = 'audio',
+//     Video = 'video',
+//     Unknown = 'unknown',
+//   }
+//   export type SID = string;
+//   export enum Source {
+//     Camera = 'camera',
+//     Microphone = 'microphone',
+//     ScreenShare = 'screen_share',
+//     ScreenShareAudio = 'screen_share_audio',
+//     Unknown = 'unknown',
+//   }
 
-  export enum StreamState {
-    Active = 'active',
-    Paused = 'paused',
-    Unknown = 'unknown',
-  }
+//   export enum StreamState {
+//     Active = 'active',
+//     Paused = 'paused',
+//     Unknown = 'unknown',
+//   }
 
-  export interface Dimensions {
-    width: number;
-    height: number;
-  }
+//   export interface Dimensions {
+//     width: number;
+//     height: number;
+//   }
+// }
+
+export interface CreateLocalTracksOptions {
+  audio?: boolean | AudioCaptureOptions;
+  // video?: boolean | VideoCaptureOptions;
 }
 
 export interface TrackInfo {
   sid: string;
-  type: TrackType;
+  type: Track;
   name: string;
   muted: boolean;
   /**

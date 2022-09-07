@@ -24,10 +24,12 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
 
   const { mode, dockColor, windowColor, accentColor } = desktop.theme;
 
+  // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
-  const isLiveColor = useMemo(() => lighten(0.25, accentColor), [accentColor]);
-
-  
+  const isLiveColor = useMemo(
+    () => rgba(darken(0.01, accentColor), 0.15),
+    [accentColor]
+  );
 
   let peopleText = 'people';
   if (present!.length === 1) {
@@ -68,11 +70,10 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
               {/* {isLive && <Icons mr={1} color="#4E9EFD" name="RoomSpeaker" />} */}
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text opacity={0.5} fontWeight={400} fontSize={2}>
-              {present!.length} {peopleText}{' '}
+                {present!.length} {peopleText}{' '}
                 {/* {present!.includes(ship!.patp) && ` - (You)`} */}
               </Text>
               <Text ml={2} opacity={0.5} fontWeight={200} fontSize={2}>
-
                 {/* {creator === ship!.patp ? '(You)' : ''} */}
 
                 {present!.includes(ship!.patp) && ` - (You)`}

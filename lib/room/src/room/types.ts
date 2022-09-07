@@ -1,6 +1,6 @@
 import { Patp } from 'types';
 
-export enum TrackType {
+export enum Track {
   AUDIO = 0,
   VIDEO = 1,
   DATA = 2,

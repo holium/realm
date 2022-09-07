@@ -15,11 +15,8 @@ import {
 } from './logic/store';
 
 import { Mouse } from './system/desktop/components/Mouse';
-<<<<<<< HEAD
 
-=======
 import { ShellActions } from './logic/actions/shell';
->>>>>>> main
 // import * as RealmMultiplayer from '@holium/realm-multiplayer';
 // import { Presences } from './system/desktop/components/Multiplayer/Presences';
 // import { api } from './system/desktop/components/Multiplayer/multiplayer';

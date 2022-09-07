@@ -1,24 +1,23 @@
 import { Participant } from './Participant';
 import {
   AudioCaptureOptions,
-  Track,
+  CreateLocalTracksOptions,
   TrackPublishOptions,
 } from '../track/options';
 import { LocalTrack } from '../track/LocalTrack';
 import { LocalTrackPublication } from '../track/LocalTrackPublication';
-import { TrackPublication } from '../track/TrackPublication';
-
 import { RemoteParticipant } from './RemoteParticipant';
 import { Room } from '../room';
 import { ParticipantEvent } from './events';
 import { TrackEvent } from '../track/events';
-import { Patp, RoomsModelType } from '../types';
+import { Patp } from '../types';
 import LocalAudioTrack from '../track/LocalAudioTrack';
-import { isFireFox } from '../utils';
+import { Track } from '../track/Track';
+import { action, makeObservable, observable } from 'mobx';
 
 export type Handshake = 'awaiting-offer' | 'offer' | 'ice-candidate' | 'answer';
 
-export const DEFAULT_AUDIO_CONSTRAINTS = {
+export const DEFAULT_AUDIO_OPTIONS = {
   channelCount: {
     ideal: 2,
     min: 1,
@@ -46,30 +45,15 @@ export class LocalParticipant extends Participant {
     this.audioTracks = new Map();
     this.videoTracks = new Map();
     this.tracks = new Map();
+    makeObservable(this, {
+      isLoaded: observable,
+      mute: action.bound,
+      unmute: action.bound,
+    });
   }
 
   async connect() {
-    const tracks = (await this.setMicrophoneEnabled(
-      true
-    )) as LocalTrackPublication[];
-    // There could be a case where we've already added and connect is called again
-    if (tracks) {
-      tracks.forEach((track: LocalTrackPublication) => {
-        if (track.kind === Track.Kind.Audio) {
-          // this.audioTracks.set(track.trackName, track);
-          track.on(TrackEvent.Muted, () => {
-            console.log('in local participant, muting');
-            track.track?.detach();
-            this.emit(ParticipantEvent.MuteToggled, true);
-          });
-          track.on(TrackEvent.Unmuted, () => {
-            console.log('in local participant, unmuting');
-            track.track?.attach();
-            this.emit(ParticipantEvent.MuteToggled, false);
-          });
-        }
-      });
-    }
+    await this.setMicrophoneEnabled(true);
     this.isLoaded = true;
   }
 
@@ -84,19 +68,31 @@ export class LocalParticipant extends Participant {
     this.removeAllListeners();
   }
 
-  muteAudioTracks() {
-    console.log(this.audioTracks);
-    this.audioTracks.forEach((track: LocalTrackPublication) => {
-      track.track?.mute();
-    });
+  mute() {
+    this.setTrackEnabled(Track.Source.Microphone, false);
+    this.isMuted = true;
   }
 
-  unmuteAudioTracks() {
-    console.log(this.audioTracks);
-    this.audioTracks.forEach((track: LocalTrackPublication) => {
-      track.track?.unmute();
-    });
+  unmute() {
+    this.setTrackEnabled(Track.Source.Microphone, true);
+    this.isMuted = false;
   }
+
+  getTrack(source: Track.Source): LocalTrackPublication | undefined {
+    const track = super.getTrack(source);
+    if (track) {
+      return track as LocalTrackPublication;
+    }
+    return undefined;
+  }
+
+  // getTrackByName(name: string): LocalTrackPublication | undefined {
+  //   const track = super.getTrackByName(name);
+  //   if (track) {
+  //     return track as LocalTrackPublication;
+  //   }
+  // }
+
   streamTracks(peer: RemoteParticipant) {
     if (!this.isLoaded) return;
     console.log('streaming tracks');
@@ -129,7 +125,7 @@ export class LocalParticipant extends Participant {
     enabled: boolean,
     options?: AudioCaptureOptions,
     publishOptions?: TrackPublishOptions
-  ): Promise<LocalTrackPublication[] | undefined> {
+  ): Promise<LocalTrackPublication | undefined> {
     return this.setTrackEnabled(
       Track.Source.Microphone,
       enabled,
@@ -149,11 +145,11 @@ export class LocalParticipant extends Participant {
     options?: AudioCaptureOptions,
     publishOptions?: TrackPublishOptions
   ) {
-    console.log('setTrackEnabled', { source, enabled });
+    // console.log('setTrackEnabled', { source, enabled });
     let track = this.getTrack(source);
     if (enabled) {
       if (track) {
-        // track.unmute();
+        await track.unmute();
       } else {
         if (this.pendingPublishing.has(source)) {
           console.info('skipping duplicate published source', { source });
@@ -162,9 +158,11 @@ export class LocalParticipant extends Participant {
         }
 
         this.pendingPublishing.add(source);
-        // const audioOptions = { audio: options }
+        const audioOptions = {
+          audio: options || DEFAULT_AUDIO_OPTIONS,
+        } as CreateLocalTracksOptions;
         try {
-          const localTracks = await this.createTracks();
+          const localTracks = await this.createTracks(audioOptions);
           const publishPromises: Array<Promise<LocalTrackPublication>> = [];
           for (const localTrack of localTracks) {
             publishPromises.push(this.publishTrack(localTrack, publishOptions));
@@ -181,35 +179,21 @@ export class LocalParticipant extends Participant {
         } finally {
           this.pendingPublishing.delete(source);
         }
-        // try {
-        //   // const published = this.publishTrack(localTrack, publishOptions);
-        //   const publishPromises: Array<Promise<LocalTrack>> = [];
-        //   for (const localTrack of localTracks) {
-        //     publishPromises.push(this.publishTrack(localTrack, publishOptions));
-        //   }
-        // } catch (e) {
-        //   if (e instanceof Error) {
-        //     // this.emit(ParticipantEvent.MediaDevicesError, e);
-        //   }
-        //   throw e;
-        // } finally {
-        //   this.pendingPublishing.delete(source);
-        // }
       }
+    } else if (track && track.track) {
+      await track.mute();
     }
-    return [track] as LocalTrackPublication[];
+    return track;
   }
 
-  async createTracks(constraints?: MediaTrackConstraints) {
+  async createTracks(options: CreateLocalTracksOptions) {
     let stream: MediaStream | undefined;
-    const mergedConstraints = {
-      audio: DEFAULT_AUDIO_CONSTRAINTS,
-    };
     try {
-      stream = await navigator.mediaDevices.getUserMedia(mergedConstraints);
+      if (options && options.audio) options! as AudioCaptureOptions;
+      stream = await navigator.mediaDevices.getUserMedia(options);
     } catch (err) {
       if (err instanceof Error) {
-        if (mergedConstraints.audio) {
+        if (options.audio) {
           this.microphoneError = err;
         }
         // if (mergedConstraints.video) {
@@ -220,19 +204,14 @@ export class LocalParticipant extends Participant {
       throw err;
     }
 
-    if (mergedConstraints.audio) {
+    if (options.audio) {
       this.microphoneError = undefined;
     }
 
     return stream.getTracks().map((mediaStreamTrack: MediaStreamTrack) => {
-      // const isAudio = mediaStreamTrack.kind === 'audio';
-      // let track = new LocalTrack(
-      //   mediaStreamTrack,
-      //   Track.Kind.Audio
-      // );
       let track = new LocalAudioTrack(
         mediaStreamTrack,
-        mergedConstraints.audio
+        options.audio as AudioCaptureOptions
       );
       track.source = Track.Source.Microphone;
       track.mediaStream = stream;
@@ -257,7 +236,7 @@ export class LocalParticipant extends Participant {
     if (track instanceof MediaStreamTrack) {
       switch (track.kind) {
         case 'audio':
-          track = new LocalAudioTrack(track, DEFAULT_AUDIO_CONSTRAINTS, true);
+          track = new LocalAudioTrack(track, DEFAULT_AUDIO_OPTIONS, true);
           break;
         default:
           throw new Error(`unsupported MediaStreamTrack kind ${track.kind}`);
@@ -304,16 +283,10 @@ export class LocalParticipant extends Participant {
       track.stopOnMute = true;
     }
 
-    if (track.source === Track.Source.ScreenShare && isFireFox()) {
-      // Firefox does not work well with simulcasted screen share
-      // we frequently get no data on layer 0 when enabled
-      opts.simulcast = false;
-    }
-
     // handle track actions
     track.on(TrackEvent.Muted, this.onTrackMuted);
     track.on(TrackEvent.Unmuted, this.onTrackUnmuted);
-    // track.on(TrackEvent.Ended, this.handleTrackEnded);
+    track.on(TrackEvent.Ended, this.handleTrackEnded);
     track.on(TrackEvent.UpstreamPaused, this.onTrackUpstreamPaused);
     track.on(TrackEvent.UpstreamResumed, this.onTrackUpstreamResumed);
 
@@ -348,13 +321,143 @@ export class LocalParticipant extends Participant {
     return publication;
   }
 
+  unpublishTrack(
+    track: LocalTrack | MediaStreamTrack,
+    stopOnUnpublish?: boolean
+  ): LocalTrackPublication | undefined {
+    // look through all published tracks to find the right ones
+    const publication = this.getPublicationForTrack(track);
+
+    console.debug('unpublishing track', { track, method: 'unpublishTrack' });
+
+    if (!publication || !publication.track) {
+      console.warn(
+        'track was not unpublished because no publication was found',
+        {
+          track,
+          method: 'unpublishTrack',
+        }
+      );
+      return undefined;
+    }
+
+    track = publication.track;
+    track.off(TrackEvent.Muted, this.onTrackMuted);
+    track.off(TrackEvent.Unmuted, this.onTrackUnmuted);
+    track.off(TrackEvent.Ended, this.handleTrackEnded);
+    track.off(TrackEvent.UpstreamPaused, this.onTrackUpstreamPaused);
+    track.off(TrackEvent.UpstreamResumed, this.onTrackUpstreamResumed);
+
+    // if (stopOnUnpublish === undefined) {
+    //   stopOnUnpublish = this.roomOptions?.stopLocalTrackOnUnpublish ?? true;
+    // }
+    if (stopOnUnpublish) {
+      track.stop();
+    }
+
+    // TODO this.peers.notifyUnpublishTrack
+    // if (
+    //   this.room.participants &&
+    //   this.engine.publisher.pc.connectionState !== 'closed' &&
+    //   track.sender
+    // ) {
+    //   try {
+    //     // this.engine.removeTrack(track.sender);
+    //   } catch (e) {
+    //     console.warn('failed to unpublish track', {
+    //       error: e,
+    //       method: 'unpublishTrack',
+    //     });
+    //   } finally {
+    //     // this.engine.negotiate();
+    //   }
+    // }
+
+    track._sender = undefined;
+
+    // remove from our maps
+    this.tracks.delete(publication.trackSid);
+    switch (publication.kind) {
+      case Track.Kind.Audio:
+        this.audioTracks.delete(publication.trackSid);
+        break;
+      default:
+        break;
+    }
+
+    this.emit(ParticipantEvent.LocalTrackUnpublished, publication);
+    publication.setTrack(undefined);
+
+    return publication;
+  }
+
+  // removeTrack(sender: any) {
+  //   // this.pee
+  // }
+
+  unpublishTracks(
+    tracks: LocalTrack[] | MediaStreamTrack[]
+  ): LocalTrackPublication[] {
+    const publications: LocalTrackPublication[] = [];
+    tracks.forEach((track: LocalTrack | MediaStreamTrack) => {
+      const pub = this.unpublishTrack(track);
+      if (pub) {
+        publications.push(pub);
+      }
+    });
+    return publications;
+  }
+
+  private getPublicationForTrack(
+    track: LocalTrack | MediaStreamTrack
+  ): LocalTrackPublication | undefined {
+    let publication: LocalTrackPublication | undefined;
+    this.tracks.forEach((pub) => {
+      const localTrack = pub.track;
+      if (!localTrack) {
+        return;
+      }
+
+      // this looks overly complicated due to this object tree
+      if (track instanceof MediaStreamTrack) {
+        if (localTrack instanceof LocalAudioTrack) {
+          if (localTrack.mediaStreamTrack === track) {
+            publication = pub as LocalTrackPublication;
+          }
+        }
+      } else if (track === localTrack) {
+        publication = pub as LocalTrackPublication;
+      }
+    });
+    return publication;
+  }
+
+  /** @internal */
+  publishedTracksInfo(): any[] {
+    const infos: any[] = [];
+    this.tracks.forEach((track: LocalTrackPublication) => {
+      if (track.track !== undefined) {
+        infos.push({
+          cid: track.track.mediaStreamID,
+          track: track.trackInfo,
+        });
+      }
+    });
+    return infos;
+  }
+
+  // ------------------------------------------------------------------------
+  // ------------------------------- Handlers -------------------------------
+  // ------------------------------------------------------------------------
   private onTrackUnmuted = (track: LocalTrack) => {
+    console.log('on track unmuted => LocalParticipant');
     this.onTrackMuted(track, track.isUpstreamPaused);
   };
 
   // when the local track changes in mute status, we'll notify server as such
   /** @internal */
   private onTrackMuted = (track: LocalTrack, muted?: boolean) => {
+    console.log('on track muted => LocalParticipant');
     if (muted === undefined) {
       muted = true;
     }
@@ -376,5 +479,62 @@ export class LocalParticipant extends Participant {
   private onTrackUpstreamResumed = (track: LocalTrack) => {
     console.debug('upstream resumed');
     this.onTrackMuted(track, track.isMuted);
+  };
+
+  // private handleLocalTrackUnpublished = (unpublished: any) => {
+  //   const track = this.tracks.get(unpublished.trackSid);
+  //   if (!track) {
+  //     console.warn('received unpublished event for unknown track', {
+  //       method: 'handleLocalTrackUnpublished',
+  //       trackSid: unpublished.trackSid,
+  //     });
+  //     return;
+  //   }
+  //   this.unpublishTrack(track.track!);
+  // };
+
+  private handleTrackEnded = async (track: LocalTrack) => {
+    if (
+      track.source === Track.Source.ScreenShare ||
+      track.source === Track.Source.ScreenShareAudio
+    ) {
+      console.debug('unpublishing local track due to TrackEnded', {
+        track: track.sid,
+      });
+      this.unpublishTrack(track);
+    } else if (track.isUserProvided) {
+      await track.pauseUpstream();
+    } else if (track instanceof LocalAudioTrack) {
+      try {
+        try {
+          const currentPermissions = await navigator?.permissions.query({
+            // the permission query for camera and microphone currently not supported in Safari and Firefox
+            // track.source === 'video' ? 'microphone'
+            // @ts-ignore
+            name: 'microphone',
+          });
+          if (currentPermissions && currentPermissions.state === 'denied') {
+            console.warn(`user has revoked access to ${track.source}`);
+
+            // detect granted change after permissions were denied to try and resume then
+            currentPermissions.onchange = () => {
+              if (currentPermissions.state !== 'denied') {
+                track.restartTrack();
+                currentPermissions.onchange = null;
+              }
+            };
+            throw new Error('GetUserMedia Permission denied');
+          }
+        } catch (e: any) {
+          // permissions query fails for firefox, we continue and try to restart the track
+        }
+
+        console.debug('track ended, attempting to use a different device');
+        await track.restartTrack();
+      } catch (e) {
+        console.warn(`could not restart track, pausing upstream instead`);
+        await track.pauseUpstream();
+      }
+    }
   };
 }

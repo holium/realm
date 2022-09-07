@@ -11,7 +11,7 @@ const BACKGROUND_REACTION_DELAY = 5000;
 // Safari tracks which audio elements have been "blessed" by the user.
 const recycledElements: Array<HTMLAudioElement> = [];
 
-export class Track extends (EventEmitter as new () => TypedEventEmitter<TrackEventCallbacks>) {
+export abstract class Track extends (EventEmitter as new () => TypedEventEmitter<TrackEventCallbacks>) {
   kind: Track.Kind;
   attachedElements: HTMLMediaElement[] = [];
   isMuted: boolean = false;
@@ -316,6 +316,33 @@ export function detachTrack(
     }
   }
 }
+
+// export namespace Track {
+//   export enum Kind {
+//     Audio = 'audio',
+//     Video = 'video',
+//     Unknown = 'unknown',
+//   }
+//   export type SID = string;
+//   export enum Source {
+//     Camera = 'camera',
+//     Microphone = 'microphone',
+//     ScreenShare = 'screen_share',
+//     ScreenShareAudio = 'screen_share_audio',
+//     Unknown = 'unknown',
+//   }
+
+//   export enum StreamState {
+//     Active = 'active',
+//     Paused = 'paused',
+//     Unknown = 'unknown',
+//   }
+
+//   export interface Dimensions {
+//     width: number;
+//     height: number;
+//   }
+// }
 
 export type TrackEventCallbacks = {
   message: () => void;

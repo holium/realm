@@ -42,7 +42,7 @@ export class SlipService extends EventEmitter {
   }
 
   async subscribe() {
-    this.slipId = await this.core.conduit.watch({
+    await this.core.conduit!.watch({
       app: 'slip',
       path: '/slip/local',
       onEvent: this.handleSlip,
@@ -64,7 +64,7 @@ export class SlipService extends EventEmitter {
     data: any
   ) {
     // If for some reason we are not connected
-    if (!this.slipId) await this.subscribe();
+    // if (!this.slipId) await this.subscribe();
     let now = Date.now();
     // Poke slip
     this.core.conduit!.poke({

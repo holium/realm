@@ -5,10 +5,10 @@ export const handleLocalEvents = (
   setCursors: (cursor: boolean) => void,
   our?: LocalParticipant
 ) => {
-  our?.on('muteToggled', (isMuted: boolean) => {
-    console.log('mutedToggled', isMuted);
-    setMuted(isMuted);
-  });
+  // our?.on('muteToggled', (isMuted: boolean) => {
+  //   console.log('mutedToggled', isMuted);
+  //   setMuted(isMuted);
+  // });
   our?.on('cursorToggled', (isCursorSharing: boolean) => {
     console.log('cursorToggled', isCursorSharing);
     setCursors(isCursorSharing);

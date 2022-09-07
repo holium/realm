@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import type TypedEmitter from 'typed-emitter';
 import { patp2dec } from 'urbit-ob';
-import { CursorPayload, StatePayload } from '@holium/realm-multiplayer';
+// import { CursorPayload, StatePayload } from '@holium/realm-multiplayer';
 import { DisconnectReason } from '../room/types';
 import { Room } from '../room';
 import { Patp } from '../types';
@@ -9,9 +9,10 @@ import { ParticipantEvent } from './events';
 import { TrackEvent } from '../track/events';
 import { TrackPublication } from '../track';
 import LocalTrackPublication from '../track/LocalTrackPublication';
-import { Track } from '../track/Track';
 import RemoteTrackPublication from '../track/RemoteTrackPublication';
 import RemoteTrack from '../track/RemoteTrack';
+import { Track } from '../track/Track';
+import { action, makeObservable, observable } from 'mobx';
 
 export enum ConnectionState {
   Disconnected = 'disconnected',
@@ -49,11 +50,13 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
     this.audioTracks = new Map();
     this.videoTracks = new Map();
     this.tracks = new Map();
-  }
-
-  toggleMuted() {
-    this.isMuted = !this.isMuted;
-    this.emit('muteToggled', this.isMuted);
+    makeObservable(this, {
+      isMuted: observable,
+      isCursorSharing: observable,
+      isSpeaking: observable,
+      audioLevel: observable,
+      lastSpokeAt: observable,
+    });
   }
 
   toggleCursors() {
@@ -187,11 +190,11 @@ export type ParticipantEventCallbacks = {
   reconnecting: () => void;
   audioStreamAdded: (stream: MediaStream) => void;
   audioStreamRemoved: (stream: MediaStream) => void;
-  cursorUpdate: (payload: CursorPayload) => void;
-  stateUpdate: (payload: StatePayload) => void;
+  // cursorUpdate: (payload: CursorPayload) => void;
+  // stateUpdate: (payload: StatePayload) => void;
   //
   cursorToggled: (isCursorSharing: boolean) => void;
-  muteToggled: (isMuted: boolean) => void;
+  // muteToggled: (isMuted: boolean) => void;
   //
   trackMuted: (publication: TrackPublication) => void;
   trackUnmuted: (publication: TrackPublication) => void;

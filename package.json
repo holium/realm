@@ -13,15 +13,7 @@
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
     "start": "yarn workspace @holium/realm start",
-<<<<<<< HEAD
-    "add:realm": "yarn workspace @holium/realm add -W"
-=======
+    "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package"
-  },
-  "dependencies": {
-    "aws-sdk": "^2.1204.0",
-    "moment": "^2.29.4",
-    "react-infinite-scroll-component": "^6.1.0"
->>>>>>> main
   }
 }

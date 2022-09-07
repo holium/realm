@@ -26,7 +26,6 @@ import { RoomsActions } from 'renderer/logic/actions/rooms';
 interface ISpeaker {
   person: string;
   audio: any;
-  muted?: boolean;
   cursors?: boolean;
   type: 'host' | 'speaker' | 'listener';
 }
@@ -38,31 +37,18 @@ const speakerType = {
 };
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
-<<<<<<< HEAD
   const { person, audio, type } = props;
   const { ship, desktop, contacts } = useServices();
   const { roomsApp } = useTrayApps();
   const speakerRef = useRef<any>(null);
   const isOur = person === ship?.patp;
-  const [peerState, setPeerState] = useState<RTCPeerConnectionState>('new');
-  const [peerMetadata, setPeerMetadata] = useState<any>({
-    muted: false,
-    cursor: false,
-  });
   // const [peer, setPeer] = useState<RemoteParticipant | undefined>();
   const [isStarted, setIsStarted] = useState(false);
   const metadata = contacts.getContactAvatarMetadata(person);
 
-  const { muted } = roomsApp.controls;
-
-=======
-  const { person, audio } = props;
-  const { ship, contacts } = useServices();
-  const metadata = contacts.getContactAvatarMetadata(person);
-  const hasVoice = audio && person === ship?.patp;
->>>>>>> main
   let name = metadata?.nickname || person;
   const livePeer = LiveRoom.participants.get(person);
+  const muted = isOur ? LiveRoom.our?.isMuted : livePeer?.isMuted;
 
   const contextMenuItems = [
     {
@@ -70,7 +56,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       label: 'Reconnect',
       disabled: livePeer?.connectionState === 'connected',
       onClick: (evt: any) => {
-        livePeer && LiveRoom.reconnectPeer(livePeer);
+        livePeer && LiveRoom.reconnectPeer(livePeer.patp);
         evt.stopPropagation();
       },
     },
@@ -90,33 +76,36 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   }
 
   useEffect(() => {
-    if (isOur) {
-      setPeerState(PeerConnectionState.Connected);
-      // handleLocalEvents(RoomsActions., LiveRoom.our);
-    }
+    // if (isOur) {
+    //   setPeerState(PeerConnectionState.Connected);
+    //   // handleLocalEvents(RoomsActions., LiveRoom.our);
+    // }
 
     // this is getting set every 0th frame that <Speaker/> is rendered.
     // meaning: whenever the room voice view is opened, it does this logic over again
     // as a result, electron produces a warning for too many eventlisteners.
     // MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 started listeners added. Use emitter.setMaxListeners() to increase limit
     LiveRoom.on('started', () => {
-      console.log('setting isstarted!')
+      console.log('setting isstarted!');
       setIsStarted(true);
     });
   }, []);
 
-  useEffect(() => {
-    
-    if(!isStarted) return;
-    const livePeer = LiveRoom.participants.get(person);
-    handleRemoteEvents(setPeerState, livePeer);
-    handleRemoteUpdate(setPeerMetadata, livePeer);
-    
-  }, [isStarted]);
+  const peerState = isOur ? 'connected' : livePeer?.connectionState;
+  console.log('livePeer?.connectionState', livePeer?.connectionState);
+
+  // useEffect(() => {
+  //   if (!isStarted) return;
+  //   if (ship!.patp === livePeer?.patp) {
+  //     // const livePeer = LiveRoom.participants.get(person);
+  //     // handleRemoteEvents(setPeerState, livePeer);
+  //     // handleRemoteUpdate(setPeerMetadata, livePeer);
+  //   }
+  // }, [isStarted]);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
   const textColor =
-    peerState !== PeerConnectionState.Failed
+    livePeer?.connectionState !== PeerConnectionState.Failed
       ? desktop.theme.textColor
       : '#FD4E4E';
 
@@ -196,7 +185,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
                     opacity={0.5}
                   />
                 )
-              : peerMetadata.muted && (
+              : livePeer?.isMuted && (
                   <Icons
                     fill={textColor}
                     name="MicOff"

@@ -3,8 +3,7 @@ import { Track } from './Track';
 import { monitorFrequency } from '../stats';
 
 export default abstract class RemoteTrack extends Track {
-  /** @internal */
-  receiver?: RTCRtpReceiver;
+  _receiver?: RTCRtpReceiver;
 
   constructor(
     mediaTrack: MediaStreamTrack,
@@ -14,7 +13,7 @@ export default abstract class RemoteTrack extends Track {
   ) {
     super(mediaTrack, kind);
     this.sid = sid;
-    this.receiver = receiver;
+    this._receiver = receiver;
   }
 
   /** @internal */
@@ -33,7 +32,7 @@ export default abstract class RemoteTrack extends Track {
     // current track is the only one that can be removed.
     this.mediaStream = stream;
     stream.onremovetrack = () => {
-      this.receiver = undefined;
+      this._receiver = undefined;
       this._currentBitrate = 0;
       this.emit(TrackEvent.Ended, this);
     };

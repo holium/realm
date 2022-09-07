@@ -3,21 +3,24 @@ import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
-import { ContextMenu, Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
+import {
+  ContextMenu,
+  Flex,
+  Grid,
+  IconButton,
+  Icons,
+  Text,
+} from 'renderer/components';
 import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from '../components/CommButton';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
-import { pluralize } from 'renderer/logic/lib/text';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { RoomInfo } from './Info';
 import { handleLocalEvents } from '../listeners';
-import Portal from 'renderer/system/dialog/Portal';
-import { AnimatePresence } from 'framer-motion';
-import theme from 'renderer/theme';
 
 export type BaseRoomProps = {
   theme: ThemeModelType;
@@ -34,13 +37,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { ship, desktop } = useServices();
   const { roomsApp } = useTrayApps();
 
-  const { dockColor, windowColor, accentColor, inputColor, textColor } = desktop.theme;
+  const { dockColor, windowColor, accentColor, inputColor, textColor } =
+    desktop.theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const { muted } = roomsApp.controls;
-  // const [muted, setMuted] = useState(false);
-  // const [cursors, setCursors] = useState(true);
-
-  // const [displayInfo, setDisplayInfo] = useState(false);
+  const muted = LiveRoom.our?.isMuted;
+  console.log('muted', muted);
 
   useEffect(() => {
     handleLocalEvents(
@@ -94,10 +95,10 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
       ? `${roomsApp.liveRoom?.creator.substring(0, 14)}...`
       : roomsApp.liveRoom?.creator;
 
-      let peopleText = 'people';
-      if (present!.length === 1) {
-        peopleText = 'person';
-      }
+  let peopleText = 'people';
+  if (present!.length === 1) {
+    peopleText = 'person';
+  }
   // console.log(toJS(roomsApp.liveRoom));
   return (
     <Grid.Column
@@ -106,7 +107,6 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
       overflowY="hidden"
     >
       <Titlebar
-        
         hasBlur
         hasBorder={false}
         zIndex={5}
@@ -115,11 +115,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           windowColor,
         }}
       >
-        <Flex pl={3} pr={4} mr={3}
-        justifyContent="center"
-        alignItems="center"
-        
-        >
+        <Flex pl={3} pr={4} mr={3} justifyContent="center" alignItems="center">
           <IconButton
             className="realm-cursor-hover"
             size={26}
@@ -144,7 +140,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             >
               {roomsApp.liveRoom?.title}
             </Text>
-             
+
             <Flex>
               {/* <Text fontSize={2} fontWeight={400} opacity={0.7}>
                 {creatorStr}
@@ -164,12 +160,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             size={26}
             customBg={dockColor}
             color={roomView === 'invite' ? accentColor : undefined}
-
             onClick={(evt: any) => {
               evt.stopPropagation();
               roomView === 'invite'
-              ? setRoomView('voice')
-              : setRoomView('invite');
+                ? setRoomView('voice')
+                : setRoomView('invite');
               // RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
             }}
           >
@@ -182,14 +177,12 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             color={roomView === 'info' ? accentColor : undefined}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              console.log('clicked room info button' )
-              roomView === 'info'
-              ? setRoomView('voice')
-              : setRoomView('info');            }}
+              console.log('clicked room info button');
+              roomView === 'info' ? setRoomView('voice') : setRoomView('info');
+            }}
           >
             <Icons name="InfoCircle" />
           </IconButton>
-
         </Flex>
       </Titlebar>
       <Flex
@@ -216,7 +209,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             <IconButton
               className="realm-cursor-hover"
               size={26}
-              color={roomsApp.isCreator(ship!.patp!, id) ? rgba('#E56262', 0.7) : undefined }
+              color={
+                roomsApp.isCreator(ship!.patp!, id)
+                  ? rgba('#E56262', 0.7)
+                  : undefined
+              }
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -241,11 +238,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                 if (muted) {
                   console.log('unmuting time');
                   console.log(LiveRoom.our);
-                  LiveRoom.our?.unmuteAudioTracks();
+                  LiveRoom.our?.unmute();
                 } else {
                   console.log('muting time');
                   console.log(LiveRoom.our);
-                  LiveRoom.our?.muteAudioTracks();
+                  LiveRoom.our?.mute();
                 }
               }}
             />

@@ -3,7 +3,7 @@ import type LocalAudioTrack from './LocalAudioTrack';
 import type { LocalTrack } from './LocalTrack';
 // import type LocalVideoTrack from './LocalVideoTrack';
 import type { TrackInfo, TrackPublishOptions } from './options';
-import type { Track } from './Track';
+import { Track } from './Track';
 import { TrackPublication } from './TrackPublication';
 
 export class LocalTrackPublication extends TrackPublication {
@@ -26,7 +26,7 @@ export class LocalTrackPublication extends TrackPublication {
       this.track.off(TrackEvent.Ended, this.handleTrackEnded);
     }
 
-    super.setTrack(track);
+    super._setTrack(track);
 
     if (track) {
       track.on(TrackEvent.Ended, this.handleTrackEnded);

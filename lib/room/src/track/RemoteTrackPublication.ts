@@ -1,5 +1,4 @@
 import { TrackEvent } from './events';
-import type { Track } from './Track';
 import { TrackPublication } from './TrackPublication';
 import type { RemoteTrack } from './type';
 
@@ -121,40 +120,62 @@ export default class RemoteTrackPublication extends TrackPublication {
   //   return this.currentVideoQuality;
   // }
 
-  /** @internal */
-  setTrack(track?: Track) {
+  _setTrack(track?: RemoteTrack) {
     const prevStatus = this.subscriptionStatus;
     const prevTrack = this.track;
+    if (prevTrack === track) {
+      return;
+    }
     if (prevTrack) {
       // unregister listener
-      // prevTrack.off(
-      //   TrackEvent.VideoDimensionsChanged,
-      //   this.handleVideoDimensionsChange
-      // );
       prevTrack.off(TrackEvent.VisibilityChanged, this.handleVisibilityChange);
       prevTrack.off(TrackEvent.Ended, this.handleEnded);
       prevTrack.detach();
+      this.emit(TrackEvent.Unsubscribed, prevTrack);
     }
-    super.setTrack(track);
+    super._setTrack(track);
     if (track) {
       track.sid = this.trackSid;
-      // track.on(
-      //   TrackEvent.VideoDimensionsChanged,
-      //   this.handleVideoDimensionsChange
-      // );
       track.on(TrackEvent.VisibilityChanged, this.handleVisibilityChange);
       track.on(TrackEvent.Ended, this.handleEnded);
+      this.emit(TrackEvent.Subscribed, track);
     }
     this.emitSubscriptionUpdateIfChanged(prevStatus);
-    if (!!track !== !!prevTrack) {
-      // when undefined status changes, there's a subscription changed event
-      if (track) {
-        this.emit(TrackEvent.Subscribed, track);
-      } else {
-        this.emit(TrackEvent.Unsubscribed, prevTrack);
-      }
-    }
   }
+
+  //   (track?: RemoteTrack) {
+  //   const prevStatus = this.subscriptionStatus;
+  //   const prevTrack = this.track;
+  //   if (prevTrack) {
+  //     // unregister listener
+  //     // prevTrack.off(
+  //     //   TrackEvent.VideoDimensionsChanged,
+  //     //   this.handleVideoDimensionsChange
+  //     // );
+  //     prevTrack.off(TrackEvent.VisibilityChanged, this.handleVisibilityChange);
+  //     prevTrack.off(TrackEvent.Ended, this.handleEnded);
+  //     prevTrack.detach();
+  //   }
+  //   super._setTrack(track);
+  //   if (track) {
+  //     track.sid = this.trackSid;
+  //     // track.on(
+  //     //   TrackEvent.VideoDimensionsChanged,
+  //     //   this.handleVideoDimensionsChange
+  //     // );
+  //     track.on(TrackEvent.VisibilityChanged, this.handleVisibilityChange);
+  //     track.on(TrackEvent.Ended, this.handleEnded);
+  //   }
+  //   this.emitSubscriptionUpdateIfChanged(prevStatus);
+  //   if (!!track !== !!prevTrack) {
+  //     // when undefined status changes, there's a subscription changed event
+  //     if (track) {
+  //       this.emit(TrackEvent.Subscribed, track);
+  //     } else {
+  //       this.emit(TrackEvent.Unsubscribed, prevTrack);
+  //     }
+  //   }
+  // }
 
   /** @internal */
   setAllowed(allowed: boolean) {
@@ -202,7 +223,7 @@ export default class RemoteTrackPublication extends TrackPublication {
 
   protected handleEnded = (track: RemoteTrack) => {
     this.emit(TrackEvent.Ended, track);
-    this.setTrack(undefined);
+    this._setTrack(undefined);
   };
 
   // protected get isAdaptiveStream(): boolean {

@@ -42,6 +42,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     // We need to make this observable so the React component can get updates
     makeObservable(this, {
       state: observable,
+      our: observable,
       participants: observable,
       connect: action.bound,
       connectParticipant: action.bound,
@@ -153,11 +154,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
   registerListeners(peer: RemoteParticipant) {
     peer.on(ParticipantEvent.Connected, () => {
-      console.log('WE ARE CONNECTED -> start streaming to them');
-      // peer.publish
-      // peer.createDataChannel(DataChannel.Info);
       console.log(peer);
-      // this.our.streamTracks(peer);
     });
     peer.on(ParticipantEvent.Disconnected, () => {
       console.log('try to reconnect');
@@ -192,15 +189,15 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     peer.on(ParticipantEvent.AudioStreamRemoved, (event: any) => {
       console.log(ParticipantEvent.AudioStreamRemoved);
     });
-    peer.on(ParticipantEvent.CursorUpdate, (event: any) => {
-      console.log(ParticipantEvent.CursorUpdate);
-    });
-    peer.on(ParticipantEvent.StateUpdate, (event: any) => {
-      console.log(ParticipantEvent.StateUpdate);
-    });
-    peer.on(ParticipantEvent.StateUpdate, (event: any) => {
-      console.log(ParticipantEvent.StateUpdate);
-    });
+    // peer.on(ParticipantEvent.CursorUpdate, (event: any) => {
+    //   console.log(ParticipantEvent.CursorUpdate);
+    // });
+    // peer.on(ParticipantEvent.StateUpdate, (event: any) => {
+    //   console.log(ParticipantEvent.StateUpdate);
+    // });
+    // peer.on(ParticipantEvent.StateUpdate, (event: any) => {
+    //   console.log(ParticipantEvent.StateUpdate);
+    // });
     peer.on(ParticipantEvent.TrackMuted, (event: any) => {
       console.log(ParticipantEvent.TrackMuted);
     });

@@ -7,12 +7,8 @@ import { attachToElement, detachTrack, Track } from './Track';
 import { getEmptyAudioStreamTrack, getEmptyVideoStreamTrack } from './utils';
 
 export class LocalTrack extends Track {
-  /** @internal */
-  sender?: RTCRtpSender;
-
-  /** @internal */
-  codec?: VideoCodec;
-
+  _sender?: RTCRtpSender;
+  _codec?: VideoCodec;
   protected constraints: MediaTrackConstraints;
   protected reacquireTrack: boolean;
   protected providedByUser: boolean;
@@ -93,7 +89,7 @@ export class LocalTrack extends Track {
     track: MediaStreamTrack,
     userProvidedTrack = true
   ): Promise<LocalTrack> {
-    if (!this.sender) {
+    if (!this._sender) {
       throw new Error('unable to replace an unpublished track');
     }
 
@@ -112,8 +108,8 @@ export class LocalTrack extends Track {
     track.addEventListener('ended', this.handleEnded);
     console.debug('replace MediaStreamTrack');
 
-    if (this.sender) {
-      await this.sender.replaceTrack(track);
+    if (this._sender) {
+      await this._sender.replaceTrack(track);
     }
     this._mediaStreamTrack = track;
 
@@ -165,9 +161,9 @@ export class LocalTrack extends Track {
     newTrack.addEventListener('ended', this.handleEnded);
     console.debug('re-acquired MediaStreamTrack');
 
-    if (this.sender) {
+    if (this._sender) {
       // Track can be restarted after it's unpublished
-      await this.sender.replaceTrack(newTrack);
+      await this._sender.replaceTrack(newTrack);
     }
 
     this._mediaStreamTrack = newTrack;
@@ -235,7 +231,7 @@ export class LocalTrack extends Track {
       if (this._isUpstreamPaused === true) {
         return;
       }
-      if (!this.sender) {
+      if (!this._sender) {
         console.warn('unable to pause upstream for an unpublished track');
         return;
       }
@@ -246,7 +242,7 @@ export class LocalTrack extends Track {
         this.kind === Track.Kind.Audio
           ? getEmptyAudioStreamTrack()
           : getEmptyVideoStreamTrack();
-      await this.sender.replaceTrack(emptyTrack);
+      await this._sender.replaceTrack(emptyTrack);
     });
   }
 
@@ -255,14 +251,14 @@ export class LocalTrack extends Track {
       if (this._isUpstreamPaused === false) {
         return;
       }
-      if (!this.sender) {
+      if (!this._sender) {
         console.warn('unable to resume upstream for an unpublished track');
         return;
       }
       this._isUpstreamPaused = false;
       this.emit(TrackEvent.UpstreamResumed, this);
 
-      await this.sender.replaceTrack(this._mediaStreamTrack);
+      await this._sender.replaceTrack(this._mediaStreamTrack);
     });
   }
 }

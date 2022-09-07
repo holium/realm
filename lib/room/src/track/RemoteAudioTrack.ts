@@ -4,7 +4,6 @@ import { Track } from './Track';
 
 export default class RemoteAudioTrack extends RemoteTrack {
   private prevStats?: AudioReceiverStats;
-
   private elementVolume: number | undefined;
 
   constructor(
@@ -56,13 +55,13 @@ export default class RemoteAudioTrack extends RemoteTrack {
   }
 
   protected monitorReceiver = async () => {
-    if (!this.receiver) {
+    if (!this._receiver) {
       this._currentBitrate = 0;
       return;
     }
     const stats = await this.getReceiverStats();
 
-    if (stats && this.prevStats && this.receiver) {
+    if (stats && this.prevStats && this._receiver) {
       this._currentBitrate = computeBitrate(stats, this.prevStats);
     }
 
@@ -73,11 +72,11 @@ export default class RemoteAudioTrack extends RemoteTrack {
   };
 
   protected async getReceiverStats(): Promise<AudioReceiverStats | undefined> {
-    if (!this.receiver) {
+    if (!this._receiver) {
       return;
     }
 
-    const stats = await this.receiver.getStats();
+    const stats = await this._receiver.getStats();
     let receiverStats: AudioReceiverStats | undefined;
     stats.forEach((v) => {
       if (v.type === 'inbound-rtp') {
