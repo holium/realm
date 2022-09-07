@@ -436,8 +436,9 @@ export class SpacesService extends BaseService {
     return await BazaarApi.addAlly(this.core.conduit!, ship);
   }
 
-  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
-    this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
+    return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
+    // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
   }
 
   setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {

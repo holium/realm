@@ -102,7 +102,7 @@
   $%  [%pin path=space-path:spaces =app-id rank=(unit @ud)]
       [%unpin path=space-path:spaces =app-id]
       :: bulk pin ordering to facilitate efficiency/ease in UI
-      [%set-pin-order path=space-path:spaces =(list app-id)]
+      [%set-pin-order path=space-path:spaces order=(list app-id)]
       [%recommend path=space-path:spaces =app-id]
       [%unrecommend path=space-path:spaces =app-id]
       [%suite-add path=space-path:spaces =app-id rank=@ud]

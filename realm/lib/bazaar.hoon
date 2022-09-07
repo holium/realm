@@ -16,6 +16,7 @@
       %-  of
       :~  [%pin add-pin]
           [%unpin rem-pin]
+          [%set-pin-order set-pin-order]
           [%recommend add-rec]
           [%unrecommend rem-rec]
           [%suite-add suite-add]
@@ -33,6 +34,13 @@
       %-  ot
       :~  [%path pth]
           [%app-id so]
+      ==
+    ::
+    ++  set-pin-order
+      %-  ot
+      :~  [%path pth]
+          [%app-id so]
+          [%order (ar so)]
       ==
     ::
     ++  add-rec

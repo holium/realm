@@ -314,6 +314,32 @@ export const BazaarApi = {
       });
     });
   },
+  setPinnedOrder: async (conduit: Conduit, path: SpacePath, order: any[]) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'set-pin-order': {
+            path: pathObj,
+            ord: order,
+          },
+        },
+        reaction: 'bazaar-reaction.set-pin-order',
+        onReaction: (data: any) => {
+          resolve(data['set-pin-order']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
   loadTreaties: (conduit: Conduit, state: BazaarStoreType): void => {},
   watchUpdates: (conduit: Conduit, state: BazaarStoreType): void => {
     conduit.watch({
@@ -374,6 +400,15 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'unpin':
       {
         const detail = data['unpin'];
+        const space = Object.keys(detail)[0];
+        const app = detail[space];
+        // @ts-ignore
+        state.getBazaar(space)?.setPinnedApps(app.sort);
+      }
+      break;
+    case 'set-pin-order':
+      {
+        const detail = data['set-pin-order'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore

@@ -319,13 +319,13 @@
     (bazaar:send-reaction [%unpin path [app-id sieve.app-lite app] pinned.sorts.apps] paths)
   ::
   ++  set-pin-order
-    |=  [path=space-path:spaces-store ord=(list app-id:store)]
+    |=  [path=space-path:spaces-store order=(list app-id:store)]
     ^-  (quip card _state)
     =/  apps            (~(got by space-apps.state) path)
-    =.  pinned.sorts.apps  ord
+    =.  pinned.sorts.apps  order
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%set-pin-order path ord] paths)
+    (bazaar:send-reaction [%set-pin-order path order] paths)
   ::
   ::  $add-rec: note that recommending an app potentially changes the order
   ::    of the app in the recommendations list; therefore the new order (ord)
