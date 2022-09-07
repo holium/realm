@@ -129,7 +129,7 @@ export class WalletService extends BaseService {
 //        this.state!.bitcoin.applyTransactionUpdate(transaction);
     });
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
-      console.log(history);
+      this.state!.ethereum.applyHistory(history);
     });
 
     this.setNetworkProvider('realm.tray.wallet.set-network-provider', 'ethereum', 'http://127.0.0.1:8545');

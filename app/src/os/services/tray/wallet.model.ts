@@ -127,6 +127,9 @@ export const EthStore = types
       })
       applySnapshot(self.wallets, ethWallets);
     },
+    applyHistory(history: any) {
+
+    },
     // pokes
     setProvider(provider: string) {
       self.settings.provider = provider;
