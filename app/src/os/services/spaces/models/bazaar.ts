@@ -1,6 +1,6 @@
 import { types, Instance } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-import { NativeAppList, nativeApps } from '../../../../renderer/apps';
+// import { NativeAppList, nativeApps } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob, AppTypes } from '../../ship/models/docket';
 
 export const DocketMap = types.map(
@@ -13,7 +13,7 @@ const AppRankModel = types.model({
   suite: types.number,
 });
 
-const BazaarApp = types.model({
+const UrbitApp = types.model({
   id: types.identifier,
   // ship: types.string,
   tags: types.array(types.string),
@@ -28,6 +28,29 @@ const BazaarApp = types.model({
   website: types.string,
   license: types.string,
 });
+
+const NativeApp = types.model({
+  id: types.identifier,
+  // ship: types.string,
+  tags: types.array(types.string),
+  ranks: AppRankModel,
+  title: types.string,
+  info: types.string,
+  color: types.string,
+  type: types.optional(AppTypes, 'urbit'),
+  icon: types.maybeNull(types.string),
+});
+
+const BazaarApp = types.map(
+  types.union(
+    {
+      eager: true,
+    },
+    UrbitApp,
+    NativeApp
+  )
+);
+
 export type BazaarAppType = Instance<typeof BazaarApp>;
 
 export const BazaarModel = types
@@ -37,11 +60,11 @@ export const BazaarModel = types
     pinned: types.array(types.string),
     recommended: types.array(types.string),
     suite: types.array(types.string),
-    apps: types.map(BazaarApp),
+    apps: BazaarApp,
   })
   .views((self) => ({
     get allApps() {
-      return Array.from([...self.apps!.values(), ...NativeAppList]);
+      return Array.from(self.apps!.values());
     },
     // todo: sort by recommended rank (liked count)
     get recommendedApps() {
@@ -61,32 +84,37 @@ export const BazaarModel = types
     },
     get recentAppList() {
       const recents = self.recentApps;
-      return [...Array.from(self.apps!.values()), ...NativeAppList]
+      return Array.from(self.apps!.values())
         .filter((app: any) => recents.includes(app.id))
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
     get recentDevList() {
       const recents = self.recentDevs;
-      return [...Array.from(self.apps!.values()), ...NativeAppList]
+      return Array.from(self.apps!.values())
         .filter((app: any) => recents.includes(app.id))
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
     isNativeApp(appId: string) {
-      return nativeApps.hasOwnProperty(appId);
+      return self.apps.get(appId).type === 'native';
     },
     isAppPinned(appId: string) {
       return self.pinned.includes(appId);
     },
     getAppData(appId: string) {
-      const all = [...Array.from(self.apps!.values()), ...NativeAppList];
-      const idx = all.findIndex((item) => item.id === appId);
-      return idx === -1 ? undefined : all[idx];
+      const app = self.apps.get(appId);
+      console.log('getAppData => %o', app);
+      return app;
+      // const all = [...Array.from(self.apps!.values()), ...NativeAppList];
+      // const idx = all.findIndex((item) => item.id === appId);
+      // return idx === -1 ? undefined : all[idx];
     },
   }))
   .actions((self) => ({
     addApp(app: BazaarAppType) {
       const appColor = app.color;
-      app.color = appColor && cleanNounColor(appColor);
+      if (app.type === 'urbit') {
+        app.color = appColor && cleanNounColor(appColor);
+      }
       self.apps.set(app.id, app);
     },
     updateApp(app: BazaarAppType) {
@@ -98,7 +126,7 @@ export const BazaarModel = types
     findApps(searchString: string) {
       // const matches = [];
       const str = searchString.toLowerCase();
-      const apps = Array.from([...self.apps!.values(), ...NativeAppList]);
+      const apps = Array.from(self.apps!.values());
       return apps.filter((item) => item.title.toLowerCase().startsWith(str));
       // for (const app of self.allApps) {
       //   if (app[1].title.toLowerCase().startsWith(str)) {

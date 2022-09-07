@@ -35,13 +35,45 @@
   ::  scry docket for charges
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
   ?>  ?=([%initial *] charge-update)
-  =/  apps=app-index-lite:store  (index:apps:core initial.charge-update)
-  =/  our-space             [our.bowl 'our']
+  =/  apps=app-index-lite:store           (index:apps:core initial.charge-update)
+  %-  (slog leaf+"{<[apps]>}" ~)
+  =/  our-space                           [our.bowl 'our']
   :: build slimmed down space specific app (metadata) from docket charges (installed apps)
-  =.  space-apps.state      (~(put by space-apps.state) our-space [apps *sorts:store])
+  :: =/  index      (~(put by space-apps.state) our-space [apps *sorts:store])
   :: build robust app catalog from docket charges (installed apps)
-  =.  app-catalog.state     (catalog:apps:core initial.charge-update)
-  :: ~&  >>>  "{<space-apps.state>}"
+  =/  catalog     (catalog:apps:core initial.charge-update)
+
+  :: also setup some native apps that are not part of the docket
+
+  ::  configure browser
+  =|  =app-lite:store
+  =.  id.app-lite                         %os-browser
+  =.  ranks.sieve.app-lite                [0 0 0]
+  =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) %installed)
+  =/  apps                                (~(put by apps) id.app-lite app-lite)
+
+  =|  =native-app:store
+  =.  title.native-app                    'Relic Browser'
+  =.  color.native-app                    '#92D4F9'
+  =.  icon.native-app                     'AppIconCompass'
+  =/  catalog                             (~(put by catalog) id.app-lite [%native native-app])
+
+  ::  configure settings
+  =|  =app-lite:store
+  =.  id.app-lite                         %os-settings
+  =.  ranks.sieve.app-lite                [0 0 0]
+  =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) %installed)
+  =/  apps                                (~(put by apps) id.app-lite app-lite)
+
+  =|  =native-app:store
+  =.  title.native-app                    'Settings'
+  =.  color.native-app                    '#ACBCCB'
+  =.  icon.native-app                     'AppIconSettings'
+  =/  catalog                             (~(put by catalog) id.app-lite [%native native-app])
+
+  =.  space-apps.state                    (~(put by space-apps.state) our-space [apps *sorts:store])
+  =.  app-catalog.state                   catalog
+
   :_  this
   :~  ::  listen for charge updates (docket/desk)
       [%pass /docket %agent [our.bowl %docket] %watch /charges]
@@ -88,6 +120,7 @@
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
       =/  apps  initial:apps:core
+      ~&  >>  "{<dap.bowl>}: sending %initial {<[%initial apps]>}"
       :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
       (bazaar:send-reaction:core [%initial apps] [/updates ~])
     ::
@@ -451,6 +484,7 @@
         =.  pinned.ranks.sieve.app-lite  (add pinned.ranks.sieve.app-lite 1)
         app-lite
       app-lite
+      %-  (slog leaf+"adding {<[app-id updated-app]>} to apps..." ~)
       (~(put by acc) app-id updated-app)
   ::
   ++  unpin
@@ -500,6 +534,7 @@
     ^-  (unit app-index-full:store)
     ?.  (~(has by space-apps.state) path)  ~
     =/  apps  (~(got by space-apps.state) path)
+    ~&  >>>  "{<dap.bowl>}: {<app-catalog:state>}"
     =/  result=app-index-full:store
     %-  ~(rep by index.apps)
     |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
@@ -510,11 +545,13 @@
               ==
           ==  acc
       :: =/  charge  (~(get by charges.state) app-id)
+
       =/  app  (~(get by app-catalog.state) app-id)
       =|  app-full=app-full:store
       =.  id.app-full        app-id
       =.  sieve.app-full     sieve.app-lite
       ?~  app
+        ~&  >>>  "{<dap.bowl>}: app {<app-id>} not found."
         =.  pkg.app-full     [%missing ~]
         (~(put by acc) app-id app-full)
       =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)

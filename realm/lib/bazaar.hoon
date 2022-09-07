@@ -237,12 +237,14 @@
     ?-  -.app
       ::
       %native
-        :~  desk+s+desk.native-app.app
+        :: :~  desk+s+desk.native-app.app
+        :~  type+s+%native
             title+s+title.native-app.app
             info+s+info.native-app.app
-            color+s+(scot %ux color.native-app.app)
-            image+s+image.native-app.app
-            href+(href href.native-app.app)
+            :: color+s+(scot %ux color.native-app.app)
+            color+s+color.native-app.app
+            icon+s+icon.native-app.app
+            :: href+(href href.native-app.app)
         ==
       ::
       %web
@@ -301,7 +303,8 @@
   ++  dkt
     |=  =docket:docket
     ^-  (list [cord json])
-    :~  title+s+title.docket
+    :~  type+s+%urbit
+        title+s+title.docket
         info+s+info.docket
         color+s+(scot %ux color.docket)
         href+(href href.docket)

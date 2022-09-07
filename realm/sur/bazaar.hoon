@@ -24,12 +24,12 @@
 +$  app-id  @tas
 ::
 +$  native-app
-  $:  desk=@tas
-      title=@t
+  $:  title=@t
       info=@t
-      color=@ux
-      image=cord
-      =href
+      color=cord
+      icon=cord
+      :: image=cord
+      :: =href
   ==
 ::
 +$  web-app

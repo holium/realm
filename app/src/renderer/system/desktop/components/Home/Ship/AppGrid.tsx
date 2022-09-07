@@ -51,7 +51,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             disabled: isAppRecommended,
             onClick: (evt: any) => {
               evt.stopPropagation();
-              SpacesAction.recommendApp(spacePath, app.id);
+              SpacesActions.recommendApp(spacePath, app.id);
             },
           },
           {
