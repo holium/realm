@@ -6,6 +6,7 @@ import { ShellService } from './services/shell/shell.service';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { RoomsService } from './services/tray/rooms.service';
+import { WalletService } from './services/tray/wallet.service';
 
 export const osPreload = {
   ...Realm.preload,
@@ -17,6 +18,7 @@ export const osPreload = {
   onboarding: OnboardingService.preload,
   tray: {
     rooms: RoomsService.preload,
+    wallet: WalletService.preload,
   },
 };
 

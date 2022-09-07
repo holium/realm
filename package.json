@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1204.0",
+    "ethers": "^5.7.0",
     "moment": "^2.29.4",
     "react-infinite-scroll-component": "^6.1.0"
   }
