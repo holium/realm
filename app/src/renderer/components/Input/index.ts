@@ -5,5 +5,6 @@ export * from './FileUpload';
 export * from './Checkbox';
 export * from './InlineEdit';
 export * from './RadioGroup';
+export * from './RadioImages';
 export * from './RadioList';
 export * from './Select';

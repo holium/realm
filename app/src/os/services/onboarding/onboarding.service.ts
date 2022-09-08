@@ -311,7 +311,7 @@ export class OnboardingService extends BaseService {
     return ourProfile;
   }
 
-  async setProfile(
+  async setProfile (
     _event: any,
     profileData: {
       nickname: string;

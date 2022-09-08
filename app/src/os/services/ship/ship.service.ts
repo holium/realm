@@ -72,6 +72,9 @@ export class ShipService extends BaseService {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.get-dm-log': this.getDMLog,
     'realm.ship.send-dm': this.sendDm,
+    'realm.ship.get-metadata': this.getMetadata,
+    'realm.ship.get-contact': this.getContact,
+    'realm.ship.save-my-contact': this.saveMyContact,
     'realm.ship.draft-dm': this.draftNewDm,
     'realm.ship.accept-dm-request': this.acceptDm,
     'realm.ship.decline-dm-request': this.declineDm,
@@ -107,6 +110,9 @@ export class ShipService extends BaseService {
     },
     getContact: (ship: string) => {
       return ipcRenderer.invoke('realm.ship.get-contact', ship);
+    },
+    saveMyContact: (profileData: any) => {
+      return ipcRenderer.invoke('realm.ship.save-my-contact', profileData);
     },
     getDMs: () => {
       return ipcRenderer.invoke('realm.ship.get-dms');
@@ -407,6 +413,23 @@ export class ShipService extends BaseService {
     const contact = this.models.contacts?.getContactAvatarMetadata(patp);
     return contact;
   }
+  //
+  async saveMyContact(_event:IpcMainInvokeEvent, profileData: any) {
+
+
+    await ContactApi.saveContact(
+      this.core.conduit!,
+      this.state!.patp,
+      profileData
+    );
+
+    this.state?.setOurMetadata(profileData);
+
+
+    return;
+
+  }
+  
   getMetadata(_event: any, path: string): any {
     return this.metadataStore['graph'][path];
   }
