@@ -21,19 +21,26 @@ export class RealmWallet {
   private hdWallets: Map<Addr, ethers.utils.HDNode> = new Map();
 
   constructor() {
+    console.log('constructing RealmWallet')
     this.ethProvider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     );
   }
 
   loadWallet(mnemonic: string) {
+    console.log('loading wallet')
     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
     return wallet;
   }
 
   generateWallet() {
+    console.log('creating wallet')
     const wallet = ethers.Wallet.createRandom();
     this.wallets.set(wallet.publicKey, wallet);
+  }
+
+  static genWallet() {
+    return ethers.Wallet.createRandom();
   }
 
   async generateEthWallets() {
