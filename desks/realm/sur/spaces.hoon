@@ -5,6 +5,7 @@
 /-  membership
 |%
 ::
++$  group-space   [creator=ship name=@tas title=@t picture=@t color=@ux]
 +$  token
   $:  chain=?(%ethereum %uqbar)
       contract=@t

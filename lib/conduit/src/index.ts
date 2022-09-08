@@ -81,7 +81,7 @@ export class Conduit extends EventEmitter {
       await this.poke({
         app: 'hood',
         mark: 'helm-hi',
-        json: 'Opening API channel',
+        json: 'Opening Realm API channel',
       });
       return;
     }
@@ -207,6 +207,7 @@ export class Conduit extends EventEmitter {
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }
+    console.log(params)
     // Properly waiting
     const [_req, res] = await Promise.all([
       this.postToChannel(message),

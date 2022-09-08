@@ -7,35 +7,36 @@
 ++  max-occupancy      6
 ++  max-rooms          256
 ::
-++  leave-rooms
-  :: remove ship from all rooms
-  ::
-  :: this enforces cleanliness
-  |=  [rooms=(map rid room) =ship]
-  ^-  (map rid room)
-  =/  looms  ~(val by rooms)
-  :: create list of rooms to use |-
-  :: -
-  :: remove ship from every room
-  =.  looms
-    |-
-    ?~  looms  ~
-    =*  loom  i.looms
-    =?  present.loom
-        %-
-        ~(has in present.loom)
-        ship
-      ::
-      (~(del in present.loom) ship)
-      ::
-    [loom $(looms t.looms)]
-  ::
-  :: turn the list back into a map
-  %-  ~(gas by rooms)
-  |-
-  ?~  looms  ~
-  :-  [rid.i.looms i.looms]
-  $(looms t.looms)
+:: ++  leave-rooms
+::   :: remove ship from all rooms
+::   ::
+::   :: this enforces cleanliness
+::   |=  [rooms=(map rid room) =ship]
+::   ^-  (map rid room)
+::   :: TODO should this return bump %exit =ship cards?
+::   =/  looms  ~(val by rooms)
+::   :: create list of rooms to use |-
+::   :: -
+::   :: remove ship from every room
+::   =.  looms
+::     |-
+::     ?~  looms  ~
+::     =*  loom  i.looms
+::     =?  present.loom
+::         %-
+::         ~(has in present.loom)
+::         ship
+::       ::
+::       (~(del in present.loom) ship)
+::       ::
+::     [loom $(looms t.looms)]
+::   ::
+::   :: turn the list back into a map
+::   %-  ~(gas by rooms)
+::   |-
+::   ?~  looms  ~
+::   :-  [rid.i.looms i.looms]
+::   $(looms t.looms)
 ::
 ::
 :: welcome to the fun part
@@ -57,7 +58,11 @@
     :-  -.upd
     ?-  -.upd
     %room
-      (room:encode room.upd)
+      %-  pairs
+      :~
+      ['room' (room:encode room.upd)]
+      ['diff' (update-diff:encode diff.upd)]
+      ==
     %rooms
       :-  %a
       %+  turn
@@ -69,6 +74,7 @@
       :~
       ['provider' %s (scot %p provider.upd)]
       ['id' %s rid.upd]
+      ['title' %s title.upd]
       ['invitedBy' %s (scot %p ship.upd)]
       ==
     %kicked
@@ -76,6 +82,7 @@
       :~
       ['provider' %s (scot %p provider.upd)]
       ['id' %s rid.upd]
+      ['title' %s title.upd]
       ['kickedBy' %s (scot %p ship.upd)]
       ==
     %chat 
@@ -133,6 +140,17 @@
     ['present' (set-ship present.room)]
     ['whitelist' (set-ship whitelist.room)]
     ==
+  ++  update-diff
+    |=  diff=^update-diff
+    ^-  json
+    %+  frond  -.diff
+    ?-  -.diff
+      %enter
+        [%s (scot %p ship.diff)]
+      %exit
+        [%s (scot %p ship.diff)]
+      %other  ~
+    ==
   ++  set-ship
     |=  ships=(set @p)
     ^-  json
@@ -141,7 +159,7 @@
       ~(tap in ships)
       |=  her=@p
       [%s (scot %p her)]
-++  unit-ship
+  ++  unit-ship
     |=  who=(unit @p)
     ^-  json
     ?~  who

@@ -64,7 +64,7 @@
         status=%host
       ]
     =/  our-members  (malt `(list (pair ship passport:store))`~[[our.bowl our-member]])
-    =/  initial-mem   `districts:store`(malt `(list (pair space-path:spaces passports:store))`~[[[~fes 'our'] our-members]])
+    =/  initial-mem   `districts:store`(malt `(list (pair space-path:spaces passports:store))`~[[[our.bowl 'our'] our-members]])
     =.  membership.state          initial-mem
     :_  this
     ::  %watch: get the initial contact list and watch for updates
@@ -129,6 +129,12 @@
       :: =/  visas   (~(got by invitations.state) [host space-pth])
       :: ?~  passports      ``json+!>(~)
       ``visa-view+!>([%incoming incoming.invitations.state])
+    ::
+    ::  ~/scry/passports/visas.json
+    [%x %visas ~]
+      :: =/  visas   (~(got by invitations.state) [host space-pth])
+      :: ?~  passports      ``json+!>(~)
+      ``invite-view+!>([%invitations invitations.state])
     ::
     ::  ~/scry/passports/~zod/our/members.json
       [%x @ @ %members ~]
@@ -253,7 +259,7 @@
       ::
           %kick
             ~&  >  "{<dap.bowl>}: passports kicked us, resubscribing..."
-            ~&  >  [sign]
+            :: ~&  >  [sign]
             :_  this
             :~  [%pass /passports %agent [our.bowl %spaces] %watch /all]
             ==

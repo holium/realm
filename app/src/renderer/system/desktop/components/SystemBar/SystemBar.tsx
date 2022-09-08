@@ -3,7 +3,7 @@ import { Flex } from 'renderer/components';
 import { HomeButton } from './components/HomeButton';
 import { ShipTray } from './components/ShipBar';
 import { CommunityBar } from './components/CommunityBar';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './apps';
 import { useServices } from 'renderer/logic/store';
@@ -41,10 +41,7 @@ export const SystemBar: FC<SystemBarProps> = observer(
                 backgroundColor={windowColor}
                 textColor={textColor}
               >
-                <TrayAppView
-                  theme={desktop.theme}
-                  dimensions={dimensions}
-                />
+                <TrayAppView theme={desktop.theme} dimensions={dimensions} />
               </MiniApp>
             }
           />

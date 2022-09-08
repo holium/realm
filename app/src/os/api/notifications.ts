@@ -8,6 +8,7 @@ export const NotificationsApi = {
     conduit.watch({
       app: 'hark-store',
       path: '/updates',
+
       onEvent: async (data: any) => {
         console.log(`hark-store: ${util.inspect(data, false, 10, true)}`);
         if (data.more) {

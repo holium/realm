@@ -1,25 +1,25 @@
 import { FC, useState, useEffect } from 'react';
 import { toJS } from 'mobx';
-import { observer, Provider } from 'mobx-react';
+import { observer } from 'mobx-react';
 import {
   Grid,
   Flex,
   Icons,
   Text,
   TextButton,
+  InnerNotification,
+  Tooltip,
   IconButton,
+  Spinner,
 } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { Row } from 'renderer/components/NewRow';
 import { RoomRow } from './components/RoomRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
-import { rgba } from 'polished';
-import { fontSize } from 'styled-system';
-import { SoundActions } from 'renderer/logic/actions/sound';
+import { ProviderSelector } from './components/ProviderSelector';
 export type RoomListProps = {
   theme: ThemeModelType;
   dimensions: {
@@ -68,26 +68,9 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           >
             Rooms
           </Text>
-
-          {roomsApp.provider !== '' && roomsApp.provider !== ship!.patp && (
-            <Flex className="realm-cursor-hover" justifyContent="center">
-              <IconButton
-                ml={2}
-                color={'#000000'}
-                opacity={0.5}
-                onClick={(evt: any) => {
-                  evt.stopPropagation();
-                  // TODO set to current spacehost
-                  RoomsActions.setProvider(ship!.patp!);
-                }}
-              >
-                <Icons name="Logout" />
-              </IconButton>
-              <Text opacity={0.5} fontSize={2}>
-                {roomsApp.provider}
-              </Text>
-            </Flex>
-          )}
+          {roomsApp.isLoadingList && (
+           <Spinner pl={2} size={0} />
+           )}
         </Flex>
         <Flex ml={1} pl={2} pr={2}>
           <TextButton
@@ -101,52 +84,8 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           </TextButton>
         </Flex>
       </Titlebar>
-      <Flex style={{ marginTop: 54 }} flex={1} flexDirection="column">
-        {roomsApp.invitesList.map((value: any) => (
-          <Row
-            noHover
-            key={`${value.id}-invite`}
-            baseBg={rgba(inviteColor, 0.12)}
-            customBg={rgba(inviteColor, 0.16)}
-          >
-            <Flex
-              width="100%"
-              alignItems="center"
-              justifyContent="space-between"
-              className="realm-cursor-hover"
-            >
-              <Text color={inviteColor} fontWeight={500} fontSize={2}>
-                Invite: {value.id} - {value.invitedBy}
-              </Text>
-
-              <Flex gap={4}>
-                <IconButton
-                  color={inviteColor}
-                  // backgroundColor={rgba(inviteColor, 0.24)}
-                  // hoverFill={rgba('#D0384E', 0.24)}
-                  onClick={(evt: any) => {
-                    evt.stopPropagation();
-                    RoomsActions.acceptInvite(value.id);
-                  }}
-                >
-                  <Icons name="Plus" />
-                </IconButton>
-                <IconButton
-                  color={'#D0384E'}
-                  // hoverFill={rgba('#D0384E', 0.24)}
-                  // backgroundColor={rgba('#D0384E', 0.24)}
-                  onClick={(evt: any) => {
-                    evt.stopPropagation();
-                    console.log('clicked');
-                    RoomsActions.dismissInvite(value.id);
-                  }}
-                >
-                  <Icons name="Close" />
-                </IconButton>
-              </Flex>
-            </Flex>
-          </Row>
-        ))}
+      <Flex style={{ marginTop: 54 }} gap={8} flex={1} flexDirection="column">
+        
         {knownRooms.length === 0 && (
           <Flex
             flex={1}
@@ -172,7 +111,9 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
               provider={room!.provider}
               present={room!.present}
               cursors={room!.cursors}
+              creator={room!.creator}
               access={room!.access}
+              capacity={room!.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
                 if (!roomsApp.isRoomValid(room!.id)) {
@@ -192,14 +133,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
                     // conditionally delete old room
                     RoomsActions.deleteRoom(roomsApp.liveRoom.id);
                   }
-                  // if (
-                  //   // if this room is strange
-                  //   room.provider !== roomsApp.provider
-                  // ) {
-                  //   // unset aka "forget"
-                  //   RoomsActions.unsetKnownRoom(room.id);
-                  // }
-
                   await RoomsActions.joinRoom(room.id);
                   RoomsActions.setView('room');
                   await RoomsActions.requestAllRooms();
@@ -209,6 +142,49 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           );
         })}
       </Flex>
+      {roomsApp.invitesList.map((value: any) => (
+        <Flex key={value.id} flexDirection="column" width="100%">
+          <InnerNotification
+            id={value.id}
+            title={value.title}
+            seedColor="#F08735"
+            subtitle={`Sent by: ${value.invitedBy}`}
+            actionText="Accept"
+            onAction={(id: string) => {
+              console.log('accepting invite', id);
+              RoomsActions.acceptInvite(value.id);
+            }}
+            onDismiss={(id: string) => {
+              console.log('removing invite', id);
+              RoomsActions.dismissInvite(value.id);
+            }}
+          />
+        </Flex>
+      ))}
+      <Flex mt={3} pb={4} justifyContent="flex-start">
+        <IconButton
+          onClick={() => {
+              RoomsActions.requestAllRooms();
+              RoomsActions.refreshLocalRoom();
+            }}
+        >
+          <Icons opacity={0.8} name="Refresh" size={26} mr={2} />
+        </IconButton>
+        <Tooltip
+          id="room-provider"
+          placement="top"
+          content="This is your room provider."
+        >
+          <ProviderSelector
+            seedColor={windowColor}
+            onClick={() => {
+              console.log('show provider setup');
+            }}
+          />
+        </Tooltip>
+      </Flex>
+
+      
     </Grid.Column>
   );
 });

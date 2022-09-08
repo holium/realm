@@ -6,8 +6,7 @@
 ++  grow
   |%
   ++  noun  viw
-  ++  json  
-    (view:enjs viw)
+  ++  json  (view:enjs viw)
   --
 ::
 ++  grab

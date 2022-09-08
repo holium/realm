@@ -5,7 +5,7 @@ import { rgba } from 'polished';
 import { Flex, Pulser, Sigil } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 
 type AccountTrayProps = {

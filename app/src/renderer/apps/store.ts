@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import { Room } from '@holium/realm-room';
 import {
   applyPatch,
   Instance,
@@ -8,9 +9,15 @@ import {
   applySnapshot,
 } from 'mobx-state-tree';
 
-import { RoomsAppState } from 'os/services/tray/rooms.model';
-import { SoundActions } from '../actions/sound';
-import { OSActions } from '../actions/os';
+import { SlipActions } from './../logic/actions/slip';
+import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
+import { SoundActions } from '../logic/actions/sound';
+import { OSActions } from '../logic/actions/os';
+import { Patp } from 'os/types';
+import { SlipType } from 'os/services/slip.service';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
+import { RoomDiff } from 'os/services/tray/rooms.service';
+import { IpcMessageEvent } from 'electron';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -74,30 +81,19 @@ export const trayStore = TrayAppStore.create({
     width: 200,
     height: 200,
   },
-  roomsApp: (persistedState && persistedState.roomsApp) || {
+  roomsApp: {
     currentView: 'list',
-    // rooms: [], TODO
   },
-});
-
-// Watch actions for sound trigger
-onAction(trayStore, (call) => {
-  if (call.path === '/roomsApp') {
-    if (call.name === '@APPLY_SNAPSHOT') return;
-    const patchArg = call.args![0][0];
-    if (patchArg.path === '/liveRoom') {
-      if (patchArg.op === 'replace') {
-        patchArg.value
-          ? SoundActions.playRoomEnter()
-          : SoundActions.playRoomLeave();
-      }
-    }
-  }
+  // roomsApp: (persistedState && persistedState.roomsApp) || {
+  //   currentView: 'list',
+  //   // rooms: [], TODO
+  // },
 });
 
 onSnapshot(trayStore, (snapshot) => {
   localStorage.setItem('trayStore', JSON.stringify(snapshot));
 });
+
 // -------------------------------
 // Create core context
 // -------------------------------
@@ -113,17 +109,68 @@ export function useTrayApps() {
   return store;
 }
 
-// After boot, set the initial data
-OSActions.onBoot((_event: any, response: any) => {
-  if (response.rooms) {
-    applySnapshot(trayStore.roomsApp, response.rooms);
+// Set up room listeners
+export const LiveRoom = new Room((to: Patp[], data: any) => {
+  SlipActions.sendSlip(to, data);
+});
+
+SlipActions.onSlip((_event: Event, slip: SlipType) => {
+  LiveRoom.onSlip(slip);
+});
+
+RoomsActions.onRoomUpdate(
+  (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
+    console.log('room diff in renderer', diff);
+    LiveRoom.onDiff(diff, room);
+  }
+);
+
+// Watch actions for sound trigger
+onAction(trayStore, (call) => {
+  if (call.path === '/roomsApp') {
+    if (call.name === '@APPLY_SNAPSHOT') return;
+    const patchArg = call.args![0][0];
+    if (patchArg.path === '/liveRoom') {
+      if (patchArg.op === 'replace') {
+        patchArg.value
+          ? SoundActions.playRoomEnter()
+          : SoundActions.playRoomLeave();
+        if (patchArg.value) {
+          // Entering or switching room
+          const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
+          console.log('entering and switching to connect');
+          if (room) LiveRoom.connect(room);
+        }
+      }
+    }
   }
 });
 
-window.electron.os.onEffect((_event: any, value: any) => {
+// After boot, set the initial data
+OSActions.onBoot((_event: any, response: any) => {
+  LiveRoom.init(response.ship.patp!);
+  if (response.rooms) {
+    applySnapshot(trayStore.roomsApp, response.rooms);
+    if (trayStore.roomsApp.liveRoom) {
+      const { liveRoom } = trayStore.roomsApp;
+      if (liveRoom) {
+        LiveRoom.connect(liveRoom);
+      }
+    }
+  }
+});
+
+// Listen for all patches
+OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
     }
+  }
+});
+// After boot, set the initial data
+OSActions.onBoot((_event: any, response: any) => {
+  if (response.rooms) {
+    applySnapshot(trayStore.roomsApp, response.rooms);
   }
 });
