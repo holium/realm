@@ -21,6 +21,15 @@ export const constructSampleWallet = async () => {
   return await realmWallet.generateEthWallets();
 };
 
+export enum WalletView {
+  ETH_LIST = 'ethereum:list',
+  ETH_NEW = 'ethereum:new',
+  ETH_DETAIL = 'ethereum:detail',
+  ETH_TRANSACTION = 'ethereum:transaction',
+  ETH_SETTINGS = 'ethereum:settings',
+  BIT_LIST = 'bitcoin:list'
+}
+
 const BitcoinWallet = types.model('BitcoinWallet', {
   network: types.string,
   address: types.string,
@@ -102,28 +111,45 @@ const EthStore = types
 export const WalletStore = types
   .model('WalletStore', {
     network: types.enumeration(['ethereum', 'bitcoin']),
+    hdWallet: types.maybe(types.string),
     currentView: types.enumeration([
       'ethereum:list',
+      'ethereum:new',
       'ethereum:detail',
       'ethereum:transaction',
       'ethereum:settings',
       'bitcoin:list',
     ]),
+    currentAddress: types.maybe(types.string),
     bitcoin: types.maybe(BitcoinStore),
     ethereum: EthStore,
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
+      console.log('setting initial wallet store')
       if (network === 'ethereum') {
         self.ethereum.initial(wallets);
         self.currentView = 'ethereum:list';
+        self.currentAddress = '0xB017058f7De4efF370AC8bF0c84906BEC3d0b2CE';
       } else {
         //  self.bitcoin.initial(wallets);
         self.currentView = 'bitcoin:list';
       }
       // if (network === 'bitcoin') self.bitcoin.initial(wallets);
     },
+    setHdWallet() {
+      self.hdWallet = 'bub';
+    },
+    setView(view: WalletView, address?: string) {
+      self.currentView = view;
+      if (view.includes('detail')) {
+        self.currentAddress = address;
+      } else {
+        self.currentAddress = undefined;
+      }
+    },
     setNetwork(network: 'bitcoin' | 'ethereum') {
+      console.log('setting network in wallet store')
       self.network = network;
       if (network === 'ethereum') {
         self.currentView = 'ethereum:list';
