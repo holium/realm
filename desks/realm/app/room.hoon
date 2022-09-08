@@ -4,7 +4,7 @@
 /-  store=rooms
 /+  lib=rooms
 /+  dbug, default-agent
-/+  agentio
+:: /+  agentio
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -14,6 +14,7 @@
   $:  %0
       my-room=(unit room:store)
       provider=(unit ship)
+      outstanding-request=_|
   ==
 --
 %-  agent:dbug
@@ -40,14 +41,37 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
+    :: EXAMPLE SCRY FROM DOJO
+    :: > =store -build-file /=realm=/sur/rooms/hoon
+    :: > .^(view:store %gx /=room=/present/rooms-view)
+    ::  [%present ships={~bus}]
+    ::
+    :: example scry (simple)
+    ::    (doesnt require sur/rooms/hoon)
+    :: 
+    :: .^((set ship) %gx /=room=/present/simple/noun)
+    :: or
+    :: .^((set ship) %gx /(scot %p our)/room/(scot %da now)/present/simple/noun)
+    ::
       [%x ~]
         ``rooms-view+!>([%full my-room provider])
       [%x %present ~]
         :: TODO tall form?
         ::
+        :: rooms-view is a general mar for these scries.
+        ::
         ?~  my-room
           ``rooms-view+!>([%present *(set ship)])
         ``rooms-view+!>([%present present.u.my-room])
+      ::
+      :: no custom mark needed
+      :: no sur needed
+      :: just returns a (set ship)
+      :: cant encode as json
+      [%x %present %simple ~]
+         ?~  my-room
+            ``noun+!>(*(set ship))
+          ``noun+!>(present.u.my-room)
       ::
       [%x %provider ~]
         ``rooms-view+!>([%provider provider])
@@ -60,7 +84,7 @@
       [%room %local ~]
     :_  this
       ?~  my-room  ~
-      [%give %fact [/room/local]~ %rooms-update !>([%room u.my-room])]~
+      [%give %fact [/room/local]~ %rooms-update !>([%room u.my-room [%other ~]])]~
   ==
 ++  on-poke
   |=  [=mark =vase]
@@ -102,10 +126,11 @@
   ^-  (set card)
   %-  ~(run in here)
     |=  =ship
-    %+  poke:pass:agentio
-        [ship client:lib]
-        :-  %rooms-update
-        !>  upd
+    :: %+  poke:pass:agentio
+    [%pass / %agent [ship client:lib] %poke %rooms-update !>(upd)]
+        :: [ship client:lib]
+        :: :-  %rooms-update
+        :: !>  upd
 ::
 ++  action
   |=  [act=action:store]
@@ -116,6 +141,8 @@
     %logout         logout
     %exit           (exit act)
     %chat           (chat +.act)
+    %request        (request act)
+    %request-all    (request-all act)
     %set-provider   (set-provider +.act)
   ==
   ::
@@ -123,15 +150,30 @@
       |=  act=action:store
       =.  my-room  ~
       (fwd-to-provider act)
+    ++  request
+      |=  act=action:store
+      :: disabled for now because
+      :: client UI can't clearly tell the difference between a requested room and an updated room.
+      :: also its not clearly useful for the realm UI.
+      ::
+      `state
+    ++  request-all
+      |=  act=action:store
+      ?:  outstanding-request
+        ~&  >>>  'room request blocked. still awaiting response to a previous request.'
+        `state
+      =.  outstanding-request  &
+      (fwd-to-provider act)
     ++  logout
       =/  dad       +.provider
       =.  my-room   ~
       =.  provider  ~
       :_  state
       :~
-        %+  poke:pass:agentio
-          [dad server:lib]
-          rooms-action+!>([%exit ~])
+        [%pass / %agent [dad server:lib] %poke rooms-action+!>([%exit ~])]
+        :: %+  poke:pass:agentio
+        ::   [dad server:lib]
+        ::   rooms-action+!>([%exit ~])
       ==
     ++  chat
     :: fwd to peers
@@ -145,6 +187,7 @@
       abet
     ++  set-provider
       |=  new-provider=ship
+      :: ~&  >>  ['setting provider' new-provider]
       :: there is some ugliness in this gate
       :: because we need to preserve
       :: `provider`s inferred type as (unit ship)
@@ -156,6 +199,9 @@
           ?~  provider  +(new-provider)
             u.provider
           ::
+        ::
+        :: use this opportunity to reset outstanding request
+        =.  outstanding-request  |
         `state
       ::
       :: save old stuff
@@ -176,6 +222,9 @@
       =.  provider
         [~ new-provider]
       ::
+      :: reset outstanding-request
+      =.  outstanding-request  |
+      ::
       :: exit room remotely
       ::  (if applicable)
       ?~  old-room
@@ -189,21 +238,26 @@
         u.old-provider
       :_  state
       :~
-        %+  poke:pass:agentio
-          [dad server:lib]
-          rooms-action+!>([%exit ~])
+        [%pass /rooms %agent [dad server:lib] %poke rooms-action+!>([%exit ~])]
+        :: %+  poke:pass:agentio
+        ::   [dad server:lib]
+        ::   rooms-action+!>([%exit ~])
       ==
     :: ::
     :: ::
     ++  fwd-to-provider
       |=  [act=action:store]
-      ?~  provider  !!
+      ?~  provider
+        ~&  >>>  [%rooms-no-provider]
+        `state
       =*  dad  u.provider
+      :: ~&  >>  ['fwd to provider' -.act]
       :_  state
       :~
-        %+  poke:pass:agentio
-          [dad server:lib]
-          rooms-action+!>(act)
+        [%pass /rooms %agent [dad server:lib] %poke rooms-action+!>(act)]
+        :: %+  poke:pass:agentio
+        ::   [dad server:lib]
+        ::   rooms-action+!>(act)
       ==
   --
 ::
@@ -234,7 +288,7 @@
       abet
     ::
     ++  room
-      |=  =room:store
+      |=  [=room:store diff=update-diff:store]
       ::  TODO
       ::  if not my provider:
       ::    reply with [%exit ~] action
@@ -248,6 +302,7 @@
     ++  rooms
       |=  rooms=(set room:store)
       ?>  is-provider
+      =.  outstanding-request  |
       :: find and update my-room
       ::
       :: look up room by @p
@@ -268,15 +323,19 @@
       abet
     ::
     ++  invited
-      |=  [provider=ship =rid:store =ship]
-      :: ?>  is-provider :: TODO needed?
+      |=  [provider=ship =rid:store =title:store =ship]
+      ::
+      :: should there be some kind of scry to friends
+      :: to prevent spam invites?
       :: ?>  is-friend   :: TODO needed?
-      ~&  >  :-  %invited
-        [provider rid ship]
+      ~&  >  :-  %room-invited
+        [rid [%provider provider] [%invitedby ship]]
       abet
     ::
     ++  kicked
-      |=  [provider=ship =rid:store =ship]
+      |=  [provider=ship =rid:store =title:store =ship]
+      ~&  >  :-  %room-kicked
+        [provider rid ship]
       ?>  is-provider
       =.  my-room  ~
       abet
@@ -296,15 +355,16 @@
       ^-  (set card)
       %-  ~(run in here)
         |=  =ship
-        %+  poke:pass:agentio
-            [ship client:lib]
-            :-  %rooms-update
-            !>  upd
+        [%pass /room %agent [ship client:lib] %poke %rooms-update !>(upd)]
+        :: %+  poke:pass:agentio
+        ::     [ship client:lib]
+        ::     :-  %rooms-update
+        ::     !>  upd
     ::
     ++  publish-local
       |=  [upd=update:store]
       ^-  card
-      [%give %fact [/room/local]~ %rooms-update !>(upd)]
+      [%give %fact [/room/local ~] %rooms-update !>(upd)]
     ::
     ++  is-provider
       ^-  ?

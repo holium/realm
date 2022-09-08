@@ -1,6 +1,7 @@
 import { FC, useMemo, useState, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
+
 import { useCore, useServices } from 'renderer/logic/store';
 import { Auth } from './auth';
 import { Desktop } from './desktop';
@@ -8,13 +9,13 @@ import {
   BackgroundImage,
   BackgroundFill,
   DimensionMeasurement,
-  ResumingOverlay,
   DragBar,
+  ResumingOverlay,
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
 import { useWindowSize } from 'renderer/logic/lib/measure';
-import { Spinner } from 'renderer/components';
+import { Flex, Spinner } from 'renderer/components';
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();
@@ -35,6 +36,7 @@ export const Shell: FC = observer(() => {
   );
 
   const shipLoaded = ship?.loader.isLoaded;
+
   const GUI = shipLoaded ? (
     <Desktop
       hasLoaded={shipLoaded}
@@ -57,16 +59,6 @@ export const Shell: FC = observer(() => {
           </ResumingOverlay>
         )}
         {!resuming && GUI}
-        {/* {!resuming && shipLoaded && (
-          <Desktop
-            hasLoaded={shipLoaded}
-            hasWallpaper={true}
-            isFullscreen={isFullscreen}
-          />
-        )}
-        {!resuming && !shipLoaded && (
-          <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
-        )} */}
       </BackgroundFill>
     </ViewPort>
   );

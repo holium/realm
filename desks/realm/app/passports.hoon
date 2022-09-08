@@ -130,6 +130,12 @@
       :: ?~  passports      ``json+!>(~)
       ``visa-view+!>([%incoming incoming.invitations.state])
     ::
+    ::  ~/scry/passports/visas.json
+    [%x %visas ~]
+      :: =/  visas   (~(got by invitations.state) [host space-pth])
+      :: ?~  passports      ``json+!>(~)
+      ``invite-view+!>([%invitations invitations.state])
+    ::
     ::  ~/scry/passports/~zod/our/members.json
       [%x @ @ %members ~]
         =/  host        `@p`(slav %p i.t.path)
@@ -253,7 +259,7 @@
       ::
           %kick
             ~&  >  "{<dap.bowl>}: passports kicked us, resubscribing..."
-            ~&  >  [sign]
+            :: ~&  >  [sign]
             :_  this
             :~  [%pass /passports %agent [our.bowl %spaces] %watch /all]
             ==

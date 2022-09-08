@@ -8,18 +8,21 @@ import {
   position,
   color,
   BorderProps,
+  OpacityProps,
+  opacity,
 } from 'styled-system';
 
-export type SigilStyleProps = BorderProps & {
-  clickable?: boolean;
-  active?: boolean;
-  sigilColor?: string;
-  sigilSize?: number;
-  borderRadiusOverride?: string;
-  overlayBorder?: string;
-  raised?: boolean;
-  theme: any;
-};
+export type SigilStyleProps = BorderProps &
+  OpacityProps & {
+    clickable?: boolean;
+    active?: boolean;
+    sigilColor?: string;
+    sigilSize?: number;
+    borderRadiusOverride?: string;
+    overlayBorder?: string;
+    raised?: boolean;
+    theme: any;
+  };
 
 export const AvatarWrapper = styled(styled.div`
   appearance: none;
@@ -57,7 +60,9 @@ export const AvatarWrapper = styled(styled.div`
     css`
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     `}
-`)<SigilStyleProps>(compose(space, layout, flexbox, border, position, color));
+`)<SigilStyleProps>(
+  compose(space, layout, opacity, flexbox, border, position, color)
+);
 
 export const SigilStyle = styled(
   styled.div`
@@ -104,4 +109,6 @@ export const SigilStyle = styled(
         box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
       `}
   `
-)<SigilStyleProps>(compose(space, layout, flexbox, border, position, color));
+)<SigilStyleProps>(
+  compose(space, opacity, layout, flexbox, border, position, color)
+);

@@ -10,6 +10,7 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { Patp, SpacePath } from '../../../types';
+// import { InvitationsModel } from './invitations';
 
 const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner']);
 const Status = types.enumeration(['invited', 'joined', 'host']);
@@ -80,7 +81,9 @@ export const MembershipStore = types
 export type MembershipType = Instance<typeof MembershipStore>;
 
 export const MembersStore = types
-  .model({ all: types.map(MembersModel) })
+  .model({
+    all: types.map(MembersModel),
+  })
   .views((self) => ({
     get count() {
       return self.all.size;

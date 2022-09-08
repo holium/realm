@@ -5,7 +5,7 @@
 ::
 /-  store=rooms, spaces
 /+  lib=rooms
-/+  dbug, default-agent, agentio
+/+  dbug, default-agent ::, agentio
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -100,36 +100,96 @@
           %+  lth
           (lent ~(tap in present.room))
           capacity.room
+      ?:  :: ignore if user already in room
+          (~(has in present.room) src.bowl)
+          `state
       ::  access granted
       :: leave old room
-      =.  rooms
-        (leave-rooms:lib rooms src.bowl)
+      =^  cards  state
+        exit
       :: join room
       =.  present.room
         (~(put in present.room) src.bowl)
       =.  rooms
         (insert room)
       :_  state
-      (bump-room room)
+      %+  weld  cards
+      (bump-room-v room [%enter src.bowl])
+    ::
+    ++  create
+      |=  [=rid:store =access:store =title:store enter=?]
+      ::
+      :: assert unique room id
+      ?<  (~(has by rooms) rid)
+      ::
+      :: prevent too many rooms
+      ?>  (lte ~(wyt by rooms) max-rooms:lib)
+      ::
+      :: create room noun
+      =|  =room:store
+      =:  rid.room       rid
+          provider.room  our.bowl
+          access.room    access
+          creator.room   src.bowl
+          title.room     title
+          capacity.room  max-occupancy:lib
+        ==
+      ::
+      :: branch on ifenter. some logic is repeated but this is cleaner
+      ?:  enter
+        :: leave old room
+        =^  cards  state
+          :: call the exit action handler
+          exit
+        ::
+        :: enter new room
+        =.  present.room
+            (~(put in present.room) src.bowl)
+        ::
+        :: creator is always on the whitelist
+        =.  whitelist.room
+          (~(put in whitelist.room) src.bowl)
+        :: insert the room
+        =.  rooms
+          (insert room)
+        ::
+        :: send exit cards and new room bump
+        :_  state
+        %+  weld  cards
+        (bump-room-v room [%enter src.bowl])
+      ::
+      :: not autoenter
+      ::
+      =.  whitelist.room
+        (~(put in whitelist.room) src.bowl)
+      =.  rooms
+        (insert room)
+      ::
+      :: the room is new and empty,
+      :: so no bump
+      `state
+    ::
     ::
     ++  exit
       ::
       :: first look up rid by @p
-      :: TODO move this to lib?
       ::
       :: this assumes that a given ship
       ::   is only in one room.
-      :: TODO leave all old rooms, update all old rooms
-      =/  =rid:store
+      =/  rud=(unit rid:store)
         =/  looms  ~(val by rooms)
         |-
-        ?~  looms  !!
+        ?~  looms  ~
         ?:  %-
             ~(has in present.i.looms)
             src.bowl
             ::
-          rid.i.looms
+          [~ rid.i.looms]
         $(looms t.looms)
+      ::
+      :: ignore if not in a room
+      ?~  rud  `state
+      =/  rid  u.rud
       ::
       :: grabbed the dudes rid
       =/  =room:store
@@ -141,35 +201,7 @@
       =.  rooms
         (insert room)
       :_  state
-      (bump-room room)
-    ::
-    ++  create
-      |=  [=rid:store =access:store =title:store enter=?]
-      ?<  (~(has by rooms) rid)
-      ?>  (lte ~(wyt by rooms) max-rooms:lib)
-      =|  =room:store
-      =:  rid.room       rid
-          provider.room  our.bowl
-          access.room    access
-          creator.room   src.bowl
-          title.room     title
-          capacity.room  max-occupancy:lib
-        ==
-      =?  rooms
-          enter
-        :: leave old rooms
-        (leave-rooms:lib rooms src.bowl)
-      =?  present.room
-          enter
-        :: enter new room
-        (~(put in present.room) src.bowl)
-      ::
-      =.  whitelist.room
-        (~(put in whitelist.room) src.bowl)
-      =.  rooms
-        (insert room)
-      :_  state
-      (bump-room room)
+      (bump-room-v room [%exit src.bowl])
     ::
     ++  set-title
       |=  [=rid:store =title:store]
@@ -229,10 +261,11 @@
         (insert room)
       :_  state
       :-
-      %+  poke:pass:agentio
-          [invited client:lib]
-          :-  %rooms-update
-          !>  [%invited our.bowl rid src.bowl]
+      [%pass /room %agent [invited client:lib] %poke %rooms-update !>([%invited our.bowl rid title.room src.bowl])]
+      :: %+  poke:pass:agentio
+      ::     [invited client:lib]
+      ::     :-  %rooms-update
+      ::     !>  [%invited our.bowl rid src.bowl]
       (bump-room room)
     ::
     ++  kick
@@ -248,11 +281,12 @@
         (insert room)
       :_  state
       :-
-      %+  poke:pass:agentio
-          [kicked client:lib]
-          :-  %rooms-update
-          !>  [%kicked our.bowl rid src.bowl]
-      (bump-room room)
+      [%pass /room %agent [kicked client:lib] %poke %rooms-update !>([%kicked our.bowl rid title.room src.bowl])]
+      :: %+  poke:pass:agentio
+      ::     [kicked client:lib]
+      ::     :-  %rooms-update
+      ::     !>  [%kicked our.bowl rid src.bowl]
+      (bump-room-v room [%exit src.bowl])
     ::
     ++  delete
       |=  =rid:store
@@ -280,10 +314,11 @@
       ::
       :_  state
       :~
-      %+  poke:pass:agentio
-        [src.bowl client:lib]
-        :-  %rooms-update
-        !>  [%room room]
+      [%pass /room %agent [src.bowl client:lib] %poke %rooms-update !>([%room room])]
+      :: %+  poke:pass:agentio
+      ::   [src.bowl client:lib]
+      ::   :-  %rooms-update
+      ::   !>  [%room room]
       ==
     ::
     ++  request-all
@@ -315,15 +350,14 @@
       ::
       :_  state
       :~
-      %+  poke:pass:agentio
-        [src.bowl client:lib]
-        :-  %rooms-update
-        !>  [%rooms rooms-set]
+        [%pass /room %agent [src.bowl client:lib] %poke %rooms-update !>([%rooms rooms-set])]
+      :: %+  poke:pass:agentio
+      ::   [src.bowl client:lib]
+      ::   :-  %rooms-update
+      ::   !>  [%rooms rooms-set]
       ==
     ::
     ::  utilities
-    ::  TODO move update-room to lib
-    ::    call in rooms and room
     ++  update-room
       |=  [=room:store upd=update:store]
       ^-  (list card)
@@ -331,20 +365,34 @@
       ^-  (set card)
       %-  ~(run in present.room)
         |=  =ship
-        %+  poke:pass:agentio
-            [ship client:lib]
-            :-  %rooms-update
-            !>  upd
+        [%pass /room %agent [ship client:lib] %poke %rooms-update !>(upd)]
+        :: %+  poke:pass:agentio
+        ::     [ship client:lib]
+        ::     :-  %rooms-update
+        ::     !>  upd
+    ::
     ++  kick-room
       |=  =room:store
       %+  update-room
         room 
-        [%kicked our.bowl rid.room src.bowl]
+        [%kicked our.bowl rid.room title.room src.bowl]
+    ::
+    :: bump-room verbose
+    :: send an update with an indication of what changed
+    ++  bump-room-v
+      |=  [=room:store diff=update-diff:store]
+      %+  update-room
+        room 
+        [%room room diff]
+    ::
+    :: bump room
+    :: just send a standard update
     ++  bump-room
       |=  =room:store
       %+  update-room
         room 
-        [%room room]
+        [%room room [%other ~]]
+    ::
     ++  insert
       |=  =room:store
       ^-  (map rid:store room:store)

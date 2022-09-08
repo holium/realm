@@ -111,7 +111,7 @@
           :: The space level watch subscription
         =/  host        `@p`(slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
-        ~&  >  [i.t.path host space-pth src.bowl]
+        :: ~&  >  [i.t.path host space-pth src.bowl]
         :: ?>  (check-member:core [host space-pth] src.bowl)     ::  only members should subscribe
         =/  space        (~(got by spaces.state) [host space-pth])
         (member:send-reaction [%space [host space-pth] space] [/spaces/(scot %p host)/(scot %tas space-pth) ~])
@@ -366,10 +366,10 @@
 ++  has-auth
   |=  [path=space-path:store =ship =role:membership-store]
   ::  TODO scry passports
-  ~&  >  [path ship role]
+  :: ~&  >  [path ship role]
   =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
   ?>  ?=(%member -.member)
-  ~&  >  [member]
+  :: ~&  >  [member]
   ::
   ::
   :: =/  member        (~(got by (~(got by membership.state) space-path)) ship)
@@ -381,7 +381,7 @@
   ^-  ?
   =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
   ?>  ?=(%is-member -.member)
-  ~&  >  ['is member' is-member.member]
+  :: ~&  >  ['is member' is-member.member]
   is-member.member
 ::
 ++  is-host

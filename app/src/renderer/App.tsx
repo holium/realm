@@ -2,7 +2,7 @@ import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
-import { FC, useContext, useEffect, useMemo } from 'react';
+import { FC, useContext, useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { theme } from './theme';
 import {
@@ -15,6 +15,7 @@ import {
 } from './logic/store';
 
 import { Mouse } from './system/desktop/components/Mouse';
+
 import { ShellActions } from './logic/actions/shell';
 // import * as RealmMultiplayer from '@holium/realm-multiplayer';
 // import { Presences } from './system/desktop/components/Multiplayer/Presences';
@@ -23,6 +24,7 @@ import { ShellActions } from './logic/actions/shell';
 export const App: FC = observer(() => {
   const { booted, resuming } = useCore();
   const { desktop, shell } = useServices();
+  // const styleRef = useRef(null);
 
   const themeMode = desktop.theme.mode;
 

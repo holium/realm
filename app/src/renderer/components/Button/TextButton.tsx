@@ -23,7 +23,8 @@ type IProps = {
   theme: ThemeType;
   disabled?: boolean;
 } & OpacityProps &
-  ButtonStyleProps & PositionProps;
+  ButtonStyleProps &
+  PositionProps;
 
 export const TextButtonStyle = styled(styled.div`
   font-family: ${(props: any) => props.theme.fonts.body};
@@ -91,6 +92,7 @@ type TextButtonProps = {
   disabled?: boolean;
   style?: any;
   onClick?: (evt: any) => void;
+  onKeyDown?: (evt: any) => void;
 } & PositionProps;
 
 export const TextButton: FC<TextButtonProps> = (props: TextButtonProps) => {
