@@ -1,6 +1,7 @@
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
+import { servicesStore } from 'renderer/logic/store';
 
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 import DisclaimerDialog from 'renderer/system/onboarding/Disclaimer.dialog';
@@ -50,6 +51,11 @@ const initialOnboardingDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <HaveUrbitDialog {...props} />,
+    hasPrevious: () => !servicesStore.identity.auth.firstTime,
+    onPrevious: () => {
+      ShellActions.closeDialog();
+      OnboardingActions.exitOnboarding();
+    },
     onNext(selfHosted: boolean) {
       OnboardingActions.setSelfHosted(selfHosted);
       return selfHosted

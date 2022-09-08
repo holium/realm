@@ -48,10 +48,10 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
     firstStep,
     nextButtonText,
     onNext,
+    hasPrevious,
     onPrevious,
     isValidated,
   } = dialogRenderers[window.id];
-
   useEffect(() => {
     if (firstStep) {
       setValidated(false);
@@ -91,7 +91,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           width={customNext ? 30 : undefined}
         >
           <Flex alignItems="center" justifyContent="flex-start">
-            {onPrevious && (
+            {onPrevious && (hasPrevious && hasPrevious() !== false) && (
               <IconButton
                 customBg={desktop.theme.windowColor}
                 onClick={() => {
