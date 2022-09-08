@@ -38,7 +38,7 @@
     :: todo sort by last-sent
     =/  single-dms      (weld prev-list pen-list)
     =/  group-dms       (grp-dm-prevs our now rolo)
-    [(weld single-dms group-dms)]
+    [(weld single-dms group-dms)] 
     ::
     ::  Performs all the scries needed to build a group dm preview for the list view
     ::
@@ -51,20 +51,17 @@
       %+  turn  group-dms
         |=  ass=association:mtd
         (grp-prev our ass now rolo)
-          ::  TODO check invite store
       =/  graph-invites  (need .^((unit invitatory:inv) %gx /(scot %p our)/invite-store/(scot %da now)/invitatory/graph/noun))
       =/  group-invs     (skim ~(tap by graph-invites) skim-grp-inv)
       =/  group-dm-invs=(list message-preview)
       %+  turn  group-invs
         |=  [hash=@uvH inv=invite:inv]
         (grp-inv our inv now rolo hash)
-      :: ~&  >  [group-dm-invs]
       [(weld dms-list group-dm-invs)]
       ::
       ++  grp-inv         ::  generates group dm invite previews
         |=  [our=ship inv=invite:inv now=@da rolo=rolodex:sur hash=@uvH]
         ^-  message-preview
-        :: ~&  >  inv
         =/  ginv                (ginv our inv now)
         =/  mtd-list            (get-metadata to.ginv our now)
         [path.ginv to.ginv %group-pending %graph-store time.ginv [~] mtd-list (some hash)]
@@ -80,7 +77,7 @@
           [path.glog to.glog %group %graph-store time.glog [~] mtd-list ~] 
         ::
         =/  posts=(list post:gra)
-        %+  turn  ~(val by posts.glog)
+        %+  turn  (skim ~(val by posts.glog) skim-maybe-post)
           |=  [node=node:gra]
           ?<  ?=(%| -.post.node)
           =/  p     ^-(post p.post.node)
@@ -158,7 +155,6 @@
     =/  group-path      (spat /(scot %p entity)/(cord group-name))
     ?>  ?=(%invite -.policy.group)
     =/  to-set          (~(gas in members.group) ~(tap in pending.policy.group))
-    :: ~&  >  [entity to-set]
     =/  node            .^(update:gra %gx /(scot %p our)/graph-store/(scot %da now)/graph/(scot %p entity)/(scot %da dm-name)/noun)   
     ?>  ?=(%add-graph -.+.node)
     =/  post-graph       ^-((map atom node:gra) graph.+.+.node)
@@ -194,6 +190,12 @@
     =/  name-da   (slaw %da name)
     ?~  name-da   
       %.n   
+    %.y
+  ::
+  ++  skim-maybe-post  :: used for skimming out group dm resources from graph-update-3 updates
+    |=  [node=node:gra]
+    ?:  =(%| -.post.node)  :: if it's a post
+      %.n
     %.y
   ::
   ::  forms a single dm preview for the list view
@@ -609,7 +611,7 @@
         %mention    (frond %mention s+(scot %p ship.c))
         %text       (frond %text s+text.c)
         %url        (frond %url s+url.c)
-        %reference  (frond %reference s+'')
+        %reference  (frond %reference (reference reference.c))
         %code
       %+  frond  %code
       %-  pairs
@@ -636,36 +638,36 @@
         ['contents' a+(turn contents.dm content)]
     ==
   ::
-  :: ++  reference
-  ::   |=  ref=^reference
-  ::   |^
-  ::   %+  frond  -.ref
-  ::   ?-  -.ref
-  ::     %graph  (graph +.ref)
-  ::     %group  (group +.ref)
-  ::     %app    (app +.ref)
-  ::   ==
-  ::   ::
-  ::   ++  graph
-  ::     |=  [grp=res gra=res idx=^index]
-  ::     %-  pairs
-  ::     :~  graph+s+(enjs-path:res gra)
-  ::         group+s+(enjs-path:res grp)
-  ::         index+(index idx)
-  ::     ==
-  ::   ::
-  ::   ++  group
-  ::     |=  grp=res
-  ::     s+(enjs-path:res grp)
-  ::   ::
-  ::   ++  app
-  ::     |=  [=^ship =desk p=^path]
-  ::     %-  pairs
-  ::     :~  ship+s+(scot %p ship)
-  ::         desk+s+desk
-  ::         path+(path p)
-  ::     ==
-  ::   --
+  ++  reference
+    |=  ref=^reference
+    |^
+    %+  frond  -.ref
+    ?-  -.ref
+      %graph  (graph +.ref)
+      %group  (group +.ref)
+      %app    (app +.ref)
+    ==
+    ::
+    ++  graph
+      |=  [grp=res gra=res idx=^index]
+      %-  pairs
+      :~  graph+s+(enjs-path:res gra)
+          group+s+(enjs-path:res grp)
+          index+(index idx)
+      ==
+    ::
+    ++  group
+      |=  grp=res
+      s+(enjs-path:res grp)
+    ::
+    ++  app
+      |=  [=^ship =desk p=^path]
+      %-  pairs
+      :~  ship+s+(scot %p ship)
+          desk+s+desk
+          path+(path p)
+      ==
+    --
   ::
   --
   ::

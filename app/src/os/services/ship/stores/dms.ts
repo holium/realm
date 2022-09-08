@@ -18,7 +18,7 @@ export const loadDMsFromDisk = (
         });
 
   let persistedState: ChatStoreType = persisted.store;
-  const isEmpty = Object.keys(persistedState).length === 0;
+  const isEmpty = !persistedState || Object.keys(persistedState).length === 0;
   const model = ChatStore.create(
     !isEmpty ? castToSnapshot(persistedState) : {}
   );
