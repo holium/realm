@@ -1,9 +1,10 @@
-import { FC, createRef } from 'react';
+import { FC, createRef, useMemo } from 'react';
+import { rgba } from 'polished';
 import { Flex } from 'renderer/components';
 import { HomeButton } from './components/HomeButton';
 import { ShipTray } from './components/ShipBar';
 import { CommunityBar } from './components/CommunityBar';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './apps';
 import { useServices } from 'renderer/logic/store';
@@ -26,11 +27,23 @@ export const SystemBar: FC<SystemBarProps> = observer(
       trayAppRef = createRef<HTMLDivElement>();
     }
 
+    // const { dockColor, textColor } = useMemo(
+    //   () => ({
+    //     ...desktop.theme,
+    //     dockColor: rgba(desktop.theme.dockColor!, 0.55),
+    //     textColor:
+    //       desktop.theme.mode === 'light'
+    //         ? rgba(desktop.theme.textColor!, 0.8)
+    //         : desktop.theme.textColor!,
+    //   }),
+    //   [desktop.theme.dockColor]
+    // );
+
     return (
       <>
         {TrayAppView && (
           <TrayMenu
-            id={activeApp!}
+            id={activeApp! as TrayAppKeys}
             coords={coords}
             dimensions={dimensions}
             content={
@@ -41,10 +54,7 @@ export const SystemBar: FC<SystemBarProps> = observer(
                 backgroundColor={windowColor}
                 textColor={textColor}
               >
-                <TrayAppView
-                  theme={desktop.theme}
-                  dimensions={dimensions}
-                />
+                <TrayAppView theme={desktop.theme} dimensions={dimensions} />
               </MiniApp>
             }
           />

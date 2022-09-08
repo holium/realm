@@ -35,3 +35,4 @@ export * from './ShipSearch';
 export * from './People';
 export * from './SpacePicture';
 export * from './AppTile';
+export * from './Notification/InnerNotification';

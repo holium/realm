@@ -140,7 +140,12 @@ export class DesktopService extends BaseService {
       wallpaper
     );
     this.core.services.shell.closeDialog(null);
-    newTheme && this.state?.setTheme(cast(newTheme)!);
+
+    // const isHomeSpace : boolean = (spaceId === `/${this.core.conduit!.ship}/our`);
+    if(newTheme) {
+      this.state?.setTheme(cast(newTheme)!);
+    }
+
     return toJS(newTheme);
   }
 
@@ -167,6 +172,12 @@ export class DesktopService extends BaseService {
   }
   openAppWindow(_event: any, spaceId: string, selectedApp: any) {
     let { desktopDimensions, isFullscreen } = this.core.services.shell;
+    // console.log(
+    //   'openAppWindow => %o',
+    //   JSON.parse(
+    //     JSON.stringify({ desktopDimensions, isFullscreen, selectedApp })
+    //   )
+    // );
     const newWindow = this.state!.openBrowserWindow(
       selectedApp,
       desktopDimensions as any,

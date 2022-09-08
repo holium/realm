@@ -31,6 +31,8 @@ export type {
   AnyPayload,
   RealmMultiplayerInterface,
   Ship,
+  CursorPayload,
+  StatePayload,
 } from './types';
 
 export { CursorEvent, RealmEvent } from './types';

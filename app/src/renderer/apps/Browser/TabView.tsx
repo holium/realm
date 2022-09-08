@@ -116,7 +116,7 @@ export const TabView: FC<BrowserTabProps> = observer(
             webpreferences="sandbox=false"
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            allowpopups
+            // allowpopups="true"
             // @ts-ignore
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"

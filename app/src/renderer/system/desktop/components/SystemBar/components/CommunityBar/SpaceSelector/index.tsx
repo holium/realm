@@ -6,7 +6,7 @@ import { Flex, Pulser, Divider } from 'renderer/components';
 import { TrayButton } from '../../TrayButton';
 import { SelectedSpace } from './SelectedSpace';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 
 type SpaceSelectorProps = {};
@@ -31,7 +31,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
 
     const dimensions = {
       height: 500,
-      width: 380,
+      width: 340,
     };
 
     const position = 'top-right';

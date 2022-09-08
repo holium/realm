@@ -25,10 +25,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
 
   const orderedList = useMemo(
     () => (currentBazaar ? currentBazaar.pinnedApps! : []),
-    [
-      currentBazaar && currentBazaar.pinned,
-      currentBazaar && currentBazaar.pinnedApps,
-    ]
+    [currentBazaar && currentBazaar.pinnedApps]
   );
 
   const pinnedApps = useMemo(() => {
@@ -80,7 +77,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,
-                    toJS(selectedApp)
+                    JSON.parse(JSON.stringify(selectedApp))
                   );
                 }
               }}
@@ -93,6 +90,20 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 app={app}
                 selected={selected}
                 open={open}
+                onAppClick={(evt: any) => {
+                  const selectedApp = app;
+                  if (desktop.isOpenWindow(selectedApp.id)) {
+                    DesktopActions.setActive(
+                      spaces.selected!.path,
+                      selectedApp.id
+                    );
+                  } else {
+                    DesktopActions.openAppWindow(
+                      spaces.selected!.path,
+                      JSON.parse(JSON.stringify(selectedApp))
+                    );
+                  }
+                }}
                 contextMenu={[
                   {
                     label: 'Unpin',
@@ -104,10 +115,11 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   {
                     label: 'Close',
                     section: 2,
+                    disabled: !open,
                     onClick: (evt: any) => {
                       DesktopActions.closeAppWindow(
                         spaces.selected?.path!,
-                        toJS(app)
+                        JSON.parse(JSON.stringify(app))
                       );
                       evt.stopPropagation();
                     },
@@ -123,7 +135,6 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.activeWindow?.id,
     desktop.openAppIds,
     spaces.selected?.path,
-    currentBazaar && currentBazaar.pinned,
     currentBazaar && currentBazaar.pinnedApps,
   ]);
 
@@ -161,14 +172,15 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               open={open}
               contextMenu={[
                 {
-                  label: 'Unpin',
+                  label: 'Pin',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    SpacesActions.unpinApp(spaces.selected?.path!, app.id);
+                    SpacesActions.pinApp(spaces.selected?.path!, app.id);
                   },
                 },
                 {
                   label: 'Close',
+                  disabled: !open,
                   section: 2,
                   onClick: (evt: any) => {
                     DesktopActions.closeAppWindow(
@@ -188,7 +200,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,
-                    selectedApp
+                    JSON.parse(JSON.stringify(selectedApp))
                   );
                 }
               }}

@@ -7,7 +7,7 @@ import {
   applyPatch,
 } from 'mobx-state-tree';
 
-export const Invite = types.model({
+export const Visa = types.model({
   inviter: types.string,
   patp: types.string,
   role: types.string,
@@ -17,10 +17,10 @@ export const Invite = types.model({
   invitedAt: types.Date,
 });
 
-export const InvitationsModel = types
+export const VisaModel = types
   .model({
-    incoming: types.map(Invite), // Map<SpacePath, Invite>
-    outgoing: types.map(types.map(Invite)), // Map<SpacePath, Map<Patp, Invite>>
+    incoming: types.map(Visa), // Map<SpacePath, Invite>
+    outgoing: types.map(types.map(Visa)), // Map<SpacePath, Map<Patp, Invite>>
   })
   .views((self) => ({
     get invitations() {
@@ -35,6 +35,7 @@ export const InvitationsModel = types
   }))
   .actions((self) => ({
     initial(data: any) {
+      console.log(data);
       // set initial data
     },
     addIncoming(data: any) {
@@ -56,3 +57,5 @@ export const InvitationsModel = types
       // update outgoing invitations
     },
   }));
+
+export type VisaModelType = Instance<typeof VisaModel>;

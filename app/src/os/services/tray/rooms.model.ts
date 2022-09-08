@@ -8,6 +8,8 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { SelectedLine } from 'renderer/system/auth/login/ShipSelector';
+
+import { TypedSchema } from 'yup/lib/util/types';
 import { RoomsApi } from '../../api/rooms';
 import { Patp } from 'os/types';
 
@@ -18,6 +20,7 @@ export const DmAppState = types.model('DmAppState', {
 
 export const RoomInvite = types.model('RoomInvite', {
   id: types.string,
+  title: types.string,
   provider: types.string,
   invitedBy: types.string,
   path: types.maybe(types.string),
@@ -48,17 +51,38 @@ export const RoomsModel = types
 // https://mobx-state-tree.js.org/tips/inheritance
 //
 
+
 //
 export type RoomsModelType = Instance<typeof RoomsModel>;
+
+
+export const ChatModel = types.model('ChatModel', {
+  index: types.integer,
+  author: types.string,
+  contents: types.string,
+  isRightAligned: types.boolean,
+  timeReceived: types.integer,
+});
+export type ChatModelType = Instance<typeof ChatModel>;
+
 
 export const RoomsAppState = types
   .model('RoomsAppState', {
     currentView: types.enumeration(['list', 'room', 'new-room']),
     liveRoom: types.safeReference(RoomsModel),
     knownRooms: types.map(RoomsModel),
+    outstandingRequest: types.maybe(types.boolean),
     invites: types.map(RoomInvite),
     ourPatp: types.maybe(types.string),
     provider: types.maybe(types.string),
+    chatData: types.map(ChatModel),
+    controls: types.optional(
+      types.model({
+        muted: types.boolean,
+        cursors: types.boolean,
+      }),
+      { muted: false, cursors: false }
+    ),
   })
   .views((self) => ({
     get list() {
@@ -81,8 +105,20 @@ export const RoomsAppState = types
       if (!self.liveRoom) return false;
       return room.id === self.liveRoom.id;
     },
+    get isLoadingList() {
+      return self.outstandingRequest;
+    },
+    get chats() {
+      return Array.from(self.chatData.values());
+    }
   }))
   .actions((self) => ({
+    setMuted(muted: boolean) {
+      self.controls.muted = muted;
+    },
+    setCursors(cursors: boolean) {
+      self.controls.cursors = cursors;
+    },
     handleInvite(invite: RoomInviteType) {
       self.invites.set(invite.id, RoomInvite.create(invite));
     },
@@ -103,19 +139,33 @@ export const RoomsAppState = types
     // setInvited
     // setKicked
     // newChat
-    handleRoomUpdate(room: RoomsModelType) {
-      // console.log('inside handleRoomUpdate');
+    handleRoomUpdate(room: RoomsModelType, diff: any) {
       // set room view if we just created this room
       let knownRoom = self.knownRooms.get(room.id);
+
+      //
+      // TODOO diff for newly created room
       if (!knownRoom && room.creator === self.ourPatp) {
         this.setLiveRoom(room);
         this.setView('room');
       } else {
+        // if (diff.enter) {
+        //   room.present.push(diff.enter);
+        // }
+        // if (diff.exit) {
+        //   room.present.remove(diff.exit);
+        // }
         this.setLiveRoom(room);
       }
     },
     setLiveRoom(room: RoomsModelType) {
+      
       self.knownRooms.set(room.id, room);
+      if(!self.liveRoom || self.liveRoom.id !== room.id) {
+        // clear chat data if a new room
+        // todo maybe this logic has a better home elsewhere
+        self.chatData.clear();
+      }
       self.liveRoom = self.knownRooms.get(room.id);
     },
     unsetLiveRoom() {
@@ -148,9 +198,9 @@ export const RoomsAppState = types
       self.knownRooms.get(roomId)?.present.remove(patp);
     },
     leaveRoom() {
-      if (self.liveRoom) {
-        self.knownRooms.delete(self.liveRoom.id);
-      }
+      // if (self.liveRoom) {
+      //   self.knownRooms.delete(self.liveRoom.id);
+      // }
       self.liveRoom = undefined;
       self.currentView = 'list';
     },
@@ -163,6 +213,47 @@ export const RoomsAppState = types
       self.liveRoom = undefined;
       // TODO some info toast saying your were kicked / host left
     },
+    deleteRoom(roomId: string) {
+      if (roomId === self.liveRoom?.id) {
+        self.liveRoom = undefined;
+        self.knownRooms.delete(roomId);
+        self.currentView = 'list';
+      } else {
+        self.knownRooms.delete(roomId);
+      }
+    },
+    didRequest() {
+      // track outbound requestAll and corresponding inbound rooms update
+      self.outstandingRequest = true;
+    },
+    gotResponse() {
+      // track outbound requestAll and corresponding inbound rooms update
+      self.outstandingRequest = false;
+    },
+    appendOurChat(our: Patp, contents: string) {
+      let time = Date.now();
+      let chat : ChatModelType = {
+        author: our,
+        index: time,
+        timeReceived: time,
+        contents: contents,
+        isRightAligned: true,
+      }
+
+      self.chatData.set(String(time), chat);
+    },
+    handleInboundChat(from:Patp, contents:string) {
+      let time = Date.now();
+      let chat : ChatModelType = {
+        author: from,
+        index: time,
+        timeReceived: time,
+        contents: contents,
+        isRightAligned: false,
+      }
+
+      self.chatData.set(String(time), chat);
+    }
   }));
 
 export type RoomsAppStateType = Instance<typeof RoomsAppState>;

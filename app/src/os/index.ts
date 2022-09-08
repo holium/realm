@@ -4,8 +4,6 @@ import Store from 'electron-store';
 // ---
 import { Conduit, ConduitState } from '@holium/conduit';
 import { AuthService } from './services/identity/auth.service';
-import { MSTAction } from './types';
-import { cleanPath, fromPathString } from './lib/action';
 import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
@@ -13,9 +11,8 @@ import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import HoliumAPI from './api/holium';
-
+import { RoomsService } from './services/tray/rooms.service';
 import PasswordStore from './lib/passwordStore';
-
 import { getSnapshot } from 'mobx-state-tree';
 
 export interface ISession {
@@ -56,6 +53,7 @@ export class Realm extends EventEmitter {
     },
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
     onBoot: (callback: any) => ipcRenderer.on('realm.on-boot', callback),
+
     onLogin: (callback: any) => ipcRenderer.on('realm.on-login', callback),
     onConnected: (callback: any) =>
       ipcRenderer.on('realm.on-connected', callback),
@@ -130,6 +128,10 @@ export class Realm extends EventEmitter {
     let models = {};
 
     if (this.session) {
+      this.onEffect({
+        response: 'status',
+        data: 'boot:resuming',
+      });
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
@@ -140,6 +142,7 @@ export class Realm extends EventEmitter {
       rooms = this.services.ship.roomSnapshot;
       wallet = this.services.ship.walletSnapshot;
     }
+
     const bootPayload = {
       auth: this.services.identity.auth.snapshot,
       onboarding: this.services.onboarding.snapshot,
@@ -156,6 +159,7 @@ export class Realm extends EventEmitter {
     };
     // Send boot payload to any listeners
     this.onBoot(bootPayload);
+
     this.services.identity.auth.setLoader('loaded');
     return bootPayload;
   }

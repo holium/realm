@@ -53,7 +53,7 @@
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
       core   ~(. +> [bowl ~])
-  ::
+  :: :: ::
   ++  on-init  :: on-init:def
     ^-  (quip card _this)
     ::  set initial state
@@ -64,7 +64,7 @@
         status=%host
       ]
     =/  our-members  (malt `(list (pair ship passport:store))`~[[our.bowl our-member]])
-    =/  initial-mem   `districts:store`(malt `(list (pair space-path:spaces passports:store))`~[[[~fes 'our'] our-members]])
+    =/  initial-mem   `districts:store`(malt `(list (pair space-path:spaces passports:store))`~[[[our.bowl 'our'] our-members]])
     =.  membership.state          initial-mem
     :_  this
     ::  %watch: get the initial contact list and watch for updates
@@ -129,6 +129,12 @@
       :: =/  visas   (~(got by invitations.state) [host space-pth])
       :: ?~  passports      ``json+!>(~)
       ``visa-view+!>([%incoming incoming.invitations.state])
+    ::
+    ::  ~/scry/passports/visas.json
+    [%x %visas ~]
+      :: =/  visas   (~(got by invitations.state) [host space-pth])
+      :: ?~  passports      ``json+!>(~)
+      ``invite-view+!>([%invitations invitations.state])
     ::
     ::  ~/scry/passports/~zod/our/members.json
       [%x @ @ %members ~]
@@ -233,12 +239,11 @@
                   =/  rct  !<(=reaction:spaces q.cage.sign)
                   =^  cards  state
                   ?-  -.rct :: (on-agent:def wire sign)
-                    %initial  (on-spaces-initial:core rct)
-                    %add      (on-spaces-add:core rct)
-                    %replace  (on-spaces-replace:core rct)
-                    %remove   (on-spaces-remove:core rct)
-                    %space    (on-spaces-sub:core rct)
-                    %member-added  `state
+                    %initial      (on-spaces-initial:core rct)
+                    %add          (on-spaces-add:core rct)
+                    %replace      (on-spaces-replace:core rct)
+                    %remove       (on-spaces-remove:core rct)
+                    %new-space    (on-spaces-new:core rct)
                   ==
                   [cards this]
             ==
@@ -253,16 +258,16 @@
       ::
           %kick
             ~&  >  "{<dap.bowl>}: passports kicked us, resubscribing..."
-            ~&  >  [sign]
+            :: ~&  >  [sign]
             :_  this
             :~  [%pass /passports %agent [our.bowl %spaces] %watch /all]
             ==
       ::
           %fact
             ?+    p.cage.sign  (on-agent:def wire sign)
-                %visas-reaction
+                %visa-reaction
                 =^  cards  state
-                  (visas-reaction:core !<(=reaction:visas q.cage.sign))
+                  (visa-reaction:core !<(=reaction:visas q.cage.sign))
                 [cards this]
 
                 %passports-reaction
@@ -445,12 +450,14 @@
     |=  [path=space-path:spaces]
     ^-  (quip card _state)
     ?.  (is-host:core ship.path)
+      ~&  >>  "handle-accept: we are invited {<[our.bowl ship.path]>}"
       ::
       ::  MEMBER
       ::  If we are invited we will send the invite action to the host
       :_  state
       :~  [%pass / %agent [ship.path %passports] %poke visa-action+!>(act)]
       ==
+    ~&  >>  "handle-accept: we are the host {<[our.bowl ship.path]>}"
     ::
     ::  HOST
     ::
@@ -528,7 +535,7 @@
   ::
   --
 ::
-++  visas-reaction
+++  visa-reaction
   |=  [rct=reaction:visas]
   ^-  (quip card _state)
   |^
@@ -660,10 +667,10 @@
   ?>  ?=(%remove -.rct)
   `state(membership (~(del by membership) path.rct))
 ::
-++  on-spaces-sub
+++  on-spaces-new
   |=  [rct=reaction:spaces]
   ^-  (quip card _state)
-  ?>  ?=(%space -.rct)
+  ?>  ?=(%new-space -.rct)
   ~&  >  ['spaces subbed']
   `state
 ::

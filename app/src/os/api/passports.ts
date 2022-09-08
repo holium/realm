@@ -11,6 +11,13 @@ export const PassportsApi = {
     // console.log(response.members);
     return response.members;
   },
+  getVisas: async (conduit: Conduit) => {
+    const response = await conduit.scry({
+      app: 'passports',
+      path: '/visas', // the spaces scry is at the root of the path
+    });
+    return response.invitations;
+  },
   /**
    * inviteMember: invite a member to a space
    *
@@ -70,10 +77,11 @@ export const PassportsApi = {
         if (data['members']) {
           state.initial(data['members']);
         }
-        if (data['invite-reaction']) {
-          handleInviteReactions(data['invite-reaction'], state);
+        if (data['visa-reaction']) {
+          handleInviteReactions(data['visa-reaction'], state);
         }
       },
+
       onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription'),
     });

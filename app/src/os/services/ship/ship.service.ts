@@ -20,6 +20,10 @@ import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { NotificationsApi } from '../../api/notifications';
 import { NotificationsStore, NotificationsType } from './models/notifications';
+import { SlipService } from '../slip.service';
+// import { VisaModel, VisaModelType } from '../spaces/models/invitations';
+import { PassportsApi } from '../../api/passports';
+
 import { ContactStore, ContactStoreType } from './models/contacts';
 import { DocketStore, DocketStoreType } from './models/docket';
 import { ChatStoreType, ChatStore } from './models/dms';
@@ -34,6 +38,7 @@ import { toJS } from 'mobx';
 
 export type ShipModels = {
   friends: FriendsType;
+  // invitations: VisaModelType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
@@ -48,6 +53,10 @@ export class ShipService extends BaseService {
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
+    // invitations: VisaModel.create({
+    //   outgoing: {},
+    //   incoming: {},
+    // }),
     contacts: undefined,
     docket: DocketStore.create({ apps: {} }),
     chat: undefined,
@@ -57,12 +66,16 @@ export class ShipService extends BaseService {
   } = {
     graph: {},
   };
-  private rooms?: RoomsService;
-  private wallet?: WalletService;
+  private services: { slip?: SlipService } = {};
+  rooms: RoomsService;
+
   handlers = {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.get-dm-log': this.getDMLog,
     'realm.ship.send-dm': this.sendDm,
+    'realm.ship.get-metadata': this.getMetadata,
+    'realm.ship.get-contact': this.getContact,
+    'realm.ship.save-my-contact': this.saveMyContact,
     'realm.ship.draft-dm': this.draftNewDm,
     'realm.ship.accept-dm-request': this.acceptDm,
     'realm.ship.decline-dm-request': this.declineDm,
@@ -98,6 +111,9 @@ export class ShipService extends BaseService {
     },
     getContact: (ship: string) => {
       return ipcRenderer.invoke('realm.ship.get-contact', ship);
+    },
+    saveMyContact: (profileData: any) => {
+      return ipcRenderer.invoke('realm.ship.save-my-contact', profileData);
     },
     getDMs: () => {
       return ipcRenderer.invoke('realm.ship.get-dms');
@@ -153,10 +169,10 @@ export class ShipService extends BaseService {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
-    this.rooms = new RoomsService(core);
-    this.wallet = new WalletService(core);
 
     this.subscribe = this.subscribe.bind(this);
+    this.services.slip = new SlipService(core);
+    this.rooms = new RoomsService(core);
   }
 
   get modelSnapshots() {
@@ -281,6 +297,11 @@ export class ShipService extends BaseService {
         // this.rooms?.onLogin(ship);
         this.wallet?.onLogin(ship);
       });
+      // const invitations = await PassportsApi.getVisas(this.core.conduit!);
+      // this.models.invitations.initial(invitations);
+
+      this.services.slip?.subscribe();
+      this.rooms?.onLogin(ship);
 
       // return ship state
     } catch (err) {
@@ -322,6 +343,7 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
+    this.rooms?.onLogout();
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;
@@ -399,6 +421,23 @@ export class ShipService extends BaseService {
     const contact = this.models.contacts?.getContactAvatarMetadata(patp);
     return contact;
   }
+  //
+  async saveMyContact(_event:IpcMainInvokeEvent, profileData: any) {
+
+
+    await ContactApi.saveContact(
+      this.core.conduit!,
+      this.state!.patp,
+      profileData
+    );
+
+    this.state?.setOurMetadata(profileData);
+
+
+    return;
+
+  }
+  
   getMetadata(_event: any, path: string): any {
     return this.metadataStore['graph'][path];
   }

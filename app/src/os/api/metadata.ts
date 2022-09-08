@@ -16,6 +16,7 @@ export const MetadataApi = {
           );
         }
       },
+
       onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription'),
     });

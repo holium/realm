@@ -10,6 +10,7 @@ import {
 } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeModelType } from 'os/services/shell/theme.model';
+import AppSearchApp from '../AppSearch';
 
 type SpaceTitlebarProps = {
   space: SpaceModelType;
@@ -51,26 +52,7 @@ export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
           />
         </Flex>
         <Flex alignItems="center" gap={12}>
-          <Input
-            className="realm-cursor-text-cursor"
-            type="text"
-            placeholder="Search for apps..."
-            bgOpacity={0.3}
-            borderColor={'input.borderHover'}
-            bg="bg.blendedBg"
-            wrapperStyle={{
-              borderRadius: 25,
-              height: 40,
-              width: 336,
-              paddingLeft: 12,
-              paddingRight: 16,
-            }}
-            rightIcon={
-              <Flex>
-                <Icons name="Search" size="18px" opacity={0.5} />
-              </Flex>
-            }
-          />
+          <AppSearchApp />
           <Flex flex={1} gap={8} justifyContent="flex-end">
             <IconButton
               size={3}

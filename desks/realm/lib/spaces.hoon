@@ -70,20 +70,12 @@
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
     ::
-        %space
-      :-  %space
+        %new-space
+      :-  %new-space
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%space (spc:encode space.rct)]
           :: [%members (membs:encode members.rct)]
-      ==
-
-    ::
-        %member-added
-      :-  %member-added
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%ship s+(scot %p ship.path.rct)]
       ==
     ==
   ::

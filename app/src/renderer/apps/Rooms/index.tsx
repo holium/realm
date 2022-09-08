@@ -1,7 +1,8 @@
 import { observer } from 'mobx-react';
+// import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { FC } from 'react';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { Rooms, RoomListProps } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';

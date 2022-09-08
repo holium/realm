@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 
 import { IconButton, Icons } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 
 type WalletTrayProps = {

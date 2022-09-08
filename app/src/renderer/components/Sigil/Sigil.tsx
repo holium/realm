@@ -15,6 +15,7 @@ export type SigilProps = {
   color: [string, string];
   isLogin?: boolean;
   clickable?: boolean;
+  opacity?: number;
 };
 
 export const Sigil: FC<SigilProps> = (props: SigilProps) => {
@@ -28,6 +29,7 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
     clickable,
     isLogin,
     borderColor,
+    opacity,
   } = props;
   const sigilSize = size / 2;
   const horizontalPadding = sigilSize / 2;
@@ -36,6 +38,7 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
       avatar ? (
         <AvatarWrapper
           id="ship"
+          opacity={opacity || 1}
           raised={isLogin}
           style={{ borderRadius: borderRadiusOverride || 4 }}
           borderRadiusOverride={borderRadiusOverride}
@@ -53,6 +56,7 @@ export const Sigil: FC<SigilProps> = (props: SigilProps) => {
         </AvatarWrapper>
       ) : (
         <SigilStyle
+          opacity={opacity || 1}
           raised={isLogin}
           sigilSize={size}
           sigilColor={color[0]}

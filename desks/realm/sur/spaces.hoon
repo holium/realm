@@ -5,6 +5,7 @@
 /-  membership
 |%
 ::
++$  group-space   [creator=ship name=@tas title=@t picture=@t color=@ux]
 +$  token
   $:  chain=?(%ethereum %uqbar)
       contract=@t
@@ -78,8 +79,7 @@
       [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]
-      [%space path=space-path =space]
-      [%member-added path=space-path =ship]
+      [%new-space path=space-path =space]
   ==
 ::
 ::  Scry views
