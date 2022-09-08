@@ -200,7 +200,7 @@ export const WalletStore = types
         self.bitcoin.setProvider(provider)
       else if (network == 'ethereum')
         self.ethereum.setProvider(provider);
-    }
+    },
   }));
 
 export type WalletStoreType = Instance<typeof WalletStore>;

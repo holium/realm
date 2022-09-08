@@ -66,6 +66,30 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
+  requestAddress: async (conduit: Conduit, network: string, from: string) => {
+    const payload = {
+      app: 'wallet',
+      mark: 'wallet-action',
+      json: {
+        'request-address': {
+          network: network,
+          from: from,
+        }
+      }
+    }
+    await conduit.poke(payload);
+  },
+  subscribeToAddresses: async (conduit: Conduit, handler: (address: any) => void) => {
+    conduit.watch({
+      app: 'wallet',
+      path: '/address',
+      onEvent: (data: any) => {
+        handler(data);
+      },
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
+    });
+  },
   enqueueTransaction: async (conduit: Conduit, network: string, hash: any, transaction: any) => {
     const payload = {
       app: 'wallet',
@@ -121,7 +145,7 @@ export const WalletApi = {
       onEvent: (data: any) => {
         handler(data);
       },
-      onErr: () => console.log('Subscription rejected'),
+      onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
@@ -138,7 +162,7 @@ export const WalletApi = {
       onEvent: (data: any) => {
         handler(data);
       },
-      onErr: () => console.log('Subscription rejected'),
+      onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription'),
     });
   }

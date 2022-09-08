@@ -31,6 +31,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.add-smart-contract': this.addSmartContract,
+    'realm.tray.wallet.request-address': this.requestAddress,
   };
 
   static preload = {
@@ -57,6 +58,9 @@ export class WalletService extends BaseService {
     },
     addSmartContract: (contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.add-smart-contract', contractId, contractType, name, contractAddress, walletIndex);
+    },
+    requestAddress: (from: string, network: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.request-address');
     }
   };
 
@@ -110,6 +114,10 @@ export class WalletService extends BaseService {
       response: 'initial',
     };
     this.core.onEffect(patchEffect);
+
+    WalletApi.subscribeToAddresses(this.core.conduit!, (address: any) => {
+      console.log(address);
+    })
     WalletApi.subscribeToWallets(this.core.conduit!, (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
@@ -197,6 +205,10 @@ export class WalletService extends BaseService {
 
   async addSmartContract(_event: any, contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) {
     await WalletApi.addSmartContact(this.core.conduit!, contractId, contractType, name, contractAddress, walletIndex);
+  }
+
+  async requestAddress(_event: any, network: string, from: string) {
+    await WalletApi.requestAddress(this.core.conduit!, network, from);
   }
 
   /*
