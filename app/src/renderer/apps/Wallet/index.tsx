@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { ThemeProvider } from 'styled-components';
 import { FC, useEffect, useState } from 'react';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { EthDetail } from './views/ethereum/Detail';
 import { EthList } from './views/ethereum/List';

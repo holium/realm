@@ -6,7 +6,7 @@ import {QRCodeSVG} from 'qrcode.react';
 
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { CircleButton } from '../../components/CircleButton';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { shortened, formatWei, convertWeiToUsd, monthNames } from '../../lib/helpers';

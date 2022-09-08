@@ -2,7 +2,7 @@ import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text, Box, Icons } from 'renderer/components';
 import { darken, transparentize } from 'polished';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { NewWalletScreen } from './index';
 
