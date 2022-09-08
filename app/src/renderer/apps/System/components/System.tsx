@@ -23,15 +23,16 @@ export const SystemPanel: FC<any> = observer(() => {
 
     <Flex gap={12}  flexDirection="column" p="12px" width='100%'>
 
+
+
       <Text
-        fontSize={8}
+        fontSize={7}
         fontWeight={600}
         mb={6}
       >
         System
       </Text>
-
-    {/*     
+              
     <Text opacity={0.7} fontSize={3} fontWeight={500}>
       INTERFACE
     </Text>
@@ -47,8 +48,26 @@ export const SystemPanel: FC<any> = observer(() => {
           Coming Soon
         </Text>
 
-    </Card> */}
+    </Card>
 
+    <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+      SOUNDS
+    </Text>
+    <Card
+        p="20px"
+        width="100%"
+        // minHeight="240px"
+        elevation="none"
+        customBg={cardColor}
+        flexDirection={'column'}
+      >
+        <Text>
+          Coming Soon
+        </Text>
+
+    </Card>
+
+{/* 
     <Text opacity={0.7} fontSize={3} fontWeight={500}>
       MOUSE
     </Text>
@@ -64,7 +83,6 @@ export const SystemPanel: FC<any> = observer(() => {
           Cursor Type:
         </Text>
         <Flex >
-            {/* menu / list  */}
             <RadioGroup
                 customBg={windowColor}
                 textColor={textColor}
@@ -80,8 +98,10 @@ export const SystemPanel: FC<any> = observer(() => {
               
           </Flex>
         <Flex mt={6} gap={6} justifyContent="flex-start">
-          {/* TODO there is no way to set an initial value to this checkbox component */}
-          <Checkbox defaultValue='' mr={16} />
+          <Checkbox defaultValue='' mr={16}
+            // TODO default value doesnt work
+            // there appears to be no way to set an initial value to the checkbox component
+          />
           <Text>Use profile color for cursor</Text>
         </Flex>
 
@@ -104,7 +124,8 @@ export const SystemPanel: FC<any> = observer(() => {
           <Text fontWeight='200'>These sounds play on login, logout, etc.</Text>
           </Flex>
         </Flex>
-    </Card>
+    </Card> */}
+
     </Flex>
   )
 })

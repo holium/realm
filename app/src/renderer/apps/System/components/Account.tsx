@@ -6,6 +6,7 @@ import { useServices } from 'renderer/logic/store';
 import { ColorPicker } from './ColorPicker';
 import { useForm, useField } from 'mobx-easy-form';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 
 
@@ -42,13 +43,8 @@ export const AccountPanel: FC<any> = observer(() => {
       setIsLoading(true);
 
       await ShipActions.saveMyContact(profileData);
-
-
+      await DesktopActions.setMouseColor(values.avatarColor);
       setIsLoading(false);
-      // ShipActions.
-      // ship!.avatar = values.avatarImage!;
-      // ship!.color = values.avatarColor;
-      // ship!.nickname = values.nickname;
 
     }
 
@@ -70,6 +66,14 @@ export const AccountPanel: FC<any> = observer(() => {
     id: 'nickname',
     form: profileForm,
     initialValue: ship!.nickname ? ship!.nickname : '',
+    validate: (nickname: string) => {
+      if (nickname.length > 40) {
+        return { error: 'too long', parsed: undefined };
+      }
+      // const parsed = tokenizeMessage(message);
+      // TODO parse out patp, links, etc here
+      return { error: undefined, parsed: nickname };
+    },
   });
 
 
@@ -78,7 +82,7 @@ export const AccountPanel: FC<any> = observer(() => {
     <Flex gap={12} flexDirection="column" p="12px" width='100%'>
 
       <Text
-        fontSize={8}
+        fontSize={7}
         fontWeight={600}
         mb={6}
       >
@@ -103,7 +107,7 @@ export const AccountPanel: FC<any> = observer(() => {
             <Text fontWeight={500} flex={1}>
               Urbit ID
             </Text>
-            <Text flex={2}>
+            <Text flex={3}>
               {ship!.patp!}
             </Text>
           </Flex>
@@ -113,7 +117,7 @@ export const AccountPanel: FC<any> = observer(() => {
               Nickname
             </Text>
             <Input
-            flex={2}
+            flex={3}
             className="realm-cursor-text-cursor"
             type="text"
             placeholder="(none)"
@@ -136,7 +140,7 @@ export const AccountPanel: FC<any> = observer(() => {
               Avatar
             </Text>
 
-            <Flex flex={2} flexDirection={'column'} justifyContent={'flex-start'} gap={8}>
+            <Flex flex={3} flexDirection={'column'} justifyContent={'flex-start'} gap={8}>
               <RadioGroup
                   customBg={windowColor}
                   textColor={textColor}
@@ -172,6 +176,7 @@ export const AccountPanel: FC<any> = observer(() => {
                 }
                 {avatarOption === 'image' &&
                     <Input
+                    spellCheck={false} // TODO i solved this in rooms chat, rn the red squiggle still shows with this attribute
                     className="realm-cursor-text-cursor"
                     type="text"
                     placeholder="Paste url here"
@@ -179,7 +184,7 @@ export const AccountPanel: FC<any> = observer(() => {
                     wrapperStyle={{
                       cursor: 'none',
                       borderRadius: 9,
-                      backgroundColor: inputColor,
+                      backgroundColor: inputColor
                     }}
                     // defaultValue={customWallpaper.state.value}
                     // error={!shipUrl.computed.isDirty || shipUrl.computed.error}

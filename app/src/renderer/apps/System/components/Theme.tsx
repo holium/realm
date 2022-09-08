@@ -3,6 +3,8 @@ import { observer } from 'mobx-react';
 import { Flex, Text, Card, RadioImages, TextButton, RadioGroup, Input} from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { lighten } from 'polished';
+import { toJS } from 'mobx';
+
 import { ColorPicker } from './ColorPicker';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -10,6 +12,8 @@ import { useField, useForm } from 'mobx-easy-form';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import { TwitterPicker } from 'react-color';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import theme from 'renderer/theme';
+import { clone, getSnapshot } from 'mobx-state-tree';
 
 
 const WallpaperPreview = styled(motion.img)`
@@ -24,7 +28,8 @@ const WallpaperPreview = styled(motion.img)`
 export const ThemePanel: FC<any> = observer(() => {
 
   const { desktop, ship, contacts } = useServices();
-  const { windowColor, textColor, accentColor, inputColor } = desktop.theme;
+  const {theme} = desktop;
+  const { windowColor, textColor, accentColor, inputColor } = theme;
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
   
@@ -59,7 +64,12 @@ export const ThemePanel: FC<any> = observer(() => {
       else if(wpOption !== undefined) {
         await DesktopActions.changeWallpaper(`/${ship!.patp!}/our`, wpGallery[wpOption])
       }
-      // await OnboardingActions.addShip(values);
+
+      let mytheme = toJS(theme);
+
+      mytheme.accentColor = values.accentColor;
+
+      // await DesktopActions.setTheme(mytheme)
 
       // props.setState &&
       //   props.setState({ ...props.workflowState, ship: values });
@@ -113,7 +123,8 @@ export const ThemePanel: FC<any> = observer(() => {
 
   return (
 
-    <Flex gap={12} flexDirection="column" p="12px" width='100%'>
+    <Flex gap={12} flexDirection="column" p="12px" width='100%' overflowX={'scroll'}
+    >
 
       <Flex 
         flexDirection='row'
@@ -121,7 +132,7 @@ export const ThemePanel: FC<any> = observer(() => {
         mb={6}
         >
         <Text
-          fontSize={8}
+          fontSize={7}
           fontWeight={600}
         >
           Theme
@@ -139,7 +150,7 @@ export const ThemePanel: FC<any> = observer(() => {
           </TextButton>
       </Flex>
       
-      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+      {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
         COLORS
       </Text>
       <Card
@@ -157,7 +168,6 @@ export const ThemePanel: FC<any> = observer(() => {
         </Text>
 
         <Flex>
-            {/* menu / list  */}
             <RadioGroup
                 customBg={windowColor}
                 textColor={textColor}
@@ -179,10 +189,6 @@ export const ThemePanel: FC<any> = observer(() => {
           <Text my='auto' fontWeight={500} >
             Accent Color
           </Text>
-          
-          {/* <ColorPicker /> */}
-
-          {/* TODO use colorpicker component */}
           
           <Flex position="relative" justifyContent="flex-end">
               <ColorTile
@@ -227,15 +233,14 @@ export const ThemePanel: FC<any> = observer(() => {
 
         </Flex>
         
-      </Card>
+      </Card> */}
       
-      <Text
-        mt={2}
+      {/* <Text
         opacity={0.7}
         fontSize={3}
         fontWeight={500}>
         WALLPAPER
-      </Text>
+      </Text> */}
       <Card
         p="20px"
         width="100%"

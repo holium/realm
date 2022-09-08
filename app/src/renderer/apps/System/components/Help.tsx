@@ -19,7 +19,7 @@ export const HelpPanel: FC<any> = observer(() => {
     <Flex gap={12} flexDirection="column" p="12px" width='100%'>
 
       <Text
-        fontSize={8}
+        fontSize={7}
         fontWeight={600}
         mb={6}
       >
@@ -27,9 +27,9 @@ export const HelpPanel: FC<any> = observer(() => {
       </Text>
 
     
-    <Text opacity={0.7} fontSize={3} fontWeight={500}>
+    {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
       Coming Soon
-    </Text>
+    </Text> */}
     <Card
         p="20px"
         width="100%"

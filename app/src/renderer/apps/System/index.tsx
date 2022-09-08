@@ -21,16 +21,16 @@ export const SystemApp: FC<any> = observer(() => {
   type SystemPanelType = 'system' | 'theme' | 'account' | 'about' | 'help' | undefined;
 
   const [systemPanel, setSystemPanelType] =
-          useState<SystemPanelType>('account');
+          useState<SystemPanelType>('theme');
 
 
   return (
 
     <Flex height={'100%'}>
 
-      <Flex gap={12} flexDirection="row" width={'100%'}>
+      <Flex gap={12} flexDirection="row" flex={5} overflowX={'scroll'}>
         {/* left hand side, list selector view */}
-        <Flex gap={12} flexDirection="column" p="12px" width={'25%'}>
+        <Flex gap={12} flexDirection="column" p="12px" minWidth={'250px'} maxWidth={'250px'} >
           
           <Flex flexDirection='row' alignItems='center' gap={8}>
             {/* sig and patp */}
@@ -43,14 +43,18 @@ export const SystemApp: FC<any> = observer(() => {
                 patp={person}
                 color={[(ship!.color) || '#000000', 'white']}
               />
-            <Flex flexDirection='column' ml={2}>
+            <Flex flexDirection='column' ml={2}  overflowX={'hidden'}
+              style={{
+                overflowWrap: 'break-word'
+              }}
+            >
               
               {ship!.nickname && 
-              <Text fontWeight={500}>
+              <Text fontWeight={500} fontSize={2}>
               {ship!.nickname}
               </Text>
               }
-              <Text fontWeight={300}>
+              <Text fontWeight={300} fontSize={2}>
                 {ship!.patp}
               </Text>
             </Flex>
@@ -77,7 +81,7 @@ export const SystemApp: FC<any> = observer(() => {
             />
           </Flex> */}
 
-          <Flex overflowY='scroll' flexDirection='row' minWidth={'100%'}>
+          <Flex overflowY='scroll' flexDirection='row' flex={4}>
             {/* menu / list  */}
             <RadioList
               customBg={windowColor}
