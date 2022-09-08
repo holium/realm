@@ -16,12 +16,6 @@ import { useServices } from 'renderer/logic/store';
 import { LiveRoom } from 'renderer/apps/store';
 import { PeerConnectionState } from '@holium/realm-room';
 import { rgba, darken } from 'polished';
-import {
-  handleLocalEvents,
-  handleRemoteEvents,
-  handleRemoteUpdate,
-} from '../listeners';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
 
 interface ISpeaker {
   person: string;
@@ -76,11 +70,6 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   }
 
   useEffect(() => {
-    // if (isOur) {
-    //   setPeerState(PeerConnectionState.Connected);
-    //   // handleLocalEvents(RoomsActions., LiveRoom.our);
-    // }
-
     // this is getting set every 0th frame that <Speaker/> is rendered.
     // meaning: whenever the room voice view is opened, it does this logic over again
     // as a result, electron produces a warning for too many eventlisteners.
@@ -92,16 +81,6 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   }, []);
 
   const peerState = isOur ? 'connected' : livePeer?.connectionState;
-  console.log('livePeer?.connectionState', livePeer?.connectionState);
-
-  // useEffect(() => {
-  //   if (!isStarted) return;
-  //   if (ship!.patp === livePeer?.patp) {
-  //     // const livePeer = LiveRoom.participants.get(person);
-  //     // handleRemoteEvents(setPeerState, livePeer);
-  //     // handleRemoteUpdate(setPeerMetadata, livePeer);
-  //   }
-  // }, [isStarted]);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
   const textColor =

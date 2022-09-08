@@ -450,7 +450,7 @@ export class LocalParticipant extends Participant {
   // ------------------------------- Handlers -------------------------------
   // ------------------------------------------------------------------------
   private onTrackUnmuted = (track: LocalTrack) => {
-    console.log('on track unmuted => LocalParticipant');
+    // console.log('on track unmuted => LocalParticipant');
     this.onTrackMuted(track, track.isUpstreamPaused);
   };
 

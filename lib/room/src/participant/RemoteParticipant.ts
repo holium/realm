@@ -190,7 +190,7 @@ export class RemoteParticipant extends Participant {
   }
 
   updateOurInfo(info: { patp: Patp; muted: boolean; cursor: boolean }) {
-    console.log(this.dataChannel);
+    // console.log(this.dataChannel);
     // this.peerConn.
     if (this.dataChannel && this.dataChannel.readyState === 'open') {
       this.dataChannel.send(
@@ -211,7 +211,7 @@ export class RemoteParticipant extends Participant {
   }
 
   onConnectionChange(event: Event) {
-    console.log(event);
+    // console.log(event);
     if (
       // @ts-ignore
       event.currentTarget.connectionState === PeerConnectionState.Connected

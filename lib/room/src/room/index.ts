@@ -111,7 +111,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
         this.connect(room);
         return;
       }
-      console.log('add participant', enterDiff.enter);
+      // console.log('add participant', enterDiff.enter);
       this.newParticipant(enterDiff.enter);
     }
     // check if type has exit
@@ -120,7 +120,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
         console.log('we should leave the room and unsub');
         this.disconnect();
       }
-      console.log('remove participant', exitDiff.exit);
+      // console.log('remove participant', exitDiff.exit);
       this.kickParticipant(exitDiff.exit);
     }
   }
@@ -149,7 +149,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     if (peer === this.our.patp) return;
     await this.participants.get(peer)?.cleanup();
     this.participants.delete(peer);
-    console.log('after kicked', this.participants);
+    // console.log('after kicked', this.participants);
   }
 
   registerListeners(peer: RemoteParticipant) {
