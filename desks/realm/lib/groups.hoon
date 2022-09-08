@@ -8,10 +8,13 @@
   ^-  (list group-space)
   =/  group-paths     .^((set resource) %gy /(scot %p our)/group-store/(scot %da now)/groups)
   ::  now find ours
+  :: =/  hosted           (skim ~(tap by group-paths) skim-groups)
   =/  hosted=(list resource)
   %+  skim  ~(tap by group-paths)
     |=  [resource=[entity=ship name=@tas]]
-    =(entity.resource our)
+    ?:  =(entity.resource our)
+      (skim-group-dms resource)    ::  removes group dms from group-paths
+    %.n
   ::  get metadata for each
   =/  our-groups=(list group-space)
   %+  turn  hosted
@@ -39,6 +42,12 @@
       color.metadatum.+.+.mt-data
     [entity.rid name.rid title picture color member-count]
   our-groups
+  ::
+++  skim-group-dms
+  |=  [resource=[entity=ship name=@tas]]
+  =/  name      (cord name.resource)
+  =/  name-da   (slaw %da name)
+  ?~  name-da   %.y   %.n
 ::
 ::  JSON
 ::
