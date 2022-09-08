@@ -100,15 +100,20 @@ export const AccountPanel: FC<any> = observer(() => {
         customBg={cardColor}
         flexDirection={'column'}
         mb={2}
+        overflowX={'hidden'}
+        overflowY={'visible'}
       >
 
         <Flex gap={20} flexDirection={'column'} mt={2}>
-          <Flex flexDirection={'row'} flex={4} justifyContent='flex-start'>
-            <Text fontWeight={500} flex={1}>
+          <Flex flexDirection={'row'} flex={4} justifyContent='flex-start'
+            minWidth={100}
+          >
+            <Text fontWeight={500} flex={1} margin={'auto'}>
               Urbit ID
             </Text>
-            <Text flex={3}>
+            <Text flex={3} mx={4}>
               {ship!.patp!}
+              {/* ~sampel-palnet-sampel-palnet */}
             </Text>
           </Flex>
           
@@ -116,23 +121,24 @@ export const AccountPanel: FC<any> = observer(() => {
             <Text fontWeight={500} flex={1} margin='auto'>
               Nickname
             </Text>
-            <Input
-            flex={3}
-            className="realm-cursor-text-cursor"
-            type="text"
-            placeholder="(none)"
-            value={nicknameField.state.value}
-            wrapperStyle={{
-              cursor: 'none',
-              borderRadius: 9,
-              backgroundColor: inputColor,
-            }}
-            // defaultValue={ship!.nickname ? ship!.nickname : ''}
-            // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
-            onChange={(e: any) =>
-              nicknameField.actions.onChange(e.target.value)
-            }
-          />
+              <Flex flex={3}>
+                <Input
+                className="realm-cursor-text-cursor"
+                type="text"
+                placeholder="(none)"
+                value={nicknameField.state.value}
+                wrapperStyle={{
+                  cursor: 'none',
+                  borderRadius: 9,
+                  backgroundColor: inputColor,
+                }}
+                // defaultValue={ship!.nickname ? ship!.nickname : ''}
+                // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
+                onChange={(e: any) =>
+                  nicknameField.actions.onChange(e.target.value)
+                }
+              />
+            </Flex>
           </Flex>
 
           <Flex flexDirection={'row'} flex={4} justifyContent='flex-start'>
@@ -176,7 +182,7 @@ export const AccountPanel: FC<any> = observer(() => {
                 }
                 {avatarOption === 'image' &&
                     <Input
-                    spellCheck={false} // TODO i solved this in rooms chat, rn the red squiggle still shows with this attribute
+                    spellCheck={false} // TODO i solved this in rooms chat, rn the red squiggle still shows with this attribute ~bacwyls
                     className="realm-cursor-text-cursor"
                     type="text"
                     placeholder="Paste url here"

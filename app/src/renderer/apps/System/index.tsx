@@ -9,6 +9,8 @@ import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
 
+
+
 export const SystemApp: FC<any> = observer(() => {
   const { desktop, ship, contacts } = useServices();
   const { windowColor } = desktop.theme;
@@ -28,11 +30,11 @@ export const SystemApp: FC<any> = observer(() => {
 
     <Flex height={'100%'}>
 
-      <Flex gap={12} flexDirection="row" flex={5} overflowX={'scroll'}>
+      <Flex gap={0} flexDirection="row" flex={5} overflowX={'scroll'}>
         {/* left hand side, list selector view */}
-        <Flex gap={12} flexDirection="column" p="12px" minWidth={'250px'} maxWidth={'250px'} >
+        <Flex gap={12} flexDirection="column" p="12px" >
           
-          <Flex flexDirection='row' alignItems='center' gap={8}>
+          <Flex flexDirection='row' alignItems='center' gap={8} maxWidth={'220px'}>
             {/* sig and patp */}
             <Sigil
                 // borderColor={backgroundColor}

@@ -35,7 +35,7 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
   },
   ['os-settings']: {
     width: 800,
-    height: 800,
+    height: 650,
   },
   ['sphinx']: {
     width: 600,

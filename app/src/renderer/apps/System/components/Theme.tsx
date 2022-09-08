@@ -1,24 +1,19 @@
 import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card, RadioImages, TextButton, RadioGroup, Input} from 'renderer/components';
+import { Flex, Text, Card, RadioImages, TextButton, Input} from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { lighten } from 'polished';
-import { toJS } from 'mobx';
 
-import { ColorPicker } from './ColorPicker';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
-import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { TwitterPicker } from 'react-color';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import theme from 'renderer/theme';
-import { clone, getSnapshot } from 'mobx-state-tree';
 
 
 const WallpaperPreview = styled(motion.img)`
-  width:250px;
+  width:80%;
   height:'auto';
+  margin: 0 auto;
   border-radius: 6px;
   transition: all 0.25s ease;
   draggable: false;
@@ -27,7 +22,7 @@ const WallpaperPreview = styled(motion.img)`
 
 export const ThemePanel: FC<any> = observer(() => {
 
-  const { desktop, ship, contacts } = useServices();
+  const { desktop, ship, contacts, spaces } = useServices();
   const {theme} = desktop;
   const { windowColor, textColor, accentColor, inputColor } = theme;
 
@@ -41,39 +36,60 @@ export const ThemePanel: FC<any> = observer(() => {
 
   type wpOptionType = 'blueorb' | 'darkneon' | 'hallway' | 'sunorb' | 'jiggleorb' | 'sliceball' | undefined;
 
-  const wpGallery = {
+  const wpGallery : { [key: string]: string } = {
     'blueorb' : 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2574&q=80',
+    'nightcity': 'https://images.unsplash.com/photo-1655463223445-7c7cc696fdf8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+    'oranges': 'https://images.unsplash.com/photo-1656567229591-72a12a4cb0d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+    'water': 'https://images.unsplash.com/photo-1660469770527-cd73fbc59cc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
+    'forestfog': 'https://images.unsplash.com/photo-1661749232278-3c8380532c07?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80',
     'darkneon' : 'https://images.unsplash.com/photo-1650943574955-ac02c65cfc71?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2942&q=80',
-    'hallway' : 'https://images.unsplash.com/photo-1622798023168-76a8f3b1f24e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3864&q=80',
-    'sunorb'    : 'https://images.unsplash.com/photo-1636408807362-a6195d3dd4de?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
-    'jiggleorb' : 'https://images.unsplash.com/photo-1633783156075-a01661455344?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
-    'sliceball' : 'https://images.unsplash.com/photo-1627037558426-c2d07beda3af?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3075&q=80 ',
+    'ogdefault' : 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=80',
+    // 'hallway' : 'https://images.unsplash.com/photo-1622798023168-76a8f3b1f24e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3864&q=80',
+    // 'sunorb'    : 'https://images.unsplash.com/photo-1636408807362-a6195d3dd4de?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
+    // 'jiggleorb' : 'https://images.unsplash.com/photo-1633783156075-a01661455344?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3264&q=80',
+    // 'sliceball' : 'https://images.unsplash.com/photo-1627037558426-c2d07beda3af?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3075&q=80 ',
   }
+
+  const wpGalleryKeys = Object.keys(wpGallery);
 
   const [wpOption, setWpOption] =
   useState<wpOptionType>(undefined);
+
+
+  // const spaceAdmins = spaces.selected!.members.admins;
+  // const canEditSpace : boolean = spaceAdmins.find( (admin) => {
+  //   return admin.patp === ship!.patp;
+  // }) !== null;
+
+  const canEditSpace : boolean = spaces.selected!.path === `/${ship!.patp}/our`;
 
   const themeForm = useForm({
     async onSubmit({ values }: any) {
 
       //
+
+      if(!canEditSpace) {
+        // this shouldnt happen, blocked at validate form
+        return;
+      }
+
       if(values.customWallpaper !== '') {
         customWallpaper.actions.onChange('');
-        await DesktopActions.changeWallpaper(`/${ship!.patp!}/our`, values.customWallpaper)
+        await DesktopActions.changeWallpaper(spaces.selected!.path, values.customWallpaper)
       }
       else if(wpOption !== undefined) {
-        await DesktopActions.changeWallpaper(`/${ship!.patp!}/our`, wpGallery[wpOption])
+        await DesktopActions.changeWallpaper(spaces.selected!.path, wpGallery[wpOption])
       }
 
-      let mytheme = toJS(theme);
-
-      mytheme.accentColor = values.accentColor;
-
+      // TODO doesnt work
+      // could probably be made to work, but it would be pretty hacky
+      //  drunkplato and bacwyls have agreed that theme stuff should probably be refactored
+      //  before wiring it up to settings.
+      //
+      // let mytheme = toJS(theme);
+      // mytheme.accentColor = values.accentColor;
       // await DesktopActions.setTheme(mytheme)
 
-      // props.setState &&
-      //   props.setState({ ...props.workflowState, ship: values });
-      // props.onNext && props.onNext(values);
     },
   });
 
@@ -129,7 +145,7 @@ export const ThemePanel: FC<any> = observer(() => {
       <Flex 
         flexDirection='row'
         justifyContent={'space-between'}
-        mb={6}
+        mb={0}
         >
         <Text
           fontSize={7}
@@ -143,10 +159,11 @@ export const ThemePanel: FC<any> = observer(() => {
             showBackground
             textColor={accentColor}
             highlightColor={accentColor}
-            disabled={!themeForm.computed.isValid}
+            disabled={!themeForm.computed.isValid || !canEditSpace}
             onClick={themeForm.actions.submit}
             >
-                Save
+              { canEditSpace ? 'Save' : 'Bad Space Permissions'}
+                {/* Save */}
           </TextButton>
       </Flex>
       
@@ -241,6 +258,7 @@ export const ThemePanel: FC<any> = observer(() => {
         fontWeight={500}>
         WALLPAPER
       </Text> */}
+      
       <Card
         p="20px"
         width="100%"
@@ -248,6 +266,7 @@ export const ThemePanel: FC<any> = observer(() => {
         flexDirection={'column'}
       >
 
+        
         <Text mb={4} fontWeight={500}>
           Current
         </Text>
@@ -264,33 +283,12 @@ export const ThemePanel: FC<any> = observer(() => {
           customBg={windowColor}
           accentColor={accentColor}
           selected={wpOption}
-          options={[
-            {
-              imageSrc: wpGallery['blueorb'],
-              value: 'blueorb',
-            },
-           
-            {
-              imageSrc: wpGallery['hallway'],
-              value: 'hallway',
-            },
-            {
-              imageSrc: wpGallery['sunorb'],
-              value: 'sunorb',
-            },
-            {
-              imageSrc: wpGallery['darkneon'],
-              value: 'darkneon',
-            },
-            {
-              imageSrc: wpGallery['jiggleorb'],
-              value: 'jiggleorb',
-            },
-            {
-              imageSrc: wpGallery['sliceball'],
-              value: 'sliceball',
-            },
-          ]}
+          options={
+            wpGalleryKeys.map(
+              (key : string) =>
+                ({'imageSrc': wpGallery[key], 'value': key})
+              )
+          }
           onClick={(value: wpOptionType) => {
 
             if (wpOption && value === wpOption) {
@@ -299,7 +297,7 @@ export const ThemePanel: FC<any> = observer(() => {
               setWpOption(value);
             }
 
-          } }
+          }}
           />
 
 

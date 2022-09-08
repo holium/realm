@@ -80,7 +80,7 @@ export const RadioImages: FC<IRadioImages> = (props: IRadioImages) => {
       justifyContent="flex-start"
       overflowX='scroll'
     //   backgroundColor={optionBg}
-    mb={10}
+      mb={10}
       gap={6}
       borderRadius={6}
     >
