@@ -1,6 +1,6 @@
 import { Conduit } from '@holium/conduit';
 import { ShipModelType } from '../services/ship/models/ship';
-var util = require('util');
+// var util = require('util');
 import { decToUd, unixToDa } from '@urbit/api';
 
 export const NotificationsApi = {

@@ -18,7 +18,7 @@
     ]
   new-invite
 ::
-::  json 
+::  json
 ::
 ++  enjs
   =,  enjs:format
@@ -70,7 +70,7 @@
   ++  reaction
     |=  rct=^reaction
     ^-  json
-    %+  frond  %invite-reaction
+    %+  frond  %visa-reaction
     %-  pairs
     :_  ~
     ^-  [cord json]

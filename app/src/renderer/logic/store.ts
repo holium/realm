@@ -184,6 +184,9 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.membership) {
     applySnapshot(servicesStore.membership, response.membership);
   }
+  if (response.bazaar) {
+    applySnapshot(servicesStore.bazaar, response.bazaar);
+  }
   // console.log(response.ship)
   if (!response.ship) {
     // if we haven't logged in, set false for auth page
@@ -222,10 +225,10 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    // applySnapshot(
-    //   servicesStore.courier,
-    //   castToSnapshot(initials.models.courier!)
-    // );
+    applySnapshot(
+      servicesStore.courier,
+      castToSnapshot(initials.models.courier!)
+    );
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(initials.models.contacts!)
@@ -304,9 +307,6 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }
-    if (value.resource === 'bazaar') {
-      applySnapshot(servicesStore.bazaar, value.model);
-    }
     if (value.resource === 'auth') {
       // authState.authStore.initialSync(value);
     }
@@ -314,11 +314,13 @@ OSActions.onEffect((_event: any, value: any) => {
       // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
+      applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
       applySnapshot(
         servicesStore.membership,
         castToSnapshot(value.model.membership)
       );
+      applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
     }
   }
 });

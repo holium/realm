@@ -1,9 +1,8 @@
-import { FC, useState, useEffect, useMemo } from 'react';
+import { FC } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
 import { AppModelType } from 'os/services/ship/models/docket';
-import { NativeAppList } from 'renderer/apps';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -15,20 +14,19 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
-  const { docket, spaces, bazaar } = useServices();
-
-  const apps: any = docket
-    ? [...docket.list, ...NativeAppList]
-    : [...NativeAppList];
+  const { spaces, bazaar } = useServices();
 
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path)
     : null;
-  // console.log(apps);
+
+  const apps: any = currentBazaar?.allApps;
+
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;
-    const isAppPinned =
-      (currentBazaar && currentBazaar.isAppPinned(app.id)) || false;
+    const tags = (currentBazaar && currentBazaar.appTags) || [];
+    const isAppPinned = tags.includes('pinned');
+    const isAppRecommended = tags.includes('recommended');
     return (
       <AppTile
         key={app.title + index + 'grid'}
@@ -40,11 +38,20 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         contextMenu={[
           {
             label: isAppPinned ? 'Unpin app' : 'Pin to taskbar',
+            disabled: false,
             onClick: (evt: any) => {
               evt.stopPropagation();
               isAppPinned
                 ? SpacesActions.unpinApp(spacePath, app.id)
                 : SpacesActions.pinApp(spacePath, app.id);
+            },
+          },
+          {
+            label: 'Add to recommendations',
+            disabled: isAppRecommended,
+            onClick: (evt: any) => {
+              evt.stopPropagation();
+              SpacesActions.recommendApp(spacePath, app.id);
             },
           },
           {
@@ -81,6 +88,9 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           }
         }
         onAppClick={(selectedApp: AppModelType) => {
+          console.log(selectedApp);
+          // const app = JSON.parse(JSON.stringify(selectedApp));
+          SpacesActions.addRecentApp(spaces.selected!.path, selectedApp.id);
           DesktopActions.openAppWindow(
             spaces.selected!.path,
             toJS(selectedApp)

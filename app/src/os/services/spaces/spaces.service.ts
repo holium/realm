@@ -11,14 +11,14 @@ import {
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { DocketMap, SpacesStore, SpacesStoreType } from './models/spaces';
+import { SpacesStore, SpacesStoreType } from './models/spaces';
 import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-import { BazaarStore } from './models/bazaar';
 import { PassportsApi } from '../../api/passports';
+import { BazaarApi } from '../../api/bazaar';
 // import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
@@ -26,6 +26,7 @@ import { RoomsApi } from '../../api/rooms';
 
 const getHost = (path: string) => path.split('/')[1];
 import { DocketStoreType, DocketStore } from '../ship/models/docket';
+import { BazaarStore } from './models/bazaar';
 
 type SpaceModels = {
   bazaar?: any;
@@ -49,15 +50,28 @@ export class SpacesService extends BaseService {
 
   handlers = {
     'realm.spaces.set-selected': this.setSelected,
-    'realm.spaces.pin-app': this.pinApp,
-    'realm.spaces.unpin-app': this.unpinApp,
-    'realm.spaces.set-pinned-order': this.setPinnedOrder,
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
     'realm.spaces.get-members': this.getMembers,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
+    'realm.spaces.bazaar.get-apps': this.getApps,
+    'realm.spaces.bazaar.get-allies': this.getAllies,
+    'realm.spaces.bazaar.get-treaties': this.getTreaties,
+    'realm.spaces.bazaar.add-recent-app': this.addRecentApp,
+    'realm.spaces.bazaar.get-recent-apps': this.getRecentApps,
+    'realm.spaces.bazaar.add-recent-dev': this.addRecentDev,
+    'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
+    'realm.spaces.bazaar.pin-app': this.pinApp,
+    'realm.spaces.bazaar.unpin-app': this.unpinApp,
+    'realm.spaces.bazaar.set-pinned-order': this.setPinnedOrder,
+    'realm.spaces.bazaar.recommend-app': this.recommendApp,
+    'realm.spaces.bazaar.unrecommend-app': this.unrecommendApp,
+    'realm.spaces.bazaar.suite-add': this.addToSuite,
+    'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
+    'realm.spaces.bazaar.install-app': this.installApp,
+    'realm.spaces.bazaar.add-ally': this.addAlly,
   };
 
   static preload = {
@@ -67,15 +81,34 @@ export class SpacesService extends BaseService {
     selectSpace: (spaceId: string) => {
       return ipcRenderer.invoke('realm.spaces.set-selected', spaceId);
     },
-    pinApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.spaces.pin-app', path, appId);
+    pinApp: (path: string, appId: string, rank: number | null = null) => {
+      return ipcRenderer.invoke(
+        'realm.spaces.bazaar.pin-app',
+        path,
+        appId,
+        rank
+      );
     },
     unpinApp: (path: string, appId: string) => {
-      return ipcRenderer.invoke('realm.spaces.unpin-app', path, appId);
+      return ipcRenderer.invoke('realm.spaces.bazaar.unpin-app', path, appId);
+    },
+    recommendApp: (path: string, appId: string) => {
+      return ipcRenderer.invoke(
+        'realm.spaces.bazaar.recommend-app',
+        path,
+        appId
+      );
+    },
+    unrecommendApp: (path: string, appId: string) => {
+      return ipcRenderer.invoke(
+        'realm.spaces.bazaar.unrecommend-app',
+        path,
+        appId
+      );
     },
     setPinnedOrder: (path: string, newOrder: any[]) => {
       return ipcRenderer.invoke(
-        'realm.spaces.set-pinned-order',
+        'realm.spaces.bazaar.set-pinned-order',
         path,
         newOrder
       );
@@ -100,6 +133,29 @@ export class SpacesService extends BaseService {
     //
     kickMember: async (path: string, patp: string) =>
       ipcRenderer.invoke('realm.spaces.members.kick-member', path, patp),
+    //
+    getApps: async (path: SpacePath, tag: string = 'all') =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-apps', path, tag),
+    getAllies: async (path: SpacePath) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
+    getTreaties: async (patp: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-treaties', patp),
+    getRecentApps: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-recent-apps'),
+    addRecentApp: async (path: SpacePath, appId: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-recent-app', path, appId),
+    getRecentDevs: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
+    addRecentDev: async () =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
+    addToSuite: async (path: SpacePath, appId: string, rank: number) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
+    removeFromSuite: async (path: SpacePath, appId: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
+    installApp: async (app: any) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.install-app', app),
+    addAlly: async (ship: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -136,7 +192,7 @@ export class SpacesService extends BaseService {
     this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
     // Temporary setup
-    this.models.bazaar.our(`/${patp}/our`, docket.apps || {});
+    // this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
     // Get the initial scry
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
@@ -150,6 +206,7 @@ export class SpacesService extends BaseService {
       model: {
         spaces: getSnapshot(this.state!),
         membership: getSnapshot(this.models.membership),
+        bazaar: getSnapshot(this.models.bazaar),
       },
       resource: 'spaces',
       key: null,
@@ -177,9 +234,13 @@ export class SpacesService extends BaseService {
     SpacesApi.watchUpdates(
       this.core.conduit!,
       this.state,
-      this.models.membership
+      this.models.membership,
+      this.models.bazaar
     );
     PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
+    // Subscribe to sync updates
+    BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
+    BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
     //
     // setting provider to current space host
     this.core.services.ship.rooms!.setProvider(
@@ -289,26 +350,120 @@ export class SpacesService extends BaseService {
   // async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
   //   return await FriendsApi.removeFriend(this.core.conduit!, patp);
   // }
+  //
+
   // ***********************************************************
   // ************************ BAZAAR ***************************
   // ***********************************************************
-  async pinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    console.log('pinning');
-    console.log(path);
-    console.log(this.models.bazaar.getBazaar(path));
-    this.models.bazaar.getBazaar(path).pinApp(appId);
-    return;
+  async installDocket(_event: any, ship: string, desk: string) {
+    return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
   }
 
-  async unpinApp(_event: IpcMainInvokeEvent, path: string, appId: string) {
-    console.log(path);
-    console.log(this.models.bazaar.getBazaar(path));
-    this.models.bazaar.getBazaar(path).unpinApp(appId);
-    return;
+  async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
+    return await BazaarApi.getApps(this.core.conduit!, path, tag);
+  }
+  async getAllies(_event: IpcMainInvokeEvent, path: SpacePath) {
+    return await BazaarApi.getAllies(this.core.conduit!, path);
+  }
+  async getTreaties(_event: IpcMainInvokeEvent, patp: string) {
+    return await BazaarApi.getTreaties(this.core.conduit!, patp);
+  }
+  async getRecentApps(_event: IpcMainInvokeEvent) {
+    return this.models.bazaar.getRecentApps();
+  }
+  async addRecentApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    // console.log('addRecentApp => %o', { spacePath, appId });
+    return this.models.bazaar.getBazaar(spacePath).addRecentApp(appId);
+  }
+  async addRecentDev(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    shipId: string
+  ) {
+    return this.models.bazaar.getBazaar(spacePath).addRecentDev(shipId);
+  }
+  async getRecentDevs(_event: IpcMainInvokeEvent) {
+    return this.models.bazaar.getRecentDevs();
   }
 
-  setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
-    this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  async pinApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string,
+    rank: number | null
+  ) {
+    return await BazaarApi.pinApp(this.core.conduit!, spacePath, appId, rank);
+  }
+
+  async unpinApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return await BazaarApi.unpinApp(this.core.conduit!, spacePath, appId);
+  }
+
+  async recommendApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return await BazaarApi.recommendApp(this.core.conduit!, spacePath, appId);
+  }
+
+  async unrecommendApp(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return await BazaarApi.unrecommendApp(this.core.conduit!, spacePath, appId);
+  }
+
+  async addToSuite(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string,
+    rank: number
+  ) {
+    return await BazaarApi.addToSuite(
+      this.core.conduit!,
+      spacePath,
+      appId,
+      rank
+    );
+  }
+
+  async removeFromSuite(
+    _event: IpcMainInvokeEvent,
+    spacePath: SpacePath,
+    appId: string
+  ) {
+    return await BazaarApi.removeFromSuite(
+      this.core.conduit!,
+      spacePath,
+      appId
+    );
+  }
+
+  async installApp(_event: IpcMainInvokeEvent, app: any) {
+    return await BazaarApi.installDocket(
+      this.core.conduit!,
+      app.ship,
+      app.desk
+    );
+  }
+
+  async addAlly(_event: IpcMainInvokeEvent, ship: any) {
+    return await BazaarApi.addAlly(this.core.conduit!, ship);
+  }
+
+  async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
+    return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
+    // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
   }
 
   setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {

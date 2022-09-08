@@ -7,6 +7,8 @@ import { Box, AppTile, Icons } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { BazaarApi } from 'os/api/bazaar';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 const AppEmpty = styled(Box)`
   border-radius: 16px;
@@ -28,10 +30,11 @@ type SuiteAppProps = {
   highlightColor?: string;
   app?: any; // AppModelType;
   isAdmin?: boolean;
+  onClick?: (e: React.MouseEvent<any, MouseEvent>, app: any) => void;
 };
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
-  const { app, space, isAdmin } = props;
+  const { app, space, isAdmin, onClick } = props;
   if (app) {
     return (
       <AppTile
@@ -45,7 +48,14 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
                   label: 'Remove from suite',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
-                    // BazaarActions.removeFromAppSuite(space.path, app.id);
+                    onClick && onClick();
+                  },
+                },
+                {
+                  label: 'Recommend this app',
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    SpacesActions.recommendApp(space.path, app.id);
                   },
                 },
               ]
@@ -53,14 +63,20 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
         }
         onAppClick={(selectedApp: AppModelType) => {
           // QUESTION: should this open the app listing or the actual app?
-          DesktopActions.openAppWindow(space.path, toJS(selectedApp));
+          // const app = toJS(selectedApp);
+          const app = JSON.parse(JSON.stringify(selectedApp));
+          DesktopActions.openAppWindow(space.path, app);
           DesktopActions.setHomePane(false);
         }}
       />
     );
   }
   return (
-    <AppEmpty height={148} width={148}>
+    <AppEmpty
+      height={148}
+      width={148}
+      onClick={(e) => onClick && onClick(e, undefined)}
+    >
       <Icons size={24} name="Plus" fill="#FFFFFF" opacity={0.4} />
     </AppEmpty>
   );

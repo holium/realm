@@ -28,8 +28,7 @@ type IProps = {
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { courier } = useServices();
-  const { inputColor, textColor, iconColor, dockColor, windowColor, mode } =
-    theme;
+  const { textColor, iconColor, dockColor, windowColor, mode } = theme;
   const previews = useMemo(() => {
     return Array.from(courier.previews.values()).sort((a, b) => {
       // @ts-ignore
@@ -146,8 +145,8 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
                   </Text>
                 </Flex>
               )}
-              {previews.map((dm: any) => (
-                <Box display="block" key={dm.to}>
+              {previews.map((dm: any, index: number) => (
+                <Box display="block" key={`${dm.to}-${index}`}>
                   <ContactRow
                     theme={theme}
                     dm={dm}

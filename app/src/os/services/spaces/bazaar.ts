@@ -1,6 +1,7 @@
 import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
 import { BazaarStore, BazaarStoreType } from './models/bazaar';
 import Store from 'electron-store';
+import { toJS } from 'mobx';
 
 export const loadBazaarFromDisk = (
   patp: string,
@@ -11,7 +12,9 @@ export const loadBazaarFromDisk = (
     cwd: `realm.${patp}`, // base folder
   });
   let persistedState: BazaarStoreType = persisted.store;
-  const model = BazaarStore.create(castToSnapshot(persistedState));
+  const model = BazaarStore.create(
+    castToSnapshot(persistedState) || { spaces: {}, treaties: {}, allies: {} }
+  );
 
   onSnapshot(model, (snapshot) => {
     persisted.store = castToSnapshot(snapshot);

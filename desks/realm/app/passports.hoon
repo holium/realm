@@ -239,12 +239,11 @@
                   =/  rct  !<(=reaction:spaces q.cage.sign)
                   =^  cards  state
                   ?-  -.rct :: (on-agent:def wire sign)
-                    %initial  (on-spaces-initial:core rct)
-                    %add      (on-spaces-add:core rct)
-                    %replace  (on-spaces-replace:core rct)
-                    %remove   (on-spaces-remove:core rct)
-                    %space    (on-spaces-sub:core rct)
-                    %member-added  `state
+                    %initial      (on-spaces-initial:core rct)
+                    %add          (on-spaces-add:core rct)
+                    %replace      (on-spaces-replace:core rct)
+                    %remove       (on-spaces-remove:core rct)
+                    %new-space    (on-spaces-new:core rct)
                   ==
                   [cards this]
             ==
@@ -266,9 +265,9 @@
       ::
           %fact
             ?+    p.cage.sign  (on-agent:def wire sign)
-                %visas-reaction
+                %visa-reaction
                 =^  cards  state
-                  (visas-reaction:core !<(=reaction:visas q.cage.sign))
+                  (visa-reaction:core !<(=reaction:visas q.cage.sign))
                 [cards this]
 
                 %passports-reaction
@@ -451,12 +450,14 @@
     |=  [path=space-path:spaces]
     ^-  (quip card _state)
     ?.  (is-host:core ship.path)
+      ~&  >>  "handle-accept: we are invited {<[our.bowl ship.path]>}"
       ::
       ::  MEMBER
       ::  If we are invited we will send the invite action to the host
       :_  state
       :~  [%pass / %agent [ship.path %passports] %poke visa-action+!>(act)]
       ==
+    ~&  >>  "handle-accept: we are the host {<[our.bowl ship.path]>}"
     ::
     ::  HOST
     ::
@@ -534,7 +535,7 @@
   ::
   --
 ::
-++  visas-reaction
+++  visa-reaction
   |=  [rct=reaction:visas]
   ^-  (quip card _state)
   |^
@@ -666,10 +667,10 @@
   ?>  ?=(%remove -.rct)
   `state(membership (~(del by membership) path.rct))
 ::
-++  on-spaces-sub
+++  on-spaces-new
   |=  [rct=reaction:spaces]
   ^-  (quip card _state)
-  ?>  ?=(%space -.rct)
+  ?>  ?=(%new-space -.rct)
   ~&  >  ['spaces subbed']
   `state
 ::

@@ -79,8 +79,7 @@
       [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]
-      [%space path=space-path =space]
-      [%member-added path=space-path =ship]
+      [%new-space path=space-path =space]
   ==
 ::
 ::  Scry views

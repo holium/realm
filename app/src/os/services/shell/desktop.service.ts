@@ -167,6 +167,12 @@ export class DesktopService extends BaseService {
   }
   openAppWindow(_event: any, spaceId: string, selectedApp: any) {
     let { desktopDimensions, isFullscreen } = this.core.services.shell;
+    // console.log(
+    //   'openAppWindow => %o',
+    //   JSON.parse(
+    //     JSON.stringify({ desktopDimensions, isFullscreen, selectedApp })
+    //   )
+    // );
     const newWindow = this.state!.openBrowserWindow(
       selectedApp,
       desktopDimensions as any,

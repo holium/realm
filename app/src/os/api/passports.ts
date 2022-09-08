@@ -77,8 +77,8 @@ export const PassportsApi = {
         if (data['members']) {
           state.initial(data['members']);
         }
-        if (data['invite-reaction']) {
-          handleInviteReactions(data['invite-reaction'], state);
+        if (data['visa-reaction']) {
+          handleInviteReactions(data['visa-reaction'], state);
         }
       },
 
