@@ -1,7 +1,11 @@
-import { FC, forwardRef, useRef, useState } from 'react';
+import { FC, forwardRef } from 'react';
+import { transparentize } from 'polished'
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { Flex, Text } from 'renderer/components';
+import { Text } from 'renderer/components';
+import { ThemeType } from 'renderer/theme';
+import { useServices } from 'renderer/logic/store';
+import { theme as themes } from 'renderer/theme';
 
 type CardStyleProps = {
   isSelected: boolean;
@@ -25,6 +29,7 @@ interface WalletCardProps {
   isSelected?: boolean;
   onSelect?: () => void;
   ref: any;
+  theme?: ThemeType
 }
 
 const abbrMap = {
@@ -34,6 +39,11 @@ const abbrMap = {
 
 export const WalletCard: FC<WalletCardProps> = forwardRef(
   ({ wallet, isSelected, onSelect }: WalletCardProps, ref: any) => {
+    const { desktop } = useServices();
+
+    const mode = desktop.theme.mode === 'light' ? 'light' : 'dark';
+    const theme = themes[mode];
+
     return (
       <CardStyle
         layoutId={`wallet-container-${wallet.address}`}
@@ -46,6 +56,7 @@ export const WalletCard: FC<WalletCardProps> = forwardRef(
           layoutId={`wallet-name-${wallet.address}`}
           opacity={0.5}
           fontWeight={600}
+          color={transparentize(.4, theme.colors.text.primary)}
           style={{ textTransform: 'uppercase' }}
         >
           {wallet.name}
@@ -67,24 +78,3 @@ export const WalletCard: FC<WalletCardProps> = forwardRef(
 WalletCard.defaultProps = {
   isSelected: false,
 };
-
-{
-  /* <motion.div
-  className={selectedId === card ? 'opened-card' : 'card'}
-  key={i}
-  layout
-  drag={selectedId === card ? 'x' : false}
-  dragConstraints={{ left: canDrag ? -850 : 0, right: 0 }}
-  dragElastic={0.2}
-  onPanEnd={(e, info) => handlePanEnd(e, info, card)}
-  ref={(el) => (containerRefs.current[card] = el)}
->
-  {selectedId === card && (
-    <>
-      <div />
-      <div />
-      <div />
-    </>
-  )}
-</motion.div>; */
-}

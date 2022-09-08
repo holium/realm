@@ -1,7 +1,5 @@
-import { findLastKey } from 'lodash';
-import { lastIndexOfFrom } from 'lodash/fp';
 import { FC } from 'react';
-import { Icons, Flex, Text, RadioGroup, IconButton } from 'renderer/components';
+import { Icons, Flex, RadioGroup, IconButton } from 'renderer/components';
 
 type Network = 'ethereum' | 'bitcoin';
 
@@ -13,6 +11,7 @@ interface WalletHeader {
   network: Network | string;
   onSetNetwork: (network: Network) => void;
   onAddWallet: () => void;
+  hide: boolean
 }
 
 export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
@@ -31,31 +30,39 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
       // height="40px"
     >
       <Icons name="WalletNew" size="20px" opacity={0.7} />
-      <RadioGroup
-        customBg={windowColor}
-        textColor={textColor}
-        selected={network}
-        options={[
-          {
-            label: 'Bitcoin',
-            icon: 'Bitcoin',
-            value: 'bitcoin',
-            highlightColor: '#F7931A',
-          },
-          {
-            label: 'Ethereum',
-            icon: 'Ethereum',
-            value: 'ethereum',
-            highlightColor: '#627EEA',
-          },
-        ]}
-        onClick={(value: Network) => {
-          onSetNetwork(value);
-        }}
-      />
-      <IconButton onClick={onAddWallet}>
-        <Icons name="Plus" />
-      </IconButton>
+      {
+        props.hide
+        ? <></>
+        : (
+          <>
+            <RadioGroup
+              customBg={windowColor}
+              textColor={textColor}
+              selected={network}
+              options={[
+                {
+                  label: 'Bitcoin',
+                  icon: 'Bitcoin',
+                  value: 'bitcoin',
+                  highlightColor: '#F7931A',
+                },
+                {
+                  label: 'Ethereum',
+                  icon: 'Ethereum',
+                  value: 'ethereum',
+                  highlightColor: '#627EEA',
+                },
+              ]}
+              onClick={(value: Network) => {
+                onSetNetwork(value);
+              }}
+            />
+            <IconButton onClick={onAddWallet}>
+              <Icons name="Plus" />
+            </IconButton>
+          </>
+        )
+      }
     </Flex>
   );
 };
