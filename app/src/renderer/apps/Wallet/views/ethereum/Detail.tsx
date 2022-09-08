@@ -150,6 +150,7 @@ export const EthDetail: FC<EthDetailProps> = observer((props: EthDetailProps) =>
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
+      { /* @ts-ignore */ }
       <Flex p={3} width="100%" flexDirection="column" background={lighten(.02, desktop.theme.windowColor)} boxShadow="0px 0px 9px rgba(0, 0, 0, 0.12)" borderRadius="16px">
         <WalletInfo qr={qr} onClick={() => setQr(!qr)} />
         <Box pt={2}>

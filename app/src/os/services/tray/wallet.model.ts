@@ -7,6 +7,15 @@ import {
 import { Patp } from 'os/types';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
+export enum WalletView {
+  ETH_LIST = 'ethereum:list',
+  ETH_NEW = 'ethereum:new',
+  ETH_DETAIL = 'ethereum:detail',
+  ETH_TRANSACTION = 'ethereum:transaction',
+  ETH_SETTINGS = 'ethereum:settings',
+  BIT_LIST = 'bitcoin:list'
+}
+
 const gweiToEther = (gwei: number) => {
   return gwei / 1000000000;
 }
@@ -175,6 +184,7 @@ export const WalletStore = types
     ethereum: EthStore,
     creationMode: types.string,
     ourPatp: types.maybe(types.string),
+    currentAddress: types.maybe(types.string),
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
@@ -193,6 +203,14 @@ export const WalletStore = types
         self.currentView = 'ethereum:list';
       } else {
         self.currentView = 'bitcoin:list';
+      }
+    },
+    setView(view: WalletView, address?: string) {
+      self.currentView = view;
+      if (view.includes('detail')) {
+        self.currentAddress = address;
+      } else {
+        self.currentAddress = undefined;
       }
     },
     setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
