@@ -68,6 +68,7 @@ export class ShipService extends BaseService {
   };
   private services: { slip?: SlipService } = {};
   rooms: RoomsService;
+  wallet: WalletService;
 
   handlers = {
     'realm.ship.get-dms': this.getDMs,
@@ -173,6 +174,7 @@ export class ShipService extends BaseService {
     this.subscribe = this.subscribe.bind(this);
     this.services.slip = new SlipService(core);
     this.rooms = new RoomsService(core);
+    this.wallet = new WalletService(core);
   }
 
   get modelSnapshots() {
@@ -292,16 +294,13 @@ export class ShipService extends BaseService {
           this.state!.loader.set('loaded');
           resolve(this.state!);
         });
-
-        // TODO turning off rooms for now
-        // this.rooms?.onLogin(ship);
-        this.wallet?.onLogin(ship);
       });
       // const invitations = await PassportsApi.getVisas(this.core.conduit!);
       // this.models.invitations.initial(invitations);
 
       this.services.slip?.subscribe();
       this.rooms?.onLogin(ship);
+      this.wallet?.onLogin(ship);
 
       // return ship state
     } catch (err) {
