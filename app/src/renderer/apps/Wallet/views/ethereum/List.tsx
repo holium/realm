@@ -4,7 +4,7 @@ import { Flex, Text } from 'renderer/components';
 import { rgba } from 'polished';
 import { WalletHeader } from '../common/Header';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { Wallet } from '../../lib/wallet';
 import { constructSampleWallet } from '../../store';
 import { WalletCard } from '../common/WalletCard';

@@ -11,6 +11,7 @@ import {
 
 import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
+import { WalletStore } from 'os/services/tray/wallet.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
@@ -85,6 +86,22 @@ export const trayStore = TrayAppStore.create({
   roomsApp: {
     currentView: 'list',
   },
+  walletApp: {
+    network: 'ethereum',
+    currentView: 'ethereum:list',
+    bitcoin: {
+      settings: {
+        defaultIndex: 0,
+      }
+    },
+    ethereum: {
+      settings: {
+        defaultIndex: 0,
+      }
+    },
+    creationMode: 'default',
+    ourPatp: '~zod',
+  }
   // roomsApp: (persistedState && persistedState.roomsApp) || {
   //   currentView: 'list',
   //   // rooms: [], TODO
