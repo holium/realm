@@ -4,6 +4,7 @@ import {
   compose,
   space,
   color,
+  ColorProps,
   backgroundColor,
   layout,
   opacity,
@@ -23,8 +24,7 @@ type IProps = {
   theme: ThemeType;
   disabled?: boolean;
 } & OpacityProps &
-  ButtonStyleProps &
-  PositionProps;
+  ButtonStyleProps & PositionProps & ColorProps;
 
 export const TextButtonStyle = styled(styled.div`
   font-family: ${(props: any) => props.theme.fonts.body};
