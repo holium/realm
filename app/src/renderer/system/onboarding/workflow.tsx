@@ -49,10 +49,6 @@ const initialOnboardingDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
-    onPrevious: () => {
-      ShellActions.closeDialog();
-      OnboardingActions.exitOnboarding();
-    },
     component: (props: any) => <HaveUrbitDialog {...props} />,
     onNext(selfHosted: boolean) {
       OnboardingActions.setSelfHosted(selfHosted);
