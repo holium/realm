@@ -99,7 +99,7 @@
       ?+    path      (on-watch:def path)
           [%updates ~]
         ::  only host should get all updates
-        ?>  (is-host:core src.bowl)
+        ?>  =(our.bowl src.bowl)
         (spaces:send-reaction [%initial spaces.state] [/updates ~])
         ::
           [%our ~]

@@ -225,10 +225,10 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    // applySnapshot(
-    //   servicesStore.courier,
-    //   castToSnapshot(initials.models.courier!)
-    // );
+    applySnapshot(
+      servicesStore.courier,
+      castToSnapshot(initials.models.courier!)
+    );
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(initials.models.contacts!)
@@ -266,7 +266,6 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.identity.auth, value.patch);
     }
     if (value.resource === 'bazaar') {
-      console.log('patch huh => %o', value);
       applyPatch(servicesStore.bazaar, value.patch);
     }
     if (value.resource === 'onboarding') {

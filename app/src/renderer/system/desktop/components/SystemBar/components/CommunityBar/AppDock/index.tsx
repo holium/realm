@@ -29,7 +29,6 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   );
 
   const pinnedApps = useMemo(() => {
-    console.log('pinnedApps updated. rerendering...');
     return (
       <Reorder.Group
         axis="x"

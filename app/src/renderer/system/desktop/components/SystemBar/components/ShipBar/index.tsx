@@ -55,7 +55,7 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
         <WalletTray theme={desktop.theme} />
         <MessagesTray theme={desktop.theme} />
         <AccountTray theme={desktop.theme} />
-        <TrayClock />
+        {/* <TrayClock /> */}
       </Flex>
     </SystemBarStyle>
   );

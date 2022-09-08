@@ -1,11 +1,17 @@
 import { types, Instance } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
 // import { NativeAppList, nativeApps } from '../../../../renderer/apps';
-import { DocketApp, WebApp, Glob, AppTypes } from '../../ship/models/docket';
+import { DocketApp, WebApp, Glob } from '../../ship/models/docket';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
+
+enum AppTypes {
+  Urbit = 'urbit',
+  Native = 'native',
+  Web = 'web',
+}
 
 const AppRankModel = types.model({
   pinned: types.number,
@@ -21,13 +27,14 @@ const UrbitApp = types.model({
   title: types.string,
   info: types.string,
   color: types.string,
-  type: types.optional(AppTypes, 'urbit'),
+  type: types.literal(AppTypes.Urbit),
   image: types.maybeNull(types.string),
   href: Glob,
   version: types.string,
   website: types.string,
   license: types.string,
 });
+export type UrbitAppType = Instance<typeof UrbitApp>;
 
 const NativeApp = types.model({
   id: types.identifier,
@@ -37,11 +44,23 @@ const NativeApp = types.model({
   title: types.string,
   info: types.string,
   color: types.string,
-  type: types.optional(AppTypes, 'urbit'),
+  type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
 });
 
-const BazaarApp = types.map(
+export type NativeAppType = Instance<typeof NativeApp>;
+
+const AppModel = types.union(
+  {
+    eager: true,
+  },
+  UrbitApp,
+  NativeApp
+);
+
+export type AppType = Instance<typeof AppModel>;
+
+const BazaarAppMap = types.map(
   types.union(
     {
       eager: true,
@@ -51,7 +70,7 @@ const BazaarApp = types.map(
   )
 );
 
-export type BazaarAppType = Instance<typeof BazaarApp>;
+export type BazaarAppType = Instance<typeof BazaarAppMap>;
 
 export const BazaarModel = types
   .model('BazaarModel', {
@@ -60,7 +79,7 @@ export const BazaarModel = types
     pinned: types.array(types.string),
     recommended: types.array(types.string),
     suite: types.array(types.string),
-    apps: BazaarApp,
+    apps: BazaarAppMap,
   })
   .views((self) => ({
     get allApps() {
@@ -95,14 +114,14 @@ export const BazaarModel = types
         .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
     },
     isNativeApp(appId: string) {
-      return self.apps.get(appId).type === 'native';
+      return self.apps.get(appId)?.type === 'native';
     },
     isAppPinned(appId: string) {
       return self.pinned.includes(appId);
     },
     getAppData(appId: string) {
       const app = self.apps.get(appId);
-      console.log('getAppData => %o', app);
+      // console.log('getAppData => %o', app);
       return app;
       // const all = [...Array.from(self.apps!.values()), ...NativeAppList];
       // const idx = all.findIndex((item) => item.id === appId);
@@ -110,15 +129,15 @@ export const BazaarModel = types
     },
   }))
   .actions((self) => ({
-    addApp(app: BazaarAppType) {
+    addApp(app: AppType) {
       const appColor = app.color;
       if (app.type === 'urbit') {
         app.color = appColor && cleanNounColor(appColor);
       }
       self.apps.set(app.id, app);
     },
-    updateApp(app: BazaarAppType) {
-      console.log('updating app => %o', app);
+    updateApp(app: AppType) {
+      // console.log('updating app => %o', app);
       const appColor = app.color;
       if (app.type === 'urbit') {
         app.color = appColor && cleanNounColor(appColor);
@@ -231,7 +250,7 @@ export const BazaarStore = types
   .actions((self) => ({
     initial(apps: any) {
       const catalog = apps['space-apps'];
-      console.log('catalog => %o', catalog);
+      // console.log('catalog => %o', catalog);
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
         const bazaar = BazaarModel.create({
@@ -270,7 +289,7 @@ export const BazaarStore = types
       }
     },
     addBazaar(path: string) {
-      console.log('addBazaar => %o', path);
+      // console.log('addBazaar => %o', path);
       self.spaces.set(path, BazaarModel.create({}));
     },
   }));

@@ -356,7 +356,7 @@ export class SpacesService extends BaseService {
   // ************************ BAZAAR ***************************
   // ***********************************************************
   async installDocket(_event: any, ship: string, desk: string) {
-    return await BazaarApi.installDocket(this.core.conduit?.ship!, ship, desk);
+    return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
   }
 
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
@@ -376,7 +376,7 @@ export class SpacesService extends BaseService {
     spacePath: SpacePath,
     appId: string
   ) {
-    console.log('addRecentApp => %o', { spacePath, appId });
+    // console.log('addRecentApp => %o', { spacePath, appId });
     return this.models.bazaar.getBazaar(spacePath).addRecentApp(appId);
   }
   async addRecentDev(

@@ -4,7 +4,6 @@
 ::  A store for metadata on app dockets per Realm space.
 ::
 ::
-<<<<<<< HEAD:realm/app/bazaar.hoon
 /-  store=bazaar, docket, spaces-store=spaces
 /-  membership-store=membership, hark=hark-store, passports-store=passports
 /-  treaty
@@ -19,14 +18,6 @@
     $:  %0
         =app-catalog:store
         space-apps=space-apps-lite:store
-=======
-/-  store=bazaar, docket, spaces-store=spaces, membership-store=membership, passports-store=passports
-/+  dbug, default-agent
-|%
-+$  card  card:agent:gall
-+$  versioned-state
-    $%  state-0
->>>>>>> main:desks/realm/app/bazaar.hoon
     ==
   --
 =|  state-0
@@ -47,6 +38,7 @@
   =/  apps=app-index-lite:store           (index:apps:core initial.charge-update)
   %-  (slog leaf+"{<[apps]>}" ~)
   =/  our-space                           [our.bowl 'our']
+  :: ~&  >  our-space
   :: build slimmed down space specific app (metadata) from docket charges (installed apps)
   :: =/  index      (~(put by space-apps.state) our-space [apps *sorts:store])
   :: build robust app catalog from docket charges (installed apps)
@@ -129,7 +121,7 @@
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
       =/  apps  initial:apps:core
-      ~&  >>  "{<dap.bowl>}: sending %initial {<[%initial apps]>}"
+      :: ~&  >>  "{<dap.bowl>}: sending %initial {<[%initial apps]>}"
       :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
       (bazaar:send-reaction:core [%initial apps] [/updates ~])
     ::
@@ -137,10 +129,6 @@
       :: The space level watch subscription
       =/  host        `@p`(slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
-<<<<<<< HEAD:realm/app/bazaar.hoon
-=======
-      :: ~&  >  [i.t.path host space-pth src.bowl]
->>>>>>> main:desks/realm/app/bazaar.hoon
       :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
       ::  recommends crash on permission check or other failure
       ?>  (check-member:security:core [host space-pth] src.bowl)
@@ -563,7 +551,7 @@
     ^-  (unit app-index-full:store)
     ?.  (~(has by space-apps.state) path)  ~
     =/  apps  (~(got by space-apps.state) path)
-    ~&  >>>  "{<dap.bowl>}: {<app-catalog:state>}"
+    :: ~&  >>>  "{<dap.bowl>}: {<app-catalog:state>}"
     =/  result=app-index-full:store
     %-  ~(rep by index.apps)
     |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
@@ -856,6 +844,7 @@
   ++  on-initial
     |=  [spaces=spaces:spaces-store]
     ^-  (quip card _state)
+    :: ~&  >  spaces
     :: =/  cards=(list card)
     :: %-  ~(rep by sps)
     :: |=  [[path=space-path:spaces-store =space:spaces-store] acc=(list card)]
