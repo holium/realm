@@ -10,6 +10,8 @@ import { constructSampleWallet } from '../../store';
 import { WalletCard } from '../common/WalletCard';
 import { AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 import { WalletActions } from '../../../../logic/actions/wallet';
+import { ThemeType } from 'renderer/theme';
+import { WalletView } from '../../store';
 
 interface EthListProps {}
 
@@ -44,7 +46,7 @@ export const EthList: FC<EthListProps> = observer((props: EthListProps) => {
                 wallet={wallet}
                 onSelect={() => {
                   console.log('selected');
-                  setSelected(wallet);
+                  walletApp.setView(WalletView.ETH_DETAIL, wallet.address);
                 }}
               />
             );
