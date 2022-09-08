@@ -2,7 +2,7 @@
 # ./copy-desk.sh <ship_name> <desk>
 # ./copy-desk.sh zod playground
 
-mkdir -p "ships/$1/$2" && cp -R -f $2/* ships/$1/$2 && echo "~$1" > ships/$1/$2/desk.ship && rm ships/$1/$2/README.md
+mkdir -p "ships/$1/$2" && cp -R -f desks/$2/* ships/$1/$2 && echo "~$1" > ships/$1/$2/desk.ship
 
 cp -R -f ships/$1/garden/mar/docket-0.hoon ships/$1/realm/mar/docket-0.hoon
 cp -R -f ships/$1/garden/lib/docket.hoon ships/$1/realm/lib/docket.hoon

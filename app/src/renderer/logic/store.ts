@@ -1,3 +1,4 @@
+import { AuthActions } from './actions/auth';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
@@ -255,6 +256,9 @@ OSActions.onLogout((_event: any) => {
   SoundActions.playLogout();
 });
 
+// --------------------------------------
+// ---------- Effects listener ----------
+// --------------------------------------
 // Effect events
 OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
@@ -296,6 +300,7 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.courier, value.patch);
     }
   }
+
   if (value.response === 'initial') {
     if (value.resource === 'courier') {
       applySnapshot(servicesStore.courier, value.model);

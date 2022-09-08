@@ -1,5 +1,6 @@
 import { Conduit } from '@holium/conduit';
-import { createPost } from '@urbit/api';
+import { PokeCallbacks, PokeParams } from '@holium/conduit/src/types';
+import { createPost, Post } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { CourierStoreType } from '../services/ship/models/courier';
 import { Patp } from '../types';
@@ -33,6 +34,11 @@ export const CourierApi = {
           case 'dm-received':
             store.setReceivedDM(payload);
             break;
+          case 'group-dm-created':
+            // console.log('group-dm-created', payload);
+            // if()
+            // store.setReceivedDM(payload);
+            break;
           default:
             console.log('action', action);
             break;
@@ -47,62 +53,59 @@ export const CourierApi = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  sendDM: async (
-    conduit: Conduit,
-    ourShip: string,
-    path: string, // i.e. /dm-inbox/~dev
-    contents: any[]
-  ) => {
-    const to = path.split('/')[2];
-
-    const post = createPost(ourShip.substring(1), contents, `/${patp2dec(to)}`);
-
+  sendDM: async (conduit: Conduit, path: string, post: Post) => {
+    const to = path.split('/')[2]; // /dm-inbox/<to @p>
     const payload = {
-      app: 'dm-hook',
-      mark: `graph-update-3`,
+      app: 'courier',
+      mark: `graph-dm-action`,
       json: {
-        'add-nodes': {
-          resource: { ship: ourShip, name: 'dm-inbox' },
-          nodes: {
-            [post.index]: {
-              post,
-              children: null,
-            },
-          },
+        'send-dm': {
+          ship: to,
+          post,
         },
       },
     };
     return await conduit.poke(payload);
   },
-  // Pending dms
   sendGroupDM: async (
     conduit: Conduit,
-    ourShip: string,
     path: string, // i.e. /~fes/~2022.8.31..18.41.37
-    contents: any[]
+    post: Post
   ) => {
     const split = path.split('/');
     const host = split[1];
     const timestamp = split[2];
-    const post = createPost(ourShip.substring(1), contents);
-
     const payload = {
-      app: 'graph-store',
-      mark: `graph-update-3`,
+      app: 'courier',
+      mark: `graph-dm-action`,
       json: {
-        'add-nodes': {
+        'send-group-dm': {
           resource: { ship: host, name: timestamp },
-          nodes: {
-            [post.index]: {
-              post,
-              children: null,
-            },
-          },
+          post,
         },
       },
     };
-    // console.log(payload.json, post);
     return await conduit.poke(payload);
+  },
+  createGroupDM: async (conduit: Conduit, ships: Patp[]) => {
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'courier',
+        mark: `graph-dm-action`,
+        json: {
+          'create-group-dm': {
+            ships,
+          },
+        },
+        reaction: 'graph-dm-reaction.group-dm-created',
+        onReaction(data: any) {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
   },
   acceptDm: async (conduit: Conduit, toShip: string) => {
     console.log('accepting dm');
@@ -120,7 +123,34 @@ export const CourierApi = {
       app: 'dm-hook',
       mark: 'dm-hook-action',
       json: {
-        decline: toShip,
+        reject: toShip,
+      },
+    };
+    return await conduit.poke(payload);
+  },
+  acceptGroupDm: async (conduit: Conduit, inviteId: string) => {
+    const payload = {
+      app: 'invite-store',
+      mark: 'invite-action',
+      json: {
+        accept: {
+          term: 'graph',
+          uid: inviteId,
+        },
+      },
+    };
+    console.log('accepting dm', payload);
+    return await conduit.poke(payload);
+  },
+  declineGroupDm: async (conduit: Conduit, inviteId: string) => {
+    const payload = {
+      app: 'invite-store',
+      mark: 'invite-action',
+      json: {
+        decline: {
+          term: 'graph',
+          uid: inviteId,
+        },
       },
     };
     return await conduit.poke(payload);

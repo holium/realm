@@ -1,4 +1,4 @@
-import { Instance, types, applySnapshot } from 'mobx-state-tree';
+import { Instance, types, applySnapshot, cast } from 'mobx-state-tree';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from 'os/types';
@@ -6,6 +6,7 @@ import { toJS } from 'mobx';
 import { cleanNounColor } from '../../../lib/color';
 import { LoaderModel } from '../../common.model';
 import moment from 'moment';
+import { type } from 'os';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -144,7 +145,7 @@ const GroupLog = types
   .model('GroupLog', {
     path: types.string,
     to: types.array(types.string),
-    type: types.enumeration(['group']),
+    type: types.enumeration(['group', 'group-pending']),
     source: types.enumeration(['graph-store', 'chatstead']),
     messages: types.array(GraphDM),
     metadata: types.array(ContactMetadata),
@@ -156,26 +157,33 @@ const GroupLog = types
     },
   }))
   .actions((self) => ({
-    receiveDM: (dm: GraphDMType) => {
-      // console.log(dm);
-      self.messages.unshift(dm);
-      // self.outgoing
+    receiveDM: (incomingDm: GraphDMType) => {
+      // for some reason the indexes are different after group dm send
+      const replaceIdx = self.messages.findIndex(
+        (outDm: GraphDMType) => outDm.timeSent === incomingDm.timeSent
+      );
+      if (replaceIdx >= 0) {
+        // a pending message we've already sent
+        self.messages[replaceIdx].index = incomingDm.index;
+        self.messages[replaceIdx].pending = false;
+      } else {
+        self.messages.unshift(incomingDm);
+      }
     },
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
-      const split = self.path.split('/');
-      const host = split[1];
-      const post = createPost(author, contents, `/${patp2dec(host)}`);
-      self.outgoing.unshift(
+      const post = createPost(author, contents);
+      self.messages.unshift(
         GraphDM.create({
           index: post.index,
-          author: author,
+          author: `~${author}`,
           pending: true,
           timeSent: post['time-sent'],
           // @ts-expect-error
           contents: post.contents,
         })
       );
+      return post;
     },
   }));
 export type GroupLogType = Instance<typeof GroupLog>;
@@ -196,23 +204,32 @@ const DMLog = types
     },
   }))
   .actions((self) => ({
-    receiveDM: (dm: GraphDMType) => {
-      // console.log(dm);
-      self.messages.unshift(dm);
+    receiveDM: (incomingDm: GraphDMType) => {
+      const replaceIdx = self.messages.findIndex(
+        (outDm: GraphDMType) => outDm.index === incomingDm.index
+      );
+      if (replaceIdx >= 0) {
+        // a pending message we've already sent
+        self.messages[replaceIdx].pending = false;
+      } else {
+        self.messages.unshift(incomingDm);
+      }
     },
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
       const post = createPost(author, contents, `/${patp2dec(self.to)}`);
-      self.outgoing.unshift(
+      self.messages.unshift(
         GraphDM.create({
           index: post.index,
-          author: author,
+          author: `~${author}`,
           pending: true,
           timeSent: post['time-sent'],
           // @ts-expect-error
           contents: post.contents,
         })
       );
+
+      return post;
     },
   }));
 
@@ -231,6 +248,7 @@ const PreviewDM = types
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: ContactMetadata,
+    inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
   })
@@ -247,19 +265,20 @@ const PreviewGroupDM = types
   .model('PreviewGroupDM', {
     path: types.string,
     to: types.array(types.string),
-    type: types.enumeration(['group']),
+    type: types.enumeration(['group', 'group-pending']),
     source: types.enumeration(['graph-store', 'chatstead']),
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: types.array(ContactMetadata),
+    inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {
       // add the sender
-      dm.contents.unshift({ mention: dm.author });
-      self.lastMessage = dm.contents;
+      // @ts-ignore
+      self.lastMessage = [{ mention: dm.author }, ...dm.contents];
       self.lastTimeSent = dm.timeSent;
     },
   }));
@@ -289,7 +308,7 @@ export const CourierStore = types
       // console.log(dmPreviews);
       Object.keys(dmPreviews).forEach((key: string) => {
         const preview: any = dmPreviews[key];
-        if (preview.type === 'group') {
+        if (preview.type === 'group' || preview.type === 'group-pending') {
           preview.metadata.forEach((mtd: any) => {
             mtd.color = cleanNounColor(mtd.color);
           });
@@ -300,40 +319,65 @@ export const CourierStore = types
       applySnapshot(self.previews, dmPreviews);
       self.loader.set('loaded');
     },
-    draftNew: (patps: Patp[], metadata: any[]) => {
-      const type = patps.length === 1 ? 'dm' : 'group';
-      if (type === 'dm') {
-        self.dms.set(
-          patps[0],
-          DMLog.create({
-            path: `/dm-inbox/${patps[0]}`,
-            to: patps[0],
-            type: type,
-            source: 'graph-store',
-            messages: [],
-            metadata: ContactMetadata.create(metadata[0] || {}),
-            outgoing: [],
-          })
-        );
-        self.previews.set(
-          patps[0],
-          DMPreview.create({
-            path: `/dm-inbox/${patps[0]}`,
-            to: patps[0],
-            type: 'type',
-            source: 'graph-store',
-            lastTimeSent: moment().unix() * 1000,
-            lastMessage: [{ text: 'Drafting...' }],
-            metadata: ContactMetadata.create(metadata[0] || {}),
-            pending: false,
-            isNew: true,
-          })
-        );
-        return self.previews.get(patps[0]);
-      } else {
-        // is group
-        return;
-      }
+    draftDM: (patps: Patp[], metadata: any[]) => {
+      const path = `/dm-inbox/${patps[0]}`;
+      self.dms.set(
+        path,
+        DMLog.create({
+          path: `/dm-inbox/${patps[0]}`,
+          to: patps[0],
+          type: 'dm',
+          source: 'graph-store',
+          messages: [],
+          metadata: ContactMetadata.create(metadata[0] || {}),
+        })
+      );
+      self.previews.set(
+        path,
+        DMPreview.create({
+          path: `/dm-inbox/${patps[0]}`,
+          to: patps[0],
+          type: 'dm',
+          source: 'graph-store',
+          lastTimeSent: moment().unix() * 1000,
+          lastMessage: [{ text: 'Drafting...' }],
+          metadata: ContactMetadata.create(metadata[0] || {}),
+          pending: false,
+          isNew: true,
+        })
+      );
+      return self.previews.get(path);
+    },
+    draftGroupDM: (preview: PreviewGroupDMType) => {
+      preview.metadata.forEach((mtd: any) => {
+        mtd.color = cleanNounColor(mtd.color);
+      });
+      self.previews.set(
+        preview.path,
+        DMPreview.create({
+          path: preview.path,
+          to: preview.to,
+          type: preview.type,
+          source: preview.source,
+          lastTimeSent: preview.lastTimeSent,
+          lastMessage: preview.lastMessage,
+          metadata: preview.metadata,
+          pending: false,
+          isNew: true,
+        })
+      );
+      self.dms.set(
+        preview.path,
+        GroupLog.create({
+          path: preview.path,
+          to: preview.to,
+          type: preview.type,
+          source: preview.source,
+          messages: [],
+          metadata: preview.metadata,
+        })
+      );
+      return self.previews.get(preview.path);
     },
     setDMLog: (dmLog: DMLogType) => {
       self.dms.set(dmLog.path, dmLog);

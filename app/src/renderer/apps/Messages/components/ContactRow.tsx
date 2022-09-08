@@ -23,6 +23,7 @@ import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';
 import { Patp } from 'os/types';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type DMContact = {
   theme: ThemeModelType;
@@ -72,7 +73,7 @@ const getNickname = (patp: Patp, metadata: any[]) => {};
 export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
   // const { ship } = useShip();
-  const pending = dm.type === 'pending';
+  const pending = dm.type === 'pending' || dm.type === 'group-pending';
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
 
@@ -84,15 +85,17 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     dmModel: PreviewDMType,
     groupModel: PreviewGroupDMType;
 
-  if (dm.type === 'group') {
+  if (dm.type === 'group' || dm.type === 'group-pending') {
     groupModel = dm as PreviewGroupDMType;
     to = Array.from(groupModel.to).join(', ');
     sigil = (
-      <GroupSigil
-        path={groupModel.path}
-        patps={groupModel.to}
-        metadata={groupModel.metadata}
-      />
+      <Box opacity={pending ? 0.4 : 1}>
+        <GroupSigil
+          path={groupModel.path}
+          patps={groupModel.to}
+          metadata={groupModel.metadata}
+        />
+      </Box>
     );
     let type = 'text',
       lastMessage;
@@ -103,9 +106,38 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
       // @ts-ignore
       lastMessage = { text: `${lastSender.mention}: ${lastMessage[type]}` };
     } else {
-      lastMessage = { text: 'No messages yet' };
+      lastMessage = {
+        text: pending ? 'Group chat invite' : 'No messages yet',
+      };
     }
     subTitle = <Message preview type={type} content={lastMessage} />;
+    onAccept = (evt: any) => {
+      evt.stopPropagation();
+      setAcceptLoading(true);
+
+      ShipActions.acceptGroupDm(groupModel.path)
+        .then((response: any) => {
+          console.log('accept ContactRow response', response);
+          setAcceptLoading(false);
+        })
+        .catch(() => {
+          setAcceptLoading(false);
+        });
+      console.log('accepting group dm');
+    };
+    onDecline = (evt: any) => {
+      evt.stopPropagation();
+      setRejectLoading(true);
+      ShipActions.declineDm(groupModel.path)
+        .then((response: any) => {
+          console.log('response', response);
+          setRejectLoading(false);
+        })
+        .catch(() => {
+          setRejectLoading(false);
+        });
+      console.log('rejecting group dm');
+    };
   } else {
     dmModel = dm as PreviewDMType;
     to = dmModel.to;

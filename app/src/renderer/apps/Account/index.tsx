@@ -16,7 +16,7 @@ import { nativeApps } from '..';
 import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
 type ProfileProps = {

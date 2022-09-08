@@ -84,3 +84,11 @@ export type Message =
   | (MessageBase & UnsubscribeParams)
   | (MessageBase & AckParams)
   | (MessageBase & DeleteParams);
+
+export interface Thread<Action> {
+  inputMark: string; // graph-update
+  outputMark: string; //
+  threadName: string; // graph-add-nodes
+  desk?: string; // graph-store
+  body: Action;
+}

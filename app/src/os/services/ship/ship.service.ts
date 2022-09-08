@@ -19,6 +19,10 @@ import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { NotificationsApi } from '../../api/notifications';
 import { NotificationsStore, NotificationsType } from './models/notifications';
+import { SlipService } from '../slip.service';
+// import { VisaModel, VisaModelType } from '../spaces/models/invitations';
+import { PassportsApi } from '../../api/passports';
+
 import { ContactStore, ContactStoreType } from './models/contacts';
 import { DocketStore, DocketStoreType } from './models/docket';
 import { ChatStoreType, ChatStore } from './models/dms';
@@ -28,11 +32,12 @@ import { loadContactsFromDisk } from './stores/contacts';
 import { loadDocketFromDisk } from './stores/docket';
 import { loadFriendsFromDisk } from './stores/friends';
 import { CourierApi } from '../../api/courier';
-import { CourierStoreType } from './models/courier';
+import { CourierStoreType, PreviewGroupDMType } from './models/courier';
 import { toJS } from 'mobx';
 
 export type ShipModels = {
   friends: FriendsType;
+  // invitations: VisaModelType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
@@ -47,6 +52,10 @@ export class ShipService extends BaseService {
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
+    // invitations: VisaModel.create({
+    //   outgoing: {},
+    //   incoming: {},
+    // }),
     contacts: undefined,
     docket: DocketStore.create({ apps: {} }),
     chat: undefined,
@@ -56,7 +65,9 @@ export class ShipService extends BaseService {
   } = {
     graph: {},
   };
-  private rooms?: RoomsService;
+  private services: { slip?: SlipService } = {};
+  rooms: RoomsService;
+
   handlers = {
     'realm.ship.get-dms': this.getDMs,
     'realm.ship.get-dm-log': this.getDMLog,
@@ -64,6 +75,8 @@ export class ShipService extends BaseService {
     'realm.ship.draft-dm': this.draftNewDm,
     'realm.ship.accept-dm-request': this.acceptDm,
     'realm.ship.decline-dm-request': this.declineDm,
+    'realm.ship.accept-group-dm-request': this.acceptGroupDm,
+    'realm.ship.decline-group-dm-request': this.declineGroupDm,
     'realm.ship.get-s3-bucket': this.getS3Bucket,
     'realm.ship.get-metadata': this.getMetadata,
     'realm.ship.get-contact': this.getContact,
@@ -107,6 +120,12 @@ export class ShipService extends BaseService {
     declineDm: (toShip: string) => {
       return ipcRenderer.invoke('realm.ship.decline-dm-request', toShip);
     },
+    acceptGroupDm: (path: string) => {
+      return ipcRenderer.invoke('realm.ship.accept-group-dm-request', path);
+    },
+    declineGroupDm: (path: string) => {
+      return ipcRenderer.invoke('realm.ship.decline-group-dm-request', path);
+    },
     setScreen: (screen: boolean) => {
       return ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
     },
@@ -143,9 +162,10 @@ export class ShipService extends BaseService {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
-    this.rooms = new RoomsService(core);
 
     this.subscribe = this.subscribe.bind(this);
+    this.services.slip = new SlipService(core);
+    this.rooms = new RoomsService(core);
   }
 
   get modelSnapshots() {
@@ -266,10 +286,12 @@ export class ShipService extends BaseService {
           this.state!.loader.set('loaded');
           resolve(this.state!);
         });
-
-        // TODO turning off rooms for now
-        // this.rooms?.onLogin(ship);
       });
+      // const invitations = await PassportsApi.getVisas(this.core.conduit!);
+      // this.models.invitations.initial(invitations);
+
+      this.services.slip?.subscribe();
+      this.rooms?.onLogin(ship);
 
       // return ship state
     } catch (err) {
@@ -307,6 +329,7 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
+    this.rooms?.onLogout();
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;
@@ -328,7 +351,7 @@ export class ShipService extends BaseService {
 
     const storeParams = {
       name: 'ship',
-      cwd: `realm.${ship}`,
+      cwd: `realm.${ship.patp}`,
       secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
     };
@@ -374,6 +397,7 @@ export class ShipService extends BaseService {
   ) {
     return await FriendsApi.editFriend(this.core.conduit!, patp, payload);
   }
+
   async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
     return await FriendsApi.removeFriend(this.core.conduit!, patp);
   }
@@ -414,33 +438,55 @@ export class ShipService extends BaseService {
     console.log('acceptingDM', toShip);
     return await CourierApi.acceptDm(this.core.conduit!, toShip);
   }
+
   async declineDm(_event: any, toShip: string) {
     console.log('rejectingDM', toShip);
     return await CourierApi.declineDm(this.core.conduit!, toShip);
   }
-  async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
-    const draft = this.models.courier?.draftNew(patps, metadata);
-    return toJS(draft);
-  }
-  async sendDm(_event: any, path: string, contents: any[]) {
-    const ourShip = this.state?.patp!;
-    const dmLog = this.models.courier?.dms.get(path)!;
-    dmLog.sendDM(this.state!.patp, contents);
 
-    if (dmLog.type === 'group') {
-      return await CourierApi.sendGroupDM(
+  async acceptGroupDm(_event: any, path: string) {
+    const inviteId = this.models.courier?.previews.get(path)?.inviteId;
+    console.log('acceptingDM', path, inviteId);
+    if (inviteId) {
+      return await CourierApi.acceptGroupDm(this.core.conduit!, inviteId);
+    }
+    return;
+  }
+
+  async declineGroupDm(_event: any, path: string) {
+    const inviteId = this.models.courier?.previews.get(path)?.inviteId;
+    console.log('rejectingDM', path, inviteId);
+    if (inviteId) {
+      return await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
+    }
+    return;
+  }
+
+  async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
+    let draft: any;
+    if (patps.length > 1) {
+      const reaction: any = await CourierApi.createGroupDM(
         this.core.conduit!,
-        ourShip,
-        path,
-        contents
+        patps
+      );
+      draft = this.models.courier?.draftGroupDM(
+        reaction['group-dm-created'] as PreviewGroupDMType
       );
     } else {
-      return await CourierApi.sendDM(
-        this.core.conduit!,
-        ourShip,
-        path,
-        contents
-      );
+      // single dm
+      draft = this.models.courier?.draftDM(patps, metadata);
+    }
+    return toJS(draft);
+  }
+
+  async sendDm(_event: any, path: string, contents: any[]) {
+    const dmLog = this.models.courier?.dms.get(path)!;
+    const post = dmLog.sendDM(this.state!.patp, contents);
+
+    if (dmLog.type === 'group') {
+      return await CourierApi.sendGroupDM(this.core.conduit!, path, post);
+    } else {
+      return await CourierApi.sendDM(this.core.conduit!, path, post);
     }
   }
   async removeDm(_event: any, toShip: string, removeIndex: any) {

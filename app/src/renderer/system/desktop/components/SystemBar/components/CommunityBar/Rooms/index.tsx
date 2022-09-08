@@ -9,7 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import { RoomRow } from 'renderer/apps/Rooms/components/RoomRow';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 type RoomTrayProps = {};
 
 const iconSize = 28;
@@ -30,7 +30,7 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
 
   const dimensions = {
     height: 500,
-    width: 360,
+    width: 380,
   };
 
   const position = 'top-left';

@@ -272,6 +272,18 @@ export class OnboardingService extends BaseService {
         url,
       });
 
+      let ship = patp
+
+      //
+      // this is a hot-patch for onboarding after conduit moved to lib
+      // it may conflict with main after 111-webrtc-os-service merges
+      //
+      this.core.setSession({
+        ship,
+        url,
+        cookie,
+      });
+
       return { url, cookie, patp };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);

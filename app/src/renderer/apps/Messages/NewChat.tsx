@@ -12,6 +12,7 @@ import {
   Box,
   Badge,
   Tag,
+  Spinner,
 } from 'renderer/components';
 import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/shell/theme.model';
@@ -21,6 +22,7 @@ import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { DmActions } from 'renderer/logic/actions/chat';
 
 type IProps = {
   theme: ThemeModelType;
@@ -34,7 +36,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
   const { courier, contacts } = useServices();
   const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
-
+  const [loading, setLoading] = useState(false);
   const [patp, setPatp] = useState<string>('');
 
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
@@ -51,14 +53,16 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
       if (contacts.getContactAvatarMetadata(contactsList[0])) {
         metadata = contacts.getContactAvatarMetadata(contactsList[0]);
       }
+      //
+      setLoading(true);
       const newDm = await ShipActions.draftDm(contactsList, [metadata]);
+      setLoading(false);
       onCreateNewDm(newDm);
     },
     [selectedPatp]
   );
 
   const onShipSelected = (contact: [string, string?]) => {
-    console.log('selecting', contact);
     const patp = contact[0];
     const nickname = contact[1];
     // const pendingAdd = selectedPatp;
@@ -66,6 +70,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
     setSelected(new Set(selectedPatp));
     selectedNickname.add(nickname ? nickname : '');
     setSelectedNickname(new Set(selectedNickname));
+    setPatp('');
   };
 
   const onShipRemove = (contact: [string, string?]) => {
@@ -187,7 +192,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         marginTop={headerOffset}
         overflowY="hidden"
         height={height}
-        style={{ backgroundColor: windowColor }}
+        style={{ backgroundColor: windowColor, position: 'relative' }}
       >
         <FormControl.Field>
           <Input
@@ -214,6 +219,23 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
             }}
           />
         </FormControl.Field>
+        {loading && (
+          <Flex
+            left={0}
+            right={0}
+            top={0}
+            bottom={50}
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            position="absolute"
+          >
+            <Spinner size={1} />
+            <Text mt={3} opacity={0.4}>
+              {selectedPatp.size > 1 ? 'Creating group chat...' : ''}
+            </Text>
+          </Flex>
+        )}
         {contactArray}
         <Flex pl={2} pr={2} flex={1} flexDirection="column">
           <ShipSearch

@@ -4,7 +4,7 @@ import { darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
 
 import { IconButton, Icons, Badge, Flex } from 'renderer/components';
-import { useTrayApps } from 'renderer/logic/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 type MessagesTrayProps = {
   theme: any;
