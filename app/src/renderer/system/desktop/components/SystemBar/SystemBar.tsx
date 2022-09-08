@@ -19,7 +19,12 @@ export const SystemBar: FC<SystemBarProps> = observer(
     let trayAppRef;
 
     const { windowColor, textColor } = desktop.theme;
-    const { activeApp, dimensions, coords } = useTrayApps();
+    const { activeApp, dimensions, coords, setActiveApp } = useTrayApps();
+
+    // useEffect(() => {
+    //   console.log('setting active app..');
+    //   setActiveApp('wallet-tray');
+    // }, [])
 
     let TrayAppView: FC<any> | undefined;
     if (activeApp) {

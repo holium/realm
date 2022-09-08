@@ -316,7 +316,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                   name="nickname"
                   placeholder="optional"
                   defaultValue={nickname.state.value}
-                  error={!nickname.computed.isDirty || nickname.computed.error}
+                  error={nickname.computed.error}
                   onChange={(e: any) =>
                     nickname.actions.onChange(e.target.value)
                   }
