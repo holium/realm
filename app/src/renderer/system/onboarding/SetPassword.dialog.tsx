@@ -38,7 +38,10 @@ export const SetPassword: FC<BaseDialogProps> = observer(
       id: 'password',
       form: passwordForm,
       initialValue: '',
-      validationSchema: yup.string().required('Password is required'),
+      validationSchema: yup
+        .string()
+        .required('No password provided.')
+        .min(8, 'Password is too short - should be 8 chars minimum.'),
     });
 
     const confirmPassword = useField({
@@ -119,13 +122,22 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   name="password"
                   type="password"
                   placeholder="***************"
-                  // error={!password.computed.isDirty || password.computed.error}
+                  error={
+                    password.computed.isDirty &&
+                    password.computed.ifWasEverBlurredThenError
+                  }
                   onChange={(e: any) =>
                     password.actions.onChange(e.target.value)
                   }
                   onFocus={() => password.actions.onFocus()}
                   onBlur={() => password.actions.onBlur()}
                 />
+
+                <FormControl.Error>
+                  {password.computed.ifWasEverBlurredThenError &&
+                    password.computed.isDirty &&
+                    password.computed.error}
+                </FormControl.Error>
               </FormControl.Field>
               <FormControl.Field>
                 <Label>Confirm password</Label>
@@ -134,16 +146,22 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   name="confirm-password"
                   type="password"
                   placeholder="***************"
-                  // error={
-                  //   !confirmPassword.computed.isDirty ||
-                  //   confirmPassword.computed.error
-                  // }
+                  error={
+                    confirmPassword.computed.isDirty &&
+                    confirmPassword.computed.ifWasEverBlurredThenError
+                  }
                   onChange={(e: any) =>
                     confirmPassword.actions.onChange(e.target.value)
                   }
                   onFocus={() => confirmPassword.actions.onFocus()}
                   onBlur={() => confirmPassword.actions.onBlur()}
                 />
+                {confirmPassword.computed.ifWasEverBlurredThenError &&
+                  confirmPassword.computed.isDirty && (
+                    <FormControl.Error>
+                      {confirmPassword.computed.error}
+                    </FormControl.Error>
+                  )}
               </FormControl.Field>
             </FormControl.FieldSet>
           </Grid.Column>
