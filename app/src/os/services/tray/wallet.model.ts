@@ -88,6 +88,7 @@ const EthWallet = types.model('EthWallet', {
   address: types.string,
   balance: types.string,
   contracts: types.map(SmartContract),
+  nickname: types.string,
   conversions: types.maybe(
     types.model({
       usd: types.maybe(types.string),
@@ -117,7 +118,7 @@ export const EthStore = types
     get list() {
       return Array.from(self.wallets.values()).map(
         (wallet: any, index: number) => ({
-          name: `Wallet ${index}`,
+          name: wallet.nickname,
           address: wallet.address,
           balance: wallet.balance,
         })
@@ -157,6 +158,7 @@ export const EthStore = types
         path: wallet.wallet.path,
         address: wallet.wallet.address,
         balance: gweiToEther(wallet.wallet.balance).toString(),
+        nickname: wallet.wallet.nickname,
         contracts: {},
       };
       self.wallets.set(wallet.key, EthWallet.create(walletObj));

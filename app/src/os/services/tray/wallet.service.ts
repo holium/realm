@@ -51,8 +51,8 @@ export class WalletService extends BaseService {
     setNetworkProvider: (network: string, provider: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-network-provider', network, provider);
     },
-    createWallet: (sender: string, network: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.create-wallet', sender, network);
+    createWallet: (sender: string, network: string, nickname: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.create-wallet', sender, network, nickname);
     },
     sendEthereumTransaction: (walletIndex: number, to: string, amount: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.send-ethereum-transaction', walletIndex, to, amount)
@@ -204,8 +204,8 @@ export class WalletService extends BaseService {
     await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
   }
 
-  async createWallet(_event: any, sender: string, network: string) {
-    await WalletApi.createWallet(this.core.conduit!, sender, network);
+  async createWallet(_event: any, sender: string, network: string, nickname: string) {
+    await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
   }
 
   async sendEthereumTransaction(_event: any, walletIndex: number, to: string, amount: string) {

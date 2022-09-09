@@ -53,7 +53,7 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  createWallet: async (conduit: Conduit, sender: string, network: string) => {
+  createWallet: async (conduit: Conduit, sender: string, network: string, nickname: string) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -61,6 +61,7 @@ export const WalletApi = {
         'create-wallet': {
           sndr: sender,
           network: network,
+          nickname: nickname,
         }
       }
     };
