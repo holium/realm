@@ -9,7 +9,7 @@ interface AvatarRowProps {
 
 export const AvatarRow: FC<AvatarRowProps> = (props: AvatarRowProps) => {
   const { people, backgroundColor } = props;
-  const { contacts } = useServices();
+  const { ship, contacts } = useServices();
 
   return (
     <Flex flexDirection="row" alignItems="center">

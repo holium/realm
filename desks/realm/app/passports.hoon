@@ -53,7 +53,7 @@
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
       core   ~(. +> [bowl ~])
-  ::
+  :: :: ::
   ++  on-init  :: on-init:def
     ^-  (quip card _this)
     ::  set initial state

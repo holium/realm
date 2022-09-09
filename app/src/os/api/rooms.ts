@@ -190,7 +190,7 @@ export const RoomsApi = {
       path: `/room/local`,
       onEvent: async (data: any) => {
         let update = data['rooms-update'];
-        // console.log('rooms update', update)
+        console.log('rooms update', update);
         if (!update) return;
         if (update['room']) {
           const { diff, room } = update['room'];

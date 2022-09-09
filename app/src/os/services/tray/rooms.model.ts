@@ -51,10 +51,8 @@ export const RoomsModel = types
 // https://mobx-state-tree.js.org/tips/inheritance
 //
 
-
 //
 export type RoomsModelType = Instance<typeof RoomsModel>;
-
 
 export const ChatModel = types.model('ChatModel', {
   index: types.integer,
@@ -64,7 +62,6 @@ export const ChatModel = types.model('ChatModel', {
   timeReceived: types.integer,
 });
 export type ChatModelType = Instance<typeof ChatModel>;
-
 
 export const RoomsAppState = types
   .model('RoomsAppState', {
@@ -110,7 +107,7 @@ export const RoomsAppState = types
     },
     get chats() {
       return Array.from(self.chatData.values());
-    }
+    },
   }))
   .actions((self) => ({
     setMuted(muted: boolean) {
@@ -140,6 +137,7 @@ export const RoomsAppState = types
     // setKicked
     // newChat
     handleRoomUpdate(room: RoomsModelType, diff: any) {
+      console.log(room, diff);
       // set room view if we just created this room
       let knownRoom = self.knownRooms.get(room.id);
 
@@ -159,9 +157,8 @@ export const RoomsAppState = types
       }
     },
     setLiveRoom(room: RoomsModelType) {
-      
       self.knownRooms.set(room.id, room);
-      if(!self.liveRoom || self.liveRoom.id !== room.id) {
+      if (!self.liveRoom || self.liveRoom.id !== room.id) {
         // clear chat data if a new room
         // todo maybe this logic has a better home elsewhere
         self.chatData.clear();
@@ -232,28 +229,28 @@ export const RoomsAppState = types
     },
     appendOurChat(our: Patp, contents: string) {
       let time = Date.now();
-      let chat : ChatModelType = {
+      let chat: ChatModelType = {
         author: our,
         index: time,
         timeReceived: time,
         contents: contents,
         isRightAligned: true,
-      }
+      };
 
       self.chatData.set(String(time), chat);
     },
-    handleInboundChat(from:Patp, contents:string) {
+    handleInboundChat(from: Patp, contents: string) {
       let time = Date.now();
-      let chat : ChatModelType = {
+      let chat: ChatModelType = {
         author: from,
         index: time,
         timeReceived: time,
         contents: contents,
         isRightAligned: false,
-      }
+      };
 
       self.chatData.set(String(time), chat);
-    }
+    },
   }));
 
 export type RoomsAppStateType = Instance<typeof RoomsAppState>;

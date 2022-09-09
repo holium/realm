@@ -10,6 +10,7 @@ export type BaseWorkflowProps = {
   customNext?: boolean; // an override to remove the next button if the dialog has a custom "next" component
   nextButtonText?: string; // renames the text of "Next"
   workflowState?: any; // the state that is passed between the various dialogs in a workflow
+  hasPrevious?: () => boolean;
   setState?: (data: any) => void; // a function that is passed into the dialog component for setting workflow state.
   isValidated?: (state: any) => boolean; // a function that takes in the state and can then check for value.
   onNext?: (evt?: any, state?: any, setState?: any) => void; // is the function executes when the "next" button is clicked.

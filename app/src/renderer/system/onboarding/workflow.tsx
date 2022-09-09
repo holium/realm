@@ -1,12 +1,12 @@
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
+import { servicesStore } from 'renderer/logic/store';
 
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 import DisclaimerDialog from 'renderer/system/onboarding/Disclaimer.dialog';
 import HaveUrbitDialog from 'renderer/system/onboarding/HaveUrbit.dialog';
 import AddShip from 'renderer/system/onboarding/AddShip.dialog';
-import ConnectingShip from 'renderer/system/onboarding/ConnectingShip.dialog';
 import ProfileSetup from 'renderer/system/onboarding/ProfileSetup.dialog';
 import SetPassword from 'renderer/system/onboarding/SetPassword.dialog';
 import InstallAgent from 'renderer/system/onboarding/InstallAgent.dialog';
@@ -49,11 +49,12 @@ const initialOnboardingDialogs: DialogRenderers = {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
+    component: (props: any) => <HaveUrbitDialog {...props} />,
+    hasPrevious: () => !servicesStore.identity.auth.firstTime,
     onPrevious: () => {
       ShellActions.closeDialog();
       OnboardingActions.exitOnboarding();
     },
-    component: (props: any) => <HaveUrbitDialog {...props} />,
     onNext(selfHosted: boolean) {
       OnboardingActions.setSelfHosted(selfHosted);
       return selfHosted
@@ -68,7 +69,7 @@ const initialOnboardingDialogs: DialogRenderers = {
         x: 0,
         y: 0,
         width: 460,
-        height: 360,
+        height: 370,
       },
     },
   },
@@ -80,10 +81,11 @@ const selfHostedDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <AddShip {...props} />,
+    hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
-    onNext: () => OnboardingActions.setStep(OnboardingStep.CONNECTING_SHIP),
+    onNext: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
     window: {
       id: OnboardingStep.ADD_SHIP,
       zIndex: 13,
@@ -91,7 +93,7 @@ const selfHostedDialogs: DialogRenderers = {
       dimensions: {
         x: 0,
         y: 0,
-        width: 450,
+        width: 460,
         height: 370,
       },
     },
@@ -99,30 +101,12 @@ const selfHostedDialogs: DialogRenderers = {
 };
 
 const completeProfileDialogs: DialogRenderers = {
-  [OnboardingStep.CONNECTING_SHIP]: {
-    workflow: true,
-    hasCloseButton: false,
-    customNext: true,
-    component: (props: any) => <ConnectingShip {...props} />,
-    onPrevious: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
-    onNext: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
-    window: {
-      id: OnboardingStep.CONNECTING_SHIP,
-      zIndex: 13,
-      type: 'dialog',
-      dimensions: {
-        x: 0,
-        y: 0,
-        width: 560,
-        height: 300,
-      },
-    },
-  },
   [OnboardingStep.PROFILE_SETUP]: {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <ProfileSetup {...props} />,
+    hasPrevious: () => true,
     onPrevious: () => OnboardingActions.setStep(OnboardingStep.ADD_SHIP),
     onNext: () => OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),
     window: {
@@ -142,6 +126,7 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <SetPassword {...props} />,
+    hasPrevious: () => true,
     onPrevious: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
     onNext: () => OnboardingActions.setStep(OnboardingStep.INSTALL_AGENT),
     window: {
@@ -152,7 +137,7 @@ const completeProfileDialogs: DialogRenderers = {
         x: 0,
         y: 0,
         width: 560,
-        height: 300,
+        height: 380,
       },
     },
   },
@@ -161,7 +146,8 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <InstallAgent {...props} />,
-    onPrevious: () => OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+    hasPrevious: () => true,
+    onPrevious: () => OnboardingActions.setStep(OnboardingStep.SET_PASSWORD),
     onNext: () => {},
     window: {
       id: OnboardingStep.INSTALL_AGENT,
@@ -171,7 +157,7 @@ const completeProfileDialogs: DialogRenderers = {
         x: 0,
         y: 0,
         width: 560,
-        height: 350,
+        height: 380,
       },
     },
   },

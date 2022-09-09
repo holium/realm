@@ -51,6 +51,9 @@ export const ThemeModel = types
     setMouseColor(color: string) {
       self.mouseColor = color;
     },
+    setAccentColor(color: string) {
+      self.accentColor = color;
+    },
     setWallpaper(path: string, color: string, wallpaper: string) {
       const bgLuminosity = bgIsLightOrDark(color.toString());
       const windowTheme = generateColors(color, bgLuminosity);
@@ -61,6 +64,7 @@ export const ThemeModel = types
       applySnapshot(self, clone(theme));
       return self;
     },
+    
   }));
 
 export type ThemeModelType = Instance<typeof ThemeModel>;

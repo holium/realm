@@ -1,19 +1,15 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { isValidPatp } from 'urbit-ob';
-import { createField, createForm, useForm, useField } from 'mobx-easy-form';
+import { useForm, useField } from 'mobx-easy-form';
 import * as yup from 'yup';
 import {
   Grid,
   Input,
   Label,
-  Sigil,
   FormControl,
-  ActionButton,
-  Icons,
   Box,
   Spinner,
   Flex,
-  Text,
   TextButton,
 } from 'renderer/components';
 // @ts-expect-error its there...
@@ -21,16 +17,36 @@ import UrbitSVG from '../../../../assets/urbit.svg';
 import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { useServices } from 'renderer/logic/store';
+
+// /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
 
 export const AddShip: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
+    const [loading, setLoading] = useState(false);
+    const { identity } = useServices();
+
+    useEffect(() => {
+      // Reset onboarding conduit when this page loads
+      OnboardingActions.closeConduit();
+    }, []);
+
     const shipForm = useForm({
       async onSubmit({ values }: any) {
-        await OnboardingActions.addShip(values);
+        setLoading(true);
+        try {
+          // Parse the url, fail otherwise
+          values['url'] = new URL(values['url']).origin;
+          await OnboardingActions.addShip(values);
 
-        props.setState &&
-          props.setState({ ...props.workflowState, ship: values });
-        props.onNext && props.onNext(values);
+          props.setState &&
+            props.setState({ ...props.workflowState, ship: values });
+          props.onNext && props.onNext(values);
+          setLoading(false);
+        } catch (reason: any) {
+          setLoading(false);
+          throw new Error(`Cannot add ship: ${reason.toString()}`);
+        }
       },
     });
 
@@ -39,9 +55,9 @@ export const AddShip: FC<BaseDialogProps> = observer(
       form: shipForm,
       initialValue: '',
       validate: (patp: string) => {
-        // if (addedShips.includes(patp)) {
-        //   return { error: 'Already added', parsed: undefined };
-        // }
+        if (identity.auth.addedShips.includes(patp)) {
+          return { error: 'Already added', parsed: undefined };
+        }
 
         if (patp.length > 1 && isValidPatp(patp)) {
           return { error: undefined, parsed: patp };
@@ -59,7 +75,6 @@ export const AddShip: FC<BaseDialogProps> = observer(
         .string()
         .matches(
           /(?:^|\s)((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/,
-          // /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
           'Enter correct url'
         )
         .required('Please enter url'),
@@ -72,7 +87,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
         .string()
         .matches(
           /[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}-[a-z][a-z-]{5}$/,
-          'Enter correct access key'
+          'Access key not in correct format'
         )
         .required('Please enter access key'),
     });
@@ -92,7 +107,13 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     placeholder="~sampel-palnet"
                     borderColor="input.borderColor"
                     defaultValue={urbitId.state.value}
-                    // error={!urbitId.computed.isDirty || urbitId.computed.error}
+                    autoCapitalize="false"
+                    autoCorrect="false"
+                    spellCheck="false"
+                    error={
+                      urbitId.computed.ifWasEverBlurredThenError &&
+                      urbitId.computed.isDirty
+                    }
                     onChange={(e: any) =>
                       urbitId.actions.onChange(e.target.value)
                     }
@@ -113,7 +134,13 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     name="url"
                     placeholder="https://my-ship.host.com"
                     defaultValue={shipUrl.state.value}
-                    // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
+                    autoCapitalize="false"
+                    autoCorrect="false"
+                    spellCheck="false"
+                    error={
+                      shipUrl.computed.ifWasEverBlurredThenError &&
+                      shipUrl.computed.isDirty
+                    }
                     onChange={(e: any) =>
                       shipUrl.actions.onChange(e.target.value)
                     }
@@ -134,9 +161,13 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     name="code"
                     placeholder="sample-micsev-bacmug-moldex"
                     defaultValue={accessKey.state.value}
-                    // error={
-                    //   !accessKey.computed.isDirty || accessKey.computed.error
-                    // }
+                    autoCapitalize="false"
+                    autoCorrect="false"
+                    spellCheck="false"
+                    error={
+                      accessKey.computed.ifWasEverBlurredThenError &&
+                      accessKey.computed.isDirty
+                    }
                     onChange={(e: any) =>
                       accessKey.actions.onChange(e.target.value)
                     }
@@ -156,10 +187,11 @@ export const AddShip: FC<BaseDialogProps> = observer(
         </Grid.Column>
         <Box position="absolute" left={385} bottom={20}>
           <TextButton
-            disabled={!shipForm.computed.isValid}
+            disabled={!shipForm.computed.isValid || loading}
             onClick={shipForm.actions.submit}
+            style={{ minWidth: 45 }}
           >
-            Next
+            {loading ? <Spinner size={0} /> : 'Next'}
           </TextButton>
         </Box>
       </Grid.Column>

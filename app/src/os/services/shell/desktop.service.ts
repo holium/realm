@@ -140,7 +140,12 @@ export class DesktopService extends BaseService {
       wallpaper
     );
     this.core.services.shell.closeDialog(null);
-    newTheme && this.state?.setTheme(cast(newTheme)!);
+
+    // const isHomeSpace : boolean = (spaceId === `/${this.core.conduit!.ship}/our`);
+    if(newTheme) {
+      this.state?.setTheme(cast(newTheme)!);
+    }
+
     return toJS(newTheme);
   }
 
