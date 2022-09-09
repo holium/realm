@@ -7,6 +7,7 @@ import { Create } from './Create';
 import { Backup } from './Backup';
 import { Confirm } from './Confirm';
 import { Passcode } from './Passcode';
+import { ConfirmPasscode } from './ConfirmPasscode';
 import { Finalizing } from './Finalizing';
 
 export enum NewWalletScreen {
@@ -18,24 +19,31 @@ export enum NewWalletScreen {
   FINALIZING = 'finalizing'
 }
 
-const components = {
-  [NewWalletScreen.CREATE]: Create,
-  [NewWalletScreen.BACKUP]: Backup,
-  [NewWalletScreen.CONFIRM]: Confirm,
-  [NewWalletScreen.PASSCODE]: Passcode,
-  [NewWalletScreen.CONFIRM_PASSCODE]: Passcode,
-  [NewWalletScreen.FINALIZING]: Finalizing
-}
-
-export const EthNew: FC<any> = observer((props: any) => {
-  const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.CONFIRM_PASSCODE);
-  let Component = components[screen];
-
+export const EthNew: FC<any> = observer(() => {
+  const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.PASSCODE);
+  const [passcode, setPasscode] = useState('');
   const seedPhrase = useMemo(() => ethers.Wallet.createRandom().mnemonic.phrase, []);
+
+  let setPasscodeWrapper = (passcode: string) => {
+    console.log('setting passcode!')
+    setPasscode(passcode);
+    setScreen(NewWalletScreen.CONFIRM_PASSCODE);
+  }
+
+  const components = {
+    [NewWalletScreen.CREATE]: <Create setScreen={setScreen} />,
+    [NewWalletScreen.BACKUP]: <Backup setScreen={setScreen} seedPhrase={seedPhrase} />,
+    [NewWalletScreen.CONFIRM]: <Confirm setScreen={setScreen} seedPhrase={seedPhrase} />,
+    [NewWalletScreen.PASSCODE]: <Passcode setPasscode={setPasscodeWrapper} />,
+    [NewWalletScreen.CONFIRM_PASSCODE]: <ConfirmPasscode setScreen={setScreen} correctPasscode={passcode} />,
+    [NewWalletScreen.FINALIZING]: <Finalizing seedPhrase={seedPhrase} passcode={passcode} />
+  }
+  const currentComponent = components[screen];
+
 
   return (
     <Box width="100%" height="100%" px={16} py={12}>
-      <Component {...props} setScreen={setScreen} seedPhrase={seedPhrase} />
+      {currentComponent}
     </Box>
   )
 });

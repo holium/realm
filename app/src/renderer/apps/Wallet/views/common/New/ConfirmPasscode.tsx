@@ -1,16 +1,20 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Box } from 'renderer/components';
 import { darken, transparentize } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../../lib/helpers';
+import { NewWalletScreen } from './index';
 
 interface PasscodeProps {
-  setPasscode: (passcode: string) => void
+  setScreen: Dispatch<SetStateAction<NewWalletScreen>>
+  correctPasscode: string
 }
 
-export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
+export const ConfirmPasscode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
+  console.log(`correct code: ${props.correctPasscode}`);
   let [passcode, setPasscode] = useState('');
+  let [wrongCode, setWrongCode] = useState(false);
   const { desktop } = useServices();
   const theme = getBaseTheme(desktop);
 
@@ -31,7 +35,7 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
 
       let newPasscode = passcode.concat(event.key);
       if (newPasscode.length === 6) {
-        props.setPasscode(newPasscode);
+        props.setScreen(NewWalletScreen.CONFIRM_PASSCODE);
       }
 
       return setPasscode(newPasscode);
@@ -40,6 +44,17 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
     document.addEventListener('keydown', listener);
 
     return () => document.removeEventListener('keydown', listener);
+  }, [passcode])
+
+  useEffect(() => {
+    if (passcode === props.correctPasscode) {
+      console.log('theyre equal?')
+      return props.setScreen(NewWalletScreen.FINALIZING);
+    } else if (passcode.length === 6) {
+      setWrongCode(true);
+    } else {
+      setWrongCode(false);
+    }
   }, [passcode])
 
   const PasscodeDisplay: FC<any> = (props: { numDigits: number, border: string, background: string }) => {
@@ -68,13 +83,18 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
   return (
     <Flex width="100%" height="100%" flexDirection="column" justifyContent="space-evenly" alignItems="center">
       <Flex flexDirection="column">
-        <Text variant="h5">Set a passcode</Text>
+        <Text variant="h5">Confirm passcode</Text>
         <Text mt={3} variant="body">
-          Set a 6-digit passcode to unlock your wallet. This adds an extra layer of security but is not needed to recover your wallet.
+          Please retype your passcode to confirm.
         </Text>
       </Flex>
       <Flex alignItems="center">
         <PasscodeDisplay numDigits={passcode.length} border={panelBorder} background={panelBackground} />
+      </Flex>
+      <Flex alignItems="center">
+        <Text variant="body" color={theme.colors.text.error}>
+        { wrongCode && 'Incorrect passcode.'}
+        </Text>
       </Flex>
     </Flex>
   )

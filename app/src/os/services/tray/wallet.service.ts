@@ -13,8 +13,8 @@ import { BaseService } from '../base.service';
 import {
   WalletStore,
   WalletStoreType,
+  WalletView
 } from './wallet.model';
-import bitcore from 'bitcore-lib';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { HDNode } from 'ethers/lib/utils';
 
@@ -79,8 +79,8 @@ export class WalletService extends BaseService {
 
   async onLogin(ship: string) {
 
-//    const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
-//    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
+    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
@@ -154,16 +154,23 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
+    console.log(`setting: ${mnemonic} : ${passcodeHash}`)
     this.state!.passcodeHash = passcodeHash;
     this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
     let xpub: string = this.privateKey!.derivePath(ethPath).neuter().extendedKey;
     // eth
+
+    console.log('setting eth xpub')
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
+    console.log('setting btc xpub')
     xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+
+    console.log('okay transitioning')
+    this.state!.setView(WalletView.ETH_LIST);
   }
 
   async setXpub(_event: any) {

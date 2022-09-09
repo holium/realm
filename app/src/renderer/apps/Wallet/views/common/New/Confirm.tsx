@@ -22,7 +22,6 @@ export const Confirm: FC<ConfirmProps> = observer((props: ConfirmProps) => {
 
   useEffect(() => {
     let prevDims = dimensions;
-    console.log(prevDims.height, prevDims.width)
     setTrayAppDimensions({ height: 560, width: 360 });
 
     return () => {
