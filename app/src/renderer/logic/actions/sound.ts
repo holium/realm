@@ -14,7 +14,9 @@ const playAudio = (src: string) => {
   } else {
     window.audio = new window.Audio(src);
   }
-  window.audio.play();
+  window.audio.play().catch((err: any) => {
+    console.log('audio error', err);
+  });
 };
 export const SoundActions = {
   playStartup: async () => {

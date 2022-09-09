@@ -18,7 +18,7 @@ export const loadContactsFromDisk = (
         });
 
   let persistedState: ContactStoreType = persisted.store;
-  const isEmpty = Object.keys(persistedState).length === 0;
+  const isEmpty = !persistedState || Object.keys(persistedState).length === 0;
   const model = ContactStore.create(
     !isEmpty ? castToSnapshot(persistedState) : { ourPatp: patp }
   );

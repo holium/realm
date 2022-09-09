@@ -18,7 +18,7 @@ import {
 import { Patp } from '@urbit/api';
 
 export class RoomsService extends BaseService {
-  private state?: RoomsAppStateType; // for state management
+  state?: RoomsAppStateType; // for state management
   handlers = {
     'realm.tray.rooms.join-room': this.joinRoom,
     'realm.tray.rooms.create-room': this.createRoom,
@@ -28,11 +28,15 @@ export class RoomsService extends BaseService {
     'realm.tray.rooms.set-live': this.setLiveRoom,
     'realm.tray.rooms.unset-known-room': this.unsetKnownRoom,
     'realm.tray.rooms.request-rooms': this.requestAllRooms,
+    'realm.tray.rooms.refresh-local-room': this.refreshLocalRoom,
     'realm.tray.rooms.dismiss-invite': this.dismissInvite,
     'realm.tray.rooms.accept-invite': this.acceptInvite,
     'realm.tray.rooms.get-provider': this.getProvider,
     'realm.tray.rooms.set-provider': this.setProvider,
     'realm.tray.rooms.invite': this.invite,
+    'realm.tray.rooms.set-muted': this.setMuted,
+    'realm.tray.rooms.set-cursor': this.setCursors,
+    'realm.tray.rooms.send-chat': this.sendChat,
   };
 
   static preload = {
@@ -55,6 +59,12 @@ export class RoomsService extends BaseService {
     },
     setView: (view: string) => {
       return ipcRenderer.invoke('realm.tray.rooms.set-view', view);
+    },
+    setMuted: (muted: boolean) => {
+      return ipcRenderer.invoke('realm.tray.rooms.set-muted', muted);
+    },
+    setCursors: (cursor: boolean) => {
+      return ipcRenderer.invoke('realm.tray.rooms.set-cursor', cursor);
     },
     setLiveRoom: (room: RoomsModelType) => {
       return ipcRenderer.invoke('realm.tray.rooms.set-live', room);
@@ -86,6 +96,14 @@ export class RoomsService extends BaseService {
     invite: (roomId: string, patp: Patp) => {
       return ipcRenderer.invoke('realm.tray.rooms.invite', roomId, patp);
     },
+    refreshLocalRoom: () => {
+      return ipcRenderer.invoke('realm.tray.rooms.refresh-local-room');
+    },
+    sendChat: (ourPatP: Patp, chat: string) => {
+      return ipcRenderer.invoke('realm.tray.rooms.send-chat', ourPatP, chat);
+    },
+    onRoomUpdate: (callback: any) =>
+      ipcRenderer.on('realm.on-room-update', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -103,6 +121,7 @@ export class RoomsService extends BaseService {
       knownRooms: {},
       invites: {},
       ourPatp: ship,
+      outstandingRequest: false,
     });
 
     const patchEffect = {
@@ -121,12 +140,18 @@ export class RoomsService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    RoomsApi.watchUpdates(this.core.conduit!, this.state!, () => {});
-
-    // TODO set provider to current space host?
-    RoomsApi.setProvider(this.core.conduit!, '~' + this.core.conduit!.ship!);
+    RoomsApi.watchUpdates(
+      this.core.conduit!,
+      this.state!,
+      (diff: RoomDiff, room: RoomsModelType) => {
+        this.core.mainWindow.webContents.send(
+          'realm.on-room-update',
+          diff,
+          room
+        );
+      }
+    );
   }
-
   removeHandlers() {
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
@@ -142,26 +167,30 @@ export class RoomsService extends BaseService {
     let room = this.state?.knownRooms.get(roomId);
     if (!room) return;
     await RoomsApi.joinRoom(this.core.conduit!, roomId);
-    // let room = this.state?.knownRooms.get(roomId);
-    // this.state?.setLiveRoom(room!);
-    // this.state?.setView('room');
+    // Start rooms
   }
   setView(_event: any, view: 'list' | 'room' | 'new-room') {
     this.state?.setView(view);
+  }
+  setMuted(_event: any, muted: boolean) {
+    this.state?.setMuted(muted);
+  }
+  setCursors(_event: any, cursors: boolean) {
+    this.state?.setCursors(cursors);
   }
   setLiveRoom(_event: any, room: RoomsModelType) {
     this.state?.setLiveRoom(room);
   }
   setProvider(_event: any, patp: Patp) {
     RoomsApi.setProvider(this.core.conduit!, patp);
+    this.state?.setProvider(patp);
   }
   async leaveRoom(_event: any, roomId: string) {
-    await RoomsApi.leaveRoom(this.core.conduit!, roomId, this.state!);
-    this.state?.leaveRoom();
-    // RoomsApi.requestAllRooms(this.core.conduit!);
+    RoomsApi.leaveRoom(this.core.conduit!, roomId, this.state!);
   }
   async deleteRoom(_event: any, roomId: string) {
-    await RoomsApi.deleteRoom(this.core.conduit!, roomId, this.state!);
+    RoomsApi.deleteRoom(this.core.conduit!, roomId, this.state!);
+    this.state!.deleteRoom(roomId);
   }
   async unsetKnownRoom(_event: any, roomId: string) {
     this.state?.unsetKnownRoom(roomId);
@@ -176,7 +205,6 @@ export class RoomsService extends BaseService {
     // TODO this sequence would benefit from more metadata from the backend.
     // its difficult to verify the success of these calls
     //
-    // await RoomsApi.leaveRoom(this.core.conduit!, invite.id, this.state!);
     this.state?.leaveRoom();
     //
     await RoomsApi.setProvider(this.core.conduit!, invite.provider);
@@ -184,24 +212,73 @@ export class RoomsService extends BaseService {
     await RoomsApi.joinRoom(this.core.conduit!, invite.id);
     this.state?.acceptInvite(invite);
   }
-  requestAllRooms(_event: any) {
-    RoomsApi.requestAllRooms(this.core.conduit!);
+  sendChat(_event: any, ourPatP: Patp, chat: string) {
+    RoomsApi.sendChat(this.core.conduit!, chat);
+    this.state?.appendOurChat(ourPatP, chat);
   }
-  createRoom(
+  
+  async requestAllRooms(_event: any) {
+    //
+    // track outstanding request to display loading state in List view
+    this.state?.didRequest();
+
+    await RoomsApi.requestAllRooms(this.core.conduit!);
+  }
+  async createRoom(
     _event: any,
     roomId: string,
     access: string,
     title: string,
     enter: boolean
   ) {
-    RoomsApi.createRoom(this.core.conduit!, roomId, access, title, enter);
+    return RoomsApi.createRoom(
+      this.core.conduit!,
+      roomId,
+      access,
+      title,
+      enter
+    );
   }
   async getProvider(_event: any) {
     let res = await RoomsApi.getProvider(this.core.conduit!);
-    this.state?.setProvider(res['rooms-view'].provider);
+    let provider = res['rooms-view']['provider']
+    if(provider === null) provider = undefined;
+    this.state?.setProvider(provider)
+    return provider;
   }
   async invite(_event: any, roomId: string, patp: Patp) {
-    RoomsApi.invite(this.core.conduit!, roomId, patp);
+    return RoomsApi.invite(this.core.conduit!, roomId, patp);
+  }
+
+  //
+  // scry latest state from room client agent
+  // apply it to room model state representation.
+  async refreshLocalRoom(_event: any) {
+      let res = await RoomsApi.getFull(this.core.conduit!);
+      
+      let full = res['rooms-view']['full']
+      let room = full['my-room']
+      if(room === null) {
+        // room is null.
+        // this update can come from a scry to the room client agent
+        this.state?.unsetLiveRoom();
+      } else {
+        this.state?.setLiveRoom(room);
+      }
+
+      let provider = full['provider']
+      if(provider === null) {
+        this.state?.setProvider('~'+this.core?.conduit?.ship!);
+      } else {
+        this.state?.setProvider(full['provider']);
+      }
+
+  }
+
+  onLogout() {
+    this.state = undefined;
   }
   // this.state?.setIsMouseInWebview(mouseInWebview);
 }
+
+export type RoomDiff = { enter: Patp } | { exit: Patp };

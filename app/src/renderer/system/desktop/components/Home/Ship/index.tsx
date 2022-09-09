@@ -38,6 +38,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             flex={2}
           >
             <Members our />
+            {/* <Invitations /> */}
           </Flex>
         )}
       </AnimatePresence>

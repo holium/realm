@@ -1,3 +1,4 @@
+import { AuthActions } from './actions/auth';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
@@ -224,10 +225,10 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    // applySnapshot(
-    //   servicesStore.courier,
-    //   castToSnapshot(initials.models.courier!)
-    // );
+    applySnapshot(
+      servicesStore.courier,
+      castToSnapshot(initials.models.courier!)
+    );
     applySnapshot(
       servicesStore.contacts,
       castToSnapshot(initials.models.contacts!)
@@ -255,6 +256,9 @@ OSActions.onLogout((_event: any) => {
   SoundActions.playLogout();
 });
 
+// --------------------------------------
+// ---------- Effects listener ----------
+// --------------------------------------
 // Effect events
 OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
@@ -262,7 +266,6 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.identity.auth, value.patch);
     }
     if (value.resource === 'bazaar') {
-      console.log('patch huh => %o', value);
       applyPatch(servicesStore.bazaar, value.patch);
     }
     if (value.resource === 'onboarding') {
@@ -296,6 +299,7 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.courier, value.patch);
     }
   }
+
   if (value.response === 'initial') {
     if (value.resource === 'courier') {
       applySnapshot(servicesStore.courier, value.model);

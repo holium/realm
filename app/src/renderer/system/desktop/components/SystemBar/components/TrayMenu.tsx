@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
 import { Portal } from 'renderer/system/dialog/Portal';
-import { TrayAppKeys, useTrayApps } from 'renderer/logic/apps/store';
+import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 
 export type TrayMenuProps = {
   id: TrayAppKeys;
@@ -50,7 +50,7 @@ export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
 export const TrayMenu = (props: TrayMenuProps) => {
   const { id, style, content, dimensions, coords } = props;
 
-  const { setActiveApp } = useTrayApps();
+  const { setActiveApp, activeApp } = useTrayApps();
 
   let body = content;
   const handleClickOutside = (event: any) => {
@@ -82,7 +82,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
   }, [id]);
 
   return (
-    <TrayMenuWrapper id={`${id}`} data-visible={id} style={style}>
+    <TrayMenuWrapper id={id} data-visible={id} style={style}>
       <Portal>
         <AnimatePresence>
           {id && (
@@ -96,7 +96,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
                 height: dimensions.height,
               }}
               animate={{
-                opacity: 1,
+                opacity: activeApp ? 1 : 0,
                 y: 0,
                 width: dimensions.width,
                 height: dimensions.height,

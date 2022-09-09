@@ -5,26 +5,19 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Bubble } from './Bubble';
 import { Message } from './Message';
 import { displayDate } from 'os/lib/time';
-
-export type MessageType = {
-  index?: string;
-  author: string;
-  contents: any[];
-  position: 'right' | 'left';
-  timeSent: number;
-  // type: 'text' | 'url' | 'mention' | 'code' | 'reference' | string;
-};
+import { GraphDMType } from 'os/services/ship/models/courier';
 
 type IProps = {
+  isSending?: boolean;
   showAuthor: boolean;
   theme: ThemeModelType;
   our: string;
   ourColor: string;
-  message: MessageType;
+  message: GraphDMType;
 };
 
 export const ChatMessage: FC<IProps> = (props: IProps) => {
-  const { theme, our, ourColor, message, showAuthor } = props;
+  const { theme, our, ourColor, message, showAuthor, isSending } = props;
   const primaryBubble = our === message.author;
   const color = primaryBubble ? 'white' : undefined;
 
@@ -58,6 +51,7 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
   const isMention = messageTypes.includes('mention');
   return (
     <Flex
+      opacity={isSending ? 0.5 : 1}
       alignItems={primaryBubble ? 'flex-end' : 'flex-start'}
       flexDirection="column"
       mb={2}

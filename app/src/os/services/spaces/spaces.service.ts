@@ -19,10 +19,14 @@ import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
 import { PassportsApi } from '../../api/passports';
 import { BazaarApi } from '../../api/bazaar';
-import { InvitationsModel } from './models/invitations';
+// import { InvitationsModel } from './models/invitations';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
+import { RoomsApi } from '../../api/rooms';
+
+const getHost = (path: string) => path.split('/')[1];
 import { DocketStoreType, DocketStore } from '../ship/models/docket';
+import { BazaarStore } from './models/bazaar';
 
 type SpaceModels = {
   bazaar?: any;
@@ -37,10 +41,11 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
-    invitations: InvitationsModel.create({
-      outgoing: {},
-      incoming: {},
-    }),
+    // invitations: InvitationsModel.create({
+    //   outgoing: {},
+    //   incoming: {},
+    // }),
+    bazaar: BazaarStore.create({}),
   };
 
   handlers = {
@@ -236,8 +241,15 @@ export class SpacesService extends BaseService {
     // Subscribe to sync updates
     // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
     // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
+    //
+    // setting provider to current space host
+    this.core.services.ship.rooms!.setProvider(
+      null,
+      getHost(this.state.selected!.path)
+    );
     BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
   }
+
   // ***********************************************************
   // ************************ SPACES ***************************
   // ***********************************************************
@@ -283,6 +295,11 @@ export class SpacesService extends BaseService {
   setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
     this.core.services.desktop.setTheme(selected?.theme!);
+    // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
+    // setting provider to current space host
+    const spaceHost = getHost(this.state!.selected!.path);
+    // if (currentRoomProvider !== spaceHost)
+    this.core.services.ship.rooms!.setProvider(null, spaceHost);
   }
   // ***********************************************************
   // *********************** MEMBERS ***************************
@@ -340,7 +357,7 @@ export class SpacesService extends BaseService {
   // ************************ BAZAAR ***************************
   // ***********************************************************
   async installDocket(_event: any, ship: string, desk: string) {
-    return await BazaarApi.installDocket(this.core.conduit?.ship!, ship, desk);
+    return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
   }
 
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
@@ -360,7 +377,7 @@ export class SpacesService extends BaseService {
     spacePath: SpacePath,
     appId: string
   ) {
-    console.log('addRecentApp => %o', { spacePath, appId });
+    // console.log('addRecentApp => %o', { spacePath, appId });
     return this.models.bazaar.getBazaar(spacePath).addRecentApp(appId);
   }
   async addRecentDev(

@@ -42,7 +42,7 @@ export const BazaarApi = {
     return appMap;
   },
   addAlly: async (conduit: Conduit, ship: string) => {
-    console.log('addAlly [os] => %o', ship);
+    // console.log('addAlly [os] => %o', ship);
     return new Promise((resolve, reject) => {
       conduit.poke({
         ...allyShip(ship),
@@ -57,7 +57,7 @@ export const BazaarApi = {
       });
     });
   },
-  installDocket: async (conduit: Urbit, ship: string, desk: string) => {
+  installDocket: async (conduit: Conduit, ship: string, desk: string) => {
     return new Promise((resolve, reject) => {
       conduit.poke({
         ...docketInstall(ship, desk),
@@ -82,7 +82,7 @@ export const BazaarApi = {
     return response.ini;
   },
   addAppTag: async (
-    conduit: Urbit,
+    conduit: Conduit,
     path: SpacePath,
     appId: string,
     tag: string
@@ -355,7 +355,7 @@ export const BazaarApi = {
       app: 'bazaar',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('bazaar/updates => %o', { mark, data });
+        // console.log('bazaar/updates => %o', { mark, data });
         if (mark === 'bazaar-reaction') {
           handleBazaarReactions(data, state);
         }
@@ -391,8 +391,10 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       {
         let detail = data['app-installed'];
         console.log(detail);
+        console.log('app-installed');
         // @ts-ignore
-        state.addApp(detail);
+        // TODO insert a new app here
+        // state.spaces.get('/our/').addApp(detail);
       }
       break;
     case 'app-uninstalled':

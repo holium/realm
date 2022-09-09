@@ -87,6 +87,21 @@ export interface CursorLeavePayload extends BaseCursorPayload {
   event: CursorEvent.Leave;
 }
 
+export type CursorPayload =
+  | BaseRealmPayload
+  | CursorMovePayload
+  | CursorClickPayload
+  | CursorLeavePayload
+  | CursorOverPayload
+  | CursorDownPayload
+  | CursorUpPayload
+  | CursorOutPayload;
+
+export type StatePayload =
+  | JoinPayload
+  | PresenceStatePayload
+  | PresenceStateSyncPayload;
+
 export type AnyPayload =
   | JoinPayload
   | CursorMovePayload

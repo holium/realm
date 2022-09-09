@@ -1,9 +1,0 @@
-:~  title+'Realm'
-    info+'A desktop environment for DAOs and communities. Developed by Holium.'
-    color+0xce.bef0
-    glob-ames+[~zod 0v0]
-    base+'realm'
-    version+[0 1 0]
-    website+'https://holium.com'
-    license+'MIT'
-==

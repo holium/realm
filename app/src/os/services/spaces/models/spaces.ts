@@ -8,7 +8,7 @@ import { toJS } from 'mobx';
 import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
-import { InvitationsModel } from './invitations';
+import { VisaModel } from './invitations';
 
 import { TokenModel } from './token';
 // import { FriendsStore } from '../../ship/models/friends';
@@ -29,7 +29,7 @@ export const SpaceModel = types
     picture: types.maybeNull(types.string),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
-    invitations: types.optional(InvitationsModel, {
+    invitations: types.optional(VisaModel, {
       outgoing: {},
       incoming: {},
     }),

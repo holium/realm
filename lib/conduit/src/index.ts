@@ -13,6 +13,7 @@ import {
   Scry,
   SubscribeCallbacks,
   SubscribeParams,
+  Thread,
 } from './types';
 
 // For now, set it to 20
@@ -80,7 +81,7 @@ export class Conduit extends EventEmitter {
       await this.poke({
         app: 'hood',
         mark: 'helm-hi',
-        json: 'Opening API channel',
+        json: 'Opening Realm API channel',
       });
       return;
     }
@@ -211,6 +212,7 @@ export class Conduit extends EventEmitter {
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }
+    console.log(params)
     // Properly waiting
     const [_req, res] = await Promise.all([
       this.postToChannel(message),
@@ -269,6 +271,29 @@ export class Conduit extends EventEmitter {
         `${this.url}/~/scry/${app}${path}.json`,
         {
           headers: this.headers,
+        }
+      );
+      return response.data;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * thread
+   *
+   * @param params
+   * @returns
+   */
+  async thread(params: Thread<Action>): Promise<any> {
+    const { inputMark, outputMark, threadName, body, desk } = params;
+
+    try {
+      const response = await axios.post(
+        `${this.url}/spider/${desk}/${inputMark}/${threadName}/${outputMark}.json`,
+        {
+          headers: this.headers,
+          body,
         }
       );
       return response.data;

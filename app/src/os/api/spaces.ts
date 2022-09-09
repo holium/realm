@@ -145,6 +145,7 @@ export const SpacesApi = {
           handleSpacesReactions(data, state, membersState, bazaarState);
         }
       },
+
       onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription %spaces'),
     });
