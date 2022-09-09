@@ -32,15 +32,7 @@ let listener = (event: KeyboardEvent) => {
         props.setPasscode(newPasscode);
       }
 
-<<<<<<< Updated upstream
       return setPasscode(newPasscode);
-=======
-//      setPasscode(passcode.concat(event.key));
-      setPasscode('test');
-      console.log('set passcode')
-      console.log(passcode)
-      //return setPasscode(passcode.concat(event.key));
->>>>>>> Stashed changes
     }
   useEffect(() => {
     
