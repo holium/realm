@@ -1,5 +1,5 @@
 :~  title+'Courier'
-    info+'A Realm Dependency'
+    info+'A Realm dependency'
     color+0xce.bef0
     glob-http+['https://holium-app-globs.nyc3.digitaloceanspaces.com/realm/glob-0v3.ijtsa.kqfsm.f71li.n99kg.etthr.glob' 0v3.ijtsa.kqfsm.f71li.n99kg.etthr]
     base+'courier'
