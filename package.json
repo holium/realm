@@ -17,6 +17,7 @@
     "package": "yarn workspace @holium/realm package"
   },
   "dependencies": {
-    "ethers": "^5.7.0"
+    "ethers": "^5.7.0",
+    "qrcode.react": "^3.1.0"
   }
 }
