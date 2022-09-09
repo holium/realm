@@ -36,8 +36,8 @@ export class WalletService extends BaseService {
   };
 
   static preload = {
-    setMnemonic: (mnemonic: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-mnemonic', mnemonic)
+    setMnemonic: (mnemonic: string, passcodeHash: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-mnemonic', mnemonic, passcodeHash)
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
@@ -92,7 +92,8 @@ export class WalletService extends BaseService {
         ethereum: {
           settings: {
             defaultIndex: 0,
-          }
+          },
+          initialized: false,
         },
         bitcoin: {
           settings: {
@@ -152,15 +153,16 @@ export class WalletService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async setMnemonic(_event: any, mnemonic: string) {
-    let hdNode: ethers.utils.HDNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+  async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
+    this.state!.passcodeHash = passcodeHash;
+    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    let xpub: string = hdNode.derivePath(ethPath).neuter().extendedKey;
+    let xpub: string = this.privateKey!.derivePath(ethPath).neuter().extendedKey;
     // eth
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
-    xpub = hdNode.derivePath(btcPath).neuter().extendedKey;
+    xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 

@@ -187,6 +187,7 @@ export const WalletStore = types
     creationMode: types.string,
     ourPatp: types.maybe(types.string),
     currentAddress: types.maybe(types.string),
+    passcodeHash: types.maybe(types.string),
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
