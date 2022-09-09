@@ -17,9 +17,7 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
   const panelBackground = darken(0.02, desktop.theme!.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
-
-  useEffect(() => {
-    let listener = (event: KeyboardEvent) => {
+let listener = (event: KeyboardEvent) => {
       if (event.key === 'Backspace' || event.key === 'Delete') {
         return passcode.length
           ? setPasscode(passcode.substring(0, passcode.length - 1))
@@ -34,8 +32,18 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
         props.setPasscode(newPasscode);
       }
 
+<<<<<<< Updated upstream
       return setPasscode(newPasscode);
+=======
+//      setPasscode(passcode.concat(event.key));
+      setPasscode('test');
+      console.log('set passcode')
+      console.log(passcode)
+      //return setPasscode(passcode.concat(event.key));
+>>>>>>> Stashed changes
     }
+  useEffect(() => {
+    
 
     document.addEventListener('keydown', listener);
 

@@ -154,8 +154,7 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
-    console.log(`setting: ${mnemonic} : ${passcodeHash}`)
-    this.state!.passcodeHash = passcodeHash;
+    this.state!.setPasscodeHash(passcodeHash);
     this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";

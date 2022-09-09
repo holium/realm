@@ -225,6 +225,9 @@ export const WalletStore = types
       else if (network == 'ethereum')
         self.ethereum.setProvider(provider);
     },
+    setPasscodeHash(hash: string) {
+      self.passcodeHash = hash;
+    }
   }));
 
 export type WalletStoreType = Instance<typeof WalletStore>;
