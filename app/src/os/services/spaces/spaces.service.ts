@@ -234,8 +234,9 @@ export class SpacesService extends BaseService {
     );
     PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
     // Subscribe to sync updates
-    BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
-    BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
+    // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
+    // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
+    BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
   }
   // ***********************************************************
   // ************************ SPACES ***************************

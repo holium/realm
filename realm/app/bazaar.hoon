@@ -18,6 +18,7 @@
     $:  %0
         =app-catalog:store
         space-apps=space-apps-lite:store
+        installations=(map =ship =desk)
     ==
   --
 =|  state-0
@@ -220,7 +221,7 @@
         %kick
           ~&  >  "{<dap.bowl>}: docket/charges kicked us, resubscribing..."
           :_  this
-          :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          :~  [%pass /docket %agent [our.bowl %docket] %watch /charges]
           ==
     ::
         %fact
@@ -242,7 +243,7 @@
         %kick
           ~&  >  "{<dap.bowl>}: /treaties kicked us, resubscribing..."
           :_  this
-          :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          :~  [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
           ==
     ::
         %fact
@@ -264,7 +265,7 @@
         %kick
           ~&  >  "{<dap.bowl>}: /allies kicked us, resubscribing..."
           :_  this
-          :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          :~  [%pass /allies %agent [our.bowl %treaty] %watch /allies]
           ==
     ::
         %fact
@@ -321,6 +322,7 @@
       %unrecommend       (rem-rec +.action)
       %suite-add         (add-ste +.action)
       %suite-remove      (rem-ste +.action)
+      %install-app       (install-app +.action)
     ==
   ::
   ++  add-pin
@@ -431,6 +433,26 @@
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%suite-remove path [app-id sieve.app-lite app] suite.sorts.apps] paths)
+  ::
+  ++  install-app
+    |=  [=ship =desk]
+    ^-  (quip card _state)
+    ~&  >  "{<dap.bowl>}: install-app {<[ship desk]>}"
+    =/  allies=update:ally:treaty  .^(update:ally:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/allies/noun)
+    ::  is the ship already an ally? if not, we'll have to add them as an ally
+    ::   then once alliance is completed, trigger docket to install
+    ?>  ?=(%ini -.allies)
+    ?.  (~(has by init.allies) ship)
+      :: queue this installation request, so that once alliance is complete,
+      ::   we can automatically kick off the install
+      :: =/  alliance  (silt [[ship desk] ~])
+      =.  installations.state  (~(put by installations.state) ship desk)
+      :_  state
+      ::  poke treaty to add ally
+      [%pass / %agent [our.bowl %treaty] %poke alliance-update-0+!>([%add ship])]~
+    :_  state
+    :: ship is already an ally. trigger app install in docket
+    [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship desk])]~
   ::
   ++  extract-apps
     |=  [=app-index-lite:store =tag:store]
@@ -612,6 +634,7 @@
     %set-suite-order  (on-set-suite-order +.rct)
     %app-installed    `state
     %app-uninstalled  `state
+    %treaty-added     `state
   ==
   ::
   ++  on-initial
@@ -743,13 +766,14 @@
     |=  [init=(map [=ship =desk] =treaty:treaty)]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: treaty-update [on-initial] => {<init>}"
+    :: %glob  (bazaar:send-reaction:core [%initial-treaties desk [%urbit docket.charge]] [/updates ~])
     `state
   ::
   ++  on-add
     |=  [=treaty:treaty]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
-    `state
+    (bazaar:send-reaction:core [%treaty-added [ship.treaty desk.treaty] docket.treaty] [/updates ~])
   ::
   ++  on-del
     |=  [=ship =desk]
@@ -779,11 +803,13 @@
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
     ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
+    :: (bazaar:send-reaction:core [%new-ally-added [ship.treaty desk.treaty] [%urbit docket.charge]] [/updates ~])
     `state
   ::
   ++  on-add
     |=  [=ship]
     ^-  (quip card _state)
+    :: =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
     ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
     `state
   ::

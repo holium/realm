@@ -107,7 +107,8 @@ export const AppRow = ({
         flexDirection="row"
         alignItems="center"
         gap={8}
-        style={{ width: '100%' }}
+        flex={1}
+        // style={{ width: '100%' }}
         onClick={(e) => onClick && onClick(app)}
       >
         <TileStyle
@@ -138,7 +139,7 @@ export const AppRow = ({
         <Flex flexDirection="column" flex={1}>
           <Text fontWeight={500}>{app.title}</Text>
           <Text
-            width={404}
+            // width={404}
             style={{
               textOverflow: 'ellipsis',
               overflow: 'hidden',

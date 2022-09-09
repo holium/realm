@@ -256,13 +256,29 @@ const AppSearchApp = (props: AppSearchProps) => {
   const currentBazaar = spaces.selected ? bazaar.getBazaar(spacePath) : null;
 
   useEffect(() => {
+    console.log('AppSearch effect [spacePath]...');
+    setSearchMode('none');
+    setSearchModeArgs([]);
+    setSearchString('');
+    setSearchPlaceholder('Search...');
+    setSelectedShip('');
+  }, [spacePath]);
+
+  useEffect(() => {
+    console.log('AppSearch effect [searchString]...');
     if (searchMode === 'app-search') {
       const apps = currentBazaar?.findApps(searchString);
       console.log(apps);
       setData(apps);
+    } else if (searchMode === 'dev-app-search') {
+      const apps = currentBazaar?.treatyList;
+      console.log(apps);
+      setData(apps);
     }
   }, [searchString]);
+
   useEffect(() => {
+    console.log('AppSearch effect [searchMode]...');
     if (searchMode === 'ship-search') {
       setData([]);
       // todo: move into bazaar "main" (no space specific) store
@@ -276,19 +292,56 @@ const AppSearchApp = (props: AppSearchProps) => {
       });
     } else if (searchMode === 'dev-app-search') {
       setData([]);
-      console.log('adding treaty => %o', selectedShip);
-      SpacesActions.addAlly(selectedShip).then((result) => {
-        console.log('addTreaty response => %o', result);
-        SpacesActions.getTreaties(searchModeArgs[0]).then((items: any) => {
+      // if the 'selected' ship is not yet an ally, make them one which will
+      //  trigger a treay which can then be listed for installation
+      if (!bazaar.hasAlly(selectedShip)) {
+        console.log('adding ally => %o', selectedShip);
+        SpacesActions.addAlly(selectedShip).then((result) => {
+          console.log('addTreaty response => %o', result);
+          SpacesActions.getTreaties(searchModeArgs[0]).then((items: any) => {
+            const data = Object.entries(items).map(([key, value], index) => ({
+              ...value,
+              id: value.desk,
+            }));
+            setData(data);
+          });
+        });
+      } else {
+        console.log('fetching treaties => %o', selectedShip);
+        SpacesActions.getTreaties(selectedShip).then((items: any) => {
+          console.log('treaties => %o', items);
           const data = Object.entries(items).map(([key, value], index) => ({
             ...value,
             id: value.desk,
           }));
           setData(data);
         });
-      });
+      }
+    } else if (searchMode === 'dev-app-detail') {
+      setData([]);
+      // if the 'selected' ship is not yet an ally, make them one which will
+      //  trigger a treay which can then be listed for installation
+      const treatyDetail = currentBazaar?.getTreatyDetail(
+        searchModeArgs[0],
+        searchModeArgs[1]
+      );
+      if (treatyDetail) {
+        setData(treatyDetail);
+      }
     }
-  }, [searchMode, spacePath]);
+  }, [searchMode]);
+
+  // const onDevAppAction = (app: any) => {
+  //   console.log('onDevAppAction => %o', app);
+  // };
+
+  // const devAppRowRenderer = (app: any) => (
+  //   <>
+  //     <Button borderRadius={6} onClick={(e) => onDevAppAction(app)}>
+  //       Install
+  //     </Button>
+  //   </>
+  // );
 
   const renderDevApps = (apps: Array<any>) => {
     if (apps.length === 0) {
@@ -299,6 +352,7 @@ const AppSearchApp = (props: AppSearchProps) => {
         <AppRow
           caption={app.title}
           app={app}
+          // actionRenderer={() => devAppRowRenderer(app)}
           onClick={(app: any) => {
             setData(app);
             setSearchMode('app-summary');
@@ -398,7 +452,11 @@ const AppSearchApp = (props: AppSearchProps) => {
               if (e.target.value[0] === '~') {
                 setSearchMode('ship-search');
               } else {
-                setSearchMode('app-search');
+                if (['app-search', 'dev-app-search'].includes(searchMode)) {
+                  setSearchMode(searchMode);
+                } else {
+                  setSearchMode('app-search');
+                }
               }
             } else {
               setSearchMode('start');
