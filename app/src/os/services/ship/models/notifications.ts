@@ -1,101 +1,206 @@
-import {
-  applySnapshot,
-  castToSnapshot,
-  getSnapshot,
-  Instance,
-  types,
-} from 'mobx-state-tree';
+import { NotificationApi } from '../../../api/notifications';
 import { toJS } from 'mobx';
+import { cast, Instance, types, flow } from 'mobx-state-tree';
+import { daToUnix, decToUd, udToDec, unixToDa } from '@urbit/api';
+import bigInt from 'big-integer';
 
-export const NotificationModel = types.model({
-  body: types.array(
-    types.model({
-      link: types.string,
-      title: types.array(
-        types.model({
-          text: types.string,
-        })
-      ),
-      time: types.number,
-    })
-  ),
-  bin: types.model({
-    place: types.model({
-      desk: types.string,
-      path: types.string,
-    }),
-    path: types.string,
+const NotificationContentTypes = types.union(
+  { eager: true },
+  types.model('ContentTextTitle', {
+    text: types.string,
   }),
-  time: types.number,
+  types.model('ContentShipTitle', { ship: types.string })
+);
+
+const PlaceModel = types.model({
+  desk: types.string,
+  path: types.string,
 });
 
-export const HarkStats = types.model({
-  place: types.model({
-    desk: types.string,
-    path: types.string,
-  }),
+export type PlaceModelType = Instance<typeof PlaceModel>;
+
+export const NotificationModel = types
+  .model('NotificationModel', {
+    // index: types.identifier,
+    timebox: types.maybe(types.number),
+    seen: types.optional(types.boolean, false),
+    dismissed: types.optional(types.boolean, false),
+    link: types.string,
+    title: types.array(NotificationContentTypes),
+    time: types.number,
+    content: types.array(NotificationContentTypes),
+    place: PlaceModel,
+    // config: types.model({}),
+  })
+  .actions((self) => ({
+    setSeen: flow(function* () {
+      // ::  %saw-place: Update last-updated for .place to now.bowl
+      // [%saw-place =place time=(unit time)]
+      // const response = yield NotificationApi.sawPlace(
+      //   self.place,
+      //   decToUd(unixToDa(Date.now() * 1000).toString())
+      // );
+      // console.log(response);
+      self.seen = true;
+    }),
+    setRead() {
+      //  ::  %read-count: set unread count to zero
+      //  [%read-count =place]
+    },
+    archive(lid: string, bin: PlaceModelType) {
+      // ::  %archive: archive single notification
+      // ::  if .time is ~, then archiving unread notification
+      // ::  else, archiving read notification
+      // [%archive =lid =bin]
+    },
+  }));
+
+export type NotificationModelType = Instance<typeof NotificationModel>;
+
+const AllStatsModel = types.model('AllStats', {
+  place: PlaceModel,
   stats: types.model({
     count: types.number,
-    each: types.array(types.string),
+    each: types.array(types.frozen()),
     last: types.number,
   }),
 });
+export type AllStatsModelType = Instance<typeof AllStatsModel>;
 
-export const HarkTimeboxModel = {
-  lid: types.union(
-    types.model({
-      unseen: types.null,
-    }),
-    types.model({ seen: types.null })
-  ),
-  notifications: types.array(NotificationModel),
-};
-
-export const HarkItemModel = types.union(
-  {
-    eager: true,
-  },
-  types.model({
-    timebox: types.model(HarkTimeboxModel),
-  }),
-  types.model({
-    'all-stats': types.array(HarkStats),
-  })
-);
-
-export type HarkItemModelType = Instance<typeof HarkItemModel>;
-
-export const NotificationsStore = types
-  .model({ more: types.array(HarkItemModel) })
-  .views((self) => {
-    return {
-      get list() {
-        return getSnapshot(self.more);
-      },
-      timeboxes() {
-        return self.more
-          .filter((item: HarkItemModelType) => item.timebox)
-          .map((item) => toJS(item));
-      },
-    };
+export const NotificationStore = types
+  .model('NotificationStore', {
+    unseen: types.array(NotificationModel),
+    seen: types.array(NotificationModel),
+    all: types.array(AllStatsModel),
+    recent: types.array(NotificationModel),
   })
   .actions((self) => ({
-    initial(more: typeof self.more) {
-      applySnapshot(self.more, castToSnapshot(more));
+    setInitial(data: any) {
+      let allTimeboxes: NotificationModelType[] = [];
+      data['more'].forEach(({ timebox }: { timebox: RawTimeBoxType }) => {
+        const timeboxId = daToUnix(bigInt(udToDec(timebox.lid.archive)));
+        timebox.notifications.forEach((notification: RawNotificationType) => {
+          notification.body.forEach((body: RawNotificationBody) => {
+            allTimeboxes.push(
+              NotificationModel.create({
+                timebox: timeboxId,
+                link: body.link,
+                title: body.title,
+                time: body.time,
+                content: body.content,
+                place: notification.bin.place,
+              })
+            );
+          });
+        });
+      });
+      self.recent = cast(allTimeboxes);
     },
-    // setAllStats(data: any) {
-    //   const allStats = data['more'][0]['all-stats'];
-    //   let allStatsList: AllStatsModelType[] = allStats.map(
-    //     (statsData: AllStatsModelType) => ({
-    //       place: statsData.place,
-    //       stats: statsData.stats,
-    //     })
-    //   );
-    //   self.all = cast(allStatsList);
-    // },
+    setAllStats(data: any) {
+      const allStats = data['more'][0]['all-stats'];
+      let allStatsList: AllStatsModelType[] = allStats.map(
+        (statsData: AllStatsModelType) => ({
+          place: statsData.place,
+          stats: statsData.stats,
+        })
+      );
+      self.all = cast(allStatsList);
+    },
+    setWatchUpdate(data: any) {
+      console.log(data);
+      const unseenTimebox: RawTimeBoxType = data['more'][0].timebox;
+      // const lid = unseenTimebox.lid;
+      let unseenTimeboxes: NotificationModelType[] = [];
+      unseenTimebox.notifications.forEach(
+        (notification: RawNotificationType) => {
+          notification.body.forEach((body: RawNotificationBody) => {
+            unseenTimeboxes.push(
+              NotificationModel.create({
+                link: body.link,
+                title: body.title,
+                time: body.time,
+                content: body.content,
+                place: notification.bin.place,
+              })
+            );
+          });
+        }
+      );
+      const seenTimebox = data['more'][1].timebox;
+      let seenTimeboxes: NotificationModelType[] = [];
+      seenTimebox.notifications.forEach((notification: RawNotificationType) => {
+        notification.body.forEach((body: RawNotificationBody) => {
+          seenTimeboxes.unshift(
+            NotificationModel.create({
+              link: body.link,
+              title: body.title,
+              time: body.time,
+              content: body.content,
+              place: notification.bin.place,
+            })
+          );
+        });
+      });
+      const allStats = data['more'][2]['all-stats'];
+      let allStatsList: AllStatsModelType[] = allStats.map(
+        (statsData: AllStatsModelType) => ({
+          place: statsData.place,
+          stats: statsData.stats,
+        })
+      );
+      self.unseen = cast(unseenTimeboxes);
+      self.seen = cast(
+        seenTimeboxes.sort(
+          (notifA: any, notifB: any) => notifB.time - notifA.time
+        )
+      );
+      self.all = cast(allStatsList);
+    },
+    setSeen: flow(function* (link: string) {
+      // ::  %saw-place: Update last-updated for .place to now.bowl
+      // [%saw-place =place time=(unit time)]
+      const notif = self.recent.find(
+        (notification: NotificationModelType) => notification.link === link
+      );
+      // Only set as seen if it is unseen
+      if (notif) {
+        const response = yield NotificationApi.sawPlace(
+          notif?.place,
+          decToUd(unixToDa(Date.now() * 1000).toString())
+        );
+      }
+      // if (unseen) {
+      // const response = yield NotificationApi.sawPlace(
+      //   unseen?.place,
+      //   decToUd(unixToDa(Date.now() * 1000).toString())
+      // );
+      //   console.log(response);
+      //   unseen?.setSeen();
+      //   // self.unseen.remove(unseen);
+      //   // self.seen.unshift(unseen);
+      // }
+    }),
+    setDismissed: flow(function* (link: string) {
+      const unseen = self.unseen.find(
+        (notification: NotificationModelType) => notification.link === link
+      );
+      const seen = self.seen.find(
+        (notification: NotificationModelType) => notification.link === link
+      );
+      const notif = unseen || seen;
+    }),
+    getByLink(link: string) {
+      const unseen = self.unseen.find(
+        (notification: NotificationModelType) => notification.link === link
+      );
+      const seen = self.seen.find(
+        (notification: NotificationModelType) => notification.link === link
+      );
+      return unseen || seen;
+    },
   }));
 
-export type NotificationsType = Instance<typeof NotificationsStore>;
+export type NotificationStoreType = Instance<typeof NotificationStore>;
 
 // ---------------------------------------------------------
 // ----------- Using raw sample to derive type -------------

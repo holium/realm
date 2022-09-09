@@ -17,12 +17,7 @@ import { GroupsApi } from '../../api/groups';
 import { RoomsService } from '../tray/rooms.service';
 import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
-import { NotificationsApi } from '../../api/notifications';
-import { NotificationsStore, NotificationsType } from './models/notifications';
 import { SlipService } from '../slip.service';
-// import { VisaModel, VisaModelType } from '../spaces/models/invitations';
-import { PassportsApi } from '../../api/passports';
-
 import { ContactStore, ContactStoreType } from './models/contacts';
 import { DocketStore, DocketStoreType } from './models/docket';
 import { ChatStoreType, ChatStore } from './models/dms';
@@ -31,17 +26,25 @@ import { loadCourierFromDisk } from './stores/courier';
 import { loadContactsFromDisk } from './stores/contacts';
 import { loadDocketFromDisk } from './stores/docket';
 import { loadFriendsFromDisk } from './stores/friends';
+import { loadNotificationsFromDisk } from './stores/notifications';
 import { CourierApi } from '../../api/courier';
 import { CourierStoreType, PreviewGroupDMType } from './models/courier';
 import { toJS } from 'mobx';
+import {
+  NotificationStore,
+  NotificationStoreType,
+} from './models/notifications';
+import { VisaModel, VisaModelType } from '../spaces/models/invitations';
+import { NotificationApi } from '../../api/notifications';
 
 export type ShipModels = {
   friends: FriendsType;
-  // invitations: VisaModelType;
+  invitations: VisaModelType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
+  notifications: NotificationStoreType;
 };
 
 /**
@@ -52,13 +55,19 @@ export class ShipService extends BaseService {
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
-    // invitations: VisaModel.create({
-    //   outgoing: {},
-    //   incoming: {},
-    // }),
     contacts: undefined,
     docket: DocketStore.create({ apps: {} }),
     chat: undefined,
+    notifications: NotificationStore.create({
+      unseen: [],
+      seen: [],
+      all: [],
+      recent: [],
+    }),
+    invitations: VisaModel.create({
+      outgoing: {},
+      incoming: {},
+    }),
   };
   private metadataStore: {
     graph: { [key: string]: any };
@@ -81,8 +90,6 @@ export class ShipService extends BaseService {
     'realm.ship.accept-group-dm-request': this.acceptGroupDm,
     'realm.ship.decline-group-dm-request': this.declineGroupDm,
     'realm.ship.get-s3-bucket': this.getS3Bucket,
-    'realm.ship.get-metadata': this.getMetadata,
-    'realm.ship.get-contact': this.getContact,
     'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
     'realm.ship.get-friends': this.getFriends,
@@ -181,6 +188,9 @@ export class ShipService extends BaseService {
       docket: this.models.docket ? getSnapshot(this.models.docket) : null,
       contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
+      notifications: this.models.notifications
+        ? getSnapshot(this.models.notifications)
+        : null,
     };
   }
   get snapshot() {
@@ -216,6 +226,11 @@ export class ShipService extends BaseService {
       loader: { state: 'initial' },
     });
 
+    this.models.notifications = loadNotificationsFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
     this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
     this.models.courier = loadCourierFromDisk(
       ship,
@@ -282,10 +297,7 @@ export class ShipService extends BaseService {
         // register dm update handler
         DmApi.updates(this.core.conduit!, this.models.chat!);
         CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
-
-        // register hark-store update handler
-        // TODO commenting out for now
-        // NotificationsApi.watch(this.core.conduit!, this.state);
+        NotificationApi.updates(this.core.conduit!, this.models.notifications!);
 
         DocketApi.getApps(this.core.conduit!).then((apps) => {
           this.models.docket.setInitial(apps);
@@ -414,9 +426,7 @@ export class ShipService extends BaseService {
     return contact;
   }
   //
-  async saveMyContact(_event:IpcMainInvokeEvent, profileData: any) {
-
-
+  async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
     await ContactApi.saveContact(
       this.core.conduit!,
       this.state!.patp,
@@ -425,11 +435,9 @@ export class ShipService extends BaseService {
 
     this.state?.setOurMetadata(profileData);
 
-
     return;
-
   }
-  
+
   getMetadata(_event: any, path: string): any {
     return this.metadataStore['graph'][path];
   }

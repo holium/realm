@@ -18,14 +18,14 @@ export const SystemBar: FC<SystemBarProps> = observer(
     const { desktop } = useServices();
     let trayAppRef;
 
-    const { windowColor, textColor } = desktop.theme;
-    const { activeApp, dimensions, coords } = useTrayApps();
+    // const { windowColor, textColor } = desktop.theme;
+    // const { activeApp, dimensions, coords } = useTrayApps();
 
-    let TrayAppView: FC<any> | undefined;
-    if (activeApp) {
-      TrayAppView = trayAppRenderers[activeApp]!.component!;
-      trayAppRef = createRef<HTMLDivElement>();
-    }
+    // let TrayAppView: FC<any> | undefined;
+    // if (activeApp) {
+    //   TrayAppView = trayAppRenderers[activeApp]!.component!;
+    //   trayAppRef = createRef<HTMLDivElement>();
+    // }
 
     // const { dockColor, textColor } = useMemo(
     //   () => ({
@@ -41,7 +41,7 @@ export const SystemBar: FC<SystemBarProps> = observer(
 
     return (
       <>
-        {TrayAppView && (
+        {/* {TrayAppView && (
           <TrayMenu
             id={activeApp! as TrayAppKeys}
             coords={coords}
@@ -58,7 +58,7 @@ export const SystemBar: FC<SystemBarProps> = observer(
               </MiniApp>
             }
           />
-        )}
+        )} */}
         <Flex
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
