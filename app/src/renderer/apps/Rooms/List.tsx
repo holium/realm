@@ -163,12 +163,13 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
       ))}
       <Flex mt={3} pb={4} justifyContent="flex-start">
         <IconButton
+          mr={2}
           onClick={() => {
               RoomsActions.requestAllRooms();
               RoomsActions.refreshLocalRoom();
             }}
         >
-          <Icons opacity={0.8} name="Refresh" size={26} mr={2} />
+          <Icons opacity={0.8} name="Refresh" size={26} mx={2} />
         </IconButton>
         <Tooltip
           id="room-provider"
