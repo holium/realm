@@ -88,7 +88,7 @@ export class WalletService extends BaseService {
 
     this.state = WalletStore.create({
         network: 'ethereum',
-        currentView: 'ethereum:list',
+        currentView: 'ethereum:new',
         ethereum: {
           settings: {
             defaultIndex: 0,

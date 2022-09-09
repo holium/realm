@@ -199,4 +199,8 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);
   }
+
+  if (response.wallet) {
+    applySnapshot(trayStore.walletApp, response.wallet)
+  }
 });
