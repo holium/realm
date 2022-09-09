@@ -9,4 +9,5 @@ export const Hint: any = styled(Text).attrs({
 export const Error: any = styled(Text).attrs({
   variant: 'hint',
   color: 'ui.intent.alert',
+  height: 16,
 })<TextProps>``;

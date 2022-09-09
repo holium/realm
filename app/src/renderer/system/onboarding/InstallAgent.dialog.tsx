@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import {
@@ -15,11 +15,11 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { ShellActions } from 'renderer/logic/actions/shell';
 
 export const InstallAgent: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { onboarding } = useServices();
+    const [loading, setLoading] = useState(false);
 
     const shipName = onboarding.ship!.patp;
     const shipNick = onboarding.ship!.nickname;
@@ -120,12 +120,21 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
             justifyContent="space-between"
           >
             <TextButton
-              disabled={!onboarding.installer.isLoaded}
+              disabled={!onboarding.installer.isLoaded || loading}
+              style={{ minWidth: 45 }}
               onClick={async (_evt: any) => {
-                await OnboardingActions.completeOnboarding();
+                setLoading(true);
+                OnboardingActions.completeOnboarding()
+                  .then(() => {
+                    setLoading(false);
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                    setLoading(false);
+                  });
               }}
             >
-              Next
+              {loading ? <Spinner size={0} /> : 'Next'}
             </TextButton>
           </Flex>
         </Box>

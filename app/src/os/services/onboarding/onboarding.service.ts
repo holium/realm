@@ -44,6 +44,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.installRealm': this.installRealm,
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
     'realm.onboarding.exit': this.exit,
+    'realm.onboarding.closeConduit': this.closeConduit,
   };
 
   static preload = {
@@ -53,6 +54,10 @@ export class OnboardingService extends BaseService {
 
     agreedToDisclaimer() {
       return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
+    },
+
+    closeConduit() {
+      return ipcRenderer.invoke('realm.onboarding.closeConduit');
     },
 
     setSelfHosted(selfHosted: boolean) {
@@ -168,6 +173,21 @@ export class OnboardingService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
+  /**
+   * Provides a clean conduit for onboarding pokes and scries
+   *
+   * @param url
+   * @param patp
+   * @param substring
+   */
+  async tempConduit(url: string, patp: string, cookie: string) {
+    await this.closeConduit();
+    this.conduit = new Conduit();
+    await this.conduit.init(url, patp.substring(1), cookie!);
+
+    return this.conduit;
+  }
+
   reset() {
     this.state.reset();
   }
@@ -272,18 +292,6 @@ export class OnboardingService extends BaseService {
         url,
       });
 
-      let ship = patp
-
-      //
-      // this is a hot-patch for onboarding after conduit moved to lib
-      // it may conflict with main after 111-webrtc-os-service merges
-      //
-      this.core.setSession({
-        ship,
-        url,
-        cookie,
-      });
-
       return { url, cookie, patp };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
@@ -296,22 +304,20 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
-    if (!this.conduit) {
-      this.conduit = new Conduit();
-    }
     const { url, patp, cookie } = this.state.ship!;
-    await this.conduit.init(url, patp.substring(1), cookie!);
+    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    // await this.tempConduit.init(url, patp.substring(1), cookie!);
 
     if (!this.state.ship)
       throw new Error('Cannot get profile, onboarding ship not set.');
 
-    const ourProfile = await ContactApi.getContact(this.conduit!, patp);
+    const ourProfile = await ContactApi.getContact(tempConduit, patp);
 
     this.state.ship.setContactMetadata(ourProfile);
     return ourProfile;
   }
 
-  async setProfile (
+  async setProfile(
     _event: any,
     profileData: {
       nickname: string;
@@ -321,18 +327,23 @@ export class OnboardingService extends BaseService {
   ) {
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
+    const { url, patp, cookie } = this.state.ship!;
+    const tempConduit = await this.tempConduit(url, patp, cookie!);
 
-    const { patp } = this.state.ship!;
+    try {
+      const updatedProfile = await ContactApi.saveContact(
+        tempConduit,
+        patp,
+        profileData
+      );
 
-    const updatedProfile = await ContactApi.saveContact(
-      this.conduit!,
-      patp,
-      profileData
-    );
+      this.state.ship.setContactMetadata(updatedProfile);
 
-    this.state.ship.setContactMetadata(updatedProfile);
-
-    return updatedProfile;
+      return updatedProfile;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Error updating profile');
+    }
   }
 
   async setPassword(_event: any, password: string) {
@@ -370,14 +381,17 @@ export class OnboardingService extends BaseService {
     this.core.services.ship.storeNewShip(authShip);
     this.core.services.shell.closeDialog(null);
 
+    await this.exit();
+  }
+
+  async closeConduit() {
     // Close onboarding conduit
     await this.conduit?.closeChannel();
     this.conduit = undefined;
-    this.exit();
-    this.core.mainWindow.webContents.send('realm.onboarding.on-exit');
   }
 
-  exit(_event?: any) {
+  async exit(_event?: any) {
+    await this.closeConduit();
     this.core.mainWindow.webContents.send('realm.onboarding.on-exit');
   }
 }

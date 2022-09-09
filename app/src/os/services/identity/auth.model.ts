@@ -32,7 +32,7 @@ export const AuthShip = types
     }),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
-    passwordHash: types.maybeNull(types.string)
+    passwordHash: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setStatus(status: Instance<typeof StepList>) {
@@ -93,6 +93,11 @@ export const AuthStore = types
           };
         })
         .sort((a, b) => self.order.indexOf(b) - self.order.indexOf(a));
+    },
+    get addedShips(): any {
+      return Array.from(self.ships.entries()).map((entry: any) => {
+        return entry[1].patp;
+      });
     },
   }))
   .actions((self) => ({
