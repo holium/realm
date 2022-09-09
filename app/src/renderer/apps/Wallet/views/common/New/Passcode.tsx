@@ -30,6 +30,7 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
           ? setPasscode(passcode.substring(0, passcode.length - 1))
           : null;
       }
+      console.log('got key')
 
       if (passcode.length >= 6 || isNaN(Number(event.key)))
         return console.log('oops')
@@ -38,7 +39,8 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
       console.log(event.key)
       console.log(passcode.concat(event.key))
 
-      return setPasscode(passcode.concat(event.key));
+      setPasscode(passcode.concat(event.key));
+      //return setPasscode(passcode.concat(event.key));
     }
 
     document.addEventListener('keydown', listener);

@@ -23,6 +23,7 @@ export class WalletService extends BaseService {
   private privateKey?: ethers.utils.HDNode;
   private ethProvider?: ethers.providers.JsonRpcProvider;
   handlers = {
+    'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
@@ -35,6 +36,9 @@ export class WalletService extends BaseService {
   };
 
   static preload = {
+    setMnemonic: (mnemonic: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-mnemonic', mnemonic)
+    },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
     },
@@ -75,8 +79,8 @@ export class WalletService extends BaseService {
 
   async onLogin(ship: string) {
 
-    const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
-    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
+//    const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
+//    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
@@ -146,6 +150,18 @@ export class WalletService extends BaseService {
 
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
+  }
+
+  async setMnemonic(_event: any, mnemonic: string) {
+    let hdNode: ethers.utils.HDNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    const ethPath = "m/44'/60'/0'/0";
+    const btcPath = "m/44'/0'/0'/0";
+    let xpub: string = hdNode.derivePath(ethPath).neuter().extendedKey;
+    // eth
+    await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
+    // btc
+    xpub = hdNode.derivePath(btcPath).neuter().extendedKey;
+    await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
   async setXpub(_event: any) {

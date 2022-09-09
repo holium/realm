@@ -110,7 +110,8 @@ export const EthStore = types
   .model('EthStore', {
     wallets: types.map(EthWallet),
     transactions: types.map(EthTransaction),
-    settings: Settings
+    settings: Settings,
+    initialized: types.boolean,
   })
   .views((self) => ({
     get list() {
@@ -175,6 +176,7 @@ export const WalletStore = types
     network: types.enumeration(['ethereum', 'bitcoin']),
     currentView: types.enumeration([
       'ethereum:list',
+      'ethereum:new',
       'ethereum:detail',
       'ethereum:transaction',
       'ethereum:settings',
@@ -190,7 +192,10 @@ export const WalletStore = types
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
       if (network === 'ethereum') {
         self.ethereum.initial(wallets);
-        self.currentView = 'ethereum:list';
+//        if (self.ethereum.initialized)
+          self.currentView = 'ethereum:list';
+//        else
+//          self.currentView = 'ethereum:new'
       } else {
         //  self.bitcoin.initial(wallets);
         self.currentView = 'bitcoin:list';
