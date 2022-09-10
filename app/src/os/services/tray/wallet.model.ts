@@ -16,6 +16,11 @@ export enum WalletView {
   BIT_LIST = 'bitcoin:list'
 }
 
+export enum NetworkType {
+  ethereum = 'ethereum',
+  bitcoin = 'bitcoin'
+}
+
 const gweiToEther = (gwei: number) => {
   return gwei / 1000000000;
 }

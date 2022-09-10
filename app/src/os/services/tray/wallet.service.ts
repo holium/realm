@@ -26,6 +26,7 @@ export class WalletService extends BaseService {
   private ethProvider?: ethers.providers.JsonRpcProvider;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
+    'realm.tray.wallet.set-view': this.setView,
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
@@ -40,6 +41,9 @@ export class WalletService extends BaseService {
   static preload = {
     setMnemonic: (mnemonic: string, passcodeHash: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-mnemonic', mnemonic, passcodeHash)
+    },
+    setView: (view: WalletView) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-view', view);
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
@@ -192,6 +196,10 @@ export class WalletService extends BaseService {
     // btc
     xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+  }
+
+  async setView(_event: any, view: WalletView) {
+    this.state!.setView(view);
   }
 
   async setWalletCreationMode(_event: any, mode: string) {
