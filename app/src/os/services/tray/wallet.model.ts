@@ -129,7 +129,7 @@ export const EthStore = types
       return Array.from(self.wallets).map(
         ([key, wallet]) => ({
           key: key,
-          name: wallet.nickname,
+          nickname: wallet.nickname,
           address: wallet.address,
           balance: wallet.balance,
         })
@@ -142,6 +142,7 @@ export const EthStore = types
       Object.entries(ethWallets).forEach(([key, wallet]) => {
         ethWallets[key] = {
           network: 'ethereum',
+          nickname: (wallet as any).nickname,
           path: (wallet as any).path,
           balance: gweiToEther((wallet as any).balance).toString(),
           address: (wallet as any).address,
