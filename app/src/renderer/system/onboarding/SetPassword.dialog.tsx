@@ -71,15 +71,8 @@ export const SetPassword: FC<BaseDialogProps> = observer(
           Your password will encrypt your local data. It is only needed for
           Realm.
         </Text>
-        <Grid.Row noGutter>
-          <Grid.Column
-            noGutter
-            align="center"
-            justify="center"
-            pr={6}
-            lg={6}
-            xl={6}
-          >
+        <Flex width="100%" height="100%" justifyContent="center" alignItems="center">
+          <Flex flex={1} flexDirection="column" justifyContent="center" alignItems="center">
             <Sigil
               simple={false}
               size={52}
@@ -112,12 +105,13 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                 {shipName}
               </Text>
             </Flex>
-          </Grid.Column>
-          <Grid.Column noGutter justify="center" lg={6} xl={6}>
-            <FormControl.FieldSet>
+          </Flex>
+          <Flex flex={3} flexDirection="column" justifyContent="center" alignItems="center">
+            <FormControl.FieldSet width="100%">
               <FormControl.Field>
                 <Label>Password</Label>
                 <Input
+                  mt={1}
                   tabIndex={1}
                   name="password"
                   type="password"
@@ -139,9 +133,10 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                     password.computed.error}
                 </FormControl.Error>
               </FormControl.Field>
-              <FormControl.Field>
+              <FormControl.Field mt={2}>
                 <Label>Confirm password</Label>
                 <Input
+                  mt={1}
                   tabIndex={2}
                   name="confirm-password"
                   type="password"
@@ -156,16 +151,14 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   onFocus={() => confirmPassword.actions.onFocus()}
                   onBlur={() => confirmPassword.actions.onBlur()}
                 />
-                {confirmPassword.computed.ifWasEverBlurredThenError &&
-                  confirmPassword.computed.isDirty && (
-                    <FormControl.Error>
-                      {confirmPassword.computed.error}
-                    </FormControl.Error>
-                  )}
+                <FormControl.Error>
+                    {confirmPassword.computed.ifWasEverBlurredThenError &&
+                  confirmPassword.computed.isDirty && confirmPassword.computed.error}
+                </FormControl.Error>
               </FormControl.Field>
             </FormControl.FieldSet>
-          </Grid.Column>
-        </Grid.Row>
+          </Flex>
+        </Flex>
         <Box position="absolute" height={40} bottom={20} right={24}>
           <Flex
             mt={5}
