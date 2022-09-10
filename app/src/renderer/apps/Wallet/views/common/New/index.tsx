@@ -22,7 +22,8 @@ export enum NewWalletScreen {
 export const EthNew: FC<any> = observer(() => {
   const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.PASSCODE);
   const [passcode, setPasscode] = useState('');
-  const seedPhrase = useMemo(() => ethers.Wallet.createRandom().mnemonic.phrase, []);
+  // const seedPhrase = useMemo(() => ethers.Wallet.createRandom().mnemonic.phrase, []);
+  const seedPhrase = 'common refuse chicken skull error trick disease account soldier excite conduct allow';
 
   let setPasscodeWrapper = (passcode: string) => {
     console.log('setting passcode!')

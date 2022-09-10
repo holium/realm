@@ -143,7 +143,7 @@ const AmountInput = observer((props: { max: number, setValid: (valid: boolean, a
   )
 })
 
-const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid: boolean, recipient: { address?: string, patp?: string }) => void }) => {
+const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid: boolean, recipient: { address?: string, patp?: string, patpAddress?: string }) => void }) => {
   const { desktop } = useServices();
   const { walletApp } = useTrayApps();
 
@@ -161,41 +161,54 @@ const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid:
   const panelBackground = darken(0.04, desktop.theme!.windowColor);
   const panelBorder = darken(0.08, desktop.theme!.windowColor);
 
+  const getRecipient = async (patp: string) => {
+    console.log(`trying to get recipient ${patp}`)
+    let promise = WalletActions.getRecipient(patp);
+    setCurrPromise(promise);
+
+    promise
+      .then((details: RecipientPayload | null) => {
+        console.log(`money! it resolved`)
+        console.log(details)
+        if (currPromise && currPromise !== promise)
+          return
+
+        details && details.address
+          ? setRecipientDetails({ failed: false, details })
+          : setRecipientDetails({ failed: true, details: null })
+
+        if(details && details.gasEstimate) {
+          props.setGasEstimate(details.gasEstimate);
+        }
+
+        setCurrPromise(null);
+      })
+      .catch((err: Error) => {
+        console.error(err);
+        if (currPromise && currPromise !== promise)
+          return
+        setRecipientDetails({ failed: true, details: null });
+        setCurrPromise(null);
+      })
+  }
+
+  useEffect(() => {
+    console.log('effecting...');
+    console.log(recipientDetails.details);
+    console.log(recipient);
+    if (!recipientDetails.failed && recipientDetails.details?.patp === recipient) {
+      console.log('she valid')
+      props.setValid(true, { patp: recipientDetails.details.patp, patpAddress: recipientDetails!.details.address! });
+    } else if (recipientDetails.failed && recipientDetails.details?.patp === recipient) {
+      console.log('no dice')
+      props.setValid(false, {});
+    }
+  }, [recipientDetails])
+
   const onChange = (e: any) => {
     let value: string = e.target.value;
     let validAddress = walletApp.network === 'ethereum' ? ethers.utils.isAddress(value) : false ; // TODO add bitcoin validation
     let validPatp = isValidPatp(value);
-
-    const getRecipient = async (patp: string) => {
-      console.log(`trying to get recipient ${patp}`)
-      let promise = WalletActions.getRecipient(patp);
-      setCurrPromise(promise);
-
-      promise
-        .then((details: RecipientPayload | null) => {
-          console.log(`money! it resolved`)
-          console.log(details)
-          if (currPromise && currPromise !== promise)
-            return
-
-          details && details.address
-            ? setRecipientDetails({ failed: false, details })
-            : setRecipientDetails({ failed: true, details: null })
-
-          if(details && details.gasEstimate) {
-            props.setGasEstimate(details.gasEstimate);
-          }
-
-          setCurrPromise(null);
-        })
-        .catch((err: Error) => {
-          console.error(err);
-          if (currPromise && currPromise !== promise)
-            return
-          setRecipientDetails({ failed: true, details: null });
-          setCurrPromise(null);
-        })
-    }
 
     if (validAddress) {
       setIcon('spy');
@@ -208,13 +221,13 @@ const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid:
       setValueCache(value);
 
       getRecipient(value);
-      props.setValid(true, { patp: value });
+      // props.setValid(true, { patp: value });
     } else if (isValidPatp(`~${value}`)) {
       setIcon('sigil');
       setValueCache(`~${value}`);
 
       getRecipient(value);
-      props.setValid(true, { patp: value });
+      // props.setValid(true, { patp: value });
       return setRecipient(`~${value}`);
     }else {
       setIcon('blank');
@@ -246,7 +259,8 @@ const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid:
   }
 
   return (
-    <Flex width="100%" justifyContent="space-evenly" alignItems="center">
+    <Flex flexDirection="column">
+        <Flex width="100%" justifyContent="space-evenly" alignItems="center">
       <Text fontSize={1} variant="body" color={theme.colors.text.secondary}>TO</Text>
       <Flex px={1} py={1} width="240px" height="45px" borderRadius="7px" alignItems="center" background={panelBackground} border={`solid 1px ${recipientError ? theme.colors.text.error : theme.colors.ui.borderColor}`}>
         <Flex ml={1} mr={2}>
@@ -256,7 +270,13 @@ const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid:
         <Input mode={desktop.theme.mode} width="100%" placeholder="@p or recipient’s address" spellCheck="false" value={recipient} onChange={onChange} />
       </Flex>
     </Flex>
-  )
+    <Box mt={2} ml="72px" width="100%">
+      <Text variant="body" fontSize="11px" color={theme.colors.text.error}>
+        {recipientDetails.failed && recipientDetails.details?.patp === recipient && `${recipient} doesn\'nt have wallet installed yet.`}
+      </Text>
+    </Box>
+  </Flex>
+)
 });
 
 interface TransactionPaneProps {
@@ -273,7 +293,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
   const [transactionAmount, setTransactionAmount] = useState(0);
 
   const [recipientValid, setRecipientValid] = useState(false);
-  const [transactionRecipient, setTransactionRecipient] = useState<{ address?: string, patp?: string }>({});
+  const [transactionRecipient, setTransactionRecipient] = useState<{ address?: string, patp?: string, patpAddress?: string }>({});
 
   const [gasEstimate, setGasEstimate] = useState<number | null>(null);
 
@@ -290,10 +310,23 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
     props.onScreenChange('initial');
   }
 
-  const sendTransaction = () => {
+  const sendTransaction = async () => {
     // send to wallet
     // WalletActions.sendEthereumTransaction(walletApp.currentAddress, )
-    props.close();
+    console.log('here we gooooooooooo')
+    try {
+      await WalletActions.sendEthereumTransaction(
+        Number(walletApp.currentAddress!),
+        transactionRecipient.address || transactionRecipient.patpAddress!,
+        transactionAmount.toString()
+      );
+      console.log('leo crushed it');
+      props.close();
+
+    } catch (e)  {
+      console.log('sending trans failed')
+      console.log(e);
+    }
   }
 
   const amountValidator = (valid: boolean, amount?: number) => {
@@ -303,7 +336,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
     }
   }
 
-  const recipientValidator = (valid: boolean, recipient: { address?: string, patp?: string }) => {
+  const recipientValidator = (valid: boolean, recipient: { address?: string, patp?: string, patpAddress?: string }) => {
     setRecipientValid(valid);
     if (valid) {
       setTransactionRecipient(recipient);
