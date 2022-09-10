@@ -213,6 +213,11 @@ export class WalletService extends BaseService {
 
   async getRecipient(_event: any, patp: string) {
     // TODO: fetch contact metadata (profile pic)
+    let recipientMetadata: {
+      color?: string,
+      avatar?: string,
+      nickname?: string
+    } = await this.core.services.ship.getContact(null, patp);
 
     // LEO: this is where we need to poke the agent and determine if we can
     // get an address for this patp and return it if we can
