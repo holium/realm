@@ -72,7 +72,6 @@
         ++  form-unreads
           |=  [=place:hark =stats:hark]
           =/  parsed-path   (parse-hark-path path.place)
-          :: ~&  >  [parsed-path]
           ?~  parsed-path
             ::  its not a dm or group dm
             :: %.n
@@ -80,24 +79,46 @@
           [(need parsed-path) stats]
         ::
         ++  parse-hark-path
-        |=  =path
-        ^-  (unit cord)
-        ?+  path    ~
-        ::
-          [@ ship %dm-inbox ship ~]
-          =/  ship-dec   (scan (trip (woad -.+.+.+.path)) bisk:so)
-          ?>  ?=(%ud -.ship-dec)
-          [~ (spat /dm-inbox/(scot %p +.ship-dec))]
-        ::
-          [@ ship @ta ~]
-            =/  to       `@p`(slav %p i.t.path)
-            =/  name-da   `(unit @da)`(slaw %da i.t.t.path)
-            ?~  name-da   
-              ::  its not a @da
-               ~
-            ::  its a @da
-            [~ (spat /(scot %p to)/(scot %da (need name-da)))]
-        ==
+          |=  =path
+          ^-  (unit cord)
+          ?+  path    ~
+          ::
+            [@ ship %dm-inbox @ta ~]
+            =/  raw=cord  i.t.t.t.path
+            =/  taw=tape  (trip raw)
+            =.  taw  (flop taw)
+            =/  ctr=@ud  0
+            =/  idx=@ud  0
+            =/  len=@ud  (lent taw)
+            =/  ntaw=tape
+              |-
+              ?~  taw  ~
+              ?:  ?& 
+                  =(ctr 2)
+                  ?!(=(idx (sub len 1)))
+                  ==
+                :-  i.taw
+                :-  '.'
+                $(idx +(idx), ctr 0, taw t.taw)
+              :-  i.taw
+              $(idx +(idx), ctr +(ctr), taw t.taw)
+
+            =/  maybe  (slaw %ud (crip (flop ntaw)))
+            ?~  maybe
+              ~
+
+            =/  ship-dec   u.maybe
+            [~ (spat /dm-inbox/(scot %p `@p`ship-dec))]
+          ::
+            [@ ship @ta ~]
+              =/  to       `@p`(slav %p i.t.path)
+              =/  name-da   `(unit @da)`(slaw %da i.t.t.path)
+              ?~  name-da   
+                ::  its not a @da
+                ~
+              ::  its a @da
+              [~ (spat /(scot %p to)/(scot %da (need name-da)))]
+          ==
     ::
     ::  Performs all the scries needed to build a group dm preview for the list view
     ::

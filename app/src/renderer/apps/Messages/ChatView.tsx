@@ -78,8 +78,10 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
       setLoading(true);
       let path = selectedChat.path.substring(1);
       if (selectedChat.type === 'group') {
+        ShipActions.readGroupDm(path);
         path = `group/${path}`;
       } else {
+        ShipActions.readDm(selectedChat.to as string);
         path = `${path.split('/')[1]}`;
       }
       ShipActions.getDMLog(path).then(resetLoading).catch(resetLoading);

@@ -77,12 +77,11 @@ export const Notification = (props: NotificationProps) => {
   const seedColor = '#4E9EFD';
 
   const bgColor = useMemo(
-    () => rgba(lighten(0.1, seedColor), 0.12),
-    [seedColor]
-  );
-  const subtitleColor = useMemo(
-    () => rgba(darken(0.3, seedColor), 0.35),
-    [seedColor]
+    () =>
+      props.seen
+        ? rgba(lighten(0.1, '#a1a1a1'), 0.12)
+        : rgba(lighten(0.1, seedColor), 0.12),
+    [seedColor && props.seen]
   );
 
   useEffect(() => {
@@ -138,7 +137,7 @@ export const Notification = (props: NotificationProps) => {
           </motion.div>
         </motion.div>
         <Flex justifyContent="center" alignItems="center">
-          <IconButton
+          {/* <IconButton
             customBg={bgColor}
             onClick={(evt: any) => {
               evt.stopPropagation();
@@ -146,7 +145,7 @@ export const Notification = (props: NotificationProps) => {
             }}
           >
             <Icons name="Close" />
-          </IconButton>
+          </IconButton> */}
         </Flex>
       </>
     );

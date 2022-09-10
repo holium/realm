@@ -111,93 +111,119 @@ export const NotificationStore = types
       if (data['more'].length === 1) {
         // then it is [{'opened'}]
         if (data['more'][0]['opened']) {
-          console.log("[{'opened'}]", data['more'][0]['opened']);
+          // console.log("[{'opened'}]", data['more'][0]['opened']);
+          self.unseen.clear();
+          // self.seen.join(self.unseen)
         }
         if (data['more'][0]['added']) {
-          console.log("[{'added'}]", data['more'][0]['added']);
+          // when a new post is added
+          const notification = data['more'][0]['added'];
+          notification.body.forEach((body: RawNotificationBody) => {
+            // console.log(body.title, body.content);
+            self.unseen.unshift(
+              NotificationModel.create({
+                link: body.link,
+                title: body.title,
+                time: body.time,
+                content: body.content,
+                place: notification.bin.place,
+              })
+            );
+          });
+          self.unseen = self.unseen.sort((a, b) => b.time - a.time);
+          return;
         }
-        if (data['more'][0]['read-count']) {
-          const place = data['more'][0]['read-count'];
-          if (place.path.includes('dm-inbox')) {
-            const pathArr = place.path.split('/').splice(3);
-            const dmPath = `/${pathArr.join('/')}`;
-            console.log(dmPath);
-          } else {
-            // is likely group-dm
-            const pathArr = place.path.split('/').splice(2);
-            const groupDmPath = `/${pathArr.join('/')}`;
-            console.log(groupDmPath);
-          }
-        }
+        // if (data['more'][0]['read-count']) {
+        //   const place = data['more'][0]['read-count'];
+        //   if (place.path.includes('dm-inbox')) {
+        //     const pathArr = place.path.split('/').splice(3);
+        //     const dmPath = `/${pathArr.join('/')}`;
+        //     console.log(dmPath);
+        //   } else {
+        //     // is likely group-dm
+        //     const pathArr = place.path.split('/').splice(2);
+        //     const groupDmPath = `/${pathArr.join('/')}`;
+        //     console.log(groupDmPath);
+        //   }
+        // }
         // this is returned after opened is poked
       }
       if (data['more'].length === 2) {
         // then it is [{'opened'}]
         if (data['more'][0]['unread-count']) {
-          console.log(
-            "[{'unread-count'},{'saw-place'}] => %o %o",
-            data['more'][0]['unread-count'],
-            data['more'][0]['saw-place']
-          );
+          console.log(data['more'][1]['unread-count']);
         }
         // this is returned after opened is poked
       }
       if (data['more'].length === 3) {
-        console.log("[{'timebox'}, {'timebox'}, {'all-stats'}]", data['more']);
-        // then it is the initial [{'timebox'}, {'timebox'}, {'all-stats'}]
-        const unseenTimebox: RawTimeBoxType = data['more'][0]?.timebox;
-        let unseenTimeboxes: NotificationModelType[] = [];
-        if (unseenTimebox) {
-          unseenTimebox.notifications.forEach(
-            (notification: RawNotificationType) => {
-              notification.body.forEach((body: RawNotificationBody) => {
-                unseenTimeboxes.push(
-                  NotificationModel.create({
-                    link: body.link,
-                    title: body.title,
-                    time: body.time,
-                    content: body.content,
-                    place: notification.bin.place,
-                  })
-                );
-              });
-            }
+        if (data['more'][0]['read-count']) {
+          console.log(
+            "[{'read-count'}, {'archived'}, {'archived'}]",
+            data['more']
           );
         }
-        const seenTimebox = data['more'][1]?.timebox;
-        let seenTimeboxes: NotificationModelType[] = [];
-        if (seenTimebox) {
-          seenTimebox.notifications.forEach(
-            (notification: RawNotificationType) => {
-              notification.body.forEach((body: RawNotificationBody) => {
-                seenTimeboxes.unshift(
-                  NotificationModel.create({
-                    link: body.link,
-                    title: body.title,
-                    time: body.time,
-                    content: body.content,
-                    place: notification.bin.place,
-                  })
-                );
-              });
-            }
+        if (data['more'][0].timebox) {
+          console.log(
+            "[{'timebox'}, {'timebox'}, {'all-stats'}]",
+            data['more']
           );
+          // then it is the initial [{'timebox'}, {'timebox'}, {'all-stats'}]
+          const unseenTimebox: RawTimeBoxType = data['more'][0]?.timebox;
+          let unseenTimeboxes: NotificationModelType[] = [];
+          if (unseenTimebox) {
+            unseenTimebox.notifications.forEach(
+              (notification: RawNotificationType) => {
+                notification.body.forEach((body: RawNotificationBody) => {
+                  unseenTimeboxes.unshift(
+                    NotificationModel.create({
+                      link: body.link,
+                      title: body.title,
+                      time: body.time,
+                      content: body.content,
+                      place: notification.bin.place,
+                    })
+                  );
+                });
+              }
+            );
+          }
+          const seenTimebox = data['more'][1]?.timebox;
+          let seenTimeboxes: NotificationModelType[] = [];
+          if (seenTimebox) {
+            seenTimebox.notifications.forEach(
+              (notification: RawNotificationType) => {
+                notification.body.forEach((body: RawNotificationBody) => {
+                  seenTimeboxes.unshift(
+                    NotificationModel.create({
+                      link: body.link,
+                      title: body.title,
+                      time: body.time,
+                      content: body.content,
+                      place: notification.bin.place,
+                    })
+                  );
+                });
+              }
+            );
+          }
+          const allStats = data['more'][2] && data['more'][2]['all-stats'];
+          // console.log(allStats);
+          let allStatsList: AllStatsModelType[] = allStats.map(
+            (statsData: AllStatsModelType) => ({
+              place: statsData.place,
+              stats: statsData.stats,
+            })
+          );
+          self.unseen = cast(unseenTimeboxes);
+          self.unseen = self.unseen.sort((a, b) => b.time - a.time);
+
+          self.seen = cast(
+            seenTimeboxes.sort(
+              (notifA: any, notifB: any) => notifB.time - notifA.time
+            )
+          );
+          self.all = cast(allStatsList);
         }
-        const allStats = data['more'][2] && data['more'][2]['all-stats'];
-        // console.log(allStats);
-        let allStatsList: AllStatsModelType[] = allStats.map(
-          (statsData: AllStatsModelType) => ({
-            place: statsData.place,
-            stats: statsData.stats,
-          })
-        );
-        self.unseen = cast(unseenTimeboxes);
-        self.seen = cast(
-          seenTimeboxes.sort(
-            (notifA: any, notifB: any) => notifB.time - notifA.time
-          )
-        );
-        self.all = cast(allStatsList);
       }
     },
     setSeen: flow(function* (link: string) {

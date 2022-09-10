@@ -1,19 +1,20 @@
 import { FC } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Flex } from 'renderer/components';
+import { Flex, Label, Text } from 'renderer/components';
 import { Notification } from './Notification';
 
 interface INotificationList {
-  notifications: any[];
+  unseen: any[];
+  seen: any[];
 }
 
 export const NotificationList: FC<INotificationList> = (
   props: INotificationList
 ) => {
-  const { notifications } = props;
+  const { unseen, seen } = props;
   return (
     <InfiniteScroll
-      dataLength={notifications.length}
+      dataLength={unseen.length + seen.length + 30}
       next={() => {}}
       style={{
         display: 'flex',
@@ -28,10 +29,40 @@ export const NotificationList: FC<INotificationList> = (
       scrollableTarget="scrollableDiv"
     >
       <Flex flex="0 0 58px" />
-
-      {notifications.map((notif: any, index: number) => (
+      <Text ml={1} mb={2} fontSize={2} opacity={0.6}>
+        Unseen
+      </Text>
+      {unseen.map((notif: any, index: number) => (
         <Notification key={`unseen-${index}`} {...notif} />
       ))}
+      {unseen.length === 0 && (
+        <Flex
+          flex="0 0 60px"
+          height={60}
+          mb="20px"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Text opacity={0.3}>No unseen</Text>
+        </Flex>
+      )}
+      <Text mt={2} ml={1} mb={2} fontSize={2} opacity={0.6}>
+        Seen
+      </Text>
+      {seen.map((notif: any, index: number) => (
+        <Notification key={`unseen-${index}`} {...notif} seen={true} />
+      ))}
+      {seen.length === 0 && (
+        <Flex
+          flex="0 0 60px"
+          height={60}
+          mb="20px"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Text opacity={0.3}>No notifications</Text>
+        </Flex>
+      )}
       <Flex flex="0 0 62px" />
     </InfiniteScroll>
   );

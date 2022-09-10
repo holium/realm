@@ -7,7 +7,9 @@ import {
   Text,
   IconButton,
   TextButton,
+  Label,
 } from 'renderer/components';
+import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
 import { nativeApps } from '..';
@@ -40,11 +42,13 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
       //   // console.log(battery);
       //   setBatteryLevel(level);
       // });
-      ShipActions.openedNotifications()
-        .then(() => {})
-        .catch((err) => {
-          console.error(err);
-        });
+      return () => {
+        ShipActions.openedNotifications()
+          .then(() => {})
+          .catch((err) => {
+            console.error(err);
+          });
+      };
     }, []);
 
     const openSettingsApp = () => {
@@ -59,6 +63,8 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
         </Text>
       );
     }
+
+    console.log(toJS(notifications.unseen));
     return (
       <Grid.Column
         style={{ position: 'relative', height: dimensions.height }}
@@ -85,7 +91,7 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
           }}
         >
           <Flex gap={10} alignItems="center">
-            <Text fontWeight={500} fontSize={2}>
+            <Text fontWeight={500} fontSize={3}>
               Notifications
             </Text>
             <Text opacity={0.5} fontSize={2}>
@@ -97,24 +103,21 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
               style={{ fontWeight: 400 }}
               textColor={rgba(theme.textColor, 0.5)}
               highlightColor={lighten(0.4, theme.textColor)}
-              disabled={notifications.unseen.length === 0}
+              disabled={true}
+              // disabled={notifications.seen.length === 0}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 // submitNewChat(evt);
               }}
             >
-              Show seen
+              Show archived
             </TextButton>
           </Flex>
         </Flex>
-        {notifications.unseen.length ? (
-          <NotificationList notifications={notifications.unseen} />
-        ) : (
-          <Flex flex={1} mb="50px" justifyContent="center" alignItems="center">
-            <Text opacity={0.3}>No notifications</Text>
-          </Flex>
-        )}
-        {/* Footer */}
+        <NotificationList
+          unseen={notifications.unseen}
+          seen={notifications.seen}
+        />
 
         <Flex
           position="absolute"

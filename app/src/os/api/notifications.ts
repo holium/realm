@@ -52,6 +52,8 @@ import {
   NotificationModel,
   NotificationStoreType,
 } from '../services/ship/models/notifications';
+import { Patp } from 'os/types';
+import { CourierStoreType } from '../services/ship/models/courier';
 
 export const NotificationApi: any = {
   allStats: async (conduit: Conduit, notifications: NotificationStoreType) => {
@@ -76,7 +78,11 @@ export const NotificationApi: any = {
     // notifications.setInitial(response);
     return response;
   },
-  updates: (conduit: Conduit, notifications: NotificationStoreType) => {
+  updates: (
+    conduit: Conduit,
+    notifications: NotificationStoreType,
+    courier: CourierStoreType
+  ) => {
     conduit.watch({
       app: 'hark-store',
       path: '/updates',
@@ -88,6 +94,7 @@ export const NotificationApi: any = {
           //   data['more'][0].timebox.notifications[1].body[0]
           // );
           notifications.setWatchUpdate(data);
+          courier.setNotificationUpdates(data);
         }
       },
       onError: () => console.log('Subscription rejected'),
@@ -95,11 +102,11 @@ export const NotificationApi: any = {
     });
   },
   opened: async (conduit: Conduit) => {
-    // await conduit.poke({
-    //   app: 'hark-store',
-    //   mark: 'hark-action',
-    //   json: { opened: null },
-    // });
+    await conduit.poke({
+      app: 'hark-store',
+      mark: 'hark-action',
+      json: { opened: null },
+    });
     return;
   },
   dismiss: async (conduit: Conduit, notification: NotificationModelType) => {

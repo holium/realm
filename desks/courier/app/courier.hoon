@@ -197,11 +197,7 @@
   ::
   ++  read-dm
     |=  [=ship]
-    :: =/  place  [
-    ::     desk=%landscape
-    ::     path=[/graph/(scot %p our.bowl)/dm-inbox/(scot %p ship)]
-    :: ]
-    =/  action  ^-(action:hark [%read-count [%landscape [/graph/(scot %p our.bowl)/dm-inbox/(scot %p ship)]]])
+    =/  action  ^-(action:hark [%read-count [%landscape [/graph/(scot %p our.bowl)/dm-inbox/(scot %ud ship)]]])
     :_  state
     :~ 
         [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(action)]
@@ -209,14 +205,10 @@
   ::
   ++  read-group-dm
     |=  [=resource]
-    :: ~&  >  'here'
-    =/  place  [
-        desk=%landscape
-        path=[/graph/(scot %p entity.resource)/(cord name.resource)]
-    ]
+    =/  action  ^-(action:hark [%read-count [%landscape [/graph/(scot %p entity.resource)/(cord name.resource)]]])
     :_  state
     :~ 
-        [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>([%read-count place])]
+        [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(action)]
     ==
       ::
   ++  create-group-dm     ::  should be in a thread, but for now its here

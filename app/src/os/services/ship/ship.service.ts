@@ -98,6 +98,8 @@ export class ShipService extends BaseService {
     'realm.ship.remove-friend': this.removeFriend,
     'realm.ship.get-notifications': this.getNotifications,
     'realm.ship.opened-notifications': this.openedNotifications,
+    'realm.ship.read-dm': this.readDm,
+    'realm.ship.read-group-dm': this.readGroupDm,
   };
 
   static preload = {
@@ -152,6 +154,10 @@ export class ShipService extends BaseService {
     removeDm: (ship: string, index: any) => {
       return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
     },
+    readDm: async (ship: Patp) =>
+      ipcRenderer.invoke('realm.ship.read-dm', ship),
+    readGroupDm: async (path: string) =>
+      ipcRenderer.invoke('realm.ship.read-group-dm', path),
     getFriends: () => {
       return ipcRenderer.invoke('realm.ship.get-friends');
     },
@@ -300,7 +306,11 @@ export class ShipService extends BaseService {
         // register dm update handler
         DmApi.updates(this.core.conduit!, this.models.chat!);
         CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
-        NotificationApi.updates(this.core.conduit!, this.models.notifications!);
+        NotificationApi.updates(
+          this.core.conduit!,
+          this.models.notifications!,
+          this.models.courier
+        );
 
         DocketApi.getApps(this.core.conduit!).then((apps) => {
           this.models.docket.setInitial(apps);
@@ -354,6 +364,7 @@ export class ShipService extends BaseService {
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;
+    this.models.notifications = NotificationStore.create({});
     // this.models.docket = undefined;
     // this.models.friends = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
@@ -476,6 +487,31 @@ export class ShipService extends BaseService {
   async declineDm(_event: any, toShip: string) {
     console.log('rejectingDM', toShip);
     return await CourierApi.declineDm(this.core.conduit!, toShip);
+  }
+
+  /**
+   * Sets the unread count of a dm inbox to 0
+   *
+   * @param _event
+   * @param toShip
+   * @returns
+   */
+  async readDm(_event: any, toShip: string) {
+    return await CourierApi.readDm(this.core.conduit!, toShip);
+  }
+
+  /**
+   * Sets the unread count of a group dm channel to 0
+   *
+   * @param _event
+   * @param path
+   * @returns
+   */
+  async readGroupDm(_event: any, path: string) {
+    const split = path.split('/');
+    const host = split[0];
+    const timestamp = split[1];
+    return await CourierApi.readGroupDm(this.core.conduit!, host, timestamp);
   }
 
   async acceptGroupDm(_event: any, path: string) {
