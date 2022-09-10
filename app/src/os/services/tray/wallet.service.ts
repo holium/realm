@@ -20,6 +20,20 @@ import {
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { HDNode } from 'ethers/lib/utils';
 
+interface RecipientPayload {
+  recipientMetadata: {
+    color?: string,
+    avatar?: string,
+    nickname?: string
+  }
+  address: string | null
+  gasEstimate: number,
+  exchangeRate: {
+    coinToUsdMultiplier: number,
+    usdToCoinMultiplier: number
+  }
+}
+
 export class WalletService extends BaseService {
   private db?: Store<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
@@ -211,7 +225,7 @@ export class WalletService extends BaseService {
     this.state!.setNetwork(network);
   }
 
-  async getRecipient(_event: any, patp: string) {
+  async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
     // TODO: fetch contact metadata (profile pic)
     let recipientMetadata: {
       color?: string,
