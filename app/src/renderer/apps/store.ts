@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { Room } from '@holium/realm-room';
+import { Room, RoomState } from '@holium/realm-room';
 import {
   applyPatch,
   Instance,
@@ -139,7 +139,16 @@ onAction(trayStore, (call) => {
           // Entering or switching room
           const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
           console.log('entering and switching to connect');
-          if (room) LiveRoom.connect(room);
+          
+          if (room) {
+            if( LiveRoom.state === RoomState.Disconnected ) {
+              // not init yet, so leave
+              // this case is hit if we boot realm and are still in a room from a previous session.
+              RoomsActions.leaveRoom(room.id)
+              return;
+            }
+            // LiveRoom.connect(room);
+          }
         }
       }
     }
@@ -147,7 +156,11 @@ onAction(trayStore, (call) => {
 });
 
 // After boot, set the initial data
-OSActions.onBoot((_event: any, response: any) => {
+OSActions.onConnected((_event: any, response: any) => {
+  console.log("HITTING ONCONNECTED")
+  RoomsActions.resetLocal();
+  RoomsActions.exitRoom();
+  LiveRoom.leave();
   LiveRoom.init(response.ship.patp!);
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);

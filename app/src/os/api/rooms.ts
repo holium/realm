@@ -5,6 +5,8 @@ import {
 } from '../services/tray/rooms.model';
 import { Patp } from '@urbit/api';
 import { RoomDiff } from '../services/tray/rooms.service';
+import { toJS } from 'mobx';
+
 
 export const RoomsApi = {
   /**
@@ -173,6 +175,32 @@ export const RoomsApi = {
     return;
   },
 
+  kick: async (conduit: Conduit, roomId: string, patp: Patp) => {
+    await conduit.poke({
+      app: 'room',
+      mark: 'rooms-action',
+      json: {
+        kick: {
+          rid: roomId,
+          ship: patp,
+        },
+      },
+    });
+    return;
+  },
+
+  exit: async (conduit: Conduit) => {
+    await conduit.poke({
+      app: 'room',
+      mark: 'rooms-action',
+      json: {
+        exit: 
+          null
+      },
+    });
+    return;
+  },
+
   /**
    * watchUpdates: subscribes and handles responses
    *
@@ -203,9 +231,13 @@ export const RoomsApi = {
         } else if (update['invited']) {
           state.handleInvite(update['invited']);
         } else if (update['kicked']) {
-          // console.log('kicked', update['kicked']);
+          console.log('kicked', update['kicked']);
           //   state.leaveRoom()
           const roomId = update['kicked'].id;
+          let room = toJS(state.knownRooms.get(roomId));
+          let diff = {exit: `~${conduit.ship!}`}
+         if(room) { onDiff(diff, room) }
+
           state.kickRoom(`~${conduit.ship!}`, roomId);
           //   state.requestAllRooms();
 

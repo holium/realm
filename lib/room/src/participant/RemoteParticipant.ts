@@ -18,7 +18,7 @@ export enum DataChannel {
   Cursor = 2,
 }
 
-const RetryLimit = 10;
+const RetryLimit = 5;
 export class RemoteParticipant extends Participant {
   connectionState: PeerConnectionState = PeerConnectionState.New;
   isLower?: boolean; // if the remote particpant is lower, they are recieving
@@ -30,7 +30,7 @@ export class RemoteParticipant extends Participant {
   videoTracks: Map<string, RemoteTrackPublication>;
   tracks: Map<string, RemoteTrackPublication>;
   config: RTCConfiguration;
-  private timer?: any;
+  interval?: any;
   private sender?: RTCRtpSender;
   publish: any;
   private retryAttempts: number = 0;
@@ -158,6 +158,7 @@ export class RemoteParticipant extends Participant {
   // --------------------------------- Event handlers ----------------------------------
   // -----------------------------------------------------------------------------------
   async onTrack(event: RTCTrackEvent) {
+    // console.log('onTrack')
     const [remoteStream] = event.streams;
     remoteStream.getTracks().forEach((track: MediaStreamTrack) => {
       const remotePub = new RemoteTrackPublication(
@@ -217,8 +218,10 @@ export class RemoteParticipant extends Participant {
       event.currentTarget.connectionState === PeerConnectionState.Connected
     ) {
       console.log('peers connected!');
+
       this.emit(PeerConnectionState.Connected);
       this.connectionState = PeerConnectionState.Connected;
+
       if (!this.isLower) {
         console.log('creating data channel', this.patp);
       }
@@ -228,6 +231,8 @@ export class RemoteParticipant extends Participant {
       event.currentTarget.connectionState === PeerConnectionState.Connecting
     ) {
       console.log('peers connecting!');
+      // MoBX is complaining about this!
+      // changing (observed) observable values without using an action is not allowed
       this.connectionState = PeerConnectionState.Connecting;
 
       this.emit(PeerConnectionState.Connecting);
@@ -328,20 +333,28 @@ export class RemoteParticipant extends Participant {
   // -------------------------- PeerEngine --------------------------
   // ----------------------------------------------------------------
 
-  sendAwaitingOffer = async () => {
-    console.log('sending ready');
+  sendAwaitingOffer() {
+    // console.log('sending ready init', this.interval);
+    // this.sendAwaitingOfferHelper.bind(this);
+    // this.sendAwaitingOfferHelper();
     this.sendSignal(this.patp, 'awaiting-offer', '');
-    // @ts-ignore
-    this.timer = setTimeout(this.sendAwaitingOffer, 5000);
-    this.retryAttempts = this.retryAttempts + 1;
-    if (this.retryAttempts > RetryLimit) {
-      clearTimeout(this.timer);
-      this.retryAttempts = 0;
-      this.emit(ParticipantEvent.Failed);
-    }
-    // this.waitInterval = setInterval(this.sendAwaitingOffer, 5000);
+    this.interval = setInterval( () => {
+      // console.log('sending ready help', this.interval, this.connectionState);
+      if(this.interval === null || this.interval === undefined) {
+        // console.log('exiting sending ready')
+        return;
+      }
+      // console.log('actually sending ready')
+      this.sendSignal(this.patp, 'awaiting-offer', '');
+      // @ts-ignore
+      this.retryAttempts = this.retryAttempts + 1;
+      if (this.retryAttempts > RetryLimit) {
+        // console.log("timed out")
+        clearInterval(this.interval)
+      }
+    }, 5000)
   };
-
+  
   /**
    * handleSlip
    *
@@ -377,8 +390,9 @@ export class RemoteParticipant extends Participant {
         sdpMLineIndex: iceCand.sdpMLineIndex,
       });
     } else if (slipData['offer']) {
-      clearTimeout(this.timer);
-      this.timer = undefined;
+      console.log('calling clear interval:', this.interval);
+      clearInterval(this.interval);
+      // this.interval = undefined;
       // isHigher skips this logic
       if (!this.isLower) return;
       // isLower gets offer they were awaiting
@@ -391,12 +405,13 @@ export class RemoteParticipant extends Participant {
       this.sendSignal(this.patp, 'answer', this.peerConn.localDescription);
     } else if (slipData['answer']) {
       // console.log('answer');
-      this.timer = undefined;
+      // this.interval = undefined;
       // isHigher receives answers
       if (this.isLower) {
         return;
       }
       console.log('got answer');
+      
       await this.peerConn.setRemoteDescription(slipData['answer']);
     }
   }

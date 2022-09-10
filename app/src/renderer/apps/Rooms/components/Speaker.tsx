@@ -16,6 +16,7 @@ import { useServices } from 'renderer/logic/store';
 import { LiveRoom } from 'renderer/apps/store';
 import { PeerConnectionState } from '@holium/realm-room';
 import { rgba, darken } from 'polished';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
 
 interface ISpeaker {
   person: string;
@@ -64,6 +65,9 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       label: 'Kick',
       loading: false,
       onClick: (evt: any) => {
+        if(!roomsApp.liveRoom) return;
+        console.log("kicking user?")
+        RoomsActions.kickUser(roomsApp.liveRoom.id, person);
         LiveRoom.kickParticipant(person);
       },
     });
