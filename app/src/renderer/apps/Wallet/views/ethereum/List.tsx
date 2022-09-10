@@ -16,7 +16,7 @@ export const WalletList: FC<WalletListProps> = observer((props: WalletListProps)
 
   const List: FC = () => {
     return (
-      <Flex width="100%">
+      <Flex width="100%" flexDirection="column" overflowY="scroll">
         {list.map((wallet) => {
           console.log(wallet)
           return (

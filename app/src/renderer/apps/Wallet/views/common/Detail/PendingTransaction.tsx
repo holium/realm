@@ -23,7 +23,7 @@ const abbrMap = {
   bitcoin: 'BTC',
 };
 
-interface TransactionType {
+export interface TransactionType {
   hash: string
   date: Date
   amount: string | number

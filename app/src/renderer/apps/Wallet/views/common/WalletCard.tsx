@@ -2,7 +2,7 @@ import { FC, forwardRef } from 'react';
 import { transparentize } from 'polished'
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { Text } from 'renderer/components';
+import { Text, Flex} from 'renderer/components';
 import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
 import { theme as themes } from 'renderer/theme';
@@ -10,6 +10,7 @@ import { useTrayApps } from 'renderer/apps/store';
 
 type CardStyleProps = {
   isSelected: boolean;
+  mode: string;
 };
 
 const CardStyle = styled(motion.div)<CardStyleProps>`
@@ -17,7 +18,7 @@ const CardStyle = styled(motion.div)<CardStyleProps>`
     props.isSelected
       ? css``
       : css`
-          border: 1px solid #00000010;
+          border: 1px solid ${props => props.mode === 'light' ? ' #00000010' : '#83909F'};
           border-radius: 12px;
           display: flex;
           flex-direction: column;
@@ -47,32 +48,35 @@ export const WalletCard: FC<WalletCardProps> = forwardRef(
     const theme = themes[mode];
 
     return (
-      <CardStyle
-        layoutId={`wallet-container-${wallet.address}`}
-        layout
-        isSelected={!!isSelected}
-        onClick={onSelect}
-      >
-        <Text
-          layoutId={`wallet-name-${wallet.address}`}
-          opacity={0.5}
-          fontWeight={600}
-          color={transparentize(.4, theme.colors.text.primary)}
-          style={{ textTransform: 'uppercase' }}
+      <Flex mt={6}>
+        <CardStyle
+          mode={mode}
+          layoutId={`wallet-container-${wallet.address}`}
+          layout
+          isSelected={!!isSelected}
+          onClick={onSelect}
         >
-          {wallet.nickname}
-        </Text>
-        <Text
-          mt={1}
-          layoutId={`wallet-balance-${wallet.address}`}
-          opacity={0.9}
-          fontWeight={600}
-          fontSize={7}
-        >
-          {/* @ts-ignore */}
-          {wallet.balance} {abbrMap[network]}
-        </Text>
-      </CardStyle>
+          <Text
+            layoutId={`wallet-name-${wallet.address}`}
+            opacity={0.5}
+            fontWeight={600}
+            color={transparentize(.4, theme.colors.text.primary)}
+            style={{ textTransform: 'uppercase' }}
+          >
+            {wallet.nickname}
+          </Text>
+          <Text
+            mt={1}
+            layoutId={`wallet-balance-${wallet.address}`}
+            opacity={0.9}
+            fontWeight={600}
+            fontSize={7}
+          >
+            {/* @ts-ignore */}
+            {wallet.balance} {abbrMap[network]}
+          </Text>
+        </CardStyle>
+      </Flex>
     );
   }
 );
