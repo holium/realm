@@ -21,18 +21,15 @@ import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/s
 import { HDNode } from 'ethers/lib/utils';
 import { wallet } from 'renderer/apps/Wallet/store';
 
-interface RecipientPayload {
+export interface RecipientPayload {
   recipientMetadata: {
     color?: string,
     avatar?: string,
     nickname?: string
   }
+  patp: string
   address: string | null
   gasEstimate: number,
-  exchangeRate: {
-    coinToUsdMultiplier: number,
-    usdToCoinMultiplier: number
-  }
 }
 
 export class WalletService extends BaseService {
@@ -44,6 +41,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-view': this.setView,
     'realm.tray.wallet.set-network': this.setNetwork,
+    'realm.tray.wallet.get-recipient': this.getRecipient,
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
@@ -64,6 +62,9 @@ export class WalletService extends BaseService {
     },
     setNetwork: (network: NetworkType) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-network', network);
+    },
+    getRecipient: (patp: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
@@ -224,6 +225,7 @@ export class WalletService extends BaseService {
   }
 
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
+    console.log('hey from get rec')
     // TODO: fetch contact metadata (profile pic)
     let recipientMetadata: {
       color?: string,
@@ -231,34 +233,36 @@ export class WalletService extends BaseService {
       nickname?: string
     } = await this.core.services.ship.getContact(null, patp);
 
-    interface RecipientPayload {
-      recipientMetadata: {
-        color?: string,
-        avatar?: string,
-        nickname?: string
+    console.log('metadata fetched:')
+    console.log(recipientMetadata)
+
+    // let dummy: ethers.Wallet = ethers.Wallet.createRandom();
+    // let tx = {
+    //   to: dummy,
+    //   value: ethers.utils.parseEther("1.0"),
+    // }
+    // //@ts-ignore
+    // const gasEstimate: number = await this.ethProvider!.estimateGas(tx);
+    // console.log(`got gas estimate: ${gasEstimate}`);
+
+    try {
+      const address: string = await WalletApi.getAddress(this.core.conduit!, this.state!.network, patp);
+      console.log(`got address! ${address}`)
+
+      return {
+        patp,
+        recipientMetadata: recipientMetadata,
+        address: address,
+        gasEstimate: 7,
       }
-      address: string | null
-      gasEstimate: number,
-      exchangeRate: {
-        coinToUsdMultiplier: number,
-        usdToCoinMultiplier: number
-      }
-    }
-    const address: string = await WalletApi.getAddress(this.core.conduit!, this.state!.network, patp);
-    let dummy: ethers.Wallet = ethers.Wallet.createRandom();
-    let tx = {
-      to: dummy,
-      value: ethers.utils.parseEther("1.0"),
-    }
-    //@ts-ignore
-    const gasEstimate: number = await this.ethProvider!.estimateGas(tx);
-    return {
-      recipientMetadata: recipientMetadata,
-      address: address,
-      gasEstimate: gasEstimate,
-      exchangeRate: {
-        coinToUsdMultiplier: 0,
-        usdToCoinMultiplier: 0,
+    } catch (e) {
+      console.log('damn')
+      console.error(e);
+      return {
+        patp,
+        gasEstimate: 7,
+        recipientMetadata: {},
+        address: null,
       }
     }
   }

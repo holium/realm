@@ -88,9 +88,9 @@ export const WalletApi = {
         onEvent: (data: any) => {
           resolve(data);
         },
-        onError: () => {
+        onError: (err: Error) => {
           console.log('Subscription rejected');
-          reject();
+          reject(err);
         },
         onQuit: () => {
           // console.log('Kicked from subscription'),

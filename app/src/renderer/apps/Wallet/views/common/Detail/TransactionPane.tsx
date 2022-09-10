@@ -1,18 +1,22 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { isValidPatp} from 'urbit-ob';
-import { ethers } from 'ethers';
+import { errors, ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { theme as themes } from 'renderer/theme';
 import { darken, lighten } from 'polished';
 import {QRCodeSVG} from 'qrcode.react';
 
-import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
+import { Flex, Box, Icons, Text, Sigil, Button, ImagePreview } from 'renderer/components';
 import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme } from '../../../lib/helpers';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { BitcoinWalletType, EthWalletType, WalletStoreType } from 'os/services/tray/wallet.model';
+import { RecipientPayload } from 'os/services/tray/wallet.service';
+import { boolean } from 'yup';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -139,7 +143,7 @@ const AmountInput = observer((props: { max: number, setValid: (valid: boolean, a
   )
 })
 
-const RecipientInput = observer((props: { setValid: (valid: boolean, recipient: { address?: string, patp?: string }) => void }) => {
+const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid: boolean, recipient: { address?: string, patp?: string }) => void }) => {
   const { desktop } = useServices();
   const { walletApp } = useTrayApps();
 
@@ -147,6 +151,10 @@ const RecipientInput = observer((props: { setValid: (valid: boolean, recipient: 
   const [valueCache, setValueCache] = useState('');
   const [recipient, setRecipient] = useState('');
   const [recipientError, setRecipientError] = useState('');
+
+  // const [detailsLoading, setDetailsLoading] = useState(false);
+  const [recipientDetails, setRecipientDetails] = useState<{ failed: boolean, details: RecipientPayload | null }>({ failed: false, details: null });
+  const [currPromise, setCurrPromise] = useState<Promise<RecipientPayload | null> | null>(null);
 
 
   const theme = getBaseTheme(desktop);
@@ -158,19 +166,54 @@ const RecipientInput = observer((props: { setValid: (valid: boolean, recipient: 
     let validAddress = walletApp.network === 'ethereum' ? ethers.utils.isAddress(value) : false ; // TODO add bitcoin validation
     let validPatp = isValidPatp(value);
 
+    const getRecipient = async (patp: string) => {
+      console.log(`trying to get recipient ${patp}`)
+      let promise = WalletActions.getRecipient(patp);
+      setCurrPromise(promise);
+
+      promise
+        .then((details: RecipientPayload | null) => {
+          console.log(`money! it resolved`)
+          console.log(details)
+          if (currPromise && currPromise !== promise)
+            return
+
+          details && details.address
+            ? setRecipientDetails({ failed: false, details })
+            : setRecipientDetails({ failed: true, details: null })
+
+          if(details && details.gasEstimate) {
+            props.setGasEstimate(details.gasEstimate);
+          }
+
+          setCurrPromise(null);
+        })
+        .catch((err: Error) => {
+          console.error(err);
+          if (currPromise && currPromise !== promise)
+            return
+          setRecipientDetails({ failed: true, details: null });
+          setCurrPromise(null);
+        })
+    }
+
     if (validAddress) {
       setIcon('spy');
       setValueCache(value);
+
       props.setValid(true, { address: value });
       return setRecipient(shortened(value));
     } else if (validPatp) {
       setIcon('sigil');
       setValueCache(value);
+
+      getRecipient(value);
       props.setValid(true, { patp: value });
-      // fetch contact/check address
     } else if (isValidPatp(`~${value}`)) {
       setIcon('sigil');
       setValueCache(`~${value}`);
+
+      getRecipient(value);
       props.setValid(true, { patp: value });
       return setRecipient(`~${value}`);
     }else {
@@ -183,9 +226,14 @@ const RecipientInput = observer((props: { setValid: (valid: boolean, recipient: 
   }
 
   const RecipientIcon = (props: { icon: string }) => {
-    let blankBg = desktop.theme.mode === 'light' ? lighten(.1, theme.colors.text.disabled) : darken(.04, theme.colors.text.disabled);
-    if (props.icon === 'blank')
-      return <Box background={blankBg} height="24px" width="24px" borderRadius="5px" />
+    if (recipientDetails.details?.recipientMetadata) {
+      let metadata = recipientDetails.details.recipientMetadata;
+      if (metadata.avatar) {
+        return <ImagePreview src={metadata.avatar} height="24px" width="24px" />
+      } else if (metadata.color) {
+        return <Sigil color={[metadata.color, 'white']} simple={true} size={24} patp={valueCache!} />
+      }
+    }
 
     if (props.icon === 'spy')
       return <Icons name="Spy" size="24px" color={theme.colors.text.secondary} />
@@ -193,7 +241,8 @@ const RecipientInput = observer((props: { setValid: (valid: boolean, recipient: 
     if (props.icon === 'sigil')
       return  <Sigil color={desktop.theme.mode === 'light' ? ['black', 'white'] : ['white', 'black']} simple={true} size={24} patp={valueCache!} />
 
-    return <></>
+    let blankBg = desktop.theme.mode === 'light' ? lighten(.1, theme.colors.text.disabled) : darken(.04, theme.colors.text.disabled);
+    return <Box background={blankBg} height="24px" width="24px" borderRadius="5px" />
   }
 
   return (
@@ -226,6 +275,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
   const [recipientValid, setRecipientValid] = useState(false);
   const [transactionRecipient, setTransactionRecipient] = useState<{ address?: string, patp?: string }>({});
 
+  const [gasEstimate, setGasEstimate] = useState<number | null>(null);
+
   const { desktop } = useServices();
   const theme = getBaseTheme(desktop);
 
@@ -241,6 +292,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
 
   const sendTransaction = () => {
     // send to wallet
+    // WalletActions.sendEthereumTransaction(walletApp.currentAddress, )
     props.close();
   }
 
@@ -265,7 +317,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
         <Flex mt={7} flexDirection="column">
           <AmountInput max={props.max} setValid={amountValidator} />
           <Box width="100%" mt={4}>
-            <RecipientInput setValid={recipientValidator} />
+            <RecipientInput setValid={recipientValidator} setGasEstimate={setGasEstimate} />
           </Box>
           <Flex mt={7} justifyContent="space-between">
             <Button variant="transparent" onClick={() => props.close()}>Cancel</Button>
