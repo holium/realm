@@ -67,7 +67,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
     setHideWalletHero(false);
   }
 
-  const wallet = walletApp.ethereum.wallets.get(walletApp.currentAddress!);
+  const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
 
   /* @ts-ignore */
   const theme = getBaseTheme(desktop);

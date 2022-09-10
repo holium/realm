@@ -59,8 +59,8 @@ export class WalletService extends BaseService {
     setMnemonic: (mnemonic: string, passcodeHash: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-mnemonic', mnemonic, passcodeHash)
     },
-    setView: (view: WalletView, address?: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-view', view, address);
+    setView: (view: WalletView, index?: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-view', view, index);
     },
     setNetwork: (network: NetworkType) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-network', network);
@@ -155,9 +155,6 @@ export class WalletService extends BaseService {
     };
     this.core.onEffect(patchEffect);
 
-    WalletApi.subscribeToAddresses(this.core.conduit!, (address: any) => {
-      console.log(address);
-    })
     WalletApi.subscribeToWallets(this.core.conduit!, (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
@@ -218,8 +215,8 @@ export class WalletService extends BaseService {
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
-  async setView(_event: any, view: WalletView, address: string) {
-    this.state!.setView(view, address);
+  async setView(_event: any, view: WalletView, index?: string) {
+    this.state!.setView(view, index);
   }
 
   async setNetwork(_event: any, network: NetworkType) {

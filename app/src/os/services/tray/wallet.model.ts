@@ -4,8 +4,6 @@ import {
   types,
   Instance,
 } from 'mobx-state-tree';
-import { Patp } from 'os/types';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 
 export enum WalletView {
   ETH_LIST = 'ethereum:list',
@@ -61,6 +59,7 @@ const BitcoinStore = types
         btcWallets[key] = {
           network: 'bitcoin',
           path: (wallet as any).path,
+          nickname: (wallet as any).nickname,
           balance: (wallet as any).balance.toString(),
           address: (wallet as any).address,
           contracts: {}
@@ -78,6 +77,7 @@ const BitcoinStore = types
         network: 'bitcoin',
         path: wallet.wallet.path,
         address: wallet.wallet.address,
+        nickname: wallet.wallet.nickname,
         balance: wallet.wallet.balance.toString(),
       };
       self.wallets.set(wallet.key, BitcoinWallet.create(walletObj));
@@ -127,8 +127,6 @@ export const EthStore = types
   })
   .views((self) => ({
     get list() {
-      console.log('here')
-      console.log(self.wallets.get('0')?.balance);
       return Array.from(self.wallets).map(
         ([key, wallet]) => ({
           key: key,
@@ -230,11 +228,9 @@ export const WalletStore = types
         self.currentView = 'bitcoin:list';
       }
     },
-    setView(view: WalletView, address?: string) {
-      console.log(view)
-      console.log(address)
+    setView(view: WalletView, index?: string) {
+      self.currentIndex = index;
       self.currentView = view;
-      self.currentAddress = address;
     },
     setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
       if (network == 'bitcoin')
