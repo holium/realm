@@ -80,15 +80,22 @@ export const WalletApi = {
     }
     await conduit.poke(payload);
   },
-  subscribeToAddresses: async (conduit: Conduit, handler: (address: any) => void) => {
-    conduit.watch({
-      app: 'wallet',
-      path: '/address',
-      onEvent: (data: any) => {
-        handler(data);
-      },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
+  getAddress: async (conduit: Conduit, network: string, from: string) => {
+    return new Promise<string>((resolve, reject) => {
+      conduit.watch({
+        app: 'wallet',
+        path: '/address/' + network + '/' + from,
+        onEvent: (data: any) => {
+          resolve(data);
+        },
+        onError: () => {
+          console.log('Subscription rejected');
+          reject();
+        },
+        onQuit: () => {
+          // console.log('Kicked from subscription'),
+        }
+      });
     });
   },
   enqueueTransaction: async (conduit: Conduit, network: string, hash: any, transaction: any) => {

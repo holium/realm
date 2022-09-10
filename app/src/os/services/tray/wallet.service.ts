@@ -19,6 +19,7 @@ import {
 } from './wallet.model';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { HDNode } from 'ethers/lib/utils';
+import { wallet } from 'renderer/apps/Wallet/store';
 
 interface RecipientPayload {
   recipientMetadata: {
@@ -233,8 +234,36 @@ export class WalletService extends BaseService {
       nickname?: string
     } = await this.core.services.ship.getContact(null, patp);
 
-    // LEO: this is where we need to poke the agent and determine if we can
-    // get an address for this patp and return it if we can
+    interface RecipientPayload {
+      recipientMetadata: {
+        color?: string,
+        avatar?: string,
+        nickname?: string
+      }
+      address: string | null
+      gasEstimate: number,
+      exchangeRate: {
+        coinToUsdMultiplier: number,
+        usdToCoinMultiplier: number
+      }
+    }
+    const address: string = await WalletApi.getAddress(this.core.conduit!, this.state!.network, patp);
+    let dummy: ethers.Wallet = ethers.Wallet.createRandom();
+    let tx = {
+      to: dummy,
+      value: ethers.utils.parseEther("1.0"),
+    }
+    //@ts-ignore
+    const gasEstimate: number = await this.ethProvider!.estimateGas(tx);
+    return {
+      recipientMetadata: recipientMetadata,
+      address: address,
+      gasEstimate: gasEstimate,
+      exchangeRate: {
+        coinToUsdMultiplier: 0,
+        usdToCoinMultiplier: 0,
+      }
+    }
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
@@ -269,6 +298,9 @@ export class WalletService extends BaseService {
     const network: string = this.state!.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
     this.state!.setView(WalletView.ETH_LIST);
+  }
+
+  async estimateCurrentGasFee(_event: any) {
   }
 
   async sendEthereumTransaction(_event: any, walletIndex: number, to: string, amount: string) {
