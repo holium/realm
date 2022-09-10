@@ -1,29 +1,26 @@
-import { FC, useRef } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from '../common/WalletCard';
-import { WalletView } from '../../store';
-import { NetworkType } from 'os/services/tray/wallet.model';
+import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {
   network: NetworkType
 }
 
 export const WalletList: FC<WalletListProps> = observer((props: WalletListProps) => {
-  console.log(props.network)
-  console.log(props.network === NetworkType.ethereum)
-  const containerRefs = useRef(new Array());
   const { walletApp } = useTrayApps();
   const list = walletApp.ethereum.list;
 
-  const List: FC = (props: any) => {
+  const List: FC = () => {
     return (
       <Flex>
         {list.map((wallet) => {
+          console.log(wallet)
           return (
             <WalletCard
-              ref={(el: any) => (containerRefs.current[wallet.address as string] = el)}
               key={wallet.address}
               wallet={wallet}
               onSelect={() => {
@@ -39,8 +36,7 @@ export const WalletList: FC<WalletListProps> = observer((props: WalletListProps)
 
   const Empty: FC<any> = (props: any) => {
     let onClick = () => {
-      // set view
-      console.log('set the viewwww');
+      WalletActions.setView(WalletView.CREATE_WALLET)
     }
 
     return (

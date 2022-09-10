@@ -28,7 +28,6 @@ interface WalletCardProps {
   wallet: any;
   isSelected?: boolean;
   onSelect?: () => void;
-  ref: any;
   theme?: ThemeType
 }
 
@@ -38,7 +37,7 @@ const abbrMap = {
 };
 
 export const WalletCard: FC<WalletCardProps> = forwardRef(
-  ({ wallet, isSelected, onSelect }: WalletCardProps, ref: any) => {
+  ({ wallet, isSelected, onSelect }: WalletCardProps) => {
     const { desktop } = useServices();
 
     const mode = desktop.theme.mode === 'light' ? 'light' : 'dark';
@@ -47,7 +46,6 @@ export const WalletCard: FC<WalletCardProps> = forwardRef(
     return (
       <CardStyle
         layoutId={`wallet-container-${wallet.address}`}
-        ref={ref}
         layout
         isSelected={!!isSelected}
         onClick={onSelect}
@@ -59,7 +57,7 @@ export const WalletCard: FC<WalletCardProps> = forwardRef(
           color={transparentize(.4, theme.colors.text.primary)}
           style={{ textTransform: 'uppercase' }}
         >
-          {wallet.name}
+          {wallet.nickname}
         </Text>
         <Text
           layoutId={`wallet-balance-${wallet.address}`}

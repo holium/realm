@@ -35,8 +35,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
     // WalletActions.createWallet('~zod', walletApp.network);
   };
 
-  // const View = WalletViews[walletApp.currentView];
-  const View = WalletViews[WalletView.CREATE_WALLET]
+  const View = WalletViews[walletApp.currentView];
+  // const View = WalletViews[WalletView.CREATE_WALLET]
   return (
       <Flex position="relative" height="100%" width="100%" flexDirection="column">
         <WalletHeader

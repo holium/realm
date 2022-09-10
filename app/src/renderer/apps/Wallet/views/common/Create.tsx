@@ -1,7 +1,6 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button, Label, Input } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
 import { useField, useForm } from 'mobx-easy-form';
 import { NetworkType } from 'os/services/tray/wallet.model';
 import { FieldSet } from 'renderer/components/Input/FormControl/Field';
@@ -20,7 +19,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer((props: CreateWallet
         setLoading(true);
         try {
           console.log(`creating wallet ${values.nickname}`)
-          await WalletActions.createWallet('', 'ethereum', values.nickname);
+          await WalletActions.createWallet(values.nickname);
           setLoading(false);
         } catch (reason) {
           console.error(reason);
@@ -35,11 +34,16 @@ export const CreateWallet: FC<CreateWalletProps> = observer((props: CreateWallet
     id: 'nickname',
     form: form,
     initialValue: '',
+    validate: (nickname: string) => {
+      return nickname.length
+        ? { parsed: nickname }
+        : { error: 'Must enter nickname.'}
+    }
   });
 
   return (
     <Flex p={4} height="100%" width="100%" flexDirection="column">
-      <Text mt={3} variant="h4">
+      <Text mt={2} variant="h4">
         Create Wallet
       </Text>
       <Text mt={3} variant="body">
@@ -47,9 +51,9 @@ export const CreateWallet: FC<CreateWalletProps> = observer((props: CreateWallet
       </Text>
       <FieldSet mt={8}>
         <Label required={true}>Nickname</Label>
-        <Input name="nickname" placeholder="Fort Knox" />
+        <Input value={nickname.state.value} onChange={(e) => nickname.actions.onChange(e.target.value)} placeholder="Fort Knox" />
         <Flex mt={5} width="100%">
-          <Button width="100%" isLoading={loading} disabled={form.computed.isDirty}>Create</Button>
+          <Button id="submit" width="100%" isLoading={loading} disabled={!form.computed.isValid} onClick={form.actions.submit}>Create</Button>
         </Flex>
       </FieldSet>
     </Flex>

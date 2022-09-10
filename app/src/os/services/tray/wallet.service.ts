@@ -224,9 +224,11 @@ export class WalletService extends BaseService {
   }
 
   async createWallet(_event: any, nickname: string) {
+    console.log(`creating with nickname: ${nickname}`)
     const sender: string = this.state!.ourPatp!;
     const network: string = this.state!.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
+    this.state!.setView(WalletView.ETH_LIST);
   }
 
   async sendEthereumTransaction(_event: any, walletIndex: number, to: string, amount: string) {
