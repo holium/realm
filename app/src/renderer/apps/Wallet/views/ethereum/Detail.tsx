@@ -50,7 +50,7 @@ export const EthDetail: FC<EthDetailProps> = observer((props: EthDetailProps) =>
 
   /* @ts-ignore */
   const theme = themes[desktop.theme.mode === 'light' ? 'light' : 'dark'];
-  const wallet = walletApp.ethereum.wallets.get(walletApp.currentAddress!);
+  const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
 
   const panelBackground = darken(0.04, props.theme!.windowColor);
   const panelBorder = darken(0.08, props.theme!.windowColor);

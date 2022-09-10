@@ -1,5 +1,6 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { ethers, utils, Wallet } from 'ethers';
+import Store from 'electron-store';
 import {
   onPatch,
   onSnapshot,
@@ -19,6 +20,7 @@ import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/s
 import { HDNode } from 'ethers/lib/utils';
 
 export class WalletService extends BaseService {
+  private db?: Store<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
   private privateKey?: ethers.utils.HDNode;
   private ethProvider?: ethers.providers.JsonRpcProvider;
@@ -51,8 +53,8 @@ export class WalletService extends BaseService {
     setNetworkProvider: (network: string, provider: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-network-provider', network, provider);
     },
-    createWallet: (sender: string, network: string, nickname: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.create-wallet', sender, network, nickname);
+    createWallet: (nickname) => {
+      return ipcRenderer.invoke('realm.tray.wallet.create-wallet', nickname);
     },
     sendEthereumTransaction: (walletIndex: number, to: string, amount: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.send-ethereum-transaction', walletIndex, to, amount)
@@ -78,31 +80,40 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
+    this.db = new Store({
+      name: 'wallet',
+      cwd: `realm.wallet`, // base folder
+      accessPropertiesByDotNotation: true,
+    });
 
-    const mnemonic = 'carry poem leisure coffee issue urban save evolve catch hammer simple unknown';
-    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    let persistedState: WalletStoreType = this.db.store;
+
+    if (Object.keys(persistedState).length !== 0) {
+      this.state = WalletStore.create(castToSnapshot(persistedState))
+    }
+    else {
+      this.state = WalletStore.create({
+          network: 'ethereum',
+          currentView: 'ethereum:new',
+          ethereum: {
+            settings: {
+              defaultIndex: 0,
+            },
+            initialized: false,
+          },
+          bitcoin: {
+            settings: {
+              defaultIndex: 0,
+            }
+          },
+          creationMode: 'default',
+          ourPatp: ship,
+      });
+    }
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     );
-
-    this.state = WalletStore.create({
-        network: 'ethereum',
-        currentView: 'ethereum:new',
-        ethereum: {
-          settings: {
-            defaultIndex: 0,
-          },
-          initialized: false,
-        },
-        bitcoin: {
-          settings: {
-            defaultIndex: 0,
-          }
-        },
-        creationMode: 'default',
-        ourPatp: ship,
-    });
 
     onPatch(this.state, (patch) => {
       const patchEffect = {
@@ -204,7 +215,9 @@ export class WalletService extends BaseService {
     await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
   }
 
-  async createWallet(_event: any, sender: string, network: string, nickname: string) {
+  async createWallet(_event: any, nickname: string) {
+    const sender: string = this.state!.ourPatp!;
+    const network: string = this.state!.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
   }
 

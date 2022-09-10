@@ -98,6 +98,8 @@ const EthWallet = types.model('EthWallet', {
   ),
 });
 
+type EthWalletType = Instance<typeof EthWallet>
+
 const EthTransaction = types
   .model('EthTransaction', {
     status: types.string, // pending, approved, failed
@@ -116,8 +118,11 @@ export const EthStore = types
   })
   .views((self) => ({
     get list() {
-      return Array.from(self.wallets.values()).map(
-        (wallet: any, index: number) => ({
+      console.log('here')
+      console.log(self.wallets.get('0')?.balance);
+      return Array.from(self.wallets).map(
+        ([key, wallet]) => ({
+          key: key,
           name: wallet.nickname,
           address: wallet.address,
           balance: wallet.balance,
@@ -189,6 +194,7 @@ export const WalletStore = types
     creationMode: types.string,
     ourPatp: types.maybe(types.string),
     currentAddress: types.maybe(types.string),
+    currentIndex: types.maybe(types.string),
     passcodeHash: types.maybe(types.string),
   })
   .actions((self) => ({
@@ -213,12 +219,14 @@ export const WalletStore = types
         self.currentView = 'bitcoin:list';
       }
     },
-    setView(view: WalletView, address?: string) {
+    setView(view: WalletView, address?: string, index?: string) {
       self.currentView = view;
       if (view.includes('detail')) {
         self.currentAddress = address;
+        self.currentIndex = index;
       } else {
         self.currentAddress = undefined;
+        self.currentIndex = undefined;
       }
     },
     setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {

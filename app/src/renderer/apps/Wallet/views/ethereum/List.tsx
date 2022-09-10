@@ -41,12 +41,13 @@ export const EthList: FC<EthListProps> = observer((props: EthListProps) => {
           {list.map((wallet) => {
             return (
               <WalletCard
+              //@ts-ignore
                 ref={(el: any) => (containerRefs.current[wallet.address] = el)}
                 key={wallet.address}
                 wallet={wallet}
                 onSelect={() => {
                   console.log('selected');
-                  walletApp.setView(WalletView.ETH_DETAIL, wallet.address);
+                  walletApp.setView(WalletView.ETH_DETAIL, wallet.address, wallet.key);
                 }}
               />
             );
