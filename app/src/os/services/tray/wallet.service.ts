@@ -57,7 +57,7 @@ export class WalletService extends BaseService {
     setNetworkProvider: (network: string, provider: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-network-provider', network, provider);
     },
-    createWallet: (nickname) => {
+    createWallet: (nickname: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.create-wallet', nickname);
     },
     sendEthereumTransaction: (walletIndex: number, to: string, amount: string) => {
