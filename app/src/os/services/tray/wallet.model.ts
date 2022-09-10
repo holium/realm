@@ -161,8 +161,16 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
-    enqueueTransaction(transaction: any) {
-      self.transactions.put(transaction);
+    enqueueTransaction(hash: any, toAddress: any, from: any, amount: any, timestamp: any) {
+      let tx = {
+        status: 'pending',
+        txh: hash,
+        toAddress: toAddress,
+        from: from,
+        amount: amount,
+        timestamp: timestamp,
+      }
+      self.transactions.put(tx);
     },
     // updates
     applyWalletUpdate(wallet: any) {

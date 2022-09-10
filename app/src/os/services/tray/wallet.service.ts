@@ -308,7 +308,7 @@ export class WalletService extends BaseService {
     const wallet = new ethers.Wallet(this.privateKey!.derivePath("m/44'/60'/0'/0/" + walletIndex).privateKey);
     wallet.connect(this.ethProvider!);
     const { hash } = await wallet.sendTransaction(tx);
-    this.state!.ethereum.enqueueTransaction(tx);
+    this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
     await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
   }
 
