@@ -81,7 +81,7 @@ export class WalletService extends BaseService {
     createWallet: (nickname: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.create-wallet', nickname);
     },
-    sendEthereumTransaction: (walletIndex: number, to: string, amount: string) => {
+    sendEthereumTransaction: (walletIndex: string, to: string, amount: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.send-ethereum-transaction', walletIndex, to, amount)
     },
     sendBitcoinTransaction: (walletIndex: number, to: string, amount: string) => {
@@ -246,13 +246,14 @@ export class WalletService extends BaseService {
     // console.log(`got gas estimate: ${gasEstimate}`);
 
     try {
-      const address: string = await WalletApi.getAddress(this.core.conduit!, this.state!.network, patp);
+      const address: any = await WalletApi.getAddress(this.core.conduit!, this.state!.network, patp);
+      console.log(address);
       console.log(`got address! ${address}`)
 
       return {
         patp,
         recipientMetadata: recipientMetadata,
-        address: address,
+        address: address ? address.address : null,
         gasEstimate: 7,
       }
     } catch (e) {
@@ -304,14 +305,17 @@ export class WalletService extends BaseService {
   async estimateCurrentGasFee(_event: any) {
   }
 
-  async sendEthereumTransaction(_event: any, walletIndex: number, to: string, amount: string) {
+  async sendEthereumTransaction(_event: any, walletIndex: string, to: string, amount: string) {
+    console.log(walletIndex);
+    console.log(to);
+    console.log(amount);
     let tx = {
       to: to,
       value: ethers.utils.parseEther(amount),
     }
     const wallet = new ethers.Wallet(this.privateKey!.derivePath("m/44'/60'/0'/0/" + walletIndex).privateKey);
-    wallet.connect(this.ethProvider!);
-    const { hash } = await wallet.sendTransaction(tx);
+    const signed = await wallet.signTransaction(tx);
+    const { hash } = await this.ethProvider!.sendTransaction(signed);
     this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
     await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
   }

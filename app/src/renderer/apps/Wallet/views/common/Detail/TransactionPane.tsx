@@ -316,7 +316,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
     console.log('here we gooooooooooo')
     try {
       await WalletActions.sendEthereumTransaction(
-        Number(walletApp.currentAddress!),
+        walletApp.currentIndex,
         transactionRecipient.address || transactionRecipient.patpAddress!,
         transactionAmount.toString()
       );
