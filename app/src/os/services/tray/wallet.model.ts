@@ -13,7 +13,8 @@ export enum WalletView {
   ETH_DETAIL = 'ethereum:detail',
   ETH_TRANSACTION = 'ethereum:transaction',
   ETH_SETTINGS = 'ethereum:settings',
-  BIT_LIST = 'bitcoin:list'
+  BIT_LIST = 'bitcoin:list',
+  CREATE_WALLET = 'create-wallet'
 }
 
 export enum NetworkType {
@@ -193,6 +194,7 @@ export const WalletStore = types
       'ethereum:transaction',
       'ethereum:settings',
       'bitcoin:list',
+      'create-wallet'
     ]),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
