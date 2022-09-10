@@ -81,11 +81,12 @@ export const NotificationApi: any = {
       app: 'hark-store',
       path: '/updates',
       onEvent: async (data: any, id?: number, mark?: string) => {
-        console.log(
-          'unread notifications => %o',
-          data['more'][0].timebox.notifications[1].body[0]
-        );
+        console.log(data, mark);
         if (data['more']) {
+          // console.log(
+          //   'unread notifications => %o',
+          //   data['more'][0].timebox.notifications[1].body[0]
+          // );
           notifications.setWatchUpdate(data);
         }
       },
@@ -93,9 +94,54 @@ export const NotificationApi: any = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  sawPlace: async (place: any, time: string) => {
-    console.log(place, time);
+  opened: async (conduit: Conduit) => {
+    // await conduit.poke({
+    //   app: 'hark-store',
+    //   mark: 'hark-action',
+    //   json: { opened: null },
+    // });
+    return;
   },
+  dismiss: async (conduit: Conduit, notification: NotificationModelType) => {
+    // const payload = [
+    //   {
+    //     id: 145,
+    //     action: 'poke',
+    //     ship: 'lomder-librun',
+    //     app: 'hark-store',
+    //     mark: 'hark-action',
+    //     json: {
+    //       archive: {
+    //         lid: { seen: null },
+    //         bin: {
+    //           place: {
+    //             desk: 'landscape',
+    //             path: '/graph/0v1.vqpmh.djee1.ef0ug.k7658.80igd',
+    //           },
+    //           path: '/',
+    //         },
+    //       },
+    //     },
+    //   },
+    // ];
+    await conduit.poke({
+      app: 'hark-store',
+      mark: 'hark-action',
+      json: {
+        archive: {
+          lid: { seen: null },
+          bin: {
+            place: {
+              desk: 'landscape',
+              path: '/graph/0v1.vqpmh.djee1.ef0ug.k7658.80igd',
+            },
+            path: '/',
+          },
+        },
+      },
+    });
+  },
+  //
   archive: async (
     lid: { archive: string },
     bin: {

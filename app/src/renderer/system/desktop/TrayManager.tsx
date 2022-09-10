@@ -12,7 +12,7 @@ type TrayManagerProps = {};
 export const TrayManager: FC<TrayManagerProps> = observer(
   (props: TrayManagerProps) => {
     const { desktop } = useServices();
-    let trayAppRef: any = useRef();
+    let trayAppRef: any;
 
     const { windowColor, textColor } = desktop.theme;
     const { activeApp, dimensions, coords } = useTrayApps();

@@ -2,7 +2,7 @@
 ::
 ::  A thin agent that interfaces with various chat stores
 ::
-/-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store
+/-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store, hark=hark-store
 /+  dbug, default-agent, lib=courier, hook=dm-hook
 |%
 +$  card  card:agent:gall
@@ -80,6 +80,9 @@
         =/  entity       `@p`(slav %p i.t.t.t.path)
         =/  timestamp    `@t`i.t.t.t.t.path
         =/  dms           (grp-log:gs:lib our.bowl now.bowl entity timestamp)
+        :: ?:  =(%graph-store source.dms)
+        ::   :: mark the dm-inbox as read
+        ::   (poke-read )
         ``graph-dm-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev.json
@@ -87,6 +90,7 @@
         ?>  =(our.bowl src.bowl)
         =/  to-ship       `@p`(slav %p i.t.t.path)
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
+
         ``graph-dm-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev/paged/0/20.json
@@ -184,11 +188,37 @@
     :: %decline-dm         `state
     :: %pendings           `state
     :: %screen             `state
-    %create-group-dm       (create-group-dm +.act)
     %send-dm               (send-dm +.act)
+    %read-dm               (read-dm +.act) 
+    %create-group-dm       (create-group-dm +.act)
     %send-group-dm         (send-group-dm +.act)
+    %read-group-dm         (read-group-dm +.act)
   ==
   ::
+  ++  read-dm
+    |=  [=ship]
+    :: =/  place  [
+    ::     desk=%landscape
+    ::     path=[/graph/(scot %p our.bowl)/dm-inbox/(scot %p ship)]
+    :: ]
+    =/  action  ^-(action:hark [%read-count [%landscape [/graph/(scot %p our.bowl)/dm-inbox/(scot %p ship)]]])
+    :_  state
+    :~ 
+        [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(action)]
+    ==
+  ::
+  ++  read-group-dm
+    |=  [=resource]
+    :: ~&  >  'here'
+    =/  place  [
+        desk=%landscape
+        path=[/graph/(scot %p entity.resource)/(cord name.resource)]
+    ]
+    :_  state
+    :~ 
+        [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>([%read-count place])]
+    ==
+      ::
   ++  create-group-dm     ::  should be in a thread, but for now its here
     |=  [ships=(set ship)]
     ^-  (quip card _state)
@@ -231,6 +261,7 @@
           last-message=[~]
           metadata=mtd-list
           invite-hash=~
+          unread-count=0
       ]
     :_  state
     :~ 
@@ -314,5 +345,10 @@
       `state
   ==
   --
-
+::
+:: ++  read-dm-log
+::   |=  [=place:hark our=ship now=@da]
+::   :: =/  act     [%read-count place]
+::   [%pass / %agent [our %hark-store] %poke hark-action+!>([%read-count place])]
+::
 --

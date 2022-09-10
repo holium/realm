@@ -16,41 +16,40 @@ import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { useTrayApps } from '../store';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import { lighten, rgba } from 'polished';
+import { AuthActions } from 'renderer/logic/actions/auth';
 
 type ProfileProps = {
   theme: ThemeModelType;
-  // dimensions: {
-  //   height: number;
-  //   width: number;
-  // };
 };
 
 export const AccountTrayApp: FC<ProfileProps> = observer(
   (props: ProfileProps) => {
-    const { ship, identity, notifications } = useServices();
-    const { auth } = identity;
+    const { ship, identity, notifications, desktop } = useServices();
+    const { theme } = desktop;
     // let [batteryLevel, setBatteryLevel] = useState(0);
-    // const { dimensions } = props;
-    const { dimensions } = useTrayApps();
+    const { dimensions, setActiveApp } = useTrayApps();
     const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
+    const currentShip = ship!;
 
-    // useEffect(() => {
-    //   // @ts-ignore
-    //   // navigator.getBattery().then((battery: any) => {
-    //   //   const level = battery.level;
-    //   //   // console.log(battery);
-    //   //   setBatteryLevel(level);
-    //   // });
-    //   // window.electron.ship
-    //   //   .getInitialNotifications()
-    //   //   .then((result: any) => console.log(result));
-    // }, []);
+    useEffect(() => {
+      // @ts-ignore
+      // navigator.getBattery().then((battery: any) => {
+      //   const level = battery.level;
+      //   // console.log(battery);
+      //   setBatteryLevel(level);
+      // });
+      ShipActions.openedNotifications()
+        .then(() => {})
+        .catch((err) => {
+          console.error(err);
+        });
+    }, []);
 
     const openSettingsApp = () => {
       DesktopActions.openAppWindow('', nativeApps['os-settings']);
     };
-
-    const currentShip = ship!;
 
     let subtitle;
     if (currentShip.nickname) {
@@ -71,8 +70,19 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
           pl={4}
           pr={4}
           pt={3}
+          pb={3}
+          top={0}
+          left={0}
+          right={0}
+          position="absolute"
           alignItems="center"
           justifyContent="space-between"
+          style={{
+            background: rgba(windowColor, 0.6),
+            backdropFilter: 'blur(24px)',
+            minHeight: 58,
+            zIndex: 4,
+          }}
         >
           <Flex gap={10} alignItems="center">
             <Text fontWeight={500} fontSize={2}>
@@ -85,32 +95,42 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
           <Flex gap={10} alignItems="center">
             <TextButton
               style={{ fontWeight: 400 }}
-              textColor="rgb(208, 66, 27, .7)"
-              highlightColor="#D0421B"
+              textColor={rgba(theme.textColor, 0.5)}
+              highlightColor={lighten(0.4, theme.textColor)}
               disabled={notifications.unseen.length === 0}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 // submitNewChat(evt);
               }}
             >
-              Dismiss all
+              Show seen
             </TextButton>
           </Flex>
         </Flex>
-        <Flex flex={1} mb="50px" justifyContent="center" alignItems="center">
-          {notifications.unseen.length ? (
-            <NotificationList notifications={notifications.unseen} />
-          ) : (
+        {notifications.unseen.length ? (
+          <NotificationList notifications={notifications.unseen} />
+        ) : (
+          <Flex flex={1} mb="50px" justifyContent="center" alignItems="center">
             <Text opacity={0.3}>No notifications</Text>
-          )}
-        </Flex>
+          </Flex>
+        )}
         {/* Footer */}
+
         <Flex
           position="absolute"
-          left={14}
-          right={14}
-          bottom={14}
+          bottom={0}
+          left={0}
+          right={0}
           justifyContent="space-between"
+          pt={3}
+          pb={4}
+          px={4}
+          style={{
+            background: rgba(windowColor, 0.6),
+            backdropFilter: 'blur(24px)',
+            minHeight: 58,
+            zIndex: 4,
+          }}
         >
           <Flex alignItems="center">
             <Sigil
@@ -144,8 +164,9 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
               size={26}
               color={iconColor}
               style={{ cursor: 'none' }}
-              onClick={() => {
-                auth.logout(ship!.patp!);
+              onClick={async () => {
+                AuthActions.logout(currentShip.patp);
+                setActiveApp(null);
               }}
             >
               <Icons name="Lock" />

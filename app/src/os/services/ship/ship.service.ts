@@ -97,6 +97,7 @@ export class ShipService extends BaseService {
     'realm.ship.edit-friend': this.editFriend,
     'realm.ship.remove-friend': this.removeFriend,
     'realm.ship.get-notifications': this.getNotifications,
+    'realm.ship.opened-notifications': this.openedNotifications,
   };
 
   static preload = {
@@ -166,6 +167,8 @@ export class ShipService extends BaseService {
       ipcRenderer.invoke('realm.ship.remove-friend', patp),
     getNotifications: async (timestamp: number, length: number) =>
       ipcRenderer.invoke('realm.ship.get-notifications', timestamp, length),
+    openedNotifications: async () =>
+      ipcRenderer.invoke('realm.ship.opened-notifications'),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -541,5 +544,12 @@ export class ShipService extends BaseService {
     // const timeboxes = this.state?.notifications.timeboxes();
     // console.log(timeboxes);
     return [];
+  }
+  async openedNotifications(_event: any) {
+    // console.log('getNotifications: %o, %o', timestamp, length);
+    await NotificationApi.opened(this.core.conduit!);
+    // const timeboxes = this.state?.notifications.timeboxes();
+    // console.log(timeboxes);
+    return;
   }
 }

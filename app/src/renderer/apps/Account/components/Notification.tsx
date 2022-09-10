@@ -1,4 +1,4 @@
-import { darken, rgba } from 'polished';
+import { darken, lighten, rgba } from 'polished';
 import styled from 'styled-components';
 import {
   Flex,
@@ -9,8 +9,11 @@ import {
   IconButton,
   Icons,
 } from 'renderer/components';
-import { FC, useEffect } from 'react';
+import { Row } from 'renderer/components/NewRow';
+
+import { FC, useEffect, useMemo } from 'react';
 import { useServices } from 'renderer/logic/store';
+import { motion } from 'framer-motion';
 
 const EmptyIcon = styled.div`
   height: 48px;
@@ -37,6 +40,7 @@ interface NotifTitleProps {
   content: ContentType;
   fontSize?: number;
   fontOpacity?: number;
+  bold?: boolean;
 }
 
 const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
@@ -55,7 +59,7 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
       );
       break;
     case 'ship':
-      token = <Mention patp={content.ship} />;
+      token = <Mention height={19} mb={2} patp={content.ship} />;
       break;
     default:
       token = (
@@ -70,7 +74,16 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
 
 export const Notification = (props: NotificationProps) => {
   let innerContent: React.ReactNode;
-  const { ship } = useServices();
+  const seedColor = '#4E9EFD';
+
+  const bgColor = useMemo(
+    () => rgba(lighten(0.1, seedColor), 0.12),
+    [seedColor]
+  );
+  const subtitleColor = useMemo(
+    () => rgba(darken(0.3, seedColor), 0.35),
+    [seedColor]
+  );
 
   useEffect(() => {
     // ship?.notifications.setSeen(props.link);
@@ -95,21 +108,16 @@ export const Notification = (props: NotificationProps) => {
   } else {
     innerContent = (
       <>
-        {/* <Flex alignItems="center" mr={3}>
-          <img
+        <motion.div style={{ display: 'inline-grid' }}>
+          <motion.div
             style={{
-              borderRadius: 6,
-              // border: props.color
-              //   ? `1px solid ${rgba(darken(0.4, props.color), 0.1)}`
-              //   : 'none',
+              margin: 0,
+              display: '-webkit-inline-box',
+              verticalAlign: 'middle',
+              gap: 4,
+              alignItems: 'center',
             }}
-            width={48}
-            height={48}
-            src={props.image}
-          />
-        </Flex> */}
-        <Flex gap={1} justifyContent="center" flexDirection="column">
-          <Flex gap={6}>
+          >
             {props.title.map((content: ContentType, index: number) => (
               <NotifTitle
                 key={`title-${index}`}
@@ -117,8 +125,8 @@ export const Notification = (props: NotificationProps) => {
                 content={content}
               />
             ))}
-          </Flex>
-          <Flex mt={1} justifyContent="space-between">
+          </motion.div>
+          <motion.div style={{ display: '-webkit-inline-box' }}>
             {props.content.map((content: ContentType, index: number) => (
               <NotifTitle
                 key={`content-${index}`}
@@ -127,10 +135,16 @@ export const Notification = (props: NotificationProps) => {
                 content={content}
               />
             ))}
-          </Flex>
-        </Flex>
+          </motion.div>
+        </motion.div>
         <Flex justifyContent="center" alignItems="center">
-          <IconButton>
+          <IconButton
+            customBg={bgColor}
+            onClick={(evt: any) => {
+              evt.stopPropagation();
+              // onDismiss(id);
+            }}
+          >
             <Icons name="Close" />
           </IconButton>
         </Flex>
@@ -146,12 +160,12 @@ export const Notification = (props: NotificationProps) => {
   }
 
   return (
-    <EmbedBox
+    <NotifRow
       className="realm-cursor-hover"
-      mb={2}
-      p={3}
-      pr={3}
-      justifyContent="space-between"
+      // p={3}
+      // pr={3}
+      baseBg={bgColor}
+      customBg={bgColor}
       // customBg={}
       // customTextColor={}
       // seen={props.seen}
@@ -161,6 +175,15 @@ export const Notification = (props: NotificationProps) => {
       }}
     >
       {innerContent}
-    </EmbedBox>
+    </NotifRow>
   );
 };
+
+const NotifRow = styled(Row)`
+  border-radius: 12px;
+  /* padding: 10px 12px; */
+  margin-bottom: 4px;
+  padding: 12px;
+  justify-content: space-between;
+  width: 100%;
+`;

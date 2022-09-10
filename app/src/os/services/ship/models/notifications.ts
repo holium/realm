@@ -107,54 +107,98 @@ export const NotificationStore = types
       self.all = cast(allStatsList);
     },
     setWatchUpdate(data: any) {
-      console.log(data);
-      const unseenTimebox: RawTimeBoxType = data['more'][0].timebox;
-      // const lid = unseenTimebox.lid;
-      let unseenTimeboxes: NotificationModelType[] = [];
-      unseenTimebox.notifications.forEach(
-        (notification: RawNotificationType) => {
-          notification.body.forEach((body: RawNotificationBody) => {
-            unseenTimeboxes.push(
-              NotificationModel.create({
-                link: body.link,
-                title: body.title,
-                time: body.time,
-                content: body.content,
-                place: notification.bin.place,
-              })
-            );
-          });
+      //  'opened' is returned when the notification
+      if (data['more'].length === 1) {
+        // then it is [{'opened'}]
+        if (data['more'][0]['opened']) {
+          console.log("[{'opened'}]", data['more'][0]['opened']);
         }
-      );
-      const seenTimebox = data['more'][1].timebox;
-      let seenTimeboxes: NotificationModelType[] = [];
-      seenTimebox.notifications.forEach((notification: RawNotificationType) => {
-        notification.body.forEach((body: RawNotificationBody) => {
-          seenTimeboxes.unshift(
-            NotificationModel.create({
-              link: body.link,
-              title: body.title,
-              time: body.time,
-              content: body.content,
-              place: notification.bin.place,
-            })
+        if (data['more'][0]['added']) {
+          console.log("[{'added'}]", data['more'][0]['added']);
+        }
+        if (data['more'][0]['read-count']) {
+          const place = data['more'][0]['read-count'];
+          if (place.path.includes('dm-inbox')) {
+            const pathArr = place.path.split('/').splice(3);
+            const dmPath = `/${pathArr.join('/')}`;
+            console.log(dmPath);
+          } else {
+            // is likely group-dm
+            const pathArr = place.path.split('/').splice(2);
+            const groupDmPath = `/${pathArr.join('/')}`;
+            console.log(groupDmPath);
+          }
+        }
+        // this is returned after opened is poked
+      }
+      if (data['more'].length === 2) {
+        // then it is [{'opened'}]
+        if (data['more'][0]['unread-count']) {
+          console.log(
+            "[{'unread-count'},{'saw-place'}] => %o %o",
+            data['more'][0]['unread-count'],
+            data['more'][0]['saw-place']
           );
-        });
-      });
-      const allStats = data['more'][2]['all-stats'];
-      let allStatsList: AllStatsModelType[] = allStats.map(
-        (statsData: AllStatsModelType) => ({
-          place: statsData.place,
-          stats: statsData.stats,
-        })
-      );
-      self.unseen = cast(unseenTimeboxes);
-      self.seen = cast(
-        seenTimeboxes.sort(
-          (notifA: any, notifB: any) => notifB.time - notifA.time
-        )
-      );
-      self.all = cast(allStatsList);
+        }
+        // this is returned after opened is poked
+      }
+      if (data['more'].length === 3) {
+        console.log("[{'timebox'}, {'timebox'}, {'all-stats'}]", data['more']);
+        // then it is the initial [{'timebox'}, {'timebox'}, {'all-stats'}]
+        const unseenTimebox: RawTimeBoxType = data['more'][0]?.timebox;
+        let unseenTimeboxes: NotificationModelType[] = [];
+        if (unseenTimebox) {
+          unseenTimebox.notifications.forEach(
+            (notification: RawNotificationType) => {
+              notification.body.forEach((body: RawNotificationBody) => {
+                unseenTimeboxes.push(
+                  NotificationModel.create({
+                    link: body.link,
+                    title: body.title,
+                    time: body.time,
+                    content: body.content,
+                    place: notification.bin.place,
+                  })
+                );
+              });
+            }
+          );
+        }
+        const seenTimebox = data['more'][1]?.timebox;
+        let seenTimeboxes: NotificationModelType[] = [];
+        if (seenTimebox) {
+          seenTimebox.notifications.forEach(
+            (notification: RawNotificationType) => {
+              notification.body.forEach((body: RawNotificationBody) => {
+                seenTimeboxes.unshift(
+                  NotificationModel.create({
+                    link: body.link,
+                    title: body.title,
+                    time: body.time,
+                    content: body.content,
+                    place: notification.bin.place,
+                  })
+                );
+              });
+            }
+          );
+        }
+        const allStats = data['more'][2] && data['more'][2]['all-stats'];
+        // console.log(allStats);
+        let allStatsList: AllStatsModelType[] = allStats.map(
+          (statsData: AllStatsModelType) => ({
+            place: statsData.place,
+            stats: statsData.stats,
+          })
+        );
+        self.unseen = cast(unseenTimeboxes);
+        self.seen = cast(
+          seenTimeboxes.sort(
+            (notifA: any, notifB: any) => notifB.time - notifA.time
+          )
+        );
+        self.all = cast(allStatsList);
+      }
     },
     setSeen: flow(function* (link: string) {
       // ::  %saw-place: Update last-updated for .place to now.bowl
@@ -248,3 +292,36 @@ export type RawTimeBoxType = typeof RawTimeBox;
 export type RawNotificationType = typeof RawTimeBox.notifications[0];
 
 export type RawNotificationBody = typeof RawTimeBox.notifications[0]['body'][0];
+
+// Notes
+//
+// new notification received
+// [{'added'}] {
+//   body: [
+//     {
+//       link: '/graph-validator-dm/~rilmyl-soltyd-lomder-librun/dm-inbox/3794141858/170141184505825689191024443210495688704',
+//       title: [Array],
+//       time: 1662814917958,
+//       content: [Array]
+//     }
+//   ],
+//   bin: {
+//     place: {
+//       desk: 'landscape',
+//       path: '/graph/~rilmyl-soltyd-lomder-librun/dm-inbox/3794141858'
+//     },
+//     path: '/'
+//   },
+//   time: 1662814917958
+// }
+//
+// If it is a DM it sends an update to increase the unread count
+//
+// [{'unread-count'},{'saw-place'}] => {
+//   count: 1,
+//   place: {
+//     desk: 'landscape',
+//     path: '/graph/~rilmyl-soltyd-lomder-librun/dm-inbox/3794141858'
+//   },
+//   inc: true
+// }

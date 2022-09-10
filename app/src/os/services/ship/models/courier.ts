@@ -251,6 +251,7 @@ const PreviewDM = types
     inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
+    unreadCount: types.optional(types.number, 0),
   })
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {
@@ -273,6 +274,7 @@ const PreviewGroupDM = types
     inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
+    unreadCount: types.optional(types.number, 0),
   })
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {

@@ -8,6 +8,7 @@ import { getCenteredXY } from 'os/services/shell/lib/window-manager';
 import { dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { toJS } from 'mobx';
 
 type DialogManagerProps = {
   dialogId?: string;
@@ -18,18 +19,29 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     const { dialogId } = props;
 
     const { desktop, shell } = useServices();
+    console.log(toJS(shell.desktopDimensions));
     const desktopRef = useRef<any>(null);
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;
 
     // clear dialog on escape pressed if closable
-    useHotkeys('esc', () => {
-      let notOnboardingDialog = !Object.values(OnboardingStep).includes(dialogId as any);
-      if (isOpen && notOnboardingDialog && dialogRenderers[dialogId].hasCloseButton) {
-        ShellActions.closeDialog();
-        ShellActions.setBlur(false);
-      }
-    }, { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT']});
+    useHotkeys(
+      'esc',
+      () => {
+        let notOnboardingDialog = !Object.values(OnboardingStep).includes(
+          dialogId as any
+        );
+        if (
+          isOpen &&
+          notOnboardingDialog &&
+          dialogRenderers[dialogId].hasCloseButton
+        ) {
+          ShellActions.closeDialog();
+          ShellActions.setBlur(false);
+        }
+      },
+      { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }
+    );
 
     if (isOpen) {
       const dialogConfig = dialogRenderers[dialogId];

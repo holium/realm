@@ -56,6 +56,7 @@ export const TrayAppStore = types
       self.coords = coords;
     },
     setTrayAppDimensions(dimensions: Instance<typeof TrayAppDimensions>) {
+      // const calculatedDimensions =
       self.dimensions = dimensions;
     },
     setActiveApp(appKey: TrayAppKeys | null) {
@@ -72,7 +73,8 @@ const loadSnapshot = () => {
 const persistedState = loadSnapshot();
 
 export const trayStore = TrayAppStore.create({
-  activeApp: null,
+  // activeApp: null, // 'account-tray',
+  activeApp: 'account-tray',
   coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
@@ -98,9 +100,9 @@ onSnapshot(trayStore, (snapshot) => {
 // Create core context
 // -------------------------------
 export type TrayInstance = Instance<typeof TrayAppStore>;
-const TrayStateContext = createContext<null | TrayInstance>(trayStore);
+export const TrayStateContext = createContext<null | TrayInstance>(trayStore);
 
-export const CoreProvider = TrayStateContext.Provider;
+export const TrayProvider = TrayStateContext.Provider;
 export function useTrayApps() {
   const store = useContext(TrayStateContext);
   if (store === null) {

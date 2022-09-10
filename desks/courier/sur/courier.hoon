@@ -66,6 +66,7 @@
     last-message=(list content)
     metadata=(list contact-mtd)
     invite-id=(unit @uvH)
+    unread-count=@ud
   ==
 ::
 ::  %contact-store
@@ -90,9 +91,11 @@
       :: [%decline-dm =ship]
       :: [%pendings ships=(set ship)]
       :: [%screen screen=?]
-      [%create-group-dm ships=(set ship)]
       [%send-dm =ship =post]
+      [%read-dm =ship]
+      [%create-group-dm ships=(set ship)]
       [%send-group-dm =resource =post]
+      [%read-group-dm =resource]
   ==
 ::
 +$  reaction
