@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { isValidPatp} from 'urbit-ob';
 import { errors, ethers } from 'ethers';
 import { observer } from 'mobx-react';
@@ -16,7 +16,6 @@ import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme } from 
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { BitcoinWalletType, EthWalletType, WalletStoreType } from 'os/services/tray/wallet.model';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
-import { boolean } from 'yup';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -25,6 +24,15 @@ const abbrMap = {
 
 let ethToUsd = (eth: number) => isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2);
 let usdToEth = (usd: number) => isNaN(usd) ? 0 : (usd / 1715.66).toFixed(12);
+
+interface ContainerFlexProps { focusBorder: string }
+/* @ts-ignore */
+const ContainerFlex = styled(Flex)<ContainerFlexProps>`
+  :focus-within {
+    /* @ts-ignore */
+    border: 1px solid ${props => props.focusBorder};
+  }
+`;
 
 interface InputProps { mode: 'light' | 'dark' }
 const Input = styled.input<InputProps>`
@@ -49,6 +57,7 @@ input[type=number]::-webkit-outer-spin-button {
 `
 
 const AmountInput = observer((props: { max: number, setValid: (valid: boolean, amount?: number) => void }) => {
+  const amountRef = React.createRef();
   const { desktop } = useServices();
   const { walletApp } = useTrayApps();
 
@@ -99,20 +108,25 @@ const AmountInput = observer((props: { max: number, setValid: (valid: boolean, a
     }
   }
 
+  const inputContainerClicked = () => {
+    (amountRef.current! as HTMLElement).focus();
+  }
+
   return (
     <Flex flexDirection="column">
       <FlexHider width="100%" justifyContent="space-evenly" alignItems="center">
         <Text fontSize={1} variant="body" color={theme.colors.text.secondary}>AMOUNT</Text>
-        <Flex px={1} py={1} width="200px" height="40px" justifyContent="space-between" borderRadius="7px" background={panelBackground} border={`solid 1px ${amountError ? theme.colors.text.error : theme.colors.ui.borderColor}`}>
+        {/* @ts-ignore */}
+        <ContainerFlex focusBorder={theme.colors.brand.primary} px={1} py={1} onClick={inputContainerClicked} width="200px" height="40px" justifyContent="space-between" borderRadius="7px" background={panelBackground} border={`solid 1px ${amountError ? theme.colors.text.error : theme.colors.ui.borderColor}`}>
           <Flex pl="10px" flexDirection="column" justifyContent="center" alignItems="flex-start">
             {inCrypto
                 /* @ts-ignore */
-              ? <Input mode={desktop.theme.mode} type="number" color={theme.colors.text.primary} placeholder="0.00000000" value={amount || ''} onChange={onChange} />
+              ? <Input autoFocus ref={amountRef} mode={desktop.theme.mode} type="number" color={theme.colors.text.primary} placeholder="0.00000000" value={amount || ''} onChange={onChange} />
               :(
                 <Flex>
                   <Text pt="2px" fontSize="12px">$</Text>
                   {/* @ts-ignore */}
-                  <Input mode={desktop.theme.mode} type="number" color={theme.colors.text.primary} placeholder="0.00" value={amount || ''} onChange={onChange} />
+                  <Input autoFocus ref={amountRef} mode={desktop.theme.mode} type="number" color={theme.colors.text.primary} placeholder="0.00" value={amount || ''} onChange={onChange} />
                 </Flex>
               )}
             <Box hidden={!amount}>
@@ -132,7 +146,7 @@ const AmountInput = observer((props: { max: number, setValid: (valid: boolean, a
             </Text>
             <Icons name="UpDown" size="12px" />
           </Flex>
-        </Flex>
+        </ContainerFlex>
       </FlexHider>
       <Box mt={2} ml="72px" width="100%">
         <Text variant="body" fontSize="11px" color={theme.colors.text.error}>
@@ -262,13 +276,14 @@ const RecipientInput = observer((props: { setGasEstimate: any, setValid: (valid:
     <Flex flexDirection="column">
         <Flex width="100%" justifyContent="space-evenly" alignItems="center">
       <Text fontSize={1} variant="body" color={theme.colors.text.secondary}>TO</Text>
-      <Flex px={1} py={1} width="240px" height="45px" borderRadius="7px" alignItems="center" background={panelBackground} border={`solid 1px ${recipientError ? theme.colors.text.error : theme.colors.ui.borderColor}`}>
+      {/* @ts-ignore */}
+      <ContainerFlex focusBorder={theme.colors.brand.primary} px={1} py={1} width="240px" height="45px" borderRadius="7px" alignItems="center" background={panelBackground} border={`solid 1px ${recipientError ? theme.colors.text.error : theme.colors.ui.borderColor}`}>
         <Flex ml={1} mr={2}>
           <RecipientIcon icon={icon} />
         </Flex>
         {/* @ts-ignore */}
         <Input mode={desktop.theme.mode} width="100%" placeholder="@p or recipient’s address" spellCheck="false" value={recipient} onChange={onChange} />
-      </Flex>
+      </ContainerFlex>
     </Flex>
     <Box mt={2} ml="72px" width="100%">
       <Text variant="body" fontSize="11px" color={theme.colors.text.error}>
@@ -316,11 +331,12 @@ export const TransactionPane: FC<TransactionPaneProps> = observer((props: Transa
     console.log('here we gooooooooooo')
     try {
       await WalletActions.sendEthereumTransaction(
-        walletApp.currentIndex,
+        walletApp.currentIndex!,
         transactionRecipient.address || transactionRecipient.patpAddress!,
         transactionAmount.toString()
       );
       console.log('leo crushed it');
+      setScreen('initial');
       props.close();
 
     } catch (e)  {

@@ -121,7 +121,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
       <Flex p={3} width="100%" flexDirection="column" background={lighten(.02, desktop.theme.windowColor)} boxShadow="0px 0px 9px rgba(0, 0, 0, 0.12)" borderRadius="16px">
         <WalletInfo wallet={wallet!} QROpen={QROpen} setQROpen={setQROpen} sendTrans={sendTrans} hideWalletHero={hideWalletHero} />
         <SendReceiveButtons />
-        <SendTransaction hidden={!sendTrans} onScreenChange={onScreenChange} close={close} />
+        <SendTransaction wallet={wallet!} hidden={!sendTrans} onScreenChange={onScreenChange} close={close} />
       </Flex>
       <Box width="100%" hidden={QROpen || sendTrans}>
         <Flex width="100%" pt={6} flexDirection="column" justifyContent="center">

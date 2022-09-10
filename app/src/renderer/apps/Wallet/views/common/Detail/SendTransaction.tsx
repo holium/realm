@@ -13,9 +13,8 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme } from '../../../lib/helpers';
-
-import { WalletInfo } from './WalletInfo';
 import { TransactionPane } from './TransactionPane';
+import { BitcoinWalletType, EthWalletType } from 'os/services/tray/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -26,6 +25,7 @@ interface SendTransactionProps {
   hidden: boolean
   onScreenChange: any
   close: () => void
+  wallet: EthWalletType | BitcoinWalletType
 }
 
 export const SendTransaction: FC<SendTransactionProps> = observer((props: SendTransactionProps) => {
@@ -44,7 +44,7 @@ const Seperator = () => (
 return (
   <Box width="100%" hidden={props.hidden}>
     <Seperator />
-    <TransactionPane max={4} onScreenChange={props.onScreenChange} close={props.close} />
+    <TransactionPane max={Number(props.wallet.balance)} onScreenChange={props.onScreenChange} close={props.close} />
   </Box>
 )
 });
