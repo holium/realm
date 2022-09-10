@@ -16,7 +16,7 @@ export const WalletList: FC<WalletListProps> = observer((props: WalletListProps)
 
   const List: FC = () => {
     return (
-      <Flex>
+      <Flex width="100%">
         {list.map((wallet) => {
           console.log(wallet)
           return (
@@ -24,8 +24,7 @@ export const WalletList: FC<WalletListProps> = observer((props: WalletListProps)
               key={wallet.address}
               wallet={wallet}
               onSelect={() => {
-                console.log('selected');
-                walletApp.setView(WalletView.ETH_DETAIL, wallet.address);
+                WalletActions.setView(WalletView.ETH_DETAIL, wallet.key);
               }}
             />
           );
@@ -55,7 +54,7 @@ export const WalletList: FC<WalletListProps> = observer((props: WalletListProps)
   };
 
   return (
-    <Flex p={4} height="100%" width="100%" flexDirection="column" alignItems="center" justifyContent="center">
+    <Flex p={4} height="100%" width="100%" flexDirection="column" alignItems="center">
         { list.length
           ? <List />
           : <Empty network={props.network} />

@@ -14,7 +14,8 @@ import { BaseService } from '../base.service';
 import {
   WalletStore,
   WalletStoreType,
-  WalletView
+  WalletView,
+  NetworkType,
 } from './wallet.model';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { HDNode } from 'ethers/lib/utils';
@@ -27,6 +28,7 @@ export class WalletService extends BaseService {
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-view': this.setView,
+    'realm.tray.wallet.set-network': this.setNetwork,
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
@@ -42,8 +44,11 @@ export class WalletService extends BaseService {
     setMnemonic: (mnemonic: string, passcodeHash: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-mnemonic', mnemonic, passcodeHash)
     },
-    setView: (view: WalletView) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-view', view);
+    setView: (view: WalletView, address?: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-view', view, address);
+    },
+    setNetwork: (network: NetworkType) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-network', network);
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
@@ -198,8 +203,24 @@ export class WalletService extends BaseService {
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
-  async setView(_event: any, view: WalletView) {
-    this.state!.setView(view);
+  async setView(_event: any, view: WalletView, address: string) {
+    this.state!.setView(view, address);
+  }
+
+  async setNetwork(_event: any, network: NetworkType) {
+    this.state!.setNetwork(network);
+  }
+
+  async getRecipient(_event: any, patp: string) {
+    // TODO: fetch contact metadata (profile pic)
+
+    // LEO: this is where we need to poke the agent and determine if we can
+    // get an address for this patp and return it if we can
+  }
+
+  async getCurrentExchangeRate(_event: any, network: NetworkType) {
+    // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
+    // is probably cleaner to pull from here than add some random npm lib to do it
   }
 
   async setWalletCreationMode(_event: any, mode: string) {

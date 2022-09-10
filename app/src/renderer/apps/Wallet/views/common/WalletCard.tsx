@@ -6,6 +6,7 @@ import { Text } from 'renderer/components';
 import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
 import { theme as themes } from 'renderer/theme';
+import { useTrayApps } from 'renderer/apps/store';
 
 type CardStyleProps = {
   isSelected: boolean;
@@ -39,6 +40,8 @@ const abbrMap = {
 export const WalletCard: FC<WalletCardProps> = forwardRef(
   ({ wallet, isSelected, onSelect }: WalletCardProps) => {
     const { desktop } = useServices();
+    const { walletApp } = useTrayApps();
+    let network = walletApp.network;
 
     const mode = desktop.theme.mode === 'light' ? 'light' : 'dark';
     const theme = themes[mode];
@@ -60,13 +63,14 @@ export const WalletCard: FC<WalletCardProps> = forwardRef(
           {wallet.nickname}
         </Text>
         <Text
+          mt={1}
           layoutId={`wallet-balance-${wallet.address}`}
           opacity={0.9}
           fontWeight={600}
           fontSize={7}
         >
           {/* @ts-ignore */}
-          {wallet.balance} {abbrMap[wallet.network]}
+          {wallet.balance} {abbrMap[network]}
         </Text>
       </CardStyle>
     );

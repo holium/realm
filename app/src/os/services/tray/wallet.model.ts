@@ -36,6 +36,7 @@ const BitcoinWallet = types.model('BitcoinWallet', {
   network: types.string,
   path: types.string,
   address: types.string,
+  nickname: types.string,
   balance: types.string,
   conversions: types.maybe(
     types.model({
@@ -45,6 +46,8 @@ const BitcoinWallet = types.model('BitcoinWallet', {
     })
   ),
 });
+
+export type BitcoinWalletType = Instance<typeof BitcoinWallet>
 
 const BitcoinStore = types
   .model('BitcoinStore', {
@@ -104,7 +107,7 @@ const EthWallet = types.model('EthWallet', {
   ),
 });
 
-type EthWalletType = Instance<typeof EthWallet>
+export type EthWalletType = Instance<typeof EthWallet>
 
 const EthTransaction = types
   .model('EthTransaction', {
@@ -227,15 +230,11 @@ export const WalletStore = types
         self.currentView = 'bitcoin:list';
       }
     },
-    setView(view: WalletView, address?: string, index?: string) {
+    setView(view: WalletView, address?: string) {
+      console.log(view)
+      console.log(address)
       self.currentView = view;
-      if (view.includes('detail')) {
-        self.currentAddress = address;
-        self.currentIndex = index;
-      } else {
-        self.currentAddress = undefined;
-        self.currentIndex = undefined;
-      }
+      self.currentAddress = address;
     },
     setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
       if (network == 'bitcoin')
