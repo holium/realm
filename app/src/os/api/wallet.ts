@@ -98,7 +98,7 @@ export const WalletApi = {
       });
     });
   },
-  enqueueTransaction: async (conduit: Conduit, network: string, hash: any, transaction: any) => {
+  enqueueTransaction: async (conduit: Conduit, network: string, hash: string, transaction: any) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',

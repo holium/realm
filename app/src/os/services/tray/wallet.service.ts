@@ -169,6 +169,7 @@ export class WalletService extends BaseService {
       this.state!.bitcoin.initial(wallets);
     });
     WalletApi.subscribeToTransactions(this.core.conduit!, (transaction: any) => {
+      console.log('WE GOT IT BOIZZZZ')
       if (transaction.network == 'ethereum')
         this.state!.ethereum.applyTransactionUpdate(transaction)
 //      else if (transaction.network == 'bitcoin')
@@ -309,15 +310,18 @@ export class WalletService extends BaseService {
     console.log(walletIndex);
     console.log(to);
     console.log(amount);
+    const path = "m/44'/60'/0'/0/0"// + walletIndex;
+    console.log(path)
+    console.log(this.privateKey!.mnemonic!.phrase);
+    const wallet = new ethers.Wallet(this.privateKey!.derivePath(path).privateKey);
+    let signer = wallet.connect(this.ethProvider!);
     let tx = {
       to: to,
       value: ethers.utils.parseEther(amount),
     }
-    const wallet = new ethers.Wallet(this.privateKey!.derivePath("m/44'/60'/0'/0/" + walletIndex).privateKey);
-    const signed = await wallet.signTransaction(tx);
-    const { hash } = await this.ethProvider!.sendTransaction(signed);
-    this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
-    await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
+    const { hash } = await signer.sendTransaction(tx);
+    // this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
+    await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', hash, tx);
   }
 
   async sendBitcoinTransaction(_event: any, walletIndex: string, to: string, amount: string) {

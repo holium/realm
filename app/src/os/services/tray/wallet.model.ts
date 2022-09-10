@@ -21,7 +21,7 @@ export enum NetworkType {
 }
 
 const gweiToEther = (gwei: number) => {
-  return gwei / 1000000000;
+  return gwei / 1000000000000000000;
 }
 
 const Settings = types
@@ -112,10 +112,12 @@ export type EthWalletType = Instance<typeof EthWallet>
 const EthTransaction = types
   .model('EthTransaction', {
     status: types.string, // pending, approved, failed
+    hash: types.string,
     from: types.string,
     toShip: types.maybe(types.string),
     toAddress: types.maybe(types.string),
     amount: types.string,
+    timestamp: types.string
   })
 
 export const EthStore = types
