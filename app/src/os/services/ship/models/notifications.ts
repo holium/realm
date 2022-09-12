@@ -111,9 +111,7 @@ export const NotificationStore = types
       if (data['more'].length === 1) {
         // then it is [{'opened'}]
         if (data['more'][0]['opened']) {
-          // console.log("[{'opened'}]", data['more'][0]['opened']);
           self.unseen.clear();
-          // self.seen.join(self.unseen)
         }
         if (data['more'][0]['added']) {
           // when a new post is added
@@ -151,22 +149,22 @@ export const NotificationStore = types
       if (data['more'].length === 2) {
         // then it is [{'opened'}]
         if (data['more'][0]['unread-count']) {
-          console.log(data['more'][1]['unread-count']);
+          // console.log(data['more'][0]['unread-count']);
         }
         // this is returned after opened is poked
       }
       if (data['more'].length === 3) {
         if (data['more'][0]['read-count']) {
-          console.log(
-            "[{'read-count'}, {'archived'}, {'archived'}]",
-            data['more']
-          );
+          // console.log(
+          //   "[{'read-count'}, {'archived'}, {'archived'}]",
+          //   data['more']
+          // );
         }
         if (data['more'][0].timebox) {
-          console.log(
-            "[{'timebox'}, {'timebox'}, {'all-stats'}]",
-            data['more']
-          );
+          // console.log(
+          //   "[{'timebox'}, {'timebox'}, {'all-stats'}]",
+          //   data['more']
+          // );
           // then it is the initial [{'timebox'}, {'timebox'}, {'all-stats'}]
           const unseenTimebox: RawTimeBoxType = data['more'][0]?.timebox;
           let unseenTimeboxes: NotificationModelType[] = [];

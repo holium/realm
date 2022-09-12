@@ -21,7 +21,6 @@ import { RealmActions } from 'renderer/logic/actions/main';
 
 // Get the initial dimensions from the main process
 RealmActions.onInitialDimensions((_e: any, dims: any) => {
-  console.log('desktop', dims);
   ShellActions.setDesktopDimensions(dims.width, dims.height);
 });
 

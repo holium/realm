@@ -2,11 +2,10 @@ import { Instance, types, applySnapshot, cast } from 'mobx-state-tree';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from 'os/types';
-import { toJS } from 'mobx';
 import { cleanNounColor } from '../../../lib/color';
 import { LoaderModel } from '../../common.model';
 import moment from 'moment';
-import { type } from 'os';
+import { pathToDmInbox } from '../../../lib/graph-store';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -305,7 +304,11 @@ const PreviewGroupDM = types
 
 export type PreviewGroupDMType = Instance<typeof PreviewGroupDM>;
 
-const DMPreview = types.union({ eager: true }, PreviewDM, PreviewGroupDM);
+export const DMPreview = types.union(
+  { eager: true },
+  PreviewDM,
+  PreviewGroupDM
+);
 
 export type DMPreviewType = Instance<typeof DMPreview>;
 
@@ -329,18 +332,14 @@ export const CourierStore = types
         if (update['more'][0]['read-count']) {
           const place = update['more'][0]['read-count'];
           if (place.path.includes('dm-inbox')) {
-            const pathArr = place.path.split('/').splice(3);
-            const dmPath = `/${pathArr.join('/')}`;
-            console.log(dmPath);
+            const dmPath = pathToDmInbox(place.path);
             const dmPreview = self.previews.get(dmPath);
-            console.log('clearing', dmPreview);
             dmPreview?.clearUnread();
           } else {
             // is likely group-dm
             const pathArr = place.path.split('/').splice(2);
             const groupDmPath = `/${pathArr.join('/')}`;
             const dmPreview = self.previews.get(groupDmPath);
-            console.log('clearing', dmPreview);
             dmPreview?.clearUnread();
           }
         }
@@ -349,40 +348,34 @@ export const CourierStore = types
         if (update['more'][0]['read-count']) {
           const place = update['more'][0]['read-count'];
           if (place.path.includes('dm-inbox')) {
-            const pathArr = place.path.split('/').splice(3);
-            const dmPath = `/${pathArr.join('/')}`;
-            console.log(dmPath);
+            const dmPath = pathToDmInbox(place.path);
             const dmPreview = self.previews.get(dmPath);
-            console.log('clearing', dmPreview);
             dmPreview?.clearUnread();
           } else {
             // is likely group-dm
             const pathArr = place.path.split('/').splice(2);
             const groupDmPath = `/${pathArr.join('/')}`;
             const dmPreview = self.previews.get(groupDmPath);
-            console.log('clearing', dmPreview);
             dmPreview?.clearUnread();
           }
         }
         // then it is [{'opened'}]
         if (update['more'][0]['unread-count']) {
           const stats = update['more'][0]['unread-count'];
-          // const pathArr = place.path.split('/').splice(3);
-          console.log(stats);
           if (stats.place.path.includes('dm-inbox')) {
-            const pathArr = stats.place.path.split('/').splice(3);
-            console.log(pathArr[1]);
-            const dmPath = `/${pathArr.join('/')}`;
-            // hex2patp(pathArr[1]);
-            console.log(dmPath, stats.count);
+            const dmPath = pathToDmInbox(stats.place.path);
             const dmPreview = self.previews.get(dmPath);
-            dmPreview?.incrementUnread(stats.count);
+            if (stats.inc) {
+              dmPreview?.incrementUnread(stats.count);
+            }
           } else {
             // is likely group-dm
             const pathArr = stats.place.path.split('/').splice(2);
             const groupDmPath = `/${pathArr.join('/')}`;
             const dmPreview = self.previews.get(groupDmPath);
-            dmPreview?.incrementUnread(stats.count);
+            if (stats.inc) {
+              dmPreview?.incrementUnread(stats.count);
+            }
           }
         }
         // this is returned after opened is poked

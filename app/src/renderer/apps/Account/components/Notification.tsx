@@ -14,6 +14,8 @@ import { Row } from 'renderer/components/NewRow';
 import { FC, useEffect, useMemo } from 'react';
 import { useServices } from 'renderer/logic/store';
 import { motion } from 'framer-motion';
+import { pathToDmInbox } from 'os/lib/graph-store';
+import { useTrayApps } from 'renderer/apps/store';
 
 const EmptyIcon = styled.div`
   height: 48px;
@@ -75,6 +77,7 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
 export const Notification = (props: NotificationProps) => {
   let innerContent: React.ReactNode;
   const seedColor = '#4E9EFD';
+  // const { dmApp, setActiveApp } = useTrayApps();
 
   const bgColor = useMemo(
     () =>
@@ -169,8 +172,15 @@ export const Notification = (props: NotificationProps) => {
       // customTextColor={}
       // seen={props.seen}
       onClick={(evt: any) => {
+        evt.stopPropagation();
+        // TODO make this open dm and load url
+        //
+        // const path = pathToDmInbox(props.link);
+        // if (path.includes('dm-inbox')) {
+        //   dmApp.setPath(path);
+        //   setActiveApp('messages-tray');
+        // }
         evt.preventDefault();
-        // TODO make this open groups app and load url
       }}
     >
       {innerContent}

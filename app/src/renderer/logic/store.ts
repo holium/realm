@@ -143,7 +143,6 @@ coreStore.setResuming(true); // need to start the renderer with resuming
 OSActions.boot();
 
 OSActions.onBoot((_event: any, response: any) => {
-  console.log(response);
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
   // console.log('onBoot');

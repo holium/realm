@@ -8,6 +8,8 @@ import { NewChat } from './NewChat';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import S3Client from 'renderer/logic/s3/S3Client';
 import { DMPreviewType } from 'os/services/ship/models/courier';
+import { useTrayApps } from '../store';
+import { DmViewType } from './store';
 
 type ChatProps = {
   theme: ThemeModelType;
@@ -26,10 +28,11 @@ type ChatViewType = 'dm-list' | 'dm-chat' | 'new-chat' | 'loading';
 
 export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
   const { dimensions } = props;
-  const [currentView, setCurrentView] = useState<ChatViewType>('dm-list');
-  const [selectedChat, setSelectedChat] = useState<DMPreviewType | undefined>(
-    undefined
-  );
+  // const [currentView, setCurrentView] = useState<ChatViewType>('dm-list');
+  // const [selectedChat, setSelectedChat] = useState<DMPreviewType | undefined>(
+  //   undefined
+  // );
+  const { dmApp } = useTrayApps();
   const [s3Config, setS3Config] = useState<any>();
   // const [s3Client, setS3Client] = useState<any>();
 
@@ -47,26 +50,23 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
   // }, []);
 
   const headerSize = 50;
-  let viewSwitcher: React.ReactElement;
-
-  switch (currentView) {
-    case 'loading':
-      viewSwitcher = (
-        <Grid.Column
-          gap={2}
-          mt={1}
-          mb={3}
-          noGutter
-          expand
-          height={dimensions.height}
-          overflowY="auto"
-        >
-          <Flex flex={1} alignItems="center" justifyContent="center">
-            <Spinner size={2} />
-          </Flex>
-        </Grid.Column>
-      );
-      break;
+  let viewSwitcher: React.ReactElement = (
+    <Grid.Column
+      gap={2}
+      mt={1}
+      mb={3}
+      noGutter
+      expand
+      height={dimensions.height}
+      overflowY="auto"
+    >
+      <Flex flex={1} alignItems="center" justifyContent="center">
+        <Spinner size={2} />
+      </Flex>
+    </Grid.Column>
+  );
+  const view = dmApp.currentView;
+  switch (view) {
     case 'new-chat':
       viewSwitcher = (
         <NewChat
@@ -74,11 +74,11 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           headerOffset={headerSize}
           height={dimensions.height}
           onBack={() => {
-            setCurrentView('dm-list');
+            dmApp.setView('dm-list');
           }}
           onCreateNewDm={(newDm: DMPreviewType) => {
-            setSelectedChat(newDm);
-            setCurrentView('dm-chat');
+            dmApp.setSelectedChat(newDm);
+            dmApp.setView('dm-chat');
           }}
         />
       );
@@ -91,11 +91,11 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           height={dimensions.height}
           onNewChat={(evt: any) => {
             evt.stopPropagation();
-            setCurrentView('new-chat');
+            dmApp.setView('new-chat');
           }}
           onSelectDm={(dm: any) => {
-            setCurrentView('dm-chat');
-            setSelectedChat(dm);
+            dmApp.setView('dm-chat');
+            dmApp.setSelectedChat(dm);
           }}
         />
       );
@@ -108,10 +108,10 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           dimensions={dimensions}
           theme={props.theme}
           // s3Client={s3Client}
-          selectedChat={selectedChat!}
+          selectedChat={dmApp.selectedChat!}
           setSelectedChat={(chat: any) => {
-            if (!chat) setCurrentView('dm-list');
-            setSelectedChat(chat);
+            if (!chat) dmApp.setView('dm-list');
+            dmApp.setSelectedChat(chat);
           }}
           onSend={(message: any) => {
             console.log('dm message', message);
