@@ -53,7 +53,7 @@ export const TrayAppStore = types
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
     walletApp: WalletStore,
-    dmApp: DmApp
+    dmApp: DmApp,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -96,13 +96,13 @@ export const trayStore = TrayAppStore.create({
     bitcoin: {
       settings: {
         defaultIndex: 0,
-      }
+      },
     },
     ethereum: {
       settings: {
         defaultIndex: 0,
       },
-      initialized: false
+      initialized: false,
     },
     creationMode: 'default',
     ourPatp: '~zod',
@@ -115,10 +115,6 @@ export const trayStore = TrayAppStore.create({
   //   // rooms: [], TODO
   // },
 });
-
-onAction(trayStore.walletApp, (call) => {
-
-})
 
 onSnapshot(trayStore, (snapshot) => {
   localStorage.setItem('trayStore', JSON.stringify(snapshot));
@@ -207,8 +203,7 @@ OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
-    }
-    else if (value.resource === 'wallet') {
+    } else if (value.resource === 'wallet') {
       applyPatch(trayStore.walletApp, value.patch);
     }
   }
@@ -220,6 +215,6 @@ OSActions.onBoot((_event: any, response: any) => {
   }
 
   if (response.wallet) {
-    applySnapshot(trayStore.walletApp, response.wallet)
+    applySnapshot(trayStore.walletApp, response.wallet);
   }
 });

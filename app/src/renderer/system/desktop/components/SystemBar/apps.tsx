@@ -6,7 +6,6 @@ import { WalletApp } from 'renderer/apps/Wallet';
 import { trayStore } from '../../../../apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 
-
 export type ViewRenderers = {
   [key: string]: {
     dimensions: {
@@ -94,6 +93,10 @@ export const trayAppRenderers: ViewRenderers = {
     },
   },
   'wallet-tray': {
-    component: (props: any) => <WalletApp {...props} />
+    component: (props: any) => <WalletApp {...props} />,
+    dimensions: {
+      width: 330,
+      height: 600,
+    },
   },
 };

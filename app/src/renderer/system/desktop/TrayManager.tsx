@@ -22,7 +22,6 @@ export const TrayManager: FC<TrayManagerProps> = observer(
       TrayAppView = trayAppRenderers[activeApp]!.component!;
       trayAppRef = createRef<HTMLDivElement>();
     }
-
     return useMemo(
       () =>
         TrayAppView ? (
