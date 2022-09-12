@@ -5,6 +5,7 @@ import { servicesStore } from 'renderer/logic/store';
 
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 import DisclaimerDialog from 'renderer/system/onboarding/Disclaimer.dialog';
+import EmailDialog from 'renderer/system/onboarding/Email.dialog';
 import HaveUrbitDialog from 'renderer/system/onboarding/HaveUrbit.dialog';
 import AddShip from 'renderer/system/onboarding/AddShip.dialog';
 import ProfileSetup from 'renderer/system/onboarding/ProfileSetup.dialog';
@@ -31,10 +32,37 @@ const initialOnboardingDialogs: DialogRenderers = {
     },
     onNext: (data: any) => {
       OnboardingActions.agreedToDisclaimer();
-      OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
+      OnboardingActions.setStep(OnboardingStep.EMAIL);
     },
     window: {
       id: OnboardingStep.DISCLAIMER,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 520,
+        height: 490,
+      },
+    },
+  },
+  [OnboardingStep.EMAIL]: {
+    workflow: true,
+    hasCloseButton: false,
+    customNext: false,
+    component: (props: any) => <EmailDialog {...props} />,
+    isValidated: (state: any) => {
+      return state && state.disclaimerAccepted;
+    },
+    onOpen: () => {
+      ShellActions.setBlur(true);
+    },
+    onNext: (data: any) => {
+      OnboardingActions.agreedToDisclaimer();
+      OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
+    },
+    window: {
+      id: OnboardingStep.EMAIL,
       zIndex: 13,
       type: 'dialog',
       dimensions: {
