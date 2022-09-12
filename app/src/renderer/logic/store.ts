@@ -151,9 +151,9 @@ OSActions.onBoot((_event: any, response: any) => {
     key: 'ships',
     model: response.auth,
   });
-  if (response.auth.firstTime) {
-    SoundActions.playStartup();
-  }
+  // if (response.auth.firstTime) {
+  //   SoundActions.playStartup();
+  // }
 
   if (response.models && response.ship) {
     applySnapshot(
@@ -250,7 +250,7 @@ OSActions.onConnected(
     );
     applySnapshot(
       servicesStore.notifications,
-      castToSnapshot(initials.models.notifications!)
+      castToSnapshot(initials.models.notifications)
     );
     applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
     applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat!));

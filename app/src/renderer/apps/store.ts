@@ -73,8 +73,8 @@ const loadSnapshot = () => {
 const persistedState = loadSnapshot();
 
 export const trayStore = TrayAppStore.create({
-  // activeApp: null, // 'account-tray',
-  activeApp: 'account-tray',
+  activeApp: null,
+  // activeApp: 'account-tray',
   coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
@@ -141,12 +141,12 @@ onAction(trayStore, (call) => {
           // Entering or switching room
           const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
           console.log('entering and switching to connect');
-          
+
           if (room) {
-            if( LiveRoom.state === RoomState.Disconnected ) {
+            if (LiveRoom.state === RoomState.Disconnected) {
               // not init yet, so leave
               // this case is hit if we boot realm and are still in a room from a previous session.
-              RoomsActions.leaveRoom(room.id)
+              RoomsActions.leaveRoom(room.id);
               return;
             }
             // LiveRoom.connect(room);
