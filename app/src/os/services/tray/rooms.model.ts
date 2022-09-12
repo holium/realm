@@ -173,6 +173,9 @@ export const RoomsAppState = types
       self.knownRooms.delete(id);
     },
     setProvider(provider: Patp) {
+      if(provider !== self.provider) {
+        self.knownRooms.clear();
+      }
       self.provider = provider;
     },
     enterRoom() {
@@ -190,6 +193,16 @@ export const RoomsAppState = types
         return rMap;
       }, {});
       applySnapshot(self.knownRooms, roomMap);
+    },
+    resetLocal() {
+      self.liveRoom = undefined;
+      self.knownRooms.clear();
+      self.currentView = 'list'
+      self.outstandingRequest = false;
+      self.invites.clear();
+      self.chatData.clear();
+      self.controls.muted = false;
+      self.controls.cursors = false;
     },
     removeSelf(roomId: string, patp: string) {
       self.knownRooms.get(roomId)?.present.remove(patp);

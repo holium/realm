@@ -305,8 +305,7 @@
         =/  dm            ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
         =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
         =/  ship-dec      (snag 0 p.dm-node)
-        =/  index         (snag 1 p.dm-node)
-        =/  new-dm        (received-dm:gs:lib ship-dec index q.dm-node our now)
+        =/  new-dm        (received-dm:gs:lib ship-dec q.dm-node our now)
         :_  state
         [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
       ::

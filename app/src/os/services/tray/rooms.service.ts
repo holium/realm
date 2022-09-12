@@ -37,6 +37,11 @@ export class RoomsService extends BaseService {
     'realm.tray.rooms.set-muted': this.setMuted,
     'realm.tray.rooms.set-cursor': this.setCursors,
     'realm.tray.rooms.send-chat': this.sendChat,
+    'realm.tray.rooms.kick-user': this.kickUser,
+    'realm.tray.rooms.exit-room': this.exitRoom,
+    'realm.tray.rooms.reset-local': this.resetLocal,
+
+
   };
 
   static preload = {
@@ -95,6 +100,15 @@ export class RoomsService extends BaseService {
     },
     invite: (roomId: string, patp: Patp) => {
       return ipcRenderer.invoke('realm.tray.rooms.invite', roomId, patp);
+    },
+    kickUser: (roomId: string, patp: Patp) => {
+      return ipcRenderer.invoke('realm.tray.rooms.kick-user', roomId, patp);
+    },
+    exitRoom: () => {
+      return ipcRenderer.invoke('realm.tray.rooms.exit-room');
+    },
+    resetLocal: () => {
+      return ipcRenderer.invoke('realm.tray.rooms.reset-local');
     },
     refreshLocalRoom: () => {
       return ipcRenderer.invoke('realm.tray.rooms.refresh-local-room');
@@ -248,6 +262,30 @@ export class RoomsService extends BaseService {
   }
   async invite(_event: any, roomId: string, patp: Patp) {
     return RoomsApi.invite(this.core.conduit!, roomId, patp);
+  }
+  async kickUser(_event: any, roomId: string, patp: Patp) {
+    console.log("kicking user")
+    let room = this.state?.knownRooms.get(roomId);
+    if(!room) return;
+    console.log("kicking user1", room.creator, this.core!.conduit!.ship)
+
+    if(room.creator !== "~"+this.core!.conduit!.ship) return;
+    console.log("kicking user2")
+
+
+    if(!room.present.includes(patp)) return;
+    console.log("kicking user3")
+
+
+    return RoomsApi.kick(this.core.conduit!, roomId, patp);
+  }
+
+  async exitRoom(_event: any) {
+    this.state?.setView('list')
+    return RoomsApi.exit(this.core.conduit!);
+  }
+  async resetLocal(_event: any) {
+    this.state?.resetLocal();
   }
 
   //

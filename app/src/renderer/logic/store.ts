@@ -63,13 +63,13 @@ export const Services = types
     },
   }));
 
-const desktopSnapshot = loadSnapshot('desktop');
-const shellSnapshot = loadSnapshot('shell');
-const bazaarSnapshot = loadSnapshot('bazaar');
+// const desktopSnapshot = loadSnapshot('desktop');
+// const shellSnapshot = loadSnapshot('shell');
+// const bazaarSnapshot = loadSnapshot('bazaar');
 
 const services = Services.create({
-  desktop: desktopSnapshot || {},
-  shell: shellSnapshot || {},
+  desktop: {},
+  shell: {},
   identity: {
     auth: {
       loader: { state: 'initial' },
@@ -82,7 +82,7 @@ const services = Services.create({
     loader: { state: 'initial' },
     spaces: undefined,
   },
-  bazaar: bazaarSnapshot || {},
+  bazaar: {},
   membership: {},
   docket: {},
   dms: {},
@@ -143,6 +143,9 @@ coreStore.setResuming(true); // need to start the renderer with resuming
 OSActions.boot();
 
 OSActions.onBoot((_event: any, response: any) => {
+  console.log(response);
+  applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
+  applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
   // console.log('onBoot');
   servicesStore.identity.auth.initialSync({
     key: 'ships',
@@ -151,6 +154,7 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.auth.firstTime) {
     SoundActions.playStartup();
   }
+
   if (response.models && response.ship) {
     applySnapshot(
       servicesStore.contacts,
@@ -185,14 +189,14 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
   }
+  if (response.bazaar) {
+    applySnapshot(servicesStore.bazaar, response.bazaar);
+  }
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
   }
   if (response.membership) {
     applySnapshot(servicesStore.membership, response.membership);
-  }
-  if (response.bazaar) {
-    applySnapshot(servicesStore.bazaar, response.bazaar);
   }
   // console.log(response.ship)
   if (!response.ship) {
@@ -222,9 +226,9 @@ export function useCore() {
   return store;
 }
 
-onSnapshot(servicesStore, (snapshot) => {
-  localStorage.setItem('servicesStore', JSON.stringify(snapshot));
-});
+// onSnapshot(servicesStore, (snapshot) => {
+//   localStorage.setItem('servicesStore', JSON.stringify(snapshot));
+// });
 
 OSActions.onLogin((_event: any) => {
   SoundActions.playLogin();
@@ -316,17 +320,17 @@ OSActions.onEffect((_event: any, value: any) => {
   }
 
   if (value.response === 'initial') {
+    if (value.resource === 'desktop') {
+      applySnapshot(servicesStore.desktop, value.model);
+    }
+    if (value.resource === 'shell') {
+      applySnapshot(servicesStore.shell, value.model);
+    }
     if (value.resource === 'courier') {
       applySnapshot(servicesStore.courier, value.model);
     }
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
-    }
-    if (value.resource === 'auth') {
-      // authState.authStore.initialSync(value);
-    }
-    if (value.resource === 'theme') {
-      // osState.theme.initialSync(value);
     }
     if (value.resource === 'spaces') {
       applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
@@ -335,7 +339,13 @@ OSActions.onEffect((_event: any, value: any) => {
         servicesStore.membership,
         castToSnapshot(value.model.membership)
       );
-      applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
+      // applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
+    }
+    if (value.resource === 'auth') {
+      // authState.authStore.initialSync(value);
+    }
+    if (value.resource === 'theme') {
+      // osState.theme.initialSync(value);
     }
   }
 });

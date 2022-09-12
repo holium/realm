@@ -337,7 +337,7 @@
     [path (silt ~[to-ship]) %dm %graph-store (flop dms) ~[contact]]
   ::
   ++  received-dm
-    |=  [ship-dec=@ud idx=atom =node:gra our=ship now=@da]
+    |=  [ship-dec=@ud =node:gra our=ship now=@da]
     ^-  chat
     =/  to-ship             ^-(@p `@p`ship-dec)
     =/  message             (node-to-dm node)

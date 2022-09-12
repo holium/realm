@@ -25,7 +25,6 @@ export const CourierApi = {
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
-        // console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
@@ -50,7 +49,7 @@ export const CourierApi = {
         console.log(err);
         console.log('Subscription rejected');
       },
-      onQuit: () => console.log('Kicked from subscription'),
+      onQuit: () => console.log('Kicked from courier subscription'),
     });
   },
   sendDM: async (conduit: Conduit, path: string, post: Post) => {

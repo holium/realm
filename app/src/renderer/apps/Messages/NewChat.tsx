@@ -194,7 +194,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         height={height}
         style={{ backgroundColor: windowColor, position: 'relative' }}
       >
-        <FormControl.Field>
+        <FormControl.Field mt={2}>
           <Input
             tabIndex={1}
             name="new-contact"
