@@ -19,6 +19,7 @@ import { SlipType } from 'os/services/slip.service';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomDiff } from 'os/services/tray/rooms.service';
 import { IpcMessageEvent } from 'electron';
+import { DmApp } from './Messages/store';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -52,12 +53,14 @@ export const TrayAppStore = types
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
     walletApp: WalletStore,
+    dmApp: DmApp
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
       self.coords = coords;
     },
     setTrayAppDimensions(dimensions: Instance<typeof TrayAppDimensions>) {
+      // const calculatedDimensions =
       self.dimensions = dimensions;
     },
     setActiveApp(appKey: TrayAppKeys | null) {
@@ -75,6 +78,7 @@ const persistedState = loadSnapshot();
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,
+  // activeApp: 'account-tray',
   coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
@@ -102,7 +106,10 @@ export const trayStore = TrayAppStore.create({
     },
     creationMode: 'default',
     ourPatp: '~zod',
-  }
+  },
+  dmApp: {
+    currentView: 'dm-list',
+  },
   // roomsApp: (persistedState && persistedState.roomsApp) || {
   //   currentView: 'list',
   //   // rooms: [], TODO
@@ -121,9 +128,9 @@ onSnapshot(trayStore, (snapshot) => {
 // Create core context
 // -------------------------------
 export type TrayInstance = Instance<typeof TrayAppStore>;
-const TrayStateContext = createContext<null | TrayInstance>(trayStore);
+export const TrayStateContext = createContext<null | TrayInstance>(trayStore);
 
-export const CoreProvider = TrayStateContext.Provider;
+export const TrayProvider = TrayStateContext.Provider;
 export function useTrayApps() {
   const store = useContext(TrayStateContext);
   if (store === null) {
@@ -162,12 +169,12 @@ onAction(trayStore, (call) => {
           // Entering or switching room
           const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
           console.log('entering and switching to connect');
-          
+
           if (room) {
-            if( LiveRoom.state === RoomState.Disconnected ) {
+            if (LiveRoom.state === RoomState.Disconnected) {
               // not init yet, so leave
               // this case is hit if we boot realm and are still in a room from a previous session.
-              RoomsActions.leaveRoom(room.id)
+              RoomsActions.leaveRoom(room.id);
               return;
             }
             // LiveRoom.connect(room);

@@ -7,6 +7,7 @@ import { HomePane } from './components/Home';
 import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { LiveRoom } from 'renderer/apps/store';
+import { TrayManager } from './TrayManager';
 
 type OSFrameProps = {
   hasLoaded?: boolean;
@@ -36,6 +37,9 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
         <Bottom size={58}>
           <SystemBar />
         </Bottom>
+      </Layer>
+      <Layer zIndex={13}>
+        <TrayManager />
       </Layer>
     </Fill>
   ) : null;

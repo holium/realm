@@ -120,8 +120,8 @@ export class Realm extends EventEmitter {
   async boot(_event: any) {
     let ship = null;
     let spaces = null;
-    let desktop = null;
-    let shell = null;
+    let desktop = this.services.desktop.snapshot;
+    let shell = this.services.shell.snapshot;
     let membership = null;
     let bazaar = null;
     let rooms = null;
@@ -136,8 +136,6 @@ export class Realm extends EventEmitter {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
-      desktop = this.services.desktop.snapshot;
-      shell = this.services.shell.snapshot;
       bazaar = this.services.spaces.bazaarSnapshot;
       membership = this.services.spaces.membershipSnapshot;
       rooms = this.services.ship.roomSnapshot;

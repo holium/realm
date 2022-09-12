@@ -1,12 +1,13 @@
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { rgba } from 'polished';
+import { darken, rgba } from 'polished';
 
-import { Flex, Pulser, Sigil } from 'renderer/components';
+import { Flex, Pulser, Sigil, Box } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { motion } from 'framer-motion';
 
 type AccountTrayProps = {
   theme: ThemeModelType;
@@ -15,18 +16,22 @@ type AccountTrayProps = {
 export const AccountTray: FC<AccountTrayProps> = observer(
   (props: AccountTrayProps) => {
     const { theme } = props;
-    const { ship } = useServices();
+    const { ship, notifications } = useServices();
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
       useTrayApps();
 
     const dimensions = {
-      height: 238,
-      width: 350,
+      height: 450,
+      width: 400,
     };
 
     const position = 'top-left';
     // const anchorOffset = { x: 60, y: 26 };
     const anchorOffset = { x: 8, y: 26 };
+    const unreadCount = useMemo(
+      () => notifications.unseen.length,
+      [notifications.unseen.length]
+    );
 
     const onButtonClick = useCallback(
       (evt: any) => {
@@ -52,9 +57,12 @@ export const AccountTray: FC<AccountTrayProps> = observer(
     );
 
     return (
-      <Flex
+      <motion.div
         id="account-tray-icon"
         className="realm-cursor-hover"
+        style={{
+          position: 'relative',
+        }}
         whileTap={{ scale: 0.95 }}
         transition={{ scale: 0.2 }}
         onClick={onButtonClick}
@@ -79,7 +87,30 @@ export const AccountTray: FC<AccountTrayProps> = observer(
             />
           </Flex>
         )}
-      </Flex>
+        {unreadCount > 0 && (
+          <Box
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+            }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{
+              default: { duration: 0.2 },
+            }}
+            style={{
+              position: 'absolute',
+              background: '#4E9EFD',
+              border: `2px solid ${darken(0.025, theme.dockColor)}`,
+              borderRadius: '50%',
+              right: -3,
+              bottom: -3,
+              height: 11,
+              width: 11,
+            }}
+          />
+        )}
+      </motion.div>
     );
   }
 );

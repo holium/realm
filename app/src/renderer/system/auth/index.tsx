@@ -4,6 +4,8 @@ import { Flex } from 'renderer/components';
 import { Login } from './login';
 import { Onboarding } from 'renderer/system/onboarding/Onboarding';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { useServices } from 'renderer/logic/store';
+import { Splash } from './Splash';
 
 type LoginProps = {
   hasWallpaper?: boolean;
@@ -12,6 +14,7 @@ type LoginProps = {
 
 export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
   const { hasWallpaper, firstTime } = props;
+  const { onboarding } = useServices();
   const [addShip, setAddShip] = useState(false);
 
   useEffect(() => {
@@ -20,6 +23,14 @@ export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
       setAddShip(false);
     });
   }, []);
+
+  if (!onboarding.seenSplash) {
+    return (
+      <Flex height="100vh" alignItems="center" justifyContent="center">
+        <Splash />
+      </Flex>
+    );
+  }
 
   return (
     <Flex height="100vh" alignItems="center" justifyContent="center">

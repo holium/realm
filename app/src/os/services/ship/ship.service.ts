@@ -18,12 +18,7 @@ import { RoomsService } from '../tray/rooms.service';
 import { WalletService } from '../tray/wallet.service';
 import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
-import { NotificationsApi } from '../../api/notifications';
-import { NotificationsStore, NotificationsType } from './models/notifications';
 import { SlipService } from '../slip.service';
-// import { VisaModel, VisaModelType } from '../spaces/models/invitations';
-import { PassportsApi } from '../../api/passports';
-
 import { ContactStore, ContactStoreType } from './models/contacts';
 import { DocketStore, DocketStoreType } from './models/docket';
 import { ChatStoreType, ChatStore } from './models/dms';
@@ -32,17 +27,25 @@ import { loadCourierFromDisk } from './stores/courier';
 import { loadContactsFromDisk } from './stores/contacts';
 import { loadDocketFromDisk } from './stores/docket';
 import { loadFriendsFromDisk } from './stores/friends';
+import { loadNotificationsFromDisk } from './stores/notifications';
 import { CourierApi } from '../../api/courier';
 import { CourierStoreType, PreviewGroupDMType } from './models/courier';
 import { toJS } from 'mobx';
+import {
+  NotificationStore,
+  NotificationStoreType,
+} from './models/notifications';
+import { VisaModel, VisaModelType } from '../spaces/models/invitations';
+import { NotificationApi } from '../../api/notifications';
 
 export type ShipModels = {
   friends: FriendsType;
-  // invitations: VisaModelType;
+  invitations: VisaModelType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
+  notifications: NotificationStoreType;
 };
 
 /**
@@ -53,13 +56,19 @@ export class ShipService extends BaseService {
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
-    // invitations: VisaModel.create({
-    //   outgoing: {},
-    //   incoming: {},
-    // }),
     contacts: undefined,
     docket: DocketStore.create({ apps: {} }),
     chat: undefined,
+    notifications: NotificationStore.create({
+      unseen: [],
+      seen: [],
+      all: [],
+      recent: [],
+    }),
+    invitations: VisaModel.create({
+      outgoing: {},
+      incoming: {},
+    }),
   };
   private metadataStore: {
     graph: { [key: string]: any };
@@ -90,6 +99,9 @@ export class ShipService extends BaseService {
     'realm.ship.edit-friend': this.editFriend,
     'realm.ship.remove-friend': this.removeFriend,
     'realm.ship.get-notifications': this.getNotifications,
+    'realm.ship.opened-notifications': this.openedNotifications,
+    'realm.ship.read-dm': this.readDm,
+    'realm.ship.read-group-dm': this.readGroupDm,
   };
 
   static preload = {
@@ -144,6 +156,10 @@ export class ShipService extends BaseService {
     removeDm: (ship: string, index: any) => {
       return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
     },
+    readDm: async (ship: Patp) =>
+      ipcRenderer.invoke('realm.ship.read-dm', ship),
+    readGroupDm: async (path: string) =>
+      ipcRenderer.invoke('realm.ship.read-group-dm', path),
     getFriends: () => {
       return ipcRenderer.invoke('realm.ship.get-friends');
     },
@@ -159,6 +175,8 @@ export class ShipService extends BaseService {
       ipcRenderer.invoke('realm.ship.remove-friend', patp),
     getNotifications: async (timestamp: number, length: number) =>
       ipcRenderer.invoke('realm.ship.get-notifications', timestamp, length),
+    openedNotifications: async () =>
+      ipcRenderer.invoke('realm.ship.opened-notifications'),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -182,6 +200,9 @@ export class ShipService extends BaseService {
       docket: this.models.docket ? getSnapshot(this.models.docket) : null,
       contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
+      notifications: this.models.notifications
+        ? getSnapshot(this.models.notifications)
+        : null,
     };
   }
   get snapshot() {
@@ -217,6 +238,11 @@ export class ShipService extends BaseService {
       loader: { state: 'initial' },
     });
 
+    this.models.notifications = loadNotificationsFromDisk(
+      ship,
+      secretKey,
+      this.core.onEffect
+    );
     this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
     this.models.courier = loadCourierFromDisk(
       ship,
@@ -282,10 +308,11 @@ export class ShipService extends BaseService {
         // register dm update handler
         DmApi.updates(this.core.conduit!, this.models.chat!);
         CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
-
-        // register hark-store update handler
-        // TODO commenting out for now
-        // NotificationsApi.watch(this.core.conduit!, this.state);
+        NotificationApi.updates(
+          this.core.conduit!,
+          this.models.notifications!,
+          this.models.courier
+        );
 
         DocketApi.getApps(this.core.conduit!).then((apps) => {
           this.models.docket.setInitial(apps);
@@ -344,6 +371,7 @@ export class ShipService extends BaseService {
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;
+    this.models.notifications = NotificationStore.create({});
     // this.models.docket = undefined;
     // this.models.friends = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');
@@ -419,9 +447,7 @@ export class ShipService extends BaseService {
     return contact;
   }
   //
-  async saveMyContact(_event:IpcMainInvokeEvent, profileData: any) {
-
-
+  async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
     await ContactApi.saveContact(
       this.core.conduit!,
       this.state!.patp,
@@ -430,9 +456,7 @@ export class ShipService extends BaseService {
 
     this.state?.setOurMetadata(profileData);
 
-
     return;
-
   }
 
   getMetadata(_event: any, path: string): any {
@@ -470,6 +494,31 @@ export class ShipService extends BaseService {
   async declineDm(_event: any, toShip: string) {
     console.log('rejectingDM', toShip);
     return await CourierApi.declineDm(this.core.conduit!, toShip);
+  }
+
+  /**
+   * Sets the unread count of a dm inbox to 0
+   *
+   * @param _event
+   * @param toShip
+   * @returns
+   */
+  async readDm(_event: any, toShip: string) {
+    return await CourierApi.readDm(this.core.conduit!, toShip);
+  }
+
+  /**
+   * Sets the unread count of a group dm channel to 0
+   *
+   * @param _event
+   * @param path
+   * @returns
+   */
+  async readGroupDm(_event: any, path: string) {
+    const split = path.split('/');
+    const host = split[0];
+    const timestamp = split[1];
+    return await CourierApi.readGroupDm(this.core.conduit!, host, timestamp);
   }
 
   async acceptGroupDm(_event: any, path: string) {
@@ -538,5 +587,12 @@ export class ShipService extends BaseService {
     // const timeboxes = this.state?.notifications.timeboxes();
     // console.log(timeboxes);
     return [];
+  }
+  async openedNotifications(_event: any) {
+    // console.log('getNotifications: %o, %o', timestamp, length);
+    await NotificationApi.opened(this.core.conduit!);
+    // const timeboxes = this.state?.notifications.timeboxes();
+    // console.log(timeboxes);
+    return;
   }
 }

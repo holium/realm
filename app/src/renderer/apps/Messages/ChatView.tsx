@@ -44,6 +44,7 @@ import {
 } from 'renderer/logic/lib/useFileUpload';
 import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
+import { useTrayApps } from '../store';
 
 type IProps = {
   theme: ThemeModelType;
@@ -73,13 +74,16 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   const dmLog = courier.dms.get(selectedChat.path);
   const messages = dmLog?.messages || [];
   const resetLoading = () => setLoading(false);
+  const { dmApp } = useTrayApps();
   useEffect(() => {
     if (!selectedChat.isNew) {
       setLoading(true);
       let path = selectedChat.path.substring(1);
       if (selectedChat.type === 'group') {
+        ShipActions.readGroupDm(path);
         path = `group/${path}`;
       } else {
+        ShipActions.readDm(selectedChat.to as string);
         path = `${path.split('/')[1]}`;
       }
       ShipActions.getDMLog(path).then(resetLoading).catch(resetLoading);
@@ -109,7 +113,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   const [rows, setRows] = useState(1);
 
   const onBack = () => {
-    setSelectedChat(null);
+    dmApp.setSelectedChat(null);
     setIsSending(false);
     setLoading(false);
   };
@@ -330,16 +334,19 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onKeyDown={submitDm}
                 rightIcon={
                   <Flex justifyContent="center" alignItems="center">
-                      <IconButton
-                        ref={submitRef}
-                        luminosity={mode as 'light' | 'dark' | undefined}
-                        size={24}
-                        canFocus={false}
-                        onKeyDown={submitDm}
-                      >
-                        {!isSending ? <Icons opacity={0.5} name="ArrowRightLine" /> : <Spinner size={0} />}
-                      </IconButton>
-                  
+                    <IconButton
+                      ref={submitRef}
+                      luminosity={mode as 'light' | 'dark' | undefined}
+                      size={24}
+                      canFocus={false}
+                      onKeyDown={submitDm}
+                    >
+                      {!isSending ? (
+                        <Icons opacity={0.5} name="ArrowRightLine" />
+                      ) : (
+                        <Spinner size={0} />
+                      )}
+                    </IconButton>
                   </Flex>
                 }
                 onChange={(e: any) =>

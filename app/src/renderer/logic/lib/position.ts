@@ -4,6 +4,7 @@ export const calculateAnchorPoint = (
   position: any,
   dimensions: any
 ) => {
+  // console.log(anchorOffset, position, dimensions);
   const buttonEvent = event.nativeEvent;
   let style = {};
 

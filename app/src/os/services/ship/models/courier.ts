@@ -2,11 +2,10 @@ import { Instance, types, applySnapshot, cast } from 'mobx-state-tree';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from 'os/types';
-import { toJS } from 'mobx';
 import { cleanNounColor } from '../../../lib/color';
 import { LoaderModel } from '../../common.model';
 import moment from 'moment';
-import { type } from 'os';
+import { pathToDmInbox } from '../../../lib/graph-store';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -251,11 +250,21 @@ const PreviewDM = types
     inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
+    unreadCount: types.optional(types.number, 0),
   })
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {
       self.lastMessage = dm.contents;
       self.lastTimeSent = dm.timeSent;
+    },
+    setUnread: (count: number) => {
+      self.unreadCount = count;
+    },
+    clearUnread: () => {
+      self.unreadCount = 0;
+    },
+    incrementUnread: (count: number) => {
+      self.unreadCount = self.unreadCount + count;
     },
   }));
 
@@ -273,6 +282,7 @@ const PreviewGroupDM = types
     inviteId: types.maybeNull(types.string),
     pending: types.optional(types.boolean, false),
     isNew: types.optional(types.boolean, false),
+    unreadCount: types.optional(types.number, 0),
   })
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {
@@ -281,11 +291,24 @@ const PreviewGroupDM = types
       self.lastMessage = [{ mention: dm.author }, ...dm.contents];
       self.lastTimeSent = dm.timeSent;
     },
+    setUnread: (count: number) => {
+      self.unreadCount = count;
+    },
+    clearUnread: () => {
+      self.unreadCount = 0;
+    },
+    incrementUnread: (count: number) => {
+      self.unreadCount = self.unreadCount + count;
+    },
   }));
 
 export type PreviewGroupDMType = Instance<typeof PreviewGroupDM>;
 
-const DMPreview = types.union({ eager: true }, PreviewDM, PreviewGroupDM);
+export const DMPreview = types.union(
+  { eager: true },
+  PreviewDM,
+  PreviewGroupDM
+);
 
 export type DMPreviewType = Instance<typeof DMPreview>;
 
@@ -304,6 +327,60 @@ export const CourierStore = types
     },
   }))
   .actions((self) => ({
+    setNotificationUpdates: (update: any) => {
+      if (update['more'].length === 1) {
+        if (update['more'][0]['read-count']) {
+          const place = update['more'][0]['read-count'];
+          if (place.path.includes('dm-inbox')) {
+            const dmPath = pathToDmInbox(place.path);
+            const dmPreview = self.previews.get(dmPath);
+            dmPreview?.clearUnread();
+          } else {
+            // is likely group-dm
+            const pathArr = place.path.split('/').splice(2);
+            const groupDmPath = `/${pathArr.join('/')}`;
+            const dmPreview = self.previews.get(groupDmPath);
+            dmPreview?.clearUnread();
+          }
+        }
+      }
+      if (update['more'].length === 2) {
+        if (update['more'][0]['read-count']) {
+          const place = update['more'][0]['read-count'];
+          if (place.path.includes('dm-inbox')) {
+            const dmPath = pathToDmInbox(place.path);
+            const dmPreview = self.previews.get(dmPath);
+            dmPreview?.clearUnread();
+          } else {
+            // is likely group-dm
+            const pathArr = place.path.split('/').splice(2);
+            const groupDmPath = `/${pathArr.join('/')}`;
+            const dmPreview = self.previews.get(groupDmPath);
+            dmPreview?.clearUnread();
+          }
+        }
+        // then it is [{'opened'}]
+        if (update['more'][0]['unread-count']) {
+          const stats = update['more'][0]['unread-count'];
+          if (stats.place.path.includes('dm-inbox')) {
+            const dmPath = pathToDmInbox(stats.place.path);
+            const dmPreview = self.previews.get(dmPath);
+            if (stats.inc) {
+              dmPreview?.incrementUnread(stats.count);
+            }
+          } else {
+            // is likely group-dm
+            const pathArr = stats.place.path.split('/').splice(2);
+            const groupDmPath = `/${pathArr.join('/')}`;
+            const dmPreview = self.previews.get(groupDmPath);
+            if (stats.inc) {
+              dmPreview?.incrementUnread(stats.count);
+            }
+          }
+        }
+        // this is returned after opened is poked
+      }
+    },
     setPreviews: (dmPreviews: any) => {
       // console.log("DMPREVIEWS:", dmPreviews);
       Object.keys(dmPreviews).forEach((key: string) => {

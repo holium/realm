@@ -16,12 +16,19 @@ import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
 import { useWindowSize } from 'renderer/logic/lib/measure';
 import { Flex, Spinner } from 'renderer/components';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { RealmActions } from 'renderer/logic/actions/main';
+
+// Get the initial dimensions from the main process
+RealmActions.onInitialDimensions((_e: any, dims: any) => {
+  ShellActions.setDesktopDimensions(dims.width, dims.height);
+});
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, identity, ship } = useServices();
   const { resuming } = useCore();
-  const windowRef = useRef(null);
-  useWindowSize(windowRef);
+  // const windowRef = useRef(null);
+  // useWindowSize(windowRef);
 
   const isFullscreen = shell.isFullscreen;
   const wallpaper = desktop.theme.wallpaper;
@@ -48,11 +55,11 @@ export const Shell: FC = observer(() => {
   );
   return (
     <ViewPort>
-      <DimensionMeasurement id="dimensions" ref={windowRef} />
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
+        {/* <DimensionMeasurement id="dimensions" ref={windowRef} /> */}
         {resuming && (
           <ResumingOverlay>
             <Spinner color="#ffffff" size={4} />

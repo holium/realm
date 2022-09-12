@@ -844,18 +844,20 @@
   ++  on-initial
     |=  [spaces=spaces:spaces-store]
     ^-  (quip card _state)
-    :: ~&  >  spaces
-    :: =/  cards=(list card)
-    :: %-  ~(rep by sps)
-    :: |=  [[path=space-path:spaces-store =space:spaces-store] acc=(list card)]
-    ::   %-  weld
-    ::   :-  acc  ^-  (list card)
-    ::   :~  [%pass /bazaar/(scot %tas space.path) %agent [our.bowl dap.bowl] %watch /updates]
-    ::   ==
-    :: :_  state(membership mems)
-    :: cards
+    ::  sets the initial spaces maps properly
+    =/  spaces-map=space-apps-lite:store
+    %-  ~(rep by spaces)
+      |=  [[path=space-path:spaces-store =space:spaces-store] acc=(map space-path:spaces-store [index=app-index-lite:store =sorts:store])]
+    ?:  =(space.path 'our')  acc
+      (~(put by acc) path.space [*app-index-lite:store *sorts:store])
+    ::
+    =.  space-apps.state    (~(uni by space-apps.state) spaces-map)
     `state
   ::
+    ++  skim-our
+      |=  [path=space-path:spaces-store =space:spaces-store]
+      ?:  =(space.path 'our')  %.n
+      %.y
   ++  on-add
     |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
