@@ -16,17 +16,24 @@ import { constructSampleWallet, wallet } from './store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
-import { PendingTransactionDisplay, TransactionType} from './views/common/Detail/PendingTransaction';
+import {
+  PendingTransactionDisplay,
+  TransactionType,
+} from './views/common/Detail/PendingTransaction';
 
 export const WalletViews: { [key: string]: any } = {
   'bitcoin:list': (props: any) => <div />,
   'bitcoin:detail': (props: any) => <div />,
   'bitcoin:transaction': (props: any) => <div />,
-  'ethereum:list': (props: any) => <WalletList network={NetworkType.ethereum} {...props} />,
+  'ethereum:list': (props: any) => (
+    <WalletList network={NetworkType.ethereum} {...props} />
+  ),
   'ethereum:detail': (props: any) => <Detail {...props} />,
   'ethereum:transaction': (props: any) => <EthTransaction {...props} />,
   'ethereum:new': (props: any) => <EthNew {...props} />,
-  [WalletView.CREATE_WALLET]: (props: any) => <CreateWallet network={NetworkType.ethereum} />,
+  [WalletView.CREATE_WALLET]: (props: any) => (
+    <CreateWallet network={NetworkType.ethereum} />
+  ),
   settings: (props: any) => <WalletSettings {...props} />,
 };
 
@@ -40,17 +47,26 @@ export const WalletApp: FC<any> = observer((props: any) => {
   const View = WalletViews[walletApp.currentView];
   // const View = WalletViews[WalletView.CREATE_WALLET]
   return (
-      <Flex position="relative" height="100%" width="100%" flexDirection="column">
-        <WalletHeader
-          theme={desktop.theme}
-          network={walletApp.network}
-          onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
-          onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
-          hide={walletApp.currentView === 'ethereum:new'}
-        />
-        {/* <PendingTransactionDisplay transactions={walletApp.ethereum.transactions as unknown as TransactionType[]} /> */}
-        <View {...props} />
-        <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} theme={desktop.theme} />
-      </Flex>
+    <Flex
+      onClick={(evt: any) => evt.stopPropagation()}
+      position="relative"
+      height="100%"
+      width="100%"
+      flexDirection="column"
+    >
+      <WalletHeader
+        theme={desktop.theme}
+        network={walletApp.network}
+        onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
+        onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
+        hide={walletApp.currentView === 'ethereum:new'}
+      />
+      {/* <PendingTransactionDisplay transactions={walletApp.ethereum.transactions as unknown as TransactionType[]} /> */}
+      <View {...props} />
+      <WalletNetwork
+        hidden={walletApp.currentView === 'ethereum:new'}
+        theme={desktop.theme}
+      />
+    </Flex>
   );
 });
