@@ -25,14 +25,22 @@ const abbrMap = {
 
 export interface TransactionType {
   hash: string
-  date: Date
-  amount: string | number
-  notes?: string
-  type?: 'sent' | 'received'
+  amount: string
   network: 'ethereum' | 'bitcoin'
-  link?: string
-  address: string
+  type: 'sent' | 'received'
+
+  initiatedAt: string | number  // timestamp
+  completedAt?: string | number // timestamp
+
+  ourAddress: string // actual address, path, w/e works
+  theirPatp?: string
+  theirAddress: string
+
   status: 'pending' | 'failed' | 'succeeded'
+  failureReason?: string
+
+  notes?: string
+  link?: string // to etherscan or w/e, probs can just derive this given the hash
 }
 
 interface PendingTransactionDisplayProps {
