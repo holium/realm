@@ -99,18 +99,14 @@ export class DesktopService extends BaseService {
   }
 
   async load(patp: string, mouseColor: string) {
-    this.db = new Store({
-      name: 'desktop',
-      cwd: `realm.${patp}`, // base folder
-      accessPropertiesByDotNotation: true,
-    });
-
-    let persistedState: DesktopStoreType = this.db.store;
-    this.state = DesktopStore.create(castToSnapshot(persistedState));
-
-    onSnapshot(this.state, (snapshot) => {
-      this.db!.store = castToSnapshot(snapshot);
-    });
+    this.state = DesktopStore.create({});
+    // const syncEffect = {
+    //   model: getSnapshot(this.state!),
+    //   resource: 'desktop',
+    //   key: null,
+    //   response: 'initial',
+    // };
+    // this.core.onEffect(syncEffect);
 
     onPatch(this.state, (patch) => {
       const patchEffect = {
@@ -142,7 +138,7 @@ export class DesktopService extends BaseService {
     this.core.services.shell.closeDialog(null);
 
     // const isHomeSpace : boolean = (spaceId === `/${this.core.conduit!.ship}/our`);
-    if(newTheme) {
+    if (newTheme) {
       this.state?.setTheme(cast(newTheme)!);
     }
 

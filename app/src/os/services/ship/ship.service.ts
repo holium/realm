@@ -412,9 +412,7 @@ export class ShipService extends BaseService {
     return contact;
   }
   //
-  async saveMyContact(_event:IpcMainInvokeEvent, profileData: any) {
-
-
+  async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
     await ContactApi.saveContact(
       this.core.conduit!,
       this.state!.patp,
@@ -423,11 +421,9 @@ export class ShipService extends BaseService {
 
     this.state?.setOurMetadata(profileData);
 
-
     return;
-
   }
-  
+
   getMetadata(_event: any, path: string): any {
     return this.metadataStore['graph'][path];
   }
