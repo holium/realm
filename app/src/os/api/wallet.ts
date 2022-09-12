@@ -168,7 +168,7 @@ export const WalletApi = {
   getHistory: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'wallet',
-      path: '/history',
+      path: '/histories',
     });
   },
   subscribeToTransactions(
