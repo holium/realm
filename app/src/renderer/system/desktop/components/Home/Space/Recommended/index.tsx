@@ -1,5 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 import { AppPreview } from './AppPreview';
@@ -14,15 +15,16 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
     const [apps, setApps] = useState<any>([]);
     const { spaces, bazaar } = useServices();
 
-    const currentSpace = spaces.selected;
-    const currentBazaar = bazaar.getBazaar(currentSpace.path);
+    const currentSpace = spaces.selected!;
+    const currentBazaar = bazaar.spaces.get(currentSpace.path);
+    console.log(toJS(bazaar));
 
     useEffect(() => {
       if (currentSpace) {
-        console.log('recommendedApps => %o', currentBazaar.recommendedApps);
-        setApps(currentBazaar.recommendedApps);
+        // console.log('recommendedApps => %o', currentBazaar.recommendedApps);
+        setApps(currentBazaar?.recommendedApps);
       }
-    }, [currentSpace, currentBazaar.recommendedApps]);
+    }, [currentSpace, currentSpace && currentBazaar.recommendedApps]);
 
     return (
       <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>

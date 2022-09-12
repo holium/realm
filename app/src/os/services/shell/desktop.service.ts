@@ -33,7 +33,7 @@ import { ThemeModelType } from './theme.model';
  */
 export class DesktopService extends BaseService {
   private db?: Store<DesktopStoreType>; // for persistance
-  private state?: DesktopStoreType; // for state management
+  private state: DesktopStoreType; // for state management
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
@@ -92,6 +92,7 @@ export class DesktopService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
+    this.state = DesktopStore.create({});
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
@@ -99,18 +100,13 @@ export class DesktopService extends BaseService {
   }
 
   async load(patp: string, mouseColor: string) {
-    this.db = new Store({
-      name: 'desktop',
-      cwd: `realm.${patp}`, // base folder
-      accessPropertiesByDotNotation: true,
-    });
-
-    let persistedState: DesktopStoreType = this.db.store;
-    this.state = DesktopStore.create(castToSnapshot(persistedState));
-
-    onSnapshot(this.state, (snapshot) => {
-      this.db!.store = castToSnapshot(snapshot);
-    });
+    // const syncEffect = {
+    //   model: getSnapshot(this.state!),
+    //   resource: 'desktop',
+    //   key: null,
+    //   response: 'initial',
+    // };
+    // this.core.onEffect(syncEffect);
 
     onPatch(this.state, (patch) => {
       const patchEffect = {
@@ -142,7 +138,7 @@ export class DesktopService extends BaseService {
     this.core.services.shell.closeDialog(null);
 
     // const isHomeSpace : boolean = (spaceId === `/${this.core.conduit!.ship}/our`);
-    if(newTheme) {
+    if (newTheme) {
       this.state?.setTheme(cast(newTheme)!);
     }
 
