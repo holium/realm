@@ -11,6 +11,7 @@ import {
 
 import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
+import { WalletStore } from 'os/services/tray/wallet.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
@@ -51,7 +52,8 @@ export const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
-    dmApp: DmApp,
+    walletApp: WalletStore,
+    dmApp: DmApp
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -88,6 +90,23 @@ export const trayStore = TrayAppStore.create({
   roomsApp: {
     currentView: 'list',
   },
+  walletApp: {
+    network: 'ethereum',
+    currentView: 'ethereum:new',
+    bitcoin: {
+      settings: {
+        defaultIndex: 0,
+      }
+    },
+    ethereum: {
+      settings: {
+        defaultIndex: 0,
+      },
+      initialized: false
+    },
+    creationMode: 'default',
+    ourPatp: '~zod',
+  },
   dmApp: {
     currentView: 'dm-list',
   },
@@ -96,6 +115,10 @@ export const trayStore = TrayAppStore.create({
   //   // rooms: [], TODO
   // },
 });
+
+onAction(trayStore.walletApp, (call) => {
+
+})
 
 onSnapshot(trayStore, (snapshot) => {
   localStorage.setItem('trayStore', JSON.stringify(snapshot));
@@ -185,11 +208,18 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
     }
+    else if (value.resource === 'wallet') {
+      applyPatch(trayStore.walletApp, value.patch);
+    }
   }
 });
 // After boot, set the initial data
 OSActions.onBoot((_event: any, response: any) => {
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);
+  }
+
+  if (response.wallet) {
+    applySnapshot(trayStore.walletApp, response.wallet)
   }
 });

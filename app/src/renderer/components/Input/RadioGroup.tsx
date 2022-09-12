@@ -2,12 +2,13 @@ import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
-import { IconTypes, Flex } from '..';
+import { IconTypes, Flex, Icons } from '..';
 import { ThemeType } from 'renderer/theme';
 
 interface IRadioLabel {
   selected?: boolean;
   accentColor?: string;
+  highlightColor?: string;
   textColor?: string;
   customBg: string;
   theme: ThemeType;
@@ -23,7 +24,7 @@ const RadioLabel = styled(motion.label)<IRadioLabel>`
   ${(props: IRadioLabel) =>
     props.selected
       ? css`
-          color: ${props.theme.colors.brand.primary};
+          color: ${props.highlightColor || props.theme.colors.brand.primary};
           /* background-color: ${rgba(
             props.theme.colors.brand.primary,
             0.12
@@ -43,12 +44,15 @@ const RadioHighlight = styled(motion.label)<IRadioLabel>`
   bottom: 0;
   z-index: 13;
   /* padding: 4px; */
-  border-radius: 4px;
+  border-radius: 5px;
   position: absolute;
   ${(props: IRadioLabel) =>
     props.selected
       ? css`
-          background-color: ${rgba(props.theme.colors.brand.primary, 0.12)};
+          background-color: ${rgba(
+            props.highlightColor || props.theme.colors.brand.primary,
+            0.12
+          )};
         `
       : css`
           background-color: ${darken(0.015, props.customBg)};
@@ -61,6 +65,7 @@ export type RadioOption = {
   sublabel?: string;
   icon?: IconTypes;
   hidden?: boolean;
+  highlightColor?: string;
 };
 
 interface IRadioGroup {
@@ -82,7 +87,7 @@ export const RadioGroup: FC<IRadioGroup> = (props: IRadioGroup) => {
       width="fit-content"
       justifyContent="flex-start"
       backgroundColor={optionBg}
-      gap={6}
+      gap={4}
       borderRadius={6}
     >
       {options?.map((option: RadioOption) => {
@@ -90,20 +95,28 @@ export const RadioGroup: FC<IRadioGroup> = (props: IRadioGroup) => {
         return (
           <motion.div
             key={option.value}
-            style={{ position: 'relative', padding: '4px 4px' }}
+            style={{
+              position: 'relative',
+              padding: option.icon ? '4px 8px 4px 4px' : '4px 4px',
+            }}
+            onClick={(_evt: any) => onClick(option.value)}
           >
             {isSelected && (
               <RadioHighlight
                 // layoutId="selection"
+                highlightColor={option.highlightColor}
                 customBg={optionBg}
                 selected
               />
             )}
+            {option.icon && (
+              <Icons mr="6px" name={option.icon} pointerEvents="none" />
+            )}
             <RadioLabel
               customBg={optionBg}
-              textColor={textColor}
+              highlightColor={option.highlightColor}
+              textColor={isSelected ? option.highlightColor : textColor}
               selected={option.value === selected}
-              onClick={(_evt: any) => onClick(option.value)}
             >
               {option.label}
             </RadioLabel>

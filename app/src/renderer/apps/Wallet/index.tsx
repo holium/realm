@@ -1,134 +1,56 @@
-import { FC } from 'react';
-import { rgba, lighten, darken } from 'polished';
-import { ThemeModelType } from 'os/services/shell/theme.model';
-import { Grid, Flex, IconButton, Icons, Text } from '../../components';
-import { WalletMain } from './components/WalletMain';
-import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
+import { observer } from 'mobx-react';
+import { ThemeProvider } from 'styled-components';
+import { FC, useEffect, useState } from 'react';
+import { useTrayApps } from 'renderer/apps/store';
+import { WalletSettings } from './views/common/Settings';
+import { EthDetail } from './views/ethereum/Detail';
+import { Detail } from './views/common/Detail';
+import { WalletList } from './views/ethereum/List';
+import { EthTransaction } from './views/ethereum/Transaction';
+import { EthNew } from './views/common/New';
+import { WalletNetwork } from './views/common/Network';
+import { CreateWallet } from './views/common/Create';
+import { WalletHeader } from './views/common/Header';
+import { useServices } from 'renderer/logic/store';
+import { constructSampleWallet, wallet } from './store';
+import { Flex } from 'renderer/components';
+import { WalletActions } from '../../logic/actions/wallet';
+import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
+import { PendingTransactionDisplay, TransactionType} from './views/common/Detail/PendingTransaction';
 
-type WalletProps = {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
+export const WalletViews: { [key: string]: any } = {
+  'bitcoin:list': (props: any) => <div />,
+  'bitcoin:detail': (props: any) => <div />,
+  'bitcoin:transaction': (props: any) => <div />,
+  'ethereum:list': (props: any) => <WalletList network={NetworkType.ethereum} {...props} />,
+  'ethereum:detail': (props: any) => <Detail {...props} />,
+  'ethereum:transaction': (props: any) => <EthTransaction {...props} />,
+  'ethereum:new': (props: any) => <EthNew {...props} />,
+  [WalletView.CREATE_WALLET]: (props: any) => <CreateWallet network={NetworkType.ethereum} />,
+  settings: (props: any) => <WalletSettings {...props} />,
+};
+
+export const WalletApp: FC<any> = observer((props: any) => {
+  const { desktop } = useServices();
+  const { walletApp } = useTrayApps();
+  const onAddWallet = () => {
+    // WalletActions.createWallet('~zod', walletApp.network);
   };
-};
 
-export const WalletTrayApp: FC<WalletProps> = (props: WalletProps) => {
-  const { dimensions } = props;
-  const { windowColor, inputColor, iconColor, textColor } = props.theme;
-
+  const View = WalletViews[walletApp.currentView];
+  // const View = WalletViews[WalletView.CREATE_WALLET]
   return (
-    <Grid.Column
-      style={{ position: 'relative', height: dimensions.height }}
-      expand
-      noGutter
-      overflowY="hidden"
-    >
-      <Titlebar
-        closeButton={false}
-        hasBorder={false}
-        theme={{
-          ...props.theme,
-          windowColor,
-        }}
-      >
-        <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
-          <Icons opacity={0.8} name="Wallet" size={24} mr={2} />
-          <Text
-            opacity={0.8}
-            style={{ textTransform: 'uppercase' }}
-            fontWeight={600}
-          >
-            Wallet
-          </Text>
-        </Flex>
-
-        <Flex
-          minHeight={22}
-          // minWidth={150}
-          style={{
-            borderRadius: 5,
-            borderWidth: 1,
-            borderStyle: 'solid',
-            borderColor: darken(0.025, windowColor!),
-            minWidth: 120,
-          }}
-          pt={1}
-          pl={2}
-          pb={1}
-          pr={2}
-          mr={3}
-          flexDirection="row"
-          justifyContent="space-between"
-          alignItems="space-between"
-          background={rgba(inputColor, 0.8)}
-        >
-          <Text
-            display="flex"
-            width="fit-content"
-            justifyContent="center"
-            alignItems="center"
-            fontSize={3}
-            mr={2}
-            opacity={0.7}
-          >
-            <img
-              style={{ marginRight: 10 }}
-              width={16}
-              height={16}
-              src="https://cdn.decrypt.co/resize/1536/wp-content/uploads/2019/03/bitcoin-logo-bitboy.png.webp"
-            />
-            Bitcoin
-          </Text>
-          <Icons name="ArrowDown" opacity={0.4} />
-        </Flex>
-      </Titlebar>
-
-      <Flex
-        position="absolute"
-        style={{ bottom: 40, top: 50, left: 0, right: 0 }}
-        overflowY="hidden"
-      >
-        <WalletMain theme={props.theme} />
+      <Flex position="relative" height="100%" width="100%" flexDirection="column">
+        <WalletHeader
+          theme={desktop.theme}
+          network={walletApp.network}
+          onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
+          onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
+          hide={walletApp.currentView === 'ethereum:new'}
+        />
+        {/* <PendingTransactionDisplay transactions={walletApp.ethereum.transactions as unknown as TransactionType[]} /> */}
+        <View {...props} />
+        <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} theme={desktop.theme} />
       </Flex>
-      <Grid.Row
-        expand
-        noGutter
-        justify="space-between"
-        align="center"
-        style={{
-          background: windowColor,
-          borderTop: `1px solid ${rgba(windowColor!, 0.7)}`,
-          position: 'absolute',
-          padding: '0 8px',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 50,
-        }}
-      >
-        <Text
-          display="flex"
-          flexDirection="row"
-          alignItems="center"
-          ml={2}
-          opacity={0.7}
-          style={{ cursor: 'pointer' }}
-        >
-          1JCKfg...u8vJCh
-          <IconButton size={26} ml={2} color={iconColor}>
-            <Icons name="Copy" />
-          </IconButton>
-        </Text>
-        <Flex>
-          <IconButton size={26} mr={2} color={iconColor}>
-            <Icons name="QRCode" />
-          </IconButton>
-          <IconButton size={26} color={iconColor}>
-            <Icons name="ShareBox" />
-          </IconButton>
-        </Flex>
-      </Grid.Row>
-    </Grid.Column>
   );
-};
+});

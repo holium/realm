@@ -2,9 +2,10 @@ import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
 import { AccountTrayApp } from 'renderer/apps/Account';
 import { MessagesTrayApp } from 'renderer/apps/Messages';
-import { WalletTrayApp } from 'renderer/apps/Wallet';
+import { WalletApp } from 'renderer/apps/Wallet';
 import { trayStore } from '../../../../apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+
 
 export type ViewRenderers = {
   [key: string]: {
@@ -93,10 +94,6 @@ export const trayAppRenderers: ViewRenderers = {
     },
   },
   'wallet-tray': {
-    dimensions: {
-      width: 330,
-      height: 360,
-    },
-    component: (props: any) => <WalletTrayApp {...props} />,
+    component: (props: any) => <WalletApp {...props} />
   },
 };

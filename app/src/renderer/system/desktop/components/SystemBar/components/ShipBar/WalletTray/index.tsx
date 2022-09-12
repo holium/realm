@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from 'react';
+import { FC, useCallback, useEffect, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
 
@@ -12,7 +12,7 @@ type WalletTrayProps = {
 };
 
 const dimensions = {
-  height: 360,
+  height: 520,
   width: 330,
 };
 
