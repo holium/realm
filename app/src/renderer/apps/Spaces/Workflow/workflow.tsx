@@ -26,13 +26,13 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <CreateSpaceModal {...props} />,
     onOpen: () => {
-      ShellActions.setBlur(true);
+      ShellActions.setBlur(true, true);
     },
     onNext: (_evt: any) => {
       ShellActions.nextDialog('create-space-2');
     },
     onClose: () => {
-      ShellActions.setBlur(false);
+      ShellActions.setBlur(false, true);
       ShellActions.closeDialog();
     },
     window: {
