@@ -28,6 +28,8 @@ import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
+import { LiveRoom } from 'renderer/apps/store';
+import { RoomsActions } from './actions/rooms';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -264,6 +266,8 @@ OSActions.onConnected(
 
 // Auth events
 OSActions.onLogout((_event: any) => {
+  // RoomsActions.exitRoom();
+  LiveRoom.leave()
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
   ShellActions.setBlur(true);
