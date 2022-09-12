@@ -217,6 +217,10 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
+                if(!id || !roomsApp.knownRooms.get(id)) {
+                  // bad state
+                  RoomsActions.resetLocal();
+                }
                 if (roomsApp.isCreator(ship!.patp!, id)) {
                   // SoundActions.playRoomLeave();
                   RoomsActions.deleteRoom(id);

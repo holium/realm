@@ -81,8 +81,6 @@ export class ShipService extends BaseService {
     'realm.ship.accept-group-dm-request': this.acceptGroupDm,
     'realm.ship.decline-group-dm-request': this.declineGroupDm,
     'realm.ship.get-s3-bucket': this.getS3Bucket,
-    'realm.ship.get-metadata': this.getMetadata,
-    'realm.ship.get-contact': this.getContact,
     'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
     'realm.ship.get-friends': this.getFriends,

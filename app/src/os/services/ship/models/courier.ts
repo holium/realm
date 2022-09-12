@@ -305,7 +305,7 @@ export const CourierStore = types
   }))
   .actions((self) => ({
     setPreviews: (dmPreviews: any) => {
-      // console.log(dmPreviews);
+      // console.log("DMPREVIEWS:", dmPreviews);
       Object.keys(dmPreviews).forEach((key: string) => {
         const preview: any = dmPreviews[key];
         if (preview.type === 'group' || preview.type === 'group-pending') {
