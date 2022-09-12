@@ -236,7 +236,7 @@
     ++  kick
       %-  ot
       :~  [%rid so]
-          [%space patp]
+          [%ship patp]
       ==
     ++  access
       |=  =json

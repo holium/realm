@@ -355,7 +355,7 @@ export const BazaarApi = {
       app: 'bazaar',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        // console.log('bazaar/updates => %o', { mark, data });
+        console.log('bazaar/updates => %o', data);
         if (mark === 'bazaar-reaction') {
           handleBazaarReactions(data, state);
         }

@@ -78,8 +78,10 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
       setLoading(true);
       let path = selectedChat.path.substring(1);
       if (selectedChat.type === 'group') {
+        ShipActions.readGroupDm(path);
         path = `group/${path}`;
       } else {
+        ShipActions.readDm(selectedChat.to as string);
         path = `${path.split('/')[1]}`;
       }
       ShipActions.getDMLog(path).then(resetLoading).catch(resetLoading);
@@ -330,17 +332,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onKeyDown={submitDm}
                 rightIcon={
                   <Flex justifyContent="center" alignItems="center">
-                    {isSending ? (
-                      <Flex
-                        mr={1}
-                        width="24"
-                        height="24"
-                        justifyContent="center"
-                        alignItems="center"
-                      >
-                        <Spinner size={0} />
-                      </Flex>
-                    ) : (
                       <IconButton
                         ref={submitRef}
                         luminosity={mode as 'light' | 'dark' | undefined}
@@ -348,9 +339,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                         canFocus={false}
                         onKeyDown={submitDm}
                       >
-                        <Icons opacity={0.5} name="ArrowRightLine" />
+                        {!isSending ? <Icons opacity={0.5} name="ArrowRightLine" /> : <Spinner size={0} />}
                       </IconButton>
-                    )}
+                  
                   </Flex>
                 }
                 onChange={(e: any) =>

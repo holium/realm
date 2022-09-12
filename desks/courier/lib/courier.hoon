@@ -4,11 +4,12 @@
 ::    to/from json from types stored in courier sur.
 ::
 /-  sur=courier, gra=graph-store, *post, *resource, contact-store, dm-hook, 
-    mtd=metadata-store, inv=invite-store, graph-view
+    mtd=metadata-store, inv=invite-store, graph-view, hark=hark-store
 /+  res=resource
 =<  [sur .]
 =,  sur
 |%
++$  hark-places   (map place:hark stats:hark)
 ::
 ++  gs   ::  converts dms from graph-store dm-inbox
   |%
@@ -38,7 +39,86 @@
     :: todo sort by last-sent
     =/  single-dms      (weld prev-list pen-list)
     =/  group-dms       (grp-dm-prevs our now rolo)
-    [(weld single-dms group-dms)] 
+    =/  all-dms         (weld single-dms group-dms)
+    =/  hark-notifs     .^(update:hark %gx /(scot %p our)/hark-store/(scot %da now)/all-stats/noun)
+    ?>  ?=(%more -.hark-notifs)
+    ?>  ?=(%all-stats -.-.+.hark-notifs)
+    =/  dms-appended    (append-unread all-dms ^-(hark-places +.-.+.hark-notifs))
+    [dms-appended]
+        ::
+        ::  Unread count
+        ::
+        ++  append-unread
+          |=  [all-dms=(list message-preview) places=hark-places]
+          ^-  (list message-preview)
+          =/  dm-unreads    (malt `(list [cord stats:hark])`(turn ~(tap by places) form-unreads))
+          =/  dms-appended=(list message-preview)
+          %+  turn  all-dms
+            |=  prev=message-preview
+            =/  stats       (~(get by dm-unreads) path.prev)
+            ?~  stats                             ::  branch on unit
+              prev                                ::  no unread stats
+            (insert-unread prev (need stats))     ::  we have unread stats
+          dms-appended
+        ::
+        ++  insert-unread
+          :: |=  [dm-prev=message-preview]
+          |=  [prev=message-preview =stats:hark]
+          ^-  message-preview
+          =/  appended                prev
+          =.  unread-count.appended   count.stats
+          [appended]
+        ::
+        ++  form-unreads
+          |=  [=place:hark =stats:hark]
+          =/  parsed-path   (parse-hark-path path.place)
+          ?~  parsed-path
+            ::  its not a dm or group dm
+            :: %.n
+            [(spat path.place) stats]
+          [(need parsed-path) stats]
+        ::
+        ++  parse-hark-path
+          |=  =path
+          ^-  (unit cord)
+          ?+  path    ~
+          ::
+            [@ ship %dm-inbox @ta ~]
+            =/  raw=cord  i.t.t.t.path
+            =/  taw=tape  (trip raw)
+            =.  taw  (flop taw)
+            =/  ctr=@ud  0
+            =/  idx=@ud  0
+            =/  len=@ud  (lent taw)
+            =/  ntaw=tape
+              |-
+              ?~  taw  ~
+              ?:  ?& 
+                  =(ctr 2)
+                  ?!(=(idx (sub len 1)))
+                  ==
+                :-  i.taw
+                :-  '.'
+                $(idx +(idx), ctr 0, taw t.taw)
+              :-  i.taw
+              $(idx +(idx), ctr +(ctr), taw t.taw)
+
+            =/  maybe  (slaw %ud (crip (flop ntaw)))
+            ?~  maybe
+              ~
+
+            =/  ship-dec   u.maybe
+            [~ (spat /dm-inbox/(scot %p `@p`ship-dec))]
+          ::
+            [@ ship @ta ~]
+              =/  to       `@p`(slav %p i.t.path)
+              =/  name-da   `(unit @da)`(slaw %da i.t.t.path)
+              ?~  name-da   
+                ::  its not a @da
+                ~
+              ::  its a @da
+              [~ (spat /(scot %p to)/(scot %da (need name-da)))]
+          ==
     ::
     ::  Performs all the scries needed to build a group dm preview for the list view
     ::
@@ -64,7 +144,7 @@
         ^-  message-preview
         =/  ginv                (ginv our inv now)
         =/  mtd-list            (get-metadata to.ginv our now)
-        [path.ginv to.ginv %group-pending %graph-store time.ginv [~] mtd-list (some hash)]
+        [path.ginv to.ginv %group-pending %graph-store time.ginv [~] mtd-list (some hash) 0]
       ::
       ++  grp-prev        ::  generates group dm log previews
         |=  [our=ship ass=association:mtd now=@da rolo=rolodex:sur]
@@ -74,7 +154,7 @@
         =/  mtd-list            (get-metadata to.glog our now)
         ::
         ?:  =(0 ~(wyt by posts.glog))    :: if theres no data, return empty preview
-          [path.glog to.glog %group %graph-store time.glog [~] mtd-list ~] 
+          [path.glog to.glog %group %graph-store time.glog [~] mtd-list ~ 0] 
         ::
         =/  posts=(list post:gra)
         %+  turn  (skim ~(val by posts.glog) skim-maybe-post)
@@ -86,7 +166,7 @@
         =/  last              (rear posts)
         ::  Add a mention so we know who posted the last message
         =/  contents          (weld [[%mention author.last] ~] contents.last)
-        [path.glog to.glog %group %graph-store time-sent.last contents mtd-list ~]
+        [path.glog to.glog %group %graph-store time-sent.last contents mtd-list ~ 0]
     ::
   ::
   ++  grp-log             ::  generates the group dm log metadata
@@ -218,7 +298,7 @@
     =/  last              (rear posts)
     =/  contact           (form-contact-mtd rolo to-ship)
     =/  path              (spat /dm-inbox/(scot %p to-ship))
-    [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last ~[contact] ~]
+    [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last ~[contact] ~ 0]
   ::
   ::  Pending dms
   ::
@@ -226,7 +306,7 @@
     |=  [=ship now=@da rolo=rolodex:sur]
     ^-  message-preview
     =/  path              (spat /dm-inbox/(scot %p ship))
-    [path (silt ~[ship]) %pending %graph-store now [~] ~[(form-contact-mtd rolo ship)] ~]
+    [path (silt ~[ship]) %pending %graph-store now [~] ~[(form-contact-mtd rolo ship)] ~ 0]
   ::
   ::
   ::
@@ -257,7 +337,7 @@
     [path (silt ~[to-ship]) %dm %graph-store (flop dms) ~[contact]]
   ::
   ++  received-dm
-    |=  [ship-dec=@ud idx=atom =node:gra our=ship now=@da]
+    |=  [ship-dec=@ud =node:gra our=ship now=@da]
     ^-  chat
     =/  to-ship             ^-(@p `@p`ship-dec)
     =/  message             (node-to-dm node)
@@ -411,10 +491,25 @@
     |%
     ++  decode
       %-  of
-      :~  [%create-group-dm cr-gp-dm]
-          [%send-dm dm]
+      :~  [%send-dm dm]
+          [%read-dm read-dm]
+          [%create-group-dm cr-gp-dm]
           [%send-group-dm gp-dm]
+          [%read-group-dm read-group-dm]
       ==
+    ::
+    ++  read-dm
+      %-  ot
+      :~  
+          [%ship (su ;~(pfix sig fed:ag))]
+      ==
+    ::
+    ++  read-group-dm
+      %-  ot
+      :~  
+          [%resource dejs:res]
+      ==
+    ::
     ::
     ++  cr-gp-dm
       %-  ot
@@ -556,6 +651,7 @@
         ['lastMessage' a+(turn last-message.cha content)]
         ['metadata' mtd-field]
         ['inviteId' invite-id]
+        ['unreadCount' n+(scot %ud unread-count.cha)]
     ==
   ::
   ++  dm-log

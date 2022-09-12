@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { Room } from '@holium/realm-room';
+import { Room, RoomState } from '@holium/realm-room';
 import {
   applyPatch,
   Instance,
@@ -56,6 +56,7 @@ export const TrayAppStore = types
       self.coords = coords;
     },
     setTrayAppDimensions(dimensions: Instance<typeof TrayAppDimensions>) {
+      // const calculatedDimensions =
       self.dimensions = dimensions;
     },
     setActiveApp(appKey: TrayAppKeys | null) {
@@ -73,6 +74,7 @@ const persistedState = loadSnapshot();
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,
+  // activeApp: 'account-tray',
   coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
@@ -98,9 +100,9 @@ onSnapshot(trayStore, (snapshot) => {
 // Create core context
 // -------------------------------
 export type TrayInstance = Instance<typeof TrayAppStore>;
-const TrayStateContext = createContext<null | TrayInstance>(trayStore);
+export const TrayStateContext = createContext<null | TrayInstance>(trayStore);
 
-export const CoreProvider = TrayStateContext.Provider;
+export const TrayProvider = TrayStateContext.Provider;
 export function useTrayApps() {
   const store = useContext(TrayStateContext);
   if (store === null) {
@@ -139,7 +141,16 @@ onAction(trayStore, (call) => {
           // Entering or switching room
           const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
           console.log('entering and switching to connect');
-          if (room) LiveRoom.connect(room);
+
+          if (room) {
+            if (LiveRoom.state === RoomState.Disconnected) {
+              // not init yet, so leave
+              // this case is hit if we boot realm and are still in a room from a previous session.
+              RoomsActions.leaveRoom(room.id);
+              return;
+            }
+            // LiveRoom.connect(room);
+          }
         }
       }
     }
@@ -147,7 +158,10 @@ onAction(trayStore, (call) => {
 });
 
 // After boot, set the initial data
-OSActions.onBoot((_event: any, response: any) => {
+OSActions.onConnected((_event: any, response: any) => {
+  RoomsActions.resetLocal();
+  RoomsActions.exitRoom();
+  LiveRoom.leave();
   LiveRoom.init(response.ship.patp!);
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);

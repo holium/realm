@@ -25,7 +25,6 @@ export const CourierApi = {
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
-        // console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
@@ -50,7 +49,7 @@ export const CourierApi = {
         console.log(err);
         console.log('Subscription rejected');
       },
-      onQuit: () => console.log('Kicked from subscription'),
+      onQuit: () => console.log('Kicked from courier subscription'),
     });
   },
   sendDM: async (conduit: Conduit, path: string, post: Post) => {
@@ -107,6 +106,32 @@ export const CourierApi = {
       });
     });
   },
+  // Set read status
+  readDm: async (conduit: Conduit, ship: Patp) => {
+    await conduit.poke({
+      app: 'courier',
+      mark: 'graph-dm-action',
+      json: {
+        'read-dm': {
+          ship,
+        },
+      },
+    });
+    return;
+  },
+  readGroupDm: async (conduit: Conduit, host: Patp, name: string) => {
+    await conduit.poke({
+      app: 'courier',
+      mark: 'graph-dm-action',
+      json: {
+        'read-group-dm': {
+          resource: { ship: host, name },
+        },
+      },
+    });
+    return;
+  },
+  // Dm invite flow
   acceptDm: async (conduit: Conduit, toShip: string) => {
     console.log('accepting dm');
     const payload = {
@@ -128,6 +153,7 @@ export const CourierApi = {
     };
     return await conduit.poke(payload);
   },
+  // Group invite flow
   acceptGroupDm: async (conduit: Conduit, inviteId: string) => {
     const payload = {
       app: 'invite-store',

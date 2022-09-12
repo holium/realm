@@ -16,10 +16,12 @@ import { ThemeModelType } from 'os/services/shell/theme.model';
 import { RoomRow } from './components/RoomRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/apps/store';
+import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
 import { ProviderSelector } from './components/ProviderSelector';
+import { textColor } from 'styled-system';
+import theme from 'renderer/theme';
 export type RoomListProps = {
   theme: ThemeModelType;
   dimensions: {
@@ -147,7 +149,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           <InnerNotification
             id={value.id}
             title={value.title}
-            seedColor="#F08735"
+            seedColor={desktop.theme.textColor}
             subtitle={`Sent by: ${value.invitedBy}`}
             actionText="Accept"
             onAction={(id: string) => {
@@ -162,13 +164,31 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         </Flex>
       ))}
       <Flex mt={3} pb={4} justifyContent="flex-start">
+          
+        {roomsApp.provider !== ship!.patp &&
+          <IconButton
+            // Temporary way to get back to your provider
+            mr={2}
+            onClick={() => {
+                if(roomsApp.liveRoom) {
+                  RoomsActions.leaveRoom(roomsApp.liveRoom.id)
+                }
+                LiveRoom.leave();
+                RoomsActions.setProvider(ship!.patp);
+              }}
+          >
+            <Icons opacity={0.8} name="ProfileImage" size={26} mx={2} />
+          </IconButton>
+        }
         <IconButton
+          mr={2}
           onClick={() => {
               RoomsActions.requestAllRooms();
               RoomsActions.refreshLocalRoom();
+              // RoomsActions.getProvider();
             }}
         >
-          <Icons opacity={0.8} name="Refresh" size={26} mr={2} />
+          <Icons opacity={0.8} name="Refresh" size={26} mx={2} />
         </IconButton>
         <Tooltip
           id="room-provider"

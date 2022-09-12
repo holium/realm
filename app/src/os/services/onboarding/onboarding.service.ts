@@ -28,6 +28,7 @@ export class OnboardingService extends BaseService {
 
   handlers = {
     'realm.onboarding.setStep': this.setStep,
+    'realm.onboarding.setSeenSplash': this.setSeenSplash,
     'realm.onboarding.agreedToDisclaimer': this.agreedToDisclaimer,
     'realm.onboarding.selfHosted': this.setSelfHosted,
     'realm.onboarding.getAvailablePlanets': this.getAvailablePlanets,
@@ -54,6 +55,9 @@ export class OnboardingService extends BaseService {
 
     agreedToDisclaimer() {
       return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
+    },
+    setSeenSplash() {
+      return ipcRenderer.invoke('realm.onboarding.setSeenSplash');
     },
 
     closeConduit() {
@@ -201,6 +205,9 @@ export class OnboardingService extends BaseService {
     this.state.setAgreedToDisclaimer();
   }
 
+  setSeenSplash(_event: any) {
+    this.state.setSeenSplash();
+  }
   setSelfHosted(_event: any, selfHosted: boolean) {
     this.state.setSelfHosted(selfHosted);
   }
