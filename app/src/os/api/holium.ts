@@ -34,9 +34,14 @@ export interface AccessCode {
 
 export class HoliumAPI {
 
-  async createAccount(accessCode?: string): Promise<{ id: string, planets: HostingPlanet[] }> {
-    let { data } = await client.post(`accounts/create${accessCode ? `?accessCode=${accessCode}` : ''}`);
-    return { id: data.id, planets: data.planets };
+  async createAccount(email: string, accessCode?: string): Promise<{ id: string, verificationCode: string }> {
+    let { data } = await client.post(`accounts/create?email=${email}${accessCode ? `&accessCode=${accessCode}` : ''}`);
+    return { id: data.id, verificationCode: data.verificationCode };
+  }
+
+  async resendVerificationCode(accountId: string): Promise<string> {
+    let { data } = await client.post(`accounts/${accountId}/resend-email-verification`);
+    return data.verificationCode;
   }
 
   async getPlanets(accountId: string, accessCode?: string): Promise<HostingPlanet[]> {
