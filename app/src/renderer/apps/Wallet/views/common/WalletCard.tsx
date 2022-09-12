@@ -1,4 +1,4 @@
-import { FC, forwardRef } from 'react';
+import { FC } from 'react';
 import { transparentize } from 'polished';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
@@ -19,7 +19,8 @@ const CardStyle = styled(motion.div)<CardStyleProps>`
       ? css``
       : css`
           border: 1px solid
-            ${(props) => (props.mode === 'light' ? ' #00000010' : '#83909F')};
+            ${(props: CardStyleProps) =>
+              props.mode === 'light' ? ' #00000010' : '#83909F'};
           border-radius: 12px;
           display: flex;
           flex-direction: column;
