@@ -1,48 +1,38 @@
-import {
-  flow,
-  Instance,
-  types,
-} from 'mobx-state-tree';
+import { flow, Instance, types } from 'mobx-state-tree';
 import { LoaderModel } from '../common.model';
 import { AccessCode, HostingPlanet } from 'os/api/holium';
 
 export enum OnboardingStep {
   DISCLAIMER = 'onboarding:disclaimer',
   HAVE_URBIT_ID = 'onboarding:have-urbit-id',
-
-    ADD_SHIP = 'onboarding:add-ship',
-
-    ACCESS_CODE = 'onboarding:access-code',
-
-    SELECT_PATP = 'onboarding:hosted:select-patp',
-    SELECT_HOSTING_PLAN = 'onboarding:hosted:select-hosting-plan',
-    STRIPE_PAYMENT = 'onboarding:hosted:stripe_payment',
-    CONFIRMATION = 'onboarding:hosted:confirmation',
-
+  ADD_SHIP = 'onboarding:add-ship',
+  ACCESS_CODE = 'onboarding:access-code',
+  SELECT_PATP = 'onboarding:hosted:select-patp',
+  SELECT_HOSTING_PLAN = 'onboarding:hosted:select-hosting-plan',
+  STRIPE_PAYMENT = 'onboarding:hosted:stripe_payment',
+  CONFIRMATION = 'onboarding:hosted:confirmation',
   CONNECTING_SHIP = 'onboarding:connecting-ship',
   PROFILE_SETUP = 'onboarding:profile-setup',
   SET_PASSWORD = 'onboarding:set-password',
-  INSTALL_AGENT = 'onboarding:install-agent'
-};
+  INSTALL_AGENT = 'onboarding:install-agent',
+}
 
-export const PlanetModel = types
-  .model({
-    patp: types.string,
-    booted: types.boolean,
-    priceMonthly: types.number,
-    priceAnnual: types.number
-  })
+export const PlanetModel = types.model({
+  patp: types.string,
+  booted: types.boolean,
+  priceMonthly: types.number,
+  priceAnnual: types.number,
+});
 
-export const AccessCodeModel = types
-  .model({
-    id: types.string,
-    value: types.maybeNull(types.string),
-    redeemed: types.maybeNull(types.boolean),
-    image: types.maybeNull(types.string),
-    title: types.maybeNull(types.string),
-    description: types.maybeNull(types.string),
-    expiresAt: types.maybeNull(types.string)
-  })
+export const AccessCodeModel = types.model({
+  id: types.string,
+  value: types.maybeNull(types.string),
+  redeemed: types.maybeNull(types.boolean),
+  image: types.maybeNull(types.string),
+  title: types.maybeNull(types.string),
+  description: types.maybeNull(types.string),
+  expiresAt: types.maybeNull(types.string),
+});
 
 export const OnboardingShipModel = types
   .model({
@@ -64,24 +54,27 @@ export const OnboardingShipModel = types
       if (contactMetadata.nickname) self.nickname = contactMetadata.nickname;
       if (contactMetadata.avatar) self.avatar = contactMetadata.avatar;
     },
-  }))
+  }));
 
 export const OnboardingStore = types
   .model({
     currentStep: OnboardingStep.DISCLAIMER,
     agreedToDisclaimer: false,
+    seenSplash: types.optional(types.boolean, false),
     selfHosted: false,
     planet: types.maybe(PlanetModel),
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
     checkoutComplete: false,
     accessCode: types.maybe(AccessCodeModel),
-    encryptedPassword: types.maybe(types.string)
+    encryptedPassword: types.maybe(types.string),
   })
   .actions((self) => ({
-
     setStep(step: OnboardingStep) {
       self.currentStep = step;
+    },
+    setSeenSplash() {
+      self.seenSplash = true;
     },
 
     setAgreedToDisclaimer() {
@@ -93,7 +86,7 @@ export const OnboardingStore = types
     },
 
     setPlanet(planet: HostingPlanet) {
-      self.planet = PlanetModel.create(planet)
+      self.planet = PlanetModel.create(planet);
     },
 
     setEncryptedPassword(passwordHash: string) {
@@ -105,7 +98,10 @@ export const OnboardingStore = types
       url: string;
       cookie: string;
     }) {
-      self.ship = OnboardingShipModel.create({ ...shipInfo, id: `onboarding${shipInfo.patp}` });
+      self.ship = OnboardingShipModel.create({
+        ...shipInfo,
+        id: `onboarding${shipInfo.patp}`,
+      });
     }),
 
     setCheckoutComplete() {
@@ -134,7 +130,7 @@ export const OnboardingStore = types
       self.ship = undefined;
       self.encryptedPassword = undefined;
       self.currentStep = OnboardingStep.DISCLAIMER;
-    }
+    },
   }));
 
 export type OnboardingStoreType = Instance<typeof OnboardingStore>;

@@ -198,7 +198,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     }
   }
 
-  const unread = false;
+  const unreadCount = dm.unreadCount;
 
   return (
     <Row
@@ -256,11 +256,11 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
             borderRadius={12}
             height={20}
             minWidth={12}
-            background={unread ? '#569BE2' : 'transparent'}
+            background={unreadCount ? '#569BE2' : 'transparent'}
           >
-            {unread && (
+            {unreadCount > 0 && (
               <Text fontSize={2} color="white" fontWeight={500}>
-                1
+                {unreadCount}
               </Text>
             )}
           </Flex>

@@ -27,6 +27,7 @@ import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
+import { NotificationStore } from 'os/services/ship/models/notifications';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -51,6 +52,7 @@ export const Services = types
     courier: CourierStore,
     contacts: ContactStore,
     friends: FriendsStore,
+    notifications: NotificationStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -87,6 +89,7 @@ const services = Services.create({
   courier: {},
   contacts: { ourPatp: '' },
   friends: {},
+  notifications: { unseen: [], seen: [], all: [], recent: [] },
 });
 
 export const servicesStore = services;
@@ -148,9 +151,9 @@ OSActions.onBoot((_event: any, response: any) => {
     key: 'ships',
     model: response.auth,
   });
-  if (response.auth.firstTime) {
-    SoundActions.playStartup();
-  }
+  // if (response.auth.firstTime) {
+  //   SoundActions.playStartup();
+  // }
 
   if (response.models && response.ship) {
     applySnapshot(
@@ -164,6 +167,10 @@ OSActions.onBoot((_event: any, response: any) => {
     applySnapshot(
       servicesStore.courier,
       castToSnapshot(response.models.courier!)
+    );
+    applySnapshot(
+      servicesStore.notifications,
+      castToSnapshot(response.models.notifications!)
     );
     applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
     applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
@@ -241,6 +248,10 @@ OSActions.onConnected(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
     );
+    applySnapshot(
+      servicesStore.notifications,
+      castToSnapshot(initials.models.notifications)
+    );
     applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
     applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat!));
 
@@ -271,6 +282,10 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'bazaar') {
       applyPatch(servicesStore.bazaar, value.patch);
+    }
+    if (value.resource === 'notification') {
+      console.log('notification patch');
+      applyPatch(servicesStore.notifications, value.patch);
     }
     if (value.resource === 'onboarding') {
       applyPatch(servicesStore.onboarding, value.patch);

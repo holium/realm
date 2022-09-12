@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session } from 'electron';
+import { app, BrowserWindow, shell, session, screen } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
@@ -88,11 +88,12 @@ const createWindow = async () => {
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };
+  let factor = screen.getPrimaryDisplay().scaleFactor;
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920,
-    height: 1440,
+    width: 1920 / factor,
+    height: 1440 / factor,
     titleBarStyle: 'hidden',
     vibrancy: 'under-window',
     icon: getAssetPath('icon.png'),
@@ -129,6 +130,14 @@ const createWindow = async () => {
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.maximize();
+
+  mainWindow.on('resize', () => {
+    const newDimension = mainWindow?.getBounds();
+    mainWindow?.webContents.send('set-dimensions', newDimension);
+    // console.log('dims change: ' + dims);
+  });
+
+  // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
     mainWindow?.webContents.setZoomFactor(1.0);
@@ -136,20 +145,22 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
-    mainWindow.webContents.send(
-      'realm.shell.set-fullscreen',
-      mainWindow.isFullScreen()
-    );
-    mainWindow.webContents.send(
-      'set-appview-preload',
-      path.join(app.getAppPath(), 'appview.preload.js')
-    );
-
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
       isDev ? mainWindow.showInactive() : mainWindow.show();
     }
+    mainWindow.webContents.send(
+      'realm.shell.set-fullscreen',
+      mainWindow.isFullScreen()
+    );
+    const initialDimensions = mainWindow.getBounds();
+    mainWindow.webContents.send('set-dimensions', initialDimensions);
+    // console.log('setting dims ready-to-show');
+    mainWindow.webContents.send(
+      'set-appview-preload',
+      path.join(app.getAppPath(), 'appview.preload.js')
+    );
   });
 
   mainWindow.on('closed', () => {
@@ -175,7 +186,9 @@ const createWindow = async () => {
 /**
  * Add event listeners...
  */
-
+// app.on('web-contents-created', () => {
+//   console.log('web-contents-created');
+// });
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
