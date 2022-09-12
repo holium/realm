@@ -30,6 +30,9 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setStep': this.setStep,
     'realm.onboarding.setSeenSplash': this.setSeenSplash,
     'realm.onboarding.agreedToDisclaimer': this.agreedToDisclaimer,
+    'realm.onboarding.setEmail': this.setEmail,
+    'realm.onboarding.verifyEmail': this.verifyEmail,
+    'realm.onboarding.resendEmailConfirmation': this.resendEmailVerification,
     'realm.onboarding.selfHosted': this.setSelfHosted,
     'realm.onboarding.getAvailablePlanets': this.getAvailablePlanets,
     'realm.onboarding.prepareCheckout': this.prepareCheckout,
@@ -56,6 +59,19 @@ export class OnboardingService extends BaseService {
     agreedToDisclaimer() {
       return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
     },
+
+    setEmail(email: string) {
+      return ipcRenderer.invoke('realm.onboarding.confirmEmail', email);
+    },
+
+    verifyEmail(verificationCode: string) {
+      return ipcRenderer.invoke('realm.onboarding.confirmEmail', verificationCode);
+    },
+
+    resendEmailConfirmation() {
+      return ipcRenderer.invoke('realm.onboarding.resendEmailConfirmation');
+    },
+
     setSeenSplash() {
       return ipcRenderer.invoke('realm.onboarding.setSeenSplash');
     },
@@ -205,6 +221,38 @@ export class OnboardingService extends BaseService {
     this.state.setAgreedToDisclaimer();
   }
 
+  async setEmail(_event: any, email: string) {
+    const { auth } = this.core.services.identity;
+
+    let account = await this.core.holiumClient.createAccount(email);
+    this.state.setEmail(email);
+    this.state.setVerificationCode(account.verificationCode);
+
+    auth.setAccountId(account.id);
+  }
+
+  async resendEmailVerification(_event: any) {
+    const { auth } = this.core.services.identity;
+    if (!auth.accountId)
+      throw new Error('Accout must be set before resending verification code.');
+
+    let newVerificationCode = await this.core.holiumClient.resendVerificationCode(auth.accountId);
+    this.state.setVerificationCode(newVerificationCode);
+
+    return newVerificationCode
+  }
+
+  verifyEmail(_event: any, verificationCode: string): boolean {
+    if (!this.state.verificationCode)
+      throw new Error('Verification code must be set before verifying.')
+
+    let verified = this.state.verificationCode === verificationCode
+    if (verified)
+      this.state.setVerificationCode(null);
+
+    return verified
+  }
+
   setSeenSplash(_event: any) {
     this.state.setSeenSplash();
   }
@@ -214,11 +262,8 @@ export class OnboardingService extends BaseService {
 
   async getAvailablePlanets() {
     const { auth } = this.core.services.identity;
-    if (!auth.accountId) {
-      let account = await this.core.holiumClient.createAccount();
-      auth.setAccountId(account.id);
-      return account.planets;
-    }
+    if (!auth.accountId)
+      throw new Error('Accout must be set before getting available planets.');
 
     let planets = await this.core.holiumClient.getPlanets(
       auth.accountId,
