@@ -25,13 +25,16 @@ const abbrMap = {
 
 export interface TransactionType {
   hash: string
-  date: Date
-  amount: string | number
+  amount: string
   network: 'ethereum' | 'bitcoin'
-  type?: 'sent' | 'received'
+  type: 'sent' | 'received'
 
-  patp?: string
-  address: string
+  initiatedAt: string | number  // timestamp
+  completedAt?: string | number // timestamp
+
+  ourAddress: string // actual address, path, w/e works
+  theirPatp?: string
+  theirAddress: string
 
   status: 'pending' | 'failed' | 'succeeded'
   failureReason?: string
