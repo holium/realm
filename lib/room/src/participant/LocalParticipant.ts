@@ -249,7 +249,7 @@ export class LocalParticipant extends Participant {
     let existingPublication: LocalTrackPublication | undefined;
     this.tracks.forEach((publication) => {
       if (!publication.track) {
-        console.log("skippyboi")
+        // console.log("skippyboi")
 
         return;
       }
@@ -259,7 +259,7 @@ export class LocalParticipant extends Participant {
     });
 
     if (existingPublication) {
-      console.log("skippyboi 2")
+      // console.log("skippyboi 2")
       return existingPublication;
     }
 
