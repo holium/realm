@@ -158,7 +158,6 @@ export class RoomsService extends BaseService {
       this.core.conduit!,
       this.state!,
       (diff: RoomDiff, room: RoomsModelType) => {
-        console.log('12oij12j312kj,', diff, room)
         this.core.mainWindow.webContents.send(
           'realm.on-room-update',
           diff,
