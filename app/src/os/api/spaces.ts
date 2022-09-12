@@ -7,7 +7,6 @@ import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
-    console.log(conduit);
     const response = await conduit.scry({
       app: 'spaces',
       path: '/all', // the spaces scry is at the root of the path

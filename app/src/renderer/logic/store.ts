@@ -283,7 +283,6 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.bazaar, value.patch);
     }
     if (value.resource === 'notification') {
-      console.log('notification patch');
       applyPatch(servicesStore.notifications, value.patch);
     }
     if (value.resource === 'onboarding') {

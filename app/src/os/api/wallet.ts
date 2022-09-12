@@ -10,7 +10,7 @@ export const WalletApi = {
         'set-xpub': {
           network: network,
           xpub: xpub,
-        }
+        },
       },
     };
     await conduit.poke(payload);
@@ -22,12 +22,16 @@ export const WalletApi = {
       json: {
         'set-wallet-creation-mode': {
           mode: mode,
-        }
-      }
-    }
+        },
+      },
+    };
     await conduit.poke(payload);
   },
-  changeDefaultWallet: async (conduit: Conduit, network: string, index: number) => {
+  changeDefaultWallet: async (
+    conduit: Conduit,
+    network: string,
+    index: number
+  ) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -35,12 +39,16 @@ export const WalletApi = {
         'change-default-wallet': {
           network: network,
           index: index,
-        }
-      }
-    }
+        },
+      },
+    };
     await conduit.poke(payload);
   },
-  setNetworkProvider: async (conduit: Conduit, network: string, provider: string) => {
+  setNetworkProvider: async (
+    conduit: Conduit,
+    network: string,
+    provider: string
+  ) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -48,12 +56,17 @@ export const WalletApi = {
         'set-network-provider': {
           network: network,
           provider: provider,
-        }
-      }
-    }
+        },
+      },
+    };
     await conduit.poke(payload);
   },
-  createWallet: async (conduit: Conduit, sender: string, network: string, nickname: string) => {
+  createWallet: async (
+    conduit: Conduit,
+    sender: string,
+    network: string,
+    nickname: string
+  ) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -62,8 +75,8 @@ export const WalletApi = {
           sndr: sender,
           network: network,
           nickname: nickname,
-        }
-      }
+        },
+      },
     };
     await conduit.poke(payload);
   },
@@ -75,9 +88,9 @@ export const WalletApi = {
         'request-address': {
           network: network,
           from: from,
-        }
-      }
-    }
+        },
+      },
+    };
     await conduit.poke(payload);
   },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
@@ -88,17 +101,22 @@ export const WalletApi = {
         onEvent: (data: any) => {
           resolve(data);
         },
-        onError: (err: Error) => {
+        onError: (_id: number, err: Error) => {
           console.log('Subscription rejected');
           reject(err);
         },
         onQuit: () => {
           // console.log('Kicked from subscription'),
-        }
+        },
       });
     });
   },
-  enqueueTransaction: async (conduit: Conduit, network: string, hash: string, transaction: any) => {
+  enqueueTransaction: async (
+    conduit: Conduit,
+    network: string,
+    hash: string,
+    transaction: any
+  ) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -107,7 +125,7 @@ export const WalletApi = {
           network: network,
           hash: hash,
           transaction: transaction,
-        }
+        },
       },
     };
     await conduit.poke(payload);
@@ -118,13 +136,20 @@ export const WalletApi = {
       mark: 'wallet-action',
       json: {
         'set-transaction-pending': {
-          transactionKey: transactionKey
-        }
-      }
-    }
+          transactionKey: transactionKey,
+        },
+      },
+    };
     await conduit.poke(payload);
   },
-  addSmartContact: async (conduit: Conduit, contractId: string, contractType: string, name: string, contractAddress: string, walletIndex: string) => {
+  addSmartContact: async (
+    conduit: Conduit,
+    contractId: string,
+    contractType: string,
+    name: string,
+    contractAddress: string,
+    walletIndex: string
+  ) => {
     const payload = {
       app: 'wallet',
       mark: 'wallet-action',
@@ -132,21 +157,24 @@ export const WalletApi = {
         'add-smart-contract': {
           'contract-id': contractId,
           'contract-type': contractType,
-          'name': name,
-          'address': contractAddress,
-          'wallet-index': walletIndex
-        }
-      }
-    }
+          name: name,
+          address: contractAddress,
+          'wallet-index': walletIndex,
+        },
+      },
+    };
     await conduit.poke(payload);
   },
   getHistory: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'wallet',
-      path: '/history'
-    })
+      path: '/history',
+    });
   },
-  subscribeToTransactions(conduit: Conduit, handler: (transaction: any) => void) {
+  subscribeToTransactions(
+    conduit: Conduit,
+    handler: (transaction: any) => void
+  ) {
     conduit.watch({
       app: 'wallet',
       path: '/transactions',
@@ -163,7 +191,10 @@ export const WalletApi = {
       path: '/wallets',
     });
   },
-  subscribeToWallets: async (conduit: Conduit, handler: (transaction: any) => void) => {
+  subscribeToWallets: async (
+    conduit: Conduit,
+    handler: (transaction: any) => void
+  ) => {
     conduit.watch({
       app: 'wallet',
       path: '/wallets',
@@ -173,5 +204,5 @@ export const WalletApi = {
       onError: () => console.log('Subscription rejected'),
       onQuit: () => console.log('Kicked from subscription'),
     });
-  }
-}
+  },
+};
