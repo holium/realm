@@ -22,6 +22,7 @@ export enum NewWalletScreen {
 export const EthNew: FC<any> = observer(() => {
   const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.CREATE);
   const [passcode, setPasscode] = useState('');
+  // TODO move this to background thread
   const seedPhrase = useMemo(
     () => ethers.Wallet.createRandom().mnemonic.phrase,
     []
