@@ -18,6 +18,7 @@ import { SlipType } from 'os/services/slip.service';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomDiff } from 'os/services/tray/rooms.service';
 import { IpcMessageEvent } from 'electron';
+import { DmApp } from './Messages/store';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -50,6 +51,7 @@ export const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
+    dmApp: DmApp,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -85,6 +87,9 @@ export const trayStore = TrayAppStore.create({
   },
   roomsApp: {
     currentView: 'list',
+  },
+  dmApp: {
+    currentView: 'dm-list',
   },
   // roomsApp: (persistedState && persistedState.roomsApp) || {
   //   currentView: 'list',
