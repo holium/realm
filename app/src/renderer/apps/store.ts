@@ -157,7 +157,6 @@ onAction(trayStore, (call) => {
 
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
-  console.log("HITTING ONCONNECTED")
   RoomsActions.resetLocal();
   RoomsActions.exitRoom();
   LiveRoom.leave();
