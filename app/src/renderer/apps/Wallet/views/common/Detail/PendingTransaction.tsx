@@ -27,12 +27,17 @@ export interface TransactionType {
   hash: string
   date: Date
   amount: string | number
-  notes?: string
-  type?: 'sent' | 'received'
   network: 'ethereum' | 'bitcoin'
-  link?: string
+  type?: 'sent' | 'received'
+
+  patp?: string
   address: string
+
   status: 'pending' | 'failed' | 'succeeded'
+  failureReason?: string
+
+  notes?: string
+  link?: string // to etherscan or w/e, probs can just derive this given the hash
 }
 
 interface PendingTransactionDisplayProps {
