@@ -74,6 +74,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
     room.present.forEach((peer: Patp) => {
       if (peer === this.our.patp) return;
+      // console.log('calling new part from connect')
       this.newParticipant(peer);
     });
 
@@ -81,11 +82,16 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   leave() {
+    // console.log("leaving room 99999999999")
     this.state = RoomState.Disconnected;
-    this.our.disconnect();
+
     this.participants.forEach((peer: RemoteParticipant) => {
+      // console.log("kicking", peer.patp)
       this.kickParticipant(peer.patp);
     });
+
+    if(this.our) this.our.disconnect();
+
     this.removeAllListeners();
   }
 
@@ -108,16 +114,17 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     if (enterDiff.enter) {
       if (enterDiff.enter === this.our.patp) {
         // We have created a room or have entered a room
+        // console.log('calling connect from enter diff', enterDiff)
         this.connect(room);
         return;
       }
-      // console.log('add participant', enterDiff.enter);
+      // console.log('calling new part from enter diff');
       this.newParticipant(enterDiff.enter);
     }
     // check if type has exit
     if (exitDiff.exit) {
       if (exitDiff.exit === this.our.patp) {
-        console.log('we should leave the room and unsub');
+        // console.log('we should leave the room and unsub', exitDiff);
         this.disconnect();
       }
       // console.log('remove participant', exitDiff.exit);
@@ -126,6 +133,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   newParticipant(peer: Patp) {
+    // console.log('new participant', peer)
     const remote = new RemoteParticipant(peer, peerConnectionConfig, this);
     this.participants.set(peer, remote);
     this.registerListeners(remote);
@@ -140,15 +148,21 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     // console.log('isLower', isLower);
     peer.registerAudio();
     if (isLower) {
-      console.log('we are ready');
+      console.log('we are ready', peer.patp);
       peer.sendAwaitingOffer();
+      // console.log(peer.interval)
     }
   }
 
   async kickParticipant(peer: Patp) {
-    if (peer === this.our.patp) return;
+    if (peer === this.our.patp) {
+      this.leave();
+      return;
+    }
+
     await this.participants.get(peer)?.cleanup();
     this.participants.delete(peer);
+
     // console.log('after kicked', this.participants);
   }
 

@@ -150,11 +150,7 @@ export class Conduit extends EventEmitter {
             }
             const reaction = Object.keys(json)[0];
             const maybeReactionPath = `${mark}.${reaction}`;
-            /*console.log('maybe => %o', {
-              maybeReactionPath,
-              reactions: this.reactions,
-              json: parsedData.json,
-            });*/
+
             if (this.reactions.has(maybeReactionPath)) {
               this.reactions.get(maybeReactionPath)!(parsedData.json, mark);
               this.reactions.delete(maybeReactionPath);
@@ -212,7 +208,6 @@ export class Conduit extends EventEmitter {
     if (params.reaction && params.onReaction) {
       this.reactions.set(params.reaction, params.onReaction);
     }
-    console.log(params)
     // Properly waiting
     const [_req, res] = await Promise.all([
       this.postToChannel(message),

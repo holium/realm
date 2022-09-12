@@ -58,6 +58,7 @@ export class LocalParticipant extends Participant {
   }
 
   disconnect() {
+    // console.log("local participant disconnect");
     this.tracks.forEach((track: LocalTrackPublication) => {
       track.removeAllListeners();
       track.track?.detach();
@@ -232,6 +233,8 @@ export class LocalParticipant extends Participant {
       ...options,
     };
 
+    // console.log("publishTrack");
+
     // convert raw media track into audio or video track
     if (track instanceof MediaStreamTrack) {
       switch (track.kind) {
@@ -247,6 +250,8 @@ export class LocalParticipant extends Participant {
     let existingPublication: LocalTrackPublication | undefined;
     this.tracks.forEach((publication) => {
       if (!publication.track) {
+        // console.log("skippyboi")
+
         return;
       }
       if (publication.track === track) {
@@ -254,7 +259,10 @@ export class LocalParticipant extends Participant {
       }
     });
 
-    if (existingPublication) return existingPublication;
+    if (existingPublication) {
+      // console.log("skippyboi 2")
+      return existingPublication;
+    }
 
     if (opts.source) {
       track.source = opts.source;
@@ -317,6 +325,7 @@ export class LocalParticipant extends Participant {
     this.addTrackPublication(publication);
 
     // send event for publication
+    // console.log("emitting published traK")
     this.emit(ParticipantEvent.LocalTrackPublished, publication);
     return publication;
   }
