@@ -57,6 +57,7 @@ export class ShellService extends BaseService {
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
+    this.state = ShellStore.create({});
 
     // this.db = new Store({
     //   name: `realm.shell`, // TODO add windowId here
@@ -65,7 +66,6 @@ export class ShellService extends BaseService {
 
     // let persistedState: ShellStoreType = this.db.store;
     // this.state = ShellStore.create(castToSnapshot(persistedState));
-    this.state = ShellStore.create({});
     // const syncEffect = {
     //   model: getSnapshot(this.state!),
     //   resource: 'shell',

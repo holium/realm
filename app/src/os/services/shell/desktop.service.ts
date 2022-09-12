@@ -33,7 +33,7 @@ import { ThemeModelType } from './theme.model';
  */
 export class DesktopService extends BaseService {
   private db?: Store<DesktopStoreType>; // for persistance
-  private state?: DesktopStoreType; // for state management
+  private state: DesktopStoreType; // for state management
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
@@ -92,6 +92,7 @@ export class DesktopService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
+    this.state = DesktopStore.create({});
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
@@ -99,7 +100,6 @@ export class DesktopService extends BaseService {
   }
 
   async load(patp: string, mouseColor: string) {
-    this.state = DesktopStore.create({});
     // const syncEffect = {
     //   model: getSnapshot(this.state!),
     //   resource: 'desktop',

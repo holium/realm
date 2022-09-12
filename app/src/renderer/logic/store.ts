@@ -140,6 +140,9 @@ coreStore.setResuming(true); // need to start the renderer with resuming
 OSActions.boot();
 
 OSActions.onBoot((_event: any, response: any) => {
+  console.log(response);
+  applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
+  applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
   // console.log('onBoot');
   servicesStore.identity.auth.initialSync({
     key: 'ships',
@@ -148,8 +151,6 @@ OSActions.onBoot((_event: any, response: any) => {
   if (response.auth.firstTime) {
     SoundActions.playStartup();
   }
-  applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
-  applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
 
   if (response.models && response.ship) {
     applySnapshot(
