@@ -55,6 +55,7 @@
     "electron-log": "^4.4.6",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
+    "email-validator": "^2.0.4",
     "ethers": "^5.7.0",
     "eventsource": "^2.0.0",
     "extract-colors": "^1.1.22",
