@@ -94,6 +94,7 @@ export const NotificationStore = types
           });
         });
       });
+      allTimeboxes = Array.from<NotificationModelType>(new Set(allTimeboxes));
       self.recent = cast(allTimeboxes);
     },
     setAllStats(data: any) {
@@ -212,9 +213,17 @@ export const NotificationStore = types
               stats: statsData.stats,
             })
           );
+
+          unseenTimeboxes = Array.from<NotificationModelType>(
+            new Set(unseenTimeboxes)
+          );
+
           self.unseen = cast(unseenTimeboxes);
           self.unseen = self.unseen.sort((a, b) => b.time - a.time);
 
+          seenTimeboxes = Array.from<NotificationModelType>(
+            new Set(seenTimeboxes)
+          );
           self.seen = cast(
             seenTimeboxes.sort(
               (notifA: any, notifB: any) => notifB.time - notifA.time

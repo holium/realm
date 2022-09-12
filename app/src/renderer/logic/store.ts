@@ -152,9 +152,6 @@ OSActions.onBoot((_event: any, response: any) => {
     key: 'ships',
     model: response.auth,
   });
-  // if (response.auth.firstTime) {
-  //   SoundActions.playStartup();
-  // }
 
   if (response.models && response.ship) {
     applySnapshot(
@@ -267,7 +264,7 @@ OSActions.onConnected(
 // Auth events
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
-  LiveRoom.leave()
+  LiveRoom.leave();
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
   ShellActions.setBlur(true);
@@ -317,6 +314,7 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.dms, value.patch);
     }
     if (value.resource === 'courier') {
+      console.log(value.patch);
       applyPatch(servicesStore.courier, value.patch);
     }
   }
@@ -328,9 +326,9 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applySnapshot(servicesStore.shell, value.model);
     }
-    if (value.resource === 'courier') {
-      applySnapshot(servicesStore.courier, value.model);
-    }
+    // if (value.resource === 'courier') {
+    //   applySnapshot(servicesStore.courier, value.model);
+    // }
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }

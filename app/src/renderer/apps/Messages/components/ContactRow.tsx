@@ -155,7 +155,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     onAccept = (evt: any) => {
       evt.stopPropagation();
       setAcceptLoading(true);
-      DmActions.acceptDm(dmModel.to)
+      ShipActions.acceptDm(dmModel.to)
         .then((response: any) => {
           console.log('accept ContactRow response', response);
           setAcceptLoading(false);

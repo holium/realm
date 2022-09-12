@@ -163,18 +163,18 @@ onAction(trayStore, (call) => {
           : SoundActions.playRoomLeave();
         if (patchArg.value) {
           // Entering or switching room
-          const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
+          // const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
           console.log('entering and switching to connect');
-
-          if (room) {
-            if (LiveRoom.state === RoomState.Disconnected) {
-              // not init yet, so leave
-              // this case is hit if we boot realm and are still in a room from a previous session.
-              RoomsActions.leaveRoom(room.id);
-              return;
-            }
-            // LiveRoom.connect(room);
-          }
+          // TODO this broke rooms
+          // if (room) {
+          //   if (LiveRoom.state === RoomState.Disconnected) {
+          //     // not init yet, so leave
+          //     // this case is hit if we boot realm and are still in a room from a previous session.
+          //     RoomsActions.leaveRoom(room.id);
+          //     return;
+          //   }
+          //   // LiveRoom.connect(room);
+          // }
         }
       }
     }
@@ -183,11 +183,13 @@ onAction(trayStore, (call) => {
 
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
-  RoomsActions.resetLocal();
-  RoomsActions.exitRoom();
-  LiveRoom.leave();
-  LiveRoom.init(response.ship.patp!);
   if (response.rooms) {
+    // Ro
+    // LiveRoom.leave();
+    if (response.ship) {
+      console.log('resposne.ship');
+      LiveRoom.init(response.ship.patp!);
+    }
     applySnapshot(trayStore.roomsApp, response.rooms);
     if (trayStore.roomsApp.liveRoom) {
       const { liveRoom } = trayStore.roomsApp;
@@ -198,12 +200,24 @@ OSActions.onConnected((_event: any, response: any) => {
   }
 });
 
+// OSActions.onEffect((_event: any, value: any) => {
+//   if (value.response === 'initial') {
+//     if (value.resource === 'ship') {
+//       // RoomsActions.resetLocal();
+//       // RoomsActions.exitRoom();
+//       // LiveRoom.leave();
+//       LiveRoom.init(value.model.patp!);
+//     }
+//   }
+// });
+
 // Listen for all patches
 OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
-    } else if (value.resource === 'wallet') {
+    }
+    if (value.resource === 'wallet') {
       applyPatch(trayStore.walletApp, value.patch);
     }
   }

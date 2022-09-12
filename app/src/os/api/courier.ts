@@ -25,6 +25,7 @@ export const CourierApi = {
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
+        console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
@@ -37,6 +38,9 @@ export const CourierApi = {
             // console.log('group-dm-created', payload);
             // if()
             // store.setReceivedDM(payload);
+            break;
+          case 'invite-dm':
+            console.log('invited to dm', payload);
             break;
           default:
             console.log('action', action);

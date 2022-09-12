@@ -1,5 +1,6 @@
 import { Conduit } from '@holium/conduit';
 import { createPost } from '@urbit/api';
+import { CourierStoreType } from 'os/services/ship/models/courier';
 import { patp2dec } from 'urbit-ob';
 import { ChatStoreType } from '../services/ship/models/dms';
 
@@ -24,7 +25,7 @@ export const DmApi = {
           switch (action) {
             case 'pendings':
               const pendings: string[] = payload;
-              chatStore.setPendingDms(pendings);
+              // chatStore.setPendingDms(pendings);
               break;
             case 'screen':
               // console.log('screen set');
@@ -33,22 +34,22 @@ export const DmApi = {
               break;
             case 'accept':
               console.log('accept', payload);
-              const acceptedContact = `~${payload}`;
-              const response = await conduit.scry({
-                app: 'graph-store',
-                path: `/graph/${ship}/dm-inbox/${acceptedContact}`,
-              });
+              // const acceptedContact = `~${payload}`;
+              // const response = await conduit.scry({
+              //   app: 'graph-store',
+              //   path: `/graph/${ship}/dm-inbox/${acceptedContact}`,
+              // });
               // console.log('accept', response);
-              const chat = chatStore.dms.get(acceptedContact);
-              chat?.setDm(
-                conduit.ship!,
-                response['graph-update']['add-graph']['graph']
-              );
+              // const chat = chatStore.dms.get(acceptedContact);
+              // chat?.setDm(
+              //   conduit.ship!,
+              //   response['graph-update']['add-graph']['graph']
+              // );
               break;
             case 'decline':
               console.log('decline', payload);
-              const declinedContact = `~${payload}`;
-              chatStore.dms.delete(declinedContact);
+              // const declinedContact = `~${payload}`;
+              // chatStore.dms.delete(declinedContact);
               break;
             default:
               console.log('action', action);
@@ -110,7 +111,7 @@ export const DmApi = {
     return await conduit.poke(payload);
   },
   acceptDm: async (conduit: Conduit, toShip: string) => {
-    console.log('accepting dm');
+    console.log('accepting dm', toShip);
     const payload = {
       app: 'dm-hook',
       mark: 'dm-hook-action',
@@ -121,6 +122,8 @@ export const DmApi = {
     return await conduit.poke(payload);
   },
   declineDm: async (conduit: Conduit, toShip: string) => {
+    console.log('decline dm', toShip);
+
     const payload = {
       app: 'dm-hook',
       mark: 'dm-hook-action',

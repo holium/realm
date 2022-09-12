@@ -2,7 +2,8 @@
 ::
 ::  A thin agent that interfaces with various chat stores
 ::
-/-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store, hark=hark-store
+/-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store, 
+    hark=hark-store, dm-hook-sur=dm-hook
 /+  dbug, default-agent, lib=courier, hook=dm-hook
 |%
 +$  card  card:agent:gall
@@ -33,6 +34,7 @@
     ::  %watch: all incoming dms and convert to our simple structure
     :~  
       [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
+      [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
       :: [%pass /group-dm-thread %agent [our.bowl %spider] %watch /thread-result/[tid]]
       :: [%pass /thread/[ta-now] %agent [our.bowl %spider] %poke %spider-start !>(start-args)]
     ==
@@ -126,26 +128,26 @@
               [cards this]
             ==
         ==
-      :: [%dm-hook ~]
-      ::   ?+    -.sign  (on-agent:def wire sign)
-      ::     %watch-ack
-      ::       ?~  p.sign  `this
-      ::       ~&  >>>  "{<dap.bowl>}: dm-hook subscription failed"
-      ::       `this
-      ::     %kick
-      ::       ~&  >  "{<dap.bowl>}: dm-hook kicked us, resubscribing..."
-      ::       :_  this
-      ::       :~  
-      ::         [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
-      ::       ==
-      ::     %fact
-      ::       ?+    p.cage.sign  (on-agent:def wire sign)
-      ::           %graph-update-3
-      ::         =^  cards  state
-      ::           (graph-dm !<(=update:graph-store q.cage.sign) our.bowl now.bowl)
-      ::         [cards this]
-      ::       ==
-      ::   ==
+      [%dm-hook ~]
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: dm-hook subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: dm-hook kicked us, resubscribing..."
+            :_  this
+            :~  
+              [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
+            ==
+          %fact
+            ?+    p.cage.sign  (on-agent:def wire sign)
+                %dm-hook-action
+              =^  cards  state
+                (on-hook-action !<(=action:dm-hook-sur q.cage.sign) now.bowl our.bowl)
+              [cards this]
+            ==
+        ==
       :: [%thread ~]
       ::   ?+    -.sign  (on-agent:def wire sign)
       ::     %poke-ack
@@ -293,7 +295,7 @@
     ==
   ::
   --
-
+::
 ++  on-graph-update    ::  Handles graph-store updates
   |=  [upd=update:graph-store now=@da our=ship]
   ^-  (quip card _state)
@@ -336,7 +338,26 @@
       `state
   ==
   --
+
 ::
+++  on-hook-action
+  |=  [act=action:dm-hook-sur now=@da our=ship]
+  ^-  (quip card _state)
+  |^
+  ?+  -.act                 `state
+    %pendings               (pending-dm +.act)
+    :: %screen                 (screen +.act) 
+    :: %accept                 (accept +.act)
+    :: %declined               (decline +.act)
+  ==
+  ++  pending-dm
+    |=  ships=(set ship)
+    =/  new-from            (rear ~(tap in ships))    ::  assumes at least one ship is in the set
+    =/  invite-preview      (invite-preview:gs:lib new-from our now)
+    ~&  >  invite-preview
+    :_  state
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%invite-dm invite-preview])]~
+  --
 :: ++  read-dm-log
 ::   |=  [=place:hark our=ship now=@da]
 ::   :: =/  act     [%read-count place]
