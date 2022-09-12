@@ -1,3 +1,3 @@
 [submodule "wallet"]
-	path = /desks/wallet
+	path = desks/wallet
 	url = https://github.com/holium/wallet.git
