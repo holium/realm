@@ -265,6 +265,20 @@ const AppSearchApp = (props: AppSearchProps) => {
   }, [spacePath]);
 
   useEffect(() => {
+    console.log('fetching treaties => %o', selectedShip);
+    if (selectedShip) {
+      SpacesActions.getTreaties(selectedShip).then((items: any) => {
+        console.log('treaties => %o', items);
+        const data = Object.entries(items).map(([key, value], index) => ({
+          ...value,
+          id: value.desk,
+        }));
+        setData(data);
+      });
+    }
+  }, [selectedShip, bazaar.treatyAdded]);
+
+  useEffect(() => {
     console.log('AppSearch effect [searchString]...');
     if (searchMode === 'app-search') {
       const apps = currentBazaar?.findApps(searchString);
@@ -298,13 +312,7 @@ const AppSearchApp = (props: AppSearchProps) => {
         console.log('adding ally => %o', selectedShip);
         SpacesActions.addAlly(selectedShip).then((result) => {
           console.log('addTreaty response => %o', result);
-          SpacesActions.getTreaties(searchModeArgs[0]).then((items: any) => {
-            const data = Object.entries(items).map(([key, value], index) => ({
-              ...value,
-              id: value.desk,
-            }));
-            setData(data);
-          });
+          setData([]);
         });
       } else {
         console.log('fetching treaties => %o', selectedShip);
@@ -451,6 +459,7 @@ const AppSearchApp = (props: AppSearchProps) => {
             if (e.target.value) {
               if (e.target.value[0] === '~') {
                 setSearchMode('ship-search');
+                setData([]);
               } else {
                 if (['app-search', 'dev-app-search'].includes(searchMode)) {
                   setSearchMode(searchMode);

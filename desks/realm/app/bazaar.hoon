@@ -778,9 +778,12 @@
     ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
     ::  do we have a pending installation request for this ship/desk?
     =/  installation  (~(get by installations.state) ship.treaty)
-    ?~  installation  `state
+    ?~  installation
+      (bazaar:send-reaction:core [%treaty-added [ship.treaty desk.treaty] docket.treaty] [/updates ~] ~)
+    ::
     ~&  >>  "{<dap.bowl>}: [on-new] => testing {<u.installation>} = {<desk.treaty>}..."
-    ?.  =(u.installation desk.treaty)  `state
+    ?.  =(u.installation desk.treaty)
+      (bazaar:send-reaction:core [%treaty-added [ship.treaty desk.treaty] docket.treaty] [/updates ~] ~)
     ~&  >>  "{<dap.bowl>}: [on-new] => triggering install {<[ship.treaty desk.treaty]>}..."
     =/  install-poke  [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])]~
     ::  trigger docker install

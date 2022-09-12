@@ -42,7 +42,6 @@ export const BazaarApi = {
     return appMap;
   },
   addAlly: async (conduit: Conduit, ship: string) => {
-    // console.log('addAlly [os] => %o', ship);
     return new Promise((resolve, reject) => {
       conduit.poke({
         ...allyShip(ship),

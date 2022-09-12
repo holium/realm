@@ -3,7 +3,7 @@ import { cleanNounColor } from '../../../lib/color';
 // import { NativeAppList, nativeApps } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob } from '../../ship/models/docket';
 import { toJS } from 'mobx';
-const util = require('util');
+// const util = require('util');
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
@@ -219,24 +219,20 @@ export const BazaarStore = types
     _treaties: types.map(
       types.model({
         key: types.identifier,
-        case: types.model({
-          da: types.string,
-        }),
         image: types.string,
         title: types.string,
         license: types.string,
         version: types.string,
-        desk: types.string,
         website: types.string,
-        ship: types.string,
         href: types.model({
           glob: Glob,
         }),
-        hash: types.string,
+        type: types.string,
         color: types.string,
         info: types.string,
       })
     ),
+    treatyAdded: types.optional(types.boolean, false),
     allies: types.map(
       types.model({
         ship: types.identifier,
@@ -249,7 +245,7 @@ export const BazaarStore = types
       return self.spaces.get(path);
     },
     get treaties() {
-      return self.treaties;
+      return self._treaties;
     },
   }))
   .actions((self) => ({
@@ -265,13 +261,14 @@ export const BazaarStore = types
         });
         for (const desk in entry.apps) {
           const app = entry.apps[desk];
-          console.log(util.inspect(app, { depth: 10 }));
+          // console.log(util.inspect(app, { depth: 10 }));
           bazaar.addApp(app);
         }
         self.spaces.set(spacePath, bazaar);
       }
     },
     hasAlly(ship: any) {
+      console.log('hasAlly => %o', toJS(self.allies));
       return self.allies.has(ship);
     },
     addAlly(ally: any) {
@@ -281,16 +278,17 @@ export const BazaarStore = types
       // self.treaties.push(`${treaty.ship}/${treaty.desk}`);
       const key = `${treaty.ship}/${treaty.desk}`;
       console.log('adding treaty => %o', { k: key, treaty });
-      self.treaties.set(key, {
-        ...treaty,
+      self._treaties.set(key, {
+        ...treaty.docket,
         key: key,
       });
+      self.treatyAdded = !self.treatyAdded;
     },
     initialTreaties(treaties: any) {
       console.log('initial treaties => %o', treaties);
       for (const key in treaties) {
         const val = treaties[key];
-        self.treaties.set(key, {
+        self._treaties.set(key, {
           ...val,
           key: key,
         });
@@ -300,6 +298,7 @@ export const BazaarStore = types
       console.log(toJS(allies));
       for (const key in allies) {
         const val = allies[key];
+        console.log('adding ally => %o', val);
         self.allies.set(key, { ship: key, alliance: val });
       }
     },
