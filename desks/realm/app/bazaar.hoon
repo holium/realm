@@ -554,8 +554,9 @@
     %-  ~(rep by space-apps:state)
     |:  [[=space-path:spaces-store [=app-index-lite:store =sorts:store]] acc=`space-apps-full:store`~]
     =/  apps  (view space-path ~)
-    ?~  apps  acc
-    (~(put by acc) space-path [u.apps sorts])
+    :: ?~  apps  acc
+    ~&  >  "{<dap.bowl>}: sending {<space-path>}..."
+    (~(put by acc) space-path [?~(apps ~ u.apps) sorts])
   ::
   ++  space-initial
     |=  =space-path:spaces-store

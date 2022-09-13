@@ -254,6 +254,7 @@ export const BazaarStore = types
       // console.log('catalog => %o', catalog);
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
+        console.log('sorts => %o', entry.sorts);
         const bazaar = BazaarModel.create({
           pinned: entry.sorts.pinned,
           recommended: entry.sorts.recommended,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { styled as stitch, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { isValidPatp } from 'urbit-ob';
+import { observer } from 'mobx-react';
 import {
   Input,
   Flex,
@@ -242,7 +243,7 @@ interface AppSearchProps {
   };
 }
 
-const AppSearchApp = (props: AppSearchProps) => {
+const AppSearchApp = observer((props: AppSearchProps) => {
   const { spaces, bazaar } = useServices();
   const [data, setData] = useState<any>([]);
   const [searchMode, setSearchMode] = useState('none');
@@ -501,6 +502,6 @@ const AppSearchApp = (props: AppSearchProps) => {
       </PopoverContent>
     </Popover>
   );
-};
+});
 
 export default AppSearchApp;
