@@ -254,7 +254,7 @@ export const BazaarStore = types
       // console.log('catalog => %o', catalog);
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
-        console.log('sorts => %o', entry.sorts);
+        // console.log('sorts => %o', entry.sorts);
         const bazaar = BazaarModel.create({
           pinned: entry.sorts.pinned,
           recommended: entry.sorts.recommended,
@@ -269,7 +269,7 @@ export const BazaarStore = types
       }
     },
     hasAlly(ship: any) {
-      console.log('hasAlly => %o', toJS(self.allies));
+      // console.log('hasAlly => %o', toJS(self.allies));
       return self.allies.has(ship);
     },
     addAlly(ally: any) {
@@ -278,7 +278,7 @@ export const BazaarStore = types
     addTreaty(treaty: any) {
       // self.treaties.push(`${treaty.ship}/${treaty.desk}`);
       const key = `${treaty.ship}/${treaty.desk}`;
-      console.log('adding treaty => %o', { k: key, treaty });
+      // console.log('adding treaty => %o', { k: key, treaty });
       self._treaties.set(key, {
         ...treaty.docket,
         key: key,
@@ -286,7 +286,7 @@ export const BazaarStore = types
       self.treatyAdded = !self.treatyAdded;
     },
     initialTreaties(treaties: any) {
-      console.log('initial treaties => %o', treaties);
+      // console.log('initial treaties => %o', treaties);
       for (const key in treaties) {
         const val = treaties[key];
         self._treaties.set(key, {
@@ -296,10 +296,10 @@ export const BazaarStore = types
       }
     },
     initialAllies(allies: any) {
-      console.log(toJS(allies));
+      // console.log(toJS(allies));
       for (const key in allies) {
         const val = allies[key];
-        console.log('adding ally => %o', val);
+        // console.log('adding ally => %o', val);
         self.allies.set(key, { ship: key, alliance: val });
       }
     },

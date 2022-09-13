@@ -100,7 +100,7 @@
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
-  ~&  >>  "{<dap.bowl>}: {<[mark vase]>}"
+  :: ~&  >>  "{<dap.bowl>}: {<[mark vase]>}"
   =^  cards  state
   ?+  mark  (on-poke:def mark vase)
     %bazaar-action  (on:action:core !<(action:store vase))
@@ -406,9 +406,9 @@
   ++  add-ste
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
+    :: ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
+    :: ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
     =/  app            (~(got by app-catalog.state) app-id)
     =/  apps                    (~(got by space-apps.state) path)
     =.  index.apps                    (remove-at-pos index.apps rank)
@@ -419,7 +419,7 @@
     =.  index.apps                    (~(put by index.apps) app-id [app-id sieve])
     =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite) %suite %asc)
     =.  space-apps.state              (~(put by space-apps.state) path apps)
-    ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id sieve app]]>}"
+    :: ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id sieve app]]>}"
     (bazaar:send-reaction [%suite-add path [app-id sieve app] suite.sorts.apps] paths ~)
   ::
   ++  rem-ste
@@ -438,14 +438,14 @@
   ++  install-app
     |=  [=ship =desk]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: install-app {<[ship desk]>}"
+    :: ~&  >  "{<dap.bowl>}: install-app {<[ship desk]>}"
     =/  allies=update:ally:treaty  .^(update:ally:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/allies/noun)
-    ~&  >  "{<dap.bowl>}: install-app {<[allies]>}"
+    :: ~&  >  "{<dap.bowl>}: install-app {<[allies]>}"
     ::  is the ship already an ally? if not, we'll have to add them as an ally
     ::   then once alliance is completed, trigger docket to install
     ?>  ?=(%ini -.allies)
     ?.  (~(has by init.allies) ship)
-      %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
+      :: %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
       :: queue this installation request, so that once alliance is complete,
       ::   we can automatically kick off the install
       :: =/  alliance  (silt [[ship desk] ~])
@@ -555,7 +555,7 @@
     |:  [[=space-path:spaces-store [=app-index-lite:store =sorts:store]] acc=`space-apps-full:store`~]
     =/  apps  (view space-path ~)
     :: ?~  apps  acc
-    ~&  >  "{<dap.bowl>}: sending {<space-path>}..."
+    :: ~&  >  "{<dap.bowl>}: sending {<space-path>}..."
     (~(put by acc) space-path [?~(apps ~ u.apps) sorts])
   ::
   ++  space-initial
@@ -564,6 +564,7 @@
     =/  apps  (~(got by space-apps.state) space-path)
     %-  ~(rep by index.apps)
     |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
+    ?:  (is-system-app app-id)  acc
     =/  app  (~(got by app-catalog.state) app-id)
     =|  app-full=app-full:store
     =.  id.app-full         app-id
@@ -580,6 +581,7 @@
     =/  result=app-index-full:store
     %-  ~(rep by index.apps)
     |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
+      ?:  (is-system-app app-id)  acc
       :: skip if filter is neither %all nor the app tagged with tag
       ?.  ?|  =(tag ~)
               ?&  !=(tag ~)
@@ -600,6 +602,19 @@
       =.  pkg.app-full      u.app
       (~(put by acc) app-id app-full)
     ?~(result ~ (some result))
+  ::
+  ++  is-system-app
+    |=  [=app-id:store]
+    ^-  ?
+    ::
+    ::  per Trent's request (https://github.com/holium/realm/pull/148)
+    ::   "We should filter out the %courier, %realm, and %system apps from
+    ::      the app list since they don't do anything and are really backends."
+    ?:  ?|  =(app-id %courier)
+            =(app-id %realm)
+            =(app-id %garden)
+        ==
+      %.y  %.n
   ::
   ++  catalog
     |=  [charges=(map desk charge:docket)]
@@ -680,37 +695,37 @@
   ++  on-pin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full ord]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full ord]>}"
     `state
   ::
   ++  on-unpin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full ord]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full ord]>}"
     `state
   ::
   ++  on-set-pin-order
     |=  [path=space-path:spaces-store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [set-pin-order] => {<[path ord]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [set-pin-order] => {<[path ord]>}"
     `state
   ::
   ++  on-rec
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
     `state
   ::
   ++  on-unrec
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
     `state
   ::
   ++  on-suite-add
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
     `state
@@ -718,13 +733,13 @@
   ++  on-suite-rem
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
     `state
   ::
   ++  on-set-suite-order
     |=  [path=space-path:spaces-store ord=(list app-id:store)]
     ^-  (quip card _state)
-    ~&  >  "{<dap.bowl>}: bazaar-reaction [set-suite-order] => {<[path ord]>}"
+    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [set-suite-order] => {<[path ord]>}"
     `state
   --
 ::
@@ -769,23 +784,23 @@
   ++  on-ini
     |=  [init=(map [=ship =desk] =treaty:treaty)]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: treaty-update [on-initial] => {<init>}"
+    :: ~&  >>  "{<dap.bowl>}: treaty-update [on-initial] => {<init>}"
     :: %glob  (bazaar:send-reaction:core [%initial-treaties desk [%urbit docket.charge]] [/updates ~])
     `state
   ::
   ++  on-add
     |=  [=treaty:treaty]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
+    :: ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
     ::  do we have a pending installation request for this ship/desk?
     =/  installation  (~(get by installations.state) ship.treaty)
     ?~  installation
       (bazaar:send-reaction:core [%treaty-added [ship.treaty desk.treaty] docket.treaty] [/updates ~] ~)
     ::
-    ~&  >>  "{<dap.bowl>}: [on-new] => testing {<u.installation>} = {<desk.treaty>}..."
+    :: ~&  >>  "{<dap.bowl>}: [on-new] => testing {<u.installation>} = {<desk.treaty>}..."
     ?.  =(u.installation desk.treaty)
       (bazaar:send-reaction:core [%treaty-added [ship.treaty desk.treaty] docket.treaty] [/updates ~] ~)
-    ~&  >>  "{<dap.bowl>}: [on-new] => triggering install {<[ship.treaty desk.treaty]>}..."
+    :: ~&  >>  "{<dap.bowl>}: [on-new] => triggering install {<[ship.treaty desk.treaty]>}..."
     =/  install-poke  [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])]~
     ::  trigger docker install
     :: :_  state
@@ -794,7 +809,7 @@
   ++  on-del
     |=  [=ship =desk]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: treaty-update [on-del] => {<[ship desk]>}"
+    :: ~&  >>  "{<dap.bowl>}: treaty-update [on-del] => {<[ship desk]>}"
     `state
   --
 ::
@@ -812,13 +827,13 @@
   ++  on-ini
     |=  [init=(map ship alliance:treaty)]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: ally-update [on-initial] => {<init>}"
+    :: ~&  >>  "{<dap.bowl>}: ally-update [on-initial] => {<init>}"
     `state
   ::
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
+    :: ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
     :: (bazaar:send-reaction:core [%new-ally-added [ship.treaty desk.treaty] [%urbit docket.charge]] [/updates ~])
     `state
   ::
@@ -826,13 +841,13 @@
     |=  [=ship]
     ^-  (quip card _state)
     :: =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
-    ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
+    :: ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
     `state
   ::
   ++  on-del
     |=  [=ship]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: ally-update [on-del] => {<[ship]>}"
+    :: ~&  >>  "{<dap.bowl>}: ally-update [on-del] => {<[ship]>}"
     `state
   --
 ::  charge arms
@@ -851,13 +866,13 @@
   ++  ini
     |=  [initial=(map desk charge:docket)]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: charge-update [initial] received. {<initial>}"
+    :: ~&  >>  "{<dap.bowl>}: charge-update [initial] received. {<initial>}"
     `state
   ::
   ++  add
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
+    :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
       %glob
@@ -878,7 +893,7 @@
   ++  rem
     |=  [=desk]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
+    :: ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
     (bazaar:send-reaction:core [%app-uninstalled desk] [/updates ~] ~)
   --
 ::

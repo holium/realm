@@ -200,7 +200,6 @@ function renderShipSearch(data: Array<any>, searchString: string) {
 }
 
 const renderAppSearch = (apps: any) => {
-  console.log('apps => %o', apps);
   return (
     <>
       <Flex flexDirection="column" gap={10}>
@@ -252,7 +251,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   const currentBazaar = spaces.selected ? bazaar.getBazaar(spacePath) : null;
 
   useEffect(() => {
-    console.log('AppSearch effect [spacePath]...');
     setSearchMode('none');
     setSearchModeArgs([]);
     setSearchString('');
@@ -261,10 +259,9 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   }, [spacePath]);
 
   useEffect(() => {
-    console.log('fetching treaties => %o', selectedShip);
     if (selectedShip) {
       SpacesActions.getTreaties(selectedShip).then((items: any) => {
-        console.log('treaties => %o', items);
+        // console.log('treaties => %o', items);
         const data = Object.entries(items).map(([key, value], index) => ({
           ...value,
           id: value.desk,
@@ -275,20 +272,20 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   }, [selectedShip, bazaar.treatyAdded]);
 
   useEffect(() => {
-    console.log('AppSearch effect [searchString]...');
+    // console.log('AppSearch effect [searchString]...');
     if (searchMode === 'app-search') {
       const apps = currentBazaar?.findApps(searchString);
-      console.log(apps);
+      // console.log(apps);
       setData(apps);
     } else if (searchMode === 'dev-app-search') {
-      const apps = currentBazaar?.treatyList;
-      console.log(apps);
+      const apps = bazaar.treaties;
+      // console.log(apps);
       setData(apps);
     }
   }, [searchString]);
 
   useEffect(() => {
-    console.log('AppSearch effect [searchMode]...');
+    // console.log('AppSearch effect [searchMode]...');
     if (searchMode === 'ship-search') {
       setData([]);
       // todo: move into bazaar "main" (no space specific) store
@@ -305,15 +302,15 @@ const AppSearchApp = observer((props: AppSearchProps) => {
       // if the 'selected' ship is not yet an ally, make them one which will
       //  trigger a treay which can then be listed for installation
       if (!bazaar.hasAlly(selectedShip)) {
-        console.log('adding ally => %o', selectedShip);
+        // console.log('adding ally => %o', selectedShip);
         SpacesActions.addAlly(selectedShip).then((result) => {
           console.log('addTreaty response => %o', result);
           setData([]);
         });
       } else {
-        console.log('fetching treaties => %o', selectedShip);
+        // console.log('fetching treaties => %o', selectedShip);
         SpacesActions.getTreaties(selectedShip).then((items: any) => {
-          console.log('treaties => %o', items);
+          // console.log('treaties => %o', items);
           const data = Object.entries(items).map(([key, value], index) => ({
             ...value,
             id: value.desk,
@@ -383,7 +380,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   };
 
   const installApp = (app: any) => {
-    console.log('installApp => %o', app);
+    // console.log('installApp => %o', app);
     SpacesActions.installApp(app);
   };
 
