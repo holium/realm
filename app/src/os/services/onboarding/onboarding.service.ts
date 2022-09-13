@@ -61,11 +61,11 @@ export class OnboardingService extends BaseService {
     },
 
     setEmail(email: string) {
-      return ipcRenderer.invoke('realm.onboarding.confirmEmail', email);
+      return ipcRenderer.invoke('realm.onboarding.setEmail', email);
     },
 
     verifyEmail(verificationCode: string) {
-      return ipcRenderer.invoke('realm.onboarding.confirmEmail', verificationCode);
+      return ipcRenderer.invoke('realm.onboarding.verifyEmail', verificationCode);
     },
 
     resendEmailConfirmation() {
