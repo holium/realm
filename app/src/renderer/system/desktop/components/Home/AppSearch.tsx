@@ -236,12 +236,7 @@ export const PopoverContent = Content;
 export const PopoverClose = StyledClose;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
-interface AppSearchProps {
-  theme: {
-    textColor: string;
-    windowColor: string;
-  };
-}
+interface AppSearchProps {}
 
 const AppSearchApp = observer((props: AppSearchProps) => {
   const { spaces, bazaar } = useServices();
