@@ -163,33 +163,39 @@ onAction(trayStore, (call) => {
           : SoundActions.playRoomLeave();
         if (patchArg.value) {
           // Entering or switching room
-          // const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
+          const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
           console.log('entering and switching to connect');
-          // TODO this broke rooms
-          // if (room) {
-          //   if (LiveRoom.state === RoomState.Disconnected) {
-          //     // not init yet, so leave
-          //     // this case is hit if we boot realm and are still in a room from a previous session.
-          //     RoomsActions.leaveRoom(room.id);
-          //     return;
-          //   }
-          //   // LiveRoom.connect(room);
-          // }
+
+          if (room) {
+            if (LiveRoom.state === RoomState.Disconnected) {
+              // not init yet, so leave
+              // this case is hit if we boot realm and are still in a room from a previous session.
+              RoomsActions.leaveRoom(room.id);
+              return;
+            }
+            // LiveRoom.connect(room);
+          }
         }
       }
     }
   }
 });
 
+OSActions.onBoot((_event: any, response: any) => {
+  if (response.loggedIn) {
+    console.log('refresh');
+    // RoomsActions.resetLocal();
+    // RoomsActions.exitRoom();
+    // LiveRoom.leave();
+    LiveRoom.init(response.ship.patp!);
+  }
+});
+
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
+  console.log('on connected');
   if (response.rooms) {
-    // Ro
-    // LiveRoom.leave();
-    if (response.ship) {
-      console.log('resposne.ship');
-      LiveRoom.init(response.ship.patp!);
-    }
+    LiveRoom.init(response.ship.patp!);
     applySnapshot(trayStore.roomsApp, response.rooms);
     if (trayStore.roomsApp.liveRoom) {
       const { liveRoom } = trayStore.roomsApp;
@@ -200,12 +206,16 @@ OSActions.onConnected((_event: any, response: any) => {
   }
 });
 
+// OSActions.onLogout((_event: any) => {
+
+// })
+
 // OSActions.onEffect((_event: any, value: any) => {
 //   if (value.response === 'initial') {
 //     if (value.resource === 'ship') {
-//       // RoomsActions.resetLocal();
-//       // RoomsActions.exitRoom();
-//       // LiveRoom.leave();
+// RoomsActions.resetLocal();
+// RoomsActions.exitRoom();
+// LiveRoom.leave();
 //       LiveRoom.init(value.model.patp!);
 //     }
 //   }

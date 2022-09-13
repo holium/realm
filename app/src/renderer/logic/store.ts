@@ -314,7 +314,7 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.dms, value.patch);
     }
     if (value.resource === 'courier') {
-      console.log(value.patch);
+      // console.log(value.patch);
       applyPatch(servicesStore.courier, value.patch);
     }
   }

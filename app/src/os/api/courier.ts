@@ -1,7 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { PokeCallbacks, PokeParams } from '@holium/conduit/src/types';
 import { createPost, Post } from '@urbit/api';
-import { patp2dec } from 'urbit-ob';
 import { CourierStoreType } from '../services/ship/models/courier';
 import { Patp } from '../types';
 

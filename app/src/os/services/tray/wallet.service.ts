@@ -223,6 +223,7 @@ export class WalletService extends BaseService {
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
       }
     );
+
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
       this.state!.ethereum.applyHistory(history);
     });
