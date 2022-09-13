@@ -482,6 +482,10 @@ export const CourierStore = types
         );
       }
     },
+    declineDm: (path: string) => {
+      self.previews.delete(path);
+      return;
+    },
   }));
 
 export type CourierStoreType = Instance<typeof CourierStore>;

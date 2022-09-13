@@ -128,7 +128,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     onDecline = (evt: any) => {
       evt.stopPropagation();
       setRejectLoading(true);
-      ShipActions.declineDm(groupModel.path)
+      ShipActions.declineGroupDm(groupModel.path)
         .then((response: any) => {
           console.log('response', response);
           setRejectLoading(false);

@@ -12,7 +12,7 @@ export const DmApi = {
     });
     return response['graph-update']['add-graph']['graph'];
   },
-  updates: (conduit: Conduit, chatStore: ChatStoreType): Promise<any> => {
+  updates: (conduit: Conduit, store: CourierStoreType): Promise<any> => {
     const ship = `~${conduit.ship}`;
     return conduit.watch({
       app: 'dm-hook',
@@ -47,9 +47,9 @@ export const DmApi = {
               // );
               break;
             case 'decline':
-              console.log('decline', payload);
-              // const declinedContact = `~${payload}`;
-              // chatStore.dms.delete(declinedContact);
+              const declinedContact = `~${payload}`;
+              console.log('decline', payload, `/dm-inbox/${declinedContact}`);
+              store.previews.delete(`/dm-inbox/${declinedContact}`);
               break;
             default:
               console.log('action', action);

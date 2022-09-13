@@ -260,7 +260,8 @@ export class ShipService extends BaseService {
       this.core.onEffect
     );
     this.models.friends = loadFriendsFromDisk(
-      ship, secretKey,
+      ship,
+      secretKey,
       this.core.onEffect
     );
     secretKey = null;
@@ -306,7 +307,7 @@ export class ShipService extends BaseService {
         MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
 
         // register dm update handler
-        DmApi.updates(this.core.conduit!, this.models.chat!);
+        DmApi.updates(this.core.conduit!, this.models.courier!);
         CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
         NotificationApi.updates(
           this.core.conduit!,
@@ -534,7 +535,8 @@ export class ShipService extends BaseService {
     const inviteId = this.models.courier?.previews.get(path)?.inviteId;
     console.log('rejectingDM', path, inviteId);
     if (inviteId) {
-      return await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
+      await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
+      return this.models.courier?.declineDm(path);
     }
     return;
   }

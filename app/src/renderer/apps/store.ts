@@ -148,37 +148,44 @@ RoomsActions.onRoomUpdate(
   (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
     console.log('room diff in renderer', diff);
     LiveRoom.onDiff(diff, room);
+
+    if (diff.exit) {
+      SoundActions.playRoomLeave();
+    }
+    if (diff.enter) {
+      SoundActions.playRoomEnter();
+    }
   }
 );
 
 // Watch actions for sound trigger
-onAction(trayStore, (call) => {
-  if (call.path === '/roomsApp') {
-    if (call.name === '@APPLY_SNAPSHOT') return;
-    const patchArg = call.args![0][0];
-    if (patchArg.path === '/liveRoom') {
-      if (patchArg.op === 'replace') {
-        patchArg.value
-          ? SoundActions.playRoomEnter()
-          : SoundActions.playRoomLeave();
-        if (patchArg.value) {
-          // Entering or switching room
-          // const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
-          // console.log('entering and switching to connect');
-          // if (room) {
-          //   if (LiveRoom.state === RoomState.Disconnected) {
-          //     // not init yet, so leave
-          //     // this case is hit if we boot realm and are still in a room from a previous session.
-          //     RoomsActions.leaveRoom(room.id);
-          //     return;
-          //   }
-          //   // LiveRoom.connect(room);
-          // }
-        }
-      }
-    }
-  }
-});
+// onAction(trayStore, (call) => {
+//   if (call.path === '/roomsApp') {
+//     if (call.name === '@APPLY_SNAPSHOT') return;
+//     const patchArg = call.args![0][0];
+//     if (patchArg.path === '/liveRoom') {
+//       if (patchArg.op === 'replace') {
+//         patchArg.value
+//           ? SoundActions.playRoomEnter()
+//           : SoundActions.playRoomLeave();
+//         if (patchArg.value) {
+//           // Entering or switching room
+//           // const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
+//           // console.log('entering and switching to connect');
+//           // if (room) {
+//           //   if (LiveRoom.state === RoomState.Disconnected) {
+//           //     // not init yet, so leave
+//           //     // this case is hit if we boot realm and are still in a room from a previous session.
+//           //     RoomsActions.leaveRoom(room.id);
+//           //     return;
+//           //   }
+//           //   // LiveRoom.connect(room);
+//           // }
+//         }
+//       }
+//     }
+//   }
+// });
 
 OSActions.onBoot((_event: any, response: any) => {
   if (response.loggedIn) {
@@ -199,8 +206,13 @@ OSActions.onConnected((_event: any, response: any) => {
   }
   if (response.rooms) {
     // LiveRoom.init(response.ship.patp!);
+    console.log('OSActions.onConnected', response.rooms);
     applySnapshot(trayStore.roomsApp, response.rooms);
     if (trayStore.roomsApp.liveRoom) {
+      console.log(
+        '210: if (trayStore.roomsApp.liveRoom) {',
+        trayStore.roomsApp.liveRoom
+      );
       const { liveRoom } = trayStore.roomsApp;
       if (liveRoom) {
         LiveRoom.connect(liveRoom);
