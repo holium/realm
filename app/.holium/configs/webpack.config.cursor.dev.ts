@@ -26,7 +26,7 @@ const configuration: webpack.Configuration = {
 
   output: {
     path: webpackPaths.dllPath,
-    filename: 'mouse.js',
+    filename: 'cursor.js',
   },
 
   plugins: [

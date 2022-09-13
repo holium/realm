@@ -5,6 +5,7 @@
 import path from 'path';
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
@@ -27,13 +28,9 @@ const devtoolsConfig =
 
 const configuration: webpack.Configuration = {
   ...devtoolsConfig,
-
   mode: 'production',
-
   target: ['web', 'electron-renderer'],
-
   entry: [path.join(webpackPaths.srcRendererPath, 'index.tsx')],
-
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: './',
@@ -42,7 +39,6 @@ const configuration: webpack.Configuration = {
       type: 'umd',
     },
   },
-
   module: {
     rules: [
       {
@@ -88,7 +84,6 @@ const configuration: webpack.Configuration = {
       new CssMinimizerPlugin(),
     ],
   },
-
   plugins: [
     /**
      * Create global constants which can be configured at compile time.
@@ -103,16 +98,13 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
     }),
-
     new MiniCssExtractPlugin({
       filename: 'style.css',
     }),
-
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
       analyzerPort: 8889,
     }),
-
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.join(webpackPaths.srcRendererPath, 'index.ejs'),
@@ -123,6 +115,18 @@ const configuration: webpack.Configuration = {
       },
       isBrowser: false,
       isDevelopment: process.env.NODE_ENV !== 'production',
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, '../../media'),
+          to: path.resolve(webpackPaths.distRendererPath),
+        },
+        {
+          from: path.resolve(__dirname, '../../media'),
+          to: path.resolve(webpackPaths.distRendererPath),
+        },
+      ],
     }),
   ],
 };

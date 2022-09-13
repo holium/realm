@@ -159,12 +159,15 @@ const createWindow = async () => {
     // console.log('setting dims ready-to-show');
     mainWindow.webContents.send(
       'set-appview-preload',
-      path.join(app.getAppPath(), 'appview.preload.js')
+      app.isPackaged
+        ? path.join(__dirname, 'cursor.preload.js')
+        : path.join(app.getAppPath(), 'cursor.preload.js')
     );
   });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    app.quit();
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
