@@ -76,7 +76,6 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
           flexDirection="row"
           alignItems="center"
           justifyContent={'center'}
-          border={'solid 1px red'}
           width={'100%'}
         >
           <Flex>
