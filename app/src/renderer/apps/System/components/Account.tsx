@@ -99,6 +99,7 @@ export const AccountPanel: FC<any> = observer(() => {
         elevation="none"
         customBg={cardColor}
         flexDirection={'column'}
+        height={'80%'}
         mb={2}
         overflowX={'hidden'}
         overflowY={'visible'}
@@ -162,6 +163,7 @@ export const AccountPanel: FC<any> = observer(() => {
 
                 <Flex height={30}>
                 {avatarOption === 'color' && 
+
                   <ColorPicker
                     initialColor={ship!.color!}
                     swatches={[
@@ -227,7 +229,7 @@ export const AccountPanel: FC<any> = observer(() => {
         </Flex>
 
     </Card>
-    <Text opacity={0.7} fontSize={3} fontWeight={500}>
+    {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
       HOSTING
     </Text>
     <Card
@@ -243,7 +245,7 @@ export const AccountPanel: FC<any> = observer(() => {
           Coming Soon
         </Text>
 
-    </Card>
+    </Card> */}
     </Flex>
   )
 })

@@ -25,8 +25,8 @@ export class ShellService extends BaseService {
   };
 
   static preload = {
-    setBlur: (blurred: boolean) => {
-      return ipcRenderer.invoke('realm.shell.set-blur', blurred);
+    setBlur: (blurred: boolean, checkDouble: boolean = false) => {
+      return ipcRenderer.invoke('realm.shell.set-blur', blurred, checkDouble);
     },
     setDesktopDimensions: (width: number, height: number) => {
       return ipcRenderer.invoke(
@@ -121,8 +121,8 @@ export class ShellService extends BaseService {
     this.state?.closeDialog();
   }
 
-  setBlur(_event: any, blurred: boolean) {
-    this.state?.setIsBlurred(blurred);
+  setBlur(_event: any, blurred: boolean, checkDouble: boolean) {
+    this.state?.setIsBlurred(blurred, checkDouble);
   }
 
   setDesktopDimensions(_event: any, width: number, height: number) {

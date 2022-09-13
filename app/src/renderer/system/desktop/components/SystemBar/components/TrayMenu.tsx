@@ -68,6 +68,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
       }
       // If the app node does not contain the click event target, close it.
       const appNode = document.getElementById(`${id}-app`);
+      // TODO: fix wallet containing element detection
       if (appNode && !appNode.contains(event.target)) {
         setActiveApp(null);
       }

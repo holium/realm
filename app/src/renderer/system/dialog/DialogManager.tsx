@@ -19,7 +19,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     const { dialogId } = props;
 
     const { desktop, shell } = useServices();
-    console.log(toJS(shell.desktopDimensions));
+
     const desktopRef = useRef<any>(null);
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;

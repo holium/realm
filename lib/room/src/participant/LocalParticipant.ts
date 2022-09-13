@@ -96,13 +96,12 @@ export class LocalParticipant extends Participant {
 
   streamTracks(peer: RemoteParticipant) {
     if (!this.isLoaded) return;
-    console.log('streaming tracks');
-    // peer.replaceAudioTrack(this.audio!.mediaStreamTrack);
-    // peer.streamAudioTrack(this.audio!.mediaStreamTrack);
+    // console.log('streaming tracks TO ', peer.patp);
 
-    // this.stream!.getTracks().forEach((track: MediaStreamTrack) => {
-    //   peerConn.addTrack(track, this.stream!);
-    // });
+    this.audioTracks.forEach((pub: LocalTrackPublication) => {
+      // @ts-ignore
+      peer.streamAudioTrack(pub.track!);
+    });
   }
 
   // getTrack(): any | undefined {
@@ -233,7 +232,7 @@ export class LocalParticipant extends Participant {
       ...options,
     };
 
-    // console.log("publishTrack");
+    console.log("publishTrack");
 
     // convert raw media track into audio or video track
     if (track instanceof MediaStreamTrack) {
@@ -310,6 +309,7 @@ export class LocalParticipant extends Participant {
     // track.sid = ti.sid;
 
     this.room.participants.forEach((peer: RemoteParticipant) => {
+      console.log('publishing track to:', peer.patp)
       peer.streamAudioTrack(publication.audioTrack!);
     });
 
@@ -325,7 +325,7 @@ export class LocalParticipant extends Participant {
     this.addTrackPublication(publication);
 
     // send event for publication
-    // console.log("emitting published traK")
+    console.log("emitting published traK")
     this.emit(ParticipantEvent.LocalTrackPublished, publication);
     return publication;
   }

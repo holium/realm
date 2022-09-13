@@ -150,6 +150,7 @@ export class Conduit extends EventEmitter {
             }
             const reaction = Object.keys(json)[0];
             const maybeReactionPath = `${mark}.${reaction}`;
+
             if (this.reactions.has(maybeReactionPath)) {
               this.reactions.get(maybeReactionPath)!(parsedData.json, mark);
               this.reactions.delete(maybeReactionPath);

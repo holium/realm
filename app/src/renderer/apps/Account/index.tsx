@@ -64,7 +64,6 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
       );
     }
 
-    console.log(toJS(notifications.unseen));
     return (
       <Grid.Column
         style={{ position: 'relative', height: dimensions.height }}

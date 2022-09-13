@@ -15,6 +15,7 @@ import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
 import { RoomsService } from '../tray/rooms.service';
+import { WalletService } from '../tray/wallet.service';
 import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { SlipService } from '../slip.service';
@@ -76,6 +77,7 @@ export class ShipService extends BaseService {
   };
   private services: { slip?: SlipService } = {};
   rooms: RoomsService;
+  wallet: WalletService;
 
   handlers = {
     'realm.ship.get-dms': this.getDMs,
@@ -188,6 +190,7 @@ export class ShipService extends BaseService {
     this.subscribe = this.subscribe.bind(this);
     this.services.slip = new SlipService(core);
     this.rooms = new RoomsService(core);
+    this.wallet = new WalletService(core);
   }
 
   get modelSnapshots() {
@@ -257,8 +260,7 @@ export class ShipService extends BaseService {
       this.core.onEffect
     );
     this.models.friends = loadFriendsFromDisk(
-      ship,
-      secretKey,
+      ship, secretKey,
       this.core.onEffect
     );
     secretKey = null;
@@ -323,6 +325,7 @@ export class ShipService extends BaseService {
 
       this.services.slip?.subscribe();
       this.rooms?.onLogin(ship);
+      this.wallet?.onLogin(ship);
 
       // return ship state
     } catch (err) {
@@ -345,6 +348,10 @@ export class ShipService extends BaseService {
 
   get roomSnapshot() {
     return this.rooms?.snapshot;
+  }
+
+  get walletSnapshot() {
+    return this.wallet?.snapshot;
   }
 
   async init(ship: string) {

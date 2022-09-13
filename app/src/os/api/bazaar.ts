@@ -354,7 +354,7 @@ export const BazaarApi = {
       app: 'bazaar',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('bazaar/updates => %o', data);
+        // console.log('bazaar/updates => %o', data);
         if (mark === 'bazaar-reaction') {
           handleBazaarReactions(data, state);
         }
@@ -389,8 +389,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'app-installed':
       {
         let detail = data['app-installed'];
-        console.log(detail);
-        console.log('app-installed');
+        // console.log(detail);
+        // console.log('app-installed');
         // @ts-ignore
         // TODO insert a new app here
         // state.spaces.get('/our/').addApp(detail);

@@ -192,6 +192,7 @@ export const theme = {
       brand: {
         primary: '#4E9EFD',
         secondary: '#EF9134',
+        neutral: '#F3F3F3',
         accent: '#FDB447',
         muted: rgba('#4E9EFD', 0.2),
       },

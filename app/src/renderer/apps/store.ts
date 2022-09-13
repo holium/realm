@@ -11,6 +11,7 @@ import {
 
 import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
+import { WalletStore } from 'os/services/tray/wallet.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
@@ -18,6 +19,7 @@ import { SlipType } from 'os/services/slip.service';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomDiff } from 'os/services/tray/rooms.service';
 import { IpcMessageEvent } from 'electron';
+import { DmApp } from './Messages/store';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -50,6 +52,8 @@ export const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
+    walletApp: WalletStore,
+    dmApp: DmApp,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -85,6 +89,26 @@ export const trayStore = TrayAppStore.create({
   },
   roomsApp: {
     currentView: 'list',
+  },
+  walletApp: {
+    network: 'ethereum',
+    currentView: 'ethereum:new',
+    bitcoin: {
+      settings: {
+        defaultIndex: 0,
+      },
+    },
+    ethereum: {
+      settings: {
+        defaultIndex: 0,
+      },
+      initialized: false,
+    },
+    creationMode: 'default',
+    ourPatp: '~zod',
+  },
+  dmApp: {
+    currentView: 'dm-list',
   },
   // roomsApp: (persistedState && persistedState.roomsApp) || {
   //   currentView: 'list',
@@ -179,6 +203,8 @@ OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
+    } else if (value.resource === 'wallet') {
+      applyPatch(trayStore.walletApp, value.patch);
     }
   }
 });
@@ -186,5 +212,9 @@ OSActions.onEffect((_event: any, value: any) => {
 OSActions.onBoot((_event: any, response: any) => {
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);
+  }
+
+  if (response.wallet) {
+    applySnapshot(trayStore.walletApp, response.wallet);
   }
 });
