@@ -47,7 +47,7 @@ function InitialScreen (props: { done: any }) {
         </Text>
         <Text fontSize={2} lineHeight="copy" variant="body">
           We need a contact email for account recovery purposes. We pledge a solemn oath to never
-          share it with anyone or abuse it for marketing spam.
+          share it with anyone or use it for marketing spam.
         </Text>
       </Flex>
       <Flex mt={8} flexDirection="column">
