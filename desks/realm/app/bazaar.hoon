@@ -73,6 +73,7 @@
   =.  icon.native-app                     'AppIconSettings'
   =/  catalog                             (~(put by catalog) id.app-lite [%native native-app])
 
+  :: ~&  >  "on-init..."
   =.  space-apps.state                    (~(put by space-apps.state) our-space [apps *sorts:store])
   =.  app-catalog.state                   catalog
 
@@ -338,6 +339,7 @@
     =.  index.apps  (pin index.apps app-lite)
     =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned) %pinned %asc)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    :: ~&  >  "add-pin..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     (bazaar:send-reaction [%pin path [app-id sieve.app-lite app] pinned.sorts.apps] paths ~)
   ::
@@ -350,6 +352,7 @@
     =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %pinned)
     =.  index.apps  (unpin index.apps app-lite)
     =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned) %pinned %asc)
+    :: ~&  >  "rem-pin..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%unpin path [app-id sieve.app-lite app] pinned.sorts.apps] paths ~)
@@ -368,6 +371,7 @@
     [(~(put by index.acc) app-id u.app) (add rank.acc 1)]
     =.  index.apps          index.updated-apps
     =.  pinned.sorts.apps   order
+    :: ~&  >  "set-pin-order..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%set-pin-order path order] paths ~)
@@ -385,6 +389,7 @@
     =.  recommended.ranks.sieve.app-lite   (add recommended.ranks.sieve.app-lite 1)
     =.  index.apps                        (~(put by index.apps) app-id app-lite)
     =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
+    :: ~&  >  "add-rec..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%recommend path [app-id sieve.app-lite app] recommended.sorts.apps] paths ~)
@@ -399,6 +404,7 @@
     =.  recommended.ranks.sieve.app-lite  (sub recommended.ranks.sieve.app-lite 1)
     =.  index.apps  (~(put by index.apps) app-id app-lite)
     =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
+    :: ~&  >  "rem-rec..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
   (bazaar:send-reaction [%unrecommend path [app-id sieve.app-lite app] recommended.sorts.apps] paths ~)
@@ -418,6 +424,7 @@
     =.  suite.ranks.sieve        rank
     =.  index.apps                    (~(put by index.apps) app-id [app-id sieve])
     =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite) %suite %asc)
+    :: ~&  >  "add-ste..."
     =.  space-apps.state              (~(put by space-apps.state) path apps)
     :: ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id sieve app]]>}"
     (bazaar:send-reaction [%suite-add path [app-id sieve app] suite.sorts.apps] paths ~)
@@ -431,6 +438,7 @@
     =.  tags.sieve.app-lite        (~(del in tags.sieve.app-lite) %suite)
     =.  index.apps                (~(put by index.apps) app-id app-lite)
     =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite) %suite %asc)
+    :: ~&  >  "rem-ste..."
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%suite-remove path [app-id sieve.app-lite app] suite.sorts.apps] paths ~)
@@ -634,6 +642,7 @@
       =.  tags.sieve.app    (~(put in tags.sieve.app) %installed)
       =.  ranks.sieve.app   [0 0 0]
       (~(put by acc) desk app)
+  ::
   --
 ::  bazaar reactions
 ++  bazaar-reaction
@@ -685,6 +694,7 @@
     =.  app-catalog.acc      (~(put by app-catalog.acc) app-id pkg.updated-app-full)
     =.  app-index-lite.acc   (~(put by app-index-lite.acc) app-id [app-id sieve.updated-app-full])
     acc
+    :: ~&  >  "on-space-apps..."
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result *sorts:store])
     =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     :: :_  state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
@@ -918,8 +928,7 @@
       |=  [[path=space-path:spaces-store =space:spaces-store] acc=(map space-path:spaces-store [index=app-index-lite:store =sorts:store])]
     ?:  =(space.path 'our')  acc
       (~(put by acc) path.space [*app-index-lite:store *sorts:store])
-    ::
-    =.  space-apps.state    (~(uni by space-apps.state) spaces-map)
+    =.  space-apps.state    (~(uni by spaces-map) space-apps.state)
     `state
   ::
     ++  skim-our
