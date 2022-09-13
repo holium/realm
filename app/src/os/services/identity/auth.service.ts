@@ -152,8 +152,8 @@ export class AuthService extends BaseService {
   }
 
   async logout(_event: any, ship: string) {
-    this.core.services.ship.rooms.resetLocal(null);
-    this.core.services.ship.rooms.exitRoom(null);
+    await this.core.services.ship.rooms.resetLocal(null);
+    await this.core.services.ship.rooms.exitRoom(null);
     await this.core.clearSession();
     this.core.passwords.clearPassword(ship);
     this.core.services.ship.logout();
