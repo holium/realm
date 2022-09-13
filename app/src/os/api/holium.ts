@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-const baseURL =`https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+const baseURL = process.env.USE_LOCAL_API
+  ? 'http://localhost:8080'
+  : `https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+
 const client = axios.create({ baseURL });
 
 export interface HostingPlanet {
