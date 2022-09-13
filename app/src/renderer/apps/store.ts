@@ -163,9 +163,8 @@ onAction(trayStore, (call) => {
           : SoundActions.playRoomLeave();
         if (patchArg.value) {
           // Entering or switching room
-          const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
-          console.log('entering and switching to connect');
-
+          // const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
+          // console.log('entering and switching to connect');
           // if (room) {
           //   if (LiveRoom.state === RoomState.Disconnected) {
           //     // not init yet, so leave
@@ -194,8 +193,12 @@ OSActions.onBoot((_event: any, response: any) => {
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
   console.log('on connected');
-  if (response.rooms) {
+  if (LiveRoom.state === 'disconnected') {
+    console.log('LiveRoom.init in OSActions.onConnected ');
     LiveRoom.init(response.ship.patp!);
+  }
+  if (response.rooms) {
+    // LiveRoom.init(response.ship.patp!);
     applySnapshot(trayStore.roomsApp, response.rooms);
     if (trayStore.roomsApp.liveRoom) {
       const { liveRoom } = trayStore.roomsApp;
