@@ -12,8 +12,13 @@
     "build:app": "yarn workspace @holium/realm build",
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
+    "build:room": "yarn workspace @holium/realm-room build",
     "start": "yarn workspace @holium/realm start",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package"
+  },
+  "dependencies": {
+    "ethers": "^5.7.0",
+    "qrcode.react": "^3.1.0"
   }
 }

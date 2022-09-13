@@ -28,6 +28,8 @@ import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
+import { LiveRoom } from 'renderer/apps/store';
+import { RoomsActions } from './actions/rooms';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -143,7 +145,6 @@ coreStore.setResuming(true); // need to start the renderer with resuming
 OSActions.boot();
 
 OSActions.onBoot((_event: any, response: any) => {
-  console.log(response);
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
   // console.log('onBoot');
@@ -265,6 +266,8 @@ OSActions.onConnected(
 
 // Auth events
 OSActions.onLogout((_event: any) => {
+  // RoomsActions.exitRoom();
+  LiveRoom.leave()
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
   ShellActions.setBlur(true);
@@ -284,7 +287,6 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.bazaar, value.patch);
     }
     if (value.resource === 'notification') {
-      console.log('notification patch');
       applyPatch(servicesStore.notifications, value.patch);
     }
     if (value.resource === 'onboarding') {

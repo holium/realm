@@ -116,6 +116,14 @@ export const OnboardingStore = types
       self.accessCode = undefined;
     },
 
+    beginRealmInstall() {
+      self.installer.set('loading');
+    },
+
+    endRealmInstall() {
+      self.installer.set('loaded');
+    },
+
     installRealm: flow(function* () {
       self.installer.set('loading');
       self.installer.set('loaded');

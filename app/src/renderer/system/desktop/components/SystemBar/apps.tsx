@@ -2,7 +2,7 @@ import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
 import { AccountTrayApp } from 'renderer/apps/Account';
 import { MessagesTrayApp } from 'renderer/apps/Messages';
-import { WalletTrayApp } from 'renderer/apps/Wallet';
+import { WalletApp } from 'renderer/apps/Wallet';
 import { trayStore } from '../../../../apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 
@@ -72,12 +72,31 @@ export const trayAppRenderers: ViewRenderers = {
       height: 600,
     },
     component: (props: any) => <MessagesTrayApp {...props} />,
+    onOpen: (evt: any) => {
+      const position = 'top-left';
+      const appDims = dimensions['account-tray'];
+      const anchorOffset = { x: 4, y: 26 };
+      const { setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
+        trayStore;
+      const { left, bottom }: any = calculateAnchorPoint(
+        evt,
+        anchorOffset,
+        position,
+        dimensions
+      );
+      setTrayAppCoords({
+        left,
+        bottom,
+      });
+      setTrayAppDimensions(appDims);
+      setActiveApp('messages-tray');
+    },
   },
   'wallet-tray': {
+    component: (props: any) => <WalletApp {...props} />,
     dimensions: {
       width: 330,
-      height: 360,
+      height: 600,
     },
-    component: (props: any) => <WalletTrayApp {...props} />,
   },
 };

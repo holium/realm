@@ -87,7 +87,7 @@ export const NotificationApi: any = {
       app: 'hark-store',
       path: '/updates',
       onEvent: async (data: any, id?: number, mark?: string) => {
-        console.log(data, mark);
+        // console.log(data, mark);
         if (data['more']) {
           // console.log(
           //   'unread notifications => %o',

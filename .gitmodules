@@ -1,0 +1,4 @@
+[submodule "desks/wallet"]
+	path = desks/wallet
+	url = git@github.com:holium/wallet.git
+  branch = e8198e47578acdf07f8450ff99f99c455b2ed97d

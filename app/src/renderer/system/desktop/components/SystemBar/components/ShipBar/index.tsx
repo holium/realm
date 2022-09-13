@@ -9,7 +9,7 @@ import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
 import { useServices } from 'renderer/logic/store';
 import { TrayClock } from './Clock';
-import { rgba } from 'polished';
+import { darken, rgba } from 'polished';
 
 type ShipTrayProps = {};
 
@@ -24,6 +24,10 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
     [desktop.theme.dockColor]
   );
 
+  const iconHoverColor = useMemo(
+    () => rgba(darken(0.05, desktop.theme.dockColor), 0.5),
+    [desktop.theme.windowColor]
+  );
   const [voiceOn, setVoiceOn] = useState(false);
 
   return (
@@ -54,6 +58,17 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
         </IconButton> */}
         <WalletTray theme={desktop.theme} />
         <MessagesTray theme={desktop.theme} />
+        {/* <IconButton
+          id="notification-tray-icon"
+          size={28}
+          customBg={iconHoverColor}
+          color={textColor}
+          whileTap={{ scale: 0.95 }}
+          transition={{ scale: 0.1 }}
+          onClick={() => {}}
+        >
+          <Icons name="Notifications" pointerEvents="none" />
+        </IconButton> */}
         <AccountTray theme={desktop.theme} />
         {/* <TrayClock /> */}
       </Flex>

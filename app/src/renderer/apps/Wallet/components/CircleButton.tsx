@@ -18,6 +18,7 @@ import { ThemeType } from '../../../theme';
 
 type CircleButtonProps = {
   icon: IconPathsType;
+  iconColor?: string;
   title?: string;
 };
 
@@ -64,7 +65,7 @@ const FullButton = styled(Flex)`
         }
         ${Text} {
           transition: ${props.theme.transition};
-          color: ${darken(0.05, props.theme.colors.text.primary)};
+          color: ${darken(0.05, props.theme.colors.brand.primary)};
         }
       }
     `}
@@ -73,7 +74,7 @@ const FullButton = styled(Flex)`
 export const CircleButton: FC<CircleButtonProps> = (
   props: CircleButtonProps
 ) => {
-  const { icon, title } = props;
+  const { icon, title, iconColor } = props;
   // const { walletStore } = useMst();
 
   return (
@@ -83,10 +84,10 @@ export const CircleButton: FC<CircleButtonProps> = (
       justifyContent="center"
     >
       <CircleBtn>
-        <Icons name={icon} size={24} color="inherit" />
+        <Icons name={icon} size={24} color={iconColor || 'inherit'} />
       </CircleBtn>
       {title && (
-        <Text mt={2} fontWeight={300} color="text.primary" fontSize={3}>
+        <Text mt={2} fontWeight={300} color="brand.primary" fontSize={2}>
           {title}
         </Text>
       )}

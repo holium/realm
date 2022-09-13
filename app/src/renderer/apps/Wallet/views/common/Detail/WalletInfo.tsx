@@ -1,0 +1,111 @@
+import { FC, useState } from 'react';
+import { isValidPatp} from 'urbit-ob';
+import { ethers } from 'ethers';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
+import { theme as themes } from 'renderer/theme';
+import { darken, lighten } from 'polished';
+import {QRCodeSVG} from 'qrcode.react';
+
+import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
+import { CircleButton } from '../../../components/CircleButton';
+import { useTrayApps } from 'renderer/apps/store';
+import { useServices } from 'renderer/logic/store';
+import { ThemeModelType } from 'os/services/shell/theme.model';
+import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme } from '../../../lib/helpers';
+import { EthWalletType, BitcoinWalletType } from 'os/services/tray/wallet.model';
+
+const abbrMap = {
+  ethereum: 'ETH',
+  bitcoin: 'BTC',
+};
+
+interface WalletInfoProps {
+  wallet: EthWalletType | BitcoinWalletType
+  QROpen: boolean
+  setQROpen: (open: boolean) => void
+  hideWalletHero: boolean
+  sendTrans: boolean
+}
+
+export const WalletInfo: FC<WalletInfoProps> = observer((props: WalletInfoProps) => {
+  const { desktop } = useServices();
+  const { walletApp } = useTrayApps();
+
+  const theme = getBaseTheme(desktop);
+  const panelBackground = darken(0.04, desktop.theme!.windowColor);
+  const panelBorder = darken(0.08, desktop.theme!.windowColor);
+
+  const CopyButton: FC<{ content: string}> = (props: { content: string }) => {
+    const [copied, setCopied] = useState(false);
+
+    function copy() {
+      navigator.clipboard.writeText(props.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 750);
+    }
+
+    return (
+      <Box>
+        { !copied
+            ? (
+              <Box onClick={copy}>
+                <Icons name="Copy" height="20px" color={theme.colors.text.disabled} />
+              </Box>
+            )
+            : <Icons name="CheckCircle" height="20px" color={theme.colors.ui.intent.success} />
+        }
+      </Box>
+    )
+  };
+
+  return (
+    <Flex p={2} width="100%"
+          background={darken(.03, desktop.theme.windowColor)} border={`solid 1px ${panelBorder}`} borderRadius="8px"
+          flexDirection="column" justifyContent="center" alignItems="center">
+      <Flex width="100%" justifyContent="space-between">
+        <Flex>
+          <Icons name="Ethereum" height="20px" mr={2} />
+          <Text pt="2px" textAlign="center" fontSize="14px">{shortened(props.wallet!.address)}</Text>
+        </Flex>
+        <Flex>
+          {props.sendTrans
+            ? <Icons name="ChevronDown" color={theme.colors.text.disabled} />
+            : <>
+              <CopyButton content={props.wallet!.address} />
+              <Box onClick={() => props.setQROpen(!props.QROpen)}>
+                <Icons ml={2} name="QRCode" height="20px" color={props.QROpen ? theme.colors.brand.primary : theme.colors.text.disabled} />
+              </Box>
+            </>
+          }
+        </Flex>
+      </Flex>
+      <Box width="100%" hidden={!props.QROpen}>
+        <Flex mt={1} p={3} width="100%" height="200px" justifyContent="center" alignItems="center">
+            <QRCodeSVG width="100%" height="100%" value={props.wallet!.address} />
+        </Flex>
+      </Box>
+      <Box p={2} width="100%" hidden={props.hideWalletHero}>
+        <Text
+          mt={3}
+          opacity={0.5}
+          fontWeight={600}
+          color={theme.colors.text.tertiary}
+          style={{ textTransform: 'uppercase' }}
+          animate={false}
+        >
+          {props.wallet.nickname}
+        </Text>
+        <Text
+          opacity={0.9}
+          fontWeight={600}
+          fontSize={7}
+          animate={false}
+        >
+          {/* @ts-ignore */}
+          {props.wallet.balance} {abbrMap[props.wallet.network]}
+        </Text>
+      </Box>
+    </Flex>
+  )
+});

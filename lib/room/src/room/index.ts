@@ -147,6 +147,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     const isLower = this.our.patpId < peer.patpId;
     // console.log('isLower', isLower);
     peer.registerAudio();
+    this.our.streamTracks(peer);
     if (isLower) {
       console.log('we are ready', peer.patp);
       peer.sendAwaitingOffer();
