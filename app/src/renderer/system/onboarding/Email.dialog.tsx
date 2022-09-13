@@ -90,7 +90,7 @@ function VerifyScreen (props: { theme: ThemeType, verificationCode: string, done
           Verify Email
         </Text>
         <Text fontSize={2} lineHeight="copy" variant="body">
-          We sent a verification code to your email. Once you receive the code, verify it below.
+          We sent a verification code to your email. Once you receive the code, confirm it below.
         </Text>
       </Flex>
       <Flex flexDirection="column">
