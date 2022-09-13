@@ -210,7 +210,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                   avatar={
                     avatar.state.value && !avatar.computed.error
                       ? avatar.state.value
-                      : null
+                      : ''
                   }
                   patp={shipName}
                   borderRadiusOverride="6px"
@@ -321,8 +321,11 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                             size={24}
                           />
                         }
-                        value={avatar.state.value}
-                        error={avatar.computed.ifWasEverBlurredThenError}
+                        value={avatar.state.value || ''}
+                        error={
+                          avatar.computed.isDirty &&
+                          avatar.computed.ifWasEverBlurredThenError
+                          }
                         onChange={(e: any) =>
                           avatar.actions.onChange(e.target.value)
                         }
@@ -337,8 +340,11 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                       tabIndex={1}
                       name="nickname"
                       placeholder="optional"
-                      defaultValue={nickname.state.value}
-                      error={nickname.computed.ifWasEverBlurredThenError}
+                      value={nickname.state.value || ''}
+                      error={
+                        nickname.computed.isDirty &&
+                        nickname.computed.ifWasEverBlurredThenError
+                        }
                       onChange={(e: any) =>
                         nickname.actions.onChange(e.target.value)
                       }
