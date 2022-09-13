@@ -20,6 +20,7 @@ type IProps = {
   highlightColor?: string;
   showBackground?: boolean;
   textColor?: string;
+  fontWeight?: string | number;
   fontSize?: string | number;
   theme: ThemeType;
   disabled?: boolean;
@@ -29,7 +30,6 @@ type IProps = {
 export const TextButtonStyle = styled(styled.div`
   font-family: ${(props: any) => props.theme.fonts.body};
   font-style: normal;
-  font-weight: 500;
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
@@ -45,6 +45,7 @@ export const TextButtonStyle = styled(styled.div`
   ${(props: IProps) =>
     css`
       font-size: ${props.fontSize ? `${props.fontSize}px` : '14px'};
+      font-weight: ${props.fontWeight ? props.fontWeight : 500};
       color: ${props.textColor || props.theme.colors.brand.primary};
       background-color: ${
         props.showBackground ? `${props.highlightColor}25` : 'transparent'
@@ -89,6 +90,7 @@ type TextButtonProps = {
   showBackground?: boolean;
   textColor?: string;
   fontSize?: number | string;
+  fontWeight?: number | string;
   disabled?: boolean;
   style?: any;
   onClick?: (evt: any) => void;

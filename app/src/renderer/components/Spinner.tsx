@@ -64,7 +64,7 @@ export interface SpinnerProps {
   block?: boolean;
   title?: string;
   color?: string;
-  size: number;
+  size: number | string;
 }
 
 const defaultProps = {
@@ -83,7 +83,7 @@ export const Spinner = React.memo(
     ...props
   }: SimpleSpinnerProps & SpinnerProps = defaultProps) => (
     <Box display={block ? 'block' : 'inline-block'} {...props}>
-      <SimpleSpinnerComposed title={title} size={sizes[size]} color={color} />
+      <SimpleSpinnerComposed title={title} size={typeof size === 'number' ? sizes[size] : size} color={color} />
       {/* <RotatingLoader title={title} fontSize={size} color={color} /> */}
     </Box>
   )
