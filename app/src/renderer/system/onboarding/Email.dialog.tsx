@@ -1,8 +1,8 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
 
-import { Flex, Input, Label, Text, Button, BigInput } from 'renderer/components';
+import { Flex, Input, Label, Text, TextButton, Button, Box, BigInput, Spinner } from 'renderer/components';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
@@ -41,7 +41,7 @@ function InitialScreen (props: { done: any }) {
 
   return (
     <>
-      <Flex mt={7} flexDirection="column">
+      <Flex flexDirection="column">
          <Text fontSize={3} fontWeight={500} mb={20}>
           Email
         </Text>
@@ -50,12 +50,14 @@ function InitialScreen (props: { done: any }) {
           share it with anyone or abuse it for marketing spam.
         </Text>
       </Flex>
-      <Flex flexDirection="column">
-        <Label required={true}>Email</Label>
+      <Flex mt={8} flexDirection="column">
+        <Label mb={3} required={true}>Email</Label>
         <Input value={email} onChange={onChange} type="email" required={true} />
-        <Button mt="50px" disabled={!email || !emailValidator.validate(email)} isLoading={loading} onClick={onClick}>
-          Submit
-        </Button>
+        <Box mt={7} width="100%">
+          <Button width="100%" disabled={!email || !emailValidator.validate(email)} isLoading={loading} onClick={onClick}>
+            Submit
+          </Button>
+        </Box>
       </Flex>
     </>
   );
@@ -66,23 +68,24 @@ function VerifyScreen (props: { theme: ThemeType, verificationCode: string, done
   const [error, setError] = useState(false);
   const validChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-  const onChange = (value: string) => {
-    setError(false);
-    setCode(value
-      .split('').filter(char => validChars.includes(char))
-      .join('').toUpperCase());
-  }
-
-  const submit = async () => {
+  const submit = async (code: string) => {
     let wasCorrect = await OnboardingActions.verifyEmail(code);
-    wasCorrect
-      ? props.done()
-      : setError(true);
+    wasCorrect ? props.done() : setError(true);
   };
+
+  const onChange = async (value: string) => {
+    setError(false);
+    let newCode = value
+      .trim().split('').filter(char => validChars.includes(char))
+      .slice(0, 6).join('').toUpperCase();
+
+    setCode(newCode);
+    if (newCode.length >= 6) submit(newCode);
+  }
 
   return (
     <>
-      <Flex mt={7} flexDirection="column">
+      <Flex mt={7} mb={5} flexDirection="column">
          <Text fontSize={3} fontWeight={500} mb={20}>
           Verify Email
         </Text>
@@ -91,13 +94,51 @@ function VerifyScreen (props: { theme: ThemeType, verificationCode: string, done
         </Text>
       </Flex>
       <Flex flexDirection="column">
-        <Label required={true}>Verification Code</Label>
-        <BigInput mt={3} placeholder="A1F9C5" value={code} onChange={onChange} />
-        <Button mt={5} disabled={code.length < 6} onClick={submit}>Submit</Button>
-        <Text mt={3} fontSize={1} color={props.theme.colors.text.error}>
-          {error && 'Verification code was incorrect.'}
-        </Text>
+        <Flex mt={5} width="100%" justifyContent="center">
+          <BigInput mt={7} placeholder="A1F9C5" value={code} onChange={onChange} />
+        </Flex>
+        <Flex mt={4} flexDirection="column">
+          <ResendCodeButton theme={props.theme} />
+          <Text mt={3} fontSize={1} color={props.theme.colors.text.error}>
+            {error && 'Verification code was incorrect.'}
+          </Text>
+        </Flex>
       </Flex>
     </>
+  );
+}
+
+function ResendCodeButton (props: { theme: ThemeType }) {
+  const [ state, setState ] = useState('initial');
+
+  const resendCode = async () => {
+    setState('loading');
+    await OnboardingActions.resendEmailConfirmation();
+    setState('resent');
+  }
+
+  useEffect(() => {
+    if (state === 'resent')
+      setTimeout(() => setState('initial'), 3000);
+  }, [state]);
+
+  return (
+    <Flex width="100%" justifyContent="center" flexDirection="row" alignItems="center">
+      { state === 'initial' || state === 'loading'
+        ? (
+          <>
+            <TextButton fontSize={1} fontWeight={400} disabled={state === 'loading'} textColor={state === 'loading' ? props.theme.colors.text.disabled : props.theme.colors.brand.secondary} onClick={resendCode}>
+              send another code
+            </TextButton>
+            { state === 'loading' && <Spinner ml={1} size="8px" color={props.theme.colors.brand.secondary} /> }
+          </>
+        )
+        : (
+          <Text variant="body" fontSize={1} color={props.theme.colors.text.success}>
+            Another verification code was sent.
+          </Text>
+        )
+      }
+    </Flex>
   );
 }

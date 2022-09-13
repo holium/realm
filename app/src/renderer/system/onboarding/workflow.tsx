@@ -49,7 +49,7 @@ const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.EMAIL]: {
     workflow: true,
     hasCloseButton: false,
-    customNext: false,
+    customNext: true,
     component: (props: any) => <EmailDialog {...props} />,
     isValidated: (state: any) => {
       return state && state.disclaimerAccepted;
@@ -68,8 +68,8 @@ const initialOnboardingDialogs: DialogRenderers = {
       dimensions: {
         x: 0,
         y: 0,
-        width: 520,
-        height: 490,
+        width: 450,
+        height: 420, // ayyyy
       },
     },
   },
