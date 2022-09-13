@@ -166,15 +166,15 @@ onAction(trayStore, (call) => {
           const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
           console.log('entering and switching to connect');
 
-          if (room) {
-            if (LiveRoom.state === RoomState.Disconnected) {
-              // not init yet, so leave
-              // this case is hit if we boot realm and are still in a room from a previous session.
-              RoomsActions.leaveRoom(room.id);
-              return;
-            }
-            // LiveRoom.connect(room);
-          }
+          // if (room) {
+          //   if (LiveRoom.state === RoomState.Disconnected) {
+          //     // not init yet, so leave
+          //     // this case is hit if we boot realm and are still in a room from a previous session.
+          //     RoomsActions.leaveRoom(room.id);
+          //     return;
+          //   }
+          //   // LiveRoom.connect(room);
+          // }
         }
       }
     }
