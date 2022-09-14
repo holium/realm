@@ -292,8 +292,9 @@ export class Conduit extends EventEmitter {
         }
       );
       return response.data;
-    } catch (err) {
-      console.log(err);
+    } catch (err : any) {
+      console.log("scry error", app, path, err.response.status)
+      // console.log(err);
     }
   }
 

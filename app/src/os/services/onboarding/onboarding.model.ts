@@ -4,6 +4,7 @@ import { AccessCode, HostingPlanet } from 'os/api/holium';
 
 export enum OnboardingStep {
   DISCLAIMER = 'onboarding:disclaimer',
+  EMAIL = 'onboarding:email',
   HAVE_URBIT_ID = 'onboarding:have-urbit-id',
   ADD_SHIP = 'onboarding:add-ship',
   ACCESS_CODE = 'onboarding:access-code',
@@ -60,6 +61,8 @@ export const OnboardingStore = types
   .model({
     currentStep: OnboardingStep.DISCLAIMER,
     agreedToDisclaimer: false,
+    email: types.maybe(types.string),
+    verificationCode: types.maybeNull(types.string),
     seenSplash: types.optional(types.boolean, false),
     selfHosted: false,
     planet: types.maybe(PlanetModel),
@@ -79,6 +82,14 @@ export const OnboardingStore = types
 
     setAgreedToDisclaimer() {
       self.agreedToDisclaimer = true;
+    },
+
+    setEmail(email: string) {
+      self.email = email;
+    },
+
+    setVerificationCode: (verificationCode: string | null) => {
+      self.verificationCode = verificationCode;
     },
 
     setSelfHosted(selfHosted: boolean) {

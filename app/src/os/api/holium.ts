@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-const baseURL =`https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+const baseURL = process.env.USE_LOCAL_API
+  ? 'http://localhost:8080'
+  : `https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+
 const client = axios.create({ baseURL });
 
 export interface HostingPlanet {
@@ -34,9 +37,14 @@ export interface AccessCode {
 
 export class HoliumAPI {
 
-  async createAccount(accessCode?: string): Promise<{ id: string, planets: HostingPlanet[] }> {
-    let { data } = await client.post(`accounts/create${accessCode ? `?accessCode=${accessCode}` : ''}`);
-    return { id: data.id, planets: data.planets };
+  async createAccount(email: string, accessCode?: string): Promise<{ id: string, verificationCode: string }> {
+    let { data } = await client.post(`accounts/create?email=${email}${accessCode ? `&accessCode=${accessCode}` : ''}`);
+    return { id: data.id, verificationCode: data.verificationCode };
+  }
+
+  async resendVerificationCode(accountId: string): Promise<string> {
+    let { data } = await client.post(`accounts/${accountId}/resend-email-verification`);
+    return data.verificationCode;
   }
 
   async getPlanets(accountId: string, accessCode?: string): Promise<HostingPlanet[]> {

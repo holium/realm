@@ -191,7 +191,7 @@ export const BazaarStore = types
     _treaties: types.map(
       types.model({
         key: types.identifier,
-        image: types.string,
+        image: types.maybeNull(types.string),
         title: types.string,
         license: types.string,
         version: types.string,

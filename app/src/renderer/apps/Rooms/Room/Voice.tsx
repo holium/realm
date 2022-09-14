@@ -15,9 +15,9 @@ export const VoiceView: FC<VoiceViewProps> = ({
 }: VoiceViewProps) => {
   return (
     <Flex flex={2} gap={16} p={2} flexDirection="row" alignItems="center">
-      {/* <Speaker type="host" person={host} audio={audio} /> */}
+      <Speaker type="host" person={host} audio={audio} />
       {present
-        // .filter((person: string) => person !== host)
+        .filter((person: string) => person !== host)
         .map((person: string, index: number) => (
           <Speaker key={person} type="speaker" person={person} audio={audio} />
         ))}

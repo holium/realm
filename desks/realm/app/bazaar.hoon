@@ -1,7 +1,7 @@
 ::
 ::  %bazaar [realm]:
 ::
-::  A store for metadata on app dockets per Realm space.
+::  A store for metadata on app dockets and installs.
 ::
 ::
 /-  store=bazaar, docket, spaces-store=spaces

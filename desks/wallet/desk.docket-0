@@ -1,0 +1,9 @@
+:~  title+'Wallet'
+    info+'A Realm dependency'
+    color+0x42.8e65
+    glob-http+['https://holium-app-globs.nyc3.digitaloceanspaces.com/realm/glob-0v3.ijtsa.kqfsm.f71li.n99kg.etthr.glob' 0v3.ijtsa.kqfsm.f71li.n99kg.etthr]
+    base+'wallet'
+    version+[0 1 0]
+    website+'https://holium.com'
+    license+'MIT'
+==

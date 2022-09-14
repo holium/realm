@@ -85,7 +85,7 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
       {roomsApp.liveRoom ? (
         <Flex style={{ pointerEvents: 'none' }}>
           <RoomRow
-            tray
+            tray={true}
             {...roomsApp.liveRoom}
             rightChildren={
               <Icons

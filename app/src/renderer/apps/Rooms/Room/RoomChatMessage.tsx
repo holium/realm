@@ -64,6 +64,9 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
                 <Text
                 color={theme.textColor}
                 fontSize={2}
+                style={{
+                  maxWidth: '200px',
+                }}
                 >
                 {`${chat.contents}`}
                 </Text>

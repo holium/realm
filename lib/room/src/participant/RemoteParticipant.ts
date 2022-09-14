@@ -211,8 +211,15 @@ export class RemoteParticipant extends Participant {
     });
   }
 
+  // TODO this still doesnt fix the mobx warning
+  // and its weird that the warning only happens some small % of the time
+  setConnectionState(connState : PeerConnectionState) {
+    this.connectionState = connState;
+  }
   onConnectionChange(event: Event) {
-    // console.log(event);
+          // @ts-ignore
+
+    this.setConnectionState(event.currentTarget.connectionState)
     if (
       // @ts-ignore
       event.currentTarget.connectionState === PeerConnectionState.Connected
@@ -220,7 +227,6 @@ export class RemoteParticipant extends Participant {
       console.log('peers connected!');
 
       this.emit(PeerConnectionState.Connected);
-      this.connectionState = PeerConnectionState.Connected;
 
       if (!this.isLower) {
         console.log('creating data channel', this.patp);
@@ -231,9 +237,6 @@ export class RemoteParticipant extends Participant {
       event.currentTarget.connectionState === PeerConnectionState.Connecting
     ) {
       console.log('peers connecting!');
-      // MoBX is complaining about this!
-      // changing (observed) observable values without using an action is not allowed
-      this.connectionState = PeerConnectionState.Connecting;
 
       this.emit(PeerConnectionState.Connecting);
     }
@@ -242,7 +245,6 @@ export class RemoteParticipant extends Participant {
       event.currentTarget.connectionState === PeerConnectionState.Disconnected
     ) {
       console.log('peers Disconnected!');
-      this.connectionState = PeerConnectionState.Disconnected;
       this.emit(PeerConnectionState.Disconnected);
       // this.audioRef.parentElement?.removeChild(this.audioRef);
     }
@@ -251,7 +253,6 @@ export class RemoteParticipant extends Participant {
       event.currentTarget.connectionState === PeerConnectionState.Failed
     ) {
       console.log('peer connect failed!');
-      this.connectionState = PeerConnectionState.Failed;
       this.emit(PeerConnectionState.Failed);
       // this.audioRef.parentElement?.removeChild(this.audioRef);
     }
@@ -260,7 +261,6 @@ export class RemoteParticipant extends Participant {
       event.currentTarget.connectionState === PeerConnectionState.Closed
     ) {
       console.log('peer connect closed!');
-      this.connectionState = PeerConnectionState.Closed;
       this.reset();
       this.emit(PeerConnectionState.Closed);
       // this.audioRef.parentElement?.removeChild(this.audioRef);
