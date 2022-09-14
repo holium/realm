@@ -4,7 +4,7 @@ import { createField, createForm } from 'mobx-easy-form';
 
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ChatMessage, MessageType } from 'renderer/apps/Messages/components/ChatMessage';
+import { ChatMessage } from 'renderer/apps/Messages/components/ChatMessage';
 import { useTrayApps } from 'renderer/apps/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { ChatModelType } from 'os/services/tray/rooms.model';
