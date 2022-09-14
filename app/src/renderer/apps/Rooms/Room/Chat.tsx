@@ -159,7 +159,10 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
             }}
             value={text.state.value}
             // value={''}
-            error={!text.computed.isDirty || text.computed.error}
+            error={
+              text.computed.isDirty &&
+              text.computed.ifWasEverBlurredThenError
+              }
             onChange={(e: any) => {
               text.actions.onChange(e.target.value);
             }}
