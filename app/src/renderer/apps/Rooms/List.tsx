@@ -86,7 +86,11 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           </TextButton>
         </Flex>
       </Titlebar>
-      <Flex style={{ marginTop: 54 }} gap={8} flex={1} flexDirection="column">
+      <Flex style={{ marginTop: 54, maxHeight: '100%' }}
+            gap={8} flex={1}
+            flexDirection="column"
+            overflowY={'scroll'}
+            >
         
         {knownRooms.length === 0 && (
           <Flex
