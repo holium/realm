@@ -472,16 +472,22 @@ export class OnboardingService extends BaseService {
 
   async installRealm(_event: any, ship: string) {
     // TODO kiln-install realm desk
-    console.log('placeholder: installing realm on ', ship);
     if (!process.env.INSTALL_MOON) {
       console.error(
         'error: [installRealm] - INSTALL_MOON not found in environment variables. please configure.'
       );
       return;
     }
+    if (process.env.INSTALL_MOON === 'bypass') {
+      console.error(
+        "error: [installRealm] - INSTALL_MOON set to 'bypass'. skipping realm installation..."
+      );
+      this.state.installRealm();
+      return;
+    }
     // const desks: string[] = ['realm', 'courier'];
     const desks: string[] = ['realm', 'courier'];
-    console.log('installRealm: starting...');
+    console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp, cookie } = this.state.ship!;
     const tempConduit = await this.tempConduit(url, patp, cookie!);
     this.state.beginRealmInstall();
