@@ -23,12 +23,13 @@ export const EthNew: FC<any> = observer(() => {
   const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.CREATE);
   const [passcode, setPasscode] = useState('');
   // TODO move this to background thread
-  const seedPhrase = useMemo(
+  /*const seedPhrase = useMemo(
     () => ethers.Wallet.createRandom().mnemonic.phrase,
     []
-  );
+  );*/
   // const seedPhrase =
   //   'govern mountain flush ordinary field adult stereo quiz humor pigeon flush stuff';
+  const seedPhrase = "envelope robot unlock mercy lizard nothing frozen outside laundry woman dial expand"
 
   let setPasscodeWrapper = (passcode: string) => {
     // console.log('setting passcode!');
