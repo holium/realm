@@ -372,6 +372,9 @@ export class OnboardingService extends BaseService {
           console.log('docket/charges => %o', data);
           if (data.hasOwnProperty('add-charge')) {
             resolve(data);
+            console.log('unsubscribing from docket/charges...');
+            await tempConduit.unsubscribe(_id!);
+            console.log('unsubscribed from docket/charges...');
           }
         },
         onError: () => {
@@ -389,13 +392,21 @@ export class OnboardingService extends BaseService {
 
   async addAlly(tempConduit: Conduit, ship: string) {
     return new Promise(async (resolve, reject) => {
+      let subscriptionId = undefined;
       await tempConduit.watch({
         app: 'treaty',
         path: '/treaties',
+        onSubscribed: (subscription: number) => {
+          console.log('treaty/treaties subscription succeeded!');
+          subscriptionId = subscription;
+        },
         onEvent: async (data: any, _id?: number, mark?: string) => {
           console.log('treaty/treaties => %o', data);
           if (data.hasOwnProperty('add')) {
             resolve(data);
+            console.log('unsubscribing from treaty/treaties...');
+            await tempConduit.unsubscribe(_id!);
+            console.log('unsubscribed from treaty/treateis...');
           }
         },
         onError: () => {

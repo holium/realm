@@ -14,6 +14,7 @@ import {
   SubscribeCallbacks,
   SubscribeParams,
   Thread,
+  UnsubscribeParams,
 } from './types';
 
 // For now, set it to 20
@@ -139,6 +140,11 @@ export class Conduit extends EventEmitter {
                 console.error(new Error('watch sse error'));
               }
               this.watches.delete(eventId);
+            } else {
+              const watchHandler = this.watches.get(eventId);
+              if (watchHandler) {
+                watchHandler.onSubscribed!(eventId);
+              }
             }
             break;
           //
@@ -237,6 +243,7 @@ export class Conduit extends EventEmitter {
       onEvent: (_data) => {},
       onQuit: (_id) => {},
       onError: (_id, _err) => {},
+      onSubscribed: (_id) => {},
       ...params,
     };
     const message: Message = {
@@ -248,6 +255,23 @@ export class Conduit extends EventEmitter {
     };
     this.watches.set(message.id, handlers);
     this.postToChannel(message).then(() => {
+      return message.id;
+    });
+  }
+
+  /**
+   * watch
+   *
+   * @param params
+   */
+  async unsubscribe(subscription: number) {
+    const message: Message = {
+      id: this.nextMsgId,
+      action: Action.Unsubscribe,
+      subscription: subscription,
+    };
+    this.postToChannel(message).then(() => {
+      this.watches.delete(subscription);
       return message.id;
     });
   }
