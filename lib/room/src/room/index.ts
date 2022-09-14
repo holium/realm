@@ -83,13 +83,15 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   leave() {
-    // console.log("leaving room 99999999999")
+    console.log("LiveRoom.leave()", this.participants)
     this.state = RoomState.Disconnected;
 
     this.participants.forEach((peer: RemoteParticipant) => {
       // console.log("kicking", peer.patp)
       this.kickParticipant(peer.patp);
     });
+
+    this.participants.clear();
 
     if (this.our) this.our.disconnect();
 
@@ -126,10 +128,12 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     if (exitDiff.exit) {
       if (exitDiff.exit === this.our.patp) {
         // console.log('we should leave the room and unsub', exitDiff);
-        this.disconnect();
+        // we've been kicked from the room
+        this.leave();
       }
-      // console.log('remove participant', exitDiff.exit);
-      this.kickParticipant(exitDiff.exit);
+      else {
+        this.kickParticipant(exitDiff.exit);
+      }
     }
   }
 
@@ -158,6 +162,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
   async kickParticipant(peer: Patp) {
     if (peer === this.our.patp) {
+      // hmm i feel like this shouldnt ever happen
       this.leave();
       return;
     }
@@ -165,7 +170,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     await this.participants.get(peer)?.cleanup();
     this.participants.delete(peer);
 
-    // console.log('after kicked', this.participants);
   }
 
   registerListeners(peer: RemoteParticipant) {
