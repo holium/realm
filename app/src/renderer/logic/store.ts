@@ -152,9 +152,6 @@ OSActions.onBoot((_event: any, response: any) => {
     key: 'ships',
     model: response.auth,
   });
-  // if (response.auth.firstTime) {
-  //   SoundActions.playStartup();
-  // }
 
   if (response.models && response.ship) {
     applySnapshot(
@@ -237,6 +234,7 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
+    console.log(initials.models.courier);
     applySnapshot(
       servicesStore.courier,
       castToSnapshot(initials.models.courier!)
@@ -267,7 +265,7 @@ OSActions.onConnected(
 // Auth events
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
-  LiveRoom.leave()
+  LiveRoom.leave();
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
   ShellActions.setBlur(true);
@@ -320,7 +318,7 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.courier, value.patch);
     }
   }
-
+  // TODO do we need initial anymore?
   if (value.response === 'initial') {
     if (value.resource === 'desktop') {
       applySnapshot(servicesStore.desktop, value.model);

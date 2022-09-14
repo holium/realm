@@ -65,10 +65,11 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       label: 'Kick',
       loading: false,
       onClick: (evt: any) => {
-        if(!roomsApp.liveRoom) return;
-        console.log("kicking user?")
+        if (!roomsApp.liveRoom) return;
+        console.log('kicking user?');
         RoomsActions.kickUser(roomsApp.liveRoom.id, person);
         LiveRoom.kickParticipant(person);
+        evt.stopPropagation();
       },
     });
   }

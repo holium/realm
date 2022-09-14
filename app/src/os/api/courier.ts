@@ -1,7 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { PokeCallbacks, PokeParams } from '@holium/conduit/src/types';
 import { createPost, Post } from '@urbit/api';
-import { patp2dec } from 'urbit-ob';
 import { CourierStoreType } from '../services/ship/models/courier';
 import { Patp } from '../types';
 
@@ -20,11 +18,13 @@ export const CourierApi = {
     });
     return response['dm-log'];
   },
+
   dmUpdates: (conduit: Conduit, store: CourierStoreType): Promise<any> => {
     return conduit.watch({
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
+        // console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
@@ -37,6 +37,10 @@ export const CourierApi = {
             // console.log('group-dm-created', payload);
             // if()
             // store.setReceivedDM(payload);
+            break;
+          case 'invite-dm':
+            console.log('invited to dm', payload);
+            store.setNewPreview(payload);
             break;
           default:
             console.log('action', action);
@@ -144,11 +148,18 @@ export const CourierApi = {
     return await conduit.poke(payload);
   },
   declineDm: async (conduit: Conduit, toShip: string) => {
+    console.log({
+      app: 'dm-hook',
+      mark: 'dm-hook-action',
+      json: {
+        decline: toShip,
+      },
+    });
     const payload = {
       app: 'dm-hook',
       mark: 'dm-hook-action',
       json: {
-        reject: toShip,
+        decline: toShip,
       },
     };
     return await conduit.poke(payload);

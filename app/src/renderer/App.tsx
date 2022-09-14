@@ -52,7 +52,7 @@ export const App: FC = observer(() => {
 
   return (
     <CoreProvider value={coreStore}>
-      <ThemeProvider theme={theme[themeMode]}>
+      <ThemeProvider theme={theme[themeMode as 'light' | 'dark']}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}

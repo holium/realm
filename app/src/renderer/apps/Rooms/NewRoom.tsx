@@ -41,10 +41,13 @@ export const createRoomForm = (
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (name.length > 1 && name.length < 20 && /^[a-zA-Z0-9- ]*$/.test(name)) {
+      if (
+        name.length > 1 &&
+        name.length < 20 &&
+        /^[a-zA-Z0-9- ]*$/.test(name)
+      ) {
         return { error: undefined, parsed: name };
       }
-      
 
       return { error: 'Invalid Name', parsed: undefined };
     },
@@ -152,7 +155,9 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               backgroundColor: inputColor,
             }}
             value={name.state.value}
-            error={!name.computed.isDirty || name.computed.error}
+            error={
+              name.computed.isDirty && name.computed.ifWasEverBlurredThenError
+            }
             onChange={(e: any) => {
               name.actions.onChange(e.target.value);
             }}

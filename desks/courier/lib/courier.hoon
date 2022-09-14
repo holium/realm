@@ -13,6 +13,10 @@
 ::
 ++  gs   ::  converts dms from graph-store dm-inbox
   |%
+  ++  invite-preview
+    |=  [=ship our=ship now=@da]
+    =/  rolo           .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
+    (form-pending ship now rolo)
   ::
   ::  DM list handlers
   :: 
@@ -461,6 +465,9 @@
       (dm-log:encode chat.vi)
       ::
         %group-dm-created
+      (preview:encode message-preview.vi)
+      ::
+        %invite-dm
       (preview:encode message-preview.vi)
     ==
   ::

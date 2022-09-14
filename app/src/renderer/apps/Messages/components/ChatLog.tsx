@@ -1,6 +1,8 @@
-import { FC, useRef, useEffect, useState } from 'react';
+import { FC, useRef, useEffect, useState, memo } from 'react';
 import styled from 'styled-components';
 import ScrollView from 'react-inverted-scrollview';
+import { isEqual } from 'lodash';
+import { toJS } from 'mobx';
 import { ChatMessage } from './ChatMessage';
 import { GraphDMType } from 'os/services/ship/models/courier';
 import { observer } from 'mobx-react';
@@ -22,15 +24,80 @@ const Log = styled(Flex)`
   }
 `;
 
+const reduceToPending = (arr: GraphDMType[]) => {
+  return arr.map((val: GraphDMType) => val.pending);
+};
+
 export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
   const { loading, messages, isGroup } = props;
   const { dimensions } = useTrayApps();
   const { ship, desktop } = useServices();
+  const pageSize = 20;
+  const [listEnd, setListEnd] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const [all, setAll] = useState<GraphDMType[]>(toJS(messages));
+  const [current, setCurrent] = useState<GraphDMType[]>(messages);
+  const [chunk, setChunk] = useState<GraphDMType[]>([]);
   const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
     desktop.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
+  // console.log(reduceToPending(messages), reduceToPending(current));
+
+  // todo better render prevention
+  const isUpdated = isEqual(reduceToPending(all), reduceToPending(current));
 
   let scrollView = useRef<any>(null);
+  useEffect(() => {
+    const all = toJS(messages);
+    if (all.length > pageSize) {
+      const pageStart = currentPage * pageSize;
+      let pageEnd = pageStart + pageSize;
+      if (pageEnd > all.length) {
+        pageEnd = all.length;
+      }
+      setChunk(all.slice(pageStart, pageEnd));
+    } else {
+      setChunk(all);
+      setListEnd(true);
+    }
+    setCurrent(messages);
+    setAll(all);
+  }, [messages.length, isUpdated]);
+
+  // const pendings = memo(reduceToPending(messages));
+
+  // useEffect(() => {
+  //   if (all.length > pageSize) {
+  //     const pageStart = currentPage * pageSize;
+  //     let pageEnd = pageStart + pageSize;
+  //     if (pageEnd > all.length) {
+  //       pageEnd = all.length;
+  //     }
+  //     setChunk(all.slice(pageStart, pageEnd));
+  //   } else {
+  //     setChunk(all);
+  //     setListEnd(true);
+  //   }
+  // }, [all]);
+
+  const onMore = () => {
+    const newCurrentPage = currentPage + 1;
+    const pageStart = newCurrentPage * pageSize;
+    let pageLeftSize = pageSize;
+    if (pageStart + pageSize > all.length) {
+      pageLeftSize = all.length - newCurrentPage * pageSize;
+    }
+
+    let pageEnd = pageStart + pageLeftSize;
+    if (pageEnd >= all.length) {
+      pageEnd = all.length;
+      setListEnd(true);
+    }
+
+    setCurrentPage(newCurrentPage);
+    setChunk(chunk.concat(all.slice(pageStart, pageEnd)));
+  };
 
   // const handleScroll = ({
   //   scrollTop,
@@ -82,18 +149,16 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
       flexDirection="column-reverse"
     >
       <InfiniteScroll
-        dataLength={messages.length}
-        next={() => {
-          console.log('load more');
-        }}
+        dataLength={chunk.length}
+        next={onMore}
         style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
         inverse={true} //
-        hasMore={true}
+        hasMore={!listEnd}
         loader={<div></div>}
         scrollableTarget="scrollableDiv"
       >
         <Flex style={{ height: 58 }} />
-        {messages.map((message: GraphDMType, index: number) => (
+        {chunk.map((message: GraphDMType, index: number) => (
           <ChatMessage
             isSending={message.pending}
             showAuthor={isGroup}
