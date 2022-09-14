@@ -107,6 +107,7 @@
       [%unrecommend path=space-path:spaces =app-id]
       [%suite-add path=space-path:spaces =app-id rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
+      [%install-app =ship =desk]
   ==
 ::
 +$  reaction
@@ -122,6 +123,7 @@
       [%set-suite-order path=space-path:spaces ord=(list app-id)]
       [%app-installed =app-id =app]
       [%app-uninstalled =app-id]
+      [%treaty-added [=ship =desk] =docket:docket]
   ==
 ::
 ::  Scry views

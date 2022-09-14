@@ -239,14 +239,15 @@ export class SpacesService extends BaseService {
     );
     PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
     // Subscribe to sync updates
-    BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
-    BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
+    // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
+    // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
     //
     // setting provider to current space host
     this.core.services.ship.rooms!.setProvider(
       null,
       getHost(this.state.selected!.path)
     );
+    BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
   }
 
   // ***********************************************************

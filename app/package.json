@@ -12,7 +12,7 @@
     "package": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --publish never",
     "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts",
     "start": "ts-node ./.holium/scripts/check-port-in-use.js && npm run start:renderer",
-    "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
+    "start:main": "cross-env INSTALL_MOON=~rilmyl-soltyd-lomder-librun NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.preload.dev.ts",
     "start:webview": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.webview.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.holium/configs/webpack.config.renderer.dev.ts",

@@ -88,7 +88,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           }
         }
         onAppClick={(selectedApp: AppModelType) => {
-          console.log(selectedApp);
+          // console.log(selectedApp);
           // const app = JSON.parse(JSON.stringify(selectedApp));
           SpacesActions.addRecentApp(spaces.selected!.path, selectedApp.id);
           DesktopActions.openAppWindow(

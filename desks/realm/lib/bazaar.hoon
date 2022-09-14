@@ -21,6 +21,13 @@
           [%unrecommend rem-rec]
           [%suite-add suite-add]
           [%suite-remove suite-remove]
+          [%install-app install-app]
+      ==
+    ::
+    ++  install-app
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+          [%desk so]
       ==
     ::
     ++  add-pin
@@ -171,6 +178,14 @@
       :-  %app-uninstalled
       %-  pairs
       :~  [%app-id s+app-id.rct]
+      ==
+    ::
+        %treaty-added
+      :-  %treaty-added
+      %-  pairs
+      :~  [%ship s+(crip "{<ship.rct>}")]
+          [%desk s+desk.rct]
+          [%docket (pairs (dkt:encode docket.rct))]
       ==
     ==
   ::

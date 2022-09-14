@@ -17,7 +17,7 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
 
     const currentSpace = spaces.selected!;
     const currentBazaar = bazaar.spaces.get(currentSpace.path);
-    console.log(toJS(bazaar));
+    // console.log(toJS(bazaar));
 
     useEffect(() => {
       if (currentSpace) {

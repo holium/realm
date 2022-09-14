@@ -42,14 +42,13 @@ export const BazaarApi = {
     return appMap;
   },
   addAlly: async (conduit: Conduit, ship: string) => {
-    // console.log('addAlly [os] => %o', ship);
     return new Promise((resolve, reject) => {
       conduit.poke({
         ...allyShip(ship),
-        reaction: 'bazaar-reaction.add-tag',
+        reaction: 'bazaar-reaction.new-ally',
         onReaction: (data: any) => {
           console.log('addAlly [os] onReaction => %o', data);
-          resolve(data['add-tag']);
+          resolve(data['new-ally']);
         },
         onError: (e: any) => {
           reject(e);
@@ -341,7 +340,16 @@ export const BazaarApi = {
     });
   },
   loadTreaties: (conduit: Conduit, state: BazaarStoreType): void => {},
-  watchUpdates: (conduit: Conduit, state: BazaarStoreType): void => {
+  initialize: async (
+    conduit: Conduit,
+    state: BazaarStoreType
+  ): Promise<void> => {
+    // load allies
+    const allies = await conduit.scry({
+      app: 'treaty',
+      path: '/allies', // the spaces scry is at the root of the path
+    });
+    state.initialAllies(allies.ini);
     conduit.watch({
       app: 'bazaar',
       path: `/updates`,
@@ -369,6 +377,12 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'ally-removed':
       break;
     case 'treaty-added':
+      {
+        let detail = data['treaty-added'];
+        console.log(detail);
+        // @ts-ignore
+        state.addTreaty(detail);
+      }
       break;
     case 'treaty-removed':
       break;
