@@ -18,12 +18,13 @@ export const CourierApi = {
     });
     return response['dm-log'];
   },
+
   dmUpdates: (conduit: Conduit, store: CourierStoreType): Promise<any> => {
     return conduit.watch({
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
-        console.log(data);
+        // console.log(data);
         const [action, payload] = Object.entries<any>(data)[0];
         switch (action) {
           case 'previews':
@@ -39,6 +40,7 @@ export const CourierApi = {
             break;
           case 'invite-dm':
             console.log('invited to dm', payload);
+            store.setNewPreview(payload);
             break;
           default:
             console.log('action', action);

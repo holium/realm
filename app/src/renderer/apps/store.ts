@@ -148,10 +148,11 @@ RoomsActions.onRoomUpdate(
   (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
     console.log('room diff in renderer', diff);
     LiveRoom.onDiff(diff, room);
-
+    // @ts-ignore
     if (diff.exit) {
       SoundActions.playRoomLeave();
     }
+    // @ts-ignore
     if (diff.enter) {
       SoundActions.playRoomEnter();
     }
@@ -189,7 +190,6 @@ RoomsActions.onRoomUpdate(
 
 OSActions.onBoot((_event: any, response: any) => {
   if (response.loggedIn) {
-    console.log('refresh');
     // RoomsActions.resetLocal();
     // RoomsActions.exitRoom();
     // LiveRoom.leave();

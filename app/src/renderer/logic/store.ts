@@ -234,6 +234,7 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
+    console.log(initials.models.courier);
     applySnapshot(
       servicesStore.courier,
       castToSnapshot(initials.models.courier!)
@@ -314,11 +315,10 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.dms, value.patch);
     }
     if (value.resource === 'courier') {
-      // console.log(value.patch);
       applyPatch(servicesStore.courier, value.patch);
     }
   }
-
+  // TODO do we need initial anymore?
   if (value.response === 'initial') {
     if (value.resource === 'desktop') {
       applySnapshot(servicesStore.desktop, value.model);
@@ -326,9 +326,9 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'shell') {
       applySnapshot(servicesStore.shell, value.model);
     }
-    // if (value.resource === 'courier') {
-    //   applySnapshot(servicesStore.courier, value.model);
-    // }
+    if (value.resource === 'courier') {
+      applySnapshot(servicesStore.courier, value.model);
+    }
     if (value.resource === 'ship') {
       servicesStore.setShip(ShipModel.create(value.model));
     }

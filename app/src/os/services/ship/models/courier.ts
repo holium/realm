@@ -327,6 +327,10 @@ export const CourierStore = types
     },
   }))
   .actions((self) => ({
+    rejectDmInvite: (path: string) => {},
+    setNewPreview: (preview: DMPreviewType) => {
+      self.previews.set(preview.path, preview);
+    },
     setNotificationUpdates: (update: any) => {
       if (update['more'].length === 1) {
         if (update['more'][0]['read-count']) {

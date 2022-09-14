@@ -7,7 +7,13 @@ interface ITextParsed {
   content: string;
 }
 
-type TokenTypes = 'code' | 'text' | 'mention' | 'link' | 'tag' | 'emoticon';
+export type TokenTypes =
+  | 'code'
+  | 'text'
+  | 'mention'
+  | 'link'
+  | 'tag'
+  | 'emoticon';
 type TokenType = {
   content: string;
   type: TokenTypes;

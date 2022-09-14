@@ -199,7 +199,7 @@
   ::
   ++  read-dm
     |=  [=ship]
-    =/  action  ^-(action:hark [%read-count [%landscape [/graph/(scot %p our.bowl)/dm-inbox/(scot %ud ship)]]])
+    =/  action      ^-(action:hark [%read-count [%landscape [/graph/(scot %p our.bowl)/dm-inbox/(crip (y-co:co ship))]]])
     :_  state
     :~ 
         [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(action)]
@@ -324,7 +324,14 @@
       `state
     %add-graph
       ::  TODO new graph invites
-      ~&  >>  ['add graph' upd]
+      :: ~&  >>  ['add graph' upd]
+      :: ?:  =(-.q.upd %add-graph)
+      ::   ?>  =(+.mark.+.q.upd %graph-validator-chat)
+      ::   =/  name-da   (slaw %da name)
+      ::   ?~  name-da  
+      ::     ~&  >  ['continue'] 
+      ::     `state   
+      ::   `state
       :: [%add-graph
       ::   p=~2022.9.5..19.36.10..46ff
       ::     q
@@ -338,7 +345,6 @@
       `state
   ==
   --
-
 ::
 ++  on-hook-action
   |=  [act=action:dm-hook-sur now=@da our=ship]
@@ -352,6 +358,8 @@
   ==
   ++  pending-dm
     |=  ships=(set ship)
+    ?:  =(0 ~(wyt in ships))  ::  if no ships in pendings
+      `state
     =/  new-from            (rear ~(tap in ships))    ::  assumes at least one ship is in the set
     =/  invite-preview      (invite-preview:gs:lib new-from our now)
     ~&  >  invite-preview

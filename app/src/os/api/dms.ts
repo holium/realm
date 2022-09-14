@@ -35,6 +35,7 @@ export const DmApi = {
             case 'accept':
               console.log('accept', payload);
               // const acceptedContact = `~${payload}`;
+              // store.setNewPreview(`/dm-inbox/${acceptedContact}`, );
               // const response = await conduit.scry({
               //   app: 'graph-store',
               //   path: `/graph/${ship}/dm-inbox/${acceptedContact}`,
@@ -49,7 +50,7 @@ export const DmApi = {
             case 'decline':
               const declinedContact = `~${payload}`;
               console.log('decline', payload, `/dm-inbox/${declinedContact}`);
-              store.previews.delete(`/dm-inbox/${declinedContact}`);
+              store.rejectDmInvite(`/dm-inbox/${declinedContact}`);
               break;
             default:
               console.log('action', action);

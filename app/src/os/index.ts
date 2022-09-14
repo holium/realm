@@ -207,16 +207,15 @@ export class Realm extends EventEmitter {
 
   async onConduit() {
     const sessionPatp = this.session?.ship!;
-    const { ship, models } = await this.services.ship.subscribe(
+    const { models } = await this.services.ship.subscribe(
       sessionPatp,
       this.session
     );
     await this.services.spaces.load(sessionPatp, models.docket);
-    // console.log(toJS(models.courier));
     this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.on-connected', {
-      ship: getSnapshot(ship),
-      models,
+      ship: this.services.ship.snapshot,
+      models: this.services.ship.modelSnapshots,
     });
     if (!this.isResuming) {
       this.mainWindow.webContents.send('realm.on-login');

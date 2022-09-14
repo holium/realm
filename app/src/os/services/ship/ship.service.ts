@@ -484,7 +484,8 @@ export class ShipService extends BaseService {
   async getDMLog(_event: any, ship: Patp) {
     const dmLog = await CourierApi.getDMLog(ship, this.core.conduit!);
     this.models.courier?.setDMLog(dmLog);
-    return dmLog;
+    const dms = this.models.courier?.dms.get(dmLog.path);
+    return toJS(dms?.messages);
   }
 
   async acceptDm(_event: any, toShip: string) {
