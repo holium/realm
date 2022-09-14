@@ -83,7 +83,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   leave() {
-    console.log("LiveRoom.leave()", this.participants)
+    console.log("in LiveRoom.leave()")
     this.state = RoomState.Disconnected;
 
     this.participants.forEach((peer: RemoteParticipant) => {
