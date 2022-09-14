@@ -33,6 +33,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
   }
 
   const onHome = () => {
+    // desktop.setHomePane(!desktop.showHomePane);
     DesktopActions.setHomePane(!desktop.showHomePane);
   };
 

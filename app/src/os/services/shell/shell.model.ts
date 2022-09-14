@@ -4,8 +4,6 @@ import { types, Instance } from 'mobx-state-tree';
 export const ShellStore = types
   .model('ShellStore', {
     isBlurred: types.optional(types.boolean, true),
-    isDoubleBlurred: types.optional(types.boolean, false),
-    checkDouble: types.optional(types.boolean, false),
     isFullscreen: types.optional(types.boolean, true),
     isMouseInWebview: types.optional(types.boolean, false),
     desktopDimensions: types.optional(
@@ -30,26 +28,7 @@ export const ShellStore = types
         height,
       };
     },
-    setIsBlurred(isBlurred: boolean, checkDouble: boolean) {
-      let toggled = false;
-      if (checkDouble && !self.checkDouble) {
-        self.checkDouble = !self.checkDouble;
-        toggled = true;
-      }
-      if (self.checkDouble) {
-        if (self.isBlurred && isBlurred)
-          self.isDoubleBlurred = true;
-        else if (self.isDoubleBlurred && !isBlurred) {
-          self.isDoubleBlurred = false;
-          if (checkDouble && !toggled) {
-            self.checkDouble = !self.checkDouble;
-          }
-          return;
-        }
-      }
-      if (checkDouble && !toggled) {
-        self.checkDouble = !self.checkDouble;
-      }
+    setIsBlurred(isBlurred: boolean) {
       self.isBlurred = isBlurred;
     },
     setFullscreen(isFullscreen: boolean) {

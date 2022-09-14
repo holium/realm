@@ -67,6 +67,7 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
           const app = JSON.parse(JSON.stringify(selectedApp));
           DesktopActions.openAppWindow(space.path, app);
           DesktopActions.setHomePane(false);
+          // desktop.setHomePane(false);
         }}
       />
     );
