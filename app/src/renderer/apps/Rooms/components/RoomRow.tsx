@@ -1,14 +1,16 @@
 import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Grid, Text, Flex, Icons, Sigil } from 'renderer/components';
+import { Grid, Text, Flex, Icons, Sigil, IconButton } from 'renderer/components';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
 import { rgba, darken, lighten } from 'polished';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
-import { useTrayApps } from 'renderer/apps/store';
-import { id } from 'ethers/lib/utils';
+import { LiveRoom, useTrayApps } from 'renderer/apps/store';
+// import { id } from 'ethers/lib/utils';
+import { RoomsActions } from 'renderer/logic/actions/rooms';
+
 
 type RoomRowProps = Partial<RoomsModelType> & {
   tray?: boolean;
@@ -17,7 +19,7 @@ type RoomRowProps = Partial<RoomsModelType> & {
 };
 
 export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
-  const { id, tray, title, present, creator, cursors, onClick, rightChildren } =
+  const { id, tray, title, present, creator, provider, cursors, onClick, rightChildren } =
     props;
   const { desktop, ship } = useServices();
   const { roomsApp } = useTrayApps();
@@ -87,6 +89,24 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
           backgroundColor={tray ? dockColor : windowColor}
         />
       </Flex>
+      {/* room deletion button */}
+      {(  tray !== true &&
+          (creator === ship!.patp ||
+          provider === ship!.patp  )) &&
+            
+            <IconButton
+              size={26}
+              customBg={bgColor}
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                RoomsActions.deleteRoom(id!);
+                if(roomsApp.liveRoom && id! === roomsApp.liveRoom.id) {
+                  LiveRoom.leave();
+                }
+              }}>
+              <Icons name='Trash' />
+            </IconButton>
+            }
       {rightChildren || <div />}
     </Row>
   );

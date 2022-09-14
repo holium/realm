@@ -57,7 +57,8 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
     },
   ];
 
-  if (type !== 'host') {
+  // only the creator can kick people
+  if (ship!.patp === roomsApp!.liveRoom!.creator) {
     contextMenuItems.push({
       // @ts-ignore
       style: { color: '#FD4E4E' },

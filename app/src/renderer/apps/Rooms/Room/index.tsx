@@ -250,13 +250,13 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                 }
               }}
             />
-            <CommButton
+            {/* <CommButton
               icon="CursorOn"
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
               }}
-            />
+            /> */}
             {/* <CommButton
               icon="HeadphoneLine"
               customBg={dockColor}

@@ -10,17 +10,9 @@ import { useServices } from 'renderer/logic/store';
 
 interface RoomInfoProps {}
 
-export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
-  const { roomsApp } = useTrayApps();
-  const room = roomsApp.liveRoom!;
-  const { desktop } = useServices();
-  const theme = desktop.theme;
 
-  const rowGap = 16
-  
-  const swid = '75px'
-  const bwid = '175px'
-
+const swid = '75px'
+const bwid = '175px'
 
 const Key = styled(Text)`
   width:${swid};
@@ -33,6 +25,17 @@ const Value = styled(Text)`
   max-width:${bwid};
   min-width:${bwid};
 `;
+
+export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
+  const { roomsApp } = useTrayApps();
+  const room = roomsApp.liveRoom!;
+  const { desktop } = useServices();
+  const theme = desktop.theme;
+
+  const rowGap = 16
+  
+
+
 
   return (
     
