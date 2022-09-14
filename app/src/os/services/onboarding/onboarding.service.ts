@@ -480,7 +480,7 @@ export class OnboardingService extends BaseService {
       return;
     }
     // const desks: string[] = ['realm', 'courier'];
-    const desks: string[] = ['hello'];
+    const desks: string[] = ['realm', 'courier'];
     console.log('installRealm: starting...');
     const { url, patp, cookie } = this.state.ship!;
     const tempConduit = await this.tempConduit(url, patp, cookie!);
