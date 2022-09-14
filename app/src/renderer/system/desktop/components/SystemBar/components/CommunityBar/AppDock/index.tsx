@@ -24,8 +24,9 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     : null;
 
   const orderedList = useMemo(
-    () => (currentBazaar ? currentBazaar.pinnedApps! : []),
-    [currentBazaar && currentBazaar.pinnedApps]
+    () =>
+      spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : [],
+    [currentBazaar && currentBazaar.pinned]
   );
 
   const pinnedApps = useMemo(() => {
@@ -77,7 +78,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,
-                    JSON.parse(JSON.stringify(selectedApp))
+                    selectedApp
                   );
                 }
               }}
@@ -100,7 +101,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   } else {
                     DesktopActions.openAppWindow(
                       spaces.selected!.path,
-                      JSON.parse(JSON.stringify(selectedApp))
+                      selectedApp
                     );
                   }
                 }}
@@ -119,7 +120,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     onClick: (evt: any) => {
                       DesktopActions.closeAppWindow(
                         spaces.selected?.path!,
-                        JSON.parse(JSON.stringify(app))
+                        app
                       );
                       evt.stopPropagation();
                     },
@@ -135,13 +136,13 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.activeWindow?.id,
     desktop.openAppIds,
     spaces.selected?.path,
-    currentBazaar && currentBazaar.pinnedApps,
+    currentBazaar && currentBazaar.pinned,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       currentBazaar &&
-      currentBazaar.pinnedApps.findIndex(
+      currentBazaar.pinned.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );
@@ -158,7 +159,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       </AnimatePresence>
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
-          const app = currentBazaar!.getAppData(unpinnedApp.id)!;
+          const app = bazaar.getApp(unpinnedApp.id);
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (

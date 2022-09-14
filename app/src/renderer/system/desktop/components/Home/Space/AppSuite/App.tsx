@@ -64,8 +64,7 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
         onAppClick={(selectedApp: AppModelType) => {
           // QUESTION: should this open the app listing or the actual app?
           // const app = toJS(selectedApp);
-          const app = JSON.parse(JSON.stringify(selectedApp));
-          DesktopActions.openAppWindow(space.path, app);
+          DesktopActions.openAppWindow(space.path, selectedApp);
           DesktopActions.setHomePane(false);
         }}
       />

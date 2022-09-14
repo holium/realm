@@ -389,6 +389,11 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'app-installed':
       {
         let detail = data['app-installed'];
+        console.log('app-installed => %o', detail);
+        state.addApp(detail['app-id'], {
+          ...detail.app,
+          id: detail['app-id'],
+        });
         // console.log(detail);
         // console.log('app-installed');
         // @ts-ignore
@@ -437,6 +442,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.updateRecommendedRank(app.ranks.recommended);
         state.getBazaar(space)?.setRecommendedApps(app.sort);
       }
       break;
@@ -446,6 +452,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.updateRecommendedRank(app.ranks.recommended);
         state.getBazaar(space)?.setRecommendedApps(app.sort);
       }
       break;
@@ -455,7 +462,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.updateApp(app);
+        state.getBazaar(space)?.updateSuiteRank(app.ranks.suite);
         state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;
@@ -465,7 +472,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
-        state.getBazaar(space)?.updateApp(app);
+        state.getBazaar(space)?.updateSuiteRank(app.ranks.suite);
         state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;

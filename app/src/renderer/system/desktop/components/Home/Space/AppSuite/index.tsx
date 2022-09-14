@@ -95,9 +95,9 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   const [suiteIndex, setSuiteIndex] = useState(-1);
 
   const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
-    // console.log('onAppsAction => %o', { path, id: app.id, tag });
+    console.log('onAppsAction => %o', { path, id: app.id, tag });
     SpacesActions.addToSuite(path, app.id, rank).then((result) => {
-      // console.log('addToSuite response => %o', result);
+      console.log('addToSuite response => %o', result);
       loadSuite();
       // setSearchMode('none');
     });
@@ -117,10 +117,8 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
   const loadSuite = () => {
     // @ts-ignore
     const suite = Array(5).fill(undefined);
-    const apps = bazaar.getBazaar(space.path).suiteApps;
-    apps.forEach((app, index) =>
-      suite.splice(app.ranks?.suite, 1, JSON.parse(JSON.stringify(app)))
-    );
+    const apps = bazaar.getSuiteApps(space.path);
+    apps?.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
     // console.log(suite);
     setSuite(suite);
   };
@@ -130,7 +128,8 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
     //   ship: ship.patp,
     //   path: space.path,
     // });
-    setApps(bazaar.getBazaar(`/${ship.patp}/our`).allApps);
+    setApps(bazaar.getAvailableApps());
+    // setApps(bazaar.getBazaar(`/${ship.patp}/our`).allApps);
     loadSuite();
   }, [space.path]);
 

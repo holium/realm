@@ -20,11 +20,14 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
     // console.log(toJS(bazaar));
 
     useEffect(() => {
+      console.log(
+        'recommendedApps => %o',
+        bazaar.getRecommendedApps(currentSpace.path)
+      );
       if (currentSpace) {
-        // console.log('recommendedApps => %o', currentBazaar.recommendedApps);
-        setApps(currentBazaar?.recommendedApps);
+        setApps(bazaar.getRecommendedApps(currentSpace.path));
       }
-    }, [currentSpace, currentSpace && currentBazaar.recommendedApps]);
+    }, [currentSpace, currentBazaar?.recommendedChange]);
 
     return (
       <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>
