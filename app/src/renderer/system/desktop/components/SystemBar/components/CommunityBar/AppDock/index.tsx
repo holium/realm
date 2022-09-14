@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { AppTile } from 'renderer/components/AppTile';
@@ -14,6 +14,7 @@ interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
   const { desktop, spaces, bazaar, ship } = useServices();
+  // const [orderedList, setOrderedList] = useState([]);
 
   const dividerBg = useMemo(
     () => rgba(lighten(0.2, desktop.theme.dockColor), 0.4),
@@ -23,10 +24,21 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     ? bazaar.getBazaar(spaces.selected?.path!)
     : null;
 
+  // useEffect(() => {
+  //   console.log(
+  //     'pinnedChange.rerender => %o',
+  //     spaces.selected?.path,
+  //     bazaar.getPinnedApps(spaces.selected?.path!)
+  //   );
+  //   setOrderedList(
+  //     spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : []
+  //   );
+  // }, [currentBazaar?.pinnedChange]);
+
   const orderedList = useMemo(
     () =>
       spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : [],
-    [currentBazaar && currentBazaar.pinned]
+    [currentBazaar?.pinnedChange]
   );
 
   const pinnedApps = useMemo(() => {
@@ -136,7 +148,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.activeWindow?.id,
     desktop.openAppIds,
     spaces.selected?.path,
-    currentBazaar && currentBazaar.pinned,
+    currentBazaar?.pinnedChange,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(

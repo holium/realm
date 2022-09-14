@@ -78,9 +78,11 @@ export const BazaarModel = types
   .model('BazaarModel', {
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
+    pinnedChange: types.optional(types.boolean, false),
     pinned: types.array(types.string),
     recommendedChange: types.optional(types.boolean, false),
     recommended: types.array(types.string),
+    suiteChange: types.optional(types.boolean, false),
     suite: types.array(types.string),
     apps: types.map(
       types.model({
@@ -102,7 +104,7 @@ export const BazaarModel = types
     },
   }))
   .actions((self) => ({
-    addApp(app: AppType) {
+    setApp(app: AppType) {
       self.apps.set(app.id, {
         id: app.id,
         tags: app.tags,
@@ -115,6 +117,7 @@ export const BazaarModel = types
       let suite = self.apps.get(app.id);
       suite.ranks.suite = app.ranks.suite;
       self.apps.set(app.id, suite);
+      self.suiteChange = !self.suiteChange;
     },
     updateRecommendedRank(app: AppType) {
       console.log('updating recommended app => %o...', app);
@@ -125,11 +128,13 @@ export const BazaarModel = types
       self.recommendedChange = !self.recommendedChange;
     },
     updatePinnedRank(app: AppType) {
-      console.log('updating pinned app => %o...', app);
+      console.log('updatePinnedRank => %o', app);
       if (!self.apps.has(app.id)) return;
       let pinned = self.apps.get(app.id);
       pinned.ranks.pinned = app.ranks.pinned;
       self.apps.set(app.id, pinned);
+      console.log('updating pinned app => %o...', app);
+      self.pinnedChange = !self.pinnedChange;
     },
     findApps(searchString: string) {
       // const matches = [];
@@ -138,10 +143,13 @@ export const BazaarModel = types
       return apps.filter((item) => item.title.toLowerCase().startsWith(str));
     },
     setPinnedApps(apps: any) {
+      console.log('setPinnedApps => %o', apps);
       self.pinned.replace(apps);
+      self.pinnedChange = !self.pinnedChange;
     },
     setSuiteApps(apps: any) {
       self.suite.replace(apps);
+      self.suiteChange = !self.suiteChange;
     },
     setRecommendedApps(apps: any) {
       console.log('updating recommended apps => %o', apps);
@@ -223,14 +231,22 @@ export const BazaarStore = types
       }));
     },
     getRecommendedApps(path: string) {
-      return self.spaces.get(path)?.recommended.map((appId, index) => ({
-        ...toJS(self.apps.get(appId)),
-      }));
+      return self.spaces
+        .get(path)
+        ?.getRecommendedApps()
+        .map((app, index) => ({
+          ...toJS(self.apps.get(app.id)),
+          ...toJS(app),
+        }));
     },
     getPinnedApps(path: string) {
-      return self.spaces.get(path)?.pinned.map((appId, index) => ({
-        ...toJS(self.apps.get(appId)),
-      }));
+      return self.spaces
+        .get(path)
+        ?.getPinnedApps()
+        .map((app, index) => ({
+          ...toJS(self.apps.get(app.id)),
+          ...toJS(app),
+        }));
     },
     getSuiteApps(path: string) {
       return self.spaces
@@ -275,7 +291,7 @@ export const BazaarStore = types
             app.color = appColor && cleanNounColor(appColor);
           }
           console.log('%o: adding app %o...', spacePath, app);
-          bazaar.addApp(app);
+          bazaar.setApp(app);
           self.apps.set(app.id, app);
         }
         self.spaces.set(spacePath, bazaar);
