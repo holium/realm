@@ -187,10 +187,11 @@ export class OnboardingService extends BaseService {
    * @param substring
    */
   async tempConduit(url: string, patp: string, cookie: string) {
-    await this.closeConduit();
+    if (this.conduit !== undefined) {
+      await this.closeConduit();
+    }
     this.conduit = new Conduit();
     await this.conduit.init(url, patp.substring(1), cookie!);
-
     return this.conduit;
   }
 
@@ -463,7 +464,7 @@ export class OnboardingService extends BaseService {
       return;
     }
     // const desks: string[] = ['realm', 'courier'];
-    const desks: string[] = ['realm'];
+    const desks: string[] = ['hello'];
     console.log('installRealm: starting...');
     const { url, patp, cookie } = this.state.ship!;
     const tempConduit = await this.tempConduit(url, patp, cookie!);
@@ -475,7 +476,7 @@ export class OnboardingService extends BaseService {
         desks[idx]
       );
     }
-    tempConduit.closeChannel();
+    this.closeConduit();
     this.state.endRealmInstall();
   }
 
