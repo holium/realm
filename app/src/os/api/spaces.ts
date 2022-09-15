@@ -88,48 +88,6 @@ export const SpacesApi = {
       });
     });
   },
-  sendInvite: async (
-    conduit: Conduit,
-    path: SpacePath,
-    payload: { patp: Patp; role: MemberRole; message: string }
-  ) => {
-    const pathArr = path.split('/');
-    const pathObj = {
-      ship: pathArr[1],
-      space: pathArr[2],
-    };
-    const response = await conduit.poke({
-      app: 'spaces',
-      mark: 'visa-action',
-      json: {
-        'send-invite': {
-          path: pathObj,
-          ship: payload.patp,
-          role: payload.role,
-          message: payload.message,
-        },
-      },
-    });
-    return response;
-  },
-  kickMember: async (conduit: Conduit, path: SpacePath, patp: Patp) => {
-    const pathArr = path.split('/');
-    const pathObj = {
-      ship: pathArr[1],
-      space: pathArr[2],
-    };
-    const response = await conduit.poke({
-      app: 'spaces',
-      mark: 'visa-action',
-      json: {
-        'kick-member': {
-          path: pathObj,
-          ship: patp,
-        },
-      },
-    });
-    return response;
-  },
   watchUpdates: (
     conduit: Conduit,
     state: SpacesStoreType,
@@ -174,6 +132,12 @@ const handleSpacesReactions = (
     case 'remove':
       const deleted = state.deleteSpace(data['remove']);
       membersState.removeMemberMap(deleted);
+      break;
+    case 'new-space':
+      console.log('new-space', data);
+      state.addSpace(data['new-space']);
+      // membersState.addMemberMap(remoteSpace, data['add'].members);
+      // bazaarState.addBazaar(remoteSpace);
       break;
     default:
       // unknown

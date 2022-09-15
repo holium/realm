@@ -33,6 +33,12 @@
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%members (passes:encode passports.rct)]
       ==
+        %new-members
+      :-  %new-members
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%members (passes:encode passports.rct)]
+      ==
         %all
       [%members (dists:encode districts.rct)]
     ==

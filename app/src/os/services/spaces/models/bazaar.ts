@@ -25,7 +25,7 @@ const UrbitApp = types.model({
   id: types.identifier,
   // ship: types.string,
   tags: types.array(types.string),
-  ranks: AppRankModel,
+  ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
@@ -42,7 +42,7 @@ const NativeApp = types.model({
   id: types.identifier,
   // ship: types.string,
   tags: types.array(types.string),
-  ranks: AppRankModel,
+  ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
@@ -292,7 +292,7 @@ export const BazaarStore = types
           if (app.type === 'urbit') {
             app.color = appColor && cleanNounColor(appColor);
           }
-          console.log('%o: adding app %o...', spacePath, app);
+          // console.log('%o: adding app %o...', spacePath, app);
           bazaar.setApp(app);
           self.apps.set(app.id, app);
         }

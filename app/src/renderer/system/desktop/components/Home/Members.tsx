@@ -226,11 +226,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
         />
       </Flex>
       {our && <FriendsList friends={friends.list} />}
-      {!our && (
-        <MembersList
-          members={membership.getMembersList(spaces.selected!.path)}
-        />
-      )}
+      {!our && <MembersList path={spaces.selected!.path} />}
     </HomeSidebar>
   );
 });

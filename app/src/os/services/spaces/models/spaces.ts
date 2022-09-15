@@ -107,9 +107,10 @@ export const SpacesStore = types
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
     },
     addSpace: (addReaction: { space: any; members: any }) => {
+      console.log(addReaction);
       const space = addReaction.space;
       const newSpace = SpaceModel.create(space);
-      newSpace.members?.initial(addReaction.members);
+      // newSpace.members?.initial(addReaction.members);
       self.spaces.set(space.path, newSpace);
       return newSpace.path;
     },

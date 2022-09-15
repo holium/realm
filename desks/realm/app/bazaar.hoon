@@ -278,7 +278,31 @@
                 [cards this]
           ==
       ==
-
+    ::  only space members will sub to this
+    [%bazaar @ @ ~]
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: bazaar subscription failed"
+            `this
+          %kick
+            =/  =ship       `@p`(slav %p i.t.wire)
+            =/  space-pth   `@t`i.t.t.wire
+            ~&  >  "{<dap.bowl>}: bazaar kicked us, resubscribing... {<ship>} {<space-pth>}"
+            =/  watch-path      [/bazaar/(scot %p ship)/(scot %tas space-pth)]
+            :_  this
+            :~  [%pass watch-path %agent [ship %bazaar] %watch watch-path]
+            ==
+          %fact
+            ?+    p.cage.sign  (on-agent:def wire sign)
+                %bazaar-reaction
+                =^  cards  state
+                  (bazaar-reaction:core !<(=reaction:store q.cage.sign))
+                [cards this]
+            ==
+        ==
+      ::
+    ::  only our will sub to this
     [%bazaar ~]
       ?+    -.sign  (on-agent:def wire sign)
         %watch-ack
@@ -740,6 +764,7 @@
     :: ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
+
     `state
   ::
   ++  on-suite-rem
@@ -952,7 +977,12 @@
   ++  on-remove
     |=  [path=space-path:spaces-store]
     ^-  (quip card _state)
-    `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
+    =.  space-apps.state      (~(del by space-apps.state) path)
+    ~&  >  ['%bazaar spaces on remove' path]
+    :_  state
+    ~[[%pass /bazaar/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %bazaar] %leave ~]]
+    :: [%pass /bazaar/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %bazaar] %leave ~]
+    :: `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
   ::
   ++  on-new-space
     |=  [path=space-path:spaces-store space=space:spaces-store]
@@ -963,8 +993,9 @@
     ::  no need to subscribe to our own ship's bazaar. we're already getting all updates
     ?:  =(our.bowl ship.path)  `state
     %-  (slog leaf+"{<dap.bowl>}: on-space-initial:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
+    =/  watch-path    [/bazaar/(scot %p ship.path)/(scot %tas space.path)]
     :_  state
-    :~  [%pass /bazaar %agent [ship.path %bazaar] %watch /bazaar/(scot %p ship.path)/(scot %tas space.path)]
+    :~  [%pass watch-path %agent [ship.path %bazaar] %watch watch-path]
     ==
   --
 ::
@@ -986,14 +1017,23 @@
   ::    add additional security as needed
   ++  check-member
     |=  [path=space-path:spaces-store =ship]
-    :: =/  members  (~(get by membership.state) path)
-    :: ?~  members  %.n
-    :: =/  member  (~(get by u.members) ship)
-    :: ?~  member  %.n
-    =/  vw  .^(view:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
-    ?>  ?=([%member *] vw)
-    ?:(=(status.passport.vw 'joined') %.y %.n)
+    ~&  >  ['bazaar check-member' our.bowl ship]
+    ^-  ?
+    =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
+    ?>  ?=(%is-member -.member)
+    :: ~&  >  ['is member' is-member.member]
+    is-member.member
+  :: ++  check-member
+  ::   |=  [path=space-path:spaces-store =ship]
+  ::   :: =/  members  (~(get by membership.state) path)
+  ::   :: ?~  members  %.n
+  ::   :: =/  member  (~(get by u.members) ship)
+  ::   :: ?~  member  %.n
+  ::   =/  vw  .^(view:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
+  ::   ?>  ?=([%member *] vw)
+  ::   ?:(=(status.passport.vw 'joined') %.y %.n)
   --
+::
 ::
 ++  is-host
   |=  [=ship]

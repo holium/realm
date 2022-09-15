@@ -1,3 +1,4 @@
+import { Patp } from './../../../types';
 import {
   applySnapshot,
   castToSnapshot,
@@ -38,6 +39,18 @@ export const MembershipStore = types
     spaces: types.map(types.map(MembersModel)),
   })
   .views((self) => ({
+    isAdmin(path: string, patp: Patp) {
+      const roles = self.spaces.get(path)?.get(patp)!.roles;
+      return roles?.includes('admin');
+    },
+    getMemberCount(path: SpacePath) {
+      const members = self.spaces.get(path);
+      if (!members) return 0;
+      const list = Array.from(members.values()).filter(
+        (mem: MemberType) => mem.status !== 'invited'
+      );
+      return list.length;
+    },
     getSpaceMembers(path: SpacePath) {
       const members = self.spaces.get(path);
       if (!members) return {};

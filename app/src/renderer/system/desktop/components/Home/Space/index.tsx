@@ -56,6 +56,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
     );
   }, [sidebar, members]);
   if (!currentSpace) return null;
+  const membersCount = membership.getMemberCount(currentSpace.path);
 
   const headerWidth = '50%';
   const paneWidth = '50%';
@@ -87,7 +88,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           <SpaceTitlebar
             space={currentSpace}
             theme={desktop.theme}
-            membersCount={members.length}
+            membersCount={membersCount}
             showAppGrid={appGrid}
             showMembers={sidebar === 'members'}
             onToggleApps={() => {

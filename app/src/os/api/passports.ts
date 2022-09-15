@@ -1,6 +1,7 @@
 import { Conduit } from '@holium/conduit';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { MembershipType } from '../services/spaces/models/members';
+import { SpacesStoreType } from 'os/services/spaces/models/spaces';
 
 export const PassportsApi = {
   getMembers: async (conduit: Conduit, path: SpacePath) => {
@@ -75,11 +76,6 @@ export const PassportsApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    console.log({
-      'accept-invite': {
-        path: pathObj,
-      },
-    });
     const response = await conduit.poke({
       app: 'passports',
       mark: 'visa-action',
@@ -87,9 +83,6 @@ export const PassportsApi = {
         'accept-invite': {
           path: pathObj,
         },
-      },
-      onSuccess: (id: number) => {
-        console.log(id);
       },
     });
     return response;
@@ -100,11 +93,7 @@ export const PassportsApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    console.log({
-      'decline-invite': {
-        path: pathObj,
-      },
-    });
+
     const response = await conduit.poke({
       app: 'passports',
       mark: 'visa-action',
@@ -116,16 +105,30 @@ export const PassportsApi = {
     });
     return response;
   },
-  watchMembers: (conduit: Conduit, state: MembershipType): void => {
+  watchMembers: (
+    conduit: Conduit,
+    state: MembershipType,
+    spacesState: SpacesStoreType
+  ): void => {
     conduit.watch({
       app: 'passports',
       path: `/all`,
       onEvent: async (data: any) => {
+        console.log(data);
         if (data['members']) {
           state.initial(data['members']);
         }
+        if (data['new-members']) {
+          const { path, members } = data['new-members'];
+          state.addMemberMap(path, members);
+        }
         if (data['visa-reaction']) {
-          handleInviteReactions(data['visa-reaction'], state);
+          handleInviteReactions(
+            data['visa-reaction'],
+            conduit.ship!,
+            state,
+            spacesState
+          );
         }
       },
 
@@ -137,8 +140,9 @@ export const PassportsApi = {
 
 const handleInviteReactions = (
   data: any,
+  ship: string,
   state: MembershipType,
-  id?: string
+  spacesState: SpacesStoreType
 ) => {
   // console.log(data);
   const reaction: string = Object.keys(data)[0];
@@ -158,6 +162,9 @@ const handleInviteReactions = (
       break;
     case 'kicked':
       const kickedPayload = data['kicked'];
+      if (`~${ship}` === kickedPayload.ship) {
+        spacesState.deleteSpace({ 'space-path': kickedPayload.path });
+      }
       state.removeMember(kickedPayload.path, kickedPayload.ship);
       break;
     default:

@@ -9,7 +9,7 @@ import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { VisaRow } from './components/VisaRow';
 import { VisaType } from 'os/services/spaces/models/visas';
-import { darken } from 'polished';
+import { darken, rgba } from 'polished';
 
 export type Space = {
   color?: string;
@@ -43,6 +43,8 @@ export const SpacesList: FC<SpacesListProps> = observer(
         })
         .catch(() => setLoading(false));
     }, []);
+
+    const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
     console.log(visas);
 
     if (!spaces.length && !loadingVisa && !visas.length) {
@@ -91,7 +93,14 @@ export const SpacesList: FC<SpacesListProps> = observer(
       );
     }
     return (
-      <Grid.Column expand gap={4}>
+      <Flex
+        px={10}
+        gap={4}
+        flex={1}
+        width="100%"
+        flexDirection="column"
+        overflowY="scroll"
+      >
         {visas.map((visa: VisaType) => {
           return (
             <VisaRow
@@ -99,7 +108,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
               image={visa.picture}
               color={visa.color}
               path={visa.path}
-              customBg={windowColor}
+              customBg={highlightColor}
               invitedBy={visa.inviter}
               title={visa.name}
             />
@@ -115,7 +124,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
             />
           );
         })}
-      </Grid.Column>
+      </Flex>
     );
   }
 );

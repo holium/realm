@@ -369,7 +369,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log('initial => %o', data['initial']);
+      // console.log('initial => %o', data['initial']);
       state.initial(data['initial']);
       // state.initialReaction(data['initial']);
       break;
@@ -380,7 +380,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'treaty-added':
       {
         let detail = data['treaty-added'];
-        console.log(detail);
+        // console.log(detail);
         // @ts-ignore
         state.addTreaty(detail);
       }
@@ -390,7 +390,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'app-installed':
       {
         let detail = data['app-installed'];
-        console.log('app-installed => %o', detail);
+        // console.log('app-installed => %o', detail);
         state.addApp(detail['app-id'], {
           ...detail.app,
           id: detail['app-id'],
@@ -405,14 +405,14 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'app-uninstalled':
       {
         let detail = data['app-uninstalled'];
-        console.log(detail);
+        // console.log(detail);
         // @ts-ignore
         state.removeApp(detail);
       }
       break;
     case 'pin':
       {
-        console.log('pin reaction => %o', data);
+        // console.log('pin reaction => %o', data);
         const detail = data['pin'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -478,7 +478,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'suite-remove':
       {
-        console.log('suite-remove [reaction] => %o', data);
+        // console.log('suite-remove [reaction] => %o', data);
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
         const app = detail[space];

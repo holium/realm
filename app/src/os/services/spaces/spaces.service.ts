@@ -127,10 +127,10 @@ export class SpacesService extends BaseService {
     getInvitations: () => {
       return ipcRenderer.invoke('realm.spaces.get-invitations');
     },
-    acceptInvite: (path: any) => {
+    acceptInvite: async (path: any) => {
       return ipcRenderer.invoke('realm.spaces.accept-invite', path);
     },
-    declineInvite: (path: any) => {
+    declineInvite: async (path: any) => {
       return ipcRenderer.invoke('realm.spaces.decline-invite', path);
     },
     getMembers: (path: any) => {
@@ -248,7 +248,11 @@ export class SpacesService extends BaseService {
       this.models.membership,
       this.models.bazaar
     );
-    PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
+    PassportsApi.watchMembers(
+      this.core.conduit!,
+      this.models.membership,
+      this.state
+    );
     // Subscribe to sync updates
     // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
     // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
