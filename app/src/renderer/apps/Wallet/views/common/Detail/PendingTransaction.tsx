@@ -14,7 +14,7 @@ import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
 import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme, formatEthAmount, formatBtcAmount } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { BitcoinWalletType, EthWalletType, NetworkType, WalletStoreType } from 'os/services/tray/wallet.model';
+import { BitcoinWalletType, EthWalletType, NetworkType, WalletStoreType, WalletView } from 'os/services/tray/wallet.model';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 import { transaction } from 'mobx';
 import { TransactionType } from 'os/services/tray/wallet.model';
@@ -49,13 +49,17 @@ export const PendingTransaction: FC<PendingTransactionProps> = (props: PendingTr
   const { desktop } = useServices();
   const { colors } = getBaseTheme(desktop);
 
+  const goToTransaction = () => {
+    WalletActions.setView(WalletView.TRANSACTION_DETAIL, undefined, props.transaction.hash);
+  };
+
   let isEth = props.transaction.network === 'ethereum';
   let ethAmount = formatEthAmount(isEth ? props.transaction.amount : '1')
   let btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1')
   let themDisplay = props.transaction.theirPatp || shortened(props.transaction.theirAddress);
 
   return (
-    <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={desktop.theme.mode == 'light' ? darken(.04, desktop.theme.windowColor) : lighten(.02, desktop.theme.windowColor)} borderRadius="9px">
+    <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={desktop.theme.mode == 'light' ? darken(.04, desktop.theme.windowColor) : lighten(.02, desktop.theme.windowColor)} borderRadius="9px" onClick={goToTransaction}>
       <Flex flexDirection="column">
         <Text variant="body" color={colors.brand.primary}>
           { props.transaction.type === 'sent' ? 'Sending' : 'Receiving' } { isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC` }

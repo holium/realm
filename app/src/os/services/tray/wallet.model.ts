@@ -260,6 +260,7 @@ export const WalletStore = types
       if (transaction) {
         self.currentTransaction = transaction;
       }
+      self.returnView = self.currentView;
       self.currentView = view;
     },
     setReturnView(view: WalletView) {

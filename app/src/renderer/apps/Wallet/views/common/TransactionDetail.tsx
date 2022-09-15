@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { ThemeType } from 'renderer/theme';
 import { darken, lighten, transparentize } from 'polished';
 
-import { Flex, Text, Button, Icons, Sigil, Anchor } from 'renderer/components';
+import { Flex, Text, Button, Icons, Sigil, Anchor, Spinner } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
@@ -62,9 +62,19 @@ export const TransactionDetail: FC = observer(() => {
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
         <Text fontSize={1} color={theme.colors.text.disabled}>Transaction</Text>
         <Flex width="100%" justifyContent="space-between" alignItems="center">
-          <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-            { wasSent ? `Sent` : `Received` }
-          </Text>
+          {transaction.status === 'pending'
+            ? (
+              <Flex>
+                <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>Pending</Text>
+                <Spinner ml={3} mt={1} size={1} color={theme.colors.text.primary} />
+              </Flex>
+            )
+            : (
+              <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+                { wasSent ? `Sent` : `Received` }
+              </Text>
+            )
+          }
           <Flex mt="18px" flexDirection="column" justifyContent="center" alignItems="flex-end">
             <Text variant="body" fontSize={4} color={wasSent ? theme.colors.text.error : theme.colors.text.success}>
               {wasSent && '-'} { amountDisplay }
