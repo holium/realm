@@ -30,6 +30,7 @@ import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
 import { LiveRoom } from 'renderer/apps/store';
 import { RoomsActions } from './actions/rooms';
+import { VisaModel } from 'os/services/spaces/models/visas';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -49,6 +50,7 @@ export const Services = types
     spaces: SpacesStore,
     bazaar: BazaarStore,
     membership: MembershipStore,
+    visas: VisaModel,
     docket: DocketStore,
     dms: ChatStore,
     courier: CourierStore,
@@ -86,6 +88,10 @@ const services = Services.create({
   },
   bazaar: {},
   membership: {},
+  visas: {
+    incoming: {},
+    outgoing: {},
+  },
   docket: {},
   dms: {},
   courier: {},
@@ -186,6 +192,7 @@ OSActions.onBoot((_event: any, response: any) => {
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
+    applySnapshot(servicesStore.visas, castToSnapshot(response.visas));
   }
   if (response.bazaar) {
     applySnapshot(servicesStore.bazaar, response.bazaar);
@@ -304,6 +311,9 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'membership') {
       applyPatch(servicesStore.membership, value.patch);
+    }
+    if (value.resource === 'visas') {
+      applyPatch(servicesStore.visas, value.patch);
     }
     if (value.resource === 'docket') {
       applyPatch(servicesStore.docket, value.patch);

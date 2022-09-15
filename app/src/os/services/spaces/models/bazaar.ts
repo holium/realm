@@ -108,30 +108,30 @@ export const BazaarModel = types
       self.apps.set(app.id, {
         id: app.id,
         tags: app.tags,
-        ranks: app.ranks,
+        ranks: app.ranks!,
       });
     },
     updateSuiteRank(app: AppType) {
       console.log('updating suite app => %o...', app);
       if (!self.apps.has(app.id)) return;
-      let suite = self.apps.get(app.id);
-      suite.ranks.suite = app.ranks.suite;
+      let suite = self.apps.get(app.id)!;
+      suite.ranks.suite = app.ranks!.suite;
       self.apps.set(app.id, suite);
       self.suiteChange = !self.suiteChange;
     },
     updateRecommendedRank(app: AppType) {
       console.log('updating recommended app => %o...', app);
       if (!self.apps.has(app.id)) return;
-      let rec = self.apps.get(app.id);
-      rec.ranks.recommended = app.ranks.recommended;
+      let rec = self.apps.get(app.id)!;
+      rec.ranks.recommended = app.ranks!.recommended;
       self.apps.set(app.id, rec);
       self.recommendedChange = !self.recommendedChange;
     },
     updatePinnedRank(app: AppType) {
       console.log('updatePinnedRank => %o', app);
       if (!self.apps.has(app.id)) return;
-      let pinned = self.apps.get(app.id);
-      pinned.ranks.pinned = app.ranks.pinned;
+      let pinned = self.apps.get(app.id)!;
+      pinned.ranks.pinned = app.ranks!.pinned;
       self.apps.set(app.id, pinned);
       console.log('updating pinned app => %o...', app);
       self.pinnedChange = !self.pinnedChange;

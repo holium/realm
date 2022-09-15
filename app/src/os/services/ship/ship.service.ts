@@ -35,7 +35,6 @@ import {
   NotificationStore,
   NotificationStoreType,
 } from './models/notifications';
-import { VisaModel, VisaModelType } from '../spaces/models/visas';
 import { NotificationApi } from '../../api/notifications';
 
 export type ShipModels = {

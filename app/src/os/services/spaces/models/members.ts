@@ -1,4 +1,3 @@
-import { Patp } from './../../../types';
 import {
   applySnapshot,
   castToSnapshot,

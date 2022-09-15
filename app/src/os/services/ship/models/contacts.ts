@@ -3,7 +3,6 @@ import { flow, Instance, types } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
 import { ContactApi } from '../../../api/contacts';
 
-
 // const Reactions = types.model({
 //   likes: types.number,
 //   replies: types.reference()
@@ -33,7 +32,6 @@ export const ContactStore = types
     },
     getContactAvatarMetadata(patp: string) {
       const contact = self.rolodex.get(patp);
-      // console.log(toJS(contact));
       return {
         color: contact?.color,
         avatar: contact?.avatar,

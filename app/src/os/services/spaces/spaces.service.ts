@@ -26,11 +26,12 @@ import { RoomsApi } from '../../api/rooms';
 
 const getHost = (path: string) => path.split('/')[1];
 import { BazaarStore } from './models/bazaar';
+import { MembershipStore } from './models/members';
 
 type SpaceModels = {
-  bazaar?: any;
-  membership?: any;
-  visas?: VisaModelType;
+  bazaar: any;
+  membership: any;
+  visas: VisaModelType;
   // friends: FriendsType;
 };
 /**
@@ -40,6 +41,7 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
+    membership: MembershipStore.create({}),
     visas: VisaModel.create({
       incoming: {},
       outgoing: {},
@@ -182,12 +184,12 @@ export class SpacesService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  get bazaarSnapshot() {
-    return this.models.bazaar ? getSnapshot(this.models.bazaar) : null;
-  }
-
-  get membershipSnapshot() {
-    return this.models.membership ? getSnapshot(this.models.membership) : null;
+  get modelSnapshots() {
+    return {
+      membership: getSnapshot(this.models.membership),
+      bazaar: getSnapshot(this.models.bazaar),
+      visas: getSnapshot(this.models.visas),
+    };
   }
 
   async load(patp: string, docket: any) {
@@ -202,6 +204,19 @@ export class SpacesService extends BaseService {
     // Load sub-models
     this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
+    // Set up patch for visas
+    onPatch(this.models.visas, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'visas',
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
+
+    PassportsApi.getVisas(this.core.conduit!).then((visas: any) => {
+      this.models.visas.initialIncoming(visas);
+    });
     // Temporary setup
     // this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
@@ -251,7 +266,8 @@ export class SpacesService extends BaseService {
     PassportsApi.watchMembers(
       this.core.conduit!,
       this.models.membership,
-      this.state
+      this.state,
+      this.models.visas!
     );
     // Subscribe to sync updates
     // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
