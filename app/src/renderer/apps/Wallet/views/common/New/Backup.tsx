@@ -12,21 +12,10 @@ interface BackupProps {
 }
 
 export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
-  let { setTrayAppDimensions, dimensions } = useTrayApps();
   const { desktop } = useServices();
 
   const panelBackground = darken(0.02, desktop.theme!.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
-
-  useEffect(() => {
-    let prevDims = dimensions;
-    console.log(prevDims.height, prevDims.width)
-    setTrayAppDimensions({ height: 440, width: 320 });
-
-    return () => {
-      setTrayAppDimensions(prevDims);
-    }
-  }, [])
 
   let [blurred, setBlurred] = useState(false);
   let [copied, setCopied] = useState(false);
@@ -74,7 +63,7 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
         </Flex>
       </Flex>
       <Flex mt={2} width="100%" justifyContent="center">
-        <Button onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>I wrote it down</Button>
+        <Button onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>I wrote it down</Button> {/* TODO: link to confirm instead after demo */}
       </Flex>
     </Flex>
   );

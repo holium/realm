@@ -1,6 +1,6 @@
 import { FC, useMemo, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Box, Icons } from 'renderer/components';
+import { Button, Flex, Text, Box, Icons, TextButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
@@ -18,16 +18,22 @@ export const Create: FC<CreateProps> = observer((props: CreateProps) => {
       <Flex
         flex={4}
         flexDirection="column"
-        justifyContent="center"
         alignItems="center"
       >
-        <Box>
+        <Text mt={6} variant="h4">No Wallet Found</Text>
+        <Text px="30px" mt={2} mb={5} variant="body" color={theme.colors.text.secondary} textAlign="center">You haven't yet configured your Realm wallet.</Text>
+        <Box mt={9}>
           <Button onClick={() => props.setScreen(NewWalletScreen.BACKUP)}>
             Create a new wallet
           </Button>
         </Box>
+        <Box mt={3}>
+          <TextButton textColor={theme.colors.text.secondary} onClick={() => props.setScreen(NewWalletScreen.IMPORT)}>
+            Or import an exsiting wallet
+          </TextButton>
+        </Box>
       </Flex>
-      <Flex justifyContent="center" alignItems="center">
+      <Flex mb={6} justifyContent="center" alignItems="center">
         <Box>
           <Icons name="InfoCircle" color={theme.colors.brand.secondary} />
         </Box>
