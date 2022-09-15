@@ -369,6 +369,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
+      console.log('initial => %o', data['initial']);
       state.initial(data['initial']);
       // state.initialReaction(data['initial']);
       break;
@@ -389,6 +390,11 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'app-installed':
       {
         let detail = data['app-installed'];
+        console.log('app-installed => %o', detail);
+        state.addApp(detail['app-id'], {
+          ...detail.app,
+          id: detail['app-id'],
+        });
         // console.log(detail);
         // console.log('app-installed');
         // @ts-ignore
@@ -406,10 +412,13 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'pin':
       {
+        console.log('pin reaction => %o', data);
         const detail = data['pin'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.setApp(app);
+        state.getBazaar(space)?.updatePinnedRank(app);
         state.getBazaar(space)?.setPinnedApps(app.sort);
       }
       break;
@@ -419,6 +428,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.setApp(app);
+        state.getBazaar(space)?.updatePinnedRank(app);
         state.getBazaar(space)?.setPinnedApps(app.sort);
       }
       break;
@@ -428,6 +439,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.setPinnedApps(app.sort);
       }
       break;
@@ -437,6 +449,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.setApp(app);
+        state.getBazaar(space)?.updateRecommendedRank(app);
         state.getBazaar(space)?.setRecommendedApps(app.sort);
       }
       break;
@@ -446,6 +460,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
+        state.getBazaar(space)?.setApp(app);
+        state.getBazaar(space)?.updateRecommendedRank(app);
         state.getBazaar(space)?.setRecommendedApps(app.sort);
       }
       break;
@@ -455,7 +471,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.updateApp(app);
+        state.getBazaar(space)?.setApp(app);
+        state.getBazaar(space)?.updateSuiteRank(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;
@@ -465,7 +482,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
-        state.getBazaar(space)?.updateApp(app);
+        state.getBazaar(space)?.setApp(app);
+        state.getBazaar(space)?.updateSuiteRank(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
       }
       break;

@@ -78,94 +78,83 @@ export const BazaarModel = types
   .model('BazaarModel', {
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
+    pinnedChange: types.optional(types.boolean, false),
     pinned: types.array(types.string),
+    recommendedChange: types.optional(types.boolean, false),
     recommended: types.array(types.string),
+    suiteChange: types.optional(types.boolean, false),
     suite: types.array(types.string),
-    apps: BazaarAppMap,
+    apps: types.map(
+      types.model({
+        id: types.identifier,
+        ranks: AppRankModel,
+        tags: types.array(types.string),
+      })
+    ),
   })
   .views((self) => ({
-    get allApps() {
-      return Array.from(self.apps!.values());
+    getPinnedApps() {
+      return self.pinned.map((appId, index) => self.apps.get(appId));
     },
-    // todo: sort by recommended rank (liked count)
-    get recommendedApps() {
-      return self.recommended.map((appId, index) => ({
-        ...self.apps.get(appId),
-      }));
+    getSuiteApps() {
+      return self.suite.map((appId, index) => self.apps.get(appId));
     },
-    get suiteApps() {
-      return self.suite.map((appId, index) => ({
-        ...self.apps.get(appId),
-      }));
-    },
-    get pinnedApps() {
-      return self.pinned.map((appId, index) => ({
-        ...self.apps.get(appId),
-      }));
-    },
-    get recentAppList() {
-      const recents = self.recentApps;
-      return Array.from(self.apps!.values())
-        .filter((app: any) => recents.includes(app.id))
-        .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
-    },
-    get recentDevList() {
-      const recents = self.recentDevs;
-      return Array.from(self.apps!.values())
-        .filter((app: any) => recents.includes(app.id))
-        .sort((a, b) => recents.indexOf(a.id) - recents.indexOf(b.id));
-    },
-    isNativeApp(appId: string) {
-      return self.apps.get(appId)?.type === 'native';
-    },
-    isAppPinned(appId: string) {
-      return self.pinned.includes(appId);
-    },
-    getAppData(appId: string) {
-      const app = self.apps.get(appId);
-      // console.log('getAppData => %o', app);
-      return app;
-      // const all = [...Array.from(self.apps!.values()), ...NativeAppList];
-      // const idx = all.findIndex((item) => item.id === appId);
-      // return idx === -1 ? undefined : all[idx];
+    getRecommendedApps() {
+      return self.recommended.map((appId, index) => self.apps.get(appId));
     },
   }))
   .actions((self) => ({
-    addApp(app: AppType) {
-      const appColor = app.color;
-      if (app.type === 'urbit') {
-        app.color = appColor && cleanNounColor(appColor);
-      }
-      self.apps.set(app.id, app);
+    setApp(app: AppType) {
+      self.apps.set(app.id, {
+        id: app.id,
+        tags: app.tags,
+        ranks: app.ranks,
+      });
     },
-    updateApp(app: AppType) {
-      // console.log('updating app => %o', app);
-      const appColor = app.color;
-      if (app.type === 'urbit') {
-        app.color = appColor && cleanNounColor(appColor);
-      }
-      self.apps.set(app.id, app);
+    updateSuiteRank(app: AppType) {
+      console.log('updating suite app => %o...', app);
+      if (!self.apps.has(app.id)) return;
+      let suite = self.apps.get(app.id);
+      suite.ranks.suite = app.ranks.suite;
+      self.apps.set(app.id, suite);
+      self.suiteChange = !self.suiteChange;
+    },
+    updateRecommendedRank(app: AppType) {
+      console.log('updating recommended app => %o...', app);
+      if (!self.apps.has(app.id)) return;
+      let rec = self.apps.get(app.id);
+      rec.ranks.recommended = app.ranks.recommended;
+      self.apps.set(app.id, rec);
+      self.recommendedChange = !self.recommendedChange;
+    },
+    updatePinnedRank(app: AppType) {
+      console.log('updatePinnedRank => %o', app);
+      if (!self.apps.has(app.id)) return;
+      let pinned = self.apps.get(app.id);
+      pinned.ranks.pinned = app.ranks.pinned;
+      self.apps.set(app.id, pinned);
+      console.log('updating pinned app => %o...', app);
+      self.pinnedChange = !self.pinnedChange;
     },
     findApps(searchString: string) {
       // const matches = [];
       const str = searchString.toLowerCase();
       const apps = Array.from(self.apps!.values());
       return apps.filter((item) => item.title.toLowerCase().startsWith(str));
-      // for (const app of self.allApps) {
-      //   if (app[1].title.toLowerCase().startsWith(str)) {
-      //     matches.push(app[1]);
-      //   }
-      // }
-      // return matches;
     },
     setPinnedApps(apps: any) {
+      console.log('setPinnedApps => %o', apps);
       self.pinned.replace(apps);
+      self.pinnedChange = !self.pinnedChange;
     },
     setSuiteApps(apps: any) {
       self.suite.replace(apps);
+      self.suiteChange = !self.suiteChange;
     },
     setRecommendedApps(apps: any) {
+      console.log('updating recommended apps => %o', apps);
       self.recommended.replace(apps);
+      self.recommendedChange = !self.recommendedChange;
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
@@ -188,23 +177,6 @@ export const BazaarModel = types
       if (idx !== -1) self.recentDevs.splice(idx, 1);
       // add app to front of list
       self.recentDevs.splice(0, 0, shipId);
-    },
-    addAppTag(appId: string, tag: string) {
-      let app = self.apps.get(appId);
-      if (app) {
-        if (app.tags.includes(tag)) return;
-        app.tags.push(tag);
-        self.apps.set(appId, app);
-      }
-    },
-    removeAppTag(appId: string, tag: string) {
-      let app = self.apps.get(appId);
-      if (app) {
-        let idx = app.tags.findIndex((item) => item === tag);
-        if (idx === -1) return;
-        app.tags.splice(idx, 1);
-        self.apps.set(appId, app);
-      }
     },
   }));
 export type BazaarModelType = Instance<typeof BazaarModel>;
@@ -239,6 +211,8 @@ export const BazaarStore = types
         alliance: types.array(types.string),
       })
     ),
+    apps: BazaarAppMap,
+    appsChange: types.optional(types.boolean, false),
   })
   .views((self) => ({
     getBazaar(path: string) {
@@ -246,6 +220,58 @@ export const BazaarStore = types
     },
     get treaties() {
       return self._treaties;
+    },
+    getRecentApps(path: string) {
+      return self.spaces.get(path)?.recentApps.map((appId, index) => ({
+        ...toJS(self.apps.get(appId)),
+      }));
+    },
+    getRecentDevs(path: string) {
+      return self.spaces.get(path)?.recentDevs.map((appId, index) => ({
+        ...toJS(self.apps.get(appId)),
+      }));
+    },
+    getRecommendedApps(path: string) {
+      return self.spaces
+        .get(path)
+        ?.getRecommendedApps()
+        .map((app, index) => ({
+          ...toJS(self.apps.get(app.id)),
+          ...toJS(app),
+        }));
+    },
+    getPinnedApps(path: string) {
+      return self.spaces
+        .get(path)
+        ?.getPinnedApps()
+        .map((app, index) => ({
+          ...toJS(self.apps.get(app.id)),
+          ...toJS(app),
+        }));
+    },
+    getSuiteApps(path: string) {
+      return self.spaces
+        .get(path)
+        ?.getSuiteApps()
+        .map((app, index) => ({
+          ...toJS(self.apps.get(app.id)),
+          ...toJS(app),
+        }));
+    },
+    getApps(path: string) {
+      const bazaar = self.spaces.get(path);
+      return bazaar
+        ? Array.from(bazaar.apps.values()).map((app, index) => ({
+            ...toJS(self.apps.get(app.id)),
+            ...toJS(app),
+          }))
+        : [];
+    },
+    getApp(appId: string) {
+      return toJS(self.apps.get(appId));
+    },
+    getAvailableApps() {
+      return Array.from(self.apps.values());
     },
   }))
   .actions((self) => ({
@@ -262,11 +288,29 @@ export const BazaarStore = types
         });
         for (const desk in entry.apps) {
           const app = entry.apps[desk];
-          // console.log(util.inspect(app, { depth: 10 }));
-          bazaar.addApp(app);
+          const appColor = app.color;
+          if (app.type === 'urbit') {
+            app.color = appColor && cleanNounColor(appColor);
+          }
+          console.log('%o: adding app %o...', spacePath, app);
+          bazaar.setApp(app);
+          self.apps.set(app.id, app);
         }
         self.spaces.set(spacePath, bazaar);
       }
+    },
+    addApp(appId: string, app: any) {
+      self.apps.set(appId, app);
+      // trigger UI update if someone is listening
+      self.appsChange = !self.appsChange;
+    },
+    updateApp(app: AppType) {
+      // console.log('updating app => %o', app);
+      const appColor = app.color;
+      if (app.type === 'urbit') {
+        app.color = appColor && cleanNounColor(appColor);
+      }
+      self.apps.set(app.id, app);
     },
     hasAlly(ship: any) {
       // console.log('hasAlly => %o', toJS(self.allies));

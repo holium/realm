@@ -589,7 +589,9 @@
     =/  result=app-index-full:store
     %-  ~(rep by index.apps)
     |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
-      ?:  (is-system-app app-id)  acc
+      ?:  (is-system-app app-id)
+        ~&  >>  "{<dap.bowl>}: is-system-app %.y"
+        acc
       :: skip if filter is neither %all nor the app tagged with tag
       ?.  ?|  =(tag ~)
               ?&  !=(tag ~)

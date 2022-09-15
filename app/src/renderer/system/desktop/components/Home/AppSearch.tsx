@@ -146,7 +146,7 @@ const renderStart = (space: string, bazaar: any) => {
           Recent Apps
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderApps(space, bazaar.recentAppList)}
+          {renderApps(space, bazaar.getRecentApps(space))}
         </Flex>
       </Flex>
       <div style={{ marginTop: '12px', marginBottom: '12px' }}>
@@ -157,7 +157,7 @@ const renderStart = (space: string, bazaar: any) => {
           Recent Developers
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderDevs(space, bazaar.recentDevs)}
+          {renderDevs(space, bazaar.getRecentDevs(space))}
         </Flex>
       </Flex>
     </>
@@ -485,7 +485,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         />
       </PopoverAnchor>
       <PopoverContent sideOffset={5}>
-        {searchMode === 'start' && renderStart(spacePath, currentBazaar)}
+        {searchMode === 'start' && renderStart(spacePath, bazaar)}
         {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
         {searchMode === 'dev-app-search' &&
           renderDevAppSearch(searchModeArgs[0], data)}

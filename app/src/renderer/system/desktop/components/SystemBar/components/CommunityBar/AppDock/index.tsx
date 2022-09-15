@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { AppTile } from 'renderer/components/AppTile';
@@ -14,6 +14,7 @@ interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
   const { desktop, spaces, bazaar, ship } = useServices();
+  // const [orderedList, setOrderedList] = useState([]);
 
   const dividerBg = useMemo(
     () => rgba(lighten(0.2, desktop.theme.dockColor), 0.4),
@@ -23,9 +24,21 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     ? bazaar.getBazaar(spaces.selected?.path!)
     : null;
 
+  // useEffect(() => {
+  //   console.log(
+  //     'pinnedChange.rerender => %o',
+  //     spaces.selected?.path,
+  //     bazaar.getPinnedApps(spaces.selected?.path!)
+  //   );
+  //   setOrderedList(
+  //     spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : []
+  //   );
+  // }, [currentBazaar?.pinnedChange]);
+
   const orderedList = useMemo(
-    () => (currentBazaar ? currentBazaar.pinnedApps! : []),
-    [currentBazaar && currentBazaar.pinnedApps]
+    () =>
+      spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : [],
+    [currentBazaar?.pinnedChange]
   );
 
   const pinnedApps = useMemo(() => {
@@ -77,7 +90,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,
-                    JSON.parse(JSON.stringify(selectedApp))
+                    selectedApp
                   );
                 }
               }}
@@ -100,7 +113,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   } else {
                     DesktopActions.openAppWindow(
                       spaces.selected!.path,
-                      JSON.parse(JSON.stringify(selectedApp))
+                      selectedApp
                     );
                   }
                 }}
@@ -119,7 +132,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     onClick: (evt: any) => {
                       DesktopActions.closeAppWindow(
                         spaces.selected?.path!,
-                        JSON.parse(JSON.stringify(app))
+                        app
                       );
                       evt.stopPropagation();
                     },
@@ -135,13 +148,13 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.activeWindow?.id,
     desktop.openAppIds,
     spaces.selected?.path,
-    currentBazaar && currentBazaar.pinnedApps,
+    currentBazaar?.pinnedChange,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       currentBazaar &&
-      currentBazaar.pinnedApps.findIndex(
+      currentBazaar.pinned.findIndex(
         (pinned: any) => appWindow.id === pinned.id
       ) === -1
   );
@@ -158,7 +171,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       </AnimatePresence>
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
-          const app = currentBazaar!.getAppData(unpinnedApp.id)!;
+          const app = bazaar.getApp(unpinnedApp.id);
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (
