@@ -1,21 +1,13 @@
-import { FC, useState } from 'react';
-import { isValidPatp} from 'urbit-ob';
-import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { theme as themes, ThemeType } from 'renderer/theme';
-import { darken, lighten } from 'polished';
-import {QRCodeSVG} from 'qrcode.react';
+import { darken } from 'polished';
 
-import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
-import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/shell/theme.model';
-import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
-import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme, EthAmount, formatEthAmount, formatBtcAmount, convertEthAmountToUsd, convertBtcAmountToUsd } from '../../../lib/helpers';
-import { TransactionDetail } from '../TransactionDetail';
+import { shortened, monthNames, formatEthAmount, formatBtcAmount, convertEthAmountToUsd, convertBtcAmountToUsd } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { TransactionType } from 'os/services/tray/wallet.model';
+import { WalletView } from 'os/services/tray/wallet.model';
 
 const NoScrollBar = styled(Flex)`
 ::-webkit-scrollbar {
@@ -47,7 +39,6 @@ export const Transaction = observer((props: TransactionProps) => {
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1')
 
   let onClick = () => {
-    console.log('click')
     WalletActions.setReturnView(WalletView.ETH_DETAIL);
     WalletActions.setView(WalletView.TRANSACTION_DETAIL, undefined, transaction.hash);
   };
@@ -57,7 +48,7 @@ export const Transaction = observer((props: TransactionProps) => {
       <Flex flexDirection="column" justifyContent="center">
         <Text variant="h5" fontSize={3}>{ wasSent ? 'Sent' : 'Received'}</Text>
         <Flex>
-          <Text variant="body" fontSize={1} color="text.success">
+          <Text variant="body" fontSize={1} color={wasSent ? 'text.error' : 'text.success'}>
             {`${monthNames[initiatedDate.getMonth()]} ${initiatedDate.getDate()}`}
           </Text>
           <Text mx={1} variant="body" fontSize={1} color="text.disabled">·</Text>
