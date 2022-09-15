@@ -7,16 +7,17 @@ import { theme as themes } from 'renderer/theme';
 import { darken, lighten } from 'polished';
 import {QRCodeSVG} from 'qrcode.react';
 
-import { Flex, Box, Icons, Text, Sigil, Button, ImagePreview } from 'renderer/components';
+import { Flex, Box, Icons, Text, Sigil, Button, ImagePreview, Spinner } from 'renderer/components';
 import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme } from '../../../lib/helpers';
+import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme, formatEthAmount, formatBtcAmount } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { BitcoinWalletType, EthWalletType, WalletStoreType } from 'os/services/tray/wallet.model';
+import { BitcoinWalletType, EthWalletType, NetworkType, WalletStoreType } from 'os/services/tray/wallet.model';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 import { transaction } from 'mobx';
+import { TransactionType } from 'os/services/tray/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -29,7 +30,7 @@ interface PendingTransactionDisplayProps {
 export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (props: PendingTransactionDisplayProps) => {
   const pendingTransactions = props.transactions
     .filter((trans) => trans.status === 'pending')
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .sort((a, b) => (new Date(a.initiatedAt)).getTime() - (new Date(b.initiatedAt)).getTime());
 
   return (
     <Flex mt={4} width="100%">
@@ -48,15 +49,23 @@ export const PendingTransaction: FC<PendingTransactionProps> = (props: PendingTr
   const { desktop } = useServices();
   const { colors } = getBaseTheme(desktop);
 
+  let isEth = props.transaction.network === 'ethereum';
+  let ethAmount = formatEthAmount(isEth ? props.transaction.amount : '1')
+  let btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1')
+  let themDisplay = props.transaction.theirPatp || shortened(props.transaction.theirAddress);
+
   return (
-    <Flex p="8px" width="100%" justifyContent="space-between" background="#F3F3F3">
+    <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={desktop.theme.mode == 'light' ? darken(.04, desktop.theme.windowColor) : lighten(.02, desktop.theme.windowColor)} borderRadius="9px">
       <Flex flexDirection="column">
         <Text variant="body" color={colors.brand.primary}>
-          {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'} {props.transaction.amount} {abbrMap[props.transaction.network]}
+          { props.transaction.type === 'sent' ? 'Sending' : 'Receiving' } { isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC` }
         </Text>
-        <Text variant="body" color={colors.text.secondary} fontSize={1}>
-          {props.transaction.type === 'sent' ? 'To:' : 'From:'} {props.transaction.address} <Icons ml="7px" name="ShareBox" size="15px" />
+        <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
+          { props.transaction.type === 'sent' ? 'To:' : 'From:' } {themDisplay} <Icons ml="7px" name="ShareBox" size="15px" />
         </Text>
+      </Flex>
+      <Flex height="100%" alignItems="center">
+        <Spinner size={1} color={colors.brand.primary} />
       </Flex>
     </Flex>
   )

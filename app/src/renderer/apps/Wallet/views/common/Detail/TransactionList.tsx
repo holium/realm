@@ -33,7 +33,7 @@ interface TransactionProps {
 }
 export const Transaction = observer((props: TransactionProps) => {
   const { desktop } = useServices();
-  let hoverBackground = desktop.theme!.mode === 'light' ? darken(.04, desktop.theme!.windowColor) : darken(.04, desktop.theme!.windowColor);
+  let hoverBackground =  darken(.04, desktop.theme!.windowColor);
 
   const { transaction } = props;
   let wasSent = transaction.type === 'sent';
@@ -75,14 +75,14 @@ export const Transaction = observer((props: TransactionProps) => {
 
 interface TransactionListProps {
   transactions: TransactionType[]
-  theme: ThemeModelType
 }
 export const TransactionList = observer((props: TransactionListProps) => {
   const { desktop } = useServices();
+  const pending = props.transactions.filter(trans => trans.status === 'pending').length;
 
   return (
     <>
-      <NoScrollBar width="100%" height="180px" flexDirection="column" margin="auto" overflow="scroll">
+      <NoScrollBar width="100%" height={pending ? '200px' : '150px'} flexDirection="column" margin="auto" overflow="scroll">
         { props.transactions.length
           ? props.transactions.map((transaction, index) => <Transaction key={index} transaction={transaction} />)
           : <Text variant="h4">No transactions</Text>

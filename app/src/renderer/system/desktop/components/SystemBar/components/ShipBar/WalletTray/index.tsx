@@ -12,7 +12,7 @@ type WalletTrayProps = {
 };
 
 const dimensions = {
-  height: 540,
+  height: 580,
   width: 330,
 };
 
