@@ -404,16 +404,10 @@
 ::
 ++  has-auth
   |=  [path=space-path:store =ship =role:membership-store]
-  ::  TODO scry passports
-  :: ~&  >  [path ship role]
+  ^-  ?
   =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
   ?>  ?=(%member -.member)
-  :: ~&  >  [member]
-  ::
-  ::
-  :: =/  member        (~(got by (~(got by membership.state) space-path)) ship)
-  :: (~(has in roles.member) role)
-  %.y
+  (~(has in roles.passport.member) role)
 ::
 ++  check-member
   |=  [path=space-path:store =ship]

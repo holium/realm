@@ -45,7 +45,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
     }, []);
 
     const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
-    console.log(visas);
+
     const incoming = Array.from(visas.incoming.values());
 
     if (!spaces.length && !loadingVisa && !incoming.length) {

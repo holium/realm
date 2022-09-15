@@ -153,31 +153,39 @@ OSActions.boot();
 OSActions.onBoot((_event: any, response: any) => {
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
-  // console.log('onBoot');
+  console.log('onBoot', response);
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
   });
 
   if (response.models && response.ship) {
-    applySnapshot(
-      servicesStore.contacts,
-      castToSnapshot(response.models.contacts!)
-    );
+    if (response.models.contacts) {
+      applySnapshot(
+        servicesStore.contacts,
+        castToSnapshot(response.models.contacts!)
+      );
+    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(response.models.friends)
     );
-    applySnapshot(
-      servicesStore.courier,
-      castToSnapshot(response.models.courier!)
-    );
-    applySnapshot(
-      servicesStore.notifications,
-      castToSnapshot(response.models.notifications!)
-    );
+    if (response.models.courier) {
+      applySnapshot(
+        servicesStore.courier,
+        castToSnapshot(response.models.courier)
+      );
+    }
+    if (response.models.notifications) {
+      applySnapshot(
+        servicesStore.notifications,
+        castToSnapshot(response.models.notifications)
+      );
+    }
     applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
-    applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
+    if (response.models.chat) {
+      applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat));
+    }
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
@@ -241,15 +249,19 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    console.log(initials.models.courier);
-    applySnapshot(
-      servicesStore.courier,
-      castToSnapshot(initials.models.courier!)
-    );
-    applySnapshot(
-      servicesStore.contacts,
-      castToSnapshot(initials.models.contacts!)
-    );
+    console.log('onConnected', initials.models);
+    if (initials.models.courier) {
+      applySnapshot(
+        servicesStore.courier,
+        castToSnapshot(initials.models.courier)
+      );
+    }
+    if (initials.models.contacts) {
+      applySnapshot(
+        servicesStore.contacts,
+        castToSnapshot(initials.models.contacts)
+      );
+    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
@@ -259,7 +271,9 @@ OSActions.onConnected(
       castToSnapshot(initials.models.notifications)
     );
     applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
-    applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat!));
+    if (initials.models.chat) {
+      applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat));
+    }
 
     servicesStore.setShip(ShipModel.create(initials.ship));
 

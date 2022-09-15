@@ -150,10 +150,10 @@
         =/  host        `@p`(slav %p i.t.path)
         =/  space-pth   `@t`i.t.t.path
         =/  patp        `@p`(slav %p i.t.t.t.t.path)
-        =/  passports   (~(got by membership.state) [host space-pth])
-        =/  member      (~(get by passports) patp)
-        ?~  member      ~
-        ``passports-view+!>([%member member])
+        =/  passports   (~(get by membership.state) [host space-pth])
+        =/  member      (~(get by (need passports)) patp)
+        ?~  member      ``passports-view+!>([%member (silt ~[~])])
+        ``passports-view+!>([%member (need member)])
     ::
     ::  ~/scry/passports/~zod/our/is-member/~fes.json
       [%x @ @ %is-member @ ~]
