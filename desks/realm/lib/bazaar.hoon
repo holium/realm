@@ -200,12 +200,26 @@
       ::
         %apps
       (pairs (full-app-index:encode app-index-full.vi))
+      ::
+        %directories
+      [%a (directories:encode dirs.vi)]
     ==
   --
 ::
 ++  encode
   =,  enjs:format
   |%
+  ++  directories
+    |=  [dirs=(list [=ship =desk])]
+    ^-  (list json)
+    %-  turn
+    :-  dirs
+    |=  [[=ship =desk]]
+    %-  pairs
+    :~  [%ship s+(crip "{<ship>}")]
+        [%desk s+desk]
+    ==
+  ::
   ++  space-apps-full
     |=  =space-apps-full:store
     ^-  json

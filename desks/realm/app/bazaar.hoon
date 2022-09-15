@@ -18,6 +18,8 @@
     $:  %0
         =app-catalog:store
         space-apps=space-apps-lite:store
+        :: vips are ships hosting apps for install
+        =space-vips:store
         installations=(map ship desk)
     ==
   --
@@ -137,7 +139,7 @@
       =/  pth         [host space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
       =/  apps        (space-initial:apps:core pth)
-      (bazaar:send-reaction:core [%space-apps pth apps] paths ~)
+      (bazaar:send-reaction:core [%space-apps pth apps treaties:core] paths ~)
     ::
     [%response ~]     ~
   ==
@@ -184,6 +186,26 @@
         ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
       ==
+
+    ::
+    ::  list of [ship desk]. can be used to resolve app installation locations.
+    ::  ~/scry/bazaar/directories/[desk].json
+    ::
+    [%x %vips @ ~]
+      ?:  ?|  =(~ space-vips.state)
+              =(0 (lent ~(tap in space-vips.state)))
+          ==
+          =/  dirs=json
+          %-  pairs:enjs:format
+          :~  [%vips [%a `(list json)`~]]  ==
+          ``json+!>(dirs)
+      =/  app-name   `@t`i.t.path
+      =/  dirs=(list [=ship =desk])
+      %-  skim
+      :-  directories.state
+      |=  [[=ship =desk]]
+      =(desk app-name)
+      ``bazaar-view+!>([%vips dirs])
   ==
 ::
 ++  on-agent
@@ -699,7 +721,7 @@
   ::  this reaction comes in as a result of accepting an invitation
   ::   to a space and then subscribing to the space-path
   ++  on-space-apps
-    |=  [=space-path:spaces-store =app-index-full:store]
+    |=  [=space-path:spaces-store =app-index-full:store vips=(set [=ship =desk])]
     ^-  (quip card _state)
     ::  get all of 'our' installed apps on this ship, and compare it to the list of
     ::   space apps to determine the installation status of the app
@@ -722,11 +744,12 @@
     acc
     :: ~&  >  "on-space-apps..."
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result *sorts:store])
+    =.  space-vips.state    (~(put by space-vips.state) space-path vips)
     =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     :: :_  state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
     :: notify the UI of that we've accepted an invite to a new space and there
     ::   are apps available in this new space
-    (bazaar:send-reaction:core [%space-apps space-path app-index-full] [/updates ~] ~)
+    (bazaar:send-reaction:core [%space-apps space-path app-index-full vips] [/updates ~] ~)
   ::
   ++  on-pin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
@@ -739,6 +762,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
+    =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  pinned.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -756,6 +780,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
+    =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  pinned.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -786,6 +811,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
+    =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  recommended.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -803,6 +829,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
+    =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  recommended.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -820,6 +847,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
+    =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  suite.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -837,6 +865,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
+    =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  suite.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -856,6 +885,16 @@
     =/  paths                [/updates /our ~]
     (bazaar:send-reaction [%set-suite-order path ord] paths ~)
   --
+::
+++  update-installed-status
+  |=  [app=app-lite:store]
+  ^-  app-lite:store
+  ::  set the app's installed state relative to this ship
+  ?:  (~(has by app-catalog.state) id.app)
+    =.  tags.sieve.app  (~(put in tags.sieve.app) %installed)
+    app
+  =.  tags.sieve.app  (~(del in tags.sieve.app) %installed)
+  app
 ::
 :: ++  suite
 ::   |%
@@ -884,6 +923,17 @@
 ::     =.  app-catalog.state               app.catalog.updates
 ::     rank
 ::   --
+::
+
+::
+++  treaties
+  ^-  (set [=ship =desk])
+  =/  allies=update:ally:treaty  .^(update:ally:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/allies/noun)
+  ?>  ?=(%ini -.allies)
+  %-  ~(rep by init.allies)
+  |=  [[=ship =alliance:alliance:treaty] acc=(set [=ship =desk])]
+  (~(uni in acc) alliance)
+
 ::
 ++  treaty-update
   |=  [upd=update:treaty:treaty]
@@ -1032,8 +1082,15 @@
       |=  [[path=space-path:spaces-store =space:spaces-store] acc=(map space-path:spaces-store [index=app-index-lite:store =sorts:store])]
     ?:  =(space.path 'our')  acc
       (~(put by acc) path.space [*app-index-lite:store *sorts:store])
+    =/  subscriptions=(list card)
+    %-  ~(rep by spaces)
+      |=  [[path=space-path:spaces-store =space:spaces-store] acc=(list card)]
+        ?:  =(space.path 'our')  acc
+        =/  watch-path    [/bazaar/(scot %p ship.path)/(scot %tas space.path)]
+        %-  (slog leaf+"{<dap.bowl>}: subscribing to {<watch-path>}..." ~)
+        (snoc acc [%pass watch-path %agent [ship.path %bazaar] %watch watch-path])
     =.  space-apps.state    (~(uni by spaces-map) space-apps.state)
-    `state
+    [subscriptions state]
   ::
     ++  skim-our
       |=  [path=space-path:spaces-store =space:spaces-store]

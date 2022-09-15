@@ -73,6 +73,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.suite-add': this.addToSuite,
     'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
     'realm.spaces.bazaar.install-app': this.installApp,
+    'realm.spaces.bazaar.install-docket': this.installDocket,
     'realm.spaces.bazaar.add-ally': this.addAlly,
   };
 
@@ -163,8 +164,10 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
     removeFromSuite: async (path: SpacePath, appId: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
-    installApp: async (app: any) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.install-app', app),
+    installDocket: async (ship: string, desk: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.install-docket', ship, desk),
+    installApp: async (desk: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.install-app', desk),
     addAlly: async (ship: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
   };
@@ -384,9 +387,6 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   // ************************ BAZAAR ***************************
   // ***********************************************************
-  async installDocket(_event: any, ship: string, desk: string) {
-    return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
-  }
 
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
     return await BazaarApi.getApps(this.core.conduit!, path, tag);
@@ -478,12 +478,12 @@ export class SpacesService extends BaseService {
     );
   }
 
-  async installApp(_event: IpcMainInvokeEvent, app: any) {
-    return await BazaarApi.installDocket(
-      this.core.conduit!,
-      app.ship,
-      app.desk
-    );
+  async installDocket(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+    return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
+  }
+
+  async installApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await BazaarApi.installApp(this.core.conduit!, desk);
   }
 
   async addAlly(_event: IpcMainInvokeEvent, ship: any) {
