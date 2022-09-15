@@ -731,53 +731,116 @@
   ++  on-pin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full ord]>}"
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full ord]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  apps                 (~(got by space-apps.state) path)
+    =/  app-lite             (~(got by index.apps) id.app-full)
+    =.  sieve.app-lite       sieve.app-full
+    =/  index                (~(put by index.apps) id.app-lite app-lite)
+    =.  pinned.sorts.apps    ord
+    =.  space-apps.state     (~(put by space-apps.state) path [index sorts.apps])
+    =/  paths                [/updates /our ~]
+    (bazaar:send-reaction [%pin path app-full ord] paths ~)
   ::
   ++  on-unpin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full ord]>}"
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full ord]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  apps                 (~(got by space-apps.state) path)
+    =/  app-lite             (~(got by index.apps) id.app-full)
+    =.  sieve.app-lite       sieve.app-full
+    =/  index                (~(put by index.apps) id.app-lite app-lite)
+    =.  pinned.sorts.apps    ord
+    =.  space-apps.state     (~(put by space-apps.state) path [index sorts.apps])
+    =/  paths                [/updates /our ~]
+    (bazaar:send-reaction [%unpin path app-full ord] paths ~)
   ::
   ++  on-set-pin-order
     |=  [path=space-path:spaces-store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [set-pin-order] => {<[path ord]>}"
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [set-pin-order] => {<[path ord]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  apps                 (~(got by space-apps.state) path)
+    =.  pinned.sorts.apps    ord
+    =.  space-apps.state     (~(put by space-apps.state) path [index.apps sorts.apps])
+    =/  paths                [/updates /our ~]
+    (bazaar:send-reaction [%set-pin-order path ord] paths ~)
   ::
   ++  on-rec
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  apps                    (~(got by space-apps.state) path)
+    =/  app-lite                (~(got by index.apps) id.app-full)
+    =.  sieve.app-lite          sieve.app-full
+    =/  index                   (~(put by index.apps) id.app-lite app-lite)
+    =.  recommended.sorts.apps  ord
+    =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
+    =/  paths                   [/updates /our ~]
+    (bazaar:send-reaction [%recommend path app-full ord] paths ~)
   ::
   ++  on-unrec
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  apps                    (~(got by space-apps.state) path)
+    =/  app-lite                (~(got by index.apps) id.app-full)
+    =.  sieve.app-lite          sieve.app-full
+    =/  index                   (~(put by index.apps) id.app-lite app-lite)
+    =.  recommended.sorts.apps  ord
+    =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
+    =/  paths                   [/updates /our ~]
+    (bazaar:send-reaction [%unrecommend path app-full ord] paths ~)
   ::
   ++  on-suite-add
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-
-    `state
+    =/  apps                    (~(got by space-apps.state) path)
+    =/  app-lite                (~(got by index.apps) id.app-full)
+    =.  sieve.app-lite          sieve.app-full
+    =/  index                   (~(put by index.apps) id.app-lite app-lite)
+    =.  suite.sorts.apps        ord
+    =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
+    =/  paths                   [/updates /our ~]
+    (bazaar:send-reaction [%suite-add path app-full ord] paths ~)
   ::
   ++  on-suite-rem
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  apps                    (~(got by space-apps.state) path)
+    =/  app-lite                (~(got by index.apps) id.app-full)
+    =.  sieve.app-lite          sieve.app-full
+    =/  index                   (~(put by index.apps) id.app-lite app-lite)
+    =.  suite.sorts.apps        ord
+    =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
+    =/  paths                   [/updates /our ~]
+    (bazaar:send-reaction [%suite-remove path app-full ord] paths ~)
   ::
   ++  on-set-suite-order
     |=  [path=space-path:spaces-store ord=(list app-id:store)]
     ^-  (quip card _state)
-    :: ~&  >  "{<dap.bowl>}: bazaar-reaction [set-suite-order] => {<[path ord]>}"
-    `state
+    ~&  >  "{<dap.bowl>}: bazaar-reaction [set-suite-order] => {<[path ord]>}"
+    :: only if this reaction originated remotely should we attempt to process it
+    ?:  =(our.bowl src.bowl)  `state
+    =/  apps                 (~(got by space-apps.state) path)
+    =.  suite.sorts.apps     ord
+    =.  space-apps.state     (~(put by space-apps.state) path [index.apps sorts.apps])
+    =/  paths                [/updates /our ~]
+    (bazaar:send-reaction [%set-suite-order path ord] paths ~)
   --
 ::
 :: ++  suite
