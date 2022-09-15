@@ -24,7 +24,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
     if (currentSpace) {
       setApps(bazaar.getApps(currentSpace.path));
     }
-  }, [currentSpace, currentBazaar?.pinnedChange]);
+  }, [currentSpace, currentBazaar?.pinnedChange, bazaar.appsChange]);
 
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;

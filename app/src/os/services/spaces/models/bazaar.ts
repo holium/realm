@@ -212,6 +212,7 @@ export const BazaarStore = types
       })
     ),
     apps: BazaarAppMap,
+    appsChange: types.optional(types.boolean, false),
   })
   .views((self) => ({
     getBazaar(path: string) {
@@ -300,6 +301,8 @@ export const BazaarStore = types
     },
     addApp(appId: string, app: any) {
       self.apps.set(appId, app);
+      // trigger UI update if someone is listening
+      self.appsChange = !self.appsChange;
     },
     updateApp(app: AppType) {
       // console.log('updating app => %o', app);
