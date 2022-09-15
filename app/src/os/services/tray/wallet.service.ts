@@ -42,8 +42,10 @@ export class WalletService extends BaseService {
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-view': this.setView,
+    'realm.tray.wallet.set-return-view': this.setReturnView,
     'realm.tray.wallet.set-network': this.setNetwork,
     'realm.tray.wallet.get-recipient': this.getRecipient,
+    'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
@@ -63,14 +65,20 @@ export class WalletService extends BaseService {
         passcodeHash
       );
     },
-    setView: (view: WalletView, index?: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-view', view, index);
+    setView: (view: WalletView, index?: string, transactionHash?: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-view', view, index, transactionHash);
+    },
+    setReturnView: (view: WalletView) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-return-view', view);
     },
     setNetwork: (network: NetworkType) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-network', network);
     },
     getRecipient: (patp: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
+    },
+    saveTransactionNotes: (notes: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.save-transaction-notes', notes);
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
@@ -284,8 +292,12 @@ export class WalletService extends BaseService {
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
-  async setView(_event: any, view: WalletView, index?: string) {
-    this.state!.setView(view, index);
+  async setView(_event: any, view: WalletView, index?: string, transactionHash?: string) {
+    this.state!.setView(view, index, transactionHash);
+  }
+
+  async setReturnView(_event: any, view: WalletView) {
+    this.state!.setReturnView(view);
   }
 
   async setNetwork(_event: any, network: NetworkType) {
@@ -338,6 +350,10 @@ export class WalletService extends BaseService {
         address: null,
       };
     }
+  }
+
+  async saveTransactionNotes(notes: string) {
+    // TODO: implement this with Leo
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {

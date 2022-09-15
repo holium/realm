@@ -12,8 +12,10 @@ import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { TransactionType } from 'os/services/tray/wallet.model';
+import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
 import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme, EthAmount, formatEthAmount, formatBtcAmount, convertEthAmountToUsd, convertBtcAmountToUsd } from '../../../lib/helpers';
+import { TransactionDetail } from '../TransactionDetail';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 const NoScrollBar = styled(Flex)`
 ::-webkit-scrollbar {
@@ -44,8 +46,14 @@ export const Transaction = observer((props: TransactionProps) => {
   let ethAmount = formatEthAmount(isEth ? transaction.amount : '1')
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1')
 
+  let onClick = () => {
+    console.log('click')
+    WalletActions.setReturnView(WalletView.ETH_DETAIL);
+    WalletActions.setView(WalletView.TRANSACTION_DETAIL, undefined, transaction.hash);
+  };
+
   return (
-    <DarkenOnHover p={2} width="100%" justifyContent="space-between" alignItems="center" hoverBg={hoverBackground}>
+    <DarkenOnHover p={2} width="100%" justifyContent="space-between" alignItems="center" hoverBg={hoverBackground} onClick={onClick}>
       <Flex flexDirection="column" justifyContent="center">
         <Text variant="h5" fontSize={3}>{ wasSent ? 'Sent' : 'Received'}</Text>
         <Flex>

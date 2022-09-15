@@ -7,6 +7,7 @@ import { EthDetail } from './views/ethereum/Detail';
 import { Detail } from './views/common/Detail';
 import { WalletList } from './views/ethereum/List';
 import { EthTransaction } from './views/ethereum/Transaction';
+import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletNetwork } from './views/common/Network';
 import { CreateWallet } from './views/common/Create';
@@ -29,7 +30,7 @@ export const WalletViews: { [key: string]: any } = {
     <WalletList network={NetworkType.ethereum} {...props} />
   ),
   'ethereum:detail': (props: any) => <Detail {...props} />,
-  'ethereum:transaction': (props: any) => <EthTransaction {...props} />,
+  [WalletView.TRANSACTION_DETAIL]: (props: any) => <TransactionDetail {...props} />,
   'ethereum:new': (props: any) => <EthNew {...props} />,
   [WalletView.CREATE_WALLET]: (props: any) => (
     <CreateWallet network={NetworkType.ethereum} />
@@ -40,9 +41,7 @@ export const WalletViews: { [key: string]: any } = {
 export const WalletApp: FC<any> = observer((props: any) => {
   const { desktop } = useServices();
   const { walletApp } = useTrayApps();
-
-  let wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
-  let transactions = getTransactions(walletApp.ethereum.transactions, wallet!.address);
+  let transactions = getTransactions(walletApp.ethereum.transactions);
 
   let View = WalletViews[walletApp.currentView];
 
@@ -61,7 +60,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={walletApp.currentView === 'ethereum:new'}
       />
-      <PendingTransactionDisplay transactions={transactions} />
+      {walletApp.currentView !== WalletView.TRANSACTION_DETAIL && <PendingTransactionDisplay transactions={transactions} />}
       <View {...props} />
       <WalletNetwork
         hidden={walletApp.currentView === 'ethereum:new'}

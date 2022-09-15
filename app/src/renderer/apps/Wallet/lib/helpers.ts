@@ -26,8 +26,8 @@ export function convertWeiToUsd(wei: string) {
   return usd.toFixed(2);
 }
 
-export function getTransactions(transactionMap: Map<string, TransactionType>, address: string): TransactionType[] {
-  return Array.from(transactionMap.values()).filter(trans => trans.ourAddress === address);
+export function getTransactions(transactionMap: Map<string, TransactionType>, address?: string): TransactionType[] {
+  return Array.from(transactionMap.values()).filter(trans => address ? trans.ourAddress === address : true);
 }
 
 export interface EthAmount {
@@ -46,9 +46,7 @@ export interface BtcAmount {
 }
 
 export function formatEthAmount(amount: string): EthAmount {
-  console.log(`converting amount: ${amount}`)
   let wei = utils.parseEther(amount);
-  console.log(`parsed wei: ${wei}`)
   return {
     eth: utils.formatUnits(wei, 'ether').slice(0, 6),
     gwei: utils.formatUnits(wei, 'gwei').slice(0, 6),
@@ -89,4 +87,19 @@ export const monthNames = [
   'Oct',
   'Nov',
   'Dec'
+];
+
+export const fullMonthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
 ];

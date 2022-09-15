@@ -9,7 +9,7 @@ export enum WalletView {
   ETH_LIST = 'ethereum:list',
   ETH_NEW = 'ethereum:new',
   ETH_DETAIL = 'ethereum:detail',
-  ETH_TRANSACTION = 'ethereum:transaction',
+  TRANSACTION_DETAIL = 'ethereum:transaction',
   ETH_SETTINGS = 'ethereum:settings',
   BIT_LIST = 'bitcoin:list',
   CREATE_WALLET = 'create-wallet'
@@ -175,15 +175,15 @@ export const EthStore = types
       self.settings!.defaultIndex = index;
     },
     enqueueTransaction(hash: any, toAddress: any, from: any, amount: any, timestamp: any) {
-      let tx = {
-        status: 'pending',
-        txh: hash,
-        toAddress: toAddress,
-        from: from,
-        amount: amount,
-        timestamp: timestamp,
-      }
-      self.transactions.put(tx);
+      // let tx = {
+      //   status: 'pending',
+      //   txh: hash,
+      //   toAddress: toAddress,
+      //   from: from,
+      //   amount: amount,
+      //   timestamp: timestamp,
+      // }
+      // self.transactions.put(tx);
     },
     // updates
     applyWalletUpdate(wallet: any) {
@@ -203,7 +203,6 @@ export const EthStore = types
         tx.status = "approved";
       else
         tx.status = "failed";
-//      self.transactions.set(transaction.key, tx);
     },
   }));
 
@@ -219,6 +218,16 @@ export const WalletStore = types
       'bitcoin:list',
       'create-wallet'
     ]),
+    returnView: types.maybe(types.enumeration([
+      'ethereum:list',
+      'ethereum:new',
+      'ethereum:detail',
+      'ethereum:transaction',
+      'ethereum:settings',
+      'bitcoin:list',
+      'create-wallet'
+    ])),
+    currentTransaction: types.maybe(types.string),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
     creationMode: types.string,
@@ -231,15 +240,10 @@ export const WalletStore = types
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
       if (network === 'ethereum') {
         self.ethereum.initial(wallets);
-//        if (self.ethereum.initialized)
           self.currentView = 'ethereum:list';
-//        else
-//          self.currentView = 'ethereum:new'
       } else {
-        //  self.bitcoin.initial(wallets);
         self.currentView = 'bitcoin:list';
       }
-      // if (network === 'bitcoin') self.bitcoin.initial(wallets);
     },
     setNetwork(network: 'bitcoin' | 'ethereum') {
       self.network = network;
@@ -249,9 +253,17 @@ export const WalletStore = types
         self.currentView = 'bitcoin:list';
       }
     },
-    setView(view: WalletView, index?: string) {
-      self.currentIndex = index;
+    setView(view: WalletView, index?: string, transaction?: string) {
+      if (index) {
+        self.currentIndex = index;
+      }
+      if (transaction) {
+        self.currentTransaction = transaction;
+      }
       self.currentView = view;
+    },
+    setReturnView(view: WalletView) {
+      self.returnView = view;
     },
     setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
       if (network == 'bitcoin')
