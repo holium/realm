@@ -114,7 +114,7 @@ export const PassportsApi = {
       app: 'passports',
       path: `/all`,
       onEvent: async (data: any) => {
-        console.log(data);
+        // console.log(data);
         if (data['members']) {
           state.initial(data['members']);
         }
