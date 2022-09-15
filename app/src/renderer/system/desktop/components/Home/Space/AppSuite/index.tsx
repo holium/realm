@@ -14,6 +14,7 @@ import { cleanNounColor } from 'os/lib/color';
 type AppSuiteProps = {
   patp: string;
   space: SpaceModelType;
+  apps: any[];
   suite: any[];
   // suite?: AppModelType[];
 };
@@ -87,20 +88,14 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
-  const { patp, space } = props;
-  const { spaces, ship, bazaar, identity } = useServices();
+  const { patp, space, apps, suite } = props;
+  // const { spaces } = useServices();
   const [searchMode, setSearchMode] = useState('none');
-  const [suite, setSuite] = useState<any[]>([]);
-  const [apps, setApps] = useState<any[]>([]);
   const [suiteIndex, setSuiteIndex] = useState(-1);
 
   const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
     console.log('onAppsAction => %o', { path, id: app.id, tag });
-    SpacesActions.addToSuite(path, app.id, rank).then((result) => {
-      console.log('addToSuite response => %o', result);
-      loadSuite();
-      // setSearchMode('none');
-    });
+    SpacesActions.addToSuite(path, app.id, rank);
   };
 
   const actionRenderer = (space: string, app: any, rank: number) => (
@@ -113,25 +108,6 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
       </Button>
     </>
   );
-
-  const loadSuite = () => {
-    // @ts-ignore
-    const suite = Array(5).fill(undefined);
-    const apps = bazaar.getSuiteApps(space.path);
-    apps?.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
-    // console.log(suite);
-    setSuite(suite);
-  };
-
-  useEffect(() => {
-    // console.log('AppSuite useEffect => %o', {
-    //   ship: ship.patp,
-    //   path: space.path,
-    // });
-    setApps(bazaar.getAvailableApps());
-    // setApps(bazaar.getBazaar(`/${ship.patp}/our`).allApps);
-    loadSuite();
-  }, [space.path]);
 
   return (
     <Flex flexDirection="column" position="relative" gap={20} mb={60}>
@@ -156,9 +132,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
                 space={space}
                 app={app}
                 onClick={() => {
-                  SpacesActions.removeFromSuite(space.path, app.id).then(
-                    (result) => loadSuite()
-                  );
+                  SpacesActions.removeFromSuite(space.path, app.id);
                 }}
               />
             )) || (
