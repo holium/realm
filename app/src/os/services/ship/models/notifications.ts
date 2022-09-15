@@ -112,6 +112,7 @@ export const NotificationStore = types
       if (data['more'].length === 1) {
         // then it is [{'opened'}]
         if (data['more'][0]['opened']) {
+          self.seen.concat(self.unseen);
           self.unseen.clear();
         }
         if (data['more'][0]['added']) {

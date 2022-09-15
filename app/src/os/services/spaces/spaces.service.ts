@@ -19,19 +19,18 @@ import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
 import { PassportsApi } from '../../api/passports';
 import { BazaarApi } from '../../api/bazaar';
-// import { InvitationsModel } from './models/invitations';
+import { VisaModel, VisaModelType } from './models/visas';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
 import { RoomsApi } from '../../api/rooms';
 
 const getHost = (path: string) => path.split('/')[1];
-import { DocketStoreType, DocketStore } from '../ship/models/docket';
 import { BazaarStore } from './models/bazaar';
 
 type SpaceModels = {
   bazaar?: any;
   membership?: any;
-  invitations?: any;
+  visas?: VisaModelType;
   // friends: FriendsType;
 };
 /**
@@ -41,10 +40,10 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
-    // invitations: InvitationsModel.create({
-    //   outgoing: {},
-    //   incoming: {},
-    // }),
+    visas: VisaModel.create({
+      incoming: {},
+      outgoing: {},
+    }),
     bazaar: BazaarStore.create({}),
   };
 
@@ -53,7 +52,10 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.accept-invite': this.acceptInvite,
+    'realm.spaces.decline-invite': this.declineInvite,
     'realm.spaces.get-members': this.getMembers,
+    'realm.spaces.get-invitations': this.getInvitations,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
     'realm.spaces.bazaar.get-apps': this.getApps,
@@ -121,6 +123,15 @@ export class SpacesService extends BaseService {
     },
     deleteSpace: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.delete-space', path);
+    },
+    getInvitations: () => {
+      return ipcRenderer.invoke('realm.spaces.get-invitations');
+    },
+    acceptInvite: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.accept-invite', path);
+    },
+    declineInvite: (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.decline-invite', path);
     },
     getMembers: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.get-members', path);
@@ -330,6 +341,19 @@ export class SpacesService extends BaseService {
     return await PassportsApi.kickMember(this.core.conduit!, path, patp);
   }
 
+  async getInvitations(_event: IpcMainInvokeEvent) {
+    return await PassportsApi.getVisas(this.core.conduit!);
+  }
+
+  async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
+    return await PassportsApi.acceptInvite(this.core.conduit!, path);
+  }
+
+  async declineInvite(_event: IpcMainInvokeEvent, path: string) {
+    await PassportsApi.declineInvite(this.core.conduit!, path);
+    this.models.visas?.removeIncoming(path);
+    return;
+  }
   // // ***********************************************************
   // // *********************** FRIENDS ***************************
   // // ***********************************************************

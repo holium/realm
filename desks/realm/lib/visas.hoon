@@ -14,6 +14,8 @@
       message=message
       name=name:space
       type=type:space
+      picture=picture:space
+      color=color:space
       invited-at=invited-at
     ]
   new-invite
@@ -48,6 +50,11 @@
       ==
       ::
         %accept-invite
+      :-  %accept-invite
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
+      ==
+        %decline-invite
       :-  %accept-invite
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
@@ -166,6 +173,8 @@
         ['message' s+message.invite]
         ['name' s+name.invite]
         ['type' s+type.invite]
+        ['picture' s+picture.invite]
+        ['color' s+color.invite]
         ['invitedAt' (time invited-at.invite)]
     ==
   ::
@@ -192,6 +201,7 @@
       %-  of
       :~  [%send-invite send-invite-payload]
           [%accept-invite accept-invite-payload]
+          [%decline-invite accept-invite-payload]
           [%invited invited-payload]
           [%stamped stamped-payload]
           [%kick-member kicked-payload]
@@ -228,6 +238,8 @@
           [%message so]
           [%name so]
           [%type space-type:action:dejs:spaces-lib]
+          [%picture so]
+          [%color so]
           [%invited-at di]
       ==
     ::

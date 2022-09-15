@@ -259,7 +259,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
             background={unreadCount ? '#569BE2' : 'transparent'}
           >
             {unreadCount > 0 && (
-              <Text fontSize={2} color="white" fontWeight={500}>
+              <Text fontSize={2} color="white" fontWeight={400}>
                 {unreadCount}
               </Text>
             )}

@@ -128,7 +128,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
 
   return (
     <HomeSidebar
-      filterMode={mode}
+      filterMode={mode as 'light' | 'dark'}
       customBg={windowColor}
       onContextMenu={(evt: any) => {
         evt.stopPropagation();
@@ -194,7 +194,9 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
             </TextButton>
           }
           value={person.state.value}
-          error={person.computed.ifWasEverBlurredThenError}
+          error={
+            person.computed.isDirty && person.computed.ifWasEverBlurredThenError
+          }
           onKeyDown={(evt: any) => {
             if (evt.key === 'Enter' && person.computed.parsed) {
               onShipSelected([person.computed.parsed, '']);

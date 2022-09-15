@@ -288,96 +288,6 @@
 ++  core  .
 ++  this  .
 ::
-::
-::  $handle-add: add a new person to the person store, while
-::    also adding a new space entry to track ship/role relationships
-:: ++  handle-add
-::   |=  [path=space-path:spaces =ship =payload:store]
-::   ^-  (quip card _state)
-::   =/  passports  (~(get by membership) path)
-::   ?~  passports
-::     ~&  >>  "{<dap.bowl>}: handle-add - {<path>} not found"
-::     `state
-::   ?:  (~(has by u.passports) ship)
-::     ~&  >>>  "{<dap.bowl>}: handle-add - {<ship>} already exists"
-::     `state
-::   `state
-::   ::  if needed, add a create method; otherwise the statement below
-::   ::    will construct a civ object w/ defaults based on types
-::   :: =|  passport=passport:store
-::   :: ::  update the civ instance with values from the attributes
-::   :: =/  passport  (update-passport passport payload)
-::   :: ::  put updated civ back in civs map
-::   :: =/  passports  (~(put by u.passports) ship passport)
-::   :: =/  notify=action:hark  (notify path /visas (crip " issued you a passport to the {<`@t`(scot %tas space.path)>} space in Realm."))
-::   :: :: :_  state(people (~(put by people) ship *person:store), membership (~(put by membership) path passports))
-::   :: :~  [%give %fact [/all ~] %passports-reaction !>([%add path ship *person:store passport])]
-::   ::     [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]
-::   :: ==
-:: ::
-:: ::
-:: ::
-:: ::  $handle-remove: remove all person artifacts across all stores
-:: ::    this differs from %kick which only removes a person from a space
-:: ++  handle-remove
-::   |=  [path=space-path:spaces =ship]
-::   ^-  (quip card _state)
-::   =/  passports  (~(get by membership) path)
-::   ?~  passports
-::     ~&  >>  "{<dap.bowl>}: handle-remove - {<path>} not found"
-::     `state
-::   =/  passports  (~(del by u.passports) ship)
-::   `state(people (~(del by people) ship), membership (~(put by membership) path passports))
-:: ::
-:: ::  $handle-edit: modify a person attribute.
-:: ::    note that $alias values are space specific; therefore, editing
-:: ::    the alias changes the membership store and not people store
-:: ++  handle-edit
-::   |=  [path=space-path:spaces =ship =payload:store]
-::   ^-  (quip card _state)
-::   =/  passports  (~(get by membership) path)
-::   ?~  passports
-::     ~&  >>  "{<dap.bowl>}: handle-edit - {<path>} not found"
-::     `state
-::   =/  passport  (~(get by u.passports) ship)
-::   ?~  passport
-::     ~&  >>>  "{<dap.bowl>}: handle-edit - {<ship>} not found"
-::     `state
-::   ::  update existing civ based on attributes
-::   =/  passport  (update-passport u.passport payload)
-::   ::  put updated civ back in civs map
-::   =/  passports  (~(put by u.passports) ship passport)
-::   `state(membership (~(put by membership) path passports))
-:: ::
-:: ::  $update-civ: update the civilian based on the updated attributes (fields)
-:: ++  update-passport
-::   |=  [=passport:store =payload:store]
-::   ^-  passport:store
-::   %-  ~(rep in payload)
-::   :: |=  [attribute=edit-field:store rslt=civ:store]
-::   |:  [=mod:store acc=`passport:store`passport]
-::   ?-  -.mod
-::     %alias         acc(alias alias.mod)
-::     %add-roles     acc(roles (~(gas in roles.passport) ~(tap in roles.mod)))
-::     %remove-roles  acc(roles (~(dif in roles.passport) roles.mod))
-::   ==
-:: ::
-:: ::  $handle-ping: %ping pokes come in from UI to indicate user is
-:: ::    actively using Realm. we record the timestamp of this ping and
-:: ::    then forward (reaction) our status to all subscribers
-:: ::
-:: ++  handle-ping
-::   |=  [msg=(unit @t)]
-::   ^-  (quip card _state)
-::   `state
-::   :: =/  per  (~(get by people.state) our.bowl)
-::   :: ?~  per  `state
-::   :: =.  last-known-active.u.per  (some now.bowl)
-::   :: :_  state(people (~(put by people.state) our.bowl u.per))
-::   :: :~  [%give %fact [/all ~] %passports-reaction !>([%pong our.bowl now.bowl])]
-::   :: ==
-:: ::
-::
 ++  make-visas
   |=  [path=space-path:spaces =members:membership-store =space:spaces]
   ^-  (list card)
@@ -395,11 +305,12 @@
   ^-  (quip card _state)
   |^
   ?-  -.act
-    %send-invite    (handle-send +.act)
-    %invited        (handle-invited +.act)
-    %accept-invite  (handle-accept +.act)
-    %stamped        (handle-stamped +.act)
-    %kick-member    (handle-kicked +.act)
+    %send-invite          (handle-send +.act)
+    %invited              (handle-invited +.act)
+    %accept-invite        (handle-accept +.act)
+    %decline-invite       (handle-decline +.act)
+    %stamped              (handle-stamped +.act)
+    %kick-member          (handle-kicked +.act)
   ==
   ::
   ++  handle-send     ::  MEMBER | HOST
@@ -474,6 +385,32 @@
     :_  state
     :~  [%pass / %agent [accepter %passports] %poke visa-action+!>([%stamped path])]              :: Send space to invitee
         [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
+    ==
+  ::
+  ++  handle-decline     ::  MEMBER | HOST
+    |=  [path=space-path:spaces]
+    ^-  (quip card _state)
+    ?.  (is-host:core ship.path)
+      ::
+      ::  MEMBER
+      ::  If we are invited we will send the invite action to the host
+      =.  incoming.invitations.state    (~(del by incoming.invitations.state) path)
+      :_  state
+      :~  [%pass /passports %agent [ship.path %passports] %poke visa-action+!>(act)]
+      ==
+    ::
+    ::  HOST
+    ::
+    =/  decliner                    src.bowl
+    =/  membs                       (~(got by membership.state) path)
+    =.  membs                       (~(del by membs) decliner)
+    =.  membership.state            (~(put by membership.state) [path membs])
+    =/  space-invites               (~(got by outgoing.invitations.state) path)
+    =.  space-invites               (~(del by space-invites) decliner)
+    ~&  >  [space-invites]
+    =.  outgoing.invitations.state  (~(put by outgoing.invitations.state) [path space-invites])
+    :_  state
+    :~  [%give %fact [/all ~] visa-reaction+!>([%kicked path decliner])]
     ==
   ::
   ++  handle-stamped    :: MEMBER

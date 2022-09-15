@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 
@@ -6,6 +6,10 @@ import { Flex, Grid, Text, ActionButton, Icons } from 'renderer/components';
 import { SpaceRow } from './SpaceRow';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { VisaRow } from './components/VisaRow';
+import { VisaType } from 'os/services/spaces/models/visas';
+import { darken } from 'polished';
 
 export type Space = {
   color?: string;
@@ -27,7 +31,21 @@ export const SpacesList: FC<SpacesListProps> = observer(
     const { desktop } = useServices();
     const { textColor, windowColor } = desktop.theme;
     const { selected, spaces, onSelect } = props;
-    if (!spaces.length) {
+    const [visas, setVisas] = useState([]);
+    const [loadingVisa, setLoading] = useState(true);
+
+    useEffect(() => {
+      SpacesActions.getInvitations()
+        .then((invites: any) => {
+          console.log(invites);
+          setLoading(false);
+          setVisas(Object.values(invites));
+        })
+        .catch(() => setLoading(false));
+    }, []);
+    console.log(visas);
+
+    if (!spaces.length && !loadingVisa && !visas.length) {
       return (
         <Flex
           flex={1}
@@ -74,6 +92,19 @@ export const SpacesList: FC<SpacesListProps> = observer(
     }
     return (
       <Grid.Column expand gap={4}>
+        {visas.map((visa: VisaType) => {
+          return (
+            <VisaRow
+              key={visa.name}
+              image={visa.picture}
+              color={visa.color}
+              path={visa.path}
+              customBg={windowColor}
+              invitedBy={visa.inviter}
+              title={visa.name}
+            />
+          );
+        })}
         {spaces.map((space: SpaceModelType) => {
           return (
             <SpaceRow

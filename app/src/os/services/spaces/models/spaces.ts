@@ -8,7 +8,7 @@ import { toJS } from 'mobx';
 import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
-import { VisaModel } from './invitations';
+import { VisaModel } from './visas';
 
 import { TokenModel } from './token';
 // import { FriendsStore } from '../../ship/models/friends';

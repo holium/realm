@@ -100,7 +100,7 @@ export const SpacesApi = {
     };
     const response = await conduit.poke({
       app: 'spaces',
-      mark: 'invite-action',
+      mark: 'visa-action',
       json: {
         'send-invite': {
           path: pathObj,
@@ -120,7 +120,7 @@ export const SpacesApi = {
     };
     const response = await conduit.poke({
       app: 'spaces',
-      mark: 'invite-action',
+      mark: 'visa-action',
       json: {
         'kick-member': {
           path: pathObj,

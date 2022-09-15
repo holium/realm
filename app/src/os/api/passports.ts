@@ -16,7 +16,7 @@ export const PassportsApi = {
       app: 'passports',
       path: '/visas', // the spaces scry is at the root of the path
     });
-    return response.invitations;
+    return response.invites;
   },
   /**
    * inviteMember: invite a member to a space
@@ -39,7 +39,7 @@ export const PassportsApi = {
     };
     const response = await conduit.poke({
       app: 'passports',
-      mark: 'invite-action',
+      mark: 'visa-action',
       json: {
         'send-invite': {
           path: pathObj,
@@ -59,11 +59,58 @@ export const PassportsApi = {
     };
     const response = await conduit.poke({
       app: 'passports',
-      mark: 'invite-action',
+      mark: 'visa-action',
       json: {
         'kick-member': {
           path: pathObj,
           ship: patp,
+        },
+      },
+    });
+    return response;
+  },
+  acceptInvite: async (conduit: Conduit, path: SpacePath) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    console.log({
+      'accept-invite': {
+        path: pathObj,
+      },
+    });
+    const response = await conduit.poke({
+      app: 'passports',
+      mark: 'visa-action',
+      json: {
+        'accept-invite': {
+          path: pathObj,
+        },
+      },
+      onSuccess: (id: number) => {
+        console.log(id);
+      },
+    });
+    return response;
+  },
+  declineInvite: async (conduit: Conduit, path: SpacePath) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    console.log({
+      'decline-invite': {
+        path: pathObj,
+      },
+    });
+    const response = await conduit.poke({
+      app: 'passports',
+      mark: 'visa-action',
+      json: {
+        'decline-invite': {
+          path: pathObj,
         },
       },
     });
