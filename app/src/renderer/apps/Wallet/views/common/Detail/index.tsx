@@ -3,17 +3,18 @@ import { observer } from 'mobx-react';
 import { theme as themes, ThemeType } from 'renderer/theme';
 import { darken, lighten } from 'polished';
 
-import { Flex, Box, Text } from 'renderer/components';
+import { Flex, Box, Text, Icons } from 'renderer/components';
 import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/shell/theme.model';
-import { TransactionType } from 'os/services/tray/wallet.model';
+import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
 import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme, getTransactions, EthAmount, formatEthAmount, formatBtcAmount, convertEthAmountToUsd, convertBtcAmountToUsd } from '../../../lib/helpers';
 
 import { WalletInfo } from './WalletInfo';
 import { TransactionList } from './TransactionList';
 import { SendTransaction } from './SendTransaction';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface EthDetailProps {
   theme: ThemeModelType
@@ -56,6 +57,9 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
           <TransactionList transactions={transactions} />
         </Flex>
       </Box>
+      <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletView.ETH_LIST)}>
+        <Icons name="ArrowLeftLine" size={2} color={desktop.theme.iconColor} />
+      </Flex>
     </Flex>
   );
 });

@@ -1,6 +1,6 @@
 import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Box } from 'renderer/components';
+import { Flex, Text, Box, Icons } from 'renderer/components';
 import { darken, transparentize } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../../lib/helpers';
@@ -105,6 +105,7 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
     };
 
     return (
+      <>
       <Flex
         width="100%"
         height="100%"
@@ -131,6 +132,10 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
           </Text>
         </Flex>
       </Flex>
+      <Flex position="absolute" top="542px" zIndex={999} onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>
+        <Icons name="ArrowLeftLine" size={2} color={desktop.theme.iconColor} />
+      </Flex>
+      </>
     );
   }
 );

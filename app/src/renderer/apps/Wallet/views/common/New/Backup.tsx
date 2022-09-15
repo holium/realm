@@ -1,8 +1,7 @@
-import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import { FC, useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Flex, Text, Box, Icons } from 'renderer/components';
 import { darken, transparentize } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { NewWalletScreen } from './index';
 
@@ -27,6 +26,7 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
   }
 
   return (
+    <>
     <Flex px={16} height="100%" width="100%" flexDirection="column" justifyContent="space-evenly" alignItems="center">
       <Flex flexDirection="column">
         <Text variant="h5">Back up your Wallet</Text>
@@ -66,5 +66,9 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
         <Button onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>I wrote it down</Button> {/* TODO: link to confirm instead after demo */}
       </Flex>
     </Flex>
+    <Flex position="absolute" top="542px" zIndex={999} onClick={() => props.setScreen(NewWalletScreen.CREATE)}>
+      <Icons name="ArrowLeftLine" size={2} color={desktop.theme.iconColor} />
+    </Flex>
+    </>
   );
 });

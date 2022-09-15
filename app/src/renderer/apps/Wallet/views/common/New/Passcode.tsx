@@ -35,7 +35,7 @@ let listener = (event: KeyboardEvent) => {
       return setPasscode(newPasscode);
     }
   useEffect(() => {
-    
+
 
     document.addEventListener('keydown', listener);
 

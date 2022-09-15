@@ -33,7 +33,7 @@ export const Create: FC<CreateProps> = observer((props: CreateProps) => {
           </TextButton>
         </Box>
       </Flex>
-      <Flex mb={6} justifyContent="center" alignItems="center">
+      <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
         <Box>
           <Icons name="InfoCircle" color={theme.colors.brand.secondary} />
         </Box>

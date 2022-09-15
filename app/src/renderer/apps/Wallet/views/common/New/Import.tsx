@@ -1,7 +1,7 @@
 import { FC, useMemo, Dispatch, SetStateAction, useState } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Box, Label, Input } from 'renderer/components';
+import { Button, Flex, Text, Icons, Label, Input } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { NewWalletScreen } from './index';
@@ -36,6 +36,9 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
           <Flex mt={7} width="100%">
             <Button width="100%" disabled={!ethers.utils.isValidMnemonic(phrase)} onClick={saveSeedPhrase}>Save</Button>
           </Flex>
+        </Flex>
+        <Flex position="absolute" top="542px" zIndex={999} onClick={() => props.setScreen(NewWalletScreen.CREATE)}>
+          <Icons name="ArrowLeftLine" size={2} color={desktop.theme.iconColor} />
         </Flex>
     </Flex>
   );
