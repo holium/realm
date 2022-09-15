@@ -31,6 +31,7 @@
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
       [%enqueue-transaction =network hash=@ =transaction]
+      [%add-to-history =network hash=@ =transaction]
       [%add-smart-contract contract-id=@t =contract-type name=@t address=@ux wallet-index=@t]
   ==
 ::  subscription updates
@@ -45,7 +46,7 @@
 ::  stores
 ::
 +$  transaction-queue        (map network (map @t [hash=@ transaction]))
-+$  transaction-history  (map network (map @t [status=? transaction]))
++$  transaction-history  (map network (map @t transaction))
 +$  wallets  (map =network (map @t wallet))
 +$  settings
   $:  wallet-creation=mode

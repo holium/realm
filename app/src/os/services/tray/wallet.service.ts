@@ -221,6 +221,8 @@ export class WalletService extends BaseService {
           this.state!.ethereum.applyTransactionUpdate(transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
+        const tx = this.state!.ethereum.transactions.get(transaction.transaction.hash);
+        WalletApi.addToHistory(this.core.conduit!, 'ethereum', transaction.transaction.hash, tx);
       }
     );
 
@@ -301,6 +303,7 @@ export class WalletService extends BaseService {
     // console.log(`got gas estimate: ${gasEstimate}`);
 
     try {
+      console.log('requesting address');
       const address: any = await WalletApi.getAddress(
         this.core.conduit!,
         this.state!.network,
@@ -382,12 +385,14 @@ export class WalletService extends BaseService {
       value: ethers.utils.parseEther(amount),
     };
     const { hash } = await signer.sendTransaction(tx);
-    // this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
+    console.log('hash: ' + hash);
+    this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
       hash,
-      tx
+      this.state!.ethereum.transactions.get(hash)
+      // tx
     );
   }
 
