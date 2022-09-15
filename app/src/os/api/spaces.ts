@@ -134,7 +134,7 @@ const handleSpacesReactions = (
       membersState.removeMemberMap(deleted);
       break;
     case 'new-space':
-      console.log('new-space', data);
+      // console.log('new-space', data);
       state.addSpace(data['new-space']);
       // membersState.addMemberMap(remoteSpace, data['add'].members);
       // bazaarState.addBazaar(remoteSpace);

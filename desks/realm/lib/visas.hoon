@@ -91,6 +91,18 @@
           [%member (memb:encode passport.rct)]
       ==
       ::
+       %invite-received
+      :-  %invite-received
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%invite (invite:encode invite.rct)]
+      ==
+      ::
+        %invite-removed
+      :-  %invite-removed
+      %-  pairs
+      [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]~
+      ::
         %invite-accepted
       :-  %invite-accepted
       %-  pairs

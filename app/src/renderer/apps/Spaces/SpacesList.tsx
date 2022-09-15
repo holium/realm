@@ -28,26 +28,27 @@ type SpacesListProps = {
 
 export const SpacesList: FC<SpacesListProps> = observer(
   (props: SpacesListProps) => {
-    const { desktop } = useServices();
+    const { desktop, visas } = useServices();
     const { textColor, windowColor } = desktop.theme;
     const { selected, spaces, onSelect } = props;
-    const [visas, setVisas] = useState([]);
+    // const [visas, setVisas] = useState([]);
     const [loadingVisa, setLoading] = useState(true);
 
     useEffect(() => {
-      SpacesActions.getInvitations()
-        .then((invites: any) => {
-          console.log(invites);
-          setLoading(false);
-          setVisas(Object.values(invites));
-        })
-        .catch(() => setLoading(false));
+      // SpacesActions.getInvitations()
+      //   .then((invites: any) => {
+      //     console.log(invites);
+      //     setLoading(false);
+      //     setVisas(Object.values(invites));
+      //   })
+      //   .catch(() => setLoading(false));
     }, []);
 
     const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
-    console.log(visas);
 
-    if (!spaces.length && !loadingVisa && !visas.length) {
+    const incoming = Array.from(visas.incoming.values());
+
+    if (!spaces.length && !loadingVisa && !incoming.length) {
       return (
         <Flex
           flex={1}
@@ -101,7 +102,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
         flexDirection="column"
         overflowY="scroll"
       >
-        {visas.map((visa: VisaType) => {
+        {incoming.map((visa: VisaType) => {
           return (
             <VisaRow
               key={visa.name}

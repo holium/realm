@@ -9,7 +9,6 @@ import {
 
 export const Visa = types.model({
   inviter: types.string,
-  patp: types.string,
   role: types.string,
   message: types.string,
   path: types.string,
@@ -43,9 +42,12 @@ export const VisaModel = types
       console.log(data);
       // set initial data
     },
-    addIncoming(data: any) {
+    initialIncoming(data: any) {
+      applySnapshot(self.incoming, data);
+    },
+    addIncoming(data: { path: string; invite: VisaType }) {
       // update incoming invitations
-      self.incoming.set(data.path, data);
+      self.incoming.set(data.path, data.invite);
     },
     updateIncoming(data: any) {
       // update incoming invitations

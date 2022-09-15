@@ -2,6 +2,7 @@ import { Conduit } from '@holium/conduit';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { MembershipType } from '../services/spaces/models/members';
 import { SpacesStoreType } from 'os/services/spaces/models/spaces';
+import { VisaModelType } from 'os/services/spaces/models/visas';
 
 export const PassportsApi = {
   getMembers: async (conduit: Conduit, path: SpacePath) => {
@@ -9,7 +10,6 @@ export const PassportsApi = {
       app: 'passports',
       path: `${path}/members`, // the spaces scry is at the root of the path
     });
-    // console.log(response.members);
     return response.members;
   },
   getVisas: async (conduit: Conduit) => {
@@ -108,13 +108,13 @@ export const PassportsApi = {
   watchMembers: (
     conduit: Conduit,
     state: MembershipType,
-    spacesState: SpacesStoreType
+    spacesState: SpacesStoreType,
+    visaState: VisaModelType
   ): void => {
     conduit.watch({
       app: 'passports',
       path: `/all`,
       onEvent: async (data: any) => {
-        console.log(data);
         if (data['members']) {
           state.initial(data['members']);
         }
@@ -122,12 +122,14 @@ export const PassportsApi = {
           const { path, members } = data['new-members'];
           state.addMemberMap(path, members);
         }
+
         if (data['visa-reaction']) {
           handleInviteReactions(
             data['visa-reaction'],
             conduit.ship!,
             state,
-            spacesState
+            spacesState,
+            visaState
           );
         }
       },
@@ -142,11 +144,10 @@ const handleInviteReactions = (
   data: any,
   ship: string,
   state: MembershipType,
-  spacesState: SpacesStoreType
+  spacesState: SpacesStoreType,
+  visaState: VisaModelType
 ) => {
-  // console.log(data);
   const reaction: string = Object.keys(data)[0];
-  // console.log(reaction);
   switch (reaction) {
     case 'invite-sent':
       const sentPayload = data['invite-sent'];
@@ -159,6 +160,15 @@ const handleInviteReactions = (
         acceptedPayload.ship,
         acceptedPayload.member
       );
+      break;
+    case 'invite-received':
+      const receivedPayload = data['invite-received'];
+      visaState.addIncoming(receivedPayload);
+      break;
+    case 'invite-removed':
+      const removePayload = data['invite-removed'];
+      visaState.removeIncoming(removePayload.path);
+
       break;
     case 'kicked':
       const kickedPayload = data['kicked'];

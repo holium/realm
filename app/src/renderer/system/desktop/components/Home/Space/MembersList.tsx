@@ -45,7 +45,7 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
   );
 
   const ourIsAdmin = membership.isAdmin(path, ship!.patp!);
-  console.log(toJS(ourIsAdmin));
+
   const RowRenderer = (
     { index, style }: { index: number; style: any },
     role: 'admin' | 'member'
