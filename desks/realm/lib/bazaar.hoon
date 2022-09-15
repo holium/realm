@@ -117,6 +117,7 @@
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
           [%app-index-full (pairs (full-app-index:encode app-index-full.rct))]
+          :: [%vips [%a (vips:encode vips.rct)]]
       ==
     ::
         %pin
@@ -201,20 +202,20 @@
         %apps
       (pairs (full-app-index:encode app-index-full.vi))
       ::
-        %directories
-      [%a (directories:encode dirs.vi)]
+        %sites
+      [%a (sites:encode sites.vi)]
     ==
   --
 ::
 ++  encode
   =,  enjs:format
   |%
-  ++  directories
-    |=  [dirs=(list [=ship =desk])]
+  ++  sites
+    |=  [stes=(set [ship=@p desk=@tas])]
     ^-  (list json)
-    %-  turn
-    :-  dirs
-    |=  [[=ship =desk]]
+    %+  turn  ~(tap in stes)
+    |=  [ship=@p desk=@tas]
+    ^-  json
     %-  pairs
     :~  [%ship s+(crip "{<ship>}")]
         [%desk s+desk]

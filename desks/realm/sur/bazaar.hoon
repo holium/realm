@@ -86,7 +86,7 @@
 +$  app-index-lite          (map app-id app-lite)
 +$  space-apps-lite         (map space-path:spaces [index=app-index-lite =sorts])  :: INCLUDED IN AGENT STATE
 +$  space-apps-full         (map space-path:spaces [index=app-index-full =sorts])
-+$  space-vips              (map space-path:spaces (set [=ship =desk]))
++$  sites                   (set [ship desk])
 
 :: +$  pinned-apps             (map space-path:spaces (map app-id @ud))
 :: +$  recommended-apps        (map space-path:spaces (map app-id @ud))
@@ -113,7 +113,7 @@
 ::
 +$  reaction
   $%  [%initial =space-apps-full]
-      [%space-apps =space-path:spaces =app-index-full vips=(set [=ship =desk])]
+      [%space-apps =space-path:spaces =app-index-full sites=(set [ship desk])]
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]
       [%set-pin-order path=space-path:spaces ord=(list app-id)]
@@ -131,6 +131,6 @@
 ::
 +$  view
   $%  [%apps =app-index-full]
-      [%directories dirs=(list [=ship =desk])]
+      [%sites sites=(set [ship desk])]
   ==
 --

@@ -19,7 +19,7 @@
         =app-catalog:store
         space-apps=space-apps-lite:store
         :: vips are ships hosting apps for install
-        =space-vips:store
+        =sites:store
         installations=(map ship desk)
     ==
   --
@@ -139,7 +139,9 @@
       =/  pth         [host space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
       =/  apps        (space-initial:apps:core pth)
-      (bazaar:send-reaction:core [%space-apps pth apps treaties:core] paths ~)
+      =/  sites        sites:core
+      ~&  >>  "{<dap.bowl>}: {<sites>}"
+      (bazaar:send-reaction:core [%space-apps pth apps sites] paths ~)
     ::
     [%response ~]     ~
   ==
@@ -191,21 +193,29 @@
     ::  list of [ship desk]. can be used to resolve app installation locations.
     ::  ~/scry/bazaar/directories/[desk].json
     ::
-    [%x %vips @ ~]
-      ?:  ?|  =(~ space-vips.state)
-              =(0 (lent ~(tap in space-vips.state)))
-          ==
-          =/  dirs=json
-          %-  pairs:enjs:format
-          :~  [%vips [%a `(list json)`~]]  ==
-          ``json+!>(dirs)
+    [%x %sites @ ~]
+      :: ``json+!>([%a ~])
+      :: ?:  ?|  =(~ space-vips.state)
+      ::         =(0 (lent ~(tap in space-vips.state)))
+      ::     ==
+      ::     =/  dirs=json
+      ::     %-  pairs:enjs:format
+      ::     :~  [%vips [%a `(list json)`~]]  ==
+      ::     ``json+!>(dirs)
       =/  app-name   `@t`i.t.path
-      =/  dirs=(list [=ship =desk])
-      %-  skim
-      :-  directories.state
-      |=  [[=ship =desk]]
+      =/  sites
+      :: %-  ~(rep in space-vips.state)
+      :: |=  [[path=spaces-path:store vips=(set [ship desk])] acc=(set [ship desk])]
+      %+  skim  ~(tap in sites.state)
+      |=  [=ship =desk]
       =(desk app-name)
-      ``bazaar-view+!>([%vips dirs])
+
+      :: =/  dirs=(list [=ship =desk])
+      :: %-  skim
+      :: :-  directories.state
+      :: |=  [[=ship =desk]]
+      :: =(desk app-name)
+      ``bazaar-view+!>([%sites (silt sites)])
   ==
 ::
 ++  on-agent
@@ -721,7 +731,7 @@
   ::  this reaction comes in as a result of accepting an invitation
   ::   to a space and then subscribing to the space-path
   ++  on-space-apps
-    |=  [=space-path:spaces-store =app-index-full:store vips=(set [=ship =desk])]
+    |=  [=space-path:spaces-store =app-index-full:store sites=(set [=ship =desk])]
     ^-  (quip card _state)
     ::  get all of 'our' installed apps on this ship, and compare it to the list of
     ::   space apps to determine the installation status of the app
@@ -744,12 +754,12 @@
     acc
     :: ~&  >  "on-space-apps..."
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result *sorts:store])
-    =.  space-vips.state    (~(put by space-vips.state) space-path vips)
+    =.  sites.state         sites
     =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     :: :_  state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
     :: notify the UI of that we've accepted an invite to a new space and there
     ::   are apps available in this new space
-    (bazaar:send-reaction:core [%space-apps space-path app-index-full vips] [/updates ~] ~)
+    (bazaar:send-reaction:core [%space-apps space-path app-index-full sites] [/updates ~] ~)
   ::
   ++  on-pin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
@@ -926,8 +936,8 @@
 ::
 
 ::
-++  treaties
-  ^-  (set [=ship =desk])
+++  sites
+  ^-  (set [ship desk])
   =/  allies=update:ally:treaty  .^(update:ally:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/allies/noun)
   ?>  ?=(%ini -.allies)
   %-  ~(rep by init.allies)
