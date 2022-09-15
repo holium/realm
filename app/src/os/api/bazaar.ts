@@ -369,6 +369,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
+      console.log('initial => %o', data['initial']);
       state.initial(data['initial']);
       // state.initialReaction(data['initial']);
       break;

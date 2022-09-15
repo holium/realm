@@ -67,7 +67,10 @@ export class OnboardingService extends BaseService {
     },
 
     verifyEmail(verificationCode: string) {
-      return ipcRenderer.invoke('realm.onboarding.verifyEmail', verificationCode);
+      return ipcRenderer.invoke(
+        'realm.onboarding.verifyEmail',
+        verificationCode
+      );
     },
 
     resendEmailConfirmation() {
@@ -239,21 +242,21 @@ export class OnboardingService extends BaseService {
     if (!auth.accountId)
       throw new Error('Accout must be set before resending verification code.');
 
-    let newVerificationCode = await this.core.holiumClient.resendVerificationCode(auth.accountId);
+    let newVerificationCode =
+      await this.core.holiumClient.resendVerificationCode(auth.accountId);
     this.state.setVerificationCode(newVerificationCode);
 
-    return newVerificationCode
+    return newVerificationCode;
   }
 
   verifyEmail(_event: any, verificationCode: string): boolean {
     if (!this.state.verificationCode)
-      throw new Error('Verification code must be set before verifying.')
+      throw new Error('Verification code must be set before verifying.');
 
-    let verified = this.state.verificationCode === verificationCode
-    if (verified)
-      this.state.setVerificationCode(null);
+    let verified = this.state.verificationCode === verificationCode;
+    if (verified) this.state.setVerificationCode(null);
 
-    return verified
+    return verified;
   }
 
   setSeenSplash(_event: any) {
@@ -415,16 +418,16 @@ export class OnboardingService extends BaseService {
         app: 'docket',
         path: '/charges',
         onSubscribed: (subscription: number) => {
-          console.log('docket/charges subscription succeeded!');
           subscriptionId = subscription;
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
-          console.log('docket/charges => %o', data);
           if (data.hasOwnProperty('add-charge')) {
-            resolve(data);
-            console.log('unsubscribing from docket/charges...');
-            await tempConduit.unsubscribe(subscriptionId);
-            console.log('unsubscribed from docket/charges...');
+            const charge = data['add-charge'].charge;
+            // according to Tlon source, this determines when the app is fully installed
+            if ('glob' in charge.chad || 'site' in charge.chad) {
+              await tempConduit.unsubscribe(subscriptionId);
+              resolve(data);
+            }
           }
         },
         onError: () => {
@@ -447,16 +450,12 @@ export class OnboardingService extends BaseService {
         app: 'treaty',
         path: '/treaties',
         onSubscribed: (subscription: number) => {
-          console.log('treaty/treaties subscription succeeded!');
           subscriptionId = subscription;
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
-          console.log('treaty/treaties => %o', data);
           if (data.hasOwnProperty('add')) {
-            resolve(data);
-            console.log('unsubscribing from treaty/treaties...');
             await tempConduit.unsubscribe(subscriptionId);
-            console.log('unsubscribed from treaty/treateis...');
+            resolve(data);
           }
         },
         onError: () => {
@@ -477,10 +476,6 @@ export class OnboardingService extends BaseService {
       app: 'docket',
       path: '/charges', // the spaces scry is at the root of the path
     });
-    console.log('isAppInstalled: testing charges => %o', {
-      desk,
-      charges: response.initial,
-    });
     return Object.keys(response.initial).includes(desk);
   }
 
@@ -488,10 +483,6 @@ export class OnboardingService extends BaseService {
     const response = await tempConduit.scry({
       app: 'treaty',
       path: '/allies', // the spaces scry is at the root of the path
-    });
-    console.log('isAlly: testing allies => %o', {
-      ship,
-      allies: response.ini,
     });
     return Object.keys(response.ini).includes(ship);
   }
@@ -543,45 +534,33 @@ export class OnboardingService extends BaseService {
         desks[idx]
       );
     }
-    this.closeConduit();
+    await this.closeConduit();
     this.state.endRealmInstall();
+    console.log('realm installation complete.');
   }
 
   async installDesk(tempConduit: Conduit, ship: string, desk: string) {
     return new Promise(async (resolve, reject) => {
-      console.log('installRealm: is %o an ally?...', ship);
       if (!(await this.isAlly(tempConduit, ship))) {
-        console.log(
-          'installRealm: %o is NOT an ally. forming alliance with %o...',
-          ship,
-          ship
-        );
-        this.addAlly(tempConduit, ship)
+        console.log('forming alliance with %o...', ship);
+        await this.addAlly(tempConduit, ship)
           .then((result) => {
-            console.log('addAlly result => %o', result);
             console.log('installing %o...', desk);
             this.installApp(tempConduit, ship, desk)
               .then((result) => {
-                console.log('app install complete => %o', result);
+                console.log('app install complete');
                 resolve(result);
-                // setTimeout(() => tempConduit.closeChannel(), 200);
               })
               .catch((e) => reject(e));
           })
           .catch((e) => reject(e));
       } else {
-        console.log(
-          'installRealm: %o IS an ally. is %o already installed?...',
-          ship
-        );
+        console.log('checking if %o installed...', ship);
         if (!(await this.isAppInstalled(tempConduit, ship, desk))) {
-          console.log(
-            'installRealm: %o is NOT installed. installing %o...',
-            desk
-          );
-          this.installApp(tempConduit, ship, desk)
+          console.log('installing %o...', desk);
+          await this.installApp(tempConduit, ship, desk)
             .then((result) => {
-              console.log('app install complete => %o', result);
+              console.log('app install complete');
               resolve(result);
             })
             .catch((e) => reject(e));
