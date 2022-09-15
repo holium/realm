@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { toJS, isObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
@@ -15,10 +15,16 @@ type AppGridProps = {
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
   const { spaces, bazaar } = useServices();
+  const [apps, setApps] = useState<any>([]);
 
-  const apps = spaces.selected?.path
-    ? bazaar.getApps(spaces.selected?.path!)
-    : [];
+  const currentSpace = spaces.selected!;
+  const currentBazaar = bazaar.spaces.get(currentSpace.path);
+
+  useEffect(() => {
+    if (currentSpace) {
+      setApps(bazaar.getApps(currentSpace.path));
+    }
+  }, [currentSpace, currentBazaar?.pinnedChange]);
 
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;

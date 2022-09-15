@@ -262,6 +262,7 @@ export const BazaarStore = types
       return bazaar
         ? Array.from(bazaar.apps.values()).map((app, index) => ({
             ...toJS(self.apps.get(app.id)),
+            ...toJS(app),
           }))
         : [];
     },
