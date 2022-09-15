@@ -1,5 +1,6 @@
 import {utils, BigNumber} from 'ethers';
 import { DesktopStoreType } from 'os/services/shell/desktop.model';
+import { NetworkType, TransactionType } from 'os/services/tray/wallet.model';
 import { theme } from 'renderer/theme';
 
 export function getBaseTheme(desktop: DesktopStoreType) {
@@ -23,6 +24,56 @@ export function convertWeiToUsd(wei: string) {
   let usd = eth * exchangeRate;
 
   return usd.toFixed(2);
+}
+
+export function getTransactions(transactionMap: Map<string, TransactionType>, address: string): TransactionType[] {
+  return Array.from(transactionMap.values()).filter(trans => trans.ourAddress === address);
+}
+
+export interface EthAmount {
+  eth: string
+  gwei: string
+  wei: string
+
+  ethFull: string
+  gweiFull: string
+  weiFull: string
+}
+
+export interface BtcAmount {
+  btc: string
+  sats: string
+}
+
+export function formatEthAmount(amount: string): EthAmount {
+  console.log(`converting amount: ${amount}`)
+  let wei = utils.parseEther(amount);
+  console.log(`parsed wei: ${wei}`)
+  return {
+    eth: utils.formatUnits(wei, 'ether').slice(0, 6),
+    gwei: utils.formatUnits(wei, 'gwei').slice(0, 6),
+    wei: utils.formatUnits(wei, 'wei').slice(0, 6),
+    ethFull: utils.formatUnits(wei, 'ether'),
+    gweiFull: utils.formatUnits(wei, 'gwei'),
+    weiFull: utils.formatUnits(wei, 'wei')
+  };
+}
+
+export function convertEthAmountToUsd(amount: EthAmount) {
+  let exchangeRate = 1647.37;
+  let usd = Number(amount.eth) * exchangeRate;
+  return usd.toFixed(2);
+}
+
+export function formatBtcAmount(amount: string): BtcAmount {
+  return {
+    btc: 'placeholder',
+    sats: 'placeholder'
+  }
+}
+
+export function convertBtcAmountToUsd(amount: BtcAmount) {
+  return 'placeholder'
 }
 
 export const monthNames = [

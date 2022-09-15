@@ -442,7 +442,7 @@ export class ShipService extends BaseService {
     return await FriendsApi.removeFriend(this.core.conduit!, patp);
   }
   // ---
-  getContact(_event: IpcMainInvokeEvent, ship: string): any {
+  getContact(_event: any, ship: string): any {
     const patp = ship.includes('~') ? ship : `~${ship}`;
     const contact = this.models.contacts?.getContactAvatarMetadata(patp);
     return contact;

@@ -109,16 +109,27 @@ const EthWallet = types.model('EthWallet', {
 
 export type EthWalletType = Instance<typeof EthWallet>
 
-const EthTransaction = types
+export const EthTransaction = types
   .model('EthTransaction', {
-    status: types.string, // pending, approved, failed
     hash: types.string,
-    from: types.string,
-    toShip: types.maybe(types.string),
-    toAddress: types.maybe(types.string),
     amount: types.string,
-    timestamp: types.string
+    network: types.enumeration(['ethereum', 'bitcoin']),
+    type: types.enumeration(['sent', 'received']),
+
+    initiatedAt: types.string,
+    completedAt: types.maybe(types.string),
+
+    ourAddress: types.string,
+    theirPatp: types.maybe(types.string),
+    theirAddress: types.string,
+
+    status: types.enumeration(['pending', 'failed', 'succeeded']),
+    failureReason: types.maybe(types.string),
+
+    notes: types.string,
   })
+
+export type TransactionType = Instance<typeof EthTransaction>;
 
 export const EthStore = types
   .model('EthStore', {

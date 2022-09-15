@@ -20,6 +20,8 @@ import {
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { HDNode } from 'ethers/lib/utils';
 import { wallet } from 'renderer/apps/Wallet/store';
+import EncryptedStore from '../ship/encryptedStore';
+import stubTransactions from './stubTransactions';
 
 export interface RecipientPayload {
   recipientMetadata: {
@@ -33,7 +35,7 @@ export interface RecipientPayload {
 }
 
 export class WalletService extends BaseService {
-  private db?: Store<WalletStoreType>; // for persistence
+  private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
   private privateKey?: ethers.utils.HDNode;
   private ethProvider?: ethers.providers.JsonRpcProvider;
@@ -151,11 +153,17 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
-    this.db = new Store({
+    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    const storeParams = {
       name: 'wallet',
-      cwd: `realm.wallet`, // base folder
+      cwd: `realm.${ship}`,
+      secretKey,
       accessPropertiesByDotNotation: true,
-    });
+    };
+    this.db =
+      process.env.NODE_ENV === 'development'
+        ? new Store<WalletStoreType>(storeParams)
+        : new EncryptedStore<WalletStoreType>(storeParams);
 
     let persistedState: WalletStoreType = this.db.store;
 
@@ -170,6 +178,7 @@ export class WalletService extends BaseService {
             defaultIndex: 0,
           },
           initialized: false,
+          transactions: stubTransactions // TODO: remove once transactions work
         },
         bitcoin: {
           settings: {
@@ -180,6 +189,10 @@ export class WalletService extends BaseService {
         ourPatp: ship,
       });
     }
+
+    onSnapshot(this.state, (snapshot: any) => {
+      this.db!.store = snapshot;
+    });
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
