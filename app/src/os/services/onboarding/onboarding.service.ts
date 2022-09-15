@@ -32,6 +32,9 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setStep': this.setStep,
     'realm.onboarding.setSeenSplash': this.setSeenSplash,
     'realm.onboarding.agreedToDisclaimer': this.agreedToDisclaimer,
+    'realm.onboarding.setEmail': this.setEmail,
+    'realm.onboarding.verifyEmail': this.verifyEmail,
+    'realm.onboarding.resendEmailConfirmation': this.resendEmailVerification,
     'realm.onboarding.selfHosted': this.setSelfHosted,
     'realm.onboarding.getAvailablePlanets': this.getAvailablePlanets,
     'realm.onboarding.prepareCheckout': this.prepareCheckout,
@@ -58,6 +61,22 @@ export class OnboardingService extends BaseService {
     agreedToDisclaimer() {
       return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
     },
+
+    setEmail(email: string) {
+      return ipcRenderer.invoke('realm.onboarding.setEmail', email);
+    },
+
+    verifyEmail(verificationCode: string) {
+      return ipcRenderer.invoke(
+        'realm.onboarding.verifyEmail',
+        verificationCode
+      );
+    },
+
+    resendEmailConfirmation() {
+      return ipcRenderer.invoke('realm.onboarding.resendEmailConfirmation');
+    },
+
     setSeenSplash() {
       return ipcRenderer.invoke('realm.onboarding.setSeenSplash');
     },
@@ -208,6 +227,38 @@ export class OnboardingService extends BaseService {
     this.state.setAgreedToDisclaimer();
   }
 
+  async setEmail(_event: any, email: string) {
+    const { auth } = this.core.services.identity;
+
+    let account = await this.core.holiumClient.createAccount(email);
+    this.state.setEmail(email);
+    this.state.setVerificationCode(account.verificationCode);
+
+    auth.setAccountId(account.id);
+  }
+
+  async resendEmailVerification(_event: any) {
+    const { auth } = this.core.services.identity;
+    if (!auth.accountId)
+      throw new Error('Accout must be set before resending verification code.');
+
+    let newVerificationCode =
+      await this.core.holiumClient.resendVerificationCode(auth.accountId);
+    this.state.setVerificationCode(newVerificationCode);
+
+    return newVerificationCode;
+  }
+
+  verifyEmail(_event: any, verificationCode: string): boolean {
+    if (!this.state.verificationCode)
+      throw new Error('Verification code must be set before verifying.');
+
+    let verified = this.state.verificationCode === verificationCode;
+    if (verified) this.state.setVerificationCode(null);
+
+    return verified;
+  }
+
   setSeenSplash(_event: any) {
     this.state.setSeenSplash();
   }
@@ -217,11 +268,8 @@ export class OnboardingService extends BaseService {
 
   async getAvailablePlanets() {
     const { auth } = this.core.services.identity;
-    if (!auth.accountId) {
-      let account = await this.core.holiumClient.createAccount();
-      auth.setAccountId(account.id);
-      return account.planets;
-    }
+    if (!auth.accountId)
+      throw new Error('Accout must be set before getting available planets.');
 
     let planets = await this.core.holiumClient.getPlanets(
       auth.accountId,
@@ -370,16 +418,16 @@ export class OnboardingService extends BaseService {
         app: 'docket',
         path: '/charges',
         onSubscribed: (subscription: number) => {
-          console.log('docket/charges subscription succeeded!');
           subscriptionId = subscription;
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
-          console.log('docket/charges => %o', data);
           if (data.hasOwnProperty('add-charge')) {
-            resolve(data);
-            console.log('unsubscribing from docket/charges...');
-            await tempConduit.unsubscribe(subscriptionId);
-            console.log('unsubscribed from docket/charges...');
+            const charge = data['add-charge'].charge;
+            // according to Tlon source, this determines when the app is fully installed
+            if ('glob' in charge.chad || 'site' in charge.chad) {
+              await tempConduit.unsubscribe(subscriptionId);
+              resolve(data);
+            }
           }
         },
         onError: () => {
@@ -402,16 +450,12 @@ export class OnboardingService extends BaseService {
         app: 'treaty',
         path: '/treaties',
         onSubscribed: (subscription: number) => {
-          console.log('treaty/treaties subscription succeeded!');
           subscriptionId = subscription;
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
-          console.log('treaty/treaties => %o', data);
           if (data.hasOwnProperty('add')) {
-            resolve(data);
-            console.log('unsubscribing from treaty/treaties...');
             await tempConduit.unsubscribe(subscriptionId);
-            console.log('unsubscribed from treaty/treateis...');
+            resolve(data);
           }
         },
         onError: () => {
@@ -432,10 +476,6 @@ export class OnboardingService extends BaseService {
       app: 'docket',
       path: '/charges', // the spaces scry is at the root of the path
     });
-    console.log('isAppInstalled: testing charges => %o', {
-      desk,
-      charges: response.initial,
-    });
     return Object.keys(response.initial).includes(desk);
   }
 
@@ -443,10 +483,6 @@ export class OnboardingService extends BaseService {
     const response = await tempConduit.scry({
       app: 'treaty',
       path: '/allies', // the spaces scry is at the root of the path
-    });
-    console.log('isAlly: testing allies => %o', {
-      ship,
-      allies: response.ini,
     });
     return Object.keys(response.ini).includes(ship);
   }
@@ -472,16 +508,22 @@ export class OnboardingService extends BaseService {
 
   async installRealm(_event: any, ship: string) {
     // TODO kiln-install realm desk
-    console.log('placeholder: installing realm on ', ship);
     if (!process.env.INSTALL_MOON) {
       console.error(
         'error: [installRealm] - INSTALL_MOON not found in environment variables. please configure.'
       );
       return;
     }
+    if (process.env.INSTALL_MOON === 'bypass') {
+      console.error(
+        "error: [installRealm] - INSTALL_MOON set to 'bypass'. skipping realm installation..."
+      );
+      this.state.installRealm();
+      return;
+    }
     // const desks: string[] = ['realm', 'courier'];
     const desks: string[] = ['realm', 'courier'];
-    console.log('installRealm: starting...');
+    console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp, cookie } = this.state.ship!;
     const tempConduit = await this.tempConduit(url, patp, cookie!);
     this.state.beginRealmInstall();
@@ -492,45 +534,33 @@ export class OnboardingService extends BaseService {
         desks[idx]
       );
     }
-    this.closeConduit();
+    await this.closeConduit();
     this.state.endRealmInstall();
+    console.log('realm installation complete.');
   }
 
   async installDesk(tempConduit: Conduit, ship: string, desk: string) {
     return new Promise(async (resolve, reject) => {
-      console.log('installRealm: is %o an ally?...', ship);
       if (!(await this.isAlly(tempConduit, ship))) {
-        console.log(
-          'installRealm: %o is NOT an ally. forming alliance with %o...',
-          ship,
-          ship
-        );
-        this.addAlly(tempConduit, ship)
+        console.log('forming alliance with %o...', ship);
+        await this.addAlly(tempConduit, ship)
           .then((result) => {
-            console.log('addAlly result => %o', result);
             console.log('installing %o...', desk);
             this.installApp(tempConduit, ship, desk)
               .then((result) => {
-                console.log('app install complete => %o', result);
+                console.log('app install complete');
                 resolve(result);
-                // setTimeout(() => tempConduit.closeChannel(), 200);
               })
               .catch((e) => reject(e));
           })
           .catch((e) => reject(e));
       } else {
-        console.log(
-          'installRealm: %o IS an ally. is %o already installed?...',
-          ship
-        );
+        console.log('checking if %o installed...', ship);
         if (!(await this.isAppInstalled(tempConduit, ship, desk))) {
-          console.log(
-            'installRealm: %o is NOT installed. installing %o...',
-            desk
-          );
-          this.installApp(tempConduit, ship, desk)
+          console.log('installing %o...', desk);
+          await this.installApp(tempConduit, ship, desk)
             .then((result) => {
-              console.log('app install complete => %o', result);
+              console.log('app install complete');
               resolve(result);
             })
             .catch((e) => reject(e));

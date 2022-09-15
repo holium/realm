@@ -8,3 +8,4 @@ export * from './RadioGroup';
 export * from './RadioImages';
 export * from './RadioList';
 export * from './Select';
+export * from './BigInput';

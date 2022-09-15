@@ -1,30 +1,12 @@
 import { FC, useState, useRef, useCallback } from 'react';
-import styled, { css } from 'styled-components';
-import { fontSize, fontWeight, margin, MarginProps, FontSizeProps, FontWeightProps } from 'styled-system';
 // @ts-expect-error its there...
 import UrbitSVG from '../../../../assets/urbit.svg';
-import { Grid, Text, Flex, Button, Box, Input, Icons } from 'renderer/components';
+import { Grid, Text, Flex, Button, Box, Icons, BigInput } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import _ from 'lodash'
 import { AccessCode } from 'os/api/holium';
-
-const AccessCodeInput = (props: any) => {
-  return (
-    <Flex mt={16} flexDirection="row" alignItems="space-between" justifyContent="center">
-      <Box width={300} height={50}>
-        <Input noCursor autoFocus
-          spellCheck={false}
-          textAlign="center"
-          fontSize={24}
-          fontWeight={500}
-          placeholder="alchemists-dao"
-          value={props.value} onChange={(e) => props.onChange(e.target.value)} />
-      </Box>
-    </Flex>
-  )
-}
 
 const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
   let accessCode = props.accessCode
@@ -120,7 +102,7 @@ const AccessCode: FC<BaseDialogProps> = observer(
                     <Text variant="body" textAlign="center">Realm access codes can be used to pre-join certain groups or for pricing discounts. If you have one, please enter it now.</Text>
                   </Box>
                   <Flex flexDirection="column" alignItems="center" justifyContent="center">
-                    <AccessCodeInput value={inputText} onChange={inputChangeHandler} />
+                  <BigInput mt={16} value={inputText} placeholder="alchemy-dao" onChange={inputChangeHandler} />
                     <Box mt={12} height={18}>
                       <Text variant="body" color="text.error">{errorMessage}</Text>
                     </Box>

@@ -135,6 +135,8 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         </Flex>
         <Flex ml={1} pl={2} pr={2}></Flex>
       </Titlebar>
+
+      {!roomsApp.liveRoom ? (
       <Flex style={{ marginTop: 58 }} flex={1} flexDirection="column">
         <Flex
           flexDirection="row"
@@ -206,6 +208,14 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           />
         </Flex>
       </Flex>
+      ) : (
+        <Flex flexDirection={'column'}
+          onClick={() => console.log("ASDA", roomsApp.liveRoom)}
+        >
+        <Text mt={100} opacity={0.7}>you have to exit your room before you can create a new one</Text>
+        </Flex>
+
+      )}
     </Grid.Column>
   );
 });
