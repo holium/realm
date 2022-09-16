@@ -81,7 +81,7 @@
       ?:  =('pinned' p.json)              %pinned
       ?:  =('recommended' p.json)         %recommended
       ?:  =('suite' p.json)               %suite
-      ?:  =('installed' p.json)           %installed
+      :: ?:  =('installed' p.json)           %installed
       !!
     ::
     ++  pth
@@ -282,7 +282,9 @@
             href+s+href.web-app.app
         ==
       ::
-      %urbit  (dkt docket.app)
+      %urbit
+        =/  ins=(list [cord json])  [%installed [%b installed.app]]~
+        (weld (dkt docket.app) ins)
       ::
       %missing  ~
     ==
@@ -331,7 +333,7 @@
     ==
   ::
   ++  dkt
-    |=  =docket:docket
+    |=  [=docket:docket]
     ^-  (list [cord json])
     :~  type+s+%urbit
         title+s+title.docket

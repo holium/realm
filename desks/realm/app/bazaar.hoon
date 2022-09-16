@@ -53,7 +53,7 @@
   =|  =app-lite:store
   =.  id.app-lite                         %os-browser
   =.  ranks.sieve.app-lite                [0 0 0]
-  =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) %installed)
+  :: =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) 690)
   =/  apps                                (~(put by apps) id.app-lite app-lite)
 
   =|  =native-app:store
@@ -66,7 +66,7 @@
   =|  =app-lite:store
   =.  id.app-lite                         %os-settings
   =.  ranks.sieve.app-lite                [0 0 0]
-  =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) %installed)
+  :: =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) %installed)
   =/  apps                                (~(put by apps) id.app-lite app-lite)
 
   =|  =native-app:store
@@ -183,10 +183,10 @@
         ?~  apps  ``json+!>([%a ~]) :: empty array
         ``bazaar-view+!>([%apps u.apps])
         ::
-        %installed
-        =/  apps  (view:apps:core [ship space-pth] (some %installed))
-        ?~  apps  ``json+!>([%a ~]) :: empty array
-        ``bazaar-view+!>([%apps u.apps])
+        :: %installed
+        :: =/  apps  (view:apps:core [ship space-pth] (some %installed))
+        :: ?~  apps  ``json+!>([%a ~]) :: empty array
+        :: ``bazaar-view+!>([%apps u.apps])
       ==
 
     ::
@@ -476,7 +476,7 @@
     =.  index.apps                    (remove-at-pos index.apps rank)
     =|  sieve=sieve:store
     =.  tags.sieve               (~(put in tags.sieve) %suite)
-    =.  tags.sieve               (~(put in tags.sieve) %installed)
+    :: =.  tags.sieve               (~(put in tags.sieve) %installed)
     =.  suite.ranks.sieve        rank
     =.  index.apps                    (~(put by index.apps) app-id [app-id sieve])
     =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite) %suite %asc)
@@ -664,7 +664,7 @@
         ~&  >>>  "{<dap.bowl>}: app {<app-id>} not found."
         =.  pkg.app-full     [%missing ~]
         (~(put by acc) app-id app-full)
-      =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
+      :: =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
       =.  pkg.app-full      u.app
       (~(put by acc) app-id app-full)
     ?~(result ~ (some result))
@@ -687,7 +687,7 @@
     ^-  app-catalog:store
     %-  ~(rep by charges)
     |:  [[=desk =charge:docket] acc=`app-catalog:store`~]
-    (~(put by acc) desk [%urbit docket.charge])
+    (~(put by acc) desk [%urbit docket.charge %.y])
   ::
   ++  index
     |=  [charges=(map desk charge:docket)]
@@ -697,7 +697,7 @@
       =|  app=app-lite:store
       =.  id.app          desk
       :: =.  ship.app  our.bowl
-      =.  tags.sieve.app    (~(put in tags.sieve.app) %installed)
+      :: =.  tags.sieve.app    (~(put in tags.sieve.app) %installed)
       =.  ranks.sieve.app   [0 0 0]
       (~(put by acc) desk app)
   ::
@@ -745,9 +745,9 @@
     ::  is this app installed?
     =/  updated-app-full
       ?:  (~(has by initial.charge-update) app-id)
-        =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
+        :: =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
         app-full
-      =.  tags.sieve.app-full  (~(del in tags.sieve.app-full) %installed)
+      :: =.  tags.sieve.app-full  (~(del in tags.sieve.app-full) %installed)
       app-full
     =.  app-catalog.acc      (~(put by app-catalog.acc) app-id pkg.updated-app-full)
     =.  app-index-lite.acc   (~(put by app-index-lite.acc) app-id [app-id sieve.updated-app-full])
@@ -772,7 +772,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
-    =/  app                     (update-installed-status app)
+    :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  pinned.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -790,7 +790,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
-    =/  app                     (update-installed-status app)
+    :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  pinned.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -821,7 +821,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
-    =/  app                     (update-installed-status app)
+    :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  recommended.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -839,7 +839,7 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
-    =/  app                     (update-installed-status app)
+    :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  recommended.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
@@ -857,12 +857,12 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
-    =/  app                     (update-installed-status app)
+    :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  suite.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
     =/  paths                   [/updates ~]
-    (bazaar:send-reaction [%suite-add path app-full ord] paths ~)
+    (bazaar:send-reaction [%suite-add path [id.app-full sieve.app pkg.app-full] ord] paths ~)
   ::
   ++  on-suite-rem
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
@@ -875,12 +875,12 @@
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
-    =/  app                     (update-installed-status app)
+    :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  suite.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
     =/  paths                   [/updates ~]
-    (bazaar:send-reaction [%suite-remove path app-full ord] paths ~)
+    (bazaar:send-reaction [%suite-remove path [id.app-full sieve.app pkg.app-full] ord] paths ~)
   ::
   ++  on-set-suite-order
     |=  [path=space-path:spaces-store ord=(list app-id:store)]
@@ -896,15 +896,19 @@
     (bazaar:send-reaction [%set-suite-order path ord] paths ~)
   --
 ::
-++  update-installed-status
-  |=  [app=app-lite:store]
-  ^-  app-lite:store
-  ::  set the app's installed state relative to this ship
-  ?:  (~(has by app-catalog.state) id.app)
-    =.  tags.sieve.app  (~(put in tags.sieve.app) %installed)
-    app
-  =.  tags.sieve.app  (~(del in tags.sieve.app) %installed)
-  app
+:: ++  update-installed-status
+::   |=  [app=app-lite:store]
+::   ^-  app-lite:store
+::   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+::   ?>  ?=([%initial *] charge-update)
+::   ::  set the app's installed state relative to this ship
+::   ?:  (~(has by initial.charge-update) id.app)
+::     ~&  >>  "{<dap.bowl>}: update-installed-status [installed] {<app>}..."
+::     =.  tags.sieve.app  (~(put in tags.sieve.app) %installed)
+::     app
+::   ~&  >>  "{<dap.bowl>}: update-installed-status [not installed] {<app>}..."
+::   =.  tags.sieve.app  (~(del in tags.sieve.app) %installed)
+::   app
 ::
 :: ++  suite
 ::   |%
@@ -1046,22 +1050,28 @@
   ++  add
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
+    ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
       %glob
         ::  once fully installed, remove the installation entry from state
+        =/  app  (~(get by app-catalog.state) desk)
+        =/  app  ?~  app  [%urbit docket.charge %.y]
+          ?>  ?=(%urbit -.u.app)
+          =.  installed.u.app  %.y
+          u.app
+        =.  app-catalog.state  (~(put by app-catalog.state) desk app)
         ?.  ?=(%glob -.href.docket.charge)
-         (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge]] [/updates ~] ~)
+         (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
         =/  loc  location.glob-reference.href.docket.charge
         ?.  ?=(%ames -.loc)
-          (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge]] [/updates ~] ~)
+          (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
         =/  app-ship      ship.loc
         =/  installation  (~(get by installations.state) app-ship)
         ?~  installation
-          (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge]] [/updates ~] ~)
+          (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
         =.  installations.state  (~(del by installations.state) app-ship)
-        (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge]] [/updates ~] ~)
+        (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
     ==
   ::
   ++  rem

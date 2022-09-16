@@ -39,7 +39,7 @@
 ::
 +$  app-type  ?(%native %web %urbit %missing)
 ::
-+$  tag     ?(%pinned %recommended %suite %installed)
++$  tag     ?(%pinned %recommended %suite)
 ::
 +$  tags    (set tag)
 ::
@@ -70,7 +70,7 @@
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      [%urbit =docket:docket]
+      [%urbit =docket:docket installed=?]
       [%missing ~]
   ==
 ::

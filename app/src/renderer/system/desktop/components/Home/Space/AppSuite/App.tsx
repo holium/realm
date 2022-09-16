@@ -64,9 +64,10 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
                 },
                 {
                   label: 'Install app',
-                  disabled: app.tags.includes('installed'),
+                  disabled: !app.tags.includes('installed'),
                   onClick: (evt: any) => {
                     evt.stopPropagation();
+                    // console.log('install app => %o', app);
                     SpacesActions.installApp(app);
                   },
                 },

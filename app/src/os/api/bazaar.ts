@@ -6,6 +6,128 @@ import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
 
 export const BazaarApi = {
+  installApp: async (tempConduit: Conduit, ship: string, desk: string) => {
+    return new Promise(async (resolve, reject) => {
+      let subscriptionId: number = -1;
+      await tempConduit.watch({
+        app: 'docket',
+        path: '/charges',
+        onSubscribed: (subscription: number) => {
+          subscriptionId = subscription;
+        },
+        onEvent: async (data: any, _id?: number, mark?: string) => {
+          if (data.hasOwnProperty('add-charge')) {
+            const charge = data['add-charge'].charge;
+            // according to Tlon source, this determines when the app is fully installed
+            if ('glob' in charge.chad || 'site' in charge.chad) {
+              await tempConduit.unsubscribe(subscriptionId);
+              resolve(data);
+            }
+          }
+        },
+        onError: () => {
+          console.log('subscription [docket/charges] rejected');
+          reject('subscription [docket/charges] rejected');
+        },
+        onQuit: () => {
+          console.log('kicked from subscription [docket/charges]');
+          reject('kicked from subscription [docket/charges]');
+        },
+      });
+      await tempConduit.poke(docketInstall(ship, desk));
+    });
+  },
+  addAlly: async (tempConduit: Conduit, ship: string) => {
+    return new Promise(async (resolve, reject) => {
+      let subscriptionId: number = -1;
+      await tempConduit.watch({
+        app: 'treaty',
+        path: '/treaties',
+        onSubscribed: (subscription: number) => {
+          subscriptionId = subscription;
+        },
+        onEvent: async (data: any, _id?: number, mark?: string) => {
+          if (data.hasOwnProperty('add')) {
+            await tempConduit.unsubscribe(subscriptionId);
+            resolve(data);
+          }
+        },
+        onError: () => {
+          console.log('subscription [treaty/treaties] rejected');
+          reject('subscription [treaty/treaties] rejected');
+        },
+        onQuit: () => {
+          console.log('kicked from subscription [treaty/treaties]');
+          reject('kicked from subscription [treaty/treaties]');
+        },
+      });
+      await tempConduit.poke(allyShip(ship));
+    });
+  },
+  isAppInstalled: async (tempConduit: Conduit, ship: string, desk: string) => {
+    const response = await tempConduit.scry({
+      app: 'docket',
+      path: '/charges', // the spaces scry is at the root of the path
+    });
+    return Object.keys(response.initial).includes(desk);
+  },
+  isAlly: async (tempConduit: Conduit, ship: string) => {
+    const response = await tempConduit.scry({
+      app: 'treaty',
+      path: '/allies', // the spaces scry is at the root of the path
+    });
+    return Object.keys(response.ini).includes(ship);
+  },
+  hasTreaty: async (tempConduit: Conduit, ship: string, desk: string) => {
+    try {
+      const response = await tempConduit.scry({
+        app: 'treaty',
+        path: `/treaty/${ship}/${desk}`, // the spaces scry is at the root of the path
+      });
+      // assume undefined response means no treaty found. not sure how reliable
+      //  this is, but scry method doesn't return error codes (e.g. 404)
+      console.log('hasTreaty: testing treaty => %o', {
+        ship,
+        desk,
+        response,
+      });
+      return response !== undefined;
+    } catch (e) {
+      console.log(e);
+    }
+    return;
+  },
+  installDesk: async (tempConduit: Conduit, ship: string, desk: string) => {
+    return new Promise(async (resolve, reject) => {
+      if (!(await BazaarApi.isAlly(tempConduit, ship))) {
+        console.log('forming alliance with %o...', ship);
+        await BazaarApi.addAlly(tempConduit, ship)
+          .then((result) => {
+            console.log('installing %o...', desk);
+            BazaarApi.installApp(tempConduit, ship, desk)
+              .then((result) => {
+                console.log('app install complete');
+                resolve(result);
+              })
+              .catch((e) => reject(e));
+          })
+          .catch((e) => reject(e));
+      } else {
+        console.log('checking if %o installed...', ship);
+        if (!(await BazaarApi.isAppInstalled(tempConduit, ship, desk))) {
+          console.log('installing %o...', desk);
+          await BazaarApi.installApp(tempConduit, ship, desk)
+            .then((result) => {
+              console.log('app install complete');
+              resolve(result);
+            })
+            .catch((e) => reject(e));
+        }
+        // nothing to do, Realm already installed
+        resolve('done');
+      }
+    });
+  },
   getApps: async (conduit: Conduit, path: SpacePath, tag: string = 'all') => {
     //  [host]/~/scry/bazaar/~zod/my-space/apps.json
     const response = await conduit.scry({
@@ -41,69 +163,69 @@ export const BazaarApi = {
     });
     return appMap;
   },
-  addAlly: async (conduit: Conduit, ship: string) => {
-    return new Promise((resolve, reject) => {
-      conduit.poke({
-        ...allyShip(ship),
-        reaction: 'bazaar-reaction.new-ally',
-        onReaction: (data: any) => {
-          console.log('addAlly [os] onReaction => %o', data);
-          resolve(data['new-ally']);
-        },
-        onError: (e: any) => {
-          reject(e);
-        },
-      });
-    });
-  },
+  // addAlly: async (conduit: Conduit, ship: string) => {
+  //   return new Promise((resolve, reject) => {
+  //     conduit.poke({
+  //       ...allyShip(ship),
+  //       reaction: 'bazaar-reaction.new-ally',
+  //       onReaction: (data: any) => {
+  //         console.log('addAlly [os] onReaction => %o', data);
+  //         resolve(data['new-ally']);
+  //       },
+  //       onError: (e: any) => {
+  //         reject(e);
+  //       },
+  //     });
+  //   });
+  // },
   // in the case of standard app search/install, we will have the ship/desk
   //  information (treaty/ally), so simply leverage Tlon docketInstall to
   //   perform install on local ship
   installDocket: async (conduit: Conduit, ship: string, desk: string) => {
-    return new Promise((resolve, reject) => {
-      conduit.poke({
-        ...docketInstall(ship, desk),
-        reaction: 'bazaar-reaction.add-tag',
-        onReaction: (data: any) => {
-          resolve(data['add-tag']);
-        },
-        onError: (e: any) => {
-          reject(e);
-        },
-      });
+    return new Promise(async (resolve, reject) => {
+      await BazaarApi.installApp(conduit, ship, desk);
+      resolve('done');
     });
   },
   // in the case of space apps, all we have is the desk, since docket/glob
   //   data does not include host/source ship. therefore we request an install
   //   back to the space host which requires desk name only. space host will then
   //   resolve origin ship by scrying its own treaties
-  installApp: async (conduit: Conduit, desk: string) => {
+  resolveAppInstall: async (conduit: Conduit, app: any) => {
     return new Promise(async (resolve, reject) => {
-      const response = await conduit.scry({
-        app: 'bazaar',
-        path: `/directories/${desk}`, // the spaces scry is at the root of the path
-      });
-      if (!response.directories || response.directories.length === 0) {
-        console.error(`directory for '${desk}' not found.`);
-        return;
+      let ship = undefined;
+      if (app.href.glob['glob-reference'].location.ames) {
+        ship = app.href.glob['glob-reference'].location.ames;
+      } else {
+        const response = await conduit.scry({
+          app: 'bazaar',
+          path: `/sites/${app.id}`, // the spaces scry is at the root of the path
+        });
+        if (!response.sites || response.sites.length === 0) {
+          console.error(`site for '${app.id}' not found.`);
+          return;
+        }
+        if (response.sites && response.sites.length > 1) {
+          console.warn(
+            `multiple ship entries found for the '${app.id}' app. using top match '${response.sites[0].ship}'...`
+          );
+        }
+        ship = response.directories[0].ship;
       }
-      if (response.directories && response.directories.length > 1) {
-        console.warn(
-          `multiple ship entries found for the '${desk}' app. using top match '${response.directories[0].ship}'...`
-        );
-      }
-      const dir = response.directories[0];
-      conduit.poke({
-        ...docketInstall(dir.ship, dir.desk),
-        reaction: 'bazaar-reaction.placeholder',
-        onReaction: (data: any) => {
-          console.log('docketInstall => %o', data);
-          resolve(data);
-        },
-        onError: (e: any) => {
-          reject(e);
-        },
-      });
+      console.log('install app => %o...', { ship, desk: app.id });
+      await BazaarApi.installDesk(conduit, ship, app.id);
+      resolve('done');
+      // conduit.poke({
+      //   ...docketInstall(ship, app.id),
+      //   reaction: 'bazaar-reaction.placeholder',
+      //   onReaction: (data: any) => {
+      //     console.log('docketInstall => %o', data);
+      //     resolve(data);
+      //   },
+      //   onError: (e: any) => {
+      //     reject(e);
+      //   },
+      // });
     });
   },
   // leverage treaty /allies scry for now. allies are technically ship specific,
