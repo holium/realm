@@ -413,7 +413,7 @@ export class WalletService extends BaseService {
     contractAddress: string,
     walletIndex: string
   ) {
-    await WalletApi.addSmartContact(
+    await WalletApi.addSmartContract(
       this.core.conduit!,
       contractId,
       contractType,
