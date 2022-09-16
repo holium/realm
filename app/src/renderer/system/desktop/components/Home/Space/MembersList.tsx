@@ -24,30 +24,31 @@ import { toJS } from 'mobx';
 import { Member } from 'os/types';
 
 interface IMembersList {
-  members: any[];
+  path: string;
 }
 
 export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
-  const { members } = props;
-  const { desktop, spaces, ship, contacts } = useServices();
+  const { path } = props;
+  const { desktop, spaces, membership, contacts, ship } = useServices();
 
   const { textColor, windowColor } = desktop.theme;
 
   const rowBg = rgba(darken(0.075, windowColor), 0.5);
 
+  const members = Array.from(membership.getMembersList(path));
   const admins = members.filter((member: Member) =>
     member.roles.includes('admin')
   );
-  const membersOnly = members.filter((member: Member) =>
-    member.roles.includes('member')
+  const membersOnly = members.filter(
+    (member: Member) =>
+      member.roles.includes('member') || member.status.includes('invited')
   );
-  const initiatesOnly = members.filter((member: Member) =>
-    member.roles.includes('initiate')
-  );
+
+  const ourIsAdmin = membership.isAdmin(path, ship!.patp!);
 
   const RowRenderer = (
     { index, style }: { index: number; style: any },
-    role: 'admin' | 'member' | 'initiate'
+    role: 'admin' | 'member'
   ) => {
     let person: any;
     if (role === 'admin') {
@@ -56,14 +57,12 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
     if (role === 'member') {
       person = membersOnly[index];
     }
-    if (role === 'initiate') {
-      person = initiatesOnly[index];
-    }
 
     const contact = contacts.getContactAvatarMetadata(person.patp);
 
     return (
       <PersonRow
+        key={person!.patp}
         patp={person!.patp}
         nickname={contact.nickname || person.nickname}
         sigilColor={contact.color || person.color}
@@ -76,18 +75,25 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
           textColor,
           windowColor,
         }}
-        contextMenuOptions={[
-          {
-            label: 'Kick',
-            onClick: (_evt: any) => {
-              SpacesActions.kickMember(spaces.selected!.path, person!.patp);
-            },
-          },
-        ]}
+        contextMenuOptions={
+          ourIsAdmin
+            ? [
+                {
+                  label: 'Kick',
+                  onClick: (_evt: any) => {
+                    SpacesActions.kickMember(
+                      spaces.selected!.path,
+                      person!.patp
+                    );
+                  },
+                },
+              ]
+            : []
+        }
       >
         {person.status === 'invited' && (
           <Text opacity={0.3} fontSize={1}>
-            Pending
+            Invited
           </Text>
         )}
       </PersonRow>
@@ -96,25 +102,45 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
 
   //
   const showHint = members.length === 0;
-  return useMemo(
-    () => (
-      <>
-        <Flex
-          mt={18}
-          height={admins.length === 0 ? 60 : 24 + admins.length * 42}
-          flexDirection="column"
+  return (
+    <>
+      <Flex
+        mt={18}
+        height={admins.length === 0 ? 60 : 24 + admins.length * 42}
+        flexDirection="column"
+      >
+        <Text
+          style={{ textTransform: 'uppercase' }}
+          fontSize={1}
+          fontWeight={600}
+          opacity={0.6}
+          ml="2px"
+          mb="4px"
         >
-          <Text
-            style={{ textTransform: 'uppercase' }}
-            fontSize={1}
-            fontWeight={600}
-            opacity={0.6}
-            ml="2px"
-            mb="4px"
-          >
-            Admins
-          </Text>
-          {/* {admins.length === 0 && (
+          Admins
+        </Text>
+        <List height={40} itemSize={40} width="100%" itemCount={admins.length}>
+          {(pinProps: { index: number; style: any }) =>
+            RowRenderer(pinProps, 'admin')
+          }
+        </List>
+      </Flex>
+      <Flex
+        mt={18}
+        height={24 + membersOnly.length * 42}
+        flexDirection="column"
+      >
+        <Text
+          style={{ textTransform: 'uppercase' }}
+          fontSize={1}
+          fontWeight={600}
+          opacity={0.6}
+          ml="2px"
+          mb="4px"
+        >
+          Members
+        </Text>
+        {showHint && (
           <Flex
             flexDirection="column"
             justifyContent="center"
@@ -122,22 +148,23 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
             height={40}
           >
             <Text fontSize={2} opacity={0.5}>
-              No admins added
+              No members added
             </Text>
           </Flex>
-        )} */}
-          <List
-            height={40}
-            itemSize={40}
-            width="100%"
-            itemCount={admins.length}
-          >
-            {(pinProps: { index: number; style: any }) =>
-              RowRenderer(pinProps, 'admin')
-            }
-          </List>
-        </Flex>
-        <Flex
+        )}
+
+        <List
+          height={400}
+          itemSize={40}
+          width="100%"
+          itemCount={membersOnly.length}
+        >
+          {(pinProps: { index: number; style: any }) =>
+            RowRenderer(pinProps, 'member')
+          }
+        </List>
+      </Flex>
+      {/* <Flex
           mt={18}
           height={24 + membersOnly.length * 42}
           flexDirection="column"
@@ -175,9 +202,7 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
               RowRenderer(pinProps, 'member')
             }
           </List>
-        </Flex>
-      </>
-    ),
-    [membersOnly.length, admins.length]
+        </Flex> */}
+    </>
   );
 });

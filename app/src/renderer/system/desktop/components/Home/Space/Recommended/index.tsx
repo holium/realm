@@ -35,12 +35,13 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
           Recommended Apps
         </Text>
 
-        {(apps.length === 0 && (
-          <Text variant="h6" opacity={0.4}>
-            No recommendations. Start liking apps in this space to show them
-            here!
-          </Text>
-        )) ||
+        {!apps ||
+          (apps.length === 0 && (
+            <Text variant="h6" opacity={0.4}>
+              No recommendations. Start liking apps in this space to show them
+              here!
+            </Text>
+          )) ||
           apps.map((app: any) => {
             return (
               <Flex flex={2} flexWrap="wrap" key={app.id}>

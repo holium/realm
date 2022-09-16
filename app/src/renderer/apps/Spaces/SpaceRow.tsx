@@ -7,6 +7,7 @@ import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { pluralize } from 'renderer/logic/lib/text';
 
 export const EmptyGroup = styled.div`
   height: 32px;
@@ -22,7 +23,7 @@ type RowProps = {
 };
 
 export const SpaceRowStyle = styled(motion.div)<RowProps>`
-  height: 48px;
+  height: 52px;
   position: relative;
   border-radius: 8px;
   padding: 0 8px;
@@ -54,7 +55,7 @@ type SpaceRowProps = {
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { desktop } = useServices();
+  const { desktop, membership } = useServices();
   const { theme } = desktop;
   const [deleteLoading, setDeleteLoading] = useState(false);
   // const {} =
@@ -86,7 +87,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   ];
 
   const contextMenuButtonIds = contextMenuItems.map((item: any) => item.id);
-
+  const memberCount = membership.getMemberCount(space.path);
   return (
     <SpaceRowStyle
       id={`space-row-${space.path}`}
@@ -126,7 +127,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
         ) : (
           <EmptyGroup color={space.color! || '#000000'} />
         )}
-        <Flex ml={2} flexDirection="column">
+        <Flex ml="10px" flexDirection="column">
           <Text
             style={{
               display: 'flex',
@@ -144,21 +145,14 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
             {/* <Icons.ExpandMore ml="6px" /> */}
           </Text>
           <Flex flexDirection="row" gap={12}>
-            {space.path === '~hatryx-lastud/spaces/other-life' && (
-              <Flex gap={4} flexDirection="row" alignItems="center">
-                <Icons name="Members" size={16} opacity={0.6} />
+            <Flex gap={4} flexDirection="row" alignItems="center">
+              <Icons name="Members" size={16} opacity={0.6} />
 
-                <Text
-                  fontWeight={400}
-                  mt="1px"
-                  mr={1}
-                  opacity={0.6}
-                  fontSize={2}
-                >
-                  {1261} members
-                </Text>
-              </Flex>
-            )}
+              <Text fontWeight={400} mt="1px" mr={1} opacity={0.6} fontSize={2}>
+                {membership.getMemberCount(space.path)}{' '}
+                {pluralize('member', memberCount)}
+              </Text>
+            </Flex>
             {space.path === '~hatryx-lastud/spaces/other-life' && (
               <Flex gap={4} flexDirection="row" alignItems="center">
                 <Icons name="Coins" size={16} opacity={0.6} />

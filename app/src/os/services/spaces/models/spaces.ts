@@ -8,7 +8,7 @@ import { toJS } from 'mobx';
 import { ThemeModel } from '../../shell/theme.model';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
-import { VisaModel } from './invitations';
+import { VisaModel } from './visas';
 
 import { TokenModel } from './token';
 // import { FriendsStore } from '../../ship/models/friends';
@@ -91,7 +91,7 @@ export const SpacesStore = types
       if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
     },
     initialSync: (syncEffect: { key: string; model: typeof self }) => {
-      console.log('initial %spaces sync');
+      // console.log('initial %spaces sync');
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
     },
@@ -107,9 +107,10 @@ export const SpacesStore = types
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
     },
     addSpace: (addReaction: { space: any; members: any }) => {
+      // console.log(addReaction);
       const space = addReaction.space;
       const newSpace = SpaceModel.create(space);
-      newSpace.members?.initial(addReaction.members);
+      // newSpace.members?.initial(addReaction.members);
       self.spaces.set(space.path, newSpace);
       return newSpace.path;
     },

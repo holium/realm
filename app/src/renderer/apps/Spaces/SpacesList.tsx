@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 
@@ -6,6 +6,10 @@ import { Flex, Grid, Text, ActionButton, Icons } from 'renderer/components';
 import { SpaceRow } from './SpaceRow';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { VisaRow } from './components/VisaRow';
+import { VisaType } from 'os/services/spaces/models/visas';
+import { darken, rgba } from 'polished';
 
 export type Space = {
   color?: string;
@@ -24,10 +28,27 @@ type SpacesListProps = {
 
 export const SpacesList: FC<SpacesListProps> = observer(
   (props: SpacesListProps) => {
-    const { desktop } = useServices();
+    const { desktop, visas } = useServices();
     const { textColor, windowColor } = desktop.theme;
     const { selected, spaces, onSelect } = props;
-    if (!spaces.length) {
+    // const [visas, setVisas] = useState([]);
+    const [loadingVisa, setLoading] = useState(true);
+
+    useEffect(() => {
+      // SpacesActions.getInvitations()
+      //   .then((invites: any) => {
+      //     console.log(invites);
+      //     setLoading(false);
+      //     setVisas(Object.values(invites));
+      //   })
+      //   .catch(() => setLoading(false));
+    }, []);
+
+    const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
+
+    const incoming = Array.from(visas.incoming.values());
+
+    if (!spaces.length && !loadingVisa && !incoming.length) {
       return (
         <Flex
           flex={1}
@@ -73,7 +94,27 @@ export const SpacesList: FC<SpacesListProps> = observer(
       );
     }
     return (
-      <Grid.Column expand gap={4}>
+      <Flex
+        px={10}
+        gap={4}
+        flex={1}
+        width="100%"
+        flexDirection="column"
+        overflowY="scroll"
+      >
+        {incoming.map((visa: VisaType) => {
+          return (
+            <VisaRow
+              key={visa.name}
+              image={visa.picture}
+              color={visa.color}
+              path={visa.path}
+              customBg={highlightColor}
+              invitedBy={visa.inviter}
+              title={visa.name}
+            />
+          );
+        })}
         {spaces.map((space: SpaceModelType) => {
           return (
             <SpaceRow
@@ -84,7 +125,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
             />
           );
         })}
-      </Grid.Column>
+      </Flex>
     );
   }
 );

@@ -56,6 +56,9 @@ export const BazaarApi = {
       });
     });
   },
+  // in the case of standard app search/install, we will have the ship/desk
+  //  information (treaty/ally), so simply leverage Tlon docketInstall to
+  //   perform install on local ship
   installDocket: async (conduit: Conduit, ship: string, desk: string) => {
     return new Promise((resolve, reject) => {
       conduit.poke({
@@ -63,6 +66,39 @@ export const BazaarApi = {
         reaction: 'bazaar-reaction.add-tag',
         onReaction: (data: any) => {
           resolve(data['add-tag']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  // in the case of space apps, all we have is the desk, since docket/glob
+  //   data does not include host/source ship. therefore we request an install
+  //   back to the space host which requires desk name only. space host will then
+  //   resolve origin ship by scrying its own treaties
+  installApp: async (conduit: Conduit, desk: string) => {
+    return new Promise(async (resolve, reject) => {
+      const response = await conduit.scry({
+        app: 'bazaar',
+        path: `/directories/${desk}`, // the spaces scry is at the root of the path
+      });
+      if (!response.directories || response.directories.length === 0) {
+        console.error(`directory for '${desk}' not found.`);
+        return;
+      }
+      if (response.directories && response.directories.length > 1) {
+        console.warn(
+          `multiple ship entries found for the '${desk}' app. using top match '${response.directories[0].ship}'...`
+        );
+      }
+      const dir = response.directories[0];
+      conduit.poke({
+        ...docketInstall(dir.ship, dir.desk),
+        reaction: 'bazaar-reaction.placeholder',
+        onReaction: (data: any) => {
+          console.log('docketInstall => %o', data);
+          resolve(data);
         },
         onError: (e: any) => {
           reject(e);
@@ -369,7 +405,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log('initial => %o', data['initial']);
+      // console.log('initial => %o', data['initial']);
       state.initial(data['initial']);
       // state.initialReaction(data['initial']);
       break;
@@ -380,7 +416,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'treaty-added':
       {
         let detail = data['treaty-added'];
-        console.log(detail);
+        // console.log(detail);
         // @ts-ignore
         state.addTreaty(detail);
       }
@@ -390,7 +426,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'app-installed':
       {
         let detail = data['app-installed'];
-        console.log('app-installed => %o', detail);
+        // console.log('app-installed => %o', detail);
         state.addApp(detail['app-id'], {
           ...detail.app,
           id: detail['app-id'],
@@ -405,14 +441,14 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'app-uninstalled':
       {
         let detail = data['app-uninstalled'];
-        console.log(detail);
+        // console.log(detail);
         // @ts-ignore
         state.removeApp(detail);
       }
       break;
     case 'pin':
       {
-        console.log('pin reaction => %o', data);
+        // console.log('pin reaction => %o', data);
         const detail = data['pin'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -478,7 +514,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'suite-remove':
       {
-        console.log('suite-remove [reaction] => %o', data);
+        // console.log('suite-remove [reaction] => %o', data);
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
         const app = detail[space];

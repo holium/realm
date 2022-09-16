@@ -36,6 +36,10 @@ type SuiteAppProps = {
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
   const { app, space, isAdmin, onClick } = props;
   if (app) {
+    // lighten app if not installed on this ship
+    app.color = app.tags.includes('installed')
+      ? app.color
+      : rgba(app.color, 0.7);
     return (
       <AppTile
         tileSize="xl"
@@ -56,6 +60,14 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     SpacesActions.recommendApp(space.path, app.id);
+                  },
+                },
+                {
+                  label: 'Install app',
+                  disabled: app.tags.includes('installed'),
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    SpacesActions.installApp(app);
                   },
                 },
               ]

@@ -126,6 +126,7 @@ export class Realm extends EventEmitter {
     let bazaar = null;
     let rooms = null;
     let wallet = null;
+    let visas = null;
     let models = {};
 
     if (this.session) {
@@ -136,10 +137,11 @@ export class Realm extends EventEmitter {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
-      bazaar = this.services.spaces.bazaarSnapshot;
-      membership = this.services.spaces.membershipSnapshot;
       rooms = this.services.ship.roomSnapshot;
       wallet = this.services.ship.walletSnapshot;
+      bazaar = this.services.spaces.modelSnapshots.bazaar;
+      membership = this.services.spaces.modelSnapshots.membership;
+      visas = this.services.spaces.modelSnapshots.visas;
     }
 
     const bootPayload = {
@@ -151,6 +153,7 @@ export class Realm extends EventEmitter {
       shell,
       bazaar,
       membership,
+      visas,
       rooms,
       wallet,
       models,

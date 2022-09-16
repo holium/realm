@@ -35,12 +35,10 @@ import {
   NotificationStore,
   NotificationStoreType,
 } from './models/notifications';
-import { VisaModel, VisaModelType } from '../spaces/models/invitations';
 import { NotificationApi } from '../../api/notifications';
 
 export type ShipModels = {
   friends: FriendsType;
-  invitations: VisaModelType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
@@ -64,10 +62,6 @@ export class ShipService extends BaseService {
       seen: [],
       all: [],
       recent: [],
-    }),
-    invitations: VisaModel.create({
-      outgoing: {},
-      incoming: {},
     }),
   };
   private metadataStore: {
