@@ -181,7 +181,7 @@ export const EthStore = types
           theirAddress: tx.theirAddress,
           status: tx.status,
           failureReason: tx.failureReason,
-          notes: tx.notes,
+          notes: tx.notes || '',
           link: tx.link,
         }
       });
@@ -194,7 +194,7 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
-    enqueueTransaction(hash: any, toAddress: any, from: any, amount: any, timestamp: any) {
+    enqueueTransaction(hash: any, toAddress: any, from: string, amount: any, timestamp: any) {
       let tx = {
         hash: hash,
         amount: amount.toString(),
@@ -204,6 +204,7 @@ export const EthStore = types
         ourAddress: from,
         theirAddress: toAddress,
         status: 'pending',
+        notes: '',
       };
       self.transactions.put(tx);
     },

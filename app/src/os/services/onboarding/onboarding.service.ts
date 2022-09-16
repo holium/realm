@@ -507,6 +507,7 @@ export class OnboardingService extends BaseService {
   }
 
   async installRealm(_event: any, ship: string) {
+    /*
     // TODO kiln-install realm desk
     if (!process.env.INSTALL_MOON) {
       console.error(
@@ -537,6 +538,8 @@ export class OnboardingService extends BaseService {
     await this.closeConduit();
     this.state.endRealmInstall();
     console.log('realm installation complete.');
+    */
+   this.state.installRealm();
   }
 
   async installDesk(tempConduit: Conduit, ship: string, desk: string) {

@@ -29,7 +29,7 @@ export const Create: FC<CreateProps> = observer((props: CreateProps) => {
         </Box>
         <Box mt={3}>
           <TextButton textColor={theme.colors.text.secondary} onClick={() => props.setScreen(NewWalletScreen.IMPORT)}>
-            Or import an exsiting wallet
+            Or import an existing wallet
           </TextButton>
         </Box>
       </Flex>

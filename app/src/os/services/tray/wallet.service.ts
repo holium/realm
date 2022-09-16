@@ -37,7 +37,6 @@ export interface RecipientPayload {
 export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
-  private privateKey?: ethers.utils.HDNode;
   private ethProvider?: ethers.providers.JsonRpcProvider;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
@@ -160,6 +159,10 @@ export class WalletService extends BaseService {
     });
   }
 
+  private getPrivateKey() {
+    return ethers.utils.HDNode.fromMnemonic(this.core.services.identity.auth.getMnemonic(null));
+  }
+
   async onLogin(ship: string) {
     let secretKey: string | null = this.core.passwords.getPassword(ship)!;
     const storeParams = {
@@ -186,7 +189,6 @@ export class WalletService extends BaseService {
             defaultIndex: 0,
           },
           initialized: false,
-          transactions: stubTransactions // TODO: remove once transactions work
         },
         bitcoin: {
           settings: {
@@ -264,18 +266,18 @@ export class WalletService extends BaseService {
 
   async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
     this.state!.setPasscodeHash(passcodeHash);
-    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    this.core.services.identity.auth.setMnemonic('realm.auth.set-mnemonic', mnemonic);
+    const privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    let xpub: string =
-      this.privateKey!.derivePath(ethPath).neuter().extendedKey;
+    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
     // eth
 
     console.log('setting eth xpub');
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
     console.log('setting btc xpub');
-    xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
 
     console.log('okay transitioning');
@@ -285,12 +287,13 @@ export class WalletService extends BaseService {
   async setXpub(_event: any) {
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
+    const privateKey = this.getPrivateKey();
     let xpub: string =
-      this.privateKey!.derivePath(ethPath).neuter().extendedKey;
+      privateKey.derivePath(ethPath).neuter().extendedKey;
     // eth
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
-    xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
@@ -402,11 +405,12 @@ export class WalletService extends BaseService {
     console.log(walletIndex);
     console.log(to);
     console.log(amount);
-    const path = "m/44'/60'/0'/0/0"; // + walletIndex;
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
     console.log(path);
-    console.log(this.privateKey!.mnemonic!.phrase);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(
-      this.privateKey!.derivePath(path).privateKey
+      privateKey.derivePath(path).privateKey
     );
     let signer = wallet.connect(this.ethProvider!);
     let tx = {
@@ -415,7 +419,8 @@ export class WalletService extends BaseService {
     };
     const { hash } = await signer.sendTransaction(tx);
     console.log('hash: ' + hash);
-    this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
+    const fromAddress = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.address;
+    this.state!.ethereum.enqueueTransaction(hash, tx.to, fromAddress, tx.value, (new Date()).toISOString());
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
@@ -432,7 +437,8 @@ export class WalletService extends BaseService {
     amount: string
   ) {
     let sourceAddress = this.state!.bitcoin.wallets.get(walletIndex)!.address;
-    let privateKey = this.privateKey!.derivePath(
+    const privateKeyNode = this.getPrivateKey();
+    const privateKey = privateKeyNode.derivePath(
       "m/44'/0'/0'/0" + walletIndex
     ).privateKey;
     // let tx, hash = sendBitcoin(sourceAddress, to, amount, privateKey)

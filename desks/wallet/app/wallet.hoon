@@ -63,7 +63,8 @@
         [%address =network from=@ta ~]
       =/  [%address =network from=@ta ~]  path
       =/  from=@p  (slav %p from)
-      =/  task  [%poke %wallet-action !>(`action`[%create-wallet our.bowl network (crip (scow %p our.bowl))])]
+      =/  wall-act=action  [%create-wallet our.bowl network (crip (scow %p our.bowl))]
+      =/  task  [%poke %wallet-action !>(`action`wall-act)]
       :-  [%pass /addr/(scot %p from) %agent [from dap.bowl] task]~
       this
         [%transactions ~]
@@ -504,7 +505,8 @@
         =/  task  [%poke %wallet-action !>(`action`[%receive-address network.act ~])]
         [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
       ^-  (list card)
-      =/  task  [%poke %wallet-action !>(`action`[%receive-address network.act `-:u.default-wallet])]
+      =/  wall-act=action  [%receive-address network.act `-:u.default-wallet]
+      =/  task  [%poke %wallet-action !>(`action`wall-act)]
       [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
     ::  create new wallet
     ::

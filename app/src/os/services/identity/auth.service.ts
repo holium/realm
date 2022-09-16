@@ -29,6 +29,7 @@ export class AuthService extends BaseService {
     'realm.auth.login': this.login,
     'realm.auth.logout': this.logout,
     'realm.auth.remove-ship': this.removeShip,
+    'realm.auth.set-mnemonic': this.setMnemonic,
   };
 
   static preload = {
@@ -45,6 +46,7 @@ export class AuthService extends BaseService {
     getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
     removeShip: (ship: string) =>
       ipcRenderer.invoke('realm.auth.remove-ship', ship),
+    setMnemonic: (mnemonic: string) => ipcRenderer.invoke('realm.auth.set-mnemonic', mnemonic),
     // onLogin: (callback: any) =>
     //   ipcRenderer.on('realm.auth.on-log-in', callback),
     // onLogout: (callback: any) =>
@@ -225,4 +227,13 @@ export class AuthService extends BaseService {
   removeShip(_event: any, ship: string) {
     this.state.deleteShip(ship);
   }
+
+  setMnemonic(_event: any, mnemonic: string) {
+    this.state.setMnemonic(mnemonic);
+  }
+
+  getMnemonic(_event: any) {
+    return this.state.mnemonic;
+  }
+
 }
