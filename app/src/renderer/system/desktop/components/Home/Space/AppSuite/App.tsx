@@ -54,7 +54,11 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
           onClick: (evt: any) => {
             evt.stopPropagation();
             // console.log('install app => %o', app);
-            SpacesActions.installApp(app);
+            if (app.installed) {
+              SpacesActions.uninstallApp(app.id);
+            } else {
+              SpacesActions.installApp(app);
+            }
           },
         });
       }

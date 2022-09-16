@@ -1,7 +1,7 @@
 import { Conduit } from '@holium/conduit';
 import { SpacePath } from '../types';
 import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
-import { allyShip, docketInstall } from '@urbit/api';
+import { allyShip, docketInstall, docketUninstall } from '@urbit/api';
 import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
 
@@ -187,6 +187,8 @@ export const BazaarApi = {
       resolve('done');
     });
   },
+  uninstallApp: async (conduit: Conduit, desk: string) =>
+    await conduit.poke(docketUninstall(desk)),
   // in the case of space apps, all we have is the desk, since docket/glob
   //   data does not include host/source ship. therefore we request an install
   //   back to the space host which requires desk name only. space host will then
@@ -563,10 +565,10 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'app-uninstalled':
       {
+        console.log('app-uninstalled => %o', data);
         let detail = data['app-uninstalled'];
-        // console.log(detail);
         // @ts-ignore
-        state.removeApp(detail);
+        state.setUninstalled(detail['app-id']);
       }
       break;
     case 'pin':

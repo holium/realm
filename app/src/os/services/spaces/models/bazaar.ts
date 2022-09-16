@@ -3,6 +3,7 @@ import { cleanNounColor } from '../../../lib/color';
 // import { NativeAppList, nativeApps } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob } from '../../ship/models/docket';
 import { toJS } from 'mobx';
+import { apiOwnKeys } from 'mobx/dist/internal';
 // const util = require('util');
 
 export const DocketMap = types.map(
@@ -308,6 +309,15 @@ export const BazaarStore = types
       self.apps.set(appId, app);
       // trigger UI update if someone is listening
       self.appsChange = !self.appsChange;
+    },
+    setUninstalled(appId: string) {
+      const app = self.apps.get(appId);
+      if (app?.type === 'urbit') {
+        app.installed = false;
+        self.apps.set(appId, app);
+        // trigger UI update if someone is listening
+        self.appsChange = !self.appsChange;
+      }
     },
     updateApp(app: AppType) {
       // console.log('updating app => %o', app);
