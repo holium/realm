@@ -133,8 +133,8 @@
             ==
         `this
           %thread-done
-        =+  !<(txh=@ux q.cage.sign)
-        ?:  ?=([%tx %result %eth-send tid=@ta ~] wire)
+        =+  !<([txh=@ux status=? block=@ud] q.cage.sign)
+        ?:  ?=([%tx %result %eth-receipt tid=@ta ~] wire)
           =/  tid=@ta  i.t.t.t.wire
           =+  !<(rez=tx-rez q.cage.sign)
           =/  net-pend  (~(got by transaction-queue) %ethereum)
@@ -144,11 +144,10 @@
             =.  net-pending  (~(del by net-pending) tid)
             (~(put by transaction-queue) [%ethereum net-pending])
           ?:  status.rez
-            =.  transaction-history
-              =/  net-history  (~(got by transaction-history) %ethereum)
-              =.  net-history  (~(put by net-history) [tid status.rez pending-tx])
-              (~(put by transaction-history) [%ethereum net-history])
-            ~&  'sending update'
+            :: =.  transaction-history
+            ::   =/  net-history  (~(got by transaction-history) %ethereum)
+            ::  =.  net-history  (~(put by net-history) [tid status.rez pending-tx])
+            ::  (~(put by transaction-history) [%ethereum net-history])
             :_  this
             [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum tid pending-tx status.rez])]~
           ~&  ["{(trip dap.bowl)} transaction reverted" txh.rez]
@@ -575,8 +574,7 @@
     :_  state
     ?+  network.act  `(list card)`~
         %ethereum
-      ~&  'trying to send'
-      =/  =wire  [%tx tid ~]
+      =/  =wire  [%eth-receipt tid ~]
       =/  args
         :-  ~
         :^  `tid  byk.bowl(r da+now.bowl)  %eth-get-transaction-receipt
@@ -587,13 +585,19 @@
             ~|  'provider not set for pending transaction'
             !!
           u.provider
-        ~&  node-url
-        ~&  hash.act
         !>([node-url 'tx' hash.act])
       :~  (watch-spider [%tx %result wire] /thread-result/[tid])
           (poke-spider [%tx wire] %spider-start !>(args))
       ==
     ==
+    ::
+      %add-to-history
+    =.  transaction-history
+      =/  net-map  (~(got by transaction-history) network.act)
+      =.  net-map  (~(put by net-map) [hash.act transaction.act])
+      (~(put by transaction-history) [network.act net-map])
+    `state
+    ::
       %add-smart-contract
     =^  address  wallets
       =/  wallet-map  (~(got by wallets) %ethereum)

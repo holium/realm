@@ -55,7 +55,8 @@
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
       [%set-network-provider (ot ~[network+(su (perk %bitcoin %ethereum ~)) provider+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
-      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+so transaction+json])]
+      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+json-to-ux transaction+json])]
+      [%add-to-history (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+json-to-ux transaction+json])]
       [%add-smart-contract (ot ~[contract-id+so contract-type+(su (perk %erc20 %erc721 ~)) name+so address+json-to-ux wallet-index+so])]
   ==
   ++  json-to-ux
@@ -91,19 +92,17 @@
     %+  turn  transaction-list
       jsonify-transaction-map
     ++  jsonify-transaction-map
-      |=  [=network transactions=(map @t [success=? transaction])]
+      |=  [=network transactions=(map @t transaction)]
       ^-  [@t json]
       :-  `@t`network
         %-  pairs
-        =/  tx-list  ~(tap by transactions)
-        %+  turn  tx-list
-        |=  [key=@t [success=? =transaction]]
-        ^-  [@t json]
-        :-  key
-        %-  pairs
-        :~  ['success' [%b success]]
-            ['transaction' transaction]
-        ==
+        ~(tap by transactions)
+::        =/  tx-list  ~(tap by transactions)
+::        %+  turn  tx-list
+::        |=  [key=@t transaction]
+::        ^-  [@t json]
+::        :-  key
+::        transaction
     --
   ::
       %wallet

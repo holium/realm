@@ -111,7 +111,7 @@ export type EthWalletType = Instance<typeof EthWallet>
 
 export const EthTransaction = types
   .model('EthTransaction', {
-    hash: types.string,
+    hash: types.identifier,
     amount: types.string,
     network: types.enumeration(['ethereum', 'bitcoin']),
     type: types.enumeration(['sent', 'received']),
@@ -165,7 +165,27 @@ export const EthStore = types
       applySnapshot(self.wallets, ethWallets);
     },
     applyHistory(history: any) {
-
+      const ethHistory = history.ethereum;
+      console.log(ethHistory);
+      Object.entries(ethHistory).forEach(([key, transaction]) => {
+        const tx = (transaction as any);
+        ethHistory[key] = {
+          hash: tx.hash,
+          amount: tx.amount,
+          network: 'ethereum',
+          type: tx.type,
+          initiatedAt: tx.initiatedAt,
+          completedAt: tx.completedAt,
+          ourAddress: tx.ourAddress,
+          theirPatp: tx.theirPatp,
+          theirAddress: tx.theirAddress,
+          status: tx.status,
+          failureReason: tx.failureReason,
+          notes: tx.notes,
+          link: tx.link,
+        }
+      });
+      applySnapshot(self.transactions, ethHistory);
     },
     // pokes
     setProvider(provider: string) {
@@ -175,15 +195,17 @@ export const EthStore = types
       self.settings!.defaultIndex = index;
     },
     enqueueTransaction(hash: any, toAddress: any, from: any, amount: any, timestamp: any) {
-      // let tx = {
-      //   status: 'pending',
-      //   txh: hash,
-      //   toAddress: toAddress,
-      //   from: from,
-      //   amount: amount,
-      //   timestamp: timestamp,
-      // }
-      // self.transactions.put(tx);
+      let tx = {
+        hash: hash,
+        amount: amount.toString(),
+        network: 'ethereum',
+        type: 'sent',
+        initiatedAt: timestamp.toString(),
+        ourAddress: from,
+        theirAddress: toAddress,
+        status: 'pending',
+      };
+      self.transactions.put(tx);
     },
     // updates
     applyWalletUpdate(wallet: any) {
@@ -198,11 +220,13 @@ export const EthStore = types
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     },
     applyTransactionUpdate(transaction: any) {
-      let tx = self.transactions.get(transaction.key)!;
-      if (transaction.status)
+      let tx = self.transactions.get(transaction.transaction.hash)!;
+      tx.completedAt = Date.now().toString();
+      if (transaction.transaction.success)
         tx.status = "approved";
       else
         tx.status = "failed";
+      self.transactions.set(transaction.transaction.hash, tx);
     },
   }));
 
