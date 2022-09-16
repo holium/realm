@@ -767,6 +767,8 @@
     ~&  >  "{<dap.bowl>}: bazaar-reaction [pin] => {<[path app-full ord]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)    `state
+    =/  app-id                  id.app-full
+    =/  app-full                (update-status app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -785,6 +787,8 @@
     ~&  >  "{<dap.bowl>}: bazaar-reaction [unpin] => {<[path app-full ord]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)    `state
+    =/  app-id                  id.app-full
+    =/  app-full                (update-status app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -816,6 +820,8 @@
     ~&  >  "{<dap.bowl>}: bazaar-reaction [recommended] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)    `state
+    =/  app-id                  id.app-full
+    =/  app-full                (update-status app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -834,6 +840,8 @@
     ~&  >  "{<dap.bowl>}: bazaar-reaction [unrecommended] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)    `state
+    =/  app-id                  id.app-full
+    =/  app-full                (update-status app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -852,17 +860,18 @@
     ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-add] => {<[path app-full ord our.bowl src.bowl]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)    `state
+    =/  app-id                  id.app-full
+    =/  app-full                (update-status app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
     =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
     =.  sieve.app               sieve.app-full
-    :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
     =.  suite.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
     =/  paths                   [/updates ~]
-    (bazaar:send-reaction [%suite-add path [id.app-full sieve.app pkg.app-full] ord] paths ~)
+    (bazaar:send-reaction [%suite-add path app-full ord] paths ~)
   ::
   ++  on-suite-rem
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
@@ -870,6 +879,8 @@
     ~&  >  "{<dap.bowl>}: bazaar-reaction [on-suite-rem] => {<[path app-full]>}"
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)    `state
+    =/  app-id                  id.app-full
+    =/  app-full                (update-status app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -880,7 +891,7 @@
     =.  suite.sorts.apps        ord
     =.  space-apps.state        (~(put by space-apps.state) path [index sorts.apps])
     =/  paths                   [/updates ~]
-    (bazaar:send-reaction [%suite-remove path [id.app-full sieve.app pkg.app-full] ord] paths ~)
+    (bazaar:send-reaction [%suite-remove path app-full ord] paths ~)
   ::
   ++  on-set-suite-order
     |=  [path=space-path:spaces-store ord=(list app-id:store)]
@@ -896,19 +907,16 @@
     (bazaar:send-reaction [%set-suite-order path ord] paths ~)
   --
 ::
-:: ++  update-installed-status
-::   |=  [app=app-lite:store]
-::   ^-  app-lite:store
-::   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
-::   ?>  ?=([%initial *] charge-update)
-::   ::  set the app's installed state relative to this ship
-::   ?:  (~(has by initial.charge-update) id.app)
-::     ~&  >>  "{<dap.bowl>}: update-installed-status [installed] {<app>}..."
-::     =.  tags.sieve.app  (~(put in tags.sieve.app) %installed)
-::     app
-::   ~&  >>  "{<dap.bowl>}: update-installed-status [not installed] {<app>}..."
-::   =.  tags.sieve.app  (~(del in tags.sieve.app) %installed)
-::   app
+++  update-status
+  |=  [=app-full:store]
+  ^-  app-full:store
+  ?.  =(%urbit -.pkg.app-full)  app-full
+  =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+  ?>  ?=([%initial *] charge-update)
+  ?>  ?=(%urbit -.pkg.app-full)
+  =.  installed.pkg.app-full  (~(has by initial.charge-update) id.app-full)
+  =.  app-catalog.state       (~(put by app-catalog.state) id.app-full pkg.app-full)
+  app-full
 ::
 :: ++  suite
 ::   |%
@@ -1055,6 +1063,7 @@
     ?+  -.chad.charge  `state
       %glob
         ::  once fully installed, remove the installation entry from state
+        ~&  >>  "{<dap.bowl>}: charge-update [add-charge] {<desk>}, {<charge>}. app fully installed. adding to bazaar catalog..."
         =/  app  (~(get by app-catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge %.y]
           ?>  ?=(%urbit -.u.app)
@@ -1077,7 +1086,11 @@
   ++  rem
     |=  [=desk]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
+    ~&  >>  "{<dap.bowl>}: charge-update [del-charge] received. {<desk>}"
+    =/  app  (~(got by app-catalog.state) desk)
+    ?>  ?=(%urbit -.app)
+    =.  installed.app  %.n
+    =.  app-catalog.state  (~(put by app-catalog.state) desk app)
     (bazaar:send-reaction:core [%app-uninstalled desk] [/updates ~] ~)
   --
 ::

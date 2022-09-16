@@ -35,6 +35,7 @@ const UrbitApp = types.model({
   version: types.string,
   website: types.string,
   license: types.string,
+  installed: types.boolean,
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
@@ -300,6 +301,10 @@ export const BazaarStore = types
       }
     },
     addApp(appId: string, app: any) {
+      const appColor = app.color;
+      if (app.type === 'urbit') {
+        app.color = appColor && cleanNounColor(appColor);
+      }
       self.apps.set(appId, app);
       // trigger UI update if someone is listening
       self.appsChange = !self.appsChange;

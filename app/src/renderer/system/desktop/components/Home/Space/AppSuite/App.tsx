@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
@@ -36,44 +36,48 @@ type SuiteAppProps = {
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
   const { app, space, isAdmin, onClick } = props;
   if (app) {
+    const menu = useMemo(() => {
+      let menu = [];
+      if (isAdmin) {
+        menu.push({
+          label: 'Remove from suite',
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            onClick && onClick();
+          },
+        });
+      }
+      if (app.type === 'urbit') {
+        menu.push({
+          label: app.installed ? 'Uninstall app' : 'Install app',
+          disabled: false,
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            // console.log('install app => %o', app);
+            SpacesActions.installApp(app);
+          },
+        });
+      }
+      menu.push({
+        label: 'Recommend this app',
+        onClick: (evt: any) => {
+          evt.stopPropagation();
+          SpacesActions.recommendApp(space.path, app.id);
+        },
+      });
+      return menu;
+    }, [app, isAdmin]);
     // lighten app if not installed on this ship
-    app.color = app.tags.includes('installed')
-      ? app.color
-      : rgba(app.color, 0.7);
+    app.color =
+      app.type !== 'urbit' || (app.type === 'urbit' && app.installed)
+        ? app.color
+        : rgba(app.color, 0.7);
     return (
       <AppTile
         tileSize="xl"
         app={app}
-        allowContextMenu={isAdmin}
-        contextMenu={
-          isAdmin
-            ? [
-                {
-                  label: 'Remove from suite',
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    onClick && onClick();
-                  },
-                },
-                {
-                  label: 'Recommend this app',
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    SpacesActions.recommendApp(space.path, app.id);
-                  },
-                },
-                {
-                  label: 'Install app',
-                  disabled: !app.tags.includes('installed'),
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    // console.log('install app => %o', app);
-                    SpacesActions.installApp(app);
-                  },
-                },
-              ]
-            : undefined
-        }
+        allowContextMenu={true}
+        contextMenu={menu}
         onAppClick={(selectedApp: AppModelType) => {
           // QUESTION: should this open the app listing or the actual app?
           // const app = toJS(selectedApp);
