@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { Grid, Text, Flex, Anchor, Checkbox } from 'renderer/components';
+import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
@@ -36,7 +37,7 @@ const DisclaimerDialog: FC<BaseDialogProps> = observer(
           Possible addition, or separate instruction to users: Alpha users are
           encouraged to report any perceived bugs or problems in the software
           and system to Holium Corporation by email at
-          <Anchor color="brand.primary" m={0} href="mailto:bugs@holium.io">
+          <Anchor color={theme.light.colors.brand.primary} m={0} href="mailto:bugs@holium.io">
             bugs@holium.io
           </Anchor>
         </Text>
