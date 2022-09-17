@@ -232,6 +232,11 @@ export class OnboardingService extends BaseService {
   }
 
   async checkGatedAccess(_event: any, code: string): Promise<{ success: boolean, message: string }> {
+    if (process.env.NODE_ENV === 'development' && code === '~admins-admins-admins') {
+      this.state.setInviteCode('~admins-admins-admins');
+      return { success: true, message: 'Access succeeded.'};
+    }
+
     let accessCode = await this.core.holiumClient.getAccessCode(code);
     if (accessCode && accessCode.type === 'ACCESS') {
       if (accessCode.singleUse && accessCode.redeemed) {
@@ -252,6 +257,13 @@ export class OnboardingService extends BaseService {
 
   async setEmail(_event: any, email: string) {
     const { auth } = this.core.services.identity;
+
+    if (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') {
+      let account = await this.core.holiumClient.createAccount(email);
+      this.state.setEmail(email);
+      this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
+      return;
+    }
 
     let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
@@ -597,11 +609,12 @@ export class OnboardingService extends BaseService {
   async completeOnboarding(_event: any) {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
-
-    try {
-      await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
-    } catch (e) {
-      console.error('Unable to redeem gated access code, continuing anyway.');
+    if (process.env.NODE_ENV !== 'development') {
+      try {
+        await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
+      } catch (e) {
+        console.error('Unable to redeem gated access code, continuing anyway.');
+      }
     }
 
     let decryptedPassword = safeStorage.decryptString(
