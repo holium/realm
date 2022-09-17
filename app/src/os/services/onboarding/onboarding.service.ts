@@ -257,19 +257,16 @@ export class OnboardingService extends BaseService {
 
   async setEmail(_event: any, email: string) {
     const { auth } = this.core.services.identity;
-
-    if (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') {
-      let account = await this.core.holiumClient.createAccount(email);
-      this.state.setEmail(email);
-      this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
-      return;
-    }
-
     let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
     this.state.setVerificationCode(account.verificationCode);
 
     auth.setAccountId(account.id);
+
+    if (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') {
+      this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
+    }
+
   }
 
   async resendEmailVerification(_event: any) {
