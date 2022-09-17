@@ -28,7 +28,8 @@ export const EmailDialog: FC<BaseDialogProps> = observer((props: BaseDialogProps
 export default EmailDialog;
 
 function InitialScreen (props: { done: any }) {
-  const [email, setEmail] = useState('');
+  const { onboarding } = useServices();
+  const [email, setEmail] = useState(onboarding.email || '');
   const [loading, setLoading] = useState(false);
   const onChange = (event: any) => setEmail(event.target.value);
 
