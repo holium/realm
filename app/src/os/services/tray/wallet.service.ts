@@ -420,7 +420,6 @@ export class WalletService extends BaseService {
     const { hash } = await signer.sendTransaction(tx);
     console.log('hash: ' + hash);
     const fromAddress = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.address;
-    this.state!.ethereum.enqueueTransaction(hash, tx.to, fromAddress, tx.value, (new Date()).toISOString());
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
@@ -428,6 +427,7 @@ export class WalletService extends BaseService {
       this.state!.ethereum.transactions.get(hash)
       // tx
     );
+    this.state!.ethereum.enqueueTransaction(hash, tx.to, fromAddress, tx.value, (new Date()).toISOString());
   }
 
   async sendBitcoinTransaction(

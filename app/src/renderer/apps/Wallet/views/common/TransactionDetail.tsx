@@ -34,9 +34,8 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  console.log(walletApp.currentTransaction);
-  console.log(walletApp.ethereum.transactions);
   let transaction = walletApp.ethereum.transactions.get(walletApp.currentTransaction!)!;
+  console.log(transaction)
 
   const { desktop } = useServices();
   let theme = getBaseTheme(desktop);

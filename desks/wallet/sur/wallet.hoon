@@ -3,8 +3,35 @@
 ::
 +$  address  @u
 +$  network  ?(%bitcoin %ethereum)
-+$  transaction  json
-+$  status  ?(%needs-signing %pending)
++$  help-tx
+  $:  hash=@t
+      amount=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @t)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
+  ==
++$  transaction  ::  json
+  $:  hash=@t
+      amount=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @p)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
+  ==
++$  status  ?(%pending %failed %succeeded)
 +$  contracts-map  (map contract-id contract-data)
 +$  wallet  [=address path=@t nickname=@t balance=@ =contracts-map]
 +$  mode  ?(%on-demand %default)
@@ -31,7 +58,6 @@
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
       [%enqueue-transaction =network hash=@ =transaction]
-      [%add-to-history =network hash=@ =transaction]
       [%add-smart-contract contract-id=@t =contract-type name=@t address=@ux wallet-index=@t]
   ==
 ::  subscription updates
@@ -47,6 +73,7 @@
 ::
 +$  transaction-queue        (map network (map @t [hash=@ transaction]))
 +$  transaction-history  (map network (map @t transaction))
++$  transactions  (map network (map @t transaction))
 +$  wallets  (map =network (map @t wallet))
 +$  settings
   $:  wallet-creation=mode

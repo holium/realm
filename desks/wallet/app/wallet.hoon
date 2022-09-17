@@ -9,8 +9,7 @@
   ==
 +$  state-0
   $:  %0
-      =transaction-queue
-      =transaction-history
+      =transactions
       =wallets
       =settings
   ==
@@ -82,7 +81,7 @@
         [%x %history ~]
       :^  ~  ~  %wallet-update
       !>  ^-  update
-      [%history transaction-history.state]
+      [%history transactions.state]
         [%x %wallets ~]
       :^  ~  ~  %wallet-update
       !>  ^-  update
@@ -138,17 +137,16 @@
         ?:  ?=([%tx %result %eth-receipt tid=@ta ~] wire)
           =/  tid=@ta  i.t.t.t.wire
           =+  !<(rez=tx-rez q.cage.sign)
-          =/  net-pend  (~(got by transaction-queue) %ethereum)
-          =/  pending-tx=json  +:(~(got by net-pend) tid)
-          =.  transaction-queue
-            =/  net-pending  (~(got by transaction-queue) %ethereum)
-            =.  net-pending  (~(del by net-pending) tid)
-            (~(put by transaction-queue) [%ethereum net-pending])
+          =/  net-pend  (~(got by transactions) %ethereum)
+          =/  pending-tx=transaction  (~(got by net-pend) tid)
+          =.  transactions
+            =/  net-pending  (~(got by transactions) %ethereum)
+            =.  net-pending
+              =/  tx  (~(got by net-pending) tid)
+              =.  status.tx  %succeeded
+              (~(put by net-pending) [tid tx])
+            (~(put by transactions) [%ethereum net-pending])
           ?:  status.rez
-            :: =.  transaction-history
-            ::   =/  net-history  (~(got by transaction-history) %ethereum)
-            ::  =.  net-history  (~(put by net-history) [tid status.rez pending-tx])
-            ::  (~(put by transaction-history) [%ethereum net-history])
             :_  this
             [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum tid pending-tx status.rez])]~
           ~&  ["{(trip dap.bowl)} transaction reverted" txh.rez]
@@ -437,14 +435,10 @@
       (~(put by wallets.state) [%ethereum ~])
     =.  wallets.state
       (~(put by wallets.state) [%bitcoin ~])
-    =.  transaction-queue.state
-      (~(put by transaction-queue.state) [%bitcoin ~])
-    =.  transaction-queue.state
-      (~(put by transaction-queue.state) [%ethereum ~])
-    =.  transaction-history.state
-      (~(put by transaction-history.state) [%bitcoin ~])
-    =.  transaction-history.state
-      (~(put by transaction-history.state) [%ethereum ~])
+    =.  transactions.state
+      (~(put by transactions.state) [%bitcoin ~])
+    =.  transactions.state
+      (~(put by transactions.state) [%ethereum ~])
     =.  networks.settings.state
       (~(put by networks.settings.state) [%ethereum [~ '0' ~]])
     =.  networks.settings.state
@@ -566,39 +560,48 @@
     state
     ::
       %enqueue-transaction
-    ?>  (team:title our.bowl src.bowl)
     =/  tid=@ta
       :((cury cat 3) dap.bowl '--' (scot %uv eny.bowl))
-    =.  transaction-queue
-      =/  net-map  (~(got by transaction-queue) network.act)
-      =.  net-map  (~(put by net-map) [tid [hash.act transaction.act]])
-      (~(put by transaction-queue) [network.act net-map])
-    :_  state
-    ?+  network.act  `(list card)`~
-        %ethereum
-      =/  =wire  [%eth-receipt tid ~]
-      =/  args
-        :-  ~
-        :^  `tid  byk.bowl(r da+now.bowl)  %eth-get-transaction-receipt
-        =+  [gas=100.000 gas-price=30.000.000.000]
-        =/  node-url
-          =/  provider  provider:(~(got by networks.settings) network.act)
-          ?~  provider
-            ~|  'provider not set for pending transaction'
-            !!
-          u.provider
-        !>([node-url 'tx' hash.act])
-      :~  (watch-spider [%tx %result wire] /thread-result/[tid])
-          (poke-spider [%tx wire] %spider-start !>(args))
+    =.  transactions
+      =/  net-map  (~(got by transactions) network.act)
+      =.  net-map  (~(put by net-map) [tid transaction.act])
+      (~(put by transactions) [network.act net-map])
+    =/  cards
+      ?+  network.act  `(list card)`~
+          %ethereum
+        =/  =wire  [%eth-receipt tid ~]
+        =/  args
+          :-  ~
+          :^  `tid  byk.bowl(r da+now.bowl)  %eth-get-transaction-receipt
+          =+  [gas=100.000 gas-price=30.000.000.000]
+          =/  node-url
+            =/  provider  provider:(~(got by networks.settings) network.act)
+            ?~  provider
+              ~|  'provider not set for pending transaction'
+              !!
+            u.provider
+          !>([node-url 'tx' hash.act])
+        :~  (watch-spider [%tx %result wire] /thread-result/[tid])
+            (poke-spider [%tx wire] %spider-start !>(args))
+        ==
       ==
-    ==
-    ::
-      %add-to-history
-    =.  transaction-history
-      =/  net-map  (~(got by transaction-history) network.act)
-      =.  net-map  (~(put by net-map) [hash.act transaction.act])
-      (~(put by transaction-history) [network.act net-map])
-    `state
+    =?  cards
+        ?&  (team:title our.bowl src.bowl)
+            !=(~ their-patp.transaction.act)
+        ==
+      ?~  their-patp.transaction.act  !!
+      =/  to=@p  u.their-patp.transaction.act
+      =.  transaction.act
+        =.  type.transaction.act  %received
+        transaction.act
+      =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
+      =/  task  [%poke %wallet-action !>(wall-act)]
+      =/  new-card  
+        ^-  (list card)
+        :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
+        ==
+      (weld cards new-card)
+    [cards state]
     ::
       %add-smart-contract
     =^  address  wallets
