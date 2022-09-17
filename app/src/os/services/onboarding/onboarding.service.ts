@@ -21,7 +21,6 @@ import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
-import { resolve } from 'path';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
@@ -32,6 +31,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setStep': this.setStep,
     'realm.onboarding.setSeenSplash': this.setSeenSplash,
     'realm.onboarding.agreedToDisclaimer': this.agreedToDisclaimer,
+    'realm.onboarding.checkGatedAccess': this.checkGatedAccess,
     'realm.onboarding.setEmail': this.setEmail,
     'realm.onboarding.verifyEmail': this.verifyEmail,
     'realm.onboarding.resendEmailConfirmation': this.resendEmailVerification,
@@ -60,6 +60,10 @@ export class OnboardingService extends BaseService {
 
     agreedToDisclaimer() {
       return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
+    },
+
+    checkGatedAccess(code: string) {
+      return ipcRenderer.invoke('realm.onboarding.checkGatedAccess', code);
     },
 
     setEmail(email: string) {
@@ -225,6 +229,25 @@ export class OnboardingService extends BaseService {
 
   agreedToDisclaimer(_event: any) {
     this.state.setAgreedToDisclaimer();
+  }
+
+  async checkGatedAccess(_event: any, code: string): Promise<{ success: boolean, message: string }> {
+    let accessCode = await this.core.holiumClient.getAccessCode(code);
+    if (accessCode && accessCode.type === 'ACCESS') {
+      if (accessCode.singleUse && accessCode.redeemed) {
+        return { success: false, message: 'This invite code was already redeemed.' };
+      } else if ((new Date(accessCode.expiresAt!).getTime() < Date.now())) {
+        return { success: false, message: 'This invite code has expired.'};
+      } else {
+        this.state.setInviteCode(code);
+        if (accessCode.email) {
+          this.state.setEmail(accessCode.email);
+        }
+        return { success: true, message: 'Access succeeded.'};
+      }
+    } else {
+      return { success: false, message: 'Invite code not found.'};
+    }
   }
 
   async setEmail(_event: any, email: string) {
@@ -574,6 +597,12 @@ export class OnboardingService extends BaseService {
   async completeOnboarding(_event: any) {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
+
+    try {
+      await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
+    } catch (e) {
+      console.error('Unable to redeem gated access code, continuing anyway.');
+    }
 
     let decryptedPassword = safeStorage.decryptString(
       Buffer.from(this.state.encryptedPassword!, 'base64')
