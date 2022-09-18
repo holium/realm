@@ -21,6 +21,13 @@
           [%unrecommend rem-rec]
           [%suite-add suite-add]
           [%suite-remove suite-remove]
+          [%install-app install-app]
+      ==
+    ::
+    ++  install-app
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+          [%desk so]
       ==
     ::
     ++  add-pin
@@ -110,6 +117,7 @@
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
           [%app-index-full (pairs (full-app-index:encode app-index-full.rct))]
+          :: [%vips [%a (vips:encode vips.rct)]]
       ==
     ::
         %pin
@@ -172,6 +180,14 @@
       %-  pairs
       :~  [%app-id s+app-id.rct]
       ==
+    ::
+        %treaty-added
+      :-  %treaty-added
+      %-  pairs
+      :~  [%ship s+(crip "{<ship.rct>}")]
+          [%desk s+desk.rct]
+          [%docket (pairs (dkt:encode docket.rct))]
+      ==
     ==
   ::
   ++  view :: encodes for on-peek
@@ -185,12 +201,26 @@
       ::
         %apps
       (pairs (full-app-index:encode app-index-full.vi))
+      ::
+        %sites
+      [%a (sites:encode sites.vi)]
     ==
   --
 ::
 ++  encode
   =,  enjs:format
   |%
+  ++  sites
+    |=  [stes=(set [ship=@p desk=@tas])]
+    ^-  (list json)
+    %+  turn  ~(tap in stes)
+    |=  [ship=@p desk=@tas]
+    ^-  json
+    %-  pairs
+    :~  [%ship s+(crip "{<ship>}")]
+        [%desk s+desk]
+    ==
+  ::
   ++  space-apps-full
     |=  =space-apps-full:store
     ^-  json

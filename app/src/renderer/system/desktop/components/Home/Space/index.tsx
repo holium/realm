@@ -25,6 +25,9 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
+  const [apps, setApps] = useState<any>([]);
+  const [suite, setSuite] = useState<any>([]);
+  const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
 
   useEffect(() => {
     if (currentSpace) {
@@ -32,6 +35,25 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       setMembers(memberMap);
     }
   }, [currentSpace]);
+
+  useEffect(() => {
+    console.log('AppSuite useEffect => %o', {
+      ship: ship?.patp,
+      path: currentSpace?.path,
+    });
+    if (currentSpace) {
+      // @ts-ignore
+      const suite = Array(5).fill(undefined);
+      const apps = bazaar.getSuiteApps(currentSpace.path);
+      apps?.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
+      // console.log(suite);
+      setSuite(suite);
+    }
+  }, [currentSpace, currentBazaar?.suiteChange]);
+
+  useEffect(() => {
+    setApps(bazaar.getAvailableApps());
+  }, [bazaar.appsChange]);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -56,6 +78,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
     );
   }, [sidebar, members]);
   if (!currentSpace) return null;
+  const membersCount = membership.getMemberCount(currentSpace.path);
 
   const headerWidth = '50%';
   const paneWidth = '50%';
@@ -87,7 +110,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           <SpaceTitlebar
             space={currentSpace}
             theme={desktop.theme}
-            membersCount={members.length}
+            membersCount={membersCount}
             showAppGrid={appGrid}
             showMembers={sidebar === 'members'}
             onToggleApps={() => {
@@ -164,7 +187,12 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite patp={ship?.patp} space={currentSpace} suite={[]} />
+              <AppSuite
+                patp={ship!.patp!}
+                space={currentSpace}
+                apps={apps}
+                suite={suite}
+              />
               <RecommendedApps />
               <RecentActivity />
             </Flex>

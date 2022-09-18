@@ -327,6 +327,10 @@ export const CourierStore = types
     },
   }))
   .actions((self) => ({
+    rejectDmInvite: (path: string) => {},
+    setNewPreview: (preview: DMPreviewType) => {
+      self.previews.set(preview.path, preview);
+    },
     setNotificationUpdates: (update: any) => {
       if (update['more'].length === 1) {
         if (update['more'][0]['read-count']) {
@@ -382,7 +386,6 @@ export const CourierStore = types
       }
     },
     setPreviews: (dmPreviews: any) => {
-      // console.log("DMPREVIEWS:", dmPreviews);
       Object.keys(dmPreviews).forEach((key: string) => {
         const preview: any = dmPreviews[key];
         if (preview.type === 'group' || preview.type === 'group-pending') {
@@ -392,8 +395,8 @@ export const CourierStore = types
         } else {
           preview.metadata.color = cleanNounColor(preview.metadata.color);
         }
+        self.previews.set(preview.path, preview);
       });
-      applySnapshot(self.previews, dmPreviews);
       self.loader.set('loaded');
     },
     draftDM: (patps: Patp[], metadata: any[]) => {
@@ -469,7 +472,7 @@ export const CourierStore = types
         // set a new log entry
         self.dms.set(dmLog.path, dmLog);
         self.previews.set(
-          dmLog.to,
+          dmLog.path,
           DMPreview.create({
             path: dmLog.path,
             to: dmLog.to,
@@ -482,6 +485,10 @@ export const CourierStore = types
           })
         );
       }
+    },
+    declineDm: (path: string) => {
+      self.previews.delete(path);
+      return;
     },
   }));
 

@@ -173,7 +173,7 @@ export const RoomsAppState = types
       self.knownRooms.delete(id);
     },
     setProvider(provider: Patp) {
-      if(provider !== self.provider) {
+      if (provider !== self.provider) {
         self.knownRooms.clear();
       }
       self.provider = provider;
@@ -197,7 +197,7 @@ export const RoomsAppState = types
     resetLocal() {
       self.liveRoom = undefined;
       self.knownRooms.clear();
-      self.currentView = 'list'
+      self.currentView = 'list';
       self.outstandingRequest = false;
       self.invites.clear();
       self.chatData.clear();

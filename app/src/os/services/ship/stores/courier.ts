@@ -32,6 +32,14 @@ export const loadCourierFromDisk = (
     persisted.store = castToSnapshot(snapshot);
   });
 
+  // Send initial
+  const patchEffect = {
+    model: getSnapshot(model),
+    resource: 'courier',
+    response: 'initial',
+  };
+  onEffect(patchEffect);
+
   // Start patching after we've initialized the state
   onPatch(model, (patch) => {
     const patchEffect = {
@@ -41,14 +49,6 @@ export const loadCourierFromDisk = (
     };
     onEffect(patchEffect);
   });
-
-  // Send initial
-  const patchEffect = {
-    model: getSnapshot(model),
-    resource: 'courier',
-    response: 'initial',
-  };
-  onEffect(patchEffect);
 
   return model;
 };

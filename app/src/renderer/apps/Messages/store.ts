@@ -10,6 +10,7 @@ import {
   clone,
 } from 'mobx-state-tree';
 import { DMPreview, DMPreviewType } from 'os/services/ship/models/courier';
+import { toJS } from 'mobx';
 
 export type DmViewType = 'dm-list' | 'dm-chat' | 'new-chat' | 'loading';
 
@@ -30,7 +31,7 @@ export const DmApp = types
     },
     setSelectedChat(chat: DMPreviewType | null) {
       if (chat) {
-        self.selectedChat = clone(chat);
+        self.selectedChat = toJS(chat);
         self.currentPath = chat.path;
         self.currentView = 'dm-chat';
       } else {

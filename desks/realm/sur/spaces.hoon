@@ -1,6 +1,6 @@
 ::  sur/spaces.hoon
 ::  Defines the types for the spaces concept.
-
+:: 
 ::  A space is a higher level concept above a %landscape group.
 /-  membership
 |%

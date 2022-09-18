@@ -30,6 +30,7 @@ import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
 import { LiveRoom } from 'renderer/apps/store';
 import { RoomsActions } from './actions/rooms';
+import { VisaModel } from 'os/services/spaces/models/visas';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -49,6 +50,7 @@ export const Services = types
     spaces: SpacesStore,
     bazaar: BazaarStore,
     membership: MembershipStore,
+    visas: VisaModel,
     docket: DocketStore,
     dms: ChatStore,
     courier: CourierStore,
@@ -86,6 +88,10 @@ const services = Services.create({
   },
   bazaar: {},
   membership: {},
+  visas: {
+    incoming: {},
+    outgoing: {},
+  },
   docket: {},
   dms: {},
   courier: {},
@@ -147,34 +153,39 @@ OSActions.boot();
 OSActions.onBoot((_event: any, response: any) => {
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
-  // console.log('onBoot');
+  console.log('onBoot', response);
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
   });
-  // if (response.auth.firstTime) {
-  //   SoundActions.playStartup();
-  // }
 
   if (response.models && response.ship) {
-    applySnapshot(
-      servicesStore.contacts,
-      castToSnapshot(response.models.contacts!)
-    );
+    if (response.models.contacts) {
+      applySnapshot(
+        servicesStore.contacts,
+        castToSnapshot(response.models.contacts!)
+      );
+    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(response.models.friends)
     );
-    applySnapshot(
-      servicesStore.courier,
-      castToSnapshot(response.models.courier!)
-    );
-    applySnapshot(
-      servicesStore.notifications,
-      castToSnapshot(response.models.notifications!)
-    );
+    if (response.models.courier) {
+      applySnapshot(
+        servicesStore.courier,
+        castToSnapshot(response.models.courier)
+      );
+    }
+    if (response.models.notifications) {
+      applySnapshot(
+        servicesStore.notifications,
+        castToSnapshot(response.models.notifications)
+      );
+    }
     applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
-    applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
+    if (response.models.chat) {
+      applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat));
+    }
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
@@ -189,6 +200,7 @@ OSActions.onBoot((_event: any, response: any) => {
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
+    applySnapshot(servicesStore.visas, castToSnapshot(response.visas));
   }
   if (response.bazaar) {
     applySnapshot(servicesStore.bazaar, response.bazaar);
@@ -237,14 +249,19 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    applySnapshot(
-      servicesStore.courier,
-      castToSnapshot(initials.models.courier!)
-    );
-    applySnapshot(
-      servicesStore.contacts,
-      castToSnapshot(initials.models.contacts!)
-    );
+    console.log('onConnected', initials.models);
+    if (initials.models.courier) {
+      applySnapshot(
+        servicesStore.courier,
+        castToSnapshot(initials.models.courier)
+      );
+    }
+    if (initials.models.contacts) {
+      applySnapshot(
+        servicesStore.contacts,
+        castToSnapshot(initials.models.contacts)
+      );
+    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
@@ -254,7 +271,9 @@ OSActions.onConnected(
       castToSnapshot(initials.models.notifications)
     );
     applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
-    applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat!));
+    if (initials.models.chat) {
+      applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat));
+    }
 
     servicesStore.setShip(ShipModel.create(initials.ship));
 
@@ -267,7 +286,7 @@ OSActions.onConnected(
 // Auth events
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
-  LiveRoom.leave()
+  LiveRoom.leave();
   coreStore.setLoggedIn(false);
   servicesStore.clearShip();
   ShellActions.setBlur(true);
@@ -307,6 +326,9 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'membership') {
       applyPatch(servicesStore.membership, value.patch);
     }
+    if (value.resource === 'visas') {
+      applyPatch(servicesStore.visas, value.patch);
+    }
     if (value.resource === 'docket') {
       applyPatch(servicesStore.docket, value.patch);
     }
@@ -320,7 +342,7 @@ OSActions.onEffect((_event: any, value: any) => {
       applyPatch(servicesStore.courier, value.patch);
     }
   }
-
+  // TODO do we need initial anymore?
   if (value.response === 'initial') {
     if (value.resource === 'desktop') {
       applySnapshot(servicesStore.desktop, value.model);

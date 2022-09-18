@@ -17,14 +17,17 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
 
     const currentSpace = spaces.selected!;
     const currentBazaar = bazaar.spaces.get(currentSpace.path);
-    console.log(toJS(bazaar));
+    // console.log(toJS(bazaar));
 
     useEffect(() => {
+      console.log(
+        'recommendedApps => %o',
+        bazaar.getRecommendedApps(currentSpace.path)
+      );
       if (currentSpace) {
-        // console.log('recommendedApps => %o', currentBazaar.recommendedApps);
-        setApps(currentBazaar?.recommendedApps);
+        setApps(bazaar.getRecommendedApps(currentSpace.path));
       }
-    }, [currentSpace, currentSpace && currentBazaar.recommendedApps]);
+    }, [currentSpace, currentBazaar?.recommendedChange]);
 
     return (
       <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>
@@ -32,12 +35,13 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
           Recommended Apps
         </Text>
 
-        {(apps.length === 0 && (
-          <Text variant="h6" opacity={0.4}>
-            No recommendations. Start liking apps in this space to show them
-            here!
-          </Text>
-        )) ||
+        {!apps ||
+          (apps.length === 0 && (
+            <Text variant="h6" opacity={0.4}>
+              No recommendations. Start liking apps in this space to show them
+              here!
+            </Text>
+          )) ||
           apps.map((app: any) => {
             return (
               <Flex flex={2} flexWrap="wrap" key={app.id}>

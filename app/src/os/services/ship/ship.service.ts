@@ -35,12 +35,10 @@ import {
   NotificationStore,
   NotificationStoreType,
 } from './models/notifications';
-import { VisaModel, VisaModelType } from '../spaces/models/invitations';
 import { NotificationApi } from '../../api/notifications';
 
 export type ShipModels = {
   friends: FriendsType;
-  invitations: VisaModelType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
@@ -64,10 +62,6 @@ export class ShipService extends BaseService {
       seen: [],
       all: [],
       recent: [],
-    }),
-    invitations: VisaModel.create({
-      outgoing: {},
-      incoming: {},
     }),
   };
   private metadataStore: {
@@ -260,7 +254,8 @@ export class ShipService extends BaseService {
       this.core.onEffect
     );
     this.models.friends = loadFriendsFromDisk(
-      ship, secretKey,
+      ship,
+      secretKey,
       this.core.onEffect
     );
     secretKey = null;
@@ -306,7 +301,7 @@ export class ShipService extends BaseService {
         MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
 
         // register dm update handler
-        DmApi.updates(this.core.conduit!, this.models.chat!);
+        DmApi.updates(this.core.conduit!, this.models.courier!);
         CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
         NotificationApi.updates(
           this.core.conduit!,
@@ -483,7 +478,8 @@ export class ShipService extends BaseService {
   async getDMLog(_event: any, ship: Patp) {
     const dmLog = await CourierApi.getDMLog(ship, this.core.conduit!);
     this.models.courier?.setDMLog(dmLog);
-    return dmLog;
+    const dms = this.models.courier?.dms.get(dmLog.path);
+    return toJS(dms?.messages);
   }
 
   async acceptDm(_event: any, toShip: string) {
@@ -534,7 +530,8 @@ export class ShipService extends BaseService {
     const inviteId = this.models.courier?.previews.get(path)?.inviteId;
     console.log('rejectingDM', path, inviteId);
     if (inviteId) {
-      return await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
+      await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
+      return this.models.courier?.declineDm(path);
     }
     return;
   }

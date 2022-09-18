@@ -1,5 +1,5 @@
-import { FC } from 'react';
-import { toJS } from 'mobx';
+import { FC, useState, useEffect } from 'react';
+import { toJS, isObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
 import { AppModelType } from 'os/services/ship/models/docket';
@@ -15,16 +15,20 @@ type AppGridProps = {
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
   const { spaces, bazaar } = useServices();
+  const [apps, setApps] = useState<any>([]);
 
-  const currentBazaar = spaces.selected
-    ? bazaar.getBazaar(spaces.selected?.path)
-    : null;
+  const currentSpace = spaces.selected!;
+  const currentBazaar = bazaar.spaces.get(currentSpace.path);
 
-  const apps: any = currentBazaar?.allApps;
+  useEffect(() => {
+    if (currentSpace) {
+      setApps(bazaar.getApps(currentSpace.path));
+    }
+  }, [currentSpace, currentBazaar?.pinnedChange, bazaar.appsChange]);
 
   return apps.map((app: any, index: number) => {
     const spacePath = spaces.selected?.path!;
-    const tags = (currentBazaar && currentBazaar.appTags) || [];
+    const tags = app.tags || [];
     const isAppPinned = tags.includes('pinned');
     const isAppRecommended = tags.includes('recommended');
     return (
@@ -88,13 +92,9 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           }
         }
         onAppClick={(selectedApp: AppModelType) => {
-          console.log(selectedApp);
-          // const app = JSON.parse(JSON.stringify(selectedApp));
+          // console.log(selectedApp);
           SpacesActions.addRecentApp(spaces.selected!.path, selectedApp.id);
-          DesktopActions.openAppWindow(
-            spaces.selected!.path,
-            toJS(selectedApp)
-          );
+          DesktopActions.openAppWindow(spaces.selected!.path, selectedApp);
           DesktopActions.setHomePane(false);
         }}
       />

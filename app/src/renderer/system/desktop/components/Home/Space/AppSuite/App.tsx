@@ -36,6 +36,10 @@ type SuiteAppProps = {
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
   const { app, space, isAdmin, onClick } = props;
   if (app) {
+    // lighten app if not installed on this ship
+    app.color = app.tags.includes('installed')
+      ? app.color
+      : rgba(app.color, 0.7);
     return (
       <AppTile
         tileSize="xl"
@@ -58,15 +62,23 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
                     SpacesActions.recommendApp(space.path, app.id);
                   },
                 },
+                {
+                  label: 'Install app',
+                  disabled: app.tags.includes('installed'),
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    SpacesActions.installApp(app);
+                  },
+                },
               ]
             : undefined
         }
         onAppClick={(selectedApp: AppModelType) => {
           // QUESTION: should this open the app listing or the actual app?
           // const app = toJS(selectedApp);
-          const app = JSON.parse(JSON.stringify(selectedApp));
-          DesktopActions.openAppWindow(space.path, app);
+          DesktopActions.openAppWindow(space.path, selectedApp);
           DesktopActions.setHomePane(false);
+          // desktop.setHomePane(false);
         }}
       />
     );

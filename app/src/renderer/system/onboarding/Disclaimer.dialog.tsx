@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { Grid, Text, Flex, Anchor } from 'renderer/components';
+import { Grid, Text, Flex, Anchor, Checkbox } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
@@ -42,7 +42,7 @@ const DisclaimerDialog: FC<BaseDialogProps> = observer(
         </Text>
         <br />
         <Flex flexDirection="row" justifyContent="flex-start">
-          <input type="checkbox" id="disclaimer" onClick={toggleChecked} />
+          <Checkbox id="disclaimer" onClick={toggleChecked} />
           <Text ml={16} fontSize={2}>
             I agree
           </Text>

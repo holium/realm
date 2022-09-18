@@ -75,8 +75,10 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
           mt={40}
           flexDirection="row"
           alignItems="center"
+          justifyContent={'center'}
+          width={'100%'}
         >
-          <Flex flex={1}>
+          <Flex>
             {ship && (
               <Sigil
                 simple
@@ -88,7 +90,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             )}
           </Flex>
           <AppSearchApp />
-          <Flex flex={1} justifyContent="flex-end">
+          <Flex justifyContent="flex-end">
             <IconButton
               size={3}
               customBg={iconHoverColor}

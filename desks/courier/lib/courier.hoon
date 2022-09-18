@@ -13,6 +13,10 @@
 ::
 ++  gs   ::  converts dms from graph-store dm-inbox
   |%
+  ++  invite-preview
+    |=  [=ship our=ship now=@da]
+    =/  rolo           .^(rolodex:sur %gx /(scot %p our)/contact-store/(scot %da now)/all/noun)
+    (form-pending ship now rolo)
   ::
   ::  DM list handlers
   :: 
@@ -157,7 +161,7 @@
           [path.glog to.glog %group %graph-store time.glog [~] mtd-list ~ 0] 
         ::
         =/  posts=(list post:gra)
-        %+  turn  (skim ~(val by posts.glog) skim-maybe-post)
+        %+  turn  (skim ~(val by posts.glog) skim-maybe-post)       ::  skims out deleted posts and turns the posts map
           |=  [node=node:gra]
           ?<  ?=(%| -.post.node)
           =/  p     ^-(post p.post.node)
@@ -278,6 +282,12 @@
       %.n
     %.y
   ::
+  ++  skim-maybe-node  :: used for skimming out deleted dms
+    |=  [idx=atom node=node:gra]
+    ?:  =(%| -.post.node)  :: if it's a post
+      %.n
+    %.y
+  ::
   ::  forms a single dm preview for the list view
   ::
   ++  form-dm-prevs
@@ -289,7 +299,7 @@
     =/  post-graph        ^-((map atom node:gra) message-nodes)
     :: Get all posts
     =/  posts=(list post:gra)
-      %+  turn  ~(tap by post-graph)
+      %+  turn  (skim ~(tap by post-graph) skim-maybe-node)       ::  skims out deleted posts and turns the posts map
         |=  [ship-dec=atom node=node:gra]
         ?<  ?=(%| -.post.node)
         =/  p     ^-(post p.post.node)
@@ -367,7 +377,7 @@
   ++  map-to-dms
     |=  [dm-posts=(map atom node:gra)]
     =/  dms=(list graph-dm:sur)
-    %+  turn  ~(tap by dm-posts)
+    %+  turn  (skim ~(tap by dm-posts) skim-maybe-node)
       |=  [idx=atom node=node:gra]
       (node-to-dm node)
     dms
@@ -461,6 +471,9 @@
       (dm-log:encode chat.vi)
       ::
         %group-dm-created
+      (preview:encode message-preview.vi)
+      ::
+        %invite-dm
       (preview:encode message-preview.vi)
     ==
   ::

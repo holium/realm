@@ -80,6 +80,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
 
     const profileForm = useForm({
       async onSubmit({ values }) {
+        console.log(profileForm.computed.isDirty);
         if (profileForm.computed.isDirty) {
           setLoading(true);
           try {
@@ -89,6 +90,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
               avatar: values.avatar,
             };
             await OnboardingActions.setProfile(profileData);
+            console.log('profile set');
             props.setState &&
               props.setState({ ...props.workflowState, profile: profileData });
             props.onNext && props.onNext();
@@ -135,10 +137,10 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
     useEffect(() => {
       OnboardingActions.getProfile()
         .then((profile: any) => {
-          console.log(profile);
+          // console.log(profile);
           profileForm.fields.nickname.actions.onChange(profile.nickname);
           profileForm.fields.color.actions.onChange(profile.color);
-          profileForm.fields.avatar.actions.onChange(profile.avatar);
+          profileForm.fields.avatar.actions.onChange(profile.avatar || '');
           setProfileLoading(false);
         })
         .catch((err) => {
@@ -210,7 +212,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                   avatar={
                     avatar.state.value && !avatar.computed.error
                       ? avatar.state.value
-                      : null
+                      : ''
                   }
                   patp={shipName}
                   borderRadiusOverride="6px"
@@ -321,8 +323,11 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                             size={24}
                           />
                         }
-                        value={avatar.state.value}
-                        error={avatar.computed.ifWasEverBlurredThenError}
+                        value={avatar.state.value || ''}
+                        error={
+                          avatar.computed.isDirty &&
+                          avatar.computed.ifWasEverBlurredThenError
+                          }
                         onChange={(e: any) =>
                           avatar.actions.onChange(e.target.value)
                         }
@@ -337,8 +342,11 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                       tabIndex={1}
                       name="nickname"
                       placeholder="optional"
-                      defaultValue={nickname.state.value}
-                      error={nickname.computed.ifWasEverBlurredThenError}
+                      value={nickname.state.value || ''}
+                      error={
+                        nickname.computed.isDirty &&
+                        nickname.computed.ifWasEverBlurredThenError
+                        }
                       onChange={(e: any) =>
                         nickname.actions.onChange(e.target.value)
                       }

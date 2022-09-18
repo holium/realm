@@ -94,6 +94,7 @@ export const NotificationStore = types
           });
         });
       });
+      allTimeboxes = Array.from<NotificationModelType>(new Set(allTimeboxes));
       self.recent = cast(allTimeboxes);
     },
     setAllStats(data: any) {
@@ -111,6 +112,7 @@ export const NotificationStore = types
       if (data['more'].length === 1) {
         // then it is [{'opened'}]
         if (data['more'][0]['opened']) {
+          self.seen.concat(self.unseen);
           self.unseen.clear();
         }
         if (data['more'][0]['added']) {
@@ -212,9 +214,17 @@ export const NotificationStore = types
               stats: statsData.stats,
             })
           );
+
+          unseenTimeboxes = Array.from<NotificationModelType>(
+            new Set(unseenTimeboxes)
+          );
+
           self.unseen = cast(unseenTimeboxes);
           self.unseen = self.unseen.sort((a, b) => b.time - a.time);
 
+          seenTimeboxes = Array.from<NotificationModelType>(
+            new Set(seenTimeboxes)
+          );
           self.seen = cast(
             seenTimeboxes.sort(
               (notifA: any, notifB: any) => notifB.time - notifA.time

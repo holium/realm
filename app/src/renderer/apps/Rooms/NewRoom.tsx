@@ -41,10 +41,13 @@ export const createRoomForm = (
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (name.length > 1 && name.length < 20 && /^[a-zA-Z0-9- ]*$/.test(name)) {
+      if (
+        name.length > 1 &&
+        name.length < 20 &&
+        /^[a-zA-Z0-9- ]*$/.test(name)
+      ) {
         return { error: undefined, parsed: name };
       }
-      
 
       return { error: 'Invalid Name', parsed: undefined };
     },
@@ -132,6 +135,8 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         </Flex>
         <Flex ml={1} pl={2} pr={2}></Flex>
       </Titlebar>
+
+      {!roomsApp.liveRoom ? (
       <Flex style={{ marginTop: 58 }} flex={1} flexDirection="column">
         <Flex
           flexDirection="row"
@@ -152,7 +157,9 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               backgroundColor: inputColor,
             }}
             value={name.state.value}
-            error={!name.computed.isDirty || name.computed.error}
+            error={
+              name.computed.isDirty && name.computed.ifWasEverBlurredThenError
+            }
             onChange={(e: any) => {
               name.actions.onChange(e.target.value);
             }}
@@ -201,6 +208,14 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           />
         </Flex>
       </Flex>
+      ) : (
+        <Flex flexDirection={'column'}
+          onClick={() => console.log("ASDA", roomsApp.liveRoom)}
+        >
+        <Text mt={100} opacity={0.7}>you have to exit your room before you can create a new one</Text>
+        </Flex>
+
+      )}
     </Grid.Column>
   );
 });

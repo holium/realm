@@ -60,6 +60,7 @@ export type SubscribeCallbacks = {
   onQuit?: (id: number) => void;
   onEvent?: (data: any, id?: number, mark?: string) => void;
   onError?: (id: number, e: any) => void;
+  onSubscribed?: (subscription: number) => void;
 };
 
 export type AckParams = {

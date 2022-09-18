@@ -4,7 +4,7 @@
  * A room is a list of participants,
  * participants can stream various track types to the rooms participants.
  */
-import { EventEmitter } from 'events';
+import { EventEmitter, setMaxListeners } from 'events';
 import type TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
 import { LocalParticipant } from '../participant/LocalParticipant';
@@ -27,6 +27,7 @@ const peerConnectionConfig = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
 };
 
+// setMaxListeners(24);
 export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallbacks>) {
   state: RoomState = RoomState.Disconnected;
   our!: LocalParticipant;
@@ -82,7 +83,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   leave() {
-    // console.log("leaving room 99999999999")
+    console.log("in LiveRoom.leave()")
     this.state = RoomState.Disconnected;
 
     this.participants.forEach((peer: RemoteParticipant) => {
@@ -90,7 +91,9 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
       this.kickParticipant(peer.patp);
     });
 
-    if(this.our) this.our.disconnect();
+    this.participants.clear();
+
+    if (this.our) this.our.disconnect();
 
     this.removeAllListeners();
   }
@@ -125,10 +128,12 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     if (exitDiff.exit) {
       if (exitDiff.exit === this.our.patp) {
         // console.log('we should leave the room and unsub', exitDiff);
-        this.disconnect();
+        // we've been kicked from the room
+        this.leave();
       }
-      // console.log('remove participant', exitDiff.exit);
-      this.kickParticipant(exitDiff.exit);
+      else {
+        this.kickParticipant(exitDiff.exit);
+      }
     }
   }
 
@@ -145,7 +150,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     // Call or listen
     peer.emit(ParticipantEvent.Connecting);
     const isLower = this.our.patpId < peer.patpId;
-    // console.log('isLower', isLower);
+    console.log('connectParticipant - isLower', isLower);
     peer.registerAudio();
     this.our.streamTracks(peer);
     if (isLower) {
@@ -157,6 +162,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
   async kickParticipant(peer: Patp) {
     if (peer === this.our.patp) {
+      // hmm i feel like this shouldnt ever happen
       this.leave();
       return;
     }
@@ -164,7 +170,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     await this.participants.get(peer)?.cleanup();
     this.participants.delete(peer);
 
-    // console.log('after kicked', this.participants);
   }
 
   registerListeners(peer: RemoteParticipant) {
@@ -190,20 +195,20 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
         // this.connectParticipant(peer);
       }
     });
-    peer.on(ParticipantEvent.Connecting, () => {
-      console.log('show connecting state');
-    });
-    peer.on(ParticipantEvent.AudioStreamAdded, (remoteStream: MediaStream) => {
-      console.log('audiostream', remoteStream);
-    });
+    // peer.on(ParticipantEvent.Connecting, () => {
+    //   console.log('show connecting state');
+    // });
+    // peer.on(ParticipantEvent.AudioStreamAdded, (remoteStream: MediaStream) => {
+    //   console.log('audiostream', remoteStream);
+    // });
 
     // ----
-    peer.on(ParticipantEvent.AudioStreamAdded, (event: any) => {
-      console.log(ParticipantEvent.AudioStreamAdded);
-    });
-    peer.on(ParticipantEvent.AudioStreamRemoved, (event: any) => {
-      console.log(ParticipantEvent.AudioStreamRemoved);
-    });
+    // peer.on(ParticipantEvent.AudioStreamAdded, (event: any) => {
+    //   console.log(ParticipantEvent.AudioStreamAdded);
+    // });
+    // peer.on(ParticipantEvent.AudioStreamRemoved, (event: any) => {
+    //   console.log(ParticipantEvent.AudioStreamRemoved);
+    // });
     // peer.on(ParticipantEvent.CursorUpdate, (event: any) => {
     //   console.log(ParticipantEvent.CursorUpdate);
     // });
@@ -213,12 +218,12 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     // peer.on(ParticipantEvent.StateUpdate, (event: any) => {
     //   console.log(ParticipantEvent.StateUpdate);
     // });
-    peer.on(ParticipantEvent.TrackMuted, (event: any) => {
-      console.log(ParticipantEvent.TrackMuted);
-    });
-    peer.on(ParticipantEvent.TrackUnmuted, (event: any) => {
-      console.log(ParticipantEvent.TrackUnmuted);
-    });
+    // peer.on(ParticipantEvent.TrackMuted, (event: any) => {
+    //   console.log(ParticipantEvent.TrackMuted);
+    // });
+    // peer.on(ParticipantEvent.TrackUnmuted, (event: any) => {
+    //   console.log(ParticipantEvent.TrackUnmuted);
+    // });
   }
 
   removePeerAudio(patp: Patp) {

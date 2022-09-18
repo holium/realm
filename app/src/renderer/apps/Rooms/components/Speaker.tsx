@@ -57,7 +57,8 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
     },
   ];
 
-  if (type !== 'host') {
+  // only the creator can kick people
+  if (ship!.patp === roomsApp!.liveRoom!.creator) {
     contextMenuItems.push({
       // @ts-ignore
       style: { color: '#FD4E4E' },
@@ -65,10 +66,11 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       label: 'Kick',
       loading: false,
       onClick: (evt: any) => {
-        if(!roomsApp.liveRoom) return;
-        console.log("kicking user?")
+        if (!roomsApp.liveRoom) return;
+        console.log('kicking user?');
         RoomsActions.kickUser(roomsApp.liveRoom.id, person);
         LiveRoom.kickParticipant(person);
+        evt.stopPropagation();
       },
     });
   }

@@ -121,8 +121,8 @@ export class ShellService extends BaseService {
     this.state?.closeDialog();
   }
 
-  setBlur(_event: any, blurred: boolean, checkDouble: boolean) {
-    this.state?.setIsBlurred(blurred, checkDouble);
+  setBlur(_event: any, blurred: boolean) {
+    this.state?.setIsBlurred(blurred);
   }
 
   setDesktopDimensions(_event: any, width: number, height: number) {

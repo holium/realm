@@ -91,6 +91,7 @@
       :: [%decline-dm =ship]
       :: [%pendings ships=(set ship)]
       :: [%screen screen=?]
+      :: 
       [%send-dm =ship =post]
       [%read-dm =ship]
       [%create-group-dm ships=(set ship)]
@@ -102,7 +103,8 @@
   $%  
       [%previews =chat-previews]              ::  loads a list of all dms
       [%dm-received =chat]                    ::  a newly received dm-message
-      [%group-dm-created =message-preview]  ::  a newly created group dm
+      [%group-dm-created =message-preview]    ::  a newly created group dm
+      [%invite-dm =message-preview]           ::  a pending request for dm 
   ==
 ::
 ::  Scry views

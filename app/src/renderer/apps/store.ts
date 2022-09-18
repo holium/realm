@@ -148,48 +148,71 @@ RoomsActions.onRoomUpdate(
   (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
     console.log('room diff in renderer', diff);
     LiveRoom.onDiff(diff, room);
+    // @ts-ignore
+    if (diff.exit) {
+      SoundActions.playRoomLeave();
+    }
+    // @ts-ignore
+    if (diff.enter) {
+      SoundActions.playRoomEnter();
+    }
   }
 );
 
 // Watch actions for sound trigger
-onAction(trayStore, (call) => {
-  if (call.path === '/roomsApp') {
-    if (call.name === '@APPLY_SNAPSHOT') return;
-    const patchArg = call.args![0][0];
-    if (patchArg.path === '/liveRoom') {
-      if (patchArg.op === 'replace') {
-        patchArg.value
-          ? SoundActions.playRoomEnter()
-          : SoundActions.playRoomLeave();
-        if (patchArg.value) {
-          // Entering or switching room
-          const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
-          console.log('entering and switching to connect');
+// onAction(trayStore, (call) => {
+//   if (call.path === '/roomsApp') {
+//     if (call.name === '@APPLY_SNAPSHOT') return;
+//     const patchArg = call.args![0][0];
+//     if (patchArg.path === '/liveRoom') {
+//       if (patchArg.op === 'replace') {
+//         patchArg.value
+//           ? SoundActions.playRoomEnter()
+//           : SoundActions.playRoomLeave();
+//         if (patchArg.value) {
+//           // Entering or switching room
+//           // const room = trayStore.roomsApp.knownRooms.get(patchArg.value);
+//           // console.log('entering and switching to connect');
+//           // if (room) {
+//           //   if (LiveRoom.state === RoomState.Disconnected) {
+//           //     // not init yet, so leave
+//           //     // this case is hit if we boot realm and are still in a room from a previous session.
+//           //     RoomsActions.leaveRoom(room.id);
+//           //     return;
+//           //   }
+//           //   // LiveRoom.connect(room);
+//           // }
+//         }
+//       }
+//     }
+//   }
+// });
 
-          if (room) {
-            if (LiveRoom.state === RoomState.Disconnected) {
-              // not init yet, so leave
-              // this case is hit if we boot realm and are still in a room from a previous session.
-              RoomsActions.leaveRoom(room.id);
-              return;
-            }
-            // LiveRoom.connect(room);
-          }
-        }
-      }
-    }
+OSActions.onBoot((_event: any, response: any) => {
+  if (response.loggedIn) {
+    // RoomsActions.resetLocal();
+    // RoomsActions.exitRoom();
+    // LiveRoom.leave();
+    LiveRoom.init(response.ship.patp!);
   }
 });
 
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
-  RoomsActions.resetLocal();
-  RoomsActions.exitRoom();
-  LiveRoom.leave();
-  LiveRoom.init(response.ship.patp!);
+  console.log('on connected');
+  if (LiveRoom.state === 'disconnected') {
+    console.log('LiveRoom.init in OSActions.onConnected ');
+    LiveRoom.init(response.ship.patp!);
+  }
   if (response.rooms) {
+    // LiveRoom.init(response.ship.patp!);
+    console.log('OSActions.onConnected', response.rooms);
     applySnapshot(trayStore.roomsApp, response.rooms);
     if (trayStore.roomsApp.liveRoom) {
+      console.log(
+        '210: if (trayStore.roomsApp.liveRoom) {',
+        trayStore.roomsApp.liveRoom
+      );
       const { liveRoom } = trayStore.roomsApp;
       if (liveRoom) {
         LiveRoom.connect(liveRoom);
@@ -198,12 +221,28 @@ OSActions.onConnected((_event: any, response: any) => {
   }
 });
 
+// OSActions.onLogout((_event: any) => {
+
+// })
+
+// OSActions.onEffect((_event: any, value: any) => {
+//   if (value.response === 'initial') {
+//     if (value.resource === 'ship') {
+// RoomsActions.resetLocal();
+// RoomsActions.exitRoom();
+// LiveRoom.leave();
+//       LiveRoom.init(value.model.patp!);
+//     }
+//   }
+// });
+
 // Listen for all patches
 OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
-    } else if (value.resource === 'wallet') {
+    }
+    if (value.resource === 'wallet') {
       applyPatch(trayStore.walletApp, value.patch);
     }
   }

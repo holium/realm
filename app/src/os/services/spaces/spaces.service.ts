@@ -19,19 +19,19 @@ import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
 import { PassportsApi } from '../../api/passports';
 import { BazaarApi } from '../../api/bazaar';
-// import { InvitationsModel } from './models/invitations';
+import { VisaModel, VisaModelType } from './models/visas';
 import { loadMembersFromDisk } from './passports';
 import { loadBazaarFromDisk } from './bazaar';
 import { RoomsApi } from '../../api/rooms';
 
 const getHost = (path: string) => path.split('/')[1];
-import { DocketStoreType, DocketStore } from '../ship/models/docket';
 import { BazaarStore } from './models/bazaar';
+import { MembershipStore } from './models/members';
 
 type SpaceModels = {
-  bazaar?: any;
-  membership?: any;
-  invitations?: any;
+  bazaar: any;
+  membership: any;
+  visas: VisaModelType;
   // friends: FriendsType;
 };
 /**
@@ -41,10 +41,11 @@ export class SpacesService extends BaseService {
   private db?: Store<SpacesStoreType>; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
-    // invitations: InvitationsModel.create({
-    //   outgoing: {},
-    //   incoming: {},
-    // }),
+    membership: MembershipStore.create({}),
+    visas: VisaModel.create({
+      incoming: {},
+      outgoing: {},
+    }),
     bazaar: BazaarStore.create({}),
   };
 
@@ -53,7 +54,10 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.accept-invite': this.acceptInvite,
+    'realm.spaces.decline-invite': this.declineInvite,
     'realm.spaces.get-members': this.getMembers,
+    'realm.spaces.get-invitations': this.getInvitations,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
     'realm.spaces.bazaar.get-apps': this.getApps,
@@ -71,6 +75,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.suite-add': this.addToSuite,
     'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
     'realm.spaces.bazaar.install-app': this.installApp,
+    'realm.spaces.bazaar.install-docket': this.installDocket,
     'realm.spaces.bazaar.add-ally': this.addAlly,
   };
 
@@ -122,6 +127,15 @@ export class SpacesService extends BaseService {
     deleteSpace: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.delete-space', path);
     },
+    getInvitations: () => {
+      return ipcRenderer.invoke('realm.spaces.get-invitations');
+    },
+    acceptInvite: async (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.accept-invite', path);
+    },
+    declineInvite: async (path: any) => {
+      return ipcRenderer.invoke('realm.spaces.decline-invite', path);
+    },
     getMembers: (path: any) => {
       return ipcRenderer.invoke('realm.spaces.get-members', path);
     },
@@ -152,8 +166,10 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
     removeFromSuite: async (path: SpacePath, appId: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
-    installApp: async (app: any) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.install-app', app),
+    installDocket: async (ship: string, desk: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.install-docket', ship, desk),
+    installApp: async (desk: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.install-app', desk),
     addAlly: async (ship: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
   };
@@ -171,12 +187,12 @@ export class SpacesService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  get bazaarSnapshot() {
-    return this.models.bazaar ? getSnapshot(this.models.bazaar) : null;
-  }
-
-  get membershipSnapshot() {
-    return this.models.membership ? getSnapshot(this.models.membership) : null;
+  get modelSnapshots() {
+    return {
+      membership: getSnapshot(this.models.membership),
+      bazaar: getSnapshot(this.models.bazaar),
+      visas: getSnapshot(this.models.visas),
+    };
   }
 
   async load(patp: string, docket: any) {
@@ -191,6 +207,19 @@ export class SpacesService extends BaseService {
     // Load sub-models
     this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
     this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
+    // Set up patch for visas
+    onPatch(this.models.visas, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'visas',
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
+
+    PassportsApi.getVisas(this.core.conduit!).then((visas: any) => {
+      this.models.visas.initialIncoming(visas);
+    });
     // Temporary setup
     // this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
@@ -237,16 +266,22 @@ export class SpacesService extends BaseService {
       this.models.membership,
       this.models.bazaar
     );
-    PassportsApi.watchMembers(this.core.conduit!, this.models.membership);
+    PassportsApi.watchMembers(
+      this.core.conduit!,
+      this.models.membership,
+      this.state,
+      this.models.visas!
+    );
     // Subscribe to sync updates
-    BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
-    BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
+    // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
+    // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
     //
     // setting provider to current space host
     this.core.services.ship.rooms!.setProvider(
       null,
       getHost(this.state.selected!.path)
     );
+    BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
   }
 
   // ***********************************************************
@@ -329,6 +364,19 @@ export class SpacesService extends BaseService {
     return await PassportsApi.kickMember(this.core.conduit!, path, patp);
   }
 
+  async getInvitations(_event: IpcMainInvokeEvent) {
+    return await PassportsApi.getVisas(this.core.conduit!);
+  }
+
+  async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
+    return await PassportsApi.acceptInvite(this.core.conduit!, path);
+  }
+
+  async declineInvite(_event: IpcMainInvokeEvent, path: string) {
+    await PassportsApi.declineInvite(this.core.conduit!, path);
+    this.models.visas?.removeIncoming(path);
+    return;
+  }
   // // ***********************************************************
   // // *********************** FRIENDS ***************************
   // // ***********************************************************
@@ -355,9 +403,6 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   // ************************ BAZAAR ***************************
   // ***********************************************************
-  async installDocket(_event: any, ship: string, desk: string) {
-    return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
-  }
 
   async getApps(_event: IpcMainInvokeEvent, path: SpacePath, tag: string) {
     return await BazaarApi.getApps(this.core.conduit!, path, tag);
@@ -449,12 +494,12 @@ export class SpacesService extends BaseService {
     );
   }
 
-  async installApp(_event: IpcMainInvokeEvent, app: any) {
-    return await BazaarApi.installDocket(
-      this.core.conduit!,
-      app.ship,
-      app.desk
-    );
+  async installDocket(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+    return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
+  }
+
+  async installApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await BazaarApi.installApp(this.core.conduit!, desk);
   }
 
   async addAlly(_event: IpcMainInvokeEvent, ship: any) {

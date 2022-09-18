@@ -10,6 +10,7 @@ import {
 import bcrypt from 'bcryptjs';
 import Realm from '../..';
 import { BaseService } from '../base.service';
+import { allyShip, docketInstall } from '@urbit/api';
 import {
   OnboardingStore,
   OnboardingStoreType,
@@ -20,6 +21,7 @@ import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
+import { resolve } from 'path';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
@@ -30,6 +32,9 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setStep': this.setStep,
     'realm.onboarding.setSeenSplash': this.setSeenSplash,
     'realm.onboarding.agreedToDisclaimer': this.agreedToDisclaimer,
+    'realm.onboarding.setEmail': this.setEmail,
+    'realm.onboarding.verifyEmail': this.verifyEmail,
+    'realm.onboarding.resendEmailConfirmation': this.resendEmailVerification,
     'realm.onboarding.selfHosted': this.setSelfHosted,
     'realm.onboarding.getAvailablePlanets': this.getAvailablePlanets,
     'realm.onboarding.prepareCheckout': this.prepareCheckout,
@@ -56,6 +61,22 @@ export class OnboardingService extends BaseService {
     agreedToDisclaimer() {
       return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
     },
+
+    setEmail(email: string) {
+      return ipcRenderer.invoke('realm.onboarding.setEmail', email);
+    },
+
+    verifyEmail(verificationCode: string) {
+      return ipcRenderer.invoke(
+        'realm.onboarding.verifyEmail',
+        verificationCode
+      );
+    },
+
+    resendEmailConfirmation() {
+      return ipcRenderer.invoke('realm.onboarding.resendEmailConfirmation');
+    },
+
     setSeenSplash() {
       return ipcRenderer.invoke('realm.onboarding.setSeenSplash');
     },
@@ -185,10 +206,11 @@ export class OnboardingService extends BaseService {
    * @param substring
    */
   async tempConduit(url: string, patp: string, cookie: string) {
-    await this.closeConduit();
+    if (this.conduit !== undefined) {
+      await this.closeConduit();
+    }
     this.conduit = new Conduit();
     await this.conduit.init(url, patp.substring(1), cookie!);
-
     return this.conduit;
   }
 
@@ -205,6 +227,38 @@ export class OnboardingService extends BaseService {
     this.state.setAgreedToDisclaimer();
   }
 
+  async setEmail(_event: any, email: string) {
+    const { auth } = this.core.services.identity;
+
+    let account = await this.core.holiumClient.createAccount(email);
+    this.state.setEmail(email);
+    this.state.setVerificationCode(account.verificationCode);
+
+    auth.setAccountId(account.id);
+  }
+
+  async resendEmailVerification(_event: any) {
+    const { auth } = this.core.services.identity;
+    if (!auth.accountId)
+      throw new Error('Accout must be set before resending verification code.');
+
+    let newVerificationCode =
+      await this.core.holiumClient.resendVerificationCode(auth.accountId);
+    this.state.setVerificationCode(newVerificationCode);
+
+    return newVerificationCode;
+  }
+
+  verifyEmail(_event: any, verificationCode: string): boolean {
+    if (!this.state.verificationCode)
+      throw new Error('Verification code must be set before verifying.');
+
+    let verified = this.state.verificationCode === verificationCode;
+    if (verified) this.state.setVerificationCode(null);
+
+    return verified;
+  }
+
   setSeenSplash(_event: any) {
     this.state.setSeenSplash();
   }
@@ -214,11 +268,8 @@ export class OnboardingService extends BaseService {
 
   async getAvailablePlanets() {
     const { auth } = this.core.services.identity;
-    if (!auth.accountId) {
-      let account = await this.core.holiumClient.createAccount();
-      auth.setAccountId(account.id);
-      return account.planets;
-    }
+    if (!auth.accountId)
+      throw new Error('Accout must be set before getting available planets.');
 
     let planets = await this.core.holiumClient.getPlanets(
       auth.accountId,
@@ -360,10 +411,164 @@ export class OnboardingService extends BaseService {
     this.state.setEncryptedPassword(encryptedPassword);
   }
 
+  async installApp(tempConduit: Conduit, ship: string, desk: string) {
+    return new Promise(async (resolve, reject) => {
+      let subscriptionId: number = -1;
+      await tempConduit.watch({
+        app: 'docket',
+        path: '/charges',
+        onSubscribed: (subscription: number) => {
+          subscriptionId = subscription;
+        },
+        onEvent: async (data: any, _id?: number, mark?: string) => {
+          if (data.hasOwnProperty('add-charge')) {
+            const charge = data['add-charge'].charge;
+            // according to Tlon source, this determines when the app is fully installed
+            if ('glob' in charge.chad || 'site' in charge.chad) {
+              await tempConduit.unsubscribe(subscriptionId);
+              resolve(data);
+            }
+          }
+        },
+        onError: () => {
+          console.log('subscription [docket/charges] rejected');
+          reject('subscription [docket/charges] rejected');
+        },
+        onQuit: () => {
+          console.log('kicked from subscription [docket/charges]');
+          reject('kicked from subscription [docket/charges]');
+        },
+      });
+      await tempConduit.poke(docketInstall(ship, desk));
+    });
+  }
+
+  async addAlly(tempConduit: Conduit, ship: string) {
+    return new Promise(async (resolve, reject) => {
+      let subscriptionId: number = -1;
+      await tempConduit.watch({
+        app: 'treaty',
+        path: '/treaties',
+        onSubscribed: (subscription: number) => {
+          subscriptionId = subscription;
+        },
+        onEvent: async (data: any, _id?: number, mark?: string) => {
+          if (data.hasOwnProperty('add')) {
+            await tempConduit.unsubscribe(subscriptionId);
+            resolve(data);
+          }
+        },
+        onError: () => {
+          console.log('subscription [treaty/treaties] rejected');
+          reject('subscription [treaty/treaties] rejected');
+        },
+        onQuit: () => {
+          console.log('kicked from subscription [treaty/treaties]');
+          reject('kicked from subscription [treaty/treaties]');
+        },
+      });
+      await tempConduit.poke(allyShip(ship));
+    });
+  }
+
+  async isAppInstalled(tempConduit: Conduit, ship: string, desk: string) {
+    const response = await tempConduit.scry({
+      app: 'docket',
+      path: '/charges', // the spaces scry is at the root of the path
+    });
+    return Object.keys(response.initial).includes(desk);
+  }
+
+  async isAlly(tempConduit: Conduit, ship: string) {
+    const response = await tempConduit.scry({
+      app: 'treaty',
+      path: '/allies', // the spaces scry is at the root of the path
+    });
+    return Object.keys(response.ini).includes(ship);
+  }
+
+  async hasTreaty(tempConduit: Conduit, ship: string, desk: string) {
+    try {
+      const response = await tempConduit.scry({
+        app: 'treaty',
+        path: `/treaty/${ship}/${desk}`, // the spaces scry is at the root of the path
+      });
+      // assume undefined response means no treaty found. not sure how reliable
+      //  this is, but scry method doesn't return error codes (e.g. 404)
+      console.log('hasTreaty: testing treaty => %o', {
+        ship,
+        desk,
+        response,
+      });
+      return response !== undefined;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async installRealm(_event: any, ship: string) {
     // TODO kiln-install realm desk
-    console.log('placeholder: installing realm on ', ship);
-    this.state.installRealm();
+    if (!process.env.INSTALL_MOON) {
+      console.error(
+        'error: [installRealm] - INSTALL_MOON not found in environment variables. please configure.'
+      );
+      return;
+    }
+    if (process.env.INSTALL_MOON === 'bypass') {
+      console.error(
+        "error: [installRealm] - INSTALL_MOON set to 'bypass'. skipping realm installation..."
+      );
+      this.state.installRealm();
+      return;
+    }
+    // const desks: string[] = ['realm', 'courier'];
+    const desks: string[] = ['realm', 'courier'];
+    console.log('installing realm from %o...', process.env.INSTALL_MOON);
+    const { url, patp, cookie } = this.state.ship!;
+    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    this.state.beginRealmInstall();
+    for (let idx = 0; idx < desks.length; idx++) {
+      await this.installDesk(
+        tempConduit,
+        process.env.INSTALL_MOON!,
+        desks[idx]
+      );
+    }
+    await this.closeConduit();
+    this.state.endRealmInstall();
+    console.log('realm installation complete.');
+  }
+
+  async installDesk(tempConduit: Conduit, ship: string, desk: string) {
+    return new Promise(async (resolve, reject) => {
+      if (!(await this.isAlly(tempConduit, ship))) {
+        console.log('forming alliance with %o...', ship);
+        await this.addAlly(tempConduit, ship)
+          .then((result) => {
+            console.log('installing %o...', desk);
+            this.installApp(tempConduit, ship, desk)
+              .then((result) => {
+                console.log('app install complete');
+                resolve(result);
+              })
+              .catch((e) => reject(e));
+          })
+          .catch((e) => reject(e));
+      } else {
+        console.log('checking if %o installed...', ship);
+        if (!(await this.isAppInstalled(tempConduit, ship, desk))) {
+          console.log('installing %o...', desk);
+          await this.installApp(tempConduit, ship, desk)
+            .then((result) => {
+              console.log('app install complete');
+              resolve(result);
+            })
+            .catch((e) => reject(e));
+        }
+        // nothing to do, Realm already installed
+        resolve('done');
+      }
+    });
   }
 
   async completeOnboarding(_event: any) {

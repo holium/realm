@@ -138,7 +138,7 @@ export class AuthService extends BaseService {
     this.state.login(shipId);
 
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
-    this.core.services.shell.setBlur(null, false);
+    this.core.services.shell.setBlur(null, false, false);
 
     // TODO decrypt stored snapshot
     const { url, cookie } = this.getCredentials(ship, password);
@@ -152,6 +152,8 @@ export class AuthService extends BaseService {
   }
 
   async logout(_event: any, ship: string) {
+    await this.core.services.ship.rooms.resetLocal(null);
+    await this.core.services.ship.rooms.exitRoom(null);
     await this.core.clearSession();
     this.core.passwords.clearPassword(ship);
     this.core.services.ship.logout();

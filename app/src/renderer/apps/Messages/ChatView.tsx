@@ -203,7 +203,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         isGroup={selectedChat.type === 'group'}
       />
     ),
-    [messages]
+    [messages, selectedChat.to]
   );
 
   const inputHeight = 60;
