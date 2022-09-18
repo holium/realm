@@ -4,7 +4,7 @@
 ::
 /-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store, 
     hark=hark-store, dm-hook-sur=dm-hook, push-notify
-/+  dbug, default-agent, lib=courier, hook=dm-hook
+/+  dbug, default-agent, lib=courier, hook=dm-hook, push-lib=push-notify
 |%
 +$  card  card:agent:gall
 
@@ -12,12 +12,12 @@
   $:  %0
       =app-id:push-notify         :: constant
       =rest-api-key:push-notify   :: constant
-      =user-auth-key:push-notify  :: user added
+      =uuid:push-notify           :: (sham @p)
+      push-enabled=?
   ==
 --
 =|  state-0
 =*  state  -
-:: =/  tid         (scot %ta 'group-dm_0v6.cqlt2.4o96j.6fq0u.dv85g.v3tco')
 :: ^-  agent:gall
 =<
   %-  agent:dbug
@@ -28,9 +28,10 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    ~&  >  'on courier init'
     =.  app-id.state            '82328a88-f49e-4f05-bc2b-06f61d5a733e'
-    =.  rest-api-key.state      'Basic YOUR_REST_API_KEY'
+    =.  rest-api-key.state      'Basic MDZiNDZmN2EtYTBhMy00OWJlLTlkZWItOWIyNDY5MTQzMmFl'
+    =.  uuid.state              (sham our.bowl)
+    =.  push-enabled.state       %.y
     :_  this
     ::  %watch: all incoming dms and convert to our simple structure
     :~  
@@ -86,6 +87,10 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
+    ::  ~/scry/courier/dms.json
+      [%x %push-uuid ~]
+        ?>  =(our.bowl src.bowl)
+        ``notify-view+!>([%uuid uuid.state])
     ::  ~/scry/courier/dms.json
       [%x %dms ~]
         ?>  =(our.bowl src.bowl)
@@ -300,9 +305,7 @@
         =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
         =/  ship-dec      (snag 0 p.dm-node)
         =/  new-dm        (received-dm:gs:lib ship-dec q.dm-node our now)
-        =/  push-notif    ~
-        :_  state
-        [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+        (send-updates new-dm)
       ::
       ?:  (group-skim-gu:gs:lib resource.+.q.upd)  ::  is group dm
         =/  dm            ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
@@ -310,9 +313,7 @@
         =/  entity        entity.resource.+.q.upd
         =/  name          name.resource.+.q.upd
         =/  new-dm        (received-grp-dm:gs:lib our now entity name q.dm-node)
-        =/  push-notif    ~
-        :_  state
-        [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+        (send-updates new-dm)
       :: else 
       `state
     %add-graph
@@ -337,6 +338,19 @@
       :: ]
       `state
   ==
+  ++  send-updates
+    |=  [new-dm=chat:store]
+    ?:  =(%.n push-enabled.state)
+      :_  state
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+    ::
+    =/  notify   (generate-push-notification:push-lib app-id.state new-dm)
+    ~&  >>  notify
+    :_  state
+    :~ 
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
+      ::  Send to onesignal
+    ==
   --
 ::
 ++  on-hook-action
@@ -359,24 +373,19 @@
     :_  state
     [%give %fact [/updates ~] graph-dm-reaction+!>([%invite-dm invite-preview])]~
   --
-
+::
 ++  on-notify-action
   |=  [act=action:push-notify]
   ^-  (quip card _state)
   |^
   ?-  -.act      
-    %enable-push            (enable-push +.act)
-    %disable-push           (disable-push +.act) 
+    %enable-push           
+      =.  push-enabled.state   %.y
+      `state
+    %disable-push           
+      =.  push-enabled.state   %.n
+      `state  
   ==
-  ++  enable-push
-    |=  [user-auth-key=cord]
-    =.  user-auth-key.state   (some user-auth-key)
-    `state
-  ::
-  ++  disable-push
-    |=  [user-auth-key=cord]
-    =.  user-auth-key.state   ~
-    `state
   --
 
 --
