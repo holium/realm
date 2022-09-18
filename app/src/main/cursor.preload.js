@@ -3,7 +3,10 @@ const path = require('path-browserify');
 const React = require('react');
 // @ts-ignore
 const ReactDOM = require('react-dom/client');
-const { Presences, Mouse } = require(path.join(__dirname, './cursor.js'));
+const { Presences, Mouse } = require(path.join(
+  __dirname,
+  '../../.holium/dll/cursor.js'
+));
 
 // Load current ship into preload context and webview contents context
 ipcRenderer.on('load-ship', (e, shipString) => {

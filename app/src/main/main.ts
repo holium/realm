@@ -27,9 +27,9 @@ import BrowserHelper from './helpers/browser';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
 
-// ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-//   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
-// });
+ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+  blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
+});
 
 export default class AppUpdater {
   constructor() {
