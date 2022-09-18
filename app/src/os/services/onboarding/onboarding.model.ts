@@ -4,6 +4,8 @@ import { AccessCode, HostingPlanet } from 'os/api/holium';
 
 export enum OnboardingStep {
   DISCLAIMER = 'onboarding:disclaimer',
+  ACCESS_GATE = 'onboarding:gated-access',
+  ACCESS_GATE_PASSED = 'onboarding:access-gate-passed',
   EMAIL = 'onboarding:email',
   HAVE_URBIT_ID = 'onboarding:have-urbit-id',
   ADD_SHIP = 'onboarding:add-ship',
@@ -69,6 +71,7 @@ export const OnboardingStore = types
     ship: types.maybe(OnboardingShipModel),
     installer: types.optional(LoaderModel, { state: 'initial' }),
     checkoutComplete: false,
+    inviteCode: types.maybe(types.string),
     accessCode: types.maybe(AccessCodeModel),
     encryptedPassword: types.maybe(types.string),
   })
@@ -82,6 +85,10 @@ export const OnboardingStore = types
 
     setAgreedToDisclaimer() {
       self.agreedToDisclaimer = true;
+    },
+
+    setInviteCode(code: string) {
+      self.inviteCode = code;
     },
 
     setEmail(email: string) {
