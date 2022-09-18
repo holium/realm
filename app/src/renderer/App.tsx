@@ -4,7 +4,7 @@ import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { FC, useContext, useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
-import { theme } from './theme';
+import { theme as baseTheme } from './theme';
 import {
   CoreProvider,
   useCore,
@@ -17,19 +17,32 @@ import {
 import { Mouse } from './system/desktop/components/Mouse';
 
 import { ShellActions } from './logic/actions/shell';
+import { Spinner } from './components';
 // import * as RealmMultiplayer from '@holium/realm-multiplayer';
 // import { Presences } from './system/desktop/components/Multiplayer/Presences';
 // import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
 export const App: FC = observer(() => {
   const { booted, resuming } = useCore();
-  const { desktop, shell } = useServices();
+  const { desktop, shell, theme } = useServices();
   // const styleRef = useRef(null);
 
-  const themeMode = desktop.theme.mode;
+  const themeMode = theme.currentTheme.mode;
 
   const shellMemo = useMemo(
-    () => (booted ? <Shell /> : <div>Booting...</div>),
+    () =>
+      booted ? (
+        <Shell />
+      ) : (
+        <div
+          style={{
+            height: '100vh',
+            background: theme.currentTheme.backgroundColor,
+          }}
+        >
+          {/* <Spinner size={4} /> */}
+        </div>
+      ),
     [booted, resuming]
   );
 
@@ -52,7 +65,7 @@ export const App: FC = observer(() => {
 
   return (
     <CoreProvider value={coreStore}>
-      <ThemeProvider theme={theme[themeMode as 'light' | 'dark']}>
+      <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>
         <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
           <GlobalStyle blur={true} />
           {/* Modal provider */}

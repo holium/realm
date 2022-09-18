@@ -32,8 +32,8 @@ const groups: any[] = [
 
 export const CreateSpaceModal: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { desktop } = useServices();
-    const { windowColor } = desktop.theme;
+    const { theme } = useServices();
+    const { windowColor } = theme.currentTheme;
     const { workflowState, setState } = props;
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);

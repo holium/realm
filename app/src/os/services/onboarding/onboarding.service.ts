@@ -21,6 +21,7 @@ import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
+import { toJS } from 'mobx';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
@@ -231,27 +232,36 @@ export class OnboardingService extends BaseService {
     this.state.setAgreedToDisclaimer();
   }
 
-  async checkGatedAccess(_event: any, code: string): Promise<{ success: boolean, message: string }> {
-    if (process.env.NODE_ENV === 'development' && code === '~admins-admins-admins') {
+  async checkGatedAccess(
+    _event: any,
+    code: string
+  ): Promise<{ success: boolean; message: string }> {
+    if (
+      process.env.NODE_ENV === 'development' &&
+      code === '~admins-admins-admins'
+    ) {
       this.state.setInviteCode('~admins-admins-admins');
-      return { success: true, message: 'Access succeeded.'};
+      return { success: true, message: 'Access succeeded.' };
     }
 
     let accessCode = await this.core.holiumClient.getAccessCode(code);
     if (accessCode && accessCode.type === 'ACCESS') {
       if (accessCode.singleUse && accessCode.redeemed) {
-        return { success: false, message: 'This invite code was already redeemed.' };
-      } else if ((new Date(accessCode.expiresAt!).getTime() < Date.now())) {
-        return { success: false, message: 'This invite code has expired.'};
+        return {
+          success: false,
+          message: 'This invite code was already redeemed.',
+        };
+      } else if (new Date(accessCode.expiresAt!).getTime() < Date.now()) {
+        return { success: false, message: 'This invite code has expired.' };
       } else {
         this.state.setInviteCode(code);
         if (accessCode.email) {
           this.state.setEmail(accessCode.email);
         }
-        return { success: true, message: 'Access succeeded.'};
+        return { success: true, message: 'Access succeeded.' };
       }
     } else {
-      return { success: false, message: 'Invite code not found.'};
+      return { success: false, message: 'Invite code not found.' };
     }
   }
 
@@ -266,7 +276,6 @@ export class OnboardingService extends BaseService {
     if (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') {
       this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
     }
-
   }
 
   async resendEmailVerification(_event: any) {
@@ -620,7 +629,7 @@ export class OnboardingService extends BaseService {
     this.core.passwords.setPassword(this.state.ship.patp, decryptedPassword);
     let passwordHash = await bcrypt.hash(decryptedPassword, 12);
 
-    const ship = clone(this.state.ship);
+    const ship = toJS(this.state.ship);
     const authShip = AuthShip.create({
       ...ship,
       id: `auth${ship.patp}`,

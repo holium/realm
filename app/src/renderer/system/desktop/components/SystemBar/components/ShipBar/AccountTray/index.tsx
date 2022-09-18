@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { darken, rgba } from 'polished';
 
 import { Flex, Pulser, Sigil, Box } from 'renderer/components';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';

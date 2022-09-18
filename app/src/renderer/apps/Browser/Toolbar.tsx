@@ -40,11 +40,11 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
       onClose,
       onMaximize,
     } = props;
-    const { desktop } = useServices();
+    const { theme } = useServices();
     const { currentTab, setCurrentTab } = useBrowser();
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
-    const { iconColor, inputColor } = desktop.theme;
+    const { iconColor, inputColor } = theme.currentTheme;
     const tabId = `${currentTab.id}-browser-webview`;
 
     const { searchForm, searchQuery } = useMemo(

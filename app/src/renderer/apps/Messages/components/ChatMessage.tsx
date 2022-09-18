@@ -1,16 +1,16 @@
 import { FC, useMemo } from 'react';
 import { darken, lighten } from 'polished';
 import { Flex, Text } from 'renderer/components';
-import { ThemeModelType } from 'os/services/shell/theme.model';
 import { Bubble } from './Bubble';
 import { Message } from './Message';
 import { displayDate } from 'os/lib/time';
 import { GraphDMType } from 'os/services/ship/models/courier';
+import { ThemeType } from 'renderer/theme';
 
 type IProps = {
   isSending?: boolean;
   showAuthor: boolean;
-  theme: ThemeModelType;
+  theme: any;
   our: string;
   ourColor: string;
   message: GraphDMType;

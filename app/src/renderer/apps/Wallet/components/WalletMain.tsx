@@ -2,7 +2,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { Grid, Flex, Text } from '../../../components';
 import { CircleButton } from './CircleButton';
 

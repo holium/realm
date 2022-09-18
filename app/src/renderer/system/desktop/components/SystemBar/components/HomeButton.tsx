@@ -10,18 +10,18 @@ import { rgba } from 'polished';
 type HomeButton = {};
 
 export const HomeButton: FC<HomeButton> = observer(() => {
-  const { ship, desktop } = useServices();
+  const { ship, desktop, theme } = useServices();
 
   const { dockColor, textColor } = useMemo(
     () => ({
-      ...desktop.theme,
-      dockColor: rgba(desktop.theme.dockColor!, 0.55),
+      ...theme.currentTheme,
+      dockColor: rgba(theme.currentTheme.dockColor!, 0.55),
       textColor:
-        desktop.theme.mode === 'light'
-          ? rgba(desktop.theme.textColor!, 0.8)
-          : desktop.theme.textColor!,
+        theme.currentTheme.mode === 'light'
+          ? rgba(theme.currentTheme.textColor!, 0.8)
+          : theme.currentTheme.textColor!,
     }),
-    [desktop.theme.dockColor]
+    [theme.currentTheme.dockColor]
   );
   const x = useMotionValue(200);
   const y = useMotionValue(200);
@@ -69,7 +69,7 @@ export const HomeButton: FC<HomeButton> = observer(() => {
         </SystemBarStyle>
       </motion.div>
     ),
-    [ship?.patp, desktop.theme.textColor, desktop.theme.dockColor]
+    [ship?.patp, theme.currentTheme.textColor, theme.currentTheme.dockColor]
   );
 });
 

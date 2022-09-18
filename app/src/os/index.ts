@@ -15,6 +15,7 @@ import HoliumAPI from './api/holium';
 import { RoomsService } from './services/tray/rooms.service';
 import PasswordStore from './lib/passwordStore';
 import { getSnapshot } from 'mobx-state-tree';
+import { ThemeModelType } from './services/theme.model';
 
 export interface ISession {
   ship: string;
@@ -52,6 +53,9 @@ export class Realm extends EventEmitter {
     install: (ship: string) => {
       return ipcRenderer.invoke('core:install-realm', ship);
     },
+    onSetTheme: (callback: any) =>
+      ipcRenderer.on('realm.change-theme', callback),
+    onLog: (callback: any) => ipcRenderer.on('realm.on-log', callback),
     onEffect: (callback: any) => ipcRenderer.on('realm.on-effect', callback),
     onBoot: (callback: any) => ipcRenderer.on('realm.on-boot', callback),
 
@@ -159,6 +163,9 @@ export class Realm extends EventEmitter {
       models,
       loggedIn: this.session ? true : false,
     };
+    // if (spaces?.selected) {
+    //   this.setTheme({ ...spaces!.selected!.theme, id: spaces?.selected.path });
+    // }
     // Send boot payload to any listeners
     this.onBoot(bootPayload);
 
@@ -171,6 +178,7 @@ export class Realm extends EventEmitter {
   }
 
   async connect(session: ISession) {
+    this.sendLog('connecting conduit');
     if (!this.conduit) {
       this.conduit = new Conduit();
       this.handleConnectionStatus(this.conduit);
@@ -182,10 +190,13 @@ export class Realm extends EventEmitter {
         session.ship.substring(1),
         session.cookie
       );
+      this.sendLog('after conduit init');
     } catch (e) {
       console.log(e);
+      this.sendLog(e);
       this.clearSession();
     } finally {
+      console.log('connection successful');
       this.onConduit();
     }
   }
@@ -236,6 +247,10 @@ export class Realm extends EventEmitter {
     this.mainWindow.webContents.send('realm.on-effect', data);
   }
 
+  setTheme(theme: ThemeModelType) {
+    this.mainWindow.webContents.send('realm.change-theme', toJS(theme));
+  }
+
   /**
    * Sends boot data to client store
    *
@@ -243,6 +258,10 @@ export class Realm extends EventEmitter {
    */
   onBoot(data: any): void {
     this.mainWindow.webContents.send('realm.on-boot', data);
+  }
+
+  sendLog(data: any): void {
+    this.mainWindow.webContents.send('realm.on-log', data.toString());
   }
 
   /**

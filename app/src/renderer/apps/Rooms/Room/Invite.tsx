@@ -1,13 +1,19 @@
 import { FC, useRef, useState, useMemo } from 'react';
-import { Flex, IconButton, Icons, Input, Spinner, Text, TextButton } from 'renderer/components';
+import {
+  Flex,
+  IconButton,
+  Icons,
+  Input,
+  Spinner,
+  Text,
+  TextButton,
+} from 'renderer/components';
 import { createField, createForm, useField, useForm } from 'mobx-easy-form';
 import { useServices } from 'renderer/logic/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
-
-
 
 interface InviteRoomProps {}
 
@@ -45,80 +51,81 @@ interface InviteRoomProps {}
 //   };
 // };
 
-export const RoomInvite: FC<InviteRoomProps> = observer((props: InviteRoomProps) => {
-  // const { form, invitePatp } = useMemo(() => inviteForm(), []);
-  const { roomsApp } = useTrayApps();
-  const room = roomsApp.liveRoom!;
+export const RoomInvite: FC<InviteRoomProps> = observer(
+  (props: InviteRoomProps) => {
+    // const { form, invitePatp } = useMemo(() => inviteForm(), []);
+    const { roomsApp } = useTrayApps();
+    const room = roomsApp.liveRoom!;
 
-  const inviteInputRef = useRef<HTMLInputElement>(null);
+    const inviteInputRef = useRef<HTMLInputElement>(null);
 
-  const { desktop, ship } = useServices();
-  const theme = desktop.theme;
+    const { theme: themeStore, ship } = useServices();
+    const theme = themeStore.currentTheme;
 
-  const [loading, setLoading] = useState(false);
-  const [invited, setInvited] = useState<string[]>([]);
-  
+    const [loading, setLoading] = useState(false);
+    const [invited, setInvited] = useState<string[]>([]);
 
+    const inviteForm = useForm({
+      async onSubmit({ values }: any) {
+        // console.log('submittingggg');
+        // await OnboardingActions.addShip(values);
 
-  const inviteForm = useForm({
-    async onSubmit({ values }: any) {
-      // console.log('submittingggg');
-      // await OnboardingActions.addShip(values);
+        // props.setState &&
+        //   props.setState({ ...props.workflowState, ship: values });
+        // props.onNext && props.onNext(values);
 
-      // props.setState &&
-      //   props.setState({ ...props.workflowState, ship: values });
-      // props.onNext && props.onNext(values);
+        if (inviteInputRef === undefined) return;
 
-      if (inviteInputRef === undefined) return;
-  
-      if (inviteInputRef.current === null) return;
-  
-      let innerInvite = inviteInputRef.current.value;
-  
-      // if (innerInvite === '') return;
-  
-      setLoading(true);
-  
-      console.log('sending invite:', innerInvite);
+        if (inviteInputRef.current === null) return;
 
-  
-      RoomsActions.invite(room.id, innerInvite
-      ).then(() => {
-        setLoading(false);
-        // chatInputRef.current!.value = '';
-        invitePatp.actions.onChange('');
-        setInvited(prevInvited => [...prevInvited, innerInvite])
-      });
+        let innerInvite = inviteInputRef.current.value;
 
-    },
-  });
+        // if (innerInvite === '') return;
 
-  const invitePatp = useField({
-    id: 'patp',
-    form: inviteForm,
-    initialValue: '',
-    validate: (patp: string) => {
-      // if (addedShips.includes(patp)) {
-      //   return { error: 'Already added', parsed: undefined };
-      // }
+        setLoading(true);
 
-      if (patp === ship!.patp) {
-        return { error: "You can't invite yourself!", parsed: undefined };
-      }
+        console.log('sending invite:', innerInvite);
 
-      if (patp.length > 1 && isValidPatp(patp)) {
-        return { error: undefined, parsed: patp };
-      }
-      
+        RoomsActions.invite(room.id, innerInvite).then(() => {
+          setLoading(false);
+          // chatInputRef.current!.value = '';
+          invitePatp.actions.onChange('');
+          setInvited((prevInvited) => [...prevInvited, innerInvite]);
+        });
+      },
+    });
 
-      return { error: 'Invalid @p', parsed: undefined };
-    },
-  });
+    const invitePatp = useField({
+      id: 'patp',
+      form: inviteForm,
+      initialValue: '',
+      validate: (patp: string) => {
+        // if (addedShips.includes(patp)) {
+        //   return { error: 'Already added', parsed: undefined };
+        // }
 
-  return (
-    <Flex flexDirection="column" flex={2} gap={4} p={2} alignItems="flex-start">
-      <Flex flexDirection="row" gap={4} width="100%" >
-        <Input
+        if (patp === ship!.patp) {
+          return { error: "You can't invite yourself!", parsed: undefined };
+        }
+
+        if (patp.length > 1 && isValidPatp(patp)) {
+          return { error: undefined, parsed: patp };
+        }
+
+        return { error: 'Invalid @p', parsed: undefined };
+      },
+    });
+
+    return (
+      <Flex
+        flexDirection="column"
+        flex={2}
+        gap={4}
+        p={2}
+        alignItems="flex-start"
+      >
+        <Flex flexDirection="row" gap={4} width="100%">
+          <Input
             tabIndex={2}
             className="realm-cursor-text-cursor"
             type="text"
@@ -141,7 +148,7 @@ export const RoomInvite: FC<InviteRoomProps> = observer((props: InviteRoomProps)
               if (evt.key === 'Enter') {
                 evt.preventDefault();
                 evt.stopPropagation();
-                inviteForm.actions.submit()
+                inviteForm.actions.submit();
               }
             }}
             onFocus={() => invitePatp.actions.onFocus()}
@@ -150,7 +157,7 @@ export const RoomInvite: FC<InviteRoomProps> = observer((props: InviteRoomProps)
           <Flex justifyContent="center" alignItems="center">
             <TextButton
               tabIndex={2}
-              style={{ padding: '6px 10px', borderRadius: 6, height: 35, }}
+              style={{ padding: '6px 10px', borderRadius: 6, height: 35 }}
               showBackground
               textColor="#0FC383"
               highlightColor="#0FC383"
@@ -161,24 +168,35 @@ export const RoomInvite: FC<InviteRoomProps> = observer((props: InviteRoomProps)
                 inviteForm.actions.submit();
               }}
             >
-                {loading ? <Spinner mx={2} size={0} /> : <Text>Invite</Text> }
+              {loading ? <Spinner mx={2} size={0} /> : <Text>Invite</Text>}
             </TextButton>
           </Flex>
-      </Flex>
-          
-          <Flex flexDirection='column' gap={4} width="100%" maxHeight="300px" overflowY={"scroll"} overflowX={"hidden"}>
+        </Flex>
+
+        <Flex
+          flexDirection="column"
+          gap={4}
+          width="100%"
+          maxHeight="300px"
+          overflowY={'scroll'}
+          overflowX={'hidden'}
+        >
           {invited.map((patp: string, index: number) => {
             return (
-              <Flex key={`room-invited-${patp}-${index}`} mt={4}
-                flexDirection='row'
-               >
-                <Icons mr={4} name="CheckCircle"> </Icons>
+              <Flex
+                key={`room-invited-${patp}-${index}`}
+                mt={4}
+                flexDirection="row"
+              >
+                <Icons mr={4} name="CheckCircle">
+                  {' '}
+                </Icons>
                 <Text>{patp}</Text>
               </Flex>
-              )})}
-          </Flex>
-          
+            );
+          })}
+        </Flex>
       </Flex>
-      );
-})
-
+    );
+  }
+);

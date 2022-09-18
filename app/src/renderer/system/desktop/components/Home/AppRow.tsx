@@ -91,10 +91,9 @@ export const AppRow = ({
   onClick,
   actionRenderer,
 }: AppRowProps) => {
-  const { desktop } = useServices();
-  const { theme } = desktop;
+  const { theme } = useServices();
   const rowRef = useRef<any>(null);
-  const currentTheme = useMemo(() => theme, [theme]);
+  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   return app ? (
     <AppRowStyle
       id={`app-row-${app.id}`}

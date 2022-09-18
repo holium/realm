@@ -45,12 +45,12 @@ export const WalletCard: FC<WalletCardProps> = ({
   isSelected,
   onSelect,
 }: WalletCardProps) => {
-  const { desktop } = useServices();
+  const { theme } = useServices();
   const { walletApp } = useTrayApps();
   let network = walletApp.network;
 
-  const mode = desktop.theme.mode === 'light' ? 'light' : 'dark';
-  const theme = themes[mode];
+  const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
+  const themeData = themes[mode];
 
   return (
     <Flex mt={6}>
@@ -65,7 +65,7 @@ export const WalletCard: FC<WalletCardProps> = ({
           layoutId={`wallet-name-${wallet.address}`}
           opacity={0.5}
           fontWeight={600}
-          color={transparentize(0.4, theme.colors.text.primary)}
+          color={transparentize(0.4, themeData.colors.text.primary)}
           style={{ textTransform: 'uppercase' }}
         >
           {wallet.nickname}

@@ -16,11 +16,11 @@ type SpacesProps = {
 };
 
 export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
-  const { ship, desktop, spaces } = useServices();
+  const { ship, theme, spaces } = useServices();
 
   const { dimensions } = props;
 
-  const spaceTheme = useMemo(() => desktop.theme, [desktop.theme]);
+  const spaceTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   const { dockColor, iconColor, textColor, windowColor } = spaceTheme;
 
   const bottomHeight = 58;

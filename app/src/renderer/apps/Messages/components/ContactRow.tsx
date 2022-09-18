@@ -18,7 +18,7 @@ import {
   PreviewGroupDMType,
 } from 'os/services/ship/models/courier';
 import { Message } from './Message';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';

@@ -5,7 +5,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { ThemeModel } from '../../shell/theme.model';
+import { ThemeModel } from '../../theme.model';
 import { LoaderModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
 import { VisaModel } from './visas';
@@ -83,6 +83,7 @@ export const SpacesStore = types
           //   persistedState && persistedState.spaces
           //     ? persistedState.spaces[path].members
           //     : {};
+          data[path].theme.id = `${path}`;
           data[path].members = {};
         }
       );
@@ -103,6 +104,7 @@ export const SpacesStore = types
         // data.spaces[key].members = MembersStore.create({
         //   all: data.members[key],
         // });
+        data.spaces[key].theme.id = `${key}`;
       });
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
     },
@@ -118,6 +120,10 @@ export const SpacesStore = types
       const members = self.spaces.get(replaceReaction.space.path)?.members;
       self.spaces.set(replaceReaction.space.path, {
         ...replaceReaction.space,
+        theme: {
+          id: replaceReaction.space.path,
+          ...replaceReaction.space.theme,
+        },
         members,
       });
     },

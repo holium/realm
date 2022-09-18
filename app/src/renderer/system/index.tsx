@@ -25,13 +25,13 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 });
 
 export const Shell: FC = observer(() => {
-  const { shell, desktop, identity, ship } = useServices();
+  const { shell, desktop, theme, identity, ship } = useServices();
   const { resuming } = useCore();
   // const windowRef = useRef(null);
   // useWindowSize(windowRef);
 
   const isFullscreen = shell.isFullscreen;
-  const wallpaper = desktop.theme.wallpaper;
+  const wallpaper = theme.currentTheme.wallpaper;
   const firstTime = identity.auth.firstTime;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 

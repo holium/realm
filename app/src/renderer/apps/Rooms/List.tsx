@@ -12,7 +12,7 @@ import {
   IconButton,
   Spinner,
 } from 'renderer/components';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { RoomRow } from './components/RoomRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
@@ -31,8 +31,8 @@ export type RoomListProps = {
 };
 export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
   const { dimensions } = props;
-  const { ship, desktop } = useServices();
-  const { windowColor } = desktop.theme;
+  const { ship, theme } = useServices();
+  const { windowColor } = theme.currentTheme;
   const [muted, setMuted] = useState(false);
   const { roomsApp } = useTrayApps();
   // const knownRoomsMap = roomsApp.knownRooms;
@@ -70,9 +70,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           >
             Rooms
           </Text>
-          {roomsApp.isLoadingList && (
-           <Spinner pl={2} size={0} />
-           )}
+          {roomsApp.isLoadingList && <Spinner pl={2} size={0} />}
         </Flex>
         <Flex ml={1} pl={2} pr={2}>
           <TextButton
@@ -86,12 +84,13 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           </TextButton>
         </Flex>
       </Titlebar>
-      <Flex style={{ marginTop: 54, maxHeight: '100%' }}
-            gap={8} flex={1}
-            flexDirection="column"
-            overflowY={'scroll'}
-            >
-        
+      <Flex
+        style={{ marginTop: 54, maxHeight: '100%' }}
+        gap={8}
+        flex={1}
+        flexDirection="column"
+        overflowY={'scroll'}
+      >
         {knownRooms.length === 0 && (
           <Flex
             flex={1}
@@ -153,7 +152,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           <InnerNotification
             id={value.id}
             title={value.title}
-            seedColor={desktop.theme.textColor}
+            seedColor={theme.currentTheme.textColor}
             subtitle={`Sent by: ${value.invitedBy}`}
             actionText="Accept"
             onAction={(id: string) => {
@@ -168,29 +167,28 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         </Flex>
       ))}
       <Flex mt={3} pb={4} justifyContent="flex-start">
-          
-        {roomsApp.provider !== ship!.patp &&
+        {roomsApp.provider !== ship!.patp && (
           <IconButton
             // Temporary way to get back to your provider
             mr={2}
             onClick={() => {
-                if(roomsApp.liveRoom) {
-                  RoomsActions.leaveRoom(roomsApp.liveRoom.id)
-                }
-                LiveRoom.leave();
-                RoomsActions.setProvider(ship!.patp);
-              }}
+              if (roomsApp.liveRoom) {
+                RoomsActions.leaveRoom(roomsApp.liveRoom.id);
+              }
+              LiveRoom.leave();
+              RoomsActions.setProvider(ship!.patp);
+            }}
           >
             <Icons opacity={0.8} name="ProfileImage" size={26} mx={2} />
           </IconButton>
-        }
+        )}
         <IconButton
           mr={2}
           onClick={() => {
-              RoomsActions.requestAllRooms();
-              RoomsActions.refreshLocalRoom();
-              // RoomsActions.getProvider();
-            }}
+            RoomsActions.requestAllRooms();
+            RoomsActions.refreshLocalRoom();
+            // RoomsActions.getProvider();
+          }}
         >
           <Icons opacity={0.8} name="Refresh" size={26} mx={2} />
         </IconButton>
@@ -207,8 +205,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           />
         </Tooltip>
       </Flex>
-
-      
     </Grid.Column>
   );
 });

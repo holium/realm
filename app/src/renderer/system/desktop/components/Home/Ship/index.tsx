@@ -18,7 +18,7 @@ type OurHomeProps = {
 
 export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   const { isOpen } = props;
-  const { friends, desktop, ship } = useServices();
+  const { friends, theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const sidebarComponent = useMemo(() => {
@@ -48,8 +48,8 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   const highlightColor = '#4E9EFD';
 
   const iconHoverColor = useMemo(
-    () => rgba(darken(0.03, desktop.theme.iconColor), 0.1),
-    [desktop.theme.windowColor]
+    () => rgba(darken(0.03, theme.currentTheme.iconColor), 0.1),
+    [theme.currentTheme.windowColor]
   );
 
   return (
@@ -95,7 +95,9 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
               size={3}
               customBg={iconHoverColor}
               color={
-                sidebar === 'friends' ? highlightColor : desktop.theme.iconColor
+                sidebar === 'friends'
+                  ? highlightColor
+                  : theme.currentTheme.iconColor
               }
               onClick={() => {
                 setSidebar(!sidebar ? 'friends' : null);
