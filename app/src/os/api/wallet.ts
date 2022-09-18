@@ -142,7 +142,7 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  addSmartContact: async (
+  addSmartContract: async (
     conduit: Conduit,
     contractId: string,
     contractType: string,

@@ -26,9 +26,11 @@ export interface HostingPurchasedShip {
 
 export interface AccessCode {
   id: string
+  email?: string
   type: string
   value?: string
   redeemed?: boolean
+  singleUse?: boolean
   image?: string
   title?: string
   description?: string
@@ -74,6 +76,16 @@ export class HoliumAPI {
     } catch (err) {
       console.error(err)
       return null
+    }
+  }
+
+  async redeemAccessCode(code: string): Promise<boolean> {
+    try {
+      await client.post(`access-codes/${code}/redeem`)
+      return true;
+    } catch (e) {
+      console.error('Redeeming access code failed.')
+      return false;
     }
   }
 }
