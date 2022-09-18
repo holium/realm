@@ -304,10 +304,15 @@
         ?<  ?=(%| -.post.node)
         =/  p     ^-(post p.post.node)
         [p]
-    ::  Get the last post
-    =/  last              (rear posts)
     =/  contact           (form-contact-mtd rolo to-ship)
     =/  path              (spat /dm-inbox/(scot %p to-ship))
+    =/  length            (lent posts)                          
+    ?:  =(length 0)       ::  If length is greater than zero we need to form a valid empty
+      ?>  ?=(%.y -.post.node)
+      =/  root     ^-(post (need post.node))
+      [path (silt ~[to-ship]) %dm %graph-store time-sent.root contents.root ~[contact] ~ 0]
+    ::
+    =/  last              (rear posts)
     [path (silt ~[to-ship]) %dm %graph-store time-sent.last contents.last ~[contact] ~ 0]
   ::
   ::  Pending dms
