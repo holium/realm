@@ -193,14 +193,13 @@ export class Realm extends EventEmitter {
         session.cookie
       );
       this.sendLog('after conduit init');
+      this.sendLog('connection successful');
+      this.onConduit();
     } catch (e) {
       console.log(e);
       this.sendLog('error');
       this.sendLog(e);
       this.clearSession();
-    } finally {
-      console.log('connection successful');
-      this.onConduit();
     }
   }
 
@@ -224,10 +223,12 @@ export class Realm extends EventEmitter {
 
   async onConduit() {
     const sessionPatp = this.session?.ship!;
+    this.sendLog(`before ship subscribe ${this.session?.ship!}`);
     const { models } = await this.services.ship.subscribe(
       sessionPatp,
       this.session
     );
+    this.sendLog('after ship subscribe');
     await this.services.spaces.load(sessionPatp, models.docket);
     this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.on-connected', {

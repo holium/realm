@@ -1,6 +1,6 @@
 import { toJS } from 'mobx';
 import { AppModelType } from 'os/services/ship/models/docket';
-import { NativeAppType } from 'renderer/apps';
+import { nativeApps, NativeAppType } from '../../../../renderer/apps';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';
 
 /**
@@ -101,6 +101,7 @@ export const getInitialWindowDimensions = (
   isFullscreen?: boolean
 ): { x: number; y: number; width: number; height: number } => {
   let dimensions: { x: number; y: number; width: number; height: number };
+  console.log(app);
   switch (app.type) {
     case 'urbit':
       const urbitApp: AppModelType = app;
@@ -116,7 +117,9 @@ export const getInitialWindowDimensions = (
       break;
     case 'native':
       const nativeApp: NativeAppType = app;
-      if (nativeApp.native?.openFullscreen) {
+      const nativeConfig = nativeApps[app.id];
+      if (nativeConfig.native?.openFullscreen) {
+        console.log('nativeApp window size', nativeApp);
         dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
         break;
       }

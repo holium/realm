@@ -74,6 +74,7 @@ export const TabView: FC<BrowserTabProps> = observer(
       });
       webview.addEventListener('will-navigate', async (e: any) => {
         const newUrl = new URL(e.url);
+        console.log('setting url: ', newUrl);
         setCurrentTab(newUrl.toString());
         // setUrlData(newUrl);
         console.log(newUrl);

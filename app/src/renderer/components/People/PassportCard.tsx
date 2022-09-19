@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { rgba } from 'polished';
+import { rgba, darken } from 'polished';
 import { Sigil, Flex, Box, Text, Icons } from '../';
 import { PassportButton } from './PassportButton';
 
@@ -17,8 +17,10 @@ interface IPassport {
 
 export const PassportCard: FC<IPassport> = (props: IPassport) => {
   const { patp, sigilColor, avatar, nickname, description } = props;
-  const { textColor } = props.theme!;
+  const { textColor, windowColor } = props.theme!;
   const iconColor = rgba(textColor, 0.7);
+  console.log(textColor);
+  const buttonColor = darken(0.1, windowColor);
   return (
     <Flex flexDirection="column" gap={14}>
       <Flex flexDirection="row" gap={12} alignItems="center">
@@ -52,18 +54,20 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
           <PassportButton
+            style={{ backgroundColor: buttonColor }}
             onClick={(evt: any) => {
               evt.stopPropagation();
             }}
           >
-            <Icons name="SendCoins" fill={iconColor} size="16px" />
+            <Icons name="SendCoins" color={iconColor} size="16px" />
           </PassportButton>
           <PassportButton
+            style={{ backgroundColor: buttonColor }}
             onClick={(evt: any) => {
               evt.stopPropagation();
             }}
           >
-            <Icons name="StartDM" fill={iconColor} size="16px" />
+            <Icons name="StartDM" color={iconColor} size="16px" />
           </PassportButton>
         </Flex>
         {description && (
