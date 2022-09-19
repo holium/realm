@@ -147,9 +147,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
               Transactions
             </Text>
           </Box>
-          {transactions.map((transaction, index) => (
-            <Transaction key={index} transaction={transaction} />
-          ))}
+          <TransactionList transactions={transactions} />
         </Flex>
       </Box>
       <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletViews.ETH_LIST)}>
