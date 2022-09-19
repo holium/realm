@@ -17,6 +17,7 @@ import {
   convertWeiToUsd,
   monthNames,
   getBaseTheme,
+  getTransactions,
 } from '../../../lib/helpers';
 
 import { WalletInfo } from './WalletInfo';
@@ -36,32 +37,6 @@ interface Transaction {
   address: string;
 }
 
-const abbrMap = {
-  ethereum: 'ETH',
-  bitcoin: 'BTC',
-};
-
-const transactions = [
-  {
-    type: 'sent',
-    address: '0xB017058f7De4efF370AC8bF0c84906BEC3d0b2CE',
-    amount: '320057483850000000',
-    date: new Date('8/10/2022'),
-  },
-  {
-    type: 'received',
-    address: '0xD299058f7De4efF370AC8bF0c84906BEC3d0b2CE',
-    amount: '148392948570000000',
-    date: new Date('8/2/2022'),
-  },
-  {
-    type: 'received',
-    address: '0xC122058f7De4efF370AC8bF0c84906BEC3d0b2CE',
-    amount: '923424554340000000',
-    date: new Date('7/11/2022'),
-  },
-];
-
 export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
   const { walletApp } = useTrayApps();
   const { theme } = useServices();
@@ -77,6 +52,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
   };
 
   const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
+  const transactions = getTransactions(walletApp.ethereum.transactions, wallet?.address);
 
   /* @ts-ignore */
   const themeData = getBaseTheme(theme.currentTheme);
