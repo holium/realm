@@ -21,7 +21,7 @@ type HomePaneProps = {
 
 export const HomePane: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const { isOpen } = props;
-  const { desktop, spaces } = useServices();
+  const { theme, spaces } = useServices();
 
   const isOur = spaces.selected?.type === 'our';
 
@@ -38,8 +38,8 @@ export const HomePane: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           opacity: isOpen ? 1 : 0,
           display: isOpen ? 'block' : 'none',
           background: rgba(
-            desktop.theme.mode === 'light' ? '#FFFFFF' : '#000000',
-            desktop.theme.mode === 'light' ? 0.25 : 0.25
+            theme.currentTheme.mode === 'light' ? '#FFFFFF' : '#000000',
+            theme.currentTheme.mode === 'light' ? 0.25 : 0.25
           ),
         }}
         transition={{ background: { duration: 0.25 } }}

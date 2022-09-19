@@ -1,6 +1,6 @@
 const isDev = true;
 import { devApps } from './development';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 
 export type NativeAppType = {
   id: string;

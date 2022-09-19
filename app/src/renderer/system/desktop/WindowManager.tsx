@@ -15,7 +15,7 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    const { shell, desktop } = useServices();
+    const { shell, theme, desktop } = useServices();
     const desktopRef = useRef<any>(null);
 
     const managerType = 'classic';
@@ -44,8 +44,8 @@ export const WindowManager: FC<WindowManagerProps> = observer(
       >
         <ContextMenu
           isComponentContext={false}
-          textColor={desktop.theme.textColor}
-          customBg={rgba(desktop.theme.windowColor, 0.9)}
+          textColor={theme.currentTheme.textColor}
+          customBg={rgba(theme.currentTheme.windowColor, 0.9)}
           containerId="desktop-fill"
           parentRef={desktopRef}
           style={{ minWidth: 180 }}
@@ -80,7 +80,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
               desktopRef={desktopRef}
               key={key}
               window={window}
-              theme={desktop.theme}
+              theme={theme.currentTheme}
             />
           );
         })}

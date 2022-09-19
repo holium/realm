@@ -29,9 +29,9 @@ interface IMembersList {
 
 export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
   const { path } = props;
-  const { desktop, spaces, membership, contacts, ship } = useServices();
+  const { theme, spaces, membership, contacts, ship } = useServices();
 
-  const { textColor, windowColor } = desktop.theme;
+  const { textColor, windowColor } = theme.currentTheme;
 
   const rowBg = rgba(darken(0.075, windowColor), 0.5);
 

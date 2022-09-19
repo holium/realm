@@ -13,12 +13,12 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
-  const { desktop, spaces, bazaar, ship } = useServices();
+  const { desktop, spaces, bazaar, ship, theme } = useServices();
   // const [orderedList, setOrderedList] = useState([]);
 
   const dividerBg = useMemo(
-    () => rgba(lighten(0.2, desktop.theme.dockColor), 0.4),
-    [desktop.theme]
+    () => rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4),
+    [theme.currentTheme]
   );
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path!)

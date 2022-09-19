@@ -24,7 +24,7 @@ type IProps = {
   hoverReveal?: boolean;
   canFocus?: boolean;
   size?: number;
-  luminosity?: 'light' | 'dark';
+  luminosity?: 'light' | 'dark' | string;
   theme: ThemeType;
   error?: boolean | string;
   color?: string; // hacky fix for linting error

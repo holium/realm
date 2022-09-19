@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
 import {
@@ -34,11 +34,11 @@ type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
-  const { ship, desktop } = useServices();
+  const { ship, theme } = useServices();
   const { roomsApp } = useTrayApps();
 
   const { dockColor, windowColor, accentColor, inputColor, textColor } =
-    desktop.theme;
+    theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const muted = LiveRoom.our?.isMuted;
   console.log('muted', muted);
@@ -217,7 +217,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                if(!id || !roomsApp.knownRooms.get(id)) {
+                if (!id || !roomsApp.knownRooms.get(id)) {
                   // bad state
                   RoomsActions.resetLocal();
                 }

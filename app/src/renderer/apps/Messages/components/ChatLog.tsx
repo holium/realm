@@ -31,7 +31,7 @@ const reduceToPending = (arr: GraphDMType[]) => {
 export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
   const { loading, messages, isGroup } = props;
   const { dimensions } = useTrayApps();
-  const { ship, desktop } = useServices();
+  const { ship, theme } = useServices();
   const pageSize = 20;
   const [listEnd, setListEnd] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -40,7 +40,7 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
   const [current, setCurrent] = useState<GraphDMType[]>(messages);
   const [chunk, setChunk] = useState<GraphDMType[]>([]);
   const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
-    desktop.theme;
+    theme.currentTheme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
   // console.log(reduceToPending(messages), reduceToPending(current));
 
@@ -163,12 +163,11 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
             isSending={message.pending}
             showAuthor={isGroup}
             key={`${message.index}-${message.timeSent}-${index}`}
-            theme={desktop.theme}
+            theme={theme.currentTheme}
             our={ship!.patp}
             ourColor={ship!.color || '#569BE2'}
             message={message}
           />
-          // <div key={index}>div - #{index}</div>
         ))}
         <Flex style={{ height: 58 }} />
       </InfiniteScroll>

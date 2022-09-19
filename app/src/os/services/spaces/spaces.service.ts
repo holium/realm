@@ -1,3 +1,4 @@
+import { ThemeModelType } from '../theme.model';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { toJS } from 'mobx';
@@ -226,8 +227,7 @@ export class SpacesService extends BaseService {
     // Get the initial scry
     const spaces = await SpacesApi.getSpaces(this.core.conduit!);
     this.state!.initialScry(spaces, persistedState, patp);
-    this.state!.selected &&
-      this.core.services.desktop.setTheme(this.state!.selected?.theme);
+    this.state!.selected && this.setTheme(this.state!.selected?.theme);
 
     this.state.setLoader('loaded');
     // initial sync effect
@@ -307,7 +307,7 @@ export class SpacesService extends BaseService {
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
     const selected = this.state?.selectSpace(spacePath);
-    this.core.services.desktop.setTheme(selected?.theme!);
+    this.setTheme({ ...selected!.theme!, id: selected!.path });
     return spacePath;
   }
 
@@ -321,14 +321,14 @@ export class SpacesService extends BaseService {
       const selected = this.state?.selectSpace(
         `/~${this.core.conduit?.ship}/our`
       );
-      this.core.services.desktop.setTheme(selected?.theme!);
+      this.setTheme(selected?.theme!);
     }
     return await SpacesApi.deleteSpace(this.core.conduit!, { path });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
-    this.core.services.desktop.setTheme(selected?.theme!);
+    this.setTheme(selected?.theme!);
     // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
     const spaceHost = getHost(this.state!.selected!.path);
@@ -376,6 +376,10 @@ export class SpacesService extends BaseService {
     await PassportsApi.declineInvite(this.core.conduit!, path);
     this.models.visas?.removeIncoming(path);
     return;
+  }
+
+  setTheme(theme: ThemeModelType) {
+    this.core.mainWindow.webContents.send('realm.change-theme', toJS(theme));
   }
   // // ***********************************************************
   // // *********************** FRIENDS ***************************
@@ -511,14 +515,16 @@ export class SpacesService extends BaseService {
     // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
   }
 
-  setSpaceWallpaper(spacePath: string, color: string, wallpaper: string) {
+  setSpaceWallpaper(spacePath: string, theme: any) {
     const space = this.state!.getSpaceByPath(spacePath)!;
 
-    const newTheme = space.theme!.setWallpaper(spacePath, color, wallpaper);
+    space.theme!.setTheme(theme);
+    // @ts-ignore
+    delete theme.id;
     SpacesApi.updateSpace(this.core.conduit!, {
       path: space.path,
-      payload: { theme: snakeify(newTheme) },
+      payload: { theme: snakeify(theme) },
     });
-    return newTheme;
+    return;
   }
 }

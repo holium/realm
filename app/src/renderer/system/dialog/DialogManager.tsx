@@ -18,7 +18,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
   (props: DialogManagerProps) => {
     const { dialogId } = props;
 
-    const { desktop, shell } = useServices();
+    const { shell } = useServices();
 
     const desktopRef = useRef<any>(null);
     let dialogWindow: React.ReactNode | undefined;
@@ -60,7 +60,6 @@ export const DialogManager: FC<DialogManagerProps> = observer(
             ...dialogConfig.window,
             dimensions,
           }}
-          theme={desktop.theme}
         />
       );
     }

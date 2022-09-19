@@ -73,7 +73,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
         onMouseEnter={() => shell.setIsMouseInWebview(true)}
         onMouseLeave={() => shell.setIsMouseInWebview(false)}
         style={{
-          background: lighten(0.04, desktop.theme.windowColor),
+          background: lighten(0.04, theme.currentTheme.windowColor),
           width: 'inherit',
           height: '100%',
           position: 'relative',

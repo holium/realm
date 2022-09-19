@@ -5,7 +5,7 @@ import { darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
@@ -42,7 +42,6 @@ export const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
 `;
 
 type AppWindowProps = {
-  theme: Partial<ThemeModelType>;
   window: WindowModelProps;
   hideTitlebar?: boolean;
   children?: React.ReactNode;
@@ -51,9 +50,9 @@ type AppWindowProps = {
 
 export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
-    const { theme, window, desktopRef } = props;
-    const { textColor, windowColor } = theme;
-    const { shell, desktop } = useServices();
+    const { window, desktopRef } = props;
+    const { shell, desktop, theme } = useServices();
+    const { textColor, windowColor } = theme.currentTheme;
 
     const [unmaximize, setUnmaximize] = useState<
       | {
@@ -199,7 +198,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         onDragStop={() => onDragStop()}
         onClose={() => onClose()}
         onMaximize={() => maximize()}
-        theme={theme}
+        theme={theme.currentTheme}
         // theme={{
         //   ...theme,
         //   windowColor: darken(0.002, theme.windowColor!),
@@ -217,7 +216,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         titlebar = (
           <CustomTitlebar
             zIndex={window.zIndex}
-            windowColor={darken(0.002, theme.windowColor!)}
+            windowColor={darken(0.002, windowColor!)}
             showDevToolsToggle
             dragControls={dragControls}
             onDragStart={() => onDragStart()}
@@ -243,7 +242,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             onDragStop={() => onDragStop()}
             onClose={() => onClose()}
             onMaximize={() => maximize()}
-            theme={theme}
+            theme={theme.currentTheme}
             // theme={{
             //   ...theme,
             //   windowColor: darken(0.002, theme.windowColor!),
@@ -273,7 +272,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         titlebar = (
           <CustomTitlebar
             zIndex={window.zIndex}
-            windowColor={darken(0.002, theme.windowColor!)}
+            windowColor={darken(0.002, windowColor!)}
             showDevToolsToggle
             dragControls={dragControls}
             onDragStart={() => onDragStart()}

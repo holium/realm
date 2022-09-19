@@ -1,11 +1,17 @@
 // import { osState, shipState } from './../store';
-import { types, applySnapshot, Instance, clone } from 'mobx-state-tree';
+import {
+  types,
+  applySnapshot,
+  Instance,
+  clone,
+  getSnapshot,
+} from 'mobx-state-tree';
 import { toJS } from 'mobx';
 // import { setPartitionCookies } from './api';
 import { getInitialWindowDimensions } from './lib/window-manager';
 import { NativeAppList } from 'renderer/apps';
-import { ThemeModel, ThemeModelType } from './theme.model';
 import { rgba } from 'polished';
+import { string } from 'yup';
 
 // const Grid = types.model({
 //   width: types.enumeration(['1', '2', '3']),
@@ -60,16 +66,6 @@ export const DesktopStore = types
     appviewPreload: types.maybe(types.string),
     dynamicMouse: types.optional(types.boolean, true),
     mouseColor: types.optional(types.string, '#4E9EFD'),
-    theme: types.optional(ThemeModel, {
-      wallpaper:
-        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
-      backgroundColor: '#c2b4b4',
-      dockColor: '#f0ecec',
-      windowColor: '#f0ecec',
-      mode: 'light',
-      textColor: '#261f1f',
-      iconColor: rgba('#333333', 0.6),
-    }),
     activeWindow: types.safeReference(Window),
     windows: types.map(Window),
   })
@@ -98,12 +94,6 @@ export const DesktopStore = types
     },
   }))
   .actions((self) => ({
-    setWallpaper(newWallpaper: string) {
-      self.theme.wallpaper = newWallpaper;
-    },
-    setTheme(newTheme: ThemeModelType) {
-      self.theme = clone(newTheme);
-    },
     setMouseColor(newMouseColor: string = '#4E9EFD') {
       self.mouseColor = newMouseColor;
     },
