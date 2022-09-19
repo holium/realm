@@ -20,36 +20,36 @@ const playAudio = (src: string) => {
 };
 export const SoundActions = {
   playStartup: async () => {
-    playAudio('/sounds/startup.wav');
+    playAudio('sounds/startup.wav');
   },
   playLogin: async () => {
-    playAudio('/sounds/login.wav');
+    playAudio('sounds/login.wav');
   },
   playLogout: async () => {
-    playAudio('/sounds/logout.wav');
+    playAudio('sounds/logout.wav');
   },
   playSystemNotification: async () => {
-    playAudio('/sounds/system-notify.wav');
+    playAudio('sounds/system-notify.wav');
   },
   playError: async () => {
-    playAudio('/sounds/error.wav');
+    playAudio('sounds/error.wav');
   },
   playDMNotify: async () => {
-    playAudio('/sounds/dm-received.wav');
+    playAudio('sounds/dm-received.wav');
   },
   playDMSend: async () => {
-    playAudio('/sounds/dm-sent.wav');
+    playAudio('sounds/dm-sent.wav');
   },
   playCall: async () => {
-    playAudio('/sounds/voice-ring.wav');
+    playAudio('sounds/voice-ring.wav');
   },
   playHangup: async () => {
-    playAudio('/sounds/voice-hang-up.wav');
+    playAudio('sounds/voice-hang-up.wav');
   },
   playRoomEnter: async () => {
-    playAudio('/sounds/room-enter.wav');
+    playAudio('sounds/room-enter.wav');
   },
   playRoomLeave: async () => {
-    playAudio('/sounds/room-leave.wav');
+    playAudio('sounds/room-leave.wav');
   },
 };

@@ -1,5 +1,5 @@
 import { WindowModelProps } from 'os/services/shell/desktop.model';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
 import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';

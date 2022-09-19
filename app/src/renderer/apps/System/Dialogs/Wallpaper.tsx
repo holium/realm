@@ -78,21 +78,18 @@ const createWallpaperForm = (
 };
 
 export const WallpaperDialog: FC = observer(() => {
-  const { desktop, spaces } = useServices();
+  const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
-  const { inputColor, windowColor } = desktop.theme;
+  const { inputColor, windowColor } = theme.currentTheme;
   const { wallpaperForm, imageUrl } = useMemo(
-    () => createWallpaperForm({ imageUrl: desktop.theme.wallpaper }),
+    () => createWallpaperForm({ imageUrl: theme.currentTheme.wallpaper }),
     []
   );
 
   const onChange = (evt: any) => {
     const formData = wallpaperForm.actions.submit();
     setLoading(true);
-    DesktopActions.changeWallpaper(
-      spaces.selected!.path!,
-      formData.imageUrl
-    ).then(() => {
+    theme.setWallpaper(spaces.selected!.path!, formData.imageUrl).then(() => {
       ShellActions.closeDialog();
       ShellActions.setBlur(false);
       setLoading(false);
@@ -107,7 +104,7 @@ export const WallpaperDialog: FC = observer(() => {
       flexDirection="column"
       justifyContent="space-between"
     >
-      <WallpaperPreview src={desktop.theme.wallpaper} />
+      <WallpaperPreview src={theme.currentTheme.wallpaper} />
       <FormControl.Field>
         <Input
           autoFocus

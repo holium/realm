@@ -14,23 +14,17 @@ if (process.env.NODE_ENV === 'production') {
 
 const configuration: webpack.Configuration = {
   devtool: 'inline-source-map',
-
   mode: 'development',
-
   target: 'electron-preload',
-
   entry: path.join(webpackPaths.srcMainPath, 'preload.ts'),
-
   output: {
     path: webpackPaths.dllPath,
     filename: 'preload.js',
   },
-
   plugins: [
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),
-
     /**
      * Create global constants which can be configured at compile time.
      *
@@ -46,7 +40,6 @@ const configuration: webpack.Configuration = {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
     }),
-
     new webpack.LoaderOptionsPlugin({
       debug: true,
     }),
@@ -61,7 +54,6 @@ const configuration: webpack.Configuration = {
     __dirname: false,
     __filename: false,
   },
-
   watch: true,
 };
 

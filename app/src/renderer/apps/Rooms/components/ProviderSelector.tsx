@@ -36,8 +36,8 @@ interface ProviderSelectorProps {
 
 export const ProviderSelector: FC<ProviderSelectorProps> = observer(
   ({ seedColor, onClick }: ProviderSelectorProps) => {
-    const { desktop } = useServices();
-    const { windowColor, textColor } = desktop.theme;
+    const { theme } = useServices();
+    const { windowColor, textColor } = theme.currentTheme;
     const { roomsApp } = useTrayApps();
     // const accentColor = '#F08735';
     return (

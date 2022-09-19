@@ -1,42 +1,31 @@
 import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card, RadioGroup, Checkbox} from 'renderer/components';
+import { Flex, Text, Card, RadioGroup, Checkbox } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 
-
 export const SystemPanel: FC<any> = observer(() => {
+  const { theme, ship, contacts } = useServices();
 
-  const { desktop, ship, contacts } = useServices();
-
-  const { windowColor, textColor, accentColor, inputColor } = desktop.theme;
+  const { windowColor, textColor, accentColor, inputColor } =
+    theme.currentTheme;
 
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
-    
-  type mouseOptionType = 'system' | 'realm' ;
+  type mouseOptionType = 'system' | 'realm';
 
-  const [mouseOption, setMouseOption] =
-  useState<mouseOptionType>('realm');
+  const [mouseOption, setMouseOption] = useState<mouseOptionType>('realm');
 
   return (
-
-    <Flex gap={12}  flexDirection="column" p="12px" width='100%'>
-
-
-
-      <Text
-        fontSize={7}
-        fontWeight={600}
-        mb={6}
-      >
+    <Flex gap={12} flexDirection="column" p="12px" width="100%">
+      <Text fontSize={7} fontWeight={600} mb={6}>
         System
       </Text>
-              
-    <Text opacity={0.7} fontSize={3} fontWeight={500}>
-      INTERFACE
-    </Text>
-    <Card
+
+      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+        INTERFACE
+      </Text>
+      <Card
         p="20px"
         width="100%"
         // minHeight="240px"
@@ -44,16 +33,13 @@ export const SystemPanel: FC<any> = observer(() => {
         customBg={cardColor}
         flexDirection={'column'}
       >
-        <Text>
-          Coming Soon
-        </Text>
+        <Text>Coming Soon</Text>
+      </Card>
 
-    </Card>
-
-    <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
-      SOUNDS
-    </Text>
-    <Card
+      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+        SOUNDS
+      </Text>
+      <Card
         p="20px"
         width="100%"
         // minHeight="240px"
@@ -61,13 +47,10 @@ export const SystemPanel: FC<any> = observer(() => {
         customBg={cardColor}
         flexDirection={'column'}
       >
-        <Text>
-          Coming Soon
-        </Text>
+        <Text>Coming Soon</Text>
+      </Card>
 
-    </Card>
-
-{/* 
+      {/* 
     <Text opacity={0.7} fontSize={3} fontWeight={500}>
       MOUSE
     </Text>
@@ -125,7 +108,6 @@ export const SystemPanel: FC<any> = observer(() => {
           </Flex>
         </Flex>
     </Card> */}
-
     </Flex>
-  )
-})
+  );
+});

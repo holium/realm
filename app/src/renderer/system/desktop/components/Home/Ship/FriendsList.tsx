@@ -14,9 +14,9 @@ interface IFriendsList {
 
 export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   const { friends } = props;
-  const { desktop, ship, contacts } = useServices();
+  const { theme, ship, contacts } = useServices();
 
-  const { textColor, windowColor } = desktop.theme;
+  const { textColor, windowColor } = theme.currentTheme;
 
   const rowBg = rgba(darken(0.075, windowColor), 0.5);
 

@@ -6,7 +6,6 @@ import {
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { ThemeModel } from '../shell/theme.model';
 import { LoaderModel } from '../common.model';
 import { StepList } from '../common.model';
 import { Patp } from 'os/types';
@@ -23,13 +22,6 @@ export const AuthShip = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
-    theme: types.optional(ThemeModel, {
-      backgroundColor: '#c2b4b4',
-      dockColor: '#f0ecec',
-      windowColor: '#f0ecec',
-      textColor: '#261f1f',
-      mode: 'light',
-    }),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
     passwordHash: types.maybeNull(types.string),

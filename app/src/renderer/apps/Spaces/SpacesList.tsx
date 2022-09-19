@@ -28,8 +28,8 @@ type SpacesListProps = {
 
 export const SpacesList: FC<SpacesListProps> = observer(
   (props: SpacesListProps) => {
-    const { desktop, visas } = useServices();
-    const { textColor, windowColor } = desktop.theme;
+    const { theme, visas } = useServices();
+    const { textColor, windowColor } = theme.currentTheme;
     const { selected, spaces, onSelect } = props;
     // const [visas, setVisas] = useState([]);
     const [loadingVisa, setLoading] = useState(true);

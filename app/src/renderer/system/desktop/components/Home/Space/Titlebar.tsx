@@ -9,7 +9,7 @@ import {
   IconButton,
 } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import AppSearchApp from '../AppSearch';
 import { useServices } from 'renderer/logic/store';
 

@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';

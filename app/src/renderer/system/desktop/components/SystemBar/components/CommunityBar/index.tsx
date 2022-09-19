@@ -11,14 +11,14 @@ import { rgba } from 'polished';
 type CommunityBarProps = {};
 
 export const CommunityBar: FC<CommunityBarProps> = observer(() => {
-  const { desktop } = useServices();
+  const { theme } = useServices();
 
   const { dockColor } = useMemo(
     () => ({
-      ...desktop.theme,
-      dockColor: rgba(desktop.theme.dockColor!, 0.55),
+      ...theme.currentTheme,
+      dockColor: rgba(theme.currentTheme.dockColor!, 0.55),
     }),
-    [desktop.theme.dockColor]
+    [theme.currentTheme.dockColor]
   );
 
   return (

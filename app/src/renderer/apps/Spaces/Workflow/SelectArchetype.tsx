@@ -8,8 +8,8 @@ import { SelectRow } from '../components/SelectionRow';
 
 export const SelectArchetype: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { desktop } = useServices();
-    const { windowColor } = desktop.theme;
+    const { theme } = useServices();
+    const { windowColor } = theme.currentTheme;
     const { workflowState, setState } = props;
     const [selectedArchetype, setSelectedArchetype] = useState<string | null>(
       null

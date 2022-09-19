@@ -189,11 +189,12 @@ RoomsActions.onRoomUpdate(
 // });
 
 OSActions.onBoot((_event: any, response: any) => {
-  if (response.loggedIn) {
+  if (response.loggedIn && response.ship) {
     // RoomsActions.resetLocal();
     // RoomsActions.exitRoom();
     // LiveRoom.leave();
-    LiveRoom.init(response.ship.patp!);
+    console.log('ON BOOT, LIVEROOM', response.ship);
+    if (response.ship.patp) LiveRoom.init(response.ship.patp!);
   }
 });
 

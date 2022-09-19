@@ -1,7 +1,7 @@
 import { FC, useRef, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import styled, { css } from 'styled-components';
 import {
   ContextMenu,
@@ -33,7 +33,7 @@ const speakerType = {
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   const { person, audio, type } = props;
-  const { ship, desktop, contacts } = useServices();
+  const { ship, theme, contacts } = useServices();
   const { roomsApp } = useTrayApps();
   const speakerRef = useRef<any>(null);
   const isOur = person === ship?.patp;
@@ -91,7 +91,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
   const textColor =
     livePeer?.connectionState !== PeerConnectionState.Failed
-      ? desktop.theme.textColor
+      ? theme.currentTheme.textColor
       : '#FD4E4E';
 
   const textProps = {
@@ -116,7 +116,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
         id={`room-speaker-${person}`}
         // data-close-tray="false"
         ref={speakerRef}
-        hoverBg={darken(0.04, desktop.theme.windowColor)}
+        hoverBg={darken(0.04, theme.currentTheme.windowColor)}
         key={person}
         gap={4}
         flexDirection="column"
@@ -184,8 +184,8 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
         {person !== ship?.patp && (
           <ContextMenu
             isComponentContext
-            textColor={desktop.theme.textColor}
-            customBg={rgba(desktop.theme.windowColor, 0.9)}
+            textColor={theme.currentTheme.textColor}
+            customBg={rgba(theme.currentTheme.windowColor, 0.9)}
             containerId={`room-speaker-${person}`}
             parentRef={speakerRef}
             style={{ minWidth: 180 }}

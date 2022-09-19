@@ -356,6 +356,7 @@
       ::  If we are invited we will send the invite action to the host
       :_  state
       :~  [%pass / %agent [ship.path %passports] %poke visa-action+!>(act)]
+          [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share ship.path])]  ::  share our contact
       ==
     ~&  >>  "handle-accept: we are the host {<[our.bowl ship.path]>}"
     ::
@@ -372,6 +373,7 @@
     =/  watch-paths                 [/all /members/(scot %p ship.path)/(scot %tas space.path) ~]
     =/  reactions                   
       :~  [%pass / %agent [accepter %passports] %poke visa-action+!>([%stamped path])]              ::  Send space to invitee
+          [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
           [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
       ==
     ?@  space-invites

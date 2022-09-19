@@ -20,7 +20,7 @@ type SidebarType = 'members' | null;
 
 export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const { isOpen } = props;
-  const { ship, desktop, spaces, membership, bazaar } = useServices();
+  const { ship, theme, spaces, membership, bazaar } = useServices();
   const currentSpace = spaces.selected;
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
@@ -111,7 +111,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         >
           <SpaceTitlebar
             space={currentSpace}
-            theme={desktop.theme}
+            theme={theme.currentTheme}
             membersCount={membersCount}
             showAppGrid={appGrid}
             showMembers={sidebar === 'members'}

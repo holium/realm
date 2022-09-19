@@ -16,6 +16,8 @@ import SelectPlan from 'renderer/system/onboarding/SelectPlan.dialog';
 import StripePayment from 'renderer/system/onboarding/StripePayment.dialog';
 import HostingConfirmation from 'renderer/system/onboarding/HostingConfirmation.dialog';
 import AccessCode from 'renderer/system/onboarding/AccessCode.dialog';
+import AccessGate from 'renderer/system/onboarding/AccessGate.dialog';
+import AccessGatePassed from 'renderer/system/onboarding/AccessGatePassed.dialog';
 
 const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.DISCLAIMER]: {
@@ -32,7 +34,7 @@ const initialOnboardingDialogs: DialogRenderers = {
     },
     onNext: (data: any) => {
       OnboardingActions.agreedToDisclaimer();
-      OnboardingActions.setStep(OnboardingStep.EMAIL);
+      OnboardingActions.setStep(OnboardingStep.ACCESS_GATE);
     },
     window: {
       id: OnboardingStep.DISCLAIMER,
@@ -46,19 +48,63 @@ const initialOnboardingDialogs: DialogRenderers = {
       },
     },
   },
+  [OnboardingStep.ACCESS_GATE]: {
+    workflow: true,
+    firstStep: true,
+    hasCloseButton: false,
+    customNext: true,
+    component: (props: any) => <AccessGate {...props} />,
+    onOpen: () => {
+      ShellActions.setBlur(true);
+    },
+    onNext: (data: any) => {
+      OnboardingActions.setStep(OnboardingStep.ACCESS_GATE_PASSED);
+    },
+    window: {
+      id: OnboardingStep.ACCESS_GATE,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 400,
+        height: 420,
+      },
+    },
+  },
+  [OnboardingStep.ACCESS_GATE_PASSED]: {
+    workflow: true,
+    firstStep: true,
+    hasCloseButton: false,
+    customNext: true,
+    component: (props: any) => <AccessGatePassed {...props} />,
+    onOpen: () => {
+      ShellActions.setBlur(true);
+    },
+    onNext: (data: any) => {
+      OnboardingActions.setStep(OnboardingStep.EMAIL);
+    },
+    window: {
+      id: OnboardingStep.ACCESS_GATE_PASSED,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 400,
+        height: 300,
+      },
+    },
+  },
   [OnboardingStep.EMAIL]: {
     workflow: true,
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <EmailDialog {...props} />,
-    isValidated: (state: any) => {
-      return state && state.disclaimerAccepted;
-    },
     onOpen: () => {
       ShellActions.setBlur(true);
     },
     onNext: (data: any) => {
-      OnboardingActions.agreedToDisclaimer();
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
     window: {

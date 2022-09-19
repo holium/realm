@@ -24,21 +24,16 @@ const devtoolsConfig =
 
 const configuration: webpack.Configuration = {
   ...devtoolsConfig,
-
   mode: 'production',
-
   target: 'electron-main',
-
   entry: {
     main: path.join(webpackPaths.srcMainPath, 'main.ts'),
     preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
   },
-
   output: {
     path: webpackPaths.distMainPath,
     filename: '[name].js',
   },
-
   optimization: {
     minimizer: [
       new TerserPlugin({
@@ -46,12 +41,10 @@ const configuration: webpack.Configuration = {
       }),
     ],
   },
-
   plugins: [
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),
-
     /**
      * Create global constants which can be configured at compile time.
      *
@@ -67,7 +60,6 @@ const configuration: webpack.Configuration = {
       START_MINIMIZED: false,
     }),
   ],
-
   /**
    * Disables webpack processing of __dirname and __filename.
    * If you run the bundle in node.js it falls back to these values of node.js.

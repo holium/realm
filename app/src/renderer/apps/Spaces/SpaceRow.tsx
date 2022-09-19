@@ -55,13 +55,12 @@ type SpaceRowProps = {
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { desktop, membership } = useServices();
-  const { theme } = desktop;
+  const { theme, membership } = useServices();
   const [deleteLoading, setDeleteLoading] = useState(false);
   // const {} =
   const rowRef = useRef<any>(null);
 
-  const currentTheme = useMemo(() => theme, [theme]);
+  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
 
   const contextMenuItems = [
     {
@@ -108,8 +107,8 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
     >
       <ContextMenu
         isComponentContext
-        textColor={theme.textColor}
-        customBg={rgba(theme.windowColor, 0.9)}
+        textColor={currentTheme.textColor}
+        customBg={rgba(currentTheme.windowColor, 0.9)}
         containerId={`space-row-${space.path}`}
         parentRef={rowRef}
         style={{ minWidth: 180 }}

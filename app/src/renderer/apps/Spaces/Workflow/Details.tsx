@@ -96,8 +96,8 @@ type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
 export const SpacesCreateForm: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { desktop } = useServices();
-    const { inputColor, windowColor, textColor } = desktop.theme;
+    const { theme } = useServices();
+    const { inputColor, windowColor, textColor } = theme.currentTheme;
     const { workflowState, setState } = props;
     const colorPickerRef = useRef(null);
 

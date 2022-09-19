@@ -6,27 +6,45 @@ import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface FinalizingProps {
-  seedPhrase: string
-  passcode: string
+  seedPhrase: string;
+  passcode: string;
 }
 
-export const Finalizing: FC<FinalizingProps> = observer((props: FinalizingProps) => {
-  const { desktop } = useServices();
-  const theme = useMemo(() => getBaseTheme(desktop), [desktop.theme.mode]);
+export const Finalizing: FC<FinalizingProps> = observer(
+  (props: FinalizingProps) => {
+    const { theme } = useServices();
+    const themeData = useMemo(
+      () => getBaseTheme(theme.currentTheme),
+      [theme.currentTheme.mode]
+    );
 
-  let initWallet = async () => {
-    if (props.seedPhrase && props.passcode) {
-      await WalletActions.setMnemonic(props.seedPhrase, props.passcode);
-    }
+    let initWallet = async () => {
+      if (props.seedPhrase && props.passcode) {
+        await WalletActions.setMnemonic(props.seedPhrase, props.passcode);
+      }
+    };
+    useEffect(() => {
+      initWallet();
+    }, [props.seedPhrase, props.passcode]);
+
+    return (
+      <Flex
+        width="100%"
+        height="100%"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Spinner size={3} />
+        <Text
+          mt={6}
+          variant="h6"
+          color={themeData.colors.text.secondary}
+          fontSize={3}
+        >
+          Creating wallet...
+        </Text>
+      </Flex>
+    );
   }
-  useEffect(() => { initWallet() }, [props.seedPhrase, props.passcode]);
-
-  return (
-    <Flex width="100%" height="100%" flexDirection="column" justifyContent="center" alignItems="center">
-      <Spinner size={3} />
-      <Text mt={6} variant="h6" color={theme.colors.text.secondary} fontSize={3}>
-        Creating wallet...
-      </Text>
-    </Flex>
-  );
-});
+);
