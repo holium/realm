@@ -536,11 +536,13 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
+      console.log('initial => %o', data);
       state.initial(data['initial']);
       break;
     // event when a new space is joined and our ship has successfully
     //   subscribed to the space
     case 'space-apps':
+      console.log('space-apps => %o', data);
       const entry = data['space-apps'];
       state.initialSpace(entry['space-path'], entry);
       break;

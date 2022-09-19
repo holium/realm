@@ -76,7 +76,7 @@
 ::
 :: +$  app                     [=app]
 +$  app-lite                [id=app-id =sieve]
-+$  app-full                [id=app-id =sieve pkg=app]
++$  app-full                [id=app-id =sieve entry=app-catalog-entry]
 
 ::  various organizations of data (transient/ephemeral datasets)
 ::   used to facilitate scrying and data transfers between other
@@ -97,7 +97,11 @@
 ::    from remote spaces. this is to reduce memory req's for apps that are
 ::    included across multiple spaces. [app-header] data is referenced to orient an
 ::    app (tags/ranks) relative to a given space
-+$  app-catalog             (map app-id app)  :: INCLUDED IN AGENT STATE
++$  app-catalog-entry
+  $:  recommended=@ud
+      =app
+  ==
++$  app-catalog             (map app-id app-catalog-entry)  :: INCLUDED IN AGENT STATE
 ::
 +$  action
   $%  [%pin path=space-path:spaces =app-id rank=(unit @ud)]

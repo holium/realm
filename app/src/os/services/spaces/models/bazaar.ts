@@ -25,8 +25,8 @@ const AppRankModel = types.model({
 const UrbitApp = types.model({
   id: types.identifier,
   // ship: types.string,
-  tags: types.array(types.string),
-  ranks: types.maybe(AppRankModel),
+  // tags: types.array(types.string),
+  // ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
@@ -37,19 +37,21 @@ const UrbitApp = types.model({
   website: types.string,
   license: types.string,
   installed: types.boolean,
+  recommended: types.number,
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
 const NativeApp = types.model({
   id: types.identifier,
   // ship: types.string,
-  tags: types.array(types.string),
-  ranks: types.maybe(AppRankModel),
+  // tags: types.array(types.string),
+  // ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
+  recommended: types.number,
 });
 
 export type NativeAppType = Instance<typeof NativeApp>;

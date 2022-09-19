@@ -296,23 +296,24 @@
     ==
   ::
   ++  app-full
-    |=  app=app-full:store
+    |=  =app-full:store
     ^-  (list [cord json])
     =/  head=(list [cord json])
-    :~  [id+s+id.app]
-        ['ranks' (rnks ranks.sieve.app)]
-        ['tags' a+(turn ~(tap in tags.sieve.app) |=(tg=tag:store s+(scot %tas tg)))]
+    :~  [id+s+id.app-full]
+        ['ranks' (rnks ranks.sieve.app-full)]
+        ['tags' a+(turn ~(tap in tags.sieve.app-full) |=(tg=tag:store s+(scot %tas tg)))]
+        ['recommended' n+(crip "{<recommended.entry.app-full>}")]
     ==
-    =/  detail=(list [cord json])  (app-detail:encode pkg.app)
+    =/  detail=(list [cord json])  (app-detail:encode app.entry.app-full)
     ?~  detail  ~  (weld head detail)
   ::
   ++  full-app-index
     |=  =app-index-full:store
     ^-  (list [cord json])
     %+  turn  ~(tap by app-index-full)
-    |=  [=app-id:store app=app-full:store]
+    |=  [=app-id:store =app-full:store]
     ^-  [cord json]
-    [app-id (pairs (app-full:encode app))]
+    [app-id (pairs (app-full:encode app-full))]
   ::
   ++  lite-app-index
     |=  =app-index-lite:store
