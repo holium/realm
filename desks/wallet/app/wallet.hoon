@@ -562,25 +562,25 @@
       %enqueue-transaction
     =/  tid=@ta
       :((cury cat 3) dap.bowl '--' (scot %uv eny.bowl))
-    =.  transactions
-      =/  net-map  (~(got by transactions) network.act)
+    =.  transactions.state
+      =/  net-map  (~(got by transactions.state) network.act)
       =.  net-map  (~(put by net-map) [tid transaction.act])
-      (~(put by transactions) [network.act net-map])
+      (~(put by transactions.state) [network.act net-map])
     =/  cards
       ?+  network.act  `(list card)`~
           %ethereum
         =/  =wire  [%eth-receipt tid ~]
         =/  args
+          =/  node-url
+            =/  provider  provider:(~(got by networks.settings) network.act)
+            ?~  provider  ~
+            u.provider
+          ?~  node-url  ~
           :-  ~
           :^  `tid  byk.bowl(r da+now.bowl)  %eth-get-transaction-receipt
           =+  [gas=100.000 gas-price=30.000.000.000]
-          =/  node-url
-            =/  provider  provider:(~(got by networks.settings) network.act)
-            ?~  provider
-              ~|  'provider not set for pending transaction'
-              !!
-            u.provider
           !>([node-url 'tx' hash.act])
+        ?~  args  `(list card)`~
         :~  (watch-spider [%tx %result wire] /thread-result/[tid])
             (poke-spider [%tx wire] %spider-start !>(args))
         ==

@@ -177,7 +177,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
         </Flex>
       </Box>
       <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletViews.ETH_LIST)}>
-        <Icons name="ArrowLeftLine" size={2} color={themeData.theme.iconColor} />
+        <Icons name="ArrowLeftLine" size={2} color={theme.currentTheme.iconColor} />
       </Flex>
     </Flex>
   );

@@ -516,7 +516,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
         await WalletActions.sendEthereumTransaction(
           walletApp.currentIndex!,
           transactionRecipient.address || transactionRecipient.patpAddress!,
-          transactionAmount.toString()
+          transactionAmount.toString(),
+          transactionRecipient.patp,
         );
         console.log('leo crushed it');
         setScreen('initial');
@@ -599,7 +600,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     ) : (
                       <Sigil
                         color={
-                          themeData.currentTheme.mode === 'light'
+                          theme.currentTheme.mode === 'light'
                             ? ['black', 'white']
                             : ['white', 'black']
                         }

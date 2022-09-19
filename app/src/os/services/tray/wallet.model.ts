@@ -149,6 +149,23 @@ export const EthStore = types
         })
       );
     },
+    getTransaction(hash: string) {
+      const tx: any = self.transactions.get(hash);
+      return {
+        hash: tx.hash,
+        amount: tx.amount,
+        network: tx.network,
+        type: tx.type,
+        'initiated-at': tx.initiatedAt,
+        'completed-at': tx.completedAt || 1,
+        'our-address': tx.ourAddress,
+        'their-patp': tx.theirPatp || 1,
+        'their-address': tx.theirAddress,
+        status: tx.status,
+        'failure-reason': tx.failureReason || 1,
+        notes: tx.notes,
+      }
+    }
   }))
   .actions((self) => ({
     initial(wallets: any) {
@@ -194,7 +211,7 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
-    enqueueTransaction(hash: any, toAddress: any, from: string, amount: any, timestamp: any) {
+    enqueueTransaction(hash: any, toAddress: any, toPatp: any, from: string, amount: any, timestamp: any) {
       let tx = {
         hash: hash,
         amount: amount.toString(),
@@ -203,6 +220,7 @@ export const EthStore = types
         initiatedAt: timestamp.toString(),
         ourAddress: from,
         theirAddress: toAddress,
+        theirPatp: toPatp,
         status: 'pending',
         notes: '',
       };

@@ -108,13 +108,15 @@ export class WalletService extends BaseService {
     sendEthereumTransaction: (
       walletIndex: string,
       to: string,
-      amount: string
+      amount: string,
+      toPatp?: string,
     ) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.send-ethereum-transaction',
         walletIndex,
         to,
-        amount
+        amount,
+        toPatp,
       );
     },
     sendBitcoinTransaction: (
@@ -398,11 +400,13 @@ export class WalletService extends BaseService {
     _event: any,
     walletIndex: string,
     to: string,
-    amount: string
+    amount: string,
+    toPatp?: string,
   ) {
     console.log(walletIndex);
     console.log(to);
     console.log(amount);
+    console.log(toPatp);
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     console.log(path);
     // console.log(this.privateKey!.mnemonic!.phrase);
@@ -411,6 +415,7 @@ export class WalletService extends BaseService {
       privateKey.derivePath(path).privateKey
     );
     let signer = wallet.connect(this.ethProvider!);
+    console.log(amount);
     let tx = {
       to: to,
       value: ethers.utils.parseEther(amount),
@@ -418,14 +423,16 @@ export class WalletService extends BaseService {
     const { hash } = await signer.sendTransaction(tx);
     console.log('hash: ' + hash);
     const fromAddress = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.address;
+    this.state!.ethereum.enqueueTransaction(hash, tx.to, toPatp, fromAddress, tx.value, (new Date()).toISOString());
+    const stateTx = this.state!.ethereum.getTransaction(hash);
+    console.log(stateTx);
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
       hash,
-      this.state!.ethereum.transactions.get(hash)
+      stateTx
       // tx
     );
-    this.state!.ethereum.enqueueTransaction(hash, tx.to, fromAddress, tx.value, (new Date()).toISOString());
   }
 
   async sendBitcoinTransaction(
