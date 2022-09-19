@@ -6,7 +6,7 @@ An electron app that serves as a GUI for the Realm experience and Urbit. The int
 
 Install all dependencies with `yarn` or `npm install`.
 
-**Note**: Run `yarn start:webview` one time to build the `mouse.js` preload. Need to refactor the default build
+**Note**: Run `yarn watch:cursor` one time to build the `mouse.js` preload. Need to refactor the default build
 process to include this step.
 
 Start the app in dev mode with `yarn start` or `npm run start`.

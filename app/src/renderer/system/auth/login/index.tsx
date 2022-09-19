@@ -32,9 +32,8 @@ type LoginProps = {
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip, hasWallpaper } = props;
-  const { identity, desktop } = useServices();
+  const { identity, desktop, theme } = useServices();
   const { auth } = identity;
-  const { theme } = desktop;
   const [hasFailed, setHasFailed] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -102,8 +101,8 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   let colorProps = null;
   // if (theme) {
   colorProps = {
-    color: theme?.textColor,
-    textShadow: theme?.mode === 'dark' ? '0 1px black' : 'none',
+    color: theme.currentTheme.textColor,
+    textShadow: theme.currentTheme.mode === 'dark' ? '0 1px black' : 'none',
   };
   // }
 
@@ -200,7 +199,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                         <IconButton
                           size={26}
                           ref={optionsRef}
-                          luminosity={theme?.mode}
+                          luminosity={theme.currentTheme.mode}
                           opacity={1}
                           onClick={(evt: any) => {
                             setShow(true);
@@ -213,7 +212,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                             <Portal>
                               <Menu
                                 id={`${pendingShip.patp}-user-menu`}
-                                customBg={theme.windowColor}
+                                customBg={theme.currentTheme.windowColor}
                                 style={{
                                   top: anchorPoint && anchorPoint.y + 9,
                                   left: anchorPoint && anchorPoint.x + 6,
@@ -228,14 +227,14 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                                 <MenuItem
                                   data-prevent-context-close={false}
                                   label="Reset password"
-                                  customBg={theme.windowColor}
+                                  customBg={theme.currentTheme.windowColor}
                                   onClick={() => {
                                     console.log('do reset form');
                                   }}
                                 />
                                 <MenuItem
                                   label="Remove ship"
-                                  customBg={theme.windowColor}
+                                  customBg={theme.currentTheme.windowColor}
                                   mt={1}
                                   onClick={(_evt: any) => {
                                     AuthActions.removeShip(pendingShip.patp);
@@ -258,7 +257,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                           <IconButton
                             ref={submitRef}
                             error={hasFailed}
-                            luminosity={theme?.mode}
+                            luminosity={theme.currentTheme.mode}
                             size={24}
                             canFocus
                             onClick={(evt: any) => clickSubmit(evt)}

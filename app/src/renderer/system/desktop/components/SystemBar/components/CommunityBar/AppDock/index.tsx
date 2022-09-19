@@ -13,13 +13,14 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
-  const { desktop, spaces, bazaar, ship } = useServices();
+  const { desktop, spaces, bazaar, ship, theme } = useServices();
   // const [orderedList, setOrderedList] = useState([]);
 
   const dividerBg = useMemo(
-    () => rgba(lighten(0.2, desktop.theme.dockColor), 0.4),
-    [desktop.theme]
+    () => rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4),
+    [theme.currentTheme]
   );
+
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path!)
     : null;
@@ -38,7 +39,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   const orderedList = useMemo(
     () =>
       spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : [],
-    [currentBazaar?.pinnedChange]
+    [spaces.selected?.path, currentBazaar?.pinnedChange]
   );
 
   const pinnedApps = useMemo(() => {
@@ -51,13 +52,13 @@ export const AppDock: FC<AppDockProps> = observer(() => {
           flexDirection: 'row',
           gap: 8,
         }}
-        values={orderedList}
+        values={orderedList || []}
         onReorder={(newOrder: any) => {
           const newPinList = newOrder.map((app: any) => app.id);
           SpacesActions.setPinnedOrder(spaces.selected!.path, newPinList);
         }}
       >
-        {orderedList.map((app: AppModelType | any, index: number) => {
+        {orderedList?.map((app: AppModelType | any, index: number) => {
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (
@@ -171,7 +172,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       </AnimatePresence>
       <Flex position="relative" flexDirection="row" gap={8} alignItems="center">
         {activeAndUnpinned.map((unpinnedApp: any) => {
-          const app = bazaar.getApp(unpinnedApp.id);
+          const app = bazaar.getApp(unpinnedApp.id)!;
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (

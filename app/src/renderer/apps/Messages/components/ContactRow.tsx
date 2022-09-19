@@ -18,7 +18,7 @@ import {
   PreviewGroupDMType,
 } from 'os/services/ship/models/courier';
 import { Message } from './Message';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';
@@ -259,7 +259,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
             background={unreadCount ? '#569BE2' : 'transparent'}
           >
             {unreadCount > 0 && (
-              <Text fontSize={2} color="white" fontWeight={500}>
+              <Text fontSize={2} color="white" fontWeight={400}>
                 {unreadCount}
               </Text>
             )}

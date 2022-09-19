@@ -39,7 +39,7 @@ export const WalletViews: { [key: string]: any } = {
 };
 
 export const WalletApp: FC<any> = observer((props: any) => {
-  const { desktop } = useServices();
+  const { theme } = useServices();
   const { walletApp } = useTrayApps();
   let transactions = getTransactions(walletApp.ethereum.transactions);
 
@@ -54,7 +54,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
       flexDirection="column"
     >
       <WalletHeader
-        theme={desktop.theme}
+        theme={theme.currentTheme}
         network={walletApp.network}
         onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
@@ -62,10 +62,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
       />
       {walletApp.currentView !== WalletView.TRANSACTION_DETAIL && <PendingTransactionDisplay transactions={transactions} />}
       <View {...props} />
-      <WalletNetwork
-        hidden={walletApp.currentView === 'ethereum:new'}
-        theme={desktop.theme}
-      />
+      <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} />
     </Flex>
   );
 });

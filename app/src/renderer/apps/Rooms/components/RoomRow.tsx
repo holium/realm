@@ -1,7 +1,14 @@
 import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Grid, Text, Flex, Icons, Sigil, IconButton } from 'renderer/components';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import {
+  Grid,
+  Text,
+  Flex,
+  Icons,
+  Sigil,
+  IconButton,
+} from 'renderer/components';
+import { ThemeModelType } from 'os/services/theme.model';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
@@ -11,7 +18,6 @@ import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 // import { id } from 'ethers/lib/utils';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 
-
 type RoomRowProps = Partial<RoomsModelType> & {
   tray?: boolean;
   onClick?: (evt: any) => any;
@@ -19,12 +25,21 @@ type RoomRowProps = Partial<RoomsModelType> & {
 };
 
 export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
-  const { id, tray, title, present, creator, provider, cursors, onClick, rightChildren } =
-    props;
-  const { desktop, ship } = useServices();
+  const {
+    id,
+    tray,
+    title,
+    present,
+    creator,
+    provider,
+    cursors,
+    onClick,
+    rightChildren,
+  } = props;
+  const { theme, ship } = useServices();
   const { roomsApp } = useTrayApps();
 
-  const { mode, dockColor, windowColor, accentColor } = desktop.theme;
+  const { mode, dockColor, windowColor, accentColor } = theme.currentTheme;
 
   // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
@@ -90,23 +105,21 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
         />
       </Flex>
       {/* room deletion button */}
-      {(  tray !== true &&
-          (creator === ship!.patp ||
-          provider === ship!.patp  )) &&
-            
-            <IconButton
-              size={26}
-              customBg={bgColor}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                RoomsActions.deleteRoom(id!);
-                if(roomsApp.liveRoom && id! === roomsApp.liveRoom.id) {
-                  LiveRoom.leave();
-                }
-              }}>
-              <Icons name='Trash' />
-            </IconButton>
+      {tray !== true && (creator === ship!.patp || provider === ship!.patp) && (
+        <IconButton
+          size={26}
+          customBg={bgColor}
+          onClick={(evt: any) => {
+            evt.stopPropagation();
+            RoomsActions.deleteRoom(id!);
+            if (roomsApp.liveRoom && id! === roomsApp.liveRoom.id) {
+              LiveRoom.leave();
             }
+          }}
+        >
+          <Icons name="Trash" />
+        </IconButton>
+      )}
       {rightChildren || <div />}
     </Row>
   );

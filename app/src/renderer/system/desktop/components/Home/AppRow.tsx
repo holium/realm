@@ -91,17 +91,15 @@ export const AppRow = ({
   onClick,
   actionRenderer,
 }: AppRowProps) => {
-  const { desktop } = useServices();
-  const { theme } = desktop;
+  const { theme } = useServices();
   const rowRef = useRef<any>(null);
-  const currentTheme = useMemo(() => theme, [theme]);
+  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   return app ? (
     <AppRowStyle
       id={`app-row-${app.id}`}
       ref={rowRef}
       className="realm-cursor-hover"
       customBg={currentTheme.windowColor}
-      // onContextMenu={(evt: any) => evt.stopPropagation()}
     >
       <Flex
         flexDirection="row"
@@ -137,15 +135,16 @@ export const AppRow = ({
           {app.icon && <Icons name={app.icon} height={16} width={16} />}
         </TileStyle>
         <Flex flexDirection="column" flex={1}>
-          <Text fontWeight={500}>{app.title}</Text>
+          <Text fontWeight={500} color={currentTheme.textColor}>
+            {app.title}
+          </Text>
           <Text
             // width={404}
             style={{
               textOverflow: 'ellipsis',
               overflow: 'hidden',
-              whiteSpace: 'nowrap',
             }}
-            color={'#888888'}
+            color={rgba(currentTheme.textColor, 0.4)}
           >
             {app.info}
           </Text>

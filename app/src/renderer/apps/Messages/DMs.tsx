@@ -12,7 +12,7 @@ import {
 } from 'renderer/components';
 import { ContactRow } from './components/ContactRow';
 import { toJS } from 'mobx';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { darken, lighten, rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';

@@ -39,7 +39,7 @@
 ::
 +$  app-type  ?(%native %web %urbit %missing)
 ::
-+$  tag     ?(%pinned %recommended %suite %installed)
++$  tag     ?(%pinned %recommended %suite)
 ::
 +$  tags    (set tag)
 ::
@@ -70,7 +70,7 @@
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      [%urbit =docket:docket]
+      [%urbit =docket:docket installed=?]
       [%missing ~]
   ==
 ::
@@ -86,6 +86,7 @@
 +$  app-index-lite          (map app-id app-lite)
 +$  space-apps-lite         (map space-path:spaces [index=app-index-lite =sorts])  :: INCLUDED IN AGENT STATE
 +$  space-apps-full         (map space-path:spaces [index=app-index-full =sorts])
++$  sites                   (set [ship desk])
 
 :: +$  pinned-apps             (map space-path:spaces (map app-id @ud))
 :: +$  recommended-apps        (map space-path:spaces (map app-id @ud))
@@ -112,7 +113,7 @@
 ::
 +$  reaction
   $%  [%initial =space-apps-full]
-      [%space-apps =space-path:spaces =app-index-full]
+      [%space-apps =space-path:spaces =app-index-full =sorts sites=(set [ship desk])]
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]
       [%set-pin-order path=space-path:spaces ord=(list app-id)]
@@ -130,5 +131,6 @@
 ::
 +$  view
   $%  [%apps =app-index-full]
+      [%sites sites=(set [ship desk])]
   ==
 --

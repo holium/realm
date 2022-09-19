@@ -34,9 +34,9 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
     windowColor,
     onClose,
   } = props;
-  const { desktop } = useServices();
+  const { theme } = useServices();
 
-  const { iconColor } = desktop.theme;
+  const { iconColor } = theme.currentTheme;
 
   return useMemo(() => {
     return (

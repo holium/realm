@@ -40,11 +40,11 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
       onClose,
       onMaximize,
     } = props;
-    const { desktop } = useServices();
+    const { theme } = useServices();
     const { currentTab, setCurrentTab } = useBrowser();
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
-    const { iconColor, inputColor } = desktop.theme;
+    const { iconColor, inputColor } = theme.currentTheme;
     const tabId = `${currentTab.id}-browser-webview`;
 
     const { searchForm, searchQuery } = useMemo(
@@ -75,7 +75,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
           // search qwant
           const query = new URLSearchParams({ q: term });
           if (term.length > 0) {
-            const search = `https://neeva.com/search?q=${query}`;
+            const search = `https://neeva.com/search?${query}`;
             console.log(search);
             setCurrentTab(search);
             setUrlData(new URL(search));
@@ -218,7 +218,8 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
               defaultValue={searchQuery.state.value}
               onKeyPress={onKeyPress}
               error={
-                !searchQuery.computed.isDirty || searchQuery.computed.error
+                searchQuery.computed.isDirty &&
+                searchQuery.computed.ifWasEverBlurredThenError
               }
               onChange={(e: any) =>
                 searchQuery.actions.onChange(e.target.value)

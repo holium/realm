@@ -236,7 +236,7 @@ export class WalletService extends BaseService {
       this.state!.ethereum.initial(wallets);
       this.state!.bitcoin.initial(wallets);
     });
-    WalletApi.subscribeToTransactions(
+    /*WalletApi.subscribeToTransactions(
       this.core.conduit!,
       (transaction: any) => {
         console.log('WE GOT IT BOIZZZZ');
@@ -251,7 +251,7 @@ export class WalletService extends BaseService {
 
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
       this.state!.ethereum.applyHistory(history);
-    });
+    }); */
 
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
@@ -453,7 +453,7 @@ export class WalletService extends BaseService {
     contractAddress: string,
     walletIndex: string
   ) {
-    await WalletApi.addSmartContact(
+    await WalletApi.addSmartContract(
       this.core.conduit!,
       contractId,
       contractType,

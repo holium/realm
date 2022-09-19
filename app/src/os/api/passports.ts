@@ -1,6 +1,8 @@
 import { Conduit } from '@holium/conduit';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { MembershipType } from '../services/spaces/models/members';
+import { SpacesStoreType } from 'os/services/spaces/models/spaces';
+import { VisaModelType } from 'os/services/spaces/models/visas';
 
 export const PassportsApi = {
   getMembers: async (conduit: Conduit, path: SpacePath) => {
@@ -8,7 +10,6 @@ export const PassportsApi = {
       app: 'passports',
       path: `${path}/members`, // the spaces scry is at the root of the path
     });
-    // console.log(response.members);
     return response.members;
   },
   getVisas: async (conduit: Conduit) => {
@@ -16,7 +17,7 @@ export const PassportsApi = {
       app: 'passports',
       path: '/visas', // the spaces scry is at the root of the path
     });
-    return response.invitations;
+    return response.invites;
   },
   /**
    * inviteMember: invite a member to a space
@@ -39,7 +40,7 @@ export const PassportsApi = {
     };
     const response = await conduit.poke({
       app: 'passports',
-      mark: 'invite-action',
+      mark: 'visa-action',
       json: {
         'send-invite': {
           path: pathObj,
@@ -59,7 +60,7 @@ export const PassportsApi = {
     };
     const response = await conduit.poke({
       app: 'passports',
-      mark: 'invite-action',
+      mark: 'visa-action',
       json: {
         'kick-member': {
           path: pathObj,
@@ -69,7 +70,47 @@ export const PassportsApi = {
     });
     return response;
   },
-  watchMembers: (conduit: Conduit, state: MembershipType): void => {
+  acceptInvite: async (conduit: Conduit, path: SpacePath) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    const response = await conduit.poke({
+      app: 'passports',
+      mark: 'visa-action',
+      json: {
+        'accept-invite': {
+          path: pathObj,
+        },
+      },
+    });
+    return response;
+  },
+  declineInvite: async (conduit: Conduit, path: SpacePath) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+
+    const response = await conduit.poke({
+      app: 'passports',
+      mark: 'visa-action',
+      json: {
+        'decline-invite': {
+          path: pathObj,
+        },
+      },
+    });
+    return response;
+  },
+  watchMembers: (
+    conduit: Conduit,
+    state: MembershipType,
+    spacesState: SpacesStoreType,
+    visaState: VisaModelType
+  ): void => {
     conduit.watch({
       app: 'passports',
       path: `/all`,
@@ -77,8 +118,19 @@ export const PassportsApi = {
         if (data['members']) {
           state.initial(data['members']);
         }
+        if (data['new-members']) {
+          const { path, members } = data['new-members'];
+          state.addMemberMap(path, members);
+        }
+
         if (data['visa-reaction']) {
-          handleInviteReactions(data['visa-reaction'], state);
+          handleInviteReactions(
+            data['visa-reaction'],
+            conduit.ship!,
+            state,
+            spacesState,
+            visaState
+          );
         }
       },
 
@@ -90,12 +142,12 @@ export const PassportsApi = {
 
 const handleInviteReactions = (
   data: any,
+  ship: string,
   state: MembershipType,
-  id?: string
+  spacesState: SpacesStoreType,
+  visaState: VisaModelType
 ) => {
-  // console.log(data);
   const reaction: string = Object.keys(data)[0];
-  // console.log(reaction);
   switch (reaction) {
     case 'invite-sent':
       const sentPayload = data['invite-sent'];
@@ -109,8 +161,20 @@ const handleInviteReactions = (
         acceptedPayload.member
       );
       break;
+    case 'invite-received':
+      const receivedPayload = data['invite-received'];
+      visaState.addIncoming(receivedPayload);
+      break;
+    case 'invite-removed':
+      const removePayload = data['invite-removed'];
+      visaState.removeIncoming(removePayload.path);
+
+      break;
     case 'kicked':
       const kickedPayload = data['kicked'];
+      if (`~${ship}` === kickedPayload.ship) {
+        spacesState.deleteSpace({ 'space-path': kickedPayload.path });
+      }
       state.removeMember(kickedPayload.path, kickedPayload.ship);
       break;
     default:

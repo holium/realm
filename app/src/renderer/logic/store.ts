@@ -5,6 +5,7 @@ import {
   castToSnapshot,
   Instance,
   onSnapshot,
+  tryReference,
   applySnapshot,
   types,
 } from 'mobx-state-tree';
@@ -30,6 +31,10 @@ import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
 import { LiveRoom } from 'renderer/apps/store';
 import { RoomsActions } from './actions/rooms';
+import { VisaModel } from 'os/services/spaces/models/visas';
+import { ThemeStore } from './theme';
+import { rgba } from 'polished';
+import { ThemeType } from 'renderer/theme';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -44,11 +49,13 @@ export const Services = types
     identity: types.model('identity', {
       auth: AuthStore,
     }),
+    theme: ThemeStore,
     onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
     bazaar: BazaarStore,
     membership: MembershipStore,
+    visas: VisaModel,
     docket: DocketStore,
     dms: ChatStore,
     courier: CourierStore,
@@ -67,10 +74,28 @@ export const Services = types
 
 // const desktopSnapshot = loadSnapshot('desktop');
 // const shellSnapshot = loadSnapshot('shell');
-// const bazaarSnapshot = loadSnapshot('bazaar');
 
 const services = Services.create({
   desktop: {},
+  theme: {
+    currentTheme: 'default',
+    themes: {
+      default: {
+        id: 'default',
+        backgroundColor: '#c4c3bf',
+        accentColor: '#4E9EFD',
+        inputColor: '#FFFFFF',
+        dockColor: '#F5F5F4',
+        windowColor: '#f5f5f4',
+        mode: 'light',
+        textColor: '#2a2927',
+        iconColor: rgba('#333333', 0.6),
+        mouseColor: '#4E9EFD',
+        wallpaper:
+          'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
+      },
+    },
+  },
   shell: {},
   identity: {
     auth: {
@@ -86,6 +111,10 @@ const services = Services.create({
   },
   bazaar: {},
   membership: {},
+  visas: {
+    incoming: {},
+    outgoing: {},
+  },
   docket: {},
   dms: {},
   courier: {},
@@ -144,34 +173,51 @@ coreStore.setResuming(true); // need to start the renderer with resuming
 
 OSActions.boot();
 
+OSActions.onLog((_event: any, data: any) => {
+  console.log(data);
+});
+
+OSActions.onSetTheme((_event: any, data: any) => {
+  // console.log('onSetTheme', data);
+  servicesStore.theme.setCurrentTheme(data);
+});
+
 OSActions.onBoot((_event: any, response: any) => {
   applySnapshot(servicesStore.shell, castToSnapshot(response.shell));
   applySnapshot(servicesStore.desktop, castToSnapshot(response.desktop));
-  // console.log('onBoot');
+  console.log('onBoot', response);
   servicesStore.identity.auth.initialSync({
     key: 'ships',
     model: response.auth,
   });
 
   if (response.models && response.ship) {
-    applySnapshot(
-      servicesStore.contacts,
-      castToSnapshot(response.models.contacts!)
-    );
+    if (response.models.contacts) {
+      applySnapshot(
+        servicesStore.contacts,
+        castToSnapshot(response.models.contacts!)
+      );
+    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(response.models.friends)
     );
-    applySnapshot(
-      servicesStore.courier,
-      castToSnapshot(response.models.courier!)
-    );
-    applySnapshot(
-      servicesStore.notifications,
-      castToSnapshot(response.models.notifications!)
-    );
+    if (response.models.courier) {
+      applySnapshot(
+        servicesStore.courier,
+        castToSnapshot(response.models.courier)
+      );
+    }
+    if (response.models.notifications) {
+      applySnapshot(
+        servicesStore.notifications,
+        castToSnapshot(response.models.notifications)
+      );
+    }
     applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
-    applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat!));
+    if (response.models.chat) {
+      applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat));
+    }
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
@@ -186,6 +232,15 @@ OSActions.onBoot((_event: any, response: any) => {
   }
   if (response.spaces) {
     applySnapshot(servicesStore.spaces, castToSnapshot(response.spaces));
+    applySnapshot(servicesStore.visas, castToSnapshot(response.visas));
+    if (servicesStore.spaces.selected) {
+      const selected = servicesStore.spaces.selected;
+      const bootTheme: any = {
+        ...selected.theme,
+        id: selected.path,
+      };
+      servicesStore.theme.setCurrentTheme(bootTheme);
+    }
   }
   if (response.bazaar) {
     applySnapshot(servicesStore.bazaar, response.bazaar);
@@ -234,15 +289,19 @@ OSActions.onLogin((_event: any) => {
 
 OSActions.onConnected(
   (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
-    console.log(initials.models.courier);
-    applySnapshot(
-      servicesStore.courier,
-      castToSnapshot(initials.models.courier!)
-    );
-    applySnapshot(
-      servicesStore.contacts,
-      castToSnapshot(initials.models.contacts!)
-    );
+    console.log('onConnected', initials.models);
+    if (initials.models.courier) {
+      applySnapshot(
+        servicesStore.courier,
+        castToSnapshot(initials.models.courier)
+      );
+    }
+    if (initials.models.contacts) {
+      applySnapshot(
+        servicesStore.contacts,
+        castToSnapshot(initials.models.contacts)
+      );
+    }
     applySnapshot(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
@@ -252,7 +311,9 @@ OSActions.onConnected(
       castToSnapshot(initials.models.notifications)
     );
     applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
-    applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat!));
+    if (initials.models.chat) {
+      applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat));
+    }
 
     servicesStore.setShip(ShipModel.create(initials.ship));
 
@@ -304,6 +365,9 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'membership') {
       applyPatch(servicesStore.membership, value.patch);
+    }
+    if (value.resource === 'visas') {
+      applyPatch(servicesStore.visas, value.patch);
     }
     if (value.resource === 'docket') {
       applyPatch(servicesStore.docket, value.patch);

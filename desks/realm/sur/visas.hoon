@@ -17,6 +17,8 @@
       message=cord
       name=space-name:spc
       type=space-type:spc
+      picture=@t
+      color=@t 
       invited-at=@da
   ==
 ::
@@ -24,6 +26,7 @@
 +$  action
   $%  [%send-invite path=space-path:spc =ship =role:membership message=@t]
       [%accept-invite path=space-path:spc]
+      [%decline-invite path=space-path:spc]
       [%invited path=space-path:spc =invite]
       [%stamped path=space-path:spc]
       [%kick-member path=space-path:spc =ship]
@@ -31,6 +34,8 @@
 
 +$  reaction
   $%  [%invite-sent path=space-path:spc =ship =invite =passport:pprt]
+      [%invite-received path=space-path:spc =invite]
+      [%invite-removed path=space-path:spc]
       [%invite-accepted path=space-path:spc =ship =passport:pprt]
       [%kicked path=space-path:spc =ship]
   ==

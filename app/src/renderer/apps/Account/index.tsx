@@ -16,7 +16,7 @@ import { nativeApps } from '..';
 import { NotificationList } from './components/NotificationList';
 import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { useTrayApps } from '../store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { lighten, rgba } from 'polished';
@@ -28,11 +28,11 @@ type ProfileProps = {
 
 export const AccountTrayApp: FC<ProfileProps> = observer(
   (props: ProfileProps) => {
-    const { ship, identity, notifications, desktop } = useServices();
-    const { theme } = desktop;
+    const { ship, theme, notifications, desktop } = useServices();
     // let [batteryLevel, setBatteryLevel] = useState(0);
     const { dimensions, setActiveApp } = useTrayApps();
-    const { backgroundColor, textColor, windowColor, iconColor } = props.theme;
+    const { backgroundColor, textColor, windowColor, iconColor } =
+      theme.currentTheme;
     const currentShip = ship!;
 
     useEffect(() => {
@@ -100,8 +100,8 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
           <Flex gap={10} alignItems="center">
             <TextButton
               style={{ fontWeight: 400 }}
-              textColor={rgba(theme.textColor, 0.5)}
-              highlightColor={lighten(0.4, theme.textColor)}
+              textColor={rgba(textColor, 0.5)}
+              highlightColor={lighten(0.4, textColor)}
               disabled={true}
               // disabled={notifications.seen.length === 0}
               onClick={(evt: any) => {

@@ -18,7 +18,7 @@ type OurHomeProps = {
 
 export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   const { isOpen } = props;
-  const { friends, desktop, ship } = useServices();
+  const { friends, theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const sidebarComponent = useMemo(() => {
@@ -48,12 +48,12 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   const highlightColor = '#4E9EFD';
 
   const iconHoverColor = useMemo(
-    () => rgba(darken(0.03, desktop.theme.iconColor), 0.1),
-    [desktop.theme.windowColor]
+    () => rgba(darken(0.03, theme.currentTheme.iconColor), 0.1),
+    [theme.currentTheme.windowColor]
   );
 
   return (
-    <Flex flexDirection="row" height="calc(100vh - 58px)">
+    <Flex flexDirection="row" height="calc(100vh - 50px)">
       <Flex
         flex={8}
         overflowY="auto"
@@ -95,7 +95,9 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
               size={3}
               customBg={iconHoverColor}
               color={
-                sidebar === 'friends' ? highlightColor : desktop.theme.iconColor
+                sidebar === 'friends'
+                  ? highlightColor
+                  : theme.currentTheme.iconColor
               }
               onClick={() => {
                 setSidebar(!sidebar ? 'friends' : null);
@@ -133,13 +135,13 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             initial="hidden"
             animate={isOpen ? 'show' : 'exit'}
             exit="hidden"
-            gap={16}
+            gap={32}
             width="888px"
-            mb="180px"
+            mb="170px"
             flexWrap="wrap"
             flexDirection="row"
           >
-            <AppGrid isOpen={isOpen} tileSize="xxl" />
+            <AppGrid isOpen={isOpen} tileSize="xl2" />
           </Flex>
           {sidebarComponent}
         </Flex>

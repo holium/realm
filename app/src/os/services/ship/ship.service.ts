@@ -35,12 +35,10 @@ import {
   NotificationStore,
   NotificationStoreType,
 } from './models/notifications';
-import { VisaModel, VisaModelType } from '../spaces/models/invitations';
 import { NotificationApi } from '../../api/notifications';
 
 export type ShipModels = {
   friends: FriendsType;
-  invitations: VisaModelType;
   contacts?: ContactStoreType;
   docket: DocketStoreType;
   chat?: ChatStoreType;
@@ -64,10 +62,6 @@ export class ShipService extends BaseService {
       seen: [],
       all: [],
       recent: [],
-    }),
-    invitations: VisaModel.create({
-      outgoing: {},
-      incoming: {},
     }),
   };
   private metadataStore: {
@@ -212,6 +206,7 @@ export class ShipService extends BaseService {
   async subscribe(ship: string, shipInfo: any) {
     //
     let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    this.core.sendLog(`secretKey: ${secretKey}`);
     const storeParams = {
       name: 'ship',
       cwd: `realm.${ship}`,
@@ -223,7 +218,10 @@ export class ShipService extends BaseService {
         ? new Store<ShipModelType>(storeParams)
         : new EncryptedStore<ShipModelType>(storeParams);
 
+    this.core.sendLog(`db: ${JSON.stringify(this.db)}`);
+
     let persistedState: ShipModelType = this.db.store;
+    this.core.sendLog(`persistedState: ${JSON.stringify(persistedState)}`);
 
     // TODO set up multiple ships properly
     this.state = ShipModel.create({
@@ -237,6 +235,7 @@ export class ShipService extends BaseService {
       loggedIn: true,
       loader: { state: 'initial' },
     });
+    this.core.sendLog('before load from disk');
 
     this.models.notifications = loadNotificationsFromDisk(
       ship,
@@ -265,6 +264,7 @@ export class ShipService extends BaseService {
       this.core.onEffect
     );
     secretKey = null;
+    this.core.sendLog('after load from disk');
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
@@ -282,10 +282,10 @@ export class ShipService extends BaseService {
     // this.core.onEffect(syncEffect);
 
     try {
-      await new Promise<ShipModelType>(async (resolve, reject) => {
+      await new Promise<ShipModelType>((resolve, reject) => {
         // TODO rewrite the contact store logic
         try {
-          await this.core.conduit!.watch({
+          this.core.conduit!.watch({
             app: 'contact-store',
             path: '/all',
             onEvent: (data: any) => {
@@ -297,6 +297,7 @@ export class ShipService extends BaseService {
         } catch {
           console.log('Subscription failed');
         }
+        this.core.sendLog(`after contact watch`);
 
         FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
 
@@ -318,6 +319,8 @@ export class ShipService extends BaseService {
         DocketApi.getApps(this.core.conduit!).then((apps) => {
           this.models.docket.setInitial(apps);
           this.state!.loader.set('loaded');
+          this.core.sendLog(`docket laoded`);
+
           resolve(this.state!);
         });
       });
@@ -330,6 +333,7 @@ export class ShipService extends BaseService {
 
       // return ship state
     } catch (err) {
+      this.core.sendLog(`error in ship try ${err.toString()}`);
       console.error(err);
     }
     // 2. Register patches

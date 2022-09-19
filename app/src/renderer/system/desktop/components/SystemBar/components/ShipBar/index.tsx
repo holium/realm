@@ -14,19 +14,19 @@ import { darken, rgba } from 'polished';
 type ShipTrayProps = {};
 
 export const ShipTray: FC<ShipTrayProps> = observer(() => {
-  const { desktop } = useServices();
+  const { theme } = useServices();
 
   const { dockColor, textColor } = useMemo(
     () => ({
-      ...desktop.theme,
-      dockColor: rgba(desktop.theme.dockColor!, 0.55),
+      ...theme.currentTheme,
+      dockColor: rgba(theme.currentTheme.dockColor!, 0.55),
     }),
-    [desktop.theme.dockColor]
+    [theme.currentTheme.dockColor]
   );
 
   const iconHoverColor = useMemo(
-    () => rgba(darken(0.05, desktop.theme.dockColor), 0.5),
-    [desktop.theme.windowColor]
+    () => rgba(darken(0.05, theme.currentTheme.dockColor), 0.5),
+    [theme.currentTheme.windowColor]
   );
   const [voiceOn, setVoiceOn] = useState(false);
 
@@ -56,8 +56,8 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
             />
           </motion.div>
         </IconButton> */}
-        <WalletTray theme={desktop.theme} />
-        <MessagesTray theme={desktop.theme} />
+        <WalletTray theme={theme.currentTheme} />
+        <MessagesTray theme={theme.currentTheme} />
         {/* <IconButton
           id="notification-tray-icon"
           size={28}
@@ -69,7 +69,7 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
         >
           <Icons name="Notifications" pointerEvents="none" />
         </IconButton> */}
-        <AccountTray theme={desktop.theme} />
+        <AccountTray theme={theme.currentTheme} />
         {/* <TrayClock /> */}
       </Flex>
     </SystemBarStyle>

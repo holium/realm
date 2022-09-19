@@ -7,6 +7,7 @@ import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { pluralize } from 'renderer/logic/lib/text';
 
 export const EmptyGroup = styled.div`
   height: 32px;
@@ -22,7 +23,7 @@ type RowProps = {
 };
 
 export const SpaceRowStyle = styled(motion.div)<RowProps>`
-  height: 48px;
+  height: 52px;
   position: relative;
   border-radius: 8px;
   padding: 0 8px;
@@ -54,13 +55,12 @@ type SpaceRowProps = {
 
 export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { desktop } = useServices();
-  const { theme } = desktop;
+  const { theme, membership } = useServices();
   const [deleteLoading, setDeleteLoading] = useState(false);
   // const {} =
   const rowRef = useRef<any>(null);
 
-  const currentTheme = useMemo(() => theme, [theme]);
+  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
 
   const contextMenuItems = [
     {
@@ -86,7 +86,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   ];
 
   const contextMenuButtonIds = contextMenuItems.map((item: any) => item.id);
-
+  const memberCount = membership.getMemberCount(space.path);
   return (
     <SpaceRowStyle
       id={`space-row-${space.path}`}
@@ -107,8 +107,8 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
     >
       <ContextMenu
         isComponentContext
-        textColor={theme.textColor}
-        customBg={rgba(theme.windowColor, 0.9)}
+        textColor={currentTheme.textColor}
+        customBg={rgba(currentTheme.windowColor, 0.9)}
         containerId={`space-row-${space.path}`}
         parentRef={rowRef}
         style={{ minWidth: 180 }}
@@ -126,7 +126,7 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
         ) : (
           <EmptyGroup color={space.color! || '#000000'} />
         )}
-        <Flex ml={2} flexDirection="column">
+        <Flex ml="10px" flexDirection="column">
           <Text
             style={{
               display: 'flex',
@@ -144,21 +144,14 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
             {/* <Icons.ExpandMore ml="6px" /> */}
           </Text>
           <Flex flexDirection="row" gap={12}>
-            {space.path === '~hatryx-lastud/spaces/other-life' && (
-              <Flex gap={4} flexDirection="row" alignItems="center">
-                <Icons name="Members" size={16} opacity={0.6} />
+            <Flex gap={4} flexDirection="row" alignItems="center">
+              <Icons name="Members" size={16} opacity={0.6} />
 
-                <Text
-                  fontWeight={400}
-                  mt="1px"
-                  mr={1}
-                  opacity={0.6}
-                  fontSize={2}
-                >
-                  {1261} members
-                </Text>
-              </Flex>
-            )}
+              <Text fontWeight={400} mt="1px" mr={1} opacity={0.6} fontSize={2}>
+                {membership.getMemberCount(space.path)}{' '}
+                {pluralize('member', memberCount)}
+              </Text>
+            </Flex>
             {space.path === '~hatryx-lastud/spaces/other-life' && (
               <Flex gap={4} flexDirection="row" alignItems="center">
                 <Icons name="Coins" size={16} opacity={0.6} />

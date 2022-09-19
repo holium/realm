@@ -1,15 +1,17 @@
-import {utils, BigNumber} from 'ethers';
+import { utils, BigNumber } from 'ethers';
 import { DesktopStoreType } from 'os/services/shell/desktop.model';
-import { NetworkType, TransactionType } from 'os/services/tray/wallet.model';
-import { theme } from 'renderer/theme';
+import { ThemeType } from 'renderer/logic/theme';
+import { theme } from '../../../theme';
 
-export function getBaseTheme(desktop: DesktopStoreType) {
-  return theme[desktop.theme.mode === 'light' ? 'light' : 'dark'];
+export function getBaseTheme(currentTheme: ThemeType) {
+  // console.log(theme, currentTheme.mode);
+  // @ts-ignore
+  return theme[currentTheme.mode];
 }
 
 export function shortened(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
+}
 
 export function formatWei(wei: string) {
   let amount = BigNumber.from(wei);
@@ -86,7 +88,7 @@ export const monthNames = [
   'Sep',
   'Oct',
   'Nov',
-  'Dec'
+  'Dec',
 ];
 
 export const fullMonthNames = [

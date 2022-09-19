@@ -11,10 +11,10 @@ type TrayManagerProps = {};
 
 export const TrayManager: FC<TrayManagerProps> = observer(
   (props: TrayManagerProps) => {
-    const { desktop } = useServices();
+    const { theme } = useServices();
     let trayAppRef: any;
 
-    const { windowColor, textColor } = desktop.theme;
+    const { windowColor, textColor } = theme.currentTheme;
     const { activeApp, dimensions, coords } = useTrayApps();
 
     let TrayAppView: FC<any> | undefined;
@@ -37,7 +37,10 @@ export const TrayManager: FC<TrayManagerProps> = observer(
                 backgroundColor={windowColor}
                 textColor={textColor}
               >
-                <TrayAppView theme={desktop.theme} dimensions={dimensions} />
+                <TrayAppView
+                  theme={theme.currentTheme}
+                  dimensions={dimensions}
+                />
               </MiniApp>
             }
           />

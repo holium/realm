@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer } from 'electron';
+import { ipcMain, ipcRenderer, safeStorage } from 'electron';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -131,16 +131,24 @@ export class AuthService extends BaseService {
 
     let passwordHash = this.state.getPasswordHash(shipId);
     let passwordCorrect = await bcrypt.compare(password, passwordHash);
+    this.core.sendLog(`passwordHash: ${passwordHash}`);
+    this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
+
     if (!passwordCorrect) {
+      this.core.sendLog(`password incorrect`);
       this.state.setLoader('error');
       return false;
     }
-
+    this.core.sendLog(`ship: ${ship}`);
     this.core.passwords.setPassword(ship, password);
+    this.core.sendLog(
+      `safeStorage isEncryptionAvailable: ${safeStorage.isEncryptionAvailable()}`
+    );
+
     this.state.login(shipId);
 
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
-    this.core.services.shell.setBlur(null, false, false);
+    this.core.services.shell.setBlur(null, false);
 
     // TODO decrypt stored snapshot
     const { url, cookie } = this.getCredentials(ship, password);

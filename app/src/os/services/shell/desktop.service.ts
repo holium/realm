@@ -1,3 +1,5 @@
+import { theme } from './../../../renderer/theme';
+import { ThemeModelType } from './../theme.model';
 import { ipcMain, session, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { toJS } from 'mobx';
@@ -9,11 +11,11 @@ import {
   clone,
   cast,
 } from 'mobx-state-tree';
+import { rgba } from 'polished';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
-import { ThemeModelType } from './theme.model';
 
 /**
  * DesktopService
@@ -40,23 +42,17 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-home-pane': this.setHomePane,
     'realm.desktop.set-app-dimensions': this.setAppDimensions,
     'realm.desktop.set-mouse-color': this.setMouseColor,
-    'realm.desktop.set-theme': this.setTheme,
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
     'realm.desktop.close-app-window': this.closeAppWindow,
   };
 
   static preload = {
-    changeWallpaper: async (
-      spaceId: string,
-      color: string,
-      wallpaper: string
-    ) => {
+    changeWallpaper: async (spaceId: string, theme: ThemeModelType) => {
       return ipcRenderer.invoke(
         'realm.desktop.change-wallpaper',
         spaceId,
-        color,
-        wallpaper
+        theme
       );
     },
     setHomePane: (isHome: boolean) => {
@@ -78,9 +74,7 @@ export class DesktopService extends BaseService {
     setMouseColor: (mouseColor: string) => {
       return ipcRenderer.invoke('realm.desktop.set-mouse-color', mouseColor);
     },
-    setTheme: (theme: ThemeModelType) => {
-      return ipcRenderer.invoke('realm.desktop.set-theme', theme);
-    },
+
     openAppWindow: (spaceId: string, app: any) => {
       return ipcRenderer.invoke('realm.desktop.open-app-window', spaceId, app);
     },
@@ -124,25 +118,16 @@ export class DesktopService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async changeWallpaper(
-    _event: any,
-    spaceId: string,
-    color: string,
-    wallpaper: string
-  ) {
-    const newTheme = await this.core.services.spaces.setSpaceWallpaper(
-      spaceId,
-      color,
-      wallpaper
-    );
+  async changeWallpaper(_event: any, spaceId: string, theme: any) {
+    this.core.services.spaces.setSpaceWallpaper(spaceId, theme);
     this.core.services.shell.closeDialog(null);
 
     // const isHomeSpace : boolean = (spaceId === `/${this.core.conduit!.ship}/our`);
-    if (newTheme) {
-      this.state?.setTheme(cast(newTheme)!);
-    }
+    // if (newTheme) {
+    //   this.state?.setTheme(newTheme!);
+    // }
 
-    return toJS(newTheme);
+    return;
   }
 
   setActive(_event: any, spaceId: string, appId: string) {
@@ -155,9 +140,6 @@ export class DesktopService extends BaseService {
 
   setMouseColor(_event: any, mouseColor: string) {
     this.state?.setMouseColor(mouseColor);
-  }
-  setTheme(theme: ThemeModelType) {
-    this.state?.setTheme(clone(theme)!);
   }
   setAppDimensions(
     _event: any,

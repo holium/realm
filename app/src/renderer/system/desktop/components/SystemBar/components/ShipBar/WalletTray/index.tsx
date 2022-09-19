@@ -3,7 +3,7 @@ import { darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
 
 import { IconButton, Icons } from 'renderer/components';
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 

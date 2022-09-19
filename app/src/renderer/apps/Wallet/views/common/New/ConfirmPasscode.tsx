@@ -15,10 +15,10 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
   (props: PasscodeProps) => {
     let [passcode, setPasscode] = useState('');
     let [wrongCode, setWrongCode] = useState(false);
-    const { desktop } = useServices();
-    const theme = getBaseTheme(desktop);
+    const { theme } = useServices();
+    const themeData = getBaseTheme(theme.currentTheme);
 
-    const panelBackground = darken(0.02, desktop.theme!.windowColor);
+    const panelBackground = darken(0.02, theme.currentTheme!.windowColor);
     const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
     useEffect(() => {
@@ -64,14 +64,14 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
           mx="6px"
           height={35}
           width={32}
-          border={`solid 1px ${theme.colors.brand.primary}`}
+          border={`solid 1px ${themeData.colors.brand.primary}`}
           alignItems="center"
           justifyContent="center"
         >
           <Box
             height="8px"
             width="8px"
-            backgroundColor={theme.colors.text.primary}
+            backgroundColor={themeData.colors.text.primary}
             borderRadius="50%"
           ></Box>
         </Flex>
@@ -127,7 +127,7 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
           />
         </Flex>
         <Flex alignItems="center">
-          <Text variant="body" color={theme.colors.text.error}>
+          <Text variant="body" color={themeData.colors.text.error}>
             {wrongCode && 'Incorrect passcode.'}
           </Text>
         </Flex>

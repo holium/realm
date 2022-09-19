@@ -14,7 +14,7 @@ type RoomTrayProps = {};
 
 const iconSize = 28;
 export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
-  const { desktop, ship } = useServices();
+  const { theme, ship } = useServices();
   // TODO ship.cookie
   // ship
   //
@@ -25,7 +25,7 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
     setTrayAppCoords,
     setTrayAppDimensions,
   } = useTrayApps();
-  const { dockColor, textColor } = desktop.theme;
+  const { dockColor, textColor } = theme.currentTheme;
   const roomsButtonRef = createRef<HTMLButtonElement>();
 
   const dimensions = {
@@ -67,8 +67,8 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
   );
 
   const iconHoverColor = useMemo(
-    () => rgba(darken(0.05, desktop.theme.dockColor), 0.5),
-    [desktop.theme.windowColor]
+    () => rgba(darken(0.05, theme.currentTheme.dockColor), 0.5),
+    [theme.currentTheme.windowColor]
   );
 
   return (

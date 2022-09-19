@@ -3,21 +3,21 @@
 ::  A thin agent that interfaces with various chat stores
 ::
 /-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store, 
-    hark=hark-store, dm-hook-sur=dm-hook
-/+  dbug, default-agent, lib=courier, hook=dm-hook
+    hark=hark-store, dm-hook-sur=dm-hook, push-notify
+/+  dbug, default-agent, lib=courier, hook=dm-hook, push-lib=push-notify
 |%
 +$  card  card:agent:gall
-+$  versioned-state
-    $%  state-0
-    ==
+
 +$  state-0
   $:  %0
+      =app-id:push-notify         :: constant
+      =rest-api-key:push-notify   :: constant
+      =uuid:push-notify           :: (sham @p)
+      push-enabled=?
   ==
 --
 =|  state-0
 =*  state  -
-%-  agent:dbug
-:: =/  tid         (scot %ta 'group-dm_0v6.cqlt2.4o96j.6fq0u.dv85g.v3tco')
 :: ^-  agent:gall
 =<
   %-  agent:dbug
@@ -28,8 +28,10 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    :: =/  ta-now            `@ta`(scot %da now.bowl)  
-    :: =/  start-args       [~ `tid [p=our.bowl q=%landscape r=da+now.bowl] %graph-create !>(~)]
+    =.  app-id.state            '82328a88-f49e-4f05-bc2b-06f61d5a733e'
+    =.  rest-api-key.state      'Basic MDZiNDZmN2EtYTBhMy00OWJlLTlkZWItOWIyNDY5MTQzMmFl'
+    =.  uuid.state              (sham our.bowl)
+    =.  push-enabled.state       %.y
     :_  this
     ::  %watch: all incoming dms and convert to our simple structure
     :~  
@@ -38,16 +40,31 @@
       :: [%pass /group-dm-thread %agent [our.bowl %spider] %watch /thread-result/[tid]]
       :: [%pass /thread/[ta-now] %agent [our.bowl %spider] %poke %spider-start !>(start-args)]
     ==
-  ++  on-save   !>(~)
-  ++  on-load   |=(vase `..on-init)
+  ++  on-save   !>(state)
+  ++  on-load   ::|=(vase `..on-init)
+    |=  =vase
+    ^-  (quip card _this)
+    =/  old=(unit state-0)
+      (mole |.(!<(state-0 vase)))  
+    ?^  old
+      `this(state u.old)
+    ~&  >>  'nuking old state'
+    =^  cards  this  on-init
+    :_  this
+    =-  (welp - cards)
+    %+  turn  ~(tap in ~(key by wex.bowl))
+    |=  [=wire =ship =term] 
+    ^-  card
+    [%pass wire %agent [ship term] %leave ~]
+  ::
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
-    :: ~&  >  [mark]
     |^
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
       %graph-dm-action    (on-graph-action:core !<(action:store vase))
+      %notify-action      (on-notify-action:core !<(action:push-notify vase))
       :: %next-dm-action    (on-action:core !<(action:store vase))
     ==
     [cards this]
@@ -71,6 +88,10 @@
     ?+    path  (on-peek:def path)
     ::
     ::  ~/scry/courier/dms.json
+      [%x %push-uuid ~]
+        ?>  =(our.bowl src.bowl)
+        ``notify-view+!>([%uuid uuid.state])
+    ::  ~/scry/courier/dms.json
       [%x %dms ~]
         ?>  =(our.bowl src.bowl)
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
@@ -82,9 +103,6 @@
         =/  entity       `@p`(slav %p i.t.t.t.path)
         =/  timestamp    `@t`i.t.t.t.t.path
         =/  dms           (grp-log:gs:lib our.bowl now.bowl entity timestamp)
-        :: ?:  =(%graph-store source.dms)
-        ::   :: mark the dm-inbox as read
-        ::   (poke-read )
         ``graph-dm-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev.json
@@ -92,7 +110,6 @@
         ?>  =(our.bowl src.bowl)
         =/  to-ship       `@p`(slav %p i.t.t.path)
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
-
         ``graph-dm-view+!>([%dm-log dms])
     ::
     ::  ~/scry/courier/dms/~dev/paged/0/20.json
@@ -148,25 +165,6 @@
               [cards this]
             ==
         ==
-      :: [%thread ~]
-      ::   ?+    -.sign  (on-agent:def wire sign)
-      ::     %poke-ack
-      ::       ?~  p.sign
-      ::         %-  (slog leaf+"Thread started successfully" ~)
-      ::         `this
-      ::       %-  (slog leaf+"Thread failed to start" u.p.sign)
-      ::       `this
-      ::   ==
-      ::
-      :: [%group-dm-thread ~]
-      ::   ?+    -.sign  (on-agent:def wire sign)
-      ::     %fact
-      ::       ?+   p.cage.sign  `this
-      ::         %thread-fail
-      ::           ~&  >>>  ['thread failedddd' q.cage.sign]
-      ::         `this
-      ::       ==
-      ::   ==
     ==
   ::
   ++  on-leave    on-leave:def
@@ -302,24 +300,20 @@
   |^
   ?+  -.q.upd   `state
     %add-nodes
-      ?:  =(name.resource.+.q.upd %dm-inbox)
-        :: is dm-inbox
+      ?:  =(name.resource.+.q.upd %dm-inbox) :: is dm-inbox
         =/  dm            ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
         =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
         =/  ship-dec      (snag 0 p.dm-node)
         =/  new-dm        (received-dm:gs:lib ship-dec q.dm-node our now)
-        :_  state
-        [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+        (send-updates new-dm)
       ::
-      ?:  (group-skim-gu:gs:lib resource.+.q.upd)
-        ::  is group dm
+      ?:  (group-skim-gu:gs:lib resource.+.q.upd)  ::  is group dm
         =/  dm            ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
         =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
         =/  entity        entity.resource.+.q.upd
         =/  name          name.resource.+.q.upd
         =/  new-dm        (received-grp-dm:gs:lib our now entity name q.dm-node)
-        :_  state
-        [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+        (send-updates new-dm)
       :: else 
       `state
     %add-graph
@@ -344,6 +338,19 @@
       :: ]
       `state
   ==
+  ++  send-updates
+    |=  [new-dm=chat:store]
+    ?:  =(%.n push-enabled.state)
+      :_  state
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+    ::
+    =/  notify   (generate-push-notification:push-lib app-id.state new-dm)
+    ~&  >>  notify
+    :_  state
+    :~ 
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
+      ::  Send to onesignal
+    ==
   --
 ::
 ++  on-hook-action
@@ -366,9 +373,19 @@
     :_  state
     [%give %fact [/updates ~] graph-dm-reaction+!>([%invite-dm invite-preview])]~
   --
-:: ++  read-dm-log
-::   |=  [=place:hark our=ship now=@da]
-::   :: =/  act     [%read-count place]
-::   [%pass / %agent [our %hark-store] %poke hark-action+!>([%read-count place])]
 ::
+++  on-notify-action
+  |=  [act=action:push-notify]
+  ^-  (quip card _state)
+  |^
+  ?-  -.act      
+    %enable-push           
+      =.  push-enabled.state   %.y
+      `state
+    %disable-push           
+      =.  push-enabled.state   %.n
+      `state  
+  ==
+  --
+
 --

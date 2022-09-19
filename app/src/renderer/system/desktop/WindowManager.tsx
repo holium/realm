@@ -7,6 +7,7 @@ import { rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { ThemeType } from 'renderer/theme';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -15,7 +16,7 @@ type WindowManagerProps = {
 export const WindowManager: FC<WindowManagerProps> = observer(
   (props: WindowManagerProps) => {
     const { isOpen } = props;
-    const { shell, desktop } = useServices();
+    const { shell, theme, desktop } = useServices();
     const desktopRef = useRef<any>(null);
 
     const managerType = 'classic';
@@ -44,8 +45,8 @@ export const WindowManager: FC<WindowManagerProps> = observer(
       >
         <ContextMenu
           isComponentContext={false}
-          textColor={desktop.theme.textColor}
-          customBg={rgba(desktop.theme.windowColor, 0.9)}
+          textColor={theme.currentTheme.textColor}
+          customBg={rgba(theme.currentTheme.windowColor, 0.9)}
           containerId="desktop-fill"
           parentRef={desktopRef}
           style={{ minWidth: 180 }}
@@ -76,12 +77,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
         {windows.map((window: any, index: number) => {
           const key = `${window.id}-${index}`;
           return (
-            <AppWindow
-              desktopRef={desktopRef}
-              key={key}
-              window={window}
-              theme={desktop.theme}
-            />
+            <AppWindow desktopRef={desktopRef} key={key} window={window} />
           );
         })}
       </motion.div>

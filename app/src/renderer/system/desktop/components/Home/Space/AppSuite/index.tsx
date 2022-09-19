@@ -10,11 +10,15 @@ import { AppRow } from '../../AppRow';
 import { useServices } from 'renderer/logic/store';
 
 import { cleanNounColor } from 'os/lib/color';
+import { observer } from 'mobx-react';
+import { rgba } from 'polished';
 
 type AppSuiteProps = {
   patp: string;
   space: SpaceModelType;
+  apps: any[];
   suite: any[];
+  isAdmin: boolean;
   // suite?: AppModelType[];
 };
 // const emptyArr = [1, 2, 3, 4, 5];
@@ -86,52 +90,32 @@ export const PopoverTrigger = PopoverPrimitive.Trigger;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
-export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
-  const { patp, space } = props;
-  const { spaces, ship, bazaar, identity } = useServices();
+export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
+  const { patp, space, apps, suite, isAdmin } = props;
+  const { theme } = useServices();
   const [searchMode, setSearchMode] = useState('none');
-  const [suite, setSuite] = useState<any[]>([]);
-  const [apps, setApps] = useState<any[]>([]);
   const [suiteIndex, setSuiteIndex] = useState(-1);
+  const { accentColor, windowColor, textColor, iconColor } = theme.currentTheme;
 
   const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
     console.log('onAppsAction => %o', { path, id: app.id, tag });
-    SpacesActions.addToSuite(path, app.id, rank).then((result) => {
-      console.log('addToSuite response => %o', result);
-      loadSuite();
-      // setSearchMode('none');
-    });
+    SpacesActions.addToSuite(path, app.id, rank);
   };
 
   const actionRenderer = (space: string, app: any, rank: number) => (
     <>
       <Button
         borderRadius={6}
-        onClick={(e) => onAppsAction(space, app, 'suite', rank)}
+        onClick={(e) => {
+          setSearchMode('none');
+          setSuiteIndex(-1);
+          onAppsAction(space, app, 'suite', rank);
+        }}
       >
         Add to Suite
       </Button>
     </>
   );
-
-  const loadSuite = () => {
-    // @ts-ignore
-    const suite = Array(5).fill(undefined);
-    const apps = bazaar.getSuiteApps(space.path);
-    apps?.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
-    // console.log(suite);
-    setSuite(suite);
-  };
-
-  useEffect(() => {
-    // console.log('AppSuite useEffect => %o', {
-    //   ship: ship.patp,
-    //   path: space.path,
-    // });
-    setApps(bazaar.getAvailableApps());
-    // setApps(bazaar.getBazaar(`/${ship.patp}/our`).allApps);
-    loadSuite();
-  }, [space.path]);
 
   return (
     <Flex flexDirection="column" position="relative" gap={20} mb={60}>
@@ -152,19 +136,19 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
             (app && (
               <SuiteApp
                 key={index}
-                isAdmin={true}
+                isAdmin={isAdmin}
                 space={space}
                 app={app}
                 onClick={() => {
-                  SpacesActions.removeFromSuite(space.path, app.id).then(
-                    (result) => loadSuite()
-                  );
+                  SpacesActions.removeFromSuite(space.path, app.id);
                 }}
               />
             )) || (
               <SuiteApp
                 key={index}
                 space={space}
+                selected={index === suiteIndex}
+                accentColor={accentColor}
                 app={undefined}
                 onClick={(e) => {
                   setSearchMode('app-search');
@@ -197,18 +181,33 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
         <PopoverAnchor asChild>
           <div style={{ width: '100%', height: '1px' }}></div>
         </PopoverAnchor>
-        <PopoverContent sideOffset={-60} style={{ width: '50em' }}>
+        <PopoverContent
+          sideOffset={-60}
+          style={{
+            outline: 'none',
+            boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
+            width: '50em',
+            borderRadius: 12,
+            maxHeight: '50vh',
+            overflowY: 'auto',
+            background: windowColor,
+          }}
+        >
           <Flex flexDirection={'column'}>
-            <Text variant="h6" fontWeight={500} color={'#ababab'}>
+            <Text variant="h6" fontWeight={500} color={textColor}>
               Installed Apps
             </Text>
             <div style={{ marginTop: '2px', marginBottom: '2px' }}>
               <hr
-                style={{ backgroundColor: '#dadada', height: '1px', border: 0 }}
+                style={{
+                  backgroundColor: rgba(iconColor, 0.3),
+                  height: '1px',
+                  border: 0,
+                }}
               />
             </div>
             {(apps.length === 0 && (
-              <Text color={'#ababab'}>No apps found</Text>
+              <Text color={rgba(textColor, 0.4)}>No apps found</Text>
             )) || (
               <Flex flexDirection={'column'} gap={10}>
                 {apps.map((item, index) => (
@@ -219,6 +218,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
                       actionRenderer={() =>
                         actionRenderer(space.path, item, suiteIndex)
                       }
+                      onClick={() => {}}
                     />
                   </div>
                 ))}
@@ -229,7 +229,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
       </Popover>
     </Flex>
   );
-};
+});
 
 AppSuite.defaultProps = {
   suite: [],

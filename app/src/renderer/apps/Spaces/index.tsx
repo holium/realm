@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Grid, Flex, IconButton, Icons, Text } from 'renderer/components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
@@ -16,11 +16,11 @@ type SpacesProps = {
 };
 
 export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
-  const { ship, desktop, spaces } = useServices();
+  const { ship, theme, spaces } = useServices();
 
   const { dimensions } = props;
 
-  const spaceTheme = useMemo(() => desktop.theme, [desktop.theme]);
+  const spaceTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   const { dockColor, iconColor, textColor, windowColor } = spaceTheme;
 
   const bottomHeight = 58;

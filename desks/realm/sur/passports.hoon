@@ -55,6 +55,7 @@
 +$  reaction
   $%  [%all =districts]
       [%members path=space-path:spaces =passports]
+      [%new-members path=space-path:spaces =passports]
   ==
 ::
 ::  Scry views

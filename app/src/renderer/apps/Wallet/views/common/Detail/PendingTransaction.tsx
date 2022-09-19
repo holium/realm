@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from 'react';
-import { isValidPatp} from 'urbit-ob';
+import { isValidPatp } from 'urbit-ob';
 import { errors, ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { theme as themes } from 'renderer/theme';
 import { darken, lighten } from 'polished';
-import {QRCodeSVG} from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 import { Flex, Box, Icons, Text, Sigil, Button, ImagePreview, Spinner } from 'renderer/components';
 import { CircleButton } from '../../../components/CircleButton';
@@ -24,30 +24,55 @@ const abbrMap = {
   bitcoin: 'BTC',
 };
 
-interface PendingTransactionDisplayProps {
-  transactions: TransactionType[]
+export interface TransactionType {
+  hash: string
+  amount: string
+  network: 'ethereum' | 'bitcoin'
+  type: 'sent' | 'received'
+
+  initiatedAt: string | number  // timestamp
+  completedAt?: string | number // timestamp
+
+  ourAddress: string // actual address, path, w/e works
+  theirPatp?: string
+  theirAddress: string
+
+  status: 'pending' | 'failed' | 'succeeded'
+  failureReason?: string
+
+  notes?: string
+  link?: string // to etherscan or w/e, probs can just derive this given the hash
 }
-export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (props: PendingTransactionDisplayProps) => {
+
+interface PendingTransactionDisplayProps {
+  transactions: TransactionType[];
+}
+export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
+  props: PendingTransactionDisplayProps
+) => {
   const pendingTransactions = props.transactions
     .filter((trans) => trans.status === 'pending')
     .sort((a, b) => (new Date(a.initiatedAt)).getTime() - (new Date(b.initiatedAt)).getTime());
 
   return (
     <Flex mt={4} width="100%">
-      {pendingTransactions.length
-        ? <PendingTransaction transaction={pendingTransactions[0]} />
-        : <></>
-      }
+      {pendingTransactions.length ? (
+        <PendingTransaction transaction={pendingTransactions[0]} />
+      ) : (
+        <></>
+      )}
     </Flex>
-  )
-}
+  );
+};
 
 interface PendingTransactionProps {
-  transaction: TransactionType
+  transaction: TransactionType;
 }
-export const PendingTransaction: FC<PendingTransactionProps> = (props: PendingTransactionProps) => {
-  const { desktop } = useServices();
-  const { colors } = getBaseTheme(desktop);
+export const PendingTransaction: FC<PendingTransactionProps> = (
+  props: PendingTransactionProps
+) => {
+  const { theme } = useServices();
+  const { colors } = getBaseTheme(theme.currentTheme);
 
   const goToTransaction = () => {
     WalletActions.setView(WalletView.TRANSACTION_DETAIL, undefined, props.transaction.hash);
@@ -72,5 +97,5 @@ export const PendingTransaction: FC<PendingTransactionProps> = (props: PendingTr
         <Spinner size={1} color={colors.brand.primary} />
       </Flex>
     </Flex>
-  )
-}
+  );
+};

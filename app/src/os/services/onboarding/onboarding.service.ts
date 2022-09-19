@@ -20,8 +20,9 @@ import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
+import { BazaarApi } from '../../api/bazaar';
 import { Conduit } from '@holium/conduit';
-import { resolve } from 'path';
+import { toJS } from 'mobx';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
@@ -32,6 +33,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.setStep': this.setStep,
     'realm.onboarding.setSeenSplash': this.setSeenSplash,
     'realm.onboarding.agreedToDisclaimer': this.agreedToDisclaimer,
+    'realm.onboarding.checkGatedAccess': this.checkGatedAccess,
     'realm.onboarding.setEmail': this.setEmail,
     'realm.onboarding.verifyEmail': this.verifyEmail,
     'realm.onboarding.resendEmailConfirmation': this.resendEmailVerification,
@@ -60,6 +62,10 @@ export class OnboardingService extends BaseService {
 
     agreedToDisclaimer() {
       return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
+    },
+
+    checkGatedAccess(code: string) {
+      return ipcRenderer.invoke('realm.onboarding.checkGatedAccess', code);
     },
 
     setEmail(email: string) {
@@ -227,14 +233,54 @@ export class OnboardingService extends BaseService {
     this.state.setAgreedToDisclaimer();
   }
 
+  async checkGatedAccess(
+    _event: any,
+    code: string
+  ): Promise<{ success: boolean; message: string }> {
+    if (
+      (process.env.NODE_ENV === 'development' &&
+        code === '~admins-admins-admins') ||
+      (process.env.DEBUG_PROD === 'true' && code === '~admins-admins-admins')
+    ) {
+      this.state.setInviteCode('~admins-admins-admins');
+      return { success: true, message: 'Access succeeded.' };
+    }
+
+    let accessCode = await this.core.holiumClient.getAccessCode(code);
+    if (accessCode && accessCode.type === 'ACCESS') {
+      if (accessCode.singleUse && accessCode.redeemed) {
+        return {
+          success: false,
+          message: 'This invite code was already redeemed.',
+        };
+      } else if (new Date(accessCode.expiresAt!).getTime() < Date.now()) {
+        return { success: false, message: 'This invite code has expired.' };
+      } else {
+        this.state.setInviteCode(code);
+        if (accessCode.email) {
+          this.state.setEmail(accessCode.email);
+        }
+        return { success: true, message: 'Access succeeded.' };
+      }
+    } else {
+      return { success: false, message: 'Invite code not found.' };
+    }
+  }
+
   async setEmail(_event: any, email: string) {
     const { auth } = this.core.services.identity;
-
     let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
     this.state.setVerificationCode(account.verificationCode);
 
     auth.setAccountId(account.id);
+
+    if (
+      (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') ||
+      (process.env.DEBUG_PROD === 'true' && email === 'admin@admin.com')
+    ) {
+      this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
+    }
   }
 
   async resendEmailVerification(_event: any) {
@@ -411,101 +457,6 @@ export class OnboardingService extends BaseService {
     this.state.setEncryptedPassword(encryptedPassword);
   }
 
-  async installApp(tempConduit: Conduit, ship: string, desk: string) {
-    return new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1;
-      await tempConduit.watch({
-        app: 'docket',
-        path: '/charges',
-        onSubscribed: (subscription: number) => {
-          subscriptionId = subscription;
-        },
-        onEvent: async (data: any, _id?: number, mark?: string) => {
-          if (data.hasOwnProperty('add-charge')) {
-            const charge = data['add-charge'].charge;
-            // according to Tlon source, this determines when the app is fully installed
-            if ('glob' in charge.chad || 'site' in charge.chad) {
-              await tempConduit.unsubscribe(subscriptionId);
-              resolve(data);
-            }
-          }
-        },
-        onError: () => {
-          console.log('subscription [docket/charges] rejected');
-          reject('subscription [docket/charges] rejected');
-        },
-        onQuit: () => {
-          console.log('kicked from subscription [docket/charges]');
-          reject('kicked from subscription [docket/charges]');
-        },
-      });
-      await tempConduit.poke(docketInstall(ship, desk));
-    });
-  }
-
-  async addAlly(tempConduit: Conduit, ship: string) {
-    return new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1;
-      await tempConduit.watch({
-        app: 'treaty',
-        path: '/treaties',
-        onSubscribed: (subscription: number) => {
-          subscriptionId = subscription;
-        },
-        onEvent: async (data: any, _id?: number, mark?: string) => {
-          if (data.hasOwnProperty('add')) {
-            await tempConduit.unsubscribe(subscriptionId);
-            resolve(data);
-          }
-        },
-        onError: () => {
-          console.log('subscription [treaty/treaties] rejected');
-          reject('subscription [treaty/treaties] rejected');
-        },
-        onQuit: () => {
-          console.log('kicked from subscription [treaty/treaties]');
-          reject('kicked from subscription [treaty/treaties]');
-        },
-      });
-      await tempConduit.poke(allyShip(ship));
-    });
-  }
-
-  async isAppInstalled(tempConduit: Conduit, ship: string, desk: string) {
-    const response = await tempConduit.scry({
-      app: 'docket',
-      path: '/charges', // the spaces scry is at the root of the path
-    });
-    return Object.keys(response.initial).includes(desk);
-  }
-
-  async isAlly(tempConduit: Conduit, ship: string) {
-    const response = await tempConduit.scry({
-      app: 'treaty',
-      path: '/allies', // the spaces scry is at the root of the path
-    });
-    return Object.keys(response.ini).includes(ship);
-  }
-
-  async hasTreaty(tempConduit: Conduit, ship: string, desk: string) {
-    try {
-      const response = await tempConduit.scry({
-        app: 'treaty',
-        path: `/treaty/${ship}/${desk}`, // the spaces scry is at the root of the path
-      });
-      // assume undefined response means no treaty found. not sure how reliable
-      //  this is, but scry method doesn't return error codes (e.g. 404)
-      console.log('hasTreaty: testing treaty => %o', {
-        ship,
-        desk,
-        response,
-      });
-      return response !== undefined;
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
   async installRealm(_event: any, ship: string) {
     /*
     // TODO kiln-install realm desk
@@ -529,7 +480,7 @@ export class OnboardingService extends BaseService {
     const tempConduit = await this.tempConduit(url, patp, cookie!);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
-      await this.installDesk(
+      await BazaarApi.installDesk(
         tempConduit,
         process.env.INSTALL_MOON!,
         desks[idx]
@@ -542,41 +493,16 @@ export class OnboardingService extends BaseService {
    this.state.installRealm();
   }
 
-  async installDesk(tempConduit: Conduit, ship: string, desk: string) {
-    return new Promise(async (resolve, reject) => {
-      if (!(await this.isAlly(tempConduit, ship))) {
-        console.log('forming alliance with %o...', ship);
-        await this.addAlly(tempConduit, ship)
-          .then((result) => {
-            console.log('installing %o...', desk);
-            this.installApp(tempConduit, ship, desk)
-              .then((result) => {
-                console.log('app install complete');
-                resolve(result);
-              })
-              .catch((e) => reject(e));
-          })
-          .catch((e) => reject(e));
-      } else {
-        console.log('checking if %o installed...', ship);
-        if (!(await this.isAppInstalled(tempConduit, ship, desk))) {
-          console.log('installing %o...', desk);
-          await this.installApp(tempConduit, ship, desk)
-            .then((result) => {
-              console.log('app install complete');
-              resolve(result);
-            })
-            .catch((e) => reject(e));
-        }
-        // nothing to do, Realm already installed
-        resolve('done');
-      }
-    });
-  }
-
   async completeOnboarding(_event: any) {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
+    if (process.env.NODE_ENV !== 'development') {
+      try {
+        await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
+      } catch (e) {
+        console.error('Unable to redeem gated access code, continuing anyway.');
+      }
+    }
 
     let decryptedPassword = safeStorage.decryptString(
       Buffer.from(this.state.encryptedPassword!, 'base64')
@@ -584,7 +510,7 @@ export class OnboardingService extends BaseService {
     this.core.passwords.setPassword(this.state.ship.patp, decryptedPassword);
     let passwordHash = await bcrypt.hash(decryptedPassword, 12);
 
-    const ship = clone(this.state.ship);
+    const ship = toJS(this.state.ship);
     const authShip = AuthShip.create({
       ...ship,
       id: `auth${ship.patp}`,

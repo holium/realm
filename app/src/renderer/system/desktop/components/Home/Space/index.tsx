@@ -20,11 +20,16 @@ type SidebarType = 'members' | null;
 
 export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const { isOpen } = props;
-  const { ship, desktop, spaces, membership, bazaar } = useServices();
+  const { ship, theme, spaces, membership, bazaar } = useServices();
   const currentSpace = spaces.selected;
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
+  const [apps, setApps] = useState<any>([]);
+  const [suite, setSuite] = useState<any>([]);
+  const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
+  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
+  console.log('isAdmin => %o', isAdmin);
 
   useEffect(() => {
     if (currentSpace) {
@@ -32,6 +37,25 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       setMembers(memberMap);
     }
   }, [currentSpace]);
+
+  useEffect(() => {
+    console.log('AppSuite useEffect => %o', {
+      ship: ship?.patp,
+      path: currentSpace?.path,
+    });
+    if (currentSpace) {
+      // @ts-ignore
+      const suite = Array(5).fill(undefined);
+      const apps = bazaar.getSuiteApps(currentSpace.path);
+      apps?.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
+      // console.log(suite);
+      setSuite(suite);
+    }
+  }, [currentSpace, currentBazaar?.suiteChange]);
+
+  useEffect(() => {
+    setApps(bazaar.getAvailableApps());
+  }, [bazaar.appsChange]);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -56,6 +80,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
     );
   }, [sidebar, members]);
   if (!currentSpace) return null;
+  const membersCount = membership.getMemberCount(currentSpace.path);
 
   const headerWidth = '50%';
   const paneWidth = '50%';
@@ -86,8 +111,8 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         >
           <SpaceTitlebar
             space={currentSpace}
-            theme={desktop.theme}
-            membersCount={members.length}
+            theme={theme.currentTheme}
+            membersCount={membersCount}
             showAppGrid={appGrid}
             showMembers={sidebar === 'members'}
             onToggleApps={() => {
@@ -114,13 +139,13 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
               </Text>
               <Flex
                 style={{ position: 'relative' }}
-                gap={16}
+                gap={22}
                 width="810px"
                 mb="180px"
                 flexWrap="wrap"
                 flexDirection="row"
               >
-                <AppGrid isOpen tileSize="xl" />
+                <AppGrid isOpen tileSize="xl2" />
               </Flex>
             </Flex>
           )}
@@ -164,7 +189,13 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite patp={ship?.patp} space={currentSpace} suite={[]} />
+              <AppSuite
+                patp={ship!.patp!}
+                space={currentSpace}
+                apps={apps}
+                suite={suite}
+                isAdmin={isAdmin}
+              />
               <RecommendedApps />
               <RecentActivity />
             </Flex>

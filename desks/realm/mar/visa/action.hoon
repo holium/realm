@@ -10,7 +10,7 @@
 ::
 ++  grab
   |%
-  ++  noun  action:store
+  ++  noun  action
   ++  json  action:dejs
   --
 --

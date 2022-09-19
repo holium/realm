@@ -10,9 +10,13 @@ interface CreateProps {
 }
 
 export const Create: FC<CreateProps> = observer((props: CreateProps) => {
-  const { desktop } = useServices();
-  const theme = useMemo(() => getBaseTheme(desktop), [desktop.theme.mode]);
-
+  const { theme } = useServices();
+  const themeData = useMemo(
+    () => getBaseTheme(theme.currentTheme),
+    [theme.currentTheme.mode]
+  );
+  console.log(theme.currentTheme);
+  console.log(themeData);
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Flex
@@ -35,14 +39,14 @@ export const Create: FC<CreateProps> = observer((props: CreateProps) => {
       </Flex>
       <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
         <Box>
-          <Icons name="InfoCircle" color={theme.colors.brand.secondary} />
+          <Icons name="InfoCircle" color={themeData.colors.brand.secondary} />
         </Box>
         <Box>
           <Text
             ml={2}
             variant="hint"
             justifyContent="flex-end"
-            color={theme.colors.brand.secondary}
+            color={themeData.colors.brand.secondary}
           >
             You are using pre-release software. Only use for development
             purposes.

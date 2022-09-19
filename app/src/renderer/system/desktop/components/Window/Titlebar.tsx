@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
 
-import { ThemeModelType } from 'os/services/shell/theme.model';
+import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';

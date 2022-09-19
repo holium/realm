@@ -9,13 +9,17 @@ import {
 
 export const Visa = types.model({
   inviter: types.string,
-  patp: types.string,
   role: types.string,
   message: types.string,
+  path: types.string,
   name: types.string,
   type: types.string,
+  picture: types.maybeNull(types.string),
+  color: types.maybeNull(types.string),
   invitedAt: types.Date,
 });
+
+export type VisaType = Instance<typeof Visa>;
 
 export const VisaModel = types
   .model({
@@ -38,23 +42,32 @@ export const VisaModel = types
       console.log(data);
       // set initial data
     },
-    addIncoming(data: any) {
+    initialIncoming(data: any) {
+      applySnapshot(self.incoming, data);
+    },
+    addIncoming(data: { path: string; invite: VisaType }) {
       // update incoming invitations
+      self.incoming.set(data.path, data.invite);
     },
     updateIncoming(data: any) {
       // update incoming invitations
+      self.incoming.set(data.path, data);
     },
-    removeIncoming(data: any) {
+    removeIncoming(path: string) {
       // update incoming invitations
+      self.incoming.delete(path);
     },
     addOutgoing(data: any) {
       // update outgoing invitations
+      self.outgoing.set(data.path, data);
     },
     updateOutgoing(data: any) {
       // update outgoing invitations
+      self.outgoing.set(data.path, data);
     },
-    removeOutgoing(data: any) {
+    removeOutgoing(path: string) {
       // update outgoing invitations
+      self.outgoing.delete(path);
     },
   }));
 
