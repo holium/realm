@@ -107,7 +107,7 @@ function Content({ children, ...props }) {
 // );
 
 function renderDevs(space: string, devs: any) {
-  if (devs.length === 0) {
+  if (!devs || devs.length === 0) {
     return <Text color="#ababab">{`No recent devs`}</Text>;
   }
   return devs?.map((item, index) => (
@@ -123,7 +123,7 @@ function renderDevs(space: string, devs: any) {
 }
 
 function renderApps(space: string, apps: any) {
-  if (apps.length === 0) {
+  if (!apps || apps.length === 0) {
     return <Text color="#ababab">{`No apps found`}</Text>;
   }
   return apps?.map((app, index) => (
@@ -345,7 +345,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   // );
 
   const renderDevApps = (apps: Array<any>) => {
-    if (apps.length === 0) {
+    if (!apps || apps.length === 0) {
       return <Text color="#ababab">{`No apps found`}</Text>;
     }
     return apps?.map((app, index) => (
