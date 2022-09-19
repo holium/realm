@@ -139,9 +139,11 @@
       =/  pth         [host space-pth]
       =/  paths       [/bazaar/(scot %p our.bowl)/(scot %tas space-pth) ~]
       =/  apps        (space-initial:apps:core pth)
+      =/  entry       (~(get by space-apps.state) pth)
+      =/  sorts       ?~(entry *sorts:store sorts.u.entry)
       =/  sites        sites:core
       ~&  >>  "{<dap.bowl>}: {<sites>}"
-      (bazaar:send-reaction:core [%space-apps pth apps sites] paths ~)
+      (bazaar:send-reaction:core [%space-apps pth apps sorts sites] paths ~)
     ::
     [%response ~]     ~
   ==
@@ -731,7 +733,7 @@
   ::  this reaction comes in as a result of accepting an invitation
   ::   to a space and then subscribing to the space-path
   ++  on-space-apps
-    |=  [=space-path:spaces-store =app-index-full:store sites=(set [=ship =desk])]
+    |=  [=space-path:spaces-store =app-index-full:store =sorts:store sites=(set [=ship =desk])]
     ^-  (quip card _state)
     ::  get all of 'our' installed apps on this ship, and compare it to the list of
     ::   space apps to determine the installation status of the app
@@ -739,27 +741,29 @@
     ?>  ?=([%initial *] charge-update)
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    =/  result=[=app-catalog:store =app-index-lite:store]
+    =/  result=[=app-index-full:store =app-index-lite:store]
     %-  ~(rep by app-index-full)
-    |=  [[=app-id:store =app-full:store] acc=[=app-catalog:store =app-index-lite:store]]
+    |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store]]
     ::  is this app installed?
-    =/  updated-app-full
-      ?:  (~(has by initial.charge-update) app-id)
-        :: =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
+    =/  app-full
+    ?+  -.pkg.app-full  app-full
+       ::
+       %urbit
+        =.  installed.pkg.app-full   (~(has by initial.charge-update) app-id)
         app-full
-      :: =.  tags.sieve.app-full  (~(del in tags.sieve.app-full) %installed)
-      app-full
-    =.  app-catalog.acc      (~(put by app-catalog.acc) app-id pkg.updated-app-full)
-    =.  app-index-lite.acc   (~(put by app-index-lite.acc) app-id [app-id sieve.updated-app-full])
+    ==
+    =/  app-index-full         (~(put by app-index-full.acc) app-id app-full)
+    =.  app-catalog.state      (~(put by app-catalog.state) app-id pkg.app-full)
+    =.  app-index-lite.acc     (~(put by app-index-lite.acc) app-id [app-id sieve.app-full])
     acc
     :: ~&  >  "on-space-apps..."
-    =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result *sorts:store])
+    =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result sorts])
     =.  sites.state         sites
-    =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
+    :: =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     :: :_  state(app-catalog (~(gas by app-catalog.state) ~(tap by app-catalog.result)))
     :: notify the UI of that we've accepted an invite to a new space and there
     ::   are apps available in this new space
-    (bazaar:send-reaction:core [%space-apps space-path app-index-full sites] [/updates ~] ~)
+    (bazaar:send-reaction:core [%space-apps space-path app-index-full sorts sites] [/updates ~] ~)
   ::
   ++  on-pin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]

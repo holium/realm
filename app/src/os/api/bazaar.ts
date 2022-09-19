@@ -513,8 +513,10 @@ export const BazaarApi = {
     conduit.watch({
       app: 'bazaar',
       path: `/updates`,
+      onSubscribed: (eventId: number) => {
+        console.log(`message [${eventId}]: subscribed to /bazaar/updates...`);
+      },
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        // console.log('bazaar/updates => %o', data);
         if (mark === 'bazaar-reaction') {
           handleBazaarReactions(data, state);
         }
@@ -529,9 +531,13 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log('initial => %o', data);
       state.initial(data['initial']);
-      // state.initialReaction(data['initial']);
+      break;
+    // event when a new space is joined and our ship has successfully
+    //   subscribed to the space
+    case 'space-apps':
+      const entry = data['space-apps'];
+      state.initialSpace(entry['space-path'], entry);
       break;
     case 'ally-added':
       break;

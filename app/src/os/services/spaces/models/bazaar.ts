@@ -279,27 +279,27 @@ export const BazaarStore = types
   .actions((self) => ({
     initial(apps: any) {
       const catalog = apps['space-apps'];
-      // console.log('catalog => %o', catalog);
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
-        // console.log('sorts => %o', entry.sorts);
-        const bazaar = BazaarModel.create({
-          pinned: entry.sorts.pinned,
-          recommended: entry.sorts.recommended,
-          suite: entry.sorts.suite,
-        });
-        for (const desk in entry.apps) {
-          const app = entry.apps[desk];
-          const appColor = app.color;
-          if (app.type === 'urbit') {
-            app.color = appColor && cleanNounColor(appColor);
-          }
-          // console.log('%o: adding app %o...', spacePath, app);
-          bazaar.setApp(app);
-          self.apps.set(app.id, app);
-        }
-        self.spaces.set(spacePath, bazaar);
+        this.initialSpace(spacePath, entry);
       }
+    },
+    initialSpace(spacePath: string, entry: any) {
+      const bazaar = BazaarModel.create({
+        pinned: entry.sorts.pinned,
+        recommended: entry.sorts.recommended,
+        suite: entry.sorts.suite,
+      });
+      for (const desk in entry.apps) {
+        const app = entry.apps[desk];
+        const appColor = app.color;
+        if (app.type === 'urbit') {
+          app.color = appColor && cleanNounColor(appColor);
+        }
+        bazaar.setApp(app);
+        self.apps.set(app.id, app);
+      }
+      self.spaces.set(spacePath, bazaar);
     },
     addApp(appId: string, app: any) {
       const appColor = app.color;

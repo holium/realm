@@ -116,8 +116,8 @@
       :-  %space-apps
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
-          [%app-index-full (pairs (full-app-index:encode app-index-full.rct))]
-          :: [%vips [%a (vips:encode vips.rct)]]
+          [%apps (pairs (full-app-index:encode app-index-full.rct))]
+          [%sorts (pairs (app-sorts:encode sorts.rct))]
       ==
     ::
         %pin
