@@ -110,7 +110,7 @@ function Content({ children, ...props }) {
 const renderDevs = (space: string, devs: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
-  if (devs.length === 0) {
+  if (!devs || devs.length === 0) {
     return <Text color={secondaryTextColor}>{`No recent devs`}</Text>;
   }
   return devs?.map((item, index) => (
@@ -128,7 +128,7 @@ const renderDevs = (space: string, devs: any, theme: any) => {
 const renderApps = (space: string, apps: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
-  if (apps.length === 0) {
+  if (!apps || apps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
   }
   // const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
@@ -368,7 +368,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   // );
 
   const renderDevApps = (apps: Array<any>) => {
-    if (apps.length === 0) {
+    if (!apps || apps.length === 0)  {
       return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
     }
     return apps?.map((app, index) => (
