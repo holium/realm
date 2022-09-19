@@ -39,7 +39,7 @@
 ::
 +$  app-type  ?(%native %web %urbit %missing)
 ::
-+$  tag     ?(%pinned %recommended %suite %installed)
++$  tag     ?(%pinned %recommended %suite)
 ::
 +$  tags    (set tag)
 ::
@@ -70,7 +70,7 @@
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      [%urbit =docket:docket]
+      [%urbit =docket:docket installed=?]
       [%missing ~]
   ==
 ::
@@ -113,7 +113,7 @@
 ::
 +$  reaction
   $%  [%initial =space-apps-full]
-      [%space-apps =space-path:spaces =app-index-full sites=(set [ship desk])]
+      [%space-apps =space-path:spaces =app-index-full =sorts sites=(set [ship desk])]
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]
       [%set-pin-order path=space-path:spaces ord=(list app-id)]

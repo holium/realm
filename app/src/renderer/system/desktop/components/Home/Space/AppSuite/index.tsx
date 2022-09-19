@@ -16,6 +16,7 @@ type AppSuiteProps = {
   space: SpaceModelType;
   apps: any[];
   suite: any[];
+  isAdmin: boolean;
   // suite?: AppModelType[];
 };
 // const emptyArr = [1, 2, 3, 4, 5];
@@ -88,7 +89,7 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
-  const { patp, space, apps, suite } = props;
+  const { patp, space, apps, suite, isAdmin } = props;
   // const { spaces } = useServices();
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
@@ -128,7 +129,7 @@ export const AppSuite: FC<AppSuiteProps> = (props: AppSuiteProps) => {
             (app && (
               <SuiteApp
                 key={index}
-                isAdmin={true}
+                isAdmin={isAdmin}
                 space={space}
                 app={app}
                 onClick={() => {

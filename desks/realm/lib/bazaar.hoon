@@ -81,7 +81,7 @@
       ?:  =('pinned' p.json)              %pinned
       ?:  =('recommended' p.json)         %recommended
       ?:  =('suite' p.json)               %suite
-      ?:  =('installed' p.json)           %installed
+      :: ?:  =('installed' p.json)           %installed
       !!
     ::
     ++  pth
@@ -116,8 +116,8 @@
       :-  %space-apps
       %-  pairs
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
-          [%app-index-full (pairs (full-app-index:encode app-index-full.rct))]
-          :: [%vips [%a (vips:encode vips.rct)]]
+          [%apps (pairs (full-app-index:encode app-index-full.rct))]
+          [%sorts (pairs (app-sorts:encode sorts.rct))]
       ==
     ::
         %pin
@@ -282,7 +282,9 @@
             href+s+href.web-app.app
         ==
       ::
-      %urbit  (dkt docket.app)
+      %urbit
+        =/  ins=(list [cord json])  [%installed [%b installed.app]]~
+        (weld (dkt docket.app) ins)
       ::
       %missing  ~
     ==
@@ -331,7 +333,7 @@
     ==
   ::
   ++  dkt
-    |=  =docket:docket
+    |=  [=docket:docket]
     ^-  (list [cord json])
     :~  type+s+%urbit
         title+s+title.docket

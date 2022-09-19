@@ -28,6 +28,8 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const [apps, setApps] = useState<any>([]);
   const [suite, setSuite] = useState<any>([]);
   const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
+  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
+  console.log('isAdmin => %o', isAdmin);
 
   useEffect(() => {
     if (currentSpace) {
@@ -192,6 +194,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 space={currentSpace}
                 apps={apps}
                 suite={suite}
+                isAdmin={isAdmin}
               />
               <RecommendedApps />
               <RecentActivity />

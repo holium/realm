@@ -142,7 +142,6 @@ export const AppRow = ({
             style={{
               textOverflow: 'ellipsis',
               overflow: 'hidden',
-              whiteSpace: 'nowrap',
             }}
             color={'#888888'}
           >

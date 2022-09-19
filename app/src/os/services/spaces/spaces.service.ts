@@ -77,6 +77,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.suite-remove': this.removeFromSuite,
     'realm.spaces.bazaar.install-app': this.installApp,
     'realm.spaces.bazaar.install-docket': this.installDocket,
+    'realm.spaces.bazaar.uninstall-app': this.uninstallApp,
     'realm.spaces.bazaar.add-ally': this.addAlly,
   };
 
@@ -169,8 +170,10 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
     installDocket: async (ship: string, desk: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.install-docket', ship, desk),
-    installApp: async (desk: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.install-app', desk),
+    installApp: async (app: any) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.install-app', app),
+    uninstallApp: async (desk: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.uninstall-app', desk),
     addAlly: async (ship: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
   };
@@ -502,8 +505,12 @@ export class SpacesService extends BaseService {
     return await BazaarApi.installDocket(this.core.conduit!, ship, desk);
   }
 
-  async installApp(_event: IpcMainInvokeEvent, desk: string) {
-    return await BazaarApi.installApp(this.core.conduit!, desk);
+  async installApp(_event: IpcMainInvokeEvent, app: any) {
+    return await BazaarApi.resolveAppInstall(this.core.conduit!, app);
+  }
+
+  async uninstallApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await BazaarApi.uninstallApp(this.core.conduit!, desk);
   }
 
   async addAlly(_event: IpcMainInvokeEvent, ship: any) {

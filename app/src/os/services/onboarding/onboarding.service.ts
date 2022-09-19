@@ -20,6 +20,7 @@ import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
+import { BazaarApi } from '../../api/bazaar';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
 
@@ -456,101 +457,6 @@ export class OnboardingService extends BaseService {
     this.state.setEncryptedPassword(encryptedPassword);
   }
 
-  async installApp(tempConduit: Conduit, ship: string, desk: string) {
-    return new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1;
-      await tempConduit.watch({
-        app: 'docket',
-        path: '/charges',
-        onSubscribed: (subscription: number) => {
-          subscriptionId = subscription;
-        },
-        onEvent: async (data: any, _id?: number, mark?: string) => {
-          if (data.hasOwnProperty('add-charge')) {
-            const charge = data['add-charge'].charge;
-            // according to Tlon source, this determines when the app is fully installed
-            if ('glob' in charge.chad || 'site' in charge.chad) {
-              await tempConduit.unsubscribe(subscriptionId);
-              resolve(data);
-            }
-          }
-        },
-        onError: () => {
-          console.log('subscription [docket/charges] rejected');
-          reject('subscription [docket/charges] rejected');
-        },
-        onQuit: () => {
-          console.log('kicked from subscription [docket/charges]');
-          reject('kicked from subscription [docket/charges]');
-        },
-      });
-      await tempConduit.poke(docketInstall(ship, desk));
-    });
-  }
-
-  async addAlly(tempConduit: Conduit, ship: string) {
-    return new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1;
-      await tempConduit.watch({
-        app: 'treaty',
-        path: '/treaties',
-        onSubscribed: (subscription: number) => {
-          subscriptionId = subscription;
-        },
-        onEvent: async (data: any, _id?: number, mark?: string) => {
-          if (data.hasOwnProperty('add')) {
-            await tempConduit.unsubscribe(subscriptionId);
-            resolve(data);
-          }
-        },
-        onError: () => {
-          console.log('subscription [treaty/treaties] rejected');
-          reject('subscription [treaty/treaties] rejected');
-        },
-        onQuit: () => {
-          console.log('kicked from subscription [treaty/treaties]');
-          reject('kicked from subscription [treaty/treaties]');
-        },
-      });
-      await tempConduit.poke(allyShip(ship));
-    });
-  }
-
-  async isAppInstalled(tempConduit: Conduit, ship: string, desk: string) {
-    const response = await tempConduit.scry({
-      app: 'docket',
-      path: '/charges', // the spaces scry is at the root of the path
-    });
-    return Object.keys(response.initial).includes(desk);
-  }
-
-  async isAlly(tempConduit: Conduit, ship: string) {
-    const response = await tempConduit.scry({
-      app: 'treaty',
-      path: '/allies', // the spaces scry is at the root of the path
-    });
-    return Object.keys(response.ini).includes(ship);
-  }
-
-  async hasTreaty(tempConduit: Conduit, ship: string, desk: string) {
-    try {
-      const response = await tempConduit.scry({
-        app: 'treaty',
-        path: `/treaty/${ship}/${desk}`, // the spaces scry is at the root of the path
-      });
-      // assume undefined response means no treaty found. not sure how reliable
-      //  this is, but scry method doesn't return error codes (e.g. 404)
-      console.log('hasTreaty: testing treaty => %o', {
-        ship,
-        desk,
-        response,
-      });
-      return response !== undefined;
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
   async installRealm(_event: any, ship: string) {
     // TODO kiln-install realm desk
     if (!process.env.INSTALL_MOON) {
@@ -573,7 +479,7 @@ export class OnboardingService extends BaseService {
     const tempConduit = await this.tempConduit(url, patp, cookie!);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
-      await this.installDesk(
+      await BazaarApi.installDesk(
         tempConduit,
         process.env.INSTALL_MOON!,
         desks[idx]
@@ -582,38 +488,6 @@ export class OnboardingService extends BaseService {
     await this.closeConduit();
     this.state.endRealmInstall();
     console.log('realm installation complete.');
-  }
-
-  async installDesk(tempConduit: Conduit, ship: string, desk: string) {
-    return new Promise(async (resolve, reject) => {
-      if (!(await this.isAlly(tempConduit, ship))) {
-        console.log('forming alliance with %o...', ship);
-        await this.addAlly(tempConduit, ship)
-          .then((result) => {
-            console.log('installing %o...', desk);
-            this.installApp(tempConduit, ship, desk)
-              .then((result) => {
-                console.log('app install complete');
-                resolve(result);
-              })
-              .catch((e) => reject(e));
-          })
-          .catch((e) => reject(e));
-      } else {
-        console.log('checking if %o installed...', ship);
-        if (!(await this.isAppInstalled(tempConduit, ship, desk))) {
-          console.log('installing %o...', desk);
-          await this.installApp(tempConduit, ship, desk)
-            .then((result) => {
-              console.log('app install complete');
-              resolve(result);
-            })
-            .catch((e) => reject(e));
-        }
-        // nothing to do, Realm already installed
-        resolve('done');
-      }
-    });
   }
 
   async completeOnboarding(_event: any) {

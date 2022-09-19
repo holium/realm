@@ -3,6 +3,7 @@ import { cleanNounColor } from '../../../lib/color';
 // import { NativeAppList, nativeApps } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob } from '../../ship/models/docket';
 import { toJS } from 'mobx';
+import { apiOwnKeys } from 'mobx/dist/internal';
 // const util = require('util');
 
 export const DocketMap = types.map(
@@ -35,6 +36,7 @@ const UrbitApp = types.model({
   version: types.string,
   website: types.string,
   license: types.string,
+  installed: types.boolean,
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
@@ -277,32 +279,45 @@ export const BazaarStore = types
   .actions((self) => ({
     initial(apps: any) {
       const catalog = apps['space-apps'];
-      // console.log('catalog => %o', catalog);
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
-        // console.log('sorts => %o', entry.sorts);
-        const bazaar = BazaarModel.create({
-          pinned: entry.sorts.pinned,
-          recommended: entry.sorts.recommended,
-          suite: entry.sorts.suite,
-        });
-        for (const desk in entry.apps) {
-          const app = entry.apps[desk];
-          const appColor = app.color;
-          if (app.type === 'urbit') {
-            app.color = appColor && cleanNounColor(appColor);
-          }
-          // console.log('%o: adding app %o...', spacePath, app);
-          bazaar.setApp(app);
-          self.apps.set(app.id, app);
-        }
-        self.spaces.set(spacePath, bazaar);
+        this.initialSpace(spacePath, entry);
       }
     },
+    initialSpace(spacePath: string, entry: any) {
+      const bazaar = BazaarModel.create({
+        pinned: entry.sorts.pinned,
+        recommended: entry.sorts.recommended,
+        suite: entry.sorts.suite,
+      });
+      for (const desk in entry.apps) {
+        const app = entry.apps[desk];
+        const appColor = app.color;
+        if (app.type === 'urbit') {
+          app.color = appColor && cleanNounColor(appColor);
+        }
+        bazaar.setApp(app);
+        self.apps.set(app.id, app);
+      }
+      self.spaces.set(spacePath, bazaar);
+    },
     addApp(appId: string, app: any) {
+      const appColor = app.color;
+      if (app.type === 'urbit') {
+        app.color = appColor && cleanNounColor(appColor);
+      }
       self.apps.set(appId, app);
       // trigger UI update if someone is listening
       self.appsChange = !self.appsChange;
+    },
+    setUninstalled(appId: string) {
+      const app = self.apps.get(appId);
+      if (app?.type === 'urbit') {
+        app.installed = false;
+        self.apps.set(appId, app);
+        // trigger UI update if someone is listening
+        self.appsChange = !self.appsChange;
+      }
     },
     updateApp(app: AppType) {
       // console.log('updating app => %o', app);
