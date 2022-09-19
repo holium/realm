@@ -120,7 +120,7 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
             justifyContent="space-between"
           >
             <TextButton
-              // disabled={!onboarding.installer.isLoaded || loading} //TODO reenable this commented out for testing
+              disabled={!onboarding.installer.isLoaded || loading}
               style={{ minWidth: 45 }}
               onClick={async (_evt: any) => {
                 setLoading(true);

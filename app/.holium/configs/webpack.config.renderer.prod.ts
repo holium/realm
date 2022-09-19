@@ -96,6 +96,7 @@ const configuration: webpack.Configuration = {
      */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
+      INSTALL_MOON: '~rilmyl-soltyd-lomder-librun',
       DEBUG_PROD: false,
     }),
     new MiniCssExtractPlugin({
