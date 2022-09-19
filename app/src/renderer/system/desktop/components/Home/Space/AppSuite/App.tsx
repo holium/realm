@@ -1,5 +1,5 @@
 import { FC, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
 
@@ -11,7 +11,7 @@ import { BazaarApi } from 'os/api/bazaar';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 const AppEmpty = styled(Box)`
-  border-radius: 16px;
+  border-radius: 20px;
   /* border: 2px dotted white; */
   display: flex;
   flex-direction: row;
@@ -23,18 +23,26 @@ const AppEmpty = styled(Box)`
     transition: 0.2s ease;
     background: ${rgba('#FFFFFF', 0.5)};
   }
+  ${(props: any) =>
+    props.selected &&
+    css`
+      border: 2px solid ${props.accentColor};
+    `};
 `;
 
 type SuiteAppProps = {
+  selected?: boolean;
   space: SpaceModelType;
   highlightColor?: string;
+  accentColor?: string;
   app?: any; // AppModelType;
   isAdmin?: boolean;
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app: any) => void;
 };
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
-  const { app, space, isAdmin, onClick } = props;
+  const { selected, accentColor, app, space, isAdmin, onClick } = props;
+
   if (app) {
     const menu = useMemo(() => {
       let menu = [];
@@ -96,6 +104,8 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
     <AppEmpty
       height={148}
       width={148}
+      selected={selected}
+      accentColor={accentColor}
       onClick={(e) => onClick && onClick(e, undefined)}
     >
       <Icons size={24} name="Plus" fill="#FFFFFF" opacity={0.4} />

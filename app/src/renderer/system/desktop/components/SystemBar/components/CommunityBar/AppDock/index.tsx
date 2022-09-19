@@ -20,6 +20,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     () => rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4),
     [theme.currentTheme]
   );
+
   const currentBazaar = spaces.selected
     ? bazaar.getBazaar(spaces.selected?.path!)
     : null;
@@ -38,7 +39,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   const orderedList = useMemo(
     () =>
       spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : [],
-    [currentBazaar?.pinnedChange]
+    [spaces.selected?.path, currentBazaar?.pinnedChange]
   );
 
   const pinnedApps = useMemo(() => {

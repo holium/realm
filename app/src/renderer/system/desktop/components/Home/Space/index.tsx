@@ -139,13 +139,13 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
               </Text>
               <Flex
                 style={{ position: 'relative' }}
-                gap={16}
+                gap={22}
                 width="810px"
                 mb="180px"
                 flexWrap="wrap"
                 flexDirection="row"
               >
-                <AppGrid isOpen tileSize="xl" />
+                <AppGrid isOpen tileSize="xl2" />
               </Flex>
             </Flex>
           )}
