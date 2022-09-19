@@ -99,6 +99,7 @@ export const BazaarApi = {
   },
   installDesk: async (tempConduit: Conduit, ship: string, desk: string) => {
     return new Promise(async (resolve, reject) => {
+      console.log(`checking if '/${ship}/${desk}' installed...`);
       const isInstalled = await BazaarApi.isAppInstalled(
         tempConduit,
         process.env.INSTALL_MOON!,
@@ -106,6 +107,8 @@ export const BazaarApi = {
       );
       if (isInstalled) {
         console.log(`'/${ship}/${desk}' already installed. skipping...`);
+        resolve('done');
+        return;
       }
       if (!(await BazaarApi.isAlly(tempConduit, ship))) {
         console.log('forming alliance with %o...', ship);
@@ -121,18 +124,12 @@ export const BazaarApi = {
           })
           .catch((e) => reject(e));
       } else {
-        console.log('checking if %o installed...', ship);
-        if (!(await BazaarApi.isAppInstalled(tempConduit, ship, desk))) {
-          console.log('installing %o...', desk);
-          await BazaarApi.installApp(tempConduit, ship, desk)
-            .then((result) => {
-              console.log('app install complete');
-              resolve(result);
-            })
-            .catch((e) => reject(e));
-        }
-        // nothing to do, Realm already installed
-        resolve('done');
+        await BazaarApi.installApp(tempConduit, ship, desk)
+          .then((result) => {
+            console.log('app install complete');
+            resolve(result);
+          })
+          .catch((e) => reject(e));
       }
     });
   },
