@@ -111,6 +111,7 @@ export const SpacesStore = types
     addSpace: (addReaction: { space: any; members: any }) => {
       // console.log(addReaction);
       const space = addReaction.space;
+      addReaction.space.theme.id = addReaction.space.path;
       const newSpace = SpaceModel.create(space);
       // newSpace.members?.initial(addReaction.members);
       self.spaces.set(space.path, newSpace);
@@ -118,12 +119,9 @@ export const SpacesStore = types
     },
     updateSpace: (replaceReaction: { space: any }) => {
       const members = self.spaces.get(replaceReaction.space.path)?.members;
+      replaceReaction.space.theme.id = replaceReaction.space.path;
       self.spaces.set(replaceReaction.space.path, {
         ...replaceReaction.space,
-        theme: {
-          id: replaceReaction.space.path,
-          ...replaceReaction.space.theme,
-        },
         members,
       });
     },

@@ -2,6 +2,7 @@ import { FC, useMemo } from 'react';
 import { SystemBarStyle } from '../SystemBar.styles';
 import { motion, useMotionValue } from 'framer-motion';
 import HoliumAnimated from 'renderer/components/Icons/holium';
+
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';

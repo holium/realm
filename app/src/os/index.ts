@@ -185,6 +185,8 @@ export class Realm extends EventEmitter {
     }
     try {
       // wait for the init function to resolve
+      this.sendLog(JSON.stringify(session));
+
       await this.conduit.init(
         session.url,
         session.ship.substring(1),
@@ -193,6 +195,7 @@ export class Realm extends EventEmitter {
       this.sendLog('after conduit init');
     } catch (e) {
       console.log(e);
+      this.sendLog('error');
       this.sendLog(e);
       this.clearSession();
     } finally {

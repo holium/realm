@@ -237,8 +237,9 @@ export class OnboardingService extends BaseService {
     code: string
   ): Promise<{ success: boolean; message: string }> {
     if (
-      process.env.NODE_ENV === 'development' &&
-      code === '~admins-admins-admins'
+      (process.env.NODE_ENV === 'development' &&
+        code === '~admins-admins-admins') ||
+      (process.env.DEBUG_PROD === 'true' && code === '~admins-admins-admins')
     ) {
       this.state.setInviteCode('~admins-admins-admins');
       return { success: true, message: 'Access succeeded.' };
@@ -273,7 +274,10 @@ export class OnboardingService extends BaseService {
 
     auth.setAccountId(account.id);
 
-    if (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') {
+    if (
+      (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') ||
+      (process.env.DEBUG_PROD === 'true' && email === 'admin@admin.com')
+    ) {
       this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
     }
   }
