@@ -53,7 +53,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   );
 
   return (
-    <Flex flexDirection="row" height="calc(100vh - 58px)">
+    <Flex flexDirection="row" height="calc(100vh - 50px)">
       <Flex
         flex={8}
         overflowY="auto"
@@ -135,13 +135,13 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             initial="hidden"
             animate={isOpen ? 'show' : 'exit'}
             exit="hidden"
-            gap={16}
+            gap={48}
             width="888px"
-            mb="180px"
+            mb="170px"
             flexWrap="wrap"
             flexDirection="row"
           >
-            <AppGrid isOpen={isOpen} tileSize="xxl" />
+            <AppGrid isOpen={isOpen} tileSize="xl2" />
           </Flex>
           {sidebarComponent}
         </Flex>
