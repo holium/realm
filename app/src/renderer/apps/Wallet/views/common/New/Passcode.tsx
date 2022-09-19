@@ -23,12 +23,6 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
         ? setPasscode(passcode.substring(0, passcode.length - 1))
         : null;
     }
-<<<<<<< HEAD
-  useEffect(() => {
-
-=======
->>>>>>> main
-
     if (passcode.length >= 6 || isNaN(Number(event.key))) return;
 
     let newPasscode = passcode.concat(event.key);

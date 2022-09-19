@@ -130,24 +130,6 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  addToHistory: async (
-    conduit: Conduit,
-    network: string,
-    hash: string,
-    transaction: any,
-  ) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'add-to-history': {
-          network: network,
-          hash: hash,
-          transaction: transaction,
-        }
-      }
-    }
-  },
   setTransactionPending: async (conduit: Conduit, transactionKey: any) => {
     const payload = {
       app: 'wallet',

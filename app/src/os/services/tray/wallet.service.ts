@@ -236,22 +236,20 @@ export class WalletService extends BaseService {
       this.state!.ethereum.initial(wallets);
       this.state!.bitcoin.initial(wallets);
     });
-    /*WalletApi.subscribeToTransactions(
+    WalletApi.subscribeToTransactions(
       this.core.conduit!,
       (transaction: any) => {
-        console.log('WE GOT IT BOIZZZZ');
         if (transaction.network == 'ethereum')
           this.state!.ethereum.applyTransactionUpdate(transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
         const tx = this.state!.ethereum.transactions.get(transaction.transaction.hash);
-        WalletApi.addToHistory(this.core.conduit!, 'ethereum', transaction.transaction.hash, tx);
       }
     );
 
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
       this.state!.ethereum.applyHistory(history);
-    }); */
+    });
 
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',

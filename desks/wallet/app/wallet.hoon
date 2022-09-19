@@ -139,12 +139,12 @@
           =+  !<(rez=tx-rez q.cage.sign)
           =/  net-pend  (~(got by transactions) %ethereum)
           =/  pending-tx=transaction  (~(got by net-pend) tid)
+          =.  status.pending-tx  %succeeded
+          =.  completed-at.pending-tx  `(crip (scow %da now.bowl))
           =.  transactions
             =/  net-pending  (~(got by transactions) %ethereum)
             =.  net-pending
-              =/  tx  (~(got by net-pending) tid)
-              =.  status.tx  %succeeded
-              (~(put by net-pending) [tid tx])
+              (~(put by net-pending) [tid pending-tx])
             (~(put by transactions) [%ethereum net-pending])
           ?:  status.rez
             :_  this
@@ -593,6 +593,7 @@
       =/  to=@p  u.their-patp.transaction.act
       =.  transaction.act
         =.  type.transaction.act  %received
+        =.  their-patp.transaction.act  `our.bowl
         transaction.act
       =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
       =/  task  [%poke %wallet-action !>(wall-act)]

@@ -12,8 +12,8 @@ interface ImportProps {
 }
 
 export const Import: FC<ImportProps> = observer((props: ImportProps) => {
-  const { desktop } = useServices();
-  const theme = useMemo(() => getBaseTheme(desktop), [desktop.theme.mode]);
+  const { desktop, theme } = useServices();
+  const themeData = useMemo(() => getBaseTheme(theme.currentTheme.mode), [theme.mode]);
   const [phrase, setPhrase] = useState('');
 
   const saveSeedPhrase = () => {
