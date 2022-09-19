@@ -99,6 +99,14 @@ export const BazaarApi = {
   },
   installDesk: async (tempConduit: Conduit, ship: string, desk: string) => {
     return new Promise(async (resolve, reject) => {
+      const isInstalled = await BazaarApi.isAppInstalled(
+        tempConduit,
+        process.env.INSTALL_MOON!,
+        desk
+      );
+      if (isInstalled) {
+        console.log(`'/${ship}/${desk}' already installed. skipping...`);
+      }
       if (!(await BazaarApi.isAlly(tempConduit, ship))) {
         console.log('forming alliance with %o...', ship);
         await BazaarApi.addAlly(tempConduit, ship)
