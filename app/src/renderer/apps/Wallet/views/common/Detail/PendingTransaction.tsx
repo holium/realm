@@ -11,7 +11,6 @@ import { Flex, Box, Icons, Text, Sigil, Button, ImagePreview, Spinner } from 're
 import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/shell/theme.model';
 import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme, formatEthAmount, formatBtcAmount } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { BitcoinWalletType, EthWalletType, NetworkType, WalletStoreType, WalletView } from 'os/services/tray/wallet.model';
@@ -23,26 +22,6 @@ const abbrMap = {
   ethereum: 'ETH',
   bitcoin: 'BTC',
 };
-
-export interface TransactionType {
-  hash: string
-  amount: string
-  network: 'ethereum' | 'bitcoin'
-  type: 'sent' | 'received'
-
-  initiatedAt: string | number  // timestamp
-  completedAt?: string | number // timestamp
-
-  ourAddress: string // actual address, path, w/e works
-  theirPatp?: string
-  theirAddress: string
-
-  status: 'pending' | 'failed' | 'succeeded'
-  failureReason?: string
-
-  notes?: string
-  link?: string // to etherscan or w/e, probs can just derive this given the hash
-}
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];
@@ -84,7 +63,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   let themDisplay = props.transaction.theirPatp || shortened(props.transaction.theirAddress);
 
   return (
-    <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={desktop.theme.mode == 'light' ? darken(.04, desktop.theme.windowColor) : lighten(.02, desktop.theme.windowColor)} borderRadius="9px" onClick={goToTransaction}>
+    <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={theme.currentTheme.mode == 'light' ? darken(.04, theme.currentTheme.windowColor) : lighten(.02, theme.currentTheme.windowColor)} borderRadius="9px" onClick={goToTransaction}>
       <Flex flexDirection="column">
         <Text variant="body" color={colors.brand.primary}>
           { props.transaction.type === 'sent' ? 'Sending' : 'Receiving' } { isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC` }

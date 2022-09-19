@@ -133,7 +133,7 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
         </Flex>
       </Flex>
       <Flex position="absolute" top="542px" zIndex={999} onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>
-        <Icons name="ArrowLeftLine" size={2} color={desktop.theme.iconColor} />
+        <Icons name="ArrowLeftLine" size={2} color={theme.currentTheme.iconColor} />
       </Flex>
       </>
     );

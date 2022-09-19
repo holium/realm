@@ -446,9 +446,8 @@ const RecipientInput = observer(
             <Flex ml={1} mr={2}>
               <RecipientIcon icon={icon} />
             </Flex>
-            {/* @ts-ignore */}
             <Input
-              mode={theme.currentTheme.mode}
+              mode={theme.currentTheme.mode === 'light' ? 'light' : 'dark'}
               width="100%"
               placeholder="@p or recipient’s address"
               spellCheck="false"

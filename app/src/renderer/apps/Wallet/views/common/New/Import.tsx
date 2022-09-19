@@ -12,8 +12,8 @@ interface ImportProps {
 }
 
 export const Import: FC<ImportProps> = observer((props: ImportProps) => {
-  const { desktop, theme } = useServices();
-  const themeData = useMemo(() => getBaseTheme(theme.currentTheme.mode), [theme.mode]);
+  const { theme } = useServices();
+  const themeData = useMemo(() => getBaseTheme(theme.currentTheme), [theme.currentTheme]);
   const [phrase, setPhrase] = useState('');
 
   const saveSeedPhrase = () => {
@@ -27,7 +27,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
   return (
     <Flex width="100%" height="100%" flexDirection="column">
         <Text mt={6} variant="h4">Import Wallet</Text>
-        <Text mt={2} variant="body" color={theme.colors.text.secondary}>
+        <Text mt={2} variant="body" color={themeData.colors.text.secondary}>
           If you have an existing mnemonic seed phrase, you can load it into Realm now.
         </Text>
         <Flex mt={9} width="100%" flexDirection="column">
@@ -38,7 +38,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
           </Flex>
         </Flex>
         <Flex position="absolute" top="542px" zIndex={999} onClick={() => props.setScreen(NewWalletScreen.CREATE)}>
-          <Icons name="ArrowLeftLine" size={2} color={desktop.theme.iconColor} />
+          <Icons name="ArrowLeftLine" size={2} color={theme.currentTheme.iconColor} />
         </Flex>
     </Flex>
   );

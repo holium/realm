@@ -26,8 +26,8 @@ interface TransactionProps {
   transaction: TransactionType
 }
 export const Transaction = observer((props: TransactionProps) => {
-  const { desktop } = useServices();
-  let hoverBackground =  darken(.04, desktop.theme!.windowColor);
+  const { theme } = useServices();
+  let hoverBackground =  darken(.04, theme.currentTheme.windowColor);
 
   const { transaction } = props;
   let wasSent = transaction.type === 'sent';
@@ -76,7 +76,7 @@ interface TransactionListProps {
   transactions: TransactionType[]
 }
 export const TransactionList = observer((props: TransactionListProps) => {
-  const { desktop } = useServices();
+  const { theme } = useServices();
   const pending = props.transactions.filter(trans => trans.status === 'pending').length;
 
   return (
@@ -89,7 +89,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
       </NoScrollBar>
       { props.transactions.length > 3 &&
         <Flex pt={1} width="100%" justifyContent="center">
-          <Icons name="ChevronDown" size={1} color={desktop.theme.iconColor} />
+          <Icons name="ChevronDown" size={1} color={theme.currentTheme.iconColor} />
         </Flex>
       }
     </>

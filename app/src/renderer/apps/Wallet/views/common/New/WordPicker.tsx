@@ -16,6 +16,7 @@ import { WalletCard } from '../WalletCard';
 import { AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 import { theme } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
 interface WordPickerProps {
   seedPhrase: string;
@@ -24,15 +25,13 @@ interface WordPickerProps {
   onValidChange: any;
 }
 
-export const WordPicker: FC<WordPickerProps> = (props: WordPickerProps) => {
+export const WordPicker: FC<WordPickerProps> = observer((props: WordPickerProps) => {
   let [state, setState] = useState<{
     wordsToSelect: { word: string; available: boolean }[];
     selectedWords: string[];
   }>({ wordsToSelect: [], selectedWords: [] });
   const { theme } = useServices();
-
-  const panelBackground = darken(0.02, theme.currentTheme!.windowColor);
-  const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
+  const themeData = getBaseTheme(theme.currentTheme);
 
   useEffect(() => {
     let words = props.seedPhrase
@@ -148,9 +147,9 @@ export const WordPicker: FC<WordPickerProps> = (props: WordPickerProps) => {
         width={64}
         borderBottom={`2px solid ${transparentize(
           0.5,
-          theme.light.colors.brand.primary
+          themeData.colors.brand.primary
         )}`}
-        background={transparentize(0.8, theme.light.colors.brand.primary)}
+        background={transparentize(0.8, themeData.colors.brand.primary)}
       />
     );
     let Word = (props: any) => (
@@ -233,4 +232,4 @@ export const WordPicker: FC<WordPickerProps> = (props: WordPickerProps) => {
       />
     </>
   );
-};
+});
