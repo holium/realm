@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { styled as stitch, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { isValidPatp } from 'urbit-ob';
@@ -18,6 +18,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { AppRow } from './AppRow';
 import { setEnvironmentData } from 'worker_threads';
 import { BazaarApi } from 'os/api/bazaar';
+import { darken, rgba } from 'polished';
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },
@@ -106,9 +107,11 @@ function Content({ children, ...props }) {
 //   </>
 // );
 
-function renderDevs(space: string, devs: any) {
+const renderDevs = (space: string, devs: any, theme: any) => {
+  const secondaryTextColor = rgba(theme.textColor, 0.4);
+
   if (devs.length === 0) {
-    return <Text color="#ababab">{`No recent devs`}</Text>;
+    return <Text color={secondaryTextColor}>{`No recent devs`}</Text>;
   }
   return devs?.map((item, index) => (
     <div key={index}>
@@ -120,12 +123,18 @@ function renderDevs(space: string, devs: any) {
       />
     </div>
   ));
-}
+};
 
-function renderApps(space: string, apps: any) {
+const renderApps = (space: string, apps: any, theme: any) => {
+  const secondaryTextColor = rgba(theme.textColor, 0.4);
+
   if (apps.length === 0) {
-    return <Text color="#ababab">{`No apps found`}</Text>;
+    return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
   }
+  // const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
+  //   console.log('onAppsAction => %o', { path, id: app.id, tag });
+  //   SpacesActions.addToSuite(path, app.id, rank);
+  // };
   return apps?.map((app, index) => (
     <div key={index}>
       <AppRow
@@ -136,32 +145,6 @@ function renderApps(space: string, apps: any) {
       />
     </div>
   ));
-}
-
-const renderStart = (space: string, bazaar: any) => {
-  return (
-    <>
-      <Flex flexDirection="column" gap={12}>
-        <Text color="text.secondary" fontWeight={500}>
-          Recent Apps
-        </Text>
-        <Flex flexDirection="column" gap={12}>
-          {renderApps(space, bazaar.getRecentApps(space))}
-        </Flex>
-      </Flex>
-      <div style={{ marginTop: '12px', marginBottom: '12px' }}>
-        <hr style={{ backgroundColor: '#dadada', height: '1px', border: 0 }} />
-      </div>
-      <Flex flexDirection="column" gap={12}>
-        <Text color={'#8f8f8f'} fontWeight={500}>
-          Recent Developers
-        </Text>
-        <Flex flexDirection="column" gap={12}>
-          {renderDevs(space, bazaar.getRecentDevs(space))}
-        </Flex>
-      </Flex>
-    </>
-  );
 };
 
 const renderProviders = (data: Array<any>, searchString: string) => {
@@ -184,11 +167,46 @@ const renderProviders = (data: Array<any>, searchString: string) => {
   );
 };
 
-function renderShipSearch(data: Array<any>, searchString: string) {
+const renderStart = (space: string, bazaar: any, theme: any) => {
   return (
     <>
       <Flex flexDirection="column" gap={12}>
-        <Text color={'#8f8f8f'} fontWeight={500}>
+        <Text color={rgba(theme.textColor, 0.7)} fontWeight={500}>
+          Recent Apps
+        </Text>
+        <Flex flexDirection="column" gap={12}>
+          {renderApps(space, bazaar.getRecentApps(space), theme)}
+        </Flex>
+      </Flex>
+      <div style={{ marginTop: '16px', marginBottom: '16px' }}>
+        <hr
+          style={{
+            backgroundColor: rgba(theme.iconColor, 0.1),
+            height: '1px',
+            border: 0,
+          }}
+        />
+      </div>
+      <Flex flexDirection="column" gap={12}>
+        <Text color={rgba(theme.textColor, 0.7)} fontWeight={500}>
+          Recent Developers
+        </Text>
+        <Flex flexDirection="column" gap={12}>
+          {renderDevs(space, bazaar.getRecentDevs(space), theme)}
+        </Flex>
+      </Flex>
+    </>
+  );
+};
+const renderShipSearch = (
+  data: Array<any>,
+  searchString: string,
+  theme: any
+) => {
+  return (
+    <>
+      <Flex flexDirection="column" gap={12}>
+        <Text color={rgba(theme.textColor, 0.7)} fontWeight={500}>
           Searching Software Providers
         </Text>
         <Flex flexDirection="column" gap={12}>
@@ -197,14 +215,14 @@ function renderShipSearch(data: Array<any>, searchString: string) {
       </Flex>
     </>
   );
-}
+};
 
-const renderAppSearch = (apps: any) => {
+const renderAppSearch = (apps: any, theme: any) => {
   return (
     <>
       <Flex flexDirection="column" gap={10}>
         <Text fontWeight={'bold'}>{`Installed Apps`}</Text>
-        {renderApps('', apps)}
+        {renderApps('', apps, theme)}
       </Flex>
     </>
   );
@@ -238,7 +256,7 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 interface AppSearchProps {}
 
 const AppSearchApp = observer((props: AppSearchProps) => {
-  const { spaces, bazaar } = useServices();
+  const { spaces, bazaar, theme } = useServices();
   const [data, setData] = useState<any>([]);
   const [searchMode, setSearchMode] = useState('none');
   const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
@@ -332,6 +350,11 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     }
   }, [searchMode]);
 
+  const secondaryTextColor = useMemo(
+    () => rgba(theme.currentTheme.textColor, 0.5),
+    [theme.currentTheme.textColor]
+  );
+
   // const onDevAppAction = (app: any) => {
   //   console.log('onDevAppAction => %o', app);
   // };
@@ -346,7 +369,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
 
   const renderDevApps = (apps: Array<any>) => {
     if (apps.length === 0) {
-      return <Text color="#ababab">{`No apps found`}</Text>;
+      return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
     }
     return apps?.map((app, index) => (
       <div key={index}>
@@ -369,7 +392,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         <Flex flexDirection="column" gap={10}>
           <Text
             fontWeight={500}
-            color={'#8f8f8f'}
+            color={theme.currentTheme.textColor}
           >{`Software developed by ${ship}...`}</Text>
           <Flex flexDirection="column" gap={12}>
             {renderDevApps(data)}
@@ -484,12 +507,29 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           }}
         />
       </PopoverAnchor>
-      <PopoverContent sideOffset={5}>
-        {searchMode === 'start' && renderStart(spacePath, bazaar)}
-        {searchMode === 'ship-search' && renderShipSearch(data, searchString)}
+      <PopoverContent
+        sideOffset={5}
+        style={{
+          outline: 'none',
+          boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
+          // width: '50em',
+          borderRadius: 12,
+          maxHeight: '50vh',
+          overflowY: 'auto',
+          background:
+            theme.currentTheme.mode === 'light'
+              ? theme.currentTheme.windowColor
+              : darken(0.1, theme.currentTheme.windowColor),
+        }}
+      >
+        {searchMode === 'start' &&
+          renderStart(spacePath, bazaar, theme.currentTheme)}
+        {searchMode === 'ship-search' &&
+          renderShipSearch(data, searchString, theme.currentTheme)}
         {searchMode === 'dev-app-search' &&
           renderDevAppSearch(searchModeArgs[0], data)}
-        {searchMode === 'app-search' && renderAppSearch(data)}
+        {searchMode === 'app-search' &&
+          renderAppSearch(data, theme.currentTheme)}
         {searchMode === 'app-summary' && renderAppSummary(data)}
       </PopoverContent>
     </Popover>

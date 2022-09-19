@@ -135,7 +135,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             initial="hidden"
             animate={isOpen ? 'show' : 'exit'}
             exit="hidden"
-            gap={48}
+            gap={32}
             width="888px"
             mb="170px"
             flexWrap="wrap"

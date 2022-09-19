@@ -7,6 +7,7 @@ import { rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { ThemeType } from 'renderer/theme';
 
 type WindowManagerProps = {
   isOpen?: boolean;
@@ -76,12 +77,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
         {windows.map((window: any, index: number) => {
           const key = `${window.id}-${index}`;
           return (
-            <AppWindow
-              desktopRef={desktopRef}
-              key={key}
-              window={window}
-              theme={theme.currentTheme}
-            />
+            <AppWindow desktopRef={desktopRef} key={key} window={window} />
           );
         })}
       </motion.div>
