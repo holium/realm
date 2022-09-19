@@ -442,7 +442,7 @@
     ^-  (quip card _state)
     ::  if this action is being performed on a remote ship (not the host/admin ship), poke
     ::    the space host to ensure "source of truth" and subscribers properly synched
-    ?.  =(our.ship ship.path)
+    ?.  =(our.bowl ship.path)
       ~&  >>  "{<dap.bowl>}: recommend received. forwarding to space host {<ship.path>}..."
       :_  state
       [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%recommend path app-id])]~
@@ -463,7 +463,7 @@
   ++  rem-rec
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    ?.  =(our.ship ship.path)
+    ?.  =(our.bowl ship.path)
       ~&  >>  "{<dap.bowl>}: unrecommend received. forwarding to space host {<ship.path>}..."
       :_  state
       [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%unrecommend path app-id])]~
