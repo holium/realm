@@ -160,7 +160,7 @@ const createWindow = async () => {
     mainWindow.webContents.send(
       'set-appview-preload',
       app.isPackaged
-        ? path.join(__dirname, 'cursor.preload.js')
+        ? path.join(__dirname, '../renderer/cursor.preload.js')
         : path.join(app.getAppPath(), 'cursor.preload.js')
     );
   });
