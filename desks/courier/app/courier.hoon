@@ -169,7 +169,13 @@
   ::
   ++  on-leave    on-leave:def
   ::
-  ++  on-arvo     on-arvo:def
+  ++  on-arvo
+    |=  [=wire =sign-arvo]
+    ^-  (quip card _this)
+    ?+  wire  (on-arvo:def wire sign-arvo)
+        [%push-notification *]
+      `this
+    ==
   ::
   ++  on-fail     on-fail:def
   --
@@ -344,11 +350,30 @@
       :_  state
       [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
     ::
-    =/  notify   (generate-push-notification:push-lib app-id.state new-dm)
-    ~&  >>  notify
+    =/  notify   (generate-push-notification:push-lib our.bowl app-id.state new-dm)
+    ~&  >>  (request:enjs:push-lib notify)
+    :: `state
+    ::  send http request
+    ::
+    =/  =header-list:http
+      :~  ['Content-Type' 'application/json']
+      ==
+    =|  =request:http
+    =:  method.request       %'POST'
+        url.request          'https://onesignal.com/api/v1/notifications'
+        header-list.request  header-list
+        body.request
+          :-  ~
+          %-  as-octt:mimes:html
+          %-  en-json:html
+          (request:enjs:push-lib notify)
+    ==
+    ~&  >>>  request
+    :: [~[[%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]] state]
     :_  state
     :~ 
       [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
+      [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
       ::  Send to onesignal
     ==
   --

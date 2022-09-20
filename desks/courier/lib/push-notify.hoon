@@ -3,34 +3,34 @@
 =,  sur
 |%
 ++  generate-push-notification
-  |=  [app-id=cord new-dm=chat:courier]
+  |=  [our=ship app-id=cord new-dm=chat:courier]
   ^-  notification
   =/  new-push
     ?-    type.new-dm  
-      %dm                 (dm-notif app-id new-dm)
-      %pending            (dm-notif app-id new-dm)
-      %group              (group-notif app-id new-dm)
-      %group-pending      (group-notif app-id new-dm)
+      %dm                 (dm-notif our app-id new-dm)
+      %pending            (dm-notif our app-id new-dm)
+      %group              (group-notif our app-id new-dm)
+      %group-pending      (group-notif our app-id new-dm)
     ==
   new-push
 ::
 ++  dm-notif
-  |=  [app-id=cord new-dm=chat:courier]
+  |=  [our=ship app-id=cord new-dm=chat:courier]
   ^-  notification
   =/  from      (rear ~(tap in to.new-dm))
-  =/  content   (crip "New message from {(scow %p from)}")
-  =/  mtd   ^-(mtd:sur [path.new-dm])
+  =/  content   (crip "from {(scow %p from)}")
+  =/  mtd       ^-(mtd:sur [path.new-dm])
   =/  new-push
     [
       app-id=app-id
-      included-segments=~['Subscribed Users']
       data=[mtd]
+      subtitle=(malt ~[['en' 'New Message']])
       contents=(malt ~[['en' content]])
     ]
   new-push
 ::
 ++  group-notif
-  |=  [app-id=cord new-dm=chat:courier]
+  |=  [our=ship app-id=cord new-dm=chat:courier]
   ^-  notification
   =/  from      (turn ~(tap in to.new-dm) |=([p=@p] (scow %p p)))
   :: =/  content   (crip "New message from {(scow %p from)}")
@@ -38,10 +38,10 @@
   =/  new-push
     [
       app-id=app-id
-      included-segments=~['Subscribed Users']
       data=[path=path.new-dm]
       :: contents=`(map cord cord)`(malt ~[['en' (crip "New group DM from {<from>}")]])
-      contents=`(map cord cord)`(malt ~[['en' (crip "New group DM message")]])
+      subtitle=(malt ~[['en' 'New Group DM']])
+      contents=`(map cord cord)`(malt ~[['en' (crip "Message contents")]])
     ]
   new-push
 ::
@@ -65,6 +65,29 @@
 ++  enjs
   =,  enjs:format
   |%
+  ++  request :: encodes for iris outbound
+    |=  notif=notification:sur
+    ^-  json
+    %-  pairs
+    :~  
+        ['app_id' s+app-id.notif]
+        ['data' (mtd data.notif)]
+        ['subtitle' (contents subtitle.notif)]
+        ['contents' (contents contents.notif)]
+    ==
+    ++  mtd 
+      |=  =mtd:sur
+      ^-  json
+      %-  pairs
+      ['path' s+path.mtd]~
+    ::
+    ++  contents 
+      |=  contents=(map cord cord)
+      ^-  json
+      =/  message   (~(got by contents) 'en')
+      %-  pairs
+      ['en' s+message]~
+  ::
   ++  view :: encodes for on-peek
     |=  vi=view:sur
     ^-  json
