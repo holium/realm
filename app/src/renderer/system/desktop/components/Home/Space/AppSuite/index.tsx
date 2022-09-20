@@ -66,13 +66,13 @@ const StyledContent = styled(PopoverPrimitive.Content, {
   },
 });
 
-function Content({ children, ...props }) {
+function Content({ children, ...props }: any) {
   return (
     <PopoverPrimitive.Portal>
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
-          document.activeElement?.blur();
+          if (document.activeElement) document.activeElement!.blur();
           e.preventDefault();
         }}
         onFocusOutside={(e) => e.preventDefault()}

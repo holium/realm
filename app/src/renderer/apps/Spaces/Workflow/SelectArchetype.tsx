@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { Grid, Text, Flex } from 'renderer/components';
 // import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -12,7 +12,7 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
     const { windowColor } = theme.currentTheme;
     const { workflowState, setState } = props;
     const [selectedArchetype, setSelectedArchetype] = useState<string | null>(
-      null
+      'lodge'
     );
 
     const setWorkspaceState = (obj: any) => {
@@ -22,6 +22,14 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
           ...obj,
         });
     };
+
+    useEffect(() => {
+      setSelectedArchetype('lodge');
+      setWorkspaceState({
+        archetype: 'lodge',
+        archetypeTitle: 'Community',
+      });
+    }, []);
     return (
       <Grid.Column noGutter lg={12} xl={12}>
         <Text
@@ -39,12 +47,11 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
           lineHeight="20px"
           variant="body"
           opacity={0.6}
-          mb={6}
         >
           Archetypes are presets for making a space. You can change the
           configuration later.
         </Text>
-        <Flex flexDirection="column" justifyContent="flex-start">
+        {/* <Flex flexDirection="column" justifyContent="flex-start" flex={1}>
           <SelectRow
             {...(workflowState && workflowState.title !== 'New Space'
               ? { image: workflowState.image }
@@ -52,39 +59,51 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
             title={workflowState && workflowState.title}
             subtitle={workflowState && workflowState.subtitle}
           />
-          <Flex pl={4} pr={4} mt={4} flex={1} gap={12} flexDirection="column">
-            <SelectRow
-              customBg={windowColor}
-              title="Community"
-              subtitle="A space to hangout and chat with friends."
-              selected={selectedArchetype === 'lodge'}
-              onClick={() => {
-                setSelectedArchetype('lodge');
-                setWorkspaceState({
-                  archetype: 'lodge',
-                  archetypeTitle: 'Community',
-                });
-              }}
-            />
-            <SelectRow
-              disabled
-              customBg={windowColor}
-              title="Creator DAO"
-              subtitle="Launch a media empire with your followers."
-            />
-            <SelectRow
-              disabled
-              customBg={windowColor}
-              title="Service DAO"
-              subtitle="From branding to software, build a DAO of contractors."
-            />
-            <SelectRow
-              disabled
-              customBg={windowColor}
-              title="Investment DAO"
-              subtitle="Pool resources and invest with friends."
-            />
-          </Flex>
+        </Flex> */}
+        <Flex
+          pl={4}
+          pr={4}
+          flex={1}
+          mb={60}
+          gap={12}
+          flexDirection="column"
+          justifyContent="center"
+        >
+          <SelectRow
+            hideIcon
+            customBg={windowColor}
+            title="Community"
+            subtitle="A space to hangout and chat with friends."
+            selected={selectedArchetype === 'lodge'}
+            onClick={() => {
+              setSelectedArchetype('lodge');
+              setWorkspaceState({
+                archetype: 'lodge',
+                archetypeTitle: 'Community',
+              });
+            }}
+          />
+          <SelectRow
+            hideIcon
+            disabled
+            customBg={windowColor}
+            title="Creator DAO"
+            subtitle="Launch a media empire with your followers."
+          />
+          <SelectRow
+            hideIcon
+            disabled
+            customBg={windowColor}
+            title="Service DAO"
+            subtitle="From branding to software, build a DAO of contractors."
+          />
+          <SelectRow
+            hideIcon
+            disabled
+            customBg={windowColor}
+            title="Investment DAO"
+            subtitle="Pool resources and invest with friends."
+          />
         </Flex>
       </Grid.Column>
     );
