@@ -354,7 +354,7 @@ export const BazaarStore = types
       const id = `${treaty.ship}/${treaty.desk}`;
       self._treaties.set(id, {
         ...treaty.docket,
-        color: cleanNounColor(treaty.color),
+        color: cleanNounColor(treaty.docket.color),
         id: id,
       });
       self.treatyAdded = !self.treatyAdded;

@@ -2,6 +2,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
+import { useServices } from 'renderer/logic/store';
 
 import { Box, AppTile, Icons, BoxProps } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
@@ -45,9 +46,10 @@ type SuiteAppProps = {
 };
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
+  const { bazaar } = useServices();
   const { selected, accentColor, app, space, isAdmin, onClick } = props;
-
   if (app) {
+    const weRecommended = bazaar.my.recommendations.includes(app.id);
     const menu = useMemo(() => {
       let menu = [];
       if (isAdmin) {
@@ -75,10 +77,12 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
         });
       }
       menu.push({
-        label: 'Recommend this app',
+        label: weRecommended ? 'Unrecommend app' : 'Recommend app',
         onClick: (evt: any) => {
           evt.stopPropagation();
-          SpacesActions.recommendApp(space.path, app.id);
+          weRecommended
+            ? SpacesActions.unrecommendApp(space.path, app.id)
+            : SpacesActions.recommendApp(space.path, app.id);
         },
       });
       return menu;

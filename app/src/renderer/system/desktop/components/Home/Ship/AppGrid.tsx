@@ -52,7 +52,7 @@ const getAppMenu = (bazaar: any, spacePath: string, app: any) => {
       section: 2,
       disabled: false,
       onClick: (evt: any) => {
-        // evt.stopPropagation();
+        evt.stopPropagation();
         console.log(`start uninstall`);
         SpacesActions.uninstallApp(app.id);
       },
