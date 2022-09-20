@@ -36,8 +36,8 @@ const DisclaimerDialog: FC<BaseDialogProps> = observer(
           <br />
           Possible addition, or separate instruction to users: Alpha users are
           encouraged to report any perceived bugs or problems in the software
-          and system to Holium Corporation by email at
-          <Anchor color={theme.light.colors.brand.primary} m={0} href="mailto:bugs@holium.io">
+          and system to Holium Corporation by email at &nbsp;
+          <Anchor color={theme.light.colors.brand.primary} m={0} p={0} href="mailto:bugs@holium.io">
             bugs@holium.io
           </Anchor>
         </Text>
