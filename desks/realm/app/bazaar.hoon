@@ -1091,6 +1091,7 @@
         =/  entry  ?~  entry  [%0 [%urbit docket.charge %.y]]
           ?>  ?=(%urbit -.app.u.entry)
           =.  installed.app.u.entry  %.y
+          =.  docket.app.u.entry  docket.charge
           u.entry
         =.  app-catalog.state  (~(put by app-catalog.state) desk entry)
         ?.  ?=(%glob -.href.docket.charge)
