@@ -42,9 +42,7 @@ const configuration: webpack.Configuration = {
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     modules: [webpackPaths.srcPath, 'node_modules'],
-    alias: {
-      '~realm': path.resolve('../../src/core'),
-    },
+    alias: {},
     // alias: {
     //   react: path.resolve('../../node_modules/react'),
     //   'react-dom': path.resolve('../../node_modules/react-dom'),

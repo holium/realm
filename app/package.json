@@ -7,7 +7,7 @@
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\" \"npm run build:cursor\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.prod.ts",
-    "build:cursor": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.prod.ts && cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.preload.ts",
+    "build:cursor": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.prod.ts",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
     "package": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --publish never",
@@ -15,7 +15,7 @@
     "start": "ts-node ./.holium/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env INSTALL_MOON=~rilmyl-soltyd-lomder-librun NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.preload.dev.ts",
-    "watch:cursor": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.dev.ts",
+    "dev:cursor": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.holium/configs/webpack.config.renderer.dev.ts",
     "test": "jest"
   },
@@ -257,7 +257,9 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      "./src/main/cursor.preload.js",
+      "./release/app/dist/main/cursor.js"
     ],
     "publish": {
       "provider": "github",
