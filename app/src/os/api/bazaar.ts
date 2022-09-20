@@ -4,6 +4,7 @@ import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { allyShip, docketInstall, docketUninstall } from '@urbit/api';
 import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
+const util = require('node:util');
 
 export const BazaarApi = {
   installApp: async (tempConduit: Conduit, ship: string, desk: string) => {
@@ -29,9 +30,7 @@ export const BazaarApi = {
               );
               reject(err);
             } else if ('install' in charge.chad) {
-              console.log(
-                `'${charge.docket.href.base}' installation started...`
-              );
+              console.log(`'${ship}/${desk}' installation started...`);
             }
           }
         },
@@ -85,7 +84,16 @@ export const BazaarApi = {
       app: 'docket',
       path: '/charges', // the spaces scry is at the root of the path
     });
-    return Object.keys(response.initial).includes(desk);
+    let isInstalled = false;
+    const { initial } = response;
+    if (
+      initial.hasOwnProperty(desk) &&
+      'glob' in initial[desk].chad &&
+      initial[desk].chad.glob === null
+    ) {
+      isInstalled = true;
+    }
+    return isInstalled;
   },
   isAlly: async (tempConduit: Conduit, ship: string) => {
     const response = await tempConduit.scry({
@@ -203,12 +211,13 @@ export const BazaarApi = {
   // in the case of standard app search/install, we will have the ship/desk
   //  information (treaty/ally), so simply leverage Tlon docketInstall to
   //   perform install on local ship
-  installDocket: async (conduit: Conduit, ship: string, desk: string) => {
-    return new Promise(async (resolve, reject) => {
-      await BazaarApi.installApp(conduit, ship, desk);
-      resolve('done');
-    });
-  },
+  // installDocket: async (conduit: Conduit, ship: string, desk: string) => {
+  //   return new Promise(async (resolve, reject) => {
+  //     BazaarApi.installApp(conduit, ship, desk)
+  //       .then((response) => resolve('done'))
+  //       .catch((e) => reject(e));
+  //   });
+  // },
   uninstallApp: async (conduit: Conduit, desk: string) =>
     await conduit.poke(docketUninstall(desk)),
   // in the case of space apps, all we have is the desk, since docket/glob
@@ -216,6 +225,7 @@ export const BazaarApi = {
   //   back to the space host which requires desk name only. space host will then
   //   resolve origin ship by scrying its own treaties
   resolveAppInstall: async (conduit: Conduit, app: any) => {
+    console.log(util.inspect(app, { depth: 10 }));
     return new Promise(async (resolve, reject) => {
       let ship = undefined;
       if (app.href.glob['glob-reference'].location.ames) {
@@ -237,8 +247,9 @@ export const BazaarApi = {
         ship = response.directories[0].ship;
       }
       console.log('install app => %o...', { ship, desk: app.id });
-      await BazaarApi.installDesk(conduit, ship, app.id);
-      resolve('done');
+      BazaarApi.installDesk(conduit, ship, app.id)
+        .then((response) => resolve('done'))
+        .catch((e) => reject(e));
       // conduit.poke({
       //   ...docketInstall(ship, app.id),
       //   reaction: 'bazaar-reaction.placeholder',
@@ -579,7 +590,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log('initial => %o', data);
+      // console.log('initial =>   %o', toJS(data));
       state.initial(data['initial']);
       break;
     case 'allies':

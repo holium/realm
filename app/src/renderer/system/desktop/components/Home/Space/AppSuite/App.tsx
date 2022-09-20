@@ -5,9 +5,8 @@ import { toJS } from 'mobx';
 
 import { Box, AppTile, Icons } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { AppModelType } from 'os/services/ship/models/docket';
+import { AppType } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { BazaarApi } from 'os/api/bazaar';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 const AppEmpty = styled(Box)`
@@ -35,7 +34,7 @@ type SuiteAppProps = {
   space: SpaceModelType;
   highlightColor?: string;
   accentColor?: string;
-  app?: any; // AppModelType;
+  app?: AppType;
   isAdmin?: boolean;
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app: any) => void;
 };
@@ -90,7 +89,7 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
         app={app}
         allowContextMenu={true}
         contextMenu={menu}
-        onAppClick={(selectedApp: AppModelType) => {
+        onAppClick={(selectedApp: AppType) => {
           // QUESTION: should this open the app listing or the actual app?
           // const app = toJS(selectedApp);
           DesktopActions.openAppWindow(space.path, selectedApp);

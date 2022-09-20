@@ -343,7 +343,8 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   };
 
   const installApp = (app: any) => {
-    SpacesActions.installApp(app);
+    const tokens = app.id.split('/');
+    SpacesActions.installDesk(tokens[0], tokens[1]);
   };
 
   const renderAppSummary = (app: any) => {

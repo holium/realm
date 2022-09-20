@@ -2,7 +2,7 @@ import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { lighten, rgba, darken } from 'polished';
 import { Flex, Box, Text, ContextMenu } from '..';
-import { AppModelType } from 'os/services/ship/models/docket';
+import { AppType } from 'os/services/spaces/models/bazaar';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
@@ -86,10 +86,10 @@ interface AppTileProps {
   contextPosition?: 'above' | 'below';
   allowContextMenu?: boolean;
   contextMenu?: any[]; // todo types
-  onAppClick?: (app: AppModelType) => void;
+  onAppClick?: (app: AppType) => void;
   selected?: boolean;
   open?: boolean;
-  app: AppModelType | any;
+  app: AppType | any;
   variants?: any;
   isVisible?: boolean;
   isAnimated?: boolean;

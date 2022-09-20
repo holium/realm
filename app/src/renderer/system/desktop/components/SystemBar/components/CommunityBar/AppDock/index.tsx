@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppModelType } from 'os/services/ship/models/docket';
+import { AppType } from 'os/services/spaces/models/bazaar';
 import { AppTile } from 'renderer/components/AppTile';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -58,7 +58,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
           SpacesActions.setPinnedOrder(spaces.selected!.path, newPinList);
         }}
       >
-        {orderedList?.map((app: AppModelType | any, index: number) => {
+        {orderedList?.map((app: AppType | any, index: number) => {
           const selected = desktop.isActiveWindow(app.id);
           const open = !selected && desktop.isOpenWindow(app.id);
           return (

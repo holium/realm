@@ -37,7 +37,7 @@ const UrbitApp = types.model({
   website: types.string,
   license: types.string,
   installed: types.boolean,
-  recommended: types.number,
+  recommended: types.optional(types.number, 0),
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
@@ -51,7 +51,7 @@ const NativeApp = types.model({
   color: types.string,
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
-  recommended: types.number,
+  recommended: types.optional(types.number, 0),
 });
 
 export type NativeAppType = Instance<typeof NativeApp>;
@@ -108,7 +108,7 @@ export const BazaarModel = types
     },
   }))
   .actions((self) => ({
-    setApp(app: AppType) {
+    setApp(app: any) {
       self.apps.set(app.id, {
         id: app.id,
         tags: app.tags,
@@ -294,6 +294,8 @@ export const BazaarStore = types
       }
     },
     initialSpace(spacePath: string, entry: any) {
+      console.log(`${spacePath} sorts => %o`, entry.sorts);
+      console.log(`${spacePath} apps => %o`, entry.apps);
       const bazaar = BazaarModel.create({
         pinned: entry.sorts.pinned,
         recommended: entry.sorts.recommended,
@@ -329,7 +331,6 @@ export const BazaarStore = types
       }
     },
     updateApp(app: AppType) {
-      // console.log('updating app => %o', app);
       const appColor = app.color;
       if (app.type === 'urbit') {
         app.color = appColor && cleanNounColor(appColor);
@@ -337,16 +338,13 @@ export const BazaarStore = types
       self.apps.set(app.id, app);
     },
     hasAlly(ship: any) {
-      // console.log('hasAlly => %o', toJS(self.allies));
       return self.allies.has(ship);
     },
     addAlly(ally: any) {
       self.allies.set(ally.alliance[0], ally.ship);
     },
     addTreaty(treaty: any) {
-      // self.treaties.push(`${treaty.ship}/${treaty.desk}`);
       const id = `${treaty.ship}/${treaty.desk}`;
-      // console.log('adding treaty => %o', { k: key, treaty });
       self._treaties.set(id, {
         ...treaty.docket,
         color: cleanNounColor(treaty.color),
@@ -357,7 +355,6 @@ export const BazaarStore = types
     initialTreaties(treaties: any) {
       for (const id in treaties) {
         const treaty = treaties[id];
-        console.log('treaty => %o', toJS(treaty));
         self._treaties.set(id, {
           ...treaty,
           color: cleanNounColor(treaty.color),
@@ -366,15 +363,12 @@ export const BazaarStore = types
       }
     },
     initialAllies(allies: any) {
-      // console.log(toJS(allies));
       for (const key in allies) {
         const val = allies[key];
-        // console.log('adding ally => %o', val);
         self.allies.set(key, { ship: key, alliance: val });
       }
     },
     addBazaar(path: string) {
-      // console.log('addBazaar => %o', path);
       self.spaces.set(path, BazaarModel.create({}));
     },
     searchApps(term: string) {

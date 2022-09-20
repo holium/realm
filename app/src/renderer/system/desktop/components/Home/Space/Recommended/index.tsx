@@ -20,10 +20,10 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
     // console.log(toJS(bazaar));
 
     useEffect(() => {
-      console.log(
-        'recommendedApps => %o',
-        bazaar.getRecommendedApps(currentSpace.path)
-      );
+      // console.log(
+      //   'recommendedApps => %o',
+      //   bazaar.getRecommendedApps(currentSpace.path)
+      // );
       if (currentSpace) {
         setApps(bazaar.getRecommendedApps(currentSpace.path));
       }

@@ -125,7 +125,6 @@
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
       =/  apps  initial:apps:core
-      :: ~&  >>  "{<dap.bowl>}: sending %initial {<[%initial apps]>}"
       :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
       (bazaar:send-reaction:core [%initial apps] [/updates ~] ~)
     ::
@@ -788,6 +787,7 @@
     ?:  =(our.bowl src.bowl)    `state
     =/  app-id                  id.app-full
     =/  app-full                (update-status app-full)
+    =.  app-catalog.state       (~(put by app-catalog.state) id.app-full entry.app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -808,6 +808,7 @@
     ?:  =(our.bowl src.bowl)    `state
     =/  app-id                  id.app-full
     =/  app-full                (update-status app-full)
+    =.  app-catalog.state       (~(put by app-catalog.state) id.app-full entry.app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -841,6 +842,7 @@
     ?:  =(our.bowl src.bowl)    `state
     =/  app-id                  id.app-full
     =/  app-full                (update-status app-full)
+    =.  app-catalog.state       (~(put by app-catalog.state) id.app-full entry.app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -861,6 +863,7 @@
     ?:  =(our.bowl src.bowl)    `state
     =/  app-id                  id.app-full
     =/  app-full                (update-status app-full)
+    =.  app-catalog.state       (~(put by app-catalog.state) id.app-full entry.app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -881,6 +884,7 @@
     ?:  =(our.bowl src.bowl)    `state
     =/  app-id                  id.app-full
     =/  app-full                (update-status app-full)
+    =.  app-catalog.state       (~(put by app-catalog.state) id.app-full entry.app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -900,6 +904,7 @@
     ?:  =(our.bowl src.bowl)    `state
     =/  app-id                  id.app-full
     =/  app-full                (update-status app-full)
+    =.  app-catalog.state       (~(put by app-catalog.state) id.app-full entry.app-full)
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
@@ -934,7 +939,6 @@
   ?>  ?=([%initial *] charge-update)
   ?>  ?=(%urbit -.app.entry.app-full)
   =.  installed.app.entry.app-full  (~(has by initial.charge-update) id.app-full)
-  =.  app-catalog.state       (~(put by app-catalog.state) id.app-full entry.app-full)
   app-full
 ::
 :: ++  suite

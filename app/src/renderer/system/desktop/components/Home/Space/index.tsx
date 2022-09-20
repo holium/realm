@@ -29,7 +29,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const [suite, setSuite] = useState<any>([]);
   const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
   const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
-  console.log('isAdmin => %o', isAdmin);
+  // console.log('isAdmin => %o', isAdmin);
 
   useEffect(() => {
     if (currentSpace) {
@@ -39,22 +39,25 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   }, [currentSpace]);
 
   useEffect(() => {
-    console.log('AppSuite useEffect => %o', {
-      ship: ship?.patp,
-      path: currentSpace?.path,
-    });
+    // console.log('AppSuite useEffect => %o', {
+    //   ship: ship?.patp,
+    //   path: currentSpace?.path,
+    // });
     if (currentSpace) {
       // @ts-ignore
       const suite = Array(5).fill(undefined);
       const apps = bazaar.getSuiteApps(currentSpace.path);
+      console.log('suite apps => %o', apps);
       apps?.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
       // console.log(suite);
       setSuite(suite);
     }
-  }, [currentSpace, currentBazaar?.suiteChange]);
+  }, [currentSpace, currentBazaar?.suiteChange, bazaar.appsChange]);
 
   useEffect(() => {
-    setApps(bazaar.getAvailableApps());
+    const apps = bazaar.getAvailableApps();
+    console.log('appsChange => %o', apps);
+    setApps(apps);
   }, [bazaar.appsChange]);
 
   const sidebarComponent = useMemo(() => {

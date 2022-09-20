@@ -98,7 +98,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
   const { accentColor, windowColor, textColor, iconColor } = theme.currentTheme;
 
   const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
-    console.log('onAppsAction => %o', { path, id: app.id, tag });
+    // console.log('onAppsAction => %o', { path, id: app.id, tag });
     SpacesActions.addToSuite(path, app.id, rank);
   };
 
@@ -151,8 +151,10 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
                 accentColor={accentColor}
                 app={undefined}
                 onClick={(e) => {
-                  setSearchMode('app-search');
-                  setSuiteIndex(index);
+                  if (isAdmin) {
+                    setSearchMode('app-search');
+                    setSuiteIndex(index);
+                  }
                 }}
               />
             )

@@ -2,7 +2,7 @@ import { FC, useState, useEffect, useMemo } from 'react';
 import { toJS, isObservable } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
-import { AppModelType } from 'os/services/ship/models/docket';
+import { AppType } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -93,7 +93,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 // exit: { opacity: 0, top: 100 },
               }
             }
-            onAppClick={(selectedApp: AppModelType) => {
+            onAppClick={(selectedApp: AppType) => {
               // @ts-ignore
               SpacesActions.addRecentApp(spaces.selected!.path, selectedApp.id);
               DesktopActions.openAppWindow(spaces.selected!.path, selectedApp);
