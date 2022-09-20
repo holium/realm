@@ -112,7 +112,7 @@ export const TransactionDetail: FC = observer(() => {
         <Text mt={8} mb={2} ml={1} variant="body" color={themeData.colors.text.secondary} fontSize={1}>Notes</Text>
         <Flex width="100%" flexDirection="column" justifyContent="center">
           {/* @ts-ignore */}
-          <TextArea theme={theme} desktopTheme={theme.currentTheme} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Transaction notes..." />
+          <TextArea theme={themeData} desktopTheme={theme.currentTheme} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Transaction notes..." />
           <Flex mt={4} width="100%" justifyContent="flex-end">
             <Button width="100%" disabled={notes === transaction.notes} isLoading={loading} onClick={saveNotes}>Save notes</Button>
           </Flex>
