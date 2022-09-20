@@ -140,12 +140,12 @@ export const BazaarModel = types
       console.log('updating pinned app => %o...', app);
       self.pinnedChange = !self.pinnedChange;
     },
-    findApps(searchString: string) {
-      // const matches = [];
-      const str = searchString.toLowerCase();
-      const apps = Array.from(self.apps!.values());
-      return apps.filter((item) => item.title.toLowerCase().startsWith(str));
-    },
+    // findApps(searchString: string) {
+    //   // const matches = [];
+    //   const str = searchString.toLowerCase();
+    //   const apps = Array.from(self.apps!.values());
+    //   return apps.filter((item) => item.title.toLowerCase().startsWith(str));
+    // },
     setPinnedApps(apps: any) {
       console.log('setPinnedApps => %o', apps);
       self.pinned.replace(apps);
@@ -194,7 +194,7 @@ export const BazaarStore = types
     // apps: types.map(BazaarApp),
     _treaties: types.map(
       types.model({
-        key: types.identifier,
+        id: types.identifier,
         image: types.maybeNull(types.string),
         title: types.string,
         license: types.string,
@@ -203,7 +203,6 @@ export const BazaarStore = types
         href: types.model({
           glob: Glob,
         }),
-        type: types.string,
         color: types.string,
         info: types.string,
       })
@@ -222,8 +221,16 @@ export const BazaarStore = types
     getBazaar(path: string) {
       return self.spaces.get(path);
     },
-    get treaties() {
-      return self._treaties;
+    getAllies() {
+      return Array.from(self.allies.values()).map((ally, index) => toJS(ally));
+    },
+    getTreaties(ship: string) {
+      return Array.from(self._treaties.values())
+        .filter((val, index) => val.id.split('/')[0] === ship)
+        .map((treaty, index) => toJS(treaty));
+    },
+    getTreaty(ship: string, desk: string) {
+      return toJS(self._treaties.get(`${ship}/${desk}`));
     },
     getRecentApps(path: string) {
       return self.spaces.get(path)?.recentApps.map((appId, index) => ({
@@ -338,21 +345,23 @@ export const BazaarStore = types
     },
     addTreaty(treaty: any) {
       // self.treaties.push(`${treaty.ship}/${treaty.desk}`);
-      const key = `${treaty.ship}/${treaty.desk}`;
+      const id = `${treaty.ship}/${treaty.desk}`;
       // console.log('adding treaty => %o', { k: key, treaty });
-      self._treaties.set(key, {
+      self._treaties.set(id, {
         ...treaty.docket,
-        key: key,
+        color: cleanNounColor(treaty.color),
+        id: id,
       });
       self.treatyAdded = !self.treatyAdded;
     },
     initialTreaties(treaties: any) {
-      // console.log('initial treaties => %o', treaties);
-      for (const key in treaties) {
-        const val = treaties[key];
-        self._treaties.set(key, {
-          ...val,
-          key: key,
+      for (const id in treaties) {
+        const treaty = treaties[id];
+        console.log('treaty => %o', toJS(treaty));
+        self._treaties.set(id, {
+          ...treaty,
+          color: cleanNounColor(treaty.color),
+          id: id,
         });
       }
     },
@@ -367,6 +376,29 @@ export const BazaarStore = types
     addBazaar(path: string) {
       // console.log('addBazaar => %o', path);
       self.spaces.set(path, BazaarModel.create({}));
+    },
+    searchApps(term: string) {
+      const str = term.toLowerCase();
+      return Array.from(self.apps.values())
+        .filter((app, index) => {
+          return (
+            app.id.startsWith(term) || app.title.toLowerCase().startsWith(str)
+          );
+        })
+        .map((app, index) => toJS(app));
+    },
+    searchTreaties(ship: string, term: string) {
+      const str = term.toLowerCase();
+      return Array.from(self._treaties.values())
+        .filter((val, index) => {
+          const tokens = val.id.split('/');
+          return (
+            tokens[0] === ship &&
+            (val.title.toLowerCase().startsWith(str) ||
+              tokens[1].startsWith(term))
+          );
+        })
+        .map((treaty, index) => toJS(treaty));
     },
   }));
 

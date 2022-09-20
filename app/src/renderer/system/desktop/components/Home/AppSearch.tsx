@@ -168,17 +168,17 @@ const renderProviders = (data: Array<any>, searchString: string) => {
   return (
     data &&
     data
-      .filter((item) => item.name.startsWith(searchString))
+      .filter((item) => item.ship.startsWith(searchString))
       .map((item, index) => (
         <Flex key={index} flexDirection="row" alignItems="center" gap={8}>
           <Sigil
             simple
             size={28}
-            avatar={item.avatar}
-            patp={item.name}
+            // avatar={item.avatar}
+            patp={item.ship}
             color={[item.sigilColor || '#000000', 'white']}
           />
-          <Text>{item.name}</Text>
+          <Text>{item.ship}</Text>
         </Flex>
       ))
   );
@@ -245,10 +245,9 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   const [searchString, setSearchString] = useState('');
   const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
+  const [selectedDesk, setSelectedDesk] = useState('');
 
   const spacePath: string = spaces.selected?.path!;
-
-  const currentBazaar = spaces.selected ? bazaar.getBazaar(spacePath) : null;
 
   useEffect(() => {
     setSearchMode('none');
@@ -260,89 +259,53 @@ const AppSearchApp = observer((props: AppSearchProps) => {
 
   useEffect(() => {
     if (selectedShip) {
-      SpacesActions.getTreaties(selectedShip).then((items: any) => {
-        // console.log('treaties => %o', items);
-        const data = Object.entries(items).map(([key, value], index) => ({
-          ...value,
-          id: value.desk,
-        }));
-        setData(data);
-      });
+      if (!bazaar.hasAlly(selectedShip)) {
+        SpacesActions.addAlly(selectedShip).then((result) => {
+          console.log('addTreaty response => %o', result);
+          const treaties = bazaar.getTreaties(selectedShip);
+          setData(treaties);
+        });
+      }
     }
   }, [selectedShip, bazaar.treatyAdded]);
 
   useEffect(() => {
-    // console.log('AppSearch effect [searchString]...');
     if (searchMode === 'app-search') {
-      const apps = currentBazaar?.findApps(searchString);
-      // console.log(apps);
+      const apps = bazaar.searchApps(searchString);
       setData(apps);
     } else if (searchMode === 'dev-app-search') {
-      const apps = bazaar.treaties;
-      // console.log(apps);
+      const apps = bazaar.searchTreaties(selectedShip, searchString);
       setData(apps);
     }
   }, [searchString]);
 
   useEffect(() => {
-    // console.log('AppSearch effect [searchMode]...');
     if (searchMode === 'ship-search') {
       setData([]);
-      // todo: move into bazaar "main" (no space specific) store
-      //   see bazaar.allies
-      SpacesActions.getAllies(spacePath).then((allies: any) => {
-        let data = Object.entries(allies).map(([key, value], index) => ({
-          id: key,
-          name: key,
-        }));
-        setData(data);
-      });
+      const allies = bazaar.getAllies();
+      setData(allies);
     } else if (searchMode === 'dev-app-search') {
       setData([]);
       // if the 'selected' ship is not yet an ally, make them one which will
       //  trigger a treay which can then be listed for installation
       if (!bazaar.hasAlly(selectedShip)) {
-        // console.log('adding ally => %o', selectedShip);
         SpacesActions.addAlly(selectedShip).then((result) => {
           console.log('addTreaty response => %o', result);
-          setData([]);
+          const treaties = bazaar.getTreaties(selectedShip);
+          setData(treaties);
         });
       } else {
-        // console.log('fetching treaties => %o', selectedShip);
-        SpacesActions.getTreaties(selectedShip).then((items: any) => {
-          // console.log('treaties => %o', items);
-          const data = Object.entries(items).map(([key, value], index) => ({
-            ...value,
-            id: value.desk,
-          }));
-          setData(data);
-        });
+        const treaties = bazaar.getTreaties(selectedShip);
+        setData(treaties);
       }
     } else if (searchMode === 'dev-app-detail') {
       setData([]);
-      // if the 'selected' ship is not yet an ally, make them one which will
-      //  trigger a treay which can then be listed for installation
-      const treatyDetail = currentBazaar?.getTreatyDetail(
-        searchModeArgs[0],
-        searchModeArgs[1]
-      );
-      if (treatyDetail) {
-        setData(treatyDetail);
+      const treaty = bazaar.getTreaty(selectedShip, selectedDesk);
+      if (treaty) {
+        setData([treaty]);
       }
     }
   }, [searchMode]);
-
-  // const onDevAppAction = (app: any) => {
-  //   console.log('onDevAppAction => %o', app);
-  // };
-
-  // const devAppRowRenderer = (app: any) => (
-  //   <>
-  //     <Button borderRadius={6} onClick={(e) => onDevAppAction(app)}>
-  //       Install
-  //     </Button>
-  //   </>
-  // );
 
   const renderDevApps = (apps: Array<any>) => {
     if (apps.length === 0) {
@@ -380,7 +343,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   };
 
   const installApp = (app: any) => {
-    // console.log('installApp => %o', app);
     SpacesActions.installApp(app);
   };
 
@@ -442,6 +404,15 @@ const AppSearchApp = observer((props: AppSearchProps) => {
               setSearchModeArgs([searchString]);
               setSearchString('');
             } else if (evt.key === 'Escape') {
+              setSearchPlaceholder('Search...');
+              setSelectedShip('');
+              setSearchString('');
+            } else if (
+              evt.key === 'Backspace' &&
+              searchMode === 'dev-app-search' &&
+              searchString.length === 0
+            ) {
+              setSearchMode('start');
               setSearchPlaceholder('Search...');
               setSelectedShip('');
               setSearchString('');

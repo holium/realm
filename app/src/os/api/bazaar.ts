@@ -22,6 +22,16 @@ export const BazaarApi = {
             if ('glob' in charge.chad || 'site' in charge.chad) {
               await tempConduit.unsubscribe(subscriptionId);
               resolve(data);
+            } else if ('hung' in charge.chad) {
+              const err = charge.chad?.err || 'fail';
+              console.log(
+                `install failed => ${err}. have you uploaded the glob on the host?`
+              );
+              reject(err);
+            } else if ('install' in charge.chad) {
+              console.log(
+                `'${charge.docket.href.base}' installation started...`
+              );
             }
           }
         },
@@ -39,6 +49,12 @@ export const BazaarApi = {
   },
   addAlly: async (tempConduit: Conduit, ship: string) => {
     return new Promise(async (resolve, reject) => {
+      const isAlly = await BazaarApi.isAlly(tempConduit, ship);
+      if (isAlly) {
+        console.log(`'${ship}' is already an ally. skipping...`);
+        resolve(`'${ship}' is already an ally. skipping...`);
+        return;
+      }
       let subscriptionId: number = -1;
       await tempConduit.watch({
         app: 'treaty',
@@ -124,6 +140,7 @@ export const BazaarApi = {
           })
           .catch((e) => reject(e));
       } else {
+        console.log(`installing '/${ship}/${desk}'...`);
         await BazaarApi.installApp(tempConduit, ship, desk)
           .then((result) => {
             console.log('app install complete');
@@ -510,11 +527,37 @@ export const BazaarApi = {
     state: BazaarStoreType
   ): Promise<void> => {
     // load allies
-    const allies = await conduit.scry({
+    // const allies = await conduit.scry({
+    //   app: 'treaty',
+    //   path: '/allies', // the spaces scry is at the root of the path
+    // });
+    // state.initialAllies(allies.ini);
+    conduit.watch({
       app: 'treaty',
-      path: '/allies', // the spaces scry is at the root of the path
+      path: `/allies`,
+      onSubscribed: (eventId: number) => {
+        console.log(`message [${eventId}]: subscribed to treaty/allies...`);
+      },
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log('/treaty/allies => %o', { allies: data });
+        handleBazaarReactions({ allies: data }, state);
+      },
+      onError: () => console.log('subscription [treaty/allies] rejected'),
+      onQuit: () => console.log('kicked from subscription [treaty/allies]'),
     });
-    state.initialAllies(allies.ini);
+    conduit.watch({
+      app: 'treaty',
+      path: `/treaties`,
+      onSubscribed: (eventId: number) => {
+        console.log(`message [${eventId}]: subscribed to treaty/treaties...`);
+      },
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log('/treaty/treaties => %o', { treaties: data });
+        handleBazaarReactions({ treaties: data }, state);
+      },
+      onError: () => console.log('subscription [treaty/treaties] rejected'),
+      onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
+    });
     conduit.watch({
       app: 'bazaar',
       path: `/updates`,
@@ -538,6 +581,14 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     case 'initial':
       console.log('initial => %o', data);
       state.initial(data['initial']);
+      break;
+    case 'allies':
+      console.log('allies => %o', data);
+      state.initialAllies(data['allies'].ini);
+      break;
+    case 'treaties':
+      console.log('treaties => %o', data);
+      state.initialTreaties(data['treaties'].ini);
       break;
     // event when a new space is joined and our ship has successfully
     //   subscribed to the space
