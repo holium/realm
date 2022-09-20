@@ -28,7 +28,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const [apps, setApps] = useState<any>([]);
   const [suite, setSuite] = useState<any>([]);
   const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
-  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
+  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!) || false;
   console.log('isAdmin => %o', isAdmin);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       // @ts-ignore
       const suite = Array(5).fill(undefined);
       const apps = bazaar.getSuiteApps(currentSpace.path);
-      apps?.forEach((app, index) => suite.splice(app.ranks?.suite, 1, app));
+      apps?.forEach((app, index) => suite.splice(app.ranks!.suite, 1, app));
       // console.log(suite);
       setSuite(suite);
     }
@@ -103,7 +103,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           gap={12}
           mt={40}
           mb={46}
-          minWidth={810}
+          minWidth={880}
           width={headerWidth}
           flexDirection="row"
           justifyContent="space-between"
@@ -129,7 +129,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           flexDirection="row"
           justifyContent="space-between"
           gap={36}
-          minWidth={810}
+          minWidth={880}
           width={paneWidth}
         >
           {appGrid && (
@@ -139,9 +139,9 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
               </Text>
               <Flex
                 style={{ position: 'relative' }}
-                gap={22}
-                width="810px"
-                mb="180px"
+                gap={32}
+                width="880px"
+                // mb="180px"
                 flexWrap="wrap"
                 flexDirection="row"
               >

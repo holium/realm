@@ -22,11 +22,12 @@ export const RadioList: FC<IRadioList> = (props: IRadioList) => {
         const isSelected = option.value === selected;
         return (
           <Row
+            style={{ opacity: option.disabled ? 0.3 : 1 }}
             key={option.value}
             gap={12}
             selected={isSelected}
-            customBg={optionBg}
-            onClick={() => onClick(option.value)}
+            customBg={option.disabled ? undefined : optionBg}
+            onClick={() => !option.disabled && onClick(option.value)}
           >
             {option.icon && (
               <Flex alignItems="center" justifyContent="center">

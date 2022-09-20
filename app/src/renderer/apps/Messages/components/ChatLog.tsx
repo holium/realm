@@ -61,8 +61,8 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
       setChunk(all);
       setListEnd(true);
     }
-    setCurrent(messages);
     setAll(all);
+    setCurrent(messages);
   }, [messages.length, isUpdated]);
 
   // const pendings = memo(reduceToPending(messages));
