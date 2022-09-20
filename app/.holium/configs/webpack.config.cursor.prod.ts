@@ -3,6 +3,7 @@ import webpack from 'webpack';
 import { merge } from 'webpack-merge';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import checkNodeEnv from '../scripts/check-node-env';
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
@@ -12,24 +13,32 @@ checkNodeEnv('production');
 const devtoolsConfig =
   process.env.DEBUG_PROD === 'true'
     ? {
-        devtool: 'source-map',
+        devtool: 'inline-source-map',
       }
     : {};
 const configuration: webpack.Configuration = {
   ...devtoolsConfig,
-
   mode: 'production',
-
   target: 'electron-preload',
-
   entry: path.join(
     webpackPaths.srcRendererPath,
     './system/desktop/components/Multiplayer/preload.ts'
   ),
 
   output: {
-    path: webpackPaths.distMainPath,
+    path: webpackPaths.distRendererPath,
     filename: 'cursor.js',
+  },
+  /**
+   * Determine the array of extensions that should be used to resolve modules.
+   */
+  resolve: {
+    extensions: ['.js', '.ts'],
+    modules: ['node_modules'],
+    // alias: {
+    //   react: path.resolve('../../node_modules/react'),
+    //   'react-dom': path.resolve('../../node_modules/react-dom'),
+    // },
   },
 
   plugins: [
@@ -49,15 +58,6 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
     }),
-    // new webpack.LoaderOptionsPlugin({
-    //   // debug: true,
-    //   options: {
-    //     context: webpackPaths.srcPath,
-    //     output: {
-    //       path: webpackPaths.distMainPath,
-    //     },
-    //   },
-    // }),
   ],
 
   /**
@@ -69,10 +69,10 @@ const configuration: webpack.Configuration = {
     __dirname: false,
     __filename: false,
   },
-  externals: {
-    react: 'react',
-    reactDOM: 'react-dom',
-  },
+  // externals: {
+  //   react: 'react',
+  //   reactDOM: 'react-dom',
+  // },
 
   watch: false,
 };
