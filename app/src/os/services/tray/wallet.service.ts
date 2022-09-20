@@ -256,7 +256,7 @@ export class WalletService extends BaseService {
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
-      'http://127.0.0.1:8545'
+      'https://ropsten.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
     );
   }
 
