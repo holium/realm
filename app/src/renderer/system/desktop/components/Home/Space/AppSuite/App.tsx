@@ -3,13 +3,18 @@ import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
 
-import { Box, AppTile, Icons } from 'renderer/components';
+import { Box, AppTile, Icons, BoxProps } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-const AppEmpty = styled(Box)`
+type AppEmptyProps = {
+  selected: boolean;
+  accentColor: string;
+};
+
+const AppEmpty = styled(Box)<AppEmptyProps & BoxProps>`
   border-radius: 20px;
   /* border: 2px dotted white; */
   display: flex;
@@ -22,7 +27,7 @@ const AppEmpty = styled(Box)`
     transition: 0.2s ease;
     background: ${rgba('#FFFFFF', 0.5)};
   }
-  ${(props: any) =>
+  ${(props: AppEmptyProps) =>
     props.selected &&
     css`
       border: 2px solid ${props.accentColor};
@@ -85,7 +90,7 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
         : rgba(app.color, 0.7);
     return (
       <AppTile
-        tileSize="xl"
+        tileSize="xl1"
         app={app}
         allowContextMenu={true}
         contextMenu={menu}
@@ -101,8 +106,8 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
   }
   return (
     <AppEmpty
-      height={148}
-      width={148}
+      height={160}
+      width={160}
       selected={selected}
       accentColor={accentColor}
       onClick={(e) => onClick && onClick(e, undefined)}

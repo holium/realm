@@ -110,6 +110,7 @@
       :-  %initial
       %-  pairs
       :~  [%space-apps (space-apps-full:encode space-apps-full.rct)]
+          [%my (my:encode my.rct)]
       ==
     ::
         %space-apps
@@ -188,6 +189,10 @@
           [%desk s+desk.rct]
           [%docket (pairs (dkt:encode docket.rct))]
       ==
+    ::
+        %my-recommendations
+        :-  %my-recommendations
+        [%a (turn ~(tap in recommendations.rct) |=(=app-id:store s+app-id))]
     ==
   ::
   ++  view :: encodes for on-peek
@@ -210,6 +215,12 @@
 ++  encode
   =,  enjs:format
   |%
+  ++  my
+    |=  [=my:store]
+    ^-  json
+    %-  pairs
+    :~  [%recommendations a+(turn ~(tap in recommendations.my) |=(=app-id:store s+app-id))]
+    ==
   ++  sites
     |=  [stes=(set [ship=@p desk=@tas])]
     ^-  (list json)

@@ -19,7 +19,7 @@ export type ContextMenuProps = {
   parentRef: any;
   customBg?: string;
   menuItemtype?: 'neutral' | 'brand';
-  menu: any[];
+  menu: any[] | (() => any[]);
 };
 
 export const ContextMenu = (props: ContextMenuProps) => {
@@ -39,12 +39,14 @@ export const ContextMenu = (props: ContextMenuProps) => {
   const contextMenuRef = React.useRef();
   let anchorPoint;
   let show;
+  let _menu: any[] =
+    (typeof menu === 'function' && menu()) || (menu as any[]) || [];
   if (isComponentContext) {
     const context = useContextMenu(
       containerId,
       parentRef,
       contextMenuRef,
-      (menu.length + 1) * 32 + 16, // the padding plus each element,
+      (_menu.length + 1) * 32 + 16, // the padding plus each element,
       position,
       orientation,
       adaptive
@@ -57,7 +59,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
     show = systemContext.show;
   }
 
-  const sectionsArray = menu.reduce((arr, obj: any, index: number) => {
+  const sectionsArray = _menu.reduce((arr, obj: any, index: number) => {
     if (!index || arr[arr.length - 1][0].section !== obj.section) {
       return arr.concat([
         [

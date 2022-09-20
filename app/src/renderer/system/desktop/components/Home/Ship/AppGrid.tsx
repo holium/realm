@@ -1,5 +1,5 @@
 import { FC, useState, useEffect, useMemo } from 'react';
-import { toJS, isObservable } from 'mobx';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
 import { AppType } from 'os/services/spaces/models/bazaar';
@@ -12,6 +12,55 @@ type AppGridProps = {
   tileSize: AppTileSize;
 };
 
+const getAppMenu = (bazaar: any, spacePath: string, app: any) => {
+  const tags = app.tags || [];
+  const isAppPinned = tags.includes('pinned');
+  const weRecommended = bazaar.my.recommendations.includes(app.id);
+  const menu = [
+    {
+      label: isAppPinned ? 'Unpin app' : 'Pin app',
+      disabled: false,
+      onClick: (evt: any) => {
+        evt.stopPropagation();
+        isAppPinned
+          ? SpacesActions.unpinApp(spacePath, app.id)
+          : SpacesActions.pinApp(spacePath, app.id);
+      },
+    },
+    {
+      label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+      disabled: false,
+      onClick: (evt: any) => {
+        evt.stopPropagation();
+        weRecommended
+          ? SpacesActions.unrecommendApp(spacePath, app.id)
+          : SpacesActions.recommendApp(spacePath, app.id);
+      },
+    },
+    {
+      label: 'App info',
+      disabled: true,
+      onClick: (evt: any) => {
+        // evt.stopPropagation();
+        console.log('open app info');
+      },
+    },
+  ];
+  if (app.type === 'urbit' && app.installed) {
+    menu.push({
+      label: 'Uninstall',
+      section: 2,
+      disabled: false,
+      onClick: (evt: any) => {
+        // evt.stopPropagation();
+        console.log(`start uninstall`);
+        SpacesActions.uninstallApp(app.id);
+      },
+    });
+  }
+  return menu;
+};
+
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
   const { spaces, bazaar, ship } = useServices();
@@ -22,17 +71,22 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
 
   useEffect(() => {
     if (currentSpace) {
-      setApps(bazaar.getApps(`/${ship!.patp}/our`));
+      setApps(
+        bazaar
+          .getApps(`/${ship!.patp}/our`)
+          .filter(
+            (app: any) =>
+              app.type !== 'urbit' || (app.type === 'urbit' && app.installed)
+          )
+      );
     }
   }, [currentSpace, bazaar.appsChange]);
 
   return useMemo(
     () =>
       apps.map((app: any, index: number) => {
-        const spacePath = spaces.selected?.path!;
         const tags = app.tags || [];
         const isAppPinned = tags.includes('pinned');
-        const isAppRecommended = tags.includes('recommended');
         return (
           <AppTile
             key={app.title + index + 'grid'}
@@ -41,43 +95,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             tileSize={tileSize}
             app={app}
             isVisible={isOpen}
-            contextMenu={[
-              {
-                label: isAppPinned ? 'Unpin app' : 'Pin to taskbar',
-                disabled: false,
-                onClick: (evt: any) => {
-                  evt.stopPropagation();
-                  isAppPinned
-                    ? SpacesActions.unpinApp(spacePath, app.id)
-                    : SpacesActions.pinApp(spacePath, app.id);
-                },
-              },
-              {
-                label: 'Add to recommendations',
-                disabled: isAppRecommended,
-                onClick: (evt: any) => {
-                  evt.stopPropagation();
-                  SpacesActions.recommendApp(spacePath, app.id);
-                },
-              },
-              {
-                label: 'App info',
-                disabled: true,
-                onClick: (evt: any) => {
-                  // evt.stopPropagation();
-                  console.log('open app info');
-                },
-              },
-              {
-                label: 'Uninstall app',
-                section: 2,
-                disabled: true,
-                onClick: (evt: any) => {
-                  // evt.stopPropagation();
-                  console.log('start uninstall');
-                },
-              },
-            ]}
+            contextMenu={getAppMenu(bazaar, currentSpace?.path!, app)}
             variants={
               {
                 // hidden: {

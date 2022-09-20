@@ -185,6 +185,11 @@ export const BazaarModel = types
   }));
 export type BazaarModelType = Instance<typeof BazaarModel>;
 
+export const MyApps = types.model('MyApps', {
+  recommendations: types.array(types.string),
+});
+export type MyAppsType = Instance<typeof MyApps>;
+
 export const BazaarStore = types
   .model({
     // all apps installed on the local ship (our)
@@ -216,6 +221,7 @@ export const BazaarStore = types
     ),
     apps: BazaarAppMap,
     appsChange: types.optional(types.boolean, false),
+    my: types.optional(MyApps, { recommendations: [] }),
   })
   .views((self) => ({
     getBazaar(path: string) {
@@ -287,6 +293,9 @@ export const BazaarStore = types
   }))
   .actions((self) => ({
     initial(apps: any) {
+      if ('my' in apps) {
+        self.my.recommendations.replace(apps.my.recommendations);
+      }
       const catalog = apps['space-apps'];
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
@@ -294,8 +303,6 @@ export const BazaarStore = types
       }
     },
     initialSpace(spacePath: string, entry: any) {
-      console.log(`${spacePath} sorts => %o`, entry.sorts);
-      console.log(`${spacePath} apps => %o`, entry.apps);
       const bazaar = BazaarModel.create({
         pinned: entry.sorts.pinned,
         recommended: entry.sorts.recommended,
@@ -393,6 +400,11 @@ export const BazaarStore = types
           );
         })
         .map((treaty, index) => toJS(treaty));
+    },
+    updateMyRecommendations(recommendations: string[]) {
+      console.log('updateMyRecommendations => %o', recommendations);
+      self.my.recommendations.replace(recommendations);
+      self.appsChange = !self.appsChange;
     },
   }));
 

@@ -47,7 +47,7 @@ export class SpacesService extends BaseService {
       incoming: {},
       outgoing: {},
     }),
-    bazaar: BazaarStore.create({}),
+    bazaar: BazaarStore.create({ my: {} }),
   };
 
   handlers = {

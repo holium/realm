@@ -17,6 +17,7 @@ const sizes = {
   md: 48,
   lg: 120,
   xl: 148,
+  xl1: 160,
   xl2: 196,
   xxl: 210,
 };
@@ -26,6 +27,7 @@ const radius = {
   md: 12,
   lg: 16,
   xl: 20,
+  xl1: 20,
   xl2: 24,
   xxl: 20,
 };
@@ -35,6 +37,7 @@ const scales = {
   md: 0.05,
   lg: 0.07,
   xl: 0.05,
+  xl1: 0.03,
   xl2: 0.03,
   xxl: 0.02,
 };
@@ -80,12 +83,12 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
-export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xl2' | 'xxl';
+export type AppTileSize = 'sm' | 'md' | 'lg' | 'xl' | 'xl1' | 'xl2' | 'xxl';
 interface AppTileProps {
   isPinned?: boolean;
   contextPosition?: 'above' | 'below';
   allowContextMenu?: boolean;
-  contextMenu?: any[]; // todo types
+  contextMenu?: any[] | (() => any[]); // todo types
   onAppClick?: (app: AppType) => void;
   selected?: boolean;
   open?: boolean;
@@ -118,7 +121,8 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
 
   return useMemo(() => {
     let title;
-    const isAppGrid = tileSize === 'xxl' || tileSize === 'xl2';
+    const isAppGrid =
+      tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
     const boxShadowStyle = isAppGrid
       ? '0px 2px 8px rgba(0, 0, 0, 0.15)'
       : 'none';
@@ -135,11 +139,11 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
         <Text
           position="absolute"
           // style={{ mixBlendMode: 'hard-light' }}
-          left="1.5rem"
+          left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
           padding=".2rem"
           borderRadius={4}
           backgroundColor={app.image && appColor}
-          bottom="1.25rem"
+          bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
           fontWeight={500}
           fontSize={2}
           color={textColor}

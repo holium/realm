@@ -66,13 +66,13 @@ const StyledContent = styled(PopoverPrimitive.Content, {
   },
 });
 
-function Content({ children, ...props }) {
+function Content({ children, ...props }: any) {
   return (
     <PopoverPrimitive.Portal>
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
-          document.activeElement?.blur();
+          if (document.activeElement) document.activeElement!.blur();
           e.preventDefault();
         }}
         onFocusOutside={(e) => e.preventDefault()}
@@ -212,18 +212,20 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
               <Text color={rgba(textColor, 0.4)}>No apps found</Text>
             )) || (
               <Flex flexDirection={'column'} gap={10}>
-                {apps.map((item, index) => (
-                  <div key={index}>
-                    <AppRow
-                      caption={item.id}
-                      app={item}
-                      actionRenderer={() =>
-                        actionRenderer(space.path, item, suiteIndex)
-                      }
-                      onClick={() => {}}
-                    />
-                  </div>
-                ))}
+                {apps
+                  .filter((app) => app.installed)
+                  .map((item, index) => (
+                    <div key={index}>
+                      <AppRow
+                        caption={item.id}
+                        app={item}
+                        actionRenderer={() =>
+                          actionRenderer(space.path, item, suiteIndex)
+                        }
+                        onClick={() => {}}
+                      />
+                    </div>
+                  ))}
               </Flex>
             )}
           </Flex>

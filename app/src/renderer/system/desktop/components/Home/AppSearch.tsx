@@ -131,11 +131,19 @@ const renderApps = (space: string, apps: any, theme: any) => {
   if (!apps || apps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
   }
+
+  const installedApps = apps?.filter(
+    (app: any) => app.type !== 'urbit' || app.installed
+  );
+  if (!installedApps || installedApps.length === 0) {
+    return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
+  }
+
   // const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
   //   console.log('onAppsAction => %o', { path, id: app.id, tag });
   //   SpacesActions.addToSuite(path, app.id, rank);
   // };
-  return apps?.map((app, index) => (
+  return installedApps.map((app, index) => (
     <div key={index}>
       <AppRow
         caption={app.title}

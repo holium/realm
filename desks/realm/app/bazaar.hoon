@@ -16,6 +16,7 @@
       ==
   +$  state-0
     $:  %0
+        =my:store
         =app-catalog:store
         space-apps=space-apps-lite:store
         :: vips are ships hosting apps for install
@@ -126,7 +127,7 @@
       ?>  (is-host:core src.bowl)
       =/  apps  initial:apps:core
       :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
-      (bazaar:send-reaction:core [%initial apps] [/updates ~] ~)
+      (bazaar:send-reaction:core [%initial apps my.state] [/updates ~] ~)
     ::
     [%bazaar @ @ ~]
       :: The space level watch subscription
@@ -441,10 +442,14 @@
     ^-  (quip card _state)
     ::  if this action is being performed on a remote ship (not the host/admin ship), poke
     ::    the space host to ensure "source of truth" and subscribers properly synched
+    ::  track apps we've recommended to prevent multiple recommendations per ship
+    =.  recommendations.my.state  (~(put in recommendations.my.state) app-id)
     ?.  =(our.bowl ship.path)
       ~&  >>  "{<dap.bowl>}: recommend received. forwarding to space host {<ship.path>}..."
       :_  state
-      [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%recommend path app-id])]~
+      :~  [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%recommend path app-id])]
+          [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
+      ==
     =/  entry                     (~(got by app-catalog.state) app-id)
     =.  recommended.entry         (add recommended.entry 1)
     =.  app-catalog.state         (~(put by app-catalog.state) app-id entry)
@@ -457,15 +462,23 @@
     :: ~&  >  "add-rec..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%recommend path [app-id sieve.app-lite entry] recommended.sorts.apps] paths ~)
+    :_  state
+    :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
+        [%give %fact paths bazaar-reaction+!>([%recommend path [app-id sieve.app-lite entry] recommended.sorts.apps])]
+    ==
+    :: (bazaar:send-reaction [%recommend path [app-id sieve.app-lite entry] recommended.sorts.apps] paths ~)
   ::
   ++  rem-rec
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
+    ::  track apps we've recommended to prevent multiple recommendations per ship
+    =.  recommendations.my.state  (~(del in recommendations.my.state) app-id)
     ?.  =(our.bowl ship.path)
       ~&  >>  "{<dap.bowl>}: unrecommend received. forwarding to space host {<ship.path>}..."
       :_  state
-      [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%unrecommend path app-id])]~
+      :~  [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%unrecommend path app-id])]
+          [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
+      ==
     =/  entry                    (~(got by app-catalog.state) app-id)
     =.  recommended.entry        ?:((gth recommended.entry 0) (sub recommended.entry 1) 0)
     =.  app-catalog.state        (~(put by app-catalog.state) app-id entry)
@@ -478,7 +491,11 @@
     :: ~&  >  "rem-rec..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-  (bazaar:send-reaction [%unrecommend path [app-id sieve.app-lite entry] recommended.sorts.apps] paths ~)
+    :_  state
+    :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
+        [%give %fact paths bazaar-reaction+!>([%unrecommend path [app-id sieve.app-lite entry] recommended.sorts.apps])]
+    ==
+  :: (bazaar:send-reaction [%unrecommend path [app-id sieve.app-lite entry] recommended.sorts.apps] paths ~)
   ::
   ++  add-ste
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
@@ -737,10 +754,11 @@
     %app-installed    `state
     %app-uninstalled  `state
     %treaty-added     `state
+    %my-recommendations  `state
   ==
   ::
   ++  on-initial
-    |=  [=space-apps-full:store]
+    |=  [=space-apps-full:store =my:store]
     ^-  (quip card _state)
     `state
   ::

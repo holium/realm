@@ -590,7 +590,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      // console.log('initial =>   %o', toJS(data));
+      console.log('initial => %o', data);
       state.initial(data['initial']);
       break;
     case 'allies':
@@ -728,6 +728,12 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updateSuiteRank(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
+      }
+      break;
+    case 'my-recommendations':
+      {
+        console.log('my-recommendations => %o', data);
+        state.updateMyRecommendations(data['my-recommendations']);
       }
       break;
     default:

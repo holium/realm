@@ -74,12 +74,12 @@ export const Crest: FC<ICrest> = (props: ICrest) => {
       borderRadius={crestRadius[size]}
       transition={{ backgroundColor: { duration: 0.5 } }}
     >
-      <CrestSymbol
+      {/* <CrestSymbol
         fill={color}
         transitionDuration={0.5}
         height={crestSize[size] * 0.65}
         width={crestSize[size] * 0.65}
-      />
+      /> */}
     </ColorCrest>
   );
 };

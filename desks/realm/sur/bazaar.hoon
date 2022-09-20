@@ -87,6 +87,9 @@
 +$  space-apps-lite         (map space-path:spaces [index=app-index-lite =sorts])  :: INCLUDED IN AGENT STATE
 +$  space-apps-full         (map space-path:spaces [index=app-index-full =sorts])
 +$  sites                   (set [ship desk])
++$  my
+  $:  recommendations=(set app-id)
+  ==
 
 :: +$  pinned-apps             (map space-path:spaces (map app-id @ud))
 :: +$  recommended-apps        (map space-path:spaces (map app-id @ud))
@@ -116,7 +119,7 @@
   ==
 ::
 +$  reaction
-  $%  [%initial =space-apps-full]
+  $%  [%initial =space-apps-full =my]
       [%space-apps =space-path:spaces =app-index-full =sorts sites=(set [ship desk])]
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]
@@ -129,6 +132,7 @@
       [%app-installed =app-id =app]
       [%app-uninstalled =app-id]
       [%treaty-added [=ship =desk] =docket:docket]
+      [%my-recommendations recommendations=(set app-id)]
   ==
 ::
 ::  Scry views
