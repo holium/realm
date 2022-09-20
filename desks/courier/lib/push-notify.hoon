@@ -68,10 +68,14 @@
   ++  request :: encodes for iris outbound
     |=  notif=notification:sur
     ^-  json
+    =/  channel  'push'
     %-  pairs
     :~  
         ['app_id' s+app-id.notif]
         ['data' (mtd data.notif)]
+        :: ['include_player_ids' a+(turn ['95966528-80c7-48be-8d57-93c954c0f3a1' ~] |=([id=@t] s+id))]
+        ['include_external_user_ids' a+(turn ['0v4.hvetk.kr25i.filf5.8bpt4.abqrg' ~] |=([id=@t] s+id))]
+        ['channel_for_external_user_ids' s+channel]
         ['subtitle' (contents subtitle.notif)]
         ['contents' (contents contents.notif)]
     ==
