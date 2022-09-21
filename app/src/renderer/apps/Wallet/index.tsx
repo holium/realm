@@ -44,7 +44,6 @@ export const WalletApp: FC<any> = observer((props: any) => {
   let transactions = getTransactions(walletApp.ethereum.transactions);
   useEffect(() => {
     if (transactions.length !== transactionCount) {
-      console.log('new count', transactions.length)
       setTransactionCount(transactions.length);
       setHidePending(false);
     }
@@ -72,7 +71,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
         hide={walletApp.currentView === 'ethereum:new'}
       />
       {(!hidePending && walletApp.currentView !== WalletView.TRANSACTION_DETAIL) && <PendingTransactionDisplay transactions={transactions} hide={hide} />}
-      <View {...props} />
+      <View {...props } hidePending={hidePending} />
       <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} />
     </Flex>
   );

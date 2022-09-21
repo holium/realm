@@ -74,6 +74,7 @@ export const Transaction = observer((props: TransactionProps) => {
 
 interface TransactionListProps {
   transactions: TransactionType[]
+  hidePending: boolean
 }
 export const TransactionList = observer((props: TransactionListProps) => {
   const { theme } = useServices();
@@ -81,7 +82,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
 
   return (
     <>
-      <NoScrollBar width="100%" height={pending ? '200px' : '150px'} flexDirection="column" margin="auto" overflow="scroll">
+      <NoScrollBar width="100%" height={pending && !props.hidePending ? '135px' : '160px'} flexDirection="column" margin="auto" overflow="scroll">
         { props.transactions.length
           ? props.transactions.map((transaction, index) => <Transaction key={index} transaction={transaction} />)
           : <Text variant="h4">No transactions</Text>

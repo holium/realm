@@ -34,6 +34,7 @@ const FlexWithShadow = styled(Flex)`
 
 interface EthDetailProps {
   theme: ThemeModelType;
+  hidePending: boolean
 }
 
 export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
@@ -95,7 +96,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
               Transactions
             </Text>
           </Box>
-          <TransactionList transactions={transactions} />
+          <TransactionList transactions={transactions} hidePending={props.hidePending} />
         </Flex>
       </Box>
       <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletViews.ETH_LIST)}>
