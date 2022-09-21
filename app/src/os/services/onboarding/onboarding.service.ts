@@ -472,7 +472,7 @@ export class OnboardingService extends BaseService {
       this.state.installRealm();
       return;
     }
-    const desks: string[] = ['hello'];
+    const desks: string[] = ['realm', 'courier'];
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp, cookie } = this.state.ship!;
     const tempConduit = await this.tempConduit(url, patp, cookie!);
