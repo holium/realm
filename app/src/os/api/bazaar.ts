@@ -29,7 +29,7 @@ export const BazaarApi = {
               `timeout installing ${ship}/${desk}. has ${desk} been published? also check the glob-ames value in the ${desk}'s docket file to ensure match with '${ship}'.`
             );
             reject(`timeout installing ${ship}/${desk}`);
-          }, 20000);
+          }, 60000);
 
           tempConduit.poke(docketInstall(ship, desk)).catch((e) => {
             console.log(e);
@@ -93,7 +93,7 @@ export const BazaarApi = {
               `timeout forming alliance with ${ship}. are there apps published on '${ship}'?`
             );
             reject(`timeout forming alliance with ${ship}`);
-          }, 10000);
+          }, 60000);
 
           tempConduit.poke(allyShip(ship)).catch((e) => {
             console.log(e);
