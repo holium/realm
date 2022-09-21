@@ -48,7 +48,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
       setTransactionCount(transactions.length);
       setHidePending(false);
     }
-  }, transactions);
+  }, [transactions]);
   let hide = () => {
     console.log('clickey')
     setHidePending(true)
