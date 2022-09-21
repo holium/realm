@@ -7,20 +7,44 @@ import _ from 'lodash';
 const util = require('node:util');
 
 export const BazaarApi = {
-  installApp: async (tempConduit: Conduit, ship: string, desk: string) => {
+  installApp: async (
+    tempConduit: Conduit,
+    ship: string,
+    desk: string
+  ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1;
+      let subscriptionId: number = -1,
+        timeout: NodeJS.Timeout;
       await tempConduit.watch({
         app: 'docket',
         path: '/charges',
         onSubscribed: (subscription: number) => {
           subscriptionId = subscription;
+          // upon subscribing, start a timer. if we don't get the 'add-charge'
+          //  event (see below) within the allotted time, it "usually" means the configured
+          //  INSTALL_MOON is offline or down
+          timeout = setTimeout(async () => {
+            await tempConduit.unsubscribe(subscriptionId);
+            console.log(
+              `timeout installing ${ship}/${desk}. has ${desk} been published? also check the glob-ames value in the ${desk}'s docket file to ensure match with '${ship}'.`
+            );
+            reject(`timeout installing ${ship}/${desk}`);
+          }, 20000);
+
+          tempConduit.poke(docketInstall(ship, desk)).catch((e) => {
+            console.log(e);
+            if (timeout) clearTimeout(timeout);
+            reject('install app error');
+          });
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
           if (data.hasOwnProperty('add-charge')) {
             const charge = data['add-charge'].charge;
             // according to Tlon source, this determines when the app is fully installed
             if ('glob' in charge.chad || 'site' in charge.chad) {
+              if (timeout) {
+                clearTimeout(timeout);
+              }
               await tempConduit.unsubscribe(subscriptionId);
               resolve(data);
             } else if ('hung' in charge.chad) {
@@ -36,14 +60,13 @@ export const BazaarApi = {
         },
         onError: () => {
           console.log('subscription [docket/charges] rejected');
-          reject('subscription [docket/charges] rejected');
+          reject('error on channel');
         },
         onQuit: () => {
           console.log('kicked from subscription [docket/charges]');
-          reject('kicked from subscription [docket/charges]');
+          reject('unexpected channel quit');
         },
       });
-      await tempConduit.poke(docketInstall(ship, desk));
     });
   },
   addAlly: async (tempConduit: Conduit, ship: string) => {
@@ -55,14 +78,34 @@ export const BazaarApi = {
         return;
       }
       let subscriptionId: number = -1;
+      let timeout: NodeJS.Timeout;
       await tempConduit.watch({
         app: 'treaty',
         path: '/treaties',
         onSubscribed: (subscription: number) => {
           subscriptionId = subscription;
+          // upon subscribing, start a timer. if we don't get the 'add'
+          //  event (see below) within the allotted time, it "usually" means the configured
+          //  INSTALL_MOON does not have any apps available to install
+          timeout = setTimeout(async () => {
+            await tempConduit.unsubscribe(subscriptionId);
+            console.log(
+              `timeout forming alliance with ${ship}. are there apps published on '${ship}'?`
+            );
+            reject(`timeout forming alliance with ${ship}`);
+          }, 10000);
+
+          tempConduit.poke(allyShip(ship)).catch((e) => {
+            console.log(e);
+            if (timeout) clearTimeout(timeout);
+            reject('add ally error');
+          });
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
           if (data.hasOwnProperty('add')) {
+            if (timeout) {
+              clearTimeout(timeout);
+            }
             await tempConduit.unsubscribe(subscriptionId);
             resolve(data);
           }
@@ -76,24 +119,20 @@ export const BazaarApi = {
           reject('kicked from subscription [treaty/treaties]');
         },
       });
-      await tempConduit.poke(allyShip(ship));
     });
   },
-  isAppInstalled: async (tempConduit: Conduit, ship: string, desk: string) => {
+  getDocket: async (
+    tempConduit: Conduit,
+    desk: string
+  ): Promise<any | undefined> => {
     const response = await tempConduit.scry({
       app: 'docket',
       path: '/charges', // the spaces scry is at the root of the path
     });
-    let isInstalled = false;
-    const { initial } = response;
-    if (
-      initial.hasOwnProperty(desk) &&
-      'glob' in initial[desk].chad &&
-      initial[desk].chad.glob === null
-    ) {
-      isInstalled = true;
-    }
-    return isInstalled;
+    return (
+      (response.initial.hasOwnProperty(desk) && response.initial[desk]) ||
+      undefined
+    );
   },
   isAlly: async (tempConduit: Conduit, ship: string) => {
     const response = await tempConduit.scry({
@@ -121,40 +160,71 @@ export const BazaarApi = {
     }
     return;
   },
-  installDesk: async (tempConduit: Conduit, ship: string, desk: string) => {
-    return new Promise(async (resolve, reject) => {
+  installDesk: async (
+    tempConduit: Conduit,
+    ship: string,
+    desk: string
+  ): Promise<string> => {
+    return new Promise(async (resolve) => {
       console.log(`checking if '/${ship}/${desk}' installed...`);
-      const isInstalled = await BazaarApi.isAppInstalled(
-        tempConduit,
-        process.env.INSTALL_MOON!,
-        desk
-      );
-      if (isInstalled) {
-        console.log(`'/${ship}/${desk}' already installed. skipping...`);
-        resolve('done');
-        return;
+      const docket = await BazaarApi.getDocket(tempConduit, desk);
+      if (docket !== undefined) {
+        if ('glob' in docket.chad && docket.chad.glob === null) {
+          // app fully installed. return
+          console.log(`'/${ship}/${desk}' already installed. skipping...`);
+          resolve('success');
+          return;
+        } else if ('install' in docket.chad) {
+          // app install in progress
+          console.log(
+            `unexpected state. it appears '/${ship}/${desk}' is currently installing. report error.`
+          );
+          resolve('unexpected installation status. app currently installing');
+          return;
+        } else if ('hung' in docket.chad) {
+          // prior installation attempt failed
+          console.log(
+            `unexpected state. it appears an earlier attempt at installing '/${ship}/${desk}' failed.`
+          );
+          resolve(
+            'installation already attempted. please uninstall the failed installation and try again.'
+          );
+          return;
+        }
       }
       if (!(await BazaarApi.isAlly(tempConduit, ship))) {
         console.log('forming alliance with %o...', ship);
-        await BazaarApi.addAlly(tempConduit, ship)
-          .then((result) => {
+        BazaarApi.addAlly(tempConduit, ship)
+          .then(() => {
             console.log('installing %o...', desk);
             BazaarApi.installApp(tempConduit, ship, desk)
               .then((result) => {
-                console.log('app install complete');
-                resolve(result);
+                console.log('app install complete => %o', result);
+                resolve('success');
               })
-              .catch((e) => reject(e));
+              .catch((e) => resolve(e));
           })
-          .catch((e) => reject(e));
+          .catch((e) => {
+            console.error(`addAlly error => '${e}'`);
+            resolve(e);
+          });
       } else {
-        console.log(`installing '/${ship}/${desk}'...`);
-        await BazaarApi.installApp(tempConduit, ship, desk)
-          .then((result) => {
-            console.log('app install complete');
-            resolve(result);
-          })
-          .catch((e) => reject(e));
+        console.log(`${ship} is an ally. checking for '${desk}' treaty...`);
+        const hasTreaty = await BazaarApi.hasTreaty(tempConduit, ship, desk);
+        if (hasTreaty) {
+          console.log(`treaty found. installing '/${ship}/${desk}'...`);
+          BazaarApi.installApp(tempConduit, ship, desk)
+            .then((result: any) => {
+              console.log('app install complete => %o', result);
+              resolve('success');
+            })
+            .catch((e) => resolve(e));
+        } else {
+          console.log(`treaty not found. has ${desk} been published?`);
+          resolve(
+            `treaty '${ship}/${desk}' not found. Was the treaty published?`
+          );
+        }
       }
     });
   },
@@ -193,31 +263,6 @@ export const BazaarApi = {
     });
     return appMap;
   },
-  // addAlly: async (conduit: Conduit, ship: string) => {
-  //   return new Promise((resolve, reject) => {
-  //     conduit.poke({
-  //       ...allyShip(ship),
-  //       reaction: 'bazaar-reaction.new-ally',
-  //       onReaction: (data: any) => {
-  //         console.log('addAlly [os] onReaction => %o', data);
-  //         resolve(data['new-ally']);
-  //       },
-  //       onError: (e: any) => {
-  //         reject(e);
-  //       },
-  //     });
-  //   });
-  // },
-  // in the case of standard app search/install, we will have the ship/desk
-  //  information (treaty/ally), so simply leverage Tlon docketInstall to
-  //   perform install on local ship
-  // installDocket: async (conduit: Conduit, ship: string, desk: string) => {
-  //   return new Promise(async (resolve, reject) => {
-  //     BazaarApi.installApp(conduit, ship, desk)
-  //       .then((response) => resolve('done'))
-  //       .catch((e) => reject(e));
-  //   });
-  // },
   uninstallApp: async (conduit: Conduit, desk: string) =>
     await conduit.poke(docketUninstall(desk)),
   // in the case of space apps, all we have is the desk, since docket/glob
@@ -248,7 +293,7 @@ export const BazaarApi = {
       }
       console.log('install app => %o...', { ship, desk: app.id });
       BazaarApi.installDesk(conduit, ship, app.id)
-        .then((response) => resolve('done'))
+        .then((response) => resolve('success'))
         .catch((e) => reject(e));
       // conduit.poke({
       //   ...docketInstall(ship, app.id),
