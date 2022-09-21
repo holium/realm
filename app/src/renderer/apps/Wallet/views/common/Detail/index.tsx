@@ -51,7 +51,8 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
   };
 
   const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
-  const transactions = getTransactions(walletApp.ethereum.transactions, wallet?.address);
+  const transactions = getTransactions(walletApp.ethereum.transactions, wallet?.address)
+    .sort((a, b) => ((new Date(b.initiatedAt)).getTime() - (new Date(a.initiatedAt)).getTime()));
 
   /* @ts-ignore */
   const themeData = getBaseTheme(theme.currentTheme);
