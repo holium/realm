@@ -1,27 +1,12 @@
-import React, { FC, useEffect, useState } from 'react';
-import { isValidPatp } from 'urbit-ob';
-import { errors, ethers } from 'ethers';
-import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { theme as themes } from 'renderer/theme';
+import { FC } from 'react';
 import { darken, lighten } from 'polished';
-import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text, Sigil, Button, ImagePreview, Spinner } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
-import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Icons, Text, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { shortened, formatWei, convertWeiToUsd, monthNames, getBaseTheme, formatEthAmount, formatBtcAmount } from '../../../lib/helpers';
+import { shortened, getBaseTheme, formatEthAmount, formatBtcAmount } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { BitcoinWalletType, EthWalletType, NetworkType, WalletStoreType, WalletView } from 'os/services/tray/wallet.model';
-import { RecipientPayload } from 'os/services/tray/wallet.service';
-import { transaction } from 'mobx';
+import { WalletView } from 'os/services/tray/wallet.model';
 import { TransactionType } from 'os/services/tray/wallet.model';
-
-const abbrMap = {
-  ethereum: 'ETH',
-  bitcoin: 'BTC',
-};
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];
@@ -65,8 +50,11 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   let themDisplay = props.transaction.theirPatp || shortened(props.transaction.theirAddress);
 
   return (
-    <>
-      <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={theme.currentTheme.mode == 'light' ? darken(.04, theme.currentTheme.windowColor) : lighten(.02, theme.currentTheme.windowColor)} borderRadius="9px" onClick={goToTransaction}>
+    <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={theme.currentTheme.mode == 'light' ? darken(.04, theme.currentTheme.windowColor) : lighten(.02, theme.currentTheme.windowColor)} borderRadius="9px">
+      <Flex justifyContent="center" alignItems="center" onClick={goToTransaction}>
+        <Flex pl={2} pr={3} height="100%" alignItems="center">
+          <Spinner size={1} color={colors.brand.primary} />
+        </Flex>
         <Flex flexDirection="column">
           <Text variant="body" color={colors.brand.primary}>
             { props.transaction.type === 'sent' ? 'Sending' : 'Receiving' } { isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC` }
@@ -75,11 +63,10 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
             { props.transaction.type === 'sent' ? 'To:' : 'From:' } {themDisplay} <Icons ml="7px" name="ShareBox" size="15px" />
           </Text>
         </Flex>
-        <Flex pr={3} height="100%" alignItems="center">
-          <Spinner size={1} color={colors.brand.primary} />
-        </Flex>
       </Flex>
-      <Text variant="body" position="absolute" top="72px" left="304px" color={colors.text.disabled} onClick={props.hide}>x</Text>
-    </>
+      <Flex justifyContent="center" alignItems="center" pr={2}>
+        <Text variant="body" color={colors.brand.primary} fontSize={3} onClick={props.hide}>x</Text>
+      </Flex>
+    </Flex>
   );
 };
