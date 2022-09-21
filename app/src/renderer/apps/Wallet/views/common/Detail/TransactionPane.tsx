@@ -498,6 +498,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
   (props: TransactionPaneProps) => {
     const { walletApp } = useTrayApps();
     const [screen, setScreen] = useState('initial');
+    const [transactionSending, setTransactionSending] = useState(false);
 
     const [amountValid, setAmountValid] = useState(false);
     const [transactionAmount, setTransactionAmount] = useState(0);
@@ -526,16 +527,19 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
 
     const sendTransaction = async () => {
       try {
+        setTransactionSending(true);
         await WalletActions.sendEthereumTransaction(
           walletApp.currentIndex!,
           transactionRecipient.address || transactionRecipient.patpAddress!,
           transactionAmount.toString(),
           transactionRecipient.patp,
         );
+        setTransactionSending(false);
         setScreen('initial');
         props.close();
       } catch (e) {
         console.error(e);
+        setTransactionSending(false);
       }
     };
 
@@ -669,7 +673,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               <Button variant="transparent" onClick={() => prev()}>
                 Reject
               </Button>
-              <Button px={2} onClick={sendTransaction}>
+              <Button px={2} onClick={sendTransaction} isLoading={transactionSending}>
                 Confirm
               </Button>
             </Flex>
