@@ -1,16 +1,18 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Label, Input } from 'renderer/components';
+import { Flex, Text, Button, Label, Input, Icons } from 'renderer/components';
 import { useField, useForm } from 'mobx-easy-form';
-import { NetworkType } from 'os/services/tray/wallet.model';
+import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { FieldSet } from 'renderer/components/Input/FormControl/Field';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
 
 interface CreateWalletProps {
   network: NetworkType
 }
 
 export const CreateWallet: FC<CreateWalletProps> = observer((props: CreateWalletProps) => {
+  const { theme } = useServices();
   const [ loading, setLoading ] = useState(false);
   const [ error, setError ] = useState(false);
   const form = useForm({
@@ -56,6 +58,9 @@ export const CreateWallet: FC<CreateWalletProps> = observer((props: CreateWallet
           <Button id="submit" width="100%" isLoading={loading} disabled={!form.computed.isValid} onClick={form.actions.submit}>Create</Button>
         </Flex>
       </FieldSet>
+      <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletView.ETH_LIST)}>
+        <Icons name="ArrowLeftLine" size={2} color={theme.currentTheme.iconColor} />
+      </Flex>
     </Flex>
   );
 });

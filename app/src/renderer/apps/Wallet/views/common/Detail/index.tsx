@@ -25,8 +25,7 @@ import { WalletInfo } from './WalletInfo';
 import { TransactionList } from './TransactionList';
 import { SendTransaction } from './SendTransaction';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletViews } from 'renderer/apps/Wallet';
-import { TransactionType } from 'os/services/tray/wallet.model';
+import { WalletView } from 'os/services/tray/wallet.model';
 
 const FlexWithShadow = styled(Flex)`
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
@@ -99,7 +98,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
           <TransactionList transactions={transactions} hidePending={props.hidePending} />
         </Flex>
       </Box>
-      <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletViews.ETH_LIST)}>
+      <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletView.ETH_LIST)}>
         <Icons name="ArrowLeftLine" size={2} color={theme.currentTheme.iconColor} />
       </Flex>
     </Flex>

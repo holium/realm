@@ -309,6 +309,7 @@ export class WalletService extends BaseService {
   }
 
   async setView(_event: any, view: WalletView, index?: string, transactionHash?: string) {
+    console.log(`service setting view: ${view}`)
     this.state!.setView(view, index, transactionHash);
   }
 

@@ -19,7 +19,7 @@ import {
 } from './views/common/Detail/PendingTransaction';
 import { getTransactions } from './lib/helpers';
 
-export const WalletViews: { [key: string]: any } = {
+const WalletViews: { [key: string]: any } = {
   'bitcoin:list': (props: any) => <ListPlaceholder {...props} />,
   'bitcoin:detail': (props: any) => <div />,
   'bitcoin:transaction': (props: any) => <div />,
