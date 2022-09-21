@@ -44,7 +44,7 @@ export const WalletNetwork: FC<WalletNetwork> = observer(
               background="#4CDD86"
             />
             <Text fontSize="12px" color={themeData.colors.ui.secondary}>
-              localhost:8545
+              ropsen testnet
             </Text>
           </Flex>
         </Flex>
