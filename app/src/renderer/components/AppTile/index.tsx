@@ -55,14 +55,14 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
   border-radius: 4px;
   position: absolute;
   ${(props: TileHighlightProps) =>
-    props.isSelected &&
-    css`
-      background-color: ${lighten(0.05, props.theme.colors.brand.primary)};
-    `}
-  ${(props: TileHighlightProps) =>
     props.isOpen &&
     css`
       background-color: ${lighten(0.05, props.theme.colors.icon.app)};
+    `}
+  ${(props: TileHighlightProps) =>
+    props.isSelected &&
+    css`
+      background-color: ${lighten(0.05, props.theme.colors.brand.primary)};
     `}
 `;
 

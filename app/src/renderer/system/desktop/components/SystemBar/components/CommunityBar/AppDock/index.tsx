@@ -39,7 +39,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   const orderedList = useMemo(
     () =>
       spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : [],
-    [spaces.selected?.path, currentBazaar?.pinnedChange]
+    [spaces.selected?.path, currentBazaar?.pinnedChange, bazaar.appsChange]
   );
 
   const pinnedApps = useMemo(() => {
@@ -60,7 +60,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
       >
         {orderedList?.map((app: AppType | any, index: number) => {
           const selected = desktop.isActiveWindow(app.id);
-          const open = !selected && desktop.isOpenWindow(app.id);
+          const open = desktop.isOpenWindow(app.id);
           return (
             <Reorder.Item
               key={`pinned-${app.id}-${spaces.selected?.path}`}
@@ -150,13 +150,14 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.openAppIds,
     spaces.selected?.path,
     currentBazaar?.pinnedChange,
+    bazaar.appsChange,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
       currentBazaar &&
       currentBazaar.pinned.findIndex(
-        (pinned: any) => appWindow.id === pinned.id
+        (pinned: any) => appWindow.id === pinned
       ) === -1
   );
 
@@ -174,7 +175,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         {activeAndUnpinned.map((unpinnedApp: any) => {
           const app = bazaar.getApp(unpinnedApp.id)!;
           const selected = desktop.isActiveWindow(app.id);
-          const open = !selected && desktop.isOpenWindow(app.id);
+          const open = desktop.isOpenWindow(app.id);
           return (
             <AppTile
               key={`unpinned-${app.id}`}

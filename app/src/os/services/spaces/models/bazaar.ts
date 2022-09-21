@@ -116,27 +116,22 @@ export const BazaarModel = types
       });
     },
     updateSuiteRank(app: AppType) {
-      console.log('updating suite app => %o...', app);
       if (!self.apps.has(app.id)) return;
       let suite = self.apps.get(app.id)!;
       suite.ranks.suite = app.ranks!.suite;
       self.apps.set(app.id, suite);
-      self.suiteChange = !self.suiteChange;
     },
     updateRecommendedRank(app: AppType) {
-      console.log('updating recommended app => %o...', app);
       if (!self.apps.has(app.id)) return;
       let rec = self.apps.get(app.id)!;
       rec.ranks.recommended = app.ranks!.recommended;
       self.apps.set(app.id, rec);
     },
     updatePinnedRank(app: AppType) {
-      console.log('updatePinnedRank => %o', app);
       if (!self.apps.has(app.id)) return;
       let pinned = self.apps.get(app.id)!;
       pinned.ranks.pinned = app.ranks!.pinned;
       self.apps.set(app.id, pinned);
-      console.log('updating pinned app => %o...', app);
     },
     // findApps(searchString: string) {
     //   // const matches = [];
@@ -150,7 +145,6 @@ export const BazaarModel = types
     },
     setSuiteApps(apps: any) {
       self.suite.replace(apps);
-      self.suiteChange = !self.suiteChange;
     },
     setRecommendedApps(apps: any) {
       console.log('updating recommended apps => %o', apps);
@@ -306,6 +300,8 @@ export const BazaarStore = types
         const entry = catalog[spacePath];
         this.initialSpace(spacePath, entry);
       }
+      // trigger UI update if someone is listening
+      self.appsChange = !self.appsChange;
     },
     initialSpace(spacePath: string, entry: any) {
       const bazaar = BazaarModel.create({

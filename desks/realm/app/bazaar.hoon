@@ -40,7 +40,7 @@
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
   ?>  ?=([%initial *] charge-update)
   =/  apps=app-index-lite:store           (index:apps:core initial.charge-update)
-  %-  (slog leaf+"{<[apps]>}" ~)
+  :: %-  (slog leaf+"{<[apps]>}" ~)
   =/  our-space                           [our.bowl 'our']
   :: ~&  >  our-space
   :: build slimmed down space specific app (metadata) from docket charges (installed apps)
@@ -426,11 +426,11 @@
     %-  roll
     :-  order
     |=  [=app-id:store acc=[index=(map =app-id:store =app-lite:store) rank=@ud]]
-    =/  app  (~(get by index.apps) app-id)
-    ?~  app  acc
-    =.  pinned.ranks.sieve.u.app   rank.acc
-    [(~(put by index.acc) app-id u.app) (add rank.acc 1)]
-    =.  index.apps          index.updated-apps
+      =/  app  (~(get by index.apps) app-id)
+      ?~  app  acc
+      =.  pinned.ranks.sieve.u.app   rank.acc
+      [(~(put by index.acc) app-id u.app) (add rank.acc 1)]
+    =.  index.apps          (~(uni by index.apps) index.updated-apps)
     =.  pinned.sorts.apps   order
     :: ~&  >  "set-pin-order..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
@@ -629,7 +629,7 @@
         =.  pinned.ranks.sieve.app-lite  (add pinned.ranks.sieve.app-lite 1)
         app-lite
       app-lite
-      %-  (slog leaf+"adding {<[app-id updated-app]>} to apps..." ~)
+      :: %-  (slog leaf+"adding {<[app-id updated-app]>} to apps..." ~)
       (~(put by acc) app-id updated-app)
   ::
   ++  unpin
@@ -687,7 +687,7 @@
     %-  ~(rep by index.apps)
     |:  [[=app-id:store =app-lite:store] acc=`app-index-full:store`~]
       ?:  (is-system-app app-id)
-        ~&  >>  "{<dap.bowl>}: is-system-app %.y"
+        :: ~&  >>  "{<dap.bowl>}: is-system-app %.y"
         acc
       :: skip if filter is neither %all nor the app tagged with tag
       ?.  ?|  =(tag ~)

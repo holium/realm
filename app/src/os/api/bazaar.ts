@@ -700,7 +700,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.setApp(app);
+        // state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.setPinnedApps(app.sort);
         state.getBazaar(space)?.togglePinnedAppsChange();
       }
@@ -752,10 +752,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'suite-remove':
       {
-        console.log(
-          'suite-remove => %o',
-          util.inspect(data, { depth: 10, colors: true })
-        );
+        console.log('suite-remove =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= suite-remove');
         // console.log('suite-remove [reaction] => %o', data);
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];

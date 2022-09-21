@@ -48,8 +48,10 @@ type SuiteAppProps = {
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
   const { selected, accentColor, app, space, isAdmin, bazaar, onClick } = props;
+  const currentBazaar = bazaar.getBazaar(space.path);
   if (app) {
     const weRecommended = bazaar.my.recommendations.includes(app.id);
+    const isPinned = currentBazaar?.pinned.includes(app.id);
     const menu = useMemo(() => {
       let menu = [];
       if (isAdmin) {
@@ -60,19 +62,13 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
             onClick && onClick();
           },
         });
-      }
-      if (app.type === 'urbit') {
         menu.push({
-          label: app.installed ? 'Uninstall app' : 'Install app',
-          disabled: false,
+          label: isPinned ? 'Unpin' : 'Pin',
           onClick: (evt: any) => {
             evt.stopPropagation();
-            // console.log('install app => %o', app);
-            if (app.installed) {
-              SpacesActions.uninstallApp(app.id);
-            } else {
-              SpacesActions.installApp(app);
-            }
+            isPinned
+              ? SpacesActions.unpinApp(space.path, app.id)
+              : SpacesActions.pinApp(space.path, app.id, null);
           },
         });
       }
@@ -85,6 +81,22 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
             : SpacesActions.recommendApp(space.path, app.id);
         },
       });
+      if (app.type === 'urbit') {
+        menu.push({
+          label: app.installed ? 'Uninstall app' : 'Install app',
+          disabled: false,
+          section: 2,
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            // console.log('install app => %o', app);
+            if (app.installed) {
+              SpacesActions.uninstallApp(app.id);
+            } else {
+              SpacesActions.installApp(app);
+            }
+          },
+        });
+      }
       return menu;
     }, [app, isAdmin]);
     // lighten app if not installed on this ship

@@ -51,7 +51,12 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       // console.log(suite);
       setSuite(suite);
     }
-  }, [currentSpace, currentBazaar?.suiteChange, bazaar.appsChange]);
+  }, [
+    currentSpace,
+    currentBazaar?.suiteChange,
+    bazaar.appsChange,
+    currentBazaar?.pinnedChange,
+  ]);
 
   useEffect(() => {
     const apps = bazaar.getAvailableApps();
