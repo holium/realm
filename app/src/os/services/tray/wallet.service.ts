@@ -18,8 +18,6 @@ import {
   NetworkType,
 } from './wallet.model';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
-import { HDNode } from 'ethers/lib/utils';
-import { wallet } from 'renderer/apps/Wallet/store';
 import EncryptedStore from '../ship/encryptedStore';
 import stubTransactions from './stubTransactions';
 
@@ -54,6 +52,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.add-smart-contract': this.addSmartContract,
     'realm.tray.wallet.request-address': this.requestAddress,
+    'realm.tray.wallet.set-transaction-notes': this.setTransactionNotes,
   };
 
   static preload = {
@@ -146,6 +145,18 @@ export class WalletService extends BaseService {
         contractAddress,
         walletIndex
       );
+    },
+    setTransactionNotes: (
+      network: string,
+      hash: string,
+      notes: string
+    ) => {
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.set-transaction-notes',
+        network,
+        hash,
+        notes
+      )
     },
     requestAddress: (from: string, network: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.request-address');
@@ -470,6 +481,10 @@ export class WalletService extends BaseService {
 
   async requestAddress(_event: any, network: string, from: string) {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
+  }
+
+  async setTransactionNotes(_event: any, network: string, hash: string, notes: string) {
+    WalletApi.setTransactionNotes(this.core.conduit!, network, hash, notes);
   }
 
   /*

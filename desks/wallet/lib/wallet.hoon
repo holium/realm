@@ -105,6 +105,7 @@
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
       [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+json-to-ux transaction+json-to-transaction])]
       [%add-smart-contract (ot ~[contract-id+so contract-type+(su (perk %erc20 %erc721 ~)) name+so address+json-to-ux wallet-index+so])]
+      [%save-transaction-note (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+json-to-ux notes+so])]
   ==
   ++  json-to-ux
     |=  =json

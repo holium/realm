@@ -134,17 +134,18 @@
         `this
           %thread-done
         =+  !<([txh=@ux status=? block=@ud] q.cage.sign)
-        ?:  ?=([%tx %result %eth-receipt tid=@ta ~] wire)
+        ?:  ?=([%tx %result %eth-receipt tid=@ta hash=@t ~] wire)
           =/  tid=@ta  i.t.t.t.wire
+          =/  hash=@t  i.t.t.t.t.wire
           =+  !<(rez=tx-rez q.cage.sign)
           =/  net-pend  (~(got by transactions) %ethereum)
-          =/  pending-tx=transaction  (~(got by net-pend) tid)
+          =/  pending-tx=transaction  (~(got by net-pend) hash)
           =.  status.pending-tx  %succeeded
           =.  completed-at.pending-tx  `(crip (scow %da now.bowl))
           =.  transactions
             =/  net-pending  (~(got by transactions) %ethereum)
             =.  net-pending
-              (~(put by net-pending) [tid pending-tx])
+              (~(put by net-pending) [hash pending-tx])
             (~(put by transactions) [%ethereum net-pending])
           ?:  status.rez
             :_  this
@@ -564,12 +565,12 @@
       :((cury cat 3) dap.bowl '--' (scot %uv eny.bowl))
     =.  transactions.state
       =/  net-map  (~(got by transactions.state) network.act)
-      =.  net-map  (~(put by net-map) [tid transaction.act])
+      =.  net-map  (~(put by net-map) [hash.transaction.act transaction.act])
       (~(put by transactions.state) [network.act net-map])
     =/  cards
       ?+  network.act  `(list card)`~
           %ethereum
-        =/  =wire  [%eth-receipt tid ~]
+        =/  =wire  [%eth-receipt tid hash.transaction.act ~]
         =/  args
           =/  node-url
             =/  provider  provider:(~(got by networks.settings) network.act)
@@ -613,6 +614,16 @@
         ==
       (weld cards new-card)
     [cards state]
+    ::
+      %save-transaction-note
+    =.  transactions
+      =/  net-map  (~(got by transactions) %ethereum)
+      =.  net-map
+        =/  tx  (~(got by net-map) hash.act)
+        =.  notes.tx  notes.act
+        (~(put by net-map) [hash.act tx])
+      (~(put by transactions) [%ethereum net-map])
+    `state
     ::
       %add-smart-contract
     =^  address  wallets
