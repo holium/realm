@@ -218,7 +218,7 @@ export const EthStore = types
     enqueueTransaction(hash: any, toAddress: any, toPatp: any, from: string, amount: any, timestamp: any) {
       let tx = {
         hash: hash,
-        amount: amount.toString(),
+        amount: gweiToEther(amount).toString(),
         network: 'ethereum',
         type: 'sent',
         initiatedAt: timestamp.toString(),
