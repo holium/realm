@@ -22,14 +22,14 @@ import EncryptedStore from '../ship/encryptedStore';
 import stubTransactions from './stubTransactions';
 
 export interface RecipientPayload {
-  recipientMetadata: {
+  recipientMetadata?: {
     color?: string;
     avatar?: string;
     nickname?: string;
   };
   patp: string;
-  address: string | null;
-  gasEstimate: number;
+  address?: string | null;
+  gasEstimate?: number;
 }
 
 export class WalletService extends BaseService {

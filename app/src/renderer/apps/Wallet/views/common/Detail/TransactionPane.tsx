@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { errors, ethers } from 'ethers';
 import { observer } from 'mobx-react';
@@ -94,7 +94,6 @@ const AmountInput = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
-    const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
     const check = (inCrypto: boolean, value: number) => {
       let amountInCrypto = inCrypto ? value : usdToEth(value);
@@ -262,45 +261,63 @@ const RecipientInput = observer(
     const [recipient, setRecipient] = useState('');
     const [recipientError, setRecipientError] = useState('');
 
+    const stateRef = useRef();
+    /* @ts-ignore */
+    stateRef.current = recipient;
+
     // const [detailsLoading, setDetailsLoading] = useState(false);
     const [recipientDetails, setRecipientDetails] = useState<{
       failed: boolean;
       details: RecipientPayload | null;
     }>({ failed: false, details: null });
-    const [currPromise, setCurrPromise] =
-      useState<Promise<RecipientPayload | null> | null>(null);
+    const [currPromise, setCurrPromise] = useState<Promise<RecipientPayload> | null>(null);
+    const loading = currPromise !== null;
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
-    const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
     // TODO: rewrite logic here, was from when we had fewer agent/service guarentees
     const getRecipient = async (patp: string) => {
       console.log(`trying to get recipient ${patp}`);
-      let promise = WalletActions.getRecipient(patp);
+      let promise: Promise<RecipientPayload> = new Promise(async (resolve, reject) => {
+        let timer = setTimeout(() => reject(new Error('Request timed out.')), 5000);
+        try {
+          let details = await WalletActions.getRecipient(patp);
+          clearTimeout(timer);
+          resolve(details);
+        } catch(e) {
+          clearTimeout(timer);
+          reject(e);
+        }
+      });
       setCurrPromise(promise);
 
       promise
-        .then((details: RecipientPayload | null) => {
+        .then((details: RecipientPayload) => {
           console.log(`money! it resolved`);
           console.log(details);
-          // if (currPromise && currPromise !== promise) return;
 
-          details && details.address
-            ? setRecipientDetails({ failed: false, details })
-            : setRecipientDetails({ failed: true, details: null });
+          if (details && details.address) {
+            setRecipientDetails({ failed: false, details });
+            setRecipientError('');
+          } else {
+            setRecipientDetails({ failed: true, details: { patp } });
+          }
 
           if (details && details.gasEstimate) {
             props.setGasEstimate(details.gasEstimate);
           }
-
-          setCurrPromise(null);
         })
         .catch((err: Error) => {
           console.error(err);
-          if (currPromise && currPromise !== promise) return;
-          setRecipientDetails({ failed: true, details: null });
-          setCurrPromise(null);
+          console.log(`we errd — patp: ${patp}, recip: ${stateRef.current}`)
+          if (patp !== stateRef.current) return;
+          setRecipientDetails({ failed: true, details: { patp } });
+        })
+        .finally(() => {
+          if (currPromise === promise) {
+            setCurrPromise(null);
+          }
         });
     };
 
@@ -355,7 +372,7 @@ const RecipientInput = observer(
         return setRecipient(`~${value}`);
       } else {
         setIcon('blank');
-        setValueCache('');
+        setValueCache(value);
         props.setValid(false, {});
       }
 
@@ -457,7 +474,7 @@ const RecipientInput = observer(
             />
           </ContainerFlex>
         </Flex>
-        <Box mt={2} ml="72px" width="100%">
+        <Flex mt={2} width="100%" justifyContent="flex-end">
           <Text
             variant="body"
             fontSize="11px"
@@ -465,9 +482,9 @@ const RecipientInput = observer(
           >
             {recipientDetails.failed &&
               recipientDetails.details?.patp === recipient &&
-              `${recipient} doesn\'nt have wallet installed yet.`}
+              `${recipient} doesn\'t have a Realm wallet.`}&nbsp;&nbsp;&nbsp;
           </Text>
-        </Box>
+        </Flex>
       </Flex>
     );
   }
@@ -648,9 +665,9 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   TOTAL
                 </Text>
                 <Flex flexDirection="column">
-                  <Text variant="body">3.4505 ETH</Text>
+                  <Text variant="body">{transactionAmount + .0005} ETH</Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
-                    ≈ {ethToUsd(3.4505)} USD
+                    ≈ {ethToUsd(transactionAmount + .0005)} USD
                   </Text>
                 </Flex>
               </Flex>
