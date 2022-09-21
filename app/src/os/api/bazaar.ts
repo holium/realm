@@ -191,6 +191,14 @@ export const BazaarApi = {
           );
           return;
         }
+        // prior installation attempt failed
+        console.log(
+          `unexpected state. ${desk} already exists in docket. bailing...`
+        );
+        resolve(
+          `unexpected installation status. ${desk} currently exists in docket. skipping...`
+        );
+        return;
       }
       if (!(await BazaarApi.isAlly(tempConduit, ship))) {
         console.log('forming alliance with %o...', ship);
