@@ -28,23 +28,28 @@ export function convertWeiToUsd(wei: string) {
   return usd.toFixed(2);
 }
 
-export function getTransactions(transactionMap: Map<string, TransactionType>, address?: string): TransactionType[] {
-  return Array.from(transactionMap.values()).filter(trans => address ? trans.ourAddress === address : true);
+export function getTransactions(
+  transactionMap: Map<string, TransactionType>,
+  address?: string
+): TransactionType[] {
+  return Array.from(transactionMap.values()).filter((trans) =>
+    address ? trans.ourAddress === address : true
+  );
 }
 
 export interface EthAmount {
-  eth: string
-  gwei: string
-  wei: string
+  eth: string;
+  gwei: string;
+  wei: string;
 
-  ethFull: string
-  gweiFull: string
-  weiFull: string
+  ethFull: string;
+  gweiFull: string;
+  weiFull: string;
 }
 
 export interface BtcAmount {
-  btc: string
-  sats: string
+  btc: string;
+  sats: string;
 }
 
 export function formatEthAmount(amount: string): EthAmount {
@@ -55,7 +60,7 @@ export function formatEthAmount(amount: string): EthAmount {
     wei: utils.formatUnits(wei, 'wei').slice(0, 6),
     ethFull: utils.formatUnits(wei, 'ether'),
     gweiFull: utils.formatUnits(wei, 'gwei'),
-    weiFull: utils.formatUnits(wei, 'wei')
+    weiFull: utils.formatUnits(wei, 'wei'),
   };
 }
 
@@ -68,12 +73,12 @@ export function convertEthAmountToUsd(amount: EthAmount) {
 export function formatBtcAmount(amount: string): BtcAmount {
   return {
     btc: 'placeholder',
-    sats: 'placeholder'
-  }
+    sats: 'placeholder',
+  };
 }
 
 export function convertBtcAmountToUsd(amount: BtcAmount) {
-  return 'placeholder'
+  return 'placeholder';
 }
 
 export const monthNames = [
@@ -103,5 +108,5 @@ export const fullMonthNames = [
   'September',
   'October',
   'November',
-  'December'
+  'December',
 ];

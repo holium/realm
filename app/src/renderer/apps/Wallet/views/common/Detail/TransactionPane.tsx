@@ -267,7 +267,8 @@ const RecipientInput = observer(
       failed: boolean;
       details: RecipientPayload | null;
     }>({ failed: false, details: null });
-    const [currPromise, setCurrPromise] = useState<Promise<RecipientPayload> | null>(null);
+    const [currPromise, setCurrPromise] =
+      useState<Promise<RecipientPayload> | null>(null);
     const loading = currPromise !== null;
 
     const themeData = getBaseTheme(theme.currentTheme);
@@ -279,17 +280,22 @@ const RecipientInput = observer(
 
     // TODO: rewrite logic here, was from when we had fewer agent/service guarentees
     const getRecipient = async (patp: string) => {
-      let promise: Promise<RecipientPayload> = new Promise(async (resolve, reject) => {
-        let timer = setTimeout(() => reject(new Error('Request timed out.')), 5000);
-        try {
-          let details = await WalletActions.getRecipient(patp);
-          clearTimeout(timer);
-          resolve(details);
-        } catch(e) {
-          clearTimeout(timer);
-          reject(e);
+      let promise: Promise<RecipientPayload> = new Promise(
+        async (resolve, reject) => {
+          let timer = setTimeout(
+            () => reject(new Error('Request timed out.')),
+            5000
+          );
+          try {
+            let details = await WalletActions.getRecipient(patp);
+            clearTimeout(timer);
+            resolve(details);
+          } catch (e) {
+            clearTimeout(timer);
+            reject(e);
+          }
         }
-      });
+      );
       setCurrPromise(promise);
 
       promise
@@ -465,11 +471,15 @@ const RecipientInput = observer(
               value={recipient}
               onChange={onChange}
             />
-            { loading &&
+            {loading && (
               <Flex mr={2}>
-                <Spinner ml={2} size="14px" color={themeData.colors.brand.primary} />
+                <Spinner
+                  ml={2}
+                  size="14px"
+                  color={themeData.colors.brand.primary}
+                />
               </Flex>
-            }
+            )}
           </ContainerFlex>
         </Flex>
         <Flex mt={2} width="100%" justifyContent="flex-end">
@@ -480,7 +490,8 @@ const RecipientInput = observer(
           >
             {recipientDetails.failed &&
               recipientDetails.details?.patp === recipient &&
-              `${recipient} doesn\'t have a Realm wallet.`}&nbsp;&nbsp;&nbsp;
+              `${recipient} doesn\'t have a Realm wallet.`}
+            &nbsp;&nbsp;&nbsp;
           </Text>
         </Flex>
       </Flex>
@@ -532,7 +543,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           walletApp.currentIndex!,
           transactionRecipient.address || transactionRecipient.patpAddress!,
           transactionAmount.toString(),
-          transactionRecipient.patp,
+          transactionRecipient.patp
         );
         setTransactionSending(false);
         setScreen('initial');
@@ -662,9 +673,9 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   TOTAL
                 </Text>
                 <Flex flexDirection="column">
-                  <Text variant="body">{transactionAmount + .0005} ETH</Text>
+                  <Text variant="body">{transactionAmount + 0.0005} ETH</Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
-                    ≈ {ethToUsd(transactionAmount + .0005)} USD
+                    ≈ {ethToUsd(transactionAmount + 0.0005)} USD
                   </Text>
                 </Flex>
               </Flex>
@@ -673,7 +684,11 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               <Button variant="transparent" onClick={() => prev()}>
                 Reject
               </Button>
-              <Button px={2} onClick={sendTransaction} isLoading={transactionSending}>
+              <Button
+                px={2}
+                onClick={sendTransaction}
+                isLoading={transactionSending}
+              >
                 Confirm
               </Button>
             </Flex>

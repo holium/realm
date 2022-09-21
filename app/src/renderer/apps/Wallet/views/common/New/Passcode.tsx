@@ -33,8 +33,6 @@ export const Passcode: FC<PasscodeProps> = observer((props: PasscodeProps) => {
     return setPasscode(newPasscode);
   };
   useEffect(() => {
-    
-
     document.addEventListener('keydown', listener);
 
     return () => document.removeEventListener('keydown', listener);

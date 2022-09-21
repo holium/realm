@@ -27,72 +27,93 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
 
   return (
     <>
-    <Flex px={16} height="100%" width="100%" flexDirection="column" justifyContent="space-evenly" alignItems="center">
-      <Flex flexDirection="column">
-        <Text variant="h5">Back up your Wallet</Text>
-        <Text mt={3} variant="body">
-          Your secret recovery phrase is used to restore your wallet.
-        </Text>
-        <Text mt={2} variant="body">
-          Save these 12 words and store them in a safe place. Don’t share them
-          with anyone.
-        </Text>
-      </Flex>
       <Flex
-        mt={2}
+        px={16}
+        height="100%"
         width="100%"
         flexDirection="column"
-        background={panelBackground}
-        border={panelBorder}
-        borderRadius="9px"
+        justifyContent="space-evenly"
+        alignItems="center"
       >
-        <Box px={36} paddingTop={24}>
-          <Text
-            style={{
-              filter: blurred ? 'blur(7px)' : undefined,
-              wordSpacing: '7px',
-              textAlign: 'center',
-            }}
-          >
-            {props.seedPhrase}
+        <Flex flexDirection="column">
+          <Text variant="h5">Back up your Wallet</Text>
+          <Text mt={3} variant="body">
+            Your secret recovery phrase is used to restore your wallet.
           </Text>
-        </Box>
-        <Flex mt={5} width="100%" justifyContent="space-between">
-          <Button
-            variant="transparent"
-            color={theme.currentTheme.iconColor}
-            onClick={() => setBlurred(!blurred)}
-          >
-            <Icons name="Copy" color={theme.currentTheme.iconColor} mr={1} />
-            {blurred ? 'Reveal' : 'Hide'}
-          </Button>
-          <Button
-            variant="transparent"
-            color={copied ? 'ui.intent.success' : theme.currentTheme.iconColor}
-            onClick={copy}
-          >
-            {copied ? (
-              'Copied!'
-            ) : (
-              <>
-                <Icons
-                  mr={1}
-                  name="Copy"
-                  color={theme.currentTheme.iconColor}
-                />
-                Copy
-              </>
-            )}
-          </Button>
+          <Text mt={2} variant="body">
+            Save these 12 words and store them in a safe place. Don’t share them
+            with anyone.
+          </Text>
+        </Flex>
+        <Flex
+          mt={2}
+          width="100%"
+          flexDirection="column"
+          background={panelBackground}
+          border={panelBorder}
+          borderRadius="9px"
+        >
+          <Box px={36} paddingTop={24}>
+            <Text
+              style={{
+                filter: blurred ? 'blur(7px)' : undefined,
+                wordSpacing: '7px',
+                textAlign: 'center',
+              }}
+            >
+              {props.seedPhrase}
+            </Text>
+          </Box>
+          <Flex mt={5} width="100%" justifyContent="space-between">
+            <Button
+              variant="transparent"
+              color={theme.currentTheme.iconColor}
+              onClick={() => setBlurred(!blurred)}
+            >
+              <Icons name="Copy" color={theme.currentTheme.iconColor} mr={1} />
+              {blurred ? 'Reveal' : 'Hide'}
+            </Button>
+            <Button
+              variant="transparent"
+              color={
+                copied ? 'ui.intent.success' : theme.currentTheme.iconColor
+              }
+              onClick={copy}
+            >
+              {copied ? (
+                'Copied!'
+              ) : (
+                <>
+                  <Icons
+                    mr={1}
+                    name="Copy"
+                    color={theme.currentTheme.iconColor}
+                  />
+                  Copy
+                </>
+              )}
+            </Button>
+          </Flex>
+        </Flex>
+        <Flex mt={2} width="100%" justifyContent="center">
+          <Button onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>
+            I wrote it down
+          </Button>{' '}
+          {/* TODO: link to confirm instead after demo */}
         </Flex>
       </Flex>
-      <Flex mt={2} width="100%" justifyContent="center">
-        <Button onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>I wrote it down</Button> {/* TODO: link to confirm instead after demo */}
+      <Flex
+        position="absolute"
+        top="542px"
+        zIndex={999}
+        onClick={() => props.setScreen(NewWalletScreen.CREATE)}
+      >
+        <Icons
+          name="ArrowLeftLine"
+          size={2}
+          color={theme.currentTheme.iconColor}
+        />
       </Flex>
-    </Flex>
-    <Flex position="absolute" top="542px" zIndex={999} onClick={() => props.setScreen(NewWalletScreen.CREATE)}>
-      <Icons name="ArrowLeftLine" size={2} color={theme.currentTheme.iconColor} />
-    </Flex>
     </>
   );
 });

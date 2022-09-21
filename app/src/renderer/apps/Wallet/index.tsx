@@ -14,9 +14,7 @@ import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
-import {
-  PendingTransactionDisplay
-} from './views/common/Detail/PendingTransaction';
+import { PendingTransactionDisplay } from './views/common/Detail/PendingTransaction';
 import { getTransactions } from './lib/helpers';
 
 const WalletViews: { [key: string]: any } = {
@@ -27,7 +25,9 @@ const WalletViews: { [key: string]: any } = {
     <WalletList network={NetworkType.ethereum} {...props} />
   ),
   'ethereum:detail': (props: any) => <Detail {...props} />,
-  [WalletView.TRANSACTION_DETAIL]: (props: any) => <TransactionDetail {...props} />,
+  [WalletView.TRANSACTION_DETAIL]: (props: any) => (
+    <TransactionDetail {...props} />
+  ),
   'ethereum:new': (props: any) => <EthNew {...props} />,
   [WalletView.CREATE_WALLET]: (props: any) => (
     <CreateWallet network={NetworkType.ethereum} />
@@ -49,8 +49,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
     }
   }, [transactions]);
   let hide = () => {
-    console.log('clickey')
-    setHidePending(true)
+    console.log('clickey');
+    setHidePending(true);
   };
 
   let View = WalletViews[walletApp.currentView];
@@ -70,8 +70,11 @@ export const WalletApp: FC<any> = observer((props: any) => {
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={walletApp.currentView === 'ethereum:new'}
       />
-      {(!hidePending && walletApp.currentView !== WalletView.TRANSACTION_DETAIL) && <PendingTransactionDisplay transactions={transactions} hide={hide} />}
-      <View {...props } hidePending={hidePending} />
+      {!hidePending &&
+        walletApp.currentView !== WalletView.TRANSACTION_DETAIL && (
+          <PendingTransactionDisplay transactions={transactions} hide={hide} />
+        )}
+      <View {...props} hidePending={hidePending} />
       <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} />
     </Flex>
   );

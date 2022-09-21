@@ -7,7 +7,7 @@ import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
 import { theme as themes } from 'renderer/theme';
 import { useTrayApps } from 'renderer/apps/store';
-import { formatEthAmount } from '../../lib/helpers'
+import { formatEthAmount } from '../../lib/helpers';
 
 type CardStyleProps = {
   isSelected: boolean;
@@ -43,7 +43,7 @@ export const WalletCard: FC<WalletCardProps> = ({
 }: WalletCardProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
-  let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`
+  let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;
 
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
   const themeData = themes[mode];

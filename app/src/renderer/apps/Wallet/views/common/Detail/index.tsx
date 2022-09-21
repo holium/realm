@@ -29,11 +29,11 @@ import { WalletView } from 'os/services/tray/wallet.model';
 
 const FlexWithShadow = styled(Flex)`
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
-`
+`;
 
 interface EthDetailProps {
   theme: ThemeModelType;
-  hidePending: boolean
+  hidePending: boolean;
 }
 
 export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
@@ -51,8 +51,13 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
   };
 
   const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
-  const transactions = getTransactions(walletApp.ethereum.transactions, wallet?.address)
-    .sort((a, b) => ((new Date(b.initiatedAt)).getTime() - (new Date(a.initiatedAt)).getTime()));
+  const transactions = getTransactions(
+    walletApp.ethereum.transactions,
+    wallet?.address
+  ).sort(
+    (a, b) =>
+      new Date(b.initiatedAt).getTime() - new Date(a.initiatedAt).getTime()
+  );
 
   /* @ts-ignore */
   const themeData = getBaseTheme(theme.currentTheme);
@@ -75,7 +80,12 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
           hideWalletHero={hideWalletHero}
         />
         {/* @ts-ignore */}
-        <SendReceiveButtons hidden={sendTrans} desktopTheme={theme.currentTheme} send={() => setSendTrans(true)} receive={() => setQROpen(true)} />
+        <SendReceiveButtons
+          hidden={sendTrans}
+          desktopTheme={theme.currentTheme}
+          send={() => setSendTrans(true)}
+          receive={() => setQROpen(true)}
+        />
         <SendTransaction
           wallet={wallet!}
           hidden={!sendTrans}
@@ -95,24 +105,45 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
               Transactions
             </Text>
           </Box>
-          <TransactionList transactions={transactions} hidePending={props.hidePending} />
+          <TransactionList
+            transactions={transactions}
+            hidePending={props.hidePending}
+          />
         </Flex>
       </Box>
-      <Flex position="absolute" top="542px" zIndex={999} onClick={() => WalletActions.setView(WalletView.ETH_LIST)}>
-        <Icons name="ArrowLeftLine" size={2} color={theme.currentTheme.iconColor} />
+      <Flex
+        position="absolute"
+        top="542px"
+        zIndex={999}
+        onClick={() => WalletActions.setView(WalletView.ETH_LIST)}
+      >
+        <Icons
+          name="ArrowLeftLine"
+          size={2}
+          color={theme.currentTheme.iconColor}
+        />
       </Flex>
     </Flex>
   );
 });
 
-function SendReceiveButtons (props: { hidden: boolean, desktopTheme: ThemeModelType, send: any, receive: any }) {
+function SendReceiveButtons(props: {
+  hidden: boolean;
+  desktopTheme: ThemeModelType;
+  send: any;
+  receive: any;
+}) {
   let panelBackground = darken(0.04, props.desktopTheme.windowColor);
 
   return (
     <Box width="100%" hidden={props.hidden}>
       <Flex mt="18px" width="100%" justifyContent="center" alignItems="center">
         <Box mr="16px" onClick={props.receive}>
-          <CircleButton icon="Receive" title="Receive" iconColor={panelBackground} />
+          <CircleButton
+            icon="Receive"
+            title="Receive"
+            iconColor={panelBackground}
+          />
         </Box>
         <Box onClick={props.send}>
           <CircleButton icon="Send" title="Send" iconColor={panelBackground} />

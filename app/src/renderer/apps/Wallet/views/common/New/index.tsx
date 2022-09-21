@@ -25,7 +25,9 @@ export const EthNew: FC<any> = observer(() => {
   const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.CREATE);
   const [passcode, setPasscode] = useState('');
   // TODO move this to background thread
-  const [seedPhrase, setSeedPhrase] = useState(ethers.Wallet.createRandom().mnemonic.phrase);
+  const [seedPhrase, setSeedPhrase] = useState(
+    ethers.Wallet.createRandom().mnemonic.phrase
+  );
   let phraseSetter = (phrase: string) => setSeedPhrase(phrase);
 
   let setPasscodeWrapper = (passcode: string) => {
@@ -36,7 +38,9 @@ export const EthNew: FC<any> = observer(() => {
 
   const components: any = {
     [NewWalletScreen.CREATE]: <Create setScreen={setScreen} />,
-    [NewWalletScreen.IMPORT]: <Import setSeedPhrase={phraseSetter} setScreen={setScreen} />,
+    [NewWalletScreen.IMPORT]: (
+      <Import setSeedPhrase={phraseSetter} setScreen={setScreen} />
+    ),
     [NewWalletScreen.BACKUP]: (
       <Backup setScreen={setScreen} seedPhrase={seedPhrase} />
     ),
