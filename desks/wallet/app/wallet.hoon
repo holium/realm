@@ -602,6 +602,13 @@
         :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
         ==
       (weld cards new-card)
+    =?  cards
+        !(team:title our.bowl src.bowl)
+      =/  new-card
+        ^-  (list card)
+        :~  `card`[%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum tid transaction.act &])]
+        ==
+      (weld cards new-card)
     [cards state]
     ::
       %add-smart-contract

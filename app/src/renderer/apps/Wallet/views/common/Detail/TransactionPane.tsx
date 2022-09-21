@@ -283,7 +283,7 @@ const RecipientInput = observer(
         .then((details: RecipientPayload | null) => {
           console.log(`money! it resolved`);
           console.log(details);
-          if (currPromise && currPromise !== promise) return;
+          // if (currPromise && currPromise !== promise) return;
 
           details && details.address
             ? setRecipientDetails({ failed: false, details })

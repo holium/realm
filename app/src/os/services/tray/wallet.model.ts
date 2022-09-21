@@ -3,6 +3,7 @@ import {
   applySnapshot,
   types,
   Instance,
+  getSnapshot,
 } from 'mobx-state-tree';
 
 export enum WalletView {
@@ -117,14 +118,14 @@ export const EthTransaction = types
     type: types.enumeration(['sent', 'received']),
 
     initiatedAt: types.string,
-    completedAt: types.maybe(types.string),
+    completedAt: types.maybeNull(types.string),
 
     ourAddress: types.string,
-    theirPatp: types.maybe(types.string),
+    theirPatp: types.maybeNull(types.string),
     theirAddress: types.string,
 
     status: types.enumeration(['pending', 'failed', 'succeeded']),
-    failureReason: types.maybe(types.string),
+    failureReason: types.maybeNull(types.string),
 
     notes: types.string,
   })
@@ -184,25 +185,28 @@ export const EthStore = types
     applyHistory(history: any) {
       const ethHistory = history.ethereum;
       console.log(ethHistory);
+      let formattedHistory: any = {};
       Object.entries(ethHistory).forEach(([key, transaction]) => {
         const tx = (transaction as any);
-        ethHistory[key] = {
+        formattedHistory[tx.hash] = {
           hash: tx.hash,
           amount: tx.amount,
           network: 'ethereum',
           type: tx.type,
           initiatedAt: tx.initiatedAt,
-          completedAt: tx.completedAt,
+          completedAt: tx.completedAt || '',
           ourAddress: tx.ourAddress,
           theirPatp: tx.theirPatp,
           theirAddress: tx.theirAddress,
           status: tx.status,
-          failureReason: tx.failureReason,
+          failureReason: tx.failureReason || '',
           notes: tx.notes || '',
-          link: tx.link,
         }
       });
-      applySnapshot(self.transactions, ethHistory);
+      console.log(formattedHistory);
+      const map = types.map(EthTransaction);
+      const newHistory = map.create(formattedHistory);
+      applySnapshot(self.transactions, getSnapshot(newHistory));
     },
     // pokes
     setProvider(provider: string) {
@@ -224,7 +228,7 @@ export const EthStore = types
         status: 'pending',
         notes: '',
       };
-      self.transactions.put(tx);
+      self.transactions.set(hash, tx);
     },
     // updates
     applyWalletUpdate(wallet: any) {
@@ -239,13 +243,17 @@ export const EthStore = types
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     },
     applyTransactionUpdate(transaction: any) {
-      let tx = self.transactions.get(transaction.transaction.hash)!;
+      console.log('got tx')
+      console.log(transaction);
+      /*let tx = self.transactions.get(transaction.transaction.hash)!;
+      console.log(tx);
       tx.completedAt = Date.now().toString();
       if (transaction.transaction.success)
-        tx.status = "approved";
+        tx.status = "succeeded";
       else
         tx.status = "failed";
-      self.transactions.set(transaction.transaction.hash, tx);
+      console.log()*/
+      self.transactions.set(transaction.transaction.hash, transaction.transaction);
     },
   }));
 

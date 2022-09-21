@@ -78,12 +78,12 @@
       :-  'completedAt'
         ?~  completed-at.transaction  ~
         [%s u.completed-at.transaction]
-      ['ourAddress' [%s hash.transaction]]
+      ['ourAddress' [%s our-address.transaction]]
       :-  'theirPatp'
         ?~  their-patp.transaction  ~
         [%s (crip (scow %p u.their-patp.transaction))]
-      ['theirAddress' [%s hash.transaction]]
-      ['status' [%s hash.transaction]]
+      ['theirAddress' [%s their-address.transaction]]
+      ['status' [%s status.transaction]]
       :-  'failureReason'
         ?~  failure-reason.transaction  ~
         [%s u.failure-reason.transaction]

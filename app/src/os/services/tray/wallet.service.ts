@@ -207,7 +207,7 @@ export class WalletService extends BaseService {
     });
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:8545'
+      'https://ropsten.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
     );
 
     const patchEffect = {
