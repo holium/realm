@@ -25,6 +25,7 @@ const abbrMap = {
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];
+  hide: any;
 }
 export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
   props: PendingTransactionDisplayProps
@@ -36,7 +37,7 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
   return (
     <Flex mt={4} width="100%">
       {pendingTransactions.length ? (
-        <PendingTransaction transaction={pendingTransactions[0]} />
+        <PendingTransaction transaction={pendingTransactions[0]} hide={props.hide} />
       ) : (
         <></>
       )}
@@ -46,6 +47,7 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
 
 interface PendingTransactionProps {
   transaction: TransactionType;
+  hide: any;
 }
 export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
@@ -63,18 +65,21 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   let themDisplay = props.transaction.theirPatp || shortened(props.transaction.theirAddress);
 
   return (
-    <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={theme.currentTheme.mode == 'light' ? darken(.04, theme.currentTheme.windowColor) : lighten(.02, theme.currentTheme.windowColor)} borderRadius="9px" onClick={goToTransaction}>
-      <Flex flexDirection="column">
-        <Text variant="body" color={colors.brand.primary}>
-          { props.transaction.type === 'sent' ? 'Sending' : 'Receiving' } { isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC` }
-        </Text>
-        <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
-          { props.transaction.type === 'sent' ? 'To:' : 'From:' } {themDisplay} <Icons ml="7px" name="ShareBox" size="15px" />
-        </Text>
+    <>
+      <Flex mx={2} p={3} width="100%" justifyContent="space-between" background={theme.currentTheme.mode == 'light' ? darken(.04, theme.currentTheme.windowColor) : lighten(.02, theme.currentTheme.windowColor)} borderRadius="9px" onClick={goToTransaction}>
+        <Flex flexDirection="column">
+          <Text variant="body" color={colors.brand.primary}>
+            { props.transaction.type === 'sent' ? 'Sending' : 'Receiving' } { isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC` }
+          </Text>
+          <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
+            { props.transaction.type === 'sent' ? 'To:' : 'From:' } {themDisplay} <Icons ml="7px" name="ShareBox" size="15px" />
+          </Text>
+        </Flex>
+        <Flex pr={3} height="100%" alignItems="center">
+          <Spinner size={1} color={colors.brand.primary} />
+        </Flex>
       </Flex>
-      <Flex height="100%" alignItems="center">
-        <Spinner size={1} color={colors.brand.primary} />
-      </Flex>
-    </Flex>
+      <Text variant="body" position="absolute" top="72px" left="304px" color={colors.text.disabled} onClick={props.hide}>x</Text>
+    </>
   );
 };

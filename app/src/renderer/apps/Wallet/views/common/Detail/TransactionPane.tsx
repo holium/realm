@@ -274,6 +274,7 @@ const RecipientInput = observer(
     const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
+    // TODO: rewrite logic here, was from when we had fewer agent/service guarentees
     const getRecipient = async (patp: string) => {
       console.log(`trying to get recipient ${patp}`);
       let promise = WalletActions.getRecipient(patp);

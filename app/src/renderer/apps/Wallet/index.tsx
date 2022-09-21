@@ -1,19 +1,16 @@
 import { observer } from 'mobx-react';
-import { ThemeProvider } from 'styled-components';
 import { FC, useEffect, useState } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
-import { EthDetail } from './views/ethereum/Detail';
 import { Detail } from './views/common/Detail';
 import { WalletList } from './views/ethereum/List';
-import { EthTransaction } from './views/ethereum/Transaction';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletNetwork } from './views/common/Network';
 import { CreateWallet } from './views/common/Create';
+import { ListPlaceholder } from './views/bitcoin/ListPlaceholder';
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
-import { constructSampleWallet, wallet } from './store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
@@ -23,7 +20,7 @@ import {
 import { getTransactions } from './lib/helpers';
 
 export const WalletViews: { [key: string]: any } = {
-  'bitcoin:list': (props: any) => <div />,
+  'bitcoin:list': (props: any) => <ListPlaceholder {...props} />,
   'bitcoin:detail': (props: any) => <div />,
   'bitcoin:transaction': (props: any) => <div />,
   'ethereum:list': (props: any) => (
@@ -40,8 +37,22 @@ export const WalletViews: { [key: string]: any } = {
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
+  let [hidePending, setHidePending] = useState(false);
+  let [transactionCount, setTransactionCount] = useState(0);
+
   const { walletApp } = useTrayApps();
   let transactions = getTransactions(walletApp.ethereum.transactions);
+  useEffect(() => {
+    if (transactions.length !== transactionCount) {
+      console.log('new count', transactions.length)
+      setTransactionCount(transactions.length);
+      setHidePending(false);
+    }
+  }, transactions);
+  let hide = () => {
+    console.log('clickey')
+    setHidePending(true)
+  };
 
   let View = WalletViews[walletApp.currentView];
 
@@ -60,7 +71,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={walletApp.currentView === 'ethereum:new'}
       />
-      {walletApp.currentView !== WalletView.TRANSACTION_DETAIL && <PendingTransactionDisplay transactions={transactions} />}
+      {(!hidePending && walletApp.currentView !== WalletView.TRANSACTION_DETAIL) && <PendingTransactionDisplay transactions={transactions} hide={hide} />}
       <View {...props} />
       <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} />
     </Flex>

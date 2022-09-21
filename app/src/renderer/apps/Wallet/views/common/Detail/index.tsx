@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { isValidPatp } from 'urbit-ob';
+import styled from 'styled-components';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { theme as themes, ThemeType } from 'renderer/theme';
@@ -25,16 +26,14 @@ import { TransactionList } from './TransactionList';
 import { SendTransaction } from './SendTransaction';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletViews } from 'renderer/apps/Wallet';
+import { TransactionType } from 'os/services/tray/wallet.model';
+
+const FlexWithShadow = styled(Flex)`
+  box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
+`
 
 interface EthDetailProps {
   theme: ThemeModelType;
-}
-
-interface Transaction {
-  type: string;
-  amount: string;
-  date: Date;
-  address: string;
 }
 
 export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
@@ -56,67 +55,15 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
 
   /* @ts-ignore */
   const themeData = getBaseTheme(theme.currentTheme);
-  const panelBackground = darken(0.04, theme.currentTheme.windowColor);
-  const panelBorder = darken(0.08, theme.currentTheme.windowColor);
-
-  interface TransactionProps {
-    transaction: Transaction;
-  }
-  const Transaction: FC<TransactionProps> = (props: TransactionProps) => {
-    const { transaction } = props;
-
-    return (
-      <Flex
-        pt={2}
-        width="100%"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Flex flexDirection="column" justifyContent="center">
-          <Text variant="h5" fontSize={3}>
-            {transaction.type === 'received' ? 'Received ETH' : 'Sent ETH'}
-          </Text>
-          <Flex>
-            <Text variant="body" fontSize={1} color="text.success">
-              {`${
-                monthNames[transaction.date.getMonth()]
-              } ${transaction.date.getDate()}`}
-            </Text>
-            <Text mx={1} variant="body" fontSize={1} color="text.disabled">
-              ·
-            </Text>
-            <Text variant="body" fontSize={1} color="text.disabled">
-              To: {shortened(transaction.address)}
-            </Text>
-          </Flex>
-        </Flex>
-        <Flex
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="flex-end"
-        >
-          <Text variant="body" fontSize={2}>
-            {transaction.type === 'sent' ? '-' : ''}{' '}
-            {formatWei(transaction.amount)} ETH
-          </Text>
-          <Text variant="body" fontSize={1} color="text.disabled">
-            {transaction.type === 'sent' ? '-' : ''}$
-            {convertWeiToUsd(transaction.amount)} USD
-          </Text>
-        </Flex>
-      </Flex>
-    );
-  };
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
       {/* @ts-ignore */}
-      <Flex
+      <FlexWithShadow
         p={3}
         width="100%"
         flexDirection="column"
         background={lighten(0.02, theme.currentTheme.windowColor)}
-        // boxShadow="0px 0px 9px rgba(0, 0, 0, 0.12)"
         borderRadius="16px"
       >
         <WalletInfo
@@ -134,7 +81,7 @@ export const Detail: FC<EthDetailProps> = observer((props: EthDetailProps) => {
           onScreenChange={onScreenChange}
           close={close}
         />
-      </Flex>
+      </FlexWithShadow>
       <Box width="100%" hidden={QROpen || sendTrans}>
         <Flex
           width="100%"
