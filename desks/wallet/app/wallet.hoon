@@ -594,6 +594,9 @@
       =.  transaction.act
         =.  type.transaction.act  %received
         =.  their-patp.transaction.act  `our.bowl
+        =/  their-address  their-address.transaction.act
+        =.  their-address.transaction.act  our-address.transaction.act
+        =.  our-address.transaction.act  their-address
         transaction.act
       =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
       =/  task  [%poke %wallet-action !>(wall-act)]
