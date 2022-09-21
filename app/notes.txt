@@ -1,0 +1,10 @@
+- receive/send flipped in transaction list [CHECK]
+- formatting date/sender in transaction list [CHECK]
+- transaction list height depending on pending
+- loading spinner on transaction send
+- if cannot send to patp, notify user why (in transaction pane)
+- back button on create wallet
+
+
+
+hurry visit offer cabin people shell excite security toe modify wish hidden
