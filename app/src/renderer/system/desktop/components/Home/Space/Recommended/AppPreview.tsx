@@ -57,11 +57,11 @@ export const AppPreview: FC<AppPreviewProps> = (props: AppPreviewProps) => {
         <Flex flexGrow={0}>
           {app?.type !== 'urbit' ||
           (app?.type === 'urbit' && app?.installed) ? (
+            <Button borderRadius={6}>Installed</Button>
+          ) : (
             <Button disabled variant="custom" borderRadius={6}>
               Installed
             </Button>
-          ) : (
-            <Button borderRadius={6}>Installed</Button>
           )}
         </Flex>
       </Flex>

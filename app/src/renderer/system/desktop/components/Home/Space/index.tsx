@@ -55,7 +55,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
 
   useEffect(() => {
     const apps = bazaar.getAvailableApps();
-    console.log('appsChange => %o', apps);
     setApps(apps);
   }, [bazaar.appsChange]);
 
@@ -197,6 +196,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 apps={apps}
                 suite={suite}
                 isAdmin={isAdmin}
+                bazaar={bazaar}
               />
               <RecommendedApps />
               <RecentActivity />

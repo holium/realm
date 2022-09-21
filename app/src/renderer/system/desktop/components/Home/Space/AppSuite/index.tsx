@@ -12,6 +12,7 @@ import { useServices } from 'renderer/logic/store';
 import { cleanNounColor } from 'os/lib/color';
 import { observer } from 'mobx-react';
 import { rgba } from 'polished';
+import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 type AppSuiteProps = {
   patp: string;
@@ -19,6 +20,7 @@ type AppSuiteProps = {
   apps: any[];
   suite: any[];
   isAdmin: boolean;
+  bazaar: BazaarStoreType;
   // suite?: AppModelType[];
 };
 // const emptyArr = [1, 2, 3, 4, 5];
@@ -91,7 +93,7 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
-  const { patp, space, apps, suite, isAdmin } = props;
+  const { patp, space, apps, suite, isAdmin, bazaar } = props;
   const { theme } = useServices();
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
@@ -139,6 +141,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
                 isAdmin={isAdmin}
                 space={space}
                 app={app}
+                bazaar={bazaar}
                 onClick={() => {
                   SpacesActions.removeFromSuite(space.path, app.id);
                 }}
@@ -150,6 +153,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
                 selected={index === suiteIndex}
                 accentColor={accentColor}
                 app={undefined}
+                bazaar={bazaar}
                 onClick={(e) => {
                   if (isAdmin) {
                     setSearchMode('app-search');

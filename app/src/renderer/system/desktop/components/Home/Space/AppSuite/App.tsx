@@ -6,7 +6,7 @@ import { useServices } from 'renderer/logic/store';
 
 import { Box, AppTile, Icons, BoxProps } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { AppType, BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
@@ -42,12 +42,12 @@ type SuiteAppProps = {
   accentColor?: string;
   app?: AppType;
   isAdmin?: boolean;
+  bazaar: BazaarStoreType;
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app: any) => void;
 };
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
-  const { bazaar } = useServices();
-  const { selected, accentColor, app, space, isAdmin, onClick } = props;
+  const { selected, accentColor, app, space, isAdmin, bazaar, onClick } = props;
   if (app) {
     const weRecommended = bazaar.my.recommendations.includes(app.id);
     const menu = useMemo(() => {

@@ -129,7 +129,6 @@ export const BazaarModel = types
       let rec = self.apps.get(app.id)!;
       rec.ranks.recommended = app.ranks!.recommended;
       self.apps.set(app.id, rec);
-      self.recommendedChange = !self.recommendedChange;
     },
     updatePinnedRank(app: AppType) {
       console.log('updatePinnedRank => %o', app);
@@ -138,7 +137,6 @@ export const BazaarModel = types
       pinned.ranks.pinned = app.ranks!.pinned;
       self.apps.set(app.id, pinned);
       console.log('updating pinned app => %o...', app);
-      self.pinnedChange = !self.pinnedChange;
     },
     // findApps(searchString: string) {
     //   // const matches = [];
@@ -149,7 +147,6 @@ export const BazaarModel = types
     setPinnedApps(apps: any) {
       console.log('setPinnedApps => %o', apps);
       self.pinned.replace(apps);
-      self.pinnedChange = !self.pinnedChange;
     },
     setSuiteApps(apps: any) {
       self.suite.replace(apps);
@@ -158,7 +155,15 @@ export const BazaarModel = types
     setRecommendedApps(apps: any) {
       console.log('updating recommended apps => %o', apps);
       self.recommended.replace(apps);
+    },
+    togglePinnedAppsChange() {
+      self.pinnedChange = !self.pinnedChange;
+    },
+    toggleRecommendedAppsChange() {
       self.recommendedChange = !self.recommendedChange;
+    },
+    toggleSuiteAppsChange() {
+      self.suiteChange = !self.suiteChange;
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries

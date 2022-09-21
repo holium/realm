@@ -118,11 +118,13 @@
   ?+  path              (on-watch:def path)
      :: agent updates
     [%our ~]
+      ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to our..."
       ::  only host agent should get our updates
       ?>  (is-host:core src.bowl)
       `state
     ::
     [%updates ~]
+      ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
       =/  apps  initial:apps:core
@@ -133,6 +135,7 @@
       :: The space level watch subscription
       =/  host        `@p`(slav %p i.t.path)
       =/  space-pth   `@t`i.t.t.path
+      ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to {<(spat /(scot %p host)/(scot %tas space-pth))>}..."
       :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
       ::  recommends crash on permission check or other failure
       ?>  (check-member:security:core [host space-pth] src.bowl)
@@ -459,7 +462,6 @@
     =.  recommended.ranks.sieve.app-lite   (add recommended.ranks.sieve.app-lite 1)
     =.  index.apps                        (~(put by index.apps) app-id app-lite)
     =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
-    :: ~&  >  "add-rec..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     :_  state
@@ -484,11 +486,17 @@
     =.  app-catalog.state        (~(put by app-catalog.state) app-id entry)
     =/  apps  (~(got by space-apps.state) path)
     =/  app-lite   (~(got by index.apps) app-id)
-    =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %recommended)
-    =.  recommended.ranks.sieve.app-lite  (sub recommended.ranks.sieve.app-lite 1)
+    ::  sub to below 0 will crash the agent. ensure gth value before subtracting
+    =.  recommended.ranks.sieve.app-lite
+      ?:  (gth recommended.ranks.sieve.app-lite 0)
+        (sub recommended.ranks.sieve.app-lite 1)  %0
+    ::  only remove recommended tag (relative to space) if updated recommended count is 0
+    =.  tags.sieve.app-lite
+      ?:  =(recommended.ranks.sieve.app-lite 0)
+        (~(del in tags.sieve.app-lite) %recommended)
+      tags.sieve.app-lite
     =.  index.apps  (~(put by index.apps) app-id app-lite)
     =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
-    :: ~&  >  "rem-rec..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     :_  state
@@ -1165,8 +1173,13 @@
         =/  watch-path    [/bazaar/(scot %p ship.path)/(scot %tas space.path)]
         %-  (slog leaf+"{<dap.bowl>}: subscribing to {<watch-path>}..." ~)
         (snoc acc [%pass watch-path %agent [ship.path %bazaar] %watch watch-path])
+    %-  (slog leaf+"{<dap.bowl>}: spaces [initial] reaction processed. leaving channel and resubscribing to %our wire..." ~)
+    =/  rejoin-our=(list card)
+      :~  [%pass /spaces %agent [our.bowl %spaces] %leave ~]
+          [%pass /spaces %agent [our.bowl %spaces] %watch /our]
+      ==
     =.  space-apps.state    (~(uni by spaces-map) space-apps.state)
-    [subscriptions state]
+    [(weld subscriptions rejoin-our) state]
   ::
     ++  skim-our
       |=  [path=space-path:spaces-store =space:spaces-store]
