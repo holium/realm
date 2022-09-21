@@ -15,6 +15,7 @@ import {
   Sigil,
   Button,
   ImagePreview,
+  Spinner,
 } from 'renderer/components';
 import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
@@ -261,10 +262,6 @@ const RecipientInput = observer(
     const [recipient, setRecipient] = useState('');
     const [recipientError, setRecipientError] = useState('');
 
-    const stateRef = useRef();
-    /* @ts-ignore */
-    stateRef.current = recipient;
-
     // const [detailsLoading, setDetailsLoading] = useState(false);
     const [recipientDetails, setRecipientDetails] = useState<{
       failed: boolean;
@@ -276,9 +273,12 @@ const RecipientInput = observer(
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
 
+    const stateRef = useRef();
+    /* @ts-ignore */
+    stateRef.current = { recipient, currPromise };
+
     // TODO: rewrite logic here, was from when we had fewer agent/service guarentees
     const getRecipient = async (patp: string) => {
-      console.log(`trying to get recipient ${patp}`);
       let promise: Promise<RecipientPayload> = new Promise(async (resolve, reject) => {
         let timer = setTimeout(() => reject(new Error('Request timed out.')), 5000);
         try {
@@ -294,9 +294,6 @@ const RecipientInput = observer(
 
       promise
         .then((details: RecipientPayload) => {
-          console.log(`money! it resolved`);
-          console.log(details);
-
           if (details && details.address) {
             setRecipientDetails({ failed: false, details });
             setRecipientError('');
@@ -310,26 +307,23 @@ const RecipientInput = observer(
         })
         .catch((err: Error) => {
           console.error(err);
-          console.log(`we errd — patp: ${patp}, recip: ${stateRef.current}`)
-          if (patp !== stateRef.current) return;
+          /* @ts-ignore */
+          if (patp !== stateRef.current!.recipient!) return;
           setRecipientDetails({ failed: true, details: { patp } });
         })
         .finally(() => {
-          if (currPromise === promise) {
+          /* @ts-ignore */
+          if (stateRef.current!.currPromise! === promise) {
             setCurrPromise(null);
           }
         });
     };
 
     useEffect(() => {
-      console.log('effecting...');
-      console.log(recipientDetails.details);
-      console.log(recipient);
       if (
         !recipientDetails.failed &&
         recipientDetails.details?.patp === recipient
       ) {
-        console.log('she valid');
         props.setValid(true, {
           patp: recipientDetails.details.patp,
           patpAddress: recipientDetails!.details.address!,
@@ -338,7 +332,6 @@ const RecipientInput = observer(
         recipientDetails.failed &&
         recipientDetails.details?.patp === recipient
       ) {
-        console.log('no dice');
         props.setValid(false, {});
       }
     }, [recipientDetails]);
@@ -472,6 +465,11 @@ const RecipientInput = observer(
               value={recipient}
               onChange={onChange}
             />
+            { loading &&
+              <Flex mr={2}>
+                <Spinner ml={2} size="14px" color={themeData.colors.brand.primary} />
+              </Flex>
+            }
           </ContainerFlex>
         </Flex>
         <Flex mt={2} width="100%" justifyContent="flex-end">
@@ -527,9 +525,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     };
 
     const sendTransaction = async () => {
-      // send to wallet
-      // WalletActions.sendEthereumTransaction(walletApp.currentAddress, )
-      console.log('here we gooooooooooo');
       try {
         await WalletActions.sendEthereumTransaction(
           walletApp.currentIndex!,
@@ -537,12 +532,10 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           transactionAmount.toString(),
           transactionRecipient.patp,
         );
-        console.log('leo crushed it');
         setScreen('initial');
         props.close();
       } catch (e) {
-        console.log('sending trans failed');
-        console.log(e);
+        console.error(e);
       }
     };
 
