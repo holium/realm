@@ -615,15 +615,15 @@
       (weld cards new-card)
     [cards state]
     ::
-      %save-transaction-note
+      %save-transaction-notes
+    =/  net-map  (~(got by transactions) %ethereum)
+    =/  tx  (~(got by net-map) hash.act)
+    =.  notes.tx  notes.act
     =.  transactions
-      =/  net-map  (~(got by transactions) %ethereum)
-      =.  net-map
-        =/  tx  (~(got by net-map) hash.act)
-        =.  notes.tx  notes.act
-        (~(put by net-map) [hash.act tx])
+      =.  net-map  (~(put by net-map) [hash.act tx])
       (~(put by transactions) [%ethereum net-map])
-    `state
+    :_  state
+    [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum hash.act tx &])]~
     ::
       %add-smart-contract
     =^  address  wallets

@@ -52,7 +52,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.add-smart-contract': this.addSmartContract,
     'realm.tray.wallet.request-address': this.requestAddress,
-    'realm.tray.wallet.set-transaction-notes': this.setTransactionNotes,
   };
 
   static preload = {
@@ -145,18 +144,6 @@ export class WalletService extends BaseService {
         contractAddress,
         walletIndex
       );
-    },
-    setTransactionNotes: (
-      network: string,
-      hash: string,
-      notes: string
-    ) => {
-      return ipcRenderer.invoke(
-        'realm.tray.wallet.set-transaction-notes',
-        network,
-        hash,
-        notes
-      )
     },
     requestAddress: (from: string, network: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.request-address');
@@ -370,8 +357,10 @@ export class WalletService extends BaseService {
     }
   }
 
-  async saveTransactionNotes(notes: string) {
-    // TODO: implement this with Leo
+  async saveTransactionNotes(_event: any, notes: string) {
+    const network = this.state!.network;
+    const hash = this.state!.currentTransaction!;
+    WalletApi.saveTransactionNotes(this.core.conduit!, network, hash, notes);
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
@@ -482,10 +471,6 @@ export class WalletService extends BaseService {
 
   async requestAddress(_event: any, network: string, from: string) {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
-  }
-
-  async setTransactionNotes(_event: any, network: string, hash: string, notes: string) {
-    WalletApi.setTransactionNotes(this.core.conduit!, network, hash, notes);
   }
 
   /*

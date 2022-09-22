@@ -165,7 +165,7 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setTransactionNotes: async (
+  saveTransactionNotes: async (
     conduit: Conduit,
     network: string,
     hash: string,
@@ -181,7 +181,7 @@ export const WalletApi = {
           notes: notes
         }
       }
-    }
+    };
     await conduit.poke(payload);
   },
   getHistory: async (conduit: Conduit) => {
