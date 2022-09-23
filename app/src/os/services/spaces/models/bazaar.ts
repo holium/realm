@@ -25,8 +25,8 @@ const AppRankModel = types.model({
 const UrbitApp = types.model({
   id: types.identifier,
   // ship: types.string,
-  tags: types.array(types.string),
-  ranks: types.maybe(AppRankModel),
+  // tags: types.array(types.string),
+  // ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
@@ -37,19 +37,21 @@ const UrbitApp = types.model({
   website: types.string,
   license: types.string,
   installed: types.boolean,
+  recommended: types.optional(types.number, 0),
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
 const NativeApp = types.model({
   id: types.identifier,
   // ship: types.string,
-  tags: types.array(types.string),
-  ranks: types.maybe(AppRankModel),
+  // tags: types.array(types.string),
+  // ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
+  recommended: types.optional(types.number, 0),
 });
 
 export type NativeAppType = Instance<typeof NativeApp>;
@@ -106,7 +108,7 @@ export const BazaarModel = types
     },
   }))
   .actions((self) => ({
-    setApp(app: AppType) {
+    setApp(app: any) {
       self.apps.set(app.id, {
         id: app.id,
         tags: app.tags,
@@ -114,49 +116,48 @@ export const BazaarModel = types
       });
     },
     updateSuiteRank(app: AppType) {
-      console.log('updating suite app => %o...', app);
       if (!self.apps.has(app.id)) return;
       let suite = self.apps.get(app.id)!;
       suite.ranks.suite = app.ranks!.suite;
       self.apps.set(app.id, suite);
-      self.suiteChange = !self.suiteChange;
     },
     updateRecommendedRank(app: AppType) {
-      console.log('updating recommended app => %o...', app);
       if (!self.apps.has(app.id)) return;
       let rec = self.apps.get(app.id)!;
       rec.ranks.recommended = app.ranks!.recommended;
       self.apps.set(app.id, rec);
-      self.recommendedChange = !self.recommendedChange;
     },
     updatePinnedRank(app: AppType) {
-      console.log('updatePinnedRank => %o', app);
       if (!self.apps.has(app.id)) return;
       let pinned = self.apps.get(app.id)!;
       pinned.ranks.pinned = app.ranks!.pinned;
       self.apps.set(app.id, pinned);
-      console.log('updating pinned app => %o...', app);
-      self.pinnedChange = !self.pinnedChange;
     },
-    findApps(searchString: string) {
-      // const matches = [];
-      const str = searchString.toLowerCase();
-      const apps = Array.from(self.apps!.values());
-      return apps.filter((item) => item.title.toLowerCase().startsWith(str));
-    },
+    // findApps(searchString: string) {
+    //   // const matches = [];
+    //   const str = searchString.toLowerCase();
+    //   const apps = Array.from(self.apps!.values());
+    //   return apps.filter((item) => item.title.toLowerCase().startsWith(str));
+    // },
     setPinnedApps(apps: any) {
       console.log('setPinnedApps => %o', apps);
       self.pinned.replace(apps);
-      self.pinnedChange = !self.pinnedChange;
     },
     setSuiteApps(apps: any) {
       self.suite.replace(apps);
-      self.suiteChange = !self.suiteChange;
     },
     setRecommendedApps(apps: any) {
       console.log('updating recommended apps => %o', apps);
       self.recommended.replace(apps);
+    },
+    togglePinnedAppsChange() {
+      self.pinnedChange = !self.pinnedChange;
+    },
+    toggleRecommendedAppsChange() {
       self.recommendedChange = !self.recommendedChange;
+    },
+    toggleSuiteAppsChange() {
+      self.suiteChange = !self.suiteChange;
     },
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
@@ -183,6 +184,11 @@ export const BazaarModel = types
   }));
 export type BazaarModelType = Instance<typeof BazaarModel>;
 
+export const MyApps = types.model('MyApps', {
+  recommendations: types.array(types.string),
+});
+export type MyAppsType = Instance<typeof MyApps>;
+
 export const BazaarStore = types
   .model({
     // all apps installed on the local ship (our)
@@ -192,7 +198,7 @@ export const BazaarStore = types
     // apps: types.map(BazaarApp),
     _treaties: types.map(
       types.model({
-        key: types.identifier,
+        id: types.identifier,
         image: types.maybeNull(types.string),
         title: types.string,
         license: types.string,
@@ -201,7 +207,6 @@ export const BazaarStore = types
         href: types.model({
           glob: Glob,
         }),
-        type: types.string,
         color: types.string,
         info: types.string,
       })
@@ -215,13 +220,22 @@ export const BazaarStore = types
     ),
     apps: BazaarAppMap,
     appsChange: types.optional(types.boolean, false),
+    my: types.optional(MyApps, { recommendations: [] }),
   })
   .views((self) => ({
     getBazaar(path: string) {
       return self.spaces.get(path);
     },
-    get treaties() {
-      return self._treaties;
+    getAllies() {
+      return Array.from(self.allies.values()).map((ally, index) => toJS(ally));
+    },
+    getTreaties(ship: string) {
+      return Array.from(self._treaties.values())
+        .filter((val, index) => val.id.split('/')[0] === ship)
+        .map((treaty, index) => toJS(treaty));
+    },
+    getTreaty(ship: string, desk: string) {
+      return toJS(self._treaties.get(`${ship}/${desk}`));
     },
     getRecentApps(path: string) {
       return self.spaces.get(path)?.recentApps.map((appId, index) => ({
@@ -278,11 +292,16 @@ export const BazaarStore = types
   }))
   .actions((self) => ({
     initial(apps: any) {
+      if ('my' in apps) {
+        self.my.recommendations.replace(apps.my.recommendations);
+      }
       const catalog = apps['space-apps'];
       for (const spacePath in catalog) {
         const entry = catalog[spacePath];
         this.initialSpace(spacePath, entry);
       }
+      // trigger UI update if someone is listening
+      self.appsChange = !self.appsChange;
     },
     initialSpace(spacePath: string, entry: any) {
       const bazaar = BazaarModel.create({
@@ -320,7 +339,6 @@ export const BazaarStore = types
       }
     },
     updateApp(app: AppType) {
-      // console.log('updating app => %o', app);
       const appColor = app.color;
       if (app.type === 'urbit') {
         app.color = appColor && cleanNounColor(appColor);
@@ -328,43 +346,66 @@ export const BazaarStore = types
       self.apps.set(app.id, app);
     },
     hasAlly(ship: any) {
-      // console.log('hasAlly => %o', toJS(self.allies));
       return self.allies.has(ship);
     },
     addAlly(ally: any) {
       self.allies.set(ally.alliance[0], ally.ship);
     },
     addTreaty(treaty: any) {
-      // self.treaties.push(`${treaty.ship}/${treaty.desk}`);
-      const key = `${treaty.ship}/${treaty.desk}`;
-      // console.log('adding treaty => %o', { k: key, treaty });
-      self._treaties.set(key, {
+      const id = `${treaty.ship}/${treaty.desk}`;
+      self._treaties.set(id, {
         ...treaty.docket,
-        key: key,
+        color: cleanNounColor(treaty.docket.color),
+        id: id,
       });
       self.treatyAdded = !self.treatyAdded;
     },
     initialTreaties(treaties: any) {
-      // console.log('initial treaties => %o', treaties);
-      for (const key in treaties) {
-        const val = treaties[key];
-        self._treaties.set(key, {
-          ...val,
-          key: key,
+      for (const id in treaties) {
+        const treaty = treaties[id];
+        self._treaties.set(id, {
+          ...treaty,
+          color: cleanNounColor(treaty.color),
+          id: id,
         });
       }
     },
     initialAllies(allies: any) {
-      // console.log(toJS(allies));
       for (const key in allies) {
         const val = allies[key];
-        // console.log('adding ally => %o', val);
         self.allies.set(key, { ship: key, alliance: val });
       }
     },
     addBazaar(path: string) {
-      // console.log('addBazaar => %o', path);
       self.spaces.set(path, BazaarModel.create({}));
+    },
+    searchApps(term: string) {
+      const str = term.toLowerCase();
+      return Array.from(self.apps.values())
+        .filter((app, index) => {
+          return (
+            app.id.startsWith(term) || app.title.toLowerCase().startsWith(str)
+          );
+        })
+        .map((app, index) => toJS(app));
+    },
+    searchTreaties(ship: string, term: string) {
+      const str = term.toLowerCase();
+      return Array.from(self._treaties.values())
+        .filter((val, index) => {
+          const tokens = val.id.split('/');
+          return (
+            tokens[0] === ship &&
+            (val.title.toLowerCase().startsWith(str) ||
+              tokens[1].startsWith(term))
+          );
+        })
+        .map((treaty, index) => toJS(treaty));
+    },
+    updateMyRecommendations(recommendations: string[]) {
+      console.log('updateMyRecommendations => %o', recommendations);
+      self.my.recommendations.replace(recommendations);
+      self.appsChange = !self.appsChange;
     },
   }));
 

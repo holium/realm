@@ -100,13 +100,16 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
             </ActionButton>
             <Text
               fontSize={2}
-              fontWeight={200}
               lineHeight="20px"
               variant="body"
               opacity={0.6}
               mt={3}
+              fontWeight={onboarding.installer.state === 'error' ? 500 : 200}
+              color={onboarding.installer.state === 'error' ? 'red' : ''}
             >
-              {!onboarding.installer.isLoaded
+              {onboarding.installer.state === 'error'
+                ? `Oops! An error has occurred: '${onboarding.installer.errorMessage}'`
+                : !onboarding.installer.isLoaded
                 ? 'This will just take a minute'
                 : 'Congrats! You are ready to enter a new world.'}
             </Text>

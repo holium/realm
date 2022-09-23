@@ -138,8 +138,14 @@ export const OnboardingStore = types
       self.installer.set('loading');
     },
 
-    endRealmInstall() {
-      self.installer.set('loaded');
+    endRealmInstall(status: string, error: string | undefined = undefined) {
+      if (status === 'success') {
+        self.installer.set('loaded');
+      } else {
+        self.installer.errorMessage =
+          error === undefined ? 'install failed' : error;
+        self.installer.set('error');
+      }
     },
 
     installRealm: flow(function* () {
