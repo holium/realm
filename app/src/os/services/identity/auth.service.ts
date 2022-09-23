@@ -29,6 +29,7 @@ export class AuthService extends BaseService {
     'realm.auth.login': this.login,
     'realm.auth.logout': this.logout,
     'realm.auth.remove-ship': this.removeShip,
+    'realm.auth.set-ship-profile': this.setShipProfile,
   };
 
   static preload = {
@@ -45,7 +46,8 @@ export class AuthService extends BaseService {
     getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
     removeShip: (ship: string) =>
       ipcRenderer.invoke('realm.auth.remove-ship', ship),
-    // onLogin: (callback: any) =>
+    setShipProfile: (patp: string, profile:{color: string; nickname: string; avatar: string}) =>
+      ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile)
     //   ipcRenderer.on('realm.auth.on-log-in', callback),
     // onLogout: (callback: any) =>
     //   ipcRenderer.on('realm.auth.on-log-out', callback),
@@ -121,6 +123,12 @@ export class AuthService extends BaseService {
 
   getShip(ship: string): AuthShipType {
     return this.db.get(`ships.auth${ship}`);
+  }
+
+  setShipProfile(_event: any, patp: string, profile:{color: string; nickname: string; avatar: string}) {
+    let ship = this.state.ships.get(`auth${patp}`)!;
+    if(!ship) return;
+    this.state.setShipProfile(ship.id, profile.nickname, profile.color, profile.avatar)
   }
 
   async login(_event: any, ship: string, password: string): Promise<boolean> {
