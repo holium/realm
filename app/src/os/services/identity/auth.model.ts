@@ -22,6 +22,7 @@ export const AuthShip = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
+    mnemonic: types.maybe(types.string),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
     passwordHash: types.maybeNull(types.string),
@@ -30,6 +31,9 @@ export const AuthShip = types
     setStatus(status: Instance<typeof StepList>) {
       self.status = status;
     },
+    setMnemonic(mnemonic: string) {
+      self.mnemonic = mnemonic;
+    }
   }));
 
 export type AuthShipType = Instance<typeof AuthShip>;
@@ -91,6 +95,9 @@ export const AuthStore = types
         return entry[1].patp;
       });
     },
+    get mnemonic(): any {
+      return self.selected!.mnemonic;
+    }
   }))
   .actions((self) => ({
     setFirstTime() {
@@ -191,6 +198,9 @@ export const AuthStore = types
       }
       self.ships.delete(`auth${ship}`);
     }),
+    setMnemonic: (mnemonic: string) => {
+      self.selected?.setMnemonic(mnemonic);
+    }
   }));
 
 export type AuthStoreType = Instance<typeof AuthStore>;

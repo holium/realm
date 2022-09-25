@@ -29,6 +29,7 @@ export class AuthService extends BaseService {
     'realm.auth.login': this.login,
     'realm.auth.logout': this.logout,
     'realm.auth.remove-ship': this.removeShip,
+    'realm.auth.set-mnemonic': this.setMnemonic,
     'realm.auth.set-ship-profile': this.setShipProfile,
   };
 
@@ -46,11 +47,12 @@ export class AuthService extends BaseService {
     getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
     removeShip: (ship: string) =>
       ipcRenderer.invoke('realm.auth.remove-ship', ship),
-    setShipProfile: (patp: string, profile:{color: string; nickname: string; avatar: string}) =>
-      ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile)
-    //   ipcRenderer.on('realm.auth.on-log-in', callback),
-    // onLogout: (callback: any) =>
-    //   ipcRenderer.on('realm.auth.on-log-out', callback),
+    setMnemonic: (mnemonic: string) =>
+      ipcRenderer.invoke('realm.auth.set-mnemonic', mnemonic),
+    setShipProfile: (
+      patp: string,
+      profile: { color: string; nickname: string; avatar: string }
+    ) => ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -125,10 +127,19 @@ export class AuthService extends BaseService {
     return this.db.get(`ships.auth${ship}`);
   }
 
-  setShipProfile(_event: any, patp: string, profile:{color: string; nickname: string; avatar: string}) {
+  setShipProfile(
+    _event: any,
+    patp: string,
+    profile: { color: string; nickname: string; avatar: string }
+  ) {
     let ship = this.state.ships.get(`auth${patp}`)!;
-    if(!ship) return;
-    this.state.setShipProfile(ship.id, profile.nickname, profile.color, profile.avatar)
+    if (!ship) return;
+    this.state.setShipProfile(
+      ship.id,
+      profile.nickname,
+      profile.color,
+      profile.avatar
+    );
   }
 
   async login(_event: any, ship: string, password: string): Promise<boolean> {
@@ -240,5 +251,13 @@ export class AuthService extends BaseService {
 
   removeShip(_event: any, ship: string) {
     this.state.deleteShip(ship);
+  }
+
+  setMnemonic(_event: any, mnemonic: string) {
+    this.state.setMnemonic(mnemonic);
+  }
+
+  getMnemonic(_event: any) {
+    return this.state.mnemonic;
   }
 }

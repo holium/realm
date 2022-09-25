@@ -1,35 +1,33 @@
 import { observer } from 'mobx-react';
-import { ThemeProvider } from 'styled-components';
 import { FC, useEffect, useState } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
-import { EthDetail } from './views/ethereum/Detail';
 import { Detail } from './views/common/Detail';
 import { WalletList } from './views/ethereum/List';
-import { EthTransaction } from './views/ethereum/Transaction';
+import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletNetwork } from './views/common/Network';
 import { CreateWallet } from './views/common/Create';
+import { ListPlaceholder } from './views/bitcoin/ListPlaceholder';
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
-import { constructSampleWallet, wallet } from './store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
-import {
-  PendingTransactionDisplay,
-  TransactionType,
-} from './views/common/Detail/PendingTransaction';
+import { PendingTransactionDisplay } from './views/common/Detail/PendingTransaction';
+import { getTransactions } from './lib/helpers';
 
-export const WalletViews: { [key: string]: any } = {
-  'bitcoin:list': (props: any) => <div />,
+const WalletViews: { [key: string]: any } = {
+  'bitcoin:list': (props: any) => <ListPlaceholder {...props} />,
   'bitcoin:detail': (props: any) => <div />,
   'bitcoin:transaction': (props: any) => <div />,
   'ethereum:list': (props: any) => (
     <WalletList network={NetworkType.ethereum} {...props} />
   ),
   'ethereum:detail': (props: any) => <Detail {...props} />,
-  'ethereum:transaction': (props: any) => <EthTransaction {...props} />,
+  [WalletView.TRANSACTION_DETAIL]: (props: any) => (
+    <TransactionDetail {...props} />
+  ),
   'ethereum:new': (props: any) => <EthNew {...props} />,
   [WalletView.CREATE_WALLET]: (props: any) => (
     <CreateWallet network={NetworkType.ethereum} />
@@ -39,13 +37,24 @@ export const WalletViews: { [key: string]: any } = {
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
+  let [hidePending, setHidePending] = useState(false);
+  let [transactionCount, setTransactionCount] = useState(0);
+
   const { walletApp } = useTrayApps();
-  const onAddWallet = () => {
-    // WalletActions.createWallet('~zod', walletApp.network);
+  let transactions = getTransactions(walletApp.ethereum.transactions);
+  useEffect(() => {
+    if (transactions.length !== transactionCount) {
+      setTransactionCount(transactions.length);
+      setHidePending(false);
+    }
+  }, [transactions]);
+  let hide = () => {
+    console.log('clickey');
+    setHidePending(true);
   };
 
-  const View = WalletViews[walletApp.currentView];
-  // const View = WalletViews[WalletView.CREATE_WALLET]
+  let View = WalletViews[walletApp.currentView];
+
   return (
     <Flex
       onClick={(evt: any) => evt.stopPropagation()}
@@ -61,8 +70,11 @@ export const WalletApp: FC<any> = observer((props: any) => {
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={walletApp.currentView === 'ethereum:new'}
       />
-      {/* <PendingTransactionDisplay transactions={walletApp.ethereum.transactions as unknown as TransactionType[]} /> */}
-      <View {...props} />
+      {!hidePending &&
+        walletApp.currentView !== WalletView.TRANSACTION_DETAIL && (
+          <PendingTransactionDisplay transactions={transactions} hide={hide} />
+        )}
+      <View {...props} hidePending={hidePending} />
       <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} />
     </Flex>
   );

@@ -42,6 +42,54 @@
   |=  transaction
   0
 ::
+++  json-to-transaction
+  =,  dejs:format
+  |=  =json
+  ^-  transaction
+  =/  tx
+    ^-  help-tx
+    %.  json
+    (ot ~[hash+so amount+so network+(su (perk %bitcoin %ethereum ~)) type+(su (perk %sent %received ~)) initiated-at+so completed-at+so:dejs-soft:format our-address+so their-patp+so:dejs-soft:format their-address+so status+(su (perk %pending %failed %succeeded ~)) failure-reason+so:dejs-soft:format notes+so])
+  :*  hash.tx
+      amount.tx
+      network.tx
+      type.tx
+      initiated-at.tx
+      completed-at.tx
+      our-address.tx
+      ?~  their-patp.tx  ~
+      [~ `@p`(slav %p u.their-patp.tx)]
+      their-address.tx
+      status.tx
+      failure-reason.tx
+      notes.tx
+  ==
+::
+++  transaction-to-json
+  =,  enjs:format
+  |=  =transaction
+  ^-  json
+  %-  pairs
+  :~  ['hash' [%s hash.transaction]]
+      ['amount' [%s amount.transaction]]
+      ['network' [%s network.transaction]]
+      ['type' [%s type.transaction]]
+      ['initiatedAt' [%s initiated-at.transaction]]
+      :-  'completedAt'
+        ?~  completed-at.transaction  ~
+        [%s u.completed-at.transaction]
+      ['ourAddress' [%s our-address.transaction]]
+      :-  'theirPatp'
+        ?~  their-patp.transaction  ~
+        [%s (crip (scow %p u.their-patp.transaction))]
+      ['theirAddress' [%s their-address.transaction]]
+      ['status' [%s status.transaction]]
+      :-  'failureReason'
+        ?~  failure-reason.transaction  ~
+        [%s u.failure-reason.transaction]
+      ['notes' [%s notes.transaction]]
+  ==
+::
 ++  dejs-action
   =,  dejs:format
   |=  jon=json
@@ -55,8 +103,9 @@
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
       [%set-network-provider (ot ~[network+(su (perk %bitcoin %ethereum ~)) provider+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
-      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+so transaction+json])]
+      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+json-to-ux transaction+json-to-transaction])]
       [%add-smart-contract (ot ~[contract-id+so contract-type+(su (perk %erc20 %erc721 ~)) name+so address+json-to-ux wallet-index+so])]
+      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+so notes+so])]
   ==
   ++  json-to-ux
     |=  =json
@@ -80,7 +129,7 @@
     %-  pairs
     :~  ['network' [%s network.update]]
         ['key' [%s +>-.update]]
-        ['transaction' +>+<.update]
+        ['transaction' (transaction-to-json +>+<.update)]
         ['success' [%b success.update]]
     ==
   ::
@@ -91,19 +140,17 @@
     %+  turn  transaction-list
       jsonify-transaction-map
     ++  jsonify-transaction-map
-      |=  [=network transactions=(map @t [success=? transaction])]
+      |=  [=network transactions=(map @t transaction)]
       ^-  [@t json]
       :-  `@t`network
         %-  pairs
+::        ~(tap by transactions)
         =/  tx-list  ~(tap by transactions)
         %+  turn  tx-list
-        |=  [key=@t [success=? =transaction]]
+        |=  [key=@t =transaction]
         ^-  [@t json]
         :-  key
-        %-  pairs
-        :~  ['success' [%b success]]
-            ['transaction' transaction]
-        ==
+        (transaction-to-json transaction)
     --
   ::
       %wallet

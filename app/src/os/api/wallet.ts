@@ -165,10 +165,29 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
+  saveTransactionNotes: async (
+    conduit: Conduit,
+    network: string,
+    hash: string,
+    notes: string
+  ) => {
+    const payload = {
+      app: 'wallet',
+      mark: 'wallet-action',
+      json: {
+        'save-transaction-notes': {
+          network: network,
+          hash: hash,
+          notes: notes
+        }
+      }
+    };
+    await conduit.poke(payload);
+  },
   getHistory: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'wallet',
-      path: '/histories',
+      path: '/history',
     });
   },
   subscribeToTransactions(

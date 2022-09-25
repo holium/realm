@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { errors, ethers } from 'ethers';
 import { observer } from 'mobx-react';
@@ -15,6 +15,7 @@ import {
   Sigil,
   Button,
   ImagePreview,
+  Spinner,
 } from 'renderer/components';
 import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
@@ -94,7 +95,6 @@ const AmountInput = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
-    const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
     const check = (inCrypto: boolean, value: number) => {
       let amountInCrypto = inCrypto ? value : usdToEth(value);
@@ -268,50 +268,68 @@ const RecipientInput = observer(
       details: RecipientPayload | null;
     }>({ failed: false, details: null });
     const [currPromise, setCurrPromise] =
-      useState<Promise<RecipientPayload | null> | null>(null);
+      useState<Promise<RecipientPayload> | null>(null);
+    const loading = currPromise !== null;
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
-    const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
+    const stateRef = useRef();
+    /* @ts-ignore */
+    stateRef.current = { recipient, currPromise };
+
+    // TODO: rewrite logic here, was from when we had fewer agent/service guarentees
     const getRecipient = async (patp: string) => {
-      console.log(`trying to get recipient ${patp}`);
-      let promise = WalletActions.getRecipient(patp);
+      let promise: Promise<RecipientPayload> = new Promise(
+        async (resolve, reject) => {
+          let timer = setTimeout(
+            () => reject(new Error('Request timed out.')),
+            5000
+          );
+          try {
+            let details = await WalletActions.getRecipient(patp);
+            clearTimeout(timer);
+            resolve(details);
+          } catch (e) {
+            clearTimeout(timer);
+            reject(e);
+          }
+        }
+      );
       setCurrPromise(promise);
 
       promise
-        .then((details: RecipientPayload | null) => {
-          console.log(`money! it resolved`);
-          console.log(details);
-          if (currPromise && currPromise !== promise) return;
-
-          details && details.address
-            ? setRecipientDetails({ failed: false, details })
-            : setRecipientDetails({ failed: true, details: null });
+        .then((details: RecipientPayload) => {
+          if (details && details.address) {
+            setRecipientDetails({ failed: false, details });
+            setRecipientError('');
+          } else {
+            setRecipientDetails({ failed: true, details: { patp } });
+          }
 
           if (details && details.gasEstimate) {
             props.setGasEstimate(details.gasEstimate);
           }
-
-          setCurrPromise(null);
         })
         .catch((err: Error) => {
           console.error(err);
-          if (currPromise && currPromise !== promise) return;
-          setRecipientDetails({ failed: true, details: null });
-          setCurrPromise(null);
+          /* @ts-ignore */
+          if (patp !== stateRef.current!.recipient!) return;
+          setRecipientDetails({ failed: true, details: { patp } });
+        })
+        .finally(() => {
+          /* @ts-ignore */
+          if (stateRef.current!.currPromise! === promise) {
+            setCurrPromise(null);
+          }
         });
     };
 
     useEffect(() => {
-      console.log('effecting...');
-      console.log(recipientDetails.details);
-      console.log(recipient);
       if (
         !recipientDetails.failed &&
         recipientDetails.details?.patp === recipient
       ) {
-        console.log('she valid');
         props.setValid(true, {
           patp: recipientDetails.details.patp,
           patpAddress: recipientDetails!.details.address!,
@@ -320,7 +338,6 @@ const RecipientInput = observer(
         recipientDetails.failed &&
         recipientDetails.details?.patp === recipient
       ) {
-        console.log('no dice');
         props.setValid(false, {});
       }
     }, [recipientDetails]);
@@ -354,7 +371,7 @@ const RecipientInput = observer(
         return setRecipient(`~${value}`);
       } else {
         setIcon('blank');
-        setValueCache('');
+        setValueCache(value);
         props.setValid(false, {});
       }
 
@@ -446,18 +463,26 @@ const RecipientInput = observer(
             <Flex ml={1} mr={2}>
               <RecipientIcon icon={icon} />
             </Flex>
-            {/* @ts-ignore */}
             <Input
-              mode={theme.currentTheme.mode}
+              mode={theme.currentTheme.mode === 'light' ? 'light' : 'dark'}
               width="100%"
               placeholder="@p or recipient’s address"
               spellCheck="false"
               value={recipient}
               onChange={onChange}
             />
+            {loading && (
+              <Flex mr={2}>
+                <Spinner
+                  ml={2}
+                  size="14px"
+                  color={themeData.colors.brand.primary}
+                />
+              </Flex>
+            )}
           </ContainerFlex>
         </Flex>
-        <Box mt={2} ml="72px" width="100%">
+        <Flex mt={2} width="100%" justifyContent="flex-end">
           <Text
             variant="body"
             fontSize="11px"
@@ -465,9 +490,10 @@ const RecipientInput = observer(
           >
             {recipientDetails.failed &&
               recipientDetails.details?.patp === recipient &&
-              `${recipient} doesn\'nt have wallet installed yet.`}
+              `${recipient} doesn\'t have a Realm wallet.`}
+            &nbsp;&nbsp;&nbsp;
           </Text>
-        </Box>
+        </Flex>
       </Flex>
     );
   }
@@ -483,6 +509,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
   (props: TransactionPaneProps) => {
     const { walletApp } = useTrayApps();
     const [screen, setScreen] = useState('initial');
+    const [transactionSending, setTransactionSending] = useState(false);
 
     const [amountValid, setAmountValid] = useState(false);
     const [transactionAmount, setTransactionAmount] = useState(0);
@@ -510,21 +537,20 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     };
 
     const sendTransaction = async () => {
-      // send to wallet
-      // WalletActions.sendEthereumTransaction(walletApp.currentAddress, )
-      console.log('here we gooooooooooo');
       try {
+        setTransactionSending(true);
         await WalletActions.sendEthereumTransaction(
           walletApp.currentIndex!,
           transactionRecipient.address || transactionRecipient.patpAddress!,
-          transactionAmount.toString()
+          transactionAmount.toString(),
+          transactionRecipient.patp
         );
-        console.log('leo crushed it');
+        setTransactionSending(false);
         setScreen('initial');
         props.close();
       } catch (e) {
-        console.log('sending trans failed');
-        console.log(e);
+        console.error(e);
+        setTransactionSending(false);
       }
     };
 
@@ -600,7 +626,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     ) : (
                       <Sigil
                         color={
-                          themeData.currentTheme.mode === 'light'
+                          theme.currentTheme.mode === 'light'
                             ? ['black', 'white']
                             : ['white', 'black']
                         }
@@ -647,9 +673,9 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   TOTAL
                 </Text>
                 <Flex flexDirection="column">
-                  <Text variant="body">3.4505 ETH</Text>
+                  <Text variant="body">{transactionAmount + 0.0005} ETH</Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
-                    ≈ {ethToUsd(3.4505)} USD
+                    ≈ {ethToUsd(transactionAmount + 0.0005)} USD
                   </Text>
                 </Flex>
               </Flex>
@@ -658,7 +684,11 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               <Button variant="transparent" onClick={() => prev()}>
                 Reject
               </Button>
-              <Button px={2} onClick={sendTransaction}>
+              <Button
+                px={2}
+                onClick={sendTransaction}
+                isLoading={transactionSending}
+              >
                 Confirm
               </Button>
             </Flex>
