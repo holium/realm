@@ -95,19 +95,14 @@ const createWindow = async () => {
     width: 1920 / factor,
     height: 1440 / factor,
     titleBarStyle: 'hidden',
-    vibrancy: 'under-window',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     acceptFirstMouse: true,
-    // paintWhenInitiallyHidden: true,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
       allowRunningInsecureContent: false,
       sandbox: false,
-      // nodeIntegrationInSubFrames: true,
-      // sandbox: true,
-      // nodeIntegrationInWorker: true,
       contextIsolation: true,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
@@ -160,7 +155,7 @@ const createWindow = async () => {
     mainWindow.webContents.send(
       'set-appview-preload',
       app.isPackaged
-        ? path.join(__dirname, 'cursor.preload.js')
+        ? path.join(__dirname, '../renderer/cursor.preload.js')
         : path.join(app.getAppPath(), 'cursor.preload.js')
     );
   });

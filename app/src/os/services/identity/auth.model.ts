@@ -133,6 +133,14 @@ export const AuthStore = types
     setShip(newShip: AuthShipType) {
       self.ships.set(newShip.id, newShip);
     },
+    setShipProfile(id: string, nickname: string, color:string, avatar:string) {
+      let ship = self.ships.get(id);
+      if(!ship) return;
+      ship.nickname = nickname;
+      ship.color = color;
+      ship.avatar = avatar;
+      self.ships.set(id, ship);
+    },
     setSelected(newShip: AuthShipType) {
       self.selected = newShip;
     },

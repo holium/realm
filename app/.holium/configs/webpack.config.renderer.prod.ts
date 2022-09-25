@@ -123,8 +123,9 @@ const configuration: webpack.Configuration = {
           from: path.resolve(__dirname, '../../media'),
           to: path.resolve(webpackPaths.distRendererPath),
         },
+
         {
-          from: path.resolve(__dirname, '../../media'),
+          from: path.resolve(__dirname, '../../src/main/cursor.preload.js'),
           to: path.resolve(webpackPaths.distRendererPath),
         },
       ],

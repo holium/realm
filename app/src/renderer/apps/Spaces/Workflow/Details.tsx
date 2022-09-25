@@ -318,7 +318,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
           <Flex mt={1} flex={1} gap={20} flexDirection="column">
             <FormControl.Field>
               <Label fontWeight={500} required>
-                Place name
+                Space name
               </Label>
               <Input
                 tabIndex={1}
@@ -384,19 +384,20 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                     icon: 'Public',
                     label: 'Public',
                     value: 'public',
-                    sublabel: 'Anyone can search for and fully join.',
-                  },
-                  {
-                    icon: 'DoorOpen',
-                    label: 'Antechamber',
-                    value: 'antechamber',
-                    sublabel: 'Anyone can join a public holding area.',
+                    sublabel: 'Anyone can join.',
                   },
                   {
                     icon: 'EyeOff',
                     label: 'Private',
                     value: 'private',
-                    sublabel: 'Only those with an invite can join.',
+                    sublabel: 'An invitation is required to join.',
+                  },
+                  {
+                    disabled: true,
+                    icon: 'DoorOpen',
+                    label: 'Antechamber',
+                    value: 'antechamber',
+                    sublabel: 'Anyone can join a public holding area.',
                   },
                 ]}
                 onClick={(value: AccessOptionType) => {

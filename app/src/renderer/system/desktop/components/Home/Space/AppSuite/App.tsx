@@ -2,15 +2,20 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
+import { useServices } from 'renderer/logic/store';
 
-import { Box, AppTile, Icons } from 'renderer/components';
+import { Box, AppTile, Icons, BoxProps } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { AppModelType } from 'os/services/ship/models/docket';
+import { AppType, BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { BazaarApi } from 'os/api/bazaar';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-const AppEmpty = styled(Box)`
+type AppEmptyProps = {
+  selected: boolean;
+  accentColor: string;
+};
+
+const AppEmpty = styled(Box)<AppEmptyProps & BoxProps>`
   border-radius: 20px;
   /* border: 2px dotted white; */
   display: flex;
@@ -23,7 +28,7 @@ const AppEmpty = styled(Box)`
     transition: 0.2s ease;
     background: ${rgba('#FFFFFF', 0.5)};
   }
-  ${(props: any) =>
+  ${(props: AppEmptyProps) =>
     props.selected &&
     css`
       border: 2px solid ${props.accentColor};
@@ -35,15 +40,18 @@ type SuiteAppProps = {
   space: SpaceModelType;
   highlightColor?: string;
   accentColor?: string;
-  app?: any; // AppModelType;
+  app?: AppType;
   isAdmin?: boolean;
+  bazaar: BazaarStoreType;
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app: any) => void;
 };
 
 export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
-  const { selected, accentColor, app, space, isAdmin, onClick } = props;
-
+  const { selected, accentColor, app, space, isAdmin, bazaar, onClick } = props;
+  const currentBazaar = bazaar.getBazaar(space.path);
   if (app) {
+    const weRecommended = bazaar.my.recommendations.includes(app.id);
+    const isPinned = currentBazaar?.pinned.includes(app.id);
     const menu = useMemo(() => {
       let menu = [];
       if (isAdmin) {
@@ -54,11 +62,30 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
             onClick && onClick();
           },
         });
+        menu.push({
+          label: isPinned ? 'Unpin' : 'Pin',
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            isPinned
+              ? SpacesActions.unpinApp(space.path, app.id)
+              : SpacesActions.pinApp(space.path, app.id, null);
+          },
+        });
       }
+      menu.push({
+        label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+        onClick: (evt: any) => {
+          evt.stopPropagation();
+          weRecommended
+            ? SpacesActions.unrecommendApp(space.path, app.id)
+            : SpacesActions.recommendApp(space.path, app.id);
+        },
+      });
       if (app.type === 'urbit') {
         menu.push({
           label: app.installed ? 'Uninstall app' : 'Install app',
           disabled: false,
+          section: 2,
           onClick: (evt: any) => {
             evt.stopPropagation();
             // console.log('install app => %o', app);
@@ -70,13 +97,6 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
           },
         });
       }
-      menu.push({
-        label: 'Recommend this app',
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          SpacesActions.recommendApp(space.path, app.id);
-        },
-      });
       return menu;
     }, [app, isAdmin]);
     // lighten app if not installed on this ship
@@ -86,11 +106,11 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
         : rgba(app.color, 0.7);
     return (
       <AppTile
-        tileSize="xl"
+        tileSize="xl1"
         app={app}
         allowContextMenu={true}
         contextMenu={menu}
-        onAppClick={(selectedApp: AppModelType) => {
+        onAppClick={(selectedApp: AppType) => {
           // QUESTION: should this open the app listing or the actual app?
           // const app = toJS(selectedApp);
           DesktopActions.openAppWindow(space.path, selectedApp);
@@ -102,8 +122,8 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
   }
   return (
     <AppEmpty
-      height={148}
-      width={148}
+      height={160}
+      width={160}
       selected={selected}
       accentColor={accentColor}
       onClick={(e) => onClick && onClick(e, undefined)}

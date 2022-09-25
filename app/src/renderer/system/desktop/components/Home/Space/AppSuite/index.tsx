@@ -12,6 +12,7 @@ import { useServices } from 'renderer/logic/store';
 import { cleanNounColor } from 'os/lib/color';
 import { observer } from 'mobx-react';
 import { rgba } from 'polished';
+import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 type AppSuiteProps = {
   patp: string;
@@ -19,6 +20,7 @@ type AppSuiteProps = {
   apps: any[];
   suite: any[];
   isAdmin: boolean;
+  bazaar: BazaarStoreType;
   // suite?: AppModelType[];
 };
 // const emptyArr = [1, 2, 3, 4, 5];
@@ -66,13 +68,13 @@ const StyledContent = styled(PopoverPrimitive.Content, {
   },
 });
 
-function Content({ children, ...props }) {
+function Content({ children, ...props }: any) {
   return (
     <PopoverPrimitive.Portal>
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
-          document.activeElement?.blur();
+          if (document.activeElement) document.activeElement!.blur();
           e.preventDefault();
         }}
         onFocusOutside={(e) => e.preventDefault()}
@@ -91,14 +93,14 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
-  const { patp, space, apps, suite, isAdmin } = props;
+  const { patp, space, apps, suite, isAdmin, bazaar } = props;
   const { theme } = useServices();
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
   const { accentColor, windowColor, textColor, iconColor } = theme.currentTheme;
 
   const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
-    console.log('onAppsAction => %o', { path, id: app.id, tag });
+    // console.log('onAppsAction => %o', { path, id: app.id, tag });
     SpacesActions.addToSuite(path, app.id, rank);
   };
 
@@ -139,6 +141,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
                 isAdmin={isAdmin}
                 space={space}
                 app={app}
+                bazaar={bazaar}
                 onClick={() => {
                   SpacesActions.removeFromSuite(space.path, app.id);
                 }}
@@ -150,9 +153,12 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
                 selected={index === suiteIndex}
                 accentColor={accentColor}
                 app={undefined}
+                bazaar={bazaar}
                 onClick={(e) => {
-                  setSearchMode('app-search');
-                  setSuiteIndex(index);
+                  if (isAdmin) {
+                    setSearchMode('app-search');
+                    setSuiteIndex(index);
+                  }
                 }}
               />
             )
@@ -210,18 +216,20 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
               <Text color={rgba(textColor, 0.4)}>No apps found</Text>
             )) || (
               <Flex flexDirection={'column'} gap={10}>
-                {apps.map((item, index) => (
-                  <div key={index}>
-                    <AppRow
-                      caption={item.id}
-                      app={item}
-                      actionRenderer={() =>
-                        actionRenderer(space.path, item, suiteIndex)
-                      }
-                      onClick={() => {}}
-                    />
-                  </div>
-                ))}
+                {apps
+                  .filter((app) => app.installed)
+                  .map((item, index) => (
+                    <div key={index}>
+                      <AppRow
+                        caption={item.id}
+                        app={item}
+                        actionRenderer={() =>
+                          actionRenderer(space.path, item, suiteIndex)
+                        }
+                        onClick={() => {}}
+                      />
+                    </div>
+                  ))}
               </Flex>
             )}
           </Flex>

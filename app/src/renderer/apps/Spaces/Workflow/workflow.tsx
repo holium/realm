@@ -25,11 +25,12 @@ export const spacesDialogs: DialogRenderers = {
     customNext: true,
     // stateKey: 'create-space',
     component: (props: any) => <CreateSpaceModal {...props} />,
+    hasPrevious: () => true,
     onOpen: () => {
       ShellActions.setBlur(true, true);
     },
     onNext: (_evt: any) => {
-      ShellActions.nextDialog('create-space-2');
+      ShellActions.nextDialog('create-space-3');
     },
     onClose: () => {
       ShellActions.setBlur(false, true);
@@ -53,6 +54,7 @@ export const spacesDialogs: DialogRenderers = {
     customNext: false,
     // stateKey: 'create-space',
     component: (props: any) => <SelectArchetype {...props} />,
+    hasPrevious: () => true,
     isValidated: (data: any) => {
       if (data.archetype) {
         return true;
@@ -87,11 +89,12 @@ export const spacesDialogs: DialogRenderers = {
     workflow: true,
     // stateKey: 'create-space',
     component: (props: any) => <SpacesCreateForm {...props} />,
+    hasPrevious: () => true,
     onNext: (_evt: any) => {
       ShellActions.nextDialog('create-space-4');
     },
     onPrevious: () => {
-      ShellActions.nextDialog('create-space-2');
+      ShellActions.nextDialog('create-space-1');
     },
     onClose: () => {
       ShellActions.setBlur(false);
@@ -127,6 +130,7 @@ export const spacesDialogs: DialogRenderers = {
     workflow: true,
     // stateKey: 'create-space',
     component: (props: any) => <InviteMembers {...props} />,
+    hasPrevious: () => true,
     nextButtonText: 'Create Place',
     onNext: (_evt: any, state: any, setState: any) => {
       const createForm: NewSpace = state;

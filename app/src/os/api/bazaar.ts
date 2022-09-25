@@ -4,50 +4,108 @@ import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { allyShip, docketInstall, docketUninstall } from '@urbit/api';
 import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
+const util = require('node:util');
 
 export const BazaarApi = {
-  installApp: async (tempConduit: Conduit, ship: string, desk: string) => {
+  installApp: async (
+    tempConduit: Conduit,
+    ship: string,
+    desk: string
+  ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1;
+      let subscriptionId: number = -1,
+        timeout: NodeJS.Timeout;
       await tempConduit.watch({
         app: 'docket',
         path: '/charges',
         onSubscribed: (subscription: number) => {
           subscriptionId = subscription;
+          // upon subscribing, start a timer. if we don't get the 'add-charge'
+          //  event (see below) within the allotted time, it "usually" means the configured
+          //  INSTALL_MOON is offline or down
+          timeout = setTimeout(async () => {
+            await tempConduit.unsubscribe(subscriptionId);
+            console.log(
+              `timeout installing ${ship}/${desk}. has ${desk} been published? also check the glob-ames value in the ${desk}'s docket file to ensure match with '${ship}'.`
+            );
+            reject(`timeout installing ${ship}/${desk}`);
+          }, 60000);
+
+          tempConduit.poke(docketInstall(ship, desk)).catch((e) => {
+            console.log(e);
+            if (timeout) clearTimeout(timeout);
+            reject('install app error');
+          });
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
           if (data.hasOwnProperty('add-charge')) {
             const charge = data['add-charge'].charge;
             // according to Tlon source, this determines when the app is fully installed
             if ('glob' in charge.chad || 'site' in charge.chad) {
+              if (timeout) {
+                clearTimeout(timeout);
+              }
               await tempConduit.unsubscribe(subscriptionId);
               resolve(data);
+            } else if ('hung' in charge.chad) {
+              const err = charge.chad?.err || 'fail';
+              console.log(
+                `install failed => ${err}. have you uploaded the glob on the host?`
+              );
+              reject(err);
+            } else if ('install' in charge.chad) {
+              console.log(`'${ship}/${desk}' installation started...`);
             }
           }
         },
         onError: () => {
           console.log('subscription [docket/charges] rejected');
-          reject('subscription [docket/charges] rejected');
+          reject('error on channel');
         },
         onQuit: () => {
           console.log('kicked from subscription [docket/charges]');
-          reject('kicked from subscription [docket/charges]');
+          reject('unexpected channel quit');
         },
       });
-      await tempConduit.poke(docketInstall(ship, desk));
     });
   },
   addAlly: async (tempConduit: Conduit, ship: string) => {
     return new Promise(async (resolve, reject) => {
+      const isAlly = await BazaarApi.isAlly(tempConduit, ship);
+      if (isAlly) {
+        console.log(`'${ship}' is already an ally. skipping...`);
+        resolve(`'${ship}' is already an ally. skipping...`);
+        return;
+      }
       let subscriptionId: number = -1;
+      let timeout: NodeJS.Timeout;
       await tempConduit.watch({
         app: 'treaty',
         path: '/treaties',
         onSubscribed: (subscription: number) => {
           subscriptionId = subscription;
+          // upon subscribing, start a timer. if we don't get the 'add'
+          //  event (see below) within the allotted time, it "usually" means the configured
+          //  INSTALL_MOON does not have any apps available to install
+          timeout = setTimeout(async () => {
+            await tempConduit.unsubscribe(subscriptionId);
+            console.log(
+              `timeout forming alliance with ${ship}. are there apps published on '${ship}'?`
+            );
+            reject(`timeout forming alliance with ${ship}`);
+          }, 60000);
+
+          tempConduit.poke(allyShip(ship)).catch((e) => {
+            console.log(e);
+            if (timeout) clearTimeout(timeout);
+            reject('add ally error');
+          });
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
           if (data.hasOwnProperty('add')) {
+            if (timeout) {
+              clearTimeout(timeout);
+            }
             await tempConduit.unsubscribe(subscriptionId);
             resolve(data);
           }
@@ -61,15 +119,20 @@ export const BazaarApi = {
           reject('kicked from subscription [treaty/treaties]');
         },
       });
-      await tempConduit.poke(allyShip(ship));
     });
   },
-  isAppInstalled: async (tempConduit: Conduit, ship: string, desk: string) => {
+  getDocket: async (
+    tempConduit: Conduit,
+    desk: string
+  ): Promise<any | undefined> => {
     const response = await tempConduit.scry({
       app: 'docket',
       path: '/charges', // the spaces scry is at the root of the path
     });
-    return Object.keys(response.initial).includes(desk);
+    return (
+      (response.initial.hasOwnProperty(desk) && response.initial[desk]) ||
+      undefined
+    );
   },
   isAlly: async (tempConduit: Conduit, ship: string) => {
     const response = await tempConduit.scry({
@@ -97,39 +160,79 @@ export const BazaarApi = {
     }
     return;
   },
-  installDesk: async (tempConduit: Conduit, ship: string, desk: string) => {
-    return new Promise(async (resolve, reject) => {
+  installDesk: async (
+    tempConduit: Conduit,
+    ship: string,
+    desk: string
+  ): Promise<string> => {
+    return new Promise(async (resolve) => {
       console.log(`checking if '/${ship}/${desk}' installed...`);
-      const isInstalled = await BazaarApi.isAppInstalled(
-        tempConduit,
-        process.env.INSTALL_MOON!,
-        desk
-      );
-      if (isInstalled) {
-        console.log(`'/${ship}/${desk}' already installed. skipping...`);
-        resolve('done');
+      const docket = await BazaarApi.getDocket(tempConduit, desk);
+      if (docket !== undefined) {
+        if ('glob' in docket.chad && docket.chad.glob === null) {
+          // app fully installed. return
+          console.log(`'/${ship}/${desk}' already installed. skipping...`);
+          resolve('success');
+          return;
+        } else if ('install' in docket.chad) {
+          // app install in progress
+          console.log(
+            `unexpected state. it appears '/${ship}/${desk}' is currently installing. report error.`
+          );
+          resolve('unexpected installation status. app currently installing');
+          return;
+        } else if ('hung' in docket.chad) {
+          // prior installation attempt failed
+          console.log(
+            `unexpected state. it appears an earlier attempt at installing '/${ship}/${desk}' failed.`
+          );
+          resolve(
+            'installation already attempted. please uninstall the failed installation and try again.'
+          );
+          return;
+        }
+        // prior installation attempt failed
+        console.log(
+          `unexpected state. ${desk} already exists in docket. bailing...`
+        );
+        resolve(
+          `unexpected installation status. ${desk} currently exists in docket. skipping...`
+        );
         return;
       }
       if (!(await BazaarApi.isAlly(tempConduit, ship))) {
         console.log('forming alliance with %o...', ship);
-        await BazaarApi.addAlly(tempConduit, ship)
-          .then((result) => {
+        BazaarApi.addAlly(tempConduit, ship)
+          .then(() => {
             console.log('installing %o...', desk);
             BazaarApi.installApp(tempConduit, ship, desk)
               .then((result) => {
-                console.log('app install complete');
-                resolve(result);
+                console.log('app install complete => %o', result);
+                resolve('success');
               })
-              .catch((e) => reject(e));
+              .catch((e) => resolve(e));
           })
-          .catch((e) => reject(e));
+          .catch((e) => {
+            console.error(`addAlly error => '${e}'`);
+            resolve(e);
+          });
       } else {
-        await BazaarApi.installApp(tempConduit, ship, desk)
-          .then((result) => {
-            console.log('app install complete');
-            resolve(result);
-          })
-          .catch((e) => reject(e));
+        console.log(`${ship} is an ally. checking for '${desk}' treaty...`);
+        const hasTreaty = await BazaarApi.hasTreaty(tempConduit, ship, desk);
+        if (hasTreaty) {
+          console.log(`treaty found. installing '/${ship}/${desk}'...`);
+          BazaarApi.installApp(tempConduit, ship, desk)
+            .then((result: any) => {
+              console.log('app install complete => %o', result);
+              resolve('success');
+            })
+            .catch((e) => resolve(e));
+        } else {
+          console.log(`treaty not found. has ${desk} been published?`);
+          resolve(
+            `treaty '${ship}/${desk}' not found. Was the treaty published?`
+          );
+        }
       }
     });
   },
@@ -168,30 +271,6 @@ export const BazaarApi = {
     });
     return appMap;
   },
-  // addAlly: async (conduit: Conduit, ship: string) => {
-  //   return new Promise((resolve, reject) => {
-  //     conduit.poke({
-  //       ...allyShip(ship),
-  //       reaction: 'bazaar-reaction.new-ally',
-  //       onReaction: (data: any) => {
-  //         console.log('addAlly [os] onReaction => %o', data);
-  //         resolve(data['new-ally']);
-  //       },
-  //       onError: (e: any) => {
-  //         reject(e);
-  //       },
-  //     });
-  //   });
-  // },
-  // in the case of standard app search/install, we will have the ship/desk
-  //  information (treaty/ally), so simply leverage Tlon docketInstall to
-  //   perform install on local ship
-  installDocket: async (conduit: Conduit, ship: string, desk: string) => {
-    return new Promise(async (resolve, reject) => {
-      await BazaarApi.installApp(conduit, ship, desk);
-      resolve('done');
-    });
-  },
   uninstallApp: async (conduit: Conduit, desk: string) =>
     await conduit.poke(docketUninstall(desk)),
   // in the case of space apps, all we have is the desk, since docket/glob
@@ -199,6 +278,7 @@ export const BazaarApi = {
   //   back to the space host which requires desk name only. space host will then
   //   resolve origin ship by scrying its own treaties
   resolveAppInstall: async (conduit: Conduit, app: any) => {
+    console.log(util.inspect(app, { depth: 10 }));
     return new Promise(async (resolve, reject) => {
       let ship = undefined;
       if (app.href.glob['glob-reference'].location.ames) {
@@ -220,8 +300,9 @@ export const BazaarApi = {
         ship = response.directories[0].ship;
       }
       console.log('install app => %o...', { ship, desk: app.id });
-      await BazaarApi.installDesk(conduit, ship, app.id);
-      resolve('done');
+      BazaarApi.installDesk(conduit, ship, app.id)
+        .then((response) => resolve('success'))
+        .catch((e) => reject(e));
       // conduit.poke({
       //   ...docketInstall(ship, app.id),
       //   reaction: 'bazaar-reaction.placeholder',
@@ -510,11 +591,37 @@ export const BazaarApi = {
     state: BazaarStoreType
   ): Promise<void> => {
     // load allies
-    const allies = await conduit.scry({
+    // const allies = await conduit.scry({
+    //   app: 'treaty',
+    //   path: '/allies', // the spaces scry is at the root of the path
+    // });
+    // state.initialAllies(allies.ini);
+    conduit.watch({
       app: 'treaty',
-      path: '/allies', // the spaces scry is at the root of the path
+      path: `/allies`,
+      onSubscribed: (eventId: number) => {
+        console.log(`message [${eventId}]: subscribed to treaty/allies...`);
+      },
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log('/treaty/allies => %o', { allies: data });
+        handleBazaarReactions({ allies: data }, state);
+      },
+      onError: () => console.log('subscription [treaty/allies] rejected'),
+      onQuit: () => console.log('kicked from subscription [treaty/allies]'),
     });
-    state.initialAllies(allies.ini);
+    conduit.watch({
+      app: 'treaty',
+      path: `/treaties`,
+      onSubscribed: (eventId: number) => {
+        console.log(`message [${eventId}]: subscribed to treaty/treaties...`);
+      },
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log('/treaty/treaties => %o', { treaties: data });
+        handleBazaarReactions({ treaties: data }, state);
+      },
+      onError: () => console.log('subscription [treaty/treaties] rejected'),
+      onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
+    });
     conduit.watch({
       app: 'bazaar',
       path: `/updates`,
@@ -536,11 +643,29 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
+      console.log('initial =>');
+      console.log(util.inspect(data, { depth: 10, colors: true }));
+      console.log('<= initial');
       state.initial(data['initial']);
+      break;
+    case 'allies':
+      console.log('allies =>');
+      console.log(util.inspect(data, { depth: 10, colors: true }));
+      console.log('<= allies');
+      state.initialAllies(data['allies'].ini);
+      break;
+    case 'treaties':
+      console.log('treaties =>');
+      console.log(util.inspect(data, { depth: 10, colors: true }));
+      console.log('<= treaties');
+      state.initialTreaties(data['treaties'].ini);
       break;
     // event when a new space is joined and our ship has successfully
     //   subscribed to the space
     case 'space-apps':
+      console.log('space-apps =>');
+      console.log(util.inspect(data, { depth: 10, colors: true }));
+      console.log('<= space-apps');
       const entry = data['space-apps'];
       state.initialSpace(entry['space-path'], entry);
       break;
@@ -550,7 +675,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'treaty-added':
       {
-        console.log('treaty-added => %o', data);
+        console.log('treaty-added =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= treaty-added');
         let detail = data['treaty-added'];
         // console.log(detail);
         // @ts-ignore
@@ -561,7 +688,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'app-installed':
       {
-        console.log('app-installed => %o', data);
+        console.log('app-installed =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= app-installed');
         let detail = data['app-installed'];
         state.addApp(detail['app-id'], {
           ...detail.app,
@@ -576,7 +705,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'app-uninstalled':
       {
-        console.log('app-uninstalled => %o', data);
+        console.log('app-uninstalled =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= app-uninstalled');
         let detail = data['app-uninstalled'];
         // @ts-ignore
         state.setUninstalled(detail['app-id']);
@@ -584,7 +715,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'pin':
       {
-        console.log('pin => %o', data);
+        console.log('pin =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= pin');
         // console.log('pin reaction => %o', data);
         const detail = data['pin'];
         const space = Object.keys(detail)[0];
@@ -593,11 +726,14 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updatePinnedRank(app);
         state.getBazaar(space)?.setPinnedApps(app.sort);
+        state.getBazaar(space)?.togglePinnedAppsChange();
       }
       break;
     case 'unpin':
       {
-        console.log('unpin => %o', data);
+        console.log('unpin =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= unpin');
         const detail = data['unpin'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -605,22 +741,28 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updatePinnedRank(app);
         state.getBazaar(space)?.setPinnedApps(app.sort);
+        state.getBazaar(space)?.togglePinnedAppsChange();
       }
       break;
     case 'set-pin-order':
       {
-        console.log('set-pin-order => %o', data);
+        console.log('set-pin-order =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= set-pin-order');
         const detail = data['set-pin-order'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
         // @ts-ignore
-        state.getBazaar(space)?.setApp(app);
+        // state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.setPinnedApps(app.sort);
+        state.getBazaar(space)?.togglePinnedAppsChange();
       }
       break;
     case 'recommend':
       {
-        console.log('recommend => %o', data);
+        console.log('recommend =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= recommend');
         const detail = data['recommend'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -628,11 +770,14 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updateRecommendedRank(app);
         state.getBazaar(space)?.setRecommendedApps(app.sort);
+        state.getBazaar(space)?.toggleRecommendedAppsChange();
       }
       break;
     case 'unrecommend':
       {
-        console.log('unrecommend => %o', data);
+        console.log('unrecommend =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= unrecommend');
         const detail = data['unrecommend'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -640,11 +785,14 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updateRecommendedRank(app);
         state.getBazaar(space)?.setRecommendedApps(app.sort);
+        state.getBazaar(space)?.toggleRecommendedAppsChange();
       }
       break;
     case 'suite-add':
       {
-        console.log('suite-add => %o', data);
+        console.log('suite-add =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= suite-add');
         const detail = data['suite-add'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -652,11 +800,14 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updateSuiteRank(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
+        state.getBazaar(space)?.toggleSuiteAppsChange();
       }
       break;
     case 'suite-remove':
       {
-        console.log('suite-remove => %o', data);
+        console.log('suite-remove =>');
+        console.log(util.inspect(data, { depth: 10, colors: true }));
+        console.log('<= suite-remove');
         // console.log('suite-remove [reaction] => %o', data);
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
@@ -664,6 +815,16 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updateSuiteRank(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
+        state.getBazaar(space)?.toggleSuiteAppsChange();
+      }
+      break;
+    case 'my-recommendations':
+      {
+        console.log(
+          'my-recommendations => %o',
+          util.inspect(data, { depth: 10, colors: true })
+        );
+        state.updateMyRecommendations(data['my-recommendations']);
       }
       break;
     default:

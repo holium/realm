@@ -14,16 +14,12 @@ if (process.env.NODE_ENV === 'production') {
 
 const configuration: webpack.Configuration = {
   devtool: 'inline-source-map',
-
   mode: 'development',
-
   target: 'electron-preload',
-
   entry: path.join(
     webpackPaths.srcRendererPath,
     './system/desktop/components/Multiplayer/preload.ts'
   ),
-
   output: {
     path: webpackPaths.dllPath,
     filename: 'cursor.js',
@@ -69,7 +65,7 @@ const configuration: webpack.Configuration = {
     reactDOM: 'react-dom',
   },
 
-  watch: true,
+  watch: false,
 };
 
 export default merge(baseConfig, configuration);

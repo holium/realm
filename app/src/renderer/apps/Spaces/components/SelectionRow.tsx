@@ -10,6 +10,7 @@ interface ISelectRow {
   icon?: IconTypes;
   image?: string;
   customBg?: string;
+  hideIcon?: boolean;
   buttonText?: string;
   subtitle?: string;
   onClick?: (data: any) => void;
@@ -26,6 +27,7 @@ export const SelectRow = (props: ISelectRow) => {
     title,
     buttonText,
     subtitle,
+    hideIcon,
     onClick,
     onButtonClick,
   } = props;
@@ -43,13 +45,14 @@ export const SelectRow = (props: ISelectRow) => {
       selected={selected}
       disabled={disabled}
       gap={16}
+      style={{ paddingLeft: 12 }}
       customBg={customBg}
       onClick={(evt: any) => {
         evt.stopPropagation();
         onClick && onClick(title);
       }}
     >
-      {leftIcon}
+      {!hideIcon && leftIcon}
       <Flex flex={1} alignItems="center" justifyContent="space-between">
         <Flex flexDirection="column">
           <Text mb="2px" opacity={0.9} fontSize={3} fontWeight={500}>

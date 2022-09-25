@@ -8,7 +8,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { toJS } from 'mobx';
 import { Flex, Text, Box, AppTile, Button } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { AppModelType } from 'os/services/ship/models/docket';
+import { AppType } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 const AppEmpty = styled(Box)`
@@ -22,8 +22,8 @@ const AppEmpty = styled(Box)`
 `;
 
 type AppPreviewProps = {
-  app?: AppModelType;
-  isDownloaded?: boolean;
+  app?: AppType;
+  // isDownloaded?: boolean;
   // ?: string;
 };
 
@@ -31,14 +31,14 @@ export const AppPreview: FC<AppPreviewProps> = (props: AppPreviewProps) => {
   const { app } = props;
   const info = app!.info!;
   const length = 60;
-  const isDownloaded = true;
+  // console.log('AppPreview => %o', app);
   return (
     <Flex flexGrow={0} flexDirection="row" gap={16}>
       <AppTile
         tileSize="lg"
         isAnimated={false}
         app={app}
-        onAppClick={(selectedApp: AppModelType) => {}}
+        onAppClick={(selectedApp: AppType) => {}}
       />
       <Flex
         pt="6px"
@@ -55,12 +55,13 @@ export const AppPreview: FC<AppPreviewProps> = (props: AppPreviewProps) => {
           </Text>
         </Flex>
         <Flex flexGrow={0}>
-          {isDownloaded ? (
-            <Button disabled variant="custom" borderRadius={6}>
-              Downloaded
-            </Button>
+          {app?.type !== 'urbit' ||
+          (app?.type === 'urbit' && app?.installed) ? (
+            <Button borderRadius={6}>Installed</Button>
           ) : (
-            <Button borderRadius={6}>Download</Button>
+            <Button disabled variant="custom" borderRadius={6}>
+              Installed
+            </Button>
           )}
         </Flex>
       </Flex>

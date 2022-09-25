@@ -473,21 +473,26 @@ export class OnboardingService extends BaseService {
       this.state.installRealm();
       return;
     }
-    // const desks: string[] = ['realm', 'courier'];
     const desks: string[] = ['realm', 'courier'];
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp, cookie } = this.state.ship!;
     const tempConduit = await this.tempConduit(url, patp, cookie!);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
-      await BazaarApi.installDesk(
+      const response: string = await BazaarApi.installDesk(
         tempConduit,
         process.env.INSTALL_MOON!,
         desks[idx]
       );
+      console.log(`installDesk (await) => ${response}`);
+      if (response !== 'success') {
+        await this.closeConduit();
+        this.state.endRealmInstall(response, response);
+        return;
+      }
     }
     await this.closeConduit();
-    this.state.endRealmInstall();
+    this.state.endRealmInstall('success');
     console.log('realm installation complete.');
     */
    this.state.installRealm();
