@@ -28,6 +28,59 @@ export function convertWeiToUsd(wei: string) {
   return usd.toFixed(2);
 }
 
+export function getTransactions(
+  transactionMap: Map<string, TransactionType>,
+  address?: string
+): TransactionType[] {
+  return Array.from(transactionMap.values()).filter((trans) =>
+    address ? trans.ourAddress === address : true
+  );
+}
+
+export interface EthAmount {
+  eth: string;
+  gwei: string;
+  wei: string;
+
+  ethFull: string;
+  gweiFull: string;
+  weiFull: string;
+}
+
+export interface BtcAmount {
+  btc: string;
+  sats: string;
+}
+
+export function formatEthAmount(amount: string): EthAmount {
+  let wei = utils.parseEther(amount);
+  return {
+    eth: utils.formatUnits(wei, 'ether').slice(0, 6),
+    gwei: utils.formatUnits(wei, 'gwei').slice(0, 6),
+    wei: utils.formatUnits(wei, 'wei').slice(0, 6),
+    ethFull: utils.formatUnits(wei, 'ether'),
+    gweiFull: utils.formatUnits(wei, 'gwei'),
+    weiFull: utils.formatUnits(wei, 'wei'),
+  };
+}
+
+export function convertEthAmountToUsd(amount: EthAmount) {
+  let exchangeRate = 1647.37;
+  let usd = Number(amount.eth) * exchangeRate;
+  return usd.toFixed(2);
+}
+
+export function formatBtcAmount(amount: string): BtcAmount {
+  return {
+    btc: 'placeholder',
+    sats: 'placeholder',
+  };
+}
+
+export function convertBtcAmountToUsd(amount: BtcAmount) {
+  return 'placeholder';
+}
+
 export const monthNames = [
   'Jan',
   'Feb',
@@ -41,4 +94,19 @@ export const monthNames = [
   'Oct',
   'Nov',
   'Dec',
+];
+
+export const fullMonthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];

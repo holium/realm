@@ -5,6 +5,7 @@ import { ethers } from 'ethers';
 import { Box } from 'renderer/components';
 import { Create } from './Create';
 import { Backup } from './Backup';
+import { Import } from './Import';
 import { Confirm } from './Confirm';
 import { Passcode } from './Passcode';
 import { ConfirmPasscode } from './ConfirmPasscode';
@@ -12,6 +13,7 @@ import { Finalizing } from './Finalizing';
 
 export enum NewWalletScreen {
   CREATE = 'create',
+  IMPORT = 'import',
   BACKUP = 'backup',
   CONFIRM = 'confirm',
   PASSCODE = 'passcode',
@@ -23,13 +25,10 @@ export const EthNew: FC<any> = observer(() => {
   const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.CREATE);
   const [passcode, setPasscode] = useState('');
   // TODO move this to background thread
-  /*const seedPhrase = useMemo(
-    () => ethers.Wallet.createRandom().mnemonic.phrase,
-    []
-  );*/
-  // const seedPhrase =
-  //   'govern mountain flush ordinary field adult stereo quiz humor pigeon flush stuff';
-  const seedPhrase = "envelope robot unlock mercy lizard nothing frozen outside laundry woman dial expand"
+  const [seedPhrase, setSeedPhrase] = useState(
+    ethers.Wallet.createRandom().mnemonic.phrase
+  );
+  let phraseSetter = (phrase: string) => setSeedPhrase(phrase);
 
   let setPasscodeWrapper = (passcode: string) => {
     // console.log('setting passcode!');
@@ -37,8 +36,11 @@ export const EthNew: FC<any> = observer(() => {
     setScreen(NewWalletScreen.CONFIRM_PASSCODE);
   };
 
-  const components = {
+  const components: any = {
     [NewWalletScreen.CREATE]: <Create setScreen={setScreen} />,
+    [NewWalletScreen.IMPORT]: (
+      <Import setSeedPhrase={phraseSetter} setScreen={setScreen} />
+    ),
     [NewWalletScreen.BACKUP]: (
       <Backup setScreen={setScreen} seedPhrase={seedPhrase} />
     ),
@@ -53,7 +55,7 @@ export const EthNew: FC<any> = observer(() => {
       <Finalizing seedPhrase={seedPhrase} passcode={passcode} />
     ),
   };
-  const currentComponent = components[screen];
+  const currentComponent = components[screen as NewWalletScreen];
 
   return (
     <Box width="100%" height="100%" px={16} py={12}>
