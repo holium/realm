@@ -99,6 +99,8 @@
   %-  of
   :~  [%set-xpub (ot ~[network+(su (perk %bitcoin %ethereum ~)) xpub+so])]
       [%set-wallet-creation-mode (ot ~[mode+(su (perk %on-demand %default ~))])]
+      [%set-sharing-mode (ot ~[who+(su (perk %nobody %friends %anybody ~))])]
+      [%sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
       [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+so])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
       [%set-network-provider (ot ~[network+(su (perk %bitcoin %ethereum ~)) provider+so])]

@@ -57,6 +57,8 @@
   $%  [%initialize ~]
       [%set-xpub =network xpub=@t]
       [%set-wallet-creation-mode =mode]
+      [%set-sharing-mode who=?(%nobody %friends %anybody)]
+      [%sharing-permissions type=?(%allow %block) who=@p]
       [%set-default-index =network index=@t]
       [%set-wallet-nickname =network index=@t nickname=@t]
       [%set-network-provider =network provider=@t]
