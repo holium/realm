@@ -479,7 +479,7 @@
     ?>  (team:title our.bowl src.bowl)
     =.  networks.settings.state
       =/  prev-set  (~(got by networks.settings.state) network.act)
-      (~(put by networks.settings.state) [network.act [xpub.prev-set index.prev-set `provider.act]])
+      (~(put by networks.settings.state) [network.act [xpub.prev-set default-index.prev-set `provider.act]])
     `state
     ::
       %create-wallet
@@ -492,7 +492,7 @@
             =/  num-wallets  (lent net-wallets)
             (gth num-wallets 0)
         ==
-      =/  default-idx  index:(~(got by networks.settings.state) network.act)
+      =/  default-idx  default-index:(~(got by networks.settings.state) network.act)
       =/  default-wallet  (~(get by (~(got by wallets) network.act)) default-idx)
       :_  state
       ?~  default-wallet
