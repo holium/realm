@@ -4,6 +4,7 @@ import { cleanNounColor } from '../../../lib/color';
 import { DocketApp, WebApp, Glob } from '../../ship/models/docket';
 import { toJS } from 'mobx';
 import { apiOwnKeys } from 'mobx/dist/internal';
+import { hiDPI } from 'polished';
 // const util = require('util');
 
 export const DocketMap = types.map(
@@ -189,6 +190,15 @@ export const MyApps = types.model('MyApps', {
 });
 export type MyAppsType = Instance<typeof MyApps>;
 
+export const AllyModel = types.map(
+  types.model({
+    ship: types.identifier,
+    desks: types.optional(types.array(types.string), []),
+  })
+);
+
+export type AllyModelType = Instance<typeof AllyModel>;
+
 export const BazaarStore = types
   .model({
     // all apps installed on the local ship (our)
@@ -212,12 +222,7 @@ export const BazaarStore = types
       })
     ),
     treatyAdded: types.optional(types.boolean, false),
-    allies: types.map(
-      types.model({
-        ship: types.identifier,
-        alliance: types.array(types.string),
-      })
-    ),
+    allies: AllyModel,
     apps: BazaarAppMap,
     appsChange: types.optional(types.boolean, false),
     my: types.optional(MyApps, { recommendations: [] }),
@@ -348,8 +353,14 @@ export const BazaarStore = types
     hasAlly(ship: any) {
       return self.allies.has(ship);
     },
-    addAlly(ally: any) {
-      self.allies.set(ally.alliance[0], ally.ship);
+    addAlly(ship: string) {
+      self.allies.set(ship, { ship, desks: [] });
+    },
+    addAlliance(ship: string, desks: string[]) {
+      for (let i = 0; i < desks.length; i++) {
+        desks[i] = desks[i].split('/')[1];
+      }
+      self.allies.set(ship, { ship, desks });
     },
     addTreaty(treaty: any) {
       const id = `${treaty.ship}/${treaty.desk}`;

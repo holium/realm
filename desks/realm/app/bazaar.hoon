@@ -1068,7 +1068,7 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
+    ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
     :: (bazaar:send-reaction:core [%new-ally-added [ship.treaty desk.treaty] [%urbit docket.charge]] [/updates ~])
     `state
   ::

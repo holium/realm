@@ -652,7 +652,15 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       console.log('allies =>');
       console.log(util.inspect(data, { depth: 10, colors: true }));
       console.log('<= allies');
-      state.initialAllies(data['allies'].ini);
+      if ('allies' in data) {
+        if ('ini' in data.allies) {
+          state.initialAllies(data.allies.ini);
+        } else if ('add' in data.allies) {
+          state.addAlly(data.allies.add);
+        } else if ('new' in data.allies) {
+          state.addAlliance(data.allies.new.ship, data.allies.new.alliance);
+        }
+      }
       break;
     case 'treaties':
       console.log('treaties =>');
