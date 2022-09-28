@@ -431,7 +431,7 @@
   ?-  -.act
       %initialize
     ?>  (team:title our.bowl src.bowl)
-    =.  who.sharing.settings.state  %friends
+    =.  who.sharing.settings.state  %anybody
     =.  wallet-creation.sharing.settings.state  %default
     =.  wallets.state
       (~(put by wallets.state) [%ethereum ~])
