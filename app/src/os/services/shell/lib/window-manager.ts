@@ -66,23 +66,33 @@ export const getCenteredDimensions = (
   desktopDimensions: { width: number; height: number }
 ): { x: number; y: number; width: number; height: number } => {
   const { width, height } = desktopDimensions;
-  const defaultAppDimensions = {
-    width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-      ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
-      : 600,
-    height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
-      ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
-      : 600,
-  };
-  const defaultXY = getCenteredXY(defaultAppDimensions, { width, height });
-  return {
-    x: app.dimensions ? app.dimensions.x : defaultXY.x,
-    y: app.dimensions ? app.dimensions.y : defaultXY.y,
-    width: app.dimensions ? app.dimensions.width : defaultAppDimensions.width,
-    height: app.dimensions
-      ? app.dimensions.height
-      : defaultAppDimensions.height,
-  };
+  if (DEFAULT_APP_WINDOW_DIMENSIONS[app.id]) {
+    const defaultAppDimensions = {
+      width: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
+        ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].width
+        : 600,
+      height: DEFAULT_APP_WINDOW_DIMENSIONS[app.id]
+        ? DEFAULT_APP_WINDOW_DIMENSIONS[app.id].height
+        : 600,
+    };
+    const defaultXY = getCenteredXY(defaultAppDimensions, { width, height });
+    return {
+      x: app.dimensions ? app.dimensions.x : defaultXY.x,
+      y: app.dimensions ? app.dimensions.y : defaultXY.y,
+      width: app.dimensions ? app.dimensions.width : defaultAppDimensions.width,
+      height: app.dimensions
+        ? app.dimensions.height
+        : defaultAppDimensions.height,
+    };
+  } else {
+    const fullDims = getFullscreenDimensions(desktopDimensions, true);
+    return {
+      x: app.dimensions ? app.dimensions.x : fullDims.x,
+      y: app.dimensions ? app.dimensions.y : fullDims.y,
+      width: app.dimensions ? app.dimensions.width : fullDims.width,
+      height: app.dimensions ? app.dimensions.height : fullDims.height,
+    };
+  }
 };
 
 /**
