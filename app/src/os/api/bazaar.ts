@@ -90,7 +90,7 @@ export const BazaarApi = {
           timeout = setTimeout(async () => {
             await tempConduit.unsubscribe(subscriptionId);
             console.log(
-              `timeout forming alliance with ${ship}. are there apps published on '${ship}'?`
+              `timeout forming alliance with ${ship}. is the ship running? are there apps published on '${ship}'?`
             );
             reject(`timeout forming alliance with ${ship}`);
           }, 60000);

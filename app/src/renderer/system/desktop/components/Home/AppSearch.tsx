@@ -272,6 +272,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
   const [selectedDesk, setSelectedDesk] = useState('');
+  const [isAddingAlly, setIsAddingAlly] = useState<boolean>(false);
 
   const spacePath: string = spaces.selected?.path!;
 
@@ -286,11 +287,20 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   useEffect(() => {
     if (selectedShip) {
       if (!bazaar.hasAlly(selectedShip)) {
-        SpacesActions.addAlly(selectedShip).then((result) => {
-          console.log('addTreaty response => %o', result);
-          const treaties = bazaar.getTreaties(selectedShip);
-          setData(treaties);
-        });
+        if (!isAddingAlly) {
+          setIsAddingAlly(true);
+          SpacesActions.addAlly(selectedShip)
+            .then((result) => {
+              console.log('addAlly response => %o', result);
+              const treaties = bazaar.getTreaties(selectedShip);
+              setData(treaties);
+            })
+            .catch((e) => console.error(e))
+            .finally(() => setIsAddingAlly(false));
+        }
+      } else {
+        const treaties = bazaar.getTreaties(selectedShip);
+        setData(treaties);
       }
     }
   }, [selectedShip, bazaar.treatyAdded]);
@@ -310,20 +320,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
       setData([]);
       const allies = bazaar.getAllies();
       setData(allies);
-    } else if (searchMode === 'dev-app-search') {
-      setData([]);
-      // if the 'selected' ship is not yet an ally, make them one which will
-      //  trigger a treay which can then be listed for installation
-      if (!bazaar.hasAlly(selectedShip)) {
-        SpacesActions.addAlly(selectedShip).then((result) => {
-          console.log('addTreaty response => %o', result);
-          const treaties = bazaar.getTreaties(selectedShip);
-          setData(treaties);
-        });
-      } else {
-        const treaties = bazaar.getTreaties(selectedShip);
-        setData(treaties);
-      }
     } else if (searchMode === 'dev-app-detail') {
       setData([]);
       const treaty = bazaar.getTreaty(selectedShip, selectedDesk);

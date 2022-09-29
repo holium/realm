@@ -1026,7 +1026,7 @@
   ++  on-add
     |=  [=treaty:treaty]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
+    ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
     ::  do we have a pending installation request for this ship/desk?
     =/  installation  (~(get by installations.state) ship.treaty)
     ?~  installation
