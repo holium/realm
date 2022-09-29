@@ -356,6 +356,9 @@ export const BazaarStore = types
     addAlly(ship: string) {
       self.allies.set(ship, { ship, desks: [] });
     },
+    removeAlly(ship: string) {
+      self.allies.delete(ship);
+    },
     addAlliance(ship: string, desks: string[]) {
       for (let i = 0; i < desks.length; i++) {
         desks[i] = desks[i].split('/')[1];

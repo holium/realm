@@ -11,11 +11,13 @@ import {
   Icons,
   Sigil,
   Button,
+  Spinner,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { toJS } from 'mobx';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { AppRow } from './AppRow';
+import { ProviderRow } from './ProviderRow';
 import { setEnvironmentData } from 'worker_threads';
 import { BazaarApi } from 'os/api/bazaar';
 import { darken, rgba } from 'polished';
@@ -155,22 +157,23 @@ const renderApps = (space: string, apps: any, theme: any) => {
   ));
 };
 
-const renderProviders = (data: Array<any>, searchString: string) => {
+const renderProviders = (
+  data: Array<any>,
+  searchString: string,
+  onProviderClick: (ship: string) => void
+) => {
   return (
     data &&
     data
       .filter((item) => item.ship.startsWith(searchString))
       .map((item, index) => (
-        <Flex key={index} flexDirection="row" alignItems="center" gap={8}>
-          <Sigil
-            simple
-            size={28}
-            // avatar={item.avatar}
-            patp={item.ship}
-            color={[item.sigilColor || '#000000', 'white']}
-          />
-          <Text>{item.ship}</Text>
-        </Flex>
+        <ProviderRow
+          key={`provider-${index}`}
+          id={`provider-${index}`}
+          ship={item.ship}
+          color={item.sigilColor}
+          onClick={(ship: string) => onProviderClick(ship)}
+        />
       ))
   );
 };
@@ -209,7 +212,8 @@ const renderStart = (space: string, bazaar: any, theme: any) => {
 const renderShipSearch = (
   data: Array<any>,
   searchString: string,
-  theme: any
+  theme: any,
+  onProviderClick: (ship: string) => void
 ) => {
   return (
     <>
@@ -217,8 +221,8 @@ const renderShipSearch = (
         <Text color={rgba(theme.textColor, 0.7)} fontWeight={500}>
           Searching Software Providers
         </Text>
-        <Flex flexDirection="column" gap={12}>
-          {renderProviders(data, searchString)}
+        <Flex flexDirection="column" gap={2}>
+          {renderProviders(data, searchString, onProviderClick)}
         </Flex>
       </Flex>
     </>
@@ -272,7 +276,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
   const [selectedDesk, setSelectedDesk] = useState('');
-  const [isAddingAlly, setIsAddingAlly] = useState<boolean>(false);
+  const [loadingState, setLoadingState] = useState<string>('');
 
   const spacePath: string = spaces.selected?.path!;
 
@@ -285,10 +289,10 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   }, [spacePath]);
 
   useEffect(() => {
-    if (selectedShip) {
+    if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaar.hasAlly(selectedShip)) {
-        if (!isAddingAlly) {
-          setIsAddingAlly(true);
+        if (loadingState !== 'loading-published-apps') {
+          setLoadingState('loading-published-apps');
           SpacesActions.addAlly(selectedShip)
             .then((result) => {
               console.log('addAlly response => %o', result);
@@ -296,14 +300,14 @@ const AppSearchApp = observer((props: AppSearchProps) => {
               setData(treaties);
             })
             .catch((e) => console.error(e))
-            .finally(() => setIsAddingAlly(false));
+            .finally(() => setLoadingState(''));
         }
       } else {
         const treaties = bazaar.getTreaties(selectedShip);
         setData(treaties);
       }
     }
-  }, [selectedShip, bazaar.treatyAdded]);
+  }, [searchMode, selectedShip, bazaar.treatyAdded]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {
@@ -334,7 +338,22 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     [theme.currentTheme.textColor]
   );
 
-  const renderDevApps = (apps: Array<any>) => {
+  const renderDevApps = (
+    ship: string,
+    loadingState: string,
+    apps: Array<any>
+  ) => {
+    if (loadingState === 'loading-published-apps') {
+      return (
+        <Flex flex={1} verticalAlign="middle">
+          <Spinner size={0} />
+          <Text
+            marginLeft={2}
+            color={secondaryTextColor}
+          >{`Loading published apps...`}</Text>
+        </Flex>
+      );
+    }
     if (!apps || apps.length === 0) {
       return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
     }
@@ -353,7 +372,11 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     ));
   };
 
-  const renderDevAppSearch = (ship: string, data: Array<any>) => {
+  const renderDevAppSearch = (
+    ship: string,
+    loadingState: string,
+    data: Array<any>
+  ) => {
     return (
       <>
         <Flex flexDirection="column" gap={10}>
@@ -362,7 +385,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
             color={theme.currentTheme.textColor}
           >{`Software developed by ${ship}...`}</Text>
           <Flex flexDirection="column" gap={12}>
-            {renderDevApps(data)}
+            {renderDevApps(ship, loadingState, data)}
           </Flex>
         </Flex>
       </>
@@ -383,6 +406,16 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         </Flex>
       </>
     );
+  };
+
+  const onProviderClick = (ship: string) => {
+    if (isValidPatp(ship)) {
+      setSearchMode('dev-app-search');
+      setSearchPlaceholder('Search...');
+      setSelectedShip(ship);
+      setSearchModeArgs([ship]);
+      setSearchString('');
+    }
   };
 
   return (
@@ -501,9 +534,14 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         {searchMode === 'start' &&
           renderStart(spacePath, bazaar, theme.currentTheme)}
         {searchMode === 'ship-search' &&
-          renderShipSearch(data, searchString, theme.currentTheme)}
+          renderShipSearch(
+            data,
+            searchString,
+            theme.currentTheme,
+            onProviderClick
+          )}
         {searchMode === 'dev-app-search' &&
-          renderDevAppSearch(searchModeArgs[0], data)}
+          renderDevAppSearch(searchModeArgs[0], loadingState, data)}
         {searchMode === 'app-search' &&
           renderAppSearch(data, theme.currentTheme)}
         {searchMode === 'app-summary' && renderAppSummary(data)}

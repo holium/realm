@@ -659,6 +659,8 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
           state.addAlly(data.allies.add);
         } else if ('new' in data.allies) {
           state.addAlliance(data.allies.new.ship, data.allies.new.alliance);
+        } else if ('del' in data.allies) {
+          state.removeAlly(data.allies.del);
         }
       }
       break;

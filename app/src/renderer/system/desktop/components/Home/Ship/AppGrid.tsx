@@ -71,6 +71,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
 
   useEffect(() => {
     if (currentSpace) {
+      console.log(bazaar.getAvailableApps());
       setApps(
         bazaar
           .getAvailableApps()
