@@ -1,7 +1,10 @@
 import { FC } from 'react';
 import { rgba, darken } from 'polished';
 import { Sigil, Flex, Box, Text, Icons } from '../';
+import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { WalletView } from 'os/services/tray/wallet.model';
 
 interface IPassport {
   patp: string;
@@ -13,13 +16,15 @@ interface IPassport {
     textColor: string;
     windowColor: string;
   };
+  onClose: any;
 }
 
 export const PassportCard: FC<IPassport> = (props: IPassport) => {
-  const { patp, sigilColor, avatar, nickname, description } = props;
+  const { patp, sigilColor, avatar, nickname, description, onClose } = props;
   const { textColor, windowColor } = props.theme!;
+  const { setActiveApp, walletApp } = useTrayApps();
+
   const iconColor = rgba(textColor, 0.7);
-  console.log(textColor);
   const buttonColor = darken(0.1, windowColor);
   return (
     <Flex flexDirection="column" gap={14}>
@@ -55,7 +60,19 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
         <Flex flexDirection="row" gap={4}>
           <PassportButton
             style={{ backgroundColor: buttonColor }}
+            data-prevent-menu-close="true"
             onClick={(evt: any) => {
+              setActiveApp('wallet-tray', {
+                willOpen: true,
+                position: 'top-left',
+                anchorOffset: { x: 4, y: 26 },
+                dimensions: {
+                  height: 580,
+                  width: 330,
+                },
+              });
+              WalletActions.setView(WalletView.ETH_DETAIL);
+              onClose();
               evt.stopPropagation();
             }}
           >
@@ -63,7 +80,19 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
           </PassportButton>
           <PassportButton
             style={{ backgroundColor: buttonColor }}
+            data-prevent-menu-close="true"
             onClick={(evt: any) => {
+              // setActiveApp('messages-tray');
+              setActiveApp('messages-tray', {
+                willOpen: true,
+                position: 'top-left',
+                anchorOffset: { x: 4, y: 26 },
+                dimensions: {
+                  height: 600,
+                  width: 390,
+                },
+              });
+              onClose();
               evt.stopPropagation();
             }}
           >
