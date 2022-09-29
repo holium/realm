@@ -204,9 +204,14 @@ export const BazaarStore = types
         license: types.string,
         version: types.string,
         website: types.string,
-        href: types.model({
-          glob: Glob,
-        }),
+        href: types.union(
+          types.model({
+            glob: Glob,
+          }),
+          types.model({
+            site: types.string,
+          })
+        ),
         color: types.string,
         info: types.string,
       })
