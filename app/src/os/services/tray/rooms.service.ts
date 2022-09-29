@@ -52,14 +52,12 @@ export class RoomsService extends BaseService {
       roomId: string,
       access: string,
       title: string,
-      enter: boolean
     ) => {
       return ipcRenderer.invoke(
         'realm.tray.rooms.create-room',
         roomId,
         access,
         title,
-        enter
       );
     },
     setView: (view: string) => {
@@ -243,14 +241,12 @@ export class RoomsService extends BaseService {
     roomId: string,
     access: string,
     title: string,
-    enter: boolean
   ) {
     return RoomsApi.createRoom(
       this.core.conduit!,
       roomId,
       access,
       title,
-      enter
     );
   }
   async getProvider(_event: any) {
