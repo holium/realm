@@ -9,6 +9,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { darken, lighten } from 'polished';
 
 interface AppViewProps {
   window: WindowModelProps;
@@ -24,6 +25,8 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
   const { ship, shell, desktop, theme } = useServices();
+  const [ready, setReady] = useState(false);
+  const [cssId, setCssId] = useState(0);
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 
@@ -59,6 +62,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         webview!.send('mouse-color', desktop.mouseColor);
         let css = '* { cursor: none !important; }';
         webview!.insertCSS(css);
+        setReady(true);
       });
 
       webview?.addEventListener('close', () => {
@@ -73,7 +77,45 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       DesktopActions.openAppWindow('', toJS(window));
       setAppConfig({ url: appUrl });
     }
+    () => {
+      setReady(false);
+    };
   }, [window?.id, ship]);
+
+  useEffect(() => {
+    let css = `
+      :root {
+        --rlm-font: 'Rubik', sans-serif;
+        --rlm-base-color: ${theme.currentTheme.backgroundColor};
+        --rlm-accent-color: ${theme.currentTheme.accentColor};
+        --rlm-input-color: ${theme.currentTheme.inputColor};
+        --rlm-border-color: ${
+          theme.currentTheme.mode === 'light'
+            ? darken(0.1, theme.currentTheme.windowColor)
+            : darken(0.075, theme.currentTheme.windowColor)
+        };
+        --rlm-window-color: ${theme.currentTheme.windowColor};
+        --rlm-card-color: ${
+          theme.currentTheme.mode === 'light'
+            ? lighten(0.05, theme.currentTheme.windowColor)
+            : darken(0.025, theme.currentTheme.windowColor)
+        };
+        --rlm-theme-mode: ${theme.currentTheme.mode};
+        --rlm-text-color: ${theme.currentTheme.textColor};
+        --rlm-icon-color: ${theme.currentTheme.iconColor};
+      }
+    `;
+
+    if (ready) {
+      const webview: any = document.getElementById(
+        `${window.id}-urbit-webview`
+      );
+      setCssId(webview!.insertCSS(css));
+      webview?.addEventListener('did-frame-finish-load', () => {
+        setCssId(webview!.insertCSS(css));
+      });
+    }
+  }, [theme.currentTheme.id, theme.currentTheme.mode, ready]);
 
   const onMouseEnter = useCallback(() => {
     shell.setIsMouseInWebview(true);
@@ -115,6 +157,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
             height: '100%',
             position: 'relative',
             background: theme.currentTheme.windowColor,
+            overflow: 'none',
             pointerEvents: lockView ? 'none' : 'auto',
           }}
         />

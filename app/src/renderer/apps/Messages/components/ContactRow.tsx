@@ -200,6 +200,12 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
 
   const unreadCount = dm.unreadCount;
 
+  // TODO better ellipsis handling in Text
+  let toString = to;
+  if (toString.length > 21) {
+    toString = toString.substring(0, 20) + '...';
+  }
+
   return (
     <Row
       pending={pending}
@@ -211,7 +217,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
         {sigil}
         <Flex flexDirection="column" flex={1}>
           <Text opacity={pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
-            {to}
+            {toString}
           </Text>
           {subTitle}
         </Flex>

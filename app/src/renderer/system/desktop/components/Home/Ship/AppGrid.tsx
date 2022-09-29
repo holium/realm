@@ -49,7 +49,7 @@ const getAppMenu = (bazaar: any, spacePath: string, app: any) => {
   if (app.type === 'urbit' && app.installed) {
     menu.push({
       label: 'Uninstall',
-      section: 2,
+      // section: 2,
       disabled: false,
       onClick: (evt: any) => {
         evt.stopPropagation();
@@ -73,7 +73,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
     if (currentSpace) {
       setApps(
         bazaar
-          .getApps(`/${ship!.patp}/our`)
+          .getAvailableApps()
           .filter(
             (app: any) =>
               app.type !== 'urbit' || (app.type === 'urbit' && app.installed)
@@ -114,7 +114,10 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             onAppClick={(selectedApp: AppType) => {
               // @ts-ignore
               SpacesActions.addRecentApp(spaces.selected!.path, selectedApp.id);
-              DesktopActions.openAppWindow(spaces.selected!.path, selectedApp);
+              DesktopActions.openAppWindow(
+                spaces.selected!.path,
+                toJS(selectedApp)
+              );
               DesktopActions.setHomePane(false);
             }}
           />
