@@ -84,9 +84,9 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
-      [%x %push-uuid ~]
+      [%x %devices ~]
         ?>  =(our.bowl src.bowl)
-        ``notify-view+!>([%uuid uuid.state])
+        ``notify-view+!>([%devices devices.state])
     ::
       [%x %dms ~]
         ?>  =(our.bowl src.bowl)

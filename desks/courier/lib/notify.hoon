@@ -39,7 +39,6 @@
     [
       app-id=app-id
       data=[path=path.new-dm]
-      :: contents=`(map cord cord)`(malt ~[['en' (crip "New group DM from {<from>}")]])
       subtitle=(malt ~[['en' 'New Group DM']])
       contents=`(map cord cord)`(malt ~[['en' (crip "Message contents")]])
     ]
@@ -81,15 +80,12 @@
   ++  request :: encodes for iris outbound
     |=  [notif=notification:sur =devices:sur]
     ^-  json
-    :: =/  channel  'push'
     =/  player-ids  ~(val by devices)
     %-  pairs
     :~  
         ['app_id' s+app-id.notif]
         ['data' (mtd data.notif)]
         ['include_player_ids' a+(turn player-ids |=([id=@t] s+id))]
-        :: ['include_external_user_ids' a+(turn ['0v4.hvetk.kr25i.filf5.8bpt4.abqrg' ~] |=([id=@t] s+id))]
-        :: ['channel_for_external_user_ids' s+channel]
         ['subtitle' (contents subtitle.notif)]
         ['contents' (contents contents.notif)]
     ==
@@ -115,17 +111,18 @@
     :-  -.vi
     ?-  -.vi
       :: ::
-        %uuid
-      (uuid uuid.vi)
+        %devices
+      (devices devices.vi)
       ::
     ==
-  ++  uuid
-    |=  =uuid:sur
+  ++  devices
+    |=  =devices:sur
     ^-  json
-    s+(scot %uv uuid)
-    :: :~ 
-    ::     ['uuid' s+(scot %uv uuid)]
-    :: ==
+    %-  pairs
+    %+  turn  ~(tap by devices)
+    |=  [=device-id:sur =player-id:sur]
+    ^-  [cord json]
+    [device-id s+player-id]
   --
 ::
 --

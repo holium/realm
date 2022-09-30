@@ -29,7 +29,7 @@
 ::
 +$  view
   $%  
-      [%uuid =uuid]
+      [%devices =devices]
   ==
 --
 
