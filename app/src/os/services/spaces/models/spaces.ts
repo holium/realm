@@ -66,6 +66,9 @@ export const SpacesStore = types
         (space: SpaceModelType) => space.type !== 'our'
       );
     },
+    getOurSpace() {
+      // TODO get our space by type='our'
+    },
     getSpaceByPath(spacePath: string) {
       // if (spacePath === self.our!.path) {
       //   return self.our;
@@ -127,6 +130,10 @@ export const SpacesStore = types
     },
     deleteSpace: (deleteReaction: { 'space-path': string }) => {
       const path = deleteReaction['space-path'];
+      //
+      if (path === self.selected?.path) {
+        // set to our space
+      }
       self.spaces.delete(path);
       return path;
     },
