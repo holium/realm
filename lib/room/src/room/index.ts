@@ -27,13 +27,13 @@ const peerConnectionConfig = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
 };
 
-// setMaxListeners(24);
 export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallbacks>) {
-  state: RoomState = RoomState.Disconnected;
   our!: LocalParticipant;
+  isHost: boolean = false;
   participants: Map<Patp, RemoteParticipant>;
   roomConfig!: RoomsModelType;
   sendSlip: (to: Patp[], data: any) => void;
+  state: RoomState = RoomState.Disconnected;
 
   constructor(sendSlip: (to: Patp[], data: any) => void) {
     super();
@@ -63,7 +63,9 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     this.roomConfig = room;
     if (!this.our) {
       throw new Error('You must run init() before connecting');
-      // this.our = new LocalParticipant(our, this);
+    }
+    if (this.roomConfig.creator === this.our.patp) {
+      this.isHost = true;
     }
     this.our.connect();
     this.our.on(ParticipantEvent.LocalTrackPublished, (pub: any) => {
@@ -75,7 +77,6 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
     room.present.forEach((peer: Patp) => {
       if (peer === this.our.patp) return;
-      // console.log('calling new part from connect')
       this.newParticipant(peer);
     });
 
@@ -83,18 +84,13 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 
   leave() {
-    console.log("in LiveRoom.leave()")
+    console.log('in LiveRoom.leave()');
     this.state = RoomState.Disconnected;
-
     this.participants.forEach((peer: RemoteParticipant) => {
-      // console.log("kicking", peer.patp)
       this.kickParticipant(peer.patp);
     });
-
     this.participants.clear();
-
     if (this.our) this.our.disconnect();
-
     this.removeAllListeners();
   }
 
@@ -130,15 +126,13 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
         // console.log('we should leave the room and unsub', exitDiff);
         // we've been kicked from the room
         this.leave();
-      }
-      else {
+      } else {
         this.kickParticipant(exitDiff.exit);
       }
     }
   }
 
   newParticipant(peer: Patp) {
-    // console.log('new participant', peer)
     const remote = new RemoteParticipant(peer, peerConnectionConfig, this);
     this.participants.set(peer, remote);
     this.registerListeners(remote);
@@ -151,12 +145,12 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
     peer.emit(ParticipantEvent.Connecting);
     const isLower = this.our.patpId < peer.patpId;
     console.log('connectParticipant - isLower', isLower);
+    // TODO if isHost=true, take all peer audio and stream to all other peers
     peer.registerAudio();
     this.our.streamTracks(peer);
     if (isLower) {
       console.log('we are ready', peer.patp);
       peer.sendAwaitingOffer();
-      // console.log(peer.interval)
     }
   }
 
@@ -169,13 +163,12 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
     await this.participants.get(peer)?.cleanup();
     this.participants.delete(peer);
-
   }
 
   registerListeners(peer: RemoteParticipant) {
-    peer.on(ParticipantEvent.Connected, () => {
-      console.log(peer);
-    });
+    // peer.on(ParticipantEvent.Connected, () => {
+    //   console.log(peer);
+    // });
     peer.on(ParticipantEvent.Disconnected, () => {
       console.log('try to reconnect');
       if (this.participants.has(peer.patp)) {
@@ -191,39 +184,8 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
         // if the peer is still in the room,
         this.removePeerAudio(peer.patp);
         console.log('peer connection failed');
-        // console.log('awaiting offer again');
-        // this.connectParticipant(peer);
       }
     });
-    // peer.on(ParticipantEvent.Connecting, () => {
-    //   console.log('show connecting state');
-    // });
-    // peer.on(ParticipantEvent.AudioStreamAdded, (remoteStream: MediaStream) => {
-    //   console.log('audiostream', remoteStream);
-    // });
-
-    // ----
-    // peer.on(ParticipantEvent.AudioStreamAdded, (event: any) => {
-    //   console.log(ParticipantEvent.AudioStreamAdded);
-    // });
-    // peer.on(ParticipantEvent.AudioStreamRemoved, (event: any) => {
-    //   console.log(ParticipantEvent.AudioStreamRemoved);
-    // });
-    // peer.on(ParticipantEvent.CursorUpdate, (event: any) => {
-    //   console.log(ParticipantEvent.CursorUpdate);
-    // });
-    // peer.on(ParticipantEvent.StateUpdate, (event: any) => {
-    //   console.log(ParticipantEvent.StateUpdate);
-    // });
-    // peer.on(ParticipantEvent.StateUpdate, (event: any) => {
-    //   console.log(ParticipantEvent.StateUpdate);
-    // });
-    // peer.on(ParticipantEvent.TrackMuted, (event: any) => {
-    //   console.log(ParticipantEvent.TrackMuted);
-    // });
-    // peer.on(ParticipantEvent.TrackUnmuted, (event: any) => {
-    //   console.log(ParticipantEvent.TrackUnmuted);
-    // });
   }
 
   removePeerAudio(patp: Patp) {

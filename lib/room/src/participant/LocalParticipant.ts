@@ -66,6 +66,7 @@ export class LocalParticipant extends Participant {
     this.audioTracks = new Map();
     this.videoTracks = new Map();
     this.tracks = new Map();
+    this.isLoaded = false;
     this.removeAllListeners();
   }
 

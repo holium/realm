@@ -285,7 +285,9 @@ const AppSearchApp = observer((props: AppSearchProps) => {
 
   useEffect(() => {
     if (selectedShip) {
+      console.log(toJS(bazaar.allies));
       if (!bazaar.hasAlly(selectedShip)) {
+        console.log('here bro');
         SpacesActions.addAlly(selectedShip).then((result) => {
           console.log('addTreaty response => %o', result);
           const treaties = bazaar.getTreaties(selectedShip);
