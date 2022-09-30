@@ -61,9 +61,6 @@
       ::
       ::  %space actions
       ::
-      ::  Usage:
-      ::    :spaces &space [%add 'other-life' %group]
-      ::    :spaces &space [%update [~fes 'other-life'] [%name name="The Other Life"]]
       ::
       %spaces-action    (spaces-action:core !<(action:store vase))
     ==

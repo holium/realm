@@ -1,4 +1,4 @@
-/+  *push-notify
+/+  *notify
 ::
 |_  act=action
 ++  grad  %noun
