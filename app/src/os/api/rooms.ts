@@ -102,7 +102,6 @@ export const RoomsApi = {
     roomId: string,
     access: string,
     title: string,
-    enter: boolean
   ) => {
     // TODO add to roomapp state after poke???
 
@@ -114,7 +113,6 @@ export const RoomsApi = {
           rid: roomId,
           access: access,
           title: title,
-          enter: enter,
         },
       },
       onSuccess: () => {
