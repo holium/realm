@@ -1,7 +1,11 @@
 |%
+
++$  player-id         cord
++$  device-id         cord
 +$  app-id            cord
 +$  rest-api-key      cord 
 +$  uuid              @uvH
++$  devices           (map device-id player-id)
 ::
 ::
 +$  notification
@@ -18,7 +22,9 @@
 ::
 +$  action
   $%  [%enable-push ~]            
-      [%disable-push ~]  
+      [%disable-push ~]
+      [%set-device =device-id =player-id]
+      [%remove-device =device-id]  
   ==
 ::
 +$  view

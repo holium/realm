@@ -1,4 +1,4 @@
-/-  sur=push-notify, courier
+/-  sur=notify, courier
 =<  [sur .]
 =,  sur
 |%
@@ -57,6 +57,19 @@
       %-  of
       :~  [%enable-push ul]
           [%disable-push ul]
+          [%set-device set-device]
+          [%remove-device remove-device]
+      ==
+    ::
+    ++  set-device
+      %-  ot
+      :~  [%device-id so]
+          [%player-id so]
+      ==
+    ::
+    ++  remove-device
+      %-  ot
+      :~  [%device-id so]
       ==
     ::
     --
@@ -66,16 +79,17 @@
   =,  enjs:format
   |%
   ++  request :: encodes for iris outbound
-    |=  notif=notification:sur
+    |=  [notif=notification:sur =devices:sur]
     ^-  json
-    =/  channel  'push'
+    :: =/  channel  'push'
+    =/  player-ids  ~(val by devices)
     %-  pairs
     :~  
         ['app_id' s+app-id.notif]
         ['data' (mtd data.notif)]
-        :: ['include_player_ids' a+(turn ['95966528-80c7-48be-8d57-93c954c0f3a1' ~] |=([id=@t] s+id))]
-        ['include_external_user_ids' a+(turn ['0v4.hvetk.kr25i.filf5.8bpt4.abqrg' ~] |=([id=@t] s+id))]
-        ['channel_for_external_user_ids' s+channel]
+        ['include_player_ids' a+(turn player-ids |=([id=@t] s+id))]
+        :: ['include_external_user_ids' a+(turn ['0v4.hvetk.kr25i.filf5.8bpt4.abqrg' ~] |=([id=@t] s+id))]
+        :: ['channel_for_external_user_ids' s+channel]
         ['subtitle' (contents subtitle.notif)]
         ['contents' (contents contents.notif)]
     ==
