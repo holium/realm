@@ -11,7 +11,6 @@
 +$  state-0
   $:  %0
       =app-id:notify         :: constant
-      :: =rest-api-key:notify   :: constant
       =uuid:notify           :: (sham @p)
       =devices:notify        :: (map device-id player-id)
       push-enabled=?
@@ -30,20 +29,16 @@
   ++  on-init
     ^-  (quip card _this)
     =.  app-id.state            '82328a88-f49e-4f05-bc2b-06f61d5a733e'
-    :: =.  rest-api-key.state      'Basic MDZiNDZmN2EtYTBhMy00OWJlLTlkZWItOWIyNDY5MTQzMmFl'
     =.  uuid.state              (sham our.bowl)
     =.  push-enabled.state      %.y
-    =.  devices.state           (malt (limo ~[~]))
     :_  this
     ::  %watch: all incoming dms and convert to our simple structure
     :~  
       [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
       [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
-      :: [%pass /group-dm-thread %agent [our.bowl %spider] %watch /thread-result/[tid]]
-      :: [%pass /thread/[ta-now] %agent [our.bowl %spider] %poke %spider-start !>(start-args)]
     ==
   ++  on-save   !>(state)
-  ++  on-load   ::|=(vase `..on-init)
+  ++  on-load
     |=  =vase
     ^-  (quip card _this)
     =/  old=(unit state-0)
@@ -89,26 +84,22 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/courier/dms.json
       [%x %push-uuid ~]
         ?>  =(our.bowl src.bowl)
         ``notify-view+!>([%uuid uuid.state])
-    ::  ~/scry/courier/dms.json
+    ::
       [%x %dms ~]
         ?>  =(our.bowl src.bowl)
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
         ``graph-dm-view+!>([%inbox dm-previews])
-    ::
-    ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
-      [%x %dms %group @ @ ~]
+      ::
+      [%x %dms %group @ @ ~]    ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
         ?>  =(our.bowl src.bowl)
         =/  entity       `@p`(slav %p i.t.t.t.path)
         =/  timestamp    `@t`i.t.t.t.t.path
         =/  dms           (grp-log:gs:lib our.bowl now.bowl entity timestamp)
         ``graph-dm-view+!>([%dm-log dms])
-    ::
-    ::  ~/scry/courier/dms/~dev.json
-      [%x %dms @ ~]
+      [%x %dms @ ~]             ::  ~/scry/courier/dms/~dev.json
         ?>  =(our.bowl src.bowl)
         =/  to-ship       `@p`(slav %p i.t.t.path)
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
@@ -368,7 +359,7 @@
           :-  ~
           %-  as-octt:mimes:html
           %-  en-json:html
-          (request:enjs:notif-lib notify)
+          (request:enjs:notif-lib notify devices.state)
     ==
     :_  state
     :~ 
@@ -402,26 +393,29 @@
 ++  on-notify-action
   |=  [act=action:notify]
   ^-  (quip card _state)
-  :: |^
-  ?-  -.act      
-    %enable-push           
-      =.  push-enabled.state   %.y
-      `state
-    ::
-    %disable-push           
-      =.  push-enabled.state   %.n
-      `state  
-    ::
-    %set-device
-      |=  [=device-id:notify =player-id:notify]
-      =.  devices.state     (~(put in devices.state) device-id player-id)
-      `state
-    ::
-    %remove-device           
-      |=  [=device-id:notify]  
-      =.  devices.state     (~(del by devices.state) device-id)
-      `state
+  |^
+  ?-  -.act                   ::  `state
+    %enable-push              (set-push %.y)
+    %disable-push             (set-push %.n)
+    %set-device               (set-device +.act)
+    %remove-device            (remove-device +.act)
   ==
-  ::--
+  ::
+  ++  set-push
+    |=  enabled=?
+    =.  push-enabled.state   enabled
+    `state
+  ::
+  ++  set-device
+    |=  [=device-id:notify =player-id:notify]
+    =.  devices.state         (~(put by devices.state) device-id player-id)
+    `state
+  ::
+  ++  remove-device
+    |=  [=device-id:notify]
+    =.  devices.state         (~(del by devices.state) device-id)
+    `state
+  ::
+  --
 
 --

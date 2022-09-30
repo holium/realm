@@ -1,5 +1,5 @@
-/-  store=push-notify
-/+  *push-notify
+/-  store=notify
+/+  *notify
 ::
 |_  view=view:store
 ++  grad  %noun

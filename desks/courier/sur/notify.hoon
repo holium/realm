@@ -23,8 +23,8 @@
 +$  action
   $%  [%enable-push ~]            
       [%disable-push ~]
-      [%set-device =device-id =player-id]
-      [%remove-device =device-id]  
+      [%set-device device-id=cord player-id=cord]
+      [%remove-device device-id=cord]  
   ==
 ::
 +$  view
