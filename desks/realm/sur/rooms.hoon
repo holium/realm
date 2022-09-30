@@ -67,7 +67,7 @@
       ::
       [%enter =rid]
       [%exit ~]
-      [%create =rid =access =title enter=?]
+      [%create =rid =access =title]
       [%set-title =rid =title]
       [%set-access =rid =access]
       [%set-capacity =rid =capacity]
