@@ -3,13 +3,14 @@ import {
   applySnapshot,
   types,
   Instance,
+  getSnapshot,
 } from 'mobx-state-tree';
 
 export enum WalletView {
   ETH_LIST = 'ethereum:list',
   ETH_NEW = 'ethereum:new',
   ETH_DETAIL = 'ethereum:detail',
-  ETH_TRANSACTION = 'ethereum:transaction',
+  TRANSACTION_DETAIL = 'ethereum:transaction',
   ETH_SETTINGS = 'ethereum:settings',
   BIT_LIST = 'bitcoin:list',
   CREATE_WALLET = 'create-wallet'
@@ -109,16 +110,27 @@ const EthWallet = types.model('EthWallet', {
 
 export type EthWalletType = Instance<typeof EthWallet>
 
-const EthTransaction = types
+export const EthTransaction = types
   .model('EthTransaction', {
-    status: types.string, // pending, approved, failed
-    hash: types.string,
-    from: types.string,
-    toShip: types.maybe(types.string),
-    toAddress: types.maybe(types.string),
+    hash: types.identifier,
     amount: types.string,
-    timestamp: types.string
+    network: types.enumeration(['ethereum', 'bitcoin']),
+    type: types.enumeration(['sent', 'received']),
+
+    initiatedAt: types.string,
+    completedAt: types.maybeNull(types.string),
+
+    ourAddress: types.string,
+    theirPatp: types.maybeNull(types.string),
+    theirAddress: types.string,
+
+    status: types.enumeration(['pending', 'failed', 'succeeded']),
+    failureReason: types.maybeNull(types.string),
+
+    notes: types.string,
   })
+
+export type TransactionType = Instance<typeof EthTransaction>;
 
 export const EthStore = types
   .model('EthStore', {
@@ -138,6 +150,23 @@ export const EthStore = types
         })
       );
     },
+    getTransaction(hash: string) {
+      const tx: any = self.transactions.get(hash);
+      return {
+        hash: tx.hash,
+        amount: tx.amount,
+        network: tx.network,
+        type: tx.type,
+        'initiated-at': tx.initiatedAt,
+        'completed-at': tx.completedAt || 1,
+        'our-address': tx.ourAddress,
+        'their-patp': tx.theirPatp || 1,
+        'their-address': tx.theirAddress,
+        status: tx.status,
+        'failure-reason': tx.failureReason || 1,
+        notes: tx.notes,
+      }
+    }
   }))
   .actions((self) => ({
     initial(wallets: any) {
@@ -154,7 +183,30 @@ export const EthStore = types
       applySnapshot(self.wallets, ethWallets);
     },
     applyHistory(history: any) {
-
+      const ethHistory = history.ethereum;
+      console.log(ethHistory);
+      let formattedHistory: any = {};
+      Object.entries(ethHistory).forEach(([key, transaction]) => {
+        const tx = (transaction as any);
+        formattedHistory[tx.hash] = {
+          hash: tx.hash,
+          amount: tx.amount,
+          network: 'ethereum',
+          type: tx.type,
+          initiatedAt: tx.initiatedAt,
+          completedAt: tx.completedAt || '',
+          ourAddress: tx.ourAddress,
+          theirPatp: tx.theirPatp,
+          theirAddress: tx.theirAddress,
+          status: tx.status,
+          failureReason: tx.failureReason || '',
+          notes: tx.notes || '',
+        }
+      });
+      console.log(formattedHistory);
+      const map = types.map(EthTransaction);
+      const newHistory = map.create(formattedHistory);
+      applySnapshot(self.transactions, getSnapshot(newHistory));
     },
     // pokes
     setProvider(provider: string) {
@@ -163,16 +215,20 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
-    enqueueTransaction(hash: any, toAddress: any, from: any, amount: any, timestamp: any) {
+    enqueueTransaction(hash: any, toAddress: any, toPatp: any, from: string, amount: any, timestamp: any) {
       let tx = {
+        hash: hash,
+        amount: gweiToEther(amount).toString(),
+        network: 'ethereum',
+        type: 'sent',
+        initiatedAt: timestamp.toString(),
+        ourAddress: from,
+        theirAddress: toAddress,
+        theirPatp: toPatp,
         status: 'pending',
-        txh: hash,
-        toAddress: toAddress,
-        from: from,
-        amount: amount,
-        timestamp: timestamp,
-      }
-      self.transactions.put(tx);
+        notes: '',
+      };
+      self.transactions.set(hash, tx);
     },
     // updates
     applyWalletUpdate(wallet: any) {
@@ -187,12 +243,17 @@ export const EthStore = types
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     },
     applyTransactionUpdate(transaction: any) {
-      let tx = self.transactions.get(transaction.key)!;
-      if (transaction.status)
-        tx.status = "approved";
+      console.log('got tx')
+      console.log(transaction);
+      /*let tx = self.transactions.get(transaction.transaction.hash)!;
+      console.log(tx);
+      tx.completedAt = Date.now().toString();
+      if (transaction.transaction.success)
+        tx.status = "succeeded";
       else
         tx.status = "failed";
-//      self.transactions.set(transaction.key, tx);
+      console.log()*/
+      self.transactions.set(transaction.transaction.hash, transaction.transaction);
     },
   }));
 
@@ -208,6 +269,16 @@ export const WalletStore = types
       'bitcoin:list',
       'create-wallet'
     ]),
+    returnView: types.maybe(types.enumeration([
+      'ethereum:list',
+      'ethereum:new',
+      'ethereum:detail',
+      'ethereum:transaction',
+      'ethereum:settings',
+      'bitcoin:list',
+      'create-wallet'
+    ])),
+    currentTransaction: types.maybe(types.string),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
     creationMode: types.string,
@@ -220,15 +291,10 @@ export const WalletStore = types
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
       if (network === 'ethereum') {
         self.ethereum.initial(wallets);
-//        if (self.ethereum.initialized)
           self.currentView = 'ethereum:list';
-//        else
-//          self.currentView = 'ethereum:new'
       } else {
-        //  self.bitcoin.initial(wallets);
         self.currentView = 'bitcoin:list';
       }
-      // if (network === 'bitcoin') self.bitcoin.initial(wallets);
     },
     setNetwork(network: 'bitcoin' | 'ethereum') {
       self.network = network;
@@ -238,9 +304,18 @@ export const WalletStore = types
         self.currentView = 'bitcoin:list';
       }
     },
-    setView(view: WalletView, index?: string) {
-      self.currentIndex = index;
+    setView(view: WalletView, index?: string, transaction?: string) {
+      if (index) {
+        self.currentIndex = index;
+      }
+      if (transaction) {
+        self.currentTransaction = transaction;
+      }
+      self.returnView = self.currentView;
       self.currentView = view;
+    },
+    setReturnView(view: WalletView) {
+      self.returnView = view;
     },
     setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
       if (network == 'bitcoin')

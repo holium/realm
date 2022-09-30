@@ -64,6 +64,7 @@ export type RadioOption = {
   value: string;
   sublabel?: string;
   icon?: IconTypes;
+  disabled?: boolean;
   hidden?: boolean;
   highlightColor?: string;
 };

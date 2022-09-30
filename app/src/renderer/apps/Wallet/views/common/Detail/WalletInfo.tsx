@@ -12,13 +12,7 @@ import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
-import {
-  shortened,
-  formatWei,
-  convertWeiToUsd,
-  monthNames,
-  getBaseTheme,
-} from '../../../lib/helpers';
+import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
 import {
   EthWalletType,
   BitcoinWalletType,
@@ -40,11 +34,10 @@ interface WalletInfoProps {
 export const WalletInfo: FC<WalletInfoProps> = observer(
   (props: WalletInfoProps) => {
     const { theme } = useServices();
-    const { walletApp } = useTrayApps();
 
     const themeData = getBaseTheme(theme.currentTheme);
-    const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
+    let amountDisplay = `${formatEthAmount(props.wallet.balance).eth} ETH`;
 
     const CopyButton: FC<{ content: string }> = (props: {
       content: string;
@@ -150,7 +143,7 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
           </Text>
           <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
             {/* @ts-ignore */}
-            {props.wallet.balance} {abbrMap[props.wallet.network]}
+            {amountDisplay}
           </Text>
         </Box>
       </Flex>

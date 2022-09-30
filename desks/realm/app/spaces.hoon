@@ -188,7 +188,7 @@
               =^  cards  state
                 (visa-reaction:core !<(=reaction:invite-store q.cage.sign))
               [cards this]
-        
+
             ==
         ==
     ==
@@ -322,7 +322,7 @@
     |=  [path=space-path:store]
     ^-  (quip card _state)
     =.  spaces.state          (~(del by spaces.state) path)
-    ?:  =(our.bowl ship.path) 
+    ?:  =(our.bowl ship.path)
       [~ state]
     `state
   ::
@@ -331,7 +331,7 @@
     ^-  (quip card _state)
     =.  spaces.state          (~(put by spaces.state) [path space])
     :_  state
-    (spaces:send-reaction [%new-space path space] [/updates ~])
+    (spaces:send-reaction [%new-space path space] [/updates /our ~])
   ::
   --
 ::

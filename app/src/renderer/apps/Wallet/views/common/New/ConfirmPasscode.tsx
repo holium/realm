@@ -1,6 +1,6 @@
 import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Box } from 'renderer/components';
+import { Flex, Text, Box, Icons } from 'renderer/components';
 import { darken, transparentize } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../../lib/helpers';
@@ -105,32 +105,46 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
     };
 
     return (
-      <Flex
-        width="100%"
-        height="100%"
-        flexDirection="column"
-        justifyContent="space-evenly"
-        alignItems="center"
-      >
-        <Flex flexDirection="column">
-          <Text variant="h5">Confirm passcode</Text>
-          <Text mt={3} variant="body">
-            Please retype your passcode to confirm.
-          </Text>
+      <>
+        <Flex
+          width="100%"
+          height="100%"
+          flexDirection="column"
+          justifyContent="space-evenly"
+          alignItems="center"
+        >
+          <Flex flexDirection="column">
+            <Text variant="h5">Confirm passcode</Text>
+            <Text mt={3} variant="body">
+              Please retype your passcode to confirm.
+            </Text>
+          </Flex>
+          <Flex alignItems="center">
+            <PasscodeDisplay
+              numDigits={passcode.length}
+              border={panelBorder}
+              background={panelBackground}
+            />
+          </Flex>
+          <Flex alignItems="center">
+            <Text variant="body" color={themeData.colors.text.error}>
+              {wrongCode && 'Incorrect passcode.'}
+            </Text>
+          </Flex>
         </Flex>
-        <Flex alignItems="center">
-          <PasscodeDisplay
-            numDigits={passcode.length}
-            border={panelBorder}
-            background={panelBackground}
+        <Flex
+          position="absolute"
+          top="542px"
+          zIndex={999}
+          onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}
+        >
+          <Icons
+            name="ArrowLeftLine"
+            size={2}
+            color={theme.currentTheme.iconColor}
           />
         </Flex>
-        <Flex alignItems="center">
-          <Text variant="body" color={themeData.colors.text.error}>
-            {wrongCode && 'Incorrect passcode.'}
-          </Text>
-        </Flex>
-      </Flex>
+      </>
     );
   }
 );

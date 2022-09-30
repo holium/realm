@@ -76,7 +76,7 @@
 ::
 :: +$  app                     [=app]
 +$  app-lite                [id=app-id =sieve]
-+$  app-full                [id=app-id =sieve pkg=app]
++$  app-full                [id=app-id =sieve entry=app-catalog-entry]
 
 ::  various organizations of data (transient/ephemeral datasets)
 ::   used to facilitate scrying and data transfers between other
@@ -87,6 +87,9 @@
 +$  space-apps-lite         (map space-path:spaces [index=app-index-lite =sorts])  :: INCLUDED IN AGENT STATE
 +$  space-apps-full         (map space-path:spaces [index=app-index-full =sorts])
 +$  sites                   (set [ship desk])
++$  my
+  $:  recommendations=(set app-id)
+  ==
 
 :: +$  pinned-apps             (map space-path:spaces (map app-id @ud))
 :: +$  recommended-apps        (map space-path:spaces (map app-id @ud))
@@ -97,7 +100,11 @@
 ::    from remote spaces. this is to reduce memory req's for apps that are
 ::    included across multiple spaces. [app-header] data is referenced to orient an
 ::    app (tags/ranks) relative to a given space
-+$  app-catalog             (map app-id app)  :: INCLUDED IN AGENT STATE
++$  app-catalog-entry
+  $:  recommended=@ud
+      =app
+  ==
++$  app-catalog             (map app-id app-catalog-entry)  :: INCLUDED IN AGENT STATE
 ::
 +$  action
   $%  [%pin path=space-path:spaces =app-id rank=(unit @ud)]
@@ -112,7 +119,7 @@
   ==
 ::
 +$  reaction
-  $%  [%initial =space-apps-full]
+  $%  [%initial =space-apps-full =my]
       [%space-apps =space-path:spaces =app-index-full =sorts sites=(set [ship desk])]
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]
@@ -125,6 +132,7 @@
       [%app-installed =app-id =app]
       [%app-uninstalled =app-id]
       [%treaty-added [=ship =desk] =docket:docket]
+      [%my-recommendations recommendations=(set app-id)]
   ==
 ::
 ::  Scry views

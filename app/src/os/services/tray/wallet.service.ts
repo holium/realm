@@ -18,30 +18,31 @@ import {
   NetworkType,
 } from './wallet.model';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
-import { HDNode } from 'ethers/lib/utils';
-import { wallet } from 'renderer/apps/Wallet/store';
+import EncryptedStore from '../ship/encryptedStore';
+import stubTransactions from './stubTransactions';
 
 export interface RecipientPayload {
-  recipientMetadata: {
+  recipientMetadata?: {
     color?: string;
     avatar?: string;
     nickname?: string;
   };
   patp: string;
-  address: string | null;
-  gasEstimate: number;
+  address?: string | null;
+  gasEstimate?: number;
 }
 
 export class WalletService extends BaseService {
-  private db?: Store<WalletStoreType>; // for persistence
+  private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
-  private privateKey?: ethers.utils.HDNode;
   private ethProvider?: ethers.providers.JsonRpcProvider;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-view': this.setView,
+    'realm.tray.wallet.set-return-view': this.setReturnView,
     'realm.tray.wallet.set-network': this.setNetwork,
     'realm.tray.wallet.get-recipient': this.getRecipient,
+    'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
@@ -61,14 +62,20 @@ export class WalletService extends BaseService {
         passcodeHash
       );
     },
-    setView: (view: WalletView, index?: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-view', view, index);
+    setView: (view: WalletView, index?: string, transactionHash?: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-view', view, index, transactionHash);
+    },
+    setReturnView: (view: WalletView) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-return-view', view);
     },
     setNetwork: (network: NetworkType) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-network', network);
     },
     getRecipient: (patp: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
+    },
+    saveTransactionNotes: (notes: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.save-transaction-notes', notes);
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
@@ -99,13 +106,15 @@ export class WalletService extends BaseService {
     sendEthereumTransaction: (
       walletIndex: string,
       to: string,
-      amount: string
+      amount: string,
+      toPatp?: string,
     ) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.send-ethereum-transaction',
         walletIndex,
         to,
-        amount
+        amount,
+        toPatp,
       );
     },
     sendBitcoinTransaction: (
@@ -150,12 +159,22 @@ export class WalletService extends BaseService {
     });
   }
 
+  private getPrivateKey() {
+    return ethers.utils.HDNode.fromMnemonic(this.core.services.identity.auth.getMnemonic(null));
+  }
+
   async onLogin(ship: string) {
-    this.db = new Store({
+    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    const storeParams = {
       name: 'wallet',
-      cwd: `realm.wallet`, // base folder
+      cwd: `realm.${ship}`,
+      secretKey,
       accessPropertiesByDotNotation: true,
-    });
+    };
+    this.db =
+      process.env.NODE_ENV === 'development'
+        ? new Store<WalletStoreType>(storeParams)
+        : new EncryptedStore<WalletStoreType>(storeParams);
 
     let persistedState: WalletStoreType = this.db.store;
 
@@ -181,8 +200,12 @@ export class WalletService extends BaseService {
       });
     }
 
+    onSnapshot(this.state, (snapshot: any) => {
+      this.db!.store = snapshot;
+    });
+
     this.ethProvider = new ethers.providers.JsonRpcProvider(
-      'http://localhost:8545'
+      'https://ropsten.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
     );
 
     const patchEffect = {
@@ -213,25 +236,25 @@ export class WalletService extends BaseService {
       this.state!.ethereum.initial(wallets);
       this.state!.bitcoin.initial(wallets);
     });
-    /*WalletApi.subscribeToTransactions(
+    WalletApi.subscribeToTransactions(
       this.core.conduit!,
       (transaction: any) => {
-        console.log('WE GOT IT BOIZZZZ');
         if (transaction.network == 'ethereum')
           this.state!.ethereum.applyTransactionUpdate(transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
+        const tx = this.state!.ethereum.transactions.get(transaction.transaction.hash);
       }
     );
 
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
       this.state!.ethereum.applyHistory(history);
-    }); */
+    });
 
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
-      'http://127.0.0.1:8545'
+      'https://ropsten.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
     );
   }
 
@@ -241,18 +264,18 @@ export class WalletService extends BaseService {
 
   async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
     this.state!.setPasscodeHash(passcodeHash);
-    this.privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    this.core.services.identity.auth.setMnemonic('realm.auth.set-mnemonic', mnemonic);
+    const privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    let xpub: string =
-      this.privateKey!.derivePath(ethPath).neuter().extendedKey;
+    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
     // eth
 
     console.log('setting eth xpub');
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
     console.log('setting btc xpub');
-    xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
 
     console.log('okay transitioning');
@@ -262,17 +285,23 @@ export class WalletService extends BaseService {
   async setXpub(_event: any) {
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
+    const privateKey = this.getPrivateKey();
     let xpub: string =
-      this.privateKey!.derivePath(ethPath).neuter().extendedKey;
+      privateKey.derivePath(ethPath).neuter().extendedKey;
     // eth
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
-    xpub = this.privateKey!.derivePath(btcPath).neuter().extendedKey;
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
-  async setView(_event: any, view: WalletView, index?: string) {
-    this.state!.setView(view, index);
+  async setView(_event: any, view: WalletView, index?: string, transactionHash?: string) {
+    console.log(`service setting view: ${view}`)
+    this.state!.setView(view, index, transactionHash);
+  }
+
+  async setReturnView(_event: any, view: WalletView) {
+    this.state!.setReturnView(view);
   }
 
   async setNetwork(_event: any, network: NetworkType) {
@@ -301,6 +330,7 @@ export class WalletService extends BaseService {
     // console.log(`got gas estimate: ${gasEstimate}`);
 
     try {
+      console.log('requesting address');
       const address: any = await WalletApi.getAddress(
         this.core.conduit!,
         this.state!.network,
@@ -325,6 +355,12 @@ export class WalletService extends BaseService {
         address: null,
       };
     }
+  }
+
+  async saveTransactionNotes(_event: any, notes: string) {
+    const network = this.state!.network;
+    const hash = this.state!.currentTransaction!;
+    WalletApi.saveTransactionNotes(this.core.conduit!, network, hash, notes);
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
@@ -365,29 +401,38 @@ export class WalletService extends BaseService {
     _event: any,
     walletIndex: string,
     to: string,
-    amount: string
+    amount: string,
+    toPatp?: string,
   ) {
     console.log(walletIndex);
     console.log(to);
     console.log(amount);
-    const path = "m/44'/60'/0'/0/0"; // + walletIndex;
+    console.log(toPatp);
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
     console.log(path);
-    console.log(this.privateKey!.mnemonic!.phrase);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(
-      this.privateKey!.derivePath(path).privateKey
+      privateKey.derivePath(path).privateKey
     );
     let signer = wallet.connect(this.ethProvider!);
+    console.log(amount);
     let tx = {
       to: to,
       value: ethers.utils.parseEther(amount),
     };
     const { hash } = await signer.sendTransaction(tx);
-    // this.state!.ethereum.enqueueTransaction(hash, tx.to, this.state!.ourPatp, tx.value, Date.now());
+    console.log('hash: ' + hash);
+    const fromAddress = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.address;
+    this.state!.ethereum.enqueueTransaction(hash, tx.to, toPatp, fromAddress, tx.value, (new Date()).toISOString());
+    const stateTx = this.state!.ethereum.getTransaction(hash);
+    console.log(stateTx);
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
       hash,
-      tx
+      stateTx
+      // tx
     );
   }
 
@@ -398,7 +443,8 @@ export class WalletService extends BaseService {
     amount: string
   ) {
     let sourceAddress = this.state!.bitcoin.wallets.get(walletIndex)!.address;
-    let privateKey = this.privateKey!.derivePath(
+    const privateKeyNode = this.getPrivateKey();
+    const privateKey = privateKeyNode.derivePath(
       "m/44'/0'/0'/0" + walletIndex
     ).privateKey;
     // let tx, hash = sendBitcoin(sourceAddress, to, amount, privateKey)

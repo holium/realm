@@ -21,20 +21,20 @@ export class RealmWallet {
   private hdWallets: Map<Addr, ethers.utils.HDNode> = new Map();
 
   constructor() {
-    console.log('constructing RealmWallet')
+    console.log('constructing RealmWallet');
     this.ethProvider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     );
   }
 
   loadWallet(mnemonic: string) {
-    console.log('loading wallet')
+    console.log('loading wallet');
     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
     return wallet;
   }
 
   generateWallet() {
-    console.log('creating wallet')
+    console.log('creating wallet');
     const wallet = ethers.Wallet.createRandom();
     this.wallets.set(wallet.publicKey, wallet);
   }

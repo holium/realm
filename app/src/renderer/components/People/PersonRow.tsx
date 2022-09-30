@@ -99,6 +99,9 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
                   nickname={nickname}
                   description={description}
                   theme={props.theme}
+                  onClose={() => {
+                    setShow(false);
+                  }}
                 />
               </Menu>
             )}

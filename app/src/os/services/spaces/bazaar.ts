@@ -13,7 +13,12 @@ export const loadBazaarFromDisk = (
   });
   let persistedState: BazaarStoreType = persisted.store;
   const model = BazaarStore.create(
-    castToSnapshot(persistedState) || { spaces: {}, treaties: {}, allies: {} }
+    castToSnapshot(persistedState) || {
+      spaces: {},
+      treaties: {},
+      allies: {},
+      my: {},
+    }
   );
 
   onSnapshot(model, (snapshot) => {

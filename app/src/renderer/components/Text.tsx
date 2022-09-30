@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+import { darken } from 'polished';
 import { motion } from 'framer-motion';
 import { variant, space, layout } from 'styled-system';
 import type { ThemeType } from '../theme';
@@ -124,6 +125,7 @@ export const Text = styled(motion.p)<TextProps>`
 
 export const Anchor = styled(motion.a)<TextProps>`
   ${textVariants}
+  ${typographyFunctions}
   ${(props) =>
     props.fontByName &&
     css`
@@ -133,6 +135,14 @@ export const Anchor = styled(motion.a)<TextProps>`
     props.fontByType &&
     css`
       font-family: ${props.theme.fonts[props.fontByType]};
+    `}
+  ${(props) =>
+    props.color &&
+    css`
+      color: ${props.color};
+      &:hover {
+        color: ${darken(.02, props.color)};
+      }
     `}
 `;
 

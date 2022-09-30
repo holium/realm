@@ -15,6 +15,7 @@ import { ColorPicker } from './ColorPicker';
 import { useForm, useField } from 'mobx-easy-form';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { AuthActions } from 'renderer/logic/actions/auth';
 
 export const AccountPanel: FC<any> = observer(() => {
   const { theme, ship, contacts } = useServices();
@@ -48,6 +49,8 @@ export const AccountPanel: FC<any> = observer(() => {
 
       await ShipActions.saveMyContact(profileData);
       await DesktopActions.setMouseColor(values.avatarColor);
+      await AuthActions.setShipProfile(ship!.patp, profileData);
+
       setIsLoading(false);
     },
   });

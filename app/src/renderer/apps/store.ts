@@ -1,3 +1,4 @@
+import { calculateAnchorPointById } from './../logic/lib/position';
 import { createContext, useContext } from 'react';
 import { Room, RoomState } from '@holium/realm-room';
 import {
@@ -20,6 +21,7 @@ import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomDiff } from 'os/services/tray/rooms.service';
 import { IpcMessageEvent } from 'electron';
 import { DmApp } from './Messages/store';
+import { toJS } from 'mobx';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -63,8 +65,27 @@ export const TrayAppStore = types
       // const calculatedDimensions =
       self.dimensions = dimensions;
     },
-    setActiveApp(appKey: TrayAppKeys | null) {
+    setActiveApp(
+      appKey: TrayAppKeys | null,
+      params?: {
+        willOpen: boolean;
+        position: any;
+        anchorOffset: any;
+        dimensions: any;
+      }
+    ) {
       self.activeApp = appKey;
+      if (params?.willOpen) {
+        const { position, anchorOffset, dimensions } = params;
+        self.coords = calculateAnchorPointById(
+          appKey!,
+          anchorOffset,
+          position,
+          dimensions
+        );
+        self.dimensions = dimensions;
+        // console.log(toJS(self.coords));
+      }
     },
   }));
 
@@ -92,7 +113,7 @@ export const trayStore = TrayAppStore.create({
   },
   walletApp: {
     network: 'ethereum',
-    currentView: 'ethereum:new',
+    currentView: 'ethereum:list',
     bitcoin: {
       settings: {
         defaultIndex: 0,
