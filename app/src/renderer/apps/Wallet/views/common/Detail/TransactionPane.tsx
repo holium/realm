@@ -1,11 +1,9 @@
 import React, { FC, useEffect, useState, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
-import { errors, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { theme as themes } from 'renderer/theme';
 import { darken, lighten } from 'polished';
-import { QRCodeSVG } from 'qrcode.react';
 
 import {
   Flex,
@@ -17,23 +15,13 @@ import {
   ImagePreview,
   Spinner,
 } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
 import {
   shortened,
-  formatWei,
-  convertWeiToUsd,
-  monthNames,
   getBaseTheme,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import {
-  BitcoinWalletType,
-  EthWalletType,
-  WalletStoreType,
-} from 'os/services/tray/wallet.model';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 
 const abbrMap = {
@@ -66,7 +54,6 @@ const Input = styled.input<InputProps>`
   color: ${(props) =>
     props.mode === 'light' ? '#333333' : '#ffffff'} !important;
   outline: none;
-  caret-color: transparent;
   :focus {
     outline: none !important;
   }
@@ -90,14 +77,15 @@ const AmountInput = observer(
     const { walletApp } = useTrayApps();
 
     const [inCrypto, setInCrypto] = useState(true);
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState<string | number>(0);
     const [amountError, setAmountError] = useState(false);
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
 
-    const check = (inCrypto: boolean, value: number) => {
-      let amountInCrypto = inCrypto ? value : usdToEth(value);
+    const check = (inCrypto: boolean, value: string | number) => {
+      let numVal = Number(value);
+      let amountInCrypto = inCrypto ? value : usdToEth(numVal);
       if (amountInCrypto > props.max) {
         setAmountError(true);
         return props.setValid(false);
@@ -105,7 +93,7 @@ const AmountInput = observer(
         return props.setValid(false);
       } else {
         setAmountError(false);
-        return props.setValid(true, value);
+        return props.setValid(true, numVal);
       }
     };
 
@@ -113,13 +101,13 @@ const AmountInput = observer(
       let value: string = e.target.value;
       let isDecimal = value.includes('.');
       let decimalPlaces = isDecimal && value.split('.')[1].length;
+      let isZero = Number(value) === 0;
 
       if (value.length > 10) return;
-
       if (!inCrypto && isDecimal && decimalPlaces > 2) return;
 
       check(inCrypto, Number(value));
-      setAmount(Number(value));
+      setAmount(isZero && isDecimal ? value : Number(value));
     };
 
     const toggleInCrypto = () => {
@@ -129,7 +117,7 @@ const AmountInput = observer(
       check(toggled, amount);
 
       if (toggled === false) {
-        setAmount(Number(amount.toFixed(2)));
+        setAmount(Number(amount).toFixed(2));
       }
     };
 
