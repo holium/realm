@@ -1,6 +1,18 @@
 /-  membership, spc=spaces, pprt=passports
 |%
 ::
+:: +$  passport
+::   $:  =roles:membership
+::       alias=cord
+::       status=status:membership
+::   ==
+:: ::
+:: ::  $passports: passports (access) to spaces within Realm
+:: +$  passports      (map ship passport)
+:: ::
+:: ::  $districts: subdivisions of the entire realm universe
+:: +$  districts     (map path=space-path:spaces passports)
+::
 +$  invitations
   $:  outgoing=outgoing-invitations
       incoming=incoming-invitations

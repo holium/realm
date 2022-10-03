@@ -1,4 +1,5 @@
-/-  store=spaces, member-store=membership
+/-  store=spaces-store, member-store=membership
+/+  memb-lib=membership
 =<  [store .]
 =,  store
 |%
@@ -70,12 +71,20 @@
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
     ::
-        %new-space
-      :-  %new-space
+        %joined-space
+      :-  %joined-space
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%space (spc:encode space.rct)]
+          :: [%members (passes:encode:membership membership.rct)]
           :: [%members (membs:encode members.rct)]
+      ==
+    ::
+        %members
+      :-  %members
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%members (membership-json:encode:memb-lib membership.rct)]
       ==
     ==
   ::
@@ -109,8 +118,9 @@
       %-  of
       :~  [%add add-space]
           [%update update-space]
-          [%remove remove-space]
+          [%remove path-key]
           [%join joined-space]
+          [%leave path-key]
           [%kicked kicked]
       ==
     ::
@@ -152,7 +162,7 @@
           [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
-    ++  remove-space
+    ++  path-key
       %-  ot
       :~  [%path pth]
       ==
@@ -197,6 +207,7 @@
     ++  memb
       %-  ot
       :~  [%roles (as rol)]
+          [%alias so]
           [%status status]
           :: [%pinned bo]
       ==

@@ -4,7 +4,7 @@
 ::  A store for metadata on app dockets and installs.
 ::
 ::
-/-  store=bazaar, docket, spaces-store=spaces
+/-  store=bazaar, docket, spaces-store
 /-  membership-store=membership, hark=hark-store, passports-store=passports
 /-  treaty
 /+  verb, dbug, default-agent
@@ -1107,12 +1107,12 @@
   ++  add
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
+    :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
       %glob
         ::  once fully installed, remove the installation entry from state
-        ~&  >>  "{<dap.bowl>}: charge-update [add-charge] {<desk>}, {<charge>}. app fully installed. adding to bazaar catalog..."
+        :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] {<desk>}, {<charge>}. app fully installed. adding to bazaar catalog..."
         =/  entry  (~(get by app-catalog.state) desk)
         =/  entry  ?~  entry  [%0 [%urbit docket.charge %.y]]
           ?>  ?=(%urbit -.app.u.entry)
@@ -1154,7 +1154,8 @@
     %add            (on-add +.rct)
     %replace        (on-replace +.rct)
     %remove         (on-remove +.rct)
-    %new-space      (on-new-space +.rct)
+    %joined-space   (on-joined-space +.rct)
+    %members        `state
   ==
   ::
   ++  on-initial
@@ -1207,8 +1208,8 @@
     :: [%pass /bazaar/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %bazaar] %leave ~]
     :: `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
   ::
-  ++  on-new-space
-    |=  [path=space-path:spaces-store space=space:spaces-store]
+  ++  on-joined-space
+    |=  [path=space-path:spaces-store space=space:spaces-store =members:membership-store]
     ^-  (quip card _state)
     :: ?:  ?|  =(our.bowl ship.path)
     ::         =(ship ship.path)

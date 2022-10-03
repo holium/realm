@@ -1,4 +1,4 @@
-/-  store=spaces
+/-  store=spaces-store
 /+  *spaces
 ::
 |_  vi=view:store
