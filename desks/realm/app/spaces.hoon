@@ -82,7 +82,6 @@
       =/  group                (get-members:grp [ship name] our.bowl now.bowl)
       ?~  group  ~
       :: (need grp-data)
-      :: ~&  >  [groups]
       ``noun+!>(~)
       :: ``groups-view+!>([%groups groups])
       ::
@@ -558,7 +557,6 @@
     ++  handle-deported
       |=  [path=space-path:store]
       ^-  (quip card _state)
-      ~&  >  ['we are deported']
       =.  invitations.state           (~(del by invitations.state) path)
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]~
