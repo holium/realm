@@ -57,8 +57,8 @@
     ^-  json
     %-  pairs
     :~
-      ['alias' s+alias.member]
       ['roles' (rols roles.member)]
+      ['alias' s+alias.member]
       ['status' s+(scot %tas status.member)]
     ==
   ::

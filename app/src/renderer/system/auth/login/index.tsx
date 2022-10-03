@@ -58,6 +58,11 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   useEffect(() => {
     OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
       if (status === ConduitState.Failed) {
+        AuthActions.cancelLogin();
+        setHasFailed(true);
+      }
+      if (status === ConduitState.Disconnected) {
+        AuthActions.cancelLogin();
         setHasFailed(true);
       }
     });
@@ -273,8 +278,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     style={{ height: 15, fontSize: 14 }}
                     textShadow="0.5px 0.5px #080000"
                   >
-                    {hasFailed &&
-                      'Connection to your ship has been refused: ECONNREFUSED'}
+                    {hasFailed && 'Connection to your ship has been refused.'}
                     {incorrectPassword && 'Incorrect password.'}
                   </FormControl.Error>
                 </Flex>

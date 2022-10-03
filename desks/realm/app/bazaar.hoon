@@ -118,7 +118,7 @@
   ?+  path              (on-watch:def path)
      :: agent updates
     [%our ~]
-      ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to our..."
+      :: ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to our..."
       ::  only host agent should get our updates
       ?>  (is-host:core src.bowl)
       `state
@@ -1154,12 +1154,11 @@
     %add            (on-add +.rct)
     %replace        (on-replace +.rct)
     %remove         (on-remove +.rct)
-    %joined-space   (on-joined-space +.rct)
-    %members        `state
+    %remote-space   (on-remote-space +.rct)
   ==
   ::
   ++  on-initial
-    |=  [spaces=spaces:spaces-store]
+    |=  [spaces=spaces:spaces-store =membership:membership-store]
     ^-  (quip card _state)
     ::  sets the initial spaces maps properly
     =/  spaces-map=space-apps-lite:store
@@ -1175,12 +1174,13 @@
         %-  (slog leaf+"{<dap.bowl>}: subscribing to {<watch-path>}..." ~)
         (snoc acc [%pass watch-path %agent [ship.path %bazaar] %watch watch-path])
     %-  (slog leaf+"{<dap.bowl>}: spaces [initial] reaction processed. leaving channel and resubscribing to %our wire..." ~)
-    =/  rejoin-our=(list card)
-      :~  [%pass /spaces %agent [our.bowl %spaces] %leave ~]
-          [%pass /spaces %agent [our.bowl %spaces] %watch /our]
-      ==
+    :: =/  rejoin-our=(list card)
+    ::   :~  [%pass /spaces %agent [our.bowl %spaces] %leave ~]
+    ::       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+    ::   ==
     =.  space-apps.state    (~(uni by spaces-map) space-apps.state)
-    [(weld subscriptions rejoin-our) state]
+    :: [(weld subscriptions rejoin-our) state]
+    `state
   ::
     ++  skim-our
       |=  [path=space-path:spaces-store =space:spaces-store]
@@ -1208,12 +1208,9 @@
     :: [%pass /bazaar/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %bazaar] %leave ~]
     :: `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
   ::
-  ++  on-joined-space
+  ++  on-remote-space
     |=  [path=space-path:spaces-store space=space:spaces-store =members:membership-store]
     ^-  (quip card _state)
-    :: ?:  ?|  =(our.bowl ship.path)
-    ::         =(ship ship.path)
-    ::     ==  `state
     ::  no need to subscribe to our own ship's bazaar. we're already getting all updates
     ?:  =(our.bowl ship.path)  `state
     %-  (slog leaf+"{<dap.bowl>}: on-space-initial:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
@@ -1243,7 +1240,7 @@
     |=  [path=space-path:spaces-store =ship]
     ~&  >  ['bazaar check-member' our.bowl ship]
     ^-  ?
-    =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
+    =/  member   .^(view:membership-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
     ?>  ?=(%is-member -.member)
     :: ~&  >  ['is member' is-member.member]
     is-member.member

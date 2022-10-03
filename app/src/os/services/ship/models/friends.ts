@@ -16,8 +16,30 @@ export const FriendModel = types.model({
 export type FriendType = Instance<typeof FriendModel>;
 
 export const FriendsStore = types
-  .model({ all: types.map(FriendModel) })
+  .model('FriendsStore', { all: types.map(FriendModel) })
   .views((self) => ({
+    get pinned() {
+      const list = Array.from(self.all.entries())
+        .map((value: [patp: string, friend: FriendType]) => ({
+          patp: value[0],
+          pinned: value[1].pinned,
+          tags: toJS(value[1].tags),
+          mutual: value[1].mutual,
+        }))
+        .filter((friend: any) => friend.pinned);
+      return list.filter((friend: any) => friend.pinned);
+    },
+    get unpinned() {
+      const list = Array.from(self.all.entries()).map(
+        (value: [patp: string, friend: FriendType]) => ({
+          patp: value[0],
+          pinned: value[1].pinned,
+          tags: toJS(value[1].tags),
+          mutual: value[1].mutual,
+        })
+      );
+      return list.filter((friend: any) => !friend.pinned);
+    },
     get list() {
       return Array.from(self.all.entries()).map(
         (value: [patp: string, friend: FriendType]) => ({

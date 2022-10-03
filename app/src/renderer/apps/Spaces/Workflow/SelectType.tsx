@@ -39,7 +39,11 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
     const [loading, setLoading] = useState(true);
     useEffect(() => {
       ShipActions.getOurGroups().then((ourGroups) => {
-        setGroups(ourGroups);
+        console.log(ourGroups);
+        // hacky check to fix incorrectly formed %da
+        setGroups(
+          ourGroups.filter((group: any) => !group.path.includes('/~2'))
+        );
         setLoading(false);
       });
     }, []);

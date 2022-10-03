@@ -18,7 +18,6 @@ import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-import { PassportsApi } from '../../api/passports';
 import { BazaarApi } from '../../api/bazaar';
 import { VisaModel, VisaModelType } from './models/visas';
 import { loadMembersFromDisk } from './passports';
@@ -221,7 +220,7 @@ export class SpacesService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    PassportsApi.getVisas(this.core.conduit!).then((visas: any) => {
+    SpacesApi.getInvitations(this.core.conduit!).then((visas: any) => {
       this.models.visas.initialIncoming(visas);
     });
     // Temporary setup
@@ -267,13 +266,8 @@ export class SpacesService extends BaseService {
       this.core.conduit!,
       this.state,
       this.models.membership,
-      this.models.bazaar
-    );
-    PassportsApi.watchMembers(
-      this.core.conduit!,
-      this.models.membership,
-      this.state,
-      this.models.visas!
+      this.models.bazaar,
+      this.models.visas
     );
     // Subscribe to sync updates
     // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
@@ -342,7 +336,7 @@ export class SpacesService extends BaseService {
   // *********************** MEMBERS ***************************
   // ***********************************************************
   async getMembers(_event: IpcMainInvokeEvent, path: string) {
-    return await PassportsApi.getMembers(this.core.conduit!, path);
+    return await SpacesApi.getMembers(this.core.conduit!, path);
   }
 
   async inviteMember(
@@ -354,7 +348,7 @@ export class SpacesService extends BaseService {
       message: string;
     }
   ) {
-    const response = await PassportsApi.inviteMember(
+    const response = await SpacesApi.inviteMember(
       this.core.conduit!,
       path,
       payload
@@ -364,19 +358,19 @@ export class SpacesService extends BaseService {
   }
 
   async kickMember(_event: IpcMainInvokeEvent, path: string, patp: Patp) {
-    return await PassportsApi.kickMember(this.core.conduit!, path, patp);
+    return await SpacesApi.kickMember(this.core.conduit!, path, patp);
   }
 
   async getInvitations(_event: IpcMainInvokeEvent) {
-    return await PassportsApi.getVisas(this.core.conduit!);
+    return await SpacesApi.getInvitations(this.core.conduit!);
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
-    return await PassportsApi.acceptInvite(this.core.conduit!, path);
+    return await SpacesApi.acceptInvite(this.core.conduit!, path);
   }
 
   async declineInvite(_event: IpcMainInvokeEvent, path: string) {
-    await PassportsApi.declineInvite(this.core.conduit!, path);
+    await SpacesApi.declineInvite(this.core.conduit!, path);
     this.models.visas?.removeIncoming(path);
     return;
   }

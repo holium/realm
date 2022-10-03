@@ -102,12 +102,11 @@ export const NotificationApi: any = {
     });
   },
   opened: async (conduit: Conduit) => {
-    await conduit.poke({
+    return await conduit.poke({
       app: 'hark-store',
       mark: 'hark-action',
       json: { opened: null },
     });
-    return;
   },
   dismiss: async (conduit: Conduit, notification: NotificationModelType) => {
     // const payload = [

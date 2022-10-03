@@ -54,7 +54,6 @@
   $%  [%add slug=@t payload=add-payload members=members:membership]
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
-      [%join path=space-path =ship]
       [%leave path=space-path]
       [%kicked path=space-path ship=ship]
   ==
@@ -78,12 +77,11 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces]
+  $%  [%initial =spaces =membership:membership]
       [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]
-      [%joined-space path=space-path =space =members:membership]
-      [%members path=space-path =membership:membership]
+      [%remote-space path=space-path =space =members:membership]
   ==
 ::
 ::  Scry views

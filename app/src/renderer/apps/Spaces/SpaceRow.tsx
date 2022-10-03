@@ -8,6 +8,7 @@ import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { pluralize } from 'renderer/logic/lib/text';
+import { observer } from 'mobx-react';
 
 export const EmptyGroup = styled.div`
   height: 32px;
@@ -53,7 +54,7 @@ type SpaceRowProps = {
   onSelect: (spaceKey: string) => void;
 };
 
-export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
+export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { theme, membership } = useServices();
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -175,4 +176,4 @@ export const SpaceRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
       </Flex>
     </SpaceRowStyle>
   );
-};
+});

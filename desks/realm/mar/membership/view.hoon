@@ -1,5 +1,5 @@
-/-  store=passports
-/+  *passports
+/-  store=membership
+/+  *membership
 ::
 |_  view=view:store
 ++  grad  %noun

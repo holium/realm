@@ -324,8 +324,6 @@ export class ShipService extends BaseService {
           resolve(this.state!);
         });
       });
-      // const invitations = await PassportsApi.getVisas(this.core.conduit!);
-      // this.models.invitations.initial(invitations);
 
       this.services.slip?.subscribe();
       this.rooms?.onLogin(ship);
@@ -333,7 +331,7 @@ export class ShipService extends BaseService {
 
       // return ship state
     } catch (err) {
-      this.core.sendLog(`error in ship try ${err.toString()}`);
+      this.core.sendLog(`error in ship try ${err}`);
       console.error(err);
     }
     // 2. Register patches

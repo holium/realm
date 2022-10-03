@@ -1,4 +1,4 @@
-/-  membership, spc=spaces, pprt=passports
+/-  membership, spc=spaces
 |%
 ::
 :: +$  passport
@@ -13,15 +13,7 @@
 :: ::  $districts: subdivisions of the entire realm universe
 :: +$  districts     (map path=space-path:spaces passports)
 ::
-+$  invitations
-  $:  outgoing=outgoing-invitations
-      incoming=incoming-invitations
-  ==
-::
-+$  outgoing-invitations  (map space-path:spc space-invitations)
-::         
-+$  incoming-invitations  (map space-path:spc invite)
-+$  space-invitations     (map ship invite)
++$  invitations           (map space-path:spc invite)
 +$  invite
   $:  inviter=ship
       path=space-path:spc
@@ -45,16 +37,15 @@
   ==
 
 +$  reaction
-  $%  [%invite-sent path=space-path:spc =ship =invite =passport:pprt]
+  $%  [%invite-sent path=space-path:spc =ship =invite =member:membership]
       [%invite-received path=space-path:spc =invite]
       [%invite-removed path=space-path:spc]
-      [%invite-accepted path=space-path:spc =ship =passport:pprt]
+      [%invite-accepted path=space-path:spc =ship =member:membership]
       [%kicked path=space-path:spc =ship]
   ==
 ::
 +$  view
   $%  [%invitations invites=invitations]
-      [%incoming invites=incoming-invitations]
   ==
 ::
 --

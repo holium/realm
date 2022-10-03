@@ -49,7 +49,7 @@
       :-  %initial
       %-  pairs
       :~  [%spaces (spaces-map:encode spaces.rct)]
-          :: [%membership (membership-map:encode membership.rct)]
+          [%membership (membership-map:encode membership.rct)]
       ==
     ::
         %add
@@ -71,21 +71,21 @@
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
     ::
-        %joined-space
-      :-  %joined-space
+        %remote-space
+      :-  %remote-space
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%space (spc:encode space.rct)]
           :: [%members (passes:encode:membership membership.rct)]
-          :: [%members (membs:encode members.rct)]
+          [%members (membs:encode members.rct)]
       ==
     ::
-        %members
-      :-  %members
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%members (membership-json:encode:memb-lib membership.rct)]
-      ==
+      ::   %members
+      :: :-  %members
+      :: %-  pairs
+      :: :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ::     [%members (membership-json:encode:memb-lib membership.rct)]
+      :: ==
     ==
   ::
   ++  view :: encodes for on-peek
@@ -119,15 +119,8 @@
       :~  [%add add-space]
           [%update update-space]
           [%remove path-key]
-          [%join joined-space]
           [%leave path-key]
           [%kicked kicked]
-      ==
-    ::
-    ++  joined-space
-      %-  ot
-      :~  [%path pth]
-          [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
     ++  de-space

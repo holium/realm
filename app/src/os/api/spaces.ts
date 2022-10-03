@@ -21,10 +21,10 @@ export const SpacesApi = {
     });
     return response.members;
   },
-  getVisas: async (conduit: Conduit) => {
+  getInvitations: async (conduit: Conduit) => {
     const response = await conduit.scry({
       app: 'spaces',
-      path: '/visas', // the spaces scry is at the root of the path
+      path: '/invitations', // the spaces scry is at the root of the path
     });
     return response.invites;
   },
@@ -201,7 +201,7 @@ export const SpacesApi = {
     };
 
     const response = await conduit.poke({
-      app: 'passports',
+      app: 'spaces',
       mark: 'visa-action',
       json: {
         'decline-invite': {
@@ -221,20 +221,27 @@ export const SpacesApi = {
    */
   watchUpdates: (
     conduit: Conduit,
-    state: SpacesStoreType,
+    spacesState: SpacesStoreType,
     membersState: MembershipType,
-    bazaarState: BazaarStoreType
+    bazaarState: BazaarStoreType,
+    visaState: VisaModelType
   ): void => {
     conduit.watch({
       app: 'spaces',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        // console.log(mark, data);
+        console.log(mark, data);
         if (mark === 'spaces-reaction') {
-          handleSpacesReactions(data, state, membersState, bazaarState);
+          handleSpacesReactions(data, spacesState, membersState, bazaarState);
         }
         if (mark === 'visa-reaction') {
-          // handleInviteReactions(data, state, membersState, bazaarState);
+          handleInviteReactions(
+            data['visa-reaction'],
+            conduit.ship!,
+            membersState,
+            spacesState,
+            visaState
+          );
         }
       },
 
@@ -246,31 +253,34 @@ export const SpacesApi = {
 
 const handleSpacesReactions = (
   data: any,
-  state: SpacesStoreType,
+  spacesState: SpacesStoreType,
   membersState: MembershipType,
   bazaarState: BazaarStoreType
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      state.initialReaction(data['initial']);
+      spacesState.initialReaction(data['initial']);
+      membersState.initial(data['initial']['membership']);
       break;
     case 'add':
-      const newSpace = state.addSpace(data['add']);
+      const newSpace = spacesState.addSpace(data['add']);
       membersState.addMemberMap(newSpace, data['add'].members);
       bazaarState.addBazaar(newSpace);
       break;
     case 'replace':
-      state.updateSpace(data['replace']);
+      spacesState.updateSpace(data['replace']);
       break;
     case 'remove':
-      const deleted = state.deleteSpace(data['remove']);
+      const deleted = spacesState.deleteSpace(data['remove']);
       membersState.removeMemberMap(deleted);
       break;
-    case 'new-space':
-      // console.log('new-space', data);
-      state.addSpace(data['new-space']);
-      // membersState.addMemberMap(remoteSpace, data['add'].members);
+    case 'remote-space':
+      membersState.addMemberMap(
+        data['remote-space'].path,
+        data['remote-space'].members
+      );
+      spacesState.addSpace(data['remote-space']);
       // bazaarState.addBazaar(remoteSpace);
       break;
     default:
@@ -311,6 +321,7 @@ const handleInviteReactions = (
       break;
     case 'kicked':
       const kickedPayload = data['kicked'];
+      console.log('kicked', data);
       if (`~${ship}` === kickedPayload.ship) {
         spacesState.deleteSpace({ 'space-path': kickedPayload.path });
       }

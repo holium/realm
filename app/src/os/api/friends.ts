@@ -92,10 +92,9 @@ export const FriendsApi = {
     return conduit.watch({
       app: 'friends',
       path: `/all`,
-      onEvent: async (data: any) => {
-        // console.log(data);
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log(mark, data);
         if (data['friends']) {
-          // applySnapshot(state.friends.all, castToSnapshot(data['friends']));
           friendsStore.initial(data['friends']);
         }
         if (data['friend']) {

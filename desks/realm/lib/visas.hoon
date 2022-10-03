@@ -1,4 +1,4 @@
-/-  store=visas, spaces-store=spaces, member-store=membership, passport-store=passports
+/-  store=visas, spaces-store=spaces, member-store=membership
 /+  spaces-lib=spaces
 =<  [store .]
 =,  store
@@ -88,7 +88,7 @@
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%ship s+(scot %p ship.rct)]
           [%invite (invite:encode invite.rct)]
-          [%member (memb:encode passport.rct)]
+          [%member (memb:encode member.rct)]
       ==
       ::
        %invite-received
@@ -108,7 +108,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%ship s+(scot %p ship.rct)]
-          [%member (memb:encode passport.rct)]
+          [%member (memb:encode member.rct)]
       ==
       ::
         %kicked
@@ -130,8 +130,8 @@
         %invitations
       [%invitations (invitations:encode invites.view)]
       ::
-        %incoming
-      [%invites (incoming-map:encode invites.view)]
+      ::   %incoming
+      :: [%invites (incoming-map:encode invites.view)]
       ::
     ==
   --
@@ -142,38 +142,40 @@
   ++  invitations
     |=  =invitations:store
     ^-  json
-    %-  pairs:enjs:format
-    :~  ['outgoing' (outgoing-map outgoing.invitations)]
-        ['incoming' (incoming-map incoming.invitations)]
-    ==
-  ++  outgoing-map
-    |=  outgoing=outgoing-invitations:store
-    ^-  json
     %-  pairs
-    %+  turn  ~(tap by outgoing)
-    |=  [pth=space-path:spaces-store invitations=space-invitations:store]
-    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
-    ^-  [cord json]
-    [spc-path (invite-map invitations)]
-  ::
-  ++  incoming-map
-    |=  incoming=incoming-invitations:store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by incoming)
+    %+  turn  ~(tap by invitations)
     |=  [pth=space-path:spaces-store inv=invite:store]
     =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
     ^-  [cord json]
     [spc-path (invite inv)]
+  :: ++  outgoing-map
+  ::   |=  outgoing=outgoing-invitations:store
+  ::   ^-  json
+  ::   %-  pairs
+  ::   %+  turn  ~(tap by outgoing)
+  ::   |=  [pth=space-path:spaces-store invitations=space-invitations:store]
+  ::   =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+  ::   ^-  [cord json]
+  ::   [spc-path (invite-map invitations)]
   ::
-  ++  invite-map
-    |=  =space-invitations:store
-    ^-  json
-    %-  pairs
-    %+  turn  ~(tap by space-invitations)
-    |=  [=^ship inv=invite:store]
-    ^-  [cord json]
-    [(scot %p ship) (invite inv)]
+  :: ++  incoming-map
+  ::   |=  incoming=incoming-invitations:store
+  ::   ^-  json
+  ::   %-  pairs
+  ::   %+  turn  ~(tap by incoming)
+  ::   |=  [pth=space-path:spaces-store inv=invite:store]
+  ::   =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+  ::   ^-  [cord json]
+  ::   [spc-path (invite inv)]
+  ::
+  :: ++  invite-map
+  ::   |=  =space-invitations:store
+  ::   ^-  json
+  ::   %-  pairs
+  ::   %+  turn  ~(tap by space-invitations)
+  ::   |=  [=^ship inv=invite:store]
+  ::   ^-  [cord json]
+  ::   [(scot %p ship) (invite inv)]
   ::
   ++  invite
     |=  =invite:store
@@ -191,12 +193,12 @@
     ==
   ::
   ++  memb
-    |=  =passport:passport-store
+    |=  =member:member-store
     ^-  json
     %-  pairs:enjs:format
-    :~  ['roles' a+(turn ~(tap in roles.passport) |=(rol=role:member-store s+(scot %tas rol)))]
-        ['alias' s+alias.passport]
-        ['status' s+(scot %tas status.passport)]
+    :~  ['roles' a+(turn ~(tap in roles.member) |=(rol=role:member-store s+(scot %tas rol)))]
+        ['alias' s+alias.member]
+        ['status' s+(scot %tas status.member)]
     ==
   ::
   --
