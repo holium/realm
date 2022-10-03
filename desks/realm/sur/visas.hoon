@@ -1,4 +1,4 @@
-/-  membership, spc=spaces
+/-  membership, spc=spaces-store
 |%
 ::
 :: +$  passport

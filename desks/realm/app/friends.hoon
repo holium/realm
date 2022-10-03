@@ -2,7 +2,7 @@
 ::
 ::  Friend list management within Realm
 ::
-/-  store=friends, spaces, membership-store=membership
+/-  store=friends, membership-store=membership
 /+  dbug, default-agent, lib=friends
 |%
 +$  card  card:agent:gall

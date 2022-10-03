@@ -5,7 +5,7 @@
 ::
 ::
 /-  store=bazaar, docket, spaces-store
-/-  membership-store=membership, hark=hark-store, passports-store=passports
+/-  membership-store=membership, hark=hark-store
 /-  treaty
 /+  verb, dbug, default-agent
 =>
@@ -1173,7 +1173,7 @@
         =/  watch-path    [/bazaar/(scot %p ship.path)/(scot %tas space.path)]
         %-  (slog leaf+"{<dap.bowl>}: subscribing to {<watch-path>}..." ~)
         (snoc acc [%pass watch-path %agent [ship.path %bazaar] %watch watch-path])
-    %-  (slog leaf+"{<dap.bowl>}: spaces [initial] reaction processed. leaving channel and resubscribing to %our wire..." ~)
+    :: %-  (slog leaf+"{<dap.bowl>}: spaces [initial] reaction processed. leaving channel and resubscribing to %our wire..." ~)
     :: =/  rejoin-our=(list card)
     ::   :~  [%pass /spaces %agent [our.bowl %spaces] %leave ~]
     ::       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
@@ -1242,17 +1242,7 @@
     ^-  ?
     =/  member   .^(view:membership-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
     ?>  ?=(%is-member -.member)
-    :: ~&  >  ['is member' is-member.member]
     is-member.member
-  :: ++  check-member
-  ::   |=  [path=space-path:spaces-store =ship]
-  ::   :: =/  members  (~(get by membership.state) path)
-  ::   :: ?~  members  %.n
-  ::   :: =/  member  (~(get by u.members) ship)
-  ::   :: ?~  member  %.n
-  ::   =/  vw  .^(view:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
-  ::   ?>  ?=([%member *] vw)
-  ::   ?:(=(status.passport.vw 'joined') %.y %.n)
   --
 ::
 ::

@@ -1,4 +1,4 @@
-/-  sur=membership, spcs=spaces, frens-sur=friends
+/-  sur=membership, spcs=spaces-store, frens-sur=friends
 =<  [sur .]
 =,  sur
 |%

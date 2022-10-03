@@ -41,10 +41,8 @@
       theme=theme
       updated-at=@da
   ==
-:: +$  space-name     cord  :: should be a unique name to the ship
-:: +$  space-path     [ship=ship space=space-name]
 +$  space-type     ?(%group %space %our)
-+$  archetype      ?(%home %lodge %creator-dao %service-dao %investment-dao)
++$  archetype      ?(%home %community %creator-dao %service-dao %investment-dao)
 +$  space-access   ?(%public %antechamber %private)
 ::
 ::
@@ -54,8 +52,9 @@
   $%  [%add slug=@t payload=add-payload members=members:membership]
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
+      [%join path=space-path]
       [%leave path=space-path]
-      [%kicked path=space-path ship=ship]
+      :: [%kicked path=space-path ship=ship]
   ==
 ::
 +$  add-payload

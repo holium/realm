@@ -8,7 +8,7 @@
 ::   synch's contacts from contact-store.
 ::
 ::
-/-  sur=friends, spcs=spaces
+/-  sur=friends
 =<  [sur .]
 =,  sur
 |%
@@ -94,11 +94,6 @@
     ::
     ::
     ==
-  ::
-  ++  pth
-    |=  path=space-path:spaces
-    ^-  json
-    [%s (spat /(scot %p ship.path)/(scot %tas space.path))]
   ::
   ++  view :: encodes for on-peek
     |=  view=^view

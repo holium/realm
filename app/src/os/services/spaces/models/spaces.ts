@@ -25,7 +25,7 @@ export const SpaceModel = types
     name: types.string,
     color: types.maybeNull(types.string),
     type: types.enumeration(['group', 'our', 'space']),
-    archetype: types.optional(types.enumeration(['home', 'lodge']), 'home'), //TODO remove the optional
+    archetype: types.optional(types.enumeration(['home', 'community']), 'home'), //TODO remove the optional
     picture: types.maybeNull(types.string),
     theme: ThemeModel,
     token: types.maybe(TokenModel),

@@ -3,7 +3,7 @@
 ::
 ::  Keeps track of the webrtc rooms in Realm
 ::
-/-  store=rooms, spaces
+/-  store=rooms, spaces=spaces-store
 /+  lib=rooms
 /+  dbug, default-agent ::, agentio
 |%

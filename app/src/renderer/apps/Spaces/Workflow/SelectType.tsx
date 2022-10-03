@@ -134,11 +134,11 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                 setState({
                   title: 'New Space',
                   type: 'space',
-                  archetype: 'lodge',
+                  archetype: 'community',
                   archetypeTitle: 'Community',
                 });
               // setWorkspaceState({
-              //   archetype: 'lodge',
+              //   archetype: 'community',
               //   archetypeTitle: 'Community',
               // });
               // workflowState.set({

@@ -1,4 +1,4 @@
-/-  spaces, docket
+/-  spaces=spaces-store, docket
 |%
 ::
 +$  glob  (map path mime)

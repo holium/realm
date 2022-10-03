@@ -125,8 +125,10 @@
           [%spaces @ @ ~]  :: The space level watch subscription
         =/  host                `@p`(slav %p i.t.path)
         =/  space-pth           `@t`i.t.t.path
-        ?>  (check-member:core [host space-pth] src.bowl)     ::  only members should subscribe
         =/  space               (~(got by spaces.state) [host space-pth])
+        ::  TODO allow public spaces to be watched
+        ::  =(access.space %public)
+        ?>  (check-member:core [host space-pth] src.bowl)     ::  only members should subscribe
         =/  members             (~(got by membership.state) [host space-pth])
         (give:spaces:core [%remote-space [host space-pth] space members] [/spaces/(scot %p host)/(scot %tas space-pth) ~])
         ::
@@ -190,8 +192,9 @@
       %add            (handle-add +.act)
       %update         (handle-update +.act)
       %remove         (handle-remove +.act)
+      %join           (handle-join +.act)
       %leave          (handle-leave +.act)
-      %kicked         (handle-kicked +.act)
+      :: %kicked         (handle-kicked +.act)
     ==
     ::
     ++  handle-add
@@ -250,6 +253,15 @@
         [%give %fact watch-paths spaces-reaction+!>([%remove path])]
       ==
     ::
+    ++  handle-join
+      |=  [path=space-path:store]
+      ^-  (quip card _state)
+      ::  TODO implement logic to poke the host and get added to the member list, as well as watching
+      `state
+      :: =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
+      :: :_  state
+      :: [%pass watch-path %agent [ship.path %spaces] %watch watch-path]~
+    ::
     ++  handle-leave
       |=  [path=space-path:store]
       ^-  (quip card _state)
@@ -287,18 +299,6 @@
           [%give %fact watch-paths visa-reaction+!>([%kicked path ship])]
         ==
 
-    ::
-    ++  handle-kicked
-      |=  [path=space-path:store =ship]
-      ^-  (quip card _state)
-      ?:  =(our.bowl ship)  :: we are kicked
-        =.  spaces.state        (~(del by spaces.state) path)
-        =.  membership.state    (~(del by membership.state) path)
-        =/  watch-paths         [/updates ~]
-        :_  state
-        (give [%remove path] watch-paths)  ::  notify our watches
-      `state
-    ::
     --
   ++  reaction
     |=  [rct=reaction:store]
@@ -452,9 +452,7 @@
       :~  [%pass / %agent [our.bowl %hark-store] %poke hark-action+!>(notify)]                      ::  send notification to ship
           [%give %fact [/updates ~] visa-reaction+!>([%invite-received path invite])]                    
       ==               
-      :: =/  has-invite                    (~(get by invitations.state) path)
-      :: ?~  has-invite
-      :: `state
+
     ::
     ++  handle-accept
       |=  [path=space-path:store]

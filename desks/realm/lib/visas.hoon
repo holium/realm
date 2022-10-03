@@ -1,4 +1,4 @@
-/-  store=visas, spaces-store=spaces, member-store=membership
+/-  store=visas, spaces-store, member-store=membership
 /+  spaces-lib=spaces
 =<  [store .]
 =,  store

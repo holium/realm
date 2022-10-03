@@ -28,7 +28,7 @@
 ::  CLIENT
 ::  app/room/hoon
 ::
-/-  spaces
+/-  spaces=spaces-store
 |%
 +$  rid       @t
 +$  title     cord

@@ -119,8 +119,9 @@
       :~  [%add add-space]
           [%update update-space]
           [%remove path-key]
+          [%join path-key]
           [%leave path-key]
-          [%kicked kicked]
+          :: [%kicked kicked]
       ==
     ::
     ++  de-space
@@ -237,7 +238,7 @@
       ^-  archetype:store
       ?>  ?=(%s -.json)
       ?:  =('home' p.json)                %home
-      ?:  =('lodge' p.json)               %lodge
+      ?:  =('community' p.json)           %community
       ?:  =('creator-dao' p.json)         %creator-dao
       ?:  =('service-dao' p.json)         %service-dao
       ?:  =('investment-dao' p.json)      %investment-dao
