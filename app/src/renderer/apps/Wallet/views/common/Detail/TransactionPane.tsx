@@ -17,10 +17,7 @@ import {
 } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import {
-  shortened,
-  getBaseTheme,
-} from '../../../lib/helpers';
+import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 
