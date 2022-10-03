@@ -32,6 +32,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
@@ -112,12 +113,19 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
 
     // Setting up options menu
     useEffect(() => {
-      setWorkspaceState({
-        members: {
-          [ship!.patp]: { roles: ['owner'], status: 'host' },
-        },
-      });
-      selectedPatp.add(ship!.patp);
+      console.log(workflowState);
+      if (workflowState.type === 'group') {
+        ShipActions.getGroupMembers(workflowState.path).then((members: any) => {
+          console.log(members);
+        });
+      } else {
+        setWorkspaceState({
+          members: {
+            [ship!.patp]: { roles: ['owner'], status: 'host' },
+          },
+        });
+        selectedPatp.add(ship!.patp);
+      }
     }, []);
 
     const onShipSelected = (contact: [string, string?]) => {

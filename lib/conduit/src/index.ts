@@ -180,7 +180,8 @@ export class Conduit extends EventEmitter {
         console.log('sse error', error);
         this.updateStatus(ConduitState.Disconnected);
         await this.closeChannel();
-        this.reconnectToChannel();
+        // TODO make reconnection work
+        // this.reconnectToChannel();
       };
       this.sse.addEventListener('close', () => {
         console.log('e');
@@ -292,8 +293,8 @@ export class Conduit extends EventEmitter {
         }
       );
       return response.data;
-    } catch (err : any) {
-      console.log("scry error", app, path, err.response.status)
+    } catch (err: any) {
+      console.log('scry error', app, path, err.response.status);
       // console.log(err);
     }
   }

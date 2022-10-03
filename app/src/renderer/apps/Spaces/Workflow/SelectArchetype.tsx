@@ -12,7 +12,7 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
     const { windowColor } = theme.currentTheme;
     const { workflowState, setState } = props;
     const [selectedArchetype, setSelectedArchetype] = useState<string | null>(
-      'lodge'
+      'community'
     );
 
     const setWorkspaceState = (obj: any) => {
@@ -24,9 +24,9 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
     };
 
     useEffect(() => {
-      setSelectedArchetype('lodge');
+      setSelectedArchetype('community');
       setWorkspaceState({
-        archetype: 'lodge',
+        archetype: 'community',
         archetypeTitle: 'Community',
       });
     }, []);
@@ -74,11 +74,11 @@ export const SelectArchetype: FC<BaseDialogProps> = observer(
             customBg={windowColor}
             title="Community"
             subtitle="A space to hangout and chat with friends."
-            selected={selectedArchetype === 'lodge'}
+            selected={selectedArchetype === 'community'}
             onClick={() => {
-              setSelectedArchetype('lodge');
+              setSelectedArchetype('community');
               setWorkspaceState({
-                archetype: 'lodge',
+                archetype: 'community',
                 archetypeTitle: 'Community',
               });
             }}

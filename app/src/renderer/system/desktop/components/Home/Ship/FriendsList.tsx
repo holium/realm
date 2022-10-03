@@ -13,28 +13,13 @@ interface IFriendsList {
 }
 
 export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
-  const { friends } = props;
-  const { theme, ship, contacts } = useServices();
+  const { theme, ship, contacts, friends } = useServices();
 
   const { textColor, windowColor } = theme.currentTheme;
-
   const rowBg = rgba(darken(0.075, windowColor), 0.5);
 
-  const pinned = useMemo(
-    () => friends.filter((friend: any) => friend.pinned),
-    [friends && friends.filter((friend: any) => friend.pinned).length]
-  );
-
-  const mutual = useMemo(
-    () => friends.filter((friend: any) => friend.mutual),
-    [friends && friends.filter((friend: any) => friend.pinned).length]
-  );
-
-  const all = useMemo(
-    () => friends.filter((friend: any) => !friend.pinned),
-    [friends && friends.filter((friend: any) => !friend.pinned).length]
-  );
-
+  const pinned = friends.pinned || [];
+  const all = friends.unpinned || [];
   const onUnpin = (person: any) => {
     ShipActions.editFriend(person.patp, {
       pinned: false,
@@ -78,10 +63,10 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
     return (
       <PersonRow
         patp={person.patp}
-        nickname={contact.nickname || person.nickname}
-        sigilColor={contact.color || person.color}
-        avatar={contact.avatar || person.avatar}
-        description={contact.bio || person.description}
+        nickname={contact.nickname}
+        sigilColor={contact.color}
+        avatar={contact.avatar}
+        description={contact.bio}
         listId="member-list"
         rowBg={rowBg}
         style={{ ...style }}
@@ -104,85 +89,82 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
 
   //
   const showHint =
-    friends.length === 0 || (pinned.length > 0 && all.length === 0);
+    friends.list.length === 0 || (pinned.length > 0 && all.length === 0);
 
-  return useMemo(
-    () => (
-      <>
-        <Flex
-          mt={18}
-          height={pinned.length === 0 ? 60 : 24 + pinned.length * 42}
-          flexDirection="column"
+  return (
+    <>
+      <Flex
+        mt={18}
+        height={pinned.length === 0 ? 60 : 24 + pinned.length * 42}
+        flexDirection="column"
+      >
+        <Text
+          style={{ textTransform: 'uppercase' }}
+          fontSize={1}
+          fontWeight={600}
+          opacity={0.6}
+          ml="2px"
+          mb="4px"
         >
-          <Text
-            style={{ textTransform: 'uppercase' }}
-            fontSize={1}
-            fontWeight={600}
-            opacity={0.6}
-            ml="2px"
-            mb="4px"
-          >
-            Pinned
-          </Text>
-          {pinned.length === 0 && (
-            <Flex
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              height={40}
-            >
-              <Text fontSize={2} opacity={0.5}>
-                {friends.length === 0
-                  ? 'No friends to pin'
-                  : 'No friends pinned'}
-              </Text>
-            </Flex>
-          )}
-          <List
+          Pinned
+        </Text>
+        {pinned.length === 0 && (
+          <Flex
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
             height={40}
-            width="100%"
-            itemSize={40}
-            itemCount={pinned.length}
           >
-            {(pinProps: { index: number; style: any }) =>
-              RowRenderer(pinProps, true)
-            }
-          </List>
-        </Flex>
-        <Flex mt={18} height={24 + all.length * 42} flexDirection="column">
-          <Text
-            style={{ textTransform: 'uppercase' }}
-            fontSize={1}
-            fontWeight={600}
-            opacity={0.6}
-            ml="2px"
-            mb="4px"
+            <Text fontSize={2} opacity={0.5}>
+              {friends.list.length === 0
+                ? 'No friends to pin'
+                : 'No friends pinned'}
+            </Text>
+          </Flex>
+        )}
+        <List
+          height={40 * (pinned.length + 1)}
+          width="100%"
+          itemSize={40}
+          itemCount={pinned.length}
+        >
+          {(pinProps: { index: number; style: any }) =>
+            RowRenderer(pinProps, true)
+          }
+        </List>
+      </Flex>
+      <Flex mt={18} height={24 + all.length * 42} flexDirection="column">
+        <Text
+          style={{ textTransform: 'uppercase' }}
+          fontSize={1}
+          fontWeight={600}
+          opacity={0.6}
+          ml="2px"
+          mb="4px"
+        >
+          All
+        </Text>
+        {showHint && (
+          <Flex
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            height={40}
           >
-            All
-          </Text>
-          {showHint && (
-            <Flex
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              height={40}
-            >
-              <Text fontSize={2} opacity={0.5}>
-                {pinned.length > 0 &&
-                  all.length === 0 &&
-                  'All your friends are pinned'}
-                {friends.length === 0 && 'Add some friends above'}
-              </Text>
-            </Flex>
-          )}
-          <List height={40} width="100%" itemSize={40} itemCount={all.length}>
-            {(pinProps: { index: number; style: any }) =>
-              RowRenderer(pinProps, false)
-            }
-          </List>
-        </Flex>
-      </>
-    ),
-    [pinned.length, friends.length, all.length]
+            <Text fontSize={2} opacity={0.5}>
+              {pinned.length > 0 &&
+                all.length === 0 &&
+                'All your friends are pinned'}
+              {friends.list.length === 0 && 'Add some friends above'}
+            </Text>
+          </Flex>
+        )}
+        <List height={400} width="100%" itemSize={40} itemCount={all.length}>
+          {(pinProps: { index: number; style: any }) =>
+            RowRenderer(pinProps, false)
+          }
+        </List>
+      </Flex>
+    </>
   );
 });

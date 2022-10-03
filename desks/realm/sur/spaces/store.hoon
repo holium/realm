@@ -2,9 +2,11 @@
 ::  Defines the types for the spaces concept.
 :: 
 ::  A space is a higher level concept above a %landscape group.
-/-  membership
+/-  membership, spaces-path, visas
 |%
 ::
++$  space-path    path:spaces-path
++$  space-name    name:spaces-path
 +$  group-space   [creator=ship name=@tas title=@t picture=@t color=@ux]
 +$  token
   $:  chain=?(%ethereum %uqbar)
@@ -39,10 +41,8 @@
       theme=theme
       updated-at=@da
   ==
-+$  space-name     cord  :: should be a unique name to the ship
-+$  space-path     [ship=ship space=space-name]
 +$  space-type     ?(%group %space %our)
-+$  archetype      ?(%home %lodge %creator-dao %service-dao %investment-dao)
++$  archetype      ?(%home %community %creator-dao %service-dao %investment-dao)
 +$  space-access   ?(%public %antechamber %private)
 ::
 ::
@@ -52,8 +52,9 @@
   $%  [%add slug=@t payload=add-payload members=members:membership]
       [%update path=space-path payload=edit-payload]
       [%remove path=space-path]
-      [%join path=space-path =ship]
-      [%kicked path=space-path ship=ship]
+      [%join path=space-path]
+      [%leave path=space-path]
+      :: [%kicked path=space-path ship=ship]
   ==
 ::
 +$  add-payload
@@ -75,11 +76,11 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces]
+  $%  [%initial =spaces =membership:membership =invitations:visas]
       [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]
-      [%new-space path=space-path =space]
+      [%remote-space path=space-path =space =members:membership]
   ==
 ::
 ::  Scry views

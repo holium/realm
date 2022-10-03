@@ -26,6 +26,7 @@ interface IVisaRow {
   buttonText?: string;
   subtitle?: string;
   onClick?: (data: any) => void;
+  onAccept?: (data: any) => void;
   onButtonClick?: (data: any) => void;
 }
 
@@ -40,6 +41,7 @@ export const VisaRow = (props: IVisaRow) => {
     path,
     invitedBy,
     onClick,
+    onAccept,
     onButtonClick,
   } = props;
   let leftIcon = <EmptyGroup />;

@@ -4,8 +4,8 @@
 ::  A store for metadata on app dockets and installs.
 ::
 ::
-/-  store=bazaar, docket, spaces-store=spaces
-/-  membership-store=membership, hark=hark-store, passports-store=passports
+/-  store=bazaar, docket, spaces-store, vstore=visas
+/-  membership-store=membership, hark=hark-store
 /-  treaty
 /+  verb, dbug, default-agent
 =>
@@ -86,7 +86,6 @@
       [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
       [%pass /allies %agent [our.bowl %treaty] %watch /allies]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
-      [%pass /bazaar %agent [our.bowl %bazaar] %watch /our]
   ==
 ::
 ++  on-save
@@ -117,12 +116,6 @@
   =^  cards  state
   ?+  path              (on-watch:def path)
      :: agent updates
-    [%our ~]
-      ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to our..."
-      ::  only host agent should get our updates
-      ?>  (is-host:core src.bowl)
-      `state
-    ::
     [%updates ~]
       ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
       ::  only host should get all updates
@@ -857,7 +850,7 @@
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =.  pinned.sorts.apps    ord
     =.  space-apps.state     (~(put by space-apps.state) path [index.apps sorts.apps])
-    =/  paths                [/updates /our ~]
+    =/  paths                [/updates ~]
     (bazaar:send-reaction [%set-pin-order path ord] paths ~)
   ::
   ++  on-rec
@@ -953,7 +946,7 @@
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =.  suite.sorts.apps     ord
     =.  space-apps.state     (~(put by space-apps.state) path [index.apps sorts.apps])
-    =/  paths                [/updates /our ~]
+    =/  paths                [/updates ~]
     (bazaar:send-reaction [%set-suite-order path ord] paths ~)
   --
 ::
@@ -1107,12 +1100,12 @@
   ++  add
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
+    :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
       %glob
         ::  once fully installed, remove the installation entry from state
-        ~&  >>  "{<dap.bowl>}: charge-update [add-charge] {<desk>}, {<charge>}. app fully installed. adding to bazaar catalog..."
+        :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] {<desk>}, {<charge>}. app fully installed. adding to bazaar catalog..."
         =/  entry  (~(get by app-catalog.state) desk)
         =/  entry  ?~  entry  [%0 [%urbit docket.charge %.y]]
           ?>  ?=(%urbit -.app.u.entry)
@@ -1154,11 +1147,11 @@
     %add            (on-add +.rct)
     %replace        (on-replace +.rct)
     %remove         (on-remove +.rct)
-    %new-space      (on-new-space +.rct)
+    %remote-space   (on-remote-space +.rct)
   ==
   ::
   ++  on-initial
-    |=  [spaces=spaces:spaces-store]
+    |=  [spaces=spaces:spaces-store =membership:membership-store =invitations:vstore]
     ^-  (quip card _state)
     ::  sets the initial spaces maps properly
     =/  spaces-map=space-apps-lite:store
@@ -1173,13 +1166,14 @@
         =/  watch-path    [/bazaar/(scot %p ship.path)/(scot %tas space.path)]
         %-  (slog leaf+"{<dap.bowl>}: subscribing to {<watch-path>}..." ~)
         (snoc acc [%pass watch-path %agent [ship.path %bazaar] %watch watch-path])
-    %-  (slog leaf+"{<dap.bowl>}: spaces [initial] reaction processed. leaving channel and resubscribing to %our wire..." ~)
-    =/  rejoin-our=(list card)
-      :~  [%pass /spaces %agent [our.bowl %spaces] %leave ~]
-          [%pass /spaces %agent [our.bowl %spaces] %watch /our]
-      ==
+    :: %-  (slog leaf+"{<dap.bowl>}: spaces [initial] reaction processed. leaving channel and resubscribing to %our wire..." ~)
+    :: =/  rejoin-our=(list card)
+    ::   :~  [%pass /spaces %agent [our.bowl %spaces] %leave ~]
+    ::       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+    ::   ==
     =.  space-apps.state    (~(uni by spaces-map) space-apps.state)
-    [(weld subscriptions rejoin-our) state]
+    :: [(weld subscriptions rejoin-our) state]
+    `state
   ::
     ++  skim-our
       |=  [path=space-path:spaces-store =space:spaces-store]
@@ -1207,12 +1201,9 @@
     :: [%pass /bazaar/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %bazaar] %leave ~]
     :: `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
   ::
-  ++  on-new-space
-    |=  [path=space-path:spaces-store space=space:spaces-store]
+  ++  on-remote-space
+    |=  [path=space-path:spaces-store space=space:spaces-store =members:membership-store]
     ^-  (quip card _state)
-    :: ?:  ?|  =(our.bowl ship.path)
-    ::         =(ship ship.path)
-    ::     ==  `state
     ::  no need to subscribe to our own ship's bazaar. we're already getting all updates
     ?:  =(our.bowl ship.path)  `state
     %-  (slog leaf+"{<dap.bowl>}: on-space-initial:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
@@ -1242,19 +1233,9 @@
     |=  [path=space-path:spaces-store =ship]
     ~&  >  ['bazaar check-member' our.bowl ship]
     ^-  ?
-    =/  member   .^(view:passports-store %gx /(scot %p our.bowl)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
+    =/  member   .^(view:membership-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/is-member/(scot %p ship)/noun)
     ?>  ?=(%is-member -.member)
-    :: ~&  >  ['is member' is-member.member]
     is-member.member
-  :: ++  check-member
-  ::   |=  [path=space-path:spaces-store =ship]
-  ::   :: =/  members  (~(get by membership.state) path)
-  ::   :: ?~  members  %.n
-  ::   :: =/  member  (~(get by u.members) ship)
-  ::   :: ?~  member  %.n
-  ::   =/  vw  .^(view:passports-store %gx /(scot %p ship.path)/passports/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
-  ::   ?>  ?=([%member *] vw)
-  ::   ?:(=(status.passport.vw 'joined') %.y %.n)
   --
 ::
 ::

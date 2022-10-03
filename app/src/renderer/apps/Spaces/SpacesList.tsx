@@ -48,7 +48,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
 
     const incoming = Array.from(visas.incoming.values());
 
-    if (!spaces.length && !loadingVisa && !incoming.length) {
+    if (!spaces.length && !incoming.length) {
       return (
         <Flex
           flex={1}
@@ -57,7 +57,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
           alignItems="center"
           gap={24}
         >
-          <Text color={textColor} width={200} textAlign="center" opacity={0.3}>
+          <Text color={textColor} width={200} textAlign="center" opacity={0.5}>
             None of your groups have Spaces enabled.
           </Text>
           <Flex

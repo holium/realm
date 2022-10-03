@@ -1,14 +1,22 @@
+/-  *spaces-path
 |%
 ::
 +$  role            ?(%initiate %member %admin %owner)
 +$  roles           (set role)
 +$  status          ?(%invited %joined %host)
++$  alias           cord
 +$  member
   $:  =roles
+      =alias
       =status
-      :: pinned=?
   ==
 +$  members         (map ship member)
-+$  membership      (map [ship=ship space=cord] members)
++$  membership      (map path members)
 ::
++$  view
+  $%  [%membership =membership]
+      [%members =members]
+      [%member =member]
+      [%is-member is-member=?]
+  ==
 --

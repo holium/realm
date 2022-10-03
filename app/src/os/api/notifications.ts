@@ -101,13 +101,12 @@ export const NotificationApi: any = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  opened: async (conduit: Conduit) => {
-    await conduit.poke({
+  opened: (conduit: Conduit) => {
+    return conduit.poke({
       app: 'hark-store',
       mark: 'hark-action',
       json: { opened: null },
     });
-    return;
   },
   dismiss: async (conduit: Conduit, notification: NotificationModelType) => {
     // const payload = [

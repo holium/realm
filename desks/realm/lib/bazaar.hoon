@@ -1,4 +1,4 @@
-/-  store=bazaar, spaces-store=spaces, docket
+/-  store=bazaar, spaces-store, docket
 /+  docket-lib=docket
 =<  [store .]
 =,  store

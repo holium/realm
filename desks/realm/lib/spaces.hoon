@@ -1,4 +1,5 @@
-/-  store=spaces, member-store=membership
+/-  store=spaces-store, member-store=membership, visas
+/+  memb-lib=membership
 =<  [store .]
 =,  store
 |%
@@ -48,7 +49,8 @@
       :-  %initial
       %-  pairs
       :~  [%spaces (spaces-map:encode spaces.rct)]
-          :: [%membership (membership-map:encode membership.rct)]
+          [%membership (membership-map:encode membership.rct)]
+          [%invitations (invitations:encode invitations.rct)]
       ==
     ::
         %add
@@ -70,13 +72,22 @@
       :~  [%space-path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
     ::
-        %new-space
-      :-  %new-space
+        %remote-space
+      :-  %remote-space
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%space (spc:encode space.rct)]
-          :: [%members (membs:encode members.rct)]
+          :: [%members (passes:encode:membership membership.rct)]
+          [%members (membs:encode members.rct)]
       ==
+
+    
+      ::   %members
+      :: :-  %members
+      :: %-  pairs
+      :: :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+      ::     [%members (membership-json:encode:memb-lib membership.rct)]
+      :: ==
     ==
   ::
   ++  view :: encodes for on-peek
@@ -109,15 +120,10 @@
       %-  of
       :~  [%add add-space]
           [%update update-space]
-          [%remove remove-space]
-          [%join joined-space]
-          [%kicked kicked]
-      ==
-    ::
-    ++  joined-space
-      %-  ot
-      :~  [%path pth]
-          [%ship (su ;~(pfix sig fed:ag))]
+          [%remove path-key]
+          [%join path-key]
+          [%leave path-key]
+          :: [%kicked kicked]
       ==
     ::
     ++  de-space
@@ -152,7 +158,7 @@
           [%ship (su ;~(pfix sig fed:ag))]
       ==
     ::
-    ++  remove-space
+    ++  path-key
       %-  ot
       :~  [%path pth]
       ==
@@ -197,6 +203,7 @@
     ++  memb
       %-  ot
       :~  [%roles (as rol)]
+          [%alias so]
           [%status status]
           :: [%pinned bo]
       ==
@@ -233,7 +240,7 @@
       ^-  archetype:store
       ?>  ?=(%s -.json)
       ?:  =('home' p.json)                %home
-      ?:  =('lodge' p.json)               %lodge
+      ?:  =('community' p.json)           %community
       ?:  =('creator-dao' p.json)         %creator-dao
       ?:  =('service-dao' p.json)         %service-dao
       ?:  =('investment-dao' p.json)      %investment-dao
@@ -330,5 +337,31 @@
       ['windowColor' s+window-color.theme]
       ['wallpaper' s+wallpaper.theme]
     ==
+  ::
+  ++  invitations
+    |=  =invitations:visas
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by invitations)
+    |=  [pth=space-path:store inv=invite:visas]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (invite inv)]
+  ::
+  ++  invite
+    |=  =invite:visas
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['inviter' s+(scot %p inviter.invite)]
+        ['path' s+(spat /(scot %p ship.path.invite)/(scot %tas space.path.invite))]
+        ['role' s+(scot %tas role.invite)]
+        ['message' s+message.invite]
+        ['name' s+name.invite]
+        ['type' s+type.invite]
+        ['picture' s+picture.invite]
+        ['color' s+color.invite]
+        ['invitedAt' (time invited-at.invite)]
+    ==
+  ::
   --
 --
