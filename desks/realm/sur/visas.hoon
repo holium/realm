@@ -1,4 +1,4 @@
-/-  membership, spc=spaces-store
+/-  membership, spc=spaces-path
 |%
 ::
 :: +$  passport
@@ -11,16 +11,17 @@
 :: +$  passports      (map ship passport)
 :: ::
 :: ::  $districts: subdivisions of the entire realm universe
-:: +$  districts     (map path=space-path:spaces passports)
+:: +$  districts     (map path=path:spaces passports)
 ::
-+$  invitations           (map space-path:spc invite)
+
++$  invitations           (map path:spc invite)
 +$  invite
   $:  inviter=ship
-      path=space-path:spc
+      path=path:spc
       role=role:membership
       message=cord
-      name=space-name:spc
-      type=space-type:spc
+      name=name:spc
+      type=?(%group %space %our)
       picture=@t
       color=@t 
       invited-at=@da
@@ -28,20 +29,21 @@
 ::
 
 +$  action
-  $%  [%send-invite path=space-path:spc =ship =role:membership message=@t]
-      [%accept-invite path=space-path:spc]
-      [%decline-invite path=space-path:spc]
-      [%invited path=space-path:spc =invite]
-      [%stamped path=space-path:spc]
-      [%kick-member path=space-path:spc =ship]
+  $%  [%send-invite path=path:spc =ship =role:membership message=@t]
+      [%accept-invite path=path:spc]
+      [%decline-invite path=path:spc]
+      [%invited path=path:spc =invite]
+      [%stamped path=path:spc]
+      [%kick-member path=path:spc =ship]
+      [%revoke-invite path=path:spc]
   ==
 
 +$  reaction
-  $%  [%invite-sent path=space-path:spc =ship =invite =member:membership]
-      [%invite-received path=space-path:spc =invite]
-      [%invite-removed path=space-path:spc]
-      [%invite-accepted path=space-path:spc =ship =member:membership]
-      [%kicked path=space-path:spc =ship]
+  $%  [%invite-sent path=path:spc =ship =invite =member:membership]
+      [%invite-received path=path:spc =invite]
+      [%invite-removed path=path:spc]
+      [%invite-accepted path=path:spc =ship =member:membership]
+      [%kicked path=path:spc =ship]
   ==
 ::
 +$  view

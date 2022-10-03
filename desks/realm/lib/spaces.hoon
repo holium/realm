@@ -1,4 +1,4 @@
-/-  store=spaces-store, member-store=membership
+/-  store=spaces-store, member-store=membership, visas
 /+  memb-lib=membership
 =<  [store .]
 =,  store
@@ -50,6 +50,7 @@
       %-  pairs
       :~  [%spaces (spaces-map:encode spaces.rct)]
           [%membership (membership-map:encode membership.rct)]
+          [%invitations (invitations:encode invitations.rct)]
       ==
     ::
         %add
@@ -79,7 +80,8 @@
           :: [%members (passes:encode:membership membership.rct)]
           [%members (membs:encode members.rct)]
       ==
-    ::
+
+    
       ::   %members
       :: :-  %members
       :: %-  pairs
@@ -335,5 +337,31 @@
       ['windowColor' s+window-color.theme]
       ['wallpaper' s+wallpaper.theme]
     ==
+  ::
+  ++  invitations
+    |=  =invitations:visas
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by invitations)
+    |=  [pth=space-path:store inv=invite:visas]
+    =/  spc-path  (spat /(scot %p ship.pth)/(scot %tas space.pth))
+    ^-  [cord json]
+    [spc-path (invite inv)]
+  ::
+  ++  invite
+    |=  =invite:visas
+    ^-  json
+    %-  pairs:enjs:format
+    :~  ['inviter' s+(scot %p inviter.invite)]
+        ['path' s+(spat /(scot %p ship.path.invite)/(scot %tas space.path.invite))]
+        ['role' s+(scot %tas role.invite)]
+        ['message' s+message.invite]
+        ['name' s+name.invite]
+        ['type' s+type.invite]
+        ['picture' s+picture.invite]
+        ['color' s+color.invite]
+        ['invitedAt' (time invited-at.invite)]
+    ==
+  ::
   --
 --

@@ -5,9 +5,7 @@
 /+  default-agent, verb, dbug, agentio, lib=spaces, visa-lib=visas, grp=groups
 ^-  agent:gall
 ::
-::  %spaces [realm]:
-::    A store for Realm space metadata and management.
-::    Should watch and sync data with the %group-store under /landscape.
+::  %spaces [realm]: A store for Realm space metadata and members.
 ::
 =>
   |%
@@ -78,6 +76,16 @@
       =/  groups                (our-groups:grp our.bowl now.bowl)
       ``groups-view+!>([%groups groups])
       ::
+        [%x %groups @ @ %members ~]
+      =/  =ship                `@p`(slav %p i.t.t.path)
+      =/  name                 `@t`i.t.t.t.path
+      =/  group                (get-members:grp [ship name] our.bowl now.bowl)
+      ?~  group  ~
+      :: (need grp-data)
+      :: ~&  >  [groups]
+      ``noun+!>(~)
+      :: ``groups-view+!>([%groups groups])
+      ::
         [%x @ @ ~]
       =/  =ship                 `@p`(slav %p i.t.path)
       =/  space-pth             `@t`i.t.t.path
@@ -120,7 +128,7 @@
       ?+    path                      (on-watch:def path)
           [%updates ~] 
         ?>  =(our.bowl src.bowl)      ::  only host should get all updates
-        (give:spaces:core [%initial spaces.state membership.state] [/updates ~])
+        (give:spaces:core [%initial spaces.state membership.state invitations.state] [/updates ~])
         ::
           [%spaces @ @ ~]  :: The space level watch subscription
         =/  host                `@p`(slav %p i.t.path)
@@ -313,7 +321,7 @@
     ==
     ::
     ++  on-initial
-      |=  [=spaces:store =membership:membership-store]
+      |=  [=spaces:store =membership:membership-store =invitations:vstore]
       ^-  (quip card _state)
       `state
     ::
@@ -361,7 +369,6 @@
           %+  weld  %+  snoc  acc
           [%give %kick watch-path (some ship)]
         (give [%remove path] watch-path)
-      :: `state
     ::
     ++  on-remote-space
       |=  [path=space-path:store =space:store =members:membership-store]
@@ -405,6 +412,7 @@
       %decline-invite       (handle-decline +.act)
       %stamped              (handle-stamped +.act)
       %kick-member          (handle-kick +.act)
+      %revoke-invite        (handle-deported +.act)
     ==
     ::
     ++  handle-send  ::  Sends an invite to a ship
@@ -539,11 +547,22 @@
         =/  membs                   (~(got by membership.state) path)
         =.  membs                   (~(del by membs) ship)
         =.  membership.state        (~(put by membership.state) [path membs])
+        :: =/  notify=action:hark        (notify path /realm (crip " issued you a invite to join {<`@t`(scot %tas name.invite)>} in Realm."))
         =/  watch-path              /spaces/(scot %p ship.path)/(scot %tas space.path)
         :_  state
         :~  [%give %fact [watch-path /updates ~] visa-reaction+!>([%kicked path ship])]
             [%give %kick ~[/spaces/(scot %p ship.path)/(scot %tas space.path)] (some ship)]
+            [%pass / %agent [ship %spaces] %poke visa-action+!>([%revoke-invite path])]
         ==
+    ::
+    ++  handle-deported
+      |=  [path=space-path:store]
+      ^-  (quip card _state)
+      ~&  >  ['we are deported']
+      =.  invitations.state           (~(del by invitations.state) path)
+      :_  state
+      [%give %fact [/updates ~] visa-reaction+!>([%invite-removed path])]~
+    ::
     ::
     --
   ++  reaction
@@ -579,9 +598,6 @@
     ++  on-kicked
       |=  [path=space-path:store =ship]
       ^-  (quip card _state)
-      =/  membs                       (~(got by membership.state) path)
-      =.  membs                       (~(del by membs) ship)
-      =.  membership.state            (~(put by membership.state) [path membs])
       ?:  =(our.bowl ship)            ::  we've been kicked
         =.  spaces.state              (~(del by spaces.state) path)
         =.  membership.state          (~(del by membership.state) path)
@@ -591,6 +607,9 @@
           [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
           [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %leave ~]
         ==
+      =/  membs                       (~(got by membership.state) path)
+      =.  membs                       (~(del by membs) ship)
+      =.  membership.state            (~(put by membership.state) [path membs])
       :_  state
       [%give %fact [/updates ~] visa-reaction+!>([%kicked path ship])]~
     ::

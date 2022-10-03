@@ -66,11 +66,16 @@
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
       ==
       ::
-      %kick-member
+        %kick-member
       :-  %kick-member
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
           [%ship s+(scot %p ship.act)]
+      ==
+        %revoke-invite
+      :-  %revoke-invite
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.act)/(scot %tas space.path.act))]
       ==
     ==
   ::
@@ -217,8 +222,9 @@
           [%accept-invite accept-invite-payload]
           [%decline-invite accept-invite-payload]
           [%invited invited-payload]
-          [%stamped stamped-payload]
+          [%stamped path-payload]
           [%kick-member kicked-payload]
+          [%revoke-invite path-payload]
       ==
     ::
     ++  kicked-payload
@@ -228,7 +234,7 @@
       ==
     ::
     ::
-    ++  stamped-payload
+    ++  path-payload
       %-  ot
       :~  [%path pth]
       ==

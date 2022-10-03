@@ -5,6 +5,7 @@ import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { VisaModelType } from 'os/services/spaces/models/visas';
+import { reject } from 'lodash';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -169,22 +170,41 @@ export const SpacesApi = {
    * @param path
    * @returns
    */
-  acceptInvite: async (conduit: Conduit, path: SpacePath) => {
+  acceptInvite: async (
+    conduit: Conduit,
+    path: SpacePath,
+    membersState: MembershipType,
+    spacesState: SpacesStoreType
+  ) => {
     const pathArr = path.split('/');
     const pathObj = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    const response = await conduit.poke({
-      app: 'spaces',
-      mark: 'visa-action',
-      json: {
-        'accept-invite': {
-          path: pathObj,
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'visa-action',
+        json: {
+          'accept-invite': {
+            path: pathObj,
+          },
         },
-      },
+        reaction: 'spaces-reaction.remote-space',
+        onReaction(data, mark?) {
+          membersState.addMemberMap(
+            data['remote-space'].path,
+            data['remote-space'].members
+          );
+          spacesState.addSpace(data['remote-space']);
+          resolve(data);
+        },
+        onError() {
+          reject();
+        },
+      });
     });
-    return response;
+    // return response;
   },
   /**
    * declineInvite
@@ -224,15 +244,24 @@ export const SpacesApi = {
     spacesState: SpacesStoreType,
     membersState: MembershipType,
     bazaarState: BazaarStoreType,
-    visaState: VisaModelType
+    visaState: VisaModelType,
+    setTheme: (theme: any) => void
   ): void => {
     conduit.watch({
       app: 'spaces',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(mark, data);
+        // console.log(mark, data);
         if (mark === 'spaces-reaction') {
-          handleSpacesReactions(data, spacesState, membersState, bazaarState);
+          handleSpacesReactions(
+            data,
+            `~${conduit.ship}`,
+            spacesState,
+            membersState,
+            bazaarState,
+            visaState,
+            setTheme
+          );
         }
         if (mark === 'visa-reaction') {
           handleInviteReactions(
@@ -240,7 +269,8 @@ export const SpacesApi = {
             conduit.ship!,
             membersState,
             spacesState,
-            visaState
+            visaState,
+            setTheme
           );
         }
       },
@@ -253,15 +283,19 @@ export const SpacesApi = {
 
 const handleSpacesReactions = (
   data: any,
+  our: Patp,
   spacesState: SpacesStoreType,
   membersState: MembershipType,
-  bazaarState: BazaarStoreType
+  bazaarState: BazaarStoreType,
+  visaState: VisaModelType,
+  setTheme: (theme: any) => void
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
       spacesState.initialReaction(data['initial']);
       membersState.initial(data['initial']['membership']);
+      visaState.initialIncoming(data['initial']['invitations']);
       break;
     case 'add':
       const newSpace = spacesState.addSpace(data['add']);
@@ -272,15 +306,20 @@ const handleSpacesReactions = (
       spacesState.updateSpace(data['replace']);
       break;
     case 'remove':
-      const deleted = spacesState.deleteSpace(data['remove']);
+      const deleted = spacesState.deleteSpace(
+        `/${our}/our`,
+        data['remove'],
+        setTheme
+      );
+
       membersState.removeMemberMap(deleted);
       break;
     case 'remote-space':
-      membersState.addMemberMap(
-        data['remote-space'].path,
-        data['remote-space'].members
-      );
-      spacesState.addSpace(data['remote-space']);
+      // membersState.addMemberMap(
+      //   data['remote-space'].path,
+      //   data['remote-space'].members
+      // );
+      // spacesState.addSpace(data['remote-space']);
       // bazaarState.addBazaar(remoteSpace);
       break;
     default:
@@ -294,7 +333,8 @@ const handleInviteReactions = (
   ship: string,
   state: MembershipType,
   spacesState: SpacesStoreType,
-  visaState: VisaModelType
+  visaState: VisaModelType,
+  setTheme: (theme: any) => void
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
@@ -321,9 +361,14 @@ const handleInviteReactions = (
       break;
     case 'kicked':
       const kickedPayload = data['kicked'];
-      console.log('kicked', data);
       if (`~${ship}` === kickedPayload.ship) {
-        spacesState.deleteSpace({ 'space-path': kickedPayload.path });
+        spacesState.deleteSpace(
+          `/~${ship}/our`,
+          {
+            'space-path': kickedPayload.path,
+          },
+          setTheme
+        );
       }
       state.removeMember(kickedPayload.path, kickedPayload.ship);
       break;

@@ -81,6 +81,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                         image: data.picture,
                         subtitle,
                         type: 'group',
+                        path: data.path,
                       });
                     props.onNext && props.onNext(_evt);
                   }}

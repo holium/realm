@@ -184,6 +184,7 @@ export class SpacesService extends BaseService {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
+    this.setTheme = this.setTheme.bind(this);
   }
 
   get snapshot() {
@@ -267,7 +268,8 @@ export class SpacesService extends BaseService {
       this.state,
       this.models.membership,
       this.models.bazaar,
-      this.models.visas
+      this.models.visas,
+      this.setTheme
     );
     // Subscribe to sync updates
     // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
@@ -366,7 +368,12 @@ export class SpacesService extends BaseService {
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
-    return await SpacesApi.acceptInvite(this.core.conduit!, path);
+    return await SpacesApi.acceptInvite(
+      this.core.conduit!,
+      path,
+      this.models.membership,
+      this.state!
+    );
   }
 
   async declineInvite(_event: IpcMainInvokeEvent, path: string) {

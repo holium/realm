@@ -96,6 +96,7 @@ export class ShipService extends BaseService {
     'realm.ship.opened-notifications': this.openedNotifications,
     'realm.ship.read-dm': this.readDm,
     'realm.ship.read-group-dm': this.readGroupDm,
+    'realm.ship.get-group-members': this.getGroupMembers,
   };
 
   static preload = {
@@ -104,6 +105,9 @@ export class ShipService extends BaseService {
     },
     getOurGroups: () => {
       return ipcRenderer.invoke('realm.ship.get-our-groups');
+    },
+    getGroupMembers: (path: string) => {
+      return ipcRenderer.invoke('realm.ship.get-group-members', path);
     },
     getAppPreview: (ship: string, desk: string) => {
       return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
@@ -417,6 +421,9 @@ export class ShipService extends BaseService {
   }
 
   async getOurGroups(_event: any): Promise<any> {
+    return await GroupsApi.getOur(this.core.conduit!);
+  }
+  async getGroupMembers(_event: any, path: string): Promise<any> {
     return await GroupsApi.getOur(this.core.conduit!);
   }
 

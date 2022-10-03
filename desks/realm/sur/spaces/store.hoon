@@ -2,7 +2,7 @@
 ::  Defines the types for the spaces concept.
 :: 
 ::  A space is a higher level concept above a %landscape group.
-/-  membership, spaces-path
+/-  membership, spaces-path, visas
 |%
 ::
 +$  space-path    path:spaces-path
@@ -76,7 +76,7 @@
 ::  Reaction via watch paths
 ::
 +$  reaction
-  $%  [%initial =spaces =membership:membership]
+  $%  [%initial =spaces =membership:membership =invitations:visas]
       [%add =space members=members:membership]
       [%replace =space]
       [%remove path=space-path]

@@ -4,7 +4,7 @@
 ::  A store for metadata on app dockets and installs.
 ::
 ::
-/-  store=bazaar, docket, spaces-store
+/-  store=bazaar, docket, spaces-store, vstore=visas
 /-  membership-store=membership, hark=hark-store
 /-  treaty
 /+  verb, dbug, default-agent
@@ -86,7 +86,6 @@
       [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
       [%pass /allies %agent [our.bowl %treaty] %watch /allies]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
-      [%pass /bazaar %agent [our.bowl %bazaar] %watch /our]
   ==
 ::
 ++  on-save
@@ -117,12 +116,6 @@
   =^  cards  state
   ?+  path              (on-watch:def path)
      :: agent updates
-    [%our ~]
-      :: ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to our..."
-      ::  only host agent should get our updates
-      ?>  (is-host:core src.bowl)
-      `state
-    ::
     [%updates ~]
       ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
       ::  only host should get all updates
@@ -857,7 +850,7 @@
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =.  pinned.sorts.apps    ord
     =.  space-apps.state     (~(put by space-apps.state) path [index.apps sorts.apps])
-    =/  paths                [/updates /our ~]
+    =/  paths                [/updates ~]
     (bazaar:send-reaction [%set-pin-order path ord] paths ~)
   ::
   ++  on-rec
@@ -953,7 +946,7 @@
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =.  suite.sorts.apps     ord
     =.  space-apps.state     (~(put by space-apps.state) path [index.apps sorts.apps])
-    =/  paths                [/updates /our ~]
+    =/  paths                [/updates ~]
     (bazaar:send-reaction [%set-suite-order path ord] paths ~)
   --
 ::
@@ -1158,7 +1151,7 @@
   ==
   ::
   ++  on-initial
-    |=  [spaces=spaces:spaces-store =membership:membership-store]
+    |=  [spaces=spaces:spaces-store =membership:membership-store =invitations:vstore]
     ^-  (quip card _state)
     ::  sets the initial spaces maps properly
     =/  spaces-map=space-apps-lite:store
