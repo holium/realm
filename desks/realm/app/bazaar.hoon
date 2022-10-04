@@ -153,6 +153,12 @@
 
   ?+    path  (on-peek:def path)
     ::
+    ::  retrieve this ship's app catalog
+    ::  ~/scry/bazaar/catalog
+    ::
+    [%x %catalog ~]  ``bazaar-view+!>([%catalog app-catalog.state])
+
+    ::
     ::  ~/scry/bazaar/~zod/our/apps/[pinned|recommended|suite|installed|all].json
     ::
     [%x @ @ %apps @ ~]
@@ -776,7 +782,7 @@
     ?:  =(our.bowl src.bowl)  `state
     =/  result=[=app-index-full:store =app-index-lite:store cards=(list card)]
     %-  ~(rep by app-index-full)
-      |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store cards=(list card)]]
+      |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store =app-catalog:store cards=(list card)]]
       ::  is this app installed?
       =/  app-full
       ?+  -.app.entry.app-full  app-full
@@ -785,7 +791,7 @@
           =.  installed.app.entry.app-full   (~(has by app-catalog.state) app-id)
           app-full
       ==
-      =.  app-catalog.state            (~(put by app-catalog.state) app-id entry.app-full)
+      =.  app-catalog.acc            (~(put by app-catalog.acc) app-id entry.app-full)
       =.  app-index-lite.acc         (~(put by app-index-lite.acc) app-id [app-id sieve.app-full])
       =.  app-index-full.acc         (~(put by app-index-full.acc) app-id app-full)
       ?.  (~(has in tags.sieve.app-full) %recommended)  acc
@@ -794,7 +800,7 @@
       ^-  (list card)
       :~  [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]  ==
       acc
-    :: =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
+    =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result sorts])
     =.  sites.state         sites
     :: notify the UI of that we've accepted an invite to a new space and there
@@ -1107,8 +1113,6 @@
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
       %glob
-        ::  once fully installed, remove the installation entry from state
-        :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] {<desk>}, {<charge>}. app fully installed. adding to bazaar catalog..."
         =/  entry  (~(get by app-catalog.state) desk)
         =/  entry  ?~  entry  [%0 [%urbit docket.charge %.y]]
           ?>  ?=(%urbit -.app.u.entry)

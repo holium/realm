@@ -297,12 +297,19 @@ export const BazaarStore = types
       return toJS(self.apps.get(appId));
     },
     getAvailableApps() {
+      console.log('getAvailableApps => %o', self.apps.values());
       return Array.from(self.apps.values());
     },
   }))
   .actions((self) => ({
     isAppInstalled(appId: string) {
       return self.apps.get(appId)?.installed;
+    },
+    initialCatalog(apps: any) {
+      for (const desk in apps) {
+        const app = apps[desk];
+        this.addApp(app.id, app, false);
+      }
     },
     initial(apps: any) {
       if ('my' in apps) {
@@ -329,25 +336,27 @@ export const BazaarStore = types
           app.color = appColor && cleanNounColor(appColor);
         }
         bazaar.setApp(app);
+        console.log('self.apps.set => %o', app);
         self.apps.set(app.id, app);
       }
       self.spaces.set(spacePath, bazaar);
     },
-    addApp(appId: string, app: any) {
+    addApp(appId: string, app: any, triggerStateChange: boolean = true) {
       const appColor = app.color;
       if (app.type === 'urbit') {
         app.color = appColor && cleanNounColor(appColor);
       }
       self.apps.set(appId, app);
       // trigger UI update if someone is listening
-      self.appsChange = !self.appsChange;
+      if (triggerStateChange) {
+        self.appsChange = !self.appsChange;
+      }
     },
     setUninstalled(appId: string) {
       const app = self.apps.get(appId);
       if (app?.type === 'urbit') {
         app.installed = false;
         self.apps.set(appId, app);
-        // trigger UI update if someone is listening
         self.appsChange = !self.appsChange;
       }
     },

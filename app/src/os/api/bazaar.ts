@@ -594,12 +594,13 @@ export const BazaarApi = {
     state: BazaarStoreType
   ): Promise<void> => {
     // __state = state;
-    // load allies
-    // const allies = await conduit.scry({
-    //   app: 'treaty',
-    //   path: '/allies', // the spaces scry is at the root of the path
-    // });
-    // state.initialAllies(allies.ini);
+    // load complete ship's app catalog
+    const apps = await conduit.scry({
+      app: 'bazaar',
+      path: '/catalog',
+    });
+    console.log('catalog => %o', apps.catalog);
+    state.initialCatalog(apps.catalog);
     conduit.watch({
       app: 'treaty',
       path: `/allies`,
@@ -648,9 +649,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      // console.log('initial =>');
-      // console.log(util.inspect(data, { depth: 10, colors: true }));
-      // console.log('<= initial');
+      console.log('initial =>');
+      console.log(util.inspect(data, { depth: 10, colors: true }));
+      console.log('<= initial');
       state.initial(data['initial']);
       break;
     case 'allies':

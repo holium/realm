@@ -204,6 +204,9 @@
     :-  -.vi
     ?-  -.vi
       ::
+        %catalog
+      (pairs (catalog:encode app-catalog.vi))
+      ::
         %apps
       (pairs (full-app-index:encode app-index-full.vi))
       ::
@@ -317,6 +320,24 @@
     ==
     =/  detail=(list [cord json])  (app-detail:encode app.entry.app-full)
     ?~  detail  ~  (weld head detail)
+  ::
+  ++  catalog-app
+    |=  [=app-id:store entry=app-catalog-entry:store]
+    ^-  (list [cord json])
+    =/  head=(list [cord json])
+    :~  [id+s+app-id]
+        ['recommended' n+(crip "{<recommended.entry>}")]
+    ==
+    =/  detail=(list [cord json])  (app-detail:encode app.entry)
+    ?~  detail  ~  (weld head detail)
+  ::
+  ++  catalog
+    |=  [=app-catalog:store]
+    ^-  (list [cord json])
+    %+  turn  ~(tap by app-catalog)
+    |=  [=app-id:store entry=app-catalog-entry:store]
+    ^-  [cord json]
+    [app-id (pairs (catalog-app:encode app-id entry))]
   ::
   ++  full-app-index
     |=  =app-index-full:store

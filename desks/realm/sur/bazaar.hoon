@@ -138,7 +138,8 @@
 ::  Scry views
 ::
 +$  view
-  $%  [%apps =app-index-full]
+  $%  [%catalog =app-catalog]
+      [%apps =app-index-full]
       [%sites sites=(set [ship desk])]
   ==
 --
