@@ -296,6 +296,9 @@ export const BazaarStore = types
     },
   }))
   .actions((self) => ({
+    isAppInstalled(appId: string) {
+      return self.apps.get(appId)?.installed;
+    },
     initial(apps: any) {
       if ('my' in apps) {
         self.my.recommendations.replace(apps.my.recommendations);

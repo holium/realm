@@ -6,6 +6,8 @@ import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
 const util = require('node:util');
 
+// let __state : BazaarStoreType;
+
 export const BazaarApi = {
   installApp: async (
     tempConduit: Conduit,
@@ -55,6 +57,7 @@ export const BazaarApi = {
               reject(err);
             } else if ('install' in charge.chad) {
               console.log(`'${ship}/${desk}' installation started...`);
+              // __state.
             }
           }
         },
@@ -590,6 +593,7 @@ export const BazaarApi = {
     conduit: Conduit,
     state: BazaarStoreType
   ): Promise<void> => {
+    // __state = state;
     // load allies
     // const allies = await conduit.scry({
     //   app: 'treaty',

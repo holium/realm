@@ -150,7 +150,7 @@ export const AppRow = ({
           </Text>
         </Flex>
         {actionRenderer && (
-          <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer()}</div>
+          <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer(app)}</div>
         )}
       </Flex>
     </AppRowStyle>

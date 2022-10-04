@@ -6,6 +6,7 @@ import { AppType } from 'os/services/spaces/models/bazaar';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
+import { IconButton } from '../Button';
 import { Portal } from 'renderer/system/dialog/Portal';
 import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
@@ -314,6 +315,16 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
             {app.title}
           </Text>
         )}
+        {/* {app.type === 'urbit' && app.installed && (
+          <IconButton
+            tabIndex={-1}
+            mt={5}
+            height={32}
+            onClick={() => alert('hi')}
+          >
+            {app.glob ? (<Spinner size={0} />) : (<Icons name="DownloadCircle" />)}
+          </IconButton>
+        )} */}
       </Flex>
     );
   }, [app, isPinned, selected, open]);

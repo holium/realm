@@ -781,9 +781,9 @@
     ?>  ?=([%initial *] charge-update)
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    =/  result=[=app-index-full:store =app-index-lite:store =app-catalog:store]
+    =/  result=[=app-index-full:store =app-index-lite:store cards=(list card)]
     %-  ~(rep by app-index-full)
-      |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store =app-catalog:store]]
+      |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store cards=(list card)]]
       ::  is this app installed?
       =/  app-full
       ?+  -.app.entry.app-full  app-full
@@ -792,16 +792,21 @@
           =.  installed.app.entry.app-full   (~(has by app-catalog.state) app-id)
           app-full
       ==
-      =.  app-catalog.acc            (~(put by app-catalog.acc) app-id entry.app-full)
+      =.  app-catalog.state            (~(put by app-catalog.state) app-id entry.app-full)
       =.  app-index-lite.acc         (~(put by app-index-lite.acc) app-id [app-id sieve.app-full])
       =.  app-index-full.acc         (~(put by app-index-full.acc) app-id app-full)
+      ?.  (~(has in tags.sieve.app-full) %recommended)  acc
+      =.  cards.acc
+      %+  weld  cards.acc
+      ^-  (list card)
+      :~  [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]  ==
       acc
-    =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
+    :: =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result sorts])
     =.  sites.state         sites
     :: notify the UI of that we've accepted an invite to a new space and there
     ::   are apps available in this new space
-    (bazaar:send-reaction:core [%space-apps space-path app-index-full.result sorts sites] [/updates ~] ~)
+    (bazaar:send-reaction:core [%space-apps space-path app-index-full.result sorts sites] [/updates ~] cards.result)
   ::
   ++  on-pin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]

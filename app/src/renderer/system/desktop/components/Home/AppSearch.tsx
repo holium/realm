@@ -21,6 +21,7 @@ import { ProviderRow } from './ProviderRow';
 import { setEnvironmentData } from 'worker_threads';
 import { BazaarApi } from 'os/api/bazaar';
 import { darken, rgba } from 'polished';
+import { app } from 'electron';
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },
@@ -82,32 +83,6 @@ function Content({ children, ...props }) {
     </PopoverPrimitive.Portal>
   );
 }
-
-// const onAppsAction = (space: string, action: string, app: any) => {
-//   console.log('onAppsAction => %o', { action, app });
-//   SpacesActions.addAppTag(space, app.id, action).then((data) => {
-//     console.log('addAppTag response => %o', data);
-//   });
-// };
-
-// const actionRenderer = (space: string, app: any) => (
-//   <>
-//     <Button
-//       borderRadius={6}
-//       onClick={(e) => onAppsAction(space, 'pinned', app)}
-//     >
-//       Pin
-//     </Button>
-
-//     <Button
-//       style={{ marginLeft: 5 }}
-//       borderRadius={6}
-//       onClick={(e) => onAppsAction(space, 'recommend', app)}
-//     >
-//       Like
-//     </Button>
-//   </>
-// );
 
 const renderDevs = (space: string, devs: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
@@ -280,6 +255,39 @@ const AppSearchApp = observer((props: AppSearchProps) => {
 
   const spacePath: string = spaces.selected?.path!;
 
+  // based on this info, should be "safe" to recreate functions with each render
+  //  https://reactjs.org/docs/hooks-faq.html#are-hooks-slow-because-of-creating-functions-in-render
+  const appActionRenderer = (app: any) => {
+    if (!app.id) return;
+    //  treaties consist of <ship>/<desk> keys. parse to get app id value (desk)
+    const appId = app.id.split('/')[1];
+    return (
+      <>
+        <Button
+          borderRadius={6}
+          disabled={bazaar.isAppInstalled(appId)}
+          isLoading={app.isInstalling}
+          onClick={(e) => {
+            setLoadingState('installing');
+            app.isInstalling = true;
+            const tokens = app.id.split('/');
+            SpacesActions.installDesk(tokens[0], tokens[1])
+              .then((result) =>
+                console.log(`installApp response => %o`, result)
+              )
+              .catch((e) => console.error(e))
+              .finally(() => {
+                app.isInstalling = false;
+                setLoadingState('');
+              });
+          }}
+        >
+          Install
+        </Button>
+      </>
+    );
+  };
+
   useEffect(() => {
     setSearchMode('none');
     setSearchModeArgs([]);
@@ -304,6 +312,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         }
       } else {
         const treaties = bazaar.getTreaties(selectedShip);
+        console.log('treaties => %o', treaties);
         setData(treaties);
       }
     }
@@ -357,16 +366,17 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     if (!apps || apps.length === 0) {
       return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
     }
+    console.log('rendering apps => %o', apps);
     return apps?.map((app, index) => (
       <div key={index}>
         <AppRow
           caption={app.title}
           app={app}
-          // actionRenderer={() => devAppRowRenderer(app)}
-          onClick={(app: any) => {
-            setData(app);
-            setSearchMode('app-summary');
-          }}
+          actionRenderer={(app: any) => appActionRenderer(app)}
+          // onClick={(app: any) => {
+          //   setData(app);
+          //   setSearchMode('app-summary');
+          // }}
         />
       </div>
     ));

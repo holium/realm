@@ -36,7 +36,13 @@ export type StyledButtonProps = SpaceProps &
     rightIcon?: JSX.Element;
     isLoading?: boolean;
     disabled?: boolean;
-    variant?: 'primary' | 'secondary' | 'base' | 'transparent' | 'minimal' | 'custom';
+    variant?:
+      | 'primary'
+      | 'secondary'
+      | 'base'
+      | 'transparent'
+      | 'minimal'
+      | 'custom';
   };
 
 const defaultButtonStyles = {
@@ -107,13 +113,13 @@ const buttonVariants = variant({
     },
     base: {
       ...defaultButtonStyles,
-      bg: darken(.03, '#f0ecec'),
+      bg: darken(0.03, '#f0ecec'),
       color: 'text.primary',
-      border: `1px solid ${darken(.09, '#f0ecec')}`,
+      border: `1px solid ${darken(0.09, '#f0ecec')}`,
       '&:hover': {
         transition: '0.2s ease',
-        backgroundColor: darken(.07, '#f0ecec'),
-      }
+        backgroundColor: darken(0.07, '#f0ecec'),
+      },
     },
     minimal: {
       ...defaultButtonStyles,
@@ -174,7 +180,16 @@ const buttonVariants = variant({
 
 const StyledButton = styled.button<ButtonProps>`
   ${buttonVariants}
-  ${compose(space, layout, color, background, flexbox, border, position, fontWeight)}
+  ${compose(
+    space,
+    layout,
+    color,
+    background,
+    flexbox,
+    border,
+    position,
+    fontWeight
+  )}
 `;
 
 export type ButtonProps = StyledComponentProps<
@@ -227,7 +242,7 @@ export const Button: FC<ButtonProps> = forwardRef<
           bottom={0}
           left={0}
           size={0}
-          color="brand.primary"
+          // color="brand.secondary"
         />
       )}
       <Flex
