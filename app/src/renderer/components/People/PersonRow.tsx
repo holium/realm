@@ -18,10 +18,10 @@ import { PassportCard } from './PassportCard';
 interface IPersonRow {
   listId: string;
   patp: string;
-  sigilColor?: string;
-  avatar?: string;
-  nickname?: string;
-  description?: string;
+  sigilColor?: string | null;
+  avatar?: string | null;
+  nickname?: string | null;
+  description?: string | null;
   style?: any;
   rowBg: string;
   theme?: {

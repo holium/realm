@@ -152,11 +152,11 @@ export const BazaarApi = {
       });
       // assume undefined response means no treaty found. not sure how reliable
       //  this is, but scry method doesn't return error codes (e.g. 404)
-      console.log('hasTreaty: testing treaty => %o', {
-        ship,
-        desk,
-        response,
-      });
+      // console.log('hasTreaty: testing treaty => %o', {
+      //   ship,
+      //   desk,
+      //   response,
+      // });
       return response !== undefined;
     } catch (e) {
       console.log(e);
@@ -607,7 +607,7 @@ export const BazaarApi = {
         console.log(`message [${eventId}]: subscribed to treaty/allies...`);
       },
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('/treaty/allies => %o', { allies: data });
+        // console.log('/treaty/allies => %o', { allies: data });
         handleBazaarReactions({ allies: data }, state);
       },
       onError: () => console.log('subscription [treaty/allies] rejected'),
@@ -620,7 +620,7 @@ export const BazaarApi = {
         console.log(`message [${eventId}]: subscribed to treaty/treaties...`);
       },
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('/treaty/treaties => %o', { treaties: data });
+        // console.log('/treaty/treaties => %o', { treaties: data });
         handleBazaarReactions({ treaties: data }, state);
       },
       onError: () => console.log('subscription [treaty/treaties] rejected'),
@@ -633,6 +633,7 @@ export const BazaarApi = {
         console.log(`message [${eventId}]: subscribed to /bazaar/updates...`);
       },
       onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log(data);
         if (mark === 'bazaar-reaction') {
           handleBazaarReactions(data, state);
         }
@@ -647,9 +648,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log('initial =>');
-      console.log(util.inspect(data, { depth: 10, colors: true }));
-      console.log('<= initial');
+      // console.log('initial =>');
+      // console.log(util.inspect(data, { depth: 10, colors: true }));
+      // console.log('<= initial');
       state.initial(data['initial']);
       break;
     case 'allies':
@@ -669,17 +670,17 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       }
       break;
     case 'treaties':
-      console.log('treaties =>');
-      console.log(util.inspect(data, { depth: 10, colors: true }));
-      console.log('<= treaties');
+      // console.log('treaties =>');
+      // console.log(util.inspect(data, { depth: 10, colors: true }));
+      // console.log('<= treaties');
       state.initialTreaties(data['treaties'].ini);
       break;
     // event when a new space is joined and our ship has successfully
     //   subscribed to the space
     case 'space-apps':
-      console.log('space-apps =>');
-      console.log(util.inspect(data, { depth: 10, colors: true }));
-      console.log('<= space-apps');
+      // console.log('space-apps =>');
+      // console.log(util.inspect(data, { depth: 10, colors: true }));
+      // console.log('<= space-apps');
       const entry = data['space-apps'];
       state.initialSpace(entry['space-path'], entry);
       break;

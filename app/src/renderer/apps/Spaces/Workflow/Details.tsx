@@ -148,8 +148,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       });
       // props.setState!({
       //   type: 'space',
-      //   archetype: 'lodge',
-      //   archetypeTitle: 'Lodge',
+      //   archetype: 'community',
+      //   archetypeTitle: 'Community',
       //   color: '#000000',
       //   access: 'public',
       // });

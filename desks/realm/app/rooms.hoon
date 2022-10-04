@@ -3,7 +3,7 @@
 ::
 ::  Keeps track of the webrtc rooms in Realm
 ::
-/-  store=rooms, spaces
+/-  store=rooms, spaces=spaces-store
 /+  lib=rooms
 /+  dbug, default-agent ::, agentio
 |%
@@ -117,7 +117,7 @@
       (bump-room-v room [%enter src.bowl])
     ::
     ++  create
-      |=  [=rid:store =access:store =title:store enter=?]
+      |=  [=rid:store =access:store =title:store]
       ::
       :: assert unique room id
       ?<  (~(has by rooms) rid)
@@ -135,40 +135,26 @@
           capacity.room  max-occupancy:lib
         ==
       ::
-      :: branch on ifenter. some logic is repeated but this is cleaner
-      ?:  enter
-        :: leave old room
-        =^  cards  state
-          :: call the exit action handler
-          exit
-        ::
-        :: enter new room
-        =.  present.room
-            (~(put in present.room) src.bowl)
-        ::
-        :: creator is always on the whitelist
-        =.  whitelist.room
-          (~(put in whitelist.room) src.bowl)
-        :: insert the room
-        =.  rooms
-          (insert room)
-        ::
-        :: send exit cards and new room bump
-        :_  state
-        %+  weld  cards
-        (bump-room-v room [%enter src.bowl])
+      :: leave old room
+      =^  cards  state
+        :: call the exit action handler
+        exit
       ::
-      :: not autoenter
+      :: enter new room
+      =.  present.room
+          (~(put in present.room) src.bowl)
       ::
+      :: creator is always on the whitelist
       =.  whitelist.room
         (~(put in whitelist.room) src.bowl)
+      :: insert the room
       =.  rooms
         (insert room)
       ::
-      :: the room is new and empty,
-      :: so no bump
-      `state
-    ::
+      :: send exit cards and new room bump
+      :_  state
+      %+  weld  cards
+      (bump-room-v room [%enter src.bowl])
     ::
     ++  exit
       ::
@@ -176,6 +162,8 @@
       ::
       :: this assumes that a given ship
       ::   is only in one room.
+      :: should be a safe assumption,
+      ::   but depends on how the rest of this agent is implemented
       =/  rud=(unit rid:store)
         =/  looms  ~(val by rooms)
         |-
@@ -194,6 +182,12 @@
       :: grabbed the dudes rid
       =/  =room:store
         (~(got by rooms) rid)
+      ::
+      ::
+      ?:  =(creator.room src.bowl)
+        :: if the creator leaves,
+        ::   the room is deleted
+        (delete rid)
       ::
       ::
       =.  present.room

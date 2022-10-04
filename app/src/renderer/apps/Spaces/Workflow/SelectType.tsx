@@ -39,7 +39,11 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
     const [loading, setLoading] = useState(true);
     useEffect(() => {
       ShipActions.getOurGroups().then((ourGroups) => {
-        setGroups(ourGroups);
+        console.log(ourGroups);
+        // hacky check to fix incorrectly formed %da
+        setGroups(
+          ourGroups.filter((group: any) => !group.path.includes('/~2'))
+        );
         setLoading(false);
       });
     }, []);
@@ -77,6 +81,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                         image: data.picture,
                         subtitle,
                         type: 'group',
+                        path: data.path,
                       });
                     props.onNext && props.onNext(_evt);
                   }}
@@ -130,11 +135,11 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                 setState({
                   title: 'New Space',
                   type: 'space',
-                  archetype: 'lodge',
+                  archetype: 'community',
                   archetypeTitle: 'Community',
                 });
               // setWorkspaceState({
-              //   archetype: 'lodge',
+              //   archetype: 'community',
               //   archetypeTitle: 'Community',
               // });
               // workflowState.set({

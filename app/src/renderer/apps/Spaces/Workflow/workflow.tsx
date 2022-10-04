@@ -9,8 +9,8 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 type NewSpace = {
   access: 'public' | 'antechamber' | 'private';
-  archetype: 'home' | 'lodge';
-  archetypeTitle?: 'Home' | 'Lodge';
+  archetype: 'home' | 'community';
+  archetypeTitle?: 'Home' | 'Community';
   color?: string;
   picture?: string;
   members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };

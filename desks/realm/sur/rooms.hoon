@@ -28,7 +28,7 @@
 ::  CLIENT
 ::  app/room/hoon
 ::
-/-  spaces
+/-  spaces=spaces-store
 |%
 +$  rid       @t
 +$  title     cord
@@ -67,7 +67,7 @@
       ::
       [%enter =rid]
       [%exit ~]
-      [%create =rid =access =title enter=?]
+      [%create =rid =access =title]
       [%set-title =rid =title]
       [%set-access =rid =access]
       [%set-capacity =rid =capacity]

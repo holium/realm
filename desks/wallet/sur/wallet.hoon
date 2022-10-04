@@ -45,12 +45,20 @@
   ==
 +$  tx-rez  [txh=@ux status=? block=@ud]
 +$  contract-type  ?(%erc20 %erc721)
++$  sharing
+  $:  who=?(%nobody %friends %anybody)
+      wallet-creation=mode
+      whitelist=(set @p)
+      blocked=(set @p)
+  ==
 ::  poke actions
 ::
 +$  action
   $%  [%initialize ~]
       [%set-xpub =network xpub=@t]
       [%set-wallet-creation-mode =mode]
+      [%set-sharing-mode who=?(%nobody %friends %anybody)]
+      [%sharing-permissions type=?(%allow %block) who=@p]
       [%set-default-index =network index=@t]
       [%set-wallet-nickname =network index=@t nickname=@t]
       [%set-network-provider =network provider=@t]
@@ -77,7 +85,7 @@
 +$  transactions  (map network (map @t transaction))
 +$  wallets  (map =network (map @t wallet))
 +$  settings
-  $:  wallet-creation=mode
-      networks=(map network [xpub=(unit @t) index=@t provider=(unit @t)])
+  $:  =sharing
+      networks=(map network [xpub=(unit @t) default-index=@t provider=(unit @t)])
   ==
 --

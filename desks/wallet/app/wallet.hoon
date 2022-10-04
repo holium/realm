@@ -431,7 +431,8 @@
   ?-  -.act
       %initialize
     ?>  (team:title our.bowl src.bowl)
-    =.  wallet-creation.settings.state  %default
+    =.  who.sharing.settings.state  %anybody
+    =.  wallet-creation.sharing.settings.state  %default
     =.  wallets.state
       (~(put by wallets.state) [%ethereum ~])
     =.  wallets.state
@@ -456,7 +457,24 @@
     ::
       %set-wallet-creation-mode
     ?>  (team:title our.bowl src.bowl)
-    `state(wallet-creation.settings mode.act)
+    `state(wallet-creation.sharing.settings mode.act)
+    ::
+      %set-sharing-mode
+    ?>  (team:title our.bowl src.bowl)
+    `state(who.sharing.settings who.act)
+    ::
+      %sharing-permissions
+    ?>  (team:title our.bowl src.bowl)
+    =.  sharing.settings
+      ?-  type.act
+        %allow
+      =.  whitelist.sharing.settings  (~(put in whitelist.sharing.settings) who.act)
+      sharing.settings
+        %block
+      =.  blocked.sharing.settings  (~(put in whitelist.sharing.settings) who.act)
+      sharing.settings
+      ==
+    `state
     ::
       %set-default-index
     ?>  (team:title our.bowl src.bowl)
@@ -479,20 +497,34 @@
     ?>  (team:title our.bowl src.bowl)
     =.  networks.settings.state
       =/  prev-set  (~(got by networks.settings.state) network.act)
-      (~(put by networks.settings.state) [network.act [xpub.prev-set index.prev-set `provider.act]])
+      (~(put by networks.settings.state) [network.act [xpub.prev-set default-index.prev-set `provider.act]])
     `state
     ::
       %create-wallet
     ^-  (quip card _state)
+    ::  permissions
+    ::
+    =/  null-address-card
+      =/  wall-act=action  [%receive-address network.act ~]
+      =/  task  [%poke %wallet-action !>(`action`wall-act)]
+      [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
+    ?:  =(who.sharing.settings %nobody)
+      [null-address-card state]
+    ?:  (~(has in blocked.sharing.settings) src.bowl)
+      [null-address-card state]
+    ?:  ?&  =(who.sharing.settings %friends)
+            !(~(has in whitelist.sharing.settings) src.bowl)
+        ==
+      [null-address-card state]
     ::  send default wallet if requested
     ::
     ?:  ?&  !(team:title our.bowl src.bowl)
-            =(%default wallet-creation.settings.state)
+            =(%default wallet-creation.sharing.settings.state)
             =/  net-wallets  (~(got by wallets) network.act)
             =/  num-wallets  (lent net-wallets)
             (gth num-wallets 0)
         ==
-      =/  default-idx  index:(~(got by networks.settings.state) network.act)
+      =/  default-idx  default-index:(~(got by networks.settings.state) network.act)
       =/  default-wallet  (~(get by (~(got by wallets) network.act)) default-idx)
       :_  state
       ?~  default-wallet

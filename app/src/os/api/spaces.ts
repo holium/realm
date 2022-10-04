@@ -4,6 +4,8 @@ import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
 import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { VisaModelType } from 'os/services/spaces/models/visas';
+import { reject } from 'lodash';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -12,6 +14,20 @@ export const SpacesApi = {
       path: '/all', // the spaces scry is at the root of the path
     });
     return response.spaces;
+  },
+  getMembers: async (conduit: Conduit, path: SpacePath) => {
+    const response = await conduit.scry({
+      app: 'spaces',
+      path: `${path}/members`, // the spaces scry is at the root of the path
+    });
+    return response.members;
+  },
+  getInvitations: async (conduit: Conduit) => {
+    const response = await conduit.scry({
+      app: 'spaces',
+      path: '/invitations', // the spaces scry is at the root of the path
+    });
+    return response.invites;
   },
   createSpace: async (
     conduit: Conduit,
@@ -88,11 +104,148 @@ export const SpacesApi = {
       });
     });
   },
+  /**
+   * inviteMember: invite a member to a space
+   *
+   * @param conduit the conduit instance
+   * @param path  i.e. ~lomder-librun/my-place
+   * @param payload  {patp: string, role: string, message: string}
+
+   * @returns
+   */
+  inviteMember: async (
+    conduit: Conduit,
+    path: SpacePath,
+    payload: { patp: Patp; role: MemberRole; message: string }
+  ) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    const response = await conduit.poke({
+      app: 'spaces',
+      mark: 'visa-action',
+      json: {
+        'send-invite': {
+          path: pathObj,
+          ship: payload.patp,
+          role: payload.role,
+          message: payload.message,
+        },
+      },
+    });
+    return response;
+  },
+  /**
+   * kickMember: kicks a member from a space
+   *
+   * @param conduit
+   * @param path
+   * @param patp
+   * @returns
+   */
+  kickMember: async (conduit: Conduit, path: SpacePath, patp: Patp) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    const response = await conduit.poke({
+      app: 'spaces',
+      mark: 'visa-action',
+      json: {
+        'kick-member': {
+          path: pathObj,
+          ship: patp,
+        },
+      },
+    });
+    return response;
+  },
+  /**
+   * acceptInvite
+   *
+   * @param conduit
+   * @param path
+   * @returns
+   */
+  acceptInvite: async (
+    conduit: Conduit,
+    path: SpacePath,
+    membersState: MembershipType,
+    spacesState: SpacesStoreType
+  ) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'visa-action',
+        json: {
+          'accept-invite': {
+            path: pathObj,
+          },
+        },
+        reaction: 'spaces-reaction.remote-space',
+        onReaction(data, mark?) {
+          membersState.addMemberMap(
+            data['remote-space'].path,
+            data['remote-space'].members
+          );
+          spacesState.addSpace(data['remote-space']);
+          resolve(data);
+        },
+        onError() {
+          reject();
+        },
+      });
+    });
+    // return response;
+  },
+  /**
+   * declineInvite
+   *
+   * @param conduit
+   * @param path
+   * @returns
+   */
+  declineInvite: async (conduit: Conduit, path: SpacePath) => {
+    const pathArr = path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+
+    const response = await conduit.poke({
+      app: 'spaces',
+      mark: 'visa-action',
+      json: {
+        'decline-invite': {
+          path: pathObj,
+        },
+      },
+    });
+    return response;
+  },
+  /**
+   * watchUpdates
+   *
+   * @param conduit
+   * @param state
+   * @param membersState
+   * @param bazaarState
+   */
   watchUpdates: (
     conduit: Conduit,
-    state: SpacesStoreType,
+    spacesState: SpacesStoreType,
     membersState: MembershipType,
-    bazaarState: BazaarStoreType
+    bazaarState: BazaarStoreType,
+    visaState: VisaModelType,
+    setTheme: (theme: any) => void
   ): void => {
     conduit.watch({
       app: 'spaces',
@@ -100,7 +253,25 @@ export const SpacesApi = {
       onEvent: async (data: any, _id?: number, mark?: string) => {
         // console.log(mark, data);
         if (mark === 'spaces-reaction') {
-          handleSpacesReactions(data, state, membersState, bazaarState);
+          handleSpacesReactions(
+            data,
+            `~${conduit.ship}`,
+            spacesState,
+            membersState,
+            bazaarState,
+            visaState,
+            setTheme
+          );
+        }
+        if (mark === 'visa-reaction') {
+          handleInviteReactions(
+            data['visa-reaction'],
+            conduit.ship!,
+            membersState,
+            spacesState,
+            visaState,
+            setTheme
+          );
         }
       },
 
@@ -112,32 +283,94 @@ export const SpacesApi = {
 
 const handleSpacesReactions = (
   data: any,
-  state: SpacesStoreType,
+  our: Patp,
+  spacesState: SpacesStoreType,
   membersState: MembershipType,
-  bazaarState: BazaarStoreType
+  bazaarState: BazaarStoreType,
+  visaState: VisaModelType,
+  setTheme: (theme: any) => void
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      state.initialReaction(data['initial']);
+      spacesState.initialReaction(data['initial']);
+      membersState.initial(data['initial']['membership']);
+      visaState.initialIncoming(data['initial']['invitations']);
       break;
     case 'add':
-      const newSpace = state.addSpace(data['add']);
+      const newSpace = spacesState.addSpace(data['add']);
       membersState.addMemberMap(newSpace, data['add'].members);
       bazaarState.addBazaar(newSpace);
       break;
     case 'replace':
-      state.updateSpace(data['replace']);
+      spacesState.updateSpace(data['replace']);
       break;
     case 'remove':
-      const deleted = state.deleteSpace(data['remove']);
+      const deleted = spacesState.deleteSpace(
+        `/${our}/our`,
+        data['remove'],
+        setTheme
+      );
+
       membersState.removeMemberMap(deleted);
       break;
-    case 'new-space':
-      // console.log('new-space', data);
-      state.addSpace(data['new-space']);
-      // membersState.addMemberMap(remoteSpace, data['add'].members);
+    case 'remote-space':
+      // membersState.addMemberMap(
+      //   data['remote-space'].path,
+      //   data['remote-space'].members
+      // );
+      // spacesState.addSpace(data['remote-space']);
       // bazaarState.addBazaar(remoteSpace);
+      break;
+    default:
+      // unknown
+      break;
+  }
+};
+
+const handleInviteReactions = (
+  data: any,
+  ship: string,
+  state: MembershipType,
+  spacesState: SpacesStoreType,
+  visaState: VisaModelType,
+  setTheme: (theme: any) => void
+) => {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
+    case 'invite-sent':
+      const sentPayload = data['invite-sent'];
+      state.addMember(sentPayload.path, sentPayload.ship, sentPayload.member);
+      break;
+    case 'invite-accepted':
+      const acceptedPayload = data['invite-accepted'];
+      state.updateMember(
+        acceptedPayload.path,
+        acceptedPayload.ship,
+        acceptedPayload.member
+      );
+      break;
+    case 'invite-received':
+      const receivedPayload = data['invite-received'];
+      visaState.addIncoming(receivedPayload);
+      break;
+    case 'invite-removed':
+      const removePayload = data['invite-removed'];
+      visaState.removeIncoming(removePayload.path);
+
+      break;
+    case 'kicked':
+      const kickedPayload = data['kicked'];
+      if (`~${ship}` === kickedPayload.ship) {
+        spacesState.deleteSpace(
+          `/~${ship}/our`,
+          {
+            'space-path': kickedPayload.path,
+          },
+          setTheme
+        );
+      }
+      state.removeMember(kickedPayload.path, kickedPayload.ship);
       break;
     default:
       // unknown

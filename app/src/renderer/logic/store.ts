@@ -381,6 +381,9 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'courier') {
       applyPatch(servicesStore.courier, value.patch);
     }
+    if (value.resource === 'friends') {
+      applyPatch(servicesStore.friends, value.patch);
+    }
   }
   // TODO do we need initial anymore?
   if (value.response === 'initial') {

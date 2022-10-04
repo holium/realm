@@ -7,7 +7,6 @@ import { Patp } from '@urbit/api';
 import { RoomDiff } from '../services/tray/rooms.service';
 import { toJS } from 'mobx';
 
-
 export const RoomsApi = {
   /**
    * getFriends: returns a map of friends
@@ -101,8 +100,7 @@ export const RoomsApi = {
     conduit: Conduit,
     roomId: string,
     access: string,
-    title: string,
-    enter: boolean
+    title: string
   ) => {
     // TODO add to roomapp state after poke???
 
@@ -114,7 +112,6 @@ export const RoomsApi = {
           rid: roomId,
           access: access,
           title: title,
-          enter: enter,
         },
       },
       onSuccess: () => {
@@ -190,12 +187,11 @@ export const RoomsApi = {
   },
 
   exit: async (conduit: Conduit) => {
-    await conduit.poke({
+    conduit.poke({
       app: 'room',
       mark: 'rooms-action',
       json: {
-        exit: 
-          null
+        exit: null,
       },
     });
     return;
@@ -235,8 +231,10 @@ export const RoomsApi = {
           //   state.leaveRoom()
           const roomId = update['kicked'].id;
           let room = toJS(state.knownRooms.get(roomId));
-          let diff = {exit: `~${conduit.ship!}`}
-         if(room) { onDiff(diff, room) }
+          let diff = { exit: `~${conduit.ship!}` };
+          if (room) {
+            onDiff(diff, room);
+          }
 
           state.kickRoom(`~${conduit.ship!}`, roomId);
           //   state.requestAllRooms();

@@ -8,10 +8,10 @@ import { WalletView } from 'os/services/tray/wallet.model';
 
 interface IPassport {
   patp: string;
-  sigilColor?: string;
-  avatar?: string;
-  nickname?: string;
-  description?: string;
+  sigilColor?: string | null;
+  avatar?: string | null;
+  nickname?: string | null;
+  description?: string | null;
   theme?: {
     textColor: string;
     windowColor: string;

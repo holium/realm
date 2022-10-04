@@ -90,7 +90,6 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
       `${roomsApp.provider}/${name}/${new Date().getTime()}`,
       isPrivate ? 'private' : 'public',
       name,
-      true
     ).then(() => {
       setLoading(false);
     });

@@ -47,6 +47,7 @@
     |=  act=^action
     ^-  json
     :: not used
+    ::
     *json
   ++  update
     |=  upd=^update
@@ -206,7 +207,7 @@
       :~  [%rid so]
           [%access access]
           [%title so]
-          [%enter bo]
+          :: [%enter bo]
       ==
     ++  set-title
       %-  ot

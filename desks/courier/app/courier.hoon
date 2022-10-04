@@ -3,16 +3,16 @@
 ::  A thin agent that interfaces with various chat stores
 ::
 /-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store, 
-    hark=hark-store, dm-hook-sur=dm-hook, push-notify
-/+  dbug, default-agent, lib=courier, hook=dm-hook, push-lib=push-notify
+    hark=hark-store, dm-hook-sur=dm-hook, notify
+/+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify
 |%
 +$  card  card:agent:gall
 
 +$  state-0
   $:  %0
-      =app-id:push-notify         :: constant
-      =rest-api-key:push-notify   :: constant
-      =uuid:push-notify           :: (sham @p)
+      =app-id:notify         :: constant
+      =uuid:notify           :: (sham @p)
+      =devices:notify        :: (map device-id player-id)
       push-enabled=?
   ==
 --
@@ -29,19 +29,16 @@
   ++  on-init
     ^-  (quip card _this)
     =.  app-id.state            '82328a88-f49e-4f05-bc2b-06f61d5a733e'
-    =.  rest-api-key.state      'Basic MDZiNDZmN2EtYTBhMy00OWJlLTlkZWItOWIyNDY5MTQzMmFl'
     =.  uuid.state              (sham our.bowl)
-    =.  push-enabled.state       %.y
+    =.  push-enabled.state      %.y
     :_  this
     ::  %watch: all incoming dms and convert to our simple structure
     :~  
       [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
       [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
-      :: [%pass /group-dm-thread %agent [our.bowl %spider] %watch /thread-result/[tid]]
-      :: [%pass /thread/[ta-now] %agent [our.bowl %spider] %poke %spider-start !>(start-args)]
     ==
   ++  on-save   !>(state)
-  ++  on-load   ::|=(vase `..on-init)
+  ++  on-load
     |=  =vase
     ^-  (quip card _this)
     =/  old=(unit state-0)
@@ -64,7 +61,7 @@
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
       %graph-dm-action    (on-graph-action:core !<(action:store vase))
-      %notify-action      (on-notify-action:core !<(action:push-notify vase))
+      %notify-action      (on-notify-action:core !<(action:notify vase))
       :: %next-dm-action    (on-action:core !<(action:store vase))
     ==
     [cards this]
@@ -87,26 +84,22 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
     ::
-    ::  ~/scry/courier/dms.json
-      [%x %push-uuid ~]
+      [%x %devices ~]
         ?>  =(our.bowl src.bowl)
-        ``notify-view+!>([%uuid uuid.state])
-    ::  ~/scry/courier/dms.json
+        ``notify-view+!>([%devices devices.state])
+    ::
       [%x %dms ~]
         ?>  =(our.bowl src.bowl)
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
         ``graph-dm-view+!>([%inbox dm-previews])
-    ::
-    ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
-      [%x %dms %group @ @ ~]
+      ::
+      [%x %dms %group @ @ ~]    ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
         ?>  =(our.bowl src.bowl)
         =/  entity       `@p`(slav %p i.t.t.t.path)
         =/  timestamp    `@t`i.t.t.t.t.path
         =/  dms           (grp-log:gs:lib our.bowl now.bowl entity timestamp)
         ``graph-dm-view+!>([%dm-log dms])
-    ::
-    ::  ~/scry/courier/dms/~dev.json
-      [%x %dms @ ~]
+      [%x %dms @ ~]             ::  ~/scry/courier/dms/~dev.json
         ?>  =(our.bowl src.bowl)
         =/  to-ship       `@p`(slav %p i.t.t.path)
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
@@ -169,7 +162,13 @@
   ::
   ++  on-leave    on-leave:def
   ::
-  ++  on-arvo     on-arvo:def
+  ++  on-arvo
+    |=  [=wire =sign-arvo]
+    ^-  (quip card _this)
+    ?+  wire  (on-arvo:def wire sign-arvo)
+        [%push-notification *]
+      `this
+    ==
   ::
   ++  on-fail     on-fail:def
   --
@@ -344,11 +343,28 @@
       :_  state
       [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
     ::
-    =/  notify   (generate-push-notification:push-lib app-id.state new-dm)
-    ~&  >>  notify
+    =/  notify   (generate-push-notification:notif-lib our.bowl app-id.state new-dm)
+    ~&  >>  (request:enjs:notif-lib notify devices.state)
+    :: `state
+    ::  send http request
+    ::
+    =/  =header-list:http
+      :~  ['Content-Type' 'application/json']
+      ==
+    =|  =request:http
+    =:  method.request       %'POST'
+        url.request          'https://onesignal.com/api/v1/notifications'
+        header-list.request  header-list
+        body.request
+          :-  ~
+          %-  as-octt:mimes:html
+          %-  en-json:html
+          (request:enjs:notif-lib notify devices.state)
+    ==
     :_  state
     :~ 
       [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
+      [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
       ::  Send to onesignal
     ==
   --
@@ -375,17 +391,31 @@
   --
 ::
 ++  on-notify-action
-  |=  [act=action:push-notify]
+  |=  [act=action:notify]
   ^-  (quip card _state)
   |^
-  ?-  -.act      
-    %enable-push           
-      =.  push-enabled.state   %.y
-      `state
-    %disable-push           
-      =.  push-enabled.state   %.n
-      `state  
+  ?-  -.act                   ::  `state
+    %enable-push              (set-push %.y)
+    %disable-push             (set-push %.n)
+    %set-device               (set-device +.act)
+    %remove-device            (remove-device +.act)
   ==
+  ::
+  ++  set-push
+    |=  enabled=?
+    =.  push-enabled.state   enabled
+    `state
+  ::
+  ++  set-device
+    |=  [=device-id:notify =player-id:notify]
+    =.  devices.state         (~(put by devices.state) device-id player-id)
+    `state
+  ::
+  ++  remove-device
+    |=  [=device-id:notify]
+    =.  devices.state         (~(del by devices.state) device-id)
+    `state
+  ::
   --
 
 --

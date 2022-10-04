@@ -49,6 +49,12 @@
   =/  name-da   (slaw %da name)
   ?~  name-da   %.y   %.n
 ::
+++  get-members
+  |=  [rid=[entity=ship name=@tas] our=ship now=@da]
+  =/  grp-data      .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity.rid)/(scot %tas name.rid)/noun)
+  grp-data
+  
+::
 ::  JSON
 ::
 ++  enjs

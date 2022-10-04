@@ -31,6 +31,7 @@ export class AuthService extends BaseService {
     'realm.auth.remove-ship': this.removeShip,
     'realm.auth.set-mnemonic': this.setMnemonic,
     'realm.auth.set-ship-profile': this.setShipProfile,
+    'realm.auth.cancel-login': this.cancelLogin,
   };
 
   static preload = {
@@ -38,6 +39,7 @@ export class AuthService extends BaseService {
       ipcRenderer.invoke('realm.auth.login', ship, password),
     logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
     setFirstTime: () => ipcRenderer.invoke('realm.auth.set-first-time'),
+    cancelLogin: () => ipcRenderer.invoke('realm.auth.cancel-login'),
     setSelected: (ship: string) =>
       ipcRenderer.invoke('realm.auth.set-selected', ship),
     setOrder: (order: any[]) =>
@@ -178,9 +180,17 @@ export class AuthService extends BaseService {
     return true;
   }
 
+  cancelLogin(_event: any) {
+    this.state.setLoader('error');
+  }
+
   async logout(_event: any, ship: string) {
-    await this.core.services.ship.rooms.resetLocal(null);
-    await this.core.services.ship.rooms.exitRoom(null);
+    this.core.services.ship.rooms.resetLocal(null);
+    try {
+      await this.core.services.ship.rooms.exitRoom(null);
+    } catch (err) {
+      console.log(err);
+    }
     await this.core.clearSession();
     this.core.passwords.clearPassword(ship);
     this.core.services.ship.logout();

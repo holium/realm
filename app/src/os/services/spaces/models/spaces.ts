@@ -25,7 +25,7 @@ export const SpaceModel = types
     name: types.string,
     color: types.maybeNull(types.string),
     type: types.enumeration(['group', 'our', 'space']),
-    archetype: types.optional(types.enumeration(['home', 'lodge']), 'home'), //TODO remove the optional
+    archetype: types.optional(types.enumeration(['home', 'community']), 'home'), //TODO remove the optional
     picture: types.maybeNull(types.string),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
@@ -65,6 +65,9 @@ export const SpacesStore = types
       return Array.from(self.spaces.values()).filter(
         (space: SpaceModelType) => space.type !== 'our'
       );
+    },
+    getOurSpace() {
+      // TODO get our space by type='our'
     },
     getSpaceByPath(spacePath: string) {
       // if (spacePath === self.our!.path) {
@@ -125,8 +128,19 @@ export const SpacesStore = types
         members,
       });
     },
-    deleteSpace: (deleteReaction: { 'space-path': string }) => {
+    deleteSpace: (
+      ourSpace: string,
+      deleteReaction: { 'space-path': string },
+      setTheme: (theme: any) => void
+    ) => {
       const path = deleteReaction['space-path'];
+      //
+      if (path === self.selected?.path) {
+        // set to our space
+        self.selected = self.spaces.get(ourSpace);
+        console.log(self.selected?.path);
+        setTheme(self.selected?.theme);
+      }
       self.spaces.delete(path);
       return path;
     },

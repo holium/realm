@@ -1,6 +1,6 @@
 ::  friends [realm]
 ::
-/-  resource, contact-store, spaces, membership
+/-  resource, contact-store, membership
 |%
 ::
 ::  $friends: specifically used for the our space.

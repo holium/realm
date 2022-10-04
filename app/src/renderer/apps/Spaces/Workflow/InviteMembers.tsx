@@ -32,6 +32,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
+import { ShipActions } from 'renderer/logic/actions/ship';
 
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
@@ -97,9 +98,13 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       {}
     );
     const [permissionMap, setPermissionMap] = useState<{
-      [patp: string]: { roles: [MemberRole]; status: MemberStatus };
+      [patp: string]: {
+        roles: [MemberRole];
+        alias: string;
+        status: MemberStatus;
+      };
     }>({
-      [ship!.patp]: { roles: ['owner'], status: 'host' },
+      [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
     });
 
     const setWorkspaceState = (obj: any) => {
@@ -112,12 +117,19 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
 
     // Setting up options menu
     useEffect(() => {
-      setWorkspaceState({
-        members: {
-          [ship!.patp]: { roles: ['owner'], status: 'host' },
-        },
-      });
-      selectedPatp.add(ship!.patp);
+      console.log(workflowState);
+      if (workflowState.type === 'group') {
+        ShipActions.getGroupMembers(workflowState.path).then((members: any) => {
+          console.log(members);
+        });
+      } else {
+        setWorkspaceState({
+          members: {
+            [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
+          },
+        });
+        selectedPatp.add(ship!.patp);
+      }
     }, []);
 
     const onShipSelected = (contact: [string, string?]) => {
@@ -128,7 +140,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       setNicknameMap({ ...nicknameMap, [patp]: nickname || '' });
       const newMembers: any = {
         ...permissionMap,
-        [patp]: { roles: ['member'], status: 'invited' },
+        [patp]: { roles: ['member'], alias: '', status: 'invited' },
       };
       setPermissionMap(newMembers);
       setWorkspaceState({
@@ -197,7 +209,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 onClick={(selected: Roles) => {
                   setPermissionMap({
                     ...permissionMap,
-                    [patp]: { roles: [selected], status: 'invited' },
+                    [patp]: { roles: [selected], alias: '', status: 'invited' },
                   });
                 }}
               />

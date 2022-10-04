@@ -40,26 +40,18 @@ export class RoomsService extends BaseService {
     'realm.tray.rooms.kick-user': this.kickUser,
     'realm.tray.rooms.exit-room': this.exitRoom,
     'realm.tray.rooms.reset-local': this.resetLocal,
-
-
   };
 
   static preload = {
     joinRoom: (roomId: string) => {
       return ipcRenderer.invoke('realm.tray.rooms.join-room', roomId);
     },
-    createRoom: (
-      roomId: string,
-      access: string,
-      title: string,
-      enter: boolean
-    ) => {
+    createRoom: (roomId: string, access: string, title: string) => {
       return ipcRenderer.invoke(
         'realm.tray.rooms.create-room',
         roomId,
         access,
-        title,
-        enter
+        title
       );
     },
     setView: (view: string) => {
@@ -230,7 +222,7 @@ export class RoomsService extends BaseService {
     RoomsApi.sendChat(this.core.conduit!, chat);
     this.state?.appendOurChat(ourPatP, chat);
   }
-  
+
   async requestAllRooms(_event: any) {
     //
     // track outstanding request to display loading state in List view
@@ -238,53 +230,39 @@ export class RoomsService extends BaseService {
 
     await RoomsApi.requestAllRooms(this.core.conduit!);
   }
-  async createRoom(
-    _event: any,
-    roomId: string,
-    access: string,
-    title: string,
-    enter: boolean
-  ) {
-    return RoomsApi.createRoom(
-      this.core.conduit!,
-      roomId,
-      access,
-      title,
-      enter
-    );
+  async createRoom(_event: any, roomId: string, access: string, title: string) {
+    return RoomsApi.createRoom(this.core.conduit!, roomId, access, title);
   }
   async getProvider(_event: any) {
     let res = await RoomsApi.getProvider(this.core.conduit!);
-    let provider = res['rooms-view']['provider']
-    if(provider === null) provider = undefined;
-    this.state?.setProvider(provider)
+    let provider = res['rooms-view']['provider'];
+    if (provider === null) provider = undefined;
+    this.state?.setProvider(provider);
     return provider;
   }
   async invite(_event: any, roomId: string, patp: Patp) {
     return RoomsApi.invite(this.core.conduit!, roomId, patp);
   }
   async kickUser(_event: any, roomId: string, patp: Patp) {
-    console.log("kicking user")
+    console.log('kicking user');
     let room = this.state?.knownRooms.get(roomId);
-    if(!room) return;
-    console.log("kicking user1", room.creator, this.core!.conduit!.ship)
+    if (!room) return;
+    console.log('kicking user1', room.creator, this.core!.conduit!.ship);
 
-    if(room.creator !== "~"+this.core!.conduit!.ship) return;
-    console.log("kicking user2")
+    if (room.creator !== '~' + this.core!.conduit!.ship) return;
+    console.log('kicking user2');
 
-
-    if(!room.present.includes(patp)) return;
-    console.log("kicking user3")
-
+    if (!room.present.includes(patp)) return;
+    console.log('kicking user3');
 
     return RoomsApi.kick(this.core.conduit!, roomId, patp);
   }
 
   async exitRoom(_event: any) {
-    this.state?.setView('list')
+    this.state?.setView('list');
     return RoomsApi.exit(this.core.conduit!);
   }
-  async resetLocal(_event: any) {
+  resetLocal(_event: any) {
     this.state?.resetLocal();
   }
 
@@ -292,25 +270,24 @@ export class RoomsService extends BaseService {
   // scry latest state from room client agent
   // apply it to room model state representation.
   async refreshLocalRoom(_event: any) {
-      let res = await RoomsApi.getFull(this.core.conduit!);
-      
-      let full = res['rooms-view']['full']
-      let room = full['my-room']
-      if(room === null) {
-        // room is null.
-        // this update can come from a scry to the room client agent
-        this.state?.unsetLiveRoom();
-      } else {
-        this.state?.setLiveRoom(room);
-      }
+    let res = await RoomsApi.getFull(this.core.conduit!);
 
-      let provider = full['provider']
-      if(provider === null) {
-        this.state?.setProvider('~'+this.core?.conduit?.ship!);
-      } else {
-        this.state?.setProvider(full['provider']);
-      }
+    let full = res['rooms-view']['full'];
+    let room = full['my-room'];
+    if (room === null) {
+      // room is null.
+      // this update can come from a scry to the room client agent
+      this.state?.unsetLiveRoom();
+    } else {
+      this.state?.setLiveRoom(room);
+    }
 
+    let provider = full['provider'];
+    if (provider === null) {
+      this.state?.setProvider('~' + this.core?.conduit?.ship!);
+    } else {
+      this.state?.setProvider(full['provider']);
+    }
   }
 
   onLogout() {
