@@ -102,7 +102,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       >
         <Flex
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={isOpen ? 'show' : 'exit'}
           exit={{ opacity: 0 }}
           maxHeight={42}
           height={42}
@@ -111,6 +111,21 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           mb={46}
           minWidth={880}
           width={headerWidth}
+          variants={{
+            hidden: {
+              opacity: 0,
+            },
+            show: {
+              opacity: 1,
+              x: sidebar ? -80 : 0,
+              transition: {
+                x: { duration: 0.25 },
+              },
+            },
+            exit: {
+              opacity: 0,
+            },
+          }}
           flexDirection="row"
           justifyContent="space-between"
           alignItems="center"
@@ -139,7 +154,27 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           width={paneWidth}
         >
           {appGrid && (
-            <Flex flexDirection="column" justifyContent="flex-start" gap={20}>
+            <Flex
+              animate={isOpen ? 'show' : 'exit'}
+              flexDirection="column"
+              justifyContent="flex-start"
+              variants={{
+                hidden: {
+                  opacity: 0,
+                },
+                show: {
+                  opacity: 1,
+                  x: sidebar ? -80 : 0,
+                  transition: {
+                    x: { duration: 0.25 },
+                  },
+                },
+                exit: {
+                  opacity: 0,
+                },
+              }}
+              gap={20}
+            >
               <Text variant="h3" fontWeight={500}>
                 Your Apps
               </Text>
@@ -200,7 +235,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 space={currentSpace}
                 apps={apps}
                 suite={suite}
-                isAdmin={isAdmin}
+                isAdmin={isAdmin as boolean}
                 bazaar={bazaar}
               />
               <RecommendedApps />
