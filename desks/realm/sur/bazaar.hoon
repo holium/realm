@@ -50,11 +50,12 @@
 ::  because of the UI design, suite apps can have non-sequential (w/ gaps)
 ::  ordinals depending on where the user places the app in the suite
 ::  (e.g 0, 3, 4) where slots 1 and 2 would show as empty in the UI
-+$  slots   [pinned=@ud suite=@ud recommended=@ud]
+:: +$  slots   [pinned=@ud suite=@ud recommended=@ud]
 ::
 ::  $sieve: space specific metadata
 +$  sieve
-  $:  =slots
+  $:  slots=[pinned=@ud suite=@ud]
+      recommendations=[total=@ud members=(set ship)]
       =tags
   ==
 
@@ -72,8 +73,8 @@
       [%missing ~]
   ==
 ::
-+$  app-lite                [id=app-id =sieve recommendations=[total=@ud members=(set ship)]]
-+$  app-full                [id=app-id =sieve recommendations=[total=@ud members=(set ship)] entry=app-catalog-entry]
++$  app-lite                [id=app-id =sieve]
++$  app-full                [id=app-id =sieve entry=app-catalog-entry]
 
 ::  various organizations of data (transient/ephemeral datasets)
 ::   used to facilitate scrying and data transfers between other
@@ -109,8 +110,8 @@
       [%unpin path=space-path:spaces =app-id]
       :: bulk pin ordering to facilitate efficiency/ease in UI
       [%set-pin-order path=space-path:spaces order=(list app-id)]
-      [%recommend path=space-path:spaces =app-id]
-      [%unrecommend path=space-path:spaces =app-id]
+      [%recommend path=space-path:spaces =app-id payload=(unit app-full)]
+      [%unrecommend path=space-path:spaces =app-id payload=(unit app-full)]
       [%suite-add path=space-path:spaces =app-id rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
       [%install-app =ship =desk]

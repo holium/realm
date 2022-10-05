@@ -316,7 +316,7 @@
     :~  [id+s+id.app-full]
         ['slots' (rnks slots.sieve.app-full)]
         ['tags' a+(turn ~(tap in tags.sieve.app-full) |=(tg=tag:store s+(scot %tas tg)))]
-        ['recommendations' n+(crip "{<total.recommendations.app-full>}")]
+        ['recommendations' n+(crip "{<total.recommendations.sieve.app-full>}")]
     ==
     =/  detail=(list [cord json])  (app-detail:encode app.entry.app-full)
     ?~  detail  ~  (weld head detail)
@@ -426,7 +426,7 @@
     ^-  json
     %-  pairs
     :~  [%pinned n+(crip "{<pinned.slots>}")]
-        [%recommended n+(crip "{<recommended.slots>}")]
+        :: [%recommended n+(crip "{<recommended.slots>}")]
         [%suite n+(crip "{<suite.slots>}")]
     ==
     :: %+  turn  ~(tap by ranks)
