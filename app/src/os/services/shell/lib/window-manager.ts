@@ -143,6 +143,16 @@ export const getInitialWindowDimensions = (
       }
       dimensions = getCenteredDimensions(dialog, desktopDimensions);
       break;
+    case 'custom':
+      const customApp: NativeAppType = app;
+      const customConfig = nativeApps[app.id];
+      if (customConfig.native?.openFullscreen) {
+        console.log('nativeApp window size', customApp);
+        dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
+        break;
+      }
+      dimensions = getCenteredDimensions(customApp, desktopDimensions);
+      break; 
   }
   return dimensions!;
 };

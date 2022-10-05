@@ -34,7 +34,7 @@ const Window = types
     title: types.optional(types.string, ''),
     zIndex: types.number,
     type: types.optional(
-      types.enumeration(['urbit', 'web', 'native', 'dialog']),
+      types.enumeration(['urbit', 'web', 'native', 'dialog', 'custom']),
       'urbit'
     ),
     dimensions: DimensionsModel,
@@ -128,6 +128,9 @@ export const DesktopStore = types
       if (app.href) {
         glob = app.href.glob ? true : false;
       }
+      console.log(app)
+      console.log(desktopDimensions)
+      console.log(isFullscreen)
       const newWindow = Window.create({
         id: app.id,
         title: app.title,

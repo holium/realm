@@ -5,7 +5,7 @@ import { ThemeModelType } from 'os/services/theme.model';
 export type NativeAppType = {
   id: string;
   title: string;
-  type: 'native' | 'web' | 'urbit';
+  type: 'native' | 'web' | 'urbit' | 'custom';
   color: string;
   icon?: string;
   native?: {
@@ -47,6 +47,13 @@ export const nativeApps: AppManifestMap = {
     native: {
       hideTitlebarBorder: true,
     },
+  },
+  'airlift': {
+    id: 'airlift',
+    title: 'Airlift',
+    color: '#ACBCCB',
+    icon: 'Airlift',
+    type: 'custom',
   },
   ...{ ...(isDev ? devApps : {}) },
 };

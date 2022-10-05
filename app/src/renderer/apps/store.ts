@@ -38,7 +38,8 @@ export type TrayAppKeys =
   | 'account-tray'
   | 'messages-tray'
   | 'wallet-tray'
-  | 'spaces-tray';
+  | 'spaces-tray'
+  | 'airlift-tray';
 
 export const TrayAppStore = types
   .model('TrayAppStore', {
@@ -49,6 +50,7 @@ export const TrayAppStore = types
         'messages-tray',
         'wallet-tray',
         'spaces-tray',
+        'airlift-tray',
       ])
     ),
     coords: TrayAppCoords,

@@ -8,6 +8,10 @@ import { useServices } from 'renderer/logic/store';
 // import { Roompps } from 'renderer/logic/Roomore';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { nativeApps } from 'renderer/apps';
+import { AirliftInfo } from 'renderer/apps/Airlift/AirliftInfo';
+
 type AirliftTrayProps = {};
 
 const iconSize = 28;
@@ -61,6 +65,23 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
     [activeApp, anchorOffset, position, dimensions]
   );
 
+  const onButtonDragStart = useCallback(
+    (evt: any) => {
+      evt.preventDefault();
+      window.addEventListener('mouseup', onButtonDragEnd);
+    },
+    [activeApp, anchorOffset, position, dimensions]
+  );
+
+  const onButtonDragEnd = useCallback(
+    (evt: any) => {
+      evt.preventDefault();
+      window.removeEventListener('mouseup', onButtonDragEnd);
+      DesktopActions.openAppWindow('', nativeApps['airlift']);
+    },
+    [activeApp, anchorOffset, position, dimensions]
+  );
+
   const iconHoverColor = useMemo(
     () => rgba(darken(0.05, theme.currentTheme.dockColor), 0.5),
     [theme.currentTheme.windowColor]
@@ -77,10 +98,6 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
       position="relative"
       onClick={onButtonClick}
     >
-      {activeApp==='airlift-tray' ? (
-        <Flex style={{ pointerEvents: 'none' }}>
-        </Flex>
-      ) : (
         <IconButton
           id="airlift-tray-icon"
           ref={airliftButtonRef}
@@ -88,11 +105,12 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
           customBg={iconHoverColor}
           color={textColor}
           mt="2px"
+          draggable={true}
+          onDragStart={onButtonDragStart}
           // mb="-2px"
         >
           <Icons name="Airlift" pointerEvents="none" />
         </IconButton>
-      )}
     </motion.div>
   );
 });

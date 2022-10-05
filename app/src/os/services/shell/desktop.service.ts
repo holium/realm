@@ -74,7 +74,6 @@ export class DesktopService extends BaseService {
     setMouseColor: (mouseColor: string) => {
       return ipcRenderer.invoke('realm.desktop.set-mouse-color', mouseColor);
     },
-
     openAppWindow: (spaceId: string, app: any) => {
       return ipcRenderer.invoke('realm.desktop.open-app-window', spaceId, app);
     },
