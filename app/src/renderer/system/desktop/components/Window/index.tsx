@@ -418,6 +418,8 @@ export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
       );
     case 'dialog':
       return <DialogView window={window} />;
+    case 'custom':
+      return <div></div>
     default:
       return <div>No view</div>;
   }
