@@ -316,7 +316,7 @@
     :~  [id+s+id.app-full]
         ['slots' (rnks slots.sieve.app-full)]
         ['tags' a+(turn ~(tap in tags.sieve.app-full) |=(tg=tag:store s+(scot %tas tg)))]
-        ['recommended' n+(crip "{<recommended.entry.app-full>}")]
+        ['recommendations' n+(crip "{<total.recommendations.app-full>}")]
     ==
     =/  detail=(list [cord json])  (app-detail:encode app.entry.app-full)
     ?~  detail  ~  (weld head detail)
@@ -326,7 +326,7 @@
     ^-  (list [cord json])
     =/  head=(list [cord json])
     :~  [id+s+app-id]
-        ['recommended' n+(crip "{<recommended.entry>}")]
+        :: ['recommended' n+(crip "{<recommended.entry>}")]
     ==
     =/  detail=(list [cord json])  (app-detail:encode app.entry)
     ?~  detail  ~  (weld head detail)

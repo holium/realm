@@ -88,6 +88,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
       apps.map((app: any, index: number) => {
         const tags = app.tags || [];
         const isAppPinned = tags.includes('pinned');
+        const weRecommended = bazaar.my.recommendations.includes(app.id);
         return (
           <AppTile
             key={app.title + index + 'grid'}
@@ -96,7 +97,50 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             tileSize={tileSize}
             app={app}
             isVisible={isOpen}
-            contextMenu={getAppMenu(bazaar, currentSpace?.path!, app)}
+            contextMenu={[
+              {
+                label: isAppPinned ? 'Unpin app' : 'Pin app',
+                disabled: false,
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  isAppPinned
+                    ? SpacesActions.unpinApp(currentSpace?.path!, app.id)
+                    : SpacesActions.pinApp(currentSpace?.path!, app.id);
+                },
+              },
+              {
+                label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+                disabled: false,
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  weRecommended
+                    ? SpacesActions.unrecommendApp(currentSpace?.path!, app.id)
+                    : SpacesActions.recommendApp(currentSpace?.path!, app.id);
+                },
+              },
+              {
+                label: 'App info',
+                disabled: true,
+                onClick: (evt: any) => {
+                  // evt.stopPropagation();
+                  console.log('open app info');
+                },
+              },
+              ...(app.type === 'urbit' && app.installed
+                ? [
+                    {
+                      label: 'Uninstall',
+                      // section: 2,
+                      disabled: false,
+                      onClick: (evt: any) => {
+                        evt.stopPropagation();
+                        console.log(`start uninstall`);
+                        SpacesActions.uninstallApp(app.id);
+                      },
+                    },
+                  ]
+                : []),
+            ]}
             variants={
               {
                 // hidden: {
@@ -124,7 +168,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           />
         );
       }),
-    [apps]
+    [apps, bazaar.my.recommendations]
   );
 });
 

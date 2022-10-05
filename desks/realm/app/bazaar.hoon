@@ -631,7 +631,10 @@
           [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]
       [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
     =.  space-apps.state  space-apps-lite.result
-    =.  recommendations.my.state  (~(put in recommendations.my.state) app-id)
+    =.  recommendations.my.state
+      ?:  =(action %recommend)    (~(put in recommendations.my.state) app-id)
+      ?:  =(action %unrecommend)  (~(del in recommendations.my.state) app-id)
+      recommendations.my.state
     :_  state
     %+  weld  cards.result
     ^-  (list card)
