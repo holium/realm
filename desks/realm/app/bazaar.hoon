@@ -603,9 +603,17 @@
     %-  ~(rep by space-apps.state)
       |=  [[=space-path:spaces-store [=app-index-lite:store =sorts:store]] rslt=[=space-apps-lite:store cards=(list card)]]
       ::  if the app is not in the space, there's nothing to do
-      ?.  (~(has by app-index-lite) app-id)
-        [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
-      =/  app-lite  (~(got by app-index-lite) app-id)
+      :: ?.  (~(has by app-index-lite) app-id)
+      ::   [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
+      =/  app-lite  (~(get by app-index-lite) app-id)
+      =/  app-lite
+        ?~  app-lite
+          =|  app-lite=app-lite:store
+          =.  id.app-lite                  app-id
+          =.  sieve.app-lite              *sieve:store
+          =.  recommendations.app-lite     [%0 ~]
+          app-lite
+        u.app-lite
       =/  app-lite
         ?-  action
           %recommend
@@ -626,7 +634,7 @@
       ::  if the space host is not this ship, be sure to poke it and let it know we are recommending the app
       =.  cards.rslt
         ?:  =(our.bowl ship.space-path)  cards.rslt
-          ~&  >>  "{<dap.bowl>}: forwarding recommendation of {<app-id>} to space host {<ship.space-path>}..."
+          ~&  >>  "{<dap.bowl>}: forwarding recommendation of {<app-id>} to space {<space-path>}..."
           %+  snoc  cards.rslt
           [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]
       [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
@@ -653,24 +661,27 @@
       `state
     ::  is the app in this spaces' app index?
     =/  app-lite  (~(get by index.u.apps) app-id)
-    ::  were we poked with a bad app-id? print error (red text) for now to help troubleshoot
-    ?~  app-lite
-      ~&  >>>  "{<dap.bowl>}: [recommend]. app {<app-id>} not found in space {<path>}"
-      `state
-    =/  app-lite  u.app-lite
+    =/  app-lite
+      ?~  app-lite
+        =|  app-lite=app-lite:store
+        =.  id.app-lite                  app-id
+        =.  sieve.app-lite              *sieve:store
+        =.  recommendations.app-lite     [%0 ~]
+        app-lite
+      u.app-lite
     =/  app-lite
       ?-  action
         %recommend
           ::  only increment the total # of recommendations if this ship has not already been counted
-          ?:  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
+          ?:  (~(has in members.recommendations.app-lite) src.bowl)  app-lite
           =.  total.recommendations.app-lite  (add total.recommendations.app-lite 1)
-          =.  members.recommendations.app-lite  (~(put in members.recommendations.app-lite) our.bowl)
+          =.  members.recommendations.app-lite  (~(put in members.recommendations.app-lite) src.bowl)
           app-lite
         %unrecommend
           ::  only increment the total # of recommendations if this ship has not already been counted
-          ?:  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
+          ?.  (~(has in members.recommendations.app-lite) src.bowl)  app-lite
           =.  total.recommendations.app-lite  ?.((gth total.recommendations.app-lite 0) 0 (sub total.recommendations.app-lite 1))
-          =.  members.recommendations.app-lite  (~(del in members.recommendations.app-lite) our.bowl)
+          =.  members.recommendations.app-lite  (~(del in members.recommendations.app-lite) src.bowl)
           app-lite
       ==
     =/  entry            (~(got by app-catalog.state) app-id)
