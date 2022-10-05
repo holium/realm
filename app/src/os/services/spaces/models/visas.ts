@@ -7,7 +7,7 @@ import {
   applyPatch,
 } from 'mobx-state-tree';
 
-export const Visa = types.model({
+export const Visa = types.model('Visa', {
   inviter: types.string,
   role: types.string,
   message: types.string,
@@ -22,7 +22,7 @@ export const Visa = types.model({
 export type VisaType = Instance<typeof Visa>;
 
 export const VisaModel = types
-  .model({
+  .model('VisaModel', {
     incoming: types.map(Visa), // Map<SpacePath, Invite>
     outgoing: types.map(types.map(Visa)), // Map<SpacePath, Map<Patp, Invite>>
   })
@@ -39,11 +39,11 @@ export const VisaModel = types
   }))
   .actions((self) => ({
     initial(data: any) {
-      console.log(data);
+      // console.log(data);
       // set initial data
     },
     initialIncoming(data: any) {
-      applySnapshot(self.incoming, data);
+      if (data) applySnapshot(self.incoming, data);
     },
     addIncoming(data: { path: string; invite: VisaType }) {
       // update incoming invitations

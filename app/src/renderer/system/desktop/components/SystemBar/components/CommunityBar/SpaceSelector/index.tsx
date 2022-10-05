@@ -70,7 +70,7 @@ export const SpaceSelector: FC<SpaceSelectorProps> = observer(
         alignItems="center"
         onClick={onButtonClick}
       >
-        {spaces.isLoaded ? (
+        {spaces.isLoaded || spaces.selected ? (
           <SelectedSpace selectorRef={selectorRef} />
         ) : (
           <TrayButton

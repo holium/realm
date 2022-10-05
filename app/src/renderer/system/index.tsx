@@ -15,9 +15,17 @@ import {
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
 import { useWindowSize } from 'renderer/logic/lib/measure';
-import { Flex, Spinner } from 'renderer/components';
+import {
+  ActionButton,
+  Badge,
+  Flex,
+  Spinner,
+  Text,
+  ConnectionStatus,
+} from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { RealmActions } from 'renderer/logic/actions/main';
+import { OSActions } from 'renderer/logic/actions/os';
 
 // Get the initial dimensions from the main process
 RealmActions.onInitialDimensions((_e: any, dims: any) => {
@@ -26,7 +34,7 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, theme, identity, ship } = useServices();
-  const { resuming } = useCore();
+  const { resuming, connectionStatus } = useCore();
   // const windowRef = useRef(null);
   // useWindowSize(windowRef);
 
@@ -43,6 +51,16 @@ export const Shell: FC = observer(() => {
   );
 
   const shipLoaded = ship?.loader.isLoaded;
+  const TopTray = (
+    <ConnectionStatus
+      status={connectionStatus}
+      mode={theme.currentTheme!.mode as any}
+      onReconnect={() => {
+        console.log('try to reconnect');
+        OSActions.reconnect();
+      }}
+    />
+  );
 
   const GUI = shipLoaded ? (
     <Desktop
@@ -67,6 +85,9 @@ export const Shell: FC = observer(() => {
         )}
         {!resuming && GUI}
       </BackgroundFill>
+      <Layer zIndex={20}>
+        <ConnectionStatus />
+      </Layer>
     </ViewPort>
   );
 });

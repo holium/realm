@@ -6,6 +6,7 @@ import { MemberRole, Patp, SpacePath } from '../types';
 import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { VisaModelType } from 'os/services/spaces/models/visas';
 import { reject } from 'lodash';
+import { getHost } from '../services/spaces/spaces.service';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -245,6 +246,7 @@ export const SpacesApi = {
     membersState: MembershipType,
     bazaarState: BazaarStoreType,
     visaState: VisaModelType,
+    roomService: any,
     setTheme: (theme: any) => void
   ): void => {
     conduit.watch({
@@ -260,6 +262,7 @@ export const SpacesApi = {
             membersState,
             bazaarState,
             visaState,
+            roomService,
             setTheme
           );
         }
@@ -288,14 +291,18 @@ const handleSpacesReactions = (
   membersState: MembershipType,
   bazaarState: BazaarStoreType,
   visaState: VisaModelType,
+  roomService: any,
   setTheme: (theme: any) => void
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      spacesState.initialReaction(data['initial']);
+      spacesState.initialReaction(data['initial'], our);
       membersState.initial(data['initial']['membership']);
-      visaState.initialIncoming(data['initial']['invitations']);
+      if (data['initial']['invitations']) {
+        visaState.initialIncoming(data['initial']['invitations']);
+      }
+      // roomService!.setProvider(null, getHost(spacesState.selected!.path));
       break;
     case 'add':
       const newSpace = spacesState.addSpace(data['add']);

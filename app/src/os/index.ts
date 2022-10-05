@@ -23,9 +23,12 @@ export interface ISession {
   cookie: string;
 }
 
+export type ConnectParams = { reconnecting: boolean };
+
 export class Realm extends EventEmitter {
   conduit?: Conduit;
   private isResuming: boolean = false;
+  private isReconnecting: boolean = false;
   readonly mainWindow: BrowserWindow;
   private session?: ISession;
   private db: Store<ISession>;
@@ -44,11 +47,19 @@ export class Realm extends EventEmitter {
 
   readonly handlers = {
     'realm.boot': this.boot,
+    'realm.reconnect': this.reconnect,
+    'realm.disconnect': this.disconnect,
   };
 
   static preload = {
     boot: () => {
       return ipcRenderer.invoke('realm.boot');
+    },
+    reconnect: () => {
+      return ipcRenderer.invoke('realm.reconnect');
+    },
+    disconnect: () => {
+      return ipcRenderer.invoke('realm.disconnect');
     },
     install: (ship: string) => {
       return ipcRenderer.invoke('core:install-realm', ship);
@@ -134,10 +145,6 @@ export class Realm extends EventEmitter {
     let models = {};
 
     if (this.session) {
-      this.onEffect({
-        response: 'status',
-        data: 'boot:resuming',
-      });
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
@@ -146,6 +153,11 @@ export class Realm extends EventEmitter {
       bazaar = this.services.spaces.modelSnapshots.bazaar;
       membership = this.services.spaces.modelSnapshots.membership;
       visas = this.services.spaces.modelSnapshots.visas;
+    }
+
+    if (this.conduit) {
+      console.log('boot conduit', this.conduit.status);
+      this.sendConnectionStatus(this.conduit.status);
     }
 
     const bootPayload = {
@@ -177,7 +189,26 @@ export class Realm extends EventEmitter {
     return this.session;
   }
 
-  async connect(session: ISession) {
+  async disconnect() {
+    this.conduit?.closeChannel();
+    this.isResuming = true;
+    this.conduit = undefined;
+  }
+
+  async reconnect() {
+    this.conduit?.closeChannel();
+    this.conduit = undefined;
+
+    if (this.session) {
+      this.isReconnecting = true;
+      return await this.connect(this.session, { reconnecting: true });
+    }
+  }
+
+  async connect(
+    session: ISession,
+    params: ConnectParams = { reconnecting: false }
+  ) {
     this.sendLog('connecting conduit');
     if (!this.conduit) {
       this.conduit = new Conduit();
@@ -194,7 +225,7 @@ export class Realm extends EventEmitter {
       );
       this.sendLog('after conduit init');
       this.sendLog('connection successful');
-      this.onConduit();
+      this.onConduit(params);
     } catch (e) {
       console.log(e);
       this.sendLog('error');
@@ -221,25 +252,24 @@ export class Realm extends EventEmitter {
     this.session = undefined;
   }
 
-  async onConduit() {
+  async onConduit(params: ConnectParams) {
+    // this.sendConnectionStatus(this.conduit?.status);
     const sessionPatp = this.session?.ship!;
     this.sendLog(`before ship subscribe ${this.session?.ship!}`);
-    const { models } = await this.services.ship.subscribe(
-      sessionPatp,
-      this.session
-    );
+    await this.services.ship.subscribe(sessionPatp, this.session);
     this.sendLog('after ship subscribe');
-    await this.services.spaces.load(sessionPatp, models.docket);
+    await this.services.spaces.load(sessionPatp, params.reconnecting);
     this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.on-connected', {
       ship: this.services.ship.snapshot,
       models: this.services.ship.modelSnapshots,
     });
-    if (!this.isResuming) {
+    if (!this.isResuming && !params.reconnecting) {
       this.mainWindow.webContents.send('realm.on-login');
     }
     this.services.identity.auth.setLoader('loaded');
     this.isResuming = false;
+    if (this.isReconnecting) this.isReconnecting = false;
   }
 
   /**
@@ -274,18 +304,26 @@ export class Realm extends EventEmitter {
    * @param conduit
    */
   handleConnectionStatus(conduit: Conduit) {
-    conduit.on(ConduitState.Initialized, () =>
-      this.sendConnectionStatus(ConduitState.Initialized)
-    );
+    conduit.removeAllListeners();
+    // conduit.on(ConduitState.Initialized, );
+    conduit.on(ConduitState.Initialized, () => {
+      if (!this.isReconnecting) {
+        this.sendConnectionStatus(ConduitState.Initialized);
+      }
+    });
     conduit.on(ConduitState.Connected, () =>
       this.sendConnectionStatus(ConduitState.Connected)
     );
     conduit.on(ConduitState.Disconnected, () =>
       this.sendConnectionStatus(ConduitState.Disconnected)
     );
+    conduit.on(ConduitState.Connecting, () => {
+      this.sendConnectionStatus(ConduitState.Connecting);
+    });
     conduit.on(ConduitState.Failed, () => {
       this.services.identity.auth.setLoader('error');
       this.isResuming = false;
+      this.isReconnecting = false;
       this.sendConnectionStatus(ConduitState.Failed);
     });
   }

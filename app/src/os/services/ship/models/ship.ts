@@ -9,7 +9,7 @@ import {
 } from 'mobx-state-tree';
 import { LoaderModel } from '../../common.model';
 import { FriendsStore } from './friends';
-import { NotificationsStore } from './notifications';
+// import { NotificationsStore } from './notifications';
 
 export const ShipModel = types
   .model('ShipModel', {
