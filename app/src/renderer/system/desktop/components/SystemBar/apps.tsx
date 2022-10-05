@@ -36,6 +36,13 @@ export const trayAppRenderers: ViewRenderers = {
     },
     component: (props: any) => <RoomApp {...props} />,
   },
+  'airlift-tray': {
+    dimensions: {
+      width: 330,
+      height: 180,
+    },
+    component: (props: any) => <AirliftInfo {...props} />,
+  },
   'spaces-tray': {
     dimensions: {
       width: 340,
@@ -95,13 +102,6 @@ export const trayAppRenderers: ViewRenderers = {
   },
   'wallet-tray': {
     component: (props: any) => <WalletApp {...props} />,
-    dimensions: {
-      width: 330,
-      height: 600,
-    },
-  },
-  'airlift-tray': {
-    component: (props: any) => <AirliftInfo {...props} />,
     dimensions: {
       width: 330,
       height: 600,

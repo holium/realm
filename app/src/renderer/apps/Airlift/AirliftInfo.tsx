@@ -15,7 +15,7 @@ import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { observer } from "mobx-react";
 
-export type RoomAppProps = {
+export type AirliftInfoProps = {
   theme: ThemeModelType;
   dimensions: {
     height: number;
@@ -23,7 +23,7 @@ export type RoomAppProps = {
   };
 };
   
-export const AirliftInfo: FC<RoomAppProps> = observer((props: RoomAppProps) => {
+export const AirliftInfo: FC<AirliftInfoProps> = observer((props: AirliftInfoProps) => {
   const { dimensions } = props;
   const { theme } = useServices();
   const { windowColor } = theme.currentTheme;
@@ -43,11 +43,12 @@ export const AirliftInfo: FC<RoomAppProps> = observer((props: RoomAppProps) => {
       }}
     >
       <Flex pl={3} pr={4} mr={3} justifyContent="center" alignItems="center">
-        <Icons opacity={0.8} name="Airlift" size={26} mr={2} />
+        <Icons opacity={0.8} name="Airlift" size={26} />
         <Text
           opacity={0.8}
-          style={{ textTransform: 'uppercase' }}
-          fontWeight={600}
+          style={{ textTransform: 'lowercase' }}
+          fontWeight={500}
+          fontSize={26}
         >
           irlift
         </Text>
@@ -60,6 +61,7 @@ export const AirliftInfo: FC<RoomAppProps> = observer((props: RoomAppProps) => {
         flexDirection="column"
         overflowY={'scroll'}
       >
+        <Text fontWeight={550}>Coding Gall agents is hard.<br/>You might need an <a href="https://history.state.gov/milestones/1945-1952/berlin-airlift">airlift</a>.</Text>
         <Text>To drop an airlift into Realm, drag the Airlift icon from the System Bar into the current Space.</Text>
     </Flex>
   </Grid.Column>

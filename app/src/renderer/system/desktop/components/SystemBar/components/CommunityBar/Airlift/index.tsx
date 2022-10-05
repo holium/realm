@@ -5,7 +5,6 @@ import { Flex, IconButton, Icons } from 'renderer/components';
 import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
-// import { Roompps } from 'renderer/logic/Roomore';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
@@ -22,7 +21,6 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
   //
   const {
     activeApp,
-    roomsApp, // add an action for setProvider, setCookie
     setActiveApp,
     setTrayAppCoords,
     setTrayAppDimensions,
@@ -31,7 +29,7 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
   const airliftButtonRef = createRef<HTMLButtonElement>();
 
   const dimensions = {
-    height: 500,
+    height: 180,
     width: 380,
   };
 
@@ -55,11 +53,10 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
       );
       // TODO hacky fix for positioning issue with larger button
       setTrayAppCoords({
-        left: roomsApp.liveRoom ? left + 4 : left,
-        bottom: roomsApp.liveRoom ? bottom - 2 : bottom,
+        left,
+        bottom
       });
       setTrayAppDimensions(dimensions);
-      // RoomsActions.requestAllRooms();
       setActiveApp('airlift-tray');
     },
     [activeApp, anchorOffset, position, dimensions]
