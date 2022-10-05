@@ -121,9 +121,7 @@
       ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
       ::  only host should get all updates
       ?>  (is-host:core src.bowl)
-      =/  apps  initial:apps:core
-      :: (bazaar:send-reaction:core [%initial space-apps.state] [/updates ~])
-      (bazaar:send-reaction:core [%initial apps my.state] [/updates ~] ~)
+      (bazaar:send-reaction:core [%initial app-catalog.state space-apps.state my.state] [/updates ~] ~)
     ::
     [%bazaar @ @ ~]
       :: The space level watch subscription
@@ -138,7 +136,7 @@
       =/  apps        (space-initial:apps:core pth)
       =/  entry       (~(get by space-apps.state) pth)
       =/  sorts       ?~(entry *sorts:store sorts.u.entry)
-      =/  sites        sites:core
+      =/  sites       sites:core
       ~&  >>  "{<dap.bowl>}: {<sites>}"
       (bazaar:send-reaction:core [%space-apps pth apps sorts sites] paths ~)
     ::
@@ -558,6 +556,7 @@
       =/  app-lite
         ?-  action
           %recommend
+            =.  tags.sieve.app-lite  (~(put in tags.sieve.app-lite) %recommended)
             ::  only increment the total # of recommendations if this ship has not already been counted
             ?:  (~(has in members.recommendations.sieve.app-lite) our.bowl)  app-lite
             =.  total.recommendations.sieve.app-lite  (add total.recommendations.sieve.app-lite 1)
@@ -565,6 +564,7 @@
             app-lite
           ::
           %unrecommend
+            =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %recommended)
             ::  only increment the total # of recommendations if this ship has not already been counted
             ?.  (~(has in members.recommendations.sieve.app-lite) our.bowl)  app-lite
             =.  total.recommendations.sieve.app-lite  ?.((gth total.recommendations.sieve.app-lite 0) 0 (sub total.recommendations.sieve.app-lite 1))
@@ -578,9 +578,9 @@
           ~&  >>  "{<dap.bowl>}: forwarding recommendation of {<app-id>} to space {<space-path>}..."
           %+  snoc  cards.rslt
           =/  entry  (~(got by app-catalog.state) app-id)
-          =/  payload=app-full:store  [app-id sieve.app-lite entry]
+          :: =/  payload=app-full:store  [app-id sieve.app-lite entry]
           ::  must send over full app in case space host doesn't have app in app catalog
-          [%pass / %agent [ship.space-path %bazaar] %poke bazaar-interaction+!>([?:(=(action %recommend) %member-recommend %member-unrecommend) space-path payload])]
+          [%pass / %agent [ship.space-path %bazaar] %poke bazaar-interaction+!>([?:(=(action %recommend) %member-recommend %member-unrecommend) space-path app-id entry])]
       [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
     =.  space-apps.state  space-apps-lite.result
     =.  recommendations.my.state
@@ -605,19 +605,19 @@
     ==
   ::
   ++  member-recommend
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-id:store =app-catalog-entry:store]
     ^-  (quip card _state)
     ?<  =(src.bowl our.bowl)  :: must come from a member (remote ship)
-    (handle-member-recommend path app-full %recommend)
+    (handle-member-recommend path app-id app-catalog-entry %recommend)
   ::
   ++  member-unrecommend
-    |=  [path=space-path:spaces-store =app-full:store]
+    |=  [path=space-path:spaces-store =app-id:store =app-catalog-entry:store]
     ^-  (quip card _state)
     ?<  =(src.bowl our.bowl)  :: must come from a member (remote ship)
-    (handle-member-recommend path app-full %unrecommend)
+    (handle-member-recommend path app-id app-catalog-entry %unrecommend)
   ::
   ++  handle-member-recommend
-    |=  [path=space-path:spaces-store =app-full:store action=?(%recommend %unrecommend)]
+    |=  [path=space-path:spaces-store =app-id:store =app-catalog-entry:store action=?(%recommend %unrecommend)]
     ::  here we know that the poke did not originate on this ship; meaning it's come from a member
     ::    poke. in this case simply update the recommendation stats for the app in the given space
     =/  apps  (~(get by space-apps.state) path)
@@ -626,23 +626,25 @@
       ~&  >>>  "{<dap.bowl>}: [recommend]. space {<path>} not found"
       `state
     ::  is the app in this spaces' app index?
-    =/  app-lite  (~(get by index.u.apps) id.app-full)
+    =/  app-lite  (~(get by index.u.apps) app-id)
     =/  app-lite
       ?~  app-lite
         =|  app-lite=app-lite:store
-        =.  id.app-lite                  id.app-full
+        =.  id.app-lite                  app-id
         =.  sieve.app-lite              *sieve:store
         app-lite
       u.app-lite
     =/  app-lite
       ?-  action
         %recommend
+          =.  tags.sieve.app-lite  (~(put in tags.sieve.app-lite) %recommended)
           ::  only increment the total # of recommendations if this ship has not already been counted
           ?:  (~(has in members.recommendations.sieve.app-lite) src.bowl)  app-lite
           =.  total.recommendations.sieve.app-lite  (add total.recommendations.sieve.app-lite 1)
           =.  members.recommendations.sieve.app-lite  (~(put in members.recommendations.sieve.app-lite) src.bowl)
           app-lite
         %unrecommend
+          =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %recommended)
           ::  only increment the total # of recommendations if this ship has not already been counted
           ?.  (~(has in members.recommendations.sieve.app-lite) src.bowl)  app-lite
           =.  total.recommendations.sieve.app-lite  ?.((gth total.recommendations.sieve.app-lite 0) 0 (sub total.recommendations.sieve.app-lite 1))
@@ -651,23 +653,23 @@
       ==
     :: when members recommend, the app may not exist in this ship's (space owner's) app catalog
     ::  therefore add it if not there
-    =/  entry            (~(get by app-catalog.state) id.app-full)
-    =/  entry  ?~(entry entry.app-full u.entry)
+    =/  entry            (~(get by app-catalog.state) app-id)
+    =/  entry            ?~(entry app-catalog-entry u.entry)
     =/  entry
     ?+  -.app.entry  entry
       ::
       %urbit
-        =.  installed.app.entry  (~(has by app-catalog.state) id.app-full)
+        =.  installed.app.entry  (~(has by app-catalog.state) app-id)
         entry
     ==
-    =.  app-catalog      (~(put by app-catalog.state) id.app-full entry)
-    =.  index.u.apps  (~(put by index.u.apps) id.app-full app-lite)
+    =.  app-catalog      (~(put by app-catalog.state) app-id entry)
+    =.  index.u.apps  (~(put by index.u.apps) app-id app-lite)
     =.  space-apps.state  (~(put by space-apps.state) path u.apps)
     =.  recommended.sorts.u.apps     (sort-apps:helpers (extract-apps:helpers index.u.apps %recommended) %recommended %asc)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     :_  state
     :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-        [%give %fact paths bazaar-reaction+!>([%recommend path app-full recommended.sorts.u.apps])]
+        [%give %fact paths bazaar-reaction+!>([%recommend path [app-id sieve.app-lite entry] recommended.sorts.u.apps])]
     ==
   --
   ::
@@ -855,7 +857,7 @@
   ==
   ::
   ++  on-initial
-    |=  [=space-apps-full:store =my:store]
+    |=  [=app-catalog:store =space-apps-lite:store =my:store]
     ^-  (quip card _state)
     `state
   ::
@@ -870,9 +872,9 @@
     ?>  ?=([%initial *] charge-update)
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    =/  result=[=app-index-full:store =app-index-lite:store =app-catalog:store cards=(list card)]
+    =/  result=[=app-index-full:store =app-index-lite:store =app-catalog:store]
     %-  ~(rep by app-index-full)
-      |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store =app-catalog:store cards=(list card)]]
+      |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store =app-catalog:store]]
       ::  is this app installed?
       =/  app-full
       ?+  -.app.entry.app-full  app-full
@@ -884,18 +886,13 @@
       =.  app-catalog.acc            (~(put by app-catalog.acc) app-id entry.app-full)
       =.  app-index-lite.acc         (~(put by app-index-lite.acc) app-id [app-id sieve.app-full])
       =.  app-index-full.acc         (~(put by app-index-full.acc) app-id app-full)
-      ?.  (~(has in recommendations.my.state) app-id)  acc
-      =.  cards.acc
-      %+  weld  cards.acc
-      ^-  (list card)
-      [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]~
       acc
     =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result sorts])
     =.  sites.state         sites
     :: notify the UI of that we've accepted an invite to a new space and there
     ::   are apps available in this new space
-    (bazaar:send-reaction:core [%space-apps space-path app-index-full.result sorts sites] [/updates ~] cards.result)
+    (bazaar:send-reaction:core [%space-apps space-path app-index-full.result sorts sites] [/updates ~] ~)
   ::
   ++  on-pin
     |=  [path=space-path:spaces-store =app-full:store ord=(list app-id:store)]
@@ -1314,8 +1311,16 @@
     ::  no need to subscribe to our own ship's bazaar. we're already getting all updates
     ?:  =(our.bowl ship.path)  `state
     %-  (slog leaf+"{<dap.bowl>}: on-space-initial:spaces-reaction => subscribing to bazaar @ {<path>}..." ~)
+    ::  now that we've been allowed in, send over our app recommendations
+    =/  recs=(list card)
+    %+  turn  ~(tap in recommendations.my.state)
+      |=  [=app-id:store]
+      =/  entry  (~(got by app-catalog.state) app-id)
+      [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-recommend path app-id entry])]
     =/  watch-path    [/bazaar/(scot %p ship.path)/(scot %tas space.path)]
     :_  state
+    %+  weld  recs
+    ^-  (list card)
     :~  [%pass watch-path %agent [ship.path %bazaar] %watch watch-path]
     ==
   --

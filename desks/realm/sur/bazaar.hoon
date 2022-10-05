@@ -119,12 +119,12 @@
 ::
 :: 'private' ship-to-ship (member-to-host) pokes (no json encode/decode req'd)
 +$  interaction
-  $%  [%member-recommend path=space-path:spaces =app-full]
-      [%member-unrecommend path=space-path:spaces =app-full]
+  $%  [%member-recommend path=space-path:spaces =app-id =app-catalog-entry]
+      [%member-unrecommend path=space-path:spaces =app-id =app-catalog-entry]
   ==
 ::
 +$  reaction
-  $%  [%initial =space-apps-full =my]
+  $%  [%initial =app-catalog =space-apps-lite =my]
       [%space-apps =space-path:spaces =app-index-full =sorts sites=(set [ship desk])]
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]

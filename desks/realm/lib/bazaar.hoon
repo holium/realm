@@ -109,7 +109,8 @@
         %initial
       :-  %initial
       %-  pairs
-      :~  [%space-apps (space-apps-full:encode space-apps-full.rct)]
+      :~  [%catalog (pairs (catalog:encode app-catalog.rct))]
+          [%space-apps (space-apps-lite:encode space-apps-lite.rct)]
           [%my (my:encode my.rct)]
       ==
     ::
@@ -273,7 +274,11 @@
   ::
   ++  apps-lite
     |=  [index=app-index-lite:store =sorts:store]
-    (pairs (weld (lite-app-index index) (app-sorts sorts)))
+    ^-  json
+    %-  pairs
+    :~  [%apps (pairs (lite-app-index index))]
+        [%sorts (pairs (app-sorts sorts))]
+    ==
   ::
   ++  app-detail
     |=  =app:store
@@ -360,9 +365,9 @@
     ^-  json
     %-  pairs
     :~  [%id s+id.app]
-        :: ['ship' s+(scot %p ship.app-entry)]
         ['slots' (rnks slots.sieve.app)]
         ['tags' a+(turn ~(tap in tags.sieve.app) |=(tg=tag:store s+(scot %tas tg)))]
+        ['recommendations' n+(crip "{<total.recommendations.sieve.app>}")]
     ==
   ::
   ++  dkt

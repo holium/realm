@@ -19,7 +19,6 @@ enum AppTypes {
 
 const AppSlotModel = types.model({
   pinned: types.number,
-  recommended: types.number,
   suite: types.number,
 });
 
@@ -35,7 +34,7 @@ const UrbitApp = types.model({
   website: types.string,
   license: types.string,
   installed: types.boolean,
-  recommended: types.optional(types.number, 0),
+  // recommended: types.optional(types.number, 0),
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
@@ -46,7 +45,7 @@ const NativeApp = types.model({
   color: types.string,
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
-  recommended: types.optional(types.number, 0),
+  // recommended: types.optional(types.number, 0),
 });
 
 export type NativeAppType = Instance<typeof NativeApp>;
@@ -75,18 +74,21 @@ export type BazaarAppType = Instance<typeof BazaarAppMap>;
 
 export const BazaarModel = types
   .model('BazaarModel', {
+    /* observable changes */
+    pinnedChange: types.optional(types.boolean, false),
+    suiteChange: types.optional(types.boolean, false),
+    recommendedChange: types.optional(types.boolean, false),
+    /* */
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
-    pinnedChange: types.optional(types.boolean, false),
     pinned: types.array(types.string),
-    recommendedChange: types.optional(types.boolean, false),
     recommended: types.array(types.string),
-    suiteChange: types.optional(types.boolean, false),
     suite: types.array(types.string),
     apps: types.map(
       types.model({
         id: types.identifier,
         slots: AppSlotModel,
+        recommendations: types.optional(types.number, 0),
         tags: types.array(types.string),
       })
     ),
@@ -99,7 +101,12 @@ export const BazaarModel = types
       return self.suite.map((appId, index) => self.apps.get(appId));
     },
     getRecommendedApps() {
-      return self.recommended.map((appId, index) => self.apps.get(appId));
+      // return self.recommended.map((appId, index) => self.apps.get(appId));
+      // return self.apps.values().
+      return Array.from(self.apps.values())
+        .filter((app) => app.recommendations > 0)
+        .sort((a, b) => a.recommendations - b.recommendations);
+      // .map((app, index) => self);
     },
   }))
   .actions((self) => ({
@@ -108,6 +115,7 @@ export const BazaarModel = types
         id: app.id,
         tags: app.tags,
         slots: app.slots!,
+        recommendations: app.recommendations,
       });
     },
     updateSuiteRank(app: AppType) {
@@ -309,9 +317,12 @@ export const BazaarStore = types
       if ('my' in apps) {
         self.my.recommendations.replace(apps.my.recommendations);
       }
-      const catalog = apps['space-apps'];
-      for (const spacePath in catalog) {
-        const entry = catalog[spacePath];
+      if ('catalog' in apps) {
+        this.initialCatalog(apps.catalog);
+      }
+      const spaceApps = apps['space-apps'];
+      for (const spacePath in spaceApps) {
+        const entry = spaceApps[spacePath];
         this.initialSpace(spacePath, entry);
       }
       // trigger UI update if someone is listening
@@ -331,7 +342,7 @@ export const BazaarStore = types
         }
         bazaar.setApp(app);
         // console.log('self.apps.set => %o', app);
-        self.apps.set(app.id, app);
+        // self.apps.set(app.id, app);
       }
       self.spaces.set(spacePath, bazaar);
     },
