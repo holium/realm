@@ -459,7 +459,7 @@
     :: ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
     =/  entry            (~(got by app-catalog.state) app-id)
     =/  apps                    (~(got by space-apps.state) path)
-    =/  app-lite     (~(got by index.apps) app-id)
+    :: =/  app-lite     (~(got by index.apps) app-id)
     =.  index.apps                    (remove-at-pos:helpers index.apps rank)
     =|  sieve=sieve:store
     =.  tags.sieve               (~(put in tags.sieve) %suite)
@@ -572,13 +572,16 @@
             app-lite
         ==
       =.  app-index-lite  (~(put by app-index-lite) app-id app-lite)
+      =.  recommended.sorts           (sort-apps:helpers (extract-apps:helpers app-index-lite %recommended) %recommended %asc)
       ::  if the space host is not this ship, be sure to poke it and let it know we are recommending the app
       =.  cards.rslt
-        ?:  =(our.bowl ship.space-path)  cards.rslt
+        =/  entry  (~(got by app-catalog.state) app-id)
+        ?:  =(our.bowl ship.space-path)
+            =/  paths  [/updates /bazaar/(scot %p ship.space-path)/(scot %tas space.space-path) ~]
+            %+  snoc  cards.rslt
+            [%give %fact paths bazaar-reaction+!>([%recommend space-path [app-id sieve.app-lite entry] sorts])]
           ~&  >>  "{<dap.bowl>}: forwarding recommendation of {<app-id>} to space {<space-path>}..."
           %+  snoc  cards.rslt
-          =/  entry  (~(got by app-catalog.state) app-id)
-          :: =/  payload=app-full:store  [app-id sieve.app-lite entry]
           ::  must send over full app in case space host doesn't have app in app catalog
           [%pass / %agent [ship.space-path %bazaar] %poke bazaar-interaction+!>([?:(=(action %recommend) %member-recommend %member-unrecommend) space-path app-id entry])]
       [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
@@ -664,8 +667,8 @@
     ==
     =.  app-catalog      (~(put by app-catalog.state) app-id entry)
     =.  index.u.apps  (~(put by index.u.apps) app-id app-lite)
-    =.  space-apps.state  (~(put by space-apps.state) path u.apps)
     =.  recommended.sorts.u.apps     (sort-apps:helpers (extract-apps:helpers index.u.apps %recommended) %recommended %asc)
+    =.  space-apps.state  (~(put by space-apps.state) path u.apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     :_  state
     :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]

@@ -217,7 +217,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
             )) || (
               <Flex flexDirection={'column'} gap={10}>
                 {apps
-                  .filter((app) => app.installed)
+                  .filter((app) => app.type !== 'system')
                   .map((item, index) => (
                     <div key={index}>
                       <AppRow
