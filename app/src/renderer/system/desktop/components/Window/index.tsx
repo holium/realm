@@ -285,7 +285,13 @@ export const AppWindow: FC<AppWindowProps> = observer(
     }
 
     return (
-      <AppWindowStyle
+      window.type==='custom'?
+      <NativeView
+        isResizing={isResizing}
+        hasTitlebar={nativeApps[window.id].native?.hideTitlebarBorder}
+        window={window}
+      />
+      :<AppWindowStyle
         id={windowId}
         dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
         dragElastic={0}
@@ -419,7 +425,7 @@ export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
     case 'dialog':
       return <DialogView window={window} />;
     case 'custom':
-      return <div></div>
+      return <div></div>;
     default:
       return <div>No view</div>;
   }

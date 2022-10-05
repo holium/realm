@@ -51,7 +51,7 @@ export type WindowModelProps = {
   title?: string;
   glob?: boolean;
   zIndex: number;
-  type: 'urbit' | 'web' | 'native' | 'dialog';
+  type: 'urbit' | 'web' | 'native' | 'dialog' | 'custom';
   dimensions: {
     x: number;
     y: number;
