@@ -47,7 +47,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       // @ts-ignore
       const suite = Array(5).fill(undefined);
       const apps = bazaar.getSuiteApps(currentSpace.path);
-      apps?.forEach((app, index) => suite.splice(app.ranks!.suite, 1, app));
+      apps?.forEach((app, index) => suite.splice(app.slots!.suite, 1, app));
       // console.log(suite);
       setSuite(suite);
     }

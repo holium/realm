@@ -31,7 +31,7 @@ export const AppPreview: FC<AppPreviewProps> = (props: AppPreviewProps) => {
   const { app } = props;
   const info = app!.info!;
   const length = 60;
-  // console.log('AppPreview => %o', app);
+  console.log('AppPreview => %o', app);
   return (
     <Flex flexGrow={0} flexDirection="row" gap={16}>
       <AppTile

@@ -43,20 +43,18 @@
 ::
 +$  tags    (set tag)
 ::
-+$  sorts   [pinned=(list app-id) recommended=(list app-id) suite=(list app-id)]
++$  sorts   [pinned=(list app-id) suite=(list app-id) recommended=(list app-id)]
 ::
-::  $ranks - each app gets a rank (ordinal) relative to a
-::   "grouping" (pinned/recommended/suite)
-::  0th rank => default ordinal when not relative to a grouping
-::  1st rank => ordinal relative to pinned
-::  2nd rank => ordinal relative to recommended
-::  3rd rank => ordinal relative to suite
-:: +$  ranks   [default=@ud pinned=@ud recommended=@ud suite=@ud]
-+$  ranks   [pinned=@ud recommended=@ud suite=@ud]
+::  $ranks: gives the ordinal of the app within the space
+::  note that pinned ordinals are sequential and containing no 'gaps'; however
+::  because of the UI design, suite apps can have non-sequential (w/ gaps)
+::  ordinals depending on where the user places the app in the suite
+::  (e.g 0, 3, 4) where slots 1 and 2 would show as empty in the UI
++$  slots   [pinned=@ud suite=@ud recommended=@ud]
 ::
 ::  $sieve: space specific metadata
 +$  sieve
-  $:  =ranks
+  $:  =slots
       =tags
   ==
 
@@ -74,9 +72,8 @@
       [%missing ~]
   ==
 ::
-:: +$  app                     [=app]
-+$  app-lite                [id=app-id =sieve]
-+$  app-full                [id=app-id =sieve entry=app-catalog-entry]
++$  app-lite                [id=app-id =sieve recommendations=[total=@ud members=(set ship)]]
++$  app-full                [id=app-id =sieve recommendations=[total=@ud members=(set ship)] entry=app-catalog-entry]
 
 ::  various organizations of data (transient/ephemeral datasets)
 ::   used to facilitate scrying and data transfers between other
@@ -87,6 +84,7 @@
 +$  space-apps-lite         (map space-path:spaces [index=app-index-lite =sorts])  :: INCLUDED IN AGENT STATE
 +$  space-apps-full         (map space-path:spaces [index=app-index-full =sorts])
 +$  sites                   (set [ship desk])
+
 +$  my
   $:  recommendations=(set app-id)
   ==
@@ -101,8 +99,8 @@
 ::    included across multiple spaces. [app-header] data is referenced to orient an
 ::    app (tags/ranks) relative to a given space
 +$  app-catalog-entry
-  $:  recommended=@ud
-      =app
+  :: $:  recommended=@ud
+  $:  =app
   ==
 +$  app-catalog             (map app-id app-catalog-entry)  :: INCLUDED IN AGENT STATE
 ::

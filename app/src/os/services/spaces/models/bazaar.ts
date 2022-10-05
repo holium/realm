@@ -17,7 +17,7 @@ enum AppTypes {
   Web = 'web',
 }
 
-const AppRankModel = types.model({
+const AppSlotModel = types.model({
   pinned: types.number,
   recommended: types.number,
   suite: types.number,
@@ -25,9 +25,6 @@ const AppRankModel = types.model({
 
 const UrbitApp = types.model({
   id: types.identifier,
-  // ship: types.string,
-  // tags: types.array(types.string),
-  // ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
@@ -44,9 +41,6 @@ export type UrbitAppType = Instance<typeof UrbitApp>;
 
 const NativeApp = types.model({
   id: types.identifier,
-  // ship: types.string,
-  // tags: types.array(types.string),
-  // ranks: types.maybe(AppRankModel),
   title: types.string,
   info: types.string,
   color: types.string,
@@ -92,7 +86,7 @@ export const BazaarModel = types
     apps: types.map(
       types.model({
         id: types.identifier,
-        ranks: AppRankModel,
+        slots: AppSlotModel,
         tags: types.array(types.string),
       })
     ),
@@ -113,25 +107,25 @@ export const BazaarModel = types
       self.apps.set(app.id, {
         id: app.id,
         tags: app.tags,
-        ranks: app.ranks!,
+        slots: app.slots!,
       });
     },
     updateSuiteRank(app: AppType) {
       if (!self.apps.has(app.id)) return;
       let suite = self.apps.get(app.id)!;
-      suite.ranks.suite = app.ranks!.suite;
+      suite.slots.suite = app.slots!.suite;
       self.apps.set(app.id, suite);
     },
     updateRecommendedRank(app: AppType) {
       if (!self.apps.has(app.id)) return;
       let rec = self.apps.get(app.id)!;
-      rec.ranks.recommended = app.ranks!.recommended;
+      rec.slots.recommended = app.slots!.recommended;
       self.apps.set(app.id, rec);
     },
     updatePinnedRank(app: AppType) {
       if (!self.apps.has(app.id)) return;
       let pinned = self.apps.get(app.id)!;
-      pinned.ranks.pinned = app.ranks!.pinned;
+      pinned.slots.pinned = app.slots!.pinned;
       self.apps.set(app.id, pinned);
     },
     // findApps(searchString: string) {
@@ -297,7 +291,7 @@ export const BazaarStore = types
       return toJS(self.apps.get(appId));
     },
     getAvailableApps() {
-      console.log('getAvailableApps => %o', self.apps.values());
+      // console.log('getAvailableApps => %o', self.apps.values());
       return Array.from(self.apps.values());
     },
   }))
@@ -336,7 +330,7 @@ export const BazaarStore = types
           app.color = appColor && cleanNounColor(appColor);
         }
         bazaar.setApp(app);
-        console.log('self.apps.set => %o', app);
+        // console.log('self.apps.set => %o', app);
         self.apps.set(app.id, app);
       }
       self.spaces.set(spacePath, bazaar);

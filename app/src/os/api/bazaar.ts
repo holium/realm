@@ -649,9 +649,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log('initial =>');
-      console.log(util.inspect(data, { depth: 10, colors: true }));
-      console.log('<= initial');
+      // console.log('initial =>');
+      // console.log(util.inspect(data, { depth: 10, colors: true }));
+      // console.log('<= initial');
       state.initial(data['initial']);
       break;
     case 'allies':

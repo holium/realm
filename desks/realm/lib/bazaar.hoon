@@ -314,7 +314,7 @@
     ^-  (list [cord json])
     =/  head=(list [cord json])
     :~  [id+s+id.app-full]
-        ['ranks' (rnks ranks.sieve.app-full)]
+        ['slots' (rnks slots.sieve.app-full)]
         ['tags' a+(turn ~(tap in tags.sieve.app-full) |=(tg=tag:store s+(scot %tas tg)))]
         ['recommended' n+(crip "{<recommended.entry.app-full>}")]
     ==
@@ -361,7 +361,7 @@
     %-  pairs
     :~  [%id s+id.app]
         :: ['ship' s+(scot %p ship.app-entry)]
-        ['ranks' (rnks ranks.sieve.app)]
+        ['slots' (rnks slots.sieve.app)]
         ['tags' a+(turn ~(tap in tags.sieve.app) |=(tg=tag:store s+(scot %tas tg)))]
     ==
   ::
@@ -422,12 +422,12 @@
     (trip p.p)
   ::
   ++  rnks
-    |=  =ranks:store
+    |=  =slots:store
     ^-  json
     %-  pairs
-    :~  [%pinned n+(crip "{<pinned.ranks>}")]
-        [%recommended n+(crip "{<recommended.ranks>}")]
-        [%suite n+(crip "{<suite.ranks>}")]
+    :~  [%pinned n+(crip "{<pinned.slots>}")]
+        [%recommended n+(crip "{<recommended.slots>}")]
+        [%suite n+(crip "{<suite.slots>}")]
     ==
     :: %+  turn  ~(tap by ranks)
     :: |=  [=tag:store rank=@ud]

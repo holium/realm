@@ -53,7 +53,7 @@
   ::  configure browser
   =|  =app-lite:store
   =.  id.app-lite                         %os-browser
-  =.  ranks.sieve.app-lite                [0 0 0]
+  =.  slots.sieve.app-lite                [0 0 0]
   :: =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) 690)
   =/  apps                                (~(put by apps) id.app-lite app-lite)
 
@@ -61,12 +61,12 @@
   =.  title.native-app                    'Relic Browser'
   =.  color.native-app                    '#92D4F9'
   =.  icon.native-app                     'AppIconCompass'
-  =/  catalog                             (~(put by catalog) id.app-lite [%0 [%native native-app]])
+  =/  catalog                             (~(put by catalog) id.app-lite [%native native-app])
 
   ::  configure settings
   =|  =app-lite:store
   =.  id.app-lite                         %os-settings
-  =.  ranks.sieve.app-lite                [0 0 0]
+  =.  slots.sieve.app-lite                [0 0 0]
   :: =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) %installed)
   =/  apps                                (~(put by apps) id.app-lite app-lite)
 
@@ -74,7 +74,7 @@
   =.  title.native-app                    'Settings'
   =.  color.native-app                    '#ACBCCB'
   =.  icon.native-app                     'AppIconSettings'
-  =/  catalog                             (~(put by catalog) id.app-lite [%0 [%native native-app]])
+  =/  catalog                             (~(put by catalog) id.app-lite [%native native-app])
 
   :: ~&  >  "on-init..."
   =.  space-apps.state                    (~(put by space-apps.state) our-space [apps *sorts:store])
@@ -380,8 +380,8 @@
       %pin               (add-pin +.action)
       %unpin             (rem-pin +.action)
       %set-pin-order     (set-pin-order +.action)
-      %recommend         (add-rec +.action)
-      %unrecommend       (rem-rec +.action)
+      %recommend         (recommend +.action)
+      %unrecommend       (unrecommend +.action)
       %suite-add         (add-ste +.action)
       %suite-remove      (rem-ste +.action)
       %install-app       (install-app +.action)
@@ -395,13 +395,13 @@
     =/  app-lite             (~(got by index.apps) app-id)
     =.  tags.sieve.app-lite     (~(put in tags.sieve.app-lite) %pinned)
     =/  rank  ?~(rank (count-apps index.apps %pinned) u.rank)
-    =.  pinned.ranks.sieve.app-lite   rank
+    =.  pinned.slots.sieve.app-lite   rank
     =.  index.apps  (pin index.apps app-lite)
     =.  pinned.sorts.apps     (sort-apps (extract-apps index.apps %pinned) %pinned %asc)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     :: ~&  >  "add-pin..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
-    (bazaar:send-reaction [%pin path [app-id sieve.app-lite entry] pinned.sorts.apps] paths ~)
+    (bazaar:send-reaction [%pin path [app-id sieve.app-lite recommendations.app-lite entry] pinned.sorts.apps] paths ~)
   ::
   ++  rem-pin
     |=  [path=space-path:spaces-store =app-id:store]
@@ -415,7 +415,7 @@
     :: ~&  >  "rem-pin..."
     =.  space-apps.state  (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%unpin path [app-id sieve.app-lite entry] pinned.sorts.apps] paths ~)
+    (bazaar:send-reaction [%unpin path [app-id sieve.app-lite recommendations.app-lite entry] pinned.sorts.apps] paths ~)
   ::
   ++  set-pin-order
     |=  [path=space-path:spaces-store order=(list app-id:store)]
@@ -427,7 +427,7 @@
     |=  [=app-id:store acc=[index=(map =app-id:store =app-lite:store) rank=@ud]]
       =/  app  (~(get by index.apps) app-id)
       ?~  app  acc
-      =.  pinned.ranks.sieve.u.app   rank.acc
+      =.  pinned.slots.sieve.u.app   rank.acc
       [(~(put by index.acc) app-id u.app) (add rank.acc 1)]
     =.  index.apps          (~(uni by index.apps) index.updated-apps)
     =.  pinned.sorts.apps   order
@@ -436,73 +436,20 @@
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     (bazaar:send-reaction [%set-pin-order path order] paths ~)
   ::
-  ::  $add-rec: note that recommending an app potentially changes the order
+  ::  $recommend: note that recommending an app potentially changes the order
   ::    of the app in the recommendations list; therefore the new order (ord)
   ::    will be included in the reaction to account for changes in position
-  ++  add-rec
+  ++  recommend
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    ::  if this action is being performed on a remote ship (not the host/admin ship), poke
-    ::    the space host to ensure "source of truth" and subscribers properly synched
-    ::  track apps we've recommended to prevent multiple recommendations per ship
-    =.  recommendations.my.state  (~(put in recommendations.my.state) app-id)
-    ?.  =(our.bowl ship.path)
-      ~&  >>  "{<dap.bowl>}: recommend received. forwarding to space host {<ship.path>}..."
-      :_  state
-      :~  [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%recommend path app-id])]
-          [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-      ==
-    =/  entry                     (~(got by app-catalog.state) app-id)
-    =.  recommended.entry         (add recommended.entry 1)
-    =.  app-catalog.state         (~(put by app-catalog.state) app-id entry)
-    =/  apps                        (~(got by space-apps.state) path)
-    =/  app-lite                         (~(got by index.apps) app-id)
-    =.  tags.sieve.app-lite                (~(put in tags.sieve.app-lite) %recommended)
-    =.  recommended.ranks.sieve.app-lite   (add recommended.ranks.sieve.app-lite 1)
-    =.  index.apps                        (~(put by index.apps) app-id app-lite)
-    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
-    =.  space-apps.state  (~(put by space-apps.state) path apps)
-    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    :_  state
-    :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-        [%give %fact paths bazaar-reaction+!>([%recommend path [app-id sieve.app-lite entry] recommended.sorts.apps])]
-    ==
-    :: (bazaar:send-reaction [%recommend path [app-id sieve.app-lite entry] recommended.sorts.apps] paths ~)
+    ?:  =(src.bowl our.bowl)  (handle-our-recommend path app-id %recommend)
+    (handle-member-recommend path app-id %recommend)
   ::
-  ++  rem-rec
+  ++  unrecommend
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
-    ::  track apps we've recommended to prevent multiple recommendations per ship
-    =.  recommendations.my.state  (~(del in recommendations.my.state) app-id)
-    ?.  =(our.bowl ship.path)
-      ~&  >>  "{<dap.bowl>}: unrecommend received. forwarding to space host {<ship.path>}..."
-      :_  state
-      :~  [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%unrecommend path app-id])]
-          [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-      ==
-    =/  entry                    (~(got by app-catalog.state) app-id)
-    =.  recommended.entry        ?:((gth recommended.entry 0) (sub recommended.entry 1) 0)
-    =.  app-catalog.state        (~(put by app-catalog.state) app-id entry)
-    =/  apps  (~(got by space-apps.state) path)
-    =/  app-lite   (~(got by index.apps) app-id)
-    ::  sub to below 0 will crash the agent. ensure gth value before subtracting
-    =.  recommended.ranks.sieve.app-lite
-      ?:  (gth recommended.ranks.sieve.app-lite 0)
-        (sub recommended.ranks.sieve.app-lite 1)  %0
-    ::  only remove recommended tag (relative to space) if updated recommended count is 0
-    =.  tags.sieve.app-lite
-      ?:  =(recommended.ranks.sieve.app-lite 0)
-        (~(del in tags.sieve.app-lite) %recommended)
-      tags.sieve.app-lite
-    =.  index.apps  (~(put by index.apps) app-id app-lite)
-    =.  recommended.sorts.apps     (sort-apps (extract-apps index.apps %recommended) %recommended %desc)
-    =.  space-apps.state  (~(put by space-apps.state) path apps)
-    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    :_  state
-    :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-        [%give %fact paths bazaar-reaction+!>([%unrecommend path [app-id sieve.app-lite entry] recommended.sorts.apps])]
-    ==
-  :: (bazaar:send-reaction [%unrecommend path [app-id sieve.app-lite entry] recommended.sorts.apps] paths ~)
+    ?:  =(src.bowl our.bowl)  (handle-our-recommend path app-id %unrecommend)
+    (handle-member-recommend path app-id %unrecommend)
   ::
   ++  add-ste
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
@@ -512,17 +459,18 @@
     :: ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
     =/  entry            (~(got by app-catalog.state) app-id)
     =/  apps                    (~(got by space-apps.state) path)
+    =/  app-lite     (~(got by index.apps) app-id)
     =.  index.apps                    (remove-at-pos index.apps rank)
     =|  sieve=sieve:store
     =.  tags.sieve               (~(put in tags.sieve) %suite)
     :: =.  tags.sieve               (~(put in tags.sieve) %installed)
-    =.  suite.ranks.sieve        rank
-    =.  index.apps                    (~(put by index.apps) app-id [app-id sieve])
+    =.  suite.slots.sieve        rank
+    =.  index.apps                    (~(put by index.apps) app-id [app-id sieve recommendations.app-lite])
     =.  suite.sorts.apps     (sort-apps (extract-apps index.apps %suite) %suite %asc)
     :: ~&  >  "add-ste..."
     =.  space-apps.state              (~(put by space-apps.state) path apps)
     :: ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id sieve app]]>}"
-    (bazaar:send-reaction [%suite-add path [app-id sieve entry] suite.sorts.apps] paths ~)
+    (bazaar:send-reaction [%suite-add path [app-id sieve recommendations.app-lite entry] suite.sorts.apps] paths ~)
   ::
   ++  rem-ste
     |=  [path=space-path:spaces-store =app-id:store]
@@ -536,7 +484,7 @@
     :: ~&  >  "rem-ste..."
     =.  space-apps.state    (~(put by space-apps.state) path apps)
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    (bazaar:send-reaction [%suite-remove path [app-id sieve.app-lite entry] suite.sorts.apps] paths ~)
+    (bazaar:send-reaction [%suite-remove path [app-id sieve.app-lite recommendations.app-lite entry] suite.sorts.apps] paths ~)
   ::
   ++  install-app
     |=  [=ship =desk]
@@ -566,6 +514,9 @@
     %-  skim
     :-  ~(tap by app-index-lite)
     |=  [=app-id:store =app-lite:store]
+    ?:  ?&  =(tag %recommended)
+            (gth total.recommendations.app-lite 0)
+        ==  %.y
     ?:  (~(has in tags.sieve.app-lite) tag)  %.y  %.n
   ::
   ++  sort-apps
@@ -579,18 +530,18 @@
       ?-  tag
         %pinned
           ?:  =(dir %asc)
-            (lth pinned.ranks.sieve.app-lite.a pinned.ranks.sieve.app-lite.b)
-          (gth pinned.ranks.sieve.app-lite.a pinned.ranks.sieve.app-lite.b)
+            (lth pinned.slots.sieve.app-lite.a pinned.slots.sieve.app-lite.b)
+          (gth pinned.slots.sieve.app-lite.a pinned.slots.sieve.app-lite.b)
         ::s
         %recommended
           ?:  =(dir %asc)
-            (lth recommended.ranks.sieve.app-lite.a recommended.ranks.sieve.app-lite.b)
-          (gth recommended.ranks.sieve.app-lite.a recommended.ranks.sieve.app-lite.b)
+            (lth total.recommendations.app-lite.a total.recommendations.app-lite.b)
+          (gth total.recommendations.app-lite.a total.recommendations.app-lite.b)
         ::
         %suite
           ?:  =(dir %asc)
-            (lth suite.ranks.sieve.app-lite.a suite.ranks.sieve.app-lite.b)
-          (gth suite.ranks.sieve.app-lite.a suite.ranks.sieve.app-lite.b)
+            (lth suite.slots.sieve.app-lite.a suite.slots.sieve.app-lite.b)
+          (gth suite.slots.sieve.app-lite.a suite.slots.sieve.app-lite.b)
 
       ==
     |=  [=app-id:store =app-lite:store]
@@ -603,11 +554,11 @@
     ^-  (list [=app-id:store =app-lite:store])
     %-  skim
     :-  ~(tap by apps)
-    |=  [[id=app-id:store [=app-id:store =sieve:store]]]
+    |=  [[id=app-id:store [=app-id:store =sieve:store recs=[total=@ud members=(set ship)]]]]
     ::  if the app is part if this space's suite and at the same position
     ::    as the one being added to the suite, remove
     ?:  ?&  (~(has in tags.sieve) %suite)
-            =(suite.ranks.sieve rank)
+            =(suite.slots.sieve rank)
         ==  %.n  %.y
   ::  count apps in the index that are tagged with tag
   ++  count-apps
@@ -624,8 +575,8 @@
     |:  [[=app-id:store =app-lite:store] acc=`app-index-lite:store`~]
       ?:  =(app-id id.app)  (~(put by acc) app-id app)
       =/  updated-app
-      ?:  (gte pinned.ranks.sieve.app-lite pinned.ranks.sieve.app)
-        =.  pinned.ranks.sieve.app-lite  (add pinned.ranks.sieve.app-lite 1)
+      ?:  (gte pinned.slots.sieve.app-lite pinned.slots.sieve.app)
+        =.  pinned.slots.sieve.app-lite  (add pinned.slots.sieve.app-lite 1)
         app-lite
       app-lite
       :: %-  (slog leaf+"adding {<[app-id updated-app]>} to apps..." ~)
@@ -639,11 +590,94 @@
       ::  skip the item we are unpinning
       ?:  =(id.app app-id)  (~(put by acc) id.app app)
       =/  updated-app
-      ?:  (gth pinned.ranks.sieve.app-lite pinned.ranks.sieve.app)
-        =.  pinned.ranks.sieve.app-lite  (sub pinned.ranks.sieve.app-lite 1)
+      ?:  (gth pinned.slots.sieve.app-lite pinned.slots.sieve.app)
+        =.  pinned.slots.sieve.app-lite  (sub pinned.slots.sieve.app-lite 1)
         app-lite
       app-lite
       (~(put by acc) app-id updated-app)
+  ::
+  ++  handle-our-recommend
+    |=  [path=space-path:spaces-store =app-id:store action=?(%recommend %unrecommend)]
+    ^-  (quip card _state)
+    =/  result=[=space-apps-lite:store cards=(list card)]
+    %-  ~(rep by space-apps.state)
+      |=  [[=space-path:spaces-store [=app-index-lite:store =sorts:store]] rslt=[=space-apps-lite:store cards=(list card)]]
+      ::  if the app is not in the space, there's nothing to do
+      ?.  (~(has by app-index-lite) app-id)
+        [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
+      =/  app-lite  (~(got by app-index-lite) app-id)
+      =/  app-lite
+        ?-  action
+          %recommend
+            ::  only increment the total # of recommendations if this ship has not already been counted
+            ?:  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
+            =.  total.recommendations.app-lite  (add total.recommendations.app-lite 1)
+            =.  members.recommendations.app-lite  (~(put in members.recommendations.app-lite) our.bowl)
+            app-lite
+          ::
+          %unrecommend
+            ::  only increment the total # of recommendations if this ship has not already been counted
+            ?:  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
+            =.  total.recommendations.app-lite  ?.((gth total.recommendations.app-lite 0) 0 (sub total.recommendations.app-lite 1))
+            =.  members.recommendations.app-lite  (~(del in members.recommendations.app-lite) our.bowl)
+            app-lite
+        ==
+      =.  app-index-lite  (~(put by app-index-lite) app-id app-lite)
+      ::  if the space host is not this ship, be sure to poke it and let it know we are recommending the app
+      =.  cards.rslt
+        ?:  =(our.bowl ship.space-path)  cards.rslt
+          ~&  >>  "{<dap.bowl>}: forwarding recommendation of {<app-id>} to space host {<ship.space-path>}..."
+          %+  snoc  cards.rslt
+          [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]
+      [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
+    =.  space-apps.state  space-apps-lite.result
+    =.  recommendations.my.state  (~(put in recommendations.my.state) app-id)
+    :_  state
+    %+  weld  cards.result
+    ^-  (list card)
+    :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
+    ==
+  ::
+  ++  handle-member-recommend
+    |=  [path=space-path:spaces-store =app-id:store action=?(%recommend %unrecommend)]
+    ::  here we know that the poke did not originate on this ship; meaning it's come from a member
+    ::    poke. in this case simply update the recommendation stats for the app in the given space
+    =/  apps  (~(get by space-apps.state) path)
+    ::  were we poked with a bad space path? print error (red text) for now to help troubleshoot
+    ?~  apps
+      ~&  >>>  "{<dap.bowl>}: [recommend]. space {<path>} not found"
+      `state
+    ::  is the app in this spaces' app index?
+    =/  app-lite  (~(get by index.u.apps) app-id)
+    ::  were we poked with a bad app-id? print error (red text) for now to help troubleshoot
+    ?~  app-lite
+      ~&  >>>  "{<dap.bowl>}: [recommend]. app {<app-id>} not found in space {<path>}"
+      `state
+    =/  app-lite  u.app-lite
+    =/  app-lite
+      ?-  action
+        %recommend
+          ::  only increment the total # of recommendations if this ship has not already been counted
+          ?:  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
+          =.  total.recommendations.app-lite  (add total.recommendations.app-lite 1)
+          =.  members.recommendations.app-lite  (~(put in members.recommendations.app-lite) our.bowl)
+          app-lite
+        %unrecommend
+          ::  only increment the total # of recommendations if this ship has not already been counted
+          ?:  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
+          =.  total.recommendations.app-lite  ?.((gth total.recommendations.app-lite 0) 0 (sub total.recommendations.app-lite 1))
+          =.  members.recommendations.app-lite  (~(del in members.recommendations.app-lite) our.bowl)
+          app-lite
+      ==
+    =/  entry            (~(got by app-catalog.state) app-id)
+    =.  index.u.apps  (~(put by index.u.apps) app-id app-lite)
+    =.  space-apps.state  (~(put by space-apps.state) path u.apps)
+    =.  recommended.sorts.u.apps     (sort-apps (extract-apps index.u.apps %recommended) %recommended %asc)
+    =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    :_  state
+    :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
+        [%give %fact paths bazaar-reaction+!>([%recommend path [app-id sieve.app-lite entry] recommended.sorts.u.apps])]
+    ==
   --
 ::
 ++  apps
@@ -673,7 +707,7 @@
     =.  id.app-full                 app-id
     =.  sieve.app-full              sieve.app-lite
     =.  entry.app-full              entry
-    =.  recommended.entry.app-full  *@ud
+    =.  recommendations.app-full  recommendations.app-lite
     (~(put by acc) app-id app-full)
   ::
   ++  view
@@ -702,7 +736,7 @@
       =.  sieve.app-full     sieve.app-lite
       ?~  entry
         ~&  >>>  "{<dap.bowl>}: app {<app-id>} not found."
-        =.  entry.app-full     [%0 [%missing ~]]
+        =.  entry.app-full     [%missing ~]
         (~(put by acc) app-id app-full)
       :: =.  tags.sieve.app-full  (~(put in tags.sieve.app-full) %installed)
       =.  entry.app-full      u.entry
@@ -727,7 +761,7 @@
     ^-  app-catalog:store
     %-  ~(rep by charges)
     |:  [[=desk =charge:docket] acc=`app-catalog:store`~]
-    (~(put by acc) desk [%0 [%urbit docket.charge %.y]])
+    (~(put by acc) desk [%urbit docket.charge %.y])
   ::
   ++  index
     |=  [charges=(map desk charge:docket)]
@@ -738,7 +772,7 @@
       =.  id.app          desk
       :: =.  ship.app  our.bowl
       :: =.  tags.sieve.app    (~(put in tags.sieve.app) %installed)
-      =.  ranks.sieve.app   [0 0 0]
+      =.  slots.sieve.app   [0 0 0]
       (~(put by acc) desk app)
   ::
   --
@@ -780,7 +814,7 @@
     ?>  ?=([%initial *] charge-update)
     :: only if this reaction originated remotely should we attempt to process it
     ?:  =(our.bowl src.bowl)  `state
-    =/  result=[=app-index-full:store =app-index-lite:store cards=(list card)]
+    =/  result=[=app-index-full:store =app-index-lite:store =app-catalog:store cards=(list card)]
     %-  ~(rep by app-index-full)
       |=  [[=app-id:store =app-full:store] acc=[=app-index-full:store =app-index-lite:store =app-catalog:store cards=(list card)]]
       ::  is this app installed?
@@ -792,13 +826,13 @@
           app-full
       ==
       =.  app-catalog.acc            (~(put by app-catalog.acc) app-id entry.app-full)
-      =.  app-index-lite.acc         (~(put by app-index-lite.acc) app-id [app-id sieve.app-full])
+      =.  app-index-lite.acc         (~(put by app-index-lite.acc) app-id [app-id sieve.app-full recommendations.app-full])
       =.  app-index-full.acc         (~(put by app-index-full.acc) app-id app-full)
-      ?.  (~(has in tags.sieve.app-full) %recommended)  acc
+      ?.  (~(has in recommendations.my.state) app-id)  acc
       =.  cards.acc
       %+  weld  cards.acc
       ^-  (list card)
-      :~  [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]  ==
+      [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>([%recommend space-path app-id])]~
       acc
     =.  app-catalog.state   (~(gas by app-catalog.state) ~(tap by app-catalog.result))
     =.  space-apps.state    (~(put by space-apps.state) space-path [app-index-lite.result sorts])
@@ -819,7 +853,7 @@
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
-    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
+    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store recommendations=[%0 ~]] u.app)
     =.  sieve.app               sieve.app-full
     :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
@@ -840,7 +874,7 @@
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
-    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
+    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store recommendations=[%0 ~]] u.app)
     =.  sieve.app               sieve.app-full
     :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
@@ -874,7 +908,7 @@
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
-    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
+    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store recommendations=[%0 ~]] u.app)
     =.  sieve.app               sieve.app-full
     :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
@@ -895,7 +929,7 @@
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
-    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
+    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store recommendations=[%0 ~]] u.app)
     =.  sieve.app               sieve.app-full
     :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
@@ -916,7 +950,7 @@
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
-    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
+    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store recommendations=[%0 ~]] u.app)
     =.  sieve.app               sieve.app-full
     =/  index                   (~(put by index.apps) id.app app)
     =.  suite.sorts.apps        ord
@@ -936,7 +970,7 @@
     =/  apps                    (~(get by space-apps.state) path)
     =/  apps                    ?~(apps [index=*app-index-lite:store sorts=*sorts:store] u.apps)
     =/  app                     (~(get by index.apps) id.app-full)
-    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store] u.app)
+    =/  app                     ?~(app [id=id.app-full sieve=*sieve:store recommendations=[%0 ~]] u.app)
     =.  sieve.app               sieve.app-full
     :: =/  app                     (update-installed-status app)
     =/  index                   (~(put by index.apps) id.app app)
@@ -1114,7 +1148,7 @@
     ?+  -.chad.charge  `state
       %glob
         =/  entry  (~(get by app-catalog.state) desk)
-        =/  entry  ?~  entry  [%0 [%urbit docket.charge %.y]]
+        =/  entry  ?~  entry  [%urbit docket.charge %.y]
           ?>  ?=(%urbit -.app.u.entry)
           =.  installed.app.u.entry  %.y
           =.  docket.app.u.entry  docket.charge
@@ -1143,6 +1177,16 @@
     =.  installed.app.u.entry  %.n
     =.  app-catalog.state  (~(put by app-catalog.state) desk u.entry)
     (bazaar:send-reaction:core [%app-uninstalled desk] [/updates ~] ~)
+  --
+::
+++  spaces
+  |%
+  ++  poke-all
+    |=  [=action:store]
+    ^-  (list card)
+    %+  turn  ~(tap by space-apps.state)
+      |=  [=space-path:spaces-store [=app-index-lite:store =sorts:store]]
+      [%pass / %agent [ship.space-path %bazaar] %poke bazaar-action+!>(action)]
   --
 ::
 ++  spaces-reaction
