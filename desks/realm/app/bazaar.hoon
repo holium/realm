@@ -617,7 +617,7 @@
           ::
           %unrecommend
             ::  only increment the total # of recommendations if this ship has not already been counted
-            ?:  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
+            ?.  (~(has in members.recommendations.app-lite) our.bowl)  app-lite
             =.  total.recommendations.app-lite  ?.((gth total.recommendations.app-lite 0) 0 (sub total.recommendations.app-lite 1))
             =.  members.recommendations.app-lite  (~(del in members.recommendations.app-lite) our.bowl)
             app-lite
@@ -632,9 +632,10 @@
       [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
     =.  space-apps.state  space-apps-lite.result
     =.  recommendations.my.state
-      ?:  =(action %recommend)    (~(put in recommendations.my.state) app-id)
-      ?:  =(action %unrecommend)  (~(del in recommendations.my.state) app-id)
-      recommendations.my.state
+      ?-  action
+        %recommend      (~(put in recommendations.my.state) app-id)
+        %unrecommend    (~(del in recommendations.my.state) app-id)
+      ==
     :_  state
     %+  weld  cards.result
     ^-  (list card)
