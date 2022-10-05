@@ -50,11 +50,11 @@
 ::  because of the UI design, suite apps can have non-sequential (w/ gaps)
 ::  ordinals depending on where the user places the app in the suite
 ::  (e.g 0, 3, 4) where slots 1 and 2 would show as empty in the UI
-:: +$  slots   [pinned=@ud suite=@ud recommended=@ud]
++$  slots   [pinned=@ud suite=@ud]
 ::
 ::  $sieve: space specific metadata
 +$  sieve
-  $:  slots=[pinned=@ud suite=@ud]
+  $:  =slots
       recommendations=[total=@ud members=(set ship)]
       =tags
   ==
@@ -110,11 +110,17 @@
       [%unpin path=space-path:spaces =app-id]
       :: bulk pin ordering to facilitate efficiency/ease in UI
       [%set-pin-order path=space-path:spaces order=(list app-id)]
-      [%recommend path=space-path:spaces =app-id payload=(unit app-full)]
-      [%unrecommend path=space-path:spaces =app-id payload=(unit app-full)]
+      [%recommend path=space-path:spaces =app-id]
+      [%unrecommend path=space-path:spaces =app-id]
       [%suite-add path=space-path:spaces =app-id rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
       [%install-app =ship =desk]
+  ==
+::
+:: 'private' ship-to-ship (member-to-host) pokes (no json encode/decode req'd)
++$  interaction
+  $%  [%member-recommend path=space-path:spaces =app-full]
+      [%member-unrecommend path=space-path:spaces =app-full]
   ==
 ::
 +$  reaction
