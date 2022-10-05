@@ -76,6 +76,19 @@
   =.  icon.native-app                     'AppIconSettings'
   =/  catalog                             (~(put by catalog) id.app-lite [%0 [%native native-app]])
 
+  ::  configure airlift
+  =|  =app-lite:store
+  =.  id.app-lite                         %airlift
+  =.  ranks.sieve.app-lite                [0 0 0]
+  :: =.  tags.sieve.app-lite                 (~(put in tags.sieve.app-lite) %installed)
+  =/  apps                                (~(put by apps) id.app-lite app-lite)
+
+  =|  =native-app:store
+  =.  title.native-app                    'Airlift'
+  =.  color.native-app                    '#ACBCCB'
+  =.  icon.native-app                     'Airlift'
+  =/  catalog                             (~(put by catalog) id.app-lite [%0 [%native native-app]])
+
   :: ~&  >  "on-init..."
   =.  space-apps.state                    (~(put by space-apps.state) our-space [apps *sorts:store])
   =.  app-catalog.state                   catalog
