@@ -12,55 +12,6 @@ type AppGridProps = {
   tileSize: AppTileSize;
 };
 
-const getAppMenu = (bazaar: any, spacePath: string, app: any) => {
-  const tags = app.tags || [];
-  const isAppPinned = tags.includes('pinned');
-  const weRecommended = bazaar.my.recommendations.includes(app.id);
-  const menu = [
-    {
-      label: isAppPinned ? 'Unpin app' : 'Pin app',
-      disabled: false,
-      onClick: (evt: any) => {
-        evt.stopPropagation();
-        isAppPinned
-          ? SpacesActions.unpinApp(spacePath, app.id)
-          : SpacesActions.pinApp(spacePath, app.id);
-      },
-    },
-    {
-      label: weRecommended ? 'Unrecommend app' : 'Recommend app',
-      disabled: false,
-      onClick: (evt: any) => {
-        evt.stopPropagation();
-        weRecommended
-          ? SpacesActions.unrecommendApp(spacePath, app.id)
-          : SpacesActions.recommendApp(spacePath, app.id);
-      },
-    },
-    {
-      label: 'App info',
-      disabled: true,
-      onClick: (evt: any) => {
-        // evt.stopPropagation();
-        console.log('open app info');
-      },
-    },
-  ];
-  if (app.type === 'urbit' && app.installed) {
-    menu.push({
-      label: 'Uninstall',
-      // section: 2,
-      disabled: false,
-      onClick: (evt: any) => {
-        evt.stopPropagation();
-        console.log(`start uninstall`);
-        SpacesActions.uninstallApp(app.id);
-      },
-    });
-  }
-  return menu;
-};
-
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
   const { spaces, bazaar, ship } = useServices();
@@ -71,7 +22,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
 
   useEffect(() => {
     if (currentSpace) {
-      console.log(bazaar.getAvailableApps());
+      // console.log(bazaar.getAvailableApps());
       setApps(
         bazaar
           .getAvailableApps()
