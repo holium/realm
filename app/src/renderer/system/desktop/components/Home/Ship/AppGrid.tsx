@@ -2,7 +2,7 @@ import { FC, useState, useEffect, useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -28,7 +28,9 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           .getAvailableApps()
           .filter(
             (app: any) =>
-              app.type !== 'urbit' || (app.type === 'urbit' && app.installed)
+              app.type !== 'urbit' ||
+              (app.type === 'urbit' &&
+                app.installStatus === InstallStatus.installed)
           )
       );
     }
@@ -77,7 +79,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   console.log('open app info');
                 },
               },
-              ...(app.type === 'urbit' && app.installed
+              ...(app.type === 'urbit' &&
+              app.installStatus === InstallStatus.installed
                 ? [
                     {
                       label: 'Uninstall',

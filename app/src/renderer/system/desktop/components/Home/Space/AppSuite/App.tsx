@@ -1,12 +1,14 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
-import { toJS } from 'mobx';
-import { useServices } from 'renderer/logic/store';
 
 import { Box, AppTile, Icons, BoxProps } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { AppType, BazaarStoreType } from 'os/services/spaces/models/bazaar';
+import {
+  AppType,
+  BazaarStoreType,
+  InstallStatus,
+} from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
@@ -83,13 +85,16 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
       });
       if (app.type === 'urbit') {
         menu.push({
-          label: app.installed ? 'Uninstall app' : 'Install app',
+          label:
+            app.installStatus === InstallStatus.installed
+              ? 'Uninstall app'
+              : 'Install app',
           disabled: false,
           section: 2,
           onClick: (evt: any) => {
             evt.stopPropagation();
             // console.log('install app => %o', app);
-            if (app.installed) {
+            if (app.installStatus === InstallStatus.installed) {
               SpacesActions.uninstallApp(app.id);
             } else {
               SpacesActions.installApp(app);
@@ -101,7 +106,8 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
     }, [app, isAdmin]);
     // lighten app if not installed on this ship
     app.color =
-      app.type !== 'urbit' || (app.type === 'urbit' && app.installed)
+      app.type !== 'urbit' ||
+      (app.type === 'urbit' && app.installStatus !== InstallStatus.installed)
         ? app.color
         : rgba(app.color, 0.7);
     return (

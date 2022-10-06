@@ -666,7 +666,7 @@
     ?+  -.app.entry  entry
       ::
       %urbit
-        =.  installed.app.entry  (~(has by app-catalog.state) app-id)
+        =.  install-status.app.entry  ?:((~(has by app-catalog.state) app-id) %installed install-status.app.entry)
         entry
     ==
     =.  app-catalog      (~(put by app-catalog.state) app-id entry)
@@ -834,7 +834,7 @@
     ^-  app-catalog:store
     %-  ~(rep by charges)
     |:  [[=desk =charge:docket] acc=`app-catalog:store`~]
-    (~(put by acc) desk [%urbit docket.charge %.y])
+    (~(put by acc) desk [%urbit docket.charge %installed])
   ::
   ++  index
     |=  [charges=(map desk charge:docket)]
@@ -865,7 +865,7 @@
     %suite-add        (on-suite-add +.rct)
     %suite-remove     (on-suite-rem +.rct)
     %set-suite-order  (on-set-suite-order +.rct)
-    %app-installed    `state
+    %app-install-status-changed    `state
     %app-uninstalled  `state
     %treaty-added     `state
     %my-recommendations  `state
@@ -895,7 +895,7 @@
       ?+  -.app.entry.app-full  app-full
         ::
         %urbit
-          =.  installed.app.entry.app-full   (~(has by app-catalog.state) app-id)
+          =.  install-status.app.entry.app-full   ?:((~(has by app-catalog.state) app-id) %installed install-status.app.entry.app-full)
           app-full
       ==
       =.  app-catalog.acc            (~(put by app-catalog.acc) app-id entry.app-full)
@@ -1068,7 +1068,7 @@
   =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
   ?>  ?=([%initial *] charge-update)
   ?>  ?=(%urbit -.app.entry.app-full)
-  =.  installed.app.entry.app-full  (~(has by initial.charge-update) id.app-full)
+  =.  install-status.app.entry.app-full  ?:((~(has by initial.charge-update) id.app-full) %installed install-status.app.entry.app-full)
   app-full
 ::
 :: ++  suite
@@ -1211,28 +1211,58 @@
   ++  add
     |=  [=desk =charge:docket]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
+    ~&  >>  "{<dap.bowl>}: charge-update [add-charge] received. {<desk>}, {<charge>}"
     :: only if done (head is %glob). see garden/sur/docket.hoon for more details
     ?+  -.chad.charge  `state
+      %install
+        =/  entry  (~(get by app-catalog.state) desk)
+        =/  entry  ?~  entry  [%urbit docket.charge %started]
+          ?>  ?=(%urbit -.app.u.entry)
+          =.  install-status.app.u.entry  %started
+          =.  docket.app.u.entry  docket.charge
+          u.entry
+        =.  app-catalog.state  (~(put by app-catalog.state) desk entry)
+        (bazaar:send-reaction:core [%app-install-status-changed desk [%urbit docket.charge %started]] [/updates ~] ~)
+      ::
+      %hung
+        =/  entry  (~(get by app-catalog.state) desk)
+        =/  entry  ?~  entry  [%urbit docket.charge %failed]
+          ?>  ?=(%urbit -.app.u.entry)
+          =.  install-status.app.u.entry  %failed
+          =.  docket.app.u.entry  docket.charge
+          u.entry
+        =.  app-catalog.state  (~(put by app-catalog.state) desk entry)
+        (bazaar:send-reaction:core [%app-install-status-changed desk [%urbit docket.charge %failed]] [/updates ~] ~)
+      ::
+      %suspend
+        =/  entry  (~(get by app-catalog.state) desk)
+        =/  entry  ?~  entry  [%urbit docket.charge %suspended]
+          ?>  ?=(%urbit -.app.u.entry)
+          =.  install-status.app.u.entry  %suspended
+          =.  docket.app.u.entry  docket.charge
+          u.entry
+        =.  app-catalog.state  (~(put by app-catalog.state) desk entry)
+        (bazaar:send-reaction:core [%app-install-status-changed desk [%urbit docket.charge %suspended]] [/updates ~] ~)
+      ::
       %glob
         =/  entry  (~(get by app-catalog.state) desk)
-        =/  entry  ?~  entry  [%urbit docket.charge %.y]
+        =/  entry  ?~  entry  [%urbit docket.charge %installed]
           ?>  ?=(%urbit -.app.u.entry)
-          =.  installed.app.u.entry  %.y
+          =.  install-status.app.u.entry  %installed
           =.  docket.app.u.entry  docket.charge
           u.entry
         =.  app-catalog.state  (~(put by app-catalog.state) desk entry)
         ?.  ?=(%glob -.href.docket.charge)
-         (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
+         (bazaar:send-reaction:core [%app-install-status-changed desk [%urbit docket.charge %installed]] [/updates ~] ~)
         =/  loc  location.glob-reference.href.docket.charge
         ?.  ?=(%ames -.loc)
-          (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
+          (bazaar:send-reaction:core [%app-install-status-changed desk [%urbit docket.charge %installed]] [/updates ~] ~)
         =/  app-ship      ship.loc
         =/  installation  (~(get by installations.state) app-ship)
         ?~  installation
-          (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
+          (bazaar:send-reaction:core [%app-install-status-changed desk [%urbit docket.charge %installed]] [/updates ~] ~)
         =.  installations.state  (~(del by installations.state) app-ship)
-        (bazaar:send-reaction:core [%app-installed desk [%urbit docket.charge %.y]] [/updates ~] ~)
+        (bazaar:send-reaction:core [%app-install-status-changed desk [%urbit docket.charge %installed]] [/updates ~] ~)
     ==
   ::
   ++  rem
@@ -1242,7 +1272,7 @@
     =/  entry  (~(get by app-catalog.state) desk)
     ?~  entry  `state
     ?>  ?=(%urbit -.app.u.entry)
-    =.  installed.app.u.entry  %.n
+    =.  install-status.app.u.entry  %uninstalled
     =.  app-catalog.state  (~(put by app-catalog.state) desk u.entry)
     (bazaar:send-reaction:core [%app-uninstalled desk] [/updates ~] ~)
   --

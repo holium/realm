@@ -170,8 +170,8 @@
       :~  [(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct)) (pairs (srt:encode ord.rct))]
       ==
     ::
-        %app-installed
-      :-  %app-installed
+        %app-install-status-changed
+      :-  %app-install-status-changed
       %-  pairs
       :~  [%app-id s+app-id.rct]
           [%app (pairs (app-detail:encode app.rct))]
@@ -302,7 +302,7 @@
         ==
       ::
       %urbit
-        =/  ins=(list [cord json])  [%installed [%b installed.app]]~
+        =/  ins=(list [cord json])  ['installStatus' [%s `@t`install-status.app]]~ :: (crip "{<install-status.app>}")]]~
         (weld (dkt docket.app) ins)
       ::
       %missing  ~

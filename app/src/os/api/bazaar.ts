@@ -6,7 +6,7 @@ import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
 const util = require('node:util');
 
-// let __state : BazaarStoreType;
+let __state: BazaarStoreType;
 
 export const BazaarApi = {
   installApp: async (
@@ -33,6 +33,7 @@ export const BazaarApi = {
             reject(`timeout installing ${ship}/${desk}`);
           }, 60000);
 
+          __state.triggerAppInstallInitial(ship, desk);
           tempConduit.poke(docketInstall(ship, desk)).catch((e) => {
             console.log(e);
             if (timeout) clearTimeout(timeout);
@@ -48,16 +49,18 @@ export const BazaarApi = {
                 clearTimeout(timeout);
               }
               await tempConduit.unsubscribe(subscriptionId);
+              __state.triggerAppInstallCompleted(ship, desk);
               resolve(data);
             } else if ('hung' in charge.chad) {
               const err = charge.chad?.err || 'fail';
               console.log(
                 `install failed => ${err}. have you uploaded the glob on the host?`
               );
+              __state.triggerAppInstallFailed(ship, desk, err);
               reject(err);
             } else if ('install' in charge.chad) {
               console.log(`'${ship}/${desk}' installation started...`);
-              // __state.
+              __state.triggerAppInstallStarted(ship, desk);
             }
           }
         },
@@ -593,6 +596,8 @@ export const BazaarApi = {
     conduit: Conduit,
     state: BazaarStoreType
   ): Promise<void> => {
+    // stuff reference to state. this is used for app installation handling
+    __state = state;
     conduit.watch({
       app: 'treaty',
       path: `/allies`,
@@ -694,12 +699,12 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'treaty-removed':
       break;
-    case 'app-installed':
+    case 'app-install-status-changed':
       {
-        console.log('app-installed =>');
+        console.log('app-install-status-changed =>');
         console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= app-installed');
-        let detail = data['app-installed'];
+        console.log('<= app-install-status-changed');
+        let detail = data['app-install-status-changed'];
         state.addApp(detail['app-id'], {
           ...detail.app,
           id: detail['app-id'],

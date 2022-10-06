@@ -14,14 +14,11 @@ import {
   Spinner,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { toJS } from 'mobx';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
-import { setEnvironmentData } from 'worker_threads';
-import { BazaarApi } from 'os/api/bazaar';
 import { darken, rgba } from 'polished';
-import { app } from 'electron';
+import { InstallStatus } from 'os/services/spaces/models/bazaar';
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },
@@ -110,7 +107,8 @@ const renderApps = (space: string, apps: any, theme: any) => {
   }
 
   const installedApps = apps?.filter(
-    (app: any) => app.type !== 'urbit' || app.installed
+    (app: any) =>
+      app.type !== 'urbit' || app.installStatus === InstallStatus.installed
   );
   if (!installedApps || installedApps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
@@ -240,6 +238,21 @@ export const PopoverContent = Content;
 export const PopoverClose = StyledClose;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
+const BazaarAppRow = observer((props) => (
+  <div>
+    <input
+      type="checkbox"
+      checked={props.todo.done}
+      onChange={(e) => props.todo.toggle()}
+    />
+    <input
+      type="text"
+      value={props.todo.name}
+      onChange={(e) => props.todo.setName(e.target.value)}
+    />
+  </div>
+));
+
 interface AppSearchProps {}
 
 const AppSearchApp = observer((props: AppSearchProps) => {
@@ -251,41 +264,44 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
   const [selectedShip, setSelectedShip] = useState('');
   const [selectedDesk, setSelectedDesk] = useState('');
-  const [loadingState, setLoadingState] = useState<string>('');
+  const [loadingState, setLoadingState] = useState('');
 
   const spacePath: string = spaces.selected?.path!;
+
+  const InstallButton = observer((props: any) => {
+    console.log('InstallButton => %o', props);
+    return (
+      <Button
+        borderRadius={6}
+        disabled={bazaar.isAppInstalled(props.app.id)}
+        isLoading={
+          props.app.installStatus &&
+          [
+            InstallStatus.failed,
+            InstallStatus.installed,
+            InstallStatus.uninstalled,
+          ].indexOf(props.app.installStatus) === -1
+        }
+        onClick={(e) => {
+          const tokens = props.app.id.split('/');
+          SpacesActions.installDesk(tokens[0], tokens[1])
+            .then((result) => console.log(`installApp response => %o`, result))
+            .catch((e) => console.error(e))
+            .finally(() => {});
+        }}
+      >
+        Install
+      </Button>
+    );
+  });
 
   // based on this info, should be "safe" to recreate functions with each render
   //  https://reactjs.org/docs/hooks-faq.html#are-hooks-slow-because-of-creating-functions-in-render
   const appActionRenderer = (app: any) => {
     if (!app.id) return;
     //  treaties consist of <ship>/<desk> keys. parse to get app id value (desk)
-    const appId = app.id.split('/')[1];
-    return (
-      <>
-        <Button
-          borderRadius={6}
-          disabled={bazaar.isAppInstalled(appId)}
-          isLoading={app.isInstalling}
-          onClick={(e) => {
-            setLoadingState('installing');
-            app.isInstalling = true;
-            const tokens = app.id.split('/');
-            SpacesActions.installDesk(tokens[0], tokens[1])
-              .then((result) =>
-                console.log(`installApp response => %o`, result)
-              )
-              .catch((e) => console.error(e))
-              .finally(() => {
-                app.isInstalling = false;
-                setLoadingState('');
-              });
-          }}
-        >
-          Install
-        </Button>
-      </>
-    );
+    // const appId = app.id.split('/')[1];
+    return <InstallButton app={app} />;
   };
 
   useEffect(() => {
@@ -401,6 +417,15 @@ const AppSearchApp = observer((props: AppSearchProps) => {
       </>
     );
   };
+
+  useEffect(() => {
+    console.log('app install status change');
+  }, [
+    bazaar.appInstallInitial,
+    bazaar.appInstallStarted,
+    bazaar.appInstallFailed,
+    bazaar.appInstallCompleted,
+  ]);
 
   const installApp = (app: any) => {
     const tokens = app.id.split('/');

@@ -11,6 +11,14 @@ export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)
 );
 
+export enum InstallStatus {
+  uninstalled = 'uninstalled',
+  initial = 'initial',
+  started = 'started',
+  failed = 'failed',
+  installed = 'installed',
+}
+
 enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
@@ -33,7 +41,8 @@ const UrbitApp = types.model({
   version: types.string,
   website: types.string,
   license: types.string,
-  installed: types.boolean,
+  installStatus: types.string,
+  // installed: types.boolean,
   // recommended: types.optional(types.number, 0),
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
@@ -75,9 +84,9 @@ export type BazaarAppType = Instance<typeof BazaarAppMap>;
 export const BazaarModel = types
   .model('BazaarModel', {
     /* observable changes */
-    pinnedChange: types.optional(types.boolean, false),
-    suiteChange: types.optional(types.boolean, false),
-    recommendedChange: types.optional(types.boolean, false),
+    pinnedAppsChange: types.optional(types.boolean, false),
+    suiteAppsChange: types.optional(types.boolean, false),
+    recommendedAppsChange: types.optional(types.boolean, false),
     /* */
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
@@ -203,6 +212,16 @@ export type AllyModelType = Instance<typeof AllyModel>;
 
 export const BazaarStore = types
   .model({
+    /* observable changes */
+    // docket installation poke sent
+    appInstallInitial: types.optional(types.boolean, false),
+    // docket chad = 'install' received
+    appInstallStarted: types.optional(types.boolean, false),
+    // docket chad = 'failed' received
+    appInstallFailed: types.optional(types.boolean, false),
+    // docket chad = 'glob' received
+    appInstallCompleted: types.optional(types.boolean, false),
+    /* */
     // all apps installed on the local ship (our)
     // ourApps: types.map(BazaarApp),
     // space => app metadata for space specific app data
@@ -305,7 +324,7 @@ export const BazaarStore = types
   }))
   .actions((self) => ({
     isAppInstalled(appId: string) {
-      return self.apps.get(appId)?.installed;
+      return self.apps.get(appId)?.installStatus === InstallStatus.installed;
     },
     initialCatalog(apps: any) {
       for (const desk in apps) {
@@ -369,7 +388,7 @@ export const BazaarStore = types
     setUninstalled(appId: string) {
       const app = self.apps.get(appId);
       if (app?.type === 'urbit') {
-        app.installed = false;
+        app.installStatus = InstallStatus.uninstalled;
         self.apps.set(appId, app);
         self.appsChange = !self.appsChange;
       }
@@ -452,6 +471,29 @@ export const BazaarStore = types
       self.my.recommendations.replace(recommendations);
       self.appsChange = !self.appsChange;
     },
+
+    /* events */
+    triggerAppInstallInitial(ship: string, desk: string) {
+      const app = self.apps.get(desk);
+      app.installStatus = InstallStatus.initial;
+      self.appInstallInitial = !self.appInstallInitial;
+    },
+    triggerAppInstallStarted(ship: string, desk: string) {
+      const app = self.apps.get(desk);
+      app.installStatus = InstallStatus.started;
+      self.appInstallStarted = !self.appInstallStarted;
+    },
+    triggerAppInstallFailed(ship: string, desk: string, err: string) {
+      const app = self.apps.get(desk);
+      app.installStatus = InstallStatus.failed;
+      self.appInstallFailed = !self.appInstallFailed;
+    },
+    triggerAppInstallCompleted(ship: string, desk: string) {
+      const app = self.apps.get(desk);
+      app.installStatus = InstallStatus.installed;
+      self.appInstallCompleted = !self.appInstallCompleted;
+    },
+    /* */
   }));
 
 export type BazaarStoreType = Instance<typeof BazaarStore>;

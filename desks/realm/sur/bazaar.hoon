@@ -69,7 +69,7 @@
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      [%urbit =docket:docket installed=?]
+      [%urbit =docket:docket install-status=?(%started %failed %suspended %installed %uninstalled)]
       [%missing ~]
   ==
 ::
@@ -134,7 +134,7 @@
       [%suite-add path=space-path:spaces =app-full ord=(list app-id)]
       [%suite-remove path=space-path:spaces =app-full ord=(list app-id)]
       [%set-suite-order path=space-path:spaces ord=(list app-id)]
-      [%app-installed =app-id =app]
+      [%app-install-status-changed =app-id =app]
       [%app-uninstalled =app-id]
       [%treaty-added [=ship =desk] =docket:docket]
       [%my-recommendations recommendations=(set app-id)]
