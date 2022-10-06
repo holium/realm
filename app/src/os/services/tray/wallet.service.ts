@@ -205,7 +205,7 @@ export class WalletService extends BaseService {
     });
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
-      'https://ropsten.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
     );
 
     const patchEffect = {
@@ -254,7 +254,7 @@ export class WalletService extends BaseService {
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
-      'https://ropsten.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
     );
   }
 
