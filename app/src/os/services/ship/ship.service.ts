@@ -214,10 +214,11 @@ export class ShipService extends BaseService {
       secretKey,
       accessPropertiesByDotNotation: true,
     };
-    this.db =
-      process.env.NODE_ENV === 'development'
-        ? new Store<ShipModelType>(storeParams)
-        : new EncryptedStore<ShipModelType>(storeParams);
+    // this.db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store<ShipModelType>(storeParams)
+    //     : new EncryptedStore<ShipModelType>(storeParams);
+    this.db = new Store<ShipModelType>(storeParams);
 
     this.core.sendLog(`db: ${JSON.stringify(this.db)}`);
 
