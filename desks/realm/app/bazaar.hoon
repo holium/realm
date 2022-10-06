@@ -578,7 +578,7 @@
             ~&  >  "{<dap.bowl>}: gifting {<space-path>}"
             =/  paths  [/updates /bazaar/(scot %p ship.space-path)/(scot %tas space.space-path) ~]
             %+  snoc  cards.rslt
-            [%give %fact paths bazaar-reaction+!>([%recommend space-path [app-id sieve.app-lite entry] sorts])]
+            [%give %fact paths bazaar-reaction+!>([?:(=(action %recommend) %recommend %unrecommend) space-path [app-id sieve.app-lite entry] sorts])]
           ~&  >>  "{<dap.bowl>}: forwarding recommendation of {<app-id>} to space {<space-path>}..."
           %+  snoc  cards.rslt
           ::  must send over full app in case space host doesn't have app in app catalog
@@ -672,7 +672,7 @@
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
     :_  state
     :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-        [%give %fact paths bazaar-reaction+!>([%recommend path [app-id sieve.app-lite entry] recommended.sorts.u.apps])]
+        [%give %fact paths bazaar-reaction+!>([?:(=(action %recommend) %recommend %unrecommend) path [app-id sieve.app-lite entry] recommended.sorts.u.apps])]
     ==
   --
   ::
