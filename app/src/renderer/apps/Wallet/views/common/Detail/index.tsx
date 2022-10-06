@@ -1,11 +1,7 @@
 import { FC, useState } from 'react';
-import { isValidPatp } from 'urbit-ob';
 import styled from 'styled-components';
-import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { theme as themes, ThemeType } from 'renderer/theme';
 import { darken, lighten } from 'polished';
-import { QRCodeSVG } from 'qrcode.react';
 
 import { Flex, Box, Text, Icons } from 'renderer/components';
 import { CircleButton } from '../../../components/CircleButton';
@@ -13,17 +9,13 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
 import {
-  shortened,
-  formatWei,
-  convertWeiToUsd,
-  monthNames,
   getBaseTheme,
   getTransactions,
 } from '../../../lib/helpers';
 
 import { WalletInfo } from './WalletInfo';
-import { TransactionList } from './TransactionList';
-import { SendTransaction } from './SendTransaction';
+import { TransactionList } from '../Transaction/List';
+import { SendTransaction } from '../Transaction/Send';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from 'os/services/tray/wallet.model';
 
