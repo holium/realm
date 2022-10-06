@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
+import { Icons } from 'renderer/components';
 import { m, motion } from 'framer-motion';
 import styled from 'styled-components';
 
@@ -24,6 +25,7 @@ type AnimatedCursorProps = {
   isVisible?: boolean;
   isTextCursor?: boolean;
   isResizeCursor?: boolean;
+  icon?: string;
   initialRender?: boolean;
   // clickables: string[];
 };
@@ -84,6 +86,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   isVisible = true,
   isTextCursor,
   isResizeCursor,
+  icon,
   children,
 }) => {
   const cursorOuterRef = useRef<HTMLDivElement>(null);
@@ -237,7 +240,7 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
           ...styles.cursorOuter,
           visibility: isVisible ? 'visible' : 'hidden',
         }}
-      />
+      >{icon &&<Icons name={icon} size={30} />}</motion.div>
       <motion.div
         layoutId={`${id}`}
         id={`${id}`}
@@ -295,6 +298,7 @@ export function CurrentUserCursor({
   const [isVisible, setIsVisible] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isActiveClickable, setIsActiveClickable] = useState(false);
+  const [icon, setIcon] = useState(null);
 
   useEffect(() => {
     // Hide / Show global cursor
@@ -327,12 +331,18 @@ export function CurrentUserCursor({
     setIsVisible(false);
     // setIsActive(false);
   }, []);
+  const onIcon = useCallback((evt: any) => {
+    console.log('got it')
+    setIcon(evt.detail)
+    // setIsActive(false);
+  }, []);
 
   useEventListener('mousemove', onMouseMove);
   useEventListener('mousedown', onMouseDown);
   useEventListener('mouseup', onMouseUp);
   useEventListener('mouseover', onMouseEnterViewport);
   useEventListener('mouseout', onMouseLeaveViewport);
+  useEventListener('icon', onIcon)
 
   useEffect(() => {
     const clickableEls = document.querySelectorAll(
@@ -492,6 +502,7 @@ export function CurrentUserCursor({
       isResizeCursor={isResizeCursor}
       isTextCursor={isTextCursor}
       isActiveClickable={isActiveClickable}
+      icon={icon}
       {...props}
     >
       {children}

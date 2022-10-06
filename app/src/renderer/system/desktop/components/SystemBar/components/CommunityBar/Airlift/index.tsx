@@ -66,6 +66,10 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
     (evt: any) => {
       evt.preventDefault();
       window.addEventListener('mouseup', onButtonDragEnd);
+      const iconEvent = new CustomEvent('icon', {
+        detail: 'Airlift'
+      });
+      window.dispatchEvent(iconEvent);
     },
     [activeApp, anchorOffset, position, dimensions]
   );
@@ -73,6 +77,10 @@ export const AirliftTray: FC<AirliftTrayProps> = observer((props: AirliftTrayPro
   const onButtonDragEnd = useCallback(
     (evt: any) => {
       evt.preventDefault();
+      const iconEvent = new CustomEvent('icon', {
+        detail: null
+      });
+      window.dispatchEvent(iconEvent);
       window.removeEventListener('mouseup', onButtonDragEnd);
       DesktopActions.openAppWindow('', nativeApps['airlift']);
     },

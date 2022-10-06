@@ -7,6 +7,7 @@ import { hexToRgb, rgbToString } from 'os/lib/color';
 import styled from 'styled-components';
 import AnimatedCursor, { Vec2 } from './Cursor';
 import { useEventListener } from './Cursor/useEventListener';
+import { setReactionScheduler } from 'mobx/dist/internal';
 
 const MULTI_CLICK_ID_ATTRIB = 'data-multi-click-id';
 
@@ -47,6 +48,7 @@ type AnyPayload = JoinPayload | CursorMovePayload | CursorClickPayload;
 
 interface CursorState extends Omit<CursorMovePayload, 'event' | 'id'> {
   isClicking?: boolean;
+  icon?: string;
 }
 
 function getSessionID() {
@@ -171,13 +173,27 @@ export const Presences = () => {
     }
   }, []);
 
+  const onIcon = useCallback((e: any) => {
+    console.log('got icon event')
+    // prevent multiplayer clicks from creating infinite loop
+    // if (!e.isTrusted) return;
+    setCursors((prev) => ({
+      ...prev,
+      [e.id]: {
+        ...prev[e.id],
+        icon: e.icon,
+      },
+    }));
+  }, []);
+
   useEventListener('mousemove', onMouseMove);
   useEventListener('click', onClick);
+  useEventListener('icon', onIcon);
 
   return (
     <>
       {Object.entries(cursors).map(
-        ([id, { color, nickname, patp, position, isClicking }]) => (
+        ([id, { color, nickname, patp, position, isClicking, icon }]) => (
           <div key={id}>
             <AnimatedCursor
               id={patp}
@@ -185,6 +201,7 @@ export const Presences = () => {
               coords={position}
               isActive={isClicking}
               isActiveClickable={isClicking}
+              icon={icon}
             />
             <CursorName
               style={{
