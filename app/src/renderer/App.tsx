@@ -22,7 +22,7 @@ import { ShellActions } from './logic/actions/shell';
 // import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
 export const App: FC = observer(() => {
-  const { booted, resuming, connectionStatus } = useCore();
+  const { booted, resuming } = useCore();
   const { desktop, shell, theme } = useServices();
   // const styleRef = useRef(null);
 
@@ -42,7 +42,7 @@ export const App: FC = observer(() => {
           {/* <Spinner size={4} /> */}
         </div>
       ),
-    [booted, resuming, connectionStatus]
+    [booted, resuming]
   );
 
   const mouseMemo = useMemo(() => {
@@ -61,7 +61,6 @@ export const App: FC = observer(() => {
       ShellActions.closeDialog();
     };
   }, []);
-
   return (
     <CoreProvider value={coreStore}>
       <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>

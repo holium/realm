@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback, useEffect } from 'react';
+import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
@@ -85,6 +85,15 @@ export const AppWindow: FC<AppWindowProps> = observer(
       mHeight.set(activeWindow.dimensions.height);
     }, [activeWindow.dimensions.width, activeWindow.dimensions.height]);
 
+    const windowId = `app-window-${activeWindow?.id}`;
+
+    useEffect(() => {
+      const windowEl = document.getElementById(windowId);
+      if (windowEl) {
+        windowEl.style.zIndex = `${window.zIndex}`;
+      }
+    }, [window.zIndex]);
+
     const resizeRightX = useMotionValue(0);
     const resizeRightY = useMotionValue(0);
 
@@ -127,10 +136,10 @@ export const AppWindow: FC<AppWindowProps> = observer(
       }
       activeWindow &&
         DesktopActions.setAppDimensions(activeWindow.id, {
-          x: mX.get(),
-          y: mY.get(),
-          height: mHeight.get(),
-          width: mWidth.get(),
+          x: Math.round(mX.get()),
+          y: Math.round(mY.get()),
+          height: Math.round(mHeight.get()),
+          width: Math.round(mWidth.get()),
         });
     }, [shell.isFullscreen, activeWindow, unmaximize, setUnmaximize]);
 
@@ -138,10 +147,10 @@ export const AppWindow: FC<AppWindowProps> = observer(
       setIsDragging(false);
       activeWindow &&
         DesktopActions.setAppDimensions(activeWindow.id, {
-          x: mX.get(),
-          y: mY.get(),
-          height: mHeight.get(),
-          width: mWidth.get(),
+          x: Math.round(mX.get()),
+          y: Math.round(mY.get()),
+          height: Math.round(mHeight.get()),
+          width: Math.round(mWidth.get()),
         });
     };
 
@@ -160,18 +169,18 @@ export const AppWindow: FC<AppWindowProps> = observer(
       webviewId = `${desktop.activeWindow?.id}-web-webview`;
     }
 
-    const onDevTools = () => {
+    const onDevTools = useCallback(() => {
+      console.log(webviewId);
       const webview: any = document.getElementById(webviewId);
       webview.isDevToolsOpened()
         ? webview.closeDevTools()
         : webview.openDevTools();
-    };
+    }, [webviewId]);
 
     const onMouseDown = () => {
       DesktopActions.setActive('', window.id);
     };
 
-    const windowId = `app-window-${activeWindow?.id}`;
     let hideTitlebarBorder = false;
     let noTitlebar = false;
     let CustomTitlebar:
@@ -284,93 +293,105 @@ export const AppWindow: FC<AppWindowProps> = observer(
       }
     }
 
-    return (
-      <AppWindowStyle
-        id={windowId}
-        dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
-        dragElastic={0}
-        dragMomentum={false}
-        // dragConstraints={desktopRef}
-        dragListener={false}
-        drag={!isResizing}
-        dragControls={dragControls}
-        initial={{
-          opacity: 0,
-        }}
-        animate={{
-          opacity: 1,
-          transition: {
-            duration: 0.15,
-          },
-        }}
-        transition={{
-          background: { duration: 0.25 },
-        }}
-        exit={{
-          opacity: 0,
-          transition: {
-            duration: 0.1,
-          },
-        }}
-        style={{
-          x: mX,
-          y: mY,
-          width: mWidth,
-          height: mHeight,
-          zIndex: window.zIndex,
-          borderRadius,
-          background: windowColor,
-        }}
-        color={textColor}
-        customBg={windowColor}
-        onMouseDown={onMouseDown}
-      >
-        <Flex
-          flexDirection="column"
-          style={{
-            overflow: 'hidden',
-            borderRadius,
-            height: 'inherit',
-            width: 'inherit',
+    return useMemo(
+      () => (
+        <AppWindowStyle
+          id={windowId}
+          dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
+          dragElastic={0}
+          dragMomentum={false}
+          // dragConstraints={desktopRef}
+          dragListener={false}
+          drag={!isResizing}
+          dragControls={dragControls}
+          initial={{
+            opacity: 0,
           }}
+          animate={{
+            opacity: 1,
+            transition: {
+              duration: 0.15,
+            },
+          }}
+          transition={{
+            background: { duration: 0.25 },
+          }}
+          exit={{
+            opacity: 0,
+            transition: {
+              duration: 0.1,
+            },
+          }}
+          style={{
+            x: mX,
+            y: mY,
+            width: mWidth,
+            height: mHeight,
+            zIndex: window.zIndex,
+            borderRadius,
+            background: windowColor,
+          }}
+          color={textColor}
+          customBg={windowColor}
+          onMouseDown={onMouseDown}
         >
-          {titlebar}
-          <WindowType
-            hasTitlebar
-            isResizing={isResizing}
-            isDragging={isDragging}
-            window={window}
-          />
-          <DragHandleWrapper>
-            {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
-            <RightDragHandleStyle
-              className="app-window-resize app-window-resize-br"
-              drag
-              style={{
-                x: resizeRightX,
-                y: resizeRightY,
-              }}
-              onDrag={handleResize}
-              onPointerDown={() => {
-                setIsResizing(true);
-              }}
-              onPointerUp={() => {
-                setIsResizing(false);
-                activeWindow &&
-                  DesktopActions.setAppDimensions(activeWindow.id, {
-                    x: mX.get(),
-                    y: mY.get(),
-                    height: mHeight.get(),
-                    width: mWidth.get(),
-                  });
-              }}
-              onPanEnd={() => setIsResizing(false)}
-              onTap={() => setIsResizing(false)}
-              dragMomentum={false}
+          <Flex
+            flexDirection="column"
+            style={{
+              overflow: 'hidden',
+              borderRadius,
+              height: 'inherit',
+              width: 'inherit',
+            }}
+          >
+            {titlebar}
+            <WindowType
+              hasTitlebar
+              isResizing={isResizing}
+              isDragging={isDragging}
+              window={window}
             />
-          </DragHandleWrapper>
-        </Flex>
-      </AppWindowStyle>
+            <DragHandleWrapper>
+              {/* <LeftDragHandleStyle drag onDrag={handleResize} /> */}
+              <RightDragHandleStyle
+                className="app-window-resize app-window-resize-br"
+                drag
+                style={{
+                  x: resizeRightX,
+                  y: resizeRightY,
+                }}
+                onDrag={handleResize}
+                onPointerDown={() => {
+                  setIsResizing(true);
+                }}
+                onPointerUp={() => {
+                  setIsResizing(false);
+                  activeWindow &&
+                    DesktopActions.setAppDimensions(activeWindow.id, {
+                      x: mX.get(),
+                      y: mY.get(),
+                      height: mHeight.get(),
+                      width: mWidth.get(),
+                    });
+                }}
+                onPanEnd={() => setIsResizing(false)}
+                onTap={() => setIsResizing(false)}
+                dragMomentum={false}
+              />
+            </DragHandleWrapper>
+          </Flex>
+        </AppWindowStyle>
+      ),
+      [
+        window.dimensions,
+        unmaximize,
+        isResizing,
+        isDragging,
+        mHeight,
+        mWidth,
+        mX,
+        mY,
+      ]
     );
   }
 );

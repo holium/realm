@@ -104,6 +104,16 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         --rlm-text-color: ${theme.currentTheme.textColor};
         --rlm-icon-color: ${theme.currentTheme.iconColor};
       }
+      div[data-radix-portal] {
+        z-index: 2000 !important;
+      }
+   
+      #rlm-cursor {
+        position: absolute;
+        z-index: 2147483646 !important;
+      }
+      
+      
     `;
 
     if (ready) {
