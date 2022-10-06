@@ -16,13 +16,13 @@ enum AppTypes {
   Web = 'web',
 }
 
-const AppRankModel = types.model({
+const AppRankModel = types.model('AppRankModel', {
   pinned: types.number,
   recommended: types.number,
   suite: types.number,
 });
 
-const UrbitApp = types.model({
+const UrbitApp = types.model('UrbitApp', {
   id: types.identifier,
   // ship: types.string,
   // tags: types.array(types.string),
@@ -41,7 +41,7 @@ const UrbitApp = types.model({
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
-const NativeApp = types.model({
+const NativeApp = types.model('NativeApp', {
   id: types.identifier,
   // ship: types.string,
   // tags: types.array(types.string),
@@ -190,7 +190,7 @@ export const MyApps = types.model('MyApps', {
 export type MyAppsType = Instance<typeof MyApps>;
 
 export const BazaarStore = types
-  .model({
+  .model('BazaarStore', {
     // all apps installed on the local ship (our)
     // ourApps: types.map(BazaarApp),
     // space => app metadata for space specific app data

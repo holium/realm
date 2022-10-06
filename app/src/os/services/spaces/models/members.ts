@@ -33,7 +33,7 @@ const generateMemberList = (entries: any) => {
 };
 
 export const MembershipStore = types
-  .model({
+  .model('MembershipStore', {
     selected: types.safeReference(types.map(MembersModel)),
     spaces: types.map(types.map(MembersModel)),
   })
@@ -93,7 +93,7 @@ export const MembershipStore = types
 export type MembershipType = Instance<typeof MembershipStore>;
 
 export const MembersStore = types
-  .model({
+  .model('MembersStore', {
     all: types.map(MembersModel),
   })
   .views((self) => ({

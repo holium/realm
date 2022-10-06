@@ -165,7 +165,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     <Flex position="relative" flexDirection="row" alignItems="center">
       <AnimatePresence>
         {pinnedApps}
-        {activeAndUnpinned.length ? (
+        {activeAndUnpinned.length && orderedList?.length ? (
           <Divider key="app-dock-divider" customBg={dividerBg} ml={2} mr={2} />
         ) : (
           []

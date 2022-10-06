@@ -99,7 +99,7 @@ export const SpacesStore = types
       applySnapshot(self, castToSnapshot(syncEffect.model));
       self.loader.set('loaded');
     },
-    initialReaction: (data: { spaces: any; members: any }) => {
+    initialReaction: (data: { spaces: any; members: any }, ship: Patp) => {
       Object.keys(data.spaces).forEach((key: string) => {
         // if (!data.spaces[key].members) {
         //   data.spaces[key].members = { all: {} };
@@ -109,7 +109,11 @@ export const SpacesStore = types
         // });
         data.spaces[key].theme.id = `${key}`;
       });
+      // self.loader.set('loaded');
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
+      if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
+      self.loader.state = 'loaded';
+      console.log(self.loader.state);
     },
     addSpace: (addReaction: { space: any; members: any }) => {
       // console.log(addReaction);

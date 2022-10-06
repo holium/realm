@@ -15,9 +15,17 @@ import {
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
 import { useWindowSize } from 'renderer/logic/lib/measure';
-import { Flex, Spinner } from 'renderer/components';
+import {
+  ActionButton,
+  Badge,
+  Flex,
+  Spinner,
+  Text,
+  ConnectionStatus,
+} from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { RealmActions } from 'renderer/logic/actions/main';
+import { OSActions } from 'renderer/logic/actions/os';
 
 // Get the initial dimensions from the main process
 RealmActions.onInitialDimensions((_e: any, dims: any) => {
@@ -67,6 +75,9 @@ export const Shell: FC = observer(() => {
         )}
         {!resuming && GUI}
       </BackgroundFill>
+      <Layer zIndex={20}>
+        <ConnectionStatus />
+      </Layer>
     </ViewPort>
   );
 });

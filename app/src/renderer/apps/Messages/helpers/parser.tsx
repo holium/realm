@@ -64,18 +64,19 @@ export const getReferenceView = async (
 
       break;
     case 'app':
-      ShipActions.getAppPreview(reference.app.ship, reference.app.desk).then(
-        (response: any) => {
-          setter(
-            <AppLink
-              {...response}
-              textColor={textColor}
-              bgColor={embedColor}
-              color={response.color ? cleanNounColor(response.color) : null}
-            />
-          );
-        }
-      );
+      // TODO reimplement
+      // ShipActions.getAppPreview(reference.app.ship, reference.app.desk).then(
+      //   (response: any) => {
+      //     setter(
+      //       <AppLink
+      //         {...response}
+      //         textColor={textColor}
+      //         bgColor={embedColor}
+      //         color={response.color ? cleanNounColor(response.color) : null}
+      //       />
+      //     );
+      //   }
+      // );
       setter(
         <AppLink
           bgColor={embedColor}

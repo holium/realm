@@ -1,32 +1,23 @@
 import { ThemeModelType } from '../theme.model';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
-import Store from 'electron-store';
 import { toJS } from 'mobx';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-  ModelSnapshotType,
-} from 'mobx-state-tree';
+import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
-import { ShipModelType } from '../ship/models/ship';
 import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
 import { BazaarApi } from '../../api/bazaar';
 import { VisaModel, VisaModelType } from './models/visas';
-import { loadMembersFromDisk } from './passports';
-import { loadBazaarFromDisk } from './bazaar';
 import { RoomsApi } from '../../api/rooms';
 
-const getHost = (path: string) => path.split('/')[1];
+export const getHost = (path: string) => path.split('/')[1];
 import { BazaarStore } from './models/bazaar';
 import { MembershipStore } from './models/members';
+import { DiskStore } from '../base.store';
 
 type SpaceModels = {
   bazaar: any;
@@ -38,7 +29,7 @@ type SpaceModels = {
  * SpacesService
  */
 export class SpacesService extends BaseService {
-  private db?: Store<SpacesStoreType>; // for persistance
+  private db?: DiskStore; // for persistance
   private state?: SpacesStoreType; // for state management
   private models: SpaceModels = {
     membership: MembershipStore.create({}),
@@ -199,18 +190,26 @@ export class SpacesService extends BaseService {
     };
   }
 
-  async load(patp: string, docket: any) {
-    this.db = new Store({
-      name: 'spaces',
-      cwd: `realm.${patp}`,
-      accessPropertiesByDotNotation: true,
-    });
-
-    let persistedState: SpacesStoreType = this.db.store;
-    this.state = SpacesStore.create(castToSnapshot(persistedState));
+  async load(patp: string, isReconnecting: boolean) {
+    let secretKey: string | null = this.core.passwords.getPassword(patp)!;
+    this.db = new DiskStore('spaces', patp, secretKey, SpacesStore);
+    this.state = this.db.model as SpacesStoreType;
+    if (!isReconnecting) this.state.setLoader('loading');
     // Load sub-models
-    this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
-    this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
+    const membershipStore = new DiskStore(
+      'membership',
+      patp,
+      secretKey,
+      MembershipStore
+    );
+    const bazaarStore = new DiskStore('bazaar', patp, secretKey, BazaarStore, {
+      spaces: {},
+      treaties: {},
+      allies: {},
+      my: {},
+    });
+    this.models.membership = membershipStore.model;
+    this.models.bazaar = bazaarStore.model;
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -224,15 +223,9 @@ export class SpacesService extends BaseService {
     SpacesApi.getInvitations(this.core.conduit!).then((visas: any) => {
       this.models.visas.initialIncoming(visas);
     });
-    // Temporary setup
-    // this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
 
-    // Get the initial scry
-    const spaces = await SpacesApi.getSpaces(this.core.conduit!);
-    this.state!.initialScry(spaces, persistedState, patp);
     this.state!.selected && this.setTheme(this.state!.selected?.theme);
 
-    this.state.setLoader('loaded');
     // initial sync effect
     const syncEffect = {
       model: {
@@ -247,20 +240,10 @@ export class SpacesService extends BaseService {
 
     this.core.onEffect(syncEffect);
 
-    // set up snapshotting
-    onSnapshot(this.state, (snapshot) => {
-      this.db!.store = castToSnapshot(snapshot);
-    });
-
     // Start patching after we've initialized the state
-    onPatch(this.state, (patch) => {
-      const patchEffect = {
-        patch,
-        resource: 'spaces',
-        response: 'patch',
-      };
-      this.core.onEffect(patchEffect);
-    });
+    this.db.registerPatches(this.core.onEffect);
+    membershipStore.registerPatches(this.core.onEffect);
+    bazaarStore.registerPatches(this.core.onEffect);
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(
@@ -269,17 +252,15 @@ export class SpacesService extends BaseService {
       this.models.membership,
       this.models.bazaar,
       this.models.visas,
+      this.core.services.ship.rooms,
       this.setTheme
     );
-    // Subscribe to sync updates
-    // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
-    // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
-    //
+
     // setting provider to current space host
-    this.core.services.ship.rooms!.setProvider(
-      null,
-      getHost(this.state.selected!.path)
-    );
+    // this.core.services.ship.rooms!.setProvider(
+    //   null,
+    //   getHost(this.state.selected!.path)
+    // );
     BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
   }
 

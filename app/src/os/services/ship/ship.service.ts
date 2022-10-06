@@ -5,7 +5,7 @@ import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import EncryptedStore from './encryptedStore';
+import EncryptedStore from '../../lib/encryptedStore';
 import { ShipModelType, ShipModel } from './models/ship';
 import { MSTAction, Patp } from '../../types';
 import { ContactApi } from '../../api/contacts';
@@ -20,27 +20,25 @@ import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { SlipService } from '../slip.service';
 import { ContactStore, ContactStoreType } from './models/contacts';
-import { DocketStore, DocketStoreType } from './models/docket';
 import { ChatStoreType, ChatStore } from './models/dms';
-import { loadDMsFromDisk } from './stores/dms';
-import { loadCourierFromDisk } from './stores/courier';
-import { loadContactsFromDisk } from './stores/contacts';
-import { loadDocketFromDisk } from './stores/docket';
-import { loadFriendsFromDisk } from './stores/friends';
-import { loadNotificationsFromDisk } from './stores/notifications';
 import { CourierApi } from '../../api/courier';
-import { CourierStoreType, PreviewGroupDMType } from './models/courier';
+import {
+  CourierStore,
+  CourierStoreType,
+  PreviewGroupDMType,
+} from './models/courier';
 import { toJS } from 'mobx';
 import {
   NotificationStore,
   NotificationStoreType,
 } from './models/notifications';
 import { NotificationApi } from '../../api/notifications';
+import { DiskStore } from '../base.store';
 
 export type ShipModels = {
   friends: FriendsType;
   contacts?: ContactStoreType;
-  docket: DocketStoreType;
+  // docket: DocketStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
   notifications: NotificationStoreType;
@@ -55,7 +53,7 @@ export class ShipService extends BaseService {
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
     contacts: undefined,
-    docket: DocketStore.create({ apps: {} }),
+    // docket: DocketStore.create({ apps: {} }),
     chat: undefined,
     notifications: NotificationStore.create({
       unseen: [],
@@ -86,7 +84,7 @@ export class ShipService extends BaseService {
     'realm.ship.accept-group-dm-request': this.acceptGroupDm,
     'realm.ship.decline-group-dm-request': this.declineGroupDm,
     'realm.ship.get-s3-bucket': this.getS3Bucket,
-    'realm.ship.get-app-preview': this.getAppPreview,
+    // 'realm.ship.get-app-preview': this.getAppPreview,
     'realm.ship.get-our-groups': this.getOurGroups,
     'realm.ship.get-friends': this.getFriends,
     'realm.ship.add-friend': this.addFriend,
@@ -109,9 +107,9 @@ export class ShipService extends BaseService {
     getGroupMembers: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-group-members', path);
     },
-    getAppPreview: (ship: string, desk: string) => {
-      return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
-    },
+    // getAppPreview: (ship: string, desk: string) => {
+    //   return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
+    // },
     getMetadata: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-metadata', path);
     },
@@ -154,8 +152,7 @@ export class ShipService extends BaseService {
     removeDm: (ship: string, index: any) => {
       return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
     },
-    readDm: async (ship: Patp) =>
-      ipcRenderer.invoke('realm.ship.read-dm', ship),
+    readDm: (ship: Patp) => ipcRenderer.invoke('realm.ship.read-dm', ship),
     readGroupDm: async (path: string) =>
       ipcRenderer.invoke('realm.ship.read-group-dm', path),
     getFriends: () => {
@@ -173,7 +170,7 @@ export class ShipService extends BaseService {
       ipcRenderer.invoke('realm.ship.remove-friend', patp),
     getNotifications: async (timestamp: number, length: number) =>
       ipcRenderer.invoke('realm.ship.get-notifications', timestamp, length),
-    openedNotifications: async () =>
+    openedNotifications: () =>
       ipcRenderer.invoke('realm.ship.opened-notifications'),
   };
 
@@ -195,7 +192,6 @@ export class ShipService extends BaseService {
     return {
       chat: this.models.chat ? getSnapshot(this.models.chat) : null,
       courier: this.models.courier ? getSnapshot(this.models.courier) : null,
-      docket: this.models.docket ? getSnapshot(this.models.docket) : null,
       contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
       notifications: this.models.notifications
@@ -209,6 +205,7 @@ export class ShipService extends BaseService {
 
   async subscribe(ship: string, shipInfo: any) {
     //
+    console.log('subscribing');
     let secretKey: string | null = this.core.passwords.getPassword(ship)!;
     this.core.sendLog(`secretKey: ${secretKey}`);
     const storeParams = {
@@ -239,36 +236,48 @@ export class ShipService extends BaseService {
       loggedIn: true,
       loader: { state: 'initial' },
     });
+    this.state!.loader.set('loading');
+    console.log('before load froms disk');
     this.core.sendLog('before load from disk');
 
-    this.models.notifications = loadNotificationsFromDisk(
+    const notificationStore = new DiskStore(
+      'notifications',
       ship,
       secretKey,
-      this.core.onEffect
+      NotificationStore,
+      { unseen: [], seen: [], all: [], recent: [] }
     );
-    this.models.chat = loadDMsFromDisk(ship, secretKey, this.core.onEffect);
-    this.models.courier = loadCourierFromDisk(
+    this.models.notifications = notificationStore.model;
+    const courierStore = new DiskStore(
+      'courier',
       ship,
       secretKey,
-      this.core.onEffect
+      CourierStore
     );
-    this.models.contacts = loadContactsFromDisk(
+    this.models.courier = courierStore.model;
+    const contactStore = new DiskStore(
+      'contacts',
       ship,
       secretKey,
-      this.core.onEffect
+      ContactStore,
+      { ourPatp: ship }
     );
-    this.models.docket = loadDocketFromDisk(
+    this.models.contacts = contactStore.model;
+    const friendsStore = new DiskStore(
+      'friends',
       ship,
       secretKey,
-      this.core.onEffect
+      FriendsStore,
+      { all: {} }
     );
-    this.models.friends = loadFriendsFromDisk(
-      ship,
-      secretKey,
-      this.core.onEffect
-    );
+    this.models.friends = friendsStore.model;
+
     secretKey = null;
     this.core.sendLog('after load from disk');
+    notificationStore.registerPatches(this.core.onEffect);
+    courierStore.registerPatches(this.core.onEffect);
+    contactStore.registerPatches(this.core.onEffect);
+    friendsStore.registerPatches(this.core.onEffect);
 
     this.core.services.desktop.load(ship, this.state.color || '#4E9EFD');
 
@@ -286,48 +295,40 @@ export class ShipService extends BaseService {
     // this.core.onEffect(syncEffect);
 
     try {
-      await new Promise<ShipModelType>((resolve, reject) => {
-        // TODO rewrite the contact store logic
-        try {
-          this.core.conduit!.watch({
-            app: 'contact-store',
-            path: '/all',
-            onEvent: (data: any) => {
-              this.models.contacts!.setInitial(data);
-            },
-            onError: () => console.log('Subscription rejected'),
-            onQuit: () => console.log('Kicked from subscription'),
-          });
-        } catch {
-          console.log('Subscription failed');
-        }
-        this.core.sendLog(`after contact watch`);
-
-        FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
-
-        ContactApi.getContact(this.core.conduit!, ship).then((value: any) => {
-          this.state!.setOurMetadata(value);
+      // TODO rewrite the contact store logic
+      try {
+        this.core.conduit!.watch({
+          app: 'contact-store',
+          path: '/all',
+          onEvent: (data: any) => {
+            this.models.contacts!.setInitial(data);
+          },
+          onError: () => console.log('Subscription rejected'),
+          onQuit: () => console.log('Kicked from subscription'),
         });
+      } catch {
+        console.log('Subscription failed');
+      }
+      this.core.sendLog(`after contact watch`);
 
-        MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
+      FriendsApi.watchFriends(this.core.conduit!, this.models.friends);
 
-        // register dm update handler
-        DmApi.updates(this.core.conduit!, this.models.courier!);
-        CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
-        NotificationApi.updates(
-          this.core.conduit!,
-          this.models.notifications!,
-          this.models.courier
-        );
-
-        DocketApi.getApps(this.core.conduit!).then((apps) => {
-          this.models.docket.setInitial(apps);
-          this.state!.loader.set('loaded');
-          this.core.sendLog(`docket laoded`);
-
-          resolve(this.state!);
-        });
+      ContactApi.getContact(this.core.conduit!, ship).then((value: any) => {
+        this.state!.setOurMetadata(value);
       });
+
+      MetadataApi.syncGraphMetadata(this.core.conduit!, this.metadataStore);
+
+      // register dm update handler
+      DmApi.updates(this.core.conduit!, this.models.courier!);
+      CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
+      NotificationApi.updates(
+        this.core.conduit!,
+        this.models.notifications!,
+        this.models.courier
+      );
+
+      this.state!.loader.set('loaded');
 
       this.services.slip?.subscribe();
       this.rooms?.onLogin(ship);
@@ -473,15 +474,15 @@ export class ShipService extends BaseService {
     return this.metadataStore['graph'][path];
   }
 
-  async getAppPreview(_event: any, ship: string, desk: string): Promise<any> {
-    return await DocketApi.requestTreaty(
-      ship,
-      desk,
-      this.models.docket,
-      this.core.conduit!,
-      this.metadataStore
-    );
-  }
+  // async getAppPreview(_event: any, ship: string, desk: string): Promise<any> {
+  //   return await DocketApi.requestTreaty(
+  //     ship,
+  //     desk,
+  //     this.models.bazaar,
+  //     this.core.conduit!,
+  //     this.metadataStore
+  //   );
+  // }
 
   async getDMs() {
     if (!this.core.conduit) {
@@ -515,7 +516,8 @@ export class ShipService extends BaseService {
    * @returns
    */
   async readDm(_event: any, toShip: string) {
-    return await CourierApi.readDm(this.core.conduit!, toShip);
+    CourierApi.readDm(this.core.conduit!, toShip);
+    return;
   }
 
   /**
@@ -600,11 +602,8 @@ export class ShipService extends BaseService {
     // console.log(timeboxes);
     return [];
   }
-  async openedNotifications(_event: any) {
-    // console.log('getNotifications: %o, %o', timestamp, length);
-    await NotificationApi.opened(this.core.conduit!);
-    // const timeboxes = this.state?.notifications.timeboxes();
-    // console.log(timeboxes);
+  openedNotifications(_event: any) {
+    NotificationApi.opened(this.core.conduit!);
     return;
   }
 }

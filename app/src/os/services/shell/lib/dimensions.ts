@@ -45,4 +45,8 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     width: 1000,
     height: 900,
   },
+  ['templeochess']: {
+    width: 700,
+    height: 700,
+  },
 };

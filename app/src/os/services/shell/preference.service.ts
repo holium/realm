@@ -1,5 +1,5 @@
-import { WindowManager } from './../../renderer/system/desktop/WindowManager';
-import Realm from '..';
+import { WindowManager } from 'renderer/system/desktop/WindowManager';
+import Realm from '../../';
 import Store from 'electron-store';
 import { EventEmitter } from 'stream';
 import {
