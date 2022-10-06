@@ -21,7 +21,7 @@ const BehnTimerCard = types
 
 const AirliftCard = types.union(BehnTimerCard);
 
-const AirliftArm = types
+export const AirliftArm = types
   .model('AirliftArm', {
     name: types.string,
     body: types.string,
@@ -49,8 +49,12 @@ const AirliftArm = types
     }
   }))
   .actions((self) => ({
+    expand() {
+      self.expanded = true;
+    }
+  })); 
 
-  }));
+export type AirliftArmType = Instance<typeof AirliftArm>;
 
 const AirliftAgent = types
   .model('AirliftAgent', {
@@ -89,17 +93,37 @@ const AirliftAgent = types
 
   }));
 
-
-const AirliftDesk = types.model('AirliftDesk', {
+export const AirliftDesk = types.model('AirliftDesk', {
   agents: types.map(AirliftAgent),
 })
 
-const AirliftModel = types
+export const AirliftModel = types
   .model('AirliftModel', {
     desks: types.map(AirliftDesk),
   })
+export type AirliftStoreType = Instance<typeof AirliftStore>;
 
-export const AirliftStore = types.model('AirliftStore', {
-  model: AirliftModel
-});
+export const AirliftStore = types
+  .model('AirliftStore', {
+    model: AirliftModel
+  })
+  .views((self) => ({
+    initial(agents: any) {
+/*      self.model = AirliftModel.create({
+      })
+      const btcWallets = wallets.bitcoin;
+      Object.entries(btcWallets).forEach(([key, wallet]) => {
+        btcWallets[key] = {
+          network: 'bitcoin',
+          path: (wallet as any).path,
+          nickname: (wallet as any).nickname,
+          balance: (wallet as any).balance.toString(),
+          address: (wallet as any).address,
+          contracts: {}
+        }
+      })
+      applySnapshot(self.wallets, btcWallets);*/
+    },
+  }));
+
 export type AirliftStoreType = Instance<typeof AirliftStore>;

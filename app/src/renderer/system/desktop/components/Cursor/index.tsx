@@ -332,7 +332,6 @@ export function CurrentUserCursor({
     // setIsActive(false);
   }, []);
   const onIcon = useCallback((evt: any) => {
-    console.log('got it')
     setIcon(evt.detail)
     // setIsActive(false);
   }, []);

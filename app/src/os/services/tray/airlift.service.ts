@@ -16,7 +16,7 @@ import { SpacesApi } from '../../api/spaces';
 import { snakeify, camelToSnake } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
-import { AirliftStore, AirliftStoreType } from './airlift.model';
+import { AirliftStore, AirliftStoreType, AirliftModel, AirliftArmType, AirliftArm } from './airlift.model';
 
 const getHost = (path: string) => path.split('/')[1];
 
@@ -59,52 +59,37 @@ export class AirliftService extends BaseService {
   }*/
 
   async load(patp: string, docket: any) {
+    const arm: AirliftArmType = new AirliftArm({
+        name: 'hello',
+        body: 'hello',
+        expanded: false,
+        view: 'options',
+    })
+    const model = new AirliftModel({
+        desks: {}
+    })
     this.db = new AirliftStore({
-      name: 'spaces',
-      cwd: `realm.${patp}`,
-      accessPropertiesByDotNotation: true,
+      model: new AirliftModel({
+        desks: {
+          '0': {
+            agents: {
+                '%test': {
+                  arms: {
+                    name: 'TEST',
+                    body: 'asdf',
+                    cards: 'asdf',
+                    expanded: '',
+                    view: 'options'
+                  }
+                }
+            }
+          }
+        }
+      }
     });
 
-    let persistedState: SpacesStoreType = this.db.store;
-    this.state = SpacesStore.create(castToSnapshot(persistedState));
-    // Load sub-models
-    this.models.membership = loadMembersFromDisk(patp, this.core.onEffect);
-    this.models.bazaar = loadBazaarFromDisk(patp, this.core.onEffect);
-    // Set up patch for visas
-    onPatch(this.models.visas, (patch) => {
-      const patchEffect = {
-        patch,
-        resource: 'visas',
-        response: 'patch',
-      };
-      this.core.onEffect(patchEffect);
-    });
-
-    SpacesApi.getInvitations(this.core.conduit!).then((visas: any) => {
-      this.models.visas.initialIncoming(visas);
-    });
-    // Temporary setup
-    // this.models.bazaar.our(`/${patp}/our`, getSnapshot(ship.docket.apps) || {});
-
-    // Get the initial scry
-    const spaces = await SpacesApi.getSpaces(this.core.conduit!);
-    this.state!.initialScry(spaces, persistedState, patp);
-    this.state!.selected && this.setTheme(this.state!.selected?.theme);
-
-    this.state.setLoader('loaded');
-    // initial sync effect
-    const syncEffect = {
-      model: {
-        spaces: getSnapshot(this.state!),
-        membership: getSnapshot(this.models.membership),
-        bazaar: getSnapshot(this.models.bazaar),
-      },
-      resource: 'spaces',
-      key: null,
-      response: 'initial',
-    };
-
-    this.core.onEffect(syncEffect);
+    let persistedState: AirliftStoreType = this.db!.store;
+    this.state = AirliftStore.create(castToSnapshot(persistedState));
 
     // set up snapshotting
     onSnapshot(this.state, (snapshot) => {
@@ -115,31 +100,11 @@ export class AirliftService extends BaseService {
     onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
-        resource: 'spaces',
+        resource: 'airlift',
         response: 'patch',
       };
       this.core.onEffect(patchEffect);
     });
-
-    // Subscribe to sync updates
-    SpacesApi.watchUpdates(
-      this.core.conduit!,
-      this.state,
-      this.models.membership,
-      this.models.bazaar,
-      this.models.visas,
-      this.setTheme
-    );
-    // Subscribe to sync updates
-    // BazaarApi.loadTreaties(this.core.conduit!, this.models.bazaar);
-    // BazaarApi.watchUpdates(this.core.conduit!, this.models.bazaar);
-    //
-    // setting provider to current space host
-    this.core.services.ship.rooms!.setProvider(
-      null,
-      getHost(this.state.selected!.path)
-    );
-    BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
   }
 
   // ***********************************************************

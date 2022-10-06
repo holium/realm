@@ -6,19 +6,21 @@ import { AirliftActions } from 'renderer/logic/actions/airlift';
 export type AirliftArmProps = {
   desk: string;
   agent: string;
-  arm: string;
+  arm: any;
 };
 
 export const AirliftArm: FC<AirliftArmProps> = observer((props: AirliftArmProps) => {
   const { desk, agent, arm } = props;
 
   const onArmExpand = () => {
-    AirliftActions.expandArm(desk, agent, arm);
+    AirliftActions.expandArm(desk, agent, arm.name);
   }
 
   return (
     <div>
-      <Icons name="AirliftArm" onClick={onArmExpand}></Icons>
+      {arm.expanded ?
+      <div></div>
+      :<Icons name="AirliftArm" onClick={onArmExpand}></Icons>}
     </div>
   )
 });

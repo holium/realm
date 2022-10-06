@@ -6,7 +6,7 @@ import { AirliftArm } from './AirliftArm';
 export type AirliftAgentProps = {
   desk: string,
   agent: string,
-  arms: string,
+  arms: any,
 };
 
 export const AirliftAgent: FC<AirliftAgentProps> = observer((props: AirliftAgentProps) => {
@@ -26,7 +26,7 @@ export const AirliftAgent: FC<AirliftAgentProps> = observer((props: AirliftAgent
     {arms && Object.entries(arms).map((arm: any) => {
       return (
         <div>
-          <AirliftArm desk={desk} agent={agent} arm='on-poke' />
+          <AirliftArm desk={desk} agent={agent} arm={arm} />
         </div>
       );
     })}
