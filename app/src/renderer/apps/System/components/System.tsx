@@ -50,6 +50,20 @@ export const SystemPanel: FC<any> = observer(() => {
         <Text>Coming Soon</Text>
       </Card>
 
+      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+        DEV TOOLS
+      </Text>
+      <Card
+        p="20px"
+        width="100%"
+        // minHeight="240px"
+        elevation="none"
+        customBg={cardColor}
+        flexDirection={'column'}
+      >
+        <Text>Coming Soon</Text>
+      </Card>
+
       {/* 
     <Text opacity={0.7} fontSize={3} fontWeight={500}>
       MOUSE
