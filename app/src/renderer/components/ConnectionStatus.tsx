@@ -110,6 +110,9 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
             display: !ship ? 'none' : 'flex',
             top: status === 'connected' || status === 'initialized' ? -50 : 20,
           }}
+          transition={{
+            top: { duration: 0.25 },
+          }}
           exit={{ opacity: 0 }}
           width="250px"
           position="absolute"
@@ -126,7 +129,7 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
             }}
             exit={{ opacity: 0 }}
             baseColor={color}
-            mode={mode}
+            mode={mode as any}
             whileTap={{ scale: 0.95 }}
             onClick={() => {
               setIsReconnecting(true);
@@ -146,7 +149,7 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
           </ConnStatusStyle>
         </Flex>
       ),
-      [status, isReconnecting]
+      [status, isReconnecting, ship?.patp]
     );
   }
 );

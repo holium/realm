@@ -89,7 +89,7 @@ export class Conduit extends EventEmitter {
     this.updateStatus(ConduitState.Initialized);
 
     return new Promise(async (resolve, reject) => {
-      console.log(channelUrl);
+      // console.log(channelUrl);
 
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie },
@@ -181,20 +181,21 @@ export class Conduit extends EventEmitter {
       this.sse.onerror = async (error) => {
         console.log('sse error', error);
         // @ts-ignore
+        if (error.status === '404') {
+          return;
+        }
+        // @ts-ignore
         if (error.status >= 500) {
+          // @ts-ignore
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
         }
         // @ts-ignore
         if (!error.status) {
-          // this happens when the ship is disconnected
+          // this happens when the ship is offline
           this.updateStatus(ConduitState.Failed);
           this.disconnectGracefully();
         }
-        this.disconnectGracefully();
-        // this.updateStatus(ConduitState.Disconnected);
-        // TODO make reconnection work
-        await this.reconnectToChannel();
       };
       this.sse.addEventListener('close', () => {
         console.log('e');
@@ -398,19 +399,20 @@ export class Conduit extends EventEmitter {
    */
   private async reconnectToChannel() {
     // if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
-    this.uid = this.generateUID();
-    const newChannel = this.channelUrl(this.uid);
-    console.log('new id', this.uid);
-    await this.startSSE(newChannel).then(() => {
-      console.log(`reconnected to channel ${newChannel}`);
-    });
-    // .catch(() => {
-    //   (function (conduit: Conduit) {
-    //     conduit.reconnectTimeout = setTimeout(() => {
-    //       conduit.startSSE();
-    //     }, 2000);
-    //   })(this);
-    // });
+    // this.uid = this.generateUID();
+    const channelId = this.channelUrl(this.uid);
+    await this.startSSE(channelId)
+      .then(() => {
+        console.log(`reconnected to channel ${channelId}`);
+      })
+      .catch((err) => {
+        console.log('reconnectToChannel err', err);
+        // (function (conduit: Conduit) {
+        //   conduit.reconnectTimeout = setTimeout(() => {
+        //     conduit.startSSE();
+        //   }, 2000);
+        // })(this);
+      });
   }
 
   /**
@@ -448,6 +450,8 @@ export class Conduit extends EventEmitter {
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
+    this.abort.abort();
+
     this.abort = new AbortController();
     this.sse?.close();
     this.sse = undefined;

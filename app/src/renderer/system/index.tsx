@@ -34,7 +34,7 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 
 export const Shell: FC = observer(() => {
   const { shell, desktop, theme, identity, ship } = useServices();
-  const { resuming, connectionStatus } = useCore();
+  const { resuming } = useCore();
   // const windowRef = useRef(null);
   // useWindowSize(windowRef);
 
@@ -51,16 +51,6 @@ export const Shell: FC = observer(() => {
   );
 
   const shipLoaded = ship?.loader.isLoaded;
-  const TopTray = (
-    <ConnectionStatus
-      status={connectionStatus}
-      mode={theme.currentTheme!.mode as any}
-      onReconnect={() => {
-        console.log('try to reconnect');
-        OSActions.reconnect();
-      }}
-    />
-  );
 
   const GUI = shipLoaded ? (
     <Desktop
