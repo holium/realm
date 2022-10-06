@@ -576,13 +576,16 @@
         ?:  =(our.bowl ship.space-path)  ::cards.rslt
             ?:  =(space.space-path 'our')  cards.rslt
             ~&  >  "{<dap.bowl>}: gifting {<space-path>}"
-            =/  paths  [/updates /bazaar/(scot %p ship.space-path)/(scot %tas space.space-path) ~]
-            %+  snoc  cards.rslt
-            [%give %fact paths bazaar-reaction+!>([?:(=(action %recommend) %recommend %unrecommend) space-path [app-id sieve.app-lite entry] sorts])]
+            =/  paths  (limo [/updates /bazaar/(scot %p ship.space-path)/(scot %tas space.space-path) ~])
+            %+  weld  cards.rslt
+            ^-  (list card)
+            :~  [%give %fact paths bazaar-reaction+!>([action space-path [app-id sieve.app-lite entry] recommended.sorts])]  ==
           ~&  >>  "{<dap.bowl>}: forwarding recommendation of {<app-id>} to space {<space-path>}..."
-          %+  snoc  cards.rslt
+          :: %+  snoc  cards.rslt
+          %+  weld  cards.rslt
+          ^-  (list card)
           ::  must send over full app in case space host doesn't have app in app catalog
-          [%pass / %agent [ship.space-path %bazaar] %poke bazaar-interaction+!>([?:(=(action %recommend) %member-recommend %member-unrecommend) space-path app-id entry])]
+          :~  [%pass / %agent [ship.space-path %bazaar] %poke bazaar-interaction+!>([?:(=(action %recommend) %member-recommend %member-unrecommend) space-path app-id entry])]  ==
       [(~(put by space-apps-lite.rslt) space-path [app-index-lite sorts]) cards.rslt]
     =.  space-apps.state  space-apps-lite.result
     =.  recommendations.my.state
@@ -590,12 +593,13 @@
         %recommend      (~(put in recommendations.my.state) app-id)
         %unrecommend    (~(del in recommendations.my.state) app-id)
       ==
-    :: ~&  >>  "[hello] => {<cards.result>}"
-    :_  state
-    %+  weld  cards.result
-    ^-  (list card)
-    :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-    ==
+    =/  effects
+      %+  weld  cards.result
+      ^-  (list card)
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
+      ==
+    ~&  >>  "[hello] => {<effects>}"
+    [effects state]
   --
   ::
   ++  interaction
