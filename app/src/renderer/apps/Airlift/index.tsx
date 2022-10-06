@@ -1,7 +1,7 @@
 import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Grid, Flex, Text } from 'renderer/components';
-import { AirliftArm } from './AirliftArm';
+import { AirliftAgent } from './AirliftAgent';
 
 export type AirliftProps = {
   isResizing: boolean;
@@ -9,8 +9,10 @@ export type AirliftProps = {
 
 export const Airlift: FC<AirliftProps> = observer((props: AirliftProps) => {
   const { isResizing } = props;
+  const desk = '';
+  const agent = 'test';
 
   return (
-    <AirliftArm isResizing={isResizing}/>
+    <AirliftAgent desk={desk} agent={agent} arms=''/>
   )
 });

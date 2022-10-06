@@ -35,6 +35,7 @@ import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { ThemeType } from 'renderer/theme';
+import { AirliftStore } from 'os/services/tray/airlift.model';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -62,6 +63,7 @@ export const Services = types
     contacts: ContactStore,
     friends: FriendsStore,
     notifications: NotificationStore,
+    airlift: AirliftStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -121,6 +123,11 @@ const services = Services.create({
   contacts: { ourPatp: '' },
   friends: {},
   notifications: { unseen: [], seen: [], all: [], recent: [] },
+  airlift: {
+    model: {
+
+    }
+  },
 });
 
 export const servicesStore = services;
