@@ -106,7 +106,8 @@
   :: ~&  >>  "{<dap.bowl>}: {<[mark vase]>}"
   =^  cards  state
   ?+  mark  (on-poke:def mark vase)
-    %bazaar-action         (action:bazaar:core !<(action:store vase))
+    %bazaar-action
+      (action:bazaar:core !<(action:store vase))
     %bazaar-interaction    (interaction:bazaar:core !<(interaction:store vase))
   ==
   [cards this]
@@ -443,6 +444,7 @@
     |=  [path=space-path:spaces-store =app-id:store]
     ^-  (quip card _state)
     ?>  =(src.bowl our.bowl)  ::  must come from this ship (our)
+    ~&  >>  "[recommend] => {<app-id>}"
     (handle-our-recommend path app-id %recommend)
   ::
   ++  unrecommend
@@ -454,22 +456,17 @@
   ++  add-ste
     |=  [path=space-path:spaces-store =app-id:store rank=@ud]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: suite-add => {<[path app-id rank]>}"
     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-    :: ~&  >>  "{<dap.bowl>}: sending reaction {<[path app-id rank]>}"
     =/  entry            (~(got by app-catalog.state) app-id)
     =/  apps                    (~(got by space-apps.state) path)
-    :: =/  app-lite     (~(got by index.apps) app-id)
+    =/  app-lite         (~(get by index.apps) app-id)
     =.  index.apps                    (remove-at-pos:helpers index.apps rank)
-    =|  sieve=sieve:store
+    =/  sieve=sieve:store       ?~(app-lite *sieve:store sieve.u.app-lite)
     =.  tags.sieve               (~(put in tags.sieve) %suite)
-    :: =.  tags.sieve               (~(put in tags.sieve) %installed)
     =.  suite.slots.sieve        rank
     =.  index.apps                    (~(put by index.apps) app-id [app-id sieve])
     =.  suite.sorts.apps     (sort-apps:helpers (extract-apps:helpers index.apps %suite) %suite %asc)
-    :: ~&  >  "add-ste..."
     =.  space-apps.state              (~(put by space-apps.state) path apps)
-    :: ~&  >>  "{<dap.bowl>}: suite-add {<[path [app-id sieve app]]>}"
     (bazaar:send-reaction [%suite-add path [app-id sieve entry] suite.sorts.apps] paths ~)
   ::
   ++  rem-ste
@@ -576,7 +573,9 @@
       ::  if the space host is not this ship, be sure to poke it and let it know we are recommending the app
       =.  cards.rslt
         =/  entry  (~(got by app-catalog.state) app-id)
-        ?:  =(our.bowl ship.space-path)
+        ?:  =(our.bowl ship.space-path)  ::cards.rslt
+            ?:  =(space.space-path 'our')  cards.rslt
+            ~&  >  "{<dap.bowl>}: gifting {<space-path>}"
             =/  paths  [/updates /bazaar/(scot %p ship.space-path)/(scot %tas space.space-path) ~]
             %+  snoc  cards.rslt
             [%give %fact paths bazaar-reaction+!>([%recommend space-path [app-id sieve.app-lite entry] sorts])]
@@ -591,6 +590,7 @@
         %recommend      (~(put in recommendations.my.state) app-id)
         %unrecommend    (~(del in recommendations.my.state) app-id)
       ==
+    :: ~&  >>  "[hello] => {<cards.result>}"
     :_  state
     %+  weld  cards.result
     ^-  (list card)
@@ -678,6 +678,14 @@
   ::
   ++  helpers
     |%
+    ::
+    ++  extract-full
+      |=  [=app-index-lite:store]
+      ^-  app-index-full:store
+      %-  ~(rep by app-index-lite)
+      |=  [[=app-id:store lite=[=app-id:store =sieve:store]] acc=app-index-full:store]
+      =/  entry  (~(got by app-catalog) app-id)
+      (~(put by acc) app-id [app-id sieve.lite entry])
     ::
     ++  extract-apps
       |=  [=app-index-lite:store =tag:store]
@@ -1273,25 +1281,35 @@
         =/  watch-path    [/bazaar/(scot %p ship.path)/(scot %tas space.path)]
         %-  (slog leaf+"{<dap.bowl>}: subscribing to {<watch-path>}..." ~)
         (snoc acc [%pass watch-path %agent [ship.path %bazaar] %watch watch-path])
-    :: %-  (slog leaf+"{<dap.bowl>}: spaces [initial] reaction processed. leaving channel and resubscribing to %our wire..." ~)
-    :: =/  rejoin-our=(list card)
-    ::   :~  [%pass /spaces %agent [our.bowl %spaces] %leave ~]
-    ::       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
-    ::   ==
     =.  space-apps.state    (~(uni by spaces-map) space-apps.state)
-    :: [(weld subscriptions rejoin-our) state]
     `state
   ::
-    ++  skim-our
-      |=  [path=space-path:spaces-store =space:spaces-store]
-      ?:  =(space.path 'our')  %.n
-      %.y
+  ++  skim-our
+    |=  [path=space-path:spaces-store =space:spaces-store]
+    ?:  =(space.path 'our')  %.n
+    %.y
+  ::
   ++  on-add
     |=  [space=space:spaces-store members=members:membership-store]
     ^-  (quip card _state)
+    ~&  >>  "{<dap.bowl>}: [spaces-reaction.add] {<space>}"
     =.  space-apps.state  (~(put by space-apps.state) path.space [*app-index-lite:store *sorts:store])
-    :: =.  membership.state  (~(put by membership.state) path.space members)
-    `state
+    ::  ensure add always comes from our ship
+    ?>  =(our.bowl ship.path.space)
+    =/  result=app-index-lite:store
+    ::  push our recommendations into the new space
+    %-  ~(rep in recommendations.my.state)
+      |=  [[=app-id:store] acc=app-index-lite:store]
+      =/  apps-lite              (~(got by space-apps.state) [our.bowl 'our'])
+      =/  app-lite               (~(got by index.apps-lite) app-id)
+      =/  siv=sieve:store        *sieve:store
+      =.  recommendations.siv    recommendations.sieve.app-lite
+      (~(put by acc) app-id [app-id siv])
+    =/  apps-full          (extract-full:helpers:bazaar result)
+    =|  sorts=sorts:store
+    =.  recommended.sorts  (sort-apps:helpers:bazaar (extract-apps:helpers:bazaar result %recommended) %recommended %asc)
+    =.  space-apps.state   (~(put by space-apps.state) path.space [result sorts])
+    (bazaar:send-reaction:core [%space-apps path.space apps-full sorts sites:core] [/updates ~] ~)
   ::
   ++  on-replace
     |=  [space=space:spaces-store]
@@ -1305,8 +1323,6 @@
     ~&  >  ['%bazaar spaces on remove' path]
     :_  state
     ~[[%pass /bazaar/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %bazaar] %leave ~]]
-    :: [%pass /bazaar/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %bazaar] %leave ~]
-    :: `state(space-apps (~(del by space-apps.state) path)) :: , membership (~(del by membership.state) path))
   ::
   ++  on-remote-space
     |=  [path=space-path:spaces-store space=space:spaces-store =members:membership-store]

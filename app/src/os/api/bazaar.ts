@@ -671,11 +671,11 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     // event when a new space is joined and our ship has successfully
     //   subscribed to the space
     case 'space-apps':
-      // console.log('space-apps =>');
-      // console.log(util.inspect(data, { depth: 10, colors: true }));
-      // console.log('<= space-apps');
+      console.log('space-apps =>');
+      console.log(util.inspect(data, { depth: 10, colors: true }));
+      console.log('<= space-apps');
       const entry = data['space-apps'];
-      state.initialSpace(entry['space-path'], entry);
+      state.initialSpace(entry['space-path'], entry, true);
       break;
     case 'ally-added':
       break;

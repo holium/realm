@@ -328,7 +328,11 @@ export const BazaarStore = types
       // trigger UI update if someone is listening
       self.appsChange = !self.appsChange;
     },
-    initialSpace(spacePath: string, entry: any) {
+    initialSpace(
+      spacePath: string,
+      entry: any,
+      triggerStateChange: boolean = false
+    ) {
       const bazaar = BazaarModel.create({
         pinned: entry.sorts.pinned,
         recommended: entry.sorts.recommended,
@@ -342,9 +346,14 @@ export const BazaarStore = types
         }
         bazaar.setApp(app);
         // console.log('self.apps.set => %o', app);
-        // self.apps.set(app.id, app);
+        if ('type' in app) {
+          self.apps.set(app.id, app);
+        }
       }
       self.spaces.set(spacePath, bazaar);
+      if (triggerStateChange) {
+        self.appsChange = !self.appsChange;
+      }
     },
     addApp(appId: string, app: any, triggerStateChange: boolean = true) {
       const appColor = app.color;
