@@ -135,6 +135,7 @@ export const BazaarApi = {
       app: 'docket',
       path: '/charges', // the spaces scry is at the root of the path
     });
+    // console.log(response.initial);
     return (
       (response.initial.hasOwnProperty(desk) && response.initial[desk]) ||
       undefined
@@ -672,7 +673,7 @@ export const BazaarApi = {
         console.log(`message [${eventId}]: subscribed to /bazaar/updates...`);
       },
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(data);
+        // console.log(data);
         if (mark === 'bazaar-reaction') {
           handleBazaarReactions(data, state);
         }

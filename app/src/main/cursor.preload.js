@@ -36,7 +36,12 @@ window.onload = function () {
 function renderMouse(color) {
   const container = createContainer('realm-mouse-container');
   container.style.overflow = 'none';
-  container.style.zIndex = 2147483647;
+  // container.style.position = 'absolute';
+  // container.style.left = 0;
+  // container.style.right = 0;
+  // container.style.top = 0;
+  // container.style.bottom = 0;
+  // container.style.zIndex = 2147483646;
   const root = ReactDOM.createRoot(container);
   root.render(
     React.createElement(Mouse, {

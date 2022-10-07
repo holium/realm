@@ -34,7 +34,7 @@ const sizes = [16, 24, 32, 40, 48, 56, 64, 72, 80, 88];
 const SimpleSpinner = styled.div`
   width: 48px;
   height: 48px;
-  border: ${(props: any) => (props.size < 2 ? 1 : 5)}px solid
+  border: ${(props: any) => (props.size < 2 ? 0.75 : 5)}px solid
     ${(props) => rgba(props.theme.colors.ui.secondary, 0.2)};
   border-bottom-color: ${(props) =>
     props.color || props.theme.colors.brand.secondary};
@@ -83,7 +83,11 @@ export const Spinner = React.memo(
     ...props
   }: SimpleSpinnerProps & SpinnerProps = defaultProps) => (
     <Box display={block ? 'block' : 'inline-block'} {...props}>
-      <SimpleSpinnerComposed title={title} size={typeof size === 'number' ? sizes[size] : size} color={color} />
+      <SimpleSpinnerComposed
+        title={title}
+        size={typeof size === 'number' ? sizes[size] : size}
+        color={color}
+      />
       {/* <RotatingLoader title={title} fontSize={size} color={color} /> */}
     </Box>
   )

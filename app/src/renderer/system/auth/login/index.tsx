@@ -27,12 +27,11 @@ import { ConduitState } from '@holium/conduit/src/types';
 
 type LoginProps = {
   addShip: () => void;
-  hasWallpaper?: boolean;
 };
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
-  const { addShip, hasWallpaper } = props;
-  const { identity, desktop, theme } = useServices();
+  const { addShip } = props;
+  const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
   const passwordRef = useRef(null);
@@ -40,7 +39,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const submitRef = useRef(null);
   const optionsRef = useRef(null);
 
-  const [loading, setLoading] = useState(false);
   const [incorrectPassword, setIncorrectPassword] = useState(false);
 
   // Setting up options menu
@@ -89,7 +87,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const clickSubmit = async (event: any) => {
     event.stopPropagation();
     setHasFailed(false);
-    setLoading(true);
+
     let loggedIn = await AuthActions.login(
       pendingShip!.patp,
       // @ts-ignore
@@ -99,7 +97,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
       // @ts-expect-error
       submitRef.current.blur();
       setIncorrectPassword(true);
-      setLoading(false);
     }
   };
 
@@ -182,12 +179,10 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                   <Input
                     ref={passwordRef}
                     wrapperRef={wrapperRef}
-                    {...(hasWallpaper
-                      ? { bg: 'bg.blendedBg' }
-                      : { bg: 'bg.secondary' })}
+                    bg="bg.blendedBg"
                     autoFocus
                     autoCorrect="false"
-                    bgOpacity={hasWallpaper ? 0.3 : 1}
+                    bgOpacity={0.3}
                     wrapperStyle={{
                       borderRadius: 8,
                       width: isVertical ? 320 : 260,

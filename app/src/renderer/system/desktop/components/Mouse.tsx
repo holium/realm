@@ -7,6 +7,12 @@ import { useMemo } from 'react';
 
 export const MouseArea = styled(motion.div)`
   cursor: none;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
 `;
 interface MouseProps {
   hide?: boolean;

@@ -36,3 +36,4 @@ export * from './People';
 export * from './SpacePicture';
 export * from './AppTile';
 export * from './Notification/InnerNotification';
+export * from './ConnectionStatus';

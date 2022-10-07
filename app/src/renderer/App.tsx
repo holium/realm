@@ -61,7 +61,6 @@ export const App: FC = observer(() => {
       ShellActions.closeDialog();
     };
   }, []);
-
   return (
     <CoreProvider value={coreStore}>
       <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>

@@ -93,7 +93,6 @@ export const FriendsApi = {
       app: 'friends',
       path: `/all`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(mark, data);
         if (data['friends']) {
           friendsStore.initial(data['friends']);
         }

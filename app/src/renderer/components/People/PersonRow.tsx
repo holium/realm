@@ -157,9 +157,6 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
                 <Text fontSize={2}>
                   {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
                 </Text>
-                <Text fontSize={2} opacity={0.7}>
-                  {patpSanitized}
-                </Text>
               </>
             ) : (
               <Text fontSize={2}>{patp}</Text>

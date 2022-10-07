@@ -21,11 +21,15 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
     width: 1200,
     height: 900,
   },
-  ['chatstead']: {
+  ['talk']: {
     width: 1200,
     height: 900,
   },
-  ['homestead']: {
+  ['groups']: {
+    width: 1200,
+    height: 900,
+  },
+  ['engram']: {
     width: 1200,
     height: 900,
   },
@@ -44,5 +48,9 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: {
   ['channel']: {
     width: 1000,
     height: 900,
+  },
+  ['templeochess']: {
+    width: 700,
+    height: 700,
   },
 };

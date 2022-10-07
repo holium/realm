@@ -31,7 +31,7 @@ const AppSlotModel = types.model({
   suite: types.number,
 });
 
-const UrbitApp = types.model({
+const UrbitApp = types.model('UrbitApp', {
   id: types.identifier,
   title: types.string,
   info: types.string,
@@ -48,7 +48,7 @@ const UrbitApp = types.model({
 });
 export type UrbitAppType = Instance<typeof UrbitApp>;
 
-const NativeApp = types.model({
+const NativeApp = types.model('NativeApp', {
   id: types.identifier,
   title: types.string,
   info: types.string,
@@ -212,7 +212,7 @@ export const AllyModel = types.map(
 export type AllyModelType = Instance<typeof AllyModel>;
 
 export const BazaarStore = types
-  .model({
+  .model('BazaarStore', {
     /* observable changes */
     // docket installation poke sent
     appInstallInitial: types.optional(types.boolean, false),

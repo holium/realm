@@ -14,10 +14,17 @@ import {
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
-import { useWindowSize } from 'renderer/logic/lib/measure';
-import { Flex, Spinner } from 'renderer/components';
+import {
+  ActionButton,
+  Badge,
+  Flex,
+  Spinner,
+  Text,
+  ConnectionStatus,
+} from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { RealmActions } from 'renderer/logic/actions/main';
+import { OSActions } from 'renderer/logic/actions/os';
 
 // Get the initial dimensions from the main process
 RealmActions.onInitialDimensions((_e: any, dims: any) => {
@@ -25,7 +32,7 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 });
 
 export const Shell: FC = observer(() => {
-  const { shell, desktop, theme, identity, ship } = useServices();
+  const { shell, theme, identity, ship } = useServices();
   const { resuming } = useCore();
   // const windowRef = useRef(null);
   // useWindowSize(windowRef);
@@ -45,21 +52,17 @@ export const Shell: FC = observer(() => {
   const shipLoaded = ship?.loader.isLoaded;
 
   const GUI = shipLoaded ? (
-    <Desktop
-      hasLoaded={shipLoaded}
-      hasWallpaper={true}
-      isFullscreen={isFullscreen}
-    />
+    <Desktop isFullscreen={isFullscreen} />
   ) : (
-    <Auth hasWallpaper={hasWallpaper} firstTime={firstTime} />
+    <Auth firstTime={firstTime} />
   );
+
   return (
     <ViewPort>
       <Layer zIndex={0}>{!isFullscreen && <DragBar />}</Layer>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <BgImage blurred={!shipLoaded || shell.isBlurred} wallpaper={bgImage} />
       <BackgroundFill hasWallpaper={hasWallpaper}>
-        {/* <DimensionMeasurement id="dimensions" ref={windowRef} /> */}
         {resuming && (
           <ResumingOverlay>
             <Spinner color="#ffffff" size={4} />
@@ -67,6 +70,9 @@ export const Shell: FC = observer(() => {
         )}
         {!resuming && GUI}
       </BackgroundFill>
+      <Layer zIndex={20}>
+        <ConnectionStatus />
+      </Layer>
     </ViewPort>
   );
 });
@@ -88,12 +94,6 @@ const BgImage = ({
     tokenId: string;
   };
 }) => {
-  const [imageLoading, setImageLoading] = useState(true);
-
-  const imageLoaded = () => {
-    setImageLoading(false);
-  };
-
   return useMemo(
     () => (
       <AnimatePresence>
@@ -102,11 +102,9 @@ const BgImage = ({
           src={wallpaper}
           initial={{ opacity: 0 }}
           exit={{ opacity: 0 }}
-          onLoad={imageLoaded}
           animate={{
             opacity: 1,
             filter: blurred ? `blur(24px)` : 'blur(0px)',
-            // transition:
           }}
           transition={{
             opacity: { duration: 0.5 },
@@ -114,6 +112,6 @@ const BgImage = ({
         />
       </AnimatePresence>
     ),
-    [blurred, wallpaper, imageLoading, nft]
+    [blurred, wallpaper, nft]
   );
 };

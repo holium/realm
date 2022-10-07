@@ -69,7 +69,7 @@ const getCurrentCursor = (isTextCursor, isResizeCursor) => {
  *
  */
 export const CursorCore: FC<AnimatedCursorProps> = ({
-  id = 'default-cursor',
+  id = 'rlm-cursor',
   animateOut,
   color = '193, 11, 111',
   outerAlpha = 0.2,
@@ -359,6 +359,7 @@ export function CurrentUserCursor({
         'input[type="password"]',
         'input[type="date"]',
         'input',
+        ':scope > .cursor-text',
         '.realm-cursor-text-cursor',
       ].join(',')
     );

@@ -22,8 +22,6 @@ import { MembershipStore } from 'os/services/spaces/models/members';
 import { SoundActions } from './actions/sound';
 import { LoaderModel } from 'os/services/common.model';
 import { OSActions } from './actions/os';
-import { DocketStore } from 'os/services/ship/models/docket';
-import { ChatStore } from 'os/services/ship/models/dms';
 import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
@@ -35,6 +33,7 @@ import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { ThemeType } from 'renderer/theme';
+import { watchOnlineStatus } from './lib/offline';
 
 const loadSnapshot = (serviceKey: string) => {
   const localStore = localStorage.getItem('servicesStore');
@@ -56,8 +55,7 @@ export const Services = types
     bazaar: BazaarStore,
     membership: MembershipStore,
     visas: VisaModel,
-    docket: DocketStore,
-    dms: ChatStore,
+    // docket: DocketStore,
     courier: CourierStore,
     contacts: ContactStore,
     friends: FriendsStore,
@@ -115,8 +113,6 @@ const services = Services.create({
     incoming: {},
     outgoing: {},
   },
-  docket: {},
-  dms: {},
   courier: {},
   contacts: { ourPatp: '' },
   friends: {},
@@ -145,6 +141,14 @@ export const CoreStore = types
     loader: types.optional(LoaderModel, { state: 'initial' }),
     booted: types.optional(types.boolean, false),
     resuming: types.optional(types.boolean, false),
+    online: types.boolean,
+    connectionStatus: types.enumeration([
+      'connecting',
+      'initialized',
+      'connected',
+      'offline',
+      'failed',
+    ]),
     onboarded: types.optional(types.boolean, false),
     loggedIn: types.optional(types.boolean, false),
   })
@@ -155,11 +159,18 @@ export const CoreStore = types
     setResuming(isResuming: boolean) {
       self.resuming = isResuming;
     },
+    setConnectionStatus(status: any) {
+      self.connectionStatus = status;
+      localStorage.setItem('connection-status', status);
+    },
     setBooted() {
       self.booted = true;
     },
     setLoggedIn(isLoggedIn: boolean) {
       self.loggedIn = isLoggedIn;
+    },
+    setOnline(isOnline: boolean) {
+      self.online = isOnline;
     },
     reset() {
       self.booted = false;
@@ -167,9 +178,19 @@ export const CoreStore = types
     login() {},
   }));
 
-export const coreStore = CoreStore.create();
+export const coreStore = CoreStore.create({
+  online: navigator.onLine,
+  connectionStatus:
+    (localStorage.getItem('connection-status') as any) || 'offline',
+});
+
 coreStore.reset(); // need to reset coreStore for proper boot sequence
 coreStore.setResuming(true); // need to start the renderer with resuming
+watchOnlineStatus(coreStore);
+OSActions.onConnectionStatus((_event: any, status: any) => {
+  console.log(status);
+  coreStore.setConnectionStatus(status);
+});
 
 OSActions.boot();
 
@@ -213,10 +234,6 @@ OSActions.onBoot((_event: any, response: any) => {
         servicesStore.notifications,
         castToSnapshot(response.models.notifications)
       );
-    }
-    applySnapshot(servicesStore.docket, castToSnapshot(response.models.docket));
-    if (response.models.chat) {
-      applySnapshot(servicesStore.dms, castToSnapshot(response.models.chat));
     }
   }
   if (response.ship) {
@@ -310,11 +327,6 @@ OSActions.onConnected(
       servicesStore.notifications,
       castToSnapshot(initials.models.notifications)
     );
-    applySnapshot(servicesStore.docket, castToSnapshot(initials.models.docket));
-    if (initials.models.chat) {
-      applySnapshot(servicesStore.dms, castToSnapshot(initials.models.chat));
-    }
-
     servicesStore.setShip(ShipModel.create(initials.ship));
 
     coreStore.setLoggedIn(true);
@@ -327,8 +339,8 @@ OSActions.onConnected(
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
   LiveRoom.leave();
-  coreStore.setLoggedIn(false);
   servicesStore.clearShip();
+  coreStore.setLoggedIn(false);
   ShellActions.setBlur(true);
   SoundActions.playLogout();
 });
@@ -345,7 +357,7 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'bazaar') {
       applyPatch(servicesStore.bazaar, value.patch);
     }
-    if (value.resource === 'notification') {
+    if (value.resource === 'notifications') {
       applyPatch(servicesStore.notifications, value.patch);
     }
     if (value.resource === 'onboarding') {
@@ -369,14 +381,8 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'visas') {
       applyPatch(servicesStore.visas, value.patch);
     }
-    if (value.resource === 'docket') {
-      applyPatch(servicesStore.docket, value.patch);
-    }
     if (value.resource === 'contacts') {
       applyPatch(servicesStore.contacts, value.patch);
-    }
-    if (value.resource === 'dms') {
-      applyPatch(servicesStore.dms, value.patch);
     }
     if (value.resource === 'courier') {
       applyPatch(servicesStore.courier, value.patch);

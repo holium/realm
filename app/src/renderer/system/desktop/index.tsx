@@ -10,13 +10,10 @@ import { LiveRoom } from 'renderer/apps/store';
 import { TrayManager } from './TrayManager';
 
 type OSFrameProps = {
-  hasLoaded?: boolean;
   isFullscreen?: boolean;
-  hasWallpaper?: boolean;
 };
 
 export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
-  const { hasLoaded } = props;
   const { desktop } = useServices();
 
   useEffect(() => {
@@ -24,8 +21,7 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
       LiveRoom.leave();
     };
   }, []);
-
-  return hasLoaded ? (
+  return (
     <Fill>
       <Layer zIndex={0}>
         <WindowManager isOpen={!desktop.showHomePane} />
@@ -42,7 +38,7 @@ export const Desktop: FC<OSFrameProps> = observer((props: OSFrameProps) => {
         <TrayManager />
       </Layer>
     </Fill>
-  ) : null;
+  );
 });
 
 export default Desktop;

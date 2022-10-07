@@ -46,6 +46,9 @@ export class Conduit extends EventEmitter {
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
+    this.updateStatus = this.updateStatus.bind(this);
+    this.reconnectToChannel = this.reconnectToChannel.bind(this);
+    this.startSSE = this.startSSE.bind(this);
   }
 
   generateUID() {
@@ -67,14 +70,10 @@ export class Conduit extends EventEmitter {
     this.ship = ship;
     this.cookie = cookie;
     this.uid = this.generateUID();
-    // console.log(this.channelUrl)
-
-    await this.startSSE();
-
-    // console.log(`opening channel ${this.channelUrl}`);
+    await this.startSSE(this.channelUrl(this.uid));
   }
 
-  async startSSE(): Promise<void> {
+  async startSSE(channelUrl: string): Promise<void> {
     if (this.status === ConduitState.Connected) {
       return Promise.resolve();
     }
@@ -90,9 +89,9 @@ export class Conduit extends EventEmitter {
     this.updateStatus(ConduitState.Initialized);
 
     return new Promise(async (resolve, reject) => {
-      // console.log(this.channelUrl);
+      // console.log(channelUrl);
 
-      this.sse = new EventSource(this.channelUrl, {
+      this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie },
       });
 
@@ -107,6 +106,9 @@ export class Conduit extends EventEmitter {
       };
 
       this.sse.onmessage = async (event: MessageEvent) => {
+        if (this.status !== ConduitState.Connected) {
+          this.updateStatus(ConduitState.Connected);
+        }
         const parsedData = JSON.parse(event.data);
         const eventId = parseInt(parsedData.id, 10);
         const type = parsedData.response as Responses;
@@ -178,10 +180,22 @@ export class Conduit extends EventEmitter {
       };
       this.sse.onerror = async (error) => {
         console.log('sse error', error);
-        this.updateStatus(ConduitState.Disconnected);
-        await this.closeChannel();
-        // TODO make reconnection work
-        // this.reconnectToChannel();
+        // @ts-ignore
+        if (error.status === '404') {
+          return;
+        }
+        // @ts-ignore
+        if (error.status >= 500) {
+          // @ts-ignore
+          this.updateStatus(ConduitState.Failed);
+          this.failGracefully();
+        }
+        // @ts-ignore
+        if (!error.status) {
+          // this happens when the ship is offline
+          this.updateStatus(ConduitState.Failed);
+          this.disconnectGracefully();
+        }
       };
       this.sse.addEventListener('close', () => {
         console.log('e');
@@ -349,8 +363,8 @@ export class Conduit extends EventEmitter {
     };
   }
 
-  private get channelUrl(): string {
-    return `${this.url}/~/channel/${this.uid}`;
+  private channelUrl(uuid: string): string {
+    return `${this.url}/~/channel/${uuid}`;
   }
 
   private get nextMsgId() {
@@ -384,16 +398,20 @@ export class Conduit extends EventEmitter {
    * TODO add a limit here
    */
   private async reconnectToChannel() {
-    if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
-
-    this.startSSE()
-      .then(() => console.log(`reconnected to channel ${this.channelUrl}`))
-      .catch(() => {
-        (function (conduit: Conduit) {
-          conduit.reconnectTimeout = setTimeout(() => {
-            conduit.startSSE();
-          }, 2000);
-        })(this);
+    // if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
+    // this.uid = this.generateUID();
+    const channelId = this.channelUrl(this.uid);
+    await this.startSSE(channelId)
+      .then(() => {
+        console.log(`reconnected to channel ${channelId}`);
+      })
+      .catch((err) => {
+        console.log('reconnectToChannel err', err);
+        // (function (conduit: Conduit) {
+        //   conduit.reconnectTimeout = setTimeout(() => {
+        //     conduit.startSSE();
+        //   }, 2000);
+        // })(this);
       });
   }
 
@@ -405,15 +423,17 @@ export class Conduit extends EventEmitter {
    */
   private async postToChannel(body: Message): Promise<void> {
     try {
-      const response = await axios.put(this.channelUrl, [body], {
+      const response = await axios.put(this.channelUrl(this.uid), [body], {
         headers: this.headers,
         signal: this.abort.signal,
       });
       if (response.status > 300 && response.status < 200) {
+        // console.log('postToChannel poke failed');
         throw new Error('Poke failed');
       }
       if (this.status !== ConduitState.Initialized) {
-        await this.startSSE();
+        // console.log('postToChannel starting');
+        await this.startSSE(this.channelUrl(this.uid));
       }
     } catch (e: any) {
       // console.log('poke failed', e);
@@ -425,15 +445,26 @@ export class Conduit extends EventEmitter {
     }
   }
 
-  failGracefully() {
+  cleanup() {
     this.prevMsgId = 0;
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
+    this.abort.abort();
+
     this.abort = new AbortController();
     this.sse?.close();
     this.sse = undefined;
+  }
+
+  failGracefully() {
+    this.cleanup();
     this.updateStatus(ConduitState.Failed);
+  }
+
+  disconnectGracefully() {
+    this.cleanup();
+    this.updateStatus(ConduitState.Disconnected);
   }
 
   /**
