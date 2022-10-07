@@ -238,22 +238,9 @@ export const PopoverContent = Content;
 export const PopoverClose = StyledClose;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
-const BazaarAppRow = observer((props) => (
-  <div>
-    <input
-      type="checkbox"
-      checked={props.todo.done}
-      onChange={(e) => props.todo.toggle()}
-    />
-    <input
-      type="text"
-      value={props.todo.name}
-      onChange={(e) => props.todo.setName(e.target.value)}
-    />
-  </div>
-));
-
-interface AppSearchProps {}
+interface AppSearchProps {
+  mode: 'home' | 'space';
+}
 
 const AppSearchApp = observer((props: AppSearchProps) => {
   const { spaces, bazaar, theme } = useServices();
@@ -268,32 +255,20 @@ const AppSearchApp = observer((props: AppSearchProps) => {
 
   const spacePath: string = spaces.selected?.path!;
 
-  const InstallButton = observer((props: any) => {
-    console.log('InstallButton => %o', props);
+  const InstallButton = ({ app }) => {
+    const parts = app.id.split('/');
     return (
       <Button
         borderRadius={6}
-        disabled={bazaar.isAppInstalled(props.app.id)}
-        isLoading={
-          props.app.installStatus &&
-          [
-            InstallStatus.failed,
-            InstallStatus.installed,
-            InstallStatus.uninstalled,
-          ].indexOf(props.app.installStatus) === -1
-        }
+        disabled={bazaar.apps.has(parts[1])}
         onClick={(e) => {
-          const tokens = props.app.id.split('/');
-          SpacesActions.installDesk(tokens[0], tokens[1])
-            .then((result) => console.log(`installApp response => %o`, result))
-            .catch((e) => console.error(e))
-            .finally(() => {});
+          SpacesActions.addApp(parts[0], parts[1]);
         }}
       >
-        Install
+        Add to Desktop
       </Button>
     );
-  });
+  };
 
   // based on this info, should be "safe" to recreate functions with each render
   //  https://reactjs.org/docs/hooks-faq.html#are-hooks-slow-because-of-creating-functions-in-render
@@ -319,7 +294,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           setLoadingState('loading-published-apps');
           SpacesActions.addAlly(selectedShip)
             .then((result) => {
-              console.log('addAlly response => %o', result);
+              // console.log('addAlly response => %o', result);
               const treaties = bazaar.getTreaties(selectedShip);
               setData(treaties);
             })
@@ -328,7 +303,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         }
       } else {
         const treaties = bazaar.getTreaties(selectedShip);
-        console.log('treaties => %o', treaties);
+        // console.log('treaties => %o', treaties);
         setData(treaties);
       }
     }
@@ -382,7 +357,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     if (!apps || apps.length === 0) {
       return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
     }
-    console.log('rendering apps => %o', apps);
+    // console.log('rendering apps => %o', apps);
     return apps?.map((app, index) => (
       <div key={index}>
         <AppRow

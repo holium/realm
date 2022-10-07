@@ -54,7 +54,7 @@ export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
           />
         </Flex>
         <Flex alignItems="center" gap={12}>
-          <AppSearchApp />
+          <AppSearchApp mode={'space'} />
           <Flex flex={1} gap={8} justifyContent="flex-end">
             <IconButton
               size={3}

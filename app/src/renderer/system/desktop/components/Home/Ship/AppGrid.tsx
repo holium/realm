@@ -30,11 +30,11 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
             (app: any) =>
               app.type !== 'urbit' ||
               (app.type === 'urbit' &&
-                app.installStatus === InstallStatus.installed)
+                app.installStatus !== InstallStatus.treaty)
           )
       );
     }
-  }, [currentSpace, bazaar.appsChange]);
+  }, [currentSpace, bazaar.apps]);
 
   return useMemo(
     () =>
@@ -79,12 +79,20 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   console.log('open app info');
                 },
               },
+              {
+                label: 'Remove',
+                section: 2,
+                onClick: (evt: any) => {
+                  evt.stopPropagation();
+                  SpacesActions.removeApp(app.id);
+                },
+              },
               ...(app.type === 'urbit' &&
               app.installStatus === InstallStatus.installed
                 ? [
                     {
                       label: 'Uninstall',
-                      // section: 2,
+                      section: 2,
                       disabled: false,
                       onClick: (evt: any) => {
                         evt.stopPropagation();
@@ -93,7 +101,18 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                       },
                     },
                   ]
-                : []),
+                : [
+                    {
+                      label: 'Install',
+                      section: 2,
+                      disabled: false,
+                      onClick: (evt: any) => {
+                        evt.stopPropagation();
+                        console.log(`start install`);
+                        SpacesActions.installApp(toJS(app));
+                      },
+                    },
+                  ]),
             ]}
             variants={
               {
@@ -122,7 +141,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
           />
         );
       }),
-    [apps, bazaar.my.recommendations]
+    [apps, bazaar.my.recommendations, bazaar.apps]
   );
 });
 

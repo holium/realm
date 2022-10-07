@@ -60,7 +60,7 @@ export const BazaarApi = {
               reject(err);
             } else if ('install' in charge.chad) {
               console.log(`'${ship}/${desk}' installation started...`);
-              __state.triggerAppInstallStarted(ship, desk);
+              __state.triggerAppInstallStarted(ship, desk, charge.docket);
             }
           }
         },
@@ -331,6 +331,47 @@ export const BazaarApi = {
       path: '/allies', // the spaces scry is at the root of the path
     });
     return response.ini;
+  },
+  addApp: async (conduit: Conduit, ship: string, desk: string) => {
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'add-app': {
+            ship: ship,
+            desk: desk,
+          },
+        },
+        reaction: 'bazaar-reaction.add-app',
+        onReaction: (data: any) => {
+          resolve(data['add-app']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  removeApp: async (conduit: Conduit, appId: string) => {
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'remove-app': {
+            'app-id': appId,
+          },
+        },
+        reaction: 'bazaar-reaction.remove-app',
+        onReaction: (data: any) => {
+          resolve(data['remove-app']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
   },
   addAppTag: async (
     conduit: Conduit,
@@ -646,15 +687,15 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      console.log('initial =>');
-      console.log(util.inspect(data, { depth: 10, colors: true }));
-      console.log('<= initial');
+      // console.log('initial =>');
+      // console.log(util.inspect(data, { depth: 10, colors: true }));
+      // console.log('<= initial');
       state.initial(data['initial']);
       break;
     case 'allies':
-      console.log('allies =>');
-      console.log(util.inspect(data, { depth: 10, colors: true }));
-      console.log('<= allies');
+      // console.log('allies =>');
+      // console.log(util.inspect(data, { depth: 10, colors: true }));
+      // console.log('<= allies');
       if ('allies' in data) {
         if ('ini' in data.allies) {
           state.initialAllies(data.allies.ini);
@@ -676,21 +717,36 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
     // event when a new space is joined and our ship has successfully
     //   subscribed to the space
     case 'space-apps':
-      console.log('space-apps =>');
-      console.log(util.inspect(data, { depth: 10, colors: true }));
-      console.log('<= space-apps');
+      // console.log('space-apps =>');
+      // console.log(util.inspect(data, { depth: 10, colors: true }));
+      // console.log('<= space-apps');
       const entry = data['space-apps'];
       state.initialSpace(entry['space-path'], entry, true);
       break;
+
+    case 'add-app':
+      {
+        const app = data['add-app'];
+        state.addApp(app.id, app);
+      }
+      break;
+
+    case 'remove-app':
+      {
+        const app = data['remove-app'];
+        state.removeApp(app['app-id']);
+      }
+      break;
+
     case 'ally-added':
       break;
     case 'ally-removed':
       break;
     case 'treaty-added':
       {
-        console.log('treaty-added =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= treaty-added');
+        // console.log('treaty-added =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= treaty-added');
         let detail = data['treaty-added'];
         // console.log(detail);
         // @ts-ignore
@@ -701,9 +757,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'app-install-status-changed':
       {
-        console.log('app-install-status-changed =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= app-install-status-changed');
+        // console.log('app-install-status-changed =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= app-install-status-changed');
         let detail = data['app-install-status-changed'];
         state.addApp(detail['app-id'], {
           ...detail.app,
@@ -718,9 +774,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'app-uninstalled':
       {
-        console.log('app-uninstalled =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= app-uninstalled');
+        // console.log('app-uninstalled =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= app-uninstalled');
         let detail = data['app-uninstalled'];
         // @ts-ignore
         state.setUninstalled(detail['app-id']);
@@ -728,9 +784,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'pin':
       {
-        console.log('pin =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= pin');
+        // console.log('pin =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= pin');
         // console.log('pin reaction => %o', data);
         const detail = data['pin'];
         const space = Object.keys(detail)[0];
@@ -744,9 +800,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'unpin':
       {
-        console.log('unpin =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= unpin');
+        // console.log('unpin =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= unpin');
         const detail = data['unpin'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -759,9 +815,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'set-pin-order':
       {
-        console.log('set-pin-order =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= set-pin-order');
+        // console.log('set-pin-order =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= set-pin-order');
         const detail = data['set-pin-order'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -773,9 +829,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'recommend':
       {
-        console.log('recommend =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= recommend');
+        // console.log('recommend =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= recommend');
         const detail = data['recommend'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -788,9 +844,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'unrecommend':
       {
-        console.log('unrecommend =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= unrecommend');
+        // console.log('unrecommend =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= unrecommend');
         const detail = data['unrecommend'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -803,9 +859,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'suite-add':
       {
-        console.log('suite-add =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= suite-add');
+        // console.log('suite-add =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= suite-add');
         const detail = data['suite-add'];
         const space = Object.keys(detail)[0];
         const app = detail[space];
@@ -818,9 +874,9 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'suite-remove':
       {
-        console.log('suite-remove =>');
-        console.log(util.inspect(data, { depth: 10, colors: true }));
-        console.log('<= suite-remove');
+        // console.log('suite-remove =>');
+        // console.log(util.inspect(data, { depth: 10, colors: true }));
+        // console.log('<= suite-remove');
         // console.log('suite-remove [reaction] => %o', data);
         const detail = data['suite-remove'];
         const space = Object.keys(detail)[0];
@@ -833,10 +889,10 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
       break;
     case 'my-recommendations':
       {
-        console.log(
-          'my-recommendations => %o',
-          util.inspect(data, { depth: 10, colors: true })
-        );
+        // console.log(
+        //   'my-recommendations => %o',
+        //   util.inspect(data, { depth: 10, colors: true })
+        // );
         state.updateMyRecommendations(data['my-recommendations']);
       }
       break;

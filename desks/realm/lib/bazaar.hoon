@@ -14,7 +14,9 @@
     |%
     ++  decode
       %-  of
-      :~  [%pin add-pin]
+      :~  [%add-app add-app]
+          [%remove-app remove-app]
+          [%pin add-pin]
           [%unpin rem-pin]
           [%set-pin-order set-pin-order]
           [%recommend add-rec]
@@ -22,6 +24,17 @@
           [%suite-add suite-add]
           [%suite-remove suite-remove]
           [%install-app install-app]
+      ==
+    ::
+    ++  add-app
+      %-  ot
+      :~  [%ship (su ;~(pfix sig fed:ag))]
+          [%desk so]
+      ==
+    ::
+    ++  remove-app
+      %-  ot
+      :~  [%app-id so]
       ==
     ::
     ++  install-app
@@ -120,6 +133,16 @@
       :~  [%space-path s+(spat /(scot %p ship.space-path.rct)/(scot %tas space.space-path.rct))]
           [%apps (pairs (full-app-index:encode app-index-full.rct))]
           [%sorts (pairs (app-sorts:encode sorts.rct))]
+      ==
+    ::
+        %add-app
+      :-  %add-app
+      (pairs (catalog-app:encode app-id.rct app-catalog-entry.rct))
+    ::
+        %remove-app
+      :-  %remove-app
+      %-  pairs
+      :~  [%app-id s+app-id.rct]
       ==
     ::
         %pin

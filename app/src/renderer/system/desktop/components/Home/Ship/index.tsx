@@ -89,7 +89,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
               />
             )}
           </Flex>
-          <AppSearchApp />
+          <AppSearchApp mode={'home'} />
           <Flex justifyContent="flex-end">
             <IconButton
               size={3}

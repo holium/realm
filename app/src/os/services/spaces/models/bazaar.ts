@@ -17,6 +17,7 @@ export enum InstallStatus {
   started = 'started',
   failed = 'failed',
   installed = 'installed',
+  treaty = 'treaty',
 }
 
 enum AppTypes {
@@ -319,7 +320,9 @@ export const BazaarStore = types
     },
     getAvailableApps() {
       // console.log('getAvailableApps => %o', self.apps.values());
-      return Array.from(self.apps.values());
+      return Array.from(self.apps.values()).filter(
+        (app) => app.installStatus !== InstallStatus.treaty
+      );
     },
   }))
   .actions((self) => ({
@@ -384,6 +387,10 @@ export const BazaarStore = types
       if (triggerStateChange) {
         self.appsChange = !self.appsChange;
       }
+    },
+    removeApp(appId: string) {
+      self.apps.delete(appId);
+      self.appsChange = !self.appsChange;
     },
     setUninstalled(appId: string) {
       const app = self.apps.get(appId);
@@ -474,14 +481,15 @@ export const BazaarStore = types
 
     /* events */
     triggerAppInstallInitial(ship: string, desk: string) {
-      const app = self.apps.get(desk);
-      app.installStatus = InstallStatus.initial;
-      self.appInstallInitial = !self.appInstallInitial;
+      // app.installStatus = InstallStatus.initial;
+      // self.appInstallInitial = !self.appInstallInitial;
     },
-    triggerAppInstallStarted(ship: string, desk: string) {
-      const app = self.apps.get(desk);
+    triggerAppInstallStarted(ship: string, desk: string, app: any) {
       app.installStatus = InstallStatus.started;
+      self.apps.set(desk, app);
       self.appInstallStarted = !self.appInstallStarted;
+      // used to force that there's been a change to the apps map
+      self.appsChange = !self.appsChange;
     },
     triggerAppInstallFailed(ship: string, desk: string, err: string) {
       const app = self.apps.get(desk);

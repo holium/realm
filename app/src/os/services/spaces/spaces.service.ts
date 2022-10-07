@@ -78,6 +78,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.install-desk': this.installDesk,
     'realm.spaces.bazaar.uninstall-app': this.uninstallApp,
     'realm.spaces.bazaar.add-ally': this.addAlly,
+    'realm.spaces.bazaar.add-app': this.addApp,
+    'realm.spaces.bazaar.remove-app': this.removeApp,
   };
 
   static preload = {
@@ -175,6 +177,10 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.uninstall-app', desk),
     addAlly: async (ship: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-ally', ship),
+    addApp: async (ship: string, desk: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.add-app', ship, desk),
+    removeApp: async (appId: string) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.remove-app', appId),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -516,6 +522,14 @@ export class SpacesService extends BaseService {
 
   async addAlly(_event: IpcMainInvokeEvent, ship: any) {
     return await BazaarApi.addAlly(this.core.conduit!, ship);
+  }
+
+  async addApp(_event: IpcMainInvokeEvent, ship: string, desk: string) {
+    return await BazaarApi.addApp(this.core.conduit!, ship, desk);
+  }
+
+  async removeApp(_event: IpcMainInvokeEvent, appId: string) {
+    return await BazaarApi.removeApp(this.core.conduit!, appId);
   }
 
   async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {

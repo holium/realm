@@ -69,7 +69,7 @@
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      [%urbit =docket:docket install-status=?(%started %failed %suspended %installed %uninstalled)]
+      [%urbit =docket:docket host=(unit ship) install-status=?(%started %failed %suspended %installed %uninstalled %desktop %treaty)]
       [%missing ~]
   ==
 ::
@@ -106,7 +106,9 @@
 +$  app-catalog             (map app-id app-catalog-entry)  :: INCLUDED IN AGENT STATE
 ::
 +$  action
-  $%  [%pin path=space-path:spaces =app-id rank=(unit @ud)]
+  $%  [%add-app =ship =desk]
+      [%remove-app =app-id]
+      [%pin path=space-path:spaces =app-id rank=(unit @ud)]
       [%unpin path=space-path:spaces =app-id]
       :: bulk pin ordering to facilitate efficiency/ease in UI
       [%set-pin-order path=space-path:spaces order=(list app-id)]
@@ -126,6 +128,8 @@
 +$  reaction
   $%  [%initial =app-catalog =space-apps-lite =my]
       [%space-apps =space-path:spaces =app-index-full =sorts sites=(set [ship desk])]
+      [%add-app =app-id =app-catalog-entry]
+      [%remove-app =app-id]
       [%pin path=space-path:spaces =app-full ord=(list app-id)]
       [%unpin path=space-path:spaces =app-full ord=(list app-id)]
       [%set-pin-order path=space-path:spaces ord=(list app-id)]
