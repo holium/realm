@@ -18,6 +18,7 @@
     "package": "yarn workspace @holium/realm package"
   },
   "dependencies": {
+    "alchemy-sdk": "^2.1.0",
     "ethers": "^5.7.0",
     "memoize-one": "^6.0.0",
     "qrcode.react": "^3.1.0",

@@ -176,7 +176,7 @@
               ?-  -.contract-data
                   %erc20
                 %-  pairs
-                :~  ['type' [%s `@t`name.contract-data]]
+                :~  ['type' s+'erc20']
                     ['name' [%s name.contract-data]]
                     ['address' [%s (crip (z-co:co address.contract-data))]]
                     ['balance' (numb balance.contract-data)]

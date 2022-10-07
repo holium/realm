@@ -1,4 +1,3 @@
-import { settings } from '@urbit/api';
 import {
   applySnapshot,
   types,
@@ -85,11 +84,16 @@ const BitcoinStore = types
     }
   }));
 
-const SmartContract = types.model('SmartContract', {
+const ERC20 = types.model('ERC20', {
   name: types.string,
   address: types.string,
-  balance: types.maybe(types.number),
-  tokens: types.maybe(types.map(types.number)),
+  balance: types.number,
+});
+
+const ERC721 = types.model('ERC721', {
+  name: types.string,
+  address: types.string,
+  tokens: types.map(types.number),
 });
 
 const EthWallet = types.model('EthWallet', {
@@ -97,7 +101,8 @@ const EthWallet = types.model('EthWallet', {
   path: types.string,
   address: types.string,
   balance: types.string,
-  contracts: types.map(SmartContract),
+  coins: types.map(ERC20),
+  nfts: types.map(ERC721),
   nickname: types.string,
   conversions: types.maybe(
     types.model({
@@ -230,21 +235,19 @@ export const EthStore = types
       };
       self.transactions.set(hash, tx);
     },
-    // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
         network: 'ethereum',
         path: wallet.wallet.path,
         address: wallet.wallet.address,
         balance: gweiToEther(wallet.wallet.balance).toString(),
+        coins: wallet.wallet.contracts,
+        nfts: wallet.wallet.contracts,
         nickname: wallet.wallet.nickname,
-        contracts: {},
       };
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     },
     applyTransactionUpdate(transaction: any) {
-      console.log('got tx')
-      console.log(transaction);
       /*let tx = self.transactions.get(transaction.transaction.hash)!;
       console.log(tx);
       tx.completedAt = Date.now().toString();
