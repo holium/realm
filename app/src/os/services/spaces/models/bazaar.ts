@@ -14,6 +14,7 @@ enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
   Web = 'web',
+  Custom = 'custom'
 }
 
 const AppRankModel = types.model({

@@ -54,6 +54,9 @@ export const nativeApps: AppManifestMap = {
     color: '#ACBCCB',
     icon: 'Airlift',
     type: 'custom',
+    native: {
+      hideTitlebarBorder: true
+    }
   },
   ...{ ...(isDev ? devApps : {}) },
 };

@@ -1,4 +1,3 @@
-import { settings } from '@urbit/api';
 import {
   applySnapshot,
   types,

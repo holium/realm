@@ -17,6 +17,7 @@ import { NativeView } from './NativeView';
 import { nativeApps } from 'renderer/apps';
 import { nativeRenderers } from 'renderer/apps/native';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar';
+import { AirliftToolbarProps } from 'renderer/apps/Airlift/Toolbar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { DialogView } from '../../../dialog/Dialog/Dialog';
@@ -69,6 +70,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
 
     const activeWindow = window;
 
+    console.log(activeWindow.dimensions);
     const mX = useMotionValue(activeWindow ? activeWindow.dimensions.x : 20);
     const mY = useMotionValue(activeWindow ? activeWindow.dimensions.y : 20);
     const mHeight = useMotionValue(
@@ -206,7 +208,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         app={window}
       />
     );
-    if (window.type === 'native') {
+    if (window.type === 'native' || window.type === 'custom') {
       hideTitlebarBorder = nativeApps[window.id].native!.hideTitlebarBorder!;
       noTitlebar = nativeApps[window.id].native!.noTitlebar!;
       CustomTitlebar = nativeRenderers[window.id].titlebar!;
@@ -286,11 +288,62 @@ export const AppWindow: FC<AppWindowProps> = observer(
 
     return (
       window.type==='custom'?
+      <motion.div
+        id={windowId}
+        dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
+        dragElastic={0}
+        dragMomentum={false}
+        // dragConstraints={desktopRef}
+        dragListener={false}
+        drag={!isResizing}
+        dragControls={dragControls}
+        initial={{
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+          transition: {
+            duration: 0.15,
+          },
+        }}
+        transition={{
+          background: { duration: 0.25 },
+        }}
+        exit={{
+          opacity: 0,
+          transition: {
+            duration: 0.1,
+          },
+        }}
+        style={{
+          x: mX,
+          y: mY,
+          width: mWidth,
+          height: mHeight,
+          zIndex: window.zIndex,
+          borderRadius,
+          // background: windowColor,
+        }}
+        color={textColor}
+        onMouseDown={onMouseDown} 
+      >
+                <Flex
+          flexDirection="column"
+          style={{
+            overflow: 'hidden',
+            borderRadius,
+            height: 'inherit',
+            width: 'inherit',
+          }}
+        >
+          {titlebar}
       <NativeView
         isResizing={isResizing}
         hasTitlebar={nativeApps[window.id].native?.hideTitlebarBorder}
         window={window}
       />
+      </Flex>
+      </motion.div>
       :<AppWindowStyle
         id={windowId}
         dragTransition={{ bounceStiffness: 1000, bounceDamping: 100 }}
