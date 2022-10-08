@@ -22,7 +22,7 @@ export const RecommendedApps: FC<RecommendedAppsProps> = observer(
       if (currentSpace) {
         setApps(bazaar.getRecommendedApps(currentSpace.path));
       }
-    }, [currentSpace, currentBazaar?.recommendedChange, bazaar.appsChange]);
+    }, [currentSpace, bazaar.appsChange]);
 
     return (
       <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>

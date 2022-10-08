@@ -13,8 +13,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 interface AppDockProps {}
 
 export const AppDock: FC<AppDockProps> = observer(() => {
-  const { desktop, spaces, bazaar, ship, theme } = useServices();
-  // const [orderedList, setOrderedList] = useState([]);
+  const { desktop, spaces, bazaar, theme } = useServices();
 
   const dividerBg = useMemo(
     () => rgba(lighten(0.2, theme.currentTheme.dockColor), 0.4),
@@ -25,22 +24,9 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     ? bazaar.getBazaar(spaces.selected?.path!)
     : null;
 
-  // useEffect(() => {
-  //   console.log(
-  //     'pinnedChange.rerender => %o',
-  //     spaces.selected?.path,
-  //     bazaar.getPinnedApps(spaces.selected?.path!)
-  //   );
-  //   setOrderedList(
-  //     spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : []
-  //   );
-  // }, [currentBazaar?.pinnedChange]);
-
-  const orderedList = useMemo(
-    () =>
-      spaces.selected?.path ? bazaar.getPinnedApps(spaces.selected?.path!) : [],
-    [spaces.selected?.path, currentBazaar?.pinnedChange, bazaar.appsChange]
-  );
+  const orderedList = spaces.selected?.path
+    ? bazaar.getPinnedApps(spaces.selected?.path!)
+    : [];
 
   const pinnedApps = useMemo(() => {
     return (
@@ -149,8 +135,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     desktop.activeWindow?.id,
     desktop.openAppIds,
     spaces.selected?.path,
-    currentBazaar?.pinnedChange,
     bazaar.appsChange,
+    orderedList,
   ]);
 
   const activeAndUnpinned = desktop.openApps.filter(

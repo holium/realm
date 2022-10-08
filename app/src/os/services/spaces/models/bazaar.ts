@@ -320,14 +320,29 @@ export const BazaarStore = types
     },
     getAvailableApps() {
       // console.log('getAvailableApps => %o', self.apps.values());
-      return Array.from(self.apps.values()).filter(
-        (app) => app.installStatus !== InstallStatus.treaty
-      );
+      return Array.from(self.apps.values()).filter((app) => {
+        if (
+          app.id === 'realm' ||
+          app.id === 'courier' ||
+          app.id === 'wallet' ||
+          app.id === 'garden'
+        ) {
+          return false;
+        }
+        if (app.type === 'urbit') {
+          return app.installStatus !== InstallStatus.treaty;
+        }
+        return true;
+      });
     },
   }))
   .actions((self) => ({
     isAppInstalled(appId: string) {
-      return self.apps.get(appId)?.installStatus === InstallStatus.installed;
+      const app = self.apps.get(appId);
+      if (app && app.type === 'urbit') {
+        return app.installStatus === InstallStatus.installed;
+      }
+      return true;
     },
     initialCatalog(apps: any) {
       for (const desk in apps) {
