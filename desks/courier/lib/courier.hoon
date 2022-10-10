@@ -408,6 +408,11 @@
     |=  [el=[ship-dec=@ud node=node:gra] key-dec=@ud]
     =(ship-dec.el key-dec)
   ::
+  ++  is-our-message
+    |=  [our=ship =chat:sur]
+    =/  message       (rear messages.chat)
+    =(author.message our)
+  ::
   ::  Needed to hash group-dms
   ::
   ++  jael-scry

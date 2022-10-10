@@ -20,13 +20,14 @@ export class DiskStore {
       cwd: `realm.${patp}`, // base folder
     };
 
-    this.persisted =
-      process.env.NODE_ENV === 'development'
-        ? new Store<any>(baseParams)
-        : new EncryptedStore<any>({
-            secretKey,
-            ...baseParams,
-          });
+    // this.persisted =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store<any>(baseParams)
+    //     : new EncryptedStore<any>({
+    //         secretKey,
+    //         ...baseParams,
+    //       });
+    this.persisted = new Store<any>(baseParams);
 
     const isEmpty =
       !this.persisted.store || Object.keys(this.persisted.store).length === 0;
