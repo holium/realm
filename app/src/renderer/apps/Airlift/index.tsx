@@ -9,7 +9,6 @@ export type AirliftProps = {
 };
 
 export const Airlift: FC<AirliftProps> = observer((props: AirliftProps) => {
-  const { isResizing } = props;
   const desk = '0';
   const agent = 'test';
   // const { airlift } = useServices();

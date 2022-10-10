@@ -1,288 +1,177 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { createField, createForm } from 'mobx-easy-form';
-import normalizeUrl from 'normalize-url';
+import { FC } from 'react';
+import styled, { css } from 'styled-components';
+import { motion } from 'framer-motion';
+import { rgba, darken } from 'polished';
 
-import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
-import { Flex, Icons, Input, Spinner } from 'renderer/components';
-import { WindowIcon } from 'renderer/system/desktop/components/Window/WindowIcon';
-import { useServices } from 'renderer/logic/store';
-import { observer } from 'mobx-react';
+import { ThemeModelType } from 'os/services/theme.model';
+import { Flex, Text, Input } from 'renderer/components';
+import { useCallback } from 'react';
 
-const ToolbarStyle = styled(TitlebarStyle)`
-  /* height: 42px; */
-  padding: 0 10px;
-  background: transparent;
-  gap: 12px;
+type AirliftToolbarStyleProps = {
+  customBg: string;
+  hasBorder: boolean;
+  zIndex: number;
+  isAppWindow?: boolean;
+  hasBlur?: boolean;
+};
+
+export const AirliftToolbarStyle = styled(motion.div)<AirliftToolbarStyleProps>`
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: left;
+  position: ${(props: AirliftToolbarStyleProps) =>
+    props.isAppWindow ? 'relative' : 'absolute'};
+  backdrop-filter: ${(props: AirliftToolbarStyleProps) =>
+    props.hasBlur ? 'blur(16px)' : 'none'};
+  top: 0;
+  left: 0;
+  right: 0;
+  height: ${(props: AirliftToolbarStyleProps) => (props.isAppWindow ? 30 : 54)}px;
+  padding: 0 4px 0
+    ${(props: AirliftToolbarStyleProps) => (props.isAppWindow ? 4 : 0)}px;
+  --webkit-transform: translate3d(0, 0, 0);
+  --webkit-transform: translateZ(0);
+  --webkit-backface-visibility: hidden;
+  --webkit-perspective: 1000;
+  will-change: transform;
+  ${(props: AirliftToolbarStyleProps) => css`
+    z-index: ${props.zIndex};
+    border-bottom: ${props.hasBorder
+      ? `1px solid ${rgba(darken(0.5, props.customBg), 0.25)}`
+      : 'none'};
+  `}
+`;
+
+const TitleCentered = styled(Flex)`
+  text-align: left;
 `;
 
 export type AirliftToolbarProps = {
-  dragControls: any;
-  onDragStart: any;
-  onDragStop: any;
+  theme: Partial<ThemeModelType>;
   zIndex: number;
-  windowColor: string;
-  showDevToolsToggle: boolean;
-  onClose: () => any;
-  onMaximize: () => any;
+  showDevToolsToggle?: boolean;
+  hasBorder?: boolean;
+  dragControls?: any;
+  onDragStop?: (e: any) => void;
+  onDragStart?: (e: any) => void;
+  navigationButtons?: boolean;
+  closeButton?: boolean;
+  onClose?: () => void;
+  maximizeButton?: boolean;
+  onMaximize?: () => void;
+  onDevTools?: () => void;
+  isAppWindow?: boolean;
+  noTitlebar?: boolean;
+  shareable?: boolean;
+  app?: {
+    id?: string;
+    title?: string;
+    icon?: string;
+    color?: string;
+  };
+  hasBlur?: boolean;
+  children?: React.ReactNode;
 };
 
-export const AirliftToolbar: FC<AirliftToolbarProps> = observer(
-  (props: AirliftToolbarProps) => {
-    const {
-      showDevToolsToggle,
-      dragControls,
-      onDragStop,
-      onDragStart,
-      zIndex,
-      windowColor,
-      onClose,
-      onMaximize,
-    } = props;
-    const { theme } = useServices();
-    const [canGoBack, setCanGoBack] = useState(false);
-    const [canGoForward, setCanGoForward] = useState(false);
-    const { iconColor, inputColor } = theme.currentTheme;
+export const AirliftToolbar: FC<AirliftToolbarProps> = (props: AirliftToolbarProps) => {
+  const {
+    children,
+    showDevToolsToggle,
+    closeButton,
+    hasBorder,
+    zIndex,
+    noTitlebar,
+    isAppWindow,
+    dragControls,
+    onDragStop,
+    onDragStart,
+    onClose,
+    onDevTools,
+    maximizeButton,
+    onMaximize,
+    navigationButtons,
+    shareable,
+    hasBlur,
+  } = props;
+  const { windowColor, iconColor } = props.theme;
 
-    const onKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        let term: string = searchForm.actions.submit()['search-query'];
-        if (
-          term.match(
-            /(?:^|\s)((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/
-          )
-        ) {
-          // if (!term.includes('http://')) {
-          //   term = `https://${term}`;
-          // }
-          // go to url
-          const validUrl = new URL(term);
-          // console.log(validUrl);
-          setUrlData(new URL(validUrl.href));
-        } else {
-          // search qwant
-          const query = new URLSearchParams({ q: term });
-          if (term.length > 0) {
-            const search = `https://neeva.com/search?${query}`;
-            console.log(search);
-            setUrlData(new URL(search));
-          }
-        }
-        // console.log(searchForm.actions.submit());
-      }
-    };
-
-    const onBack = () => {
-      const webview: any = document.getElementById(tabId);
-      webview && webview.goBack();
-    };
-
-    const onForward = () => {
-      const webview: any = document.getElementById(tabId);
-      webview && webview.goForward();
-    };
-
-    const onRefresh = useCallback(() => {
-      const webview: any = document.getElementById(tabId);
-      webview && webview.reload();
-    }, [currentTab && currentTab.id]);
-
-    const onDevTools = () => {
-      const webview: any = document.getElementById(tabId);
-      webview && webview.isDevToolsOpened()
-        ? webview.closeDevTools()
-        : webview.openDevTools();
-    };
-
-    const [loading, setLoading] = useState(false);
-
-    const onStartLoading = () => {
-      setLoading(true);
-    };
-
-    const onStopLoading = () => {
-      setLoading(false);
-    };
-
-    const [urlData, setUrlData] = useState<any>(
-      currentTab ? new URL(currentTab!.url) : null
+  let titleSection: any;
+  if (props.app) {
+    // const { title, icon } = props.app!;
+    titleSection = (
+      <Flex gap={4} alignItems="center">
+        <Flex flexDirection="row" justifyContent="center" alignItems="left" >
+          <Text
+            opacity={0.7}
+//            style={{ textTransform: 'capitalize' }}
+            fontSize={2}
+            fontWeight={500}
+          >
+            %
+          </Text>
+          <Input opacity={0.7} fontSize={2} fontWeight={500} small={true}></Input>
+        </Flex>
+      </Flex>
     );
-    const protocol = urlData ? urlData.protocol.slice(0, -1) : '';
-
-    useEffect(() => {
-      const webview: any = document.getElementById(tabId);
-      webview?.addEventListener('did-finish-load', () => {
-        setCanGoBack(webview.canGoBack());
-        setCanGoForward(webview.canGoForward());
-        // webview!.openDevTools();
-      });
-      webview.addEventListener('will-navigate', async (e: any) => {
-        const url = new URL(e.url);
-        // console.log(url);
-        setUrlData(url);
-      });
-      webview?.addEventListener('did-start-loading', onStartLoading);
-      webview?.addEventListener('did-stop-loading', onStopLoading);
-    }, [currentTab.id]);
-
-    const leftIcon = () => {
-      if (loading) {
-        return (
-          <Flex flexDirection="row" alignItems="center">
-            <Spinner size={0} />
-          </Flex>
-        );
-      } else {
-        return protocol === 'https' ? (
-          <Icons name="LockedFill" color="#23B164" />
-        ) : (
-          <Icons name="UnlockedFill" />
-        );
-      }
-    };
-
-    return useMemo(() => {
-      // console.log('in header', protocol);
-
-      return (
-        <ToolbarStyle
-          hasBlur={false}
-          {...(dragControls
-            ? {
-                onPointerDown: (e) => {
-                  dragControls.start(e);
-                  onDragStart && onDragStart(e);
-                },
-                onPointerUp: (e) => {
-                  onDragStop && onDragStop(e);
-                },
-              }
-            : {})}
-          zIndex={zIndex}
-          customBg={windowColor!}
-          hasBorder
-        >
-          <Icons name="AppIconCompass" size="28px" />
-          <Flex flexDirection="row" alignItems="center" gap={4}>
-            <WindowIcon
-              icon="ArrowLeftLine"
-              disabled={!canGoBack}
-              iconColor={iconColor!}
-              bg="#97A3B2"
-              onClick={onBack}
-            />
-            <WindowIcon
-              icon="ArrowRightLine"
-              disabled={!canGoForward}
-              iconColor={iconColor!}
-              bg="#97A3B2"
-              onClick={onForward}
-            />
-            <WindowIcon
-              icon="Refresh"
-              iconColor={iconColor!}
-              bg="#97A3B2"
-              onClick={onRefresh}
-            />
-          </Flex>
-          <Flex flex={1}>
-            <Input
-              autoFocus
-              tabIndex={0}
-              leftIcon={leftIcon()}
-              rightIcon={
-                <Flex mr={2} flexDirection="row" alignItems="center">
-                  <Icons name="Search" opacity={0.5} />
-                </Flex>
-              }
-              placeholder="Search Qwant or enter url"
-              wrapperStyle={{
-                borderRadius: '20px',
-                height: 32,
-                backgroundColor: inputColor,
-              }}
-              defaultValue={searchQuery.state.value}
-              onKeyPress={onKeyPress}
-              error={
-                searchQuery.computed.isDirty &&
-                searchQuery.computed.ifWasEverBlurredThenError
-              }
-              onChange={(e: any) =>
-                searchQuery.actions.onChange(e.target.value)
-              }
-              onFocus={() => searchQuery.actions.onFocus()}
-              onBlur={() => searchQuery.actions.onBlur()}
-            />
-          </Flex>
-          <Flex gap={4}>
-            {showDevToolsToggle && (
-              <WindowIcon
-                icon="DevBox"
-                iconColor={iconColor!}
-                bg="#97A3B2"
-                onClick={(evt: any) => {
-                  evt.stopPropagation();
-                  onDevTools();
-                }}
-              />
-            )}
-            <WindowIcon
-              icon="Expand"
-              iconColor={iconColor!}
-              bg="#97A3B2"
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                onMaximize && onMaximize();
-              }}
-            />
-            <WindowIcon
-              icon="Close"
-              iconColor={iconColor!}
-              bg="#FF6240"
-              fillWithBg
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                // closeDevTools();
-                onClose && onClose();
-              }}
-            />
-          </Flex>
-        </ToolbarStyle>
-      );
-    }, [
-      loading,
-      zIndex,
-      iconColor,
-      windowColor,
-      searchQuery,
-      showDevToolsToggle,
-    ]);
   }
-);
+
+  const onCloseButton = useCallback(
+    (evt: any) => {
+      evt.stopPropagation();
+      // closeDevTools();
+      onClose && onClose();
+    },
+    [onClose]
+  );
+
+  return (
+    <AirliftToolbarStyle
+      hasBlur={hasBlur}
+      {...(dragControls
+        ? {
+            onPointerDown: (e) => {
+              dragControls.start(e);
+              onDragStart && onDragStart(e);
+            },
+            onPointerUp: (e) => {
+              onDragStop && onDragStop(e);
+            },
+          }
+        : {})}
+      zIndex={zIndex}
+      transition={{
+        background: { duration: 0.25 },
+      }}
+      customBg={rgba(windowColor!, 0.9)}
+      hasBorder={hasBorder!}
+      isAppWindow={isAppWindow}
+    >
+      {titleSection && !noTitlebar && (
+        <TitleCentered justifyContent="left" flex={1}>
+          {titleSection}
+        </TitleCentered>
+      )}
+      {shareable || navigationButtons ? (
+        <Flex zIndex={zIndex + 1} gap={4} alignItems="center">
+        </Flex>
+      ) : (
+        isAppWindow && <Flex></Flex>
+      )}
+      {children}
+      {(maximizeButton || closeButton) && (
+        <Flex gap={4} alignItems="center">
+        </Flex>
+      )}
+    </AirliftToolbarStyle>
+  );
+};
 
 AirliftToolbar.defaultProps = {
+  zIndex: 2,
+  hasBorder: true,
   showDevToolsToggle: true,
-};
-
-export const createSearchForm = (
-  defaults: any = {
-    searchUrl: '',
-  }
-) => {
-  const searchForm = createForm({
-    onSubmit({ values }) {
-      return values;
-    },
-  });
-
-  const searchQuery = createField({
-    id: 'search-query',
-    form: searchForm,
-    initialValue: defaults.searchUrl || '',
-  });
-
-  return {
-    searchForm,
-    searchQuery,
-  };
 };

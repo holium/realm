@@ -1,6 +1,7 @@
 import { SystemApp } from './System';
 import { Browser, BrowserProps } from './Browser';
 import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';
+import { AirliftToolbar, AirliftToolbarProps } from './Airlift/Toolbar';
 import { Airlift } from './Airlift';
 
 export type NativeRenders = {
@@ -19,6 +20,7 @@ export const nativeRenderers: NativeRenders = {
     component: (props: any) => <SystemApp {...props} />,
   },
   'airlift': {
+    titlebar: (props: AirliftToolbarProps) => <AirliftToolbar {...props} />,
     component: (props: any) => <Airlift {...props} />,
   }
 };

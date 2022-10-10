@@ -124,6 +124,7 @@ export const DesktopStore = types
       desktopDimensions: { width: number; height: number },
       isFullscreen: boolean
     ) {
+      console.log('test')
       let glob = app.glob;
       if (app.href) {
         glob = app.href.glob ? true : false;

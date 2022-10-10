@@ -179,6 +179,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     let CustomTitlebar:
       | React.FC<BrowserToolbarProps>
       | React.FC<DialogTitlebarProps>
+      | React.FC<AirliftToolbarProps>
       | undefined = undefined; // todo fix typings
     let showDevToolsToggle = true;
     let preventClickEvents = true;
@@ -216,7 +217,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
       preventClickEvents = false;
       if (CustomTitlebar) {
         titlebar = (
-          <CustomTitlebar
+          /*<CustomTitlebar
             zIndex={window.zIndex}
             windowColor={darken(0.002, windowColor!)}
             showDevToolsToggle
@@ -225,6 +226,29 @@ export const AppWindow: FC<AppWindowProps> = observer(
             onDragStop={() => onDragStop()}
             onClose={() => onClose()}
             onMaximize={() => maximize()}
+          />*/
+          <CustomTitlebar
+            windowColor={darken(0.002, windowColor!)}
+            isAppWindow
+            maximizeButton={maximizeButton}
+            closeButton
+            noTitlebar={noTitlebar}
+            hasBorder={!hideTitlebarBorder}
+            showDevToolsToggle={showDevToolsToggle}
+            zIndex={window.zIndex}
+            // shareable
+            dragControls={dragControls}
+            onDevTools={onDevTools}
+            onDragStart={() => onDragStart()}
+            onDragStop={() => onDragStop()}
+            onClose={() => onClose()}
+            onMaximize={() => maximize()}
+            theme={theme.currentTheme}
+            // theme={{
+            //   ...theme,
+            //   windowColor: darken(0.002, theme.windowColor!),
+            // }}
+            app={window}
           />
         );
       } else {

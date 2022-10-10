@@ -13,14 +13,17 @@ export const AirliftArm: FC<AirliftArmProps> = observer((props: AirliftArmProps)
   const { desk, agent, arm } = props;
 
   const onArmExpand = () => {
+    console.log('expand')
     AirliftActions.expandArm(desk, agent, arm.name);
   }
 
   return (
-    <div>
+    <div onClick={onArmExpand}>
+      <Icons name="AirliftArm" />
+    </div>
+    /*<div>
       {arm.expanded ?
       <div></div>
-      :<Icons name='AirliftArm' onClick={onArmExpand}></Icons>}
-    </div>
+      :<Icons name='AirliftArm' /*onClick={onArmExpand}*/
   )
 });

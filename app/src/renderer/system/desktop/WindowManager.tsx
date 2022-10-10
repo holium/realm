@@ -76,6 +76,7 @@ export const WindowManager: FC<WindowManagerProps> = observer(
         />
         {windows.map((window: any, index: number) => {
           const key = `${window.id}-${index}`;
+          console.log(key)
           return (
             window.type==='custom'?
             <AppWindow desktopRef={desktopRef} key={key} window={window} />
