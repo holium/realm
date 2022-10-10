@@ -304,7 +304,7 @@
         =/  dm-node       (snag 0 ~(tap by dm)) :: get the node
         =/  ship-dec      (snag 0 p.dm-node)
         =/  new-dm        (received-dm:gs:lib ship-dec q.dm-node our now)
-        (send-updates new-dm)
+        (send-updates new-dm our)
       ::
       ?:  (group-skim-gu:gs:lib resource.+.q.upd)  ::  is group dm
         =/  dm            ^-((map index:graph-store node:graph-store) nodes.+.q.upd)  
@@ -312,7 +312,7 @@
         =/  entity        entity.resource.+.q.upd
         =/  name          name.resource.+.q.upd
         =/  new-dm        (received-grp-dm:gs:lib our now entity name q.dm-node)
-        (send-updates new-dm)
+        (send-updates new-dm our)
       :: else 
       `state
     %add-graph
@@ -338,14 +338,18 @@
       `state
   ==
   ++  send-updates
-    |=  [new-dm=chat:store]
-    ?:  =(%.n push-enabled.state)
+    |=  [new-dm=chat:store our=ship]
+    ?:  =(%.n push-enabled.state) ::  we've disabled push
       :_  state
       [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
-    ::
-    =/  notify   (generate-push-notification:notif-lib our.bowl app-id.state new-dm)
-    ~&  >>  (request:enjs:notif-lib notify devices.state)
-    :: `state
+    ?:  (is-our-message:gs:lib our new-dm) :: its our message (outgoing)
+      :_  state
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+        ::
+    ?:  =((lent ~(tap by devices.state)) 0) :: there are no devices
+      :_  state
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+    =/  notify   (generate-push-notification:notif-lib our app-id.state new-dm)
     ::  send http request
     ::
     =/  =header-list:http
