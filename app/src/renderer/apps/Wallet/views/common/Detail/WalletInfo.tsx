@@ -1,27 +1,15 @@
 import { FC, useState } from 'react';
-import { isValidPatp } from 'urbit-ob';
-import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { theme as themes } from 'renderer/theme';
-import { darken, lighten } from 'polished';
+import { darken } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
-import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
 import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
 import {
   EthWalletType,
   BitcoinWalletType,
 } from 'os/services/tray/wallet.model';
-
-const abbrMap = {
-  ethereum: 'ETH',
-  bitcoin: 'BTC',
-};
 
 interface WalletInfoProps {
   wallet: EthWalletType | BitcoinWalletType;
