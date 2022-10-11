@@ -46,8 +46,7 @@
   :: build slimmed down space specific app (metadata) from docket charges (installed apps)
   :: =/  index      (~(put by space-apps.state) our-space [apps *sorts:store])
   :: build robust app catalog from docket charges (installed apps)
-  =/  catalog     (catalog:apps:core initial.charge-update)
-
+  =/  catalog                             (catalog:apps:core initial.charge-update)
   :: also setup some native apps that are not part of the docket
 
   ::  configure browser
@@ -379,7 +378,7 @@
     |^
     ?-  -.action
       %add-app           (add-app +.action)
-      %remove-app           (remove-app +.action)
+      %remove-app        (remove-app +.action)
       %pin               (add-pin +.action)
       %unpin             (rem-pin +.action)
       %set-pin-order     (set-pin-order +.action)

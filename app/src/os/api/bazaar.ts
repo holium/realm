@@ -9,6 +9,14 @@ const util = require('node:util');
 let __state: BazaarStoreType;
 
 export const BazaarApi = {
+  newInstaller: async (
+    conduit: Conduit,
+    ship: string,
+    desk: string,
+    model: BazaarStoreType
+  ) => {
+    console.log('install time');
+  },
   installApp: async (
     tempConduit: Conduit,
     ship: string,
@@ -60,6 +68,7 @@ export const BazaarApi = {
               reject(err);
             } else if ('install' in charge.chad) {
               console.log(`'${ship}/${desk}' installation started...`);
+              console.log(charge);
               __state.triggerAppInstallStarted(ship, desk, charge.docket);
             }
           }
@@ -450,25 +459,20 @@ export const BazaarApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
-      conduit.poke({
-        app: 'bazaar',
-        mark: 'bazaar-action',
-        json: {
-          'suite-add': {
-            path: pathObj,
-            'app-id': appId,
-            rank: rank,
-          },
+    conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'suite-add': {
+          path: pathObj,
+          'app-id': appId,
+          rank: rank,
         },
-        reaction: 'bazaar-reaction.suite-add',
-        onReaction: (data: any) => {
-          resolve(data['suite-add']);
-        },
-        onError: (e: any) => {
-          reject(e);
-        },
-      });
+      },
+
+      onError: (e: any) => {
+        console.error(e);
+      },
     });
   },
   removeFromSuite: async (conduit: Conduit, path: SpacePath, appId: string) => {
@@ -477,24 +481,20 @@ export const BazaarApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
-      conduit.poke({
-        app: 'bazaar',
-        mark: 'bazaar-action',
-        json: {
-          'suite-remove': {
-            path: pathObj,
-            'app-id': appId,
-          },
+    conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'suite-remove': {
+          path: pathObj,
+          'app-id': appId,
         },
-        reaction: 'bazaar-reaction.suite-remove',
-        onReaction: (data: any) => {
-          resolve(data['suite-remove']);
-        },
-        onError: (e: any) => {
-          reject(e);
-        },
-      });
+      },
+      reaction: 'bazaar-reaction.suite-remove',
+
+      onError: (e: any) => {
+        console.error(e);
+      },
     });
   },
   pinApp: async (
@@ -599,7 +599,8 @@ export const BazaarApi = {
         },
         reaction: 'bazaar-reaction.unrecommend',
         onReaction: (data: any) => {
-          resolve(data['unrecommend']);
+          console.log(data);
+          resolve(data['my-recommendations']);
         },
         onError: (e: any) => {
           reject(e);
@@ -673,8 +674,8 @@ export const BazaarApi = {
         console.log(`message [${eventId}]: subscribed to /bazaar/updates...`);
       },
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        // console.log(data);
         if (mark === 'bazaar-reaction') {
+          console.log('bazaar-reaction', data);
           handleBazaarReactions(data, state);
         }
       },
@@ -870,7 +871,7 @@ const handleBazaarReactions = (data: any, state: BazaarStoreType) => {
         state.getBazaar(space)?.setApp(app);
         state.getBazaar(space)?.updateSuiteRank(app);
         state.getBazaar(space)?.setSuiteApps(app.sort);
-        state.getBazaar(space)?.toggleSuiteAppsChange();
+        console.log('suite-add', detail, space, app);
       }
       break;
     case 'suite-remove':

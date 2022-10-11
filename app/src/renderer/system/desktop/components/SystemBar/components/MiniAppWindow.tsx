@@ -38,7 +38,7 @@ type MiniAppProps = {
   canScroll?: boolean;
   backgroundColor?: string;
   dimensions: {
-    height: number;
+    height: number | string;
     width: number;
   };
   textColor?: string;

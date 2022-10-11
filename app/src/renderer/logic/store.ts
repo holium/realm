@@ -4,8 +4,6 @@ import {
   applyPatch,
   castToSnapshot,
   Instance,
-  onSnapshot,
-  tryReference,
   applySnapshot,
   types,
 } from 'mobx-state-tree';

@@ -19,6 +19,7 @@ import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { darken, rgba } from 'polished';
 import { InstallStatus } from 'os/services/spaces/models/bazaar';
+import { useAppInstaller } from './store';
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },
@@ -62,7 +63,13 @@ const StyledContent = stitch(PopoverPrimitive.Content, {
   },
 });
 
-function Content({ children, ...props }) {
+function Content({
+  children,
+  ...props
+}: {
+  children: React.ReactNode;
+  [key: string]: any;
+}) {
   return (
     <PopoverPrimitive.Portal>
       <StyledContent
@@ -87,13 +94,15 @@ const renderDevs = (space: string, devs: any, theme: any) => {
   if (!devs || devs.length === 0) {
     return <Text color={secondaryTextColor}>{`No recent devs`}</Text>;
   }
-  return devs?.map((item, index) => (
+  return devs?.map((item: any, index: number) => (
     <div key={index}>
       <AppRow
         caption={item.title}
         app={item}
         // actionRenderer={() => actionRenderer(space, item)}
-        // onClick={(e, action, app) => onAppsAction(space, action, app)}
+        onClick={(app: any) => {
+          console.log('renderDevs', app);
+        }}
       />
     </div>
   ));
@@ -118,11 +127,12 @@ const renderApps = (space: string, apps: any, theme: any) => {
   //   console.log('onAppsAction => %o', { path, id: app.id, tag });
   //   SpacesActions.addToSuite(path, app.id, rank);
   // };
-  return installedApps.map((app, index) => (
+  return installedApps.map((app: any, index: number) => (
     <div key={index}>
       <AppRow
         caption={app.title}
         app={app}
+        onClick={(app: any) => {}}
         // actionRenderer={() => actionRenderer(space, app)}
         // onClick={(e, action, app) => onAppsAction(space, action, app)}
       />
@@ -244,18 +254,19 @@ interface AppSearchProps {
 
 const AppSearchApp = observer((props: AppSearchProps) => {
   const { spaces, bazaar, theme } = useServices();
+  const appInstaller = useAppInstaller();
   const [data, setData] = useState<any>([]);
-  const [searchMode, setSearchMode] = useState('none');
-  const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
-  const [searchString, setSearchString] = useState('');
-  const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
-  const [selectedShip, setSelectedShip] = useState('');
-  const [selectedDesk, setSelectedDesk] = useState('');
-  const [loadingState, setLoadingState] = useState('');
+  const searchMode = appInstaller.searchMode;
+  const searchModeArgs = appInstaller.searchModeArgs;
+  const searchString = appInstaller.searchString;
+  const searchPlaceholder = appInstaller.searchPlaceholder;
+  const selectedShip = appInstaller.selectedShip;
+  const selectedDesk = appInstaller.selectedDesk;
+  const loadingState = appInstaller.loadingState;
 
   const spacePath: string = spaces.selected?.path!;
 
-  const InstallButton = ({ app }) => {
+  const InstallButton = ({ app }: any) => {
     const parts = app.id.split('/');
     return (
       <Button
@@ -265,7 +276,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           SpacesActions.addApp(parts[0], parts[1]);
         }}
       >
-        Add to Desktop
+        Install
       </Button>
     );
   };
@@ -280,18 +291,18 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   };
 
   useEffect(() => {
-    setSearchMode('none');
-    setSearchModeArgs([]);
-    setSearchString('');
-    setSearchPlaceholder('Search...');
-    setSelectedShip('');
+    appInstaller.setSearchMode('none');
+    appInstaller.setSearchModeArgs([]);
+    appInstaller.setSearchString('');
+    appInstaller.setSearchPlaceholder('Search...');
+    appInstaller.setSelectedShip('');
   }, [spacePath]);
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaar.hasAlly(selectedShip)) {
         if (loadingState !== 'loading-published-apps') {
-          setLoadingState('loading-published-apps');
+          appInstaller.setLoadingState('loading-published-apps');
           SpacesActions.addAlly(selectedShip)
             .then((result) => {
               // console.log('addAlly response => %o', result);
@@ -299,7 +310,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
               setData(treaties);
             })
             .catch((e) => console.error(e))
-            .finally(() => setLoadingState(''));
+            .finally(() => appInstaller.setLoadingState(''));
         }
       } else {
         const treaties = bazaar.getTreaties(selectedShip);
@@ -409,125 +420,117 @@ const AppSearchApp = observer((props: AppSearchProps) => {
 
   const renderAppSummary = (app: any) => {
     return (
-      <>
-        <Flex flexDirection="column" gap={10}>
-          <Text fontWeight={'bold'}>{app.title}</Text>
-          <Button onClick={(e) => installApp(app)}>Install</Button>
-        </Flex>
-      </>
+      <Flex height={450} flexDirection="column" gap={10}>
+        <Text fontWeight={'bold'}>{app.title}</Text>
+        <Button onClick={(e) => installApp(app)}>Install</Button>
+      </Flex>
     );
   };
 
   const onProviderClick = (ship: string) => {
     if (isValidPatp(ship)) {
-      setSearchMode('dev-app-search');
-      setSearchPlaceholder('Search...');
-      setSelectedShip(ship);
-      setSearchModeArgs([ship]);
-      setSearchString('');
+      appInstaller.setSearchMode('dev-app-search');
+      appInstaller.setSearchPlaceholder('Search...');
+      appInstaller.setSelectedShip(ship);
+      appInstaller.setSearchModeArgs([ship]);
+      appInstaller.setSearchString('');
     }
   };
 
   return (
-    <Popover
-      open={searchMode !== 'none'}
-      onOpenChange={(open) => {
-        if (!open) {
-          setSearchMode('none');
-          setSelectedShip('');
-          setSearchPlaceholder('Search...');
+    <>
+      <Input
+        flex={8}
+        className="realm-cursor-text-cursor"
+        type="text"
+        placeholder={searchPlaceholder}
+        bgOpacity={0.3}
+        borderColor={'input.borderHover'}
+        bg="bg.blendedBg"
+        wrapperStyle={{
+          borderRadius: 25,
+          height: 42,
+          width: 500,
+          paddingLeft: 12,
+          paddingRight: 16,
+        }}
+        leftLabel={
+          searchMode === 'dev-app-search' && selectedShip !== ''
+            ? `Apps by ${selectedShip}:`
+            : 'none'
         }
-      }}
-      modal={false}
-    >
-      <PopoverAnchor asChild={false}>
-        <Input
-          flex={8}
-          className="realm-cursor-text-cursor"
-          type="text"
-          placeholder={searchPlaceholder}
-          bgOpacity={0.3}
-          borderColor={'input.borderHover'}
-          bg="bg.blendedBg"
-          wrapperStyle={{
-            borderRadius: 25,
-            height: 42,
-            width: 500,
-            paddingLeft: 12,
-            paddingRight: 16,
-          }}
-          leftLabel={
-            searchMode === 'dev-app-search' && selectedShip !== ''
-              ? `Apps by ${selectedShip}:`
-              : 'none'
+        // rightIcon={
+        //   <Flex>
+        //     <Icons name="Search" size="18px" opacity={0.5} />
+        //   </Flex>
+        // }
+        value={searchString}
+        onKeyDown={(evt: any) => {
+          if (evt.key === 'Enter' && isValidPatp(searchString)) {
+            appInstaller.setSearchMode('dev-app-search');
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip(searchString);
+            appInstaller.setSearchModeArgs([searchString]);
+            appInstaller.setSearchString('');
+          } else if (evt.key === 'Escape') {
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip('');
+            appInstaller.setSearchString('');
+          } else if (
+            evt.key === 'Backspace' &&
+            searchMode === 'dev-app-search' &&
+            searchString.length === 0
+          ) {
+            appInstaller.setSearchMode('start');
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip('');
+            appInstaller.setSearchString('');
+          } else {
+            appInstaller.setSearchMode('start');
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip('');
+            appInstaller.setSearchString('');
           }
-          // rightIcon={
-          //   <Flex>
-          //     <Icons name="Search" size="18px" opacity={0.5} />
-          //   </Flex>
-          // }
-          value={searchString}
-          onKeyDown={(evt: any) => {
-            if (evt.key === 'Enter' && isValidPatp(searchString)) {
-              setSearchMode('dev-app-search');
-              setSearchPlaceholder('Search...');
-              setSelectedShip(searchString);
-              setSearchModeArgs([searchString]);
-              setSearchString('');
-            } else if (evt.key === 'Escape') {
-              setSearchPlaceholder('Search...');
-              setSelectedShip('');
-              setSearchString('');
-            } else if (
-              evt.key === 'Backspace' &&
-              searchMode === 'dev-app-search' &&
-              searchString.length === 0
-            ) {
-              setSearchMode('start');
-              setSearchPlaceholder('Search...');
-              setSelectedShip('');
-              setSearchString('');
-            }
-          }}
-          onChange={(e: any) => {
-            setSearchString(e.target.value);
-            if (e.target.value) {
-              if (e.target.value[0] === '~') {
-                setSearchMode('ship-search');
-                setData([]);
-              } else {
-                if (['app-search', 'dev-app-search'].includes(searchMode)) {
-                  setSearchMode(searchMode);
-                } else {
-                  setSearchMode('app-search');
-                }
-              }
+        }}
+        onChange={(e: any) => {
+          appInstaller.setSearchString(e.target.value);
+          if (e.target.value) {
+            if (e.target.value[0] === '~') {
+              appInstaller.setSearchMode('ship-search');
+              setData([]);
             } else {
-              setSearchMode('start');
-            }
-          }}
-          // onClick={() => triggerSearch(!toggle)}
-          onFocus={() => {
-            if (selectedShip) {
-              setSearchMode('dev-app-search');
-              setSearchModeArgs([selectedShip]);
-            } else if (searchString) {
-              if (searchString.startsWith('~')) {
-                setSearchMode('ship-search');
+              if (['app-search', 'dev-app-search'].includes(searchMode)) {
+                appInstaller.setSearchMode(searchMode);
               } else {
-                setSearchMode('app-search');
+                appInstaller.setSearchMode('app-search');
               }
-            } else {
-              setSearchMode('start');
             }
-          }}
-          onBlur={() => {
-            // setSearchMode('none');
-          }}
-        />
-      </PopoverAnchor>
-      <PopoverContent
-        sideOffset={5}
+          } else {
+            appInstaller.setSearchMode('start');
+          }
+        }}
+        // onClick={() => triggerSearch(!toggle)}
+        onFocus={() => {
+          if (selectedShip) {
+            appInstaller.setSearchMode('dev-app-search');
+            appInstaller.setSearchModeArgs([selectedShip]);
+          } else if (searchString) {
+            if (searchString.startsWith('~')) {
+              appInstaller.setSearchMode('ship-search');
+            } else {
+              appInstaller.setSearchMode('app-search');
+            }
+          } else {
+            appInstaller.setSearchMode('start');
+          }
+        }}
+        onBlur={() => {
+          // setSearchMode('none');
+        }}
+      />
+
+      <Flex
+        // sideOffset={5}
         style={{
           outline: 'none',
           boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
@@ -555,8 +558,8 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         {searchMode === 'app-search' &&
           renderAppSearch(data, theme.currentTheme)}
         {searchMode === 'app-summary' && renderAppSummary(data)}
-      </PopoverContent>
-    </Popover>
+      </Flex>
+    </>
   );
 });
 

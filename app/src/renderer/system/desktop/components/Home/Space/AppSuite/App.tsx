@@ -11,13 +11,15 @@ import {
 } from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store';
 
 type AppEmptyProps = {
-  selected: boolean;
+  isSelected: boolean;
   accentColor: string;
-};
+} & BoxProps;
 
-const AppEmpty = styled(Box)<AppEmptyProps & BoxProps>`
+const AppEmpty = styled(Box)<AppEmptyProps>`
   border-radius: 20px;
   /* border: 2px dotted white; */
   display: flex;
@@ -31,89 +33,85 @@ const AppEmpty = styled(Box)<AppEmptyProps & BoxProps>`
     background: ${rgba('#FFFFFF', 0.5)};
   }
   ${(props: AppEmptyProps) =>
-    props.selected &&
+    props.isSelected &&
     css`
       border: 2px solid ${props.accentColor};
     `};
 `;
 
 type SuiteAppProps = {
-  selected?: boolean;
+  id: string;
+  selected: boolean;
   space: SpaceModelType;
   highlightColor?: string;
-  accentColor?: string;
+  accentColor: string;
   app?: AppType;
   isAdmin?: boolean;
-  bazaar: BazaarStoreType;
-  onClick?: (e: React.MouseEvent<any, MouseEvent>, app: any) => void;
+  onClick?: (e: React.MouseEvent<any, MouseEvent>, app?: any) => void;
 };
 
-export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
-  const { selected, accentColor, app, space, isAdmin, bazaar, onClick } = props;
+export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
+  const { id, selected, accentColor, app, space, isAdmin, onClick } = props;
+  const { bazaar } = useServices();
   const currentBazaar = bazaar.getBazaar(space.path);
   if (app) {
-    const weRecommended = bazaar.my.recommendations.includes(app.id);
     const isPinned = currentBazaar?.pinned.includes(app.id);
-    const menu = useMemo(() => {
-      let menu = [];
-      if (isAdmin) {
-        menu.push({
-          label: 'Remove from suite',
-          onClick: (evt: any) => {
-            evt.stopPropagation();
-            onClick && onClick();
-          },
-        });
-        menu.push({
-          label: isPinned ? 'Unpin' : 'Pin',
-          onClick: (evt: any) => {
-            evt.stopPropagation();
-            isPinned
-              ? SpacesActions.unpinApp(space.path, app.id)
-              : SpacesActions.pinApp(space.path, app.id, null);
-          },
-        });
-      }
+    const weRecommended = bazaar.my.recommendations.includes(app.id);
+
+    let menu = [];
+    if (isAdmin) {
       menu.push({
-        label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+        label: 'Remove from suite',
         onClick: (evt: any) => {
           evt.stopPropagation();
-          weRecommended
-            ? SpacesActions.unrecommendApp(space.path, app.id)
-            : SpacesActions.recommendApp(space.path, app.id);
+          SpacesActions.removeFromSuite(space.path, app.id);
         },
       });
-      if (app.type === 'urbit') {
-        menu.push({
-          label:
-            app.installStatus === InstallStatus.installed
-              ? 'Uninstall app'
-              : 'Install app',
-          disabled: false,
-          section: 2,
-          onClick: (evt: any) => {
-            evt.stopPropagation();
-            // console.log('install app => %o', app);
-            if (app.installStatus === InstallStatus.installed) {
-              SpacesActions.uninstallApp(app.id);
-            } else {
-              SpacesActions.installApp(app);
-            }
-          },
-        });
-      }
-      return menu;
-    }, [app, isAdmin]);
-    // lighten app if not installed on this ship
-    app.color =
-      app.type !== 'urbit' ||
-      (app.type === 'urbit' && app.installStatus !== InstallStatus.installed)
-        ? app.color
-        : rgba(app.color, 0.7);
+      menu.push({
+        label: isPinned ? 'Unpin' : 'Pin',
+        onClick: (evt: any) => {
+          evt.stopPropagation();
+          isPinned
+            ? SpacesActions.unpinApp(space.path, app.id)
+            : SpacesActions.pinApp(space.path, app.id, null);
+        },
+      });
+    }
+    menu.push({
+      label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+      onClick: (evt: any) => {
+        evt.stopPropagation();
+        weRecommended
+          ? SpacesActions.unrecommendApp(space.path, app.id)
+          : SpacesActions.recommendApp(space.path, app.id);
+      },
+    });
+    if (app.type === 'urbit') {
+      menu.push({
+        label:
+          app.installStatus === InstallStatus.installed
+            ? 'Uninstall app'
+            : 'Install app',
+        disabled: false,
+        section: 2,
+        onClick: (evt: any) => {
+          evt.stopPropagation();
+          // console.log('install app => %o', app);
+          if (app.installStatus === InstallStatus.installed) {
+            SpacesActions.uninstallApp(app.id);
+          } else {
+            SpacesActions.installApp(app);
+          }
+        },
+      });
+    }
+
     return (
       <AppTile
         tileSize="xl1"
         app={app}
+        isPinned={isPinned}
+        isRecommended={weRecommended}
         allowContextMenu={true}
         contextMenu={menu}
         onAppClick={(selectedApp: AppType) => {
@@ -128,13 +126,14 @@ export const SuiteApp: FC<SuiteAppProps> = (props: SuiteAppProps) => {
   }
   return (
     <AppEmpty
+      id={id}
       height={160}
       width={160}
-      selected={selected}
+      isSelected={selected}
       accentColor={accentColor}
       onClick={(e) => onClick && onClick(e, undefined)}
     >
-      <Icons size={24} name="Plus" fill="#FFFFFF" opacity={0.4} />
+      <Icons size={24} name="Plus" fill={'#FFFFFF'} opacity={0.4} />
     </AppEmpty>
   );
-};
+});

@@ -42,7 +42,8 @@ export type StyledButtonProps = SpaceProps &
       | 'base'
       | 'transparent'
       | 'minimal'
-      | 'custom';
+      | 'custom'
+      | 'disabled';
   };
 
 const defaultButtonStyles = {
@@ -81,11 +82,6 @@ const buttonVariants = variant({
         transition: '0.2s ease',
         backgroundColor: 'highlights.primaryExtraHighlight',
         borderColor: 'transparent',
-      },
-      '&:disabled': {
-        color: 'text.disabled',
-        backgroundColor: 'ui.disabled',
-        borderColor: 'ui.disabled',
       },
     },
     secondary: {
@@ -171,6 +167,13 @@ const buttonVariants = variant({
         backgroundColor: 'ui.disabled',
         borderColor: 'ui.disabled',
       },
+    },
+    disabled: {
+      ...defaultButtonStyles,
+      opacity: 0.5,
+      color: 'text.disabled',
+      backgroundColor: 'ui.disabled',
+      borderColor: 'ui.disabled',
     },
     custom: {
       ...defaultButtonStyles,

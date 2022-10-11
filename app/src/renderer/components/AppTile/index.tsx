@@ -1,12 +1,11 @@
 import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { lighten, rgba, darken } from 'polished';
+import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, ContextMenu } from '..';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
-import { IconButton } from '../Button';
 import { Portal } from 'renderer/system/dialog/Portal';
 import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
@@ -99,6 +98,7 @@ interface AppTileProps {
   isAnimated?: boolean;
   tileSize: AppTileSize;
   hasTitle?: boolean;
+  isRecommended: boolean;
 }
 
 export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
@@ -115,12 +115,14 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     isAnimated,
     onAppClick,
     hasTitle,
+    isRecommended,
   } = props;
   const { theme } = useServices();
 
   const tileRef = useRef(null);
 
   return useMemo(() => {
+    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     let title;
     const isAppGrid =
       tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
@@ -130,7 +132,6 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     const boxShadowHover = isAppGrid
       ? '0px 4px 8px rgba(0, 0, 0, 0.15)'
       : 'none';
-    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     const isLight = lightOrDark === 'light';
     const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
     if (isAppGrid) {
@@ -139,7 +140,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       title = (
         <Text
           position="absolute"
-          // style={{ mixBlendMode: 'hard-light' }}
+          style={{ pointerEvents: 'none' }}
           left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
           padding=".2rem"
           borderRadius={4}
@@ -311,7 +312,11 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           />
         </Flex>
         {hasTitle && (
-          <Text color={theme.currentTheme.textColor} mt={2}>
+          <Text
+            style={{ pointerEvents: 'none' }}
+            color={theme.currentTheme.textColor}
+            mt={2}
+          >
             {app.title}
           </Text>
         )}
@@ -327,7 +332,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
         )} */}
       </Flex>
     );
-  }, [app, isPinned, selected, open]);
+  }, [app, isRecommended, isPinned, selected, open, theme.currentTheme]);
 });
 
 AppTile.defaultProps = {

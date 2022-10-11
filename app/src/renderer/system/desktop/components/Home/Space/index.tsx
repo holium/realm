@@ -10,7 +10,6 @@ import { RecommendedApps } from './Recommended';
 import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
-import { sampleSuite } from './sample-suite';
 
 type HomePaneProps = {
   isOpen?: boolean;
@@ -27,7 +26,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const [appGrid, showAppGrid] = useState(false);
   const [apps, setApps] = useState<any>([]);
   const [suite, setSuite] = useState<any>([]);
-  const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
+  // const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
   const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
   // console.log('isAdmin => %o', isAdmin);
 
@@ -51,12 +50,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       // console.log(suite);
       setSuite(suite);
     }
-  }, [
-    currentSpace,
-    currentBazaar?.suiteChange,
-    bazaar.appsChange,
-    currentBazaar?.pinnedChange,
-  ]);
+  }, [currentSpace, bazaar.appsChange]);
 
   useEffect(() => {
     const apps = bazaar.getAvailableApps();
@@ -132,7 +126,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         >
           <SpaceTitlebar
             space={currentSpace}
-            theme={theme.currentTheme}
             membersCount={membersCount}
             showAppGrid={appGrid}
             showMembers={sidebar === 'members'}

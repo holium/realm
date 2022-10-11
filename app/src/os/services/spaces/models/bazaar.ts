@@ -3,8 +3,6 @@ import { cleanNounColor } from '../../../lib/color';
 // import { NativeAppList, nativeApps } from '../../../../renderer/apps';
 import { DocketApp, WebApp, Glob } from '../../ship/models/docket';
 import { toJS } from 'mobx';
-import { apiOwnKeys } from 'mobx/dist/internal';
-import { hiDPI } from 'polished';
 // const util = require('util');
 
 export const DocketMap = types.map(
@@ -331,6 +329,27 @@ export const BazaarStore = types
         }
         if (app.type === 'urbit') {
           return app.installStatus !== InstallStatus.treaty;
+        }
+        return true;
+      });
+    },
+    getInstalledApps() {
+      // console.log('getAvailableApps => %o', self.apps.values());
+      return Array.from(self.apps.values()).filter((app) => {
+        if (
+          app.id === 'realm' ||
+          app.id === 'courier' ||
+          app.id === 'wallet' ||
+          app.id === 'garden'
+        ) {
+          return false;
+        }
+        if (
+          app.type === 'urbit' &&
+          (app.installStatus === InstallStatus.treaty ||
+            app.installStatus === InstallStatus.uninstalled)
+        ) {
+          return false;
         }
         return true;
       });

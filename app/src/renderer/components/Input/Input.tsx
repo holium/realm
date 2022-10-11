@@ -301,7 +301,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
           </LeftIcon>
         )}
         {leftLabel && leftLabel !== 'none' && (
-          <Text color="#639DF6" fontWeight="bold" marginRight={2}>
+          <Text color="#639DF6" fontWeight="500" marginRight={2}>
             {leftLabel}
           </Text>
         )}
@@ -318,6 +318,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
           style={{
             width: '100%',
             caretColor: noCursor ? 'transparent' : undefined,
+            ...props.style,
           }}
         />
         {rightIcon && (

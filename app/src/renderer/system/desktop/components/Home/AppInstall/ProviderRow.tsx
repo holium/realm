@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { darken } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text, Sigil } from 'renderer/components';
-import { ThemeType } from '../../../../theme';
+import { ThemeType } from '../../../../../theme';
 
 type RowProps = {
   theme: ThemeType;
@@ -38,7 +38,7 @@ export const ProviderRowStyle = styled(motion.div)<RowProps>`
 `;
 
 interface ProviderRowProps {
-  caption: string;
+  caption?: string;
   id: string;
   ship: string;
   color: string;
@@ -68,7 +68,10 @@ export const ProviderRow = ({
         gap={8}
         flex={1}
         // style={{ width: '100%' }}
-        onClick={(e) => onClick && onClick(ship)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick && onClick(ship);
+        }}
       >
         <Sigil
           simple

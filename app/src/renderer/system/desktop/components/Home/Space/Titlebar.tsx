@@ -9,14 +9,12 @@ import {
   IconButton,
 } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { ThemeModelType } from 'os/services/theme.model';
-import AppSearchApp from '../AppSearch';
+import AppSearchApp from '../AppInstall/AppSearch';
 import { useServices } from 'renderer/logic/store';
 
 type SpaceTitlebarProps = {
   space: SpaceModelType;
   membersCount: number;
-  theme: ThemeModelType;
   showAppGrid: boolean;
   showMembers: boolean;
   onMemberClick: (evt: MouseEvent) => void;
@@ -28,13 +26,13 @@ export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
     const {
       space,
       membersCount,
-      theme,
       showAppGrid,
       showMembers,
       onMemberClick,
       onToggleApps,
     } = props;
-    const { membership } = useServices();
+    const { theme: baseTheme } = useServices();
+    const theme = baseTheme.currentTheme;
 
     const iconHoverColor = useMemo(
       () => rgba(darken(0.03, theme.iconColor), 0.1),
@@ -44,7 +42,7 @@ export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
     const highlightColor = '#4E9EFD';
 
     return (
-      <Flex width="100%">
+      <Flex style={{ position: 'relative' }} width="100%">
         <Flex flex={1}>
           <SpacePicture
             size={40}
@@ -54,7 +52,7 @@ export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
           />
         </Flex>
         <Flex alignItems="center" gap={12}>
-          <AppSearchApp mode={'space'} />
+          <AppSearchApp mode="space" />
           <Flex flex={1} gap={8} justifyContent="flex-end">
             <IconButton
               size={3}

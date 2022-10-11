@@ -34,8 +34,6 @@ RealmActions.onInitialDimensions((_e: any, dims: any) => {
 export const Shell: FC = observer(() => {
   const { shell, theme, identity, ship } = useServices();
   const { resuming } = useCore();
-  // const windowRef = useRef(null);
-  // useWindowSize(windowRef);
 
   const isFullscreen = shell.isFullscreen;
   const wallpaper = theme.currentTheme.wallpaper;
@@ -51,11 +49,7 @@ export const Shell: FC = observer(() => {
 
   const shipLoaded = ship?.loader.isLoaded;
 
-  const GUI = shipLoaded ? (
-    <Desktop isFullscreen={isFullscreen} />
-  ) : (
-    <Auth firstTime={firstTime} />
-  );
+  const GUI = shipLoaded ? <Desktop /> : <Auth firstTime={firstTime} />;
 
   return (
     <ViewPort>
