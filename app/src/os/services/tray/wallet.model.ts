@@ -6,6 +6,15 @@ import {
   getSnapshot,
 } from 'mobx-state-tree';
 import { Type } from 'react-spaces';
+import { Network, Alchemy, NftExcludeFilters } from "alchemy-sdk";
+import { type } from 'os';
+
+const alchemySettings = {
+  apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+  network: Network.ETH_MAINNET, // Replace with your network.
+};
+
+const alchemy = new Alchemy(alchemySettings);
 
 export enum WalletView {
   ETH_LIST = 'ethereum:list',
@@ -88,17 +97,24 @@ const BitcoinStore = types
 
 const ERC20 = types.model('ERC20', {
   name: types.string,
+  logo: types.string,
   address: types.string,
   balance: types.number,
 });
 
 export type ERC20Type = Instance<typeof ERC20>
 
+const ERC721Token = types
+  .model('ERC721Token', {
+    name: types.string,
+    imageUrl: types.string,
+    tokenId: types.number,
+  })
+
 const ERC721 = types.model('ERC721', {
   name: types.string,
-  imageUrl: types.string,
   address: types.string,
-  tokens: types.string,//types.map(types.number),
+  tokens: types.map(ERC721Token),//types.map(types.number),
 });
 
 export type ERC721Type = Instance<typeof ERC721>
@@ -121,19 +137,20 @@ const EthWallet = types
     ),
   })
   .actions((self) => ({
-    addSmartContract(contractId: string, contractType: string, name: string, contractAddress: string) {
+    async addSmartContract(contractId: string, contractType: string, name: string, contractAddress: string) {
       if (contractType === 'erc721') {
         const contract = ERC721.create({
           name: name,
-          imageUrl: '',
           address: contractAddress,
-          tokens: '',
+          tokens: {},
         })
         self.nfts.set(contract.address, contract);
       }
       else if (contractType === 'erc20') {
+        const response = await alchemy.core.getTokenMetadata(contractAddress);
         const contract = ERC20.create({
           name: name,
+          logo: response.logo || '',
           address: contractAddress,
           balance: 0,
         })
@@ -205,7 +222,10 @@ export const EthStore = types
   .actions((self) => ({
     initial(wallets: any) {
       const ethWallets = wallets.ethereum;
-      Object.entries(ethWallets).forEach(([key, wallet]) => {
+      for (var wallet in ethWallets) {
+        this.applyWalletUpdate(wallet);
+      }
+      /*Object.entries(ethWallets).forEach(([key, wallet]) => {
         ethWallets[key] = {
           network: 'ethereum',
           nickname: (wallet as any).nickname,
@@ -215,6 +235,7 @@ export const EthStore = types
         }
       })
       applySnapshot(self.wallets, ethWallets);
+      */
     },
     applyHistory(history: any) {
       const ethHistory = history.ethereum;
@@ -264,7 +285,7 @@ export const EthStore = types
       };
       self.transactions.set(hash, tx);
     },
-    applyWalletUpdate(wallet: any) {
+    async applyWalletUpdate(wallet: any) {
       const coins = self.wallets.get(wallet.key)!.coins.toJSON();
       const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
       for (var contract in wallet.contracts) {
@@ -274,7 +295,24 @@ export const EthStore = types
         }
         if ((contract as any).type === 'erc721') {
           let nft: any = contract;
-          nfts[nft.address].tokens = nft.tokens;
+          var tokens = nfts[nft.address].tokens;
+          for (var token in nft.tokens) {
+            // if token not in tokens
+            if (tokens)
+            {
+              const response = await alchemy.nft.getNftMetadata(
+                nft.address,
+                token
+              );
+              var newToken = {
+                name: response.title,
+                imageUrl: response.tokenUri!.toString(),
+                tokenId: 0,
+              };
+              tokens[token] = newToken;
+            }
+          }
+          nfts[nft.address].tokens = tokens;
         }
       }
       const walletObj = {

@@ -19,6 +19,14 @@ import {
 } from './wallet.model';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import EncryptedStore from '../../lib/encryptedStore';
+import { Network, Alchemy } from "alchemy-sdk";
+
+const alchemySettings = {
+  apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+  network: Network.ETH_MAINNET, // Replace with your network.
+};
+
+const alchemy = new Alchemy(alchemySettings);
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -484,6 +492,14 @@ export class WalletService extends BaseService {
     contractAddress: string,
     walletIndex: string
   ) {
+    if (contractType === 'erc721') {
+      // fetch metadata
+    }
+    var logoUrl
+    if (contractType === 'erc20') {
+      const response = await alchemy.core.getTokenMetadata(contractAddress);
+      logoUrl = response.logo;
+    }
     this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractId, contractType, name, contractAddress);
     await WalletApi.addSmartContract(
       this.core.conduit!,
@@ -491,7 +507,7 @@ export class WalletService extends BaseService {
       contractType,
       name,
       contractAddress,
-      walletIndex
+      walletIndex,
     );
   }
 
