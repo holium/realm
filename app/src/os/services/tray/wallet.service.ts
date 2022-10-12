@@ -19,7 +19,6 @@ import {
 } from './wallet.model';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import EncryptedStore from '../../lib/encryptedStore';
-import stubTransactions from './stubTransactions';
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -485,6 +484,7 @@ export class WalletService extends BaseService {
     contractAddress: string,
     walletIndex: string
   ) {
+    this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractId, contractType, name, contractAddress);
     await WalletApi.addSmartContract(
       this.core.conduit!,
       contractId,

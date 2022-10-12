@@ -1,9 +1,11 @@
+import { Types } from 'aws-sdk/clients/s3';
 import {
   applySnapshot,
   types,
   Instance,
   getSnapshot,
 } from 'mobx-state-tree';
+import { Type } from 'react-spaces';
 
 export enum WalletView {
   ETH_LIST = 'ethereum:list',
@@ -75,10 +77,10 @@ const BitcoinStore = types
     applyWalletUpdate(wallet: any) {
       const walletObj = {
         network: 'bitcoin',
-        path: wallet.wallet.path,
-        address: wallet.wallet.address,
-        nickname: wallet.wallet.nickname,
-        balance: wallet.wallet.balance.toString(),
+        path: wallet.path,
+        address: wallet.address,
+        nickname: wallet.nickname,
+        balance: wallet.balance.toString(),
       };
       self.wallets.set(wallet.key, BitcoinWallet.create(walletObj));
     }
@@ -90,28 +92,55 @@ const ERC20 = types.model('ERC20', {
   balance: types.number,
 });
 
+export type ERC20Type = Instance<typeof ERC20>
+
 const ERC721 = types.model('ERC721', {
   name: types.string,
+  imageUrl: types.string,
   address: types.string,
-  tokens: types.map(types.number),
+  tokens: types.string,//types.map(types.number),
 });
 
-const EthWallet = types.model('EthWallet', {
-  network: types.string,
-  path: types.string,
-  address: types.string,
-  balance: types.string,
-  coins: types.map(ERC20),
-  nfts: types.map(ERC721),
-  nickname: types.string,
-  conversions: types.maybe(
-    types.model({
-      usd: types.maybe(types.string),
-      cad: types.maybe(types.string),
-      euro: types.maybe(types.string),
-    })
-  ),
-});
+export type ERC721Type = Instance<typeof ERC721>
+
+const EthWallet = types
+  .model('EthWallet', {
+    network: types.string,
+    path: types.string,
+    address: types.string,
+    balance: types.string,
+    coins: types.map(ERC20),
+    nfts: types.map(ERC721),
+    nickname: types.string,
+    conversions: types.maybe(
+      types.model({
+        usd: types.maybe(types.string),
+        cad: types.maybe(types.string),
+        euro: types.maybe(types.string),
+      })
+    ),
+  })
+  .actions((self) => ({
+    addSmartContract(contractId: string, contractType: string, name: string, contractAddress: string) {
+      if (contractType === 'erc721') {
+        const contract = ERC721.create({
+          name: name,
+          imageUrl: '',
+          address: contractAddress,
+          tokens: '',
+        })
+        self.nfts.set(contract.address, contract);
+      }
+      else if (contractType === 'erc20') {
+        const contract = ERC20.create({
+          name: name,
+          address: contractAddress,
+          balance: 0,
+        })
+        self.coins.set(contract.address, contract);
+      }
+    }
+  }))
 
 export type EthWalletType = Instance<typeof EthWallet>
 
@@ -236,14 +265,26 @@ export const EthStore = types
       self.transactions.set(hash, tx);
     },
     applyWalletUpdate(wallet: any) {
+      const coins = self.wallets.get(wallet.key)!.coins.toJSON();
+      const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
+      for (var contract in wallet.contracts) {
+        if ((contract as any).type === 'erc20') {
+          let coin: any = contract;
+          coins[coin.address].balance = coin.balance;
+        }
+        if ((contract as any).type === 'erc721') {
+          let nft: any = contract;
+          nfts[nft.address].tokens = nft.tokens;
+        }
+      }
       const walletObj = {
         network: 'ethereum',
-        path: wallet.wallet.path,
-        address: wallet.wallet.address,
-        balance: gweiToEther(wallet.wallet.balance).toString(),
-        coins: wallet.wallet.contracts,
-        nfts: wallet.wallet.contracts,
-        nickname: wallet.wallet.nickname,
+        path: wallet.path,
+        address: wallet.address,
+        balance: gweiToEther(wallet.balance).toString(),
+        coins: coins,
+        nfts: nfts,
+        nickname: wallet.nickname,
       };
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     },

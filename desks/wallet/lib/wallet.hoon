@@ -161,38 +161,35 @@
     ^-  (list [@t json])
     :~  ['network' [%s network.update]]
         ['key' [%s +>-.update]]
-        :-  'wallet'
+        ['address' [%s (crip (z-co:co address.wallet.update))]]
+        ['path' [%s path.wallet.update]]
+        ['nickname' [%s nickname.wallet.update]]
+        ['balance' (numb balance.wallet.update)]
+        :-  'contracts'
+        %-  pairs
+        %+  turn  ~(tap by contracts-map.wallet.update)
+        |=  [contract-id=@t =contract-data]
+        ^-  [@t json]
+        :-  contract-id
+        ?-  -.contract-data
+            %erc20
           %-  pairs
-          :~  ['address' [%s (crip (z-co:co address.wallet.update))]]
-              ['path' [%s path.wallet.update]]
-              ['nickname' [%s nickname.wallet.update]]
-              ['balance' (numb balance.wallet.update)]
-              :-  'contracts'
-              %-  pairs
-              %+  turn  ~(tap by contracts-map.wallet.update)
-              |=  [contract-id=@t =contract-data]
-              ^-  [@t json]
-              :-  contract-id
-              ?-  -.contract-data
-                  %erc20
-                %-  pairs
-                :~  ['type' s+'erc20']
-                    ['name' [%s name.contract-data]]
-                    ['address' [%s (crip (z-co:co address.contract-data))]]
-                    ['balance' (numb balance.contract-data)]
-                ==
-                  %erc721
-                %-  pairs
-                :~  ['type' s+'erc721']
-                    ['name' s+name.contract-data]
-                    ['address' [%s (crip (z-co:co address.contract-data))]]
-                    :-  'tokens'
-                    :-  %a
-                    %+  turn  ~(tap in tokens.contract-data)
-                    numb
-                ==
-              ==
+          :~  ['type' s+'erc20']
+              ['name' [%s name.contract-data]]
+              ['address' [%s (crip (z-co:co address.contract-data))]]
+              ['balance' (numb balance.contract-data)]
           ==
+            %erc721
+          %-  pairs
+          :~  ['type' s+'erc721']
+              ['name' s+name.contract-data]
+              ['address' [%s (crip (z-co:co address.contract-data))]]
+              :-  'tokens'
+              :-  %a
+              %+  turn  ~(tap in tokens.contract-data)
+              numb
+          ==
+        ==
     ==
   ::
       %wallets
