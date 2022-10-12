@@ -266,6 +266,7 @@
       "provider": "github",
       "owner": "holium",
       "repo": "realm",
+      "releaseType": "release",
       "private": true
     }
   },
