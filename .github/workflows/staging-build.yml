@@ -7,7 +7,7 @@ on:
       - staging
   pull_request:
 jobs:
-  install-node:
+  build-staging:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
       - run: yarn install
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
-      - name: "Publishing..."
+      - name: "Build and publish..."
         run: npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:publish
         env:
           GH_TOKEN: "${{ secrets.GH_TOKEN }}"
