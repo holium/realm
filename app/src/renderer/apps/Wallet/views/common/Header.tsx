@@ -26,7 +26,6 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
       pl={3}
       pr={3}
       pt="12px"
-      pb="6px"
       // height="40px"
     >
       <Icons name="WalletNew" size="20px" opacity={0.7} />

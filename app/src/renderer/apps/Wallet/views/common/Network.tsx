@@ -44,7 +44,7 @@ export const WalletNetwork: FC<WalletNetwork> = observer(
               background="#4CDD86"
             />
             <Text fontSize="12px" color={themeData.colors.ui.secondary}>
-              Goerli Testnet
+              Görli Testnet
             </Text>
           </Flex>
         </Flex>

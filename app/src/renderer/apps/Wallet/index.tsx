@@ -14,7 +14,7 @@ import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
-import { PendingTransactionDisplay } from './views/common/Detail/PendingTransaction';
+import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 
 const WalletViews: { [key: string]: any } = {
