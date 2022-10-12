@@ -22,4 +22,4 @@ jobs:
       - name: "Publishing..."
         run: npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:publish
         env:
-          GH_TOKEN: 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
+          GH_TOKEN: "${{ secrets.GH_TOKEN }}"
