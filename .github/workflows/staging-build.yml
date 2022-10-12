@@ -1,10 +1,10 @@
-name: production-build
-run-name: Production Build - ${{ github.actor }}
+name: staging-build
+run-name: Staging Build - ${{ github.actor }}
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - staging
   pull_request:
 jobs:
   install-node:
@@ -19,4 +19,7 @@ jobs:
       - run: yarn install
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
-      - run: npx cross-env yarn package:publish
+      - name: "Publishing..."
+        run: npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:publish
+        env:
+          GH_TOKEN: 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
