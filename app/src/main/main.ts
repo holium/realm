@@ -36,7 +36,6 @@ export interface IAppUpdater {
 }
 
 export class AppUpdater implements IAppUpdater {
-  protected updatedDownloaded: boolean = false;
   constructor() {
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.autoDownload = true;
@@ -55,14 +54,17 @@ export class AppUpdater implements IAppUpdater {
           buttons: ['Sure', 'No'],
         })
         .then((buttonIndex) => {
-          // @ts-ignore
-          if (buttonIndex === 0) {
-            if (this.updatedDownloaded) {
-              autoUpdater.quitAndInstall();
-            } else {
-              autoUpdater.downloadUpdate();
-            }
-          }
+          dialog
+            .showMessageBox({
+              title: 'Button',
+              message: `${buttonIndex}`,
+            })
+            .then(() => {
+              // @ts-ignore
+              if (buttonIndex === 0) {
+                autoUpdater.downloadUpdate();
+              }
+            });
         });
     });
     autoUpdater.on('update-not-available', () => {
@@ -72,7 +74,6 @@ export class AppUpdater implements IAppUpdater {
       });
     });
     autoUpdater.on('update-downloaded', () => {
-      this.updatedDownloaded = true;
       dialog
         .showMessageBox({
           title: 'Install Updates',
@@ -82,7 +83,7 @@ export class AppUpdater implements IAppUpdater {
           setImmediate(() => autoUpdater.quitAndInstall());
         });
     });
-    log.transports.file.level = 'info';
+    log.transports.file.level = 'debug';
     autoUpdater.logger = log;
     // autoUpdater.checkForUpdatesAndNotify();
   }
