@@ -17,10 +17,6 @@ jobs:
           cache: "npm"
       - run: npm install -g yarn
       - run: yarn install
-      - name: "Print token"
-        run: echo "$GH_TOKEN"
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
       - name: "Build and publish..."
