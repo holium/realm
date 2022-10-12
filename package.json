@@ -8,7 +8,7 @@
     "lib/room"
   ],
   "scripts": {
-    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:app",
+    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:app && yarn build:room",
     "build:app": "yarn workspace @holium/realm build",
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
@@ -16,7 +16,7 @@
     "start": "yarn workspace @holium/realm start",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
-    "package:debug": "yarn workspace @holium/realm package:package"
+    "package:publish": "yarn workspace @holium/realm package:publish"
   },
   "dependencies": {
     "ethers": "^5.7.0",
