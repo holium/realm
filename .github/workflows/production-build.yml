@@ -17,6 +17,5 @@ jobs:
         with:
           node-version: "14"
       - run: npm install -g yarn
-      - run: npm install -g npx
       - run: yarn install
       - run: npx cross-env DEBUG_PROD=true yarn package:debug
