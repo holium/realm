@@ -36,8 +36,10 @@ export interface IAppUpdater {
 }
 
 export class AppUpdater implements IAppUpdater {
+  protected updatedDownloaded: boolean = false;
   constructor() {
-    autoUpdater.autoDownload = false;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.autoDownload = true;
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
         'Error: ',
@@ -55,7 +57,11 @@ export class AppUpdater implements IAppUpdater {
         .then((buttonIndex) => {
           // @ts-ignore
           if (buttonIndex === 0) {
-            autoUpdater.downloadUpdate();
+            if (this.updatedDownloaded) {
+              autoUpdater.quitAndInstall();
+            } else {
+              autoUpdater.downloadUpdate();
+            }
           }
         });
     });
@@ -66,6 +72,7 @@ export class AppUpdater implements IAppUpdater {
       });
     });
     autoUpdater.on('update-downloaded', () => {
+      this.updatedDownloaded = true;
       dialog
         .showMessageBox({
           title: 'Install Updates',
