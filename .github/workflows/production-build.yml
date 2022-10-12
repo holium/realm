@@ -18,4 +18,4 @@ jobs:
           node-version: "14"
       - run: npm install -g yarn
       - run: yarn install
-      - run: npx cross-env DEBUG_PROD=true yarn package:debug
+      - run: npx cross-env DEBUG_PROD=true yarn package:publish
