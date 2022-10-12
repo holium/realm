@@ -18,4 +18,8 @@ jobs:
           node-version: "14"
       - run: npm install -g yarn
       - run: yarn install
+      # switch to ./app folder before running npx command
+      - run: cd app
+      # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
+      #   and other utilities/functionality are available in the final product
       - run: npx cross-env DEBUG_PROD=true yarn package:publish
