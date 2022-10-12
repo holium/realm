@@ -366,6 +366,9 @@ export const paths = {
   ChevronDown: (
     <path d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z" />
   ),
+  ChevronRight: (
+   <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
+  ),
   RoomSpeaker: (
     <g>
       <rect x="1" y="10" width="2" height="5" rx="1" />

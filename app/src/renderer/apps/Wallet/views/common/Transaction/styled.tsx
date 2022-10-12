@@ -32,3 +32,9 @@ export const FlexHider = styled(Flex)`
     margin: 0;
   }
 `;
+
+export const NoScrollBar = styled(Flex)`
+::-webkit-scrollbar {
+  display: none;
+}
+`;
