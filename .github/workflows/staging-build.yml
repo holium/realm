@@ -52,6 +52,10 @@ jobs:
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
       - name: Build and publish
-        run: npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:publish
+        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_PASS=$APPLE_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$KEYCHAIN_PASSWORD CSC_IDENTITY_AUTO_DISCOVERY=false GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:publish
         env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASS: ${{ secrets.APPLE_PASSWORD }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
