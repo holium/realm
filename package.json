@@ -8,7 +8,7 @@
     "lib/room"
   ],
   "scripts": {
-    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:app && yarn build:room",
+    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
