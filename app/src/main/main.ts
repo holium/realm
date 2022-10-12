@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session, screen } from 'electron';
+import { app, BrowserWindow, shell, session, screen, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
@@ -31,12 +31,57 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
-export default class AppUpdater {
+export interface IAppUpdater {
+  checkForUpdates: () => void;
+}
+
+export class AppUpdater implements IAppUpdater {
   constructor() {
+    autoUpdater.autoDownload = false;
+    autoUpdater.on('error', (error) => {
+      dialog.showErrorBox(
+        'Error: ',
+        error == null ? 'unknown' : (error.stack || error).toString()
+      );
+    });
+    autoUpdater.on('update-available', () => {
+      dialog
+        .showMessageBox({
+          type: 'info',
+          title: 'Found Updates',
+          message: 'Found updates, do you want update now?',
+          buttons: ['Sure', 'No'],
+        })
+        .then((buttonIndex) => {
+          // @ts-ignore
+          if (buttonIndex === 0) {
+            autoUpdater.downloadUpdate();
+          }
+        });
+    });
+    autoUpdater.on('update-not-available', () => {
+      dialog.showMessageBox({
+        title: 'No Updates',
+        message: 'Current version is up-to-date.',
+      });
+    });
+    autoUpdater.on('update-downloaded', () => {
+      dialog
+        .showMessageBox({
+          title: 'Install Updates',
+          message: 'Updates downloaded, application will be quit for update...',
+        })
+        .then(() => {
+          setImmediate(() => autoUpdater.quitAndInstall());
+        });
+    });
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
+    // autoUpdater.checkForUpdatesAndNotify();
   }
+  checkForUpdates = () => {
+    return autoUpdater.checkForUpdates();
+  };
 }
 
 let mainWindow: BrowserWindow | null = null;
@@ -165,7 +210,11 @@ const createWindow = async () => {
     app.quit();
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
+  // Remove this if your app does not use auto updates
+  // eslint-disable-next-line
+  const appUpdater = new AppUpdater();
+
+  const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
   menuBuilder.buildMenu();
 
   // Open urls in the user's browser
@@ -173,10 +222,6 @@ const createWindow = async () => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
-
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
 };
 
 // start();

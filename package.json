@@ -15,7 +15,8 @@
     "build:room": "yarn workspace @holium/realm-room build",
     "start": "yarn workspace @holium/realm start",
     "add:realm": "yarn workspace @holium/realm add -W",
-    "package": "yarn workspace @holium/realm package"
+    "package": "yarn workspace @holium/realm package",
+    "package:debug": "yarn workspace @holium/realm package:debug"
   },
   "dependencies": {
     "ethers": "^5.7.0",

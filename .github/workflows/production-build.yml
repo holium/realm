@@ -1,0 +1,22 @@
+name: production-build-testing
+run-name: Production Build Testing - ${{ github.actor }}
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release-pipeline
+  pull_request:
+env:
+  GH_TOKEN: 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
+jobs:
+  run-production-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+      - run: npm install -g yarn
+      - run: npm install -g npx
+      - run: yarn install
+      - run: npx cross-env DEBUG_PROD=true yarn package:debug
