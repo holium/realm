@@ -19,6 +19,14 @@ import {
 } from './wallet.model';
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import EncryptedStore from '../../lib/encryptedStore';
+import { Network, Alchemy } from "alchemy-sdk";
+
+const alchemySettings = {
+  apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+  network: Network.ETH_MAINNET, // Replace with your network.
+};
+
+const alchemy = new Alchemy(alchemySettings);
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -233,9 +241,19 @@ export class WalletService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    WalletApi.subscribeToWallets(this.core.conduit!, (wallet: any) => {
+    WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
+        const balances = await alchemy.core.getTokenBalances(wallet.address, 'erc20');
+        // Remove tokens with zero balance
+        const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
+          return token.tokenBalance !== "0";
+        });
+
+        for (let token in nonZeroBalances) {
+          const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
+          WalletApi.addSmartContract(this.core.conduit!, '', 'erc20', metadata.name!, (token as any).contractAddress, wallet.index);
+        }
       }
       if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);

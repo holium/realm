@@ -6,8 +6,7 @@ import {
   getSnapshot,
 } from 'mobx-state-tree';
 import { Type } from 'react-spaces';
-import { Network, Alchemy, NftExcludeFilters } from "alchemy-sdk";
-import { type } from 'os';
+import { Network, Alchemy } from "alchemy-sdk";
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -286,45 +285,59 @@ export const EthStore = types
       self.transactions.set(hash, tx);
     },
     async applyWalletUpdate(wallet: any) {
-      const coins = self.wallets.get(wallet.key)!.coins.toJSON();
-      const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
-      for (var contract in wallet.contracts) {
-        if ((contract as any).type === 'erc20') {
-          let coin: any = contract;
-          coins[coin.address].balance = coin.balance;
-        }
-        if ((contract as any).type === 'erc721') {
-          let nft: any = contract;
-          var tokens = nfts[nft.address].tokens;
-          for (var token in nft.tokens) {
-            // if token not in tokens
-            if (tokens)
-            {
-              const response = await alchemy.nft.getNftMetadata(
-                nft.address,
-                token
-              );
-              var newToken = {
-                name: response.title,
-                imageUrl: response.tokenUri!.toString(),
-                tokenId: 0,
-              };
-              tokens[token] = newToken;
-            }
-          }
-          nfts[nft.address].tokens = tokens;
-        }
+      if (!self.wallets.has(wallet.key)) {
+        const walletObj = {
+          network: 'ethereum',
+          path: wallet.path,
+          address: wallet.address,
+          balance: gweiToEther(wallet.balance).toString(),
+          coins: {},
+          nfts: {},
+          nickname: wallet.nickname,
+        };
+        self.wallets.set(wallet.key, EthWallet.create(walletObj));self.wallets.set(wallet.key, EthWallet.create(walletObj));
       }
-      const walletObj = {
-        network: 'ethereum',
-        path: wallet.path,
-        address: wallet.address,
-        balance: gweiToEther(wallet.balance).toString(),
-        coins: coins,
-        nfts: nfts,
-        nickname: wallet.nickname,
-      };
-      self.wallets.set(wallet.key, EthWallet.create(walletObj));
+      else {
+        const coins = self.wallets.get(wallet.key)!.coins.toJSON();
+        const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
+        for (var contract in wallet.contracts) {
+          if ((contract as any).type === 'erc20') {
+            let coin: any = contract;
+            coins[coin.address].balance = coin.balance;
+          }
+          if ((contract as any).type === 'erc721') {
+            let nft: any = contract;
+            var tokens = nfts[nft.address].tokens;
+            for (var token in nft.tokens) {
+              // if token not in tokens
+              if (tokens)
+              {
+                const response = await alchemy.nft.getNftMetadata(
+                  nft.address,
+                  token
+                );
+                var newToken = {
+                  name: response.title,
+                  imageUrl: response.tokenUri!.toString(),
+                  tokenId: 0,
+                };
+                tokens[token] = newToken;
+              }
+            }
+            nfts[nft.address].tokens = tokens;
+          }
+        }
+        const walletObj = {
+          network: 'ethereum',
+          path: wallet.path,
+          address: wallet.address,
+          balance: gweiToEther(wallet.balance).toString(),
+          coins: coins,
+          nfts: nfts,
+          nickname: wallet.nickname,
+        };
+        self.wallets.set(wallet.key, EthWallet.create(walletObj));
+      }
     },
     applyTransactionUpdate(transaction: any) {
       /*let tx = self.transactions.get(transaction.transaction.hash)!;
