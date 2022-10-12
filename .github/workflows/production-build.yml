@@ -10,7 +10,7 @@ env:
   GH_TOKEN: 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
 jobs:
   install-node:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -19,7 +19,7 @@ jobs:
           cache: "npm"
       - run: npm install -g yarn
       - run: yarn install
-      - run: yarn build
+      # - run: yarn build
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
       - run: npx cross-env DEBUG_PROD=true yarn package:publish
