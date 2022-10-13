@@ -139,8 +139,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Increment version
-          uses: actions/github-script@v6
-          with:
-            script: |
-              const script = require('./.github/workflows/scripts/verinc.js')
-              console.log(script({github, context}))
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/verinc.js')
+            console.log(script({github, context}))
