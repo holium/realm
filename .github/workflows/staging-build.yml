@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - staging
-  pull_request:
 jobs:
   build-staging:
     runs-on: macos-latest
