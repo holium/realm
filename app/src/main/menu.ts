@@ -15,9 +15,9 @@ interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
-  appUpdater: IAppUpdater | undefined;
+  appUpdater: IAppUpdater;
 
-  constructor(mainWindow: BrowserWindow, appUpdater: IAppUpdater | undefined) {
+  constructor(mainWindow: BrowserWindow, appUpdater: IAppUpdater) {
     this.mainWindow = mainWindow;
     this.appUpdater = appUpdater;
   }
@@ -78,18 +78,14 @@ export default class MenuBuilder {
           selector: 'hideOtherApplications:',
         },
         { label: 'Show All', selector: 'unhideAllApplications:' },
-        // @ts-ignore
-        ...(this.appUpdater && { type: 'separator' }),
-        // @ts-ignore
-        ...(this.appUpdater !== undefined
-          ? {
-              label: 'Check for Updates',
-              accelerator: 'Command+U',
-              click: () => {
-                this.appUpdater && this.appUpdater.checkForUpdates();
-              },
-            }
-          : {}),
+        { type: 'separator' },
+        {
+          label: 'Check for Updates',
+          accelerator: 'Command+U',
+          click: () => {
+            this.appUpdater.checkForUpdates();
+          },
+        },
         { type: 'separator' },
         {
           label: 'Quit',
