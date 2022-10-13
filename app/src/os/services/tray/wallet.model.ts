@@ -130,6 +130,7 @@ const ERC721 = types.model('ERC721', {
   name: types.string,
   collectionName: types.maybe(types.string),
   address: types.string,
+  tokenId: types.string,
   imageUrl: types.string,
   lastPrice: types.string,
   floorPrice: types.maybe(types.string)
@@ -156,21 +157,25 @@ const EthWallet = types
   })
   .actions((self) => ({
     async addSmartContract(contractId: string, contractType: string, name: string, contractAddress: string) {
-      if (contractType === 'erc721') {
-        const contract = ERC721.create({
+      /*if (contractType === 'erc721') {
+        *const contract = ERC721.create({
           name: name,
+          collectionName: '',
           address: contractAddress,
-          tokens: {},
+          tokenId: 0,
+          imageUrl: '',
+          lastPrice: '',
+          floorPrice: '',
         })
         self.nfts.set(contract.address, contract);
-      }
-      else if (contractType === 'erc20') {
+      }*/
+      if (contractType === 'erc20') {
         const response = await alchemy.core.getTokenMetadata(contractAddress);
         const contract = ERC20.create({
           name: name,
           logo: response.logo || '',
           address: contractAddress,
-          balance: 0,
+          balance: '0',
         })
         self.coins.set(contract.address, contract);
       }
@@ -333,10 +338,9 @@ export const EthStore = types
           }
           if ((contract as any).type === 'erc721') {
             let nft: any = contract;
-            var tokens = nfts[nft.address].tokens;
             for (var token in nft.tokens) {
               // if token not in tokens
-              if (tokens)
+              if (!nfts[token])
               {
                 const response = await alchemy.nft.getNftMetadata(
                   nft.address,
@@ -344,13 +348,16 @@ export const EthStore = types
                 );
                 var newToken = {
                   name: response.title,
+                  collectionName: response.tokenType,
+                  address: nft.address,
+                  tokenId: response.tokenId,
                   imageUrl: response.tokenUri!.toString(),
-                  tokenId: 0,
+                  lastPrice: '0',
+                  floorPrice: '0'
                 };
-                tokens[token] = newToken;
+                nfts[nft.address+token] = newToken;
               }
             }
-            nfts[nft.address].tokens = tokens;
           }
         }
         const walletObj = {
