@@ -221,6 +221,31 @@
                 ['path' [%s path.wallet]]
                 ['nickname' [%s nickname.wallet]]
                 ['balance' (numb balance.wallet)]
+                :-  'contracts'
+                  %-  pairs
+                  %+  turn  ~(tap by contracts-map.wallet)
+                  |=  [contract-id=@t =contract-data]
+                  ^-  [@t json]
+                  :-  contract-id
+                  ?-  -.contract-data
+                      %erc20
+                    %-  pairs
+                    :~  ['type' s+'erc20']
+                        ['name' [%s name.contract-data]]
+                        ['address' [%s (crip (z-co:co address.contract-data))]]
+                        ['balance' (numb balance.contract-data)]
+                    ==
+                      %erc721
+                    %-  pairs
+                    :~  ['type' s+'erc721']
+                        ['name' s+name.contract-data]
+                        ['address' [%s (crip (z-co:co address.contract-data))]]
+                        :-  'tokens'
+                        :-  %a
+                        %+  turn  ~(tap in tokens.contract-data)
+                        numb
+                    ==
+                  ==
             ==
       --
     --

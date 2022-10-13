@@ -225,9 +225,16 @@ export const EthStore = types
   .actions((self) => ({
     initial(wallets: any) {
       const ethWallets = wallets.ethereum;
-      for (var wallet in ethWallets) {
+      Object.entries(ethWallets).forEach(([key, wallet]) => {
+        const walletUpdate = {
+          ...(wallet as any),
+          key: key,
+        }
+        this.applyWalletUpdate(walletUpdate)
+      })
+      /*for (var wallet in ethWallets) {
         this.applyWalletUpdate(wallet);
-      }
+      }*/
       /*Object.entries(ethWallets).forEach(([key, wallet]) => {
         ethWallets[key] = {
           network: 'ethereum',
