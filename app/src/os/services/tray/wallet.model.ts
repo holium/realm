@@ -99,6 +99,8 @@ const ERC20 = types.model('ERC20', {
   logo: types.string,
   address: types.string,
   balance: types.number,
+  // ticker
+  // last price or floor price
 });
 
 export type ERC20Type = Instance<typeof ERC20>
@@ -106,6 +108,8 @@ export type ERC20Type = Instance<typeof ERC20>
 const ERC721Token = types
   .model('ERC721Token', {
     name: types.string,
+    // collection name - null if single
+    // last price or floor price
     imageUrl: types.string,
     tokenId: types.number,
   })
@@ -113,7 +117,7 @@ const ERC721Token = types
 const ERC721 = types.model('ERC721', {
   name: types.string,
   address: types.string,
-  tokens: types.map(ERC721Token),//types.map(types.number),
+  tokens: types.map(ERC721Token),
 });
 
 export type ERC721Type = Instance<typeof ERC721>

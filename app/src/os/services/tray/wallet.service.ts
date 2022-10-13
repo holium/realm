@@ -244,7 +244,8 @@ export class WalletService extends BaseService {
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
-        const balances = await alchemy.core.getTokenBalances(wallet.address, 'erc20');
+      }
+        /*const balances = await alchemy.core.getTokenBalances(wallet.address, 'erc20');
         // Remove tokens with zero balance
         const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
           return token.tokenBalance !== "0";
@@ -254,7 +255,7 @@ export class WalletService extends BaseService {
           const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
           WalletApi.addSmartContract(this.core.conduit!, '', 'erc20', metadata.name!, (token as any).contractAddress, wallet.index);
         }
-      }
+      }*/
       if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);
       }
