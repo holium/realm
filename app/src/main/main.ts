@@ -96,9 +96,15 @@ export class AppUpdater implements IAppUpdater {
     });
     log.transports.file.level = 'debug';
     autoUpdater.logger = log;
-    // autoUpdater.checkForUpdatesAndNotify();
+    // run auto check once every 10 minutes after app starts
+    setInterval(() => autoUpdater.checkForUpdates(), 600000);
+    autoUpdater.checkForUpdates();
   }
   checkForUpdates = () => {
+    dialog.showMessageBox({
+      title: 'Build',
+      message: `${process.env.NODE_ENV}`,
+    });
     autoUpdater.checkForUpdates();
   };
 }
@@ -228,10 +234,10 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  let appUpdater: any = undefined;
-  if (process.env.NODE_ENV === 'production') {
-    appUpdater = new AppUpdater();
-  }
+  const appUpdater: any = new AppUpdater();
+  // if (process.env.NODE_ENV === 'production') {
+  //   appUpdater = new AppUpdater();
+  // }
 
   const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
   menuBuilder.buildMenu();
