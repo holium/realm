@@ -25,7 +25,7 @@ export const WalletList: FC<WalletListProps> = observer(
                 key={wallet.address}
                 wallet={wallet}
                 onSelect={() => {
-                  WalletActions.setView(WalletView.ETH_DETAIL, wallet.key);
+                  WalletActions.setView(WalletView.WALLET_DETAIL, wallet.key);
                 }}
               />
             );

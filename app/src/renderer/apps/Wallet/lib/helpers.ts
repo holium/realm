@@ -1,5 +1,5 @@
 import { utils, BigNumber } from 'ethers';
-import { DesktopStoreType } from 'os/services/shell/desktop.model';
+import { ERC20Type, ERC721Type, TransactionType } from 'os/services/tray/wallet.model';
 import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 
@@ -35,6 +35,18 @@ export function getTransactions(
   return Array.from(transactionMap.values()).filter((trans) =>
     address ? trans.ourAddress === address : true
   );
+}
+
+export function getCoins(
+  coinMap: Map<string, ERC20Type>
+): ERC20Type[] {
+  return Array.from(coinMap.values());
+}
+
+export function getNfts(
+  nftMap: Map<string, ERC721Type>
+): ERC721Type[] {
+  return Array.from(nftMap.values());
 }
 
 export interface EthAmount {

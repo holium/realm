@@ -8,7 +8,7 @@ import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
 import { ThemeModelType } from 'os/services/theme.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
@@ -29,7 +29,7 @@ const FlexWithShadow = styled(Flex)`
 
 interface DetailHeroProps {
   wallet: EthWalletType | BitcoinWalletType;
-  coin?: string;
+  coin: ERC20Type | null;
   QROpen: boolean;
   setQROpen: (open: boolean) => void;
   hideWalletHero: boolean;
@@ -56,21 +56,23 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
+    console.log(props.coin)
+
     let amountDisplay = !props.coin
       ? `${formatEthAmount(props.wallet.balance).eth} ETH`
-      : `${usdc.amount} ${usdc.ticker}`;
+      : `${props.coin.balance} ${props.coin.name}`;
 
     let accountDisplay = !props.coin
       ? props.wallet.nickname
       : (
-        <Flex onClick={() => WalletActions.setView(WalletView.ETH_DETAIL)}>
+        <Flex onClick={() => WalletActions.setView(WalletView.WALLET_DETAIL, undefined)}>
           <Icons
             name="ArrowLeftLine"
             size={2}
             mr={2}
             color={theme.currentTheme.iconColor}
           />
-          {props.wallet.nickname} / <span style={{ color: themeData.colors.text.secondary, marginLeft: '4px' }}>{usdc.ticker}</span>
+          {props.wallet.nickname} / <span style={{ color: themeData.colors.text.secondary, marginLeft: '4px' }}>{props.coin.name}</span>
         </Flex>
       )
 
@@ -152,7 +154,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           >
             {accountDisplay}
           </Flex>
-          <Balance isCoin={true} coinImg={usdc.icon} amountDisplay={amountDisplay} colors={themeData.colors} />
+          <Balance coin={props.coin} amountDisplay={amountDisplay} colors={themeData.colors} />
         </Box>
         {/* @ts-ignore */}
         <SendReceiveButtons
@@ -228,9 +230,9 @@ function SendReceiveButtons(props: {
   );
 }
 
-interface BalanceInterface { isCoin: boolean, coinImg: string, amountDisplay: string, colors: any}
+interface BalanceInterface { coin?: ERC20Type, amountDisplay: string, colors: any}
 function Balance (props: BalanceInterface) {
-  return !props.isCoin
+  return !props.coin
     ? (
       <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
         {props.amountDisplay}
@@ -238,7 +240,7 @@ function Balance (props: BalanceInterface) {
     )
     : (
       <Flex mt={1} flexDirection="column" justifyContent="center" alignItems="center">
-        <img height="26px" src={props.coinImg} />
+        <img height="26px" src={props.coin.logo} />
         <Text mt={1} opacity={0.9} fontWeight={600} fontSize={5} animate={false}>
           {props.amountDisplay}
         </Text>

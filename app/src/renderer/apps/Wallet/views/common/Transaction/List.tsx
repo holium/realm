@@ -49,11 +49,14 @@ export const Transaction = observer((props: TransactionProps) => {
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
 
   let onClick = () => {
-    WalletActions.setReturnView(WalletView.ETH_DETAIL);
+    WalletActions.setReturnView(WalletView.WALLET_DETAIL);
     WalletActions.setView(
       WalletView.TRANSACTION_DETAIL,
       undefined,
-      transaction.hash
+      {
+        type: 'transaction',
+        key: transaction.hash
+      }
     );
   };
 

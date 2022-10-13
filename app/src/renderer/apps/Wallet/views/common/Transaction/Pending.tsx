@@ -55,7 +55,10 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
     WalletActions.setView(
       WalletView.TRANSACTION_DETAIL,
       undefined,
-      props.transaction.hash
+      {
+        type: 'transaction',
+        key: props.transaction.hash
+      }
     );
   };
 

@@ -11,6 +11,8 @@ import { ThemeModelType } from 'os/services/theme.model';
 import {
   getBaseTheme,
   getTransactions,
+  getCoins,
+  getNfts
 } from '../../../lib/helpers';
 
 import { DetailHero } from './Hero';
@@ -24,14 +26,9 @@ import { NFTList } from './NFTList';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
 
-const FlexWithShadow = styled(Flex)`
-  box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
-`;
-
 interface DetailProps {
   theme: ThemeModelType;
   hidePending: boolean;
-  displayMode?: DisplayType
 }
 export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const { walletApp } = useTrayApps();
@@ -49,6 +46,15 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   };
 
   const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
+
+  let hasCoin = walletApp.currentItem && walletApp.currentItem.type === 'coin';
+  let coin = null;
+  if (hasCoin) {
+    coin = wallet!.coins.get(walletApp!.currentItem!.key)!;
+  }
+
+  const coins = getCoins(wallet!.coins);
+  const nfts = getNfts(wallet!.nfts);
   const transactions = getTransactions(
     walletApp.ethereum.transactions,
     wallet?.address
@@ -64,7 +70,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     <Flex width="100%" height="100%" flexDirection="column" px={3}>
       <DetailHero
         wallet={wallet!}
-        coin="usdc"
+        coin={coin}
         QROpen={QROpen}
         setQROpen={setQROpen}
         sendTrans={sendTrans}
@@ -82,8 +88,8 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         >
           <ListSelector selected={listView} onChange={(newView: DisplayType) => setListView(newView)} />
          { listView === 'transactions' && <TransactionList transactions={transactions} hidePending={props.hidePending}/> }
-         { listView === 'coins' && <CoinList /> }
-         { listView === 'nfts' && <NFTList /> }
+         { listView === 'coins' && <CoinList coins={coins} /> }
+         { listView === 'nfts' && <NFTList nfts={nfts} /> }
         </Flex>
       </Box>
       <Flex
@@ -122,30 +128,4 @@ function ListSelector(props: ListSelectorProps) {
       <MenuButton selected={props.selected === 'transactions'} onClick={() => props.onChange('transactions')}>Transactions</MenuButton>
     </Flex>
   )
-}
-
-function SendReceiveButtons(props: {
-  hidden: boolean;
-  desktopTheme: ThemeModelType;
-  send: any;
-  receive: any;
-}) {
-  let panelBackground = darken(0.04, props.desktopTheme.windowColor);
-
-  return (
-    <Box width="100%" hidden={props.hidden}>
-      <Flex mt="18px" width="100%" justifyContent="center" alignItems="center">
-        <Box mr="16px" onClick={props.receive}>
-          <CircleButton
-            icon="Receive"
-            title="Receive"
-            iconColor={panelBackground}
-          />
-        </Box>
-        <Box onClick={props.send}>
-          <CircleButton icon="Send" title="Send" iconColor={panelBackground} />
-        </Box>
-      </Flex>
-    </Box>
-  );
 }

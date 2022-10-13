@@ -7,6 +7,7 @@ import {
 } from 'mobx-state-tree';
 import { Type } from 'react-spaces';
 import { Network, Alchemy } from "alchemy-sdk";
+import { string } from 'yup';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -18,7 +19,7 @@ const alchemy = new Alchemy(alchemySettings);
 export enum WalletView {
   ETH_LIST = 'ethereum:list',
   ETH_NEW = 'ethereum:new',
-  ETH_DETAIL = 'ethereum:detail',
+  WALLET_DETAIL = 'ethereum:detail',
   TRANSACTION_DETAIL = 'ethereum:transaction',
   ETH_SETTINGS = 'ethereum:settings',
   BIT_LIST = 'bitcoin:list',
@@ -98,27 +99,41 @@ const ERC20 = types.model('ERC20', {
   name: types.string,
   logo: types.string,
   address: types.string,
-  balance: types.number,
-  // ticker
-  // last price or floor price
+  balance: types.string,
 });
 
 export type ERC20Type = Instance<typeof ERC20>
 
-const ERC721Token = types
-  .model('ERC721Token', {
-    name: types.string,
-    // collection name - null if single
-    // last price or floor price
-    imageUrl: types.string,
-    tokenId: types.number,
-  })
+// const ERC721Token = types
+//   .model('ERC721Token', {
+//     name: types.string,
+//     // collection name - null if single
+//     // last price or floor price
+//     imageUrl: types.string,
+//     tokenId: types.number,
+//   })
+// const ERC721Token = types
+//   .model('ERC721Token', {
+//     name: types.string,
+//     imageUrl: types.string,
+//     tokenId: types.string,
+//   })
+
+// const ERC721 = types.model('ERC721', {
+//   name: types.string,
+//   address: types.string,
+//   tokens: types.map(ERC721Token),//types.map(types.number),
+// });
+
 
 const ERC721 = types.model('ERC721', {
   name: types.string,
+  collectionName: types.maybe(types.string),
   address: types.string,
-  tokens: types.map(ERC721Token),
-});
+  imageUrl: types.string,
+  lastPrice: types.string,
+  floorPrice: types.maybe(types.string)
+})
 
 export type ERC721Type = Instance<typeof ERC721>
 
@@ -384,6 +399,10 @@ export const WalletStore = types
       'bitcoin:list',
       'create-wallet'
     ])),
+    currentItem: types.maybe(types.model({
+      type: types.enumeration(['transaction', 'coin', 'nft']),
+      key: types.string
+    })),
     currentTransaction: types.maybe(types.string),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
@@ -410,13 +429,17 @@ export const WalletStore = types
         self.currentView = 'bitcoin:list';
       }
     },
-    setView(view: WalletView, index?: string, transaction?: string) {
+    setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }) {
       if (index) {
         self.currentIndex = index;
       }
-      if (transaction) {
-        self.currentTransaction = transaction;
+
+      if (item) {
+        self.currentItem = item;
+      } else {
+        self.currentItem = undefined;
       }
+
       self.returnView = self.currentView;
       self.currentView = view;
     },

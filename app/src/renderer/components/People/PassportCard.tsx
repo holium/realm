@@ -71,7 +71,7 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
                   width: 330,
                 },
               });
-              WalletActions.setView(WalletView.ETH_DETAIL);
+              WalletActions.setView(WalletView.WALLET_DETAIL);
               onClose();
               evt.stopPropagation();
             }}

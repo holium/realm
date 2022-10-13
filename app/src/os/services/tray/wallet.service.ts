@@ -69,12 +69,12 @@ export class WalletService extends BaseService {
         passcodeHash
       );
     },
-    setView: (view: WalletView, index?: string, transactionHash?: string) => {
+    setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-view',
         view,
         index,
-        transactionHash
+        currentItem
       );
     },
     setReturnView: (view: WalletView) => {
@@ -331,10 +331,10 @@ export class WalletService extends BaseService {
     _event: any,
     view: WalletView,
     index?: string,
-    transactionHash?: string
+    currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }
   ) {
     console.log(`service setting view: ${view}`);
-    this.state!.setView(view, index, transactionHash);
+    this.state!.setView(view, index, currentItem);
   }
 
   async setReturnView(_event: any, view: WalletView) {

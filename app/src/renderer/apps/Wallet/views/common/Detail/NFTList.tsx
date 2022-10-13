@@ -15,7 +15,7 @@ import {
 import { TransactionList } from '../Transaction/List';
 import { SendTransaction } from '../Transaction/Send';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { ERC721Type, WalletView } from 'os/services/tray/wallet.model';
 
 const nfts = [
   {
@@ -31,8 +31,8 @@ const nfts = [
   }
 ]
 
-
-export const NFTList: FC = (props) => {
+interface NFTListProps { nfts: ERC721Type[] }
+export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
@@ -42,7 +42,7 @@ export const NFTList: FC = (props) => {
         <Flex alignItems="center">
           <Flex width="76px" height="76px" borderRadius="4px" justifyContent="center">
             {/* TODO: detect aspect ratio? */}
-            <img height="76px" src={props.details.image} />
+            <img height="76px" src={props.details.imageUrl} />
           </Flex>
           <Flex ml={4} flexDirection="column" justifyContent="space-evenly" alignItems="flex-start">
             <Flex flexDirection="column" justifyContent="center">
@@ -62,7 +62,7 @@ export const NFTList: FC = (props) => {
 
   return (
     <Flex flexDirection="column" alignItems="center">
-      {nfts.map((nft, index) => <NFT details={nft} key={index} />)}
+      {props.nfts.map((nft, index) => <NFT details={nft} key={index} />)}
     </Flex>
   )
 }
