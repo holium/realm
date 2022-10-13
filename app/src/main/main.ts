@@ -49,8 +49,8 @@ export interface IAppUpdater {
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   constructor() {
-    autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.autoDownload = true;
+    // autoUpdater.autoInstallOnAppQuit = true;
+    // autoUpdater.autoDownload = true;
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
         'Error: ',
@@ -63,20 +63,13 @@ export class AppUpdater implements IAppUpdater {
           type: 'info',
           title: 'Found Updates',
           message: 'Found updates, do you want update now?',
-          buttons: ['Sure', 'No'],
+          buttons: ['Yes', 'No'],
         })
         .then((result: MessageBoxReturnValue) => {
-          dialog
-            .showMessageBox({
-              title: 'Button',
-              message: `${result.response}`,
-            })
-            .then(() => {
-              // @ts-ignore
-              if (result.response === 0) {
-                autoUpdater.downloadUpdate();
-              }
-            });
+          // @ts-ignore
+          if (result.response === 0) {
+            autoUpdater.downloadUpdate();
+          }
         });
     });
     autoUpdater.on('update-not-available', () => {
@@ -98,7 +91,7 @@ export class AppUpdater implements IAppUpdater {
           setImmediate(() => autoUpdater.quitAndInstall());
         });
     });
-    log.transports.file.level = 'debug';
+    log.transports.file.level = isDevelopment ? 'debug' : 'info';
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
     setInterval(() => {
