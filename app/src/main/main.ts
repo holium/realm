@@ -39,67 +39,66 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
+const isDevelopment =
+  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+
 export interface IAppUpdater {
   checkForUpdates: () => void;
 }
 
 export class AppUpdater implements IAppUpdater {
   constructor() {
-    if (!isDev) {
-      autoUpdater.autoInstallOnAppQuit = true;
-      autoUpdater.autoDownload = true;
-      autoUpdater.on('error', (error) => {
-        dialog.showErrorBox(
-          'Error: ',
-          error == null ? 'unknown' : (error.stack || error).toString()
-        );
-      });
-      autoUpdater.on('update-available', () => {
-        dialog
-          .showMessageBox({
-            type: 'info',
-            title: 'Found Updates',
-            message: 'Found updates, do you want update now?',
-            buttons: ['Sure', 'No'],
-          })
-          .then((result: MessageBoxReturnValue) => {
-            dialog
-              .showMessageBox({
-                title: 'Button',
-                message: `${result.response}`,
-              })
-              .then(() => {
-                // @ts-ignore
-                if (result.response === 0) {
-                  autoUpdater.downloadUpdate();
-                }
-              });
-          });
-      });
-      autoUpdater.on('update-not-available', () => {
-        dialog.showMessageBox({
-          title: 'No Updates',
-          message: 'Current version is up-to-date.',
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.autoDownload = true;
+    autoUpdater.on('error', (error) => {
+      dialog.showErrorBox(
+        'Error: ',
+        error == null ? 'unknown' : (error.stack || error).toString()
+      );
+    });
+    autoUpdater.on('update-available', () => {
+      dialog
+        .showMessageBox({
+          type: 'info',
+          title: 'Found Updates',
+          message: 'Found updates, do you want update now?',
+          buttons: ['Sure', 'No'],
+        })
+        .then((result: MessageBoxReturnValue) => {
+          dialog
+            .showMessageBox({
+              title: 'Button',
+              message: `${result.response}`,
+            })
+            .then(() => {
+              // @ts-ignore
+              if (result.response === 0) {
+                autoUpdater.downloadUpdate();
+              }
+            });
         });
+    });
+    autoUpdater.on('update-not-available', () => {
+      dialog.showMessageBox({
+        title: 'No Updates',
+        message: 'Current version is up-to-date.',
       });
-      autoUpdater.on('update-downloaded', () => {
-        dialog
-          .showMessageBox({
-            title: 'Install Updates',
-            message:
-              'Updates downloaded, application will be quit for update...',
-          })
-          .then(() => {
-            setImmediate(() => autoUpdater.quitAndInstall());
-          });
-      });
-      log.transports.file.level = 'debug';
-      autoUpdater.logger = log;
-      // autoUpdater.checkForUpdatesAndNotify();
-    }
+    });
+    autoUpdater.on('update-downloaded', () => {
+      dialog
+        .showMessageBox({
+          title: 'Install Updates',
+          message: 'Updates downloaded, application will be quit for update...',
+        })
+        .then(() => {
+          setImmediate(() => autoUpdater.quitAndInstall());
+        });
+    });
+    log.transports.file.level = 'debug';
+    autoUpdater.logger = log;
+    // autoUpdater.checkForUpdatesAndNotify();
   }
   checkForUpdates = () => {
-    if (isDev) return;
     autoUpdater.checkForUpdates();
   };
 }
@@ -120,9 +119,6 @@ if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
-
-const isDevelopment =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDevelopment) {
   require('electron-debug')();
@@ -233,7 +229,7 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   let appUpdater: any = undefined;
-  if (!isDev) {
+  if (process.env.NODE_ENV === 'production') {
     appUpdater = new AppUpdater();
   }
 
