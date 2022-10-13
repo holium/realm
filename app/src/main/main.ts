@@ -50,7 +50,8 @@ export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   constructor() {
     // autoUpdater.autoInstallOnAppQuit = true;
-    // autoUpdater.autoDownload = true;
+    // must force this set or 'rename' operations post-download will fail
+    autoUpdater.autoDownload = false;
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
         'Error: ',
