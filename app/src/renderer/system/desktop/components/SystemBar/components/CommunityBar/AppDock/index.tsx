@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { AppType } from 'os/services/spaces/models/bazaar-old';
 import { AppTile } from 'renderer/components/AppTile';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -20,13 +20,13 @@ export const AppDock: FC<AppDockProps> = observer(() => {
     [theme.currentTheme]
   );
 
-  const currentBazaar = spaces.selected
-    ? bazaar.getBazaar(spaces.selected?.path!)
-    : null;
+  const spacePath = spaces.selected?.path!;
+  const dock = bazaar.getDock(spacePath);
 
-  const orderedList = spaces.selected?.path
-    ? bazaar.getPinnedApps(spaces.selected?.path!)
-    : [];
+  const orderedList = useMemo(
+    () => (spacePath ? bazaar.getDockApps(spacePath) : []),
+    [spacePath, dock?.length]
+  );
 
   const pinnedApps = useMemo(() => {
     return (
@@ -70,15 +70,10 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               onClick={(evt: any) => {
                 const selectedApp = app;
                 if (desktop.isOpenWindow(selectedApp.id)) {
-                  DesktopActions.setActive(
-                    spaces.selected!.path,
-                    selectedApp.id
-                  );
+                  DesktopActions.setActive(spacePath, selectedApp.id);
                 } else {
-                  DesktopActions.openAppWindow(
-                    spaces.selected!.path,
-                    selectedApp
-                  );
+                  console.log(selectedApp);
+                  DesktopActions.openAppWindow(spacePath, selectedApp);
                 }
               }}
               whileDrag={{ zIndex: 20 }}
@@ -87,21 +82,16 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 allowContextMenu
                 contextPosition="above"
                 tileSize="sm"
+                isRecommended={false}
                 app={app}
                 selected={selected}
                 open={open}
                 onAppClick={(evt: any) => {
                   const selectedApp = app;
                   if (desktop.isOpenWindow(selectedApp.id)) {
-                    DesktopActions.setActive(
-                      spaces.selected!.path,
-                      selectedApp.id
-                    );
+                    DesktopActions.setActive(spacePath, selectedApp.id);
                   } else {
-                    DesktopActions.openAppWindow(
-                      spaces.selected!.path,
-                      selectedApp
-                    );
+                    DesktopActions.openAppWindow(spacePath, selectedApp);
                   }
                 }}
                 contextMenu={[
@@ -109,7 +99,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     label: 'Unpin',
                     onClick: (evt: any) => {
                       evt.stopPropagation();
-                      SpacesActions.unpinApp(spaces.selected?.path!, app.id);
+                      SpacesActions.unpinApp(spacePath, app.id);
                     },
                   },
                   {
@@ -117,10 +107,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                     section: 2,
                     disabled: !open,
                     onClick: (evt: any) => {
-                      DesktopActions.closeAppWindow(
-                        spaces.selected?.path!,
-                        app
-                      );
+                      DesktopActions.closeAppWindow(spacePath, app);
                       evt.stopPropagation();
                     },
                   },
@@ -131,20 +118,11 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         })}
       </Reorder.Group>
     );
-  }, [
-    desktop.activeWindow?.id,
-    desktop.openAppIds,
-    spaces.selected?.path,
-    bazaar.appsChange,
-    orderedList,
-  ]);
+  }, [desktop.activeWindow?.id, desktop.openAppIds, spacePath, orderedList]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>
-      currentBazaar &&
-      currentBazaar.pinned.findIndex(
-        (pinned: any) => appWindow.id === pinned
-      ) === -1
+      dock && dock.findIndex((pinned: any) => appWindow.id === pinned) === -1
   );
 
   return (
@@ -169,6 +147,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               contextPosition="above"
               tileSize="sm"
               app={app}
+              isRecommended={false}
               selected={selected}
               open={open}
               contextMenu={[

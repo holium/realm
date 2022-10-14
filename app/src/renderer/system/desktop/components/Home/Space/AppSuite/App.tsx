@@ -8,7 +8,7 @@ import {
   AppType,
   BazaarStoreType,
   InstallStatus,
-} from 'os/services/spaces/models/bazaar';
+} from 'os/services/spaces/models/bazaar-old';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { observer } from 'mobx-react';
@@ -82,8 +82,8 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
       onClick: (evt: any) => {
         evt.stopPropagation();
         weRecommended
-          ? SpacesActions.unrecommendApp(space.path, app.id)
-          : SpacesActions.recommendApp(space.path, app.id);
+          ? SpacesActions.unrecommendApp(app.id)
+          : SpacesActions.recommendApp(app.id);
       },
     });
     if (app.type === 'urbit') {

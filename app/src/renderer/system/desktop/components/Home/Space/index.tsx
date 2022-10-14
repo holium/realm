@@ -37,25 +37,25 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
     }
   }, [currentSpace]);
 
-  useEffect(() => {
-    // console.log('AppSuite useEffect => %o', {
-    //   ship: ship?.patp,
-    //   path: currentSpace?.path,
-    // });
-    if (currentSpace) {
-      // @ts-ignore
-      const suite = Array(5).fill(undefined);
-      const apps = bazaar.getSuiteApps(currentSpace.path);
-      apps?.forEach((app, index) => suite.splice(app.slots!.suite, 1, app));
-      // console.log(suite);
-      setSuite(suite);
-    }
-  }, [currentSpace, bazaar.appsChange]);
+  // useEffect(() => {
+  //   // console.log('AppSuite useEffect => %o', {
+  //   //   ship: ship?.patp,
+  //   //   path: currentSpace?.path,
+  //   // });
+  //   if (currentSpace) {
+  //     // @ts-ignore
+  //     const suite = Array(5).fill(undefined);
+  //     const apps = bazaar.getSuiteApps(currentSpace.path);
+  //     apps?.forEach((app, index) => suite.splice(app.slots!.suite, 1, app));
+  //     // console.log(suite);
+  //     setSuite(suite);
+  //   }
+  // }, [currentSpace, bazaar.appsChange]);
 
-  useEffect(() => {
-    const apps = bazaar.getAvailableApps();
-    setApps(apps);
-  }, [bazaar.appsChange]);
+  // useEffect(() => {
+  //   const apps = bazaar.getAvailableApps();
+  //   setApps(apps);
+  // }, [bazaar.appsChange]);
 
   const sidebarComponent = useMemo(() => {
     return (

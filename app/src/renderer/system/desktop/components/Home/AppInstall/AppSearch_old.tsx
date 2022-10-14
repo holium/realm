@@ -18,7 +18,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { darken, rgba } from 'polished';
-import { InstallStatus } from 'os/services/spaces/models/bazaar';
+import { InstallStatus } from 'os/services/spaces/models/bazaar-old';
 import { useAppInstaller } from './store';
 
 const slideUpAndFade = keyframes({

@@ -17,21 +17,27 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { spaces, bazaar, ship } = useServices();
 
   const currentSpace = spaces.selected!;
+  const dock = bazaar.getDock(currentSpace.path);
+
   // const currentBazaar = useMemo(() => bazaar.getPinnedApps(currentSpace.path), [currentSpace]);
-  const currentBazaar = bazaar.getBazaar(currentSpace.path);
+  // const currentBazaar = bazaar.getBazaar(currentSpace.path);
 
   return useMemo(() => {
-    const apps = bazaar.getAvailableApps();
+    const apps = [...bazaar.installed, ...bazaar.installing];
+    // apps.push(bazaar.installing);
     return (
       <>
         {apps.map((app: any, index: number) => {
-          const isAppPinned = currentBazaar?.pinned.includes(app.id);
-          const weRecommended = bazaar.my.recommendations.includes(app.id);
+          const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
+          const weRecommended = bazaar.isRecommended(app.id);
           return (
             <AppTile
               key={app.title + index + 'grid'}
               isPinned={isAppPinned}
+              isRecommended={weRecommended}
               allowContextMenu
+              // isInstalling
+              isInstalling={app.installStatus !== InstallStatus.installed}
               tileSize={tileSize}
               app={app}
               isVisible={isOpen}
@@ -52,11 +58,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     weRecommended
-                      ? SpacesActions.unrecommendApp(
-                          currentSpace?.path!,
-                          app.id
-                        )
-                      : SpacesActions.recommendApp(currentSpace?.path!, app.id);
+                      ? SpacesActions.unrecommendApp(app.id)
+                      : SpacesActions.recommendApp(app.id);
                   },
                 },
                 {
@@ -67,14 +70,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                     console.log('open app info');
                   },
                 },
-                {
-                  label: 'Remove',
-                  section: 2,
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    SpacesActions.removeApp(app.id);
-                  },
-                },
+
                 ...(app.type === 'urbit' &&
                 app.installStatus === InstallStatus.installed
                   ? [
@@ -96,8 +92,9 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                         disabled: false,
                         onClick: (evt: any) => {
                           evt.stopPropagation();
-                          console.log(`start install`);
-                          SpacesActions.installApp(toJS(app));
+                          // console.log(`start install`, toJS(app));
+
+                          // SpacesActions.installApp(toJS(app));
                         },
                       },
                     ]),
@@ -135,10 +132,12 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
       </>
     );
   }, [
-    currentBazaar?.pinned,
     currentSpace,
-    bazaar.my.recommendations,
-    bazaar.apps,
+    bazaar.catalog,
+    bazaar.installed.length,
+    bazaar.installing.length,
+    dock?.length,
+    bazaar.recommendations.length,
   ]);
 });
 

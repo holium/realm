@@ -1,6 +1,6 @@
 import { Conduit } from '@holium/conduit';
 import { SpacePath } from '../types';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { BazaarStoreType } from 'os/services/spaces/models/bazaar-old';
 import { allyShip, docketInstall, docketUninstall } from '@urbit/api';
 import { cleanNounColor } from '../lib/color';
 import _ from 'lodash';
@@ -69,7 +69,7 @@ export const BazaarApi = {
             } else if ('install' in charge.chad) {
               console.log(`'${ship}/${desk}' installation started...`);
               console.log(charge);
-              __state.triggerAppInstallStarted(ship, desk, charge.docket);
+              __state.triggerAppInstallStarted(ship, desk, charge);
             }
           }
         },
@@ -287,8 +287,10 @@ export const BazaarApi = {
     });
     return appMap;
   },
-  uninstallApp: async (conduit: Conduit, desk: string) =>
-    await conduit.poke(docketUninstall(desk)),
+  uninstallApp: async (conduit: Conduit, desk: string) => {
+    console.log('uninstallApp', docketUninstall(desk));
+    await conduit.poke(docketUninstall(desk));
+  },
   // in the case of space apps, all we have is the desk, since docket/glob
   //   data does not include host/source ship. therefore we request an install
   //   back to the space host which requires desk name only. space host will then
@@ -641,32 +643,32 @@ export const BazaarApi = {
   ): Promise<void> => {
     // stuff reference to state. this is used for app installation handling
     __state = state;
-    conduit.watch({
-      app: 'treaty',
-      path: `/allies`,
-      onSubscribed: (eventId: number) => {
-        console.log(`message [${eventId}]: subscribed to treaty/allies...`);
-      },
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        // console.log('/treaty/allies => %o', { allies: data });
-        handleBazaarReactions({ allies: data }, state);
-      },
-      onError: () => console.log('subscription [treaty/allies] rejected'),
-      onQuit: () => console.log('kicked from subscription [treaty/allies]'),
-    });
-    conduit.watch({
-      app: 'treaty',
-      path: `/treaties`,
-      onSubscribed: (eventId: number) => {
-        console.log(`message [${eventId}]: subscribed to treaty/treaties...`);
-      },
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        // console.log('/treaty/treaties => %o', { treaties: data });
-        handleBazaarReactions({ treaties: data }, state);
-      },
-      onError: () => console.log('subscription [treaty/treaties] rejected'),
-      onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
-    });
+    // conduit.watch({
+    //   app: 'treaty',
+    //   path: `/allies`,
+    //   onSubscribed: (eventId: number) => {
+    //     console.log(`message [${eventId}]: subscribed to treaty/allies...`);
+    //   },
+    //   onEvent: async (data: any, _id?: number, mark?: string) => {
+    //     // console.log('/treaty/allies => %o', { allies: data });
+    //     handleBazaarReactions({ allies: data }, state);
+    //   },
+    //   onError: () => console.log('subscription [treaty/allies] rejected'),
+    //   onQuit: () => console.log('kicked from subscription [treaty/allies]'),
+    // });
+    // conduit.watch({
+    //   app: 'treaty',
+    //   path: `/treaties`,
+    //   onSubscribed: (eventId: number) => {
+    //     console.log(`message [${eventId}]: subscribed to treaty/treaties...`);
+    //   },
+    //   onEvent: async (data: any, _id?: number, mark?: string) => {
+    //     // console.log('/treaty/treaties => %o', { treaties: data });
+    //     handleBazaarReactions({ treaties: data }, state);
+    //   },
+    //   onError: () => console.log('subscription [treaty/treaties] rejected'),
+    //   onQuit: () => console.log('kicked from subscription [treaty/treaties]'),
+    // });
     conduit.watch({
       app: 'bazaar',
       path: `/updates`,
@@ -674,8 +676,8 @@ export const BazaarApi = {
         console.log(`message [${eventId}]: subscribed to /bazaar/updates...`);
       },
       onEvent: async (data: any, _id?: number, mark?: string) => {
+        console.log('bazaar-reaction', data);
         if (mark === 'bazaar-reaction') {
-          console.log('bazaar-reaction', data);
           handleBazaarReactions(data, state);
         }
       },

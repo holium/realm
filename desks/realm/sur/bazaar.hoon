@@ -117,6 +117,7 @@
       [%suite-add path=space-path:spaces =app-id rank=@ud]
       [%suite-remove path=space-path:spaces =app-id]
       [%install-app =ship =desk]
+      [%uninstall-app =desk]
   ==
 ::
 :: 'private' ship-to-ship (member-to-host) pokes (no json encode/decode req'd)
@@ -148,6 +149,7 @@
 ::
 +$  view
   $%  [%catalog =app-catalog]
+      [%installed =app-catalog]
       [%apps =app-index-full]
       [%sites sites=(set [ship desk])]
   ==

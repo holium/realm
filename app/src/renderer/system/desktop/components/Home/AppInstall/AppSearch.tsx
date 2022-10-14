@@ -15,16 +15,12 @@ import {
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { AppRow } from './AppRow';
-import { ProviderRow } from './ProviderRow';
+
 import { darken, rgba } from 'polished';
-import { InstallStatus } from 'os/services/spaces/models/bazaar';
 import { useAppInstaller } from './store';
 import { RealmPopover } from '../Popover';
 import * as yup from 'yup';
 
-import { AnimatePresence, motion } from 'framer-motion';
-import Portal from 'renderer/system/dialog/Portal';
 import { createField, createForm } from 'mobx-easy-form';
 import { SearchModes } from './SearchModes';
 
@@ -68,13 +64,8 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   const spacePath: string = spaces.selected?.path!;
 
   useEffect(() => {
-    console.log('app install status change');
-  }, [
-    bazaar.appInstallInitial,
-    bazaar.appInstallStarted,
-    bazaar.appInstallFailed,
-    bazaar.appInstallCompleted,
-  ]);
+    SpacesActions.scryAllies();
+  }, []);
 
   useEffect(() => {
     appInstaller.setSearchMode('none');
@@ -104,6 +95,13 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   }, [searchString]);
 
   const isOpen = useMemo(() => searchMode !== 'none', [searchMode !== 'none']);
+  const backgroundColor = useMemo(
+    () =>
+      theme.currentTheme.mode === 'light'
+        ? theme.currentTheme.windowColor
+        : darken(0.1, theme.currentTheme.windowColor),
+    [theme.currentTheme]
+  );
   const dimensions = { height: 450, width: 550 };
 
   const popoverId = 'app-install';
@@ -126,10 +124,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
           borderRadius: 12,
           maxHeight: '50vh',
           overflowY: 'auto',
-          background:
-            theme.currentTheme.mode === 'light'
-              ? theme.currentTheme.windowColor
-              : darken(0.1, theme.currentTheme.windowColor),
+          background: backgroundColor,
         }}
       >
         <SearchModes />

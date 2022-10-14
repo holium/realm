@@ -12,7 +12,7 @@ import { useServices } from 'renderer/logic/store';
 import { cleanNounColor } from 'os/lib/color';
 import { observer } from 'mobx-react';
 import { darken, rgba } from 'polished';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { BazaarStoreType } from 'os/services/spaces/models/bazaar-old';
 import { RealmPopover } from '../../Popover';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
 

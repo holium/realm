@@ -1,8 +1,8 @@
 import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { lighten, rgba } from 'polished';
-import { Flex, Box, Text, ContextMenu } from '..';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { Flex, Box, Text, ContextMenu, Spinner } from '..';
+import { AppType } from 'os/services/spaces/models/bazaar-old';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
@@ -97,6 +97,7 @@ interface AppTileProps {
   isVisible?: boolean;
   isAnimated?: boolean;
   tileSize: AppTileSize;
+  isInstalling?: boolean;
   hasTitle?: boolean;
   isRecommended: boolean;
 }
@@ -116,6 +117,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     onAppClick,
     hasTitle,
     isRecommended,
+    isInstalling,
   } = props;
   const { theme } = useServices();
 
@@ -178,6 +180,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
+            opacity: isInstalling ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
@@ -225,6 +228,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
+            opacity: isInstalling ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
@@ -258,6 +262,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
+            opacity: isInstalling ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{
@@ -287,6 +292,20 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           }}
           className="app-dock-icon"
         >
+          {isInstalling && (
+            <Flex
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              position="absolute"
+              left={0}
+              top={0}
+              right={0}
+              bottom={0}
+            >
+              <Spinner size={3} />
+            </Flex>
+          )}
           {allowContextMenu && (
             <Portal>
               <AnimatePresence>

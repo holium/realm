@@ -24,6 +24,7 @@
           [%suite-add suite-add]
           [%suite-remove suite-remove]
           [%install-app install-app]
+          [%uninstall-app uninstall-app]
       ==
     ::
     ++  add-app
@@ -41,6 +42,11 @@
       %-  ot
       :~  [%ship (su ;~(pfix sig fed:ag))]
           [%desk so]
+      ==
+    ::
+    ++  uninstall-app
+      %-  ot
+      :~  [%desk so]
       ==
     ::
     ++  add-pin
@@ -229,6 +235,9 @@
     ?-  -.vi
       ::
         %catalog
+      (pairs (catalog:encode app-catalog.vi))
+      ::
+        %installed
       (pairs (catalog:encode app-catalog.vi))
       ::
         %apps
