@@ -104,6 +104,7 @@ export class AppUpdater implements IAppUpdater {
     autoUpdater.checkForUpdates();
   }
   checkForUpdates = () => {
+    if (process.env.NODE_ENV === 'development') return;
     this.manualCheck = true;
     autoUpdater.checkForUpdates().finally(() => (this.manualCheck = false));
   };
