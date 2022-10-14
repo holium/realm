@@ -66,7 +66,7 @@
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
       [%enqueue-transaction =network hash=@ =transaction]
-      [%add-smart-contract contract-id=@t =contract-type name=@t address=@ux wallet-index=@t]
+      [%add-smart-contract =contract-type name=@t address=@ux wallet-index=@t]
       [%save-transaction-notes =network hash=@t notes=@t]
   ==
 ::  subscription updates

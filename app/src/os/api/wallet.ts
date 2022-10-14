@@ -144,7 +144,6 @@ export const WalletApi = {
   },
   addSmartContract: async (
     conduit: Conduit,
-    contractId: string,
     contractType: string,
     name: string,
     contractAddress: string,
@@ -155,7 +154,6 @@ export const WalletApi = {
       mark: 'wallet-action',
       json: {
         'add-smart-contract': {
-          'contract-id': contractId,
           'contract-type': contractType,
           name: name,
           address: contractAddress,

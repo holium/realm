@@ -20,10 +20,11 @@ import {
 import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
+import { T } from 'lodash/fp';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
-  network: Network.ETH_MAINNET, // Replace with your network.
+  network: Network.ETH_GOERLI, // Replace with your network.
 };
 
 const alchemy = new Alchemy(alchemySettings);
@@ -242,21 +243,23 @@ export class WalletService extends BaseService {
     });
 
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
+      console.log('got update')
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
-      }
-     /*   const balances = await alchemy.core.getTokenBalances(wallet.address, 'erc20');
+        const balances = await alchemy.core.getTokenBalances(wallet.address);
         // Remove tokens with zero balance
         const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
           return token.tokenBalance !== "0";
         });
-
-        for (let token in nonZeroBalances) {
-          const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
-          WalletApi.addSmartContract(this.core.conduit!, '', 'erc20', metadata.name!, (token as any).contractAddress, wallet.index);
+        for (let token of nonZeroBalances) {
+          console.log((token as any).contractAddress);
+          if (!this.state!.ethereum.wallets.get(wallet.key)!.coins.has((token as any).contractAddress)) {
+            const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
+            this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.name!, (token as any).contractAddress)
+            WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.name!, (token as any).contractAddress, wallet.key);
+          }
         }
       }
-      */
       if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);
       }
@@ -504,10 +507,9 @@ export class WalletService extends BaseService {
     contractAddress: string,
     walletIndex: string
   ) {
-    this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractId, contractType, name, contractAddress);
+    this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractType, name, contractAddress);
     await WalletApi.addSmartContract(
       this.core.conduit!,
-      contractId,
       contractType,
       name,
       contractAddress,

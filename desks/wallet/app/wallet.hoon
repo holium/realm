@@ -155,8 +155,9 @@
         ~&  ['unexpected thread result on' wire]
         `this
       ==
-        [%eth-watcher flow=?(%from %to) idx=@t =contract-id ~]
-      =/  [%eth-watcher flow=?(%from %to) idx=@t =contract-id ~]  wire
+        [%eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]
+      ~&  'got something from eth watcher'
+      =/  [%eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]  wire
       ?.  ?=(%fact -.sign)
         `this
       ?+  p.cage.sign  (on-agent:def wire sign)
@@ -670,11 +671,11 @@
             %erc721
               [%erc721 name.act address.act ~ ~ ~]
           ==
-        (~(put by contracts-map.wallet) [contract-id.act contract-data])
+        (~(put by contracts-map.wallet) [(crip (z-co:co address.act)) contract-data])
       =.  wallet-map  (~(put by wallet-map) [wallet-index.act wallet])
       [address (~(put by wallets) [%ethereum wallet-map])]
     =/  node-url  (need provider:(~(got by networks.settings) %ethereum))
-    =/  from-path=path  /from/[wallet-index.act]/[contract-id.act]
+    =/  from-path=path  /from/[wallet-index.act]/[(crip (z-co:co address.act))]
     =/  from-me-sub=^vase
     !>  ^-  poke:watchlib
     %-  encode-ezub:erc20lib
@@ -682,8 +683,8 @@
     :+  %watch  from-path
     :*  url=`@ta`node-url
         eager=%&
-        refresh-rate=~s15
-        timeout-time=~s30
+        refresh-rate=~s30::15
+        timeout-time=~s75::30
         from=0
         to=~
         contracts=[address.act ~]
@@ -691,7 +692,7 @@
         topics=~[%transfer address ~]
         ::~
     ==
-    =/  to-path=path  /to/[wallet-index.act]/[contract-id.act]
+    =/  to-path=path  /to/[wallet-index.act]/[(crip (z-co:co address.act))]
     =/  to-me-sub=^vase
     !>  ^-  poke:watchlib
     %-  encode-ezub:erc20lib

@@ -4,6 +4,7 @@ import {
   types,
   Instance,
   getSnapshot,
+  flow
 } from 'mobx-state-tree';
 import { Type } from 'react-spaces';
 import { Network, Alchemy } from "alchemy-sdk";
@@ -11,7 +12,7 @@ import { string } from 'yup';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
-  network: Network.ETH_MAINNET, // Replace with your network.
+  network: Network.ETH_GOERLI, // Replace with your network.
 };
 
 const alchemy = new Alchemy(alchemySettings);
@@ -156,7 +157,7 @@ const EthWallet = types
     ),
   })
   .actions((self) => ({
-    async addSmartContract(contractId: string, contractType: string, name: string, contractAddress: string) {
+    addSmartContract(contractType: string, name: string, contractAddress: string) {
       /*if (contractType === 'erc721') {
         *const contract = ERC721.create({
           name: name,
@@ -170,10 +171,9 @@ const EthWallet = types
         self.nfts.set(contract.address, contract);
       }*/
       if (contractType === 'erc20') {
-        const response = await alchemy.core.getTokenMetadata(contractAddress);
         const contract = ERC20.create({
           name: name,
-          logo: response.logo || '',
+          logo: '',
           address: contractAddress,
           balance: '0',
         })
@@ -315,9 +315,10 @@ export const EthStore = types
       };
       self.transactions.set(hash, tx);
     },
-    async applyWalletUpdate(wallet: any) {
+    applyWalletUpdate: flow(function*(wallet: any) {
+      var walletObj;
       if (!self.wallets.has(wallet.key)) {
-        const walletObj = {
+        walletObj = {
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,
@@ -326,7 +327,6 @@ export const EthStore = types
           nfts: {},
           nickname: wallet.nickname,
         };
-        self.wallets.set(wallet.key, EthWallet.create(walletObj));self.wallets.set(wallet.key, EthWallet.create(walletObj));
       }
       else {
         const coins = self.wallets.get(wallet.key)!.coins.toJSON();
@@ -342,7 +342,7 @@ export const EthStore = types
               // if token not in tokens
               if (!nfts[token])
               {
-                const response = await alchemy.nft.getNftMetadata(
+                const response = yield alchemy.nft.getNftMetadata(
                   nft.address,
                   token
                 );
@@ -360,7 +360,7 @@ export const EthStore = types
             }
           }
         }
-        const walletObj = {
+        walletObj = {
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,
@@ -369,9 +369,9 @@ export const EthStore = types
           nfts: nfts,
           nickname: wallet.nickname,
         };
-        self.wallets.set(wallet.key, EthWallet.create(walletObj));
       }
-    },
+      self.wallets.set(wallet.key, EthWallet.create(walletObj));
+    }),
     applyTransactionUpdate(transaction: any) {
       /*let tx = self.transactions.get(transaction.transaction.hash)!;
       console.log(tx);

@@ -113,7 +113,7 @@ export const trayStore = TrayAppStore.create({
   },
   walletApp: {
     network: 'ethereum',
-    currentView: 'ethereum:list',
+    currentView: 'ethereum:new',
     bitcoin: {
       settings: {
         defaultIndex: 0,
