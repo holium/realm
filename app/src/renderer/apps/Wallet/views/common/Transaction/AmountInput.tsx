@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken, lighten } from 'polished';
 
-import {
-  Flex,
-  Box,
-  Icons,
-  Text,
-} from 'renderer/components';
+import { Flex, Box, Icons, Text } from 'renderer/components';
 import { getBaseTheme } from '../../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';

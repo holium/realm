@@ -12,7 +12,7 @@ import {
   getBaseTheme,
   getTransactions,
   getCoins,
-  getNfts
+  getNfts,
 } from '../../../lib/helpers';
 
 import { DetailHero } from './Hero';
@@ -93,23 +93,32 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
           flexDirection="column"
           justifyContent="center"
         >
-        { !coin
-          ? (
+          {!coin ? (
             <>
-              <ListSelector selected={listView} onChange={(newView: DisplayType) => setListView(newView)} />
-              { listView === 'transactions' && <TransactionList transactions={transactions} hidePending={props.hidePending}/> }
-              { listView === 'coins' && <CoinList coins={coins} /> }
-              { listView === 'nfts' && <NFTList nfts={nfts} /> }
+              <ListSelector
+                selected={listView}
+                onChange={(newView: DisplayType) => setListView(newView)}
+              />
+              {listView === 'transactions' && (
+                <TransactionList
+                  transactions={transactions}
+                  hidePending={props.hidePending}
+                />
+              )}
+              {listView === 'coins' && <CoinList coins={coins} />}
+              {listView === 'nfts' && <NFTList nfts={nfts} />}
             </>
-          )
-          : (
+          ) : (
             <>
               <Box pb={1}>
                 <Text variant="body" fontSize={2} color="text.tertiary">
                   Transactions
                 </Text>
               </Box>
-              <TransactionList transactions={transactions} hidePending={props.hidePending}/>
+              <TransactionList
+                transactions={transactions}
+                hidePending={props.hidePending}
+              />
             </>
           )}
         </Flex>
@@ -131,23 +140,46 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
 });
 
 interface ListSelectorProps {
-  selected: DisplayType
-  onChange: any
+  selected: DisplayType;
+  onChange: any;
 }
 function ListSelector(props: ListSelectorProps) {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
   let MenuButton = (props: any) => {
-    return props.selected
-      ? <TextButton onClick={props.onClick}>{props.children}</TextButton>
-      : <TextButton onClick={props.onClick} textColor={baseTheme.colors.text.disabled} fontWeight={400}>{props.children}</TextButton>
-  }
+    return props.selected ? (
+      <TextButton onClick={props.onClick}>{props.children}</TextButton>
+    ) : (
+      <TextButton
+        onClick={props.onClick}
+        textColor={baseTheme.colors.text.disabled}
+        fontWeight={400}
+      >
+        {props.children}
+      </TextButton>
+    );
+  };
   return (
     <Flex mb={2} alignItems="center">
-      <MenuButton selected={props.selected === 'coins'} onClick={() => props.onChange('coins')}>Coins</MenuButton>
-      <MenuButton selected={props.selected === 'nfts'} onClick={() => props.onChange('nfts')}>NFTs</MenuButton>
-      <MenuButton selected={props.selected === 'transactions'} onClick={() => props.onChange('transactions')}>Transactions</MenuButton>
+      <MenuButton
+        selected={props.selected === 'coins'}
+        onClick={() => props.onChange('coins')}
+      >
+        Coins
+      </MenuButton>
+      <MenuButton
+        selected={props.selected === 'nfts'}
+        onClick={() => props.onChange('nfts')}
+      >
+        NFTs
+      </MenuButton>
+      <MenuButton
+        selected={props.selected === 'transactions'}
+        onClick={() => props.onChange('transactions')}
+      >
+        Transactions
+      </MenuButton>
     </Flex>
-  )
+  );
 }

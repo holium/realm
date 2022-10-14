@@ -4,9 +4,7 @@ import { observer } from 'mobx-react';
 import { Flex, Box, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import {
-  getBaseTheme,
-} from '../../../lib/helpers';
+import { getBaseTheme } from '../../../lib/helpers';
 import { TransactionPane } from './Pane';
 import {
   BitcoinWalletType,

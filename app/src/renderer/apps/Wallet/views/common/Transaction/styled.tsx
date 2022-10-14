@@ -34,7 +34,7 @@ export const FlexHider = styled(Flex)`
 `;
 
 export const NoScrollBar = styled(Flex)`
-::-webkit-scrollbar {
-  display: none;
-}
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `;

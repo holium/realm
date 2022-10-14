@@ -19,13 +19,19 @@ export const WalletList: FC<WalletListProps> = observer(
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
-            let fullWallet = props.network === 'ethereum' ? walletApp.ethereum.wallets.get(walletEntry.key) : walletApp.bitcoin.wallets.get(walletEntry.key);
+            let fullWallet =
+              props.network === 'ethereum'
+                ? walletApp.ethereum.wallets.get(walletEntry.key)
+                : walletApp.bitcoin.wallets.get(walletEntry.key);
             return (
               <WalletCard
                 key={walletEntry.address}
                 wallet={fullWallet!}
                 onSelect={() => {
-                  WalletActions.setView(WalletView.WALLET_DETAIL, walletEntry.key);
+                  WalletActions.setView(
+                    WalletView.WALLET_DETAIL,
+                    walletEntry.key
+                  );
                 }}
               />
             );

@@ -6,7 +6,12 @@ import { QRCodeSVG } from 'qrcode.react';
 
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { shortened, formatEthAmount, getBaseTheme, getMockCoinIcon } from '../../../lib/helpers';
+import {
+  shortened,
+  formatEthAmount,
+  getBaseTheme,
+  getMockCoinIcon,
+} from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -20,8 +25,8 @@ import {
 const usdc = {
   ticker: 'USDC',
   amount: '5765.2',
-  icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'
-}
+  icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
+};
 
 const FlexWithShadow = styled(Flex)`
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
@@ -39,14 +44,14 @@ interface DetailHeroProps {
   close: any;
 
   qr?: {
-    open: boolean
-    set: any
-  },
+    open: boolean;
+    set: any;
+  };
   transaction?: {
-    open: boolean
-    set: any
-    close: any
-  }
+    open: boolean;
+    set: any;
+    close: any;
+  };
 }
 
 export const DetailHero: FC<DetailHeroProps> = observer(
@@ -60,19 +65,28 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       ? `${formatEthAmount(props.wallet.balance).eth} ETH`
       : `${props.coin.balance} ${props.coin.name}`;
 
-    let accountDisplay = !props.coin
-      ? props.wallet.nickname
-      : (
-        <Flex onClick={() => WalletActions.setView(WalletView.WALLET_DETAIL, undefined)}>
-          <Icons
-            name="ArrowLeftLine"
-            size={2}
-            mr={2}
-            color={theme.currentTheme.iconColor}
-          />
-          {props.wallet.nickname} / <span style={{ color: themeData.colors.text.secondary, marginLeft: '4px' }}>{props.coin.name}</span>
-        </Flex>
-      )
+    let accountDisplay = !props.coin ? (
+      props.wallet.nickname
+    ) : (
+      <Flex
+        onClick={() =>
+          WalletActions.setView(WalletView.WALLET_DETAIL, undefined)
+        }
+      >
+        <Icons
+          name="ArrowLeftLine"
+          size={2}
+          mr={2}
+          color={theme.currentTheme.iconColor}
+        />
+        {props.wallet.nickname} /{' '}
+        <span
+          style={{ color: themeData.colors.text.secondary, marginLeft: '4px' }}
+        >
+          {props.coin.name}
+        </span>
+      </Flex>
+    );
 
     return (
       <FlexWithShadow
@@ -81,7 +95,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         flexDirection="column"
         background={lighten(0.02, theme.currentTheme.windowColor)}
         borderRadius="16px"
-        >
+      >
         <Flex
           p={2}
           width="100%"
@@ -107,7 +121,10 @@ export const DetailHero: FC<DetailHeroProps> = observer(
                 />
               ) : (
                 <>
-                  <CopyButton content={props.wallet!.address} colors={themeData.colors} />
+                  <CopyButton
+                    content={props.wallet!.address}
+                    colors={themeData.colors}
+                  />
                   <Box onClick={() => props.setQROpen(!props.QROpen)}>
                     <Icons
                       ml={2}
@@ -146,13 +163,17 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             mt={2}
             opacity={0.5}
             fontWeight={600}
-            color={lighten(.04, themeData.colors.text.secondary)}
+            color={lighten(0.04, themeData.colors.text.secondary)}
             style={{ textTransform: 'uppercase' }}
             animate={false}
           >
             {accountDisplay}
           </Flex>
-          <Balance coin={props.coin!} amountDisplay={amountDisplay} colors={themeData.colors} />
+          <Balance
+            coin={props.coin!}
+            amountDisplay={amountDisplay}
+            colors={themeData.colors}
+          />
         </Box>
         {/* @ts-ignore */}
         <SendReceiveButtons
@@ -167,29 +188,28 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           onScreenChange={props.onScreenChange}
           close={props.close}
         />
-        </FlexWithShadow>
+      </FlexWithShadow>
     );
   }
 );
 
-interface CopyProps { content: string, colors: any }
-function CopyButton (props: CopyProps) {
+interface CopyProps {
+  content: string;
+  colors: any;
+}
+function CopyButton(props: CopyProps) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText(props.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 750);
-  }
+  };
 
   return (
     <Box>
       {!copied ? (
         <Box onClick={copy}>
-          <Icons
-            name="Copy"
-            height="20px"
-            color={props.colors.text.disabled}
-          />
+          <Icons name="Copy" height="20px" color={props.colors.text.disabled} />
         </Box>
       ) : (
         <Icons
@@ -200,7 +220,7 @@ function CopyButton (props: CopyProps) {
       )}
     </Box>
   );
-};
+}
 
 function SendReceiveButtons(props: {
   hidden: boolean;
@@ -228,24 +248,33 @@ function SendReceiveButtons(props: {
   );
 }
 
-interface BalanceInterface { coin?: ERC20Type, amountDisplay: string, colors: any}
-function Balance (props: BalanceInterface) {
-  let coinIcon = props.coin ? props.coin.logo || getMockCoinIcon(props.coin.name) : '';
-  return !props.coin
-    ? (
-      <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+interface BalanceInterface {
+  coin?: ERC20Type;
+  amountDisplay: string;
+  colors: any;
+}
+function Balance(props: BalanceInterface) {
+  let coinIcon = props.coin
+    ? props.coin.logo || getMockCoinIcon(props.coin.name)
+    : '';
+  return !props.coin ? (
+    <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+      {props.amountDisplay}
+    </Text>
+  ) : (
+    <Flex
+      mt={1}
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+    >
+      <img height="26px" src={coinIcon} />
+      <Text mt={1} opacity={0.9} fontWeight={600} fontSize={5} animate={false}>
         {props.amountDisplay}
       </Text>
-    )
-    : (
-      <Flex mt={1} flexDirection="column" justifyContent="center" alignItems="center">
-        <img height="26px" src={coinIcon} />
-        <Text mt={1} opacity={0.9} fontWeight={600} fontSize={5} animate={false}>
-          {props.amountDisplay}
-        </Text>
-        <Text variant="body" color={props.colors.text.secondary}>
-          $12,345.98
-        </Text>
-      </Flex>
-    )
+      <Text variant="body" color={props.colors.text.secondary}>
+        $12,345.98
+      </Text>
+    </Flex>
+  );
 }

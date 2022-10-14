@@ -7,7 +7,12 @@ import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
 import { theme as themes } from 'renderer/theme';
 import { useTrayApps } from 'renderer/apps/store';
-import { formatEthAmount, getCoins, getMockCoinIcon, getTransactions } from '../../lib/helpers';
+import {
+  formatEthAmount,
+  getCoins,
+  getMockCoinIcon,
+  getTransactions,
+} from '../../lib/helpers';
 import {
   EthWalletType,
   BitcoinWalletType,
@@ -55,12 +60,12 @@ export const WalletCard: FC<WalletCardProps> = ({
     coins = getCoins(wallet.coins);
   }
 
-  console.log(wallet.address)
+  console.log(wallet.address);
 
   const transactions = getTransactions(
     walletApp.ethereum.transactions,
     wallet!.address
-  )
+  );
 
   let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;
 
@@ -94,9 +99,18 @@ export const WalletCard: FC<WalletCardProps> = ({
         </Text>
         <Flex pt={2} justifyContent="space-between" alignItems="center">
           <Flex>
-            {coins && coins.map((coin, index) => <img src={coin.logo || getMockCoinIcon(coin.name)} style={{ height: '14px', marginRight: '4px' }} key={index} />)}
+            {coins &&
+              coins.map((coin, index) => (
+                <img
+                  src={coin.logo || getMockCoinIcon(coin.name)}
+                  style={{ height: '14px', marginRight: '4px' }}
+                  key={index}
+                />
+              ))}
           </Flex>
-          <Text variant="body" color={theme.currentTheme.iconColor}>{transactions.length} Transactions</Text>
+          <Text variant="body" color={theme.currentTheme.iconColor}>
+            {transactions.length} Transactions
+          </Text>
         </Flex>
       </CardStyle>
     </Flex>

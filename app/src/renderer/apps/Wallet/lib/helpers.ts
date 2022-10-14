@@ -1,5 +1,9 @@
 import { utils, BigNumber } from 'ethers';
-import { ERC20Type, ERC721Type, TransactionType } from 'os/services/tray/wallet.model';
+import {
+  ERC20Type,
+  ERC721Type,
+  TransactionType,
+} from 'os/services/tray/wallet.model';
 import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 
@@ -37,26 +41,22 @@ export function getTransactions(
     // return coin ? transaction.coinName === coin!.name : true;
     // TODO: once we have hook to coin in transaction add this
     return coin ? false : true;
-  }
+  };
 
   let addressFilter = (transaction: TransactionType) => {
     return address ? transaction.ourAddress === address : true;
-  }
+  };
 
   return Array.from(transactionMap.values())
     .filter(addressFilter)
     .filter(coinFilter);
 }
 
-export function getCoins(
-  coinMap: Map<string, ERC20Type>
-): ERC20Type[] {
+export function getCoins(coinMap: Map<string, ERC20Type>): ERC20Type[] {
   return Array.from(coinMap.values());
 }
 
-export function getNfts(
-  nftMap: Map<string, ERC721Type>
-): ERC721Type[] {
+export function getNfts(nftMap: Map<string, ERC721Type>): ERC721Type[] {
   return Array.from(nftMap.values());
 }
 
@@ -134,17 +134,17 @@ export const fullMonthNames = [
   'December',
 ];
 
-export function getMockCoinIcon (ticker: string) {
+export function getMockCoinIcon(ticker: string) {
   switch (ticker) {
     case 'USDC':
-      return "https://cryptologos.cc/logos/usd-coin-usdc-logo.png";
+      return 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png';
     case 'BNB':
-      return "https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Binance-Coin-BNB-icon.png";
+      return 'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Binance-Coin-BNB-icon.png';
     case 'SHIB':
-      return "https://cryptologos.cc/logos/shiba-inu-shib-logo.png";
+      return 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png';
     case 'UNI':
-      return "https://cryptologos.cc/logos/uniswap-uni-logo.png";
+      return 'https://cryptologos.cc/logos/uniswap-uni-logo.png';
     default:
-      return "https://static.thenounproject.com/png/3262833-200.png";
+      return 'https://static.thenounproject.com/png/3262833-200.png';
   }
 }
