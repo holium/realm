@@ -10,8 +10,7 @@
     "build:cursor": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.prod.ts",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package:prerelease": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --publish always --config.publish.releaseType=prerelease",
-    "package:release": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --publish always --config.publish.releaseType=release",
+    "package": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --publish never",
     "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts",
     "start": "ts-node ./.holium/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env DEBUG_PROD=true INSTALL_MOON=bypass NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
@@ -225,8 +224,7 @@
       "hardenedRuntime": true,
       "entitlements": "assets/entitlements.mac.plist",
       "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false,
-      "timestamp": ""
+      "gatekeeperAssess": false
     },
     "dmg": {
       "contents": [
@@ -266,8 +264,7 @@
     "publish": {
       "provider": "github",
       "owner": "holium",
-      "repo": "realm",
-      "private": true
+      "repo": "realm"
     }
   },
   "repository": {
