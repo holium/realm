@@ -6,7 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 import { Flex, Box, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
+import { shortened, formatEthAmount, getBaseTheme, getMockCoinIcon } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -55,8 +55,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
-
-    console.log(props.coin)
 
     let amountDisplay = !props.coin
       ? `${formatEthAmount(props.wallet.balance).eth} ETH`
@@ -154,7 +152,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           >
             {accountDisplay}
           </Flex>
-          <Balance coin={props.coin} amountDisplay={amountDisplay} colors={themeData.colors} />
+          <Balance coin={props.coin!} amountDisplay={amountDisplay} colors={themeData.colors} />
         </Box>
         {/* @ts-ignore */}
         <SendReceiveButtons
@@ -232,6 +230,7 @@ function SendReceiveButtons(props: {
 
 interface BalanceInterface { coin?: ERC20Type, amountDisplay: string, colors: any}
 function Balance (props: BalanceInterface) {
+  let coinIcon = props.coin ? props.coin.logo || getMockCoinIcon(props.coin.name) : '';
   return !props.coin
     ? (
       <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
@@ -240,7 +239,7 @@ function Balance (props: BalanceInterface) {
     )
     : (
       <Flex mt={1} flexDirection="column" justifyContent="center" alignItems="center">
-        <img height="26px" src={props.coin.logo} />
+        <img height="26px" src={coinIcon} />
         <Text mt={1} opacity={0.9} fontWeight={600} fontSize={5} animate={false}>
           {props.amountDisplay}
         </Text>

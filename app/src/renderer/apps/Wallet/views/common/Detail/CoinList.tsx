@@ -11,6 +11,7 @@ import { ThemeModelType } from 'os/services/theme.model';
 import {
   getBaseTheme,
   getTransactions,
+  getMockCoinIcon
 } from '../../../lib/helpers';
 import { TransactionList } from '../Transaction/List';
 import { SendTransaction } from '../Transaction/Send';
@@ -49,11 +50,12 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
   const baseTheme = getBaseTheme(theme.currentTheme);
 
   const Coin = (props: { details: ERC20Type }) => {
+    let coinIcon = props.details.logo || getMockCoinIcon(props.details.name);
     return (
       <Flex width="100%" my="2px" px={3} py={2} alignItems="center" justifyContent="space-between" backgroundColor={darken(.03, theme.currentTheme.windowColor)} borderRadius="6px"
         onClick={() => WalletActions.setView(WalletView.WALLET_DETAIL, undefined, { type: 'coin', key: props.details.address})}>
         <Flex alignItems="center">
-          <img style={{ marginRight: '12px' }} height="20px" src={props.details.logo} />
+          <img style={{ marginRight: '12px' }} height="20px" src={coinIcon} />
           <Flex flexDirection="column" justifyContent="center">
             <Text variant="body"> {props.details.balance} {props.details.name} </Text>
             <Text fontSize={1} color={baseTheme.colors.text.disabled}>$5780.67</Text>

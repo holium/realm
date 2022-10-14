@@ -136,7 +136,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
             <Transaction key={index} transaction={transaction} />
           ))
         ) : (
-          <Text variant="h4">No transactions</Text>
+          <Text mt={3} variant="h4" textAlign="center" color={theme.currentTheme.iconColor}>No transactions</Text>
         )}
       </NoScrollBar>
       {props.transactions.length > 3 && (

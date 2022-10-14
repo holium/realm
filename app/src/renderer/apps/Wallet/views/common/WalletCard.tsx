@@ -7,7 +7,11 @@ import { ThemeType } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
 import { theme as themes } from 'renderer/theme';
 import { useTrayApps } from 'renderer/apps/store';
-import { formatEthAmount } from '../../lib/helpers';
+import { formatEthAmount, getCoins, getMockCoinIcon, getTransactions } from '../../lib/helpers';
+import {
+  EthWalletType,
+  BitcoinWalletType,
+} from 'os/services/tray/wallet.model';
 
 const coins = [
   {
@@ -53,7 +57,7 @@ const CardStyle = styled(motion.div)<CardStyleProps>`
         `}
 `;
 interface WalletCardProps {
-  wallet: any;
+  wallet: EthWalletType | BitcoinWalletType;
   isSelected?: boolean;
   onSelect?: () => void;
   theme?: ThemeType;
@@ -66,10 +70,22 @@ export const WalletCard: FC<WalletCardProps> = ({
 }: WalletCardProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
-  let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;
-
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
   const themeData = themes[mode];
+
+  let coins = null;
+  if ('coins' in wallet) {
+    coins = getCoins(wallet.coins);
+  }
+
+  console.log(wallet.address)
+
+  const transactions = getTransactions(
+    walletApp.ethereum.transactions,
+    wallet!.address
+  )
+
+  let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;
 
   return (
     <Flex mt={6}>
@@ -101,9 +117,9 @@ export const WalletCard: FC<WalletCardProps> = ({
         </Text>
         <Flex pt={2} justifyContent="space-between" alignItems="center">
           <Flex>
-            {coins.map((coin, index) => <img src={coin.icon} style={{ height: '14px', marginRight: '4px' }} key={index} />)}
+            {coins && coins.map((coin, index) => <img src={coin.logo || getMockCoinIcon(coin.name)} style={{ height: '14px', marginRight: '4px' }} key={index} />)}
           </Flex>
-          <Text variant="body" color={theme.currentTheme.iconColor}>112 Transactions</Text>
+          <Text variant="body" color={theme.currentTheme.iconColor}>{transactions.length} Transactions</Text>
         </Flex>
       </CardStyle>
     </Flex>
