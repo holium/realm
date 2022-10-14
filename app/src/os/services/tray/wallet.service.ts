@@ -255,8 +255,8 @@ export class WalletService extends BaseService {
           console.log((token as any).contractAddress);
           if (!this.state!.ethereum.wallets.get(wallet.key)!.coins.has((token as any).contractAddress)) {
             const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
-            this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.name!, (token as any).contractAddress)
-            WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.name!, (token as any).contractAddress, wallet.key);
+            this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.symbol!, (token as any).contractAddress)
+            WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.symbol!, (token as any).contractAddress, wallet.key);
           }
         }
       }
