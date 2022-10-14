@@ -49,6 +49,7 @@ export interface IAppUpdater {
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   constructor() {
+    if (process.env.NODE_ENV === 'development') return;
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     autoUpdater.autoDownload = false;

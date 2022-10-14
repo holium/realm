@@ -83,6 +83,7 @@ export default class MenuBuilder {
           label: 'Check for Updates',
           accelerator: 'Command+U',
           click: () => {
+            if (process.env.NODE_ENV === 'development') return;
             this.appUpdater.checkForUpdates();
           },
         },
