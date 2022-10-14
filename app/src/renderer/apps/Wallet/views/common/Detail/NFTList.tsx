@@ -17,20 +17,6 @@ import { SendTransaction } from '../Transaction/Send';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC721Type, WalletView } from 'os/services/tray/wallet.model';
 
-const nfts = [
-  {
-    title: 'Stem',
-    lastPrice: '15.58 ETH',
-    image: 'https://pbs.twimg.com/media/EuPi1V7XAAA_k7X?format=jpg&name=medium'
-  },
-  {
-    title: '~CLXXIV – VOYAGES 2',
-    tokenType: 'Tomb',
-    floorPrice: '4.67 ETH',
-    image: 'https://f8n-production-collection-assets.imgix.net/0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405/133004/nft.png?q=80&auto=format%2Ccompress&cs=srgb&max-w=1680&max-h=1680'
-  }
-]
-
 interface NFTListProps { nfts: ERC721Type[] }
 export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
   const { theme } = useServices();

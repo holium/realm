@@ -18,29 +18,6 @@ import { SendTransaction } from '../Transaction/Send';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
 
-// const coins = [
-//   {
-//     ticker: 'USDC',
-//     amount: '5765.2',
-//     icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'
-//   },
-//   {
-//     ticker: 'BNB',
-//     amount: '1.1000',
-//     icon: 'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Binance-Coin-BNB-icon.png'
-//   },
-//   {
-//     ticker: 'SHIB',
-//     amount: '21300000',
-//     icon: 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png'
-//   },
-//   {
-//     ticker: 'UNI',
-//     amount: '211',
-//     icon: 'https://cryptologos.cc/logos/uniswap-uni-logo.png'
-//   }
-// ]
-
 interface CoinListProps {
   coins: ERC20Type[]
 }
