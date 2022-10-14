@@ -1,14 +1,7 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import {
-  Flex,
-  Box,
-  Icons,
-  Text,
-  Sigil,
-  Button,
-} from 'renderer/components';
+import { Flex, Box, Icons, Text, Sigil, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { shortened, getBaseTheme } from '../../../lib/helpers';
@@ -69,10 +62,10 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               transactionRecipient.patp
             )
           : await WalletActions.sendBitcoinTransaction(
-            Number(walletApp.currentIndex!),
-            transactionRecipient.address || transactionRecipient.patpAddress!,
-            transactionAmount.toString()
-          );
+              Number(walletApp.currentIndex!),
+              transactionRecipient.address || transactionRecipient.patpAddress!,
+              transactionAmount.toString()
+            );
         setTransactionSending(false);
         setScreen('initial');
         props.close();
@@ -105,9 +98,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           <Flex mt={7} flexDirection="column">
             <AmountInput max={props.max} setValid={amountValidator} />
             <Box width="100%" mt={4}>
-              <RecipientInput
-                setValid={recipientValidator}
-              />
+              <RecipientInput setValid={recipientValidator} />
             </Box>
             <Flex mt={7} justifyContent="space-between">
               <Button variant="transparent" onClick={() => props.close()}>
