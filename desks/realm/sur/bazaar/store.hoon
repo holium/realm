@@ -24,9 +24,7 @@
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      :: [%urbit =docket:docket host=(unit ship) install-status=?(%started %failed %suspended %installed %uninstalled %desktop %treaty)]
       [%urbit =docket:docket host=(unit ship) install-status=?(%started %failed %suspended %installed %uninstalled %desktop %treaty)]
-      :: [%missing ~]
   ==
 ::
 ::  $catalog: for efficiencies sake, this is the one "master" list of apps
@@ -70,8 +68,8 @@
 ::
 +$  interaction
   $%
-    [%recommend path=space-path:spaces =app-id =app]
-    [%unrecommend path=space-path:spaces =app-id]  
+    [%member-recommend path=space-path:spaces =app-id =app]
+    [%member-unrecommend path=space-path:spaces =app-id]  
   ==
 ::
 +$  reaction
@@ -86,6 +84,7 @@
       [%app-install-update =app-id =urbit-app]
       [%joined-bazaar =path:spaces-path:spaces =catalog =stall]
       [%remove-bazaar =path:spaces-path:spaces]
+      [%stall-update =path:spaces-path:spaces =stall]
   ==
 +$  view
   $%  [%catalog =catalog]

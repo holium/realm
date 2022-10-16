@@ -34,7 +34,6 @@ export const BazaarApi = {
   getApps: (conduit: Conduit, path: string, tag: string) => null,
   getAllies: (conduit: Conduit, path: string) => null,
   getTreaties: (conduit: Conduit, patp: string) => null,
-
   scryAllies: async (conduit: Conduit): Promise<any> => {
     const response = await conduit.scry({
       app: 'bazaar',
@@ -224,6 +223,10 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'unrecommended':
       model._removeRecommended(data['unrecommended']);
+      break;
+    case 'stall-update':
+      model._updateStall(data['stall-update']);
+      // model._removeRecommended(data['stall-update']);
       break;
     default:
       break;

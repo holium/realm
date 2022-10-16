@@ -15,7 +15,6 @@ import {
   flow,
 } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-// import { NativeAppList, nativeApps } from '../../../../renderer/apps';
 import { toJS } from 'mobx';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
@@ -182,6 +181,12 @@ export const NewBazaarStore = types
     },
     _addNew(newSpace: any) {
       console.log(newSpace);
+    },
+    _updateStall(data: {
+      path: string;
+      stall: { recommended: any; suite: any };
+    }) {
+      self.stalls.set(data.path, data.stall);
     },
     _allyAdded(ship: string) {
       if (self.addingAlly.get(ship)) {
@@ -408,8 +413,6 @@ export const NewBazaarStore = types
       const stall = self.stalls.get(path);
       if (!stall) return [];
       if (stall.recommended.size === 0) return [];
-      console.log(stall.recommended);
-
       return Array.from(
         Object.keys(getSnapshot(stall.recommended)).map((appId: string) => {
           return self.catalog.get(appId);

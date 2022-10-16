@@ -87,7 +87,6 @@
     --
   --
 ::
-::
 ::  json
 ::
 ++  enjs
@@ -155,7 +154,7 @@
           [%index (numb index.rct)]
       ==
       ::
-       %joined-bazaar
+        %joined-bazaar
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%catalog (catalog-js:encode catalog.rct)]
@@ -165,6 +164,12 @@
         %remove-bazaar
       %-  pairs
       [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]~
+      ::
+        %stall-update
+      %-  pairs
+      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
+          [%stall (stall-js:encode stall.rct)]
+      ==
       ::
       ::   %treaty-added
       :: :-  %treaty-added
@@ -272,16 +277,8 @@
       ^-  [cord json]
       [app-id (app-detail:encode app-id app)]
   ::
-  :: ++  catalog-app
-  ::   |=  [=app-id:store app=app:store]
-  ::   ^-  json
-  ::   %-  pairs
-  ::   (app-detail:encode app-id app)
-  ::
   ++  app-detail
     |=  [=app-id:store =app:store]
-    :: ^-  json
-    :: %-  pairs
     ?-  -.app
       ::
       %native
@@ -306,12 +303,10 @@
       ::
       %urbit   (urbit-app:encode app-id +.app)
       ::
-      :: %missing  ~
     ==
   ::
   ++  urbit-app
     |=  [=app-id app=urbit-app:store]
-    :: ^-  json
     %+  merge  (dkt docket.app)
     %-  pairs
     :~
@@ -361,7 +356,7 @@
       %http  s+url.loc
       %ames  s+(scot %p ship.loc)
     ==
-      ::
+  ::
   ++  version
     |=  v=version:docket
     ^-  json
@@ -416,6 +411,7 @@
       %tas  s+(scot %tas p.c)  
       %ud   (numb p.c)
     ==
+  ::
   ++  alliance
     |=  a=alliance:treaty
     ^-  json

@@ -93,11 +93,11 @@
       [%bazaar @ @ ~]         :: The space level watch subscription
         =/  host              `@p`(slav %p i.t.path)
         =/  space-path        `@t`i.t.t.path
-        ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to {<(spat /(scot %p host)/(scot %tas space-path))>}..."
         :: https://developers.urbit.org/guides/core/app-school/8-subscriptions#incoming-subscriptions
         ::  recommends crash on permission check or other failure
         =/  path              [host space-path]
         ?>  (check-member:security:core path src.bowl)
+        ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to {<(spat /(scot %p host)/(scot %tas space-path))>}..."
         =/  paths             [/bazaar/(scot %p our.bowl)/(scot %tas space-path) ~]
         =/  space-data        (filter-space-data:helpers:bazaar path)
         [%give %fact paths bazaar-reaction+!>([%joined-bazaar path catalog.space-data stall.space-data])]~
@@ -156,10 +156,15 @@
             ==
       ::
           %fact
-            ?+    p.cage.sign  (on-agent:def wire sign)
+            ?+    p.cage.sign   (on-agent:def wire sign)
                   %spaces-reaction
                 =^  cards  state
                   (reaction:spaces:core !<(=reaction:spaces-store q.cage.sign))
+                [cards this]
+                ::
+                  %visa-reaction
+                =^  cards  state
+                  (reaction:visas:core !<(=reaction:vstore q.cage.sign))
                 [cards this]
             ==
         ==
@@ -255,8 +260,13 @@
       ==
   ::
   ++  on-arvo   |=([wire sign-arvo] !!)
-  ++  on-fail   |=([term tang] `..on-init)
   ++  on-leave  |=(path `..on-init)
+  ++  on-fail ::  |=([term tang] `..on-init)
+    |=  [=term =tang]
+    ^-  (quip card _this)
+    %-  (slog leaf+"error in {<dap.bowl>}" >term< tang)
+    `this
+  :: |=([term tang] `..on-init)
 --
 |_  [=bowl:gall cards=(list card)]
 ::
@@ -476,8 +486,8 @@
     ^-  (quip card _state)
     |^
     ?-  -.itc             
-      %recommend          (member-recommend +.itc)
-      %unrecommend        (member-unrecommend +.itc)
+      %member-recommend          (member-recommend +.itc)
+      %member-unrecommend        (member-unrecommend +.itc)
     ==
     ::
     ++  member-recommend
@@ -667,6 +677,33 @@
     --
   --
 ::
+++  visas
+  |%
+  ++  reaction 
+    |=  [rct=reaction:vstore]
+    ^-  (quip card _state)
+    |^
+    ?+  -.rct         `state
+      %kicked         (on-member-kicked +.rct)
+    ==
+    ++  on-member-kicked
+      |=  [path=space-path:spaces-store =ship]
+      ^-  (quip card _state)
+      =/  update-path    /bazaar/(scot %p ship.path)/(scot %tas space.path)
+      ?.  (is-host:core ship.path) 
+        ?:  =(our.bowl ship)      ::  we were kicked
+          =.  stalls.state        (~(del by stalls.state) path)
+          =.  docks.state         (~(del by docks.state) path)
+          :_  state 
+          [%pass update-path %agent [our.bowl %bazaar] %leave ~]~
+        ::  another member was kicked
+        `state
+      ~&  >  ['member kicked so remove recs' path ship]
+      ::  TODO
+      :_  state 
+      [%give %kick ~[update-path] (some ship)]~
+    --
+  --
 ++  spaces
   |%
   ++  reaction 
@@ -743,16 +780,16 @@
   |^  
   ?+  -.upd    `state
     %add       (on-add +.upd)
-    %del       (on-del +.upd)
+    :: %del       (on-del +.upd)
   ==
   ::
   ++  on-add
     |=  [=treaty:treaty]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
+    :: ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
     =|  app=app:store
-    =.  app            [%urbit docket.treaty `ship.treaty %treaty]
-    =.  catalog.state  (~(put by catalog.state) desk.treaty app)
+    :: =.  app            [%urbit docket.treaty `ship.treaty %treaty]
+    :: =.  catalog.state  (~(put by catalog.state) desk.treaty app)
     ~&  >  app
     ::  do we have a pending installation request for this ship/desk?
     =/  installation  (~(get by pending-installs.state) ship.treaty)
@@ -765,22 +802,23 @@
     ==
     
   ::
-  ++  on-del
-    |=  [=ship =desk]
-    ^-  (quip card _state)
-    =/  app       (~(get by catalog.state) desk)
-    ?~  app       `state
-    =/  app       u.app
-    ?+  -.app     `state
-      ::
-      %urbit
-        ?:  ?&  =(install-status.app %treaty)
-                =((need host.app) ship)
-            ==
-          =.  catalog.state  (~(del by catalog.state) ship)
-          `state
-        `state
-    ==
+  :: ++  on-del
+  ::   |=  [=ship =desk]
+  ::   ^-  (quip card _state)
+  ::   =/  app       (~(get by catalog.state) desk)
+  ::   ?~  app       `state
+  ::   =/  app       u.app
+  ::   ?+  -.app     `state
+  ::     ::
+  ::     %urbit
+  ::       ?:  ?&  =(install-status.app %treaty)
+  ::               =((need host.app) ship)
+  ::           ==
+  ::         =.  catalog.state  (~(del by catalog.state) ship)
+  ::         `state
+  ::         :: (give:bazaar:core [%remove-app desk] [/updates ~] ~)
+  ::       `state
+  ::   ==
   --
 ::
 ++  ally-update
@@ -796,15 +834,15 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
+    :: ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
     :: (give:bazaar:core [%new-ally-added [ship.treaty desk.treaty] [%urbit docket.charge]] [/updates ~])
     `state
   ::
   ++  on-add
     |=  [=ship]
     ^-  (quip card _state)
-    ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
-    =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
+    :: ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
+    :: =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
     :: ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
     `state
   ::
@@ -832,7 +870,7 @@
     ?-  -.chad.charge  
       %install
         =/  app  (~(get by catalog.state) desk)
-        ~&  >  ['%install' app]
+        :: ~&  >  ['%install' app]
         =/  app=app:store  ?~  app  [%urbit docket.charge ~ %started]
           ?>  ?=(%urbit -.u.app)
           =.  install-status.u.app    %started
@@ -846,7 +884,7 @@
       ::
       %hung
         =/  app  (~(get by catalog.state) desk)
-        ~&  >  ['%hung' app]
+        :: ~&  >  ['%hung' app]
         =/  app  ?~  app  [%urbit docket.charge ~ %failed]
           ?>  ?=(%urbit -.u.app)
           =.  install-status.u.app  %failed
@@ -858,7 +896,7 @@
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
       %suspend
-        ~&  >>  ['%suspend']
+        :: ~&  >>  ['%suspend']
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %suspended]
           ?>  ?=(%urbit -.u.app)
@@ -871,7 +909,7 @@
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
       %glob
-        ~&  >>  ['%glob']
+        :: ~&  >>  ['%glob']
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %installed]
           ?>  ?=(%urbit -.u.app)
@@ -884,7 +922,7 @@
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
       %site
-        ~&  >>  ['%site']
+        :: ~&  >>  ['%site']
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %installed]
           ?>  ?=(%urbit -.u.app)
@@ -931,8 +969,8 @@
     (~(has in roles.member.member) %admin)
   ::
   --
-  ++  is-host
-    |=  [=ship]
-    =(our.bowl ship)
+++  is-host
+  |=  [=ship]
+  =(our.bowl ship)
 ::
 --

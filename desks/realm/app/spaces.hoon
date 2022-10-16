@@ -363,11 +363,10 @@
         =.  membership.state              (~(del by membership.state) path)
         =/  watch-path                    [/spaces/(scot %p ship.path)/(scot %tas space.path) ~]
         :_  state
-        %-  ~(rep by members)
-          |=  [[=ship =member:membership-store] acc=(list card)]
-          %+  weld  %+  snoc  acc
-          [%give %kick watch-path (some ship)]
-        (give [%remove path] watch-path)
+        :~
+          [%give %kick watch-path ~]
+          [%give %fact watch-path spaces-reaction+!>([%remove path])]
+        ==
     ::
     ++  on-remote-space
       |=  [path=space-path:store =space:store =members:membership-store]
@@ -539,7 +538,7 @@
       ++  member-handle-kick
         |=  [path=space-path:store]
         :_  state
-        [%pass / %agent [ship.path dap.bowl] %poke visa-action+!>(act)]~
+        [%pass / %agent [ship.path %spaces] %poke visa-action+!>(act)]~
       ::
       ++  host-handle-kick
         |=  [path=space-path:store =ship]
