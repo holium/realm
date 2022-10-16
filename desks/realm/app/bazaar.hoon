@@ -50,6 +50,20 @@
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
     =.  catalog.state                 (~(put by catalog) %os-settings [%native native-app])
+    =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
+    ?>  ?=(%spaces -.spaces-scry)
+    =/  spaces                        spaces.spaces-scry
+    ~&  >  ['on-init %spaces scry' spaces.spaces-scry]
+    =/  stalls       
+      %+  turn  ~(tap by spaces)
+        |=  [path=space-path:spaces-store =space:spaces-store]
+        [path [suite=~ recommended=~]]
+    =/  docks       
+      %+  turn  ~(tap by spaces)
+        |=  [path=space-path:spaces-store =space:spaces-store]
+        [path [~]]
+    =.  stalls.state        (~(gas by stalls.state) stalls)
+    =.  docks.state         (~(gas by docks.state) docks)
     :_  this
     :~ 
         [%pass /docket %agent [our.bowl %docket] %watch /charges]
@@ -291,7 +305,7 @@
     ::
     ++  add-pin
       |=  [path=space-path:spaces-store =app-id:store index=(unit @ud)]
-      :: ?<  =(our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       =/  upd-docks=dock:store      (~(gut by docks.state) path ~)
       =/  index                     ?~(index (lent upd-docks) u.index)
       =/  exists-at                 (find [app-id]~ upd-docks)
@@ -304,14 +318,14 @@
     ::
     ++  reorder-pins
       |=  [path=space-path:spaces-store =dock:store]
-      :: ?<  =(our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       =.  docks.state             (~(put by docks.state) [path dock])
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%pins-reodered path dock])]~
       
     ++  rem-pin
       |=  [path=space-path:spaces-store =app-id:store]
-      :: ?<  =(our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       =/  upd-docks                 (~(got by docks.state) path)
       =/  index                     (find [app-id]~ upd-docks)
       ?~  index                     `state
@@ -328,13 +342,12 @@
       ::
       ++  member-add-suite
         |=  [path=space-path:spaces-store =app-id:store index=@ud]
+        ?>  (check-admin:security path src.bowl)
         :_  state
         [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%suite-add path app-id index])]~
       ::
       ++  host-add-suite
         |=  [path=space-path:spaces-store =app-id:store index=@ud]
-        :: TODO add security check
-        :: ?>  (check-admin:security path src.bowl) :: 
         =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
         =.  suite.stall         (~(put by suite.stall) [index app-id])
         =.  stalls.state        (~(put by stalls.state) [path stall])
@@ -350,13 +363,12 @@
       ::
       ++  member-remove-suite
         |=  [path=space-path:spaces-store index=@ud]
+        ?>  (check-admin:security path src.bowl)
         :_  state
         [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%suite-remove path index])]~
       ::
       ++  host-remove-suite
         |=  [path=space-path:spaces-store index=@ud]
-        :: TODO add security check
-        :: ?>  (check-admin:security path src.bowl) :: 
         =/  stall               (~(got by stalls.state) path)
         =.  suite.stall         (~(del by suite.stall) index)
         =.  stalls.state        (~(put by stalls.state) [path stall])
@@ -367,7 +379,7 @@
     ++  install-app
       |=  [=ship =desk]
       ^-  (quip card _state)    
-      :: ?<  =(our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
         %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
@@ -384,14 +396,16 @@
     ++  uninstall-app
       |=  [=desk]
       ^-  (quip card _state)
-      :: ?<  =(our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       :_  state
       [%pass / %agent [our.bowl %docket] %poke docket-uninstall+!>([desk])]~
     ::
     ++  recommend
       |=  [=app-id:store]
-      :: ?<  =(our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
+      ~&  >  ['recommend' our.bowl src.bowl]
       =.  recommendations.state     (~(put in recommendations.state) app-id)
+      =/  app                       (~(got by catalog.state) app-id)
       =/  updated-stalls=[=stalls:store cards=(list card)]
       %-  ~(rep by stalls.state)
         |=  [[path=space-path:spaces-store =stall:store] result=[=stalls:store cards=(list card)]]
@@ -401,16 +415,21 @@
           =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
           =.  stalls.result           (~(put by stalls.result) [path stall])
           =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-          [stalls.result [%give %fact paths bazaar-interaction+!>([%recommend path app-id])]~]
+          [stalls.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~]
         ::  we need to poke host
-        [stalls.result [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%recommend path ship])]~]
+        =/  cards  
+          :~
+            [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-recommend path app-id app])]
+          ==
+        [stalls.state cards]
       =.  stalls.state            stalls.updated-stalls
+      =.  cards.updated-stalls    (snoc cards.updated-stalls [%give %fact [/updates ~] bazaar-reaction+!>([%recommended app-id stalls.state])])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%recommended app-id stalls.state])]~
+      cards.updated-stalls
     ::
     ++  unrecommend
       |=  [=app-id:store]
-      :: ?<  =(our.bowl src.bowl)
+      ?>  =(our.bowl src.bowl)
       =.  recommendations.state   (~(del in recommendations.state) app-id)
       =/  updated-stalls=[=stalls:store cards=(list card)]
       %-  ~(rep by stalls.state)
@@ -424,13 +443,18 @@
             (~(put by recommended.stall) [app-id rec-members])
           =.  stalls.result           (~(put by stalls.result) [path stall])
           =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-          [stalls.result [%give %fact paths bazaar-interaction+!>([%unrecommend path app-id])]~]
-        ::  we need to poke host
-        [stalls.result [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%unrecommend path ship])]~]
+          [stalls.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~]
+        =/  cards  
+          :~
+            [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-unrecommend path app-id])]
+          ==
+        [stalls.state cards]
+
       =.  stalls.state            stalls.updated-stalls
-      ~&  >  ['unrecommend']
+      =.  cards.updated-stalls    (snoc cards.updated-stalls [%give %fact [/updates ~] bazaar-reaction+!>([%unrecommended app-id stalls.state])])
+      ~&  >  cards.updated-stalls
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%unrecommended app-id stalls.state])]~
+      cards.updated-stalls
     ::
     --
   ++  reaction
@@ -443,7 +467,7 @@
       %suite-added        (on-suite-add +.rct)
       %suite-removed      (on-suite-rem +.rct)
       %joined-bazaar      (on-joined +.rct)
-      %remove-bazaar      (on-removed +.rct)
+      %stall-update       (on-stall-update +.rct)
     ==
     ::
     ++  on-rec
@@ -456,10 +480,20 @@
     ::
     ++  on-suite-add
       |=  [path=space-path:spaces-store app-id=@tas index=@ud]
+      ?:  =(is-host:core ship.path)
+        `state
+      =/  stall               (~(got by stalls.state) path)
+      =.  suite.stall         (~(put by suite.stall) [index app-id])
+      =.  stalls.state        (~(put by stalls.state) [path stall])
       `state
     ::
     ++  on-suite-rem
       |=  [path=space-path:spaces-store index=@ud]
+      ?:  =(is-host:core ship.path)
+        `state
+      =/  stall               (~(got by stalls.state) path)
+      =.  suite.stall         (~(del by suite.stall) index)
+      =.  stalls.state        (~(put by stalls.state) [path stall])
       `state
     ::
     ++  on-joined
@@ -473,13 +507,15 @@
             result
           (snoc result entry)
       =.  catalog.state       (~(uni by catalog.state) (malt new-catalog-apps))
-      `state
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path catalog stall])]~
+
     ::
-    ++  on-removed
-      |=  [path=space-path:spaces-store]
-      =.  stalls.state        (~(del by stalls.state) path)
-      =.  docks.state         (~(del by docks.state) path)
-      `state
+    ++  on-stall-update
+      |=  [path=space-path:spaces-store =stall:store]
+      =.  stalls.state        (~(put by stalls.state) [path stall])
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall])]~
     --
   ++  interaction 
     |=  [itc=interaction:store]
@@ -492,91 +528,35 @@
     ::
     ++  member-recommend
       |=  [path=space-path:spaces-store =app-id:store =app:store]
-      ~&  >  ['interaction recommend']
-      `state
+      ?>  (check-member:security path src.bowl)
+      =/  stall                   (~(got by stalls.state) path)
+      =/  rec-members             (~(gut by recommended.stall) app-id ~)
+      =.  rec-members             (~(put in rec-members) src.bowl)
+      =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
+      =.  stalls.state            (~(put by stalls.state) [path stall])
+      =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+      :_  state
+      [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~
     ::
     ++  member-unrecommend
       |=  [path=space-path:spaces-store =app-id:store]
-      ~&  >  ['interaction unrecommend']
-      `state
+      ?>  (check-member:security path src.bowl)
+      =/  stall                   (~(got by stalls.state) path)
+      =/  rec-members=member-set:store           
+        ?:  (~(has by recommended.stall) app-id)
+          =/  members     (~(got by recommended.stall) app-id)
+          =.  members     (~(del in members) src.bowl)
+          members
+        ~
+      =.  recommended.stall       
+        ?:  =(~(wyt in rec-members) 0)
+          (~(del by recommended.stall) app-id)
+        (~(put by recommended.stall) [app-id rec-members])
+      =.  stalls.state            (~(put by stalls.state) [path stall])
+      =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+      :_  state
+      [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~
     --
-  :: ++  interaction
-  ::   |=  =interaction:store
-  ::   ^-  (quip card _state)
-  ::   |^
-  ::   ?-  -.interaction
-  ::     %member-recommend         (member-recommend +.interaction)
-  ::     %member-unrecommend       (member-unrecommend +.interaction)
-  ::   ==
-  ::   ::
-  ::   ++  member-recommend
-  ::     |=  [path=space-path:spaces-store =app-id:store =catalog-entry:store]
-  ::     ^-  (quip card _state)
-  ::     ?<  =(src.bowl our.bowl)  :: must come from a member (remote ship)
-  ::     (handle-member-recommend path app-id catalog-entry %recommend)
-  ::   ::
-  ::   ++  member-unrecommend
-  ::     |=  [path=space-path:spaces-store =app-id:store =catalog-entry:store]
-  ::     ^-  (quip card _state)
-  ::     ?<  =(src.bowl our.bowl)  :: must come from a member (remote ship)
-  ::     (handle-member-recommend path app-id catalog-entry %unrecommend)
-  ::   ::
-  ::   ++  handle-member-recommend
-  ::     |=  [path=space-path:spaces-store =app-id:store =catalog-entry:store action=?(%recommend %unrecommend)]
-  ::     ::  here we know that the poke did not originate on this ship; meaning it's come from a member
-  ::     ::    poke. in this case simply update the recommendation stats for the app in the given space
-  ::     =/  apps  (~(get by space-apps.state) path)
-  ::     ::  were we poked with a bad space path? print error (red text) for now to help troubleshoot
-  ::     ?~  apps
-  ::       ~&  >>>  "{<dap.bowl>}: [recommend]. space {<path>} not found"
-  ::       `state
-  ::     ::  is the app in this spaces' app index?
-  ::     =/  app-lite  (~(get by index.u.apps) app-id)
-  ::     =/  app-lite
-  ::       ?~  app-lite
-  ::         =|  app-lite=app-lite:store
-  ::         =.  id.app-lite                  app-id
-  ::         =.  sieve.app-lite              *sieve:store
-  ::         app-lite
-  ::       u.app-lite
-  ::     =/  app-lite
-  ::       ?-  action
-  ::         %recommend
-  ::           =.  tags.sieve.app-lite  (~(put in tags.sieve.app-lite) %recommended)
-  ::           ::  only increment the total # of recommendations if this ship has not already been counted
-  ::           ?:  (~(has in members.recommendations.sieve.app-lite) src.bowl)  app-lite
-  ::           =.  total.recommendations.sieve.app-lite  (add total.recommendations.sieve.app-lite 1)
-  ::           =.  members.recommendations.sieve.app-lite  (~(put in members.recommendations.sieve.app-lite) src.bowl)
-  ::           app-lite
-  ::         %unrecommend
-  ::           =.  tags.sieve.app-lite  (~(del in tags.sieve.app-lite) %recommended)
-  ::           ::  only increment the total # of recommendations if this ship has not already been counted
-  ::           ?.  (~(has in members.recommendations.sieve.app-lite) src.bowl)  app-lite
-  ::           =.  total.recommendations.sieve.app-lite  ?.((gth total.recommendations.sieve.app-lite 0) 0 (sub total.recommendations.sieve.app-lite 1))
-  ::           =.  members.recommendations.sieve.app-lite  (~(del in members.recommendations.sieve.app-lite) src.bowl)
-  ::           app-lite
-  ::       ==
-  ::     :: when members recommend, the app may not exist in this ship's (space owner's) app catalog
-  ::     ::  therefore add it if not there
-  ::     =/  entry            (~(get by catalog.state) app-id)
-  ::     =/  entry            ?~(entry catalog-entry u.entry)
-  ::     =/  entry
-  ::     ?+  -.app.entry  entry
-  ::       ::
-  ::       %urbit
-  ::         =.  install-status.app.entry  ?:((~(has by catalog.state) app-id) %installed install-status.app.entry)
-  ::         entry
-  ::     ==
-  ::     =.  catalog      (~(put by catalog.state) app-id entry)
-  ::     =.  index.u.apps  (~(put by index.u.apps) app-id app-lite)
-  ::     =.  recommended.sorts.u.apps     (sort-apps:helpers (extract-apps:helpers index.u.apps %recommended) %recommended %asc)
-  ::     =.  space-apps.state  (~(put by space-apps.state) path u.apps)
-  ::     =/  paths  [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-  ::     :_  state
-  ::     :~  [%give %fact [/updates]~ bazaar-reaction+!>([%my-recommendations recommendations.my.state])]
-  ::         [%give %fact paths bazaar-reaction+!>([?:(=(action %recommend) %recommend %unrecommend) path [app-id sieve.app-lite entry] recommended.sorts.u.apps])]
-  ::     ==
-  ::   --
   ++  give
     |=  [payload=reaction:store paths=(list path) cards=(list card)]
     ^-  (quip card _state)
@@ -598,12 +578,6 @@
       ?>  ?=(%ini -.treaties)
       init.treaties
     ::
-    :: ++  treaty
-    ::   |=  [=ship =desk]
-    ::   :: ^-  treaty:treaty:treaty
-    ::   =/  treaty-data  .^(treaty:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaty/(scot %p ship)/(scot %tas desk)/noun)
-    ::   :: ?~  treaty-data  ~
-    ::   treaty-data
     --
   ++  helpers
     |%
@@ -615,14 +589,13 @@
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
-      :: (~(has in roles.member.member) %admin)
-      :: =/  hidden   `(set @tas)`~[%realm %wallet %courier]
+      =/  hidden     `(set desk)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      ~&  >  [hidden]
       ^-  catalog:store
       %-  ~(rep by charges)
-      |:  [[=desk =charge:docket] acc=`catalog:store`~]
-      :: ?:  =(~(has in hidden) desk)
-      ::   ~
-      (~(put by acc) desk [%urbit docket.charge ~ %installed])
+        |:  [[=desk =charge:docket] acc=`catalog:store`~]
+        ?:  (~(has in hidden) desk)  acc
+        (~(put by acc) desk [%urbit docket.charge ~ %installed])
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
@@ -698,10 +671,25 @@
           [%pass update-path %agent [our.bowl %bazaar] %leave ~]~
         ::  another member was kicked
         `state
-      ~&  >  ['member kicked so remove recs' path ship]
-      ::  TODO
-      :_  state 
-      [%give %kick ~[update-path] (some ship)]~
+      =/  stall               (~(got by stalls.state) path)
+      =/  cleaned-recs=[=recommended:store]        
+        %-  ~(rep by recommended.stall)  ::  remove all recommendations from kicked
+          |=  [app=[=app-id:store =member-set:store] result=[=recommended:store]]
+          =/  rec-members      (~(del in member-set.app) ship)
+          =/  recommeded-map   
+            ?:  =(~(wyt in rec-members) 0)
+              (~(del by recommended.result) app-id.app)
+            (~(put by recommended.result) [app-id.app rec-members])
+          =.  recommended.result    recommeded-map 
+          [recommended.result]
+      ::
+      =.  recommended.stall   recommended.cleaned-recs
+      =.  stalls.state        (~(put by stalls.state) [path stall])
+      :_  state
+      :~
+        [%give %fact [update-path /updates ~] bazaar-reaction+!>([%stall-update path stall])]
+        [%give %kick ~[update-path] (some ship)]
+      ==
     --
   --
 ++  spaces
@@ -711,31 +699,10 @@
     ^-  (quip card _state)
     |^
     ?+  -.rct         `state
-      %initial        (on-initial +.rct)
       %add            (on-add +.rct)
       %remove         (on-remove +.rct)
       %remote-space   (on-remote-space +.rct)
     ==
-    ++  on-initial
-      |=  [=spaces:spaces-store =membership:membership-store =invitations:vstore]
-      ^-  (quip card _state)
-      ~&  >  ['%bazarr spaces-reaction on-initial']
-      =/  stalls       
-        %+  turn  ~(tap by spaces)
-          |=  [path=space-path:spaces-store =space:spaces-store]
-          ?:  (~(has by stalls.state) path)
-            [path (~(got by stalls.state) path)]
-          [path [suite=~ recommended=~]]
-      =.  stalls.state        (~(gas by stalls.state) stalls)
-      =/  docks       
-        %+  turn  ~(tap by spaces)
-          |=  [path=space-path:spaces-store =space:spaces-store]
-          ?:  (~(has by docks.state) path)
-            [path (~(got by docks.state) path)]
-          [path [~]]
-      =.  stalls.state        (~(gas by stalls.state) stalls)
-      =.  docks.state         (~(gas by docks.state) docks)
-      `state
     ::
     ++  on-add
       |=  [space=space:spaces-store members=members:membership-store]
@@ -799,8 +766,7 @@
     :_  state
     :~  
       [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])]
-    ==
-    
+    == 
   ::
   :: ++  on-del
   ::   |=  [=ship =desk]
@@ -816,7 +782,6 @@
   ::           ==
   ::         =.  catalog.state  (~(del by catalog.state) ship)
   ::         `state
-  ::         :: (give:bazaar:core [%remove-app desk] [/updates ~] ~)
   ::       `state
   ::   ==
   --
@@ -834,22 +799,17 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}"
-    :: (give:bazaar:core [%new-ally-added [ship.treaty desk.treaty] [%urbit docket.charge]] [/updates ~])
     `state
   ::
   ++  on-add
     |=  [=ship]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
     :: =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
-    :: ~&  >>  "{<dap.bowl>}: ally-update [on-add] => {<[ship]>}"
     `state
   ::
   ++  on-del
     |=  [=ship]
     ^-  (quip card _state)
-    :: ~&  >>  "{<dap.bowl>}: ally-update [on-del] => {<[ship]>}"
     `state
   --
 ::  charge arms
@@ -865,12 +825,10 @@
   ::
   ++  add
     |=  [=desk =charge:docket]
-    ^-  (quip card _state)
-    :: only if done (head is %glob). see garden/sur/docket.hoon for more details
+    ^-  (quip card _state) 
     ?-  -.chad.charge  
-      %install
+      %install  ::  app install started
         =/  app  (~(get by catalog.state) desk)
-        :: ~&  >  ['%install' app]
         =/  app=app:store  ?~  app  [%urbit docket.charge ~ %started]
           ?>  ?=(%urbit -.u.app)
           =.  install-status.u.app    %started
@@ -882,9 +840,8 @@
         :_  state
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
-      %hung
+      %hung  ::  app install failed
         =/  app  (~(get by catalog.state) desk)
-        :: ~&  >  ['%hung' app]
         =/  app  ?~  app  [%urbit docket.charge ~ %failed]
           ?>  ?=(%urbit -.u.app)
           =.  install-status.u.app  %failed
@@ -895,8 +852,7 @@
         :_  state
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
-      %suspend
-        :: ~&  >>  ['%suspend']
+      %suspend  ::  app install paused
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %suspended]
           ?>  ?=(%urbit -.u.app)
@@ -908,8 +864,7 @@
         :_  state
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
-      %glob
-        :: ~&  >>  ['%glob']
+      %glob  ::  app install is complete
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %installed]
           ?>  ?=(%urbit -.u.app)
@@ -921,8 +876,7 @@
         :_  state
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
-      %site
-        :: ~&  >>  ['%site']
+      %site  ::  app install is complete
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %installed]
           ?>  ?=(%urbit -.u.app)

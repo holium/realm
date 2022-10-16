@@ -179,8 +179,15 @@ export const NewBazaarStore = types
       applySnapshot(self.recommendations, data.recommendations);
       applySnapshot(self.stalls, data.stalls);
     },
-    _addNew(newSpace: any) {
-      console.log(newSpace);
+    _addJoined(data: { path: string; stall: any; catalog: any }) {
+      self.stalls.set(data.path, data.stall);
+      Object.keys(data.catalog).forEach((key: string) => {
+        const docket = data.catalog[key];
+        if (docket.type === 'urbit') {
+          data.catalog[key].color = cleanNounColor(data.catalog[key].color);
+        }
+      });
+      self.catalog.merge(data.catalog);
     },
     _updateStall(data: {
       path: string;

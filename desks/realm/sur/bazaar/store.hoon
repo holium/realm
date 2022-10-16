@@ -68,8 +68,8 @@
 ::
 +$  interaction
   $%
-    [%member-recommend path=space-path:spaces =app-id =app]
-    [%member-unrecommend path=space-path:spaces =app-id]  
+      [%member-recommend path=space-path:spaces =app-id =app]
+      [%member-unrecommend path=space-path:spaces =app-id]  
   ==
 ::
 +$  reaction
@@ -83,7 +83,6 @@
       [%suite-removed path=space-path:spaces index=@ud]
       [%app-install-update =app-id =urbit-app]
       [%joined-bazaar =path:spaces-path:spaces =catalog =stall]
-      [%remove-bazaar =path:spaces-path:spaces]
       [%stall-update =path:spaces-path:spaces =stall]
   ==
 +$  view

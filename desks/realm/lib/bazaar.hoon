@@ -161,10 +161,6 @@
           [%stall (stall-js:encode stall.rct)]
       ==
       ::
-        %remove-bazaar
-      %-  pairs
-      [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]~
-      ::
         %stall-update
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
@@ -266,7 +262,7 @@
     %+  turn  ~(tap by recommended)
       |=  [=app-id:store =member-set:store]
       ^-  [cord json]
-      [app-id (numb (lent member-set))]
+      [app-id (numb ~(wyt in member-set))]
   ::
   ++  catalog-js
     |=  =catalog:store

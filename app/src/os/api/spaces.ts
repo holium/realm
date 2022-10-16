@@ -308,7 +308,6 @@ const handleSpacesReactions = (
     case 'add':
       const newSpace = spacesState.addSpace(data['add']);
       membersState.addMemberMap(newSpace, data['add'].members);
-      bazaarState._addNew(newSpace);
       break;
     case 'replace':
       spacesState.updateSpace(data['replace']);
