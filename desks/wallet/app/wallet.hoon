@@ -155,14 +155,16 @@
         ~&  ['unexpected thread result on' wire]
         `this
       ==
-        [%eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]
+        [%wallet-eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]
       ~&  'got something from eth watcher'
-      =/  [%eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]  wire
+      =/  [%wallet-eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]  wire
       ?.  ?=(%fact -.sign)
         `this
       ?+  p.cage.sign  (on-agent:def wire sign)
           %eth-watcher-diff
+        ~&  'got a diff'
         =+  !<(sign=diff:watchlib q.cage.sign) 
+        ~&  sign
         =/  diff  (decode-diff:erc20lib sign)
         ?-  diff
             [%history *]
@@ -241,13 +243,13 @@
 ::
 ++  watch-eth-watcher
   |=  =path
-  %+  to-eth-watcher  [%eth-watcher `wire`path]
+  %+  to-eth-watcher  [%wallet-eth-watcher `wire`path]
   [%watch [%logs path]]
 ::
 ++  to-eth-watcher
   |=  [=wire =task:agent:gall]
   ^-  card
-  [%pass wire %agent [our.bowl %eth-watcher] task]
+  [%pass wire %agent [our.bowl %wallet-eth-watcher] task]
 ::
 ++  get-eth-transaction
   |=  [node-url=@ta txh=@ux]
@@ -683,14 +685,13 @@
     :+  %watch  from-path
     :*  url=`@ta`node-url
         eager=%&
-        refresh-rate=~s30::15
-        timeout-time=~s75::30
+        refresh-rate=~s15
+        timeout-time=~s30
         from=0
         to=~
         contracts=[address.act ~]
         batchers=~
         topics=~[%transfer address ~]
-        ::~
     ==
     =/  to-path=path  /to/[wallet-index.act]/[(crip (z-co:co address.act))]
     =/  to-me-sub=^vase
@@ -712,7 +713,7 @@
     :~  :*  %pass
             /eth-config
             %agent
-            [our.bowl %eth-watcher]
+            [our.bowl %wallet-eth-watcher]
             %poke
             %eth-watcher-poke
             to-me-sub
@@ -720,7 +721,7 @@
         :*  %pass
             /eth-config
             %agent
-            [our.bowl %eth-watcher]
+            [our.bowl %wallet-eth-watcher]
             %poke
             %eth-watcher-poke
             from-me-sub

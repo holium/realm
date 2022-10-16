@@ -58,6 +58,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           ? await WalletActions.sendEthereumTransaction(
               walletApp.currentIndex!,
               transactionRecipient.address || transactionRecipient.patpAddress!,
+              'ETH',
               transactionAmount.toString(),
               transactionRecipient.patp
             )

@@ -115,7 +115,8 @@ export const WalletApi = {
     conduit: Conduit,
     network: string,
     hash: string,
-    transaction: any
+    transaction: any,
+    ethType?: string,
   ) => {
     const payload = {
       app: 'wallet',
@@ -123,6 +124,7 @@ export const WalletApi = {
       json: {
         'enqueue-transaction': {
           network: network,
+          ethType: ethType,
           hash: hash,
           transaction: transaction,
         },

@@ -64,11 +64,11 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       new Date(b.initiatedAt).getTime() - new Date(a.initiatedAt).getTime()
   );
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (coins.length) {
       setListView('coins');
     }
-  });
+  });*/
 
   /* @ts-ignore */
   const themeData = getBaseTheme(theme.currentTheme);
@@ -77,7 +77,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     <Flex width="100%" height="100%" flexDirection="column" px={3}>
       <DetailHero
         wallet={wallet!}
-        coin={coin}
+        coin={coin!}
         QROpen={QROpen}
         setQROpen={setQROpen}
         sendTrans={sendTrans}

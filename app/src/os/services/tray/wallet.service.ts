@@ -123,14 +123,16 @@ export class WalletService extends BaseService {
       walletIndex: string,
       to: string,
       amount: string,
-      toPatp?: string
+      toPatp?: string,
+      contractType?: string,
     ) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.send-ethereum-transaction',
         walletIndex,
         to,
         amount,
-        toPatp
+        toPatp,
+        contractType
       );
     },
     sendBitcoinTransaction: (
@@ -223,7 +225,8 @@ export class WalletService extends BaseService {
     });
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
-      'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      //'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      'http://127.0.0.1:8545'
     );
 
     const patchEffect = {
@@ -243,7 +246,6 @@ export class WalletService extends BaseService {
     });
 
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
-      console.log('got update')
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
         const balances = await alchemy.core.getTokenBalances(wallet.address);
@@ -252,11 +254,18 @@ export class WalletService extends BaseService {
           return token.tokenBalance !== "0";
         });
         for (let token of nonZeroBalances) {
-          console.log((token as any).contractAddress);
           if (!this.state!.ethereum.wallets.get(wallet.key)!.coins.has((token as any).contractAddress)) {
             const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
             this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.symbol!, (token as any).contractAddress)
             WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.symbol!, (token as any).contractAddress, wallet.key);
+          }
+        }
+        const nfts = await alchemy.nft.getNftsForOwner(wallet.address);
+        for (let nft of nfts.ownedNfts) {
+          if (!this.state!.ethereum.wallets.get(wallet.key)!.nfts.has((nft as any).contract.address + nft.tokenId)) {
+            console.log(nft.title)
+            console.log(nft.description)
+            this.state!.ethereum.wallets.get(wallet.key)!.addNFT(nft.description, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!);
           }
         }
       }
@@ -288,7 +297,8 @@ export class WalletService extends BaseService {
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
-      'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      // 'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      'http://127.0.0.1:8545'
     );
   }
 
@@ -443,7 +453,8 @@ export class WalletService extends BaseService {
     walletIndex: string,
     to: string,
     amount: string,
-    toPatp?: string
+    toPatp?: string,
+    contractType?: string,
   ) {
     console.log(walletIndex);
     console.log(to);
@@ -471,7 +482,8 @@ export class WalletService extends BaseService {
       toPatp,
       fromAddress,
       tx.value,
-      new Date().toISOString()
+      new Date().toISOString(),
+      contractType,
     );
     const stateTx = this.state!.ethereum.getTransaction(hash);
     console.log(stateTx);
@@ -479,7 +491,8 @@ export class WalletService extends BaseService {
       this.core.conduit!,
       'ethereum',
       hash,
-      stateTx
+      stateTx,
+      type
       // tx
     );
   }

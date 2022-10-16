@@ -65,7 +65,7 @@
       [%create-wallet sndr=ship =network nickname=@t]
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
-      [%enqueue-transaction =network hash=@ =transaction]
+      [%enqueue-transaction =network contract-type=(unit contract-type) hash=@ =transaction]
       [%add-smart-contract =contract-type name=@t address=@ux wallet-index=@t]
       [%save-transaction-notes =network hash=@t notes=@t]
   ==

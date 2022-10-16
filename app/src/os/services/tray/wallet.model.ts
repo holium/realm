@@ -7,8 +7,9 @@ import {
   flow
 } from 'mobx-state-tree';
 import { Type } from 'react-spaces';
-import { Network, Alchemy } from "alchemy-sdk";
+import { Network, Alchemy, Nft } from "alchemy-sdk";
 import { string } from 'yup';
+import { TokenProviderChain } from 'aws-sdk/lib/token/token_provider_chain';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -179,6 +180,17 @@ const EthWallet = types
         })
         self.coins.set(contract.address, contract);
       }
+    },
+    addNFT(name: string, collectionName: string, contractAddress: string, tokenId: string, imageUrl: string) {
+      const nft = ERC721.create({
+        name: name,
+        collectionName: collectionName,
+        address: contractAddress,
+        tokenId: tokenId,
+        imageUrl: imageUrl,
+        lastPrice: '0',
+      })
+      self.nfts.set(contractAddress+tokenId, nft);
     }
   }))
 
@@ -189,6 +201,7 @@ export const EthTransaction = types
     hash: types.identifier,
     amount: types.string,
     network: types.enumeration(['ethereum', 'bitcoin']),
+    ethType: types.maybe(types.string),
     type: types.enumeration(['sent', 'received']),
 
     initiatedAt: types.string,
@@ -300,11 +313,12 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
-    enqueueTransaction(hash: any, toAddress: any, toPatp: any, from: string, amount: any, timestamp: any) {
+    enqueueTransaction(hash: any, toAddress: any, toPatp: any, from: string, amount: any, timestamp: any, contractType?: string) {
       let tx = {
         hash: hash,
         amount: gweiToEther(amount).toString(),
         network: 'ethereum',
+        ethType: contractType || 'ETH',
         type: 'sent',
         initiatedAt: timestamp.toString(),
         ourAddress: from,
@@ -329,6 +343,7 @@ export const EthStore = types
         };
       }
       else {
+        console.log(wallet);
         const coins = self.wallets.get(wallet.key)!.coins.toJSON();
         const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
         for (var contract in wallet.contracts) {
