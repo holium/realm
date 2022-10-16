@@ -22,6 +22,16 @@ const sizes = {
   xxl: 210,
 };
 
+const loaderSizes = {
+  sm: 0,
+  md: 0,
+  lg: 1,
+  xl: 2,
+  xl1: 3,
+  xl2: 3,
+  xxl: 3,
+};
+
 const radius = {
   sm: 4,
   md: 12,
@@ -98,6 +108,7 @@ interface AppTileProps {
   isAnimated?: boolean;
   tileSize: AppTileSize;
   isInstalling?: boolean;
+  isUninstalled?: boolean;
   hasTitle?: boolean;
   isRecommended: boolean;
 }
@@ -118,6 +129,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     hasTitle,
     isRecommended,
     isInstalling,
+    isUninstalled,
   } = props;
   const { theme } = useServices();
 
@@ -180,7 +192,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
-            opacity: isInstalling ? 0.5 : 1,
+            opacity: isInstalling || isUninstalled ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
@@ -228,7 +240,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
-            opacity: isInstalling ? 0.5 : 1,
+            opacity: isInstalling || isUninstalled ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
@@ -288,7 +300,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           variants={variants}
           onClick={(evt: any) => {
             evt.stopPropagation();
-            onAppClick && onAppClick(app);
+            onAppClick && !isUninstalled && !isInstalling && onAppClick(app);
           }}
           className="app-dock-icon"
         >
@@ -303,7 +315,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               right={0}
               bottom={0}
             >
-              <Spinner size={3} />
+              <Spinner size={loaderSizes[tileSize]} />
             </Flex>
           )}
           {allowContextMenu && (

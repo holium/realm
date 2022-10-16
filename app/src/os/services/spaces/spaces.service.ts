@@ -159,10 +159,10 @@ export class SpacesService extends BaseService {
       ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
     addRecentDev: async () =>
       ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
-    addToSuite: async (path: SpacePath, appId: string, rank: number) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, rank),
-    removeFromSuite: async (path: SpacePath, appId: string) =>
-      ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, appId),
+    addToSuite: async (path: SpacePath, appId: string, index: number) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.suite-add', path, appId, index),
+    removeFromSuite: async (path: SpacePath, index: number) =>
+      ipcRenderer.invoke('realm.spaces.bazaar.suite-remove', path, index),
     installDesk: async (ship: string, desk: string) =>
       ipcRenderer.invoke('realm.spaces.bazaar.install-desk', ship, desk),
     newInstaller: async (ship: string, desk: string) =>
@@ -482,28 +482,26 @@ export class SpacesService extends BaseService {
 
   async addToSuite(
     _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
+    path: SpacePath,
     appId: string,
-    rank: number
+    index: number
   ) {
-    // return await BazaarApi.addToSuite(
-    //   this.core.conduit!,
-    //   spacePath,
-    //   appId,
-    //   rank
-    // );
+    return this.models.bazaar.addToSuite(this.core.conduit!, {
+      path: formPathObj(path),
+      'app-id': appId,
+      index,
+    });
   }
 
   async removeFromSuite(
     _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    appId: string
+    path: SpacePath,
+    index: number
   ) {
-    // return await BazaarApi.removeFromSuite(
-    //   this.core.conduit!,
-    //   spacePath,
-    //   appId
-    // );
+    return this.models.bazaar.removeFromSuite(this.core.conduit!, {
+      path: formPathObj(path),
+      index,
+    });
   }
 
   async installDesk(_event: IpcMainInvokeEvent, ship: string, desk: string) {

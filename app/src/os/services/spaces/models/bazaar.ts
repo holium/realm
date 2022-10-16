@@ -1,7 +1,9 @@
 import {
+  AddToSuitePoke,
   BazaarApi,
   InstallPoke,
   PinPoke,
+  RemoveFromSuitePoke,
   UninstallPoke,
   UnpinPoke,
 } from './../../../api/new-bazaar';
@@ -17,7 +19,6 @@ import { cleanNounColor } from '../../../lib/color';
 import { toJS } from 'mobx';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
-import { type } from 'os';
 // const util = require('util');
 
 export enum InstallStatus {
@@ -102,13 +103,13 @@ const AppModel = types.union(
   NativeApp
 );
 
-const OrderedAppList = types.array(types.string);
-const RecommendedByShips = types.array(types.string);
 const AppId = types.string;
+const OrderedAppList = types.array(types.string);
+// const RecommendedByShips = types.array(types.string);
 
 export const StallModel = types.model('StallModel', {
-  suite: OrderedAppList,
-  recommended: RecommendedByShips,
+  suite: types.map(AppId), // (map index app-id)
+  recommended: types.map(types.integer),
 });
 
 export const AllyModel = types.model('AllyModel', {
@@ -132,29 +133,19 @@ export const NewBazaarStore = types
   })
   .actions((self) => ({
     // Updates
-    _setApp(app: UrbitAppType) {
-      self.catalog.set(app.id, {
+    _setAppStatus(appId: string, app: UrbitAppType) {
+      if (app.installStatus === 'installed') {
+        self.installations.delete(appId);
+      }
+      self.catalog.set(appId, {
         ...app,
         color: cleanNounColor(app.color),
       });
     },
-    _installStart(data: { appId: string; app: UrbitAppType }) {
-      console.log('_installStart', data);
-      this._setApp(data.app);
-    },
-    _installingUpdate(data: { appId: string; app: UrbitAppType }) {
-      console.log('_installingUpdate', data);
-      this._setApp(data.app);
-    },
-    _installDone(data: { appId: string; app: UrbitAppType }) {
-      console.log('_installDone', data);
-      this._setApp(data.app);
-    },
-    _uninstalled(data: { appId: string; app: UrbitAppType }) {
-      console.log('_installDone', data);
-      this._setApp(data.app);
-    },
     _addPinned(data: { path: string; id: string; index: number }) {
+      if (!self.docks.has(data.path)) {
+        self.docks.set(data.path, []);
+      }
       const dock = self.docks.get(data.path);
       dock?.push(data.id);
       self.docks.set(data.path, dock);
@@ -164,6 +155,18 @@ export const NewBazaarStore = types
       const removeIndex = dock?.findIndex((id: string) => id === data.id)!;
       dock?.splice(removeIndex, 1);
       self.docks.set(data.path, dock);
+    },
+    _suiteAdded(data: { path: string; id: string; index: number }) {
+      const stall = self.stalls.get(data.path);
+      if (!stall) return;
+      stall?.suite.set(`${data.index}`, data.id);
+      self.stalls.set(data.path, stall);
+    },
+    _suiteRemoved(data: { path: string; index: number }) {
+      const stall = self.stalls.get(data.path);
+      if (!stall) return;
+      stall.suite.delete(`${data.index}`);
+      self.stalls.set(data.path, stall);
     },
     _initial(data: any) {
       Object.keys(data.catalog).forEach((key: string) => {
@@ -180,36 +183,35 @@ export const NewBazaarStore = types
     _addNew(newSpace: any) {
       console.log(newSpace);
     },
-    _addRecommended(data: { id: string }) {
-      self.recommendations.push(data.id);
-    },
     _allyAdded(ship: string) {
       if (self.addingAlly.get(ship)) {
         self.addingAlly.delete(ship);
       }
     },
-    _removeRecommended(data: { id: string }) {
+    _addRecommended(data: { id: string; stalls: any }) {
+      self.recommendations.push(data.id);
+      applySnapshot(self.stalls, data.stalls);
+    },
+    _removeRecommended(data: { id: string; stalls: any }) {
       const removeIndex = self.recommendations?.findIndex(
-        (id: string) => (id = data.id)
+        (id: string) => id === data.id
       )!;
       self.recommendations.splice(removeIndex, 1);
+      applySnapshot(self.stalls, data.stalls);
     },
     installApp: flow(function* (conduit: Conduit, body: InstallPoke) {
+      self.installations.delete(body.desk);
       self.installations.set(body.desk, InstallStatus.started);
       try {
-        console.log('install starting.... ', body);
-        const result = yield BazaarApi.installApp(conduit, body);
-        console.log(result, 'app instaglleddddd');
-        self.installations.delete(body.desk);
-        return;
+        return yield BazaarApi.installApp(conduit, body);
       } catch (error) {
         self.installations.delete(body.desk);
-        // self.installations.set(body.desk, InstallStatus.failed);
         console.error(error);
       }
     }),
     uninstallApp: flow(function* (conduit: Conduit, body: UninstallPoke) {
       try {
+        self.installations.delete(body.desk);
         return yield BazaarApi.uninstallApp(conduit, body);
       } catch (error) {
         console.error(error);
@@ -229,6 +231,23 @@ export const NewBazaarStore = types
     unpinApp: flow(function* (conduit: Conduit, body: UnpinPoke) {
       try {
         return yield BazaarApi.unpinApp(conduit, body);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    addToSuite: flow(function* (conduit: Conduit, body: AddToSuitePoke) {
+      try {
+        return yield BazaarApi.addToSuite(conduit, body);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    removeFromSuite: flow(function* (
+      conduit: Conduit,
+      body: RemoveFromSuitePoke
+    ) {
+      try {
+        return yield BazaarApi.removeFromSuite(conduit, body);
       } catch (error) {
         console.error(error);
       }
@@ -376,12 +395,38 @@ export const NewBazaarStore = types
     },
     getDockApps(path: string) {
       const dock = self.docks.get(path);
-      return dock?.map((appId: string) =>
-        getSnapshot(self.catalog.get(appId)!)
-      );
+      return dock?.map((appId: string) => {
+        const app = self.catalog.get(appId);
+        return app && getSnapshot(app);
+      });
     },
     getStall(path: string) {
-      return self.stalls.get(path);
+      const stall = self.stalls.get(path);
+      return Array.from(Object.values(stall ? getSnapshot(stall) : {}));
+    },
+    getRecommendedApps(path: string) {
+      const stall = self.stalls.get(path);
+      if (!stall) return [];
+      if (stall.recommended.size === 0) return [];
+      console.log(stall.recommended);
+
+      return Array.from(
+        Object.keys(getSnapshot(stall.recommended)).map((appId: string) => {
+          return self.catalog.get(appId);
+        })
+      );
+    },
+    getSuite(path: string) {
+      const stall = self.stalls.get(path);
+      let suite = new Map();
+      if (!stall) return suite;
+      Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
+        (index: string) => {
+          const app = self.catalog.get(stall.suite.get(index)!);
+          suite.set(index, app && getSnapshot(app));
+        }
+      );
+      return suite;
     },
   }));
 

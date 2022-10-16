@@ -12,17 +12,11 @@ type RecommendedAppsProps = {
 export const RecommendedApps: FC<RecommendedAppsProps> = observer(
   (props: RecommendedAppsProps) => {
     const { isOpen } = props;
-    const [apps, setApps] = useState<any>([]);
     const { spaces, bazaar } = useServices();
 
     const currentSpace = spaces.selected!;
-    const currentBazaar = bazaar.spaces.get(currentSpace.path);
-
-    useEffect(() => {
-      if (currentSpace) {
-        setApps(bazaar.getRecommendedApps(currentSpace.path));
-      }
-    }, [currentSpace, bazaar.appsChange]);
+    const apps = bazaar.getRecommendedApps(currentSpace.path);
+    console.log(apps);
 
     return (
       <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>

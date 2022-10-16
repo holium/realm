@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppType } from 'os/services/spaces/models/bazaar-old';
+import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { AppTile } from 'renderer/components/AppTile';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -23,10 +23,7 @@ export const AppDock: FC<AppDockProps> = observer(() => {
   const spacePath = spaces.selected?.path!;
   const dock = bazaar.getDock(spacePath);
 
-  const orderedList = useMemo(
-    () => (spacePath ? bazaar.getDockApps(spacePath) : []),
-    [spacePath, dock?.length]
-  );
+  const orderedList = spacePath ? bazaar.getDockApps(spacePath) : [];
 
   const pinnedApps = useMemo(() => {
     return (
@@ -83,6 +80,11 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 contextPosition="above"
                 tileSize="sm"
                 isRecommended={false}
+                isUninstalled={app.installStatus === InstallStatus.uninstalled}
+                isInstalling={
+                  app.installStatus === InstallStatus.started ||
+                  app.installStatus === InstallStatus.treaty
+                }
                 app={app}
                 selected={selected}
                 open={open}
@@ -118,7 +120,13 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         })}
       </Reorder.Group>
     );
-  }, [desktop.activeWindow?.id, desktop.openAppIds, spacePath, orderedList]);
+  }, [
+    desktop.activeWindow?.id,
+    desktop.openAppIds,
+    spacePath,
+    orderedList,
+    dock?.length,
+  ]);
 
   const activeAndUnpinned = desktop.openApps.filter(
     (appWindow: any) =>

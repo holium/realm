@@ -12,7 +12,16 @@ export interface UnpinPoke {
   path: { ship: Patp; space: string };
   'app-id': string;
 }
+export interface AddToSuitePoke {
+  path: { ship: Patp; space: string };
+  'app-id': string;
+  index: number;
+}
 
+export interface RemoveFromSuitePoke {
+  path: { ship: Patp; space: string };
+  index: number;
+}
 export interface InstallPoke {
   ship: Patp;
   desk: string;
@@ -41,39 +50,21 @@ export const BazaarApi = {
     return response.treaties;
   },
   installApp: async (conduit: Conduit, body: InstallPoke) => {
-    return new Promise((resolve, reject) => {
-      conduit.poke({
-        app: 'bazaar',
-        mark: 'bazaar-action',
-        json: {
-          'install-app': body,
-        },
-        reaction: 'bazaar-reaction.app-install-done',
-        onReaction(data) {
-          resolve(data['app-install-done']);
-        },
-        onError: (e: any) => {
-          reject(e);
-        },
-      });
+    conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'install-app': body,
+      },
     });
   },
   uninstallApp: async (conduit: Conduit, body: UninstallPoke) => {
-    return new Promise((resolve, reject) => {
-      conduit.poke({
-        app: 'bazaar',
-        mark: 'bazaar-action',
-        json: {
-          'uninstall-app': body,
-        },
-        reaction: 'bazaar-reaction.app-uninstalled',
-        onReaction(data) {
-          resolve(data['app-uninstalled']);
-        },
-        onError: (e: any) => {
-          reject(e);
-        },
-      });
+    conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'uninstall-app': body,
+      },
     });
   },
   pinApp: async (conduit: Conduit, body: PinPoke) => {
@@ -105,6 +96,45 @@ export const BazaarApi = {
         reaction: 'bazaar-reaction.unpinned',
         onReaction(data) {
           resolve(data['unpinned']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  addToSuite: async (conduit: Conduit, body: AddToSuitePoke) => {
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'suite-add': body,
+        },
+        reaction: 'bazaar-reaction.suite-added',
+        onReaction(data) {
+          resolve(data['suite-added']);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  removeFromSuite: async (
+    conduit: Conduit,
+    body: RemoveFromSuitePoke
+  ): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'bazaar',
+        mark: 'bazaar-action',
+        json: {
+          'suite-remove': body,
+        },
+        reaction: 'bazaar-reaction.suite-removed',
+        onReaction(data) {
+          resolve(data['suite-removed']);
         },
         onError: (e: any) => {
           reject(e);
@@ -157,7 +187,6 @@ export const BazaarSubscriptions = {
       app: 'bazaar',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log('bazaar watch -> ', mark, data);
         if (mark === 'bazaar-reaction') {
           handleReactions(data, model);
         }
@@ -173,23 +202,22 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
     case 'initial':
       model._initial(data['initial']);
       break;
-    case 'app-install-start':
-      model._installStart(data['app-install-start']);
-      break;
     case 'app-install-update':
-      model._installingUpdate(data['app-install-update']);
-      break;
-    case 'app-install-done':
-      model._installDone(data['app-install-done']);
-      break;
-    case 'app-uninstalled':
-      model._uninstalled(data['app-uninstalled']);
+      //  installed, uninstalled, started, etc.
+      const { appId, app } = data['app-install-update'];
+      model._setAppStatus(appId, app);
       break;
     case 'pinned':
       model._addPinned(data['pinned']);
       break;
     case 'unpinned':
       model._removePinned(data['unpinned']);
+      break;
+    case 'suite-added':
+      model._suiteAdded(data['suite-added']);
+      break;
+    case 'suite-removed':
+      model._suiteRemoved(data['suite-removed']);
       break;
     case 'recommended':
       model._addRecommended(data['recommended']);

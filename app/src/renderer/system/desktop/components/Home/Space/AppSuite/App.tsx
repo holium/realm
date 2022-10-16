@@ -6,9 +6,9 @@ import { Box, AppTile, Icons, BoxProps } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import {
   AppType,
-  BazaarStoreType,
   InstallStatus,
-} from 'os/services/spaces/models/bazaar-old';
+  UrbitAppType,
+} from 'os/services/spaces/models/bazaar';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { observer } from 'mobx-react';
@@ -41,6 +41,7 @@ const AppEmpty = styled(Box)<AppEmptyProps>`
 
 type SuiteAppProps = {
   id: string;
+  index: number;
   selected: boolean;
   space: SpaceModelType;
   highlightColor?: string;
@@ -51,12 +52,12 @@ type SuiteAppProps = {
 };
 
 export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
-  const { id, selected, accentColor, app, space, isAdmin, onClick } = props;
+  const { id, selected, index, accentColor, app, space, isAdmin, onClick } =
+    props;
   const { bazaar } = useServices();
-  const currentBazaar = bazaar.getBazaar(space.path);
   if (app) {
-    const isPinned = currentBazaar?.pinned.includes(app.id);
-    const weRecommended = bazaar.my.recommendations.includes(app.id);
+    const isPinned = bazaar.isPinned(space.path, app.id);
+    const weRecommended = bazaar.isRecommended(app.id);
 
     let menu = [];
     if (isAdmin) {
@@ -64,7 +65,7 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
         label: 'Remove from suite',
         onClick: (evt: any) => {
           evt.stopPropagation();
-          SpacesActions.removeFromSuite(space.path, app.id);
+          SpacesActions.removeFromSuite(space.path, index);
         },
       });
       menu.push({
@@ -100,7 +101,7 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
           if (app.installStatus === InstallStatus.installed) {
             SpacesActions.uninstallApp(app.id);
           } else {
-            SpacesActions.installApp(app);
+            // SpacesActions.installApp(app);
           }
         },
       });
@@ -110,16 +111,16 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
       <AppTile
         tileSize="xl1"
         app={app}
+        isUninstalled={
+          (app as UrbitAppType).installStatus === InstallStatus.uninstalled
+        }
         isPinned={isPinned}
         isRecommended={weRecommended}
         allowContextMenu={true}
         contextMenu={menu}
         onAppClick={(selectedApp: AppType) => {
-          // QUESTION: should this open the app listing or the actual app?
-          // const app = toJS(selectedApp);
           DesktopActions.openAppWindow(space.path, selectedApp);
           DesktopActions.setHomePane(false);
-          // desktop.setHomePane(false);
         }}
       />
     );
