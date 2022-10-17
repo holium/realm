@@ -265,7 +265,9 @@ export class WalletService extends BaseService {
           if (!this.state!.ethereum.wallets.get(wallet.key)!.nfts.has((nft as any).contract.address + nft.tokenId)) {
             console.log(nft.title)
             console.log(nft.description)
-            this.state!.ethereum.wallets.get(wallet.key)!.addNFT(nft.description, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!);
+            // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
+            var floorPrice
+            this.state!.ethereum.wallets.get(wallet.key)!.addNFT(nft.description, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
           }
         }
       }
@@ -517,9 +519,10 @@ export class WalletService extends BaseService {
     contractType: string,
     name: string,
     contractAddress: string,
-    walletIndex: string
+    walletIndex: string,
+    decimals: number
   ) {
-    this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractType, name, contractAddress);
+    this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractType, name, contractAddress, decimals);
     await WalletApi.addSmartContract(
       this.core.conduit!,
       contractType,

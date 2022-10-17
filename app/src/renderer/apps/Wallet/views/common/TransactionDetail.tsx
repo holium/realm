@@ -86,7 +86,7 @@ export const TransactionDetail: FC = observer(() => {
   let initiated = new Date(transaction.initiatedAt);
   let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
-  let amountDisplay = isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`;
+  let amountDisplay = isEth ? `${ethAmount.eth}`/* ETH`*/ : `${btcAmount.btc} BTC`;
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>

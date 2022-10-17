@@ -76,7 +76,14 @@ export interface BtcAmount {
 }
 
 export function formatEthAmount(amount: string): EthAmount {
-  let wei = utils.parseEther(amount.replaceAll('.',''));
+  const count = amount.match(/\./g)
+  var ethAmount = amount;
+  if (count) {
+    if (count.length > 1) {
+      ethAmount = ethAmount.replaceAll('.','');
+    }
+  }
+  let wei = utils.parseEther(ethAmount)!;
   return {
     eth: utils.formatUnits(wei, 'ether').slice(0, 6),
     gwei: utils.formatUnits(wei, 'gwei').slice(0, 6),

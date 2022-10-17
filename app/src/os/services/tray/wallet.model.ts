@@ -187,14 +187,14 @@ const EthWallet = types
         self.coins.set(contract.address, contract);
       }
     },
-    addNFT(name: string, collectionName: string, contractAddress: string, tokenId: string, imageUrl: string) {
+    addNFT(name: string, collectionName: string, contractAddress: string, tokenId: string, imageUrl: string, price?: string) {
       const nft = ERC721.create({
         name: name,
         collectionName: collectionName,
         address: contractAddress,
         tokenId: tokenId,
         imageUrl: imageUrl,
-        lastPrice: '0',
+        lastPrice: price || '0',
       })
       self.nfts.set(contractAddress+tokenId, nft);
     }
@@ -362,10 +362,12 @@ export const EthStore = types
             }
             if (coins.get(coin.address)) {
               let balanceString: string = coin.balance.toString();
-              const decimals = coins.get(coin.address)!.decimals;
-              balanceString = balanceString.split("").reverse().join("");
-              balanceString = balanceString.substring(0,decimals) + '.' + balanceString.substring(decimals);
-              balanceString = balanceString.split("").reverse().join("");
+              if (balanceString != '0') {
+                const decimals = coins.get(coin.address)!.decimals;
+                balanceString = balanceString.split("").reverse().join("");
+                balanceString = balanceString.substring(0,decimals) + '.' + balanceString.substring(decimals);
+                balanceString = balanceString.split("").reverse().join("");
+              }
               coins.get(coin.address)!.setBalance(balanceString);
             }
             else
