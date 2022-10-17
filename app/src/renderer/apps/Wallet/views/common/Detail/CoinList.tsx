@@ -52,9 +52,9 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
               {' '}
               {props.details.balance} {props.details.name}{' '}
             </Text>
-            <Text fontSize={1} color={baseTheme.colors.text.disabled}>
+            {/*<Text fontSize={1} color={baseTheme.colors.text.disabled}>
               $5780.67
-            </Text>
+      </Text>*/}
           </Flex>
         </Flex>
         <Icons
