@@ -409,20 +409,20 @@
       =/  updated-stalls=[=stalls:store cards=(list card)]
       %-  ~(rep by stalls.state)
         |=  [[path=space-path:spaces-store =stall:store] result=[=stalls:store cards=(list card)]]
+        ?:  =('our' space.path)  result  ::  return result if our
         ?:  (we-host:helpers path)
+          ~&  >  ['we host, set recommended']
           =/  rec-members             (~(gut by recommended.stall) app-id ~)
           =.  rec-members             (~(put in rec-members) our.bowl)
           =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
           =.  stalls.result           (~(put by stalls.result) [path stall])
           =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-          [stalls.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~]
+          =.  cards.result            (snoc cards.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])])
+          result
         ::  we need to poke host
-        =/  cards  
-          :~
-            [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-recommend path app-id app])]
-          ==
-        [stalls.state cards]
-      =.  stalls.state            stalls.updated-stalls
+        =.  cards.result            (snoc cards.result [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-recommend path app-id app])])
+        result
+      =.  stalls.state            (~(uni by stalls.state) stalls.updated-stalls)
       =.  cards.updated-stalls    (snoc cards.updated-stalls [%give %fact [/updates ~] bazaar-reaction+!>([%recommended app-id stalls.state])])
       :_  state
       cards.updated-stalls
@@ -434,6 +434,7 @@
       =/  updated-stalls=[=stalls:store cards=(list card)]
       %-  ~(rep by stalls.state)
         |=  [[path=space-path:spaces-store =stall:store] result=[=stalls:store cards=(list card)]]
+        ?:  =('our' space.path)  result  ::  return result if our
         ?:  (we-host:helpers path)
           =/  rec-members             (~(gut by recommended.stall) app-id ~)
           =.  rec-members             (~(del in rec-members) our.bowl)
@@ -443,16 +444,12 @@
             (~(put by recommended.stall) [app-id rec-members])
           =.  stalls.result           (~(put by stalls.result) [path stall])
           =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-          [stalls.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~]
-        =/  cards  
-          :~
-            [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-unrecommend path app-id])]
-          ==
-        [stalls.state cards]
-
-      =.  stalls.state            stalls.updated-stalls
+          =.  cards.result            (snoc cards.result [%give %fact paths bazaar-reaction+!>([%stall-update path stall])])
+          result
+        =.  cards.result            (snoc cards.result [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%member-unrecommend path app-id])])
+        result
+      =.  stalls.state            (~(uni by stalls.state) stalls.updated-stalls)
       =.  cards.updated-stalls    (snoc cards.updated-stalls [%give %fact [/updates ~] bazaar-reaction+!>([%unrecommended app-id stalls.state])])
-      ~&  >  cards.updated-stalls
       :_  state
       cards.updated-stalls
     ::
@@ -485,7 +482,8 @@
       =/  stall               (~(got by stalls.state) path)
       =.  suite.stall         (~(put by suite.stall) [index app-id])
       =.  stalls.state        (~(put by stalls.state) [path stall])
-      `state
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id index])]~
     ::
     ++  on-suite-rem
       |=  [path=space-path:spaces-store index=@ud]
@@ -494,7 +492,8 @@
       =/  stall               (~(got by stalls.state) path)
       =.  suite.stall         (~(del by suite.stall) index)
       =.  stalls.state        (~(put by stalls.state) [path stall])
-      `state
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-removed path index])]~
     ::
     ++  on-joined
       |=  [path=space-path:spaces-store =catalog:store =stall:store]
@@ -529,6 +528,7 @@
     ++  member-recommend
       |=  [path=space-path:spaces-store =app-id:store =app:store]
       ?>  (check-member:security path src.bowl)
+      ~&  >  ['recommending' path src.bowl app-id]
       =/  stall                   (~(got by stalls.state) path)
       =/  rec-members             (~(gut by recommended.stall) app-id ~)
       =.  rec-members             (~(put in rec-members) src.bowl)
@@ -541,6 +541,7 @@
     ++  member-unrecommend
       |=  [path=space-path:spaces-store =app-id:store]
       ?>  (check-member:security path src.bowl)
+      ~&  >  ['unrecommending' path src.bowl app-id]
       =/  stall                   (~(got by stalls.state) path)
       =/  rec-members=member-set:store           
         ?:  (~(has by recommended.stall) app-id)
@@ -590,7 +591,6 @@
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
       =/  hidden     `(set desk)`(silt ~['realm' 'wallet' 'courier' 'garden'])
-      ~&  >  [hidden]
       ^-  catalog:store
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=`catalog:store`~]
@@ -865,6 +865,9 @@
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
       %glob  ::  app install is complete
+        =/  hide-desks     `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+        ?:  (~(has in hide-desks) desk)
+          `state
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %installed]
           ?>  ?=(%urbit -.u.app)
@@ -877,6 +880,9 @@
         [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
       ::
       %site  ::  app install is complete
+          =/  hide-desks     `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+        ?:  (~(has in hide-desks) desk)
+          `state
         =/  app  (~(get by catalog.state) desk)
         =/  app  ?~  app  [%urbit docket.charge ~ %installed]
           ?>  ?=(%urbit -.u.app)
