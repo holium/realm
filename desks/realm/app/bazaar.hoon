@@ -39,21 +39,23 @@
     =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
     ?>  ?=([%initial *] charge-update)
     =/  our-space                     [our.bowl 'our']
-    =/  catalog                       (init-catalog:helpers:bazaar initial.charge-update)
+    =/  init                          (init-catalog:helpers:bazaar initial.charge-update)
     =|  =native-app:store
       =.  title.native-app            'Relic Browser'
       =.  color.native-app            '#92D4F9'
       =.  icon.native-app             'AppIconCompass'
-    =/  catalog                       (~(put by catalog) %os-browser [%native native-app])
+    =/  catalog                       (~(put by catalog.init) %os-browser [%native native-app])
+    =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
     =|  =native-app:store
       =.  title.native-app            'Settings'
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
-    =.  catalog.state                 (~(put by catalog) %os-settings [%native native-app])
+    =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
+    =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
+    =.  grid-index.state              grid-index.init
     =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
     ?>  ?=(%spaces -.spaces-scry)
     =/  spaces                        spaces.spaces-scry
-    ~&  >  ['on-init %spaces scry' spaces.spaces-scry]
     =/  stalls       
       %+  turn  ~(tap by spaces)
         |=  [path=space-path:spaces-store =space:spaces-store]
@@ -322,7 +324,7 @@
       =.  docks.state             (~(put by docks.state) [path dock])
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%pins-reodered path dock])]~
-      
+    ::
     ++  rem-pin
       |=  [path=space-path:spaces-store =app-id:store]
       ?>  =(our.bowl src.bowl)
@@ -558,13 +560,6 @@
       :_  state
       [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~
     --
-  ++  give
-    |=  [payload=reaction:store paths=(list path) cards=(list card)]
-    ^-  (quip card _state)
-    =/  fack  [%give %fact paths bazaar-reaction+!>(payload)]~
-    :_  state
-    ?~  cards  fack  (weld fack cards)
-  ::
   ++  scry
     |%
     ++  allies
@@ -576,12 +571,22 @@
     ++  treaties
       |=  [=ship]
       =/  treaties  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
+      ~&  >  [treaties]
       ?>  ?=(%ini -.treaties)
       init.treaties
     ::
     --
   ++  helpers
     |%
+    ++  set-grid-index
+      |=  [=app-id:store =grid-index:store]
+      =/  grid-list       ~(val by grid-index)
+      =/  current-index   (find [app-id]~ grid-list)
+      ?~  current-index   
+        =.  grid-index    (~(put by grid-index) [(lent grid-list) app-id])
+        grid-index
+      grid-index
+
     ++  update-paths
       |=  [path=space-path:spaces-store]
       ?.  =(space.path %our)
@@ -591,11 +596,11 @@
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
       =/  hidden     `(set desk)`(silt ~['realm' 'wallet' 'courier' 'garden'])
-      ^-  catalog:store
+      ^-  [=catalog:store =grid-index:store]
       %-  ~(rep by charges)
-        |:  [[=desk =charge:docket] acc=`catalog:store`~]
+        |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
-        (~(put by acc) desk [%urbit docket.charge ~ %installed])
+        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
@@ -681,7 +686,7 @@
               (~(del by recommended.result) app-id.app)
             (~(put by recommended.result) [app-id.app rec-members])
           =.  recommended.result    recommeded-map 
-          [recommended.result]
+          result
       ::
       =.  recommended.stall   recommended.cleaned-recs
       =.  stalls.state        (~(put by stalls.state) [path stall])
@@ -708,9 +713,16 @@
       |=  [space=space:spaces-store members=members:membership-store]
       ^-  (quip card _state)
       ~&  >  ['%bazarr spaces-reaction on-add']
-      =.  stalls.state        (~(put by stalls.state) [path.space [suite=~ recommended=~]])
+      =/  recommended=recommended:store
+        %-  ~(rep in recommendations.state)  ::  add all of our recs to the created stall
+          |=  [=app-id:store result=[=recommended:store]]
+          =.  result          (~(put by recommended.result) [app-id (silt ~[our.bowl])])
+          result
+      =/  stall=stall:store   [suite=~ recommended=recommended]
+      =.  stalls.state        (~(put by stalls.state) [path.space stall])
       =.  docks.state         (~(put by docks.state) [path.space [~]])
-      `state
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path.space stall])]~
     ::
     ++  on-remove
       |=  [path=space-path:spaces-store]
@@ -826,75 +838,31 @@
   ++  add
     |=  [=desk =charge:docket]
     ^-  (quip card _state) 
-    ?-  -.chad.charge  
-      %install  ::  app install started
-        =/  app  (~(get by catalog.state) desk)
-        =/  app=app:store  ?~  app  [%urbit docket.charge ~ %started]
-          ?>  ?=(%urbit -.u.app)
-          =.  install-status.u.app    %started
-          =.  docket.u.app            docket.charge
-          u.app
-        ?>  ?=(%urbit -.app)
-        =.  docket.app                docket.charge
-        =.  catalog.state             (~(put by catalog.state) desk app)
-        :_  state
-        [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
-      ::
-      %hung  ::  app install failed
-        =/  app  (~(get by catalog.state) desk)
-        =/  app  ?~  app  [%urbit docket.charge ~ %failed]
-          ?>  ?=(%urbit -.u.app)
-          =.  install-status.u.app  %failed
-          =.  docket.u.app  docket.charge
-          u.app
-        ?>  ?=(%urbit -.app)
-        =.  catalog.state  (~(put by catalog.state) desk app)
-        :_  state
-        [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
-      ::
-      %suspend  ::  app install paused
-        =/  app  (~(get by catalog.state) desk)
-        =/  app  ?~  app  [%urbit docket.charge ~ %suspended]
-          ?>  ?=(%urbit -.u.app)
-          =.  install-status.u.app  %suspended
-          =.  docket.u.app  docket.charge
-          u.app
-        ?>  ?=(%urbit -.app)
-        =.  catalog.state  (~(put by catalog.state) desk app)
-        :_  state
-        [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
-      ::
-      %glob  ::  app install is complete
-        =/  hide-desks     `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
-        ?:  (~(has in hide-desks) desk)
-          `state
-        =/  app  (~(get by catalog.state) desk)
-        =/  app  ?~  app  [%urbit docket.charge ~ %installed]
-          ?>  ?=(%urbit -.u.app)
-          =.  install-status.u.app  %installed
-          =.  docket.u.app  docket.charge
-          u.app
-        ?>  ?=(%urbit -.app)
-        =.  catalog.state  (~(put by catalog.state) desk app)
-        :_  state
-        [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
-      ::
-      %site  ::  app install is complete
-          =/  hide-desks     `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
-        ?:  (~(has in hide-desks) desk)
-          `state
-        =/  app  (~(get by catalog.state) desk)
-        =/  app  ?~  app  [%urbit docket.charge ~ %installed]
-          ?>  ?=(%urbit -.u.app)
-          =.  install-status.u.app  %installed
-          =.  docket.u.app  docket.charge
-          u.app
-        ?>  ?=(%urbit -.app)
-        =.  catalog.state  (~(put by catalog.state) desk app)
-        :_  state
-        [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
-      
+    ?-  -.chad.charge
+      %install    (update-catalog-app desk charge %started)
+      %hung       (update-catalog-app desk charge %failed)
+      %suspend    (update-catalog-app desk charge %suspended)
+      %glob       (update-catalog-app desk charge %installed)
+      %site       (update-catalog-app desk charge %installed)
     ==
+    ::
+    ++  update-catalog-app
+      |=  [=desk =charge:docket status=?(%started %failed %suspended %installed)]
+      =/  hide-desks              `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      ?:  (~(has in hide-desks) desk)
+        `state
+      =/  app                     (~(get by catalog.state) desk)
+      =/  app  ?~  app  [%urbit docket.charge ~ status]
+        ?>  ?=(%urbit -.u.app)
+        =.  install-status.u.app  status
+        =.  docket.u.app          docket.charge
+        u.app
+      ?>  ?=(%urbit -.app)
+      =.  catalog.state           (~(put by catalog.state) desk app)
+      =.  grid-index.state        (set-grid-index:helpers:bazaar desk grid-index.state)
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
+
   ::
   ++  rem
     |=  [=desk]

@@ -225,13 +225,10 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._removeRecommended(data['unrecommended']);
       break;
     case 'stall-update':
-      console.log('stall-update', data['stall-update']);
-
       model._updateStall(data['stall-update']);
-      // model._removeRecommended(data['stall-update']);
       break;
     case 'joined-bazaar':
-      console.log('joined-bazaar', data['joined-bazaar']);
+      // console.log('joined-bazaar', data['joined-bazaar']);
       model._addJoined(data['joined-bazaar']);
       break;
     default:

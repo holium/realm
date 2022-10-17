@@ -344,6 +344,9 @@ export const NewBazaarStore = types
       );
     },
     get installed() {
+      // return Array.from(self.gridIndex.entries()).sort((el: []) => {
+
+      // })
       return Array.from(Object.values(getSnapshot(self.catalog))).filter(
         (app: AppType) => {
           const urb = app as UrbitAppType;
@@ -421,9 +424,14 @@ export const NewBazaarStore = types
       if (!stall) return [];
       if (stall.recommended.size === 0) return [];
       return Array.from(
-        Object.keys(getSnapshot(stall.recommended)).map((appId: string) => {
-          return self.catalog.get(appId);
-        })
+        Object.entries(getSnapshot(stall.recommended))
+          .sort((entry: [string, number], entry2: [string, number]) => {
+            return entry2[1] - entry[1];
+          })
+          .slice(0, 4)
+          .map((entry: [appId: string, count: number]) => {
+            return self.catalog.get(entry[0]);
+          })
       );
     },
     getSuite(path: string) {
