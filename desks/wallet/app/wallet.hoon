@@ -837,7 +837,7 @@
     :*  url=`@ta`node-url
         eager=%&
         refresh-rate=~s15
-        timeout-time=~s30
+        timeout-time=~m30::m30s30
         from=0
         to=~
         contracts=[address.act ~]
@@ -853,7 +853,7 @@
     :*  url=`@ta`node-url
         eager=%&
         refresh-rate=~s15
-        timeout-time=~m1
+        timeout-time=~m30::m1
         from=0
         to=~
         contracts=[address.act ~]

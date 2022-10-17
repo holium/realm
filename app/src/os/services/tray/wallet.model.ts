@@ -102,7 +102,12 @@ const ERC20 = types.model('ERC20', {
   logo: types.string,
   address: types.string,
   balance: types.string,
-});
+  decimals: types.number,
+}).actions((self) => ({
+  setBalance(balance: string) {
+    self.balance = balance
+  }
+}));
 
 export type ERC20Type = Instance<typeof ERC20>
 
@@ -158,7 +163,7 @@ const EthWallet = types
     ),
   })
   .actions((self) => ({
-    addSmartContract(contractType: string, name: string, contractAddress: string) {
+    addSmartContract(contractType: string, name: string, contractAddress: string, decimals: number) {
       /*if (contractType === 'erc721') {
         *const contract = ERC721.create({
           name: name,
@@ -177,6 +182,7 @@ const EthWallet = types
           logo: '',
           address: contractAddress,
           balance: '0',
+          decimals: decimals
         })
         self.coins.set(contract.address, contract);
       }
@@ -343,16 +349,30 @@ export const EthStore = types
         };
       }
       else {
-        console.log(wallet);
-        const coins = self.wallets.get(wallet.key)!.coins.toJSON();
+        const coins = self.wallets.get(wallet.key)!.coins;
         const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
         for (var contract in wallet.contracts) {
-          if ((contract as any).type === 'erc20') {
-            let coin: any = contract;
-            coins[coin.address].balance = coin.balance;
+          if (wallet.contracts[contract].type === 'erc20') {
+            let coin: any = wallet.contracts[contract];
+            if ((coin.address as string).length <= 42) {
+              const diff = 42 - (coin.address as string).length;
+              for (var i = 0; i < diff; ++i) {
+                coin.address = coin.address.substring(0,2) + '0' + coin.address.substring(2);
+              }
+            }
+            if (coins.get(coin.address)) {
+              let balanceString: string = coin.balance.toString();
+              const decimals = coins.get(coin.address)!.decimals;
+              balanceString = balanceString.split("").reverse().join("");
+              balanceString = balanceString.substring(0,decimals) + '.' + balanceString.substring(decimals);
+              balanceString = balanceString.split("").reverse().join("");
+              coins.get(coin.address)!.setBalance(balanceString);
+            }
+            else
+              console.log((coin.address as string).length)
           }
-          if ((contract as any).type === 'erc721') {
-            let nft: any = contract;
+          if (wallet.contracts[(contract as any)].type === 'erc721') {
+            let nft: any = wallet.contracts[contract];
             for (var token in nft.tokens) {
               // if token not in tokens
               if (!nfts[token])
@@ -380,7 +400,7 @@ export const EthStore = types
           path: wallet.path,
           address: wallet.address,
           balance: gweiToEther(wallet.balance).toString(),
-          coins: coins,
+          coins: coins.toJSON(),
           nfts: nfts,
           nickname: wallet.nickname,
         };

@@ -256,7 +256,7 @@ export class WalletService extends BaseService {
         for (let token of nonZeroBalances) {
           if (!this.state!.ethereum.wallets.get(wallet.key)!.coins.has((token as any).contractAddress)) {
             const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
-            this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.symbol!, (token as any).contractAddress)
+            this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.symbol!, (token as any).contractAddress, metadata.decimals!)
             WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.symbol!, (token as any).contractAddress, wallet.key);
           }
         }
@@ -297,7 +297,7 @@ export class WalletService extends BaseService {
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
-      // 'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+ //     'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
       'http://127.0.0.1:8545'
     );
   }
