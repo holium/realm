@@ -3,7 +3,7 @@
 ::
 +$  address  @u
 +$  network  ?(%bitcoin %ethereum)
-+$  help-tx
++$  help-eth-tx
   $:  hash=@t
       amount=@t
       =network
@@ -17,7 +17,7 @@
       failure-reason=(unit @t)
       notes=@t
   ==
-+$  transaction  ::  json
++$  eth-transaction
   $:  hash=@t
       amount=@t
       =network
@@ -31,7 +31,78 @@
       failure-reason=(unit @t)
       notes=@t
   ==
++$  help-erc20-tx
+  $:  hash=@t
+      contract-address=@ux
+      amount=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @t)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
+  ==
++$  erc20-transaction
+  $:  hash=@t
+      contract-address=@ux
+      amount=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @p)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
+  ==
++$  help-erc721-tx
+  $:  hash=@t
+      contract-address=@ux
+      token=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @t)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
+  ==
++$  erc721-transaction
+  $:  hash=@t
+      contract-address=@ux
+      token=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @p)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
+  ==
++$  transaction
+  $%  [%eth eth-transaction]
+      [%erc20 erc20-transaction]
+      [%erc721 erc721-transaction]
+  ==
++$  help-transaction
+  $%  [%eth help-eth-tx]
+      [%erc20 help-erc20-tx]
+      [%erc721 help-erc721-tx]
+  ==
 +$  status  ?(%pending %failed %succeeded)
++$  eth-type  ?(%erc20 %erc721 %eth)
 +$  contracts-map  (map contract-id contract-data)
 +$  wallet  [=address path=@t nickname=@t balance=@ =contracts-map]
 +$  mode  ?(%on-demand %default)
@@ -65,7 +136,8 @@
       [%create-wallet sndr=ship =network nickname=@t]
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
-      [%enqueue-transaction =network contract-type=(unit contract-type) hash=@ =transaction]
+      [%enqueue-transaction =network hash=@ =transaction]
+      ::[%enqueue-transaction =network hash=@ =transaction]
       [%add-smart-contract =contract-type name=@t address=@ux wallet-index=@t]
       [%save-transaction-notes =network hash=@t notes=@t]
   ==

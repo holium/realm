@@ -139,9 +139,14 @@
           =/  hash=@t  i.t.t.t.t.wire
           =+  !<(rez=tx-rez q.cage.sign)
           =/  net-pend  (~(got by transactions) %ethereum)
-          =/  pending-tx=transaction  (~(got by net-pend) hash)
-          =.  status.pending-tx  %succeeded
-          =.  completed-at.pending-tx  `(crip (scow %da now.bowl))
+          =/  pending-tx=transaction
+            =/  old-pending-tx  (~(got by net-pend) hash)
+            ?+  -.old-pending-tx  !!
+                %eth
+              =.  status.old-pending-tx  %succeeded
+              =.  completed-at.old-pending-tx  `(crip (scow %da now.bowl))
+              old-pending-tx
+            ==
           =.  transactions
             =/  net-pending  (~(got by transactions) %ethereum)
             =.  net-pending
@@ -179,14 +184,14 @@
             %+  sort  loglist.diff
             order-events:core
 ::          =.  history-parts  (~(del by history-parts) contract-id)
-          =.  state  (apply-events:core idx loglist)
+          =^  cards  state  (apply-events:core idx loglist)
           :_  this
           [[%give %fact ~[/primary] %eth-contracts-erc20-diff !>(diff)] ~]
             [%logs *]
           =/  =loglist:erc20
             %+  sort  loglist.diff
             order-events:core
-          =.  state  (apply-events:core idx loglist)
+          =^  cards  state  (apply-events:core idx loglist)
           :_  this
           [[%give %fact ~[/primary] %eth-contracts-erc20-diff !>(diff)] ~]
             [%disavow *]
@@ -293,18 +298,21 @@
 ::
 ++  apply-events
   |=  [idx=@t =loglist:erc20]
-  ^-  _state
+  ^-  (quip card _state)
+  =/  cards=(list card)  ~
   |-
-  ?~  loglist  state
-  $(state (apply-event idx i.loglist), loglist t.loglist)
+  ?~  loglist  [cards state]
+  =^  new-cards  state  (apply-event idx i.loglist)
+  ::$(state (apply-event idx i.loglist), loglist t.loglist)
+  $(cards (weld cards new-cards), state state, loglist t.loglist)
 ::
 ++  apply-event
   |=  [idx=@t =event-log:erc20]
-  ^-  _state
+  ^-  (quip card _state)
   =/  mytxn  *txn-log
   ?-  event-data.event-log
       [%approval *]
-    state
+    `state
       [%transfer *]
     =/  data
       ^-
@@ -318,13 +326,21 @@
       address:(~(got by wall-map) idx)
     ?-  -.data
         %erc20
+      =/  type
+        ?:  &(=(to.event-data.event-log from.event-data.event-log) =(to.event-data.event-log address))
+          %received
+        ?:  =(address to.event-data.event-log)
+          %received
+        ?:  =(address from.event-data.event-log)
+          %sent
+        ~|  "unexpected event"  !!
       =/  new-balance=@ud
         ?:  &(=(to.event-data.event-log from.event-data.event-log) =(to.event-data.event-log address))
           balance.data
         ?:  =(address to.event-data.event-log)
           (add balance.data value.event-data.event-log)
         ?:  =(address from.event-data.event-log)
-        (sub balance.data value.event-data.event-log)
+          (sub balance.data value.event-data.event-log)
         ~|  "unexpected event"  !!
       ?~  mined.event-log  ~|  "received unexpected unmined event"  !!
       =/  txh=@ux  transaction-hash.u.mined.event-log
@@ -354,13 +370,61 @@
         =.  contracts-map
           %+  ~(put by contracts-map)
             contract-id.data
-    ::      [contract-type name address.event-log new-balance txn-log pending-txs]
             [%erc20 name.data address.event-log new-balance txn-log.data pending-txs.data]
         =.  contracts-map.wall  contracts-map
         =.  eth-map  (~(put by eth-map) [idx wall])
         (~(put by wallets) [%ethereum eth-map])
-      state
+      =/  tx
+        ^-  transaction
+        =/  net-tx  (~(got by transactions) %ethereum)
+        =/  prev-tx  (~(get by net-tx) (crip (z-co:co txh)))
+        ?~  prev-tx
+          ^-  transaction
+          :*  %erc20
+              (crip (z-co:co txh))
+              0x0
+              `@t`value.event-data.event-log
+              %ethereum
+              type
+              ''
+              ~
+              (crip (z-co:co address))
+              ~
+              ?-  type
+                %sent  (crip (z-co:co to.event-data.event-log))
+                %received  (crip (z-co:co from.event-data.event-log))
+              ==
+              %succeeded
+              ~
+              ''
+            ==
+        =/  prev-tx  u.prev-tx
+        ?-  -.prev-tx
+            %eth
+          =.  status.prev-tx  %succeeded
+          prev-tx
+            %erc20
+          =.  status.prev-tx  %succeeded
+          prev-tx
+            %erc721
+          =.  status.prev-tx  %succeeded
+          prev-tx
+        ==
+      =.  transactions
+        =/  net-tx  (~(got by transactions) %ethereum)
+        =.  net-tx  (~(put by net-tx) [(crip (z-co:co txh)) tx])
+        (~(put by transactions) [%ethereum net-tx])
+      :-  [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum (crip (z-co:co txh)) tx &])]~
+        state
         %erc721
+      =/  type
+        ?:  &(=(to.event-data.event-log from.event-data.event-log) =(to.event-data.event-log address))
+          %received
+        ?:  =(address to.event-data.event-log)
+          %received
+        ?:  =(address from.event-data.event-log)
+          %sent
+        ~|  "unexpected event"  !!
       =/  new-tokens=(set @ud)
         ?:  &(=(to.event-data.event-log from.event-data.event-log) =(to.event-data.event-log address))
           tokens.data
@@ -403,7 +467,48 @@
         =.  contracts-map.wall  contracts-map
         =.  eth-map  (~(put by eth-map) [idx wall])
         (~(put by wallets) [%ethereum eth-map])
-      state
+      =/  tx
+        ^-  transaction
+        =/  net-tx  (~(got by transactions) %ethereum)
+        =/  prev-tx  (~(get by net-tx) (crip (z-co:co txh)))
+        ?~  prev-tx
+          ^-  transaction
+          :*  %erc721
+              (crip (z-co:co txh))
+              0x0
+              `@t`value.event-data.event-log
+              %ethereum
+              type
+              ''
+              ~
+              (crip (z-co:co address))
+              ~
+              ?-  type
+                %sent  (crip (z-co:co to.event-data.event-log))
+                %received  (crip (z-co:co from.event-data.event-log))
+              ==
+              %succeeded
+              ~
+              ''
+            ==
+        =/  prev-tx  u.prev-tx
+        ?-  -.prev-tx
+            %eth
+          =.  status.prev-tx  %succeeded
+          prev-tx
+            %erc20
+          =.  status.prev-tx  %succeeded
+          prev-tx
+            %erc721
+          =.  status.prev-tx  %succeeded
+          prev-tx
+        ==
+      =.  transactions
+        =/  net-tx  (~(got by transactions) %ethereum)
+        =.  net-tx  (~(put by net-tx) [(crip (z-co:co txh)) tx])
+        (~(put by transactions) [%ethereum net-tx])
+      :-  [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum (crip (z-co:co txh)) tx &])]~
+        state
     ==
   ==
 ::
@@ -623,24 +728,67 @@
       ==
     =?  cards
         ?&  (team:title our.bowl src.bowl)
-            !=(~ their-patp.transaction.act)
+            =/  their-patp
+              ?-  -.transaction.act
+                %eth  their-patp.transaction.act
+                %erc20  their-patp.transaction.act
+                %erc721  their-patp.transaction.act
+              ==
+            !=(~ their-patp)
         ==
-      ?~  their-patp.transaction.act  !!
-      =/  to=@p  u.their-patp.transaction.act
-      =.  transaction.act
-        =.  type.transaction.act  %received
-        =.  their-patp.transaction.act  `our.bowl
-        =/  their-address  their-address.transaction.act
-        =.  their-address.transaction.act  our-address.transaction.act
-        =.  our-address.transaction.act  their-address
-        transaction.act
-      =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
-      =/  task  [%poke %wallet-action !>(wall-act)]
-      =/  new-card  
-        ^-  (list card)
-        :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
+        ?-  -.transaction.act
+            %eth
+          ?~  their-patp.transaction.act  !!
+          =/  to=@p  u.their-patp.transaction.act
+          =.  transaction.act
+            =.  type.transaction.act  %received
+            =.  their-patp.transaction.act  `our.bowl
+            =/  their-address  their-address.transaction.act
+            =.  their-address.transaction.act  our-address.transaction.act
+            =.  our-address.transaction.act  their-address
+            transaction.act
+          =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
+          =/  task  [%poke %wallet-action !>(wall-act)]
+          =/  new-card  
+            ^-  (list card)
+            :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
+            ==
+          (weld cards new-card)
+            %erc20
+          ?~  their-patp.transaction.act  !!
+          =/  to=@p  u.their-patp.transaction.act
+          =.  transaction.act
+            =.  type.transaction.act  %received
+            =.  their-patp.transaction.act  `our.bowl
+            =/  their-address  their-address.transaction.act
+            =.  their-address.transaction.act  our-address.transaction.act
+            =.  our-address.transaction.act  their-address
+            transaction.act
+          =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
+          =/  task  [%poke %wallet-action !>(wall-act)]
+          =/  new-card  
+            ^-  (list card)
+            :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
+            ==
+          (weld cards new-card)
+            %erc721
+          ?~  their-patp.transaction.act  !!
+          =/  to=@p  u.their-patp.transaction.act
+          =.  transaction.act
+            =.  type.transaction.act  %received
+            =.  their-patp.transaction.act  `our.bowl
+            =/  their-address  their-address.transaction.act
+            =.  their-address.transaction.act  our-address.transaction.act
+            =.  our-address.transaction.act  their-address
+            transaction.act
+          =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
+          =/  task  [%poke %wallet-action !>(wall-act)]
+          =/  new-card  
+            ^-  (list card)
+            :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
+            ==
+          (weld cards new-card)
         ==
-      (weld cards new-card)
     =?  cards
         !(team:title our.bowl src.bowl)
       =/  new-card
@@ -653,7 +801,13 @@
       %save-transaction-notes
     =/  net-map  (~(got by transactions) %ethereum)
     =/  tx  (~(got by net-map) hash.act)
-    =.  notes.tx  notes.act
+    =/  notes
+      ?-  -.tx
+        %eth  notes.tx
+        %erc20  notes.tx
+        %erc721  notes.tx
+      ==
+    =.  notes  notes.act
     =.  transactions
       =.  net-map  (~(put by net-map) [hash.act tx])
       (~(put by transactions) [%ethereum net-map])
