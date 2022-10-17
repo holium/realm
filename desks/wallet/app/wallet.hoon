@@ -161,15 +161,12 @@
         `this
       ==
         [%wallet-eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]
-      ~&  'got something from eth watcher'
       =/  [%wallet-eth-watcher flow=?(%from %to) idx=@t contract-address=@t ~]  wire
       ?.  ?=(%fact -.sign)
         `this
       ?+  p.cage.sign  (on-agent:def wire sign)
           %eth-watcher-diff
-        ~&  'got a diff'
         =+  !<(sign=diff:watchlib q.cage.sign) 
-        ~&  sign
         =/  diff  (decode-diff:erc20lib sign)
         ?-  diff
             [%history *]
@@ -186,14 +183,14 @@
 ::          =.  history-parts  (~(del by history-parts) contract-id)
           =^  cards  state  (apply-events:core idx loglist)
           :_  this
-          [[%give %fact ~[/primary] %eth-contracts-erc20-diff !>(diff)] ~]
+          (weld cards `(list card)`[[%give %fact ~[/primary] %eth-contracts-erc20-diff !>(diff)] ~])
             [%logs *]
           =/  =loglist:erc20
             %+  sort  loglist.diff
             order-events:core
           =^  cards  state  (apply-events:core idx loglist)
           :_  this
-          [[%give %fact ~[/primary] %eth-contracts-erc20-diff !>(diff)] ~]
+          (weld cards `(list card)`[[%give %fact ~[/primary] %eth-contracts-erc20-diff !>(diff)] ~])
             [%disavow *]
           `this
         ==
@@ -383,7 +380,7 @@
           :*  %erc20
               (crip (z-co:co txh))
               0x0
-              `@t`value.event-data.event-log
+              (crip (scow %ud value.event-data.event-log))
               %ethereum
               type
               ''

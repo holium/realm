@@ -492,8 +492,7 @@ export class WalletService extends BaseService {
       'ethereum',
       hash,
       stateTx,
-      type
-      // tx
+      contractType
     );
   }
 
