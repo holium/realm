@@ -1,15 +1,8 @@
-import { FC, useEffect } from 'react';
-import { observer } from 'mobx-react';
+import { FC } from 'react';
 import styled from 'styled-components';
-import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { toJS } from 'mobx';
 import { Flex, Text, Box, AppTile, Button } from 'renderer/components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { AppType } from 'os/services/spaces/models/bazaar';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 
 const AppEmpty = styled(Box)`
   border-radius: 16px;
@@ -56,17 +49,13 @@ export const AppPreview: FC<AppPreviewProps> = (props: AppPreviewProps) => {
         </Flex>
         <Flex flexGrow={0}>
           {app?.type !== 'urbit' ||
-          (app?.type === 'urbit' && app?.installed) ? (
-            <Button
-              borderRadius={6}
-              opacity={0.3}
-              variant="primary"
-              onClick={() => {}}
-            >
+          (app?.type === 'urbit' &&
+            app?.installStatus === InstallStatus.installed) ? (
+            <Button borderRadius={6} opacity={0.3} variant="primary">
               Installed
             </Button>
           ) : (
-            <Button variant="primary" disabled borderRadius={6}>
+            <Button variant="primary" borderRadius={6} onClick={() => {}}>
               Install
             </Button>
           )}

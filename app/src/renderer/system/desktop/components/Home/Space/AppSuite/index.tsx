@@ -1,26 +1,19 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Text, Button } from 'renderer/components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { SuiteApp } from './App';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-
 import { styled, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { AppRow } from '../../AppRow';
+import { AppRow } from '../../AppInstall/AppRow';
 import { useServices } from 'renderer/logic/store';
-
-import { cleanNounColor } from 'os/lib/color';
 import { observer } from 'mobx-react';
-import { rgba } from 'polished';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { darken, rgba } from 'polished';
+import { RealmPopover } from '../../Popover';
+import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
 
 type AppSuiteProps = {
   patp: string;
-  space: SpaceModelType;
-  apps: any[];
-  suite: any[];
   isAdmin: boolean;
-  bazaar: BazaarStoreType;
   // suite?: AppModelType[];
 };
 // const emptyArr = [1, 2, 3, 4, 5];
@@ -74,7 +67,8 @@ function Content({ children, ...props }: any) {
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
-          if (document.activeElement) document.activeElement!.blur();
+          // @ts-ignore
+          if (document.activeElement) document.activeElement.blur();
           e.preventDefault();
         }}
         onFocusOutside={(e) => e.preventDefault()}
@@ -93,29 +87,141 @@ export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
 export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
-  const { patp, space, apps, suite, isAdmin, bazaar } = props;
-  const { theme } = useServices();
+  const { patp, isAdmin } = props;
+  const { theme, bazaar, spaces } = useServices();
+  const space = spaces.selected!;
+  const suite = bazaar.getSuite(space.path);
+  const apps = [...bazaar.installed, ...bazaar.installing];
+
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
+  const [coords, setCoords] = useState({ left: 0, top: 0 });
   const { accentColor, windowColor, textColor, iconColor } = theme.currentTheme;
 
-  const onAppsAction = (path: string, app: any, tag: any, rank: number) => {
-    // console.log('onAppsAction => %o', { path, id: app.id, tag });
-    SpacesActions.addToSuite(path, app.id, rank);
+  const isOpen = searchMode !== 'none';
+  const backgroundColor = useMemo(
+    () =>
+      theme.currentTheme.mode === 'light'
+        ? theme.currentTheme.windowColor
+        : darken(0.1, theme.currentTheme.windowColor),
+    [theme.currentTheme]
+  );
+
+  const dimensions = {
+    height: 450,
+    width: 550,
   };
 
-  const actionRenderer = (space: string, app: any, rank: number) => (
-    <>
-      <Button
-        borderRadius={6}
-        onClick={(e) => {
+  const popoverId = `app-suite-${suiteIndex}`;
+  const popover = useMemo(
+    () => (
+      <RealmPopover
+        id={popoverId}
+        isOpen={isOpen}
+        coords={coords}
+        dimensions={dimensions}
+        onClose={() => {
           setSearchMode('none');
           setSuiteIndex(-1);
-          onAppsAction(space, app, 'suite', rank);
+        }}
+        style={{
+          outline: 'none',
+          boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
+          borderRadius: 12,
+          maxHeight: '50vh',
+          overflowY: 'auto',
+          background: backgroundColor,
         }}
       >
-        Add to Suite
-      </Button>
+        <Flex flexDirection={'column'}>
+          <Text variant="h6" fontWeight={500} color={textColor}>
+            Installed Apps
+          </Text>
+          <div style={{ marginTop: '2px', marginBottom: '2px' }}>
+            <hr
+              style={{
+                backgroundColor: rgba(iconColor, 0.3),
+                height: '1px',
+                border: 0,
+              }}
+            />
+          </div>
+          {(apps.length === 0 && (
+            <Text color={rgba(textColor, 0.4)}>No apps found</Text>
+          )) || (
+            <Flex flexDirection={'column'} gap={10}>
+              {apps.map((item, index) => (
+                <div key={index}>
+                  <AppRow
+                    caption={item.id}
+                    app={item}
+                    actionRenderer={() => (
+                      <Button
+                        borderRadius={6}
+                        onClick={(e) => {
+                          setSearchMode('none');
+                          setSuiteIndex(-1);
+                          SpacesActions.addToSuite(
+                            space.path,
+                            item.id,
+                            suiteIndex
+                          );
+                        }}
+                      >
+                        Add to Suite
+                      </Button>
+                    )}
+                    onClick={() => {}}
+                  />
+                </div>
+              ))}
+            </Flex>
+          )}
+        </Flex>
+      </RealmPopover>
+    ),
+    [popoverId, setSearchMode, isOpen, coords, theme.currentTheme]
+  );
+
+  const appTile = (app: any | null, index: number) => (
+    <>
+      {(app && (
+        <SuiteApp
+          key={index}
+          index={index}
+          id={`app-suite-${index}-trigger`}
+          isAdmin={isAdmin}
+          space={space}
+          selected={index === suiteIndex}
+          accentColor={accentColor}
+          app={app}
+        />
+      )) || (
+        <SuiteApp
+          key={index}
+          index={index}
+          id={`app-suite-${index}-trigger`}
+          space={space}
+          selected={index === suiteIndex}
+          accentColor={accentColor}
+          app={undefined}
+          onClick={(e) => {
+            if (isAdmin) {
+              setCoords(
+                calculatePopoverAnchorById(`app-suite-${index}-trigger`, {
+                  dimensions,
+                  anchorOffset: {
+                    y: 12,
+                  },
+                  centered: true,
+                })
+              );
+              setSearchMode('app-search');
+              setSuiteIndex(index);
+            }
+          }}
+        />
+      )}
     </>
   );
 
@@ -133,112 +239,17 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
         position="relative"
         justifyContent="space-between"
       >
-        {suite.map(
-          (app: any, index: number) =>
-            (app && (
-              <SuiteApp
-                key={index}
-                isAdmin={isAdmin}
-                space={space}
-                app={app}
-                bazaar={bazaar}
-                onClick={() => {
-                  SpacesActions.removeFromSuite(space.path, app.id);
-                }}
-              />
-            )) || (
-              <SuiteApp
-                key={index}
-                space={space}
-                selected={index === suiteIndex}
-                accentColor={accentColor}
-                app={undefined}
-                bazaar={bazaar}
-                onClick={(e) => {
-                  if (isAdmin) {
-                    setSearchMode('app-search');
-                    setSuiteIndex(index);
-                  }
-                }}
-              />
-            )
-        )}
-        {/* {emptyArr.map((el: number, index: number) => (
-          <SuiteApp
-            key={index + suite.length}
-            space={space}
-            app={undefined}
-            onClick={(e) => {
-              setSearchMode('app-search');
-              setSuiteIndex(index);
-            }}
-          />
-        ))} */}
+        {suite && appTile(suite.get('0'), 0)}
+        {suite && appTile(suite.get('1'), 1)}
+        {suite && appTile(suite.get('2'), 2)}
+        {suite && appTile(suite.get('3'), 3)}
+        {suite && appTile(suite.get('4'), 4)}
       </Flex>
-      <Popover
-        open={searchMode !== 'none'}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSearchMode('none');
-          }
-        }}
-        modal={false}
-      >
-        <PopoverAnchor asChild>
-          <div style={{ width: '100%', height: '1px' }}></div>
-        </PopoverAnchor>
-        <PopoverContent
-          sideOffset={-60}
-          style={{
-            outline: 'none',
-            boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
-            width: '50em',
-            borderRadius: 12,
-            maxHeight: '50vh',
-            overflowY: 'auto',
-            background: windowColor,
-          }}
-        >
-          <Flex flexDirection={'column'}>
-            <Text variant="h6" fontWeight={500} color={textColor}>
-              Installed Apps
-            </Text>
-            <div style={{ marginTop: '2px', marginBottom: '2px' }}>
-              <hr
-                style={{
-                  backgroundColor: rgba(iconColor, 0.3),
-                  height: '1px',
-                  border: 0,
-                }}
-              />
-            </div>
-            {(apps.length === 0 && (
-              <Text color={rgba(textColor, 0.4)}>No apps found</Text>
-            )) || (
-              <Flex flexDirection={'column'} gap={10}>
-                {apps
-                  .filter((app) => app.installed)
-                  .map((item, index) => (
-                    <div key={index}>
-                      <AppRow
-                        caption={item.id}
-                        app={item}
-                        actionRenderer={() =>
-                          actionRenderer(space.path, item, suiteIndex)
-                        }
-                        onClick={() => {}}
-                      />
-                    </div>
-                  ))}
-              </Flex>
-            )}
-          </Flex>
-        </PopoverContent>
-      </Popover>
+      {popover}
     </Flex>
   );
 });
 
 AppSuite.defaultProps = {
-  suite: [],
+  // suite: [null, null, null, null],
 };

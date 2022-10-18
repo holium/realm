@@ -151,7 +151,7 @@ export const DesktopStore = types
       if (self.activeWindow?.id === appId) {
         const nextWindow = Array.from(self.windows.values())[0].id;
         if (nextWindow) {
-          self.activeWindow = self.windows.get(nextWindow);
+          this.setActive(nextWindow);
         }
       }
       self.windows.delete(appId);

@@ -1,7 +1,7 @@
 import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { lighten, rgba, darken } from 'polished';
-import { Flex, Box, Text, ContextMenu } from '..';
+import { lighten, rgba } from 'polished';
+import { Flex, Box, Text, ContextMenu, Spinner } from '..';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
@@ -20,6 +20,16 @@ const sizes = {
   xl1: 160,
   xl2: 196,
   xxl: 210,
+};
+
+const loaderSizes = {
+  sm: 0,
+  md: 0,
+  lg: 1,
+  xl: 2,
+  xl1: 3,
+  xl2: 3,
+  xxl: 3,
 };
 
 const radius = {
@@ -97,7 +107,10 @@ interface AppTileProps {
   isVisible?: boolean;
   isAnimated?: boolean;
   tileSize: AppTileSize;
+  isInstalling?: boolean;
+  isUninstalled?: boolean;
   hasTitle?: boolean;
+  isRecommended?: boolean;
 }
 
 export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
@@ -114,12 +127,16 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     isAnimated,
     onAppClick,
     hasTitle,
+    isRecommended,
+    isInstalling,
+    isUninstalled,
   } = props;
   const { theme } = useServices();
 
   const tileRef = useRef(null);
 
   return useMemo(() => {
+    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     let title;
     const isAppGrid =
       tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
@@ -129,7 +146,6 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     const boxShadowHover = isAppGrid
       ? '0px 4px 8px rgba(0, 0, 0, 0.15)'
       : 'none';
-    const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     const isLight = lightOrDark === 'light';
     const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
     if (isAppGrid) {
@@ -138,7 +154,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       title = (
         <Text
           position="absolute"
-          // style={{ mixBlendMode: 'hard-light' }}
+          style={{ pointerEvents: 'none' }}
           left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
           padding=".2rem"
           borderRadius={4}
@@ -176,6 +192,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
+            opacity: isInstalling || isUninstalled ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
@@ -223,6 +240,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
+            opacity: isInstalling || isUninstalled ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
@@ -256,6 +274,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
+            opacity: isInstalling ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{
@@ -281,10 +300,24 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           variants={variants}
           onClick={(evt: any) => {
             evt.stopPropagation();
-            onAppClick && onAppClick(app);
+            onAppClick && !isUninstalled && !isInstalling && onAppClick(app);
           }}
           className="app-dock-icon"
         >
+          {isInstalling && (
+            <Flex
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              position="absolute"
+              left={0}
+              top={0}
+              right={0}
+              bottom={0}
+            >
+              <Spinner size={loaderSizes[tileSize]} />
+            </Flex>
+          )}
           {allowContextMenu && (
             <Portal>
               <AnimatePresence>
@@ -310,17 +343,33 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           />
         </Flex>
         {hasTitle && (
-          <Text color={theme.currentTheme.textColor} mt={2}>
+          <Text
+            style={{ pointerEvents: 'none' }}
+            color={theme.currentTheme.textColor}
+            mt={2}
+          >
             {app.title}
           </Text>
         )}
+        {/* {app.type === 'urbit' && app.installed && (
+          <IconButton
+            tabIndex={-1}
+            mt={5}
+            height={32}
+            onClick={() => alert('hi')}
+          >
+            {app.glob ? (<Spinner size={0} />) : (<Icons name="DownloadCircle" />)}
+          </IconButton>
+        )} */}
       </Flex>
     );
-  }, [app, isPinned, selected, open]);
+  }, [app, isRecommended, isPinned, selected, open, theme.currentTheme]);
 });
 
 AppTile.defaultProps = {
   tileSize: 'md',
   allowContextMenu: false,
   isAnimated: true,
+  isRecommended: false,
+  isInstalling: false,
 };

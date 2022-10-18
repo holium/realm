@@ -20,7 +20,6 @@ import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
-import { BazaarApi } from '../../api/bazaar';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
 
@@ -495,7 +494,7 @@ export class OnboardingService extends BaseService {
     this.state.endRealmInstall('success');
     console.log('realm installation complete.');
     */
-   this.state.installRealm();
+    this.state.installRealm();
   }
 
   async completeOnboarding(_event: any) {

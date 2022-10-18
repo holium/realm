@@ -37,7 +37,9 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
-    let amountDisplay = `${formatEthAmount(props.wallet.balance).eth} ETH`;
+    let amountDisplay = `${
+      formatEthAmount(props.wallet ? props.wallet.balance : '0.0').eth
+    } ETH`;
 
     const CopyButton: FC<{ content: string }> = (props: {
       content: string;
@@ -86,7 +88,7 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
           <Flex>
             <Icons name="Ethereum" height="20px" mr={2} />
             <Text pt="2px" textAlign="center" fontSize="14px">
-              {shortened(props.wallet!.address)}
+              {props.wallet && shortened(props.wallet!.address)}
             </Text>
           </Flex>
           <Flex>
@@ -97,7 +99,7 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
               />
             ) : (
               <>
-                <CopyButton content={props.wallet!.address} />
+                <CopyButton content={props.wallet && props.wallet!.address} />
                 <Box onClick={() => props.setQROpen(!props.QROpen)}>
                   <Icons
                     ml={2}

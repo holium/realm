@@ -10,7 +10,6 @@ import { RecommendedApps } from './Recommended';
 import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
-import { sampleSuite } from './sample-suite';
 
 type HomePaneProps = {
   isOpen?: boolean;
@@ -25,11 +24,8 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
-  const [apps, setApps] = useState<any>([]);
-  const [suite, setSuite] = useState<any>([]);
-  const currentBazaar = bazaar.spaces.get(currentSpace?.path!);
+
   const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
-  // console.log('isAdmin => %o', isAdmin);
 
   useEffect(() => {
     if (currentSpace) {
@@ -37,31 +33,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
       setMembers(memberMap);
     }
   }, [currentSpace]);
-
-  useEffect(() => {
-    // console.log('AppSuite useEffect => %o', {
-    //   ship: ship?.patp,
-    //   path: currentSpace?.path,
-    // });
-    if (currentSpace) {
-      // @ts-ignore
-      const suite = Array(5).fill(undefined);
-      const apps = bazaar.getSuiteApps(currentSpace.path);
-      apps?.forEach((app, index) => suite.splice(app.ranks!.suite, 1, app));
-      // console.log(suite);
-      setSuite(suite);
-    }
-  }, [
-    currentSpace,
-    currentBazaar?.suiteChange,
-    bazaar.appsChange,
-    currentBazaar?.pinnedChange,
-  ]);
-
-  useEffect(() => {
-    const apps = bazaar.getAvailableApps();
-    setApps(apps);
-  }, [bazaar.appsChange]);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -87,7 +58,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   }, [sidebar, members]);
   if (!currentSpace) return null;
   const membersCount = membership.getMemberCount(currentSpace.path);
-
+  let maxWidth = 880;
   const headerWidth = '50%';
   const paneWidth = '50%';
   return (
@@ -109,8 +80,8 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           gap={12}
           mt={40}
           mb={46}
-          minWidth={880}
-          width={headerWidth}
+          // maxWidth={maxWidth}
+          width={maxWidth}
           variants={{
             hidden: {
               opacity: 0,
@@ -132,7 +103,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
         >
           <SpaceTitlebar
             space={currentSpace}
-            theme={theme.currentTheme}
             membersCount={membersCount}
             showAppGrid={appGrid}
             showMembers={sidebar === 'members'}
@@ -150,8 +120,8 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           flexDirection="row"
           justifyContent="space-between"
           gap={36}
-          minWidth={880}
-          width={paneWidth}
+          width={maxWidth}
+          // width={paneWidth}
         >
           {appGrid && (
             <Flex
@@ -181,7 +151,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
               <Flex
                 style={{ position: 'relative' }}
                 gap={32}
-                width="880px"
+                width={maxWidth}
                 // mb="180px"
                 flexWrap="wrap"
                 flexDirection="row"
@@ -230,14 +200,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite
-                patp={ship!.patp!}
-                space={currentSpace}
-                apps={apps}
-                suite={suite}
-                isAdmin={isAdmin as boolean}
-                bazaar={bazaar}
-              />
+              <AppSuite patp={ship!.patp!} isAdmin={isAdmin as boolean} />
               <RecommendedApps />
               <RecentActivity />
             </Flex>

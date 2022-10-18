@@ -24,7 +24,6 @@ import { ShellActions } from './logic/actions/shell';
 export const App: FC = observer(() => {
   const { booted, resuming } = useCore();
   const { desktop, shell, theme } = useServices();
-  // const styleRef = useRef(null);
 
   const themeMode = theme.currentTheme.mode;
 

@@ -3,10 +3,8 @@ import { MembershipType } from './../services/spaces/models/members';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar';
 import { VisaModelType } from 'os/services/spaces/models/visas';
-import { reject } from 'lodash';
-import { getHost } from '../services/spaces/spaces.service';
+import { NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {
@@ -244,7 +242,7 @@ export const SpacesApi = {
     conduit: Conduit,
     spacesState: SpacesStoreType,
     membersState: MembershipType,
-    bazaarState: BazaarStoreType,
+    bazaarState: NewBazaarStoreType,
     visaState: VisaModelType,
     roomService: any,
     setTheme: (theme: any) => void
@@ -289,7 +287,7 @@ const handleSpacesReactions = (
   our: Patp,
   spacesState: SpacesStoreType,
   membersState: MembershipType,
-  bazaarState: BazaarStoreType,
+  bazaarState: NewBazaarStoreType,
   visaState: VisaModelType,
   roomService: any,
   setTheme: (theme: any) => void
@@ -307,7 +305,6 @@ const handleSpacesReactions = (
     case 'add':
       const newSpace = spacesState.addSpace(data['add']);
       membersState.addMemberMap(newSpace, data['add'].members);
-      bazaarState.addBazaar(newSpace);
       break;
     case 'replace':
       spacesState.updateSpace(data['replace']);
