@@ -2,7 +2,7 @@ import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, ContextMenu, Spinner } from '..';
-import { AppType } from 'os/services/spaces/models/bazaar-old';
+import { AppType } from 'os/services/spaces/models/bazaar';
 import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
@@ -110,7 +110,7 @@ interface AppTileProps {
   isInstalling?: boolean;
   isUninstalled?: boolean;
   hasTitle?: boolean;
-  isRecommended: boolean;
+  isRecommended?: boolean;
 }
 
 export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
@@ -370,4 +370,6 @@ AppTile.defaultProps = {
   tileSize: 'md',
   allowContextMenu: false,
   isAnimated: true,
+  isRecommended: false,
+  isInstalling: false,
 };

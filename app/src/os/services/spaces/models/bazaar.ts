@@ -6,7 +6,7 @@ import {
   RemoveFromSuitePoke,
   UninstallPoke,
   UnpinPoke,
-} from './../../../api/new-bazaar';
+} from '../../../api/bazaar';
 import {
   types,
   Instance,

@@ -1,22 +1,15 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Text, Button } from 'renderer/components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { SuiteApp } from './App';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-
 import { styled, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { AppRow } from '../../AppInstall/AppRow';
 import { useServices } from 'renderer/logic/store';
-
-import { cleanNounColor } from 'os/lib/color';
 import { observer } from 'mobx-react';
 import { darken, rgba } from 'polished';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar-old';
 import { RealmPopover } from '../../Popover';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
-import { AppModelType } from 'os/services/ship/models/docket';
-import { AppType } from 'os/services/spaces/models/bazaar';
 
 type AppSuiteProps = {
   patp: string;

@@ -2,7 +2,7 @@ import { FC } from 'react';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import { Flex, Text, Box, AppTile, Button } from 'renderer/components';
-import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar-old';
+import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 
 const AppEmpty = styled(Box)`
   border-radius: 16px;

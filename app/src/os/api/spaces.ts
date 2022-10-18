@@ -3,10 +3,7 @@ import { MembershipType } from './../services/spaces/models/members';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';
-import { BazaarStoreType } from 'os/services/spaces/models/bazaar-old';
 import { VisaModelType } from 'os/services/spaces/models/visas';
-import { reject } from 'lodash';
-import { getHost } from '../services/spaces/spaces.service';
 import { NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
 
 export const SpacesApi = {

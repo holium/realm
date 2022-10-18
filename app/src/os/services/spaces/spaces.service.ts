@@ -14,10 +14,9 @@ import { VisaModel, VisaModelType } from './models/visas';
 import { RoomsApi } from '../../api/rooms';
 
 export const getHost = (path: string) => path.split('/')[1];
-import { BazaarStore } from './models/bazaar-old';
 import { MembershipStore } from './models/members';
 import { DiskStore } from '../base.store';
-import { BazaarSubscriptions, BazaarApi } from '../../api/new-bazaar';
+import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
 import { formPathObj } from '../../lib/path';
 

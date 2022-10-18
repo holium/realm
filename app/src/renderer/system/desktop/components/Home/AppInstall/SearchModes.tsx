@@ -17,10 +17,7 @@ import {
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import {
-  InstallStatus,
-  UrbitAppType,
-} from 'os/services/spaces/models/bazaar-old';
+import { InstallStatus, UrbitAppType } from 'os/services/spaces/models/bazaar';
 import { useAppInstaller } from './store';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
