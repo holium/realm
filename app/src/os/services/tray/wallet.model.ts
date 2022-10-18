@@ -410,15 +410,16 @@ export const EthStore = types
       self.wallets.set(wallet.key, EthWallet.create(walletObj));
     }),
     applyTransactionUpdate(transaction: any) {
-      /*let tx = self.transactions.get(transaction.transaction.hash)!;
-      console.log(tx);
-      tx.completedAt = Date.now().toString();
-      if (transaction.transaction.success)
-        tx.status = "succeeded";
+      let tx = self.transactions.get(transaction.transaction.hash);
+      if (tx) {
+        tx.completedAt = Date.now().toString();
+        if (transaction.transaction.success)
+          tx.status = "succeeded";
+        else
+          tx.status = "failed";
+      }
       else
-        tx.status = "failed";
-      console.log()*/
-      self.transactions.set(transaction.transaction.hash, transaction.transaction);
+        self.transactions.set(transaction.transaction.hash, transaction.transaction);
     },
   }));
 
