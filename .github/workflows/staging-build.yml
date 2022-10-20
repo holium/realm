@@ -146,8 +146,7 @@ jobs:
       #       console.log(script({github, context}))
       - name: Increment version
         run: |
-          cd app/release
           npm version patch
-          git add app/release/package.json
+          git add package.json
           git commit -m "patch version"
           git push
