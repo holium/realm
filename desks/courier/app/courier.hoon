@@ -4,7 +4,7 @@
 ::
 /-  store=courier, post, graph-store, *post, *resource, group, inv=invite-store, met=metadata-store,
     hark=hark-store, dm-hook-sur=dm-hook, notify
-/+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify
+/+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify, groups-two
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -79,8 +79,16 @@
     |^
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %graph-dm-action    (on-graph-action:core !<(action:store vase))
-      %notify-action      (on-notify-action:core !<(action:notify vase))
+      %graph-dm-action
+        ?-  groups-target
+          %1  (on-graph-action:core !<(action:store vase))
+          %2  [(on-graph-action:groups-two vase) state]
+        ==
+      %notify-action
+        ?-  groups-target
+          %1  (on-notify-action:core !<(action:notify vase))
+          %2  `state
+        ==
       %set-groups-target  `[%1 !<(?(%1 %2) vase) +>:state]
       :: %next-dm-action    (on-action:core !<(action:store vase))
     ==
