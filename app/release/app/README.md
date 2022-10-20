@@ -31,3 +31,17 @@ Prerelease builds run when changes are pushed to the `@holium/realm` repo's `sta
 ### Release
 
 Release builds run when changes are pushed to the `@holium/realm` repo's `main` branch. These builds are added to GitHub Releases as `release` builds which ensures they will be picked up by the auto-update process.
+
+## FAQ
+
+Why do I need to sign apps?
+
+https://www.electronjs.org/docs/latest/tutorial/code-signing
+
+Why not use Apple certificates to sign both Windows and Mac apps?
+
+https://stackoverflow.com/questions/12468783/code-sign-windows-programs-with-apple-certificate
+
+```
+Now you need to get a Windows developer certificate. Unfortunately you can't use your Apple certificate (well, actually you can, but it doesn't help because Apple isn't a certificate authority that Windows recognizes). Here is a list of root certificate authorities recognized by Windows.
+```
