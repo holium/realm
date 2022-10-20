@@ -20,11 +20,18 @@
   ==
 +$  state-1
   $:  %1
-      groups-target=$?(%1 %2)
+      groups-target=?(%1 %2)
       =app-id:notify         :: constant
       =uuid:notify           :: (sham @p)
       =devices:notify        :: (map device-id player-id)
       push-enabled=?
+  ==
+++  migrate-state
+  |=  old=versioned-state
+  ^-  state-1
+  ?-  -.old
+      %0  [%1 groups-target=%1 +.old]
+      %1  old
   ==
 --
 =|  state-1
@@ -74,6 +81,7 @@
     ?+  mark  (on-poke:def mark vase)
       %graph-dm-action    (on-graph-action:core !<(action:store vase))
       %notify-action      (on-notify-action:core !<(action:notify vase))
+      %set-groups-target  `[%1 !<(?(%1 %2) vase) +>:state]
       :: %next-dm-action    (on-action:core !<(action:store vase))
     ==
     [cards this]
@@ -190,13 +198,6 @@
 ++  this  .
 ++  core  .
 ::
-++  migrate-state
-  |=  old=versioned-state
-  ^-  state-1
-  ?-  -.old
-      %0  [%1 groups-target=%1 +.old]
-      %1  old
-  ==
 ++  on-graph-action
   |=  [act=action:store]
   ^-  (quip card _state)
