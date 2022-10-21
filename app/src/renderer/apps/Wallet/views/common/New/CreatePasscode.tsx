@@ -4,7 +4,7 @@ import { Flex, Text } from 'renderer/components';
 import PasscodeInput from '../../../components/PasscodeInput';
 
 interface CreatePasscodeProps {
-  setPasscode: (passcode: string) => void;
+  setPasscode: (passcode: number[]) => void;
 }
 
 export const CreatePasscode: FC<CreatePasscodeProps> = observer((props: CreatePasscodeProps) => {
