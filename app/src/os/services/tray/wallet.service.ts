@@ -30,8 +30,7 @@ const alchemySettings = {
 
 const alchemy = new Alchemy(alchemySettings);
 
-// const AUTO_LOCK_INTERVAL = 1000 * 60 * 5; // five minutes
-const AUTO_LOCK_INTERVAL = 1000 * 30; // five minutes
+const AUTO_LOCK_INTERVAL = 1000 * 60 * 10; // ten minutes
 
 export interface RecipientPayload {
   recipientMetadata?: {
