@@ -8,7 +8,6 @@ import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 
 export function getBaseTheme(currentTheme: ThemeType) {
-  // console.log(theme, currentTheme.mode);
   // @ts-ignore
   return theme[currentTheme.mode];
 }

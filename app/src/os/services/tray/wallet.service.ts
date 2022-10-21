@@ -1,5 +1,6 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { ethers, utils, Wallet } from 'ethers';
+import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -28,6 +29,9 @@ const alchemySettings = {
 };
 
 const alchemy = new Alchemy(alchemySettings);
+
+// const AUTO_LOCK_INTERVAL = 1000 * 60 * 5; // five minutes
+const AUTO_LOCK_INTERVAL = 1000 * 30; // five minutes
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -60,15 +64,19 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.add-smart-contract': this.addSmartContract,
     'realm.tray.wallet.request-address': this.requestAddress,
+    'realm.tray.wallet.check-passcode': this.checkPasscode,
   };
 
   static preload = {
-    setMnemonic: (mnemonic: string, passcodeHash: string) => {
+    setMnemonic: (mnemonic: string, passcode: number[]) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-mnemonic',
         mnemonic,
-        passcodeHash
+        passcode
       );
+    },
+    checkPasscode: (passcode: number[]) => {
+      return ipcRenderer.invoke('realm.tray.wallet.check-passcode', passcode);
     },
     setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }) => {
       return ipcRenderer.invoke(
@@ -173,8 +181,28 @@ export class WalletService extends BaseService {
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
-      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+      // ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+      ipcMain.handle(handlerName, this.wrapHandler(this.handlers[handlerName]))
     });
+
+    setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
+  }
+
+  private wrapHandler(handler: any) {
+    return (...args: any) => {
+      if (this.state) {
+        this.state.setLastInteraction(new Date());
+      }
+      handler.apply(this, args);
+    }
+  }
+
+  private autoLock() {
+    let hasPasscode = this.state && this.state.passcodeHash;
+    let shouldLock =  this.state && (Date.now() - AUTO_LOCK_INTERVAL) > this.state.lastInteraction.getTime()
+    if (hasPasscode && shouldLock) {
+      this.state!.setView(WalletView.LOCKED, this.state!.currentIndex, this.state!.currentItem);
+    }
   }
 
   private getPrivateKey() {
@@ -184,7 +212,7 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
-    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    let secretKey: string = this.core.passwords.getPassword(ship)!;
     const storeParams = {
       name: 'wallet',
       cwd: `realm.${ship}`,
@@ -203,7 +231,7 @@ export class WalletService extends BaseService {
     } else {
       this.state = WalletStore.create({
         network: 'ethereum',
-        currentView: 'ethereum:new',
+        currentView: WalletView.ETH_NEW,
         ethereum: {
           settings: {
             defaultIndex: 0,
@@ -217,6 +245,7 @@ export class WalletService extends BaseService {
         },
         creationMode: 'default',
         ourPatp: ship,
+        lastInteraction: Date.now()
       });
     }
 
@@ -308,7 +337,8 @@ export class WalletService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
+  async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
+    let passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
@@ -329,6 +359,10 @@ export class WalletService extends BaseService {
 
     console.log('okay transitioning');
     this.state!.setView(WalletView.ETH_LIST);
+  }
+
+  async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
+    return  await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
   }
 
   async setXpub(_event: any) {

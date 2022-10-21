@@ -8,6 +8,7 @@ import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletNetwork } from './views/common/Network';
 import { CreateWallet } from './views/common/Create';
+import Locked from './views/common/Locked';
 import { ListPlaceholder } from './views/bitcoin/ListPlaceholder';
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
@@ -32,6 +33,7 @@ const WalletViews: { [key: string]: any } = {
   [WalletView.CREATE_WALLET]: (props: any) => (
     <CreateWallet network={NetworkType.ethereum} />
   ),
+  [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
   settings: (props: any) => <WalletSettings {...props} />,
 };
 
@@ -53,6 +55,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
     setHidePending(true);
   };
 
+  let hideHeader = [WalletView.ETH_NEW, WalletView.LOCKED].includes(walletApp.currentView);
+
   let View = WalletViews[walletApp.currentView];
 
   return (
@@ -68,7 +72,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
         network={walletApp.network}
         onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
-        hide={walletApp.currentView === 'ethereum:new'}
+        hide={hideHeader}
       />
       {!hidePending &&
         walletApp.currentView !== WalletView.TRANSACTION_DETAIL && (
