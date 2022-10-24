@@ -20,10 +20,11 @@
   |_  =bowl:gall
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
+      ::core   ~(. +> bowl)
   ::
   ++  on-init
     ^-  (quip card _this)
-    :-  [%pass /init-wallet %agent [our.bowl %wallet] %poke %wallet-action !>([%initialize ~])]~
+    :-  [%pass /init-wallet %agent [our.bowl %min-wallet] %poke %wallet-action !>([%initialize ~])]~
     this
   ::
   ++  on-save
@@ -46,10 +47,26 @@
         %wallet-action
       =^  cards  state
         ^-  (quip card _state)
-        (handle-wallet-action:core !<(action vase))
+        (handle-wallet-action !<(action vase))
       [cards this]
     ==
-  ++  on-watch  on-watch:def
+  ++  on-watch
+    |=  =path
+    ^-  (quip card _this)
+    ?>  (team:title our.bowl src.bowl)
+    ?+  path  (on-watch:def path)
+        [%address =network from=@ta ~]
+      =/  [%address =network from=@ta ~]  path
+      =/  from=@p  (slav %p from)
+      =/  wall-act=action  [%create-wallet our.bowl network (crip (scow %p our.bowl))]
+      =/  task  [%poke %wallet-action !>(`action`wall-act)]
+      :-  [%pass /addr/(scot %p from) %agent [from dap.bowl] task]~
+      this
+        [%transactions ~]
+      `this
+        [%wallets ~]
+      `this
+    ==
   ++  on-leave  on-leave:def
   ++  on-peek
     |=  =path
@@ -176,7 +193,7 @@
       [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
     ::  create new wallet
     ::
-    =/  idx  `@t`(scot %ud (lent ~(tap by (~(got by wallets.state) network.act))))
+    =/  idx  (lent ~(tap by (~(got by wallets.state) network.act)))
     =^  wallet=(unit wallet)  wallets.state
       =/  xpub  xpub:(~(got by networks.settings.state) network.act)
       ?~  xpub  [~ wallets.state]
@@ -186,7 +203,7 @@
       ~&  >  (crip (weld "generated wallet address " (z-co:co address)))
       =/  wallet
         ^-  wallet
-        [address path nickname.act 0 *contracts-map]
+        [address path nickname.act]
       =.  wallets.state
         =/  old-map  (~(got by wallets.state) network.act)
         =.  old-map  (~(put by old-map) [idx wallet])
@@ -207,7 +224,6 @@
       ^-  (list card)
       =/  key  [network.act `@ta`idx]
       :~  `card`[%give %fact [/wallets]~ %wallet-update !>(`update`[%wallet network.act `@t`idx u.wallet])]
-          `card`(await-eth-balance key)
       ==
     ::  send wallet to requester if not our
     =?  cards  !(team:title our.bowl src.bowl)
@@ -235,28 +251,16 @@
     =/  tid=@ta
       :((cury cat 3) dap.bowl '--' (scot %uv eny.bowl))
     =.  transactions.state
-      =/  net-map  (~(got by transactions.state) network.act)
-      =.  net-map  (~(put by net-map) [hash.transaction.act transaction.act])
-      (~(put by transactions.state) [network.act net-map])
-    =/  cards
-      ?+  network.act  `(list card)`~
-          %ethereum
-        =/  =wire  [%eth-receipt tid hash.transaction.act ~]
-        =/  args
-          =/  node-url
-            =/  provider  provider:(~(got by networks.settings) network.act)
-            ?~  provider  ~
-            u.provider
-          ?~  node-url  ~
-          :-  ~
-          :^  `tid  byk.bowl(r da+now.bowl)  %eth-get-transaction-receipt
-          =+  [gas=100.000 gas-price=30.000.000.000]
-          !>([node-url 'tx' hash.act])
-        ?~  args  `(list card)`~
-        :~  (watch-spider [%tx %result wire] /thread-result/[tid])
-            (poke-spider [%tx wire] %spider-start !>(args))
-        ==
-      ==
+      =/  network-map  (~(got by transactions.state) network.act)
+      =/  net-map  (~(get by network-map) net.act)
+      ?~  net-map
+        =/  net-map  `(map @t transaction)`(my [hash.transaction.act transaction.act]~)
+        =.  network-map  (~(put by network-map) [net.act net-map])
+        (~(put by transactions.state) [network.act network-map])
+      =/  net-map  (~(put by u.net-map) [hash.transaction.act transaction.act])
+      =.  network-map  (~(put by network-map) [net.act net-map])
+      (~(put by transactions.state) [network.act network-map])
+    =/  cards  *(list card)
     =?  cards
         ?&  (team:title our.bowl src.bowl)
             =/  their-patp
@@ -278,7 +282,7 @@
             =.  their-address.transaction.act  our-address.transaction.act
             =.  our-address.transaction.act  their-address
             transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
+          =/  wall-act=action  [%enqueue-transaction network.act net.act hash.act transaction.act]
           =/  task  [%poke %wallet-action !>(wall-act)]
           =/  new-card  
             ^-  (list card)
@@ -295,7 +299,7 @@
             =.  their-address.transaction.act  our-address.transaction.act
             =.  our-address.transaction.act  their-address
             transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
+          =/  wall-act=action  [%enqueue-transaction network.act net.act hash.act transaction.act]
           =/  task  [%poke %wallet-action !>(wall-act)]
           =/  new-card  
             ^-  (list card)
@@ -312,7 +316,7 @@
             =.  their-address.transaction.act  our-address.transaction.act
             =.  our-address.transaction.act  their-address
             transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act hash.act transaction.act]
+          =/  wall-act=action  [%enqueue-transaction network.act net.act hash.act transaction.act]
           =/  task  [%poke %wallet-action !>(wall-act)]
           =/  new-card  
             ^-  (list card)
@@ -324,13 +328,14 @@
         !(team:title our.bowl src.bowl)
       =/  new-card
         ^-  (list card)
-        :~  `card`[%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum tid transaction.act &])]
+        :~  `card`[%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction network.act net.act tid transaction.act])]
         ==
       (weld cards new-card)
     [cards state]
     ::
       %save-transaction-notes
-    =/  net-map  (~(got by transactions) %ethereum)
+    =/  network-map  (~(got by transactions) %ethereum)
+    =/  net-map  (~(got by network-map) net.act)
     =/  tx  (~(got by net-map) hash.act)
     =/  notes
       ?-  -.tx
@@ -341,9 +346,10 @@
     =.  notes  notes.act
     =.  transactions
       =.  net-map  (~(put by net-map) [hash.act tx])
-      (~(put by transactions) [%ethereum net-map])
+      =.  network-map  (~(put by network-map) [net.act net-map])
+      (~(put by transactions) [%ethereum network-map])
     :_  state
-    [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum hash.act tx &])]~
+    [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum net.act hash.act tx])]~
     ::
   ==
 ::

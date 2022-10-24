@@ -7,7 +7,7 @@ import {
   getSnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { WalletApi } from '../../api/wallet';
+import { WalletApi } from '../../api/min-wallet';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
@@ -437,7 +437,7 @@ export class WalletService extends BaseService {
   async setNetworkProvider(_event: any, network: string, provider: string) {
     if (network == 'ethereum') this.state!.ethereum.setProvider(provider);
     else if (network == 'bitcoin') this.state!.bitcoin.setProvider(provider);
-    await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
+    // await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
   }
 
   async createWallet(_event: any, nickname: string) {
@@ -492,9 +492,10 @@ export class WalletService extends BaseService {
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
+      'gorli',
       hash,
       stateTx,
-      contractType
+      contractType,
     );
   }
 

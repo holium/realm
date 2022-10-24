@@ -9,14 +9,13 @@
   ==
 ::
 ++  new-address
-  |=  [xpub=@t =network idx=@]
+  |=  [xpub=@t =network idx=@ud]
   =,  hmac:crypto
   =,  secp:crypto
   =+  ecc=secp256k1
   =/  code  (~(got by bip44-codes) network)
   =/  xpub-bip32  (from-extended:bip32 (trip xpub))
-  =/  udidx  (slav %ud idx)
-  =/  path  "{<udidx>}"
+  =/  path  "{<idx>}"
   =/  derived-pub  (derive-path:xpub-bip32 path)
   :-  ?-  network
         %bitcoin
@@ -24,7 +23,7 @@
         %ethereum
           (address-from-pub:key:ethereum (serialize-point.ecc pub:derived-pub))
       ==
-  =/  path  "m/44'/{<code>}'/0'/0/{<udidx>}"
+  =/  path  "m/44'/{<code>}'/0'/0/{<idx>}"
   (crip path)
 ::
 ++  split-xpub
@@ -115,7 +114,6 @@
   ?-  -.transaction
       %eth
     :~  ['hash' [%s hash.transaction]]
-        ['amount' [%s amount.transaction]]
         ['network' [%s network.transaction]]
         ['type' [%s type.transaction]]
         ['initiatedAt' [%s initiated-at.transaction]]
@@ -187,11 +185,11 @@
       [%set-wallet-creation-mode (ot ~[mode+(su (perk %on-demand %default ~))])]
       [%set-sharing-mode (ot ~[who+(su (perk %nobody %friends %anybody ~))])]
       [%sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
-      [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+so])]
+      [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
-      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+json-to-ux transaction+json-to-transaction])]
-      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+so notes+so])]
+      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so hash+json-to-ux transaction+json-to-transaction])]
+      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so hash+so notes+so])]
   ==
 ::
 ++  json-to-ux
@@ -212,6 +210,14 @@
     :~  ['address' [%s (crip (z-co:co u.address.update))]]
     ==
   ::
+      %transaction
+    %-  pairs
+    :~  ['network' [%s network.update]]
+        ['net' [%s net.update]]
+        ['key' [%s +>+<.update]]
+        ['transaction' (transaction-to-json +>+>.update)]
+    ==
+  ::
       %history
     %-  pairs
     |^
@@ -219,17 +225,21 @@
     %+  turn  transaction-list
       jsonify-transaction-map
     ++  jsonify-transaction-map
-      |=  [=network transactions=(map @t transaction)]
+      |=  [=network transactions=(map net=@t (map @t transaction))]
       ^-  [@t json]
       :-  `@t`network
         %-  pairs
-::        ~(tap by transactions)
         =/  tx-list  ~(tap by transactions)
         %+  turn  tx-list
-        |=  [key=@t =transaction]
+        |=  [net=@t transactions=(map @t transaction)]
         ^-  [@t json]
-        :-  key
-        (transaction-to-json transaction)
+        :-  net
+          %-  pairs
+          =/  tx-list  ~(tap by transactions)
+          %+  turn  tx-list
+          |=  [key=@t =transaction]
+          ^-  [@t json]
+          [key (transaction-to-json transaction)]
     --
   ::
       %wallet
@@ -252,11 +262,11 @@
     %+  turn  wallet-list
       jsonify-wallet-map
     ++  jsonify-wallet-map
-      |=  [=network wallets=(map @t =wallet)]
+      |=  [=network wallets=(map @ud =wallet)]
       ^-  [@t json]
       |^
       =/  wallet-list
-        ^-  (list [@t =wallet])
+        ^-  (list [@ud =wallet])
         ~(tap by wallets)
       :-  `@t`network
         %-  pairs
@@ -264,9 +274,9 @@
         %+  turn  wallet-list
           jsonify-wallet
       ++  jsonify-wallet
-        |=  [key=@t =wallet]
+        |=  [key=@ud =wallet]
         ^-  [@t json]
-        :-  key
+        :-  (crip (scow %ud key))
             %-  pairs
             ^-  (list [@t json])
             :~  ['address' [%s (crip (z-co:co address.wallet))]]

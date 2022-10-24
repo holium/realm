@@ -351,7 +351,7 @@ export const EthStore = types
       else {
         const coins = self.wallets.get(wallet.key)!.coins;
         const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
-        for (var contract in wallet.contracts) {
+        /*for (var contract in wallet.contracts) {
           if (wallet.contracts[contract].type === 'erc20') {
             let coin: any = wallet.contracts[contract];
             if ((coin.address as string).length <= 42) {
@@ -396,7 +396,7 @@ export const EthStore = types
               }
             }
           }
-        }
+        }*/
         walletObj = {
           network: 'ethereum',
           path: wallet.path,
