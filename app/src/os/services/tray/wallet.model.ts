@@ -28,11 +28,6 @@ export enum WalletView {
   CREATE_WALLET = 'create-wallet'
 }
 
-export enum NetworkType {
-  ethereum = 'ethereum',
-  bitcoin = 'bitcoin'
-}
-
 const gweiToEther = (gwei: number) => {
   return gwei / 1000000000000000000;
 }
@@ -65,6 +60,18 @@ const BitcoinStore = types
     wallets: types.map(BitcoinWallet),
     settings: Settings,
   })
+  .views((self) => ({
+    get list() {
+      return Array.from(self.wallets).map(
+        ([key, wallet]) => ({
+          key: key,
+          nickname: wallet.nickname,
+          address: wallet.address,
+          balance: wallet.balance,
+        })
+      );
+    },
+  }))
   .actions((self) => ({
     initial(wallets: any) {
       const btcWallets = wallets.bitcoin;
@@ -422,6 +429,9 @@ export const EthStore = types
         self.transactions.set(transaction.transaction.hash, transaction.transaction);
     },
   }));
+
+export const Networks = types.enumeration(['ethereum', 'bitcoin']);
+export type NetworkType = Instance<typeof Networks>;
 
 export const WalletStore = types
   .model('WalletStore', {

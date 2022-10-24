@@ -6,14 +6,14 @@ import { WalletCard } from '../common/WalletCard';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-interface EthereumWalletListProps {
+interface BitcoinWalletListProps {
   network: NetworkType;
 }
 
-export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
-  (props: EthereumWalletListProps) => {
+export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
+  (props: BitcoinWalletListProps) => {
     const { walletApp } = useTrayApps();
-    const list = walletApp.ethereum.list;
+    const list = walletApp.bitcoin.list;
 
     const List: FC = () => {
       return (

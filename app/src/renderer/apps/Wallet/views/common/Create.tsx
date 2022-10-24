@@ -51,7 +51,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
         </Text>
         <Text mt={3} variant="body">
           A new{' '}
-          {props.network === NetworkType.ethereum ? 'ethererum' : 'bitcoin'}{' '}
+          {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'}{' '}
           wallet will be created. Give it a memorable nickname.
         </Text>
         <FieldSet mt={8}>

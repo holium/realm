@@ -3,12 +3,12 @@ import { FC, useEffect, useState } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail';
-import { WalletList } from './views/ethereum/List';
+import { EthereumWalletList } from './views/ethereum/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletNetwork } from './views/common/Network';
 import { CreateWallet } from './views/common/Create';
-import { ListPlaceholder } from './views/bitcoin/ListPlaceholder';
+import { BitcoinWalletList } from './views/bitcoin/List';
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
@@ -17,12 +17,12 @@ import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 
-const WalletViews: { [key: string]: any } = {
-  'bitcoin:list': (props: any) => <ListPlaceholder {...props} />,
+const WalletViews: (network: NetworkType) => { [key: string]: any } = (network: NetworkType) => ({
+  'bitcoin:list': (props: any) => <BitcoinWalletList {...props} />,
   'bitcoin:detail': (props: any) => <div />,
   'bitcoin:transaction': (props: any) => <div />,
   'ethereum:list': (props: any) => (
-    <WalletList network={NetworkType.ethereum} {...props} />
+    <EthereumWalletList network={network} {...props} />
   ),
   'ethereum:detail': (props: any) => <Detail {...props} />,
   [WalletView.TRANSACTION_DETAIL]: (props: any) => (
@@ -30,10 +30,10 @@ const WalletViews: { [key: string]: any } = {
   ),
   'ethereum:new': (props: any) => <EthNew {...props} />,
   [WalletView.CREATE_WALLET]: (props: any) => (
-    <CreateWallet network={NetworkType.ethereum} />
+    <CreateWallet network={network} />
   ),
   settings: (props: any) => <WalletSettings {...props} />,
-};
+});
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
@@ -53,7 +53,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
     setHidePending(true);
   };
 
-  let View = WalletViews[walletApp.currentView];
+  let View = WalletViews(walletApp.network)[walletApp.currentView];
 
   return (
     <Flex
