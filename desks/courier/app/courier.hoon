@@ -84,11 +84,7 @@
           %1  (on-graph-action:core !<(action:store vase))
           %2  [(on-graph-action:groups-two vase) state]
         ==
-      %notify-action
-        ?-  groups-target
-          %1  (on-notify-action:core !<(action:notify vase))
-          %2  `state
-        ==
+      %notify-action  (on-notify-action:core !<(action:notify vase))
       %set-groups-target  `[%1 !<(?(%1 %2) vase) +>:state]
       :: %next-dm-action    (on-action:core !<(action:store vase))
     ==
@@ -99,6 +95,8 @@
     |=  =path
     ^-  (quip card _this)
     =/  cards=(list card)
+      ?:  =(groups-target %2)
+        (on-watch:groups-two path)
       ?+    path      (on-watch:def path)
           [%updates ~]
         ?>  =(our.bowl src.bowl)
@@ -110,6 +108,8 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
+    ?:  =(groups-target %2)
+      (peek:groups-two path bowl devices.state)
     ?+    path  (on-peek:def path)
     ::
       [%x %devices ~]
