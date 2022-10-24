@@ -342,7 +342,7 @@ export const EthStore = types
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,
-          balance: gweiToEther(wallet.balance).toString(),
+          balance: '0',//gweiToEther(wallet.balance).toString(),
           coins: {},
           nfts: {},
           nickname: wallet.nickname,
@@ -401,7 +401,7 @@ export const EthStore = types
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,
-          balance: gweiToEther(wallet.balance).toString(),
+          balance: '0',//gweiToEther(wallet.balance).toString(),
           coins: coins.toJSON(),
           nfts: nfts,
           nickname: wallet.nickname,
@@ -452,6 +452,9 @@ export const WalletStore = types
     bitcoin: BitcoinStore,
     ethereum: EthStore,
     creationMode: types.string,
+    sharingMode: types.string,
+    whitelist: types.map(types.string),
+    blacklist: types.map(types.string),
     ourPatp: types.maybe(types.string),
     currentAddress: types.maybe(types.string),
     currentIndex: types.maybe(types.string),
@@ -499,6 +502,14 @@ export const WalletStore = types
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;
+    },
+    setSharingPermissions(type: string, who: string) {
+      if (type === 'allow') {
+        self.whitelist.put(who);
+      }
+      else if (type === 'block') {
+        self.blacklist.put(who);
+      }
     }
   }));
 

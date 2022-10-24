@@ -126,6 +126,7 @@ export const trayStore = TrayAppStore.create({
       initialized: false,
     },
     creationMode: 'default',
+    sharingMode: 'anybody',
     ourPatp: '~zod',
   },
   dmApp: {

@@ -184,7 +184,7 @@
   :~  [%set-xpub (ot ~[network+(su (perk %bitcoin %ethereum ~)) xpub+so])]
       [%set-wallet-creation-mode (ot ~[mode+(su (perk %on-demand %default ~))])]
       [%set-sharing-mode (ot ~[who+(su (perk %nobody %friends %anybody ~))])]
-      [%sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
+      [%set-sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
       [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
@@ -251,7 +251,6 @@
         ['address' [%s (crip (z-co:co address.wallet.update))]]
         ['path' [%s path.wallet.update]]
         ['nickname' [%s nickname.wallet.update]]
-        ['balance' (numb balance.wallet.update)]
     ==
   ::
       %wallets
@@ -282,7 +281,6 @@
             :~  ['address' [%s (crip (z-co:co address.wallet))]]
                 ['path' [%s path.wallet]]
                 ['nickname' [%s nickname.wallet]]
-                ['balance' (numb balance.wallet)]
             ==
       --
     --

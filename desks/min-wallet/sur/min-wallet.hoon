@@ -136,7 +136,7 @@
       [%set-xpub =network xpub=@t]
       [%set-wallet-creation-mode =mode]
       [%set-sharing-mode who=?(%nobody %friends %anybody)]
-      [%sharing-permissions type=?(%allow %block) who=@p]
+      [%set-sharing-permissions type=?(%allow %block) who=@p]
       [%set-default-index =network index=@ud]
       [%set-wallet-nickname =network index=@ud nickname=@t]
       [%create-wallet sndr=ship =network nickname=@t]

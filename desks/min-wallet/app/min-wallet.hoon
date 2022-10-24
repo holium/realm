@@ -126,7 +126,7 @@
     ?>  (team:title our.bowl src.bowl)
     `state(who.sharing.settings who.act)
     ::
-      %sharing-permissions
+      %set-sharing-permissions
     ?>  (team:title our.bowl src.bowl)
     =.  sharing.settings
       ?-  type.act
