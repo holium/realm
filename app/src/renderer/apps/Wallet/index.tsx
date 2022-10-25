@@ -75,7 +75,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <View {...props} hidePending={hidePending} />
-      <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} />
+      <WalletNetwork network={walletApp.ethereum.network === 'mainnet' ? 'Ethereum Mainnet': 'Görli Testnet'} hidden={walletApp.currentView === 'ethereum:new'} />
     </Flex>
   );
 });

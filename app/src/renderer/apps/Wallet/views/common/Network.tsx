@@ -9,6 +9,7 @@ import { getBaseTheme } from '../../lib/helpers';
 type Network = 'ethereum' | 'bitcoin';
 
 interface WalletNetwork {
+  network: 'Ethereum Mainnet'| 'Görli Testnet';
   hidden: boolean;
 }
 
@@ -44,7 +45,7 @@ export const WalletNetwork: FC<WalletNetwork> = observer(
               background="#4CDD86"
             />
             <Text fontSize="12px" color={themeData.colors.ui.secondary}>
-              Görli Testnet
+              {props.network}
             </Text>
           </Flex>
         </Flex>

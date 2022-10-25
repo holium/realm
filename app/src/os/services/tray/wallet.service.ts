@@ -8,7 +8,6 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { WalletApi } from '../../api/min-wallet';
-
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import {
@@ -17,10 +16,8 @@ import {
   WalletView,
   NetworkType,
 } from './wallet.model';
-import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
-import { T } from 'lodash/fp';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -60,8 +57,8 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.create-wallet': this.createWallet,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
-    'realm.tray.wallet.add-smart-contract': this.addSmartContract,
     'realm.tray.wallet.request-address': this.requestAddress,
+    'realm.tray.wallet.toggle-network': this.toggleNetwork,
   };
 
   static preload = {
@@ -181,6 +178,9 @@ export class WalletService extends BaseService {
     requestAddress: (from: string, network: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.request-address');
     },
+    toggleNetwork: () => {
+      return ipcRenderer.invoke('realm.tray.wallet.toggle-network');
+    }
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -190,6 +190,12 @@ export class WalletService extends BaseService {
       // @ts-ignore
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
+
+    this.ethProvider = new ethers.providers.JsonRpcProvider(
+      //'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      'http://127.0.0.1:8545'
+    );
+    this.ethProvider!._addEventListener('block', this.updateWalletInfo, false);
   }
 
   private getPrivateKey() {
@@ -220,6 +226,7 @@ export class WalletService extends BaseService {
         network: 'ethereum',
         currentView: 'ethereum:new',
         ethereum: {
+          network: 'gorli',
           settings: {
             defaultIndex: 0,
           },
@@ -240,11 +247,6 @@ export class WalletService extends BaseService {
       this.db!.store = snapshot;
     });
 
-    this.ethProvider = new ethers.providers.JsonRpcProvider(
-      //'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
-      'http://127.0.0.1:8545'
-    );
-
     const patchEffect = {
       model: getSnapshot(this.state),
       resource: 'wallet',
@@ -264,28 +266,6 @@ export class WalletService extends BaseService {
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
-        const balances = await alchemy.core.getTokenBalances(wallet.address);
-        // Remove tokens with zero balance
-        const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
-          return token.tokenBalance !== "0";
-        });
-        for (let token of nonZeroBalances) {
-          if (!this.state!.ethereum.wallets.get(wallet.key)!.coins.has((token as any).contractAddress)) {
-            const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
-            this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.symbol!, (token as any).contractAddress, metadata.decimals!)
-            WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.symbol!, (token as any).contractAddress, wallet.key);
-          }
-        }
-        const nfts = await alchemy.nft.getNftsForOwner(wallet.address);
-        for (let nft of nfts.ownedNfts) {
-          if (!this.state!.ethereum.wallets.get(wallet.key)!.nfts.has((nft as any).contract.address + nft.tokenId)) {
-            console.log(nft.title)
-            console.log(nft.description)
-            // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
-            var floorPrice
-            this.state!.ethereum.wallets.get(wallet.key)!.addNFT(nft.description, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
-          }
-        }
       }
       if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);
@@ -377,6 +357,14 @@ export class WalletService extends BaseService {
     this.state!.setNetwork(network);
   }
 
+  async setChainNetwork(_event: any, network: NetworkType, chainNetwork: string) {
+    if (network === NetworkType.ethereum) {
+      this.state!.ethereum.network = chainNetwork;
+    }
+    else if (network === NetworkType.bitcoin) {
+    }
+  }
+
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
     console.log('hey from get rec');
     // TODO: fetch contact metadata (profile pic)
@@ -428,8 +416,15 @@ export class WalletService extends BaseService {
 
   async saveTransactionNotes(_event: any, notes: string) {
     const network = this.state!.network;
+    var net
+    if (network === 'ethereum') {
+      net = this.state!.ethereum.network;
+    }
+    else {
+      net = 'mainnet'
+    }
     const hash = this.state!.currentTransaction!;
-    WalletApi.saveTransactionNotes(this.core.conduit!, network, hash, notes);
+    WalletApi.saveTransactionNotes(this.core.conduit!, network, net, hash, notes);
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
@@ -518,7 +513,7 @@ export class WalletService extends BaseService {
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
-      'gorli',
+      this.state!.ethereum.network,
       hash,
       stateTx,
       contractType,
@@ -540,27 +535,72 @@ export class WalletService extends BaseService {
     // await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
   }
 
-  async addSmartContract(
-    _event: any,
-    contractId: string,
-    contractType: string,
-    name: string,
-    contractAddress: string,
-    walletIndex: string,
-    decimals: number
-  ) {
-    this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractType, name, contractAddress, decimals);
-    await WalletApi.addSmartContract(
-      this.core.conduit!,
-      contractType,
-      name,
-      contractAddress,
-      walletIndex,
-    );
-  }
-
   async requestAddress(_event: any, network: string, from: string) {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
+  }
+
+  updateWalletInfo() {
+    console.log('updating')
+    this.getAllBalances();
+    if (this.state!.network === 'ethereum') {
+      this.getAllCoins();
+      this.getAllNfts();
+    }
+  }
+
+  async getAllCoins() {
+    for (var key in this.state!.ethereum.wallets.keys()) {
+      let wallet: any = this.state!.ethereum.wallets.get(key);
+      const balances = await alchemy.core.getTokenBalances(wallet.address);
+      // Remove tokens with zero balance
+      const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
+        return token.tokenBalance !== "0";
+      });
+      for (let token of nonZeroBalances) {
+        if (!this.state!.ethereum.wallets.get(wallet.key)!.coins.has((token as any).contractAddress)) {
+          const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
+          this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.symbol!, (token as any).contractAddress, metadata.decimals!)
+          // WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.symbol!, (token as any).contractAddress, wallet.key);
+        }
+      }
+    }
+  }
+
+  async getAllNfts() {
+    for (var key in this.state!.ethereum.wallets.keys()) {
+      let wallet: any = this.state!.ethereum.wallets.get(key);
+      const nfts = await alchemy.nft.getNftsForOwner(wallet.address);
+      for (let nft of nfts.ownedNfts) {
+        if (!this.state!.ethereum.wallets.get(wallet.key)!.nfts.has((nft as any).contract.address + nft.tokenId)) {
+          console.log(nft.title)
+          console.log(nft.description)
+          // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
+          var floorPrice
+          this.state!.ethereum.wallets.get(wallet.key)!.addNFT(nft.description, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
+        }
+      }
+    }
+  }
+
+  async getAllBalances() {
+    if (this.state!.network === 'bitcoin') {
+      
+    }
+    else if (this.state!.network === 'ethereum') {
+      for (var key in this.state!.ethereum.wallets.keys()) {
+        let wallet: any = this.state!.ethereum.wallets.get(key);
+        wallet.balance = await this.ethProvider!.getBalance(wallet.address);
+      }
+    }
+  }
+
+  toggleNetwork() {
+    if (this.state!.ethereum.network === 'mainnet') {
+      this.state!.ethereum.network = 'gorli';
+    }
+    else if (this.state!.ethereum.network === 'gorli') {
+      this.state!.ethereum.network = 'mainnet';
+    }
   }
 
   /*

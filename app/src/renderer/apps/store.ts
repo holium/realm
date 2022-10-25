@@ -120,6 +120,7 @@ export const trayStore = TrayAppStore.create({
       },
     },
     ethereum: {
+      network: 'gorli',
       settings: {
         defaultIndex: 0,
       },

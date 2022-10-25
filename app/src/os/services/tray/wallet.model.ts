@@ -1,4 +1,3 @@
-import { Types } from 'aws-sdk/clients/s3';
 import {
   applySnapshot,
   types,
@@ -6,10 +5,7 @@ import {
   getSnapshot,
   flow
 } from 'mobx-state-tree';
-import { Type } from 'react-spaces';
 import { Network, Alchemy, Nft } from "alchemy-sdk";
-import { string } from 'yup';
-import { TokenProviderChain } from 'aws-sdk/lib/token/token_provider_chain';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -227,6 +223,7 @@ export type TransactionType = Instance<typeof EthTransaction>;
 
 export const EthStore = types
   .model('EthStore', {
+    network: types.enumeration(['mainnet', 'gorli']),
     wallets: types.map(EthWallet),
     transactions: types.map(EthTransaction),
     settings: Settings,
@@ -268,6 +265,8 @@ export const EthStore = types
         const walletUpdate = {
           ...(wallet as any),
           key: key,
+          coins: {},
+          nfts: {},
         }
         this.applyWalletUpdate(walletUpdate)
       })

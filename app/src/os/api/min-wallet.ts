@@ -1,4 +1,3 @@
-import { hashHostnameBackward } from '@cliqz/adblocker/dist/types/src/request';
 import { Conduit } from '@holium/conduit';
 
 export const WalletApi = {
@@ -142,30 +141,10 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  addSmartContract: async (
-    conduit: Conduit,
-    contractType: string,
-    name: string,
-    contractAddress: string,
-    walletIndex: string
-  ) => {
-    const payload = {
-      app: 'min-wallet',
-      mark: 'wallet-action',
-      json: {
-        'add-smart-contract': {
-          'contract-type': contractType,
-          name: name,
-          address: contractAddress,
-          'wallet-index': walletIndex,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
   saveTransactionNotes: async (
     conduit: Conduit,
     network: string,
+    net: string,
     hash: string,
     notes: string
   ) => {
@@ -175,6 +154,7 @@ export const WalletApi = {
       json: {
         'save-transaction-notes': {
           network: network,
+          net: net,
           hash: hash,
           notes: notes
         }
