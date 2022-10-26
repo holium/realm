@@ -58,6 +58,7 @@ const Settings = types
 export type SettingsType = Instance<typeof Settings>;
 
 const BitcoinWallet = types.model('BitcoinWallet', {
+  index: types.number,
   network: types.string,
   path: types.string,
   address: types.string,
