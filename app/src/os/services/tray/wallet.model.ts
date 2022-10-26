@@ -19,7 +19,9 @@ export enum WalletView {
   ETH_NEW = 'ethereum:new',
   WALLET_DETAIL = 'ethereum:detail',
   TRANSACTION_DETAIL = 'ethereum:transaction',
+  LOCKED = 'locked',
   ETH_SETTINGS = 'ethereum:settings',
+  BIT_SETTINGS = 'bitcoin:settings',
   BIT_LIST = 'bitcoin:list',
   CREATE_WALLET = 'create-wallet'
 }
@@ -443,24 +445,8 @@ export const EthStore = types
 export const WalletStore = types
   .model('WalletStore', {
     network: types.enumeration(['ethereum', 'bitcoin']),
-    currentView: types.enumeration([
-      'ethereum:list',
-      'ethereum:new',
-      'ethereum:detail',
-      'ethereum:transaction',
-      'ethereum:settings',
-      'bitcoin:list',
-      'create-wallet'
-    ]),
-    returnView: types.maybe(types.enumeration([
-      'ethereum:list',
-      'ethereum:new',
-      'ethereum:detail',
-      'ethereum:transaction',
-      'ethereum:settings',
-      'bitcoin:list',
-      'create-wallet'
-    ])),
+    currentView: types.enumeration(Object.values(WalletView)),
+    returnView: types.maybe(types.enumeration(Object.values(WalletView))),
     currentItem: types.maybe(types.model({
       type: types.enumeration(['transaction', 'coin', 'nft']),
       key: types.string
@@ -476,25 +462,31 @@ export const WalletStore = types
     currentAddress: types.maybe(types.string),
     currentIndex: types.maybe(types.string),
     passcodeHash: types.maybe(types.string),
+    lastInteraction: types.Date
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
       if (network === 'ethereum') {
         self.ethereum.initial(wallets);
-          self.currentView = 'ethereum:list';
+          self.currentView = WalletView.ETH_LIST;
       } else {
-        self.currentView = 'bitcoin:list';
+        self.currentView = WalletView.BIT_LIST;
       }
     },
     setNetwork(network: 'bitcoin' | 'ethereum') {
       self.network = network;
       if (network === 'ethereum') {
-        self.currentView = 'ethereum:list';
+        self.currentView = WalletView.ETH_LIST;
       } else {
-        self.currentView = 'bitcoin:list';
+        self.currentView = WalletView.BIT_LIST;
       }
     },
     setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }) {
+      if (view === WalletView.LOCKED && self.currentView === WalletView.LOCKED) {
+        // don't allow setting locked multiple times
+        return;
+      }
+
       if (index) {
         self.currentIndex = index;
       }
@@ -505,7 +497,13 @@ export const WalletStore = types
         self.currentItem = undefined;
       }
 
-      self.returnView = self.currentView;
+      let returnView = self.currentView;
+      if (returnView === WalletView.LOCKED) {
+        // the return view should never be locked
+        returnView = WalletView.ETH_LIST;
+      }
+
+      self.returnView = returnView;
       self.currentView = view;
     },
     setReturnView(view: WalletView) {
@@ -519,6 +517,9 @@ export const WalletStore = types
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;
+    },
+    setLastInteraction(date: Date) {
+      self.lastInteraction = date;
     },
     setSharingPermissions(type: string, who: string) {
       if (type === 'allow') {

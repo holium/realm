@@ -245,7 +245,7 @@ export const TransactionDetail: FC = observer(() => {
           </Button>
         </Flex>
       </Flex>
-      <Flex position="absolute" top="542px" zIndex={999} onClick={goBack}>
+      <Flex position="absolute" top="582px" zIndex={999} onClick={goBack}>
         <Icons
           name="ArrowLeftLine"
           size={2}

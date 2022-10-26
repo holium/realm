@@ -125,7 +125,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       </Box>
       <Flex
         position="absolute"
-        top="542px"
+        top="582px"
         zIndex={999}
         onClick={() => WalletActions.setView(WalletView.ETH_LIST)}
       >

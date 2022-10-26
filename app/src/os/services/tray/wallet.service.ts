@@ -1,5 +1,6 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { ethers, utils, Wallet } from 'ethers';
+import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -22,6 +23,8 @@ import { Network, Alchemy } from "alchemy-sdk";
 import abi from 'human-standard-token-abi';
 
 
+
+const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -56,16 +59,24 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.request-address': this.requestAddress,
+    'realm.tray.wallet.check-passcode': this.checkPasscode,
+    'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
   };
 
   static preload = {
-    setMnemonic: (mnemonic: string, passcodeHash: string) => {
+    setMnemonic: (mnemonic: string, passcode: number[]) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-mnemonic',
         mnemonic,
-        passcodeHash
+        passcode
       );
+    },
+    checkPasscode: (passcode: number[]) => {
+      return ipcRenderer.invoke('realm.tray.wallet.check-passcode', passcode);
+    },
+    checkProviderURL: (providerURL: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.check-provider-url', providerURL);
     },
     setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }) => {
       return ipcRenderer.invoke(
@@ -186,8 +197,34 @@ export class WalletService extends BaseService {
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
-      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+      // ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+      ipcMain.handle(handlerName, this.wrapHandler(this.handlers[handlerName]))
     });
+
+    setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
+  }
+
+  private wrapHandler(handler: any) {
+    return (...args: any) => {
+      if (this.state) {
+        this.state.setLastInteraction(new Date());
+      }
+      return handler.apply(this, args);
+    }
+  }
+
+  private autoLock() {
+    let shouldLock =  this.state && (Date.now() - AUTO_LOCK_INTERVAL) > this.state.lastInteraction.getTime()
+    if (shouldLock) {
+      this.lock();
+    }
+  }
+
+  private lock() {
+    let hasPasscode = this.state && this.state.passcodeHash;
+    if (hasPasscode) {
+      this.state!.setView(WalletView.LOCKED, this.state!.currentIndex, this.state!.currentItem);
+    }
   }
 
   private getPrivateKey() {
@@ -197,7 +234,7 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
-    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    let secretKey: string = this.core.passwords.getPassword(ship)!;
     const storeParams = {
       name: 'wallet',
       cwd: `realm.${ship}`,
@@ -216,7 +253,7 @@ export class WalletService extends BaseService {
     } else {
       this.state = WalletStore.create({
         network: 'ethereum',
-        currentView: 'ethereum:new',
+        currentView: WalletView.ETH_NEW,
         ethereum: {
           network: 'gorli',
           settings: {
@@ -232,6 +269,7 @@ export class WalletService extends BaseService {
         creationMode: 'default',
         sharingMode: 'anybody',
         ourPatp: ship,
+        lastInteraction: Date.now()
       });
     }
 
@@ -294,6 +332,8 @@ export class WalletService extends BaseService {
       'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
 //      'http://127.0.0.1:8545'
     );
+
+    this.lock(); // lock wallet on login
   }
 
   get snapshot() {
@@ -324,7 +364,8 @@ export class WalletService extends BaseService {
     this.alchemy = new Alchemy(alchemySettings);
   }
 
-  async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
+  async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
+    let passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
@@ -345,6 +386,26 @@ export class WalletService extends BaseService {
 
     console.log('okay transitioning');
     this.state!.setView(WalletView.ETH_LIST);
+  }
+
+  async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
+    return await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
+  }
+
+  async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
+    try {
+      let newProvider = new ethers.providers.JsonRpcProvider(providerURL);
+      console.log('new provider: ', newProvider);
+      const { chainId, name } = await newProvider.getNetwork();
+      console.log('network name: ', name)
+      console.log(`chain ID: ${chainId}`)
+      if (!chainId && !name) {
+        throw new Error('Invalid provider.');
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async setXpub(_event: any) {

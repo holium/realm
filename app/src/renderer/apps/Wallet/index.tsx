@@ -6,8 +6,10 @@ import { Detail } from './views/common/Detail';
 import { WalletList } from './views/ethereum/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
-import { WalletNetwork } from './views/common/Network';
+import { EthSettings } from './views/ethereum/Settings';
+import { WalletFooter } from './views/common/Footer';
 import { CreateWallet } from './views/common/Create';
+import Locked from './views/common/Locked';
 import { ListPlaceholder } from './views/bitcoin/ListPlaceholder';
 import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
@@ -32,7 +34,9 @@ const WalletViews: { [key: string]: any } = {
   [WalletView.CREATE_WALLET]: (props: any) => (
     <CreateWallet network={NetworkType.ethereum} />
   ),
+  [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
   settings: (props: any) => <WalletSettings {...props} />,
+  [WalletView.ETH_SETTINGS]: (props: any) => <EthSettings {...props} />,
 };
 
 export const WalletApp: FC<any> = observer((props: any) => {
@@ -48,11 +52,12 @@ export const WalletApp: FC<any> = observer((props: any) => {
       setHidePending(false);
     }
   }, [transactions]);
+
   let hide = () => {
-    console.log('clickey');
     setHidePending(true);
   };
 
+  let hideHeaderFooter = [WalletView.ETH_NEW, WalletView.LOCKED, WalletView.ETH_SETTINGS].includes(walletApp.currentView);
   let View = WalletViews[walletApp.currentView];
 
   return (
@@ -68,14 +73,14 @@ export const WalletApp: FC<any> = observer((props: any) => {
         network={walletApp.network}
         onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
-        hide={walletApp.currentView === 'ethereum:new'}
+        hide={hideHeaderFooter}
       />
       {!hidePending &&
         walletApp.currentView !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <View {...props} hidePending={hidePending} />
-      <WalletNetwork network={walletApp.ethereum.network === 'mainnet' ? 'Ethereum Mainnet': 'Görli Testnet'} hidden={walletApp.currentView === 'ethereum:new'} />
+      <WalletFooter hidden={hideHeaderFooter} />
     </Flex>
   );
 });
