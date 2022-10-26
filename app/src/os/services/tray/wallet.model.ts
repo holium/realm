@@ -206,6 +206,10 @@ const EthWallet = types
     },
     setBalance(balance: string) {
       self.balance = balance
+    },
+    clearWallet() {
+      self.coins.clear();
+      self.nfts.clear();
     }
   }))
 

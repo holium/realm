@@ -59,7 +59,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
                 {props.details.floorPrice ? props.details.tokenType : 'Title'}
               </Text>
               <Text variant="h5" fontSize={1}>
-                {props.details.title}
+                {props.details.name}
               </Text>
             </Flex>
             <Flex mt={1} flexDirection="column" justifyContent="center">

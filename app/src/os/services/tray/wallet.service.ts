@@ -243,10 +243,18 @@ export class WalletService extends BaseService {
       this.db!.store = snapshot;
     });
 
-    this.ethProvider = new ethers.providers.JsonRpcProvider(
-      'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-    );
-    this.ethProvider.on("block", () => this.updateWalletInfo());
+    if (this.state!.ethereum.network === 'mainnet') {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      this.ethProvider.on("block", () => this.updateWalletInfo());
+    }
+    else {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      this.ethProvider.on("block", () => this.updateWalletInfo());
+    }
 
     const patchEffect = {
       model: getSnapshot(this.state),
@@ -542,6 +550,12 @@ export class WalletService extends BaseService {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
   }
 
+  clearWallets() {
+    for (var key of this.state!.ethereum.wallets.keys()) {
+      this.state!.ethereum.wallets.get(key)!.clearWallet();
+    }
+  }
+
   updateWalletInfo() {
     this.getAllBalances();
     if (this.state!.network === 'ethereum') {
@@ -592,7 +606,7 @@ export class WalletService extends BaseService {
       for (let nft of nfts.ownedNfts) {
         // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
         var floorPrice
-        this.state!.ethereum.wallets.get(key)!.setNFT(nft.description, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
+        this.state!.ethereum.wallets.get(key)!.setNFT(nft.title, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
       }
     }
   }
@@ -612,6 +626,7 @@ export class WalletService extends BaseService {
       );
       this.ethProvider.on("block", () => this.updateWalletInfo());
     }
+    this.clearWallets();
     this.updateWalletInfo();
   }
 
