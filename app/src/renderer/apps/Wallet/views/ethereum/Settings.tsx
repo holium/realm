@@ -150,7 +150,7 @@ export const EthSettings: FC = observer(() => {
           <Text mt={1} mb={2} variant="body" fontSize={1} color={baseTheme.colors.text.secondary}>
             Determine how you want to share addresses with other people on the network.
           </Text>
-          <VisibilitySelect theme={theme} baseTheme={baseTheme} wallets={wallets} sharingMode={state.sharingMode} defaultIndex={state.defaultIndex} onChange={setWalletVisibility} />
+          <VisibilitySelect theme={theme} baseTheme={baseTheme} wallets={wallets} sharingMode={state.sharingMode} defaultIndex={state.defaultIndex} walletCreationMode={state.walletCreationMode} onChange={setWalletVisibility} />
       </Flex>
 
       <Flex mt={3} flexDirection="column">
@@ -188,6 +188,7 @@ interface VisibilitySelectProps {
   onChange: any;
   sharingMode: SharingMode
   defaultIndex: number
+  walletCreationMode: WalletCreationMode
   wallets: { nickname: string, index: number } []
 }
 function VisibilitySelect (props: VisibilitySelectProps) {
@@ -213,7 +214,7 @@ function VisibilitySelect (props: VisibilitySelectProps) {
         options={visibilityOptions} selected={props.sharingMode} onClick={visibilityChange} />
       </Flex>
       <Flex mt={1} width="220px">
-        {['anyone', 'friends'].includes(props.sharingMode) &&
+        {['anyone', 'friends'].includes(props.sharingMode) && props.walletCreationMode !== WalletCreationMode.ON_DEMAND &&
           <Select customBg={selectBg} textColor={props.baseTheme.colors.text.primary} iconColor={props.theme.currentTheme.iconColor}
           options={sharedWalletOptions} selected={props.defaultIndex.toString() || Number(0).toString()} onClick={newAddress => props.onChange(props.sharingMode, Number(newAddress))} />
         }
