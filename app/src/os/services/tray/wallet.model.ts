@@ -183,7 +183,17 @@ const EthWallet = types
         self.coins.set(contract.address, contract);
       }
     },
-    addNFT(name: string, collectionName: string, contractAddress: string, tokenId: string, imageUrl: string, price?: string) {
+    setCoin(name: string, imageUrl: string, contractAddress: string, balance: string, decimals: number) {
+      const contract = ERC20.create({
+        name: name,
+        logo: imageUrl,
+        address: contractAddress,
+        balance: balance,
+        decimals: decimals,
+      })
+      self.coins.set(contract.address, contract);
+    },
+    setNFT(name: string, collectionName: string, contractAddress: string, tokenId: string, imageUrl: string, price?: string) {
       const nft = ERC721.create({
         name: name,
         collectionName: collectionName,
@@ -193,6 +203,9 @@ const EthWallet = types
         lastPrice: price || '0',
       })
       self.nfts.set(contractAddress+tokenId, nft);
+    },
+    setBalance(balance: string) {
+      self.balance = balance
     }
   }))
 
@@ -341,15 +354,13 @@ export const EthStore = types
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,
-          balance: '0',//gweiToEther(wallet.balance).toString(),
+          balance: '0',
           coins: {},
           nfts: {},
           nickname: wallet.nickname,
         };
+        self.wallets.set(wallet.key, EthWallet.create(walletObj));
       }
-      else {
-        const coins = self.wallets.get(wallet.key)!.coins;
-        const nfts = self.wallets.get(wallet.key)!.nfts.toJSON();
         /*for (var contract in wallet.contracts) {
           if (wallet.contracts[contract].type === 'erc20') {
             let coin: any = wallet.contracts[contract];
@@ -396,17 +407,6 @@ export const EthStore = types
             }
           }
         }*/
-        walletObj = {
-          network: 'ethereum',
-          path: wallet.path,
-          address: wallet.address,
-          balance: '0',//gweiToEther(wallet.balance).toString(),
-          coins: coins.toJSON(),
-          nfts: nfts,
-          nickname: wallet.nickname,
-        };
-      }
-      self.wallets.set(wallet.key, EthWallet.create(walletObj));
     }),
     applyTransactionUpdate(transaction: any) {
       let tx = self.transactions.get(transaction.transaction.hash);
