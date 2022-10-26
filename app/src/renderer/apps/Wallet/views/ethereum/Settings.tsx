@@ -47,10 +47,9 @@ export const EthSettings: FC = observer(() => {
   const network = walletApp.network;
   const walletStore = network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
   const settings = walletStore.settings;
-  const [blocked, setBlocked] = useState([...settings.blocked]);
   const wallets = walletStore.list.map(wallet => walletStore.wallets.get(wallet.key)!)!;
 
-  const [state, setState] = useState<UISettingsType>(settings);
+  const [state, setState] = useState<UISettingsType>({ ...settings, provider: settings.provider!, blocked: [ ...settings.blocked ]});
 
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
@@ -88,7 +87,7 @@ export const EthSettings: FC = observer(() => {
   }
 
   function setBlockList (action: 'add' | 'remove', patp: string) {
-    let currentList = blocked;
+    let currentList = state.blocked;
     if (action === 'add' && !currentList.includes(patp)) {
       currentList.push(patp);
     }
@@ -98,21 +97,16 @@ export const EthSettings: FC = observer(() => {
       currentList.splice(patpIndex, 1);
     }
 
-    setBlocked(currentList);
+    setState({ ...state, blocked: currentList })
   }
 
   async function saveSettings () {
     setSaving(true);
-    console.log('state', state)
-    let {walletCreationMode, sharingMode, defaultIndex} = state;
-    console.log(network)
-    await WalletActions.setSettings(network, {walletCreationMode, sharingMode, defaultIndex, blocked});
+    let { walletCreationMode, sharingMode, defaultIndex, provider, blocked } = state;
+    await WalletActions.setSettings(network, { provider, walletCreationMode, sharingMode, defaultIndex, blocked });
     setSaving(false);
     WalletActions.setView(walletApp.returnView || (network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST), walletApp.currentIndex, walletApp.currentItem);
   }
-
-  console.log([...settings.blocked])
-  console.log(blocked)
 
   return (
     <Flex px={3} width="100%" height="100%" flexDirection="column">
@@ -155,7 +149,7 @@ export const EthSettings: FC = observer(() => {
 
       <Flex mt={3} flexDirection="column">
         <Text mb={2} variant="h6">Blocked IDs</Text>
-        <BlockedInput theme={theme} baseTheme={baseTheme} blocked={blocked} onChange={setBlockList} />
+        <BlockedInput theme={theme} baseTheme={baseTheme} blocked={state.blocked} onChange={setBlockList} />
       </Flex>
 
       <Flex
@@ -173,7 +167,7 @@ export const EthSettings: FC = observer(() => {
           />
         </Flex>
         <Flex position="absolute" bottom="1px" right="28px">
-          <Button variant="primary" disabled={providerError !== '' || _.isEqual(state, settings) && _.isEqual(blocked, [...settings.blocked])} isLoading={saving} onClick={saveSettings}>Save</Button>
+          <Button variant="primary" disabled={providerError !== '' || _.isEqual(state, settings) && _.isEqual(state.blocked, [...settings.blocked])} isLoading={saving} onClick={saveSettings}>Save</Button>
         </Flex>
       </Flex>
     </Flex>

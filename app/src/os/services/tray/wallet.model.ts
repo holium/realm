@@ -60,7 +60,7 @@ export type SettingsType = Instance<typeof Settings>;
 export type UISettingsType = {
   walletCreationMode: WalletCreationMode,
   sharingMode: SharingMode,
-  blocked: [],
+  blocked: string [],
   defaultIndex: number,
   provider: string,
 }
