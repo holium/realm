@@ -24,7 +24,9 @@ import abi from 'human-standard-token-abi';
 
 
 
-const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
+// 10 minutes
+// const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
+const AUTO_LOCK_INTERVAL = 1000 * 30;
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -333,6 +335,7 @@ export class WalletService extends BaseService {
 //      'http://127.0.0.1:8545'
     );
 
+    console.log("LOCKING")
     this.lock(); // lock wallet on login
   }
 
