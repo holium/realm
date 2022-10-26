@@ -130,6 +130,7 @@
       (~(put by networks.settings) [network.act net-settings])
     =.  wallet-creation.sharing.settings  mode.act
     =.  who.sharing.settings  who.act
+    =.  blocked.sharing.settings  blocked.act
     `state
     ::
       %set-wallet-creation-mode
