@@ -101,6 +101,7 @@ const BitcoinStore = types
     // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
+        index: wallet.key,
         network: 'bitcoin',
         path: wallet.path,
         address: wallet.address,
@@ -160,6 +161,7 @@ export type ERC721Type = Instance<typeof ERC721>
 
 const EthWallet = types
   .model('EthWallet', {
+    index: types.number,
     network: types.string,
     path: types.string,
     address: types.string,
@@ -384,6 +386,7 @@ export const EthStore = types
       var walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
+          index: wallet.key,
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,
