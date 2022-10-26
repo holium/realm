@@ -128,7 +128,6 @@ export type ERC20Type = Instance<typeof ERC20>
 //   tokens: types.map(ERC721Token),//types.map(types.number),
 // });
 
-
 const ERC721 = types.model('ERC721', {
   name: types.string,
   collectionName: types.maybe(types.string),
