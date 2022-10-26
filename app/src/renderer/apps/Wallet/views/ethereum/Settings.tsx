@@ -11,7 +11,7 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { WalletView, WalletCreationMode, SharingMode, SettingsType } from 'os/services/tray/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
@@ -39,18 +39,20 @@ const INIT_STATE = {
 
 export const EthSettings: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  const [state, setState] = useState<EthSettingsState>(INIT_STATE);
   const [providerInput, setProviderInput] = useState('');
   const [providerError, setProviderError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  console.log('curr state: ', state)
+  const network = walletApp.network;
+  const walletStore = network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
+  const settings = walletStore.settings;
+  const wallets = walletStore.list.map(wallet => walletStore.wallets.get(wallet.key)!)!;
+
+  const [state, setState] = useState<SettingsType>(settings);
 
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const selectBg = darken(.025, theme.currentTheme.windowColor);
-
-  const wallets = walletApp.ethereum.list.map(wallet => walletApp.ethereum.wallets.get(wallet.key)!);
 
   async function setProvider (newProviderURL: string) {
     setProviderInput(newProviderURL);
@@ -75,19 +77,16 @@ export const EthSettings: FC = observer(() => {
     }
   }
 
-  function setCreationMode (newMode: CreateMode) {
-    setState({ ...state, creationMode: newMode });
+  function setCreationMode (newMode: WalletCreationMode) {
+    setState({ ...state, walletCreationMode: newMode });
   }
 
-  function setWalletVisibility (visibility: WalletVisibility, sharedWallet?: string) {
-    console.log('setting vis')
-    console.log(visibility)
-    console.log(sharedWallet)
-    setState({ ...state, visibility, sharedWallet });
+  function setWalletVisibility (sharingMode: SharingMode, defaultIndex?: number) {
+    setState({ ...state, sharingMode, defaultIndex: defaultIndex === undefined ? 0 : defaultIndex });
   }
 
   function setBlockList (action: 'add' | 'remove', patp: string) {
-    let currentList = state.blockList;
+    let currentList = state.blocked;
     if (action === 'add' && !currentList.includes(patp)) {
       currentList.push(patp);
     }
@@ -97,14 +96,14 @@ export const EthSettings: FC = observer(() => {
       currentList.splice(patpIndex, 1);
     }
 
-    setState({ ...state, blockList: currentList });
+    setState({ ...state, blocked: currentList });
   }
 
-  function saveSettings () {
-    // TODO: hook up to actual wallet
+  async function saveSettings () {
     setSaving(true);
-    console.log(`saving state: `, state);
+    await WalletActions.setSettings(network, state);
     setSaving(false);
+    WalletActions.setView(walletApp.returnView || (network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST), walletApp.currentIndex, walletApp.currentItem);
   }
 
   return (
@@ -134,7 +133,7 @@ export const EthSettings: FC = observer(() => {
           </Text>
           <Flex width="160px">
             <Select customBg={selectBg} textColor={baseTheme.colors.text.primary} iconColor={theme.currentTheme.iconColor}
-              options={[ { label: 'Default', value: 'default' }, { label: 'On-demand', value: 'on-demand' } ]} selected={state.creationMode} onClick={setCreationMode} />
+              options={[ { label: 'Default', value: 'default' }, { label: 'On-demand', value: 'on-demand' } ]} selected={state.walletCreationMode} onClick={setCreationMode} />
           </Flex>
       </Flex>
 
@@ -143,12 +142,12 @@ export const EthSettings: FC = observer(() => {
           <Text mt={1} mb={2} variant="body" fontSize={1} color={baseTheme.colors.text.secondary}>
             Determine how you want to share addresses with other people on the network.
           </Text>
-          <VisibilitySelect theme={theme} baseTheme={baseTheme} wallets={wallets} visibility={state.visibility} sharedWallet={state.sharedWallet} onChange={setWalletVisibility} />
+          <VisibilitySelect theme={theme} baseTheme={baseTheme} wallets={wallets} sharingMode={state.sharingMode} defaultIndex={state.defaultIndex} onChange={setWalletVisibility} />
       </Flex>
 
       <Flex mt={3} flexDirection="column">
         <Text mb={2} variant="h6">Blocked IDs</Text>
-        <BlockedInput theme={theme} baseTheme={baseTheme} blocked={state.blockList} onChange={setBlockList} />
+        <BlockedInput theme={theme} baseTheme={baseTheme} blocked={state.blocked} onChange={setBlockList} />
       </Flex>
 
       <Flex
@@ -179,24 +178,23 @@ interface VisibilitySelectProps {
   theme: any;
   baseTheme: any;
   onChange: any;
-  visibility: WalletVisibility
-  sharedWallet: string | undefined
-  wallets: { nickname: string, address: string } []
+  sharingMode: SharingMode
+  defaultIndex: number
+  wallets: { nickname: string, index: number } []
 }
 function VisibilitySelect (props: VisibilitySelectProps) {
   const selectBg = darken(.025, props.theme.currentTheme.windowColor);
-  const defaultWalletAddress = props.wallets[0].address;
 
   const visibilityOptions = [
-    { label: 'Anyone', value: 'anyone' },
-    { label: 'Friends only', value: 'friends' },
-    { label: 'Nobody', value: 'nobody' }
+    { label: 'Anybody', value: SharingMode.ANYBODY },
+    { label: 'Friends only', value: SharingMode.FRIENDS },
+    { label: 'Nobody', value: SharingMode.NOBODY }
   ];
-  const sharedWalletOptions = props.wallets.map((wallet) => ({ label: wallet.nickname, value: wallet.address }));
+  const sharedWalletOptions = props.wallets.map((wallet) => ({ label: wallet.nickname, value: wallet.index.toString() }));
 
   function visibilityChange (newVisibility: WalletVisibility) {
     ['anyone', 'friends'].includes(newVisibility)
-      ? props.onChange(newVisibility, props.sharedWallet ? props.sharedWallet : defaultWalletAddress)
+      ? props.onChange(newVisibility, props.defaultIndex)
       : props.onChange(newVisibility);
   }
 
@@ -204,12 +202,12 @@ function VisibilitySelect (props: VisibilitySelectProps) {
     <>
       <Flex width="160px">
         <Select customBg={selectBg} textColor={props.baseTheme.colors.text.primary} iconColor={props.theme.currentTheme.iconColor}
-        options={visibilityOptions} selected={props.visibility} onClick={visibilityChange} />
+        options={visibilityOptions} selected={props.sharingMode} onClick={visibilityChange} />
       </Flex>
       <Flex mt={1} width="220px">
-        {['anyone', 'friends'].includes(props.visibility) &&
+        {['anyone', 'friends'].includes(props.sharingMode) &&
           <Select customBg={selectBg} textColor={props.baseTheme.colors.text.primary} iconColor={props.theme.currentTheme.iconColor}
-          options={sharedWalletOptions} selected={props.sharedWallet || defaultWalletAddress} onClick={newAddress => props.onChange(props.visibility, newAddress)} />
+          options={sharedWalletOptions} selected={props.defaultIndex.toString() || Number(0).toString()} onClick={newAddress => props.onChange(props.sharingMode, Number(newAddress))} />
         }
       </Flex>
     </>
