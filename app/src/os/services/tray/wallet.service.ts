@@ -244,7 +244,7 @@ export class WalletService extends BaseService {
     });
 
     this.ethProvider = new ethers.providers.JsonRpcProvider(
-      'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
     );
     this.ethProvider.on("block", () => this.updateWalletInfo());
 
@@ -298,7 +298,7 @@ export class WalletService extends BaseService {
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
-      'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
+      'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
 //      'http://127.0.0.1:8545'
     );
   }
@@ -543,7 +543,6 @@ export class WalletService extends BaseService {
   }
 
   updateWalletInfo() {
-    console.log('updating');
     this.getAllBalances();
     if (this.state!.network === 'ethereum') {
       this.getAllCoins();
@@ -600,11 +599,20 @@ export class WalletService extends BaseService {
 
   toggleNetwork() {
     if (this.state!.ethereum.network === 'mainnet') {
-      this.state!.ethereum.network = 'gorli';
+      this.state!.ethereum.setNetwork('gorli');
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      this.ethProvider.on("block", () => this.updateWalletInfo());
     }
     else if (this.state!.ethereum.network === 'gorli') {
-      this.state!.ethereum.network = 'mainnet';
+      this.state!.ethereum.setNetwork('mainnet');
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      this.ethProvider.on("block", () => this.updateWalletInfo());
     }
+    this.updateWalletInfo();
   }
 
   getAllTransactions() {

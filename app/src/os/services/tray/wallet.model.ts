@@ -420,6 +420,9 @@ export const EthStore = types
       else
         self.transactions.set(transaction.transaction.hash, transaction.transaction);
     },
+    setNetwork(network: string) {
+      self.network = network
+    }
   }));
 
 export const WalletStore = types

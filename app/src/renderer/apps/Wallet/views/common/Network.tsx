@@ -5,6 +5,7 @@ import { FC } from 'react';
 import { Box, Flex, Text, RadioGroup, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type Network = 'ethereum' | 'bitcoin';
 
@@ -19,7 +20,7 @@ export const WalletNetwork: FC<WalletNetwork> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
 
     return (
-      <Box width="100%" hidden={props.hidden}>
+      <Box onClick={WalletActions.toggleNetwork} width="100%" hidden={props.hidden}>
         <Flex
           position="absolute"
           bottom={0}
