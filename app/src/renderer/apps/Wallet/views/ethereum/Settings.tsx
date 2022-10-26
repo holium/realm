@@ -110,7 +110,7 @@ export const EthSettings: FC = observer(() => {
     <Flex px={3} width="100%" height="100%" flexDirection="column">
 
       <Flex>
-        <Text variant="h4">Ethereum Settings</Text>
+        <Text variant="h4">{network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} Settings</Text>
       </Flex>
 
       <Flex mt={3} flexDirection="column" width="100%">
