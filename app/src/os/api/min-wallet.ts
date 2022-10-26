@@ -14,13 +14,14 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setSettings: async (conduit: Conduit, settings: any) => {
+  setSettings: async (conduit: Conduit, network: string, settings: any) => {
     const payload = {
       app: 'min-wallet',
       mark: 'wallet-action',
       json: {
         'set-wallet-settings': {
-          settings
+          network,
+          ...settings
         }
       }
     };

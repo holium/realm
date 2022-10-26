@@ -16,6 +16,9 @@ import {
   WalletStoreType,
   WalletView,
   NetworkType,
+  WalletCreationMode,
+  SharingMode,
+  SettingsType,
 } from './wallet.model';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
@@ -105,8 +108,8 @@ export class WalletService extends BaseService {
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
     },
-    setSettings: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-settings');
+    setSettings: (network: string, settings: SettingsType) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-settings', network, settings);
     },
     setWalletCreationMode: (mode: string) => {
       return ipcRenderer.invoke(
@@ -261,12 +264,18 @@ export class WalletService extends BaseService {
         ethereum: {
           network: 'gorli',
           settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
             defaultIndex: 0,
           },
           initialized: false,
         },
         bitcoin: {
           settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
             defaultIndex: 0,
           },
         },
@@ -520,8 +529,11 @@ export class WalletService extends BaseService {
     // is probably cleaner to pull from here than add some random npm lib to do it
   }
 
-  async setSettings(_events: any, settings: any) {
-    await WalletApi.setSettings(this.core.conduit!, settings);
+  async setSettings(_events: any, network: string, settings: SettingsType) {
+    if (network === 'ethereum') {
+      this.state!.ethereum.setSettings(settings);
+    }
+    await WalletApi.setSettings(this.core.conduit!, network, settings);
   }
 
   async setWalletCreationMode(_event: any, mode: string) {
