@@ -112,10 +112,24 @@
     ::
       %set-xpub
     ?>  (team:title our.bowl src.bowl)
+    =/  net  (~(got by networks.settings.state) network.act)
+    =?  wallets  !=(xpub.act xpub.net)
+      =/  net-wallets  (~(got by wallets) network.act)
+      (~(put by wallets) [network.act ~])
     =.  networks.settings.state
       =/  net  (~(got by networks.settings.state) network.act)
       =.  xpub.net  `xpub.act
       (~(put by networks.settings.state) [network.act net])
+    `state
+    ::
+      %set-settings
+    ?>  (team:title our.bowl src.bowl)
+    =.  networks.settings
+      =/  net-settings  (~(got by networks.settings) network.act)
+      =.  default-index.net-settings  share-index.act
+      (~(put by networks.settings) [network.act net-settings])
+    =.  wallet-creation.sharing.settings  mode.act
+    =.  who.sharing.settings  who.act
     `state
     ::
       %set-wallet-creation-mode

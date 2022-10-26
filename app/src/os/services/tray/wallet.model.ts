@@ -286,7 +286,7 @@ export const EthStore = types
         'failure-reason': tx.failureReason || 1,
         notes: tx.notes,
       }
-    }
+    },
   }))
   .actions((self) => ({
     initial(wallets: any) {
@@ -439,6 +439,9 @@ export const EthStore = types
     },
     setNetwork(network: string) {
       self.network = network
+    },
+    deleteWallets() {
+      self.wallets.clear();
     }
   }));
 

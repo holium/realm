@@ -134,6 +134,7 @@
 +$  action
   $%  [%initialize ~]
       [%set-xpub =network xpub=@t]
+      [%set-settings =network =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud]
       [%set-wallet-creation-mode =mode]
       [%set-sharing-mode who=?(%nobody %friends %anybody)]
       [%set-sharing-permissions type=?(%allow %block) who=@p]

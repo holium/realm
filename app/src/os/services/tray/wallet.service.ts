@@ -25,8 +25,7 @@ import abi from 'human-standard-token-abi';
 
 
 // 10 minutes
-// const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
-const AUTO_LOCK_INTERVAL = 1000 * 30;
+const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -105,6 +104,9 @@ export class WalletService extends BaseService {
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
+    },
+    setSettings: () => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-settings');
     },
     setWalletCreationMode: (mode: string) => {
       return ipcRenderer.invoke(
@@ -323,7 +325,6 @@ export class WalletService extends BaseService {
         );
       }
     );
-
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
       this.state!.ethereum.applyHistory(history);
     });
@@ -353,6 +354,7 @@ export class WalletService extends BaseService {
         apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
         network: Network.ETH_MAINNET, // Replace with your network.
       };
+      // etherscan
     }
     else {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
@@ -386,6 +388,8 @@ export class WalletService extends BaseService {
     console.log('setting btc xpub');
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+
+    this.state!.ethereum.deleteWallets();
 
     console.log('okay transitioning');
     this.state!.setView(WalletView.ETH_LIST);
@@ -514,6 +518,10 @@ export class WalletService extends BaseService {
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
     // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
     // is probably cleaner to pull from here than add some random npm lib to do it
+  }
+
+  async setSettings(_events: any, settings: any) {
+    await WalletApi.setSettings(this.core.conduit!, settings);
   }
 
   async setWalletCreationMode(_event: any, mode: string) {

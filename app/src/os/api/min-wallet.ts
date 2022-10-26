@@ -14,6 +14,18 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
+  setSettings: async (conduit: Conduit, settings: any) => {
+    const payload = {
+      app: 'min-wallet',
+      mark: 'wallet-action',
+      json: {
+        'set-wallet-settings': {
+          settings
+        }
+      }
+    };
+    await conduit.poke(payload);
+  },
   setWalletCreationMode: async (conduit: Conduit, mode: string) => {
     const payload = {
       app: 'min-wallet',
