@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
+import { types } from 'mobx-state-tree';
 import validUrl from 'valid-url';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -11,7 +12,7 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView, WalletCreationMode, SharingMode, SettingsType } from 'os/services/tray/wallet.model';
+import { WalletView, WalletCreationMode, SharingMode, UISettingsType } from 'os/services/tray/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
@@ -46,9 +47,10 @@ export const EthSettings: FC = observer(() => {
   const network = walletApp.network;
   const walletStore = network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
   const settings = walletStore.settings;
+  const [blocked, setBlocked] = useState([...settings.blocked]);
   const wallets = walletStore.list.map(wallet => walletStore.wallets.get(wallet.key)!)!;
 
-  const [state, setState] = useState<SettingsType>(settings);
+  const [state, setState] = useState<UISettingsType>(settings);
 
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
@@ -86,7 +88,7 @@ export const EthSettings: FC = observer(() => {
   }
 
   function setBlockList (action: 'add' | 'remove', patp: string) {
-    let currentList = state.blocked;
+    let currentList = blocked;
     if (action === 'add' && !currentList.includes(patp)) {
       currentList.push(patp);
     }
@@ -96,15 +98,21 @@ export const EthSettings: FC = observer(() => {
       currentList.splice(patpIndex, 1);
     }
 
-    setState({ ...state, blocked: currentList });
+    setBlocked(currentList);
   }
 
   async function saveSettings () {
     setSaving(true);
-    await WalletActions.setSettings(network, state);
+    console.log('state', state)
+    let {walletCreationMode, sharingMode, defaultIndex} = state;
+    console.log(network)
+    await WalletActions.setSettings(network, {walletCreationMode, sharingMode, defaultIndex, blocked});
     setSaving(false);
     WalletActions.setView(walletApp.returnView || (network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST), walletApp.currentIndex, walletApp.currentItem);
   }
+
+  console.log([...settings.blocked])
+  console.log(blocked)
 
   return (
     <Flex px={3} width="100%" height="100%" flexDirection="column">
@@ -147,7 +155,7 @@ export const EthSettings: FC = observer(() => {
 
       <Flex mt={3} flexDirection="column">
         <Text mb={2} variant="h6">Blocked IDs</Text>
-        <BlockedInput theme={theme} baseTheme={baseTheme} blocked={state.blocked} onChange={setBlockList} />
+        <BlockedInput theme={theme} baseTheme={baseTheme} blocked={blocked} onChange={setBlockList} />
       </Flex>
 
       <Flex
@@ -165,7 +173,7 @@ export const EthSettings: FC = observer(() => {
           />
         </Flex>
         <Flex position="absolute" bottom="1px" right="28px">
-          <Button variant="primary" disabled={providerError !== '' || _.isEqual(state, INIT_STATE)} isLoading={saving} onClick={saveSettings}>Save</Button>
+          <Button variant="primary" disabled={providerError !== '' || _.isEqual(state, settings) && _.isEqual(blocked, [...settings.blocked])} isLoading={saving} onClick={saveSettings}>Save</Button>
         </Flex>
       </Flex>
     </Flex>

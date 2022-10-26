@@ -208,6 +208,7 @@
     ::  create new wallet
     ::
     =/  idx  (lent ~(tap by (~(got by wallets.state) network.act)))
+    =?  idx  =(~ idx)  0
     =^  wallet=(unit wallet)  wallets.state
       =/  xpub  xpub:(~(got by networks.settings.state) network.act)
       ?~  xpub  [~ wallets.state]

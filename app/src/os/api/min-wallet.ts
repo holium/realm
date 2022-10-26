@@ -1,4 +1,5 @@
 import { Conduit } from '@holium/conduit';
+import { UISettingsType } from 'os/services/tray/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -14,14 +15,17 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setSettings: async (conduit: Conduit, network: string, settings: any) => {
+  setSettings: async (conduit: Conduit, network: string, settings: UISettingsType) => {
     const payload = {
       app: 'min-wallet',
       mark: 'wallet-action',
       json: {
-        'set-wallet-settings': {
-          network,
-          ...settings
+        'set-settings': {
+          network: network,
+          mode: settings.walletCreationMode,
+          who: settings.sharingMode,
+          blocked: settings.blocked,
+          'share-index': settings.defaultIndex,
         }
       }
     };

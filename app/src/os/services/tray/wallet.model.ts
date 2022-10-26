@@ -6,6 +6,7 @@ import {
   flow
 } from 'mobx-state-tree';
 import { Network, Alchemy, Nft } from "alchemy-sdk";
+import { IntelligentTieringAccessTier } from 'aws-sdk/clients/s3';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -56,6 +57,13 @@ const Settings = types
   })
 
 export type SettingsType = Instance<typeof Settings>;
+export type UISettingsType = {
+  walletCreationMode: WalletCreationMode,
+  sharingMode: SharingMode,
+  blocked: [],
+  defaultIndex: number,
+  provider: string,
+}
 
 const BitcoinWallet = types.model('BitcoinWallet', {
   index: types.number,
@@ -102,7 +110,7 @@ const BitcoinStore = types
     // updates
     applyWalletUpdate(wallet: any) {
       const walletObj = {
-        index: wallet.key,
+        index: Number(wallet.key),
         network: 'bitcoin',
         path: wallet.path,
         address: wallet.address,
@@ -387,7 +395,7 @@ export const EthStore = types
       var walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
-          index: wallet.key,
+          index: Number(wallet.key),
           network: 'ethereum',
           path: wallet.path,
           address: wallet.address,

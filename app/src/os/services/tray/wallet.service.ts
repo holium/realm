@@ -18,7 +18,7 @@ import {
   NetworkType,
   WalletCreationMode,
   SharingMode,
-  SettingsType,
+  UISettingsType,
 } from './wallet.model';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
@@ -54,6 +54,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.get-recipient': this.getRecipient,
     'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
     'realm.tray.wallet.set-xpub': this.setXpub,
+    'realm.tray.wallet.set-settings': this.setSettings,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.set-sharing-mode': this.setSharingMode,
     'realm.tray.wallet.set-sharing-permissions': this.setSharingPermissions,
@@ -108,7 +109,7 @@ export class WalletService extends BaseService {
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
     },
-    setSettings: (network: string, settings: SettingsType) => {
+    setSettings: (network: string, settings: UISettingsType) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-settings', network, settings);
     },
     setWalletCreationMode: (mode: string) => {
@@ -345,7 +346,6 @@ export class WalletService extends BaseService {
 //      'http://127.0.0.1:8545'
     );
 
-    console.log("LOCKING")
     this.lock(); // lock wallet on login
   }
 
@@ -529,7 +529,7 @@ export class WalletService extends BaseService {
     // is probably cleaner to pull from here than add some random npm lib to do it
   }
 
-  async setSettings(_events: any, network: string, settings: SettingsType) {
+  async setSettings(_events: any, network: string, settings: UISettingsType) {
     if (network === 'ethereum') {
       this.state!.ethereum.setSettings(settings);
     }
