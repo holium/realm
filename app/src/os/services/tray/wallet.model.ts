@@ -183,6 +183,12 @@ const EthWallet = types
         self.coins.set(contract.address, contract);
       }
     },
+    setCoins(coins: any) {
+      self.coins.clear();
+      for (var coin of coins) {
+        this.setCoin(coin.name, coin.logo, coin.contractAddress, coin.balance, coin.decimals)
+      }
+    },
     setCoin(name: string, imageUrl: string, contractAddress: string, balance: string, decimals: number) {
       const contract = ERC20.create({
         name: name,
@@ -192,6 +198,12 @@ const EthWallet = types
         decimals: decimals,
       })
       self.coins.set(contract.address, contract);
+    },
+    setNFTs(nfts: any) {
+      self.nfts.clear();
+      for (var nft of nfts) {
+        this.setNFT(nft.name, nft.collectionName, nft.contractAddress, nft.tokenId, nft.imageUrl, nft.price)
+      }
     },
     setNFT(name: string, collectionName: string, contractAddress: string, tokenId: string, imageUrl: string, price?: string) {
       const nft = ERC721.create({

@@ -21,12 +21,7 @@ import { Network, Alchemy } from "alchemy-sdk";
 // @ts-ignore
 import abi from 'human-standard-token-abi';
 
-const alchemySettings = {
-  apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
-  network: Network.ETH_GOERLI, // Replace with your network.
-};
 
-const alchemy = new Alchemy(alchemySettings);
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -43,6 +38,7 @@ export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
   private ethProvider?: ethers.providers.JsonRpcProvider;
+  private alchemy?: Alchemy;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-view': this.setView,
@@ -243,18 +239,7 @@ export class WalletService extends BaseService {
       this.db!.store = snapshot;
     });
 
-    if (this.state!.ethereum.network === 'mainnet') {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-      );
-      this.ethProvider.on("block", () => this.updateWalletInfo());
-    }
-    else {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-      );
-      this.ethProvider.on("block", () => this.updateWalletInfo());
-    }
+    this.setProviders();
 
     const patchEffect = {
       model: getSnapshot(this.state),
@@ -313,6 +298,30 @@ export class WalletService extends BaseService {
 
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
+  }
+
+  setProviders() {
+    var alchemySettings
+    if (this.state!.ethereum.network === 'mainnet') {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      alchemySettings = {
+        apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+        network: Network.ETH_MAINNET, // Replace with your network.
+      };
+    }
+    else {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      alchemySettings = {
+        apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+        network: Network.ETH_GOERLI, // Replace with your network.
+      };
+    }
+    this.ethProvider.on("block", () => this.updateWalletInfo());
+    this.alchemy = new Alchemy(alchemySettings);
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
@@ -550,12 +559,6 @@ export class WalletService extends BaseService {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
   }
 
-  clearWallets() {
-    for (var key of this.state!.ethereum.wallets.keys()) {
-      this.state!.ethereum.wallets.get(key)!.clearWallet();
-    }
-  }
-
   updateWalletInfo() {
     this.getAllBalances();
     if (this.state!.network === 'ethereum') {
@@ -585,48 +588,61 @@ export class WalletService extends BaseService {
   async getAllCoins() {
     for (var key of this.state!.ethereum.wallets.keys()) {
       let wallet: any = this.state!.ethereum.wallets.get(key);
-      const balances = await alchemy.core.getTokenBalances(wallet.address);
+      const balances = await this.alchemy!.core.getTokenBalances(wallet.address);
       // Remove tokens with zero balance
       const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
         return token.tokenBalance !== "0";
       });
+      var coins = []
       for (let token of nonZeroBalances) {
-        const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
+        const metadata = await this.alchemy!.core.getTokenMetadata((token as any).contractAddress);
         const contract = new ethers.Contract((token as any).contractAddress, abi, this.ethProvider);
         const balance = (await contract.balanceOf(wallet.address)).toString();
-        wallet.setCoin(metadata.symbol!, metadata.logo || '', (token as any).contractAddress, balance, metadata.decimals!)
+        const coin = {
+          name: metadata.symbol!,
+          logo: metadata.logo || '',
+          contractAddress: (token as any).contractAddress,
+          balance: balance,
+          decimals: metadata.decimals!
+        }
+        coins.push(coin)
       }
+      this.state!.ethereum.wallets.get(key)!.setCoins(coins);
     }
   }
 
   async getAllNfts() {
     for (var key of this.state!.ethereum.wallets.keys()) {
       let wallet: any = this.state!.ethereum.wallets.get(key);
-      const nfts = await alchemy.nft.getNftsForOwner(wallet.address);
+      const nfts = await this.alchemy!.nft.getNftsForOwner(wallet.address);
+      var allNfts = [];
       for (let nft of nfts.ownedNfts) {
         // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
         var floorPrice
         this.state!.ethereum.wallets.get(key)!.setNFT(nft.title, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
+        const ownedNft = {
+          name: nft.title,
+          collectionName: nft.description,
+          contractAddress: nft.contract.address,
+          tokenId: nft.tokenId,
+          imageUrl: nft.rawMetadata!.image!,
+          floorPrice
+        }
+        allNfts.push(ownedNft);
       }
+      this.state!.ethereum.wallets.get(key)!.setNFTs(allNfts)
     }
   }
 
   toggleNetwork() {
     if (this.state!.ethereum.network === 'mainnet') {
       this.state!.ethereum.setNetwork('gorli');
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-      );
-      this.ethProvider.on("block", () => this.updateWalletInfo());
+      this.setProviders();
     }
     else if (this.state!.ethereum.network === 'gorli') {
       this.state!.ethereum.setNetwork('mainnet');
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-      );
-      this.ethProvider.on("block", () => this.updateWalletInfo());
+      this.setProviders();
     }
-    this.clearWallets();
     this.updateWalletInfo();
   }
 
