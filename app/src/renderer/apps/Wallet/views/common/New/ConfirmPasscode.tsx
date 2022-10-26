@@ -37,7 +37,7 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
         </Flex>
         <Flex
           position="absolute"
-          top="542px"
+          top="582px"
           zIndex={999}
           onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}
         >

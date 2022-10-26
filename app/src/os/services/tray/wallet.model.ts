@@ -25,6 +25,7 @@ export enum WalletView {
   TRANSACTION_DETAIL = 'ethereum:transaction',
   LOCKED = 'locked',
   ETH_SETTINGS = 'ethereum:settings',
+  BIT_SETTINGS = 'bitcoin:settings',
   BIT_LIST = 'bitcoin:list',
   CREATE_WALLET = 'create-wallet'
 }
@@ -461,6 +462,11 @@ export const WalletStore = types
       }
     },
     setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }) {
+      if (view === WalletView.LOCKED && self.currentView === WalletView.LOCKED) {
+        // don't allow setting locked multiple times
+        return;
+      }
+
       if (index) {
         self.currentIndex = index;
       }
@@ -471,7 +477,13 @@ export const WalletStore = types
         self.currentItem = undefined;
       }
 
-      self.returnView = self.currentView;
+      let returnView = self.currentView;
+      if (returnView === WalletView.LOCKED) {
+        // the return view should never be locked
+        returnView = WalletView.ETH_LIST;
+      }
+
+      self.returnView = returnView;
       self.currentView = view;
     },
     setReturnView(view: WalletView) {

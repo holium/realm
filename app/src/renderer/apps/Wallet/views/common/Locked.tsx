@@ -18,7 +18,10 @@ export const Locked: FC<LockedProps> = observer(
     const { walletApp } = useTrayApps();
     const { theme } = useServices();
 
-    let unlock = () => WalletActions.setView(walletApp.returnView || WalletView.ETH_LIST, walletApp.currentIndex, walletApp.currentItem);
+    let unlock = () => {
+      console.log('unlocking', walletApp.returnView)
+      WalletActions.setView(walletApp.returnView || WalletView.ETH_LIST, walletApp.currentIndex, walletApp.currentItem);
+    }
 
     return (
       <Flex width="100%" height="100%" flexDirection="column" alignItems="center">

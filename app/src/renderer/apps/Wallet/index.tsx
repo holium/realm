@@ -6,7 +6,8 @@ import { Detail } from './views/common/Detail';
 import { WalletList } from './views/ethereum/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
-import { WalletNetwork } from './views/common/Network';
+import { EthSettings } from './views/ethereum/Settings';
+import { WalletFooter } from './views/common/Footer';
 import { CreateWallet } from './views/common/Create';
 import Locked from './views/common/Locked';
 import { ListPlaceholder } from './views/bitcoin/ListPlaceholder';
@@ -35,6 +36,7 @@ const WalletViews: { [key: string]: any } = {
   ),
   [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
   settings: (props: any) => <WalletSettings {...props} />,
+  [WalletView.ETH_SETTINGS]: (props: any) => <EthSettings {...props} />,
 };
 
 export const WalletApp: FC<any> = observer((props: any) => {
@@ -50,13 +52,12 @@ export const WalletApp: FC<any> = observer((props: any) => {
       setHidePending(false);
     }
   }, [transactions]);
+
   let hide = () => {
-    console.log('clickey');
     setHidePending(true);
   };
 
-  let hideHeader = [WalletView.ETH_NEW, WalletView.LOCKED].includes(walletApp.currentView);
-
+  let hideHeaderFooter = [WalletView.ETH_NEW, WalletView.LOCKED, WalletView.ETH_SETTINGS].includes(walletApp.currentView);
   let View = WalletViews[walletApp.currentView];
 
   return (
@@ -72,14 +73,15 @@ export const WalletApp: FC<any> = observer((props: any) => {
         network={walletApp.network}
         onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
-        hide={hideHeader}
+        hide={hideHeaderFooter}
       />
       {!hidePending &&
         walletApp.currentView !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <View {...props} hidePending={hidePending} />
-      <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} />
+      {/* <WalletNetwork hidden={walletApp.currentView === 'ethereum:new'} /> */}
+      <WalletFooter hidden={hideHeaderFooter} />
     </Flex>
   );
 });

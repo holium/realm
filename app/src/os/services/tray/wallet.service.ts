@@ -30,7 +30,7 @@ const alchemySettings = {
 
 const alchemy = new Alchemy(alchemySettings);
 
-const AUTO_LOCK_INTERVAL = 1000 * 60 * 10; // ten minutes
+const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -64,6 +64,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.add-smart-contract': this.addSmartContract,
     'realm.tray.wallet.request-address': this.requestAddress,
     'realm.tray.wallet.check-passcode': this.checkPasscode,
+    'realm.tray.wallet.check-provider-url': this.checkProviderUrl
   };
 
   static preload = {
@@ -76,6 +77,9 @@ export class WalletService extends BaseService {
     },
     checkPasscode: (passcode: number[]) => {
       return ipcRenderer.invoke('realm.tray.wallet.check-passcode', passcode);
+    },
+    checkProviderURL: (providerURL: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.check-provider-url', providerURL);
     },
     setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }) => {
       return ipcRenderer.invoke(
@@ -192,14 +196,20 @@ export class WalletService extends BaseService {
       if (this.state) {
         this.state.setLastInteraction(new Date());
       }
-      handler.apply(this, args);
+      return handler.apply(this, args);
     }
   }
 
   private autoLock() {
-    let hasPasscode = this.state && this.state.passcodeHash;
     let shouldLock =  this.state && (Date.now() - AUTO_LOCK_INTERVAL) > this.state.lastInteraction.getTime()
-    if (hasPasscode && shouldLock) {
+    if (shouldLock) {
+      this.lock();
+    }
+  }
+
+  private lock() {
+    let hasPasscode = this.state && this.state.passcodeHash;
+    if (hasPasscode) {
       this.state!.setView(WalletView.LOCKED, this.state!.currentIndex, this.state!.currentItem);
     }
   }
@@ -330,6 +340,8 @@ export class WalletService extends BaseService {
  //     'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
       'http://127.0.0.1:8545'
     );
+
+    this.lock(); // lock wallet on login
   }
 
   get snapshot() {
@@ -361,7 +373,23 @@ export class WalletService extends BaseService {
   }
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
-    return  await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
+    return await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
+  }
+
+  async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
+    try {
+      let newProvider = new ethers.providers.JsonRpcProvider(providerURL);
+      console.log('new provider: ', newProvider);
+      const { chainId, name } = await newProvider.getNetwork();
+      console.log('network name: ', name)
+      console.log(`chain ID: ${chainId}`)
+      if (!chainId && !name) {
+        throw new Error('Invalid provider.');
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async setXpub(_event: any) {

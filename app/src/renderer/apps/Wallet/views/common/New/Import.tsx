@@ -60,7 +60,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
       </Flex>
       <Flex
         position="absolute"
-        top="542px"
+        top="582px"
         zIndex={999}
         onClick={() => props.setScreen(NewWalletScreen.CREATE)}
       >

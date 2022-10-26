@@ -52,6 +52,7 @@ export const PasscodeInput: FC<PasscodeInputProps> = observer((props: PasscodeIn
         props.onSuccess(newInputCode);
       } else {
         setError(true);
+        setInputCode([]);
         props.onError && props.onError();
       }
     }
