@@ -191,7 +191,7 @@ jobs:
       #     cache: "npm"
       - name: Build and install
         run: |
-          chown -R $USER: ~/.wine
+          chown -R $USER: ~/
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn package:prerelease
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
