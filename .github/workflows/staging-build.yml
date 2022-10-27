@@ -118,7 +118,7 @@ jobs:
           sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
           sudo apt update
           sudo apt install aptitude
-          sudo aptitude install wine-stable
+          sudo aptitude install -y -q wine-stable
           npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
         # env:
         #   APPLE_ID: ${{ secrets.APPLE_ID }}
