@@ -194,7 +194,8 @@ jobs:
       #     cache: "npm"
       - name: Build and install
         run: |
-          sudo chown -R $USERNAME:$USERNAME /github/home
+          apt-get update && apt-get -y install sudo
+          useradd -m $USERNAME && echo "$USERNAME:$USERNAME" | chpasswd && adduser $USERNAME sudo
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn package:prerelease
         env:
           USERNAME: ${{ github.actor }}
