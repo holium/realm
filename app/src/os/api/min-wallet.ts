@@ -139,6 +139,7 @@ export const WalletApi = {
     conduit: Conduit,
     network: string,
     net: string,
+    wallet: number,
     hash: string,
     transaction: any,
     ethType?: string,
@@ -148,10 +149,10 @@ export const WalletApi = {
       mark: 'wallet-action',
       json: {
         'enqueue-transaction': {
-          network: network,
-          net: net,
-          ethType: ethType,
-          hash: hash,
+          network,
+          net,
+          wallet,
+          hash,
           transaction: transaction,
         },
       },
@@ -162,6 +163,7 @@ export const WalletApi = {
     conduit: Conduit,
     network: string,
     net: string,
+    wallet: number,
     hash: string,
     notes: string
   ) => {
@@ -170,10 +172,11 @@ export const WalletApi = {
       mark: 'wallet-action',
       json: {
         'save-transaction-notes': {
-          network: network,
-          net: net,
-          hash: hash,
-          notes: notes
+          network,
+          net,
+          wallet,
+          hash,
+          notes,
         }
       }
     };
