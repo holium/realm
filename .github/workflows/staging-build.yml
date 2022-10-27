@@ -110,7 +110,13 @@ jobs:
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
       - name: Build and publish
-        run: npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo mkdir -pm755 /etc/apt/keyrings
+          sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+          sudo apt update
+          sudo apt install --install-recommends winehq-stable
+          npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
         # env:
         #   APPLE_ID: ${{ secrets.APPLE_ID }}
         #   APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
