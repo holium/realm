@@ -9,7 +9,7 @@ import { PasscodeInput } from '../../../components/PasscodeInput';
 
 interface PasscodeProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
-  correctPasscode: number [];
+  correctPasscode: number[];
 }
 
 export const ConfirmPasscode: FC<PasscodeProps> = observer(
@@ -32,7 +32,10 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
             </Text>
           </Flex>
           <Flex alignItems="center">
-            <PasscodeInput checkAgainst={props.correctPasscode} onSuccess={() => props.setScreen(NewWalletScreen.FINALIZING)} />
+            <PasscodeInput
+              checkAgainst={props.correctPasscode}
+              onSuccess={() => props.setScreen(NewWalletScreen.FINALIZING)}
+            />
           </Flex>
         </Flex>
         <Flex

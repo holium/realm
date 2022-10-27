@@ -20,6 +20,7 @@ export enum WalletView {
   ETH_NEW = 'ethereum:new',
   WALLET_DETAIL = 'ethereum:detail',
   TRANSACTION_DETAIL = 'ethereum:transaction',
+  NFT_DETAIL = 'ethereum:nft',
   LOCKED = 'locked',
   ETH_SETTINGS = 'ethereum:settings',
   BIT_SETTINGS = 'bitcoin:settings',

@@ -9,35 +9,38 @@ import { useServices } from 'renderer/logic/store';
 import PasscodeInput from '../../components/PasscodeInput';
 import { useTrayApps } from 'renderer/apps/store';
 
-interface LockedProps {
+interface LockedProps {}
 
-}
+export const Locked: FC<LockedProps> = observer((props: LockedProps) => {
+  const { walletApp } = useTrayApps();
+  const { theme } = useServices();
 
-export const Locked: FC<LockedProps> = observer(
-  (props: LockedProps) => {
-    const { walletApp } = useTrayApps();
-    const { theme } = useServices();
+  let unlock = () => {
+    console.log('unlocking', walletApp.currentItem);
+    WalletActions.setView(walletApp.returnView || WalletView.ETH_LIST);
+  };
 
-    let unlock = () => {
-      console.log('unlocking', walletApp.returnView)
-      WalletActions.setView(walletApp.returnView || WalletView.ETH_LIST, walletApp.currentIndex, walletApp.currentItem);
-    }
-
-    return (
-      <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
-        <Flex flex={1} flexDirection="column" justifyContent="center" alignItems="center">
-          <Icons name="Locked" size={36} />
-          <Text mt={2} variant="h3">Wallet Locked</Text>
-        </Flex>
-        <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-          <Text mb={8} variant="body">
-            Enter your passcode to continue.
-          </Text>
-          <PasscodeInput checkStored={true} onSuccess={unlock} />
-        </Flex>
+  return (
+    <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
+      <Flex
+        flex={1}
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Icons name="Locked" size={36} />
+        <Text mt={2} variant="h3">
+          Wallet Locked
+        </Text>
       </Flex>
-    )
-  }
-);
+      <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
+        <Text mb={8} variant="body">
+          Enter your passcode to continue.
+        </Text>
+        <PasscodeInput checkStored={true} onSuccess={unlock} />
+      </Flex>
+    </Flex>
+  );
+});
 
 export default Locked;
