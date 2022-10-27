@@ -1,11 +1,11 @@
-# name: staging-build
-# run-name: Staging Build - ${{ github.actor }}
-# on:
-#   workflow_dispatch:
-#   push:
-#     branches:
-#       - staging
-# jobs:
+name: staging-build
+run-name: Staging Build - ${{ github.actor }}
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - staging
+jobs:
 #   # build-mac-staging:
 #   #   runs-on: macos-latest
 #   #   steps:
