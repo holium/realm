@@ -109,13 +109,13 @@ jobs:
         run: yarn install
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
+      # sudo apt install --install-recommends wine-stable
       - name: Build and publish
         run: |
           sudo dpkg --add-architecture i386
           sudo mkdir -pm755 /etc/apt/keyrings
           sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-          sudo apt update
-          sudo apt install --install-recommends wine-stable
+          sudo apt-get update
           sudo apt-get install wine32
           npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
         # env:
