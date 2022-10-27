@@ -116,8 +116,9 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo mkdir -pm755 /etc/apt/keyrings
           sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-          sudo apt-get update
-          sudo apt-get install wine32
+          sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+          sudo apt update
+          sudo apt install --install-recommends wine-stable
           npx cross-env GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
         # env:
         #   APPLE_ID: ${{ secrets.APPLE_ID }}
