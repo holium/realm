@@ -178,6 +178,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: electronuserland/builder:wine
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -189,6 +192,6 @@ jobs:
       - name: Build and install
         run: |
           # sudo chown -R $USER: ~/.wine
-          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo yarn package:prerelease
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn package:prerelease
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
