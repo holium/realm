@@ -65,78 +65,78 @@
 #   #           const script = require('./.github/workflows/scripts/verinc.js')
 #   #           console.log(script({github, context}))
 #   #
-#   build-windows-staging:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
-#       - name: Setup node
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: "14"
-#           cache: "npm"
-#       # - name: Install Windows certificates
-#       #   env:
-#       #     BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
-#       #     P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-#       #     # BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-#       #     KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-#       #   run: |
-#       #     # create variables
-#       #     CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-#       #     # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-#       #     KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+build-windows-staging:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "14"
+        cache: "npm"
+    # - name: Install Windows certificates
+    #   env:
+    #     BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+    #     P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+    #     # BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+    #     KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+    #   run: |
+    #     # create variables
+    #     CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+    #     # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+    #     KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-#       #     # import certificate and provisioning profile from secrets
-#       #     echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-#       #     # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+    #     # import certificate and provisioning profile from secrets
+    #     echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+    #     # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
 
-#       #     # create temporary keychain
-#       #     security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-#       #     security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-#       #     security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+    #     # create temporary keychain
+    #     security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+    #     security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+    #     security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-#       #     # import certificate to keychain
-#       #     security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-#       #     security list-keychain -d user -s $KEYCHAIN_PATH
+    #     # import certificate to keychain
+    #     security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+    #     security list-keychain -d user -s $KEYCHAIN_PATH
 
-#       #     # apply provisioning profile
-#       #     # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-#       #     # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-#       - name: Install yarn
-#         run: npm install -g yarn
-#       - name: Install app dependencies
-#         run: yarn install
-#       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
-#       #   and other utilities/functionality are available in the final product
-#       # sudo apt install --install-recommends wine-stable
-#       #       sudo dpkg --add-architecture i386
-#       # sudo mkdir -pm755 /etc/apt/keyrings
-#       # sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-#       # sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
-#       # sudo apt update
-#       # sudo apt install aptitude
-#       # sudo aptitude install -y -q wine-staging
-#       # sudo apt-get install --no-install-recommends -y gcc-multilib g++-multilib
-#       - name: Build and publish
-#         run: |
-#           sudo dpkg --add-architecture i386
-#           sudo mkdir -pm755 /etc/apt/keyrings
-#           sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-#           sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
-#           sudo apt update
-#           sudo apt install aptitude
-#           sudo aptitude install -y -q winehq-staging
-#           sudo aptitude install -y -q wine-staging
-#           which wine
-#           sudo apt update
-#           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
-#         env:
-#           #   APPLE_ID: ${{ secrets.APPLE_ID }}
-#           #   APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
-#           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-#         #   BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
-#         #   P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+    #     # apply provisioning profile
+    #     # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+    #     # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+    - name: Install yarn
+      run: npm install -g yarn
+    - name: Install app dependencies
+      run: yarn install
+    # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
+    #   and other utilities/functionality are available in the final product
+    # sudo apt install --install-recommends wine-stable
+    #       sudo dpkg --add-architecture i386
+    # sudo mkdir -pm755 /etc/apt/keyrings
+    # sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+    # sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+    # sudo apt update
+    # sudo apt install aptitude
+    # sudo aptitude install -y -q wine-staging
+    # sudo apt-get install --no-install-recommends -y gcc-multilib g++-multilib
+    - name: Build and publish
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo mkdir -pm755 /etc/apt/keyrings
+        sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+        sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+        sudo apt update
+        sudo apt install aptitude
+        sudo aptitude install -y -q winehq-staging
+        sudo aptitude install -y -q wine-staging
+        which wine
+        sudo apt update
+        GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
+      env:
+        #   APPLE_ID: ${{ secrets.APPLE_ID }}
+        #   APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+      #   P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
 #   #
 #   # build-linux-staging:
 #   #   runs-on: ubuntu-latest
@@ -167,35 +167,35 @@
 #   #         git add package.json
 #   #         git commit -m "patch version"
 #   #         git push
-name: Build/release
+# name: Build/release
 
-on: push
+# on: push
 
-jobs:
-  release:
-    runs-on: ${{ matrix.os }}
+# jobs:
+#   release:
+#     runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+#     strategy:
+#       matrix:
+#         os: [macos-latest, ubuntu-latest, windows-latest]
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
 
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "14"
-          cache: "npm"
+#       - name: Setup node
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: "14"
+#           cache: "npm"
 
-      - name: Build/release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          # GitHub token, automatically provided to the action
-          # (No need to define this secret in the repo settings)
-          github_token: ${{ secrets.GH_TOKEN }}
+#       - name: Build/release Electron app
+#         uses: samuelmeuli/action-electron-builder@v1
+#         with:
+#           # GitHub token, automatically provided to the action
+#           # (No need to define this secret in the repo settings)
+#           github_token: ${{ secrets.GH_TOKEN }}
 
-          # If the commit is tagged with a version (e.g. "v1.0.0"),
-          # release the app after building
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+#           # If the commit is tagged with a version (e.g. "v1.0.0"),
+#           # release the app after building
+#           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
