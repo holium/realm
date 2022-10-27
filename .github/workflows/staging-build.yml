@@ -129,6 +129,7 @@ jobs:
           sudo aptitude install -y -q winehq-staging
           sudo aptitude install -y -q wine-staging
           which wine
+          sudo apt update
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
         env:
           #   APPLE_ID: ${{ secrets.APPLE_ID }}
