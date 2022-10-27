@@ -176,6 +176,9 @@ on:
 jobs:
   node-docker:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ~/build
     container:
       image: electronuserland/builder:wine
       # credentials:
@@ -191,7 +194,7 @@ jobs:
       #     cache: "npm"
       - name: Build and install
         run: |
-          chown -R $USER: ~/
+          mkdir -p ~/build
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn package:prerelease
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
