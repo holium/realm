@@ -187,4 +187,4 @@ jobs:
           node-version: "14"
           cache: "npm"
       - name: Build and install
-        run: GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
+        run: GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn package:prerelease
