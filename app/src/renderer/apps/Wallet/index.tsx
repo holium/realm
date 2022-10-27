@@ -9,6 +9,7 @@ import { EthNew } from './views/common/New';
 import { EthSettings } from './views/ethereum/Settings';
 import { WalletFooter } from './views/common/Footer';
 import { CreateWallet } from './views/common/Create';
+import { NFTDetail } from './views/common/NFTDetail';
 import Locked from './views/common/Locked';
 import { ListPlaceholder } from './views/bitcoin/ListPlaceholder';
 import { WalletHeader } from './views/common/Header';
@@ -37,6 +38,7 @@ const WalletViews: { [key: string]: any } = {
   [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
   settings: (props: any) => <WalletSettings {...props} />,
   [WalletView.ETH_SETTINGS]: (props: any) => <EthSettings {...props} />,
+  [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />
 };
 
 export const WalletApp: FC<any> = observer((props: any) => {

@@ -19,8 +19,8 @@ export const Locked: FC<LockedProps> = observer(
     const { theme } = useServices();
 
     let unlock = () => {
-      console.log('unlocking', walletApp.returnView)
-      WalletActions.setView(walletApp.returnView || WalletView.ETH_LIST, walletApp.currentIndex, walletApp.currentItem);
+      console.log('unlocking', walletApp.currentItem)
+      WalletActions.setView(walletApp.returnView || WalletView.ETH_LIST);
     }
 
     return (

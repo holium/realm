@@ -94,6 +94,9 @@ export function formatEthAmount(amount: string): EthAmount {
 }
 
 export function convertEthAmountToUsd(amount: EthAmount) {
+  if (amount.eth === '0') {
+    return 0;
+  }
   let exchangeRate = 1647.37;
   let usd = Number(amount.eth) * exchangeRate;
   return usd.toFixed(2);
