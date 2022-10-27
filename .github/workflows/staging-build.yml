@@ -179,5 +179,12 @@ jobs:
     container:
       image: electronuserland/builder:wine
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+          cache: "npm"
       - name: Build and install
-        run: GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn dist
+        run: GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
