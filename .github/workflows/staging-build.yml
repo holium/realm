@@ -119,7 +119,7 @@ jobs:
           sudo apt update
           sudo apt install aptitude
           sudo aptitude install -y -q wine-stable
-          npx GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
         env:
           #   APPLE_ID: ${{ secrets.APPLE_ID }}
           #   APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
