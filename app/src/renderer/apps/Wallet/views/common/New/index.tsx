@@ -23,14 +23,14 @@ export enum NewWalletScreen {
 
 export const EthNew: FC<any> = observer(() => {
   const [screen, setScreen] = useState<NewWalletScreen>(NewWalletScreen.CREATE);
-  const [passcode, setPasscode] = useState<number []>([]);
+  const [passcode, setPasscode] = useState<number[]>([]);
   // TODO move this to background thread
   const [seedPhrase, setSeedPhrase] = useState(
     ethers.Wallet.createRandom().mnemonic.phrase
   );
   let phraseSetter = (phrase: string) => setSeedPhrase(phrase);
 
-  let setPasscodeWrapper = (passcode: number []) => {
+  let setPasscodeWrapper = (passcode: number[]) => {
     setPasscode(passcode);
     setScreen(NewWalletScreen.CONFIRM_PASSCODE);
   };
@@ -46,7 +46,9 @@ export const EthNew: FC<any> = observer(() => {
     [NewWalletScreen.CONFIRM]: (
       <Confirm setScreen={setScreen} seedPhrase={seedPhrase} />
     ),
-    [NewWalletScreen.PASSCODE]: <CreatePasscode setPasscode={setPasscodeWrapper} />,
+    [NewWalletScreen.PASSCODE]: (
+      <CreatePasscode setPasscode={setPasscodeWrapper} />
+    ),
     [NewWalletScreen.CONFIRM_PASSCODE]: (
       <ConfirmPasscode setScreen={setScreen} correctPasscode={passcode} />
     ),

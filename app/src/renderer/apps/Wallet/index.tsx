@@ -38,7 +38,7 @@ const WalletViews: { [key: string]: any } = {
   [WalletView.LOCKED]: (props: any) => <Locked {...props} />,
   settings: (props: any) => <WalletSettings {...props} />,
   [WalletView.ETH_SETTINGS]: (props: any) => <EthSettings {...props} />,
-  [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />
+  [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />,
 };
 
 export const WalletApp: FC<any> = observer((props: any) => {
@@ -59,7 +59,11 @@ export const WalletApp: FC<any> = observer((props: any) => {
     setHidePending(true);
   };
 
-  let hideHeaderFooter = [WalletView.ETH_NEW, WalletView.LOCKED, WalletView.ETH_SETTINGS].includes(walletApp.currentView);
+  let hideHeaderFooter = [
+    WalletView.ETH_NEW,
+    WalletView.LOCKED,
+    WalletView.ETH_SETTINGS,
+  ].includes(walletApp.currentView);
   let View = WalletViews[walletApp.currentView];
 
   return (

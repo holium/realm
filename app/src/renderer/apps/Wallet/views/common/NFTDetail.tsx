@@ -4,7 +4,11 @@ import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Anchor, Icons } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
-import { getBaseTheme, convertEthAmountToUsd, formatEthAmount } from '../../lib/helpers';
+import {
+  getBaseTheme,
+  convertEthAmountToUsd,
+  formatEthAmount,
+} from '../../lib/helpers';
 
 export const NFTDetail: FC = () => {
   const { walletApp } = useTrayApps();
@@ -18,21 +22,31 @@ export const NFTDetail: FC = () => {
 
   return (
     <Flex width="100%" flexDirection="column" px={3}>
-
       <Flex flexDirection="column" alignItems="center">
-        <Text variant="body" fontSize={1} color={baseTheme.colors.text.secondary}>{nft.collectionName || 'NFT' }</Text>
-        <Text variant="h5">
-          {nft.name}
+        <Text
+          variant="body"
+          fontSize={1}
+          color={baseTheme.colors.text.secondary}
+        >
+          {nft.collectionName || 'NFT'}
         </Text>
+        <Text variant="h5">{nft.name}</Text>
       </Flex>
 
       <Flex mt={4} mb={6} width="100%" height="256px" justifyContent="center">
-        <img height="100%" src={nft.imageUrl} style={{ borderRadius: "6px" }} />
+        <img height="100%" src={nft.imageUrl} style={{ borderRadius: '6px' }} />
       </Flex>
 
-      <Text mb={3} variant="body" fontSize={1} color={theme.currentTheme.iconColor}>Details</Text>
+      <Text
+        mb={3}
+        variant="body"
+        fontSize={1}
+        color={theme.currentTheme.iconColor}
+      >
+        Details
+      </Text>
 
-      { lastPrice && (
+      {lastPrice && (
         <Flex width="100%" justifyContent="space-between">
           <Text
             variant="body"
@@ -46,10 +60,7 @@ export const NFTDetail: FC = () => {
             justifyContent="center"
             alignItems="flex-end"
           >
-            <Text
-              variant="body"
-              fontSize={4}
-            >
+            <Text variant="body" fontSize={4}>
               {lastPrice.eth}
             </Text>
             <Text
@@ -62,7 +73,7 @@ export const NFTDetail: FC = () => {
           </Flex>
         </Flex>
       )}
-      { floorPrice && (
+      {floorPrice && (
         <Flex justifyContent="space-between">
           <Text
             variant="body"
@@ -112,13 +123,22 @@ export const NFTDetail: FC = () => {
             color={baseTheme.colors.text.primary}
             href={`https://etherscan.io/token/${nft.address}?a=${nft.tokenId}`}
           >
-            {nft.address.slice(0, 12)}...{' '}
-            <Icons mb={1} name="Link" size={1} />
+            {nft.address.slice(0, 12)}... <Icons mb={1} name="Link" size={1} />
           </Anchor>
         </Flex>
       </Flex>
 
-      <Flex position="absolute" top="582px" zIndex={999} onClick={()=> WalletActions.setView(WalletView.WALLET_DETAIL, walletApp.currentIndex)}>
+      <Flex
+        position="absolute"
+        top="582px"
+        zIndex={999}
+        onClick={() =>
+          WalletActions.setView(
+            WalletView.WALLET_DETAIL,
+            walletApp.currentIndex
+          )
+        }
+      >
         <Icons
           name="ArrowLeftLine"
           size={2}
@@ -126,7 +146,7 @@ export const NFTDetail: FC = () => {
         />
       </Flex>
     </Flex>
-  )
-}
+  );
+};
 
 export default NFTDetail;

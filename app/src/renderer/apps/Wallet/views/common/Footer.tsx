@@ -18,7 +18,10 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
     const { theme } = useServices();
     const themeData = getBaseTheme(theme.currentTheme);
 
-    let settingsView = walletApp.network === 'ethereum' ? WalletView.ETH_SETTINGS : WalletView.BIT_SETTINGS;
+    let settingsView =
+      walletApp.network === 'ethereum'
+        ? WalletView.ETH_SETTINGS
+        : WalletView.BIT_SETTINGS;
 
     return (
       <Box width="100%" hidden={props.hidden}>
@@ -31,9 +34,23 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           justifyContent="flex-end"
         >
           <Box mr={1}>
-            <WalletNetwork network={walletApp.ethereum.network === 'mainnet' ? 'Ethereum Mainnet' : 'Görli Testnet'} />
+            <WalletNetwork
+              network={
+                walletApp.ethereum.network === 'mainnet'
+                  ? 'Ethereum Mainnet'
+                  : 'Görli Testnet'
+              }
+            />
           </Box>
-          <Box onClick={() => WalletActions.setView(settingsView, walletApp.currentIndex, walletApp.currentItem) }>
+          <Box
+            onClick={() =>
+              WalletActions.setView(
+                settingsView,
+                walletApp.currentIndex,
+                walletApp.currentItem
+              )
+            }
+          >
             <Icons name="Settings" color={theme.currentTheme.iconColor} />
           </Box>
         </Flex>

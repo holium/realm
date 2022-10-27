@@ -5,11 +5,13 @@ import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../lib/helpers';
 
 interface PasscodeDisplayProps {
-  digits: number,
-  filled: number
+  digits: number;
+  filled: number;
 }
 
-export const PasscodeDisplay: FC<PasscodeDisplayProps> = (props: PasscodeDisplayProps) => {
+export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
+  props: PasscodeDisplayProps
+) => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
@@ -55,5 +57,5 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (props: PasscodeDisplay
         );
       })}
     </Flex>
-  )
-}
+  );
+};

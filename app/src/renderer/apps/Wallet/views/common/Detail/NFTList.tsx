@@ -34,7 +34,12 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
         justifyContent="space-between"
         backgroundColor={darken(0.03, theme.currentTheme.windowColor)}
         borderRadius="6px"
-        onClick={() => WalletActions.setView(WalletView.NFT_DETAIL, walletApp.currentIndex, { type: 'nft', key: `${props.details.address}${props.details.tokenId}`})}
+        onClick={() =>
+          WalletActions.setView(WalletView.NFT_DETAIL, walletApp.currentIndex, {
+            type: 'nft',
+            key: `${props.details.address}${props.details.tokenId}`,
+          })
+        }
       >
         <Flex alignItems="center">
           <Flex
