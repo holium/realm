@@ -197,7 +197,7 @@ jobs:
           apt-get update && apt-get -y install sudo
           # useradd -m $USERNAME && echo "$USERNAME:$USERNAME" | chpasswd && adduser $USERNAME sudo
           # sudo chown -R $USERNAME:$USERNAME /github/home
-          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo yarn package:prerelease
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
