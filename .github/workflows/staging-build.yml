@@ -191,8 +191,7 @@ jobs:
       #     cache: "npm"
       - name: Build and install
         run: |
-          rm -rf ~/docker-data/wine
-          mkdir ~/docker-data/wine
+          chown -R $USER ~/.wine
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn package:prerelease
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
