@@ -180,4 +180,4 @@ jobs:
       image: electronuserland/builder:wine
     steps:
       - name: Build and install
-        run: GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
+        run: GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && yarn dist
