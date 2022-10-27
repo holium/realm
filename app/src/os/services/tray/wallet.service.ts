@@ -24,6 +24,7 @@ import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
 // @ts-ignore
 import abi from 'human-standard-token-abi';
+import axios from 'axios';
 
 
 
@@ -730,8 +731,24 @@ export class WalletService extends BaseService {
     this.updateWalletInfo();
   }
 
-  getAllTransactions() {
+  async getAllTransactions() {
     // etherscan api call
+    /*
+    for (var key of this.state!.ethereum.wallets.keys()) {
+      const address = this.state!.ethereum.wallets.get(key)!.address;
+      const startBlock = 0;
+      const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
+      const URL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
+      const response: any = await axios.get(URL);
+      console.log(response.data.result)
+      this.state!.ethereum.addTransactions()
+      this.state!.ethereum.transactions.
+      for (var tx of response.data.result) {
+        console.log(Object.keys(tx));
+        this.state!.ethereum.wallets.get(key)!.addTransaction()
+      }
+    }
+    */
   }
 
   /*

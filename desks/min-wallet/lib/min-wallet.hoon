@@ -189,8 +189,8 @@
       [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
-      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so hash+json-to-ux transaction+json-to-transaction])]
-      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so hash+so notes+so])]
+      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+json-to-ux transaction+json-to-transaction])]
+      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+so notes+so])]
   ==
 ::
 ++  json-to-ux
@@ -226,21 +226,27 @@
     %+  turn  transaction-list
       jsonify-transaction-map
     ++  jsonify-transaction-map
-      |=  [=network transactions=(map net=@t (map @t transaction))]
+      |=  [=network transactions=(map net=@t (map wallet=@ud (map @t transaction)))]
       ^-  [@t json]
       :-  `@t`network
         %-  pairs
         =/  tx-list  ~(tap by transactions)
         %+  turn  tx-list
-        |=  [net=@t transactions=(map @t transaction)]
+        |=  [net=@t transactions=(map wallet=@ud (map @t transaction))]
         ^-  [@t json]
         :-  net
           %-  pairs
           =/  tx-list  ~(tap by transactions)
           %+  turn  tx-list
-          |=  [key=@t =transaction]
+          |=  [wallet=@ud transactions=(map @t transaction)]
           ^-  [@t json]
-          [key (transaction-to-json transaction)]
+          :-  (scot %ud wallet)
+            %-  pairs
+            =/  tx-list  ~(tap by transactions)
+            %+  turn  tx-list
+            |=  [key=@t =transaction]
+            ^-  [@t json]
+            [key (transaction-to-json transaction)]
     --
   ::
       %wallet

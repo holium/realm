@@ -404,7 +404,10 @@ export const EthStore = types
           nfts: {},
           nickname: wallet.nickname,
         };
-        self.wallets.set(wallet.key, EthWallet.create(walletObj));
+        console.log(self.wallets)
+        const ethWallet = EthWallet.create(walletObj)
+        console.log(wallet.key)
+        self.wallets.set(wallet.key, ethWallet);
       }
         /*for (var contract in wallet.contracts) {
           if (wallet.contracts[contract].type === 'erc20') {

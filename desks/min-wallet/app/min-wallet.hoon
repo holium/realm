@@ -209,7 +209,6 @@
     ::  create new wallet
     ::
     =/  idx  (lent ~(tap by (~(got by wallets.state) network.act)))
-    =?  idx  =(~ idx)  0
     =^  wallet=(unit wallet)  wallets.state
       =/  xpub  xpub:(~(got by networks.settings.state) network.act)
       ?~  xpub  [~ wallets.state]
@@ -239,7 +238,7 @@
     =/  cards
       ^-  (list card)
       =/  key  [network.act `@ta`idx]
-      :~  `card`[%give %fact [/wallets]~ %wallet-update !>(`update`[%wallet network.act `@t`idx u.wallet])]
+      :~  `card`[%give %fact [/wallets]~ %wallet-update !>(`update`[%wallet network.act (scot %ud idx) u.wallet])]
       ==
     ::  send wallet to requester if not our
     =?  cards  !(team:title our.bowl src.bowl)
@@ -270,10 +269,17 @@
       =/  network-map  (~(got by transactions.state) network.act)
       =/  net-map  (~(get by network-map) net.act)
       ?~  net-map
-        =/  net-map  `(map @t transaction)`(my [hash.transaction.act transaction.act]~)
+        =/  wall-map  `(map @t transaction)`(my [hash.transaction.act transaction.act]~)
+        =/  net-map  `(map @ud (map @t transaction))`(my [wallet.act wall-map]~)
         =.  network-map  (~(put by network-map) [net.act net-map])
         (~(put by transactions.state) [network.act network-map])
-      =/  net-map  (~(put by u.net-map) [hash.transaction.act transaction.act])
+      =/  net-map
+        =/  wall-map  (~(get by u.net-map) wallet.act)
+        ?~  wall-map
+          =/  wall-map  `(map @t transaction)`(my [hash.transaction.act transaction.act]~)
+          `(map @ud (map @t transaction))`(my [wallet.act wall-map]~)
+        =/  wall-map  (~(put by u.wall-map) [hash.transaction.act transaction.act])
+        (~(put by u.net-map) [wallet.act wall-map])
       =.  network-map  (~(put by network-map) [net.act net-map])
       (~(put by transactions.state) [network.act network-map])
     =/  cards  *(list card)
@@ -298,7 +304,7 @@
             =.  their-address.transaction.act  our-address.transaction.act
             =.  our-address.transaction.act  their-address
             transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act net.act hash.act transaction.act]
+          =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
           =/  task  [%poke %wallet-action !>(wall-act)]
           =/  new-card  
             ^-  (list card)
@@ -315,7 +321,7 @@
             =.  their-address.transaction.act  our-address.transaction.act
             =.  our-address.transaction.act  their-address
             transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act net.act hash.act transaction.act]
+          =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
           =/  task  [%poke %wallet-action !>(wall-act)]
           =/  new-card  
             ^-  (list card)
@@ -332,7 +338,7 @@
             =.  their-address.transaction.act  our-address.transaction.act
             =.  our-address.transaction.act  their-address
             transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act net.act hash.act transaction.act]
+          =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
           =/  task  [%poke %wallet-action !>(wall-act)]
           =/  new-card  
             ^-  (list card)
@@ -352,7 +358,8 @@
       %save-transaction-notes
     =/  network-map  (~(got by transactions) %ethereum)
     =/  net-map  (~(got by network-map) net.act)
-    =/  tx  (~(got by net-map) hash.act)
+    =/  wall-map  (~(got by net-map) wallet.act)
+    =/  tx  (~(got by wall-map) hash.act)
     =/  notes
       ?-  -.tx
         %eth  notes.tx
@@ -361,7 +368,8 @@
       ==
     =.  notes  notes.act
     =.  transactions
-      =.  net-map  (~(put by net-map) [hash.act tx])
+      =.  wall-map  (~(put by wall-map) [hash.act tx])
+      =.  net-map  (~(put by net-map) [wallet.act wall-map])
       =.  network-map  (~(put by network-map) [net.act net-map])
       (~(put by transactions) [%ethereum network-map])
     :_  state

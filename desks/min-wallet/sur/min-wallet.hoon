@@ -143,9 +143,9 @@
       [%create-wallet sndr=ship =network nickname=@t]
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
-      [%enqueue-transaction =network net=@t hash=@ =transaction]
+      [%enqueue-transaction =network net=@t wallet=@ud hash=@ =transaction]
       ::[%enqueue-transaction =network hash=@ =transaction]
-      [%save-transaction-notes =network net=@t hash=@t notes=@t]
+      [%save-transaction-notes =network net=@t wallet=@ud hash=@t notes=@t]
   ==
 ::  subscription updates
 ::
@@ -159,7 +159,7 @@
 ::  stores
 ::
 +$  wallets  (map =network (map @ud wallet))
-+$  transactions  (map network (map net=@t (map @t transaction)))
++$  transactions  (map network (map net=@t (map wallet=@ud (map @t transaction))))
 +$  settings
   $:  =sharing
       networks=(map network [xpub=(unit @t) default-index=@ud])
