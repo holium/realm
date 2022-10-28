@@ -522,7 +522,7 @@ export class WalletService extends BaseService {
       net = 'mainnet'
     }
     const hash = this.state!.currentTransaction!;
-    WalletApi.saveTransactionNotes(this.core.conduit!, network, net, hash, notes);
+    WalletApi.saveTransactionNotes(this.core.conduit!, network, net, this.state!.currentIndex, hash, notes);
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
@@ -704,7 +704,6 @@ export class WalletService extends BaseService {
       for (let nft of nfts.ownedNfts) {
         // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
         var floorPrice
-        this.state!.ethereum.wallets.get(key)!.setNFT(nft.title, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
         const ownedNft = {
           name: nft.title,
           collectionName: nft.description,
@@ -739,7 +738,7 @@ export class WalletService extends BaseService {
       const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
       const URL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
       const response: any = await axios.get(URL);
-      // this.state!.ethereum.wallets.get(key)!.addTransactions(response.data.result);
+      this.state!.ethereum.wallets.get(key)!.applyTransactions(response.data.result);
     }
   }
 

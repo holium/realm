@@ -61,8 +61,8 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = walletApp.ethereum.transactions.get(
-    walletApp.currentItem.key
+  let transaction = walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions.get(
+    walletApp.currentItem!.key
   )!;
   console.log(transaction);
 

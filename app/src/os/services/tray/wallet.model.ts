@@ -7,6 +7,7 @@ import {
 } from 'mobx-state-tree';
 import { Network, Alchemy, Nft } from "alchemy-sdk";
 import { IntelligentTieringAccessTier } from 'aws-sdk/clients/s3';
+import { TransactionDescription } from 'ethers/lib/utils';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -348,6 +349,27 @@ const EthWallet = types
       else
         self.transactions.set(transaction.transaction.hash, transaction.transaction);
     },
+    applyTransactions(transactions: any) {
+      var formattedTransactions: any = {};//self.transactions.toJSON();
+      console.log(transactions.length);
+      for (var transaction of transactions) {
+        formattedTransactions[transaction.hash] = {
+          hash: transaction.hash,
+          amount: gweiToEther(transaction.value).toString(),
+          network: 'ethereum',
+          ethType: transaction.contractAddress || 'ETH',
+          type: 'sent',
+          initiatedAt: transaction.timeStamp,
+          ourAddress: transaction.from,
+          theirAddress: transaction.to,
+          status: (transaction.txreceipt_status === 1 ? 'succeeded': 'failed'),
+          notes: '',
+        }
+      }
+      const map = types.map(EthTransaction);
+      const newTransactions = map.create(formattedTransactions);
+      applySnapshot(self.transactions, getSnapshot(newTransactions));
+    }
   }))
 
 export type EthWalletType = Instance<typeof EthWallet>
