@@ -117,7 +117,7 @@
 ::  ==
 +$  status  ?(%pending %failed %succeeded)
 +$  eth-type  ?(%erc20 %erc721 %eth)
-+$  wallet  [=address path=@t nickname=@t]
++$  wallet  [=address path=@t nickname=@t transactions=(map net=@t (map @t transaction))]
 +$  mode  ?(%on-demand %default)
 +$  pending-tx  [txh=(unit @ux) from=@ux to=@ux amount=@ud]
 +$  txn  [block=@ud txh=@ux log-index=@ud from=@ux to=@ux amount=@ud]
@@ -151,15 +151,14 @@
 ::
 +$  update
   $%  [%address =ship =network address=(unit address)]
-      [%transaction =network net=@t @t transaction]
-      [%history transactions]
+      [%transaction =network net=@t @ud @t transaction]
+::      [%history transactions]
       [%wallet =network @t =wallet]
       [%wallets wallets]
   ==
 ::  stores
 ::
 +$  wallets  (map =network (map @ud wallet))
-+$  transactions  (map network (map net=@t (map wallet=@ud (map @t transaction))))
 +$  settings
   $:  =sharing
       networks=(map network [xpub=(unit @t) default-index=@ud])

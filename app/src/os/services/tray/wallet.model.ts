@@ -80,6 +80,7 @@ const BitcoinWallet = types.model('BitcoinWallet', {
       euro: types.maybe(types.string),
     })
   ),
+  transactions: types.map(types.string)
 });
 
 export type BitcoinWalletType = Instance<typeof BitcoinWallet>
@@ -117,6 +118,7 @@ const BitcoinStore = types
         address: wallet.address,
         nickname: wallet.nickname,
         balance: wallet.balance.toString(),
+        transactions: {}
       };
       self.wallets.set(wallet.key, BitcoinWallet.create(walletObj));
     }
@@ -379,6 +381,7 @@ export const EthStore = types
           key: key,
           coins: {},
           nfts: {},
+          transactions: {},
         }
         this.applyWalletUpdate(walletUpdate)
       })
@@ -423,6 +426,7 @@ export const EthStore = types
           coins: {},
           nfts: {},
           nickname: wallet.nickname,
+          transactions: {}
         };
         console.log(self.wallets)
         const ethWallet = EthWallet.create(walletObj)

@@ -199,6 +199,23 @@
   ^-  @ux
   (scan (trip (so json)) ;~(pfix (jest '0x') hex))
 ::
+++  transactions-to-json
+  =,  enjs:format
+  |=  transactions=(map net=@t (map @t transaction))
+  ^-  json
+    %-  pairs
+    =/  tx-list  ~(tap by transactions)
+    %+  turn  tx-list
+    |=  [net=@t transactions=(map @t transaction)]
+    ^-  [@t json]
+    :-  net
+      %-  pairs
+      =/  tx-list  ~(tap by transactions)
+      %+  turn  tx-list
+      |=  [key=@t =transaction]
+      ^-  [@t json]
+      [key (transaction-to-json transaction)]
+::
 ++  enjs-update
   =,  enjs:format
   |=  =update
@@ -215,39 +232,10 @@
     %-  pairs
     :~  ['network' [%s network.update]]
         ['net' [%s net.update]]
-        ['key' [%s +>+<.update]]
-        ['transaction' (transaction-to-json +>+>.update)]
+        ['index' (numb +>+<.update)]
+        ['key' [%s +>+>-.update]]
+        ['transaction' (transaction-to-json +>+>+.update)]
     ==
-  ::
-      %history
-    %-  pairs
-    |^
-    =/  transaction-list  ~(tap by +.update)
-    %+  turn  transaction-list
-      jsonify-transaction-map
-    ++  jsonify-transaction-map
-      |=  [=network transactions=(map net=@t (map wallet=@ud (map @t transaction)))]
-      ^-  [@t json]
-      :-  `@t`network
-        %-  pairs
-        =/  tx-list  ~(tap by transactions)
-        %+  turn  tx-list
-        |=  [net=@t transactions=(map wallet=@ud (map @t transaction))]
-        ^-  [@t json]
-        :-  net
-          %-  pairs
-          =/  tx-list  ~(tap by transactions)
-          %+  turn  tx-list
-          |=  [wallet=@ud transactions=(map @t transaction)]
-          ^-  [@t json]
-          :-  (scot %ud wallet)
-            %-  pairs
-            =/  tx-list  ~(tap by transactions)
-            %+  turn  tx-list
-            |=  [key=@t =transaction]
-            ^-  [@t json]
-            [key (transaction-to-json transaction)]
-    --
   ::
       %wallet
     ^-  json
@@ -288,6 +276,7 @@
             :~  ['address' [%s (crip (z-co:co address.wallet))]]
                 ['path' [%s path.wallet]]
                 ['nickname' [%s nickname.wallet]]
+                ['transactions' (transactions-to-json transactions.wallet)]
             ==
       --
     --
