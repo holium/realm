@@ -48,19 +48,19 @@ export const WalletApp: FC<any> = observer((props: any) => {
 
   const { walletApp } = useTrayApps();
   var transactions: any = [];
+  for (var key of walletApp.ethereum.wallets.keys()) {
+    const walletTransactions = getTransactions(walletApp.ethereum.wallets.get(key)!.transactions);
+    transactions = [
+      ...walletTransactions,
+      ...transactions
+    ]
+  }
   useEffect(() => {
-    for (var key of walletApp.ethereum.wallets.keys()) {
-      const walletTransactions = getTransactions(walletApp.ethereum.wallets.get(key)!.transactions);
-      transactions = [
-        walletTransactions,
-        ...transactions
-      ]
-    }
     if (transactions.length !== transactionCount) {
       setTransactionCount(transactions.length);
       setHidePending(false);
     }
-  }, [/*transactions*/]);
+  }, [transactions]);
 
   let hide = () => {
     setHidePending(true);

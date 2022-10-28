@@ -350,8 +350,7 @@ const EthWallet = types
         self.transactions.set(transaction.transaction.hash, transaction.transaction);
     },
     applyTransactions(transactions: any) {
-      var formattedTransactions: any = {};//self.transactions.toJSON();
-      console.log(transactions.length);
+      var formattedTransactions: any = {};
       for (var transaction of transactions) {
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,
@@ -421,13 +420,6 @@ export const EthStore = types
       })
       applySnapshot(self.wallets, ethWallets);
       */
-    },
-    applyHistory(history: any) {
-      const ethHistory = history.ethereum;
-      console.log(ethHistory);
-      Object.entries(ethHistory).forEach(([index, walletHistory]) => {
-        self.wallets.get(index)!.applyHistory(walletHistory);
-      })
     },
     // pokes
     setProvider(provider: string) {

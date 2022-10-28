@@ -522,7 +522,8 @@ export class WalletService extends BaseService {
       net = 'mainnet'
     }
     const hash = this.state!.currentTransaction!;
-    WalletApi.saveTransactionNotes(this.core.conduit!, network, net, this.state!.currentIndex, hash, notes);
+    const index = this.state!.ethereum.wallets.get(this.state?.currentIndex!)!.index
+    WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {

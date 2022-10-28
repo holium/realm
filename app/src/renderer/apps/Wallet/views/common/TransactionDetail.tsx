@@ -64,7 +64,6 @@ export const TransactionDetail: FC = observer(() => {
   let transaction = walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions.get(
     walletApp.currentItem!.key
   )!;
-  console.log(transaction);
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);

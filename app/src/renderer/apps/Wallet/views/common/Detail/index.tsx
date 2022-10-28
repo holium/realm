@@ -57,12 +57,13 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const nfts = getNfts(wallet!.nfts);
   const transactions = getTransactions(
     walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions,
-    wallet?.address,
-    coin
+    // wallet?.address,
+    // coin
   ).sort(
     (a, b) =>
       new Date(b.initiatedAt).getTime() - new Date(a.initiatedAt).getTime()
   );
+  console.log(transactions.length)
 
   /*useEffect(() => {
     if (coins.length) {
