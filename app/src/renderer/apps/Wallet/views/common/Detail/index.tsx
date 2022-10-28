@@ -56,7 +56,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const coins = getCoins(wallet!.coins);
   const nfts = getNfts(wallet!.nfts);
   const transactions = getTransactions(
-    walletApp.ethereum.transactions,
+    walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions,
     wallet?.address,
     coin
   ).sort(

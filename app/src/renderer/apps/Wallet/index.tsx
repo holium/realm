@@ -47,7 +47,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
   let [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
-  let transactions = getTransactions(walletApp.ethereum.transactions);
+  let transactions = getTransactions(walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions);
   useEffect(() => {
     if (transactions.length !== transactionCount) {
       setTransactionCount(transactions.length);

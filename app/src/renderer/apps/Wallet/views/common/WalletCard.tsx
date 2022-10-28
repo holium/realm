@@ -63,7 +63,7 @@ export const WalletCard: FC<WalletCardProps> = ({
   console.log(wallet.address);
 
   const transactions = getTransactions(
-    walletApp.ethereum.transactions,
+    walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions,
     wallet!.address
   );
 
