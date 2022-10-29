@@ -328,16 +328,18 @@ export class WalletService extends BaseService {
       this.core.conduit!,
       (transaction: any) => {
         if (transaction.network == 'ethereum')
-          this.state!.ethereum.applyTransactionUpdate(transaction);
+          this.state!.ethereum.wallets.get(transaction.index)!.applyTransactionUpdate(transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-        const tx = this.state!.ethereum.transactions.get(
+        /*const tx = this.state!.ethereum.transactions.get(
           transaction.transaction.hash
-        );
+        );*/
       }
     );
     WalletApi.getHistory(this.core.conduit!).then((history: any) => {
-      this.state!.ethereum.applyHistory(history);
+      for (const walletHistory of history) {
+        this.state!.ethereum.wallets.get(walletHistory.index)!.applyHistory(history);
+      }
     });
 
     this.setNetworkProvider(
@@ -521,7 +523,7 @@ export class WalletService extends BaseService {
     else {
       net = 'mainnet'
     }
-    const hash = this.state!.currentTransaction!;
+    const hash = this.state!.currentItem!.key;
     const index = this.state!.ethereum.wallets.get(this.state?.currentIndex!)!.index
     WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }

@@ -341,8 +341,11 @@
       %save-transaction-notes
     =/  network-map  (~(got by wallets) %ethereum)
     =/  wall-map  (~(got by network-map) wallet.act)
-    =/  net-map  (~(got by transactions.wall-map) net.act)
-    =/  tx  (~(got by net-map) hash.act)
+    =/  net-map  (~(get by transactions.wall-map) net.act)
+    =/  tx
+      ?~  net-map
+        *transaction
+      (~(got by u.net-map) hash.act)
     =.  tx
       ?-  -.tx
           %eth
@@ -355,8 +358,11 @@
         =.  notes.tx  notes.act
         tx
       ==
+    =/  net-map
+      ?~  net-map
+        (my [hash.act tx]~)
+      (~(put by u.net-map) [hash.act tx])
     =.  wallets
-      =.  net-map  (~(put by net-map) [hash.act tx])
       =.  transactions.wall-map  (~(put by transactions.wall-map) [net.act net-map])
       =.  network-map  (~(put by network-map) [wallet.act wall-map])
       (~(put by wallets) [%ethereum network-map])
