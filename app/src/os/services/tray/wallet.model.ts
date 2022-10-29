@@ -357,7 +357,7 @@ const EthWallet = types
           amount: gweiToEther(transaction.value).toString(),
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
-          type: 'sent',
+          type: (self.address === transaction.from ? 'sent' : 'received'),
           initiatedAt: transaction.timeStamp,
           ourAddress: transaction.from,
           theirAddress: transaction.to,
