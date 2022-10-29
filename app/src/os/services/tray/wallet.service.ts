@@ -737,7 +737,9 @@ export class WalletService extends BaseService {
       const address = this.state!.ethereum.wallets.get(key)!.address;
       const startBlock = 0;
       const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
-      const URL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
+      const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
+      const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
+      const URL = (this.state!.ethereum.network === 'mainnet' ? mainnetURL : goerliURL);
       const response: any = await axios.get(URL);
       this.state!.ethereum.wallets.get(key)!.applyTransactions(response.data.result);
     }
