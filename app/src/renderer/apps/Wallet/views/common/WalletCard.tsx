@@ -64,7 +64,7 @@ export const WalletCard: FC<WalletCardProps> = ({
 
   var transactions = getTransactions(
     wallet.transactions,
-    wallet!.address
+//    wallet!.address
   );
 
   let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;

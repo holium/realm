@@ -8,7 +8,7 @@ import {
   getSnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { WalletApi } from '../../api/min-wallet';
+import { WalletApi } from '../../api/wallet';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import {

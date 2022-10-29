@@ -9,14 +9,13 @@
   ==
 ::
 ++  new-address
-  |=  [xpub=@t =network idx=@]
+  |=  [xpub=@t =network idx=@ud]
   =,  hmac:crypto
   =,  secp:crypto
   =+  ecc=secp256k1
   =/  code  (~(got by bip44-codes) network)
   =/  xpub-bip32  (from-extended:bip32 (trip xpub))
-  =/  udidx  (slav %ud idx)
-  =/  path  "{<udidx>}"
+  =/  path  "{<idx>}"
   =/  derived-pub  (derive-path:xpub-bip32 path)
   :-  ?-  network
         %bitcoin
@@ -24,7 +23,7 @@
         %ethereum
           (address-from-pub:key:ethereum (serialize-point.ecc pub:derived-pub))
       ==
-  =/  path  "m/44'/{<code>}'/0'/0/{<udidx>}"
+  =/  path  "m/44'/{<code>}'/0'/0/{<idx>}"
   (crip path)
 ::
 ++  split-xpub
@@ -115,7 +114,6 @@
   ?-  -.transaction
       %eth
     :~  ['hash' [%s hash.transaction]]
-        ['amount' [%s amount.transaction]]
         ['network' [%s network.transaction]]
         ['type' [%s type.transaction]]
         ['initiatedAt' [%s initiated-at.transaction]]
@@ -184,16 +182,15 @@
   %.  jon
   %-  of
   :~  [%set-xpub (ot ~[network+(su (perk %bitcoin %ethereum ~)) xpub+so])]
+      [%set-settings (ot ~[network+(su (perk %bitcoin %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni])]
       [%set-wallet-creation-mode (ot ~[mode+(su (perk %on-demand %default ~))])]
       [%set-sharing-mode (ot ~[who+(su (perk %nobody %friends %anybody ~))])]
-      [%sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
-      [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+so])]
+      [%set-sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
+      [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
-      [%set-network-provider (ot ~[network+(su (perk %bitcoin %ethereum ~)) provider+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
-      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+json-to-ux transaction+json-to-transaction])]
-      [%add-smart-contract (ot ~[contract-type+(su (perk %erc20 %erc721 ~)) name+so address+json-to-ux wallet-index+so])]
-      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) hash+so notes+so])]
+      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+json-to-ux transaction+json-to-transaction])]
+      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+so notes+so])]
   ==
 ::
 ++  json-to-ux
@@ -201,6 +198,23 @@
   |=  =json
   ^-  @ux
   (scan (trip (so json)) ;~(pfix (jest '0x') hex))
+::
+++  transactions-to-json
+  =,  enjs:format
+  |=  transactions=(map net=@t (map @t transaction))
+  ^-  json
+    %-  pairs
+    =/  tx-list  ~(tap by transactions)
+    %+  turn  tx-list
+    |=  [net=@t transactions=(map @t transaction)]
+    ^-  [@t json]
+    :-  net
+      %-  pairs
+      =/  tx-list  ~(tap by transactions)
+      %+  turn  tx-list
+      |=  [key=@t =transaction]
+      ^-  [@t json]
+      [key (transaction-to-json transaction)]
 ::
 ++  enjs-update
   =,  enjs:format
@@ -217,30 +231,11 @@
       %transaction
     %-  pairs
     :~  ['network' [%s network.update]]
-        ['key' [%s +>-.update]]
-        ['transaction' (transaction-to-json +>+<.update)]
-        ['success' [%b success.update]]
+        ['net' [%s net.update]]
+        ['index' (numb +>+<.update)]
+        ['key' [%s +>+>-.update]]
+        ['transaction' (transaction-to-json +>+>+.update)]
     ==
-  ::
-      %history
-    %-  pairs
-    |^
-    =/  transaction-list  ~(tap by +.update)
-    %+  turn  transaction-list
-      jsonify-transaction-map
-    ++  jsonify-transaction-map
-      |=  [=network transactions=(map @t transaction)]
-      ^-  [@t json]
-      :-  `@t`network
-        %-  pairs
-::        ~(tap by transactions)
-        =/  tx-list  ~(tap by transactions)
-        %+  turn  tx-list
-        |=  [key=@t =transaction]
-        ^-  [@t json]
-        :-  key
-        (transaction-to-json transaction)
-    --
   ::
       %wallet
     ^-  json
@@ -251,32 +246,6 @@
         ['address' [%s (crip (z-co:co address.wallet.update))]]
         ['path' [%s path.wallet.update]]
         ['nickname' [%s nickname.wallet.update]]
-        ['balance' (numb balance.wallet.update)]
-        :-  'contracts'
-        %-  pairs
-        %+  turn  ~(tap by contracts-map.wallet.update)
-        |=  [contract-id=@t =contract-data]
-        ^-  [@t json]
-        :-  contract-id
-        ?-  -.contract-data
-            %erc20
-          %-  pairs
-          :~  ['type' s+'erc20']
-              ['name' [%s name.contract-data]]
-              ['address' [%s (crip (z-co:co address.contract-data))]]
-              ['balance' (numb balance.contract-data)]
-          ==
-            %erc721
-          %-  pairs
-          :~  ['type' s+'erc721']
-              ['name' s+name.contract-data]
-              ['address' [%s (crip (z-co:co address.contract-data))]]
-              :-  'tokens'
-              :-  %a
-              %+  turn  ~(tap in tokens.contract-data)
-              numb
-          ==
-        ==
     ==
   ::
       %wallets
@@ -287,11 +256,11 @@
     %+  turn  wallet-list
       jsonify-wallet-map
     ++  jsonify-wallet-map
-      |=  [=network wallets=(map @t =wallet)]
+      |=  [=network wallets=(map @ud =wallet)]
       ^-  [@t json]
       |^
       =/  wallet-list
-        ^-  (list [@t =wallet])
+        ^-  (list [@ud =wallet])
         ~(tap by wallets)
       :-  `@t`network
         %-  pairs
@@ -299,40 +268,15 @@
         %+  turn  wallet-list
           jsonify-wallet
       ++  jsonify-wallet
-        |=  [key=@t =wallet]
+        |=  [key=@ud =wallet]
         ^-  [@t json]
-        :-  key
+        :-  (crip (scow %ud key))
             %-  pairs
             ^-  (list [@t json])
             :~  ['address' [%s (crip (z-co:co address.wallet))]]
                 ['path' [%s path.wallet]]
                 ['nickname' [%s nickname.wallet]]
-                ['balance' (numb balance.wallet)]
-                :-  'contracts'
-                  %-  pairs
-                  %+  turn  ~(tap by contracts-map.wallet)
-                  |=  [contract-id=@t =contract-data]
-                  ^-  [@t json]
-                  :-  contract-id
-                  ?-  -.contract-data
-                      %erc20
-                    %-  pairs
-                    :~  ['type' s+'erc20']
-                        ['name' [%s name.contract-data]]
-                        ['address' [%s (crip (z-co:co address.contract-data))]]
-                        ['balance' (numb balance.contract-data)]
-                    ==
-                      %erc721
-                    %-  pairs
-                    :~  ['type' s+'erc721']
-                        ['name' s+name.contract-data]
-                        ['address' [%s (crip (z-co:co address.contract-data))]]
-                        :-  'tokens'
-                        :-  %a
-                        %+  turn  ~(tap in tokens.contract-data)
-                        numb
-                    ==
-                  ==
+                ['transactions' (transactions-to-json transactions.wallet)]
             ==
       --
     --
