@@ -87,49 +87,6 @@
           [%s u.failure-reason.transaction]
         ['notes' [%s notes.transaction]]
     ==
-::      %erc20
-::    :~  ['hash' [%s hash.transaction]]
-::        ::['contract-address' [%s (crip (z-co:co contract-address.transaction))]]
-::        ::['amount' [%s amount.transaction]]
-::        ['network' [%s network.transaction]]
-::        ['type' [%s type.transaction]]
-::        ['initiatedAt' [%s initiated-at.transaction]]
-::        :-  'completedAt'
-::          ?~  completed-at.transaction  ~
-::          [%s u.completed-at.transaction]
-::        ['ourAddress' [%s our-address.transaction]]
-::        :-  'theirPatp'
-::          ?~  their-patp.transaction  ~
-::          [%s (crip (scow %p u.their-patp.transaction))]
-        ::['theirAddress' [%s their-address.transaction]]
-        ::['status' [%s status.transaction]]
-::        :-  'failureReason'
-::          ?~  failure-reason.transaction  ~
-::          [%s u.failure-reason.transaction]
-::        ['notes' [%s notes.transaction]]
-::   ==
-::      %erc721
-::    :~  ['hash' [%s hash.transaction]]
-::        ['contract-address' [%s (crip (z-co:co contract-address.transaction))]]
-::        ['token' [%s token.transaction]]
-::        ['network' [%s network.transaction]]
-::        ['type' [%s type.transaction]]
-::        ['initiatedAt' [%s initiated-at.transaction]]
-::        :-  'completedAt'
-::          ?~  completed-at.transaction  ~
-::          [%s u.completed-at.transaction]
-::        ['ourAddress' [%s our-address.transaction]]
-::        :-  'theirPatp'
-::          ?~  their-patp.transaction  ~
-::          [%s (crip (scow %p u.their-patp.transaction))]
-::        ['theirAddress' [%s their-address.transaction]]
-::        ['status' [%s status.transaction]]
-::        :-  'failureReason'
-::          ?~  failure-reason.transaction  ~
-::          [%s u.failure-reason.transaction]
-::        ['notes' [%s notes.transaction]]
-    ::==
-::  ==
 ::
 ++  dejs-action
   =,  dejs:format
