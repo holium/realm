@@ -556,8 +556,6 @@ export const WalletStore = types
 
       if (item) {
         self.currentItem = item;
-      } else {
-        self.currentItem = undefined;
       }
 
       let returnView = self.currentView;

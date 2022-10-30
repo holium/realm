@@ -58,7 +58,6 @@
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
       [%enqueue-transaction =network net=@t wallet=@ud hash=@ =transaction]
-      ::[%enqueue-transaction =network hash=@ =transaction]
       [%save-transaction-notes =network net=@t wallet=@ud hash=@t notes=@t]
   ==
 ::  subscription updates
