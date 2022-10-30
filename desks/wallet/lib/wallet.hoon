@@ -48,62 +48,20 @@
   =/  tx
     ^-  help-transaction
     %.  json
-    %-  of
-    :~  [%eth [%eth (ot ~[hash+so amount+so network+(su (perk %bitcoin %ethereum ~)) type+(su (perk %sent %received ~)) initiated-at+so completed-at+so:dejs-soft:format our-address+so their-patp+so:dejs-soft:format their-address+so status+(su (perk %pending %failed %succeeded ~)) failure-reason+so:dejs-soft:format notes+so])]]
-        [%erc20 [%erc20 (ot ~[hash+so contract-address+json-to-ux token+so network+(su (perk %bitcoin %ethereum ~)) type+(su (perk %sent %received ~)) initiated-at+so completed-at+so:dejs-soft:format our-address+so their-patp+so:dejs-soft:format their-address+so status+(su (perk %pending %failed %succeeded ~)) failure-reason+so:dejs-soft:format notes+so])]]
-        [%erc721 [%erc721 (ot ~[hash+so contract-address+json-to-ux amount+so network+(su (perk %bitcoin %ethereum ~)) type+(su (perk %sent %received ~)) initiated-at+so completed-at+so:dejs-soft:format our-address+so their-patp+so:dejs-soft:format their-address+so status+(su (perk %pending %failed %succeeded ~)) failure-reason+so:dejs-soft:format notes+so])]]
+    :~  (ot ~[hash+so network+(su (perk %bitcoin %ethereum ~)) type+(su (perk %sent %received ~)) initiated-at+so completed-at+so:dejs-soft:format our-address+so their-patp+so:dejs-soft:format their-address+so status+(su (perk %pending %failed %succeeded ~)) failure-reason+so:dejs-soft:format notes+so])
     ==
-  ?-  -.tx
-      %eth
-    :*  %eth
-        hash.tx
-        amount.tx
-        network.tx
-        type.tx
-        initiated-at.tx
-        completed-at.tx
-        our-address.tx
-        ?~  their-patp.tx  ~
-        [~ `@p`(slav %p u.their-patp.tx)]
-        their-address.tx
-        status.tx
-        failure-reason.tx
-        notes.tx
-    ==
-      %erc20
-    :*  %erc20
-        hash.tx
-        contract-address.tx
-        amount.tx
-        network.tx
-        type.tx
-        initiated-at.tx
-        completed-at.tx
-        our-address.tx
-        ?~  their-patp.tx  ~
-        [~ `@p`(slav %p u.their-patp.tx)]
-        their-address.tx
-        status.tx
-        failure-reason.tx
-        notes.tx
-    ==
-      %erc721
-    :*  %erc721
-        hash.tx
-        contract-address.tx
-        token.tx
-        network.tx
-        type.tx
-        initiated-at.tx
-        completed-at.tx
-        our-address.tx
-        ?~  their-patp.tx  ~
-        [~ `@p`(slav %p u.their-patp.tx)]
-        their-address.tx
-        status.tx
-        failure-reason.tx
-        notes.tx
-    ==
+  :*  hash.tx
+      network.tx
+      type.tx
+      initiated-at.tx
+      completed-at.tx
+      our-address.tx
+      ?~  their-patp.tx  ~
+      [~ `@p`(slav %p u.their-patp.tx)]
+      their-address.tx
+      status.tx
+      failure-reason.tx
+      notes.tx
   ==
 ::
 ++  transaction-to-json
@@ -111,8 +69,6 @@
   |=  =transaction
   ^-  json
   %-  pairs
-  ?-  -.transaction
-      %eth
     :~  ['hash' [%s hash.transaction]]
         ['network' [%s network.transaction]]
         ['type' [%s type.transaction]]
@@ -131,49 +87,49 @@
           [%s u.failure-reason.transaction]
         ['notes' [%s notes.transaction]]
     ==
-      %erc20
-    :~  ['hash' [%s hash.transaction]]
-        ['contract-address' [%s (crip (z-co:co contract-address.transaction))]]
-        ['amount' [%s amount.transaction]]
-        ['network' [%s network.transaction]]
-        ['type' [%s type.transaction]]
-        ['initiatedAt' [%s initiated-at.transaction]]
-        :-  'completedAt'
-          ?~  completed-at.transaction  ~
-          [%s u.completed-at.transaction]
-        ['ourAddress' [%s our-address.transaction]]
-        :-  'theirPatp'
-          ?~  their-patp.transaction  ~
-          [%s (crip (scow %p u.their-patp.transaction))]
-        ['theirAddress' [%s their-address.transaction]]
-        ['status' [%s status.transaction]]
-        :-  'failureReason'
-          ?~  failure-reason.transaction  ~
-          [%s u.failure-reason.transaction]
-        ['notes' [%s notes.transaction]]
-    ==
-      %erc721
-    :~  ['hash' [%s hash.transaction]]
-        ['contract-address' [%s (crip (z-co:co contract-address.transaction))]]
-        ['token' [%s token.transaction]]
-        ['network' [%s network.transaction]]
-        ['type' [%s type.transaction]]
-        ['initiatedAt' [%s initiated-at.transaction]]
-        :-  'completedAt'
-          ?~  completed-at.transaction  ~
-          [%s u.completed-at.transaction]
-        ['ourAddress' [%s our-address.transaction]]
-        :-  'theirPatp'
-          ?~  their-patp.transaction  ~
-          [%s (crip (scow %p u.their-patp.transaction))]
-        ['theirAddress' [%s their-address.transaction]]
-        ['status' [%s status.transaction]]
-        :-  'failureReason'
-          ?~  failure-reason.transaction  ~
-          [%s u.failure-reason.transaction]
-        ['notes' [%s notes.transaction]]
-    ==
-  ==
+::      %erc20
+::    :~  ['hash' [%s hash.transaction]]
+::        ::['contract-address' [%s (crip (z-co:co contract-address.transaction))]]
+::        ::['amount' [%s amount.transaction]]
+::        ['network' [%s network.transaction]]
+::        ['type' [%s type.transaction]]
+::        ['initiatedAt' [%s initiated-at.transaction]]
+::        :-  'completedAt'
+::          ?~  completed-at.transaction  ~
+::          [%s u.completed-at.transaction]
+::        ['ourAddress' [%s our-address.transaction]]
+::        :-  'theirPatp'
+::          ?~  their-patp.transaction  ~
+::          [%s (crip (scow %p u.their-patp.transaction))]
+        ::['theirAddress' [%s their-address.transaction]]
+        ::['status' [%s status.transaction]]
+::        :-  'failureReason'
+::          ?~  failure-reason.transaction  ~
+::          [%s u.failure-reason.transaction]
+::        ['notes' [%s notes.transaction]]
+::   ==
+::      %erc721
+::    :~  ['hash' [%s hash.transaction]]
+::        ['contract-address' [%s (crip (z-co:co contract-address.transaction))]]
+::        ['token' [%s token.transaction]]
+::        ['network' [%s network.transaction]]
+::        ['type' [%s type.transaction]]
+::        ['initiatedAt' [%s initiated-at.transaction]]
+::        :-  'completedAt'
+::          ?~  completed-at.transaction  ~
+::          [%s u.completed-at.transaction]
+::        ['ourAddress' [%s our-address.transaction]]
+::        :-  'theirPatp'
+::          ?~  their-patp.transaction  ~
+::          [%s (crip (scow %p u.their-patp.transaction))]
+::        ['theirAddress' [%s their-address.transaction]]
+::        ['status' [%s status.transaction]]
+::        :-  'failureReason'
+::          ?~  failure-reason.transaction  ~
+::          [%s u.failure-reason.transaction]
+::        ['notes' [%s notes.transaction]]
+    ::==
+::  ==
 ::
 ++  dejs-action
   =,  dejs:format
@@ -280,5 +236,22 @@
             ==
       --
     --
+  ::
+      %settings
+    %-  pairs
+    ^-  (list [@t json])
+    :~  ['sharingMode' [%s who.sharing.update]]
+        ['walletCreationMode' [%s wallet-creation.sharing.update]]
+        :: ['whitelist' [%s 'test']]
+        ['defaultIndex' (numb 0)]
+        :-  'blocked'
+          :-  %a
+            ^-  (list json)
+            =/  blocklist  ~(tap in blocked.sharing.update)
+            %+  turn  blocklist
+              |=  blocked=@p
+              [%s (scot %p blocked)]
+
+    ==
   ==
 --

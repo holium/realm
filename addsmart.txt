@@ -1,1 +1,0 @@
-:wallet &wallet-action [%add-smart-contract %erc20 'LeoCoin' (slav %ux '0xef69.7ae0.822e.244c.6938.fa1d.74f3.00e8.3ae6.1435') '0']

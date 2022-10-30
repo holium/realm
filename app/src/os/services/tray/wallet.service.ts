@@ -336,11 +336,9 @@ export class WalletService extends BaseService {
         );*/
       }
     );
-    WalletApi.getHistory(this.core.conduit!).then((history: any) => {
-      for (const walletHistory of history) {
-        this.state!.ethereum.wallets.get(walletHistory.index)!.applyHistory(history);
-      }
-    });
+    WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
+      this.state!.ethereum.setSettings(settings);
+    })
 
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',

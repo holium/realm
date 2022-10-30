@@ -76,6 +76,10 @@
       :^  ~  ~  %wallet-update
       !>  ^-  update
       [%wallets wallets.state]
+        [%x %settings ~]
+      :^  ~  ~  %wallet-update
+      !>  ^-  update
+      [%settings settings.state]
     ==
   ++  on-agent  on-agent:def
   ++  on-arvo   on-arvo:def
@@ -268,67 +272,25 @@
     =/  cards  *(list card)
     =?  cards
         ?&  (team:title our.bowl src.bowl)
-            =/  their-patp
-              ?-  -.transaction.act
-                %eth  their-patp.transaction.act
-                %erc20  their-patp.transaction.act
-                %erc721  their-patp.transaction.act
-              ==
+            =/  their-patp  their-patp.transaction.act
             !=(~ their-patp)
         ==
-        ?-  -.transaction.act
-            %eth
-          ?~  their-patp.transaction.act  !!
-          =/  to=@p  u.their-patp.transaction.act
-          =.  transaction.act
-            =.  type.transaction.act  %received
-            =.  their-patp.transaction.act  `our.bowl
-            =/  their-address  their-address.transaction.act
-            =.  their-address.transaction.act  our-address.transaction.act
-            =.  our-address.transaction.act  their-address
-            transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
-          =/  task  [%poke %wallet-action !>(wall-act)]
-          =/  new-card  
-            ^-  (list card)
-            :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
-            ==
-          (weld cards new-card)
-            %erc20
-          ?~  their-patp.transaction.act  !!
-          =/  to=@p  u.their-patp.transaction.act
-          =.  transaction.act
-            =.  type.transaction.act  %received
-            =.  their-patp.transaction.act  `our.bowl
-            =/  their-address  their-address.transaction.act
-            =.  their-address.transaction.act  our-address.transaction.act
-            =.  our-address.transaction.act  their-address
-            transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
-          =/  task  [%poke %wallet-action !>(wall-act)]
-          =/  new-card  
-            ^-  (list card)
-            :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
-            ==
-          (weld cards new-card)
-            %erc721
-          ?~  their-patp.transaction.act  !!
-          =/  to=@p  u.their-patp.transaction.act
-          =.  transaction.act
-            =.  type.transaction.act  %received
-            =.  their-patp.transaction.act  `our.bowl
-            =/  their-address  their-address.transaction.act
-            =.  their-address.transaction.act  our-address.transaction.act
-            =.  our-address.transaction.act  their-address
-            transaction.act
-          =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
-          =/  task  [%poke %wallet-action !>(wall-act)]
-          =/  new-card  
-            ^-  (list card)
-            :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
-            ==
-          (weld cards new-card)
-        ==
+      ?~  their-patp.transaction.act  !!
+        =/  to=@p  u.their-patp.transaction.act
+        =.  transaction.act
+          =.  type.transaction.act  %received
+          =.  their-patp.transaction.act  `our.bowl
+          =/  their-address  their-address.transaction.act
+          =.  their-address.transaction.act  our-address.transaction.act
+          =.  our-address.transaction.act  their-address
+          transaction.act
+        =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
+        =/  task  [%poke %wallet-action !>(wall-act)]
+        =/  new-card  
+          ^-  (list card)
+          :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
+          ==
+        (weld cards new-card)
     =?  cards
         !(team:title our.bowl src.bowl)
       =/  new-card
@@ -344,20 +306,13 @@
     =/  net-map  (~(get by transactions.wall-map) net.act)
     =/  tx
       ?~  net-map
-        *transaction
+        =/  tx  *transaction
+        =.  hash.tx  hash.act
+        tx
       (~(got by u.net-map) hash.act)
     =.  tx
-      ?-  -.tx
-          %eth
-        =.  notes.tx  notes.act
-        tx
-          %erc20
-        =.  notes.tx  notes.act
-        tx
-          %erc721
-        =.  notes.tx  notes.act
-        tx
-      ==
+      =.  notes.tx  notes.act
+      tx
     =/  net-map
       ?~  net-map
         (my [hash.act tx]~)

@@ -182,12 +182,6 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  getHistory: async (conduit: Conduit) => {
-    return await conduit.scry({
-      app: 'wallet',
-      path: '/history',
-    });
-  },
   subscribeToTransactions(
     conduit: Conduit,
     handler: (transaction: any) => void
@@ -222,4 +216,10 @@ export const WalletApi = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
+  getSettings: async (conduit: Conduit) => {
+    return await conduit.scry({
+      app: 'wallet',
+      path: '/settings'
+    })
+  }
 };

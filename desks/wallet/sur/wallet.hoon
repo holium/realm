@@ -3,118 +3,32 @@
 ::
 +$  address  @u
 +$  network  ?(%bitcoin %ethereum)
-+$  help-eth-tx
-  $:  hash=@t
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @t)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  eth-transaction
-  $:  hash=@t
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @p)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  help-erc20-tx
-  $:  hash=@t
-      contract-address=@ux
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @t)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  erc20-transaction
-  $:  hash=@t
-      contract-address=@ux
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @p)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  help-erc721-tx
-  $:  hash=@t
-      contract-address=@ux
-      token=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @t)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  erc721-transaction
-  $:  hash=@t
-      contract-address=@ux
-      token=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @p)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
 +$  transaction
-  $%  [%eth eth-transaction]
-      [%erc20 erc20-transaction]
-      [%erc721 erc721-transaction]
+  $:  hash=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @p)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
   ==
 +$  help-transaction
-  $%  [%eth help-eth-tx]
-      [%erc20 help-erc20-tx]
-      [%erc721 help-erc721-tx]
+  $:  hash=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @t)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
   ==
-::+$  transaction
-::  $:  type=?(%btc %eth %erc20 %erc721)
-::      hash=@u
-::      =network
-::      type=?(%sent %received)
-::      initiated-at=@t
-::      completed-at=(unit @t)
-::      our-address=@t
-::      their-patp=(unit @p)
-::      their-address=@t
-::      =status
-::      failure-reason=(unit @t)
-::      notes=@t
-::  ==
 +$  status  ?(%pending %failed %succeeded)
 +$  eth-type  ?(%erc20 %erc721 %eth)
 +$  wallet  [=address path=@t nickname=@t transactions=(map net=@t (map @t transaction))]
@@ -155,6 +69,7 @@
 ::      [%history transactions]
       [%wallet =network @t =wallet]
       [%wallets wallets]
+      [%settings settings]
   ==
 ::  stores
 ::
