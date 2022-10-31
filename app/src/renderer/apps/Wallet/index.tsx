@@ -20,7 +20,7 @@ import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 
-const WalletViews: { [key: string]: any } = {
+const WalletViews: (network: NetworkType) => { [key: string]: any } = (network: NetworkType) => ({
   'bitcoin:list': (props: any) => <BitcoinWalletList {...props} />,
   'bitcoin:detail': (props: any) => <div />,
   'bitcoin:transaction': (props: any) => <div />,
@@ -39,7 +39,7 @@ const WalletViews: { [key: string]: any } = {
   settings: (props: any) => <WalletSettings {...props} />,
   [WalletView.ETH_SETTINGS]: (props: any) => <EthSettings {...props} />,
   [WalletView.NFT_DETAIL]: (props: any) => <NFTDetail {...props} />,
-};
+});
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
@@ -66,7 +66,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
     setHidePending(true);
   };
 
-  let View = WalletViews[walletApp.currentView];
+  const walletNetwork: NetworkType = (walletApp.network === 'ethereum' ? 'ethereum': 'bitcoin');
+  let View = WalletViews(walletNetwork)[walletApp.currentView];
 
   return (
     <Flex
