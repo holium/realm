@@ -55,7 +55,7 @@ jobs:
         run: |
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
-          ts-node ./.holium/scripts/clean.js dist
+          # ts-node ./.holium/scripts/clean.js dist
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npm run build
           APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true electron-builder build --mac --publish always --config.publish.releaseType=prerelease
         env:
@@ -99,7 +99,7 @@ jobs:
           # GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn
           sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
-          ts-node ./.holium/scripts/clean.js dist
+          # ts-node ./.holium/scripts/clean.js dist
           sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npm run build
           sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true electron-builder build --linux --publish always --config.publish.releaseType=prerelease
         env:
@@ -120,7 +120,7 @@ jobs:
           # sudo chown -R $USERNAME:$USERNAME /github/home
           GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn
           sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
-          ts-node ./.holium/scripts/clean.js dist
+          # ts-node ./.holium/scripts/clean.js dist
           sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npm run build
           sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true electron-builder build --win --publish always --config.publish.releaseType=prerelease
         env:
@@ -128,6 +128,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   bump-app-version:
+    needs: [build-mac-staging, build-linux-staging, build-windows-staging]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
