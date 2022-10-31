@@ -55,8 +55,6 @@ export const WalletCard: FC<WalletCardProps> = ({
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
   const themeData = themes[mode];
 
-  console.log('HERE')
-  console.log(wallet)
   let coins = null;
   if ('coins' in wallet) {
     coins = getCoins(wallet.coins);
@@ -69,7 +67,9 @@ export const WalletCard: FC<WalletCardProps> = ({
 //    wallet!.address
   );
 
-  let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;
+  let amountDisplay = walletApp.network === 'ethereum'
+      ? `${formatEthAmount(wallet.balance).eth} ETH`
+      : `${formatEthAmount(wallet.balance).eth} BTC`;
 
   return (
     <Flex mt={6}>
