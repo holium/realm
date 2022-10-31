@@ -10,7 +10,7 @@
     "build:cursor": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.prod.ts",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package:prerelease": "ts-node ./.holium/scripts/clean.js dist && npm run build && DEBUG=electron-builder electron-builder build --$PLATFORM --publish always --config.publish.releaseType=prerelease",
+    "package:prerelease": "ts-node ./.holium/scripts/clean.js dist && npm run build && DEBUG=electron-builder electron-builder build --publish always --config.publish.releaseType=prerelease",
     "package:release": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --publish always --config.publish.releaseType=release",
     "postinstall": "ts-node .holium/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.renderer.dev.dll.ts",
     "start": "ts-node ./.holium/scripts/check-port-in-use.js && npm run start:renderer",
