@@ -114,14 +114,7 @@ jobs:
       - name: Build and install
         run: |
           apt-get update && apt-get -y install sudo
-          cd ./app
-          # use --production flag to force devDependencies to be installed
-          sudo yarn install --production=false
-          sudo DEBUG_PROD=true concurrently "npm run build:main" "npm run build:renderer" "npm run build:cursor"
-          # sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn build:multiplayer && yarn build:conduit && yarn build:room
-          # sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn workspace @holium/realm package:prerelease
-          # sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
-          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true DEBUG=electron-builder electron-builder build --win --publish always --config.publish.releaseType=prerelease
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
