@@ -108,7 +108,12 @@
       %set-xpub
     ?>  (team:title our.bowl src.bowl)
     =/  net  (~(got by networks.settings.state) network.act)
-    =?  wallets  !=(xpub.act xpub.net)
+    =?  wallets
+        ?&  !=(~ xpub.net)
+            ?~  xpub.net
+              !!
+            !=(xpub.act u.xpub.net)
+        ==
       =/  net-wallets  (~(got by wallets) network.act)
       (~(put by wallets) [network.act ~])
     =.  networks.settings.state

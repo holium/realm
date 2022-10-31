@@ -400,6 +400,11 @@ export class WalletService extends BaseService {
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
 
     this.state!.ethereum.deleteWallets();
+    WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
+      this.state!.ethereum.initial(wallets);
+      this.state!.bitcoin.initial(wallets);
+      this.updateWalletInfo();
+    });
 
     console.log('okay transitioning');
     this.state!.setView(WalletView.ETH_LIST);
@@ -673,6 +678,8 @@ export class WalletService extends BaseService {
 
   async getAllCoins() {
     for (var key of this.state!.ethereum.wallets.keys()) {
+      console.log('getting coins')
+      console.log(key)
       let wallet: any = this.state!.ethereum.wallets.get(key);
       const balances = await this.alchemy!.core.getTokenBalances(wallet.address);
       // Remove tokens with zero balance
@@ -683,6 +690,7 @@ export class WalletService extends BaseService {
       for (let token of nonZeroBalances) {
         const metadata = await this.alchemy!.core.getTokenMetadata((token as any).contractAddress);
         const contract = new ethers.Contract((token as any).contractAddress, abi, this.ethProvider);
+        let wallet: any = this.state!.ethereum.wallets.get(key);
         const balance = (await contract.balanceOf(wallet.address)).toString();
         const coin = {
           name: metadata.symbol!,
