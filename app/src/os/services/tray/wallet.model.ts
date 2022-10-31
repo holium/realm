@@ -345,6 +345,8 @@ const EthWallet = types
           tx.status = "succeeded";
         else
           tx.status = "failed";
+        tx.notes = transaction.transaction.notes;
+        self.transactions.set(transaction.transaction.hash, tx)
       }
       else
         self.transactions.set(transaction.transaction.hash, transaction.transaction);
