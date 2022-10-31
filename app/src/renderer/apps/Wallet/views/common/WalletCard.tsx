@@ -39,7 +39,7 @@ const CardStyle = styled(motion.div)<CardStyleProps>`
         `}
 `;
 interface WalletCardProps {
-  wallet: EthWalletType/* | BitcoinWalletType*/;
+  wallet: EthWalletType | BitcoinWalletType;
   isSelected?: boolean;
   onSelect?: () => void;
   theme?: ThemeType;

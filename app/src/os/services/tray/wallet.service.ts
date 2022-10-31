@@ -618,7 +618,7 @@ export class WalletService extends BaseService {
     const sender: string = this.state!.ourPatp!;
     const network: string = this.state!.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
-    this.state!.setView(WalletView.ETH_LIST);
+    this.state!.setView(this.state!.network === 'ethereum' ? WalletView.ETH_LIST: WalletView.BIT_LIST);
   }
 
   async estimateCurrentGasFee(_event: any) {}
