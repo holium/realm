@@ -784,12 +784,15 @@ export class WalletService extends BaseService {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
   }
 
+  updateBitcoinInfo() {
+    this.getAllBitcoinBalances();
+    this.getAllBitcoinTransactions();
+  }
+
   updateWalletInfo() {
     this.getAllBalances();
-    if (this.state!.network === 'ethereum') {
-      this.getAllCoins();
-      this.getAllNfts();
-    }
+    this.getAllCoins();
+    this.getAllNfts();
     this.getAllTransactions();
   }
 
@@ -883,6 +886,14 @@ export class WalletService extends BaseService {
       const response: any = await axios.get(URL);
       this.state!.ethereum.wallets.get(key)!.applyTransactions(response.data.result);
     }
+  }
+
+  async getAllBitcoinBalances() {
+
+  }
+
+  async getAllBitcoinTransactions() {
+
   }
 
   /*
