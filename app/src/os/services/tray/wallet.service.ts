@@ -25,6 +25,7 @@ import { Network, Alchemy } from "alchemy-sdk";
 // @ts-ignore
 import abi from 'human-standard-token-abi';
 import axios from 'axios';
+import { string } from 'yup';
 
 
 
@@ -63,6 +64,8 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.set-network-provider': this.setNetworkProvider,
     'realm.tray.wallet.create-wallet': this.createWallet,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
+    'realm.tray.wallet.send-erc20-transaction': this.sendERC20Transaction,
+    'realm.tray.wallet.send-erc721-transaction': this.sendERC721Transaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.request-address': this.requestAddress,
     'realm.tray.wallet.check-passcode': this.checkPasscode,
@@ -164,6 +167,44 @@ export class WalletService extends BaseService {
         toPatp,
         contractType
       );
+    },
+    sendERC20Transaction: (
+      walletIndex: string,
+      to: string,
+      amount: string,
+      contractAddress: string,
+      toPatp?: string,
+      contractType?: string,
+    ) => {
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.send-erc20-transaction',
+        walletIndex,
+        to,
+        amount,
+        contractAddress,
+        toPatp,
+        contractType,
+      )
+    },
+    sendERC721Transaction: (
+      walletIndex: string,
+      to: string,
+      amount: string,
+      contractAddress: string,
+      tokenId: string,
+      toPatp?: string,
+      contractType?: string,
+    ) => {
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.send-erc721-transaction',
+        walletIndex,
+        to,
+        amount,
+        contractAddress,
+        tokenId,
+        toPatp,
+        contractType,
+      )
     },
     sendBitcoinTransaction: (
       walletIndex: number,
@@ -629,6 +670,31 @@ export class WalletService extends BaseService {
       hash,
       stateTx,
     );
+  }
+
+  async sendERC20Transaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string,
+    contractAddress: string,
+    toPatp?: string,
+    contractType?: string,
+  ) {
+
+  }
+
+  async sendERC721Transaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string,
+    contractAddress: string,
+    tokenId: string,
+    toPatp?: string,
+    contractType?: string,
+  ) {
+
   }
 
   async sendBitcoinTransaction(
