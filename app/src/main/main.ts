@@ -156,7 +156,7 @@ const createWindow = async () => {
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };
-  let factor = screen.getPrimaryDisplay().scaleFactor;
+  // let factor = screen.getPrimaryDisplay().scaleFactor;
 
   mainWindow = new BrowserWindow({
     show: false,
