@@ -8,6 +8,7 @@ import {
 import { Network, Alchemy, Nft } from "alchemy-sdk";
 import { IntelligentTieringAccessTier } from 'aws-sdk/clients/s3';
 import { TransactionDescription } from 'ethers/lib/utils';
+import { WalletApi } from 'os/api/wallet';
 
 const alchemySettings = {
   apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
@@ -180,7 +181,7 @@ export const EthTransaction = types
     ethType: types.maybe(types.string),
     type: types.enumeration(['sent', 'received']),
 
-    initiatedAt: types.string,
+    initiatedAt: types.maybeNull(types.string),
     completedAt: types.maybeNull(types.string),
 
     ourAddress: types.string,
@@ -353,18 +354,26 @@ const EthWallet = types
     },
     applyTransactions(transactions: any) {
       var formattedTransactions: any = {};
+      const previousTransactions = self.transactions.toJSON();
       for (var transaction of transactions) {
+        const previousTransaction = previousTransactions[transaction.hash];
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,
           amount: gweiToEther(transaction.value).toString(),
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: (self.address === transaction.from ? 'sent' : 'received'),
-          initiatedAt: transaction.timeStamp,
+          initiatedAt: previousTransaction ? previousTransaction.initiatedAt : undefined,
+          completedAt: transaction.timeStamp,
           ourAddress: transaction.from,
           theirAddress: transaction.to,
           status: (transaction.txreceipt_status === 1 ? 'succeeded': 'failed'),
-          notes: '',
+          notes: previousTransaction ? previousTransaction.notes : '',
+        }
+        if (previousTransactions[transaction.hash]) {
+          if (formattedTransactions[transaction.hash].status !== previousTransactions[transaction.hash].status) {
+//            WalletApi.enqueueTransaction(transaction);
+          }
         }
       }
       const map = types.map(EthTransaction);
@@ -452,52 +461,6 @@ export const EthStore = types
       for (var transaction in wallet.transactions) {
         self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
-        /*for (var contract in wallet.contracts) {
-          if (wallet.contracts[contract].type === 'erc20') {
-            let coin: any = wallet.contracts[contract];
-            if ((coin.address as string).length <= 42) {
-              const diff = 42 - (coin.address as string).length;
-              for (var i = 0; i < diff; ++i) {
-                coin.address = coin.address.substring(0,2) + '0' + coin.address.substring(2);
-              }
-            }
-            if (coins.get(coin.address)) {
-              let balanceString: string = coin.balance.toString();
-              if (balanceString != '0') {
-                const decimals = coins.get(coin.address)!.decimals;
-                balanceString = balanceString.split("").reverse().join("");
-                balanceString = balanceString.substring(0,decimals) + '.' + balanceString.substring(decimals);
-                balanceString = balanceString.split("").reverse().join("");
-              }
-              coins.get(coin.address)!.setBalance(balanceString);
-            }
-            else
-              console.log((coin.address as string).length)
-          }
-          if (wallet.contracts[(contract as any)].type === 'erc721') {
-            let nft: any = wallet.contracts[contract];
-            for (var token in nft.tokens) {
-              // if token not in tokens
-              if (!nfts[token])
-              {
-                const response = yield alchemy.nft.getNftMetadata(
-                  nft.address,
-                  token
-                );
-                var newToken = {
-                  name: response.title,
-                  collectionName: response.tokenType,
-                  address: nft.address,
-                  tokenId: response.tokenId,
-                  imageUrl: response.tokenUri!.toString(),
-                  lastPrice: '0',
-                  floorPrice: '0'
-                };
-                nfts[nft.address+token] = newToken;
-              }
-            }
-          }
-        }*/
     }),
     setNetwork(network: string) {
       self.network = network
