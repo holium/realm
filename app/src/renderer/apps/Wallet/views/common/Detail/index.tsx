@@ -61,7 +61,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     // coin
   ).sort(
     (a, b) =>
-      new Date(b.initiatedAt).getTime() - new Date(a.initiatedAt).getTime()
+      new Date(a.initiatedAt).getTime() - new Date(b.initiatedAt).getTime()
   );
   console.log(transactions.length)
 

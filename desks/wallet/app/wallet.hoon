@@ -264,8 +264,11 @@
       =/  network-map  (~(got by wallets.state) network.act)
       =/  prev-wallet  (~(got by network-map) wallet.act)
       =.  transactions.prev-wallet
-        =/  net-map  (~(got by transactions.prev-wallet) net.act)
-        =.  net-map  (~(put by net-map) [hash.transaction.act transaction.act])
+        =/  net-map  (~(get by transactions.prev-wallet) net.act)
+        =/  net-map
+          ?~  net-map
+            (my [hash.transaction.act transaction.act]~)
+          (~(put by u.net-map) [hash.transaction.act transaction.act])
         (~(put by transactions.prev-wallet) [net.act net-map])
       =.  network-map  (~(put by network-map) [wallet.act prev-wallet])
       (~(put by wallets.state) [network.act network-map])

@@ -142,7 +142,6 @@ export const WalletApi = {
     wallet: number,
     hash: string,
     transaction: any,
-    ethType?: string,
   ) => {
     const payload = {
       app: 'wallet',

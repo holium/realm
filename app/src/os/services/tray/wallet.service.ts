@@ -605,7 +605,7 @@ export class WalletService extends BaseService {
     const fromAddress = this.state!.ethereum.wallets.get(
       this.state!.currentIndex!
     )!.address;
-    this.state!.ethereum.enqueueTransaction(
+    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
       hash,
       tx.to,
       toPatp,
@@ -614,15 +614,15 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType,
     );
-    const stateTx = this.state!.ethereum.getTransaction(hash);
+    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
     console.log(stateTx);
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
       this.state!.ethereum.network,
+      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
       hash,
       stateTx,
-      contractType,
     );
   }
 
