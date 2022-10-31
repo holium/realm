@@ -67,6 +67,10 @@ export interface EthAmount {
   ethFull: string;
   gweiFull: string;
   weiFull: string;
+
+  display: string
+  full: string
+  big: BigNumber
 }
 
 export interface BtcAmount {
@@ -90,7 +94,30 @@ export function formatEthAmount(amount: string): EthAmount {
     ethFull: utils.formatUnits(wei, 'ether'),
     gweiFull: utils.formatUnits(wei, 'gwei'),
     weiFull: utils.formatUnits(wei, 'wei'),
+
+    display: utils.formatUnits(wei, 'ether').slice(0, 6),
+    full: utils.formatUnits(wei, 'ether'),
+    big: wei
+
   };
+}
+
+export function formatCoinAmount (balance: string | BigInt, decimals: number) {
+  let amount = typeof balance === 'string' ? balance : balance.toString();
+  let decimalPosition = amount.length - decimals;
+  let includeDecimal = !amount.slice(decimalPosition).split('').every((char) => char === '0');
+  let parts = [amount.slice(0, decimalPosition)]
+  if (includeDecimal) {
+    parts.push('.')
+    parts.push(amount.slice(decimalPosition))
+  }
+  let adjustedAmount = parts.join('');
+
+  return {
+    big: BigInt(amount),
+    full: adjustedAmount,
+    display: adjustedAmount.slice(0, adjustedAmount[5] === '.' ? 8 : 7)
+  }
 }
 
 export function convertEthAmountToUsd(amount: EthAmount) {
