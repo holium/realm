@@ -63,13 +63,13 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
                 fontSize={1}
                 color={baseTheme.colors.text.secondary}
               >
-                {props.details.floorPrice ? props.details.tokenType : 'Title'}
+                {props.details.collectionName ? props.details.collectionName : 'Name'}
               </Text>
               <Text variant="h5" fontSize={1}>
                 {props.details.name}
               </Text>
             </Flex>
-            <Flex mt={1} flexDirection="column" justifyContent="center">
+            {/* <Flex mt={1} flexDirection="column" justifyContent="center">
               <Text
                 variant="body"
                 fontSize={1}
@@ -80,7 +80,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
               <Text variant="h5" fontSize={1}>
                 {props.details.floorPrice || props.details.lastPrice}
               </Text>
-            </Flex>
+            </Flex> */}
           </Flex>
         </Flex>
         <Icons

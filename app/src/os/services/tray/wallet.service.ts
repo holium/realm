@@ -25,9 +25,6 @@ import { Network, Alchemy } from "alchemy-sdk";
 // @ts-ignore
 import abi from 'human-standard-token-abi';
 import axios from 'axios';
-import { string } from 'yup';
-
-
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
