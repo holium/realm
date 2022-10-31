@@ -66,6 +66,11 @@ export const WalletApp: FC<any> = observer((props: any) => {
     setHidePending(true);
   };
 
+  let hideHeaderFooter = [
+    WalletView.ETH_NEW,
+    WalletView.LOCKED,
+    WalletView.ETH_SETTINGS,
+  ].includes(walletApp.currentView);
   const walletNetwork: NetworkType = (walletApp.network === 'ethereum' ? 'ethereum': 'bitcoin');
   let View = WalletViews(walletNetwork)[walletApp.currentView];
 
