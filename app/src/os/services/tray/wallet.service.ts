@@ -25,6 +25,7 @@ import { Network, Alchemy } from "alchemy-sdk";
 // @ts-ignore
 import abi from 'human-standard-token-abi';
 import axios from 'axios';
+import { string } from 'yup';
 
 
 
@@ -63,6 +64,8 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.set-network-provider': this.setNetworkProvider,
     'realm.tray.wallet.create-wallet': this.createWallet,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
+    'realm.tray.wallet.send-erc20-transaction': this.sendERC20Transaction,
+    'realm.tray.wallet.send-erc721-transaction': this.sendERC721Transaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.request-address': this.requestAddress,
     'realm.tray.wallet.check-passcode': this.checkPasscode,
@@ -164,6 +167,44 @@ export class WalletService extends BaseService {
         toPatp,
         contractType
       );
+    },
+    sendERC20Transaction: (
+      walletIndex: string,
+      to: string,
+      amount: string,
+      contractAddress: string,
+      toPatp?: string,
+      contractType?: string,
+    ) => {
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.send-erc20-transaction',
+        walletIndex,
+        to,
+        amount,
+        contractAddress,
+        toPatp,
+        contractType,
+      )
+    },
+    sendERC721Transaction: (
+      walletIndex: string,
+      to: string,
+      amount: string,
+      contractAddress: string,
+      tokenId: string,
+      toPatp?: string,
+      contractType?: string,
+    ) => {
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.send-erc721-transaction',
+        walletIndex,
+        to,
+        amount,
+        contractAddress,
+        tokenId,
+        toPatp,
+        contractType,
+      )
     },
     sendBitcoinTransaction: (
       walletIndex: number,
@@ -631,6 +672,102 @@ export class WalletService extends BaseService {
     );
   }
 
+  async sendERC20Transaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string,
+    contractAddress: string,
+    toPatp?: string,
+    contractType?: string,
+  ) {
+    console.log(walletIndex);
+    console.log(to);
+    console.log(amount);
+    console.log(toPatp);
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    let signer = wallet.connect(this.ethProvider!);
+    console.log(amount);
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+    const ethAmount = ethers.utils.parseEther(amount);
+    const { hash } = await contract.transfer(to, ethAmount);
+    const fromAddress = this.state!.ethereum.wallets.get(
+      this.state!.currentIndex!
+    )!.address;
+    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
+      hash,
+      to,
+      toPatp,
+      fromAddress,
+      ethAmount,
+      new Date().toISOString(),
+      'ERC20',
+    );
+    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
+    console.log(stateTx);
+    await WalletApi.enqueueTransaction(
+      this.core.conduit!,
+      'ethereum',
+      this.state!.ethereum.network,
+      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
+      hash,
+      stateTx,
+    );
+  }
+
+  async sendERC721Transaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string,
+    contractAddress: string,
+    tokenId: string,
+    toPatp?: string,
+    contractType?: string,
+  ) {
+    console.log(walletIndex);
+    console.log(to);
+    console.log(amount);
+    console.log(toPatp);
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    let signer = wallet.connect(this.ethProvider!);
+    console.log(amount);
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+    const ethAmount = ethers.utils.parseEther(amount);
+    const { hash } = await contract.transfer(to, ethAmount);
+    const fromAddress = this.state!.ethereum.wallets.get(
+      this.state!.currentIndex!
+    )!.address;
+    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
+      hash,
+      to,
+      toPatp,
+      fromAddress,
+      ethAmount,
+      new Date().toISOString(),
+      'ERC721',
+    );
+    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
+    console.log(stateTx);
+    await WalletApi.enqueueTransaction(
+      this.core.conduit!,
+      'ethereum',
+      this.state!.ethereum.network,
+      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
+      hash,
+      stateTx,
+    );
+
+  }
+
   async sendBitcoinTransaction(
     _event: any,
     walletIndex: string,
@@ -678,8 +815,6 @@ export class WalletService extends BaseService {
 
   async getAllCoins() {
     for (var key of this.state!.ethereum.wallets.keys()) {
-      console.log('getting coins')
-      console.log(key)
       let wallet: any = this.state!.ethereum.wallets.get(key);
       const balances = await this.alchemy!.core.getTokenBalances(wallet.address);
       // Remove tokens with zero balance
