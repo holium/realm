@@ -19,7 +19,9 @@
     "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:linux",
     "package:prerelease:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:mac",
     "package:prerelease:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:win",
-    "package:release": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release"
+    "package:release:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:linux",
+    "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:mac",
+    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
     "ethers": "^5.7.0",
