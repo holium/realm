@@ -351,16 +351,18 @@ export class WalletService extends BaseService {
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
+        this.updateEthereumInfo();
       }
       if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);
+        this.updateBitcoinInfo();
       }
-      this.updateWalletInfo();
     });
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
       this.state!.ethereum.initial(wallets);
+      this.updateEthereumInfo();
       this.state!.bitcoin.initial(wallets);
-      this.updateWalletInfo();
+      this.updateBitcoinInfo();
     });
     WalletApi.subscribeToTransactions(
       this.core.conduit!,
@@ -413,7 +415,7 @@ export class WalletService extends BaseService {
         network: Network.ETH_GOERLI, // Replace with your network.
       };
     }
-    this.ethProvider.on("block", () => this.updateWalletInfo());
+    this.ethProvider.on("block", () => this.updateEthereumInfo());
     this.alchemy = new Alchemy(alchemySettings);
   }
 
@@ -440,8 +442,9 @@ export class WalletService extends BaseService {
     this.state!.ethereum.deleteWallets();
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
       this.state!.ethereum.initial(wallets);
+      this.updateEthereumInfo();
       this.state!.bitcoin.initial(wallets);
-      this.updateWalletInfo();
+      this.updateBitcoinInfo();
     });
 
     console.log('okay transitioning');
@@ -789,7 +792,7 @@ export class WalletService extends BaseService {
     this.getAllBitcoinTransactions();
   }
 
-  updateWalletInfo() {
+  updateEthereumInfo() {
     this.getAllBalances();
     this.getAllCoins();
     this.getAllNfts();
@@ -871,7 +874,7 @@ export class WalletService extends BaseService {
       this.state!.ethereum.setNetwork('mainnet');
       this.setProviders();
     }
-    this.updateWalletInfo();
+    this.updateEthereumInfo();
   }
 
   async getAllTransactions() {
