@@ -51,7 +51,12 @@ jobs:
       # in this branch, set DEBUG_PROD=true to ensure invite code, developer tools,
       #   and other utilities/functionality are available in the final product
       - name: Build and publish
-        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
+        # run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
+        run: |
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn build:multiplayer && yarn build:conduit && yarn build:room
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn workspace @holium/realm package:prerelease
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true DEBUG=electron-builder electron-builder build --publish always --config.publish.releaseType=prerelease
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -90,7 +95,11 @@ jobs:
           sudo aptitude install -y -q winehq-staging
           sudo aptitude install -y -q wine-staging
           sudo apt update
-          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
+          # GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn build:multiplayer && yarn build:conduit && yarn build:room
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn workspace @holium/realm package:prerelease
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true DEBUG=electron-builder electron-builder build --publish always --config.publish.releaseType=prerelease
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
@@ -105,7 +114,10 @@ jobs:
       - name: Build and install
         run: |
           apt-get update && apt-get -y install sudo
-          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn build:multiplayer && yarn build:conduit && yarn build:room
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn workspace @holium/realm package:prerelease
+          sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true DEBUG=electron-builder electron-builder build --win --publish always --config.publish.releaseType=prerelease
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
