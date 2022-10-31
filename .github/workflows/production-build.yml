@@ -49,7 +49,7 @@ jobs:
       - name: Install app dependencies
         run: yarn install
       - name: Build and publish
-        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release
+        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -82,7 +82,7 @@ jobs:
           sudo aptitude install -y -q winehq-staging
           sudo aptitude install -y -q wine-staging
           sudo apt update
-          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:prerelease:linux
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true npx yarn package:release:linux
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
@@ -97,7 +97,7 @@ jobs:
       - name: Build and install
         run: |
           apt-get update && apt-get -y install sudo
-          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:prerelease:win
+          GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn && sudo GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:win
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
