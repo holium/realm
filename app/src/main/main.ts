@@ -156,15 +156,16 @@ const createWindow = async () => {
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };
-  let factor = screen.getPrimaryDisplay().scaleFactor;
+  // let factor = screen.getPrimaryDisplay().scaleFactor;
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920 / factor,
-    height: 1440 / factor,
+    // width: 1920 / factor,
+    // height: 1440 / factor,
     titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
+    fullscreen: true,
     acceptFirstMouse: true,
     webPreferences: {
       nodeIntegration: false,
@@ -183,7 +184,6 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
 
-  // RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
@@ -192,12 +192,9 @@ const createWindow = async () => {
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.maximize();
-
   mainWindow.on('resize', () => {
     const newDimension = mainWindow?.getBounds();
     mainWindow?.webContents.send('set-dimensions', newDimension);
-    // console.log('dims change: ' + dims);
   });
 
   // TODO why is this rendering multiple times?
@@ -219,7 +216,7 @@ const createWindow = async () => {
     );
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
-    // console.log('setting dims ready-to-show');
+
     mainWindow.webContents.send(
       'set-appview-preload',
       app.isPackaged
