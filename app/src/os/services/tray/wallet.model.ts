@@ -63,6 +63,29 @@ export type UISettingsType = {
   provider: string,
 }
 
+export const BitcoinTransaction = types
+  .model('BitcoinTransaction', {
+    hash: types.identifier,
+    amount: types.string,
+    network: types.enumeration(['ethereum', 'bitcoin']),
+    ethType: types.maybe(types.string),
+    type: types.enumeration(['sent', 'received']),
+
+    initiatedAt: types.maybeNull(types.string),
+    completedAt: types.maybeNull(types.string),
+
+    ourAddress: types.string,
+    theirPatp: types.maybeNull(types.string),
+    theirAddress: types.string,
+
+    status: types.enumeration(['pending', 'failed', 'succeeded']),
+    failureReason: types.maybeNull(types.string),
+
+    notes: types.string,
+  })
+
+export type BitcoinTransactionType = Instance<typeof BitcoinTransaction>;
+
 const BitcoinWallet = types.model('BitcoinWallet', {
   index: types.number,
   network: types.string,
@@ -77,7 +100,7 @@ const BitcoinWallet = types.model('BitcoinWallet', {
       euro: types.maybe(types.string),
     })
   ),
-  transactions: types.map(types.string)
+  transactions: types.map(BitcoinTransaction)
 });
 
 export type BitcoinWalletType = Instance<typeof BitcoinWallet>

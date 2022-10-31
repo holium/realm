@@ -49,15 +49,15 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       ? walletApp.ethereum.wallets.get(walletApp.currentIndex!)
       : walletApp.bitcoin.wallets.get(walletApp.currentIndex!);
 
-  let hasCoin = walletApp.currentItem && walletApp.currentItem.type === 'coin';
-  let coin = null;
-  if (hasCoin) {
-    coin = wallet!.coins.get(walletApp!.currentItem!.key)!;
-  }
 
   var coins
   var nfts
+  let hasCoin = walletApp.currentItem && walletApp.currentItem.type === 'coin';
+  let coin = null;
   if (walletApp.network === 'ethereum') {
+    if (hasCoin) {
+      coin = wallet!.coins.get(walletApp!.currentItem!.key)!;
+    }
     coins = getCoins(wallet!.coins);
     nfts = getNfts(wallet!.nfts);
   }
@@ -87,7 +87,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     <Flex width="100%" height="100%" flexDirection="column" px={3}>
       <DetailHero
         wallet={wallet!}
-        coin={coin!}
+        coin={coin}
         QROpen={QROpen}
         setQROpen={setQROpen}
         sendTrans={sendTrans}
@@ -106,6 +106,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
           {!coin ? (
             <>
               <ListSelector
+                network={walletApp.network}
                 selected={listView}
                 onChange={(newView: DisplayType) => setListView(newView)}
               />
@@ -152,6 +153,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
 interface ListSelectorProps {
   selected: DisplayType;
   onChange: any;
+  network: string;
 }
 function ListSelector(props: ListSelectorProps) {
   const { theme } = useServices();
@@ -172,18 +174,22 @@ function ListSelector(props: ListSelectorProps) {
   };
   return (
     <Flex mb={2} alignItems="center">
-      <MenuButton
-        selected={props.selected === 'coins'}
-        onClick={() => props.onChange('coins')}
-      >
-        Coins
-      </MenuButton>
-      <MenuButton
-        selected={props.selected === 'nfts'}
-        onClick={() => props.onChange('nfts')}
-      >
-        NFTs
-      </MenuButton>
+      {props.network === 'ethereum' &&
+        <MenuButton
+          selected={props.selected === 'coins'}
+          onClick={() => props.onChange('coins')}
+        >
+          Coins
+        </MenuButton>
+      }
+      {props.network === 'ethereum' &&
+        <MenuButton
+          selected={props.selected === 'nfts'}
+          onClick={() => props.onChange('nfts')}
+        >
+          NFTs
+        </MenuButton>
+      }
       <MenuButton
         selected={props.selected === 'transactions'}
         onClick={() => props.onChange('transactions')}
