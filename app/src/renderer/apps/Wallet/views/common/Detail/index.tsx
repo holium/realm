@@ -45,7 +45,9 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     setHideWalletHero(false);
   };
 
-  const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!);
+  const wallet = walletApp.network === 'ethereum'
+      ? walletApp.ethereum.wallets.get(walletApp.currentIndex!)
+      : walletApp.bitcoin.wallets.get(walletApp.currentIndex!);
 
   let hasCoin = walletApp.currentItem && walletApp.currentItem.type === 'coin';
   let coin = null;
@@ -53,10 +55,17 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     coin = wallet!.coins.get(walletApp!.currentItem!.key)!;
   }
 
-  const coins = getCoins(wallet!.coins);
-  const nfts = getNfts(wallet!.nfts);
+  var coins
+  var nfts
+  if (walletApp.network === 'ethereum') {
+    coins = getCoins(wallet!.coins);
+    nfts = getNfts(wallet!.nfts);
+  }
+  const networkTransactions = walletApp.network === 'ethereum'
+      ? walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions
+      : walletApp.bitcoin.wallets.get(walletApp.currentIndex!)!.transactions;
   const transactions = getTransactions(
-    walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions,
+    networkTransactions
     // wallet?.address,
     // coin
   ).sort(
