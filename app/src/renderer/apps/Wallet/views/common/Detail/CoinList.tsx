@@ -12,6 +12,7 @@ import {
   getBaseTheme,
   getTransactions,
   getMockCoinIcon,
+  formatCoinAmount
 } from '../../../lib/helpers';
 import { TransactionList } from '../Transaction/List';
 import { SendTransaction } from '../Transaction/Send';
@@ -28,6 +29,7 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
 
   const Coin = (props: { details: ERC20Type }) => {
     let coinIcon = props.details.logo || getMockCoinIcon(props.details.name);
+    let amount = formatCoinAmount(props.details.balance, props.details.decimals);
     return (
       <Flex
         width="100%"
@@ -50,7 +52,7 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
           <Flex flexDirection="column" justifyContent="center">
             <Text variant="body">
               {' '}
-              {props.details.balance} {props.details.name}{' '}
+              {amount.display} {props.details.name}{' '}
             </Text>
             {/*<Text fontSize={1} color={baseTheme.colors.text.disabled}>
               $5780.67

@@ -11,6 +11,7 @@ import {
   formatEthAmount,
   getBaseTheme,
   getMockCoinIcon,
+  formatCoinAmount
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
@@ -63,7 +64,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     let amountDisplay = !props.coin
       ? `${formatEthAmount(props.wallet.balance).eth} ETH`
-      : `${props.coin.balance} ${props.coin.name}`;
+      : `${formatCoinAmount(props.coin.balance, props.coin.decimals).display} ${props.coin.name}`;
 
     let accountDisplay = !props.coin ? (
       props.wallet.nickname
