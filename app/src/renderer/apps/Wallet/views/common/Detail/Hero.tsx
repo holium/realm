@@ -21,6 +21,7 @@ import {
   EthWalletType,
   BitcoinWalletType,
 } from 'os/services/tray/wallet.model';
+import { useTrayApps } from 'renderer/apps/store';
 
 const usdc = {
   ticker: 'USDC',
@@ -57,13 +58,16 @@ interface DetailHeroProps {
 export const DetailHero: FC<DetailHeroProps> = observer(
   (props: DetailHeroProps) => {
     const { theme } = useServices();
+    const { walletApp } = useTrayApps();
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
-    let amountDisplay = !props.coin
-      ? `${formatEthAmount(props.wallet.balance).eth} ETH`
-      : `${props.coin.balance} ${props.coin.name}`;
+    let amountDisplay = walletApp.network === 'ethereum'
+      ? !props.coin
+        ? `${formatEthAmount(props.wallet.balance).eth} ETH`
+        : `${props.coin.balance} ${props.coin.name}`
+      : `${formatEthAmount(props.wallet.balance).eth} BTC`
 
     let accountDisplay = !props.coin ? (
       props.wallet.nickname
