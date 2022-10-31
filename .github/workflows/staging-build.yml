@@ -109,24 +109,3 @@ jobs:
         env:
           USERNAME: ${{ github.actor }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-  #
-  bump-app-version:
-    needs: [build-linux-staging, build-mac-staging, build-windows-staging]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "14"
-          cache: "npm"
-      - name: Increment version
-        run: |
-          cd ./app/release/app
-          npm version patch
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git add package.json
-          git commit -m "patch version"
-          git push
