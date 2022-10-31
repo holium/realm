@@ -678,8 +678,6 @@ export class WalletService extends BaseService {
 
   async getAllCoins() {
     for (var key of this.state!.ethereum.wallets.keys()) {
-      console.log('getting coins')
-      console.log(key)
       let wallet: any = this.state!.ethereum.wallets.get(key);
       const balances = await this.alchemy!.core.getTokenBalances(wallet.address);
       // Remove tokens with zero balance
