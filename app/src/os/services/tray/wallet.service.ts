@@ -1,5 +1,6 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import { ethers, utils, Wallet } from 'ethers';
+import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
 import {
   onPatch,
@@ -7,8 +8,7 @@ import {
   getSnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { WalletApi } from '../../api/min-wallet';
-
+import { WalletApi } from '../../api/wallet';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import {
@@ -16,18 +16,20 @@ import {
   WalletStoreType,
   WalletView,
   NetworkType,
+  WalletCreationMode,
+  SharingMode,
+  UISettingsType,
 } from './wallet.model';
-import { getEntityHashesFromLabelsBackward } from '@cliqz/adblocker/dist/types/src/request';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
-import { T } from 'lodash/fp';
+// @ts-ignore
+import abi from 'human-standard-token-abi';
+import axios from 'axios';
 
-const alchemySettings = {
-  apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
-  network: Network.ETH_GOERLI, // Replace with your network.
-};
 
-const alchemy = new Alchemy(alchemySettings);
+
+// 10 minutes
+const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
 
 export interface RecipientPayload {
   recipientMetadata?: {
@@ -44,6 +46,7 @@ export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
   private ethProvider?: ethers.providers.JsonRpcProvider;
+  private alchemy?: Alchemy;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-view': this.setView,
@@ -52,6 +55,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.get-recipient': this.getRecipient,
     'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
     'realm.tray.wallet.set-xpub': this.setXpub,
+    'realm.tray.wallet.set-settings': this.setSettings,
     'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
     'realm.tray.wallet.set-sharing-mode': this.setSharingMode,
     'realm.tray.wallet.set-sharing-permissions': this.setSharingPermissions,
@@ -60,17 +64,25 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.create-wallet': this.createWallet,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
-    'realm.tray.wallet.add-smart-contract': this.addSmartContract,
     'realm.tray.wallet.request-address': this.requestAddress,
+    'realm.tray.wallet.check-passcode': this.checkPasscode,
+    'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
+    'realm.tray.wallet.toggle-network': this.toggleNetwork,
   };
 
   static preload = {
-    setMnemonic: (mnemonic: string, passcodeHash: string) => {
+    setMnemonic: (mnemonic: string, passcode: number[]) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-mnemonic',
         mnemonic,
-        passcodeHash
+        passcode
       );
+    },
+    checkPasscode: (passcode: number[]) => {
+      return ipcRenderer.invoke('realm.tray.wallet.check-passcode', passcode);
+    },
+    checkProviderURL: (providerURL: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.check-provider-url', providerURL);
     },
     setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }) => {
       return ipcRenderer.invoke(
@@ -97,6 +109,9 @@ export class WalletService extends BaseService {
     },
     setXpub: () => {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
+    },
+    setSettings: (network: string, settings: UISettingsType) => {
+      return ipcRenderer.invoke('realm.tray.wallet.set-settings', network, settings);
     },
     setWalletCreationMode: (mode: string) => {
       return ipcRenderer.invoke(
@@ -181,6 +196,9 @@ export class WalletService extends BaseService {
     requestAddress: (from: string, network: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.request-address');
     },
+    toggleNetwork: () => {
+      return ipcRenderer.invoke('realm.tray.wallet.toggle-network');
+    }
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -188,8 +206,34 @@ export class WalletService extends BaseService {
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
-      ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+      // ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
+      ipcMain.handle(handlerName, this.wrapHandler(this.handlers[handlerName]))
     });
+
+    setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
+  }
+
+  private wrapHandler(handler: any) {
+    return (...args: any) => {
+      if (this.state) {
+        this.state.setLastInteraction(new Date());
+      }
+      return handler.apply(this, args);
+    }
+  }
+
+  private autoLock() {
+    let shouldLock =  this.state && (Date.now() - AUTO_LOCK_INTERVAL) > this.state.lastInteraction.getTime()
+    if (shouldLock) {
+      this.lock();
+    }
+  }
+
+  private lock() {
+    let hasPasscode = this.state && this.state.passcodeHash;
+    if (hasPasscode) {
+      this.state!.setView(WalletView.LOCKED, this.state!.currentIndex, this.state!.currentItem);
+    }
   }
 
   private getPrivateKey() {
@@ -199,7 +243,7 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
-    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    let secretKey: string = this.core.passwords.getPassword(ship)!;
     const storeParams = {
       name: 'wallet',
       cwd: `realm.${ship}`,
@@ -218,21 +262,29 @@ export class WalletService extends BaseService {
     } else {
       this.state = WalletStore.create({
         network: 'ethereum',
-        currentView: 'ethereum:new',
+        currentView: WalletView.ETH_NEW,
         ethereum: {
+          network: 'gorli',
           settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
             defaultIndex: 0,
           },
           initialized: false,
         },
         bitcoin: {
           settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
             defaultIndex: 0,
           },
         },
         creationMode: 'default',
         sharingMode: 'anybody',
         ourPatp: ship,
+        lastInteraction: Date.now()
       });
     }
 
@@ -240,10 +292,7 @@ export class WalletService extends BaseService {
       this.db!.store = snapshot;
     });
 
-    this.ethProvider = new ethers.providers.JsonRpcProvider(
-      //'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
-      'http://127.0.0.1:8545'
-    );
+    this.setProviders();
 
     const patchEffect = {
       model: getSnapshot(this.state),
@@ -264,67 +313,74 @@ export class WalletService extends BaseService {
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
       if (wallet.network === 'ethereum') {
         this.state!.ethereum.applyWalletUpdate(wallet);
-        const balances = await alchemy.core.getTokenBalances(wallet.address);
-        // Remove tokens with zero balance
-        const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
-          return token.tokenBalance !== "0";
-        });
-        for (let token of nonZeroBalances) {
-          if (!this.state!.ethereum.wallets.get(wallet.key)!.coins.has((token as any).contractAddress)) {
-            const metadata = await alchemy.core.getTokenMetadata((token as any).contractAddress);
-            this.state!.ethereum.wallets.get(wallet.key)!.addSmartContract('erc20', metadata.symbol!, (token as any).contractAddress, metadata.decimals!)
-            WalletApi.addSmartContract(this.core.conduit!, 'erc20', metadata.symbol!, (token as any).contractAddress, wallet.key);
-          }
-        }
-        const nfts = await alchemy.nft.getNftsForOwner(wallet.address);
-        for (let nft of nfts.ownedNfts) {
-          if (!this.state!.ethereum.wallets.get(wallet.key)!.nfts.has((nft as any).contract.address + nft.tokenId)) {
-            console.log(nft.title)
-            console.log(nft.description)
-            // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
-            var floorPrice
-            this.state!.ethereum.wallets.get(wallet.key)!.addNFT(nft.description, nft.description, nft.contract.address, nft.tokenId, nft.rawMetadata!.image!, floorPrice);
-          }
-        }
       }
       if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);
       }
+      this.updateWalletInfo();
     });
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
       this.state!.ethereum.initial(wallets);
       this.state!.bitcoin.initial(wallets);
+      this.updateWalletInfo();
     });
     WalletApi.subscribeToTransactions(
       this.core.conduit!,
       (transaction: any) => {
         if (transaction.network == 'ethereum')
-          this.state!.ethereum.applyTransactionUpdate(transaction);
+          this.state!.ethereum.wallets.get(transaction.index)!.applyTransactionUpdate(transaction.transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-        const tx = this.state!.ethereum.transactions.get(
+        /*const tx = this.state!.ethereum.transactions.get(
           transaction.transaction.hash
-        );
+        );*/
       }
     );
-
-    WalletApi.getHistory(this.core.conduit!).then((history: any) => {
-      this.state!.ethereum.applyHistory(history);
-    });
+    WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
+      this.state!.ethereum.setSettings(settings);
+    })
 
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
- //     'https://goerli.infura.io/v3/db4a24fe02d9423db89e8de8809d6fff'
-      'http://127.0.0.1:8545'
+      'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+//      'http://127.0.0.1:8545'
     );
+
+    this.lock(); // lock wallet on login
   }
 
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  async setMnemonic(_event: any, mnemonic: string, passcodeHash: string) {
+  setProviders() {
+    var alchemySettings
+    if (this.state!.ethereum.network === 'mainnet') {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      alchemySettings = {
+        apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+        network: Network.ETH_MAINNET, // Replace with your network.
+      };
+      // etherscan
+    }
+    else {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      );
+      alchemySettings = {
+        apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+        network: Network.ETH_GOERLI, // Replace with your network.
+      };
+    }
+    this.ethProvider.on("block", () => this.updateWalletInfo());
+    this.alchemy = new Alchemy(alchemySettings);
+  }
+
+  async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
+    let passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
@@ -343,8 +399,35 @@ export class WalletService extends BaseService {
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
 
+    this.state!.ethereum.deleteWallets();
+    WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
+      this.state!.ethereum.initial(wallets);
+      this.state!.bitcoin.initial(wallets);
+      this.updateWalletInfo();
+    });
+
     console.log('okay transitioning');
     this.state!.setView(WalletView.ETH_LIST);
+  }
+
+  async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
+    return await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
+  }
+
+  async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
+    try {
+      let newProvider = new ethers.providers.JsonRpcProvider(providerURL);
+      console.log('new provider: ', newProvider);
+      const { chainId, name } = await newProvider.getNetwork();
+      console.log('network name: ', name)
+      console.log(`chain ID: ${chainId}`)
+      if (!chainId && !name) {
+        throw new Error('Invalid provider.');
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async setXpub(_event: any) {
@@ -375,6 +458,14 @@ export class WalletService extends BaseService {
 
   async setNetwork(_event: any, network: NetworkType) {
     this.state!.setNetwork(network);
+  }
+
+  async setChainNetwork(_event: any, network: NetworkType, chainNetwork: string) {
+    if (network === NetworkType.ethereum) {
+      this.state!.ethereum.network = chainNetwork;
+    }
+    else if (network === NetworkType.bitcoin) {
+    }
   }
 
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
@@ -428,13 +519,28 @@ export class WalletService extends BaseService {
 
   async saveTransactionNotes(_event: any, notes: string) {
     const network = this.state!.network;
-    const hash = this.state!.currentTransaction!;
-    WalletApi.saveTransactionNotes(this.core.conduit!, network, hash, notes);
+    var net
+    if (network === 'ethereum') {
+      net = this.state!.ethereum.network;
+    }
+    else {
+      net = 'mainnet'
+    }
+    const hash = this.state!.currentItem!.key;
+    const index = this.state!.ethereum.wallets.get(this.state?.currentIndex!)!.index
+    WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
 
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
     // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
     // is probably cleaner to pull from here than add some random npm lib to do it
+  }
+
+  async setSettings(_events: any, network: string, settings: UISettingsType) {
+    if (network === 'ethereum') {
+      this.state!.ethereum.setSettings(settings);
+    }
+    await WalletApi.setSettings(this.core.conduit!, network, settings);
   }
 
   async setWalletCreationMode(_event: any, mode: string) {
@@ -504,7 +610,7 @@ export class WalletService extends BaseService {
     const fromAddress = this.state!.ethereum.wallets.get(
       this.state!.currentIndex!
     )!.address;
-    this.state!.ethereum.enqueueTransaction(
+    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
       hash,
       tx.to,
       toPatp,
@@ -513,15 +619,15 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType,
     );
-    const stateTx = this.state!.ethereum.getTransaction(hash);
+    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
     console.log(stateTx);
     await WalletApi.enqueueTransaction(
       this.core.conduit!,
       'ethereum',
-      'gorli',
+      this.state!.ethereum.network,
+      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
       hash,
       stateTx,
-      contractType,
     );
   }
 
@@ -540,27 +646,111 @@ export class WalletService extends BaseService {
     // await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
   }
 
-  async addSmartContract(
-    _event: any,
-    contractId: string,
-    contractType: string,
-    name: string,
-    contractAddress: string,
-    walletIndex: string,
-    decimals: number
-  ) {
-    this.state!.ethereum.wallets.get(walletIndex)!.addSmartContract(contractType, name, contractAddress, decimals);
-    await WalletApi.addSmartContract(
-      this.core.conduit!,
-      contractType,
-      name,
-      contractAddress,
-      walletIndex,
-    );
-  }
-
   async requestAddress(_event: any, network: string, from: string) {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
+  }
+
+  updateWalletInfo() {
+    this.getAllBalances();
+    if (this.state!.network === 'ethereum') {
+      this.getAllCoins();
+      this.getAllNfts();
+    }
+    this.getAllTransactions();
+  }
+
+  gweiToEther = (gwei: number) => {
+    return gwei / 1000000000000000000;
+  }
+
+  async getAllBalances() {
+    if (this.state!.network === 'bitcoin') {
+      
+    }
+    else if (this.state!.network === 'ethereum') {
+      for (var key of this.state!.ethereum.wallets.keys()) {
+        let wallet: any = this.state!.ethereum.wallets.get(key);
+        const balance = await this.ethProvider!.getBalance(wallet.address);
+        wallet.setBalance(utils.formatEther(balance));
+      }
+    }
+  }
+
+  async getAllCoins() {
+    for (var key of this.state!.ethereum.wallets.keys()) {
+      console.log('getting coins')
+      console.log(key)
+      let wallet: any = this.state!.ethereum.wallets.get(key);
+      const balances = await this.alchemy!.core.getTokenBalances(wallet.address);
+      // Remove tokens with zero balance
+      const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
+        return token.tokenBalance !== "0";
+      });
+      var coins = []
+      for (let token of nonZeroBalances) {
+        const metadata = await this.alchemy!.core.getTokenMetadata((token as any).contractAddress);
+        const contract = new ethers.Contract((token as any).contractAddress, abi, this.ethProvider);
+        let wallet: any = this.state!.ethereum.wallets.get(key);
+        const balance = (await contract.balanceOf(wallet.address)).toString();
+        const coin = {
+          name: metadata.symbol!,
+          logo: metadata.logo || '',
+          contractAddress: (token as any).contractAddress,
+          balance: balance,
+          decimals: metadata.decimals!
+        }
+        coins.push(coin)
+      }
+      this.state!.ethereum.wallets.get(key)!.setCoins(coins);
+    }
+  }
+
+  async getAllNfts() {
+    for (var key of this.state!.ethereum.wallets.keys()) {
+      let wallet: any = this.state!.ethereum.wallets.get(key);
+      const nfts = await this.alchemy!.nft.getNftsForOwner(wallet.address);
+      var allNfts = [];
+      for (let nft of nfts.ownedNfts) {
+        // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
+        var floorPrice
+        const ownedNft = {
+          name: nft.title,
+          collectionName: nft.description,
+          contractAddress: nft.contract.address,
+          tokenId: nft.tokenId,
+          imageUrl: nft.rawMetadata!.image!,
+          floorPrice
+        }
+        allNfts.push(ownedNft);
+      }
+      this.state!.ethereum.wallets.get(key)!.setNFTs(allNfts)
+    }
+  }
+
+  toggleNetwork() {
+    if (this.state!.ethereum.network === 'mainnet') {
+      this.state!.ethereum.setNetwork('gorli');
+      this.setProviders();
+    }
+    else if (this.state!.ethereum.network === 'gorli') {
+      this.state!.ethereum.setNetwork('mainnet');
+      this.setProviders();
+    }
+    this.updateWalletInfo();
+  }
+
+  async getAllTransactions() {
+    // etherscan api call
+    for (var key of this.state!.ethereum.wallets.keys()) {
+      const address = this.state!.ethereum.wallets.get(key)!.address;
+      const startBlock = 0;
+      const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
+      const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
+      const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
+      const URL = (this.state!.ethereum.network === 'mainnet' ? mainnetURL : goerliURL);
+      const response: any = await axios.get(URL);
+      this.state!.ethereum.wallets.get(key)!.applyTransactions(response.data.result);
+    }
   }
 
   /*

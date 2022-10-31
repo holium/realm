@@ -61,10 +61,9 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = walletApp.ethereum.transactions.get(
-    walletApp.currentItem.key
+  let transaction = walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions.get(
+    walletApp.currentItem!.key
   )!;
-  console.log(transaction);
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);
@@ -86,7 +85,9 @@ export const TransactionDetail: FC = observer(() => {
   let initiated = new Date(transaction.initiatedAt);
   let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
-  let amountDisplay = isEth ? `${ethAmount.eth}`/* ETH`*/ : `${btcAmount.btc} BTC`;
+  let amountDisplay = isEth
+    ? `${ethAmount.eth}` /* ETH`*/
+    : `${btcAmount.btc} BTC`;
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
@@ -245,7 +246,7 @@ export const TransactionDetail: FC = observer(() => {
           </Button>
         </Flex>
       </Flex>
-      <Flex position="absolute" top="542px" zIndex={999} onClick={goBack}>
+      <Flex position="absolute" top="582px" zIndex={999} onClick={goBack}>
         <Icons
           name="ArrowLeftLine"
           size={2}

@@ -7,7 +7,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface FinalizingProps {
   seedPhrase: string;
-  passcode: string;
+  passcode: number[];
 }
 
 export const Finalizing: FC<FinalizingProps> = observer(

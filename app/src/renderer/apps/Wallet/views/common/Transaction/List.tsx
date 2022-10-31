@@ -94,7 +94,7 @@ export const Transaction = observer((props: TransactionProps) => {
       >
         <Text variant="body" fontSize={2}>
           {transaction.type === 'sent' ? '-' : ''}{' '}
-          {isEth ? `${ethAmount.eth}`/* ETH`*/ : `${btcAmount.btc} BTC`}
+          {isEth ? `${ethAmount.eth}` /* ETH`*/ : `${btcAmount.btc} BTC`}
         </Text>
         <Text variant="body" fontSize={1} color="text.disabled">
           {transaction.type === 'sent' ? '-' : ''}$

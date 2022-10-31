@@ -3,118 +3,39 @@
 ::
 +$  address  @u
 +$  network  ?(%bitcoin %ethereum)
-+$  help-eth-tx
-  $:  hash=@t
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @t)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  eth-transaction
-  $:  hash=@t
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @p)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  help-erc20-tx
-  $:  hash=@t
-      contract-address=@ux
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @t)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  erc20-transaction
-  $:  hash=@t
-      contract-address=@ux
-      amount=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @p)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  help-erc721-tx
-  $:  hash=@t
-      contract-address=@ux
-      token=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @t)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
-+$  erc721-transaction
-  $:  hash=@t
-      contract-address=@ux
-      token=@t
-      =network
-      type=?(%sent %received)
-      initiated-at=@t
-      completed-at=(unit @t)
-      our-address=@t
-      their-patp=(unit @p)
-      their-address=@t
-      =status
-      failure-reason=(unit @t)
-      notes=@t
-  ==
 +$  transaction
-  $%  [%eth eth-transaction]
-      [%erc20 erc20-transaction]
-      [%erc721 erc721-transaction]
+  $:  hash=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @p)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
   ==
 +$  help-transaction
-  $%  [%eth help-eth-tx]
-      [%erc20 help-erc20-tx]
-      [%erc721 help-erc721-tx]
+  $:  hash=@t
+      =network
+      type=?(%sent %received)
+      initiated-at=@t
+      completed-at=(unit @t)
+      our-address=@t
+      their-patp=(unit @t)
+      their-address=@t
+      =status
+      failure-reason=(unit @t)
+      notes=@t
   ==
 +$  status  ?(%pending %failed %succeeded)
 +$  eth-type  ?(%erc20 %erc721 %eth)
-+$  contracts-map  (map contract-id contract-data)
-+$  wallet  [=address path=@t nickname=@t balance=@ =contracts-map]
++$  wallet  [=address path=@t nickname=@t transactions=(map net=@t (map @t transaction))]
 +$  mode  ?(%on-demand %default)
 +$  pending-tx  [txh=(unit @ux) from=@ux to=@ux amount=@ud]
 +$  txn  [block=@ud txh=@ux log-index=@ud from=@ux to=@ux amount=@ud]
 +$  txn-log  (list txn)
-+$  contract-id  @t
-+$  contract-data
-  $%  [%erc20 name=@t =address balance=@ud =txn-log pending-txs=(map tid=@ta pending-tx)]
-      [%erc721 name=@t =address tokens=(set @ud) =txn-log pending-txs=(map tid=@ta pending-tx)]
-  ==
-+$  tx-rez  [txh=@ux status=? block=@ud]
 +$  contract-type  ?(%erc20 %erc721)
 +$  sharing
   $:  who=?(%nobody %friends %anybody)
@@ -127,37 +48,33 @@
 +$  action
   $%  [%initialize ~]
       [%set-xpub =network xpub=@t]
+      [%set-settings =network =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud]
       [%set-wallet-creation-mode =mode]
       [%set-sharing-mode who=?(%nobody %friends %anybody)]
-      [%sharing-permissions type=?(%allow %block) who=@p]
-      [%set-default-index =network index=@t]
-      [%set-wallet-nickname =network index=@t nickname=@t]
-      [%set-network-provider =network provider=@t]
+      [%set-sharing-permissions type=?(%allow %block) who=@p]
+      [%set-default-index =network index=@ud]
+      [%set-wallet-nickname =network index=@ud nickname=@t]
       [%create-wallet sndr=ship =network nickname=@t]
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
-      [%enqueue-transaction =network hash=@ =transaction]
-      ::[%enqueue-transaction =network hash=@ =transaction]
-      [%add-smart-contract =contract-type name=@t address=@ux wallet-index=@t]
-      [%save-transaction-notes =network hash=@t notes=@t]
+      [%enqueue-transaction =network net=@t wallet=@ud hash=@ =transaction]
+      [%save-transaction-notes =network net=@t wallet=@ud hash=@t notes=@t]
   ==
 ::  subscription updates
 ::
 +$  update
   $%  [%address =ship =network address=(unit address)]
-      [%transaction =network @t transaction success=?]
-      [%history transaction-history]
+      [%transaction =network net=@t @ud @t transaction]
+::      [%history transactions]
       [%wallet =network @t =wallet]
       [%wallets wallets]
+      [%settings settings]
   ==
 ::  stores
 ::
-+$  transaction-queue        (map network (map @t [hash=@ transaction]))
-+$  transaction-history  (map network (map @t transaction))
-+$  transactions  (map network (map @t transaction))
-+$  wallets  (map =network (map @t wallet))
++$  wallets  (map =network (map @ud wallet))
 +$  settings
   $:  =sharing
-      networks=(map network [xpub=(unit @t) default-index=@t provider=(unit @t)])
+      networks=(map network [xpub=(unit @t) default-index=@ud])
   ==
 --

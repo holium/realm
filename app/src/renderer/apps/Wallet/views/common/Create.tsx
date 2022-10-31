@@ -75,7 +75,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
         </FieldSet>
         <Flex
           position="absolute"
-          top="542px"
+          top="582px"
           zIndex={999}
           onClick={() => WalletActions.setView(WalletView.ETH_LIST)}
         >

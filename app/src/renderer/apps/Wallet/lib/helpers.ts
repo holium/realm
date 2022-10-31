@@ -8,7 +8,6 @@ import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 
 export function getBaseTheme(currentTheme: ThemeType) {
-  // console.log(theme, currentTheme.mode);
   // @ts-ignore
   return theme[currentTheme.mode];
 }
@@ -76,11 +75,11 @@ export interface BtcAmount {
 }
 
 export function formatEthAmount(amount: string): EthAmount {
-  const count = amount.match(/\./g)
+  const count = amount.match(/\./g);
   var ethAmount = amount;
   if (count) {
     if (count.length > 1) {
-      ethAmount = ethAmount.replaceAll('.','');
+      ethAmount = ethAmount.replaceAll('.', '');
     }
   }
   let wei = utils.parseEther(ethAmount)!;
@@ -95,6 +94,9 @@ export function formatEthAmount(amount: string): EthAmount {
 }
 
 export function convertEthAmountToUsd(amount: EthAmount) {
+  if (amount.eth === '0') {
+    return 0;
+  }
   let exchangeRate = 1647.37;
   let usd = Number(amount.eth) * exchangeRate;
   return usd.toFixed(2);

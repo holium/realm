@@ -18,6 +18,7 @@ interface NFTListProps {
   nfts: ERC721Type[];
 }
 export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
+  const { walletApp } = useTrayApps();
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
@@ -33,6 +34,12 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
         justifyContent="space-between"
         backgroundColor={darken(0.03, theme.currentTheme.windowColor)}
         borderRadius="6px"
+        onClick={() =>
+          WalletActions.setView(WalletView.NFT_DETAIL, walletApp.currentIndex, {
+            type: 'nft',
+            key: `${props.details.address}${props.details.tokenId}`,
+          })
+        }
       >
         <Flex alignItems="center">
           <Flex
@@ -59,7 +66,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
                 {props.details.floorPrice ? props.details.tokenType : 'Title'}
               </Text>
               <Text variant="h5" fontSize={1}>
-                {props.details.title}
+                {props.details.name}
               </Text>
             </Flex>
             <Flex mt={1} flexDirection="column" justifyContent="center">

@@ -56,13 +56,14 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const coins = getCoins(wallet!.coins);
   const nfts = getNfts(wallet!.nfts);
   const transactions = getTransactions(
-    walletApp.ethereum.transactions,
-    wallet?.address,
-    coin
+    walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions,
+    // wallet?.address,
+    // coin
   ).sort(
     (a, b) =>
-      new Date(b.initiatedAt).getTime() - new Date(a.initiatedAt).getTime()
+      new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime()
   );
+  console.log(transactions.length)
 
   /*useEffect(() => {
     if (coins.length) {
@@ -125,7 +126,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       </Box>
       <Flex
         position="absolute"
-        top="542px"
+        top="582px"
         zIndex={999}
         onClick={() => WalletActions.setView(WalletView.ETH_LIST)}
       >
