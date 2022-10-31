@@ -20,13 +20,21 @@ If updates are available, you will be prompted to download and install the updat
 
 ## Technical Notes
 
+Realm builds are located in a private repo. Because of this you will need to set a `GH_TOKEN=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` environment variable prior to launching the app. This token should not be shared outside of the Holium. The token is used to access and search for updates on the private repo.
+
+To run the release version on mac, execute the following command from a terminal:
+
+`open -n --env GH_TOKEN=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 /Applications/Realm.app`
+
+Please consult instructions for setting environment variables on Windows and Linux.
+
 ### Versioning
 
-To version builds, make sure to bump the `version` found in `./app/release/app/package.json` file prior to check-in. This will ensure that the new release is published and detected by the auto-update process.
+Versioning is handled automatically during production builds. There is no need to manually update the version string in ./app/release/app/package.json.
 
 ### Prerelease
 
-Prerelease builds run when changes are pushed to the `@holium/realm` repo's `staging` branch. These builds are added to GitHub Releases as `drafts` which ensures they will **not** be picked up by the auto-update process.
+Prerelease builds run when changes are pushed to the `@holium/realm` repo's `staging` branch. These builds are added to GitHub Releases as `prerelease` which ensures they will **not** be picked up by the auto-update process. This also gives admins a chance to review a given prerelease before promoting to a new production grade update that will be picked up by the auto-updater.
 
 ### Release
 
