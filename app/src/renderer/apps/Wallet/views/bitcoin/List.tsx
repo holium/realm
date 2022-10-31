@@ -14,15 +14,18 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
   (props: BitcoinWalletListProps) => {
     const { walletApp } = useTrayApps();
     const list = walletApp.bitcoin.list;
+    console.log('here')
+    console.log(list)
 
     const List: FC = () => {
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
-            let fullWallet =
-              props.network === 'ethereum'
-                ? walletApp.ethereum.wallets.get(walletEntry.key)
-                : walletApp.bitcoin.wallets.get(walletEntry.key);
+            let fullWallet = walletApp.bitcoin.wallets.get(walletEntry.key)
+                /*props.network === 'ethereum'
+                  ? walletApp.ethereum.wallets.get(walletEntry.key)
+                  : walletApp.bitcoin.wallets.get(walletEntry.key);
+                */
             return (
               <WalletCard
                 key={walletEntry.address}
@@ -78,7 +81,7 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        {list.length ? <List /> : <Empty network={props.network} />}
+        {(list.length && list.length > 0) ? <List /> : <Empty network={props.network} />}
       </Flex>
     );
   }

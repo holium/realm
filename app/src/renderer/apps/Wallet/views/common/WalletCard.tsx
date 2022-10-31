@@ -55,6 +55,8 @@ export const WalletCard: FC<WalletCardProps> = ({
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
   const themeData = themes[mode];
 
+  console.log('HERE')
+  console.log(wallet)
   let coins = null;
   if ('coins' in wallet) {
     coins = getCoins(wallet.coins);

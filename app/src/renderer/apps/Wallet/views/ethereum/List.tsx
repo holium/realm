@@ -14,15 +14,17 @@ export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
   (props: EthereumWalletListProps) => {
     const { walletApp } = useTrayApps();
     const list = walletApp.ethereum.list;
+    console.log("SHOULDN'T BE HERE")
 
     const List: FC = () => {
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
-            let fullWallet =
-              props.network === 'ethereum'
+            let fullWallet = walletApp.ethereum.wallets.get(walletEntry.key)
+              /*props.network === 'ethereum'
                 ? walletApp.ethereum.wallets.get(walletEntry.key)
                 : walletApp.bitcoin.wallets.get(walletEntry.key);
+              */
             return (
               <WalletCard
                 key={walletEntry.address}
