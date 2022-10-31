@@ -120,16 +120,25 @@ const BitcoinStore = types
     },
     // updates
     applyWalletUpdate(wallet: any) {
-      const walletObj = {
-        index: Number(wallet.key),
-        network: 'bitcoin',
-        path: wallet.path,
-        address: wallet.address,
-        nickname: wallet.nickname,
-        balance: wallet.balance.toString(),
-        transactions: {}
-      };
-      self.wallets.set(wallet.key, BitcoinWallet.create(walletObj));
+      var walletObj;
+      if (!self.wallets.has(wallet.key)) {
+        walletObj = {
+          index: Number(wallet.key),
+          network: 'ethereum',
+          path: wallet.path,
+          address: wallet.address,
+          balance: '0',
+          nickname: wallet.nickname,
+          transactions: {}
+        };
+        console.log(self.wallets)
+        const btcWallet = BitcoinWallet.create(walletObj)
+        console.log(wallet.key)
+        self.wallets.set(wallet.key, btcWallet);
+      }
+      for (var transaction in wallet.transactions) {
+        // self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
+      }
     }
   }));
 
