@@ -16,7 +16,7 @@
     "start": "yarn workspace @holium/realm start",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
-    "package:prerelease": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease",
+    "package:prerelease": "yarn build:multiplayer && yarn build:conduit && yarn build:room",
     "package:release": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release"
   },
   "dependencies": {
