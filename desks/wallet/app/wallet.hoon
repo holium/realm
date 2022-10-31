@@ -19,7 +19,7 @@
   |_  =bowl:gall
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
-      ::core   ~(. +> bowl)
+      core   ~(. +> bowl)
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -46,7 +46,7 @@
         %wallet-action
       =^  cards  state
         ^-  (quip card _state)
-        (handle-wallet-action !<(action vase))
+        (handle-wallet-action:core !<(action vase))
       [cards this]
     ==
   ++  on-watch
@@ -186,7 +186,7 @@
     ::
     ?:  ?&  !(team:title our.bowl src.bowl)
             =(%default wallet-creation.sharing.settings.state)
-            =/  net-wallets  (~(got by wallets) network.act)
+            =/  net-wallets  ~(tap by (~(got by wallets) network.act))
             =/  num-wallets  (lent net-wallets)
             (gth num-wallets 0)
         ==

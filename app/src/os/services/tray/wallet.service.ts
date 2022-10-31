@@ -328,7 +328,7 @@ export class WalletService extends BaseService {
       this.core.conduit!,
       (transaction: any) => {
         if (transaction.network == 'ethereum')
-          this.state!.ethereum.wallets.get(transaction.index)!.applyTransactionUpdate(transaction);
+          this.state!.ethereum.wallets.get(transaction.index)!.applyTransactionUpdate(transaction.transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
         /*const tx = this.state!.ethereum.transactions.get(

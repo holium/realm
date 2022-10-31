@@ -338,18 +338,18 @@ const EthWallet = types
       self.transactions.set(hash, tx);
     },
     applyTransactionUpdate(transaction: any) {
-      let tx = self.transactions.get(transaction.transaction.hash);
+      let tx = self.transactions.get(transaction.hash);
       if (tx) {
         tx.completedAt = Date.now().toString();
-        if (transaction.transaction.success)
+        if (transaction.success)
           tx.status = "succeeded";
         else
           tx.status = "failed";
-        tx.notes = transaction.transaction.notes;
-        self.transactions.set(transaction.transaction.hash, tx)
+        tx.notes = transaction.notes;
+        self.transactions.set(transaction.hash, tx)
       }
       else
-        self.transactions.set(transaction.transaction.hash, transaction.transaction);
+        self.transactions.set(transaction.hash, transaction);
     },
     applyTransactions(transactions: any) {
       var formattedTransactions: any = {};
@@ -448,6 +448,9 @@ export const EthStore = types
         const ethWallet = EthWallet.create(walletObj)
         console.log(wallet.key)
         self.wallets.set(wallet.key, ethWallet);
+      }
+      for (var transaction in wallet.transactions) {
+        self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
         /*for (var contract in wallet.contracts) {
           if (wallet.contracts[contract].type === 'erc20') {
