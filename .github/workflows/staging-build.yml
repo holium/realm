@@ -127,7 +127,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   bump-app-version:
-    needs: [build-mac-staging, build-linux-staging, build-windows-staging]
+    needs: [build-windows-staging]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
