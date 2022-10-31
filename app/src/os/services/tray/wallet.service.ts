@@ -681,7 +681,42 @@ export class WalletService extends BaseService {
     toPatp?: string,
     contractType?: string,
   ) {
-
+    console.log(walletIndex);
+    console.log(to);
+    console.log(amount);
+    console.log(toPatp);
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    let signer = wallet.connect(this.ethProvider!);
+    console.log(amount);
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+    const ethAmount = ethers.utils.parseEther(amount);
+    const { hash } = await contract.transfer(to, ethAmount);
+    const fromAddress = this.state!.ethereum.wallets.get(
+      this.state!.currentIndex!
+    )!.address;
+    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
+      hash,
+      to,
+      toPatp,
+      fromAddress,
+      ethAmount,
+      new Date().toISOString(),
+      'ERC20',
+    );
+    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
+    console.log(stateTx);
+    await WalletApi.enqueueTransaction(
+      this.core.conduit!,
+      'ethereum',
+      this.state!.ethereum.network,
+      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
+      hash,
+      stateTx,
+    );
   }
 
   async sendERC721Transaction(
@@ -694,6 +729,42 @@ export class WalletService extends BaseService {
     toPatp?: string,
     contractType?: string,
   ) {
+    console.log(walletIndex);
+    console.log(to);
+    console.log(amount);
+    console.log(toPatp);
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    let signer = wallet.connect(this.ethProvider!);
+    console.log(amount);
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+    const ethAmount = ethers.utils.parseEther(amount);
+    const { hash } = await contract.transfer(to, ethAmount);
+    const fromAddress = this.state!.ethereum.wallets.get(
+      this.state!.currentIndex!
+    )!.address;
+    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
+      hash,
+      to,
+      toPatp,
+      fromAddress,
+      ethAmount,
+      new Date().toISOString(),
+      'ERC721',
+    );
+    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
+    console.log(stateTx);
+    await WalletApi.enqueueTransaction(
+      this.core.conduit!,
+      'ethereum',
+      this.state!.ethereum.network,
+      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
+      hash,
+      stateTx,
+    );
 
   }
 
