@@ -16,8 +16,12 @@
     "start": "yarn workspace @holium/realm start",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
-    "package:prerelease": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease",
-    "package:release": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release"
+    "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:linux",
+    "package:prerelease:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:mac",
+    "package:prerelease:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:win",
+    "package:release:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:linux",
+    "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:mac",
+    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
     "ethers": "^5.7.0",
@@ -27,5 +31,6 @@
     "react-virtualized-auto-sizer": "^1.0.7",
     "react-virtuoso": "^2.18.0",
     "react-window": "^1.8.7"
-  }
+  },
+  "version": "0.0.1"
 }
