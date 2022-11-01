@@ -1,7 +1,6 @@
 import { ipcMain, ipcRenderer, safeStorage } from 'electron';
 import Store from 'electron-store';
 import {
-  clone,
   onPatch,
   onSnapshot,
   getSnapshot,
@@ -10,7 +9,6 @@ import {
 import bcrypt from 'bcryptjs';
 import Realm from '../..';
 import { BaseService } from '../base.service';
-import { allyShip, docketInstall } from '@urbit/api';
 import {
   OnboardingStore,
   OnboardingStoreType,
@@ -19,6 +17,7 @@ import {
 import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 import { ContactApi } from '../../api/contacts';
+import { DocketApi } from '../../api/docket';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
@@ -457,30 +456,25 @@ export class OnboardingService extends BaseService {
   }
 
   async installRealm(_event: any, ship: string) {
-    /*
-    // TODO kiln-install realm desk
-    if (!process.env.INSTALL_MOON) {
+    if (!process.env.INSTALL_MOON || process.env.INSTALL_MOON === 'bypass') {
       console.error(
-        'error: [installRealm] - INSTALL_MOON not found in environment variables. please configure.'
-      );
-      return;
-    }
-    if (process.env.INSTALL_MOON === 'bypass') {
-      console.error(
-        "error: [installRealm] - INSTALL_MOON set to 'bypass'. skipping realm installation..."
+        "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
       );
       this.state.installRealm();
       return;
     }
-    const desks: string[] = ['realm', 'courier'];
+    const parts: string[] = process.env.INSTALL_MOON.split(':');
+    const moon: string = parts[0];
+    // const desks: string[] = ['realm', 'courier'];
+    const desks: string[] = parts[1].split(',');
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp, cookie } = this.state.ship!;
     const tempConduit = await this.tempConduit(url, patp, cookie!);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
-      const response: string = await BazaarApi.installDesk(
+      const response: string = await DocketApi.installDesk(
         tempConduit,
-        process.env.INSTALL_MOON!,
+        moon,
         desks[idx]
       );
       console.log(`installDesk (await) => ${response}`);
@@ -493,7 +487,6 @@ export class OnboardingService extends BaseService {
     await this.closeConduit();
     this.state.endRealmInstall('success');
     console.log('realm installation complete.');
-    */
     this.state.installRealm();
   }
 
