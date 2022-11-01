@@ -18,10 +18,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
     const { theme } = useServices();
     const themeData = getBaseTheme(theme.currentTheme);
 
-    let settingsView =
-      walletApp.network === 'ethereum'
-        ? WalletView.ETH_SETTINGS
-        : WalletView.BIT_SETTINGS;
+    let settingsView = WalletView.SETTINGS;
 
     return (
       <Box width="100%" hidden={props.hidden}>
