@@ -102,7 +102,7 @@
       [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
-      [%enqueue-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+json-to-ux transaction+json-to-transaction])]
+      [%set-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+json-to-ux transaction+json-to-transaction])]
       [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+so notes+so])]
   ==
 ::

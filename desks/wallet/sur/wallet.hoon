@@ -57,7 +57,7 @@
       [%create-wallet sndr=ship =network nickname=@t]
       [%request-address =network from=@p]
       [%receive-address =network address=(unit address)]
-      [%enqueue-transaction =network net=@t wallet=@ud hash=@ =transaction]
+      [%set-transaction =network net=@t wallet=@ud hash=@ =transaction]
       [%save-transaction-notes =network net=@t wallet=@ud hash=@t notes=@t]
   ==
 ::  subscription updates
