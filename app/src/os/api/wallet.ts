@@ -135,7 +135,7 @@ export const WalletApi = {
       });
     });
   },
-  enqueueTransaction: async (
+  setTransaction: async (
     conduit: Conduit,
     network: string,
     net: string,
@@ -147,7 +147,7 @@ export const WalletApi = {
       app: 'wallet',
       mark: 'wallet-action',
       json: {
-        'enqueue-transaction': {
+        'set-transaction': {
           network,
           net,
           wallet,

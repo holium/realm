@@ -24,6 +24,8 @@ import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
 // @ts-ignore
 import abi from 'human-standard-token-abi';
+// @ts-ignore
+import nftabi from 'non-fungible-token-abi';
 import axios from 'axios';
 
 // 10 minutes
@@ -186,7 +188,6 @@ export class WalletService extends BaseService {
     sendERC721Transaction: (
       walletIndex: string,
       to: string,
-      amount: string,
       contractAddress: string,
       tokenId: string,
       toPatp?: string,
@@ -196,7 +197,6 @@ export class WalletService extends BaseService {
         'realm.tray.wallet.send-erc721-transaction',
         walletIndex,
         to,
-        amount,
         contractAddress,
         tokenId,
         toPatp,
@@ -720,7 +720,6 @@ export class WalletService extends BaseService {
     _event: any,
     walletIndex: string,
     to: string,
-    amount: string,
     contractAddress: string,
     tokenId: string,
     toPatp?: string,
@@ -728,7 +727,6 @@ export class WalletService extends BaseService {
   ) {
     console.log(walletIndex);
     console.log(to);
-    console.log(amount);
     console.log(toPatp);
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     console.log(path);
@@ -736,10 +734,8 @@ export class WalletService extends BaseService {
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     let signer = wallet.connect(this.ethProvider!);
-    console.log(amount);
-    const contract = new ethers.Contract(contractAddress, abi, signer);
-    const ethAmount = ethers.utils.parseEther(amount);
-    const { hash } = await contract.transfer(to, ethAmount);
+    const contract = new ethers.Contract(contractAddress, nftabi, signer);
+    const { hash } = await contract.transfer(to, tokenId);
     const fromAddress = this.state!.ethereum.wallets.get(
       this.state!.currentIndex!
     )!.address;
@@ -748,13 +744,13 @@ export class WalletService extends BaseService {
       to,
       toPatp,
       fromAddress,
-      ethAmount,
+      tokenId,
       new Date().toISOString(),
       'ERC721',
     );
     const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
     console.log(stateTx);
-    await WalletApi.enqueueTransaction(
+    await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
       this.state!.ethereum.network,

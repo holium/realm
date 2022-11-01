@@ -262,7 +262,7 @@
       ==
     state
     ::
-      %enqueue-transaction
+      %set-transaction
     =/  tid=@ta
       :((cury cat 3) dap.bowl '--' (scot %uv eny.bowl))
     =.  wallets.state
@@ -292,7 +292,7 @@
           =.  their-address.transaction.act  our-address.transaction.act
           =.  our-address.transaction.act  their-address
           transaction.act
-        =/  wall-act=action  [%enqueue-transaction network.act net.act wallet.act hash.act transaction.act]
+        =/  wall-act=action  [%set-transaction network.act net.act wallet.act hash.act transaction.act]
         =/  task  [%poke %wallet-action !>(wall-act)]
         =/  new-card  
           ^-  (list card)
