@@ -127,7 +127,7 @@ export const DocketApi = {
       });
     });
   },
-  installDesk: async (
+  getDeskStatus: async (
     conduit: Conduit,
     ship: string,
     desk: string
@@ -135,36 +135,60 @@ export const DocketApi = {
     return new Promise(async (resolve) => {
       console.log(`checking if '/${ship}/${desk}' installed...`);
       const docket = await DocketApi.getDocket(conduit, desk);
-      if (docket !== undefined) {
-        if ('glob' in docket.chad && docket.chad.glob === null) {
-          // app fully installed. return
-          console.log(`'/${ship}/${desk}' already installed. skipping...`);
-          resolve('success');
-          return;
-        } else if ('install' in docket.chad) {
-          // app install in progress
-          console.log(
-            `unexpected state. it appears '/${ship}/${desk}' is currently installing. report error.`
-          );
-          resolve('unexpected installation status. app currently installing');
-          return;
-        } else if ('hung' in docket.chad) {
-          // prior installation attempt failed
-          console.log(
-            `unexpected state. it appears an earlier attempt at installing '/${ship}/${desk}' failed.`
-          );
-          resolve(
-            'installation already attempted. please uninstall the failed installation and try again.'
-          );
-          return;
-        }
+      if (docket === undefined) {
+        resolve('not-found');
+        return;
+      }
+
+      if ('glob' in docket.chad && docket.chad.glob === null) {
+        // app fully installed. return
+        console.log(`'/${ship}/${desk}' already installed. skipping...`);
+        resolve('installed');
+        return;
+      }
+
+      if ('install' in docket.chad) {
+        // app install in progress
+        console.log(
+          `unexpected state. it appears '/${ship}/${desk}' is currently installing. report error.`
+        );
+        resolve('installing');
+        return;
+      }
+
+      if ('hung' in docket.chad) {
         // prior installation attempt failed
         console.log(
-          `unexpected state. ${desk} already exists in docket. bailing...`
+          `unexpected state. it appears an earlier attempt at installing '/${ship}/${desk}' failed.`
         );
-        resolve(
-          `unexpected installation status. ${desk} currently exists in docket. skipping...`
-        );
+        resolve('hung');
+        return;
+      }
+
+      // prior installation attempt failed
+      console.log(
+        `unexpected state. ${desk} already exists in docket. bailing...`
+      );
+      resolve('unexpected');
+      return;
+    });
+  },
+  installDesk: async (
+    conduit: Conduit,
+    ship: string,
+    desk: string
+  ): Promise<string> => {
+    return new Promise(async (resolve) => {
+      // check if the desk is already installed; if it is first unininstall it before
+      const deskStatus = await DocketApi.getDeskStatus(conduit, ship, desk);
+      // for now, if the app is currently installed; continue
+      if (deskStatus === 'installed') {
+        resolve(`success`);
+        return;
+      }
+      // if the app is hung or currently installing, inform the user
+      if (deskStatus !== 'not-found') {
+        resolve(`docket exists (status='${deskStatus}')`);
         return;
       }
       if (!(await DocketApi.isAlly(conduit, ship))) {

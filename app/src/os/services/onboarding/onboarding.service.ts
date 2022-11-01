@@ -456,6 +456,7 @@ export class OnboardingService extends BaseService {
   }
 
   async installRealm(_event: any, ship: string) {
+    // if either INSTALL_MOON is undefined or set to 'bypass', ignore installation
     if (!process.env.INSTALL_MOON || process.env.INSTALL_MOON === 'bypass') {
       console.error(
         "error: [installRealm] - INSTALL_MOON not found or set to 'bypass'. skipping realm installation..."
@@ -463,9 +464,10 @@ export class OnboardingService extends BaseService {
       this.state.installRealm();
       return;
     }
+    // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
+    // example: INSTALL_MOON=~hostyv:realm,courier,wallet
     const parts: string[] = process.env.INSTALL_MOON.split(':');
     const moon: string = parts[0];
-    // const desks: string[] = ['realm', 'courier'];
     const desks: string[] = parts[1].split(',');
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp, cookie } = this.state.ship!;
