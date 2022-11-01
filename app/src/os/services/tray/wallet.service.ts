@@ -359,6 +359,9 @@ export class WalletService extends BaseService {
       this.updateWalletInfo();
     });
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
+      if (Object.keys(wallets.ethereum).length !== 0 || Object.keys(wallets.bitcoin).length !== 0) {
+        this.state!.setInitialized(true);
+      }
       this.state!.ethereum.initial(wallets);
       this.state!.bitcoin.initial(wallets);
       this.updateWalletInfo();
