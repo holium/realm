@@ -403,7 +403,7 @@ const EthWallet = types
           ethType: transaction.contractAddress || 'ETH',
           type: (self.address === transaction.from ? 'sent' : 'received'),
           initiatedAt: previousTransaction ? previousTransaction.initiatedAt : undefined,
-          completedAt: transaction.timeStamp,
+          completedAt: new Date(transaction.timestamp * 1000).toISOString(),
           ourAddress: transaction.from,
           theirAddress: transaction.to,
           status: (transaction.txreceipt_status === 1 ? 'succeeded': 'failed'),
