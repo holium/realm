@@ -45,7 +45,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer((props: Recove
         Recover Wallet
       </Text>
       <Text mt={2} variant="body" color={themeData.colors.text.secondary}>
-        Please enter the mnemonic seed phrase for your exsiting wallet.
+        Please enter the mnemonic seed phrase for your existing wallet.
       </Text>
       <Flex mt={9} width="100%" flexDirection="column">
         <Label mb={3} required={true}>
