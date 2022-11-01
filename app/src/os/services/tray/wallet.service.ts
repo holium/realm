@@ -586,6 +586,7 @@ export class WalletService extends BaseService {
   async getCurrentExchangeRate(_event: any, network: NetworkType) {
     // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
     // is probably cleaner to pull from here than add some random npm lib to do it
+    const url = 'https://pro-api.coingecko.com/api/v3/'
   }
 
   async setSettings(_events: any, network: string, settings: UISettingsType) {

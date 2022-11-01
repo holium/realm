@@ -21,9 +21,7 @@ export function formatWei(wei: string) {
   return utils.formatEther(amount).slice(0, 7);
 }
 
-export function convertWeiToUsd(wei: string) {
-  let exchangeRate = 1647.37;
-
+export function convertWeiToUsd(wei: string, exchangeRate: number = 1647.37) {
   let amount = BigNumber.from(wei);
   let eth = Number(utils.formatEther(amount));
   let usd = eth * exchangeRate;
@@ -120,11 +118,10 @@ export function formatCoinAmount (balance: string | BigInt, decimals: number) {
   }
 }
 
-export function convertEthAmountToUsd(amount: EthAmount) {
+export function convertEthAmountToUsd(amount: EthAmount, exchangeRate: number = 1647.37) {
   if (amount.eth === '0') {
     return 0;
   }
-  let exchangeRate = 1647.37;
   let usd = Number(amount.eth) * exchangeRate;
   return usd.toFixed(2);
 }
