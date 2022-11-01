@@ -70,6 +70,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-passcode': this.checkPasscode,
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
+    'realm.tray.wallet.check-mnemonic': this.checkMnemonic
   };
 
   static preload = {
@@ -79,6 +80,9 @@ export class WalletService extends BaseService {
         mnemonic,
         passcode
       );
+    },
+    checkMnemonic: (mnemonic: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.check-mnemonic', mnemonic);
     },
     checkPasscode: (passcode: number[]) => {
       return ipcRenderer.invoke('realm.tray.wallet.check-passcode', passcode);
@@ -456,6 +460,12 @@ export class WalletService extends BaseService {
     return await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
   }
 
+  async checkMnemonic(_event: any, mnemonic: string) {
+    // TODO: Leo, can you implement this? Just needs to check against the existing
+    // pub key and return true if it matches
+    return true;
+  }
+
   async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
     try {
       let newProvider = new ethers.providers.JsonRpcProvider(providerURL);
@@ -799,7 +809,7 @@ export class WalletService extends BaseService {
 
   async getAllBalances() {
     if (this.state!.network === 'bitcoin') {
-      
+
     }
     else if (this.state!.network === 'ethereum') {
       for (var key of this.state!.ethereum.wallets.keys()) {
