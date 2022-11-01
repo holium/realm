@@ -82,7 +82,7 @@ export const TransactionDetail: FC = observer(() => {
   let isEth = transaction.network === 'ethereum';
   let themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  let initiated = new Date(transaction.initiatedAt);
+  let completed = new Date(transaction.completedAt!);
   let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
   let amountDisplay = isEth
@@ -187,9 +187,9 @@ export const TransactionDetail: FC = observer(() => {
           DATE
         </Text>
         <Text variant="body" fontSize={1}>
-          {fullMonthNames[initiated.getMonth()]} {initiated.getDate()}{' '}
-          {initiated.getFullYear() !== new Date().getFullYear() &&
-            `, ${initiated.getFullYear()}`}
+          {fullMonthNames[completed.getMonth()]} {completed.getDate()}{' '}
+          {completed.getFullYear() !== new Date().getFullYear() &&
+            `, ${completed.getFullYear()}`}
         </Text>
       </Flex>
       <Flex
