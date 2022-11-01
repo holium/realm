@@ -498,6 +498,14 @@ export class WalletService extends BaseService {
   }
 
   async setNetwork(_event: any, network: NetworkType) {
+    if (this.state!.network !== network) {
+      if (network === 'ethereum') {
+        this.setView('', WalletView.ETH_LIST)
+      }
+      if (network === 'bitcoin') {
+        this.setView('', WalletView.ETH_LIST)
+      }
+    }
     this.state!.setNetwork(network);
   }
 
