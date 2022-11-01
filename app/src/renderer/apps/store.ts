@@ -135,7 +135,8 @@ export const trayStore = TrayAppStore.create({
     creationMode: 'default',
     sharingMode: 'anybody',
     ourPatp: '~zod',
-    lastInteraction: new Date()
+    lastInteraction: new Date(),
+    initialized: false,
   },
   dmApp: {
     currentView: 'dm-list',

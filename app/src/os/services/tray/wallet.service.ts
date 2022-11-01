@@ -322,7 +322,8 @@ export class WalletService extends BaseService {
         creationMode: 'default',
         sharingMode: 'anybody',
         ourPatp: ship,
-        lastInteraction: Date.now()
+        lastInteraction: Date.now(),
+        initialized: false,
       });
     }
 
@@ -359,6 +360,9 @@ export class WalletService extends BaseService {
       }
     });
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
+      if (Object.keys(wallets.ethereum).length !== 0 || Object.keys(wallets.bitcoin).length !== 0) {
+        this.state!.setInitialized(true);
+      }
       this.state!.ethereum.initial(wallets);
       this.updateEthereumInfo();
       this.state!.bitcoin.initial(wallets);
@@ -670,7 +674,7 @@ export class WalletService extends BaseService {
     );
     const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
     console.log(stateTx);
-    await WalletApi.enqueueTransaction(
+    await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
       this.state!.ethereum.network,
@@ -717,7 +721,7 @@ export class WalletService extends BaseService {
     );
     const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
     console.log(stateTx);
-    await WalletApi.enqueueTransaction(
+    await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
       this.state!.ethereum.network,

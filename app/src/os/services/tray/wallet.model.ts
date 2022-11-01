@@ -125,11 +125,12 @@ const BitcoinStore = types
     initial(wallets: any) {
       const btcWallets = wallets.bitcoin;
       Object.entries(btcWallets).forEach(([key, wallet]) => {
+        console.log(wallet)
         btcWallets[key] = {
           network: 'bitcoin',
           path: (wallet as any).path,
           nickname: (wallet as any).nickname,
-          balance: (wallet as any).balance.toString(),
+          balance: '0',
           address: (wallet as any).address,
           contracts: {}
         }
@@ -534,16 +535,20 @@ export const WalletStore = types
     currentAddress: types.maybe(types.string),
     currentIndex: types.maybe(types.string),
     passcodeHash: types.maybe(types.string),
-    lastInteraction: types.Date
+    lastInteraction: types.Date,
+    initialized: types.boolean,
   })
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
       if (network === 'ethereum') {
         self.ethereum.initial(wallets);
-          self.currentView = WalletView.ETH_LIST;
+        self.currentView = WalletView.ETH_LIST;
       } else {
         self.currentView = WalletView.BIT_LIST;
       }
+    },
+    setInitialized(initialized: boolean) {
+      self.initialized = initialized;
     },
     setNetwork(network: 'bitcoin' | 'ethereum') {
       self.network = network;
