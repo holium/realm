@@ -427,9 +427,6 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
-    console.log('setting mnemonic')
-    console.log(mnemonic)
-    console.log(passcode)
     let passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
