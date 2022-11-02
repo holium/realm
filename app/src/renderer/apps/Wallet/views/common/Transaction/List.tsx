@@ -111,20 +111,18 @@ export const Transaction = observer((props: TransactionProps) => {
 interface TransactionListProps {
   transactions: TransactionType[];
   hidePending: boolean;
-  ethType?: string
+  ethType?: string;
 }
 export const TransactionList = observer((props: TransactionListProps) => {
   const { theme } = useServices();
 
-  const pending = props.transactions
-    .filter(
-      (trans) => trans.status === 'pending'
-    ).length;
+  const pending = props.transactions.filter(
+    (trans) => trans.status === 'pending'
+  ).length;
 
-  const transactions = props.transactions
-    .filter(
-      trans => props.ethType ? trans.ethType === props.ethType : true
-    )
+  const transactions = props.transactions.filter((trans) =>
+    props.ethType ? trans.ethType === props.ethType : true
+  );
 
   return (
     <>

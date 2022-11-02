@@ -58,21 +58,22 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
         setTransactionSending(true);
         if (walletApp.network === 'ethereum') {
           props.coin
-          ? await WalletActions.sendERC20Transaction(
-              walletApp.currentIndex!,
-              transactionRecipient.address || transactionRecipient.patpAddress!,
-              transactionAmount.toString(),
-              props.coin.address,
-              transactionRecipient.patp
-            )
-          : await WalletActions.sendEthereumTransaction(
-              walletApp.currentIndex!,
-              transactionRecipient.address || transactionRecipient.patpAddress!,
-              transactionAmount.toString(),
-              transactionRecipient.patp
-            )
-        }
-        else {
+            ? await WalletActions.sendERC20Transaction(
+                walletApp.currentIndex!,
+                transactionRecipient.address ||
+                  transactionRecipient.patpAddress!,
+                transactionAmount.toString(),
+                props.coin.address,
+                transactionRecipient.patp
+              )
+            : await WalletActions.sendEthereumTransaction(
+                walletApp.currentIndex!,
+                transactionRecipient.address ||
+                  transactionRecipient.patpAddress!,
+                transactionAmount.toString(),
+                transactionRecipient.patp
+              );
+        } else {
           await WalletActions.sendBitcoinTransaction(
             Number(walletApp.currentIndex!),
             transactionRecipient.address || transactionRecipient.patpAddress!,
@@ -109,7 +110,11 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
       <>
         {screen === 'initial' ? (
           <Flex mt={7} flexDirection="column">
-            <AmountInput max={props.max} coin={props.coin} setValid={amountValidator} />
+            <AmountInput
+              max={props.max}
+              coin={props.coin}
+              setValid={amountValidator}
+            />
             <Box width="100%" mt={4}>
               <RecipientInput setValid={recipientValidator} />
             </Box>
@@ -130,7 +135,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           <Flex mt={7} flexDirection="column">
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
               {/* @ts-ignore */}
-              {transactionAmount} {props.coin ? props.coin.name : abbrMap[walletApp.network]}
+              {transactionAmount}{' '}
+              {props.coin ? props.coin.name : abbrMap[walletApp.network]}
             </Text>
             <Text mt={1} color={themeData.colors.text.disabled}>
               ${ethToUsd(transactionAmount)} USD
@@ -193,7 +199,9 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   NETWORK FEE
                 </Text>
                 <Flex flexDirection="column">
-                  <Text variant="body">0.0005 {props.coin ? props.coin.name : 'ETH'}</Text>
+                  <Text variant="body">
+                    0.0005 {props.coin ? props.coin.name : 'ETH'}
+                  </Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
                     ≈ {ethToUsd(0.0005)} USD
                   </Text>
@@ -204,7 +212,10 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   TOTAL
                 </Text>
                 <Flex flexDirection="column">
-                  <Text variant="body">{transactionAmount + 0.0005} {props.coin ? props.coin.name : 'ETH'}</Text>
+                  <Text variant="body">
+                    {transactionAmount + 0.0005}{' '}
+                    {props.coin ? props.coin.name : 'ETH'}
+                  </Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
                     ≈ {ethToUsd(transactionAmount + 0.0005)} USD
                   </Text>

@@ -66,9 +66,9 @@ export interface EthAmount {
   gweiFull: string;
   weiFull: string;
 
-  display: string
-  full: string
-  big: BigNumber
+  display: string;
+  full: string;
+  big: BigNumber;
 }
 
 export interface BtcAmount {
@@ -95,30 +95,35 @@ export function formatEthAmount(amount: string): EthAmount {
 
     display: utils.formatUnits(wei, 'ether').slice(0, 6),
     full: utils.formatUnits(wei, 'ether'),
-    big: wei
-
+    big: wei,
   };
 }
 
-export function formatCoinAmount (balance: string | BigInt, decimals: number) {
+export function formatCoinAmount(balance: string | BigInt, decimals: number) {
   let amount = typeof balance === 'string' ? balance : balance.toString();
   let decimalPosition = amount.length - decimals;
-  let includeDecimal = !amount.slice(decimalPosition).split('').every((char) => char === '0');
-  let parts = [amount.slice(0, decimalPosition)]
+  let includeDecimal = !amount
+    .slice(decimalPosition)
+    .split('')
+    .every((char) => char === '0');
+  let parts = [amount.slice(0, decimalPosition)];
   if (includeDecimal) {
-    parts.push('.')
-    parts.push(amount.slice(decimalPosition))
+    parts.push('.');
+    parts.push(amount.slice(decimalPosition));
   }
   let adjustedAmount = parts.join('');
 
   return {
     big: BigInt(amount),
     full: adjustedAmount,
-    display: adjustedAmount.slice(0, adjustedAmount[5] === '.' ? 8 : 7)
-  }
+    display: adjustedAmount.slice(0, adjustedAmount[5] === '.' ? 8 : 7),
+  };
 }
 
-export function convertEthAmountToUsd(amount: EthAmount, exchangeRate: number = 1647.37) {
+export function convertEthAmountToUsd(
+  amount: EthAmount,
+  exchangeRate: number = 1647.37
+) {
   if (amount.eth === '0') {
     return 0;
   }

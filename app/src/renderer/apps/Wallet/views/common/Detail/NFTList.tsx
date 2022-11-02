@@ -63,7 +63,9 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
                 fontSize={1}
                 color={baseTheme.colors.text.secondary}
               >
-                {props.details.collectionName ? props.details.collectionName : 'Name'}
+                {props.details.collectionName
+                  ? props.details.collectionName
+                  : 'Name'}
               </Text>
               <Text variant="h5" fontSize={1}>
                 {props.details.name}
