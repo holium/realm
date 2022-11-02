@@ -9,6 +9,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
+  setSeedPhrase: (phrase: string) => void;
 }
 
 export const RecoverExisting: FC<RecoverExistingProps> = observer((props: RecoverExistingProps) => {
@@ -32,6 +33,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer((props: Recove
     setLoading(false);
 
     if (correct) {
+      props.setSeedPhrase(phrase);
       props.setScreen(NewWalletScreen.PASSCODE); // TODO: change to confirm after demo
       setError('');
     } else {

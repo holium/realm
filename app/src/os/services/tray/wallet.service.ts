@@ -427,6 +427,9 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
+    console.log('setting mnemonic')
+    console.log(mnemonic)
+    console.log(passcode)
     let passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
@@ -436,14 +439,15 @@ export class WalletService extends BaseService {
     const privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
     // eth
-
     console.log('setting eth xpub');
+    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
+    console.log('ethxpub', xpub)
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
     console.log('setting btc xpub');
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
+    console.log('btcxpub', xpub)
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
 
     this.state!.ethereum.deleteWallets();
