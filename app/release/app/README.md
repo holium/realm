@@ -6,6 +6,10 @@ https://github.com/holium/realm/releases
 
 ## End Usage
 
+## TODO
+
+Document branching strategy: dev, staging, main...with additional beta for forefront users
+
 ### Auto Updates
 
 Realm checks for updates when the app starts. Checks for updates will then occur every 10 mins after the initial check.

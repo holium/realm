@@ -1,12 +1,18 @@
-name: production-build
-run-name: Production Build - ${{ github.actor }}
+name: production-build-test
+run-name: Production Test Build - ${{ github.actor }}
 on:
   pull_request:
     types:
       - closed
     branches:
-      - main
+      - main-test
 jobs:
+  print-github-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print github context
+        run: echo '${{ toJSON(github) }}'
+  #
   build-mac-production:
     if: github.event.pull_request.merged == true && github.head_ref == 'staging'
     runs-on: macos-latest
