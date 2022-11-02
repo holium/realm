@@ -8,7 +8,7 @@ https://github.com/holium/realm/releases
 
 ## TODO
 
-Document branching strategy
+Document branching strategy: dev, staging, main...with additional beta for forefront users
 
 ### Auto Updates
 
