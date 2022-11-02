@@ -68,7 +68,9 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
+    'realm.tray.wallet.get-ethereum-exchange-rate': this.getEthereumExchangeRate,
     'realm.tray.wallet.get-erc20-exchange-rate': this.getERC20ExchangeRate,
+    'realm.tray.wallet.get-bitcoin-exchange-rate': this.getBitcoinExchangeRate,
   };
 
   static preload = {
@@ -227,9 +229,15 @@ export class WalletService extends BaseService {
     toggleNetwork: () => {
       return ipcRenderer.invoke('realm.tray.wallet.toggle-network');
     },
+    getEthereumExchangeRate: () => {
+      return ipcRenderer.invoke('realm.tray.wallet.get-ethereum-exchange-rate');
+    },
     getERC20ExchangeRate: (contractAddress: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.get-erc20-exchange-rate', contractAddress);
-    }
+    },
+    getBitcoinExchangeRate: () => {
+      return ipcRenderer.invoke('realm.tray.wallet.get-bitcoin-exchange-rate');
+    },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -586,10 +594,20 @@ export class WalletService extends BaseService {
     WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
 
+  async getEthereumExchangeRate(_event: any) {
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=ethereum&vs_currencies=usd`
+    const result = await axios.get(url);
+    console.log(result)
+  }
+
   async getERC20ExchangeRate(_event: any, contractAddress: string) {
-    // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
-    // is probably cleaner to pull from here than add some random npm lib to do it
     const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`
+    const result = await axios.get(url);
+    console.log(result)
+  }
+
+  async getBitcoinExchangeRate(_event: any) {
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=bitcoin&vs_currencies=usd`
     const result = await axios.get(url);
     console.log(result)
   }
