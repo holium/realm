@@ -56,9 +56,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
     'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-settings': this.setSettings,
-    'realm.tray.wallet.set-wallet-creation-mode': this.setWalletCreationMode,
-    'realm.tray.wallet.set-sharing-mode': this.setSharingMode,
-    'realm.tray.wallet.set-sharing-permissions': this.setSharingPermissions,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
     'realm.tray.wallet.set-network-provider': this.setNetworkProvider,
     'realm.tray.wallet.create-wallet': this.createWallet,
@@ -129,13 +126,6 @@ export class WalletService extends BaseService {
     setSharingMode: (who: string) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-sharing-mode',
-        who
-      )
-    },
-    setSharingPermissions: (type: string, who: string) => {
-      return ipcRenderer.invoke(
-        'realm.tray.wallet.set-sharing-mode',
-        type,
         who
       )
     },
@@ -613,16 +603,6 @@ export class WalletService extends BaseService {
   async setWalletCreationMode(_event: any, mode: string) {
     this.state!.creationMode = mode;
     await WalletApi.setWalletCreationMode(this.core.conduit!, mode);
-  }
-
-  async setSharingMode(_event: any, who: string) {
-    this.state!.sharingMode = who;
-    await WalletApi.setSharingMode(this.core.conduit!, who);
-  }
-
-  async setSharingPermissions(_event: any, type: string, who: string) {
-    this.state!.setSharingPermissions(type, who);
-    await WalletApi.setSharingPermissions(this.core.conduit!, type, who);
   }
 
   async changeDefaultWallet(_event: any, network: string, index: number) {
