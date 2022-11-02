@@ -709,7 +709,8 @@ export class WalletService extends BaseService {
     console.log(amount);
     const contract = new ethers.Contract(contractAddress, abi, signer);
     const ethAmount = ethers.utils.parseEther(amount);
-    const { hash } = await contract.transfer(to, ethAmount);
+    let erc20Amount = ethers.utils.parseUnits(amount, this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!.decimals);
+    const { hash } = await contract.transfer(to, erc20Amount);
     const fromAddress = this.state!.ethereum.wallets.get(
       this.state!.currentIndex!
     )!.address;
