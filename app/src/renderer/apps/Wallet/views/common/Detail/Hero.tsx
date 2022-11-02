@@ -11,7 +11,7 @@ import {
   formatEthAmount,
   getBaseTheme,
   getMockCoinIcon,
-  formatCoinAmount
+  formatCoinAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
@@ -75,7 +75,12 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     ) : (
       <Flex
         onClick={() =>
-          WalletActions.setView(WalletView.WALLET_DETAIL, undefined, undefined, true)
+          WalletActions.setView(
+            WalletView.WALLET_DETAIL,
+            undefined,
+            undefined,
+            true
+          )
         }
       >
         <Icons

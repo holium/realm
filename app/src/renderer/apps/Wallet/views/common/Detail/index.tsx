@@ -65,7 +65,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
       ? walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions
       : walletApp.bitcoin.wallets.get(walletApp.currentIndex!)!.transactions;
   const transactions = getTransactions(
-    networkTransactions
+    walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions
     // wallet?.address,
     // coin
   ).sort(
@@ -128,6 +128,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
               <TransactionList
                 transactions={transactions}
                 hidePending={props.hidePending}
+                ethType={coin?.address}
               />
             </>
           )}

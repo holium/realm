@@ -48,11 +48,10 @@ export const WalletApp: FC<any> = observer((props: any) => {
   const { walletApp } = useTrayApps();
   var transactions: any = [];
   for (var key of walletApp.ethereum.wallets.keys()) {
-    const walletTransactions = getTransactions(walletApp.ethereum.wallets.get(key)!.transactions);
-    transactions = [
-      ...walletTransactions,
-      ...transactions
-    ]
+    const walletTransactions = getTransactions(
+      walletApp.ethereum.wallets.get(key)!.transactions
+    );
+    transactions = [...walletTransactions, ...transactions];
   }
   useEffect(() => {
     if (transactions.length !== transactionCount) {

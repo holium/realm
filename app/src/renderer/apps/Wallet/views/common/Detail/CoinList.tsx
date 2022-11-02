@@ -12,7 +12,7 @@ import {
   getBaseTheme,
   getTransactions,
   getMockCoinIcon,
-  formatCoinAmount
+  formatCoinAmount,
 } from '../../../lib/helpers';
 import { TransactionList } from '../Transaction/List';
 import { SendTransaction } from '../Transaction/Send';
@@ -29,7 +29,10 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
 
   const Coin = (props: { details: ERC20Type }) => {
     let coinIcon = props.details.logo || getMockCoinIcon(props.details.name);
-    let amount = formatCoinAmount(props.details.balance, props.details.decimals);
+    let amount = formatCoinAmount(
+      props.details.balance,
+      props.details.decimals
+    );
     return (
       <Flex
         width="100%"

@@ -108,7 +108,13 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
         position="absolute"
         top="582px"
         zIndex={999}
-        onClick={() => props.setScreen(walletApp.initialized ? NewWalletScreen.DETECTED_EXISTING : NewWalletScreen.CREATE)}
+        onClick={() =>
+          props.setScreen(
+            walletApp.initialized
+              ? NewWalletScreen.DETECTED_EXISTING
+              : NewWalletScreen.CREATE
+          )
+        }
       >
         <Icons
           name="ArrowLeftLine"

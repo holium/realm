@@ -61,8 +61,8 @@ export const WalletCard: FC<WalletCardProps> = ({
   }
 
   var transactions = getTransactions(
-    wallet.transactions,
-//    wallet!.address
+    wallet.transactions
+    //    wallet!.address
   );
 
   let amountDisplay = walletApp.network === 'ethereum'
