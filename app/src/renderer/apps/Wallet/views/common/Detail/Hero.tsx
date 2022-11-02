@@ -11,7 +11,7 @@ import {
   formatEthAmount,
   getBaseTheme,
   getMockCoinIcon,
-  formatCoinAmount
+  formatCoinAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
@@ -64,14 +64,21 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     let amountDisplay = !props.coin
       ? `${formatEthAmount(props.wallet.balance).eth} ETH`
-      : `${formatCoinAmount(props.coin.balance, props.coin.decimals).display} ${props.coin.name}`;
+      : `${formatCoinAmount(props.coin.balance, props.coin.decimals).display} ${
+          props.coin.name
+        }`;
 
     let accountDisplay = !props.coin ? (
       props.wallet.nickname
     ) : (
       <Flex
         onClick={() =>
-          WalletActions.setView(WalletView.WALLET_DETAIL, undefined, undefined, true)
+          WalletActions.setView(
+            WalletView.WALLET_DETAIL,
+            undefined,
+            undefined,
+            true
+          )
         }
       >
         <Icons

@@ -61,9 +61,9 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions.get(
-    walletApp.currentItem!.key
-  )!;
+  let transaction = walletApp.ethereum.wallets
+    .get(walletApp.currentIndex!)!
+    .transactions.get(walletApp.currentItem!.key)!;
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);

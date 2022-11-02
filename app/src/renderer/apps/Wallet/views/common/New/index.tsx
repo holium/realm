@@ -28,7 +28,9 @@ export enum NewWalletScreen {
 
 export const EthNew: FC<any> = observer(() => {
   const { walletApp } = useTrayApps();
-  let initialScreen = walletApp.initialized ? NewWalletScreen.DETECTED_EXISTING : NewWalletScreen.CREATE;
+  let initialScreen = walletApp.initialized
+    ? NewWalletScreen.DETECTED_EXISTING
+    : NewWalletScreen.CREATE;
 
   const [screen, setScreen] = useState<NewWalletScreen>(initialScreen);
   const [passcode, setPasscode] = useState<number[]>([]);
@@ -69,7 +71,7 @@ export const EthNew: FC<any> = observer(() => {
     ),
     [NewWalletScreen.RECOVER_EXISTING]: (
       <RecoverExisting setSeedPhrase={phraseSetter} setScreen={setScreen} />
-    )
+    ),
   };
   const currentComponent = components[screen as NewWalletScreen];
 

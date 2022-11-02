@@ -39,7 +39,7 @@ const CardStyle = styled(motion.div)<CardStyleProps>`
         `}
 `;
 interface WalletCardProps {
-  wallet: EthWalletType/* | BitcoinWalletType*/;
+  wallet: EthWalletType /* | BitcoinWalletType*/;
   isSelected?: boolean;
   onSelect?: () => void;
   theme?: ThemeType;
@@ -61,8 +61,8 @@ export const WalletCard: FC<WalletCardProps> = ({
   }
 
   var transactions = getTransactions(
-    wallet.transactions,
-//    wallet!.address
+    wallet.transactions
+    //    wallet!.address
   );
 
   let amountDisplay = `${formatEthAmount(wallet.balance).eth} ETH`;

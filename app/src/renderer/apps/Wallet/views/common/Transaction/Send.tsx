@@ -52,7 +52,10 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
           }
         >
           <Text variant="body" color={themeData.colors.brand.primary}>
-            Send {props.coin ? props.coin.name : abbrMap[walletApp.network as 'bitcoin' | 'ethereum']}
+            Send{' '}
+            {props.coin
+              ? props.coin.name
+              : abbrMap[walletApp.network as 'bitcoin' | 'ethereum']}
           </Text>
         </Flex>
       </Flex>
