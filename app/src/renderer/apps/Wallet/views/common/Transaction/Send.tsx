@@ -9,6 +9,7 @@ import { TransactionPane } from './Pane';
 import {
   BitcoinWalletType,
   EthWalletType,
+  ERC20Type,
 } from 'os/services/tray/wallet.model';
 
 const abbrMap = {
@@ -21,6 +22,7 @@ interface SendTransactionProps {
   onScreenChange: any;
   close: () => void;
   wallet: EthWalletType | BitcoinWalletType;
+  coin?: ERC20Type | null;
 }
 
 export const SendTransaction: FC<SendTransactionProps> = observer(
@@ -50,7 +52,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
           }
         >
           <Text variant="body" color={themeData.colors.brand.primary}>
-            Send {abbrMap[walletApp.network as 'bitcoin' | 'ethereum']}
+            Send {props.coin ? props.coin.name : abbrMap[walletApp.network as 'bitcoin' | 'ethereum']}
           </Text>
         </Flex>
       </Flex>
@@ -63,6 +65,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
           max={Number(props.wallet.balance)}
           onScreenChange={props.onScreenChange}
           close={props.close}
+          coin={props.coin}
         />
       </Box>
     );

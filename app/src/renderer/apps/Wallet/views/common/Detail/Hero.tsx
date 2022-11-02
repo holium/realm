@@ -188,6 +188,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           hidden={!props.sendTrans}
           onScreenChange={props.onScreenChange}
           close={props.close}
+          coin={props.coin}
         />
       </FlexWithShadow>
     );

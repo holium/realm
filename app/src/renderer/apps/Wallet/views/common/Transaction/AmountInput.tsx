@@ -7,6 +7,7 @@ import { getBaseTheme } from '../../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Input, ContainerFlex, FlexHider } from './styled';
+import { ERC20Type } from 'os/services/tray/wallet.model';
 
 // TODO: replace with actual exchange rate
 let ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
@@ -21,6 +22,7 @@ export const AmountInput = observer(
   (props: {
     max: number;
     setValid: (valid: boolean, amount?: number) => void;
+    coin?: ERC20Type | null;
   }) => {
     const amountRef = React.createRef();
     const { theme } = useServices();
@@ -147,7 +149,7 @@ export const AmountInput = observer(
                   {inCrypto
                     ? `$${ethToUsd(Number(amount))} USD`
                     : `${usdToEth(Number(amount))} ${
-                        abbrMap[walletApp.network as 'bitcoin' | 'ethereum']
+                        props.coin ? props.coin.name : abbrMap[walletApp.network as 'bitcoin' | 'ethereum']
                       }`}
                 </Text>
               </Box>
@@ -163,7 +165,7 @@ export const AmountInput = observer(
             >
               <Text mr={1} variant="body" fontSize="12px">
                 {inCrypto
-                  ? abbrMap[walletApp.network as 'bitcoin' | 'ethereum']
+                  ? (props.coin ? props.coin.name : abbrMap[walletApp.network as 'bitcoin' | 'ethereum'])
                   : 'USD'}
               </Text>
               <Icons name="UpDown" size="12px" />

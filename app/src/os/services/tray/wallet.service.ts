@@ -586,7 +586,7 @@ export class WalletService extends BaseService {
     WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
 
-  async getCurrentExchangeRate(_event: any, network: NetworkType) {
+  async getCurrentExchangeRate(_event: any, network: NetworkType, contractAddress: string) {
     // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
     // is probably cleaner to pull from here than add some random npm lib to do it
     const url = 'https://pro-api.coingecko.com/api/v3/'

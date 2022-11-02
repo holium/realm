@@ -8,6 +8,7 @@ import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
+import { ERC20Type } from 'os/services/tray/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -20,6 +21,7 @@ interface TransactionPaneProps {
   max: number;
   onScreenChange: any;
   close: any;
+  coin?: ERC20Type | null;
 }
 
 export const TransactionPane: FC<TransactionPaneProps> = observer(
@@ -96,7 +98,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
       <>
         {screen === 'initial' ? (
           <Flex mt={7} flexDirection="column">
-            <AmountInput max={props.max} setValid={amountValidator} />
+            <AmountInput max={props.max} coin={props.coin} setValid={amountValidator} />
             <Box width="100%" mt={4}>
               <RecipientInput setValid={recipientValidator} />
             </Box>
@@ -180,7 +182,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   NETWORK FEE
                 </Text>
                 <Flex flexDirection="column">
-                  <Text variant="body">0.0005 ETH</Text>
+                  <Text variant="body">0.0005 {props.coin ? props.coin.name : 'ETH'}</Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
                     ≈ {ethToUsd(0.0005)} USD
                   </Text>
@@ -191,7 +193,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   TOTAL
                 </Text>
                 <Flex flexDirection="column">
-                  <Text variant="body">{transactionAmount + 0.0005} ETH</Text>
+                  <Text variant="body">{transactionAmount + 0.0005} {props.coin ? props.coin.name : 'ETH'}</Text>
                   <Text fontSize={1} color={themeData.colors.text.secondary}>
                     ≈ {ethToUsd(transactionAmount + 0.0005)} USD
                   </Text>
