@@ -90,12 +90,13 @@ export class WalletService extends BaseService {
     checkProviderURL: (providerURL: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.check-provider-url', providerURL);
     },
-    setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }) => {
+    setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }, unsetCurrentItem?: boolean) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-view',
         view,
         index,
-        currentItem
+        currentItem,
+        unsetCurrentItem,
       );
     },
     setReturnView: (view: WalletView) => {
@@ -498,10 +499,11 @@ export class WalletService extends BaseService {
     _event: any,
     view: WalletView,
     index?: string,
-    currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }
+    currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string },
+    unsetCurrentItem?: boolean
   ) {
     console.log(`service setting view: ${view}`);
-    this.state!.setView(view, index, currentItem);
+    this.state!.setView(view, index, currentItem, unsetCurrentItem);
   }
 
   async setReturnView(_event: any, view: WalletView) {
