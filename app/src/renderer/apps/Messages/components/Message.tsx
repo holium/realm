@@ -52,11 +52,11 @@ export const MessagePreview = styled(motion.div)<MessagePreviewProps>`
 export const Message: FC<DMContact> = (props: DMContact) => {
   const { type, content, preview, color, bgColor, textColor } = props;
   const [messageContainer, setMessageComponent] = useState<any>([]);
-  // let message: any = '';
+
   useEffect(() => {
     let message: string = getTextFromContent(type, content);
     if (preview) {
-      message = message.split(/(\r\n|\n|\r)/gm)[0]; // takes only the first line of a multi-line message
+      message = message ? message.split(/(\r\n|\n|\r)/gm)[0] : ''; // takes only the first line of a multi-line message
       if (message.length > 27) {
         message = message.substring(0, 28) + '...';
       }
