@@ -111,24 +111,32 @@ export const Transaction = observer((props: TransactionProps) => {
 interface TransactionListProps {
   transactions: TransactionType[];
   hidePending: boolean;
+  ethType?: string
 }
 export const TransactionList = observer((props: TransactionListProps) => {
   const { theme } = useServices();
-  const pending = props.transactions.filter(
-    (trans) => trans.status === 'pending'
-  ).length;
+
+  const pending = props.transactions
+    .filter(
+      (trans) => trans.status === 'pending'
+    ).length;
+
+  const transactions = props.transactions
+    .filter(
+      trans => props.ethType ? trans.ethType === props.ethType : true
+    )
 
   return (
     <>
       <NoScrollBar
         width="100%"
-        height={pending && !props.hidePending ? '135px' : '160px'}
+        height={pending && !props.hidePending ? '175px' : '200px'}
         flexDirection="column"
         margin="auto"
         overflow="scroll"
       >
-        {props.transactions.length ? (
-          props.transactions.map((transaction, index) => (
+        {transactions.length ? (
+          transactions.map((transaction, index) => (
             <Transaction key={index} transaction={transaction} />
           ))
         ) : (
@@ -142,7 +150,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
           </Text>
         )}
       </NoScrollBar>
-      {props.transactions.length > 3 && (
+      {transactions.length > 3 && (
         <Flex pt={1} width="100%" justifyContent="center">
           <Icons
             name="ChevronDown"

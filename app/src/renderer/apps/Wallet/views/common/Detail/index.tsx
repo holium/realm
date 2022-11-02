@@ -118,6 +118,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
               <TransactionList
                 transactions={transactions}
                 hidePending={props.hidePending}
+                ethType={coin?.address}
               />
             </>
           )}
