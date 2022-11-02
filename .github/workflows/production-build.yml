@@ -126,6 +126,7 @@ jobs:
           npm version patch
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
+          git pull
           git add package.json
           git commit -m "patch version"
           git push
