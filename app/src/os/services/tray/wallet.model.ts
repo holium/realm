@@ -106,6 +106,7 @@ export type BitcoinWalletType = Instance<typeof BitcoinWallet>
 
 const BitcoinStore = types
   .model('BitcoinStore', {
+    network: types.enumeration(['mainnet', 'testnet']),
     wallets: types.map(BitcoinWallet),
     settings: Settings,
   })
@@ -162,6 +163,9 @@ const BitcoinStore = types
       for (var transaction in wallet.transactions) {
         // self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
+    },
+    setNetwork(network: string) {
+      self.network = network;
     }
   }));
 

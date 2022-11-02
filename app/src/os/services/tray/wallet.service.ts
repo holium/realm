@@ -305,6 +305,7 @@ export class WalletService extends BaseService {
           initialized: false,
         },
         bitcoin: {
+          network: 'mainnet',
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
@@ -864,15 +865,26 @@ export class WalletService extends BaseService {
   }
 
   toggleNetwork() {
-    if (this.state!.ethereum.network === 'mainnet') {
-      this.state!.ethereum.setNetwork('gorli');
-      this.setProviders();
+    if (this.state!.network === 'ethereum') {
+      if (this.state!.ethereum.network === 'mainnet') {
+        this.state!.ethereum.setNetwork('gorli');
+        this.setProviders();
+      }
+      else if (this.state!.ethereum.network === 'gorli') {
+        this.state!.ethereum.setNetwork('mainnet');
+        this.setProviders();
+      }
+      this.updateEthereumInfo();
     }
-    else if (this.state!.ethereum.network === 'gorli') {
-      this.state!.ethereum.setNetwork('mainnet');
-      this.setProviders();
+    else {
+      if (this.state!.bitcoin.network === 'mainnet') {
+        this.state!.bitcoin.setNetwork('testnet');
+      }
+      else if (this.state!.bitcoin.network === 'testnet') {
+        this.state!.bitcoin.setNetwork('mainnet');
+      }
+
     }
-    this.updateEthereumInfo();
   }
 
   async getAllTransactions() {
