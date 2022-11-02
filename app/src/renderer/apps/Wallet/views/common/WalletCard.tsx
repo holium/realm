@@ -60,8 +60,6 @@ export const WalletCard: FC<WalletCardProps> = ({
     coins = getCoins(wallet.coins);
   }
 
-  console.log(wallet.address);
-
   var transactions = getTransactions(
     wallet.transactions,
 //    wallet!.address
