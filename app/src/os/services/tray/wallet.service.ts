@@ -421,6 +421,7 @@ export class WalletService extends BaseService {
         network: Network.ETH_GOERLI, // Replace with your network.
       };
     }
+    this.ethProvider.removeAllListeners();
     this.ethProvider.on("block", () => this.updateEthereumInfo());
     this.alchemy = new Alchemy(alchemySettings);
   }
@@ -517,7 +518,8 @@ export class WalletService extends BaseService {
         this.setView('', WalletView.ETH_LIST)
       }
       if (network === 'bitcoin') {
-        this.setView('', WalletView.ETH_LIST)
+        this.setView('', WalletView.BIT_LIST)
+        this.ethProvider!.removeAllListeners();
       }
     }
     this.state!.setNetwork(network);
