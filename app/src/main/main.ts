@@ -35,6 +35,8 @@ import BrowserHelper from './helpers/browser';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
 
+const fs = require('fs');
+
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
@@ -121,6 +123,14 @@ if (process.defaultApp) {
 } else {
   app.setAsDefaultProtocolClient('holium-realm');
 }
+
+process.on('uncaughtException', (err) => {
+  try {
+    fs.appendFileSync('realmlog.txt', err.stack || err.message);
+  } catch (e) {
+    console.log(e);
+  }
+});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

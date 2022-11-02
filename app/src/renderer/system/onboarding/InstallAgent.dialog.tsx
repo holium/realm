@@ -108,7 +108,7 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
               color={onboarding.installer.state === 'error' ? 'red' : ''}
             >
               {onboarding.installer.state === 'error'
-                ? `Oops! An error has occurred: '${onboarding.installer.errorMessage}'`
+                ? `${onboarding.installer.errorMessage}`
                 : !onboarding.installer.isLoaded
                 ? 'This will just take a minute'
                 : 'Congrats! You are ready to enter a new world.'}
