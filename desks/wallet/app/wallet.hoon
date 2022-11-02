@@ -317,7 +317,12 @@
         =/  tx  *transaction
         =.  hash.tx  hash.act
         tx
-      (~(got by u.net-map) hash.act)
+      =/  tx  (~(get by u.net-map) hash.act)
+      ?~  tx
+        =/  tx  *transaction
+        =.  hash.tx  hash.act
+        tx
+      u.tx
     =.  tx
       =.  notes.tx  notes.act
       tx
