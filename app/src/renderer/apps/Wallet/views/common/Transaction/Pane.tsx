@@ -56,18 +56,29 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const sendTransaction = async () => {
       try {
         setTransactionSending(true);
-        walletApp.network === 'ethereum'
-          ? await WalletActions.sendEthereumTransaction(
+        if (walletApp.network === 'ethereum') {
+          props.coin
+          ? await WalletActions.sendERC20Transaction(
+              walletApp.currentIndex!,
+              transactionRecipient.address || transactionRecipient.patpAddress!,
+              transactionAmount.toString(),
+              props.coin.address,
+              transactionRecipient.patp
+            )
+          : await WalletActions.sendEthereumTransaction(
               walletApp.currentIndex!,
               transactionRecipient.address || transactionRecipient.patpAddress!,
               transactionAmount.toString(),
               transactionRecipient.patp
             )
-          : await WalletActions.sendBitcoinTransaction(
-              Number(walletApp.currentIndex!),
-              transactionRecipient.address || transactionRecipient.patpAddress!,
-              transactionAmount.toString()
-            );
+        }
+        else {
+          await WalletActions.sendBitcoinTransaction(
+            Number(walletApp.currentIndex!),
+            transactionRecipient.address || transactionRecipient.patpAddress!,
+            transactionAmount.toString()
+          );
+        }
         setTransactionSending(false);
         setScreen('initial');
         props.close();
@@ -119,7 +130,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
           <Flex mt={7} flexDirection="column">
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
               {/* @ts-ignore */}
-              {transactionAmount} {abbrMap[walletApp.network]}
+              {transactionAmount} {props.coin ? props.coin.name : abbrMap[walletApp.network]}
             </Text>
             <Text mt={1} color={themeData.colors.text.disabled}>
               ${ethToUsd(transactionAmount)} USD
