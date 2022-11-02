@@ -43,31 +43,6 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setSharingMode: async (conduit: Conduit, who: string) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'set-sharing-mode': {
-          who: who
-        }
-      }
-    }
-    await conduit.poke(payload);
-  },
-  setSharingPermissions: async (conduit: Conduit, type: string, who: string) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'set-sharing-permissions': {
-          type: type,
-          who: who
-        }
-      }
-    }
-    await conduit.poke(payload);
-  },
   changeDefaultWallet: async (
     conduit: Conduit,
     network: string,

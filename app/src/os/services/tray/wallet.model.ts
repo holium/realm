@@ -558,14 +558,6 @@ export const WalletStore = types
     setLastInteraction(date: Date) {
       self.lastInteraction = date;
     },
-    setSharingPermissions(type: string, who: string) {
-      if (type === 'allow') {
-        self.whitelist.put(who);
-      }
-      else if (type === 'block') {
-        self.blacklist.put(who);
-      }
-    }
   }));
 
 export type WalletStoreType = Instance<typeof WalletStore>;
