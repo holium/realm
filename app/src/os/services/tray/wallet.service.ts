@@ -67,7 +67,8 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-passcode': this.checkPasscode,
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
-    'realm.tray.wallet.check-mnemonic': this.checkMnemonic
+    'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
+    'realm.tray.wallet.get-erc20-exchange-rate': this.getERC20ExchangeRate,
   };
 
   static preload = {
@@ -116,12 +117,6 @@ export class WalletService extends BaseService {
     },
     setSettings: (network: string, settings: UISettingsType) => {
       return ipcRenderer.invoke('realm.tray.wallet.set-settings', network, settings);
-    },
-    setWalletCreationMode: (mode: string) => {
-      return ipcRenderer.invoke(
-        'realm.tray.wallet.set-wallet-creation-mode',
-        mode
-      );
     },
     setSharingMode: (who: string) => {
       return ipcRenderer.invoke(
@@ -231,6 +226,9 @@ export class WalletService extends BaseService {
     },
     toggleNetwork: () => {
       return ipcRenderer.invoke('realm.tray.wallet.toggle-network');
+    },
+    getERC20ExchangeRate: (contractAddress: string) => {
+      return ipcRenderer.invoke('realm.tray.wallet.get-erc20-exchange-rate', contractAddress);
     }
   };
 
@@ -576,10 +574,12 @@ export class WalletService extends BaseService {
     WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
 
-  async getCurrentExchangeRate(_event: any, network: NetworkType, contractAddress: string) {
+  async getERC20ExchangeRate(_event: any, contractAddress: string) {
     // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
     // is probably cleaner to pull from here than add some random npm lib to do it
-    const url = 'https://pro-api.coingecko.com/api/v3/'
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`
+    const result = await axios.get(url);
+    console.log(result)
   }
 
   async setSettings(_events: any, network: string, settings: UISettingsType) {
@@ -587,11 +587,6 @@ export class WalletService extends BaseService {
       this.state!.ethereum.setSettings(settings);
     }
     await WalletApi.setSettings(this.core.conduit!, network, settings);
-  }
-
-  async setWalletCreationMode(_event: any, mode: string) {
-    this.state!.creationMode = mode;
-    await WalletApi.setWalletCreationMode(this.core.conduit!, mode);
   }
 
   async changeDefaultWallet(_event: any, network: string, index: number) {
