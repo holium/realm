@@ -43,7 +43,7 @@ export const Transaction = observer((props: TransactionProps) => {
   let isEth = transaction.network === 'ethereum';
   let themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  let initiatedDate = new Date(transaction.initiatedAt);
+  let initiatedDate = new Date(transaction.initiatedAt!);
 
   let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
