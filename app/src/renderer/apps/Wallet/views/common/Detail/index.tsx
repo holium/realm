@@ -72,7 +72,6 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     (a, b) =>
       new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime()
   );
-  console.log(transactions.length)
 
   /*useEffect(() => {
     if (coins.length) {

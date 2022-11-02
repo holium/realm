@@ -9,6 +9,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface RecoverExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
+  setSeedPhrase: (phrase: string) => void;
 }
 
 export const RecoverExisting: FC<RecoverExistingProps> = observer((props: RecoverExistingProps) => {
@@ -32,6 +33,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer((props: Recove
     setLoading(false);
 
     if (correct) {
+      props.setSeedPhrase(phrase);
       props.setScreen(NewWalletScreen.PASSCODE); // TODO: change to confirm after demo
       setError('');
     } else {
@@ -45,7 +47,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer((props: Recove
         Recover Wallet
       </Text>
       <Text mt={2} variant="body" color={themeData.colors.text.secondary}>
-        Please enter the mnemonic seed phrase for your exsiting wallet.
+        Please enter the mnemonic seed phrase for your existing wallet.
       </Text>
       <Flex mt={9} width="100%" flexDirection="column">
         <Label mb={3} required={true}>

@@ -75,7 +75,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     ) : (
       <Flex
         onClick={() =>
-          WalletActions.setView(WalletView.WALLET_DETAIL, undefined)
+          WalletActions.setView(WalletView.WALLET_DETAIL, undefined, undefined, true)
         }
       >
         <Icons
@@ -192,6 +192,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           hidden={!props.sendTrans}
           onScreenChange={props.onScreenChange}
           close={props.close}
+          coin={props.coin}
         />
       </FlexWithShadow>
     );

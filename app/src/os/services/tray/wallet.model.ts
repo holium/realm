@@ -558,7 +558,7 @@ export const WalletStore = types
         self.currentView = WalletView.BIT_LIST;
       }
     },
-    setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }) {
+    setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }, unsetCurrentItem?: boolean) {
       if (view === WalletView.LOCKED && self.currentView === WalletView.LOCKED) {
         // don't allow setting locked multiple times
         return;
@@ -570,6 +570,9 @@ export const WalletStore = types
 
       if (item) {
         self.currentItem = item;
+      }
+      else if (unsetCurrentItem) {
+        self.currentItem = undefined;
       }
 
       let returnView = self.currentView;

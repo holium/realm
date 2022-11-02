@@ -90,12 +90,13 @@ export class WalletService extends BaseService {
     checkProviderURL: (providerURL: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.check-provider-url', providerURL);
     },
-    setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }) => {
+    setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }, unsetCurrentItem?: boolean) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-view',
         view,
         index,
-        currentItem
+        currentItem,
+        unsetCurrentItem,
       );
     },
     setReturnView: (view: WalletView) => {
@@ -437,14 +438,15 @@ export class WalletService extends BaseService {
     const privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
     // eth
-
     console.log('setting eth xpub');
+    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
+    console.log('ethxpub', xpub)
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
     console.log('setting btc xpub');
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
+    console.log('btcxpub', xpub)
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
 
     this.state!.ethereum.deleteWallets();
@@ -501,10 +503,11 @@ export class WalletService extends BaseService {
     _event: any,
     view: WalletView,
     index?: string,
-    currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }
+    currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string },
+    unsetCurrentItem?: boolean
   ) {
     console.log(`service setting view: ${view}`);
-    this.state!.setView(view, index, currentItem);
+    this.state!.setView(view, index, currentItem, unsetCurrentItem);
   }
 
   async setReturnView(_event: any, view: WalletView) {
@@ -594,9 +597,10 @@ export class WalletService extends BaseService {
     WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
 
-  async getCurrentExchangeRate(_event: any, network: NetworkType) {
+  async getCurrentExchangeRate(_event: any, network: NetworkType, contractAddress: string) {
     // doesn't the agent have a way of getting this if you're setting the USD equivalent every so often?
     // is probably cleaner to pull from here than add some random npm lib to do it
+    const url = 'https://pro-api.coingecko.com/api/v3/'
   }
 
   async setSettings(_events: any, network: string, settings: UISettingsType) {
@@ -716,7 +720,8 @@ export class WalletService extends BaseService {
     console.log(amount);
     const contract = new ethers.Contract(contractAddress, abi, signer);
     const ethAmount = ethers.utils.parseEther(amount);
-    const { hash } = await contract.transfer(to, ethAmount);
+    let erc20Amount = ethers.utils.parseUnits(amount, this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!.decimals);
+    const { hash } = await contract.transfer(to, erc20Amount);
     const fromAddress = this.state!.ethereum.wallets.get(
       this.state!.currentIndex!
     )!.address;
