@@ -562,27 +562,12 @@ export class WalletService extends BaseService {
     this.state!.navigateBack();
   }
 
-  async setView(
-    _event: any,
-    view: WalletView,
-    index?: string,
-    currentItem?: { type: 'transaction' | 'nft' | 'coin'; key: string },
-    unsetCurrentItem?: boolean
-  ) {
-    console.log(`service setting view: ${view}`);
-    this.state!.setView(view, index, currentItem, unsetCurrentItem);
-  }
-
-  async setReturnView(_event: any, view: WalletView) {
-    this.state!.setReturnView(view);
-  }
-
   async setNetwork(_event: any, network: NetworkType) {
-    if (this.state!.network !== network) {
+    if (this.state!.navState.network !== network) {
       if (network === 'bitcoin') {
         this.ethProvider!.removeAllListeners();
       }
-      this.setView('', WalletView.LIST);
+      this.state!.navigate(WalletView.LIST);
     }
     this.state!.setNetwork(network);
   }
@@ -966,7 +951,7 @@ export class WalletService extends BaseService {
   }
 
   toggleNetwork() {
-    if (this.state!.network === 'ethereum') {
+    if (this.state!.navState.network === 'ethereum') {
       if (this.state!.ethereum.network === 'mainnet') {
         this.state!.ethereum.setNetwork('gorli');
         this.setProviders();
