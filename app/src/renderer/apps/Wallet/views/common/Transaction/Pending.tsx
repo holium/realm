@@ -24,7 +24,7 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
-        new Date(a.initiatedAt).getTime() - new Date(b.initiatedAt).getTime()
+        new Date(a.initiatedAt!).getTime() - new Date(b.initiatedAt!).getTime()
     );
 
   return (
@@ -54,7 +54,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   const goToTransaction = () => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL,
       {
-        walletIndex: props.transaction.walletIndex,
+        walletIndex: props.transaction.walletIndex.toString(),
         detail: { type: 'transaction', key: props.transaction.hash },
       }
     );

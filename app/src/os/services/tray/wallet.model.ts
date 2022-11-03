@@ -565,16 +565,7 @@ export interface WalletNavOptions {
 
 export const WalletStore = types
   .model('WalletStore', {
-    network: types.enumeration(['ethereum', 'bitcoin']),
-    currentView: types.enumeration(Object.values(WalletView)),
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
-    currentItem: types.maybe(
-      types.model({
-        type: types.enumeration(['transaction', 'coin', 'nft']),
-        key: types.string,
-      })
-    ),
-    currentTransaction: types.maybe(types.string),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
     creationMode: types.string,
@@ -582,8 +573,6 @@ export const WalletStore = types
     whitelist: types.map(types.string),
     blacklist: types.map(types.string),
     ourPatp: types.maybe(types.string),
-    currentAddress: types.maybe(types.string),
-    currentIndex: types.maybe(types.string),
     passcodeHash: types.maybe(types.string),
     lastInteraction: types.Date,
     initialized: types.boolean,
@@ -606,17 +595,10 @@ export const WalletStore = types
     },
   }))
   .actions((self) => ({
-    setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
-      if (network === 'ethereum') {
-        self.ethereum.initial(wallets);
-      }
-      self.currentView = WalletView.LIST;
-    },
     setInitialized(initialized: boolean) {
       self.initialized = initialized;
     },
     setNetwork(network: NetworkType) {
-      self.network = network;
       self.navState.network = network;
       /* @ts-ignore */
       self.resetNavigation();
@@ -666,39 +648,6 @@ export const WalletStore = types
         network: self.navState.network,
       });
       self.navHistory = cast([]);
-    },
-    setView(
-      view: WalletView,
-      index?: string,
-      item?: { type: 'transaction' | 'coin' | 'nft'; key: string },
-      unsetCurrentItem?: boolean
-    ) {
-      if (
-        view === WalletView.LOCKED &&
-        self.currentView === WalletView.LOCKED
-      ) {
-        // don't allow setting locked multiple times
-        return;
-      }
-
-      if (index) {
-        self.currentIndex = index;
-      }
-
-      if (item) {
-        self.currentItem = item;
-      } else if (unsetCurrentItem) {
-        self.currentItem = undefined;
-      }
-
-      let returnView = self.currentView;
-      if (returnView === WalletView.LOCKED) {
-        // the return view should never be locked
-        returnView = WalletView.LIST;
-      }
-
-      self.returnView = returnView;
-      self.currentView = view;
     },
     setReturnView(view: WalletView) {
       self.returnView = view;
