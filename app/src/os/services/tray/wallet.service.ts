@@ -760,7 +760,6 @@ export class WalletService extends BaseService {
     amount: string,
     contractAddress: string,
     toPatp?: string,
-    contractType?: string
   ) {
     console.log(walletIndex);
     console.log(to);
@@ -790,7 +789,7 @@ export class WalletService extends BaseService {
       fromAddress,
       ethAmount,
       new Date().toISOString(),
-      'ERC20'
+      contractAddress
     );
     const stateTx = currentWallet.getTransaction(hash);
     console.log(stateTx);
