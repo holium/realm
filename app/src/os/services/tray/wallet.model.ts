@@ -3,7 +3,8 @@ import {
   types,
   Instance,
   getSnapshot,
-  flow
+  flow,
+  cast
 } from 'mobx-state-tree';
 import { Network, Alchemy, Nft } from "alchemy-sdk";
 import { IntelligentTieringAccessTier } from 'aws-sdk/clients/s3';
@@ -519,6 +520,36 @@ export const EthStore = types
 export const Networks = types.enumeration(['ethereum', 'bitcoin']);
 export type NetworkType = Instance<typeof Networks>;
 
+
+export const WalletNavState = types
+  .model('WalletNavState', {
+    view: types.enumeration(Object.values(WalletView)),
+    network: types.enumeration(['ethereum', 'bitcoin']),
+    walletIndex: types.maybe(types.string),
+    detail: types.maybe(types.model({
+      type: types.enumeration(['transaction', 'coin', 'nft']),
+      key: types.string
+    })),
+    action: types.maybe(types.model({
+      type: types.string,
+      data: types.frozen()
+    }))
+  })
+
+export interface WalletNavOptions {
+  canReturn?: boolean
+  network?: 'ethereum' | 'bitcoin',
+  walletIndex?: string,
+  detail?: {
+    type: 'transaction' | 'coin' | 'nft',
+    key: string
+  },
+  action?: {
+    type: string
+    data: any
+  }
+}
+
 export const WalletStore = types
   .model('WalletStore', {
     network: types.enumeration(['ethereum', 'bitcoin']),
@@ -541,7 +572,19 @@ export const WalletStore = types
     passcodeHash: types.maybe(types.string),
     lastInteraction: types.Date,
     initialized: types.boolean,
+    navState: WalletNavState,
+    navHistory: types.array(WalletNavState)
   })
+  .views((self) => ({
+    get currentStore() {
+      return self.navState.network === 'ethereum' ? self.ethereum : self.bitcoin;
+    },
+
+    get currentWallet() {
+      let walletStore = self.navState.network === 'ethereum' ? self.ethereum : self.bitcoin;
+      return self.navState.walletIndex ? walletStore.wallets.get(self.navState.walletIndex) : null;
+    }
+  }))
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
       if (network === 'ethereum') {
@@ -556,11 +599,45 @@ export const WalletStore = types
     },
     setNetwork(network: 'bitcoin' | 'ethereum') {
       self.network = network;
+      self.navState.network = network;
       if (network === 'ethereum') {
         self.currentView = WalletView.ETH_LIST;
+        // TODO
       } else {
         self.currentView = WalletView.BIT_LIST;
       }
+    },
+    navigate(view: WalletView, options?: WalletNavOptions) {
+      let canReturn = options?.canReturn || true;
+      let walletIndex = options?.walletIndex || self.currentIndex;
+      let detail = options?.detail;
+      let action = options?.action;
+      let network = options?.network || self.navState.network;
+
+      // TODO: legacy field, we should remove when possible
+      self.currentIndex = walletIndex;
+
+      if (canReturn && ![WalletView.LOCKED, WalletView.ETH_NEW].includes(self.navState.view)) {
+        let returnSnapshot = getSnapshot(self.navState)
+        self.navHistory.push(WalletNavState.create(returnSnapshot));
+      }
+
+      let newState = WalletNavState.create({ view, walletIndex, detail, action, network });
+      self.navState = newState;
+    },
+    navigateBack() {
+      let DEFAULT_RETURN_VIEW = self.navState.network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST;
+      let returnSnapshot = getSnapshot(WalletNavState.create({ view: DEFAULT_RETURN_VIEW, network: self.navState.network, walletIndex: undefined, detail: undefined, action: undefined }));
+
+      if (self.navHistory.length) {
+        returnSnapshot = getSnapshot(self.navHistory.pop()!)
+      }
+
+      self.navState = WalletNavState.create(returnSnapshot);
+    },
+    resetNavigation() {
+      self.navState = WalletNavState.create({ view: WalletView.ETH_LIST, network: 'ethereum' });
+      self.navHistory = cast([]);
     },
     setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }, unsetCurrentItem?: boolean) {
       if (view === WalletView.LOCKED && self.currentView === WalletView.LOCKED) {

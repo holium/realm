@@ -71,6 +71,8 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.get-ethereum-exchange-rate': this.getEthereumExchangeRate,
     'realm.tray.wallet.get-erc20-exchange-rate': this.getERC20ExchangeRate,
     'realm.tray.wallet.get-bitcoin-exchange-rate': this.getBitcoinExchangeRate,
+    'realm.tray.wallet.navigate': this.navigate,
+    'realm.tray.wallet.navigateBack': this.navigateBack,
   };
 
   static preload = {
@@ -89,6 +91,12 @@ export class WalletService extends BaseService {
     },
     checkProviderURL: (providerURL: string) => {
       return ipcRenderer.invoke('realm.tray.wallet.check-provider-url', providerURL);
+    },
+    navigate: (view: WalletView, options?: { canReturn?: boolean, walletIndex?: string, detail?: { type:  'transaction' | 'coin' | 'nft', key: string }, action?: { type: string, data: any } }) => {
+      return ipcRenderer.invoke('realm.tray.wallet.navigate', view, options);
+    },
+    navigateBack: () => {
+      return ipcRenderer.invoke('realm.tray.wallet.navigateBack');
     },
     setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }, unsetCurrentItem?: boolean) => {
       return ipcRenderer.invoke(
@@ -271,7 +279,8 @@ export class WalletService extends BaseService {
   private lock() {
     let hasPasscode = this.state && this.state.passcodeHash;
     if (hasPasscode) {
-      this.state!.setView(WalletView.LOCKED, this.state!.currentIndex, this.state!.currentItem);
+      // this.state!.setView(WalletView.LOCKED, this.state!.currentIndex, this.state!.currentItem);
+      this.state!.navigate(WalletView.LOCKED);
     }
   }
 
@@ -302,6 +311,10 @@ export class WalletService extends BaseService {
       this.state = WalletStore.create({
         network: 'ethereum',
         currentView: WalletView.ETH_NEW,
+        navState: {
+          view: WalletView.ETH_NEW
+        },
+        navHistory: [],
         ethereum: {
           network: 'gorli',
           settings: {
@@ -393,6 +406,7 @@ export class WalletService extends BaseService {
 //      'http://127.0.0.1:8545'
     );
 
+    this.state.resetNavigation();
     this.lock(); // lock wallet on login
   }
 
@@ -456,7 +470,8 @@ export class WalletService extends BaseService {
     });
 
     console.log('okay transitioning');
-    this.state!.setView(WalletView.ETH_LIST);
+    // this.state!.setView(WalletView.ETH_LIST);
+    this.state!.navigate(WalletView.ETH_LIST);
   }
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
@@ -495,6 +510,16 @@ export class WalletService extends BaseService {
     // btc
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+  }
+
+  navigate(_event: any, view: WalletView, options?: { canReturn?: boolean, walletIndex?: string, detail?: { type:  'transaction' | 'coin' | 'nft', key: string }, action?: { type: string, data: any } }) {
+    console.log(`wallet: navigating to ${view}`)
+    this.state!.navigate(view, options);
+  }
+
+  navigateBack() {
+    console.log(`wallet: navigating back`)
+    this.state!.navigateBack();
   }
 
   async setView(
@@ -591,7 +616,8 @@ export class WalletService extends BaseService {
     else {
       net = 'mainnet'
     }
-    const hash = this.state!.currentItem!.key;
+    // const hash = this.state!.currentItem!.key;
+    const hash = this.state!.navState.detail!.key
     const index = this.state!.ethereum.wallets.get(this.state?.currentIndex!)!.index
     WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
@@ -640,7 +666,7 @@ export class WalletService extends BaseService {
     const sender: string = this.state!.ourPatp!;
     const network: string = this.state!.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
-    this.state!.setView(this.state!.network === 'ethereum' ? WalletView.ETH_LIST: WalletView.BIT_LIST);
+    this.state!.navigate(this.state!.network === 'ethereum' ? WalletView.ETH_LIST: WalletView.BIT_LIST, { canReturn: false });
   }
 
   async estimateCurrentGasFee(_event: any) {}

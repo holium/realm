@@ -45,11 +45,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           </Box>
           <Box
             onClick={() =>
-              WalletActions.setView(
-                settingsView,
-                walletApp.currentIndex,
-                walletApp.currentItem
-              )
+              WalletActions.navigate(settingsView)
             }
           >
             <Icons name="Settings" color={theme.currentTheme.iconColor} />

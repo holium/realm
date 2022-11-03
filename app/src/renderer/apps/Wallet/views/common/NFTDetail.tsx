@@ -50,10 +50,7 @@ export const NFTDetail: FC = () => {
         top="582px"
         zIndex={999}
         onClick={() =>
-          WalletActions.setView(
-            WalletView.WALLET_DETAIL,
-            walletApp.currentIndex
-          )
+          WalletActions.navigateBack()
         }
       >
         <Icons

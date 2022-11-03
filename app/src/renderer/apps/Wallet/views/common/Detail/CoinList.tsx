@@ -44,10 +44,7 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
         backgroundColor={darken(0.03, theme.currentTheme.windowColor)}
         borderRadius="6px"
         onClick={() =>
-          WalletActions.setView(WalletView.WALLET_DETAIL, undefined, {
-            type: 'coin',
-            key: props.details.address,
-          })
+          WalletActions.navigate(WalletView.WALLET_DETAIL, { detail: { type: 'coin', key: props.details.address }})
         }
       >
         <Flex alignItems="center">

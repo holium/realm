@@ -71,7 +71,6 @@ export const TransactionDetail: FC = observer(() => {
   const [notes, setNotes] = useState(transaction.notes);
   const [loading, setLoading] = useState(false);
 
-  let goBack = () => WalletActions.setView(walletApp.returnView! as WalletView);
   let saveNotes = () => {
     setLoading(true);
     WalletActions.saveTransactionNotes(notes);
@@ -246,7 +245,7 @@ export const TransactionDetail: FC = observer(() => {
           </Button>
         </Flex>
       </Flex>
-      <Flex position="absolute" top="582px" zIndex={999} onClick={goBack}>
+      <Flex position="absolute" top="582px" zIndex={999} onClick={() => WalletActions.navigateBack()}>
         <Icons
           name="ArrowLeftLine"
           size={2}

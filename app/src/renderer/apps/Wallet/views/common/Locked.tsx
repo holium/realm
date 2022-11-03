@@ -17,7 +17,7 @@ export const Locked: FC<LockedProps> = observer((props: LockedProps) => {
 
   let unlock = () => {
     console.log('unlocking', walletApp.currentItem);
-    WalletActions.setView(walletApp.returnView || WalletView.ETH_LIST);
+    WalletActions.navigateBack();
   };
 
   return (

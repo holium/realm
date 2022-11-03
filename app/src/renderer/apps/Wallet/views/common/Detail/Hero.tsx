@@ -75,12 +75,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     ) : (
       <Flex
         onClick={() =>
-          WalletActions.setView(
-            WalletView.WALLET_DETAIL,
-            undefined,
-            undefined,
-            true
-          )
+          WalletActions.navigateBack()
         }
       >
         <Icons

@@ -114,6 +114,10 @@ export const trayStore = TrayAppStore.create({
   walletApp: {
     network: 'ethereum',
     currentView: WalletView.ETH_NEW,
+    navState: {
+      view: WalletView.ETH_NEW
+    },
+    navHistory: [],
     bitcoin: {
       network: 'mainnet',
       settings: {

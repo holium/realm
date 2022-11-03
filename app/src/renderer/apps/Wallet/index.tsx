@@ -69,8 +69,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
     WalletView.LOCKED,
     WalletView.ETH_SETTINGS,
   ].includes(walletApp.currentView);
-  const walletNetwork: NetworkType = (walletApp.network === 'ethereum' ? 'ethereum': 'bitcoin');
-  let View = WalletViews(walletNetwork)[walletApp.currentView];
+  const walletNetwork: NetworkType = (walletApp.navState.network === 'ethereum' ? 'ethereum': 'bitcoin');
+  let View = WalletViews(walletNetwork)[walletApp.navState.view];
 
   return (
     <Flex
@@ -83,12 +83,12 @@ export const WalletApp: FC<any> = observer((props: any) => {
       <WalletHeader
         theme={theme.currentTheme}
         network={walletApp.network}
-        onAddWallet={() => WalletActions.setView(WalletView.CREATE_WALLET)}
+        onAddWallet={() => WalletActions.navigate(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={hideHeaderFooter}
       />
       {!hidePending &&
-        walletApp.currentView !== WalletView.TRANSACTION_DETAIL && (
+        walletApp.navState.view !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <View {...props} hidePending={hidePending} />

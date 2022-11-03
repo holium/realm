@@ -138,7 +138,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         position="absolute"
         top="582px"
         zIndex={999}
-        onClick={() => WalletActions.setView(WalletView.ETH_LIST)}
+        onClick={() => WalletActions.navigateBack()}
       >
         <Icons
           name="ArrowLeftLine"
