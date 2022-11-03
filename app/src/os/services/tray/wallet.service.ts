@@ -333,9 +333,9 @@ export class WalletService extends BaseService {
     } else {
       this.state = WalletStore.create({
         network: 'ethereum',
-        currentView: WalletView.ETH_NEW,
+        currentView: WalletView.NEW,
         navState: {
-          view: WalletView.ETH_NEW,
+          view: WalletView.NEW,
           network: NetworkType.ETHEREUM,
         },
         navHistory: [],
@@ -435,10 +435,11 @@ export class WalletService extends BaseService {
       //      'http://127.0.0.1:8545'
     );
 
-    if (this.state.navState.view !== WalletView.ETH_NEW) {
+    if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
     }
     this.lock(); // lock wallet on login
+    console.log('onlogin', this.state);
   }
 
   get snapshot() {
@@ -471,6 +472,7 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
+    console.log(this.state);
     let passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
@@ -500,8 +502,7 @@ export class WalletService extends BaseService {
     });
 
     console.log('okay transitioning');
-    // this.state!.setView(WalletView.ETH_LIST);
-    this.state!.navigate(WalletView.ETH_LIST);
+    this.state!.navigate(WalletView.LIST);
   }
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
@@ -578,13 +579,10 @@ export class WalletService extends BaseService {
 
   async setNetwork(_event: any, network: NetworkType) {
     if (this.state!.network !== network) {
-      if (network === 'ethereum') {
-        this.setView('', WalletView.ETH_LIST);
-      }
       if (network === 'bitcoin') {
-        this.setView('', WalletView.BIT_LIST);
         this.ethProvider!.removeAllListeners();
       }
+      this.setView('', WalletView.LIST);
     }
     this.state!.setNetwork(network);
   }
@@ -715,9 +713,7 @@ export class WalletService extends BaseService {
     const network: string = this.state!.navState.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
     this.state!.navigate(
-      this.state!.network === 'ethereum'
-        ? WalletView.ETH_LIST
-        : WalletView.BIT_LIST,
+      WalletView.LIST,
       { canReturn: false }
     );
   }

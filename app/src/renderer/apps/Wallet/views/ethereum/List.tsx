@@ -6,25 +6,21 @@ import { WalletCard } from '../common/WalletCard';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-interface EthereumWalletListProps {
-  network: NetworkType;
+interface WalletListProps {
 }
 
-export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
-  (props: EthereumWalletListProps) => {
+export const WalletList: FC<WalletListProps> = observer(
+  (props: WalletListProps) => {
     const { walletApp } = useTrayApps();
-    const list = walletApp.ethereum.list;
-    console.log("SHOULDN'T BE HERE");
+    const list = walletApp.currentStore.list;
 
     const List: FC = () => {
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
-            let fullWallet = walletApp.ethereum.wallets.get(walletEntry.key);
-            /*props.network === 'ethereum'
-                ? walletApp.ethereum.wallets.get(walletEntry.key)
-                : walletApp.bitcoin.wallets.get(walletEntry.key);
-              */
+            console.log(walletEntry.key)
+            let fullWallet = walletApp.currentStore.wallets.get(walletEntry.key);
+            console.log(fullWallet)
             return (
               <WalletCard
                 key={walletEntry.address}
@@ -60,7 +56,7 @@ export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
               You haven't created any{' '}
-              {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallets
+              {walletApp.navState.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallets
               yet.
             </Text>
           </Flex>
@@ -79,7 +75,7 @@ export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        {list.length ? <List /> : <Empty network={props.network} />}
+        {list.length ? <List /> : <Empty network={walletApp.navState.network} />}
       </Flex>
     );
   }

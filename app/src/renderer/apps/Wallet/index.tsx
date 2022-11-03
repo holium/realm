@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail';
-import { EthereumWalletList } from './views/ethereum/List';
+import { WalletList } from './views/ethereum/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { EthSettings } from './views/ethereum/Settings';
@@ -23,17 +23,14 @@ import { getTransactions } from './lib/helpers';
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
 ) => ({
-  'bitcoin:list': (props: any) => <BitcoinWalletList {...props} />,
-  'bitcoin:detail': (props: any) => <div />,
-  'bitcoin:transaction': (props: any) => <div />,
-  'ethereum:list': (props: any) => (
-    <EthereumWalletList network={network} {...props} />
+  [WalletView.LIST]: (props: any) => (
+    <WalletList {...props} />
   ),
-  'ethereum:detail': (props: any) => <Detail {...props} />,
+  [WalletView.WALLET_DETAIL]: (props: any) => <Detail {...props} />,
   [WalletView.TRANSACTION_DETAIL]: (props: any) => (
     <TransactionDetail {...props} />
   ),
-  'ethereum:new': (props: any) => <EthNew {...props} />,
+  [WalletView.NEW]: (props: any) => <EthNew {...props} />,
   [WalletView.CREATE_WALLET]: (props: any) => (
     <CreateWallet network={network} />
   ),
@@ -67,7 +64,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
   };
 
   let hideHeaderFooter = [
-    WalletView.ETH_NEW,
+    WalletView.NEW,
     WalletView.LOCKED,
     WalletView.SETTINGS,
   ].includes(walletApp.navState.view);

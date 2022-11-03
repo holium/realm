@@ -19,14 +19,13 @@ const alchemySettings = {
 const alchemy = new Alchemy(alchemySettings);
 
 export enum WalletView {
-  ETH_LIST = 'ethereum:list',
-  ETH_NEW = 'ethereum:new',
-  WALLET_DETAIL = 'ethereum:detail',
-  TRANSACTION_DETAIL = 'ethereum:transaction',
+  LIST = 'list',
+  NEW = 'new',
+  WALLET_DETAIL = 'detail',
+  TRANSACTION_DETAIL = 'transaction',
   NFT_DETAIL = 'ethereum:nft',
   LOCKED = 'locked',
   SETTINGS = 'settings',
-  BIT_LIST = 'bitcoin:list',
   CREATE_WALLET = 'create-wallet',
 }
 
@@ -121,19 +120,15 @@ const BitcoinStore = types
   }))
   .actions((self) => ({
     initial(wallets: any) {
-      const btcWallets = wallets.bitcoin;
-      Object.entries(btcWallets).forEach(([key, wallet]) => {
-        console.log(wallet);
-        btcWallets[key] = {
-          network: 'bitcoin',
-          path: (wallet as any).path,
-          nickname: (wallet as any).nickname,
-          balance: '0',
-          address: (wallet as any).address,
-          contracts: {},
+      const bitcoinWallets = wallets.bitcoin;
+      Object.entries(bitcoinWallets).forEach(([key, wallet]) => {
+        const walletUpdate = {
+          ...(wallet as any),
+          key: key,
+          transactions: {},
         };
+        this.applyWalletUpdate(walletUpdate);
       });
-      applySnapshot(self.wallets, btcWallets);
     },
     // pokes
     setProvider(provider: string) {
@@ -145,7 +140,7 @@ const BitcoinStore = types
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
           index: Number(wallet.key),
-          network: 'ethereum',
+          network: 'bitcoin',
           path: wallet.path,
           address: wallet.address,
           balance: '0',
@@ -153,12 +148,12 @@ const BitcoinStore = types
           transactions: {},
         };
         console.log(self.wallets);
-        const btcWallet = BitcoinWallet.create(walletObj);
+        const bitcoinWallet = BitcoinWallet.create(walletObj);
         console.log(wallet.key);
-        self.wallets.set(wallet.key, btcWallet);
+        self.wallets.set(wallet.key, bitcoinWallet);
       }
       for (var transaction in wallet.transactions) {
-        // self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
+    //    self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
     },
     setNetwork(network: string) {
@@ -394,13 +389,14 @@ const EthWallet = types
     },
     applyTransactionUpdate(transaction: any) {
       let tx = self.transactions.get(transaction.hash);
+      console.log('applying update')
       if (tx) {
-        tx.completedAt = Date.now().toString();
-        if (transaction.success) tx.status = 'succeeded';
-        else tx.status = 'failed';
         tx.notes = transaction.notes;
         self.transactions.set(transaction.hash, tx);
-      } else self.transactions.set(transaction.hash, transaction);
+      }
+      else {
+        self.transactions.set(transaction.hash, transaction);
+      }
     },
     applyTransactions(transactions: any) {
       var formattedTransactions: any = {};
@@ -413,15 +409,15 @@ const EthWallet = types
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: self.address === transaction.from ? 'sent' : 'received',
-          initiatedAt: previousTransaction
-            ? previousTransaction.initiatedAt
-            : undefined,
+          initiatedAt: previousTransaction?.initiatedAt,
           completedAt: new Date(
             Number(transaction.timeStamp) * 1000
           ).toISOString(),
           ourAddress: transaction.from,
+          theirPatp: previousTransaction?.theirPatp,
           theirAddress: transaction.to,
           status: transaction.txreceipt_status === 1 ? 'succeeded' : 'failed',
+          failureReason: previousTransaction?.failureReason,
           notes: previousTransaction ? previousTransaction.notes : '',
         };
         if (previousTransactions[transaction.hash]) {
@@ -429,7 +425,7 @@ const EthWallet = types
             formattedTransactions[transaction.hash].status !==
             previousTransactions[transaction.hash].status
           ) {
-            //            WalletApi.enqueueTransaction(transaction);
+            //            WalletApi.setTransaction(transaction);
           }
         }
       }
@@ -471,20 +467,6 @@ export const EthStore = types
         };
         this.applyWalletUpdate(walletUpdate);
       });
-      /*for (var wallet in ethWallets) {
-        this.applyWalletUpdate(wallet);
-      }*/
-      /*Object.entries(ethWallets).forEach(([key, wallet]) => {
-        ethWallets[key] = {
-          network: 'ethereum',
-          nickname: (wallet as any).nickname,
-          path: (wallet as any).path,
-          balance: gweiToEther((wallet as any).balance).toString(),
-          address: (wallet as any).address,
-        }
-      })
-      applySnapshot(self.wallets, ethWallets);
-      */
     },
     // pokes
     setProvider(provider: string) {
@@ -611,10 +593,8 @@ export const WalletStore = types
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
       if (network === 'ethereum') {
         self.ethereum.initial(wallets);
-        self.currentView = WalletView.ETH_LIST;
-      } else {
-        self.currentView = WalletView.BIT_LIST;
       }
+      self.currentView = WalletView.LIST;
     },
     setInitialized(initialized: boolean) {
       self.initialized = initialized;
@@ -634,7 +614,7 @@ export const WalletStore = types
 
       if (
         canReturn &&
-        ![WalletView.LOCKED, WalletView.ETH_NEW].includes(self.navState.view)
+        ![WalletView.LOCKED, WalletView.NEW].includes(self.navState.view)
       ) {
         let returnSnapshot = getSnapshot(self.navState);
         self.navHistory.push(WalletNavState.create(returnSnapshot));
@@ -650,10 +630,7 @@ export const WalletStore = types
       self.navState = newState;
     },
     navigateBack() {
-      let DEFAULT_RETURN_VIEW =
-        self.navState.network === 'ethereum'
-          ? WalletView.ETH_LIST
-          : WalletView.BIT_LIST;
+      let DEFAULT_RETURN_VIEW = WalletView.LIST
       let returnSnapshot = getSnapshot(
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,
@@ -669,10 +646,7 @@ export const WalletStore = types
     },
     resetNavigation() {
       self.navState = WalletNavState.create({
-        view:
-          self.navState.network === 'ethereum'
-            ? WalletView.ETH_LIST
-            : WalletView.BIT_LIST,
+        view: WalletView.LIST,
         network: self.navState.network,
       });
       self.navHistory = cast([]);
@@ -704,7 +678,7 @@ export const WalletStore = types
       let returnView = self.currentView;
       if (returnView === WalletView.LOCKED) {
         // the return view should never be locked
-        returnView = WalletView.ETH_LIST;
+        returnView = WalletView.LIST;
       }
 
       self.returnView = returnView;

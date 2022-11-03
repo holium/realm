@@ -72,7 +72,7 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
                 },
               });
               // TODO: placeholder, we need to implement the actual send coins functionality
-              WalletActions.navigate(WalletView.ETH_LIST);
+              WalletActions.navigate(WalletView.LIST);
               onClose();
               evt.stopPropagation();
             }}
