@@ -354,13 +354,13 @@ const EthWallet = types
         network: tx.network,
         type: tx.type,
         'initiated-at': tx.initiatedAt,
-        'completed-at': tx.completedAt || 1,
+        'completed-at': tx.completedAt || '',
         'our-address': tx.ourAddress,
-        'their-patp': tx.theirPatp || 1,
+        'their-patp': tx.theirPatp || '',
         'their-address': tx.theirAddress,
         status: tx.status,
-        'failure-reason': tx.failureReason || 1,
-        notes: tx.notes,
+        'failure-reason': tx.failureReason || '',
+        notes: tx.notes || '',
       };
     },
     enqueueTransaction(
@@ -423,7 +423,7 @@ const EthWallet = types
           theirAddress: transaction.to,
           status: transaction.txreceipt_status === 1 ? 'succeeded' : 'failed',
           failureReason: previousTransaction?.failureReason,
-          notes: previousTransaction ? previousTransaction.notes : '',
+          notes: previousTransaction?.notes || '',
         };
         if (previousTransactions[transaction.hash]) {
           if (
@@ -433,6 +433,10 @@ const EthWallet = types
             //            WalletApi.setTransaction(transaction);
           }
         }
+      }
+      formattedTransactions = {
+        ...formattedTransactions,
+        ...previousTransactions
       }
       const map = types.map(EthTransaction);
       const newTransactions = map.create(formattedTransactions);
