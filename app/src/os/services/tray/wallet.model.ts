@@ -420,7 +420,7 @@ const EthWallet = types
     },
     applyTransactions(network: string, transactions: any) {
       var formattedTransactions: any = {};
-      const previousTransactions = self.transactions.toJSON();
+      const previousTransactions = self.transactions.toJSON()[network];
       for (var transaction of transactions) {
         const previousTransaction = previousTransactions[transaction.hash];
         formattedTransactions[transaction.hash] = {
@@ -455,7 +455,7 @@ const EthWallet = types
         ...formattedTransactions,
       }
       formattedTransactions = {
-        network: formattedTransactions
+        [network]: formattedTransactions
       }
       const map = types.map(types.map(EthTransaction));
       const newTransactions = map.create(formattedTransactions);
