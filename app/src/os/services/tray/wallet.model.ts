@@ -428,7 +428,7 @@ const EthWallet = types
           ourAddress: transaction.from,
           theirPatp: previousTransaction?.theirPatp,
           theirAddress: transaction.to,
-          status: transaction.txreceipt_status === 1 ? 'succeeded' : 'failed',
+          status: transaction.txreceipt_status === '1' ? 'succeeded' : 'failed',
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
         };
