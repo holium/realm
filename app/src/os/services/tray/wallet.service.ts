@@ -1,5 +1,5 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import { ethers, utils } from 'ethers';
+import { ethers, utils, Wallet } from 'ethers';
 import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
 import {
@@ -435,7 +435,9 @@ export class WalletService extends BaseService {
       //      'http://127.0.0.1:8545'
     );
 
-    this.state.resetNavigation();
+    if (this.state.navState.view !== WalletView.ETH_NEW) {
+      this.state.resetNavigation();
+    }
     this.lock(); // lock wallet on login
   }
 
