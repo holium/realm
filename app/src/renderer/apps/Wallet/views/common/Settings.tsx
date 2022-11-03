@@ -145,9 +145,7 @@ export const WalletSettings: FC = observer(() => {
   return (
     <Flex px={3} width="100%" height="100%" flexDirection="column">
       <Flex>
-        <Text variant="h4">
-          Settings
-        </Text>
+        <Text variant="h4">Settings</Text>
       </Flex>
 
       <Flex mt={3} flexDirection="column" width="100%">
@@ -247,11 +245,7 @@ export const WalletSettings: FC = observer(() => {
         width="100%"
         justifyContent="space-between"
       >
-        <Flex
-          onClick={() =>
-            WalletActions.navigateBack()
-          }
-        >
+        <Flex onClick={() => WalletActions.navigateBack()}>
           <Icons
             name="ArrowLeftLine"
             size={2}

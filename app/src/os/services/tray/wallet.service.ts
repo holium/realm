@@ -22,7 +22,7 @@ import {
   EthWalletType,
 } from './wallet.model';
 import EncryptedStore from '../../lib/encryptedStore';
-import { Network, Alchemy } from "alchemy-sdk";
+import { Network, Alchemy } from 'alchemy-sdk';
 // @ts-ignore
 import abi from 'human-standard-token-abi';
 // @ts-ignore
@@ -69,7 +69,8 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
-    'realm.tray.wallet.get-ethereum-exchange-rate': this.getEthereumExchangeRate,
+    'realm.tray.wallet.get-ethereum-exchange-rate':
+      this.getEthereumExchangeRate,
     'realm.tray.wallet.get-erc20-exchange-rate': this.getERC20ExchangeRate,
     'realm.tray.wallet.get-bitcoin-exchange-rate': this.getBitcoinExchangeRate,
     'realm.tray.wallet.navigate': this.navigate,
@@ -91,21 +92,37 @@ export class WalletService extends BaseService {
       return ipcRenderer.invoke('realm.tray.wallet.check-passcode', passcode);
     },
     checkProviderURL: (providerURL: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.check-provider-url', providerURL);
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.check-provider-url',
+        providerURL
+      );
     },
-    navigate: (view: WalletView, options?: { canReturn?: boolean, walletIndex?: string, detail?: { type:  'transaction' | 'coin' | 'nft', key: string }, action?: { type: string, data: any } }) => {
+    navigate: (
+      view: WalletView,
+      options?: {
+        canReturn?: boolean;
+        walletIndex?: string;
+        detail?: { type: 'transaction' | 'coin' | 'nft'; key: string };
+        action?: { type: string; data: any };
+      }
+    ) => {
       return ipcRenderer.invoke('realm.tray.wallet.navigate', view, options);
     },
     navigateBack: () => {
       return ipcRenderer.invoke('realm.tray.wallet.navigateBack');
     },
-    setView: (view: WalletView, index?: string, currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string }, unsetCurrentItem?: boolean) => {
+    setView: (
+      view: WalletView,
+      index?: string,
+      currentItem?: { type: 'transaction' | 'nft' | 'coin'; key: string },
+      unsetCurrentItem?: boolean
+    ) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.set-view',
         view,
         index,
         currentItem,
-        unsetCurrentItem,
+        unsetCurrentItem
       );
     },
     setReturnView: (view: WalletView) => {
@@ -127,13 +144,14 @@ export class WalletService extends BaseService {
       return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
     },
     setSettings: (network: string, settings: UISettingsType) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-settings', network, settings);
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.set-settings',
+        network,
+        settings
+      );
     },
     setSharingMode: (who: string) => {
-      return ipcRenderer.invoke(
-        'realm.tray.wallet.set-sharing-mode',
-        who
-      )
+      return ipcRenderer.invoke('realm.tray.wallet.set-sharing-mode', who);
     },
     changeDefaultWallet: (network: string, index: number) => {
       return ipcRenderer.invoke(
@@ -157,7 +175,7 @@ export class WalletService extends BaseService {
       to: string,
       amount: string,
       toPatp?: string,
-      contractType?: string,
+      contractType?: string
     ) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.send-ethereum-transaction',
@@ -174,7 +192,7 @@ export class WalletService extends BaseService {
       amount: string,
       contractAddress: string,
       toPatp?: string,
-      contractType?: string,
+      contractType?: string
     ) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.send-erc20-transaction',
@@ -183,8 +201,8 @@ export class WalletService extends BaseService {
         amount,
         contractAddress,
         toPatp,
-        contractType,
-      )
+        contractType
+      );
     },
     sendERC721Transaction: (
       walletIndex: string,
@@ -192,7 +210,7 @@ export class WalletService extends BaseService {
       contractAddress: string,
       tokenId: string,
       toPatp?: string,
-      contractType?: string,
+      contractType?: string
     ) => {
       return ipcRenderer.invoke(
         'realm.tray.wallet.send-erc721-transaction',
@@ -201,8 +219,8 @@ export class WalletService extends BaseService {
         contractAddress,
         tokenId,
         toPatp,
-        contractType,
-      )
+        contractType
+      );
     },
     sendBitcoinTransaction: (
       walletIndex: number,
@@ -242,7 +260,10 @@ export class WalletService extends BaseService {
       return ipcRenderer.invoke('realm.tray.wallet.get-ethereum-exchange-rate');
     },
     getERC20ExchangeRate: (contractAddress: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.get-erc20-exchange-rate', contractAddress);
+      return ipcRenderer.invoke(
+        'realm.tray.wallet.get-erc20-exchange-rate',
+        contractAddress
+      );
     },
     getBitcoinExchangeRate: () => {
       return ipcRenderer.invoke('realm.tray.wallet.get-bitcoin-exchange-rate');
@@ -255,7 +276,7 @@ export class WalletService extends BaseService {
     Object.keys(this.handlers).forEach((handlerName: any) => {
       // @ts-ignore
       // ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
-      ipcMain.handle(handlerName, this.wrapHandler(this.handlers[handlerName]))
+      ipcMain.handle(handlerName, this.wrapHandler(this.handlers[handlerName]));
     });
 
     setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
@@ -267,11 +288,13 @@ export class WalletService extends BaseService {
         this.state.setLastInteraction(new Date());
       }
       return handler.apply(this, args);
-    }
+    };
   }
 
   private autoLock() {
-    let shouldLock =  this.state && (Date.now() - AUTO_LOCK_INTERVAL) > this.state.lastInteraction.getTime()
+    let shouldLock =
+      this.state &&
+      Date.now() - AUTO_LOCK_INTERVAL > this.state.lastInteraction.getTime();
     if (shouldLock) {
       this.lock();
     }
@@ -313,7 +336,7 @@ export class WalletService extends BaseService {
         currentView: WalletView.ETH_NEW,
         navState: {
           view: WalletView.ETH_NEW,
-          network: NetworkType.ETHEREUM
+          network: NetworkType.ETHEREUM,
         },
         navHistory: [],
         ethereum: {
@@ -376,7 +399,10 @@ export class WalletService extends BaseService {
       }
     });
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
-      if (Object.keys(wallets.ethereum).length !== 0 || Object.keys(wallets.bitcoin).length !== 0) {
+      if (
+        Object.keys(wallets.ethereum).length !== 0 ||
+        Object.keys(wallets.bitcoin).length !== 0
+      ) {
         this.state!.setInitialized(true);
       }
       this.state!.ethereum.initial(wallets);
@@ -388,7 +414,9 @@ export class WalletService extends BaseService {
       this.core.conduit!,
       (transaction: any) => {
         if (transaction.network == 'ethereum')
-          this.state!.ethereum.wallets.get(transaction.index)!.applyTransactionUpdate(transaction.transaction);
+          this.state!.ethereum.wallets.get(
+            transaction.index
+          )!.applyTransactionUpdate(transaction.transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
         /*const tx = this.state!.ethereum.transactions.get(
@@ -398,13 +426,13 @@ export class WalletService extends BaseService {
     );
     WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
       this.state!.ethereum.setSettings(settings);
-    })
+    });
 
     this.setNetworkProvider(
       'realm.tray.wallet.set-network-provider',
       'ethereum',
       'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-//      'http://127.0.0.1:8545'
+      //      'http://127.0.0.1:8545'
     );
 
     this.state.resetNavigation();
@@ -416,28 +444,27 @@ export class WalletService extends BaseService {
   }
 
   setProviders() {
-    var alchemySettings
+    var alchemySettings;
     if (this.state!.ethereum.network === 'mainnet') {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
         'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
       );
       alchemySettings = {
-        apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_MAINNET, // Replace with your network.
       };
       // etherscan
-    }
-    else {
+    } else {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
         'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
       );
       alchemySettings = {
-        apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_GOERLI, // Replace with your network.
       };
     }
     this.ethProvider.removeAllListeners();
-    this.ethProvider.on("block", () => this.updateEthereumInfo());
+    this.ethProvider.on('block', () => this.updateEthereumInfo());
     this.alchemy = new Alchemy(alchemySettings);
   }
 
@@ -454,12 +481,12 @@ export class WalletService extends BaseService {
     // eth
     console.log('setting eth xpub');
     let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
-    console.log('ethxpub', xpub)
+    console.log('ethxpub', xpub);
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
     console.log('setting btc xpub');
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
-    console.log('btcxpub', xpub)
+    console.log('btcxpub', xpub);
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
 
     this.state!.ethereum.deleteWallets();
@@ -490,8 +517,8 @@ export class WalletService extends BaseService {
       let newProvider = new ethers.providers.JsonRpcProvider(providerURL);
       console.log('new provider: ', newProvider);
       const { chainId, name } = await newProvider.getNetwork();
-      console.log('network name: ', name)
-      console.log(`chain ID: ${chainId}`)
+      console.log('network name: ', name);
+      console.log(`chain ID: ${chainId}`);
       if (!chainId && !name) {
         throw new Error('Invalid provider.');
       }
@@ -513,13 +540,22 @@ export class WalletService extends BaseService {
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
   }
 
-  navigate(_event: any, view: WalletView, options?: { canReturn?: boolean, walletIndex?: string, detail?: { type:  'transaction' | 'coin' | 'nft', key: string }, action?: { type: string, data: any } }) {
-    console.log(`wallet: navigating to ${view}`)
+  navigate(
+    _event: any,
+    view: WalletView,
+    options?: {
+      canReturn?: boolean;
+      walletIndex?: string;
+      detail?: { type: 'transaction' | 'coin' | 'nft'; key: string };
+      action?: { type: string; data: any };
+    }
+  ) {
+    console.log(`wallet: navigating to ${view}`);
     this.state!.navigate(view, options);
   }
 
   navigateBack() {
-    console.log(`wallet: navigating back`)
+    console.log(`wallet: navigating back`);
     this.state!.navigateBack();
   }
 
@@ -527,7 +563,7 @@ export class WalletService extends BaseService {
     _event: any,
     view: WalletView,
     index?: string,
-    currentItem?: { type: 'transaction' | 'nft' | 'coin', key: string },
+    currentItem?: { type: 'transaction' | 'nft' | 'coin'; key: string },
     unsetCurrentItem?: boolean
   ) {
     console.log(`service setting view: ${view}`);
@@ -541,21 +577,24 @@ export class WalletService extends BaseService {
   async setNetwork(_event: any, network: NetworkType) {
     if (this.state!.network !== network) {
       if (network === 'ethereum') {
-        this.setView('', WalletView.ETH_LIST)
+        this.setView('', WalletView.ETH_LIST);
       }
       if (network === 'bitcoin') {
-        this.setView('', WalletView.BIT_LIST)
+        this.setView('', WalletView.BIT_LIST);
         this.ethProvider!.removeAllListeners();
       }
     }
     this.state!.setNetwork(network);
   }
 
-  async setChainNetwork(_event: any, network: NetworkType, chainNetwork: string) {
+  async setChainNetwork(
+    _event: any,
+    network: NetworkType,
+    chainNetwork: string
+  ) {
     if (network === NetworkType.ETHEREUM) {
       this.state!.ethereum.network = chainNetwork;
-    }
-    else if (network === NetworkType.BITCOIN) {
+    } else if (network === NetworkType.BITCOIN) {
     }
   }
 
@@ -610,35 +649,41 @@ export class WalletService extends BaseService {
 
   async saveTransactionNotes(_event: any, notes: string) {
     const network = this.state!.navState.network;
-    var net
+    var net;
     if (network === 'ethereum') {
       net = this.state!.ethereum.network;
-    }
-    else {
-      net = 'mainnet'
+    } else {
+      net = 'mainnet';
     }
     // const hash = this.state!.currentItem!.key;
-    const hash = this.state!.navState.detail!.key
+    const hash = this.state!.navState.detail!.key;
     const index = this.state!.currentWallet!.index;
-    WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
+    WalletApi.saveTransactionNotes(
+      this.core.conduit!,
+      network,
+      net,
+      index,
+      hash,
+      notes
+    );
   }
 
   async getEthereumExchangeRate(_event: any) {
-    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=ethereum&vs_currencies=usd`
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=ethereum&vs_currencies=usd`;
     const result = await axios.get(url);
-    console.log(result)
+    console.log(result);
   }
 
   async getERC20ExchangeRate(_event: any, contractAddress: string) {
-    const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`;
     const result = await axios.get(url);
-    console.log(result)
+    console.log(result);
   }
 
   async getBitcoinExchangeRate(_event: any) {
-    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=bitcoin&vs_currencies=usd`
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=bitcoin&vs_currencies=usd`;
     const result = await axios.get(url);
-    console.log(result)
+    console.log(result);
   }
 
   async setSettings(_events: any, network: string, settings: UISettingsType) {
@@ -667,7 +712,12 @@ export class WalletService extends BaseService {
     const sender: string = this.state!.ourPatp!;
     const network: string = this.state!.navState.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
-    this.state!.navigate(this.state!.network === 'ethereum' ? WalletView.ETH_LIST: WalletView.BIT_LIST, { canReturn: false });
+    this.state!.navigate(
+      this.state!.network === 'ethereum'
+        ? WalletView.ETH_LIST
+        : WalletView.BIT_LIST,
+      { canReturn: false }
+    );
   }
 
   async estimateCurrentGasFee(_event: any) {}
@@ -678,7 +728,7 @@ export class WalletService extends BaseService {
     to: string,
     amount: string,
     toPatp?: string,
-    contractType?: string,
+    contractType?: string
   ) {
     console.log(walletIndex);
     console.log(to);
@@ -706,7 +756,7 @@ export class WalletService extends BaseService {
       fromAddress,
       tx.value,
       new Date().toISOString(),
-      contractType,
+      contractType
     );
     const stateTx = currentWallet.getTransaction(hash);
     console.log(stateTx);
@@ -716,7 +766,7 @@ export class WalletService extends BaseService {
       this.state!.ethereum.network,
       currentWallet.index,
       hash,
-      stateTx,
+      stateTx
     );
   }
 
@@ -727,7 +777,7 @@ export class WalletService extends BaseService {
     amount: string,
     contractAddress: string,
     toPatp?: string,
-    contractType?: string,
+    contractType?: string
   ) {
     console.log(walletIndex);
     console.log(to);
@@ -742,7 +792,11 @@ export class WalletService extends BaseService {
     console.log(amount);
     const contract = new ethers.Contract(contractAddress, abi, signer);
     const ethAmount = ethers.utils.parseEther(amount);
-    let erc20Amount = ethers.utils.parseUnits(amount, this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!.decimals);
+    let erc20Amount = ethers.utils.parseUnits(
+      amount,
+      this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!
+        .decimals
+    );
     const { hash } = await contract.transfer(to, erc20Amount);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
@@ -753,7 +807,7 @@ export class WalletService extends BaseService {
       fromAddress,
       ethAmount,
       new Date().toISOString(),
-      'ERC20',
+      'ERC20'
     );
     const stateTx = currentWallet.getTransaction(hash);
     console.log(stateTx);
@@ -763,7 +817,7 @@ export class WalletService extends BaseService {
       this.state!.ethereum.network,
       currentWallet.index,
       hash,
-      stateTx,
+      stateTx
     );
   }
 
@@ -774,7 +828,7 @@ export class WalletService extends BaseService {
     contractAddress: string,
     tokenId: string,
     toPatp?: string,
-    contractType?: string,
+    contractType?: string
   ) {
     console.log(walletIndex);
     console.log(to);
@@ -796,7 +850,7 @@ export class WalletService extends BaseService {
       fromAddress,
       tokenId,
       new Date().toISOString(),
-      'ERC721',
+      'ERC721'
     );
     const stateTx = currentWallet.getTransaction(hash);
     console.log(stateTx);
@@ -806,9 +860,8 @@ export class WalletService extends BaseService {
       this.state!.ethereum.network,
       currentWallet.index,
       hash,
-      stateTx,
+      stateTx
     );
-
   }
 
   async sendBitcoinTransaction(
@@ -844,13 +897,11 @@ export class WalletService extends BaseService {
 
   gweiToEther = (gwei: number) => {
     return gwei / 1000000000000000000;
-  }
+  };
 
   async getAllBalances() {
     if (this.state!.navState.network === 'bitcoin') {
-
-    }
-    else if (this.state!.navState.network === 'ethereum') {
+    } else if (this.state!.navState.network === 'ethereum') {
       for (var key of this.state!.ethereum.wallets.keys()) {
         let wallet: any = this.state!.ethereum.wallets.get(key);
         const balance = await this.ethProvider!.getBalance(wallet.address);
@@ -862,15 +913,23 @@ export class WalletService extends BaseService {
   async getAllCoins() {
     for (var key of this.state!.ethereum.wallets.keys()) {
       let wallet: any = this.state!.ethereum.wallets.get(key);
-      const balances = await this.alchemy!.core.getTokenBalances(wallet.address);
+      const balances = await this.alchemy!.core.getTokenBalances(
+        wallet.address
+      );
       // Remove tokens with zero balance
       const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
-        return token.tokenBalance !== "0";
+        return token.tokenBalance !== '0';
       });
-      var coins = []
+      var coins = [];
       for (let token of nonZeroBalances) {
-        const metadata = await this.alchemy!.core.getTokenMetadata((token as any).contractAddress);
-        const contract = new ethers.Contract((token as any).contractAddress, abi, this.ethProvider);
+        const metadata = await this.alchemy!.core.getTokenMetadata(
+          (token as any).contractAddress
+        );
+        const contract = new ethers.Contract(
+          (token as any).contractAddress,
+          abi,
+          this.ethProvider
+        );
         let wallet: any = this.state!.ethereum.wallets.get(key);
         const balance = (await contract.balanceOf(wallet.address)).toString();
         const coin = {
@@ -878,9 +937,9 @@ export class WalletService extends BaseService {
           logo: metadata.logo || '',
           contractAddress: (token as any).contractAddress,
           balance: balance,
-          decimals: metadata.decimals!
-        }
-        coins.push(coin)
+          decimals: metadata.decimals!,
+        };
+        coins.push(coin);
       }
       this.state!.ethereum.wallets.get(key)!.setCoins(coins);
     }
@@ -893,18 +952,18 @@ export class WalletService extends BaseService {
       var allNfts = [];
       for (let nft of nfts.ownedNfts) {
         // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
-        var floorPrice
+        var floorPrice;
         const ownedNft = {
           name: nft.title,
           collectionName: nft.description,
           contractAddress: nft.contract.address,
           tokenId: nft.tokenId,
           imageUrl: nft.rawMetadata!.image!,
-          floorPrice
-        }
+          floorPrice,
+        };
         allNfts.push(ownedNft);
       }
-      this.state!.ethereum.wallets.get(key)!.setNFTs(allNfts)
+      this.state!.ethereum.wallets.get(key)!.setNFTs(allNfts);
     }
   }
 
@@ -913,21 +972,17 @@ export class WalletService extends BaseService {
       if (this.state!.ethereum.network === 'mainnet') {
         this.state!.ethereum.setNetwork('gorli');
         this.setProviders();
-      }
-      else if (this.state!.ethereum.network === 'gorli') {
+      } else if (this.state!.ethereum.network === 'gorli') {
         this.state!.ethereum.setNetwork('mainnet');
         this.setProviders();
       }
       this.updateEthereumInfo();
-    }
-    else {
+    } else {
       if (this.state!.bitcoin.network === 'mainnet') {
         this.state!.bitcoin.setNetwork('testnet');
-      }
-      else if (this.state!.bitcoin.network === 'testnet') {
+      } else if (this.state!.bitcoin.network === 'testnet') {
         this.state!.bitcoin.setNetwork('mainnet');
       }
-
     }
   }
 
@@ -937,21 +992,20 @@ export class WalletService extends BaseService {
       const address = this.state!.ethereum.wallets.get(key)!.address;
       const startBlock = 0;
       const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
-      const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
-      const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`
-      const URL = (this.state!.ethereum.network === 'mainnet' ? mainnetURL : goerliURL);
+      const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
+      const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
+      const URL =
+        this.state!.ethereum.network === 'mainnet' ? mainnetURL : goerliURL;
       const response: any = await axios.get(URL);
-      this.state!.ethereum.wallets.get(key)!.applyTransactions(response.data.result);
+      this.state!.ethereum.wallets.get(key)!.applyTransactions(
+        response.data.result
+      );
     }
   }
 
-  async getAllBitcoinBalances() {
+  async getAllBitcoinBalances() {}
 
-  }
-
-  async getAllBitcoinTransactions() {
-
-  }
+  async getAllBitcoinTransactions() {}
 
   /*
   private async sendBitcoin(senderPath: string, receiverAddress: string, amountToSend: number) {

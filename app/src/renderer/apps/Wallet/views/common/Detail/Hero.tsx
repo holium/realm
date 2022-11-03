@@ -64,20 +64,19 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
-    let amountDisplay = walletApp.navState.network === 'ethereum'
-      ? !props.coin
-        ? `${formatEthAmount(props.wallet.balance).eth} ETH`
-        : `${formatCoinAmount(props.coin.balance, props.coin.decimals).display} ${props.coin.name}`
-      : `${formatEthAmount(props.wallet.balance).eth} BTC`
+    let amountDisplay =
+      walletApp.navState.network === 'ethereum'
+        ? !props.coin
+          ? `${formatEthAmount(props.wallet.balance).eth} ETH`
+          : `${
+              formatCoinAmount(props.coin.balance, props.coin.decimals).display
+            } ${props.coin.name}`
+        : `${formatEthAmount(props.wallet.balance).eth} BTC`;
 
     let accountDisplay = !props.coin ? (
       props.wallet.nickname
     ) : (
-      <Flex
-        onClick={() =>
-          WalletActions.navigateBack()
-        }
-      >
+      <Flex onClick={() => WalletActions.navigateBack()}>
         <Icons
           name="ArrowLeftLine"
           size={2}

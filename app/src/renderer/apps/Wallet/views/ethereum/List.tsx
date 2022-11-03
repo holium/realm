@@ -14,14 +14,14 @@ export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
   (props: EthereumWalletListProps) => {
     const { walletApp } = useTrayApps();
     const list = walletApp.ethereum.list;
-    console.log("SHOULDN'T BE HERE")
+    console.log("SHOULDN'T BE HERE");
 
     const List: FC = () => {
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
-            let fullWallet = walletApp.ethereum.wallets.get(walletEntry.key)
-              /*props.network === 'ethereum'
+            let fullWallet = walletApp.ethereum.wallets.get(walletEntry.key);
+            /*props.network === 'ethereum'
                 ? walletApp.ethereum.wallets.get(walletEntry.key)
                 : walletApp.bitcoin.wallets.get(walletEntry.key);
               */
@@ -30,7 +30,9 @@ export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
                 key={walletEntry.address}
                 wallet={fullWallet!}
                 onSelect={() => {
-                  WalletActions.navigate(WalletView.WALLET_DETAIL, { walletIndex: walletEntry.key })
+                  WalletActions.navigate(WalletView.WALLET_DETAIL, {
+                    walletIndex: walletEntry.key,
+                  });
                 }}
               />
             );
@@ -58,8 +60,8 @@ export const EthereumWalletList: FC<EthereumWalletListProps> = observer(
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
               You haven't created any{' '}
-              {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'}{' '}
-              wallets yet.
+              {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallets
+              yet.
             </Text>
           </Flex>
           <Flex mt={9} justifyContent="center">

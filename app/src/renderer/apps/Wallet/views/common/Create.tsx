@@ -50,9 +50,8 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
           Create Wallet
         </Text>
         <Text mt={3} variant="body">
-          A new{' '}
-          {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'}{' '}
-          wallet will be created. Give it a memorable nickname.
+          A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallet
+          will be created. Give it a memorable nickname.
         </Text>
         <FieldSet mt={8}>
           <Label required={true}>Nickname</Label>

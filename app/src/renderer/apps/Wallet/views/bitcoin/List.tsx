@@ -14,15 +14,15 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
   (props: BitcoinWalletListProps) => {
     const { walletApp } = useTrayApps();
     const list = walletApp.bitcoin.list;
-    console.log('here')
-    console.log(list)
+    console.log('here');
+    console.log(list);
 
     const List: FC = () => {
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
-            let fullWallet = walletApp.bitcoin.wallets.get(walletEntry.key)
-                /*props.network === 'ethereum'
+            let fullWallet = walletApp.bitcoin.wallets.get(walletEntry.key);
+            /*props.network === 'ethereum'
                   ? walletApp.ethereum.wallets.get(walletEntry.key)
                   : walletApp.bitcoin.wallets.get(walletEntry.key);
                 */
@@ -31,7 +31,9 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
                 key={walletEntry.address}
                 wallet={fullWallet!}
                 onSelect={() => {
-                  WalletActions.navigate(WalletView.WALLET_DETAIL, { walletIndex: walletEntry.key });
+                  WalletActions.navigate(WalletView.WALLET_DETAIL, {
+                    walletIndex: walletEntry.key,
+                  });
                 }}
               />
             );
@@ -59,8 +61,8 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
               You haven't created any{' '}
-              {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'}{' '}
-              wallets yet.
+              {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallets
+              yet.
             </Text>
           </Flex>
           <Flex mt={9} justifyContent="center">
@@ -78,7 +80,11 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        {(list.length && list.length > 0) ? <List /> : <Empty network={props.network} />}
+        {list.length && list.length > 0 ? (
+          <List />
+        ) : (
+          <Empty network={props.network} />
+        )}
       </Flex>
     );
   }

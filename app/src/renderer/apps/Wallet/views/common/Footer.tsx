@@ -31,20 +31,16 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
             <WalletNetwork
               network={
                 walletApp.navState.network === 'ethereum'
-                ? (walletApp.ethereum.network === 'mainnet'
+                  ? walletApp.ethereum.network === 'mainnet'
                     ? 'Ethereum Mainnet'
-                    : 'Görli Testnet')
-                : (walletApp.bitcoin.network === 'mainnet'
-                    ? 'Bitcoin Mainnet'
-                    : 'Bitcoin Testnet')
+                    : 'Görli Testnet'
+                  : walletApp.bitcoin.network === 'mainnet'
+                  ? 'Bitcoin Mainnet'
+                  : 'Bitcoin Testnet'
               }
             />
           </Box>
-          <Box
-            onClick={() =>
-              WalletActions.navigate(WalletView.SETTINGS)
-            }
-          >
+          <Box onClick={() => WalletActions.navigate(WalletView.SETTINGS)}>
             <Icons name="Settings" color={theme.currentTheme.iconColor} />
           </Box>
         </Flex>

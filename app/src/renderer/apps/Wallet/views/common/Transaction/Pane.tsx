@@ -67,7 +67,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 transactionRecipient.patp
               )
             : await WalletActions.sendEthereumTransaction(
-              walletApp.currentWallet!.index.toString(),
+                walletApp.currentWallet!.index.toString(),
                 transactionRecipient.address ||
                   transactionRecipient.patpAddress!,
                 transactionAmount.toString(),
@@ -136,7 +136,9 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
               {/* @ts-ignore */}
               {transactionAmount}{' '}
-              {props.coin ? props.coin.name : abbrMap[walletApp.navState.network]}
+              {props.coin
+                ? props.coin.name
+                : abbrMap[walletApp.navState.network]}
             </Text>
             <Text mt={1} color={themeData.colors.text.disabled}>
               ${ethToUsd(transactionAmount)} USD

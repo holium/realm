@@ -4,15 +4,15 @@ import {
   Instance,
   getSnapshot,
   flow,
-  cast
+  cast,
 } from 'mobx-state-tree';
-import { Network, Alchemy, Nft } from "alchemy-sdk";
+import { Network, Alchemy, Nft } from 'alchemy-sdk';
 import { IntelligentTieringAccessTier } from 'aws-sdk/clients/s3';
 import { TransactionDescription } from 'ethers/lib/utils';
 import { WalletApi } from 'os/api/wallet';
 
 const alchemySettings = {
-  apiKey: "gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM", // Replace with your Alchemy API Key.
+  apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
   network: Network.ETH_GOERLI, // Replace with your network.
 };
 
@@ -27,12 +27,12 @@ export enum WalletView {
   LOCKED = 'locked',
   SETTINGS = 'settings',
   BIT_LIST = 'bitcoin:list',
-  CREATE_WALLET = 'create-wallet'
+  CREATE_WALLET = 'create-wallet',
 }
 
 const gweiToEther = (gwei: number) => {
   return gwei / 1000000000000000000;
-}
+};
 
 export enum WalletCreationMode {
   DEFAULT = 'default',
@@ -45,44 +45,42 @@ export enum SharingMode {
   ANYBODY = 'anybody',
 }
 
-const Settings = types
-  .model('Settings', {
-    walletCreationMode: types.enumeration(Object.values(WalletCreationMode)),
-    sharingMode: types.enumeration(Object.values(SharingMode)),
-    blocked: types.array(types.string),
-    defaultIndex: types.integer,
-    provider: types.maybe(types.string),
-  })
+const Settings = types.model('Settings', {
+  walletCreationMode: types.enumeration(Object.values(WalletCreationMode)),
+  sharingMode: types.enumeration(Object.values(SharingMode)),
+  blocked: types.array(types.string),
+  defaultIndex: types.integer,
+  provider: types.maybe(types.string),
+});
 
 export type SettingsType = Instance<typeof Settings>;
 export type UISettingsType = {
-  walletCreationMode: WalletCreationMode,
-  sharingMode: SharingMode,
-  blocked: string [],
-  defaultIndex: number,
-  provider: string,
-}
+  walletCreationMode: WalletCreationMode;
+  sharingMode: SharingMode;
+  blocked: string[];
+  defaultIndex: number;
+  provider: string;
+};
 
-export const BitcoinTransaction = types
-  .model('BitcoinTransaction', {
-    hash: types.identifier,
-    amount: types.string,
-    network: types.enumeration(['ethereum', 'bitcoin']),
-    ethType: types.maybe(types.string),
-    type: types.enumeration(['sent', 'received']),
+export const BitcoinTransaction = types.model('BitcoinTransaction', {
+  hash: types.identifier,
+  amount: types.string,
+  network: types.enumeration(['ethereum', 'bitcoin']),
+  ethType: types.maybe(types.string),
+  type: types.enumeration(['sent', 'received']),
 
-    initiatedAt: types.maybeNull(types.string),
-    completedAt: types.maybeNull(types.string),
+  initiatedAt: types.maybeNull(types.string),
+  completedAt: types.maybeNull(types.string),
 
-    ourAddress: types.string,
-    theirPatp: types.maybeNull(types.string),
-    theirAddress: types.string,
+  ourAddress: types.string,
+  theirPatp: types.maybeNull(types.string),
+  theirAddress: types.string,
 
-    status: types.enumeration(['pending', 'failed', 'succeeded']),
-    failureReason: types.maybeNull(types.string),
+  status: types.enumeration(['pending', 'failed', 'succeeded']),
+  failureReason: types.maybeNull(types.string),
 
-    notes: types.string,
-  })
+  notes: types.string,
+});
 
 export type BitcoinTransactionType = Instance<typeof BitcoinTransaction>;
 
@@ -100,10 +98,10 @@ const BitcoinWallet = types.model('BitcoinWallet', {
       euro: types.maybe(types.string),
     })
   ),
-  transactions: types.map(BitcoinTransaction)
+  transactions: types.map(BitcoinTransaction),
 });
 
-export type BitcoinWalletType = Instance<typeof BitcoinWallet>
+export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
 
 const BitcoinStore = types
   .model('BitcoinStore', {
@@ -113,30 +111,28 @@ const BitcoinStore = types
   })
   .views((self) => ({
     get list() {
-      return Array.from(self.wallets).map(
-        ([key, wallet]) => ({
-          key: key,
-          nickname: wallet.nickname,
-          address: wallet.address,
-          balance: wallet.balance,
-        })
-      );
+      return Array.from(self.wallets).map(([key, wallet]) => ({
+        key: key,
+        nickname: wallet.nickname,
+        address: wallet.address,
+        balance: wallet.balance,
+      }));
     },
   }))
   .actions((self) => ({
     initial(wallets: any) {
       const btcWallets = wallets.bitcoin;
       Object.entries(btcWallets).forEach(([key, wallet]) => {
-        console.log(wallet)
+        console.log(wallet);
         btcWallets[key] = {
           network: 'bitcoin',
           path: (wallet as any).path,
           nickname: (wallet as any).nickname,
           balance: '0',
           address: (wallet as any).address,
-          contracts: {}
-        }
-      })
+          contracts: {},
+        };
+      });
       applySnapshot(self.wallets, btcWallets);
     },
     // pokes
@@ -154,11 +150,11 @@ const BitcoinStore = types
           address: wallet.address,
           balance: '0',
           nickname: wallet.nickname,
-          transactions: {}
+          transactions: {},
         };
-        console.log(self.wallets)
-        const btcWallet = BitcoinWallet.create(walletObj)
-        console.log(wallet.key)
+        console.log(self.wallets);
+        const btcWallet = BitcoinWallet.create(walletObj);
+        console.log(wallet.key);
         self.wallets.set(wallet.key, btcWallet);
       }
       for (var transaction in wallet.transactions) {
@@ -167,22 +163,24 @@ const BitcoinStore = types
     },
     setNetwork(network: string) {
       self.network = network;
-    }
+    },
   }));
 
-const ERC20 = types.model('ERC20', {
-  name: types.string,
-  logo: types.string,
-  address: types.string,
-  balance: types.string,
-  decimals: types.number,
-}).actions((self) => ({
-  setBalance(balance: string) {
-    self.balance = balance
-  }
-}));
+const ERC20 = types
+  .model('ERC20', {
+    name: types.string,
+    logo: types.string,
+    address: types.string,
+    balance: types.string,
+    decimals: types.number,
+  })
+  .actions((self) => ({
+    setBalance(balance: string) {
+      self.balance = balance;
+    },
+  }));
 
-export type ERC20Type = Instance<typeof ERC20>
+export type ERC20Type = Instance<typeof ERC20>;
 
 // const ERC721Token = types
 //   .model('ERC721Token', {
@@ -212,31 +210,30 @@ const ERC721 = types.model('ERC721', {
   tokenId: types.string,
   imageUrl: types.string,
   lastPrice: types.string,
-  floorPrice: types.maybe(types.string)
-})
+  floorPrice: types.maybe(types.string),
+});
 
-export type ERC721Type = Instance<typeof ERC721>
+export type ERC721Type = Instance<typeof ERC721>;
 
-export const EthTransaction = types
-  .model('EthTransaction', {
-    hash: types.identifier,
-    amount: types.string,
-    network: types.enumeration(['ethereum', 'bitcoin']),
-    ethType: types.maybe(types.string),
-    type: types.enumeration(['sent', 'received']),
+export const EthTransaction = types.model('EthTransaction', {
+  hash: types.identifier,
+  amount: types.string,
+  network: types.enumeration(['ethereum', 'bitcoin']),
+  ethType: types.maybe(types.string),
+  type: types.enumeration(['sent', 'received']),
 
-    initiatedAt: types.maybeNull(types.string),
-    completedAt: types.maybeNull(types.string),
+  initiatedAt: types.maybeNull(types.string),
+  completedAt: types.maybeNull(types.string),
 
-    ourAddress: types.string,
-    theirPatp: types.maybeNull(types.string),
-    theirAddress: types.string,
+  ourAddress: types.string,
+  theirPatp: types.maybeNull(types.string),
+  theirAddress: types.string,
 
-    status: types.enumeration(['pending', 'failed', 'succeeded']),
-    failureReason: types.maybeNull(types.string),
+  status: types.enumeration(['pending', 'failed', 'succeeded']),
+  failureReason: types.maybeNull(types.string),
 
-    notes: types.string,
-  })
+  notes: types.string,
+});
 
 export type TransactionType = Instance<typeof EthTransaction>;
 
@@ -260,7 +257,12 @@ const EthWallet = types
     transactions: types.map(EthTransaction),
   })
   .actions((self) => ({
-    addSmartContract(contractType: string, name: string, contractAddress: string, decimals: number) {
+    addSmartContract(
+      contractType: string,
+      name: string,
+      contractAddress: string,
+      decimals: number
+    ) {
       /*if (contractType === 'erc721') {
         *const contract = ERC721.create({
           name: name,
@@ -279,13 +281,13 @@ const EthWallet = types
           logo: '',
           address: contractAddress,
           balance: '0',
-          decimals: decimals
-        })
+          decimals: decimals,
+        });
         self.coins.set(contract.address, contract);
       }
     },
     setCoins(coins: any) {
-      var formattedCoins: any = {}
+      var formattedCoins: any = {};
       for (var Coin of coins) {
         const coin: any = Coin;
         formattedCoins[coin.contractAddress] = {
@@ -294,31 +296,31 @@ const EthWallet = types
           address: coin.contractAddress,
           balance: coin.balance,
           decimals: coin.decimals,
-        }
+        };
       }
       const map = types.map(ERC20);
       const newCoins = map.create(formattedCoins);
       applySnapshot(self.coins, getSnapshot(newCoins));
     },
     setNFTs(nfts: any) {
-      var formattedNft: any = {}
+      var formattedNft: any = {};
       for (var NFT of nfts) {
         const nft: any = NFT;
-        formattedNft[nft.contractAddress+nft.tokenId] = {
+        formattedNft[nft.contractAddress + nft.tokenId] = {
           name: nft.name,
           collectionName: nft.collectionName,
           address: nft.contractAddress,
           tokenId: nft.tokenId,
           imageUrl: nft.imageUrl,
           lastPrice: nft.price || '0',
-        }
+        };
       }
       const map = types.map(ERC721);
       const newNft = map.create(formattedNft);
       applySnapshot(self.nfts, getSnapshot(newNft));
     },
     setBalance(balance: string) {
-      self.balance = balance
+      self.balance = balance;
     },
     clearWallet() {
       self.coins.clear();
@@ -328,7 +330,7 @@ const EthWallet = types
       console.log(history);
       let formattedHistory: any = {};
       Object.entries(history).forEach(([key, transaction]) => {
-        const tx = (transaction as any);
+        const tx = transaction as any;
         formattedHistory[tx.hash] = {
           hash: tx.hash,
           amount: tx.amount,
@@ -342,7 +344,7 @@ const EthWallet = types
           status: tx.status,
           failureReason: tx.failureReason || '',
           notes: tx.notes || '',
-        }
+        };
       });
       console.log(formattedHistory);
       const map = types.map(EthTransaction);
@@ -364,9 +366,17 @@ const EthWallet = types
         status: tx.status,
         'failure-reason': tx.failureReason || 1,
         notes: tx.notes,
-      }
+      };
     },
-    enqueueTransaction(hash: any, toAddress: any, toPatp: any, from: string, amount: any, timestamp: any, contractType?: string) {
+    enqueueTransaction(
+      hash: any,
+      toAddress: any,
+      toPatp: any,
+      from: string,
+      amount: any,
+      timestamp: any,
+      contractType?: string
+    ) {
       let tx = {
         hash: hash,
         amount: gweiToEther(amount).toString(),
@@ -386,15 +396,11 @@ const EthWallet = types
       let tx = self.transactions.get(transaction.hash);
       if (tx) {
         tx.completedAt = Date.now().toString();
-        if (transaction.success)
-          tx.status = "succeeded";
-        else
-          tx.status = "failed";
+        if (transaction.success) tx.status = 'succeeded';
+        else tx.status = 'failed';
         tx.notes = transaction.notes;
-        self.transactions.set(transaction.hash, tx)
-      }
-      else
-        self.transactions.set(transaction.hash, transaction);
+        self.transactions.set(transaction.hash, tx);
+      } else self.transactions.set(transaction.hash, transaction);
     },
     applyTransactions(transactions: any) {
       var formattedTransactions: any = {};
@@ -406,28 +412,34 @@ const EthWallet = types
           amount: gweiToEther(transaction.value).toString(),
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
-          type: (self.address === transaction.from ? 'sent' : 'received'),
-          initiatedAt: previousTransaction ? previousTransaction.initiatedAt : undefined,
-          completedAt: (new Date(Number(transaction.timeStamp) * 1000)).toISOString(),
+          type: self.address === transaction.from ? 'sent' : 'received',
+          initiatedAt: previousTransaction
+            ? previousTransaction.initiatedAt
+            : undefined,
+          completedAt: new Date(
+            Number(transaction.timeStamp) * 1000
+          ).toISOString(),
           ourAddress: transaction.from,
           theirAddress: transaction.to,
-          status: (transaction.txreceipt_status === 1 ? 'succeeded': 'failed'),
+          status: transaction.txreceipt_status === 1 ? 'succeeded' : 'failed',
           notes: previousTransaction ? previousTransaction.notes : '',
-        }
+        };
         if (previousTransactions[transaction.hash]) {
-          if (formattedTransactions[transaction.hash].status !== previousTransactions[transaction.hash].status) {
-//            WalletApi.enqueueTransaction(transaction);
+          if (
+            formattedTransactions[transaction.hash].status !==
+            previousTransactions[transaction.hash].status
+          ) {
+            //            WalletApi.enqueueTransaction(transaction);
           }
         }
       }
       const map = types.map(EthTransaction);
       const newTransactions = map.create(formattedTransactions);
       applySnapshot(self.transactions, getSnapshot(newTransactions));
-    }
-  }))
+    },
+  }));
 
-export type EthWalletType = Instance<typeof EthWallet>
-
+export type EthWalletType = Instance<typeof EthWallet>;
 
 export const EthStore = types
   .model('EthStore', {
@@ -438,14 +450,12 @@ export const EthStore = types
   })
   .views((self) => ({
     get list() {
-      return Array.from(self.wallets).map(
-        ([key, wallet]) => ({
-          key: key,
-          nickname: wallet.nickname,
-          address: wallet.address,
-          balance: wallet.balance,
-        })
-      );
+      return Array.from(self.wallets).map(([key, wallet]) => ({
+        key: key,
+        nickname: wallet.nickname,
+        address: wallet.address,
+        balance: wallet.balance,
+      }));
     },
   }))
   .actions((self) => ({
@@ -458,9 +468,9 @@ export const EthStore = types
           coins: {},
           nfts: {},
           transactions: {},
-        }
-        this.applyWalletUpdate(walletUpdate)
-      })
+        };
+        this.applyWalletUpdate(walletUpdate);
+      });
       /*for (var wallet in ethWallets) {
         this.applyWalletUpdate(wallet);
       }*/
@@ -483,7 +493,7 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
-    applyWalletUpdate: flow(function*(wallet: any) {
+    applyWalletUpdate: flow(function* (wallet: any) {
       var walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
@@ -495,11 +505,11 @@ export const EthStore = types
           coins: {},
           nfts: {},
           nickname: wallet.nickname,
-          transactions: {}
+          transactions: {},
         };
-        console.log(self.wallets)
-        const ethWallet = EthWallet.create(walletObj)
-        console.log(wallet.key)
+        console.log(self.wallets);
+        const ethWallet = EthWallet.create(walletObj);
+        console.log(wallet.key);
         self.wallets.set(wallet.key, ethWallet);
       }
       for (var transaction in wallet.transactions) {
@@ -507,50 +517,52 @@ export const EthStore = types
       }
     }),
     setNetwork(network: string) {
-      self.network = network
+      self.network = network;
     },
     deleteWallets() {
       self.wallets.clear();
     },
     setSettings(settings: SettingsType) {
       self.settings = settings;
-    }
+    },
   }));
 
 export enum NetworkType {
   ETHEREUM = 'ethereum',
-  BITCOIN = 'bitcoin'
+  BITCOIN = 'bitcoin',
 }
-const Networks = types.enumeration(Object.values(NetworkType))
+const Networks = types.enumeration(Object.values(NetworkType));
 
-
-export const WalletNavState = types
-  .model('WalletNavState', {
-    view: types.enumeration(Object.values(WalletView)),
-    network: Networks,
-    walletIndex: types.maybe(types.string),
-    detail: types.maybe(types.model({
+export const WalletNavState = types.model('WalletNavState', {
+  view: types.enumeration(Object.values(WalletView)),
+  network: Networks,
+  walletIndex: types.maybe(types.string),
+  detail: types.maybe(
+    types.model({
       type: types.enumeration(['transaction', 'coin', 'nft']),
-      key: types.string
-    })),
-    action: types.maybe(types.model({
+      key: types.string,
+    })
+  ),
+  action: types.maybe(
+    types.model({
       type: types.string,
-      data: types.frozen()
-    }))
-  })
+      data: types.frozen(),
+    })
+  ),
+});
 
 export interface WalletNavOptions {
-  canReturn?: boolean
-  network?: NetworkType,
-  walletIndex?: string,
+  canReturn?: boolean;
+  network?: NetworkType;
+  walletIndex?: string;
   detail?: {
-    type: 'transaction' | 'coin' | 'nft',
-    key: string
-  },
+    type: 'transaction' | 'coin' | 'nft';
+    key: string;
+  };
   action?: {
-    type: string
-    data: any
-  }
+    type: string;
+    data: any;
+  };
 }
 
 export const WalletStore = types
@@ -558,10 +570,12 @@ export const WalletStore = types
     network: types.enumeration(['ethereum', 'bitcoin']),
     currentView: types.enumeration(Object.values(WalletView)),
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
-    currentItem: types.maybe(types.model({
-      type: types.enumeration(['transaction', 'coin', 'nft']),
-      key: types.string
-    })),
+    currentItem: types.maybe(
+      types.model({
+        type: types.enumeration(['transaction', 'coin', 'nft']),
+        key: types.string,
+      })
+    ),
     currentTransaction: types.maybe(types.string),
     bitcoin: BitcoinStore,
     ethereum: EthStore,
@@ -576,17 +590,22 @@ export const WalletStore = types
     lastInteraction: types.Date,
     initialized: types.boolean,
     navState: WalletNavState,
-    navHistory: types.array(WalletNavState)
+    navHistory: types.array(WalletNavState),
   })
   .views((self) => ({
     get currentStore() {
-      return self.navState.network === 'ethereum' ? self.ethereum : self.bitcoin;
+      return self.navState.network === 'ethereum'
+        ? self.ethereum
+        : self.bitcoin;
     },
 
     get currentWallet() {
-      let walletStore = self.navState.network === 'ethereum' ? self.ethereum : self.bitcoin;
-      return self.navState.walletIndex ? walletStore.wallets.get(self.navState.walletIndex) : null;
-    }
+      let walletStore =
+        self.navState.network === 'ethereum' ? self.ethereum : self.bitcoin;
+      return self.navState.walletIndex
+        ? walletStore.wallets.get(self.navState.walletIndex)
+        : null;
+    },
   }))
   .actions((self) => ({
     setInitial(network: 'bitcoin' | 'ethereum', wallets: any) {
@@ -613,30 +632,61 @@ export const WalletStore = types
       let action = options?.action;
       let network = options?.network || self.navState.network;
 
-      if (canReturn && ![WalletView.LOCKED, WalletView.ETH_NEW].includes(self.navState.view)) {
-        let returnSnapshot = getSnapshot(self.navState)
+      if (
+        canReturn &&
+        ![WalletView.LOCKED, WalletView.ETH_NEW].includes(self.navState.view)
+      ) {
+        let returnSnapshot = getSnapshot(self.navState);
         self.navHistory.push(WalletNavState.create(returnSnapshot));
       }
 
-      let newState = WalletNavState.create({ view, walletIndex, detail, action, network });
+      let newState = WalletNavState.create({
+        view,
+        walletIndex,
+        detail,
+        action,
+        network,
+      });
       self.navState = newState;
     },
     navigateBack() {
-      let DEFAULT_RETURN_VIEW = self.navState.network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST;
-      let returnSnapshot = getSnapshot(WalletNavState.create({ view: DEFAULT_RETURN_VIEW, network: self.navState.network }));
+      let DEFAULT_RETURN_VIEW =
+        self.navState.network === 'ethereum'
+          ? WalletView.ETH_LIST
+          : WalletView.BIT_LIST;
+      let returnSnapshot = getSnapshot(
+        WalletNavState.create({
+          view: DEFAULT_RETURN_VIEW,
+          network: self.navState.network,
+        })
+      );
 
       if (self.navHistory.length) {
-        returnSnapshot = getSnapshot(self.navHistory.pop()!)
+        returnSnapshot = getSnapshot(self.navHistory.pop()!);
       }
 
       self.navState = WalletNavState.create(returnSnapshot);
     },
     resetNavigation() {
-      self.navState = WalletNavState.create({ view: self.navState.network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST, network: self.navState.network });
+      self.navState = WalletNavState.create({
+        view:
+          self.navState.network === 'ethereum'
+            ? WalletView.ETH_LIST
+            : WalletView.BIT_LIST,
+        network: self.navState.network,
+      });
       self.navHistory = cast([]);
     },
-    setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }, unsetCurrentItem?: boolean) {
-      if (view === WalletView.LOCKED && self.currentView === WalletView.LOCKED) {
+    setView(
+      view: WalletView,
+      index?: string,
+      item?: { type: 'transaction' | 'coin' | 'nft'; key: string },
+      unsetCurrentItem?: boolean
+    ) {
+      if (
+        view === WalletView.LOCKED &&
+        self.currentView === WalletView.LOCKED
+      ) {
         // don't allow setting locked multiple times
         return;
       }
@@ -647,8 +697,7 @@ export const WalletStore = types
 
       if (item) {
         self.currentItem = item;
-      }
-      else if (unsetCurrentItem) {
+      } else if (unsetCurrentItem) {
         self.currentItem = undefined;
       }
 
@@ -665,10 +714,8 @@ export const WalletStore = types
       self.returnView = view;
     },
     setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
-      if (network == 'bitcoin')
-        self.bitcoin.setProvider(provider)
-      else if (network == 'ethereum')
-        self.ethereum.setProvider(provider);
+      if (network == 'bitcoin') self.bitcoin.setProvider(provider);
+      else if (network == 'ethereum') self.ethereum.setProvider(provider);
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;

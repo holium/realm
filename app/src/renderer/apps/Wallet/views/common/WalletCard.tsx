@@ -65,7 +65,8 @@ export const WalletCard: FC<WalletCardProps> = ({
     //    wallet!.address
   );
 
-  let amountDisplay = walletApp.navState.network === 'ethereum'
+  let amountDisplay =
+    walletApp.navState.network === 'ethereum'
       ? `${formatEthAmount(wallet.balance).eth} ETH`
       : `${formatEthAmount(wallet.balance).eth} BTC`;
 

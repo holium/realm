@@ -20,7 +20,9 @@ import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 
-const WalletViews: (network: NetworkType) => { [key: string]: any } = (network: NetworkType) => ({
+const WalletViews: (network: NetworkType) => { [key: string]: any } = (
+  network: NetworkType
+) => ({
   'bitcoin:list': (props: any) => <BitcoinWalletList {...props} />,
   'bitcoin:detail': (props: any) => <div />,
   'bitcoin:transaction': (props: any) => <div />,

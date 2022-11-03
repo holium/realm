@@ -49,9 +49,7 @@ export const NFTDetail: FC = () => {
         position="absolute"
         top="582px"
         zIndex={999}
-        onClick={() =>
-          WalletActions.navigateBack()
-        }
+        onClick={() => WalletActions.navigateBack()}
       >
         <Icons
           name="ArrowLeftLine"

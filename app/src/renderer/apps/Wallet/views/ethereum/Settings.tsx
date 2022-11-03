@@ -247,11 +247,7 @@ export const EthSettings: FC = observer(() => {
         width="100%"
         justifyContent="space-between"
       >
-        <Flex
-          onClick={() =>
-            WalletActions.navigateBack()
-          }
-        >
+        <Flex onClick={() => WalletActions.navigateBack()}>
           <Icons
             name="ArrowLeftLine"
             size={2}

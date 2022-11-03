@@ -61,7 +61,9 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = (walletApp.currentWallet! as EthWalletType).transactions.get(walletApp.navState.detail!.key)!;
+  let transaction = (
+    walletApp.currentWallet! as EthWalletType
+  ).transactions.get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);
@@ -243,7 +245,12 @@ export const TransactionDetail: FC = observer(() => {
           </Button>
         </Flex>
       </Flex>
-      <Flex position="absolute" top="582px" zIndex={999} onClick={() => WalletActions.navigateBack()}>
+      <Flex
+        position="absolute"
+        top="582px"
+        zIndex={999}
+        onClick={() => WalletActions.navigateBack()}
+      >
         <Icons
           name="ArrowLeftLine"
           size={2}
