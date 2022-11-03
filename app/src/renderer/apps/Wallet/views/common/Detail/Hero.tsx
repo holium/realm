@@ -94,6 +94,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     return (
       <FlexWithShadow
+        mt={4}
         p={3}
         width="100%"
         flexDirection="column"
