@@ -390,7 +390,7 @@ export class WalletService extends BaseService {
 
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
       if (wallet.network === 'ethereum') {
-        this.state!.ethereum.applyWalletUpdate(wallet);
+        this.state!.ethereum.applyWalletUpdate(this.state!.ethereum.network, wallet);
         this.updateEthereumInfo();
       }
       if (wallet.network === 'bitcoin') {
