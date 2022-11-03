@@ -43,7 +43,7 @@ export const Transaction = observer((props: TransactionProps) => {
   let isEth = transaction.network === 'ethereum';
   let themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  let initiatedDate = new Date(transaction.initiatedAt!);
+  let completedDate = new Date(transaction.completedAt!);
 
   let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
@@ -74,8 +74,8 @@ export const Transaction = observer((props: TransactionProps) => {
             color={wasSent ? 'text.error' : 'text.success'}
           >
             {`${
-              monthNames[initiatedDate.getMonth()]
-            } ${initiatedDate.getDate()}`}
+              monthNames[completedDate.getMonth()]
+            } ${completedDate.getDate()}`}
           </Text>
           <Text mx={1} variant="body" fontSize={1} color="text.disabled">
             ·
