@@ -63,7 +63,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
 
   const transactions = getTransactions(wallet.transactions).sort(
     (a, b) =>
-      new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime()
+      new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
   );
 
   /*useEffect(() => {

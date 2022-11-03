@@ -395,7 +395,12 @@ const EthWallet = types
         self.transactions.set(transaction.hash, tx);
       }
       else {
-        self.transactions.set(transaction.hash, transaction);
+        let tx = {
+          ...transaction,
+          amount: '0',
+          notes: '',
+        }
+        self.transactions.set(transaction.hash, tx);
       }
     },
     applyTransactions(transactions: any) {
