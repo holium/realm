@@ -980,6 +980,7 @@ export class WalletService extends BaseService {
         this.state!.ethereum.network === 'mainnet' ? mainnetURL : goerliURL;
       const response: any = await axios.get(URL);
       this.state!.ethereum.wallets.get(key)!.applyTransactions(
+        this.state!.ethereum.network,
         response.data.result
       );
     }
