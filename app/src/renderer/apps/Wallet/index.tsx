@@ -46,7 +46,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
   var transactions: any = [];
   for (var key of walletApp.currentStore.wallets.keys()) {
     const walletTransactions = getTransactions(
-      walletApp.currentStore.wallets.get(key)!.transactions
+      walletApp.currentStore.wallets.get(key)!.transactions.get(walletApp.currentStore.network!)!
     );
     transactions = [...walletTransactions, ...transactions];
   }
