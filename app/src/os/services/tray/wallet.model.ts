@@ -395,12 +395,14 @@ const EthWallet = types
       let tx = self.transactions.get(transaction.hash);
       console.log('applying update')
       if (tx) {
+        tx.walletIndex = self.index;
         tx.notes = transaction.notes;
         self.transactions.set(transaction.hash, tx);
       }
       else {
         let tx = {
           ...transaction,
+          walletIndex: self.index,
           amount: '0',
           notes: '',
         }
