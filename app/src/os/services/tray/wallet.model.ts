@@ -250,7 +250,7 @@ const EthWallet = types
         euro: types.maybe(types.string),
       })
     ),
-    transactions: types.map(EthTransaction),
+    transactions: types.map(types.map(EthTransaction)),
   })
   .actions((self) => ({
     addSmartContract(
@@ -322,7 +322,7 @@ const EthWallet = types
       self.coins.clear();
       self.nfts.clear();
     },
-    applyHistory(history: any) {
+    /*applyHistory(history: any) {
       console.log(history);
       let formattedHistory: any = {};
       Object.entries(history).forEach(([key, transaction]) => {
@@ -347,9 +347,9 @@ const EthWallet = types
       const map = types.map(EthTransaction);
       const newHistory = map.create(formattedHistory);
       applySnapshot(self.transactions, getSnapshot(newHistory));
-    },
-    getTransaction(hash: string) {
-      const tx: any = self.transactions.get(hash);
+    },*/
+    getTransaction(network: string, hash: string) {
+      const tx: any = self.transactions.get(network)!.get(hash);
       return {
         hash: tx.hash,
         walletIndex: self.index,
@@ -389,15 +389,23 @@ const EthWallet = types
         status: 'pending',
         notes: '',
       };
-      self.transactions.set(hash, tx);
+      let netMap = self.transactions.get(self.network) || types.map(EthTransaction).create()
+      netMap.set(hash, tx)
+      self.transactions.set(self.network, netMap);
     },
-    applyTransactionUpdate(transaction: any) {
-      let tx = self.transactions.get(transaction.hash);
+    applyTransactionUpdate(network: string, transaction: any) {
+      let netMap = self.transactions.get(network)
+      if (!netMap) {
+        self.transactions.set(network, {});
+      }
+      netMap = self.transactions.get(network)!;
+      let tx = netMap?.get(transaction.hash);
       console.log('applying update')
       if (tx) {
         tx.walletIndex = self.index;
         tx.notes = transaction.notes;
-        self.transactions.set(transaction.hash, tx);
+        netMap.set(transaction.hash, tx)
+        self.transactions.set(network, netMap);
       }
       else {
         let tx = {
@@ -406,10 +414,11 @@ const EthWallet = types
           amount: '0',
           notes: '',
         }
-        self.transactions.set(transaction.hash, tx);
+        netMap.set(transaction.hash, tx)
+        self.transactions.set(network, netMap);
       }
     },
-    applyTransactions(transactions: any) {
+    applyTransactions(network: string, transactions: any) {
       var formattedTransactions: any = {};
       const previousTransactions = self.transactions.toJSON();
       for (var transaction of transactions) {
@@ -445,7 +454,10 @@ const EthWallet = types
         ...previousTransactions,
         ...formattedTransactions,
       }
-      const map = types.map(EthTransaction);
+      formattedTransactions = {
+        network: formattedTransactions
+      }
+      const map = types.map(types.map(EthTransaction));
       const newTransactions = map.create(formattedTransactions);
       applySnapshot(self.transactions, getSnapshot(newTransactions));
     },
@@ -481,7 +493,7 @@ export const EthStore = types
           nfts: {},
           transactions: {},
         };
-        this.applyWalletUpdate(walletUpdate);
+        this.applyWalletUpdate(self.network, walletUpdate);
       });
     },
     // pokes
@@ -491,7 +503,7 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings!.defaultIndex = index;
     },
-    applyWalletUpdate: flow(function* (wallet: any) {
+    applyWalletUpdate: flow(function* (network: string, wallet: any) {
       var walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
@@ -511,7 +523,7 @@ export const EthStore = types
         self.wallets.set(wallet.key, ethWallet);
       }
       for (var transaction in wallet.transactions) {
-        self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
+        self.wallets.get(wallet.key)!.applyTransactionUpdate(network, transaction);
       }
     }),
     setNetwork(network: string) {
