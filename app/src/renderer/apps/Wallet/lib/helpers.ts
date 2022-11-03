@@ -101,6 +101,10 @@ export function formatEthAmount(amount: string): EthAmount {
 
 export function formatCoinAmount(balance: string | BigInt, decimals: number) {
   let amount = typeof balance === 'string' ? balance : balance.toString();
+  if (amount.length < decimals) {
+    let additionalDigits = '0'.repeat((decimals - amount.length) + 1);
+    amount = additionalDigits + amount;
+  }
   let decimalPosition = amount.length - decimals;
   let includeDecimal = !amount
     .slice(decimalPosition)
