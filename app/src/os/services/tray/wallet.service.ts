@@ -1,5 +1,5 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import { ethers, utils, Wallet } from 'ethers';
+import { ethers, utils } from 'ethers';
 import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
 import {
@@ -313,7 +313,7 @@ export class WalletService extends BaseService {
         currentView: WalletView.ETH_NEW,
         navState: {
           view: WalletView.ETH_NEW,
-          network: 'ethereum'
+          network: NetworkType.ETHEREUM
         },
         navHistory: [],
         ethereum: {

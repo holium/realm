@@ -541,7 +541,7 @@ export const WalletNavState = types
 
 export interface WalletNavOptions {
   canReturn?: boolean
-  network?: 'ethereum' | 'bitcoin',
+  network?: NetworkType,
   walletIndex?: string,
   detail?: {
     type: 'transaction' | 'coin' | 'nft',
@@ -600,15 +600,11 @@ export const WalletStore = types
     setInitialized(initialized: boolean) {
       self.initialized = initialized;
     },
-    setNetwork(network: 'bitcoin' | 'ethereum') {
+    setNetwork(network: NetworkType) {
       self.network = network;
       self.navState.network = network;
-      if (network === 'ethereum') {
-        self.currentView = WalletView.ETH_LIST;
-        // TODO
-      } else {
-        self.currentView = WalletView.BIT_LIST;
-      }
+      /* @ts-ignore */
+      self.resetNavigation();
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
       let canReturn = options?.canReturn || true;
@@ -627,7 +623,7 @@ export const WalletStore = types
     },
     navigateBack() {
       let DEFAULT_RETURN_VIEW = self.navState.network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST;
-      let returnSnapshot = getSnapshot(WalletNavState.create({ view: DEFAULT_RETURN_VIEW, network: self.navState.network, walletIndex: undefined, detail: undefined, action: undefined }));
+      let returnSnapshot = getSnapshot(WalletNavState.create({ view: DEFAULT_RETURN_VIEW, network: self.navState.network }));
 
       if (self.navHistory.length) {
         returnSnapshot = getSnapshot(self.navHistory.pop()!)
@@ -636,7 +632,7 @@ export const WalletStore = types
       self.navState = WalletNavState.create(returnSnapshot);
     },
     resetNavigation() {
-      self.navState = WalletNavState.create({ view: WalletView.ETH_LIST, network: 'ethereum' });
+      self.navState = WalletNavState.create({ view: self.navState.network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST, network: self.navState.network });
       self.navHistory = cast([]);
     },
     setView(view: WalletView, index?: string, item?: { type: 'transaction' | 'coin' | 'nft', key: string }, unsetCurrentItem?: boolean) {
