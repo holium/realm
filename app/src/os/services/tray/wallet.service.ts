@@ -19,6 +19,7 @@ import {
   WalletCreationMode,
   SharingMode,
   UISettingsType,
+  EthWalletType,
 } from './wallet.model';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from "alchemy-sdk";
@@ -279,7 +280,6 @@ export class WalletService extends BaseService {
   private lock() {
     let hasPasscode = this.state && this.state.passcodeHash;
     if (hasPasscode) {
-      // this.state!.setView(WalletView.LOCKED, this.state!.currentIndex, this.state!.currentItem);
       this.state!.navigate(WalletView.LOCKED);
     }
   }
@@ -312,7 +312,8 @@ export class WalletService extends BaseService {
         network: 'ethereum',
         currentView: WalletView.ETH_NEW,
         navState: {
-          view: WalletView.ETH_NEW
+          view: WalletView.ETH_NEW,
+          network: 'ethereum'
         },
         navHistory: [],
         ethereum: {
@@ -583,7 +584,7 @@ export class WalletService extends BaseService {
       console.log('requesting address');
       const address: any = await WalletApi.getAddress(
         this.core.conduit!,
-        this.state!.network,
+        this.state!.navState.network,
         patp
       );
       console.log(address);
@@ -608,7 +609,7 @@ export class WalletService extends BaseService {
   }
 
   async saveTransactionNotes(_event: any, notes: string) {
-    const network = this.state!.network;
+    const network = this.state!.navState.network;
     var net
     if (network === 'ethereum') {
       net = this.state!.ethereum.network;
@@ -618,7 +619,7 @@ export class WalletService extends BaseService {
     }
     // const hash = this.state!.currentItem!.key;
     const hash = this.state!.navState.detail!.key
-    const index = this.state!.ethereum.wallets.get(this.state?.currentIndex!)!.index
+    const index = this.state!.currentWallet!.index;
     WalletApi.saveTransactionNotes(this.core.conduit!, network, net, index, hash, notes);
   }
 
@@ -664,7 +665,7 @@ export class WalletService extends BaseService {
   async createWallet(_event: any, nickname: string) {
     console.log(`creating with nickname: ${nickname}`);
     const sender: string = this.state!.ourPatp!;
-    const network: string = this.state!.network;
+    const network: string = this.state!.navState.network;
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
     this.state!.navigate(this.state!.network === 'ethereum' ? WalletView.ETH_LIST: WalletView.BIT_LIST, { canReturn: false });
   }
@@ -696,10 +697,9 @@ export class WalletService extends BaseService {
     };
     const { hash } = await signer.sendTransaction(tx);
     console.log('hash: ' + hash);
-    const fromAddress = this.state!.ethereum.wallets.get(
-      this.state!.currentIndex!
-    )!.address;
-    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
+    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const fromAddress = currentWallet.address;
+    currentWallet.enqueueTransaction(
       hash,
       tx.to,
       toPatp,
@@ -708,13 +708,13 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType,
     );
-    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
+    const stateTx = currentWallet.getTransaction(hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
       this.state!.ethereum.network,
-      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
+      currentWallet.index,
       hash,
       stateTx,
     );
@@ -744,10 +744,9 @@ export class WalletService extends BaseService {
     const ethAmount = ethers.utils.parseEther(amount);
     let erc20Amount = ethers.utils.parseUnits(amount, this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!.decimals);
     const { hash } = await contract.transfer(to, erc20Amount);
-    const fromAddress = this.state!.ethereum.wallets.get(
-      this.state!.currentIndex!
-    )!.address;
-    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
+    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const fromAddress = currentWallet.address;
+    currentWallet.enqueueTransaction(
       hash,
       to,
       toPatp,
@@ -756,13 +755,13 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       'ERC20',
     );
-    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
+    const stateTx = currentWallet.getTransaction(hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
       this.state!.ethereum.network,
-      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
+      currentWallet.index,
       hash,
       stateTx,
     );
@@ -788,10 +787,9 @@ export class WalletService extends BaseService {
     let signer = wallet.connect(this.ethProvider!);
     const contract = new ethers.Contract(contractAddress, nftabi, signer);
     const { hash } = await contract.transfer(to, tokenId);
-    const fromAddress = this.state!.ethereum.wallets.get(
-      this.state!.currentIndex!
-    )!.address;
-    this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.enqueueTransaction(
+    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const fromAddress = currentWallet.address;
+    currentWallet.enqueueTransaction(
       hash,
       to,
       toPatp,
@@ -800,13 +798,13 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       'ERC721',
     );
-    const stateTx = this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.getTransaction(hash);
+    const stateTx = currentWallet.getTransaction(hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
       this.state!.ethereum.network,
-      this.state!.ethereum.wallets.get(this.state!.currentIndex!)!.index,
+      currentWallet.index,
       hash,
       stateTx,
     );
@@ -849,10 +847,10 @@ export class WalletService extends BaseService {
   }
 
   async getAllBalances() {
-    if (this.state!.network === 'bitcoin') {
+    if (this.state!.navState.network === 'bitcoin') {
 
     }
-    else if (this.state!.network === 'ethereum') {
+    else if (this.state!.navState.network === 'ethereum') {
       for (var key of this.state!.ethereum.wallets.keys()) {
         let wallet: any = this.state!.ethereum.wallets.get(key);
         const balance = await this.ethProvider!.getBalance(wallet.address);
