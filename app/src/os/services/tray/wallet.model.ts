@@ -442,8 +442,8 @@ const EthWallet = types
         }
       }
       formattedTransactions = {
+        ...previousTransactions,
         ...formattedTransactions,
-        ...previousTransactions
       }
       const map = types.map(EthTransaction);
       const newTransactions = map.create(formattedTransactions);
