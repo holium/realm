@@ -971,7 +971,6 @@ export class WalletService extends BaseService {
 
   async getAllTransactions() {
     // etherscan api call
-    console.log('getting transactions')
     for (var key of this.state!.ethereum.wallets.keys()) {
       const address = this.state!.ethereum.wallets.get(key)!.address;
       const startBlock = 0;
