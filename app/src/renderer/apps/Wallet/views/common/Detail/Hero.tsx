@@ -64,7 +64,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
 
-    let amountDisplay = walletApp.network === 'ethereum'
+    let amountDisplay = walletApp.navState.network === 'ethereum'
       ? !props.coin
         ? `${formatEthAmount(props.wallet.balance).eth} ETH`
         : `${formatCoinAmount(props.coin.balance, props.coin.decimals).display} ${props.coin.name}`

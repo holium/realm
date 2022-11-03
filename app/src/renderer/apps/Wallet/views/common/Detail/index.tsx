@@ -50,9 +50,9 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   let nfts = null;
   let hasCoin = walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
   let coin = null;
-  if (walletApp.network === 'ethereum') {
+  if (walletApp.navState.network === 'ethereum') {
     if (hasCoin) {
-      coin = (wallet! as EthWalletType).coins.get(walletApp!.currentItem!.key)!;
+      coin = (wallet! as EthWalletType).coins.get(walletApp!.navState.detail!.key)!;
     }
     coins = getCoins((wallet! as EthWalletType).coins);
     nfts = getNfts((wallet! as EthWalletType).nfts);
@@ -97,7 +97,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
           {!coin ? (
             <>
               <ListSelector
-                network={walletApp.network}
+                network={walletApp.navState.network}
                 selected={listView}
                 onChange={(newView: DisplayType) => setListView(newView)}
               />

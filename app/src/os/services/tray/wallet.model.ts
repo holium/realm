@@ -517,14 +517,17 @@ export const EthStore = types
     }
   }));
 
-export const Networks = types.enumeration(['ethereum', 'bitcoin']);
-export type NetworkType = Instance<typeof Networks>;
+export enum NetworkType {
+  ETHEREUM = 'ethereum',
+  BITCOIN = 'bitcoin'
+}
+const Networks = types.enumeration(Object.values(NetworkType))
 
 
 export const WalletNavState = types
   .model('WalletNavState', {
     view: types.enumeration(Object.values(WalletView)),
-    network: types.enumeration(['ethereum', 'bitcoin']),
+    network: Networks,
     walletIndex: types.maybe(types.string),
     detail: types.maybe(types.model({
       type: types.enumeration(['transaction', 'coin', 'nft']),

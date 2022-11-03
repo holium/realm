@@ -16,7 +16,6 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
   (props: WalletFooterProps) => {
     const { walletApp } = useTrayApps();
     const { theme } = useServices();
-    const themeData = getBaseTheme(theme.currentTheme);
 
     return (
       <Box width="100%" hidden={props.hidden}>
@@ -31,7 +30,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           <Box mr={1}>
             <WalletNetwork
               network={
-                walletApp.network === 'ethereum'
+                walletApp.navState.network === 'ethereum'
                 ? (walletApp.ethereum.network === 'mainnet'
                     ? 'Ethereum Mainnet'
                     : 'Görli Testnet')

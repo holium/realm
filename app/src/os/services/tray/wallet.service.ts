@@ -552,10 +552,10 @@ export class WalletService extends BaseService {
   }
 
   async setChainNetwork(_event: any, network: NetworkType, chainNetwork: string) {
-    if (network === NetworkType.ethereum) {
+    if (network === NetworkType.ETHEREUM) {
       this.state!.ethereum.network = chainNetwork;
     }
-    else if (network === NetworkType.bitcoin) {
+    else if (network === NetworkType.BITCOIN) {
     }
   }
 

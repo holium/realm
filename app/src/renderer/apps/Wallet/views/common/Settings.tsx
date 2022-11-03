@@ -57,7 +57,7 @@ export const WalletSettings: FC = observer(() => {
   const [providerError, setProviderError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const network = walletApp.network;
+  const network = walletApp.navState.network;
   const walletStore =
     network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
   const settings = walletStore.settings;
@@ -139,12 +139,7 @@ export const WalletSettings: FC = observer(() => {
       blocked,
     });
     setSaving(false);
-    WalletActions.setView(
-      walletApp.returnView ||
-        (network === 'ethereum' ? WalletView.ETH_LIST : WalletView.BIT_LIST),
-      walletApp.currentIndex,
-      walletApp.currentItem
-    );
+    WalletActions.navigateBack();
   }
 
   return (
@@ -254,11 +249,7 @@ export const WalletSettings: FC = observer(() => {
       >
         <Flex
           onClick={() =>
-            WalletActions.setView(
-              walletApp.returnView || WalletView.ETH_LIST,
-              walletApp.currentIndex,
-              walletApp.currentItem
-            )
+            WalletActions.navigateBack()
           }
         >
           <Icons

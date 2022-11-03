@@ -31,10 +31,7 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
                 key={walletEntry.address}
                 wallet={fullWallet!}
                 onSelect={() => {
-                  WalletActions.setView(
-                    WalletView.WALLET_DETAIL,
-                    walletEntry.key
-                  );
+                  WalletActions.navigate(WalletView.WALLET_DETAIL, { walletIndex: walletEntry.key });
                 }}
               />
             );
@@ -45,7 +42,7 @@ export const BitcoinWalletList: FC<BitcoinWalletListProps> = observer(
 
     const Empty: FC<any> = (props: any) => {
       let onClick = () => {
-        WalletActions.setView(WalletView.CREATE_WALLET);
+        WalletActions.navigate(WalletView.CREATE_WALLET);
       };
 
       return (
