@@ -12,6 +12,7 @@ import {
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { WalletView } from 'os/services/tray/wallet.model';
 import { TransactionType } from 'os/services/tray/wallet.model';
+import { useTrayApps } from 'renderer/apps/store';
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];
@@ -50,6 +51,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
 ) => {
   const { theme } = useServices();
+  const { walletApp } = useTrayApps();
   const { colors } = getBaseTheme(theme.currentTheme);
 
   const goToTransaction = () => {
@@ -66,6 +68,12 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   let btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1');
   let themDisplay =
     props.transaction.theirPatp || shortened(props.transaction.theirAddress);
+  let unitsDisplay = 'BTC'
+  if (isEth) {
+    unitsDisplay = props.transaction.ethType === 'ETH'
+      ? 'ETH'
+      : walletApp.ethereum.wallets.get(props.transaction.walletIndex.toString())!.coins.get(props.transaction.ethType!)!.name
+  }
 
   return (
     <Flex
@@ -91,7 +99,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
         <Flex flexDirection="column">
           <Text variant="body" color={colors.brand.primary}>
             {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
-            {isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`}
+            {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
           </Text>
           <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
             {props.transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
