@@ -56,10 +56,10 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const sendTransaction = async () => {
       try {
         setTransactionSending(true);
-        if (walletApp.network === 'ethereum') {
+        if (walletApp.navState.network === 'ethereum') {
           props.coin
             ? await WalletActions.sendERC20Transaction(
-                walletApp.currentIndex!,
+                walletApp.currentWallet!.index.toString(),
                 transactionRecipient.address ||
                   transactionRecipient.patpAddress!,
                 transactionAmount.toString(),
@@ -67,7 +67,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 transactionRecipient.patp
               )
             : await WalletActions.sendEthereumTransaction(
-                walletApp.currentIndex!,
+              walletApp.currentWallet!.index.toString(),
                 transactionRecipient.address ||
                   transactionRecipient.patpAddress!,
                 transactionAmount.toString(),
@@ -75,7 +75,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               );
         } else {
           await WalletActions.sendBitcoinTransaction(
-            Number(walletApp.currentIndex!),
+            walletApp.currentWallet!.index,
             transactionRecipient.address || transactionRecipient.patpAddress!,
             transactionAmount.toString()
           );
@@ -136,7 +136,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
               {/* @ts-ignore */}
               {transactionAmount}{' '}
-              {props.coin ? props.coin.name : abbrMap[walletApp.network]}
+              {props.coin ? props.coin.name : abbrMap[walletApp.navState.network]}
             </Text>
             <Text mt={1} color={themeData.colors.text.disabled}>
               ${ethToUsd(transactionAmount)} USD

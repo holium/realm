@@ -82,7 +82,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
     >
       <WalletHeader
         theme={theme.currentTheme}
-        network={walletApp.network}
+        network={walletApp.navState.network}
         onAddWallet={() => WalletActions.navigate(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={hideHeaderFooter}

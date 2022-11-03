@@ -18,8 +18,6 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
     const { theme } = useServices();
     const themeData = getBaseTheme(theme.currentTheme);
 
-    let settingsView = WalletView.SETTINGS;
-
     return (
       <Box width="100%" hidden={props.hidden}>
         <Flex
@@ -45,7 +43,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           </Box>
           <Box
             onClick={() =>
-              WalletActions.navigate(settingsView)
+              WalletActions.navigate(WalletView.SETTINGS)
             }
           >
             <Icons name="Settings" color={theme.currentTheme.iconColor} />

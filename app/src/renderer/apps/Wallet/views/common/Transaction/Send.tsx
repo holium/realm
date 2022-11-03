@@ -55,7 +55,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             Send{' '}
             {props.coin
               ? props.coin.name
-              : abbrMap[walletApp.network as 'bitcoin' | 'ethereum']}
+              : abbrMap[walletApp.navState.network as 'bitcoin' | 'ethereum']}
           </Text>
         </Flex>
       </Flex>

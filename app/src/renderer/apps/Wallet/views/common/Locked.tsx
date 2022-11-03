@@ -16,7 +16,6 @@ export const Locked: FC<LockedProps> = observer((props: LockedProps) => {
   const { theme } = useServices();
 
   let unlock = () => {
-    console.log('unlocking', walletApp.currentItem);
     WalletActions.navigateBack();
   };
 

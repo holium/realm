@@ -15,7 +15,7 @@ import {
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { EthWalletType, WalletView } from 'os/services/tray/wallet.model';
 import {
   shortened,
   fullMonthNames,
@@ -61,9 +61,7 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = walletApp.ethereum.wallets
-    .get(walletApp.currentIndex!)!
-    .transactions.get(walletApp.currentItem!.key)!;
+  let transaction = (walletApp.currentWallet! as EthWalletType).transactions.get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);

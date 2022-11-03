@@ -19,7 +19,7 @@ import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
 import { SendTransaction } from '../Transaction/Send';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { EthWalletType, WalletView } from 'os/services/tray/wallet.model';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
@@ -45,29 +45,21 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     setHideWalletHero(false);
   };
 
-  const wallet = walletApp.network === 'ethereum'
-      ? walletApp.ethereum.wallets.get(walletApp.currentIndex!)
-      : walletApp.bitcoin.wallets.get(walletApp.currentIndex!);
-
-
-  var coins
-  var nfts
-  let hasCoin = walletApp.currentItem && walletApp.currentItem.type === 'coin';
+  const wallet = walletApp.currentWallet!
+  let coins = null;
+  let nfts = null;
+  let hasCoin = walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
   let coin = null;
   if (walletApp.network === 'ethereum') {
     if (hasCoin) {
-      coin = wallet!.coins.get(walletApp!.currentItem!.key)!;
+      coin = (wallet! as EthWalletType).coins.get(walletApp!.currentItem!.key)!;
     }
-    coins = getCoins(wallet!.coins);
-    nfts = getNfts(wallet!.nfts);
+    coins = getCoins((wallet! as EthWalletType).coins);
+    nfts = getNfts((wallet! as EthWalletType).nfts);
   }
-  const networkTransactions = walletApp.network === 'ethereum'
-      ? walletApp.ethereum.wallets.get(walletApp.currentIndex!)!.transactions
-      : walletApp.bitcoin.wallets.get(walletApp.currentIndex!)!.transactions;
+
   const transactions = getTransactions(
-    networkTransactions
-    // wallet?.address,
-    // coin
+    wallet.transactions
   ).sort(
     (a, b) =>
       new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime()
@@ -115,8 +107,8 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
                   hidePending={props.hidePending}
                 />
               )}
-              {listView === 'coins' && <CoinList coins={coins} />}
-              {listView === 'nfts' && <NFTList nfts={nfts} />}
+              {listView === 'coins' && <CoinList coins={coins!} />}
+              {listView === 'nfts' && <NFTList nfts={nfts!} />}
             </>
           ) : (
             <>

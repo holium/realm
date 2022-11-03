@@ -151,7 +151,7 @@ export const AmountInput = observer(
                     : `${usdToEth(Number(amount))} ${
                         props.coin
                           ? props.coin.name
-                          : abbrMap[walletApp.network as 'bitcoin' | 'ethereum']
+                          : abbrMap[walletApp.navState.network as 'bitcoin' | 'ethereum']
                       }`}
                 </Text>
               </Box>
@@ -169,7 +169,7 @@ export const AmountInput = observer(
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
-                    : abbrMap[walletApp.network as 'bitcoin' | 'ethereum']
+                    : abbrMap[walletApp.navState.network as 'bitcoin' | 'ethereum']
                   : 'USD'}
               </Text>
               <Icons name="UpDown" size="12px" />

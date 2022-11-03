@@ -57,7 +57,7 @@ export const EthSettings: FC = observer(() => {
   const [providerError, setProviderError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const network = walletApp.network;
+  const network = walletApp.navState.network;
   const walletStore =
     network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
   const settings = walletStore.settings;

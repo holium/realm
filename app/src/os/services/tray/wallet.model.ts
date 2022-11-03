@@ -609,13 +609,10 @@ export const WalletStore = types
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
       let canReturn = options?.canReturn || true;
-      let walletIndex = options?.walletIndex || self.currentIndex;
+      let walletIndex = options?.walletIndex || self.navState.walletIndex;
       let detail = options?.detail;
       let action = options?.action;
       let network = options?.network || self.navState.network;
-
-      // TODO: legacy field, we should remove when possible
-      self.currentIndex = walletIndex;
 
       if (canReturn && ![WalletView.LOCKED, WalletView.ETH_NEW].includes(self.navState.view)) {
         let returnSnapshot = getSnapshot(self.navState)

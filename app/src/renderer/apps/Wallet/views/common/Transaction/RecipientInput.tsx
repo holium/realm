@@ -117,7 +117,7 @@ export const RecipientInput = observer(
     const onChange = (e: any) => {
       let value: string = e.target.value;
       let validAddress =
-        walletApp.network === 'ethereum'
+        walletApp.navState.network === 'ethereum'
           ? ethers.utils.isAddress(value)
           : false; // TODO add bitcoin validation
       let validPatp = isValidPatp(value);

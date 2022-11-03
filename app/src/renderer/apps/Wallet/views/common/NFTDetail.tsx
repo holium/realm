@@ -1,4 +1,4 @@
-import { WalletView } from 'os/services/tray/wallet.model';
+import { EthWalletType, WalletView } from 'os/services/tray/wallet.model';
 import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Anchor, Icons } from 'renderer/components';
@@ -15,8 +15,8 @@ export const NFTDetail: FC = () => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
-  const wallet = walletApp.ethereum.wallets.get(walletApp.currentIndex!)!;
-  const nft = wallet.nfts.get(walletApp.currentItem!.key)!;
+  const wallet = walletApp.currentWallet as EthWalletType;
+  const nft = wallet.nfts.get(walletApp.navState.detail!.key)!;
 
   return (
     <Flex width="100%" flexDirection="column" px={3}>
