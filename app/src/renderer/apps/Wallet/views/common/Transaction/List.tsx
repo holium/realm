@@ -65,13 +65,13 @@ export const Transaction = observer((props: TransactionProps) => {
     >
       <Flex flexDirection="column" justifyContent="center">
         <Text variant="h5" fontSize={3}>
-          {wasSent ? 'Sent' : 'Received'}
+          {transaction.status !== 'pending' ? (wasSent ? 'Sent' : 'Received') : (wasSent ? 'Sending' : 'Receiving')}
         </Text>
         <Flex>
           <Text
             variant="body"
             fontSize={1}
-            color={wasSent ? 'text.error' : 'text.success'}
+            color={transaction.status !== 'pending' ? (wasSent ? 'text.error' : 'text.success') : 'brand.primary'}
           >
             {`${
               monthNames[completedDate.getMonth()]
