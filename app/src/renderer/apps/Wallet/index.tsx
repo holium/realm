@@ -46,9 +46,9 @@ export const WalletApp: FC<any> = observer((props: any) => {
 
   const { walletApp } = useTrayApps();
   var transactions: any = [];
-  for (var key of walletApp.ethereum.wallets.keys()) {
+  for (var key of walletApp.currentStore.wallets.keys()) {
     const walletTransactions = getTransactions(
-      walletApp.ethereum.wallets.get(key)!.transactions
+      walletApp.currentStore.wallets.get(key)!.transactions
     );
     transactions = [...walletTransactions, ...transactions];
   }

@@ -212,6 +212,7 @@ export type ERC721Type = Instance<typeof ERC721>;
 
 export const EthTransaction = types.model('EthTransaction', {
   hash: types.identifier,
+  walletIndex: types.number,
   amount: types.string,
   network: types.enumeration(['ethereum', 'bitcoin']),
   ethType: types.maybe(types.string),
@@ -328,6 +329,7 @@ const EthWallet = types
         const tx = transaction as any;
         formattedHistory[tx.hash] = {
           hash: tx.hash,
+          walletIndex: self.index,
           amount: tx.amount,
           network: 'ethereum',
           type: tx.type,
@@ -350,6 +352,7 @@ const EthWallet = types
       const tx: any = self.transactions.get(hash);
       return {
         hash: tx.hash,
+        walletIndex: self.index,
         amount: tx.amount,
         network: tx.network,
         type: tx.type,
@@ -374,6 +377,7 @@ const EthWallet = types
     ) {
       let tx = {
         hash: hash,
+        walletIndex: self.index,
         amount: gweiToEther(amount).toString(),
         network: 'ethereum',
         ethType: contractType || 'ETH',
@@ -410,6 +414,7 @@ const EthWallet = types
         const previousTransaction = previousTransactions[transaction.hash];
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,
+          walletIndex: self.index,
           amount: gweiToEther(transaction.value).toString(),
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',

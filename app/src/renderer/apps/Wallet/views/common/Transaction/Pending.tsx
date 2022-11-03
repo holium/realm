@@ -52,9 +52,12 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   const { colors } = getBaseTheme(theme.currentTheme);
 
   const goToTransaction = () => {
-    WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
-      detail: { type: 'transaction', key: props.transaction.hash },
-    });
+    WalletActions.navigate(WalletView.TRANSACTION_DETAIL,
+      {
+        walletIndex: props.transaction.walletIndex,
+        detail: { type: 'transaction', key: props.transaction.hash },
+      }
+    );
   };
 
   let isEth = props.transaction.network === 'ethereum';
