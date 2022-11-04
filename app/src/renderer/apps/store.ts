@@ -12,7 +12,7 @@ import {
 
 import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
-import { SharingMode, WalletCreationMode, WalletStore, WalletView } from 'os/services/tray/wallet.model';
+import { NetworkType, SharingMode, WalletCreationMode, WalletStore, WalletView } from 'os/services/tray/wallet.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
@@ -112,11 +112,10 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: {
-    network: 'ethereum',
     currentView: WalletView.NEW,
     navState: {
       view: WalletView.NEW,
-      network: 'ethereum'
+      network: NetworkType.ETHEREUM,
     },
     navHistory: [],
     bitcoin: {

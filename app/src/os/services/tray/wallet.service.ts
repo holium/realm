@@ -50,8 +50,6 @@ export class WalletService extends BaseService {
   private alchemy?: Alchemy;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
-    'realm.tray.wallet.set-view': this.setView,
-    'realm.tray.wallet.set-return-view': this.setReturnView,
     'realm.tray.wallet.set-network': this.setNetwork,
     'realm.tray.wallet.get-recipient': this.getRecipient,
     'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
@@ -332,8 +330,6 @@ export class WalletService extends BaseService {
       this.state = WalletStore.create(castToSnapshot(persistedState));
     } else {
       this.state = WalletStore.create({
-        network: 'ethereum',
-        currentView: WalletView.NEW,
         navState: {
           view: WalletView.NEW,
           network: NetworkType.ETHEREUM,
@@ -416,7 +412,7 @@ export class WalletService extends BaseService {
         if (transaction.network == 'ethereum')
           this.state!.ethereum.wallets.get(
             transaction.index
-          )!.applyTransactionUpdate(transaction.transaction);
+          )!.applyTransactionUpdate(transaction.net, transaction.transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
         /*const tx = this.state!.ethereum.transactions.get(
@@ -741,7 +737,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType
     );
-    const stateTx = currentWallet.getTransaction(hash);
+    const stateTx = currentWallet.getTransaction(this.state!.ethereum.network, hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
@@ -791,7 +787,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractAddress
     );
-    const stateTx = currentWallet.getTransaction(hash);
+    const stateTx = currentWallet.getTransaction(this.state!.ethereum.network, hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
@@ -834,7 +830,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       'ERC721'
     );
-    const stateTx = currentWallet.getTransaction(hash);
+    const stateTx = currentWallet.getTransaction(this.state!.ethereum.network, hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
