@@ -350,6 +350,7 @@ const EthWallet = types
     },*/
     getTransaction(network: string, hash: string) {
       const tx: any = self.transactions.get(network)!.get(hash);
+      console.log(tx)
       return {
         hash: tx.hash,
         walletIndex: self.index,
@@ -367,6 +368,7 @@ const EthWallet = types
       };
     },
     enqueueTransaction(
+      network: string,
       hash: any,
       toAddress: any,
       toPatp: any,
@@ -389,9 +391,13 @@ const EthWallet = types
         status: 'pending',
         notes: '',
       };
-      let netMap = self.transactions.get(self.network) || types.map(EthTransaction).create()
-      netMap.set(hash, tx)
-      self.transactions.set(self.network, netMap);
+      let netMap = self.transactions.get(network)?.toJSON() || types.map(EthTransaction).create().toJSON()
+      let newMap = {
+        ...netMap,
+        [hash]: tx
+      }
+      self.transactions.set(network, getSnapshot(types.map(EthTransaction).create(newMap)));
+      console.log(self.transactions.get(self.network)!.get(hash))
     },
     applyTransactionUpdate(network: string, transaction: any) {
       let netMap = self.transactions.get(network)

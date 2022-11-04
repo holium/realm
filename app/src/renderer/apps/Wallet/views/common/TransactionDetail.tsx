@@ -63,7 +63,7 @@ export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
   let transaction = (
     walletApp.currentWallet! as EthWalletType
-  ).transactions.get(walletApp.navState.detail!.key)!;
+  ).transactions.get(walletApp.currentStore.network).get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);

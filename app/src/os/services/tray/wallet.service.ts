@@ -729,6 +729,7 @@ export class WalletService extends BaseService {
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
+      this.state!.ethereum.network,
       hash,
       tx.to,
       toPatp,
@@ -737,6 +738,7 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType
     );
+    console.log('740 here')
     const stateTx = currentWallet.getTransaction(this.state!.ethereum.network, hash);
     console.log(stateTx);
     await WalletApi.setTransaction(
@@ -779,6 +781,7 @@ export class WalletService extends BaseService {
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
+      this.state!.ethereum.network,
       hash,
       to,
       toPatp,
@@ -822,6 +825,7 @@ export class WalletService extends BaseService {
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
+      this.state!.ethereum.network,
       hash,
       to,
       toPatp,
