@@ -397,7 +397,6 @@ const EthWallet = types
         [hash]: tx
       }
       self.transactions.set(network, getSnapshot(types.map(EthTransaction).create(newMap)));
-      console.log(self.transactions.get(network)!.get(hash))
     },
     applyTransactionUpdate(network: string, transaction: any) {
       let netMap = self.transactions.get(network)
