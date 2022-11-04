@@ -21,7 +21,6 @@ interface PendingTransactionDisplayProps {
 export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
   props: PendingTransactionDisplayProps
 ) => {
-  console.log('got a pending update')
   const pendingTransactions = props.transactions
     .filter((trans) => trans.status === 'pending')
     .sort(

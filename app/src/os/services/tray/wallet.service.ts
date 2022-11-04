@@ -446,7 +446,7 @@ export class WalletService extends BaseService {
     var alchemySettings;
     if (this.state!.ethereum.network === 'mainnet') {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://mainnet.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+        'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
       );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
@@ -455,7 +455,7 @@ export class WalletService extends BaseService {
       // etherscan
     } else {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+        'https://goerli.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
       );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.

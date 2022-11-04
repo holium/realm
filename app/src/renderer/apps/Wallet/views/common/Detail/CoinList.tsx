@@ -72,9 +72,18 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
 
   return (
     <Flex flexDirection="column" alignItems="center">
-      {props.coins.map((coin, index) => (
+      {props.coins.length ? (props.coins.map((coin, index) => (
         <Coin details={coin} key={index} />
-      ))}
+      ))) : (
+          <Text
+            mt={3}
+            variant="h4"
+            textAlign="center"
+            color={theme.currentTheme.iconColor}
+          >
+            No Coins
+          </Text>
+      )}
     </Flex>
   );
 };
