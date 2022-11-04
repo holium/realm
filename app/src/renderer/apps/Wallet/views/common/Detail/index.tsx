@@ -61,7 +61,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     nfts = getNfts((wallet! as EthWalletType).nfts);
   }
 
-  const transactions = getTransactions(wallet.transactions!.get(walletApp.ethereum.network!)!).sort(
+  const transactions = getTransactions(wallet.transactions!.get(walletApp.ethereum.network!) || new Map()).sort(
     (a, b) =>
       new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
   );

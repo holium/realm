@@ -61,7 +61,7 @@ export const WalletCard: FC<WalletCardProps> = ({
   }
 
   var transactions = getTransactions(
-    wallet.transactions.get(walletApp.currentStore.network!) || {}
+    wallet.transactions.get(walletApp.currentStore.network!) || new Map()
     //    wallet!.address
   );
 

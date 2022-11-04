@@ -97,7 +97,7 @@ const BitcoinWallet = types.model('BitcoinWallet', {
       euro: types.maybe(types.string),
     })
   ),
-  transactions: types.map(BitcoinTransaction),
+  transactions: types.map(types.map(BitcoinTransaction)),
 });
 
 export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
