@@ -18,6 +18,7 @@ import { cleanNounColor } from '../../../lib/color';
 import { toJS } from 'mobx';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
+import { DocketApi } from '../../../api/docket';
 // const util = require('util');
 
 export enum InstallStatus {
@@ -211,6 +212,16 @@ export const NewBazaarStore = types
       self.recommendations.splice(removeIndex, 1);
       applySnapshot(self.stalls, data.stalls);
     },
+    installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
+      self.installations.delete(body.desk);
+      self.installations.set(body.desk, InstallStatus.started);
+      try {
+        return yield DocketApi.installApp(conduit, body.ship, body.desk);
+      } catch (error) {
+        self.installations.delete(body.desk);
+        console.error(error);
+      }
+    }),
     installApp: flow(function* (conduit: Conduit, body: InstallPoke) {
       self.installations.delete(body.desk);
       self.installations.set(body.desk, InstallStatus.started);
