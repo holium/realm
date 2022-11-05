@@ -366,7 +366,7 @@ export class WalletService extends BaseService {
       this.db!.store = snapshot;
     });
 
-    this.setProviders();
+    this.setEthereumProviders();
 
     const patchEffect = {
       model: getSnapshot(this.state),
@@ -440,31 +440,6 @@ export class WalletService extends BaseService {
 
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
-  }
-
-  setProviders() {
-    var alchemySettings;
-    if (this.state!.ethereum.network === 'mainnet') {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
-      );
-      alchemySettings = {
-        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
-        network: Network.ETH_MAINNET, // Replace with your network.
-      };
-      // etherscan
-    } else {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://goerli.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
-      );
-      alchemySettings = {
-        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
-        network: Network.ETH_GOERLI, // Replace with your network.
-      };
-    }
-    this.ethProvider.removeAllListeners();
-    this.ethProvider.on('block', () => this.updateEthereumInfo());
-    this.alchemy = new Alchemy(alchemySettings);
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
@@ -562,6 +537,10 @@ export class WalletService extends BaseService {
     if (this.state!.navState.network !== network) {
       if (network === 'bitcoin') {
         this.ethProvider!.removeAllListeners();
+        this.updateBitcoinInfo();
+      }
+      else {
+        this.setEthereumProviders();
       }
       this.state!.navigate(WalletView.LIST);
     }
@@ -865,23 +844,67 @@ export class WalletService extends BaseService {
     await WalletApi.requestAddress(this.core.conduit!, network, from);
   }
 
-  updateBitcoinInfo() {
-    this.getAllBitcoinBalances();
-    this.getAllBitcoinTransactions();
+  async updateBitcoinInfo() {
+    for (var key of this.state!.bitcoin.wallets.keys()) {
+      const btcChain = this.state!.bitcoin.network === 'mainnet' ? 'bitcoin' : 'bitcoin/testnet';
+      let wallet = this.state!.bitcoin.wallets.get(key)!
+      const url = `https://api.blockchair.com/${btcChain}/dashboards/address/${wallet.address}`;
+      console.log(url)
+      const response: any = await axios.get(url, {
+        headers: {
+            // 'Content-Type': 'application/json'
+        }
+      })
+      wallet.setBalance(response.data.data[wallet.address].address.balance.toString());
+      wallet.applyTransactions(response.data.data[wallet.address].transactions);
+    }
+  }
+
+  async getAllBitcoinBalances() {
+  }
+
+  async getAllBitcoinTransactions() {
+    const btcChain = this.state!.bitcoin.network === 'mainnet' ? 'bitcoin' : 'bitcoin/testnet'
+    const url = `https://api.blockchair.com/${btcChain}/raw/block/{:height}`
+  }
+
+  setEthereumProviders() {
+    var alchemySettings;
+    if (this.state!.ethereum.network === 'mainnet') {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
+      );
+      alchemySettings = {
+        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
+        network: Network.ETH_MAINNET, // Replace with your network.
+      };
+      // etherscan
+    } else {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://goerli.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
+      );
+      alchemySettings = {
+        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
+        network: Network.ETH_GOERLI, // Replace with your network.
+      };
+    }
+    this.ethProvider.removeAllListeners();
+    this.ethProvider.on('block', () => this.updateEthereumInfo());
+    this.alchemy = new Alchemy(alchemySettings);
   }
 
   updateEthereumInfo() {
-    this.getAllBalances();
+    this.getAllEthereumBalances();
     this.getAllCoins();
     this.getAllNfts();
-    this.getAllTransactions();
+    this.getAllEthereumTransactions();
   }
 
   gweiToEther = (gwei: number) => {
     return gwei / 1000000000000000000;
   };
 
-  async getAllBalances() {
+  async getAllEthereumBalances() {
     if (this.state!.navState.network === 'bitcoin') {
     } else if (this.state!.navState.network === 'ethereum') {
       for (var key of this.state!.ethereum.wallets.keys()) {
@@ -953,10 +976,10 @@ export class WalletService extends BaseService {
     if (this.state!.navState.network === 'ethereum') {
       if (this.state!.ethereum.network === 'mainnet') {
         this.state!.ethereum.setNetwork('gorli');
-        this.setProviders();
+        this.setEthereumProviders();
       } else if (this.state!.ethereum.network === 'gorli') {
         this.state!.ethereum.setNetwork('mainnet');
-        this.setProviders();
+        this.setEthereumProviders();
       }
       this.updateEthereumInfo();
     } else {
@@ -965,10 +988,11 @@ export class WalletService extends BaseService {
       } else if (this.state!.bitcoin.network === 'testnet') {
         this.state!.bitcoin.setNetwork('mainnet');
       }
+      this.updateBitcoinInfo();
     }
   }
 
-  async getAllTransactions() {
+  async getAllEthereumTransactions() {
     // etherscan api call
     for (var key of this.state!.ethereum.wallets.keys()) {
       const address = this.state!.ethereum.wallets.get(key)!.address;
@@ -985,10 +1009,6 @@ export class WalletService extends BaseService {
       );
     }
   }
-
-  async getAllBitcoinBalances() {}
-
-  async getAllBitcoinTransactions() {}
 
   /*
   private async sendBitcoin(senderPath: string, receiverAddress: string, amountToSend: number) {

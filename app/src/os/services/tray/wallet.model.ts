@@ -98,7 +98,14 @@ const BitcoinWallet = types.model('BitcoinWallet', {
     })
   ),
   transactions: types.map(types.map(BitcoinTransaction)),
-});
+}).actions((self) => ({
+  setBalance(balance: string) {
+    self.balance = balance;
+  },
+  applyTransactions(transactions: any) {
+
+  }
+}));
 
 export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
 
