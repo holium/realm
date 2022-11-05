@@ -3709,26 +3709,7 @@ ajv@^8.0.0, ajv@^8.6.3, ajv@^8.8.0:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-alchemy-sdk@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/alchemy-sdk/-/alchemy-sdk-2.1.0.tgz#93faa263a8659346e220bde62070eb84e977b983"
-  integrity sha512-6GxIq5JLu4DPTCd1fzaLhPzOEYQa0cTlnyjKAfRnDR1GnPrud7k1Hv0+ZdUFPn9vIRL3taZJLCkSp+RxIbhbag==
-  dependencies:
-    "@ethersproject/abstract-provider" "^5.7.0"
-    "@ethersproject/bignumber" "^5.7.0"
-    "@ethersproject/bytes" "^5.7.0"
-    "@ethersproject/contracts" "^5.7.0"
-    "@ethersproject/hash" "^5.7.0"
-    "@ethersproject/networks" "^5.7.0"
-    "@ethersproject/providers" "^5.7.0"
-    "@ethersproject/units" "^5.7.0"
-    "@ethersproject/wallet" "^5.7.0"
-    "@ethersproject/web" "^5.7.0"
-    axios "^0.26.1"
-    sturdy-websocket "^0.2.1"
-    websocket "^1.0.34"
-
-alchemy-sdk@^2.1.1:
+alchemy-sdk@^2.1.1, alchemy-sdk@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/alchemy-sdk/-/alchemy-sdk-2.2.0.tgz#b707fa8aa1a1e649ab0b94b9cb5f93edf4bb9bf3"
   integrity sha512-66eTe1JstJvfxOwyvJzNiagp0xQUiWt+2XAuJND/uPIP+WHQbSgid+rLG2lu1eMcxe7kzocvAfnnkMojkhXLXw==

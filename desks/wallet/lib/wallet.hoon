@@ -157,7 +157,7 @@
     :~  ['network' [%s network.update]]
         ['key' [%s +>-.update]]
         ?:  =(network.update %bitcoin)
-          ['address' [%s (crip (c-co:co address.wallet.update))]]
+          ['address' [%s (scot %uc address.wallet.update)]]
         ['address' [%s (crip (z-co:co address.wallet.update))]]
         ['path' [%s path.wallet.update]]
         ['nickname' [%s nickname.wallet.update]]
@@ -189,7 +189,7 @@
             %-  pairs
             ^-  (list [@t json])
             :~  ?:  =(network %bitcoin)
-                  ['address' [%s (crip (c-co:co address.wallet))]]
+                  ['address' [%s (scot %uc address.wallet)]]
                 ['address' [%s (crip (z-co:co address.wallet))]]
                 ['path' [%s path.wallet]]
                 ['nickname' [%s nickname.wallet]]
