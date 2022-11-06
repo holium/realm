@@ -20,6 +20,7 @@
   "dependencies": {
     "@icons/material": "^0.4.1",
     "alchemy-sdk": "^2.2.0",
+    "bitcore-lib": "^8.25.40",
     "eth-block-tracker": "^6.0.0",
     "eth-json-rpc-infura": "^5.1.0",
     "eth-query": "^2.1.2",

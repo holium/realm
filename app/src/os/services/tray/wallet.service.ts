@@ -28,6 +28,8 @@ import abi from 'human-standard-token-abi';
 // @ts-ignore
 import nftabi from 'non-fungible-token-abi';
 import axios from 'axios';
+// @ts-ignore
+import bitcore from 'bitcore-lib';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -347,7 +349,6 @@ export class WalletService extends BaseService {
           initialized: false,
         },
         bitcoin: {
-          network: 'mainnet',
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
@@ -356,7 +357,6 @@ export class WalletService extends BaseService {
           },
         },
         testnet: {
-          network: 'mainnet',
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
@@ -861,13 +861,14 @@ export class WalletService extends BaseService {
     to: string,
     amount: string
   ) {
-    let sourceAddress = this.state!.bitcoin.wallets.get(walletIndex)!.address;
-    const privateKeyNode = this.getPrivateKey();
-    const privateKey = privateKeyNode.derivePath(
-      "m/44'/0'/0'/0" + walletIndex
-    ).privateKey;
-    // let tx, hash = sendBitcoin(sourceAddress, to, amount, privateKey)
-    // await WalletApi.enqueueTransaction(this.core.conduit!, 'ethereum', tx, hash);
+    const senderPath = "m/44'/0'/0'/0/" + walletIndex;
+    let hash = await this.createBitcoinTransaction(senderPath, to, Number(amount))
+    /*const tx: any = {}
+    const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'btc/main' : 'btc/test3';
+    const url = `https://api.blockcypher.com/v1/${btcChain}/txs/push`;
+    const response = await axios.get(url);
+    console.log(response)*/
+    await WalletApi.setTransaction(this.core.conduit!, 'bitcoin', this.state!.navState.btcNetwork, this.state!.currentWallet!.index, hash, tx);
   }
 
   async requestAddress(_event: any, network: string, from: string) {
@@ -875,15 +876,22 @@ export class WalletService extends BaseService {
   }
 
   async updateBitcoinInfo() {
-    for (var key of this.state!.bitcoin.wallets.keys()) {
-      const btcChain = this.state!.bitcoin.network === 'mainnet' ? 'btc/main' : 'btc/test3';
-      let wallet = this.state!.bitcoin.wallets.get(key)!
+    console.log('updating')
+    const btcStore = this.state!.navState.btcNetwork === 'mainnet'
+    ? this.state!.bitcoin
+    : this.state!.testnet;
+    for (var key of btcStore.wallets.keys()) {
+      const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'btc/main' : 'btc/test3';
+      let wallet = btcStore.wallets.get(key)!
       const url = `https://api.blockcypher.com/v1/${btcChain}/addrs/${wallet.address}`;
+      console.log(url)
       const response: any = await axios.get(url, {
         headers: {
             'Content-Type': 'application/json'
         }
       })
+      console.log(response)
+      console.log(response.data.balance.toString())
       wallet.setBalance(response.data.balance.toString());
       wallet.applyTransactions(response.data.txrefs);
     }
@@ -893,7 +901,7 @@ export class WalletService extends BaseService {
   }
 
   async getAllBitcoinTransactions() {
-    const btcChain = this.state!.bitcoin.network === 'mainnet' ? 'bitcoin' : 'bitcoin/testnet'
+    const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'bitcoin' : 'bitcoin/testnet'
     const url = `https://api.blockchair.com/${btcChain}/raw/block/{:height}`
   }
 
@@ -1041,11 +1049,10 @@ export class WalletService extends BaseService {
     }
   }
 
-  /*
-  private async sendBitcoin(senderPath: string, receiverAddress: string, amountToSend: number) {
+  private async createBitcoinTransaction(senderPath: string, receiverAddress: string, amountToSend: number) {
     const sochain_network = "BTCTEST";
-    const privateKey = this.privateKey.derivePath(senderPath).privateKey;
-    const sourceAddress = this.privateKey.derivePath(senderPath).address;
+    const privateKey = this.getPrivateKey().derivePath(senderPath).privateKey;
+    const sourceAddress = this.getPrivateKey().derivePath(senderPath).address;
     const satoshiToSend = amountToSend * 100000000;
     let fee = 0;
     let inputCount = 0;
@@ -1086,5 +1093,5 @@ export class WalletService extends BaseService {
       },
     });
     return result.data.data;
-  };*/
+  };
 }
