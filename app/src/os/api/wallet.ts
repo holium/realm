@@ -65,7 +65,6 @@ export const WalletApi = {
         },
       },
     };
-    console.log(payload)
     await conduit.poke(payload);
   },
   requestAddress: async (conduit: Conduit, network: string, from: string) => {

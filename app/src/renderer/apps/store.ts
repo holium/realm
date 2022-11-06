@@ -115,6 +115,7 @@ export const trayStore = TrayAppStore.create({
     navState: {
       view: WalletView.NEW,
       network: NetworkType.ETHEREUM,
+      btcNetwork: 'mainnet'
     },
     navHistory: [],
     bitcoin: {

@@ -554,13 +554,13 @@ export const EthStore = types
 export enum NetworkType {
   ETHEREUM = 'ethereum',
   BITCOIN = 'bitcoin',
-  BITCOIN_TESTNET = 'btctestnet'
 }
 const Networks = types.enumeration(Object.values(NetworkType));
 
 export const WalletNavState = types.model('WalletNavState', {
   view: types.enumeration(Object.values(WalletView)),
   network: Networks,
+  btcNetwork: types.enumeration(['mainnet', 'testnet']),
   walletIndex: types.maybe(types.string),
   detail: types.maybe(
     types.model({
@@ -654,6 +654,7 @@ export const WalletStore = types
         detail,
         action,
         network,
+        btcNetwork: self.navState.btcNetwork,
       });
       self.navState = newState;
     },
@@ -663,6 +664,7 @@ export const WalletStore = types
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,
           network: self.navState.network,
+          btcNetwork: self.navState.btcNetwork,
         })
       );
 
@@ -676,6 +678,7 @@ export const WalletStore = types
       self.navState = WalletNavState.create({
         view: WalletView.LIST,
         network: self.navState.network,
+        btcNetwork: self.navState.btcNetwork,
       });
       self.navHistory = cast([]);
     },

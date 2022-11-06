@@ -333,6 +333,7 @@ export class WalletService extends BaseService {
         navState: {
           view: WalletView.NEW,
           network: NetworkType.ETHEREUM,
+          btcNetwork: 'mainnet'
         },
         navHistory: [],
         ethereum: {
@@ -560,14 +561,16 @@ export class WalletService extends BaseService {
 
   async setNetwork(_event: any, network: NetworkType) {
     if (this.state!.navState.network !== network) {
-      if (network === 'bitcoin' || network === 'btctestnet') {
+      if (network === 'bitcoin') {
         this.ethProvider!.removeAllListeners();
         this.updateBitcoinInfo();
+
       }
       else {
         this.setEthereumProviders();
       }
       this.state!.navigate(WalletView.LIST);
+      this.state!.setNetwork(network);
     }
   }
 
@@ -694,7 +697,10 @@ export class WalletService extends BaseService {
   async createWallet(_event: any, nickname: string) {
     console.log(`creating with nickname: ${nickname}`);
     const sender: string = this.state!.ourPatp!;
-    const network: string = this.state!.navState.network;
+    let network: string = this.state!.navState.network;
+    if (network === 'bitcoin' && this.state!.navState.btcNetwork === 'testnet') {
+      network = 'btctestnet';
+    }
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
     this.state!.navigate(
       WalletView.LIST,
