@@ -79,10 +79,15 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     let amountUsdDisplay = 
       walletApp.navState.network === 'ethereum'
         ? !props.coin
-          ? '$' + `${convertEthAmountToUsd(formatEthAmount(props.wallet.balance), walletApp.ethereum.conversions.usd)}`
-          : '$' + `${convertERC20AmountToUsd(formatCoinAmount(props.coin.balance, props.coin.decimals), props.coin.conversions.usd)}`
-        : '$' + `${convertBtcAmountToUsd(formatBtcAmount(props.wallet.balance), walletApp.bitcoin.conversions.usd)}`;
-    console.log(amountUsdDisplay)
+          ? (walletApp.ethereum.conversions.usd
+            ? '$' + `${convertEthAmountToUsd(formatEthAmount(props.wallet.balance), walletApp.ethereum.conversions.usd)}`
+            : '')
+          : (props.coin.conversions.usd
+            ? '$' + `${convertERC20AmountToUsd(formatCoinAmount(props.coin.balance, props.coin.decimals), props.coin.conversions.usd)}`
+            : '')
+        : (walletApp.bitcoin.conversions.usd
+          ? '$' + `${convertBtcAmountToUsd(formatBtcAmount(props.wallet.balance), walletApp.bitcoin.conversions.usd)}`
+          : '');
 
     let accountDisplay = !props.coin ? (
       props.wallet.nickname
@@ -277,9 +282,14 @@ function Balance(props: BalanceInterface) {
     ? props.coin.logo || getMockCoinIcon(props.coin.name)
     : '';
   return !props.coin ? (
-    <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-      {props.amountDisplay}
-    </Text>
+    <>
+      <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+        {props.amountDisplay}
+      </Text>
+      <Text variant="body" color={props.colors.text.secondary}>
+        {props.amountUsdDisplay}
+      </Text>
+    </>
   ) : (
     <Flex
       mt={1}

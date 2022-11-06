@@ -652,7 +652,7 @@ export class WalletService extends BaseService {
   async getERC20ExchangeRate(contractAddress: string) {
     const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`;
     const result = await axios.get(url);
-    return Number(result.data.ethereum.usd);
+    return result.data ? Number(result.data[contractAddress].usd) : undefined;
   }
 
   async getBitcoinExchangeRate() {
@@ -926,10 +926,13 @@ export class WalletService extends BaseService {
 
   async updateEthereumExchangeRates() {
     this.state!.ethereum.setExchangeRate(await this.getEthereumExchangeRate());
-    for (var key in this.state!.ethereum.wallets.keys()) {
-      for (var coinKey in this.state!.ethereum.wallets.get(key)!.coins.keys()) {
+    for (var key of this.state!.ethereum.wallets.keys()) {
+      for (var coinKey of this.state!.ethereum.wallets.get(key)!.coins.keys()) {
         let coin = this.state!.ethereum.wallets.get(key)!.coins.get(coinKey)!;
-        coin.setExchangeRate(await this.getERC20ExchangeRate(coin.address));
+        const exchange = await this.getERC20ExchangeRate(coin.address);
+        if (exchange) {
+          coin.setExchangeRate(exchange);
+        }
       }
     }
   }
