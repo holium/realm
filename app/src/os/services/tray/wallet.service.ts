@@ -560,6 +560,7 @@ export class WalletService extends BaseService {
   }
 
   async setNetwork(_event: any, network: NetworkType) {
+    this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.network !== network) {
       if (network === 'bitcoin') {
         this.ethProvider!.removeAllListeners();
@@ -571,7 +572,6 @@ export class WalletService extends BaseService {
       }
       this.state!.setNetwork(network);
     }
-    this.state!.navigate(WalletView.LIST);
   }
 
   async setChainNetwork(
