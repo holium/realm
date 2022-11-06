@@ -1,10 +1,10 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba, darken, lighten } from 'polished';
+import { rgba, darken } from 'polished';
 import { useServices } from 'renderer/logic/store';
-import { Flex, Text, Icons, Box, Button } from 'renderer/components';
-import { ThemeType } from '../../../../theme';
+import { Flex, Text, Icons, Box } from 'renderer/components';
+import { ThemeType } from '../../../../../theme';
 
 const sizes = {
   sm: 32,
@@ -81,12 +81,14 @@ export const AppRowStyle = styled(motion.div)<RowProps>`
 interface AppRowProps {
   caption: string;
   app: any;
-  onClick: (app: any) => void;
+  descriptionWidth?: number;
+  onClick?: (app: any) => void;
   actionRenderer?: any;
 }
 
 export const AppRow = ({
   caption,
+  descriptionWidth,
   app,
   onClick,
   actionRenderer,
@@ -94,7 +96,18 @@ export const AppRow = ({
   const { theme } = useServices();
   const rowRef = useRef<any>(null);
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
-  return app ? (
+  let image = app.image;
+  if (app && app.href && app.href.site) {
+    // for the case an image is served by the ship
+    // we wont have it until install, so set to null
+    image = null;
+  }
+  let title = app.title;
+  if (app && app.href && !app.title) {
+    title = app.id.split('/')[1];
+  }
+
+  return (
     <AppRowStyle
       id={`app-row-${app.id}`}
       ref={rowRef}
@@ -122,39 +135,45 @@ export const AppRow = ({
           width={sizes.sm}
           backgroundColor={app.color || '#F2F3EF'}
         >
-          {app.image && (
+          {image && (
             <img
               style={{ pointerEvents: 'none' }}
               draggable="false"
               height={sizes.sm}
               width={sizes.sm}
-              key={app.title}
-              src={app.image}
+              src={image}
             />
           )}
           {app.icon && <Icons name={app.icon} height={16} width={16} />}
         </TileStyle>
         <Flex flexDirection="column" flex={1}>
-          <Text fontWeight={500} color={currentTheme.textColor}>
-            {app.title}
+          <Text
+            fontWeight={500}
+            color={currentTheme.textColor}
+            style={{
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {title}
           </Text>
           <Text
-            // width={404}
+            mt="2px"
             style={{
+              width: descriptionWidth || 'fit-content',
+              whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',
               overflow: 'hidden',
             }}
+            fontSize={2}
             color={rgba(currentTheme.textColor, 0.4)}
           >
             {app.info}
           </Text>
         </Flex>
         {actionRenderer && (
-          <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer()}</div>
+          <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer(app)}</div>
         )}
       </Flex>
     </AppRowStyle>
-  ) : (
-    <Text>{caption} not installed</Text>
   );
 };

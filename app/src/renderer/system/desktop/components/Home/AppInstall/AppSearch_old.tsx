@@ -11,14 +11,15 @@ import {
   Icons,
   Sigil,
   Button,
+  Spinner,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { toJS } from 'mobx';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { AppRow } from './AppRow';
-import { setEnvironmentData } from 'worker_threads';
-import { BazaarApi } from 'os/api/bazaar';
+import { ProviderRow } from './ProviderRow';
 import { darken, rgba } from 'polished';
+import { InstallStatus } from 'os/services/spaces/models/bazaar';
+import { useAppInstaller } from './store';
 
 const slideUpAndFade = keyframes({
   '0%': { opacity: 0, transform: 'translateY(2px)' },
@@ -62,7 +63,13 @@ const StyledContent = stitch(PopoverPrimitive.Content, {
   },
 });
 
-function Content({ children, ...props }) {
+function Content({
+  children,
+  ...props
+}: {
+  children: React.ReactNode;
+  [key: string]: any;
+}) {
   return (
     <PopoverPrimitive.Portal>
       <StyledContent
@@ -81,45 +88,21 @@ function Content({ children, ...props }) {
   );
 }
 
-// const onAppsAction = (space: string, action: string, app: any) => {
-//   console.log('onAppsAction => %o', { action, app });
-//   SpacesActions.addAppTag(space, app.id, action).then((data) => {
-//     console.log('addAppTag response => %o', data);
-//   });
-// };
-
-// const actionRenderer = (space: string, app: any) => (
-//   <>
-//     <Button
-//       borderRadius={6}
-//       onClick={(e) => onAppsAction(space, 'pinned', app)}
-//     >
-//       Pin
-//     </Button>
-
-//     <Button
-//       style={{ marginLeft: 5 }}
-//       borderRadius={6}
-//       onClick={(e) => onAppsAction(space, 'recommend', app)}
-//     >
-//       Like
-//     </Button>
-//   </>
-// );
-
 const renderDevs = (space: string, devs: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
   if (!devs || devs.length === 0) {
     return <Text color={secondaryTextColor}>{`No recent devs`}</Text>;
   }
-  return devs?.map((item, index) => (
+  return devs?.map((item: any, index: number) => (
     <div key={index}>
       <AppRow
         caption={item.title}
         app={item}
         // actionRenderer={() => actionRenderer(space, item)}
-        // onClick={(e, action, app) => onAppsAction(space, action, app)}
+        onClick={(app: any) => {
+          console.log('renderDevs', app);
+        }}
       />
     </div>
   ));
@@ -133,7 +116,8 @@ const renderApps = (space: string, apps: any, theme: any) => {
   }
 
   const installedApps = apps?.filter(
-    (app: any) => app.type !== 'urbit' || app.installed
+    (app: any) =>
+      app.type !== 'urbit' || app.installStatus === InstallStatus.installed
   );
   if (!installedApps || installedApps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
@@ -143,11 +127,12 @@ const renderApps = (space: string, apps: any, theme: any) => {
   //   console.log('onAppsAction => %o', { path, id: app.id, tag });
   //   SpacesActions.addToSuite(path, app.id, rank);
   // };
-  return installedApps.map((app, index) => (
+  return installedApps.map((app: any, index: number) => (
     <div key={index}>
       <AppRow
         caption={app.title}
         app={app}
+        onClick={(app: any) => {}}
         // actionRenderer={() => actionRenderer(space, app)}
         // onClick={(e, action, app) => onAppsAction(space, action, app)}
       />
@@ -155,22 +140,23 @@ const renderApps = (space: string, apps: any, theme: any) => {
   ));
 };
 
-const renderProviders = (data: Array<any>, searchString: string) => {
+const renderProviders = (
+  data: Array<any>,
+  searchString: string,
+  onProviderClick: (ship: string) => void
+) => {
   return (
     data &&
     data
       .filter((item) => item.ship.startsWith(searchString))
       .map((item, index) => (
-        <Flex key={index} flexDirection="row" alignItems="center" gap={8}>
-          <Sigil
-            simple
-            size={28}
-            // avatar={item.avatar}
-            patp={item.ship}
-            color={[item.sigilColor || '#000000', 'white']}
-          />
-          <Text>{item.ship}</Text>
-        </Flex>
+        <ProviderRow
+          key={`provider-${index}`}
+          id={`provider-${index}`}
+          ship={item.ship}
+          color={item.sigilColor}
+          onClick={(ship: string) => onProviderClick(ship)}
+        />
       ))
   );
 };
@@ -209,7 +195,8 @@ const renderStart = (space: string, bazaar: any, theme: any) => {
 const renderShipSearch = (
   data: Array<any>,
   searchString: string,
-  theme: any
+  theme: any,
+  onProviderClick: (ship: string) => void
 ) => {
   return (
     <>
@@ -217,8 +204,8 @@ const renderShipSearch = (
         <Text color={rgba(theme.textColor, 0.7)} fontWeight={500}>
           Searching Software Providers
         </Text>
-        <Flex flexDirection="column" gap={12}>
-          {renderProviders(data, searchString)}
+        <Flex flexDirection="column" gap={2}>
+          {renderProviders(data, searchString, onProviderClick)}
         </Flex>
       </Flex>
     </>
@@ -261,41 +248,77 @@ export const PopoverContent = Content;
 export const PopoverClose = StyledClose;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 
-interface AppSearchProps {}
+interface AppSearchProps {
+  mode: 'home' | 'space';
+}
 
 const AppSearchApp = observer((props: AppSearchProps) => {
   const { spaces, bazaar, theme } = useServices();
+  const appInstaller = useAppInstaller();
   const [data, setData] = useState<any>([]);
-  const [searchMode, setSearchMode] = useState('none');
-  const [searchModeArgs, setSearchModeArgs] = useState<Array<string>>([]);
-  const [searchString, setSearchString] = useState('');
-  const [searchPlaceholder, setSearchPlaceholder] = useState('Search...');
-  const [selectedShip, setSelectedShip] = useState('');
-  const [selectedDesk, setSelectedDesk] = useState('');
+  const searchMode = appInstaller.searchMode;
+  const searchModeArgs = appInstaller.searchModeArgs;
+  const searchString = appInstaller.searchString;
+  const searchPlaceholder = appInstaller.searchPlaceholder;
+  const selectedShip = appInstaller.selectedShip;
+  const selectedDesk = appInstaller.selectedDesk;
+  const loadingState = appInstaller.loadingState;
 
   const spacePath: string = spaces.selected?.path!;
 
+  const InstallButton = ({ app }: any) => {
+    const parts = app.id.split('/');
+    return (
+      <Button
+        borderRadius={6}
+        disabled={bazaar.apps.has(parts[1])}
+        onClick={(e) => {
+          SpacesActions.addApp(parts[0], parts[1]);
+        }}
+      >
+        Install
+      </Button>
+    );
+  };
+
+  // based on this info, should be "safe" to recreate functions with each render
+  //  https://reactjs.org/docs/hooks-faq.html#are-hooks-slow-because-of-creating-functions-in-render
+  const appActionRenderer = (app: any) => {
+    if (!app.id) return;
+    //  treaties consist of <ship>/<desk> keys. parse to get app id value (desk)
+    // const appId = app.id.split('/')[1];
+    return <InstallButton app={app} />;
+  };
+
   useEffect(() => {
-    setSearchMode('none');
-    setSearchModeArgs([]);
-    setSearchString('');
-    setSearchPlaceholder('Search...');
-    setSelectedShip('');
+    appInstaller.setSearchMode('none');
+    appInstaller.setSearchModeArgs([]);
+    appInstaller.setSearchString('');
+    appInstaller.setSearchPlaceholder('Search...');
+    appInstaller.setSelectedShip('');
   }, [spacePath]);
 
   useEffect(() => {
-    if (selectedShip) {
-      console.log(toJS(bazaar.allies));
+    if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaar.hasAlly(selectedShip)) {
-        console.log('here bro');
-        SpacesActions.addAlly(selectedShip).then((result) => {
-          console.log('addTreaty response => %o', result);
-          const treaties = bazaar.getTreaties(selectedShip);
-          setData(treaties);
-        });
+        if (loadingState !== 'loading-published-apps') {
+          appInstaller.setLoadingState('loading-published-apps');
+          SpacesActions.addAlly(selectedShip)
+            .then((result) => {
+              // console.log('addAlly response => %o', result);
+              const treaties = bazaar.getTreaties(selectedShip);
+              setData(treaties);
+            })
+            .catch((e) => console.error(e))
+            .finally(() => appInstaller.setLoadingState(''));
+        }
+      } else {
+        const treaties = bazaar.getTreaties(selectedShip);
+        // console.log('treaties => %o', treaties);
+        setData(treaties);
       }
     }
-  }, [selectedShip, bazaar.treatyAdded]);
+  }, [searchMode, selectedShip, bazaar.treatyAdded]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {
@@ -312,20 +335,6 @@ const AppSearchApp = observer((props: AppSearchProps) => {
       setData([]);
       const allies = bazaar.getAllies();
       setData(allies);
-    } else if (searchMode === 'dev-app-search') {
-      setData([]);
-      // if the 'selected' ship is not yet an ally, make them one which will
-      //  trigger a treay which can then be listed for installation
-      if (!bazaar.hasAlly(selectedShip)) {
-        SpacesActions.addAlly(selectedShip).then((result) => {
-          console.log('addTreaty response => %o', result);
-          const treaties = bazaar.getTreaties(selectedShip);
-          setData(treaties);
-        });
-      } else {
-        const treaties = bazaar.getTreaties(selectedShip);
-        setData(treaties);
-      }
     } else if (searchMode === 'dev-app-detail') {
       setData([]);
       const treaty = bazaar.getTreaty(selectedShip, selectedDesk);
@@ -340,26 +349,46 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     [theme.currentTheme.textColor]
   );
 
-  const renderDevApps = (apps: Array<any>) => {
+  const renderDevApps = (
+    ship: string,
+    loadingState: string,
+    apps: Array<any>
+  ) => {
+    if (loadingState === 'loading-published-apps') {
+      return (
+        <Flex flex={1} verticalAlign="middle">
+          <Spinner size={0} />
+          <Text
+            marginLeft={2}
+            color={secondaryTextColor}
+          >{`Loading published apps...`}</Text>
+        </Flex>
+      );
+    }
     if (!apps || apps.length === 0) {
       return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
     }
+    // console.log('rendering apps => %o', apps);
     return apps?.map((app, index) => (
       <div key={index}>
         <AppRow
           caption={app.title}
           app={app}
-          // actionRenderer={() => devAppRowRenderer(app)}
-          onClick={(app: any) => {
-            setData(app);
-            setSearchMode('app-summary');
-          }}
+          actionRenderer={(app: any) => appActionRenderer(app)}
+          // onClick={(app: any) => {
+          //   setData(app);
+          //   setSearchMode('app-summary');
+          // }}
         />
       </div>
     ));
   };
 
-  const renderDevAppSearch = (ship: string, data: Array<any>) => {
+  const renderDevAppSearch = (
+    ship: string,
+    loadingState: string,
+    data: Array<any>
+  ) => {
     return (
       <>
         <Flex flexDirection="column" gap={10}>
@@ -368,12 +397,21 @@ const AppSearchApp = observer((props: AppSearchProps) => {
             color={theme.currentTheme.textColor}
           >{`Software developed by ${ship}...`}</Text>
           <Flex flexDirection="column" gap={12}>
-            {renderDevApps(data)}
+            {renderDevApps(ship, loadingState, data)}
           </Flex>
         </Flex>
       </>
     );
   };
+
+  useEffect(() => {
+    console.log('app install status change');
+  }, [
+    bazaar.appInstallInitial,
+    bazaar.appInstallStarted,
+    bazaar.appInstallFailed,
+    bazaar.appInstallCompleted,
+  ]);
 
   const installApp = (app: any) => {
     const tokens = app.id.split('/');
@@ -382,115 +420,117 @@ const AppSearchApp = observer((props: AppSearchProps) => {
 
   const renderAppSummary = (app: any) => {
     return (
-      <>
-        <Flex flexDirection="column" gap={10}>
-          <Text fontWeight={'bold'}>{app.title}</Text>
-          <Button onClick={(e) => installApp(app)}>Install</Button>
-        </Flex>
-      </>
+      <Flex height={450} flexDirection="column" gap={10}>
+        <Text fontWeight={'bold'}>{app.title}</Text>
+        <Button onClick={(e) => installApp(app)}>Install</Button>
+      </Flex>
     );
   };
 
+  const onProviderClick = (ship: string) => {
+    if (isValidPatp(ship)) {
+      appInstaller.setSearchMode('dev-app-search');
+      appInstaller.setSearchPlaceholder('Search...');
+      appInstaller.setSelectedShip(ship);
+      appInstaller.setSearchModeArgs([ship]);
+      appInstaller.setSearchString('');
+    }
+  };
+
   return (
-    <Popover
-      open={searchMode !== 'none'}
-      onOpenChange={(open) => {
-        if (!open) {
-          setSearchMode('none');
-          setSelectedShip('');
-          setSearchPlaceholder('Search...');
+    <>
+      <Input
+        flex={8}
+        className="realm-cursor-text-cursor"
+        type="text"
+        placeholder={searchPlaceholder}
+        bgOpacity={0.3}
+        borderColor={'input.borderHover'}
+        bg="bg.blendedBg"
+        wrapperStyle={{
+          borderRadius: 25,
+          height: 42,
+          width: 500,
+          paddingLeft: 12,
+          paddingRight: 16,
+        }}
+        leftLabel={
+          searchMode === 'dev-app-search' && selectedShip !== ''
+            ? `Apps by ${selectedShip}:`
+            : 'none'
         }
-      }}
-      modal={false}
-    >
-      <PopoverAnchor asChild={false}>
-        <Input
-          flex={8}
-          className="realm-cursor-text-cursor"
-          type="text"
-          placeholder={searchPlaceholder}
-          bgOpacity={0.3}
-          borderColor={'input.borderHover'}
-          bg="bg.blendedBg"
-          wrapperStyle={{
-            borderRadius: 25,
-            height: 42,
-            width: 500,
-            paddingLeft: 12,
-            paddingRight: 16,
-          }}
-          leftLabel={
-            searchMode === 'dev-app-search' && selectedShip !== ''
-              ? `Apps by ${selectedShip}:`
-              : 'none'
+        // rightIcon={
+        //   <Flex>
+        //     <Icons name="Search" size="18px" opacity={0.5} />
+        //   </Flex>
+        // }
+        value={searchString}
+        onKeyDown={(evt: any) => {
+          if (evt.key === 'Enter' && isValidPatp(searchString)) {
+            appInstaller.setSearchMode('dev-app-search');
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip(searchString);
+            appInstaller.setSearchModeArgs([searchString]);
+            appInstaller.setSearchString('');
+          } else if (evt.key === 'Escape') {
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip('');
+            appInstaller.setSearchString('');
+          } else if (
+            evt.key === 'Backspace' &&
+            searchMode === 'dev-app-search' &&
+            searchString.length === 0
+          ) {
+            appInstaller.setSearchMode('start');
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip('');
+            appInstaller.setSearchString('');
+          } else {
+            appInstaller.setSearchMode('start');
+            appInstaller.setSearchPlaceholder('Search...');
+            appInstaller.setSelectedShip('');
+            appInstaller.setSearchString('');
           }
-          // rightIcon={
-          //   <Flex>
-          //     <Icons name="Search" size="18px" opacity={0.5} />
-          //   </Flex>
-          // }
-          value={searchString}
-          onKeyDown={(evt: any) => {
-            if (evt.key === 'Enter' && isValidPatp(searchString)) {
-              setSearchMode('dev-app-search');
-              setSearchPlaceholder('Search...');
-              setSelectedShip(searchString);
-              setSearchModeArgs([searchString]);
-              setSearchString('');
-            } else if (evt.key === 'Escape') {
-              setSearchPlaceholder('Search...');
-              setSelectedShip('');
-              setSearchString('');
-            } else if (
-              evt.key === 'Backspace' &&
-              searchMode === 'dev-app-search' &&
-              searchString.length === 0
-            ) {
-              setSearchMode('start');
-              setSearchPlaceholder('Search...');
-              setSelectedShip('');
-              setSearchString('');
-            }
-          }}
-          onChange={(e: any) => {
-            setSearchString(e.target.value);
-            if (e.target.value) {
-              if (e.target.value[0] === '~') {
-                setSearchMode('ship-search');
-                setData([]);
-              } else {
-                if (['app-search', 'dev-app-search'].includes(searchMode)) {
-                  setSearchMode(searchMode);
-                } else {
-                  setSearchMode('app-search');
-                }
-              }
+        }}
+        onChange={(e: any) => {
+          appInstaller.setSearchString(e.target.value);
+          if (e.target.value) {
+            if (e.target.value[0] === '~') {
+              appInstaller.setSearchMode('ship-search');
+              setData([]);
             } else {
-              setSearchMode('start');
-            }
-          }}
-          // onClick={() => triggerSearch(!toggle)}
-          onFocus={() => {
-            if (selectedShip) {
-              setSearchMode('dev-app-search');
-              setSearchModeArgs([selectedShip]);
-            } else if (searchString) {
-              if (searchString.startsWith('~')) {
-                setSearchMode('ship-search');
+              if (['app-search', 'dev-app-search'].includes(searchMode)) {
+                appInstaller.setSearchMode(searchMode);
               } else {
-                setSearchMode('app-search');
+                appInstaller.setSearchMode('app-search');
               }
-            } else {
-              setSearchMode('start');
             }
-          }}
-          onBlur={() => {
-            // setSearchMode('none');
-          }}
-        />
-      </PopoverAnchor>
-      <PopoverContent
-        sideOffset={5}
+          } else {
+            appInstaller.setSearchMode('start');
+          }
+        }}
+        // onClick={() => triggerSearch(!toggle)}
+        onFocus={() => {
+          if (selectedShip) {
+            appInstaller.setSearchMode('dev-app-search');
+            appInstaller.setSearchModeArgs([selectedShip]);
+          } else if (searchString) {
+            if (searchString.startsWith('~')) {
+              appInstaller.setSearchMode('ship-search');
+            } else {
+              appInstaller.setSearchMode('app-search');
+            }
+          } else {
+            appInstaller.setSearchMode('start');
+          }
+        }}
+        onBlur={() => {
+          // setSearchMode('none');
+        }}
+      />
+
+      <Flex
+        // sideOffset={5}
         style={{
           outline: 'none',
           boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
@@ -507,14 +547,19 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         {searchMode === 'start' &&
           renderStart(spacePath, bazaar, theme.currentTheme)}
         {searchMode === 'ship-search' &&
-          renderShipSearch(data, searchString, theme.currentTheme)}
+          renderShipSearch(
+            data,
+            searchString,
+            theme.currentTheme,
+            onProviderClick
+          )}
         {searchMode === 'dev-app-search' &&
-          renderDevAppSearch(searchModeArgs[0], data)}
+          renderDevAppSearch(searchModeArgs[0], loadingState, data)}
         {searchMode === 'app-search' &&
           renderAppSearch(data, theme.currentTheme)}
         {searchMode === 'app-summary' && renderAppSummary(data)}
-      </PopoverContent>
-    </Popover>
+      </Flex>
+    </>
   );
 });
 

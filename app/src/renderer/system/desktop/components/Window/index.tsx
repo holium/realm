@@ -383,6 +383,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         </AppWindowStyle>
       ),
       [
+        theme.currentTheme,
         window.dimensions,
         unmaximize,
         isResizing,

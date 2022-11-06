@@ -4,8 +4,6 @@ import {
   applyPatch,
   castToSnapshot,
   Instance,
-  onSnapshot,
-  tryReference,
   applySnapshot,
   types,
 } from 'mobx-state-tree';
@@ -13,7 +11,7 @@ import {
 import { DesktopStore } from 'os/services/shell/desktop.model';
 import { ShellStore } from 'os/services/shell/shell.model';
 import { SpacesStore } from 'os/services/spaces/models/spaces';
-import { BazaarStore } from 'os/services/spaces/models/bazaar';
+import { NewBazaarStore } from 'os/services/spaces/models/bazaar';
 import { AuthStore } from 'os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
 import { ShipModel, ShipModelType } from 'os/services/ship/models/ship';
@@ -52,7 +50,7 @@ export const Services = types
     onboarding: OnboardingStore,
     ship: types.maybe(ShipModel),
     spaces: SpacesStore,
-    bazaar: BazaarStore,
+    bazaar: NewBazaarStore,
     membership: MembershipStore,
     visas: VisaModel,
     // docket: DocketStore,

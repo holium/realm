@@ -1,14 +1,13 @@
 import { FC, useState, useMemo } from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Input, Icons, IconButton, Sigil } from 'renderer/components';
+import { Flex, Icons, IconButton, Sigil } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
-import AppSearchApp from '../AppSearch';
+import AppSearchApp from '../AppInstall/AppSearch';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -38,7 +37,6 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             flex={2}
           >
             <Members our />
-            {/* <Invitations /> */}
           </Flex>
         )}
       </AnimatePresence>
@@ -89,7 +87,7 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
               />
             )}
           </Flex>
-          <AppSearchApp />
+          <AppSearchApp mode={'home'} />
           <Flex justifyContent="flex-end">
             <IconButton
               size={3}

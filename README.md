@@ -45,6 +45,21 @@ cd ...
 yarn link "@holium/conduit"
 ```
 
+
+`@holium/realm-room`:
+
+```zsh
+cd lib/room
+
+yarn build
+yarn link
+
+cd ...
+## In the root directory
+yarn link "@holium/realm-room"
+```
+See additional docs in the `/app` directory
+
 ### 2. Fake ships and Urbit
 
 You will need to copy over the following desks:

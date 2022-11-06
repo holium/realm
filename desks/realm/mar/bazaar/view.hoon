@@ -1,4 +1,4 @@
-/-  store=bazaar
+/-  store=bazaar-store
 /+  *bazaar
 ::
 |_  vi=view:store

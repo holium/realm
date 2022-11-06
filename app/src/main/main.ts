@@ -9,8 +9,16 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session, screen } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  session,
+  screen,
+  dialog,
+  MessageBoxReturnValue,
+} from 'electron';
+import { autoUpdater, UpdateCheckResult } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
@@ -27,16 +35,81 @@ import BrowserHelper from './helpers/browser';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import fetch from 'cross-fetch'; // required 'fetch'
 
+const fs = require('fs');
+
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
 });
 
-export default class AppUpdater {
+const isDevelopment =
+  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+
+export interface IAppUpdater {
+  checkForUpdates: () => void;
+}
+
+export class AppUpdater implements IAppUpdater {
+  private manualCheck: boolean = false;
   constructor() {
-    log.transports.file.level = 'info';
+    if (process.env.NODE_ENV === 'development') return;
+    // autoUpdater.autoInstallOnAppQuit = true;
+    // must force this set or 'rename' operations post-download will fail
+    autoUpdater.autoDownload = false;
+    autoUpdater.on('error', (error) => {
+      dialog.showErrorBox(
+        'Error: ',
+        error == null ? 'unknown' : (error.stack || error).toString()
+      );
+    });
+    autoUpdater.on('update-available', () => {
+      dialog
+        .showMessageBox({
+          type: 'info',
+          title: 'Found Updates',
+          message: 'Found updates, do you want update now?',
+          buttons: ['Yes', 'No'],
+        })
+        .then((result: MessageBoxReturnValue) => {
+          // @ts-ignore
+          if (result.response === 0) {
+            autoUpdater.downloadUpdate();
+          }
+        });
+    });
+    autoUpdater.on('update-not-available', () => {
+      // only show this message if the user chose to run an update check manually
+      if (this.manualCheck) {
+        dialog.showMessageBox({
+          title: 'No Updates',
+          message: 'Current version is up-to-date.',
+        });
+      }
+    });
+    autoUpdater.on('update-downloaded', () => {
+      dialog
+        .showMessageBox({
+          title: 'Install Updates',
+          message: 'Updates downloaded, application will be quit for update...',
+        })
+        .then(() => {
+          setImmediate(() => autoUpdater.quitAndInstall());
+        });
+    });
+    log.transports.file.level = isDevelopment ? 'debug' : 'info';
     autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
+    // run auto check once every 10 minutes after app starts
+    setInterval(() => {
+      if (!this.manualCheck) {
+        autoUpdater.checkForUpdates();
+      }
+    }, 600000);
+    autoUpdater.checkForUpdates();
   }
+  checkForUpdates = () => {
+    if (process.env.NODE_ENV === 'development') return;
+    this.manualCheck = true;
+    autoUpdater.checkForUpdates().finally(() => (this.manualCheck = false));
+  };
 }
 
 let mainWindow: BrowserWindow | null = null;
@@ -51,13 +124,18 @@ if (process.defaultApp) {
   app.setAsDefaultProtocolClient('holium-realm');
 }
 
+process.on('uncaughtException', (err) => {
+  try {
+    fs.appendFileSync('realmlog.txt', err.stack || err.message);
+  } catch (e) {
+    console.log(e);
+  }
+});
+
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
-
-const isDevelopment =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDevelopment) {
   require('electron-debug')();
@@ -88,15 +166,16 @@ const createWindow = async () => {
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };
-  let factor = screen.getPrimaryDisplay().scaleFactor;
+  // let factor = screen.getPrimaryDisplay().scaleFactor;
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920 / factor,
-    height: 1440 / factor,
+    // width: 1920 / factor,
+    // height: 1440 / factor,
     titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
+    fullscreen: true,
     acceptFirstMouse: true,
     webPreferences: {
       nodeIntegration: false,
@@ -115,7 +194,6 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   Realm.start(mainWindow);
 
-  // RealmCore.boot(mainWindow);
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
@@ -124,12 +202,9 @@ const createWindow = async () => {
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.maximize();
-
   mainWindow.on('resize', () => {
     const newDimension = mainWindow?.getBounds();
     mainWindow?.webContents.send('set-dimensions', newDimension);
-    // console.log('dims change: ' + dims);
   });
 
   // TODO why is this rendering multiple times?
@@ -151,7 +226,7 @@ const createWindow = async () => {
     );
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
-    // console.log('setting dims ready-to-show');
+
     mainWindow.webContents.send(
       'set-appview-preload',
       app.isPackaged
@@ -165,7 +240,14 @@ const createWindow = async () => {
     app.quit();
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
+  // Remove this if your app does not use auto updates
+  // eslint-disable-next-line
+  const appUpdater = new AppUpdater();
+  // if (process.env.NODE_ENV === 'production') {
+  //   appUpdater = new AppUpdater();
+  // }
+
+  const menuBuilder = new MenuBuilder(mainWindow, appUpdater);
   menuBuilder.buildMenu();
 
   // Open urls in the user's browser
@@ -173,10 +255,6 @@ const createWindow = async () => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
-
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
 };
 
 // start();

@@ -71,3 +71,38 @@ export const calculateAnchorPointById = (
   style = { ...style, bottom };
   return style;
 };
+
+export const calculatePopoverAnchorById = (
+  popoverId: string,
+  config: {
+    dimensions: any;
+    anchorOffset: any;
+    centered?: boolean;
+  }
+) => {
+  const el = document.getElementById(popoverId)!;
+  const { dimensions, anchorOffset } = config;
+  const divTop = el.offsetHeight!;
+
+  const {
+    left: divLeft,
+    width: divWidth,
+    height: divHeight,
+  } = el?.getBoundingClientRect();
+
+  let left = Math.round(divLeft - dimensions.width + divWidth);
+  let coords: any = {
+    top: divTop + divHeight + anchorOffset.y,
+    left: left + anchorOffset.x,
+  };
+
+  if (config.centered) {
+    const midPopover = dimensions.width / 2;
+    const midTrigger = divWidth / 2;
+    coords = {
+      ...coords,
+      left: Math.round(divLeft + midTrigger - midPopover),
+    };
+  }
+  return coords;
+};
