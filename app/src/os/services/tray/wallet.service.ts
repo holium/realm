@@ -569,9 +569,9 @@ export class WalletService extends BaseService {
       else {
         this.setEthereumProviders();
       }
-      this.state!.navigate(WalletView.LIST);
       this.state!.setNetwork(network);
     }
+    this.state!.navigate(WalletView.LIST);
   }
 
   async setChainNetwork(
@@ -1013,11 +1013,12 @@ export class WalletService extends BaseService {
       this.updateEthereumInfo();
     }
     else if (this.state!.navState.network === 'bitcoin') {
-      this.state!.setNetwork(NetworkType.BITCOIN_TESTNET);
-      this.updateBitcoinInfo();
-    }
-    else if (this.state!.navState.network === 'btctestnet') {
-      this.state!.setNetwork(NetworkType.BITCOIN);
+      if (this.state!.navState.btcNetwork === 'mainnet') {
+        this.state!.setBtcNetwork('testnet');
+      }
+      else if (this.state!.navState.btcNetwork === 'testnet') {
+        this.state!.setBtcNetwork('mainnet')
+      }
       this.updateBitcoinInfo();
     }
   }

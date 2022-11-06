@@ -111,7 +111,6 @@ export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
 
 const BitcoinStore = types
   .model('BitcoinStore', {
-    network: types.enumeration(['mainnet', 'testnet']),
     wallets: types.map(BitcoinWallet),
     settings: Settings,
   })
@@ -161,10 +160,7 @@ const BitcoinStore = types
       for (var transaction in wallet.transactions) {
     //    self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
-    },
-    setNetwork(network: string) {
-      self.network = network;
-    },
+    }
   }));
 
 const ERC20 = types
@@ -611,14 +607,18 @@ export const WalletStore = types
     get currentStore() {
       return self.navState.network === 'ethereum'
         ? self.ethereum
-        : (self.navState.network === 'bitcoin'
+        : (self.navState.btcNetwork === 'mainnet'
           ? self.bitcoin
           : self.testnet);
     },
 
     get currentWallet() {
       let walletStore =
-        self.navState.network === 'ethereum' ? self.ethereum : self.bitcoin;
+        self.navState.network === 'ethereum'
+        ? self.ethereum
+        : self.navState.btcNetwork === 'mainnet'
+        ? self.bitcoin
+        : self.testnet;
       return self.navState.walletIndex
         ? walletStore.wallets.get(self.navState.walletIndex)
         : null;
@@ -631,6 +631,11 @@ export const WalletStore = types
     setNetwork(network: NetworkType) {
       self.navState.network = network;
       /* @ts-ignore */
+      self.resetNavigation();
+    },
+    setBtcNetwork(network: string) {
+      self.navState.btcNetwork = network;
+      // @ts-ignore
       self.resetNavigation();
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
