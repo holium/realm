@@ -150,12 +150,7 @@ export class DesktopService extends BaseService {
   }
   openAppWindow(_event: any, spaceId: string, selectedApp: any) {
     let { desktopDimensions, isFullscreen } = this.core.services.shell;
-    // console.log(
-    //   'openAppWindow => %o',
-    //   JSON.parse(
-    //     JSON.stringify({ desktopDimensions, isFullscreen, selectedApp })
-    //   )
-    // );
+
     const newWindow = this.state!.openBrowserWindow(
       selectedApp,
       desktopDimensions as any,
@@ -164,13 +159,10 @@ export class DesktopService extends BaseService {
     this.core.services.shell.setBlur(null, false);
     const credentials = this.core.credentials!;
 
-    if (
-      selectedApp.type === 'urbit' ||
-      (selectedApp.type === 'web' && !selectedApp.web?.development)
-    ) {
-      const appUrl = newWindow.glob
+    if (selectedApp.type === 'urbit') {
+      const appUrl = newWindow.href?.glob
         ? `${credentials.url}/apps/${selectedApp.id!}`
-        : `${credentials.url}/${selectedApp.id!}`;
+        : `${credentials.url}${newWindow.href?.site}`;
       // Hit the main process handler for setting partition cookies
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
         url: appUrl,

@@ -50,7 +50,7 @@
       =.  title.native-app            'Settings'
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
-    =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
+    =.  catalog.state                 (~(put by catalog) %os-settings [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
     =.  grid-index.state              grid-index.init
     =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
@@ -124,7 +124,6 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-
     ?+    path  (on-peek:def path)
       ::
       [%x %catalog ~]     ::  ~/scry/bazaar/catalog
