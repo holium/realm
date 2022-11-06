@@ -99,10 +99,14 @@
       (~(put by wallets.state) [%ethereum ~])
     =.  wallets.state
       (~(put by wallets.state) [%bitcoin ~])
+    =.  wallets.state
+      (~(put by wallets.state) [%bitcoin-testnet ~])
     =.  networks.settings.state
       (~(put by networks.settings.state) [%ethereum [~ 0]])
     =.  networks.settings.state
       (~(put by networks.settings.state) [%bitcoin [~ 0]])
+    =.  networks.settings.state
+      (~(put by networks.settings.state) [%bitcoin-testnet [~ 0]])
     `state
     ::
       %set-xpub

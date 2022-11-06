@@ -5,6 +5,7 @@
   ^-  (map network @ud)
   %-  my
   :~  [%bitcoin 0]
+      [%bitcoin-testnet 1]
       [%ethereum 60]
   ==
 ::
@@ -20,6 +21,8 @@
   :-  ?-  network
         %bitcoin
           (address:derived-pub %main)
+        %bitcoin-testnet
+          (address:derived-pub %testnet)
         %ethereum
           (address-from-pub:key:ethereum (serialize-point.ecc pub:derived-pub))
       ==
@@ -156,8 +159,10 @@
     ^-  (list [@t json])
     :~  ['network' [%s network.update]]
         ['key' [%s +>-.update]]
-        ?:  =(network.update %bitcoin)
-          ['address' [%s (scot %uc address.wallet.update)]]
+        ?:  ?|  =(network.update %bitcoin)
+                =(network.update %bitcoin-testnet)
+            ==
+          ['address' [%s (crip q:(trim 2 (scow %uc address.wallet.update)))]]
         ['address' [%s (crip (z-co:co address.wallet.update))]]
         ['path' [%s path.wallet.update]]
         ['nickname' [%s nickname.wallet.update]]
@@ -188,8 +193,10 @@
         :-  (crip (scow %ud key))
             %-  pairs
             ^-  (list [@t json])
-            :~  ?:  =(network %bitcoin)
-                  ['address' [%s (scot %uc address.wallet)]]
+            :~  ?:  ?|  =(network %bitcoin)
+                        =(network %bitcoin-testnet)
+                    ==
+                  ['address' [%s (crip q:(trim 2 (scow %uc address.wallet)))]]
                 ['address' [%s (crip (z-co:co address.wallet))]]
                 ['path' [%s path.wallet]]
                 ['nickname' [%s nickname.wallet]]

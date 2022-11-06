@@ -594,6 +594,7 @@ export const WalletStore = types
   .model('WalletStore', {
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
     bitcoin: BitcoinStore,
+    testnet: BitcoinStore,
     ethereum: EthStore,
     creationMode: types.string,
     sharingMode: types.string,

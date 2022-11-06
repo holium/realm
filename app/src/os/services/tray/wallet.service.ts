@@ -846,17 +846,16 @@ export class WalletService extends BaseService {
 
   async updateBitcoinInfo() {
     for (var key of this.state!.bitcoin.wallets.keys()) {
-      const btcChain = this.state!.bitcoin.network === 'mainnet' ? 'bitcoin' : 'bitcoin/testnet';
+      const btcChain = this.state!.bitcoin.network === 'mainnet' ? 'btc/main' : 'btc/test3';
       let wallet = this.state!.bitcoin.wallets.get(key)!
-      const url = `https://api.blockchair.com/${btcChain}/dashboards/address/${wallet.address}`;
-      console.log(url)
+      const url = `https://api.blockcypher.com/v1/${btcChain}/addrs/${wallet.address}`;
       const response: any = await axios.get(url, {
         headers: {
-            // 'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
         }
       })
-      wallet.setBalance(response.data.data[wallet.address].address.balance.toString());
-      wallet.applyTransactions(response.data.data[wallet.address].transactions);
+      wallet.setBalance(response.data.balance.toString());
+      wallet.applyTransactions(response.data.txrefs);
     }
   }
 
