@@ -1,4 +1,5 @@
-/-  notify, chat
+/-  notify, c=chat
+/-  *courier
 |%
 ++  on-graph-action
   |=  =vase
@@ -17,18 +18,52 @@
     ``notify-view+!>([%devices devices])
       [%x %dms ~]
     :: Get DMs from x/briefs scy
-    ~
+    =/  =briefs:c
+      .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
+    ``graph-dm-view+!>([%inbox (previews-from-briefs briefs bowl)])
       [%x %dms %group @ @ ~]    ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
-    ~&  i.t.t.t.path
-    =/  entity           `@p`(slav %p i.t.t.t.path)
-    =/  timestamp        `@t`i.t.t.t.t.path
-    =/  whom             [%ship entity]
-    ::  find a way to get the count
-    =/  groups-two-path  /(scot %p our.bowl)/chat/(scot %da now.bowl)/chat/dm/0v4.00000.qcg10.qk70o.idqbo.qjuv7/writs/newest/1/noun
-    ~&  groups-two-path
-    ``graph-dm-view+!>(.^(writs:chat %gx groups-two-path))
+    ~
       [%x %dms @ ~]             ::  ~/scry/courier/dms/~dev.json
     ~
   ==
-:: TODO on-agent
+++  previews-from-briefs
+  |=  [=briefs:c =bowl:gall]
+  ^-  (list message-preview)
+  =/  whoms=(list whom:c)
+    ~(tap in ~(key by briefs))
+  ::  just individual & group DMs, not channels
+  =/  peeps
+    (skip whoms |=(=whom:c =(-.whom %flag)))
+  %+  turn  peeps
+    |=  =whom:c
+    ?-  -.whom
+        %flag
+      ::  these are filtered out above
+      !!
+        %club
+      =/  =crew:club:c
+        .^(crew:club:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uvh p.whom)/crew/noun)
+        ~&  crew
+      :*  path=`@t`(scot %uvh p.whom)
+          to=team.crew
+          type=%group
+          source=%chatstead
+          last-time-sent=*@da
+          last-message=~
+          metadata=~[[color=*@ux avatar=~ nickname=*@t]]
+          invite-id=~
+          unread-count=0
+      ==
+        %ship
+      :*  path=(scot %p p.whom)
+          to=(~(put in *(set ship)) p.whom)
+          type=%dm
+          source=%chatstead
+          last-time-sent=*@da
+          last-message=~
+          metadata=~[[color=*@ux avatar=~ nickname=*@t]]
+          invite-id=~
+          unread-count=0
+      ==
+    ==
 --
