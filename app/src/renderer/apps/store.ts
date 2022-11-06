@@ -119,22 +119,22 @@ export const trayStore = TrayAppStore.create({
     },
     navHistory: [],
     bitcoin: {
-      network: 'mainnet',
       settings: {
         walletCreationMode: WalletCreationMode.DEFAULT,
         sharingMode: SharingMode.ANYBODY,
         blocked: [],
         defaultIndex: 0,
       },
+      conversions: {}
     },
     testnet: {
-      network: 'mainnet',
       settings: {
         walletCreationMode: WalletCreationMode.DEFAULT,
         sharingMode: SharingMode.ANYBODY,
         blocked: [],
         defaultIndex: 0,
       },
+      conversions: {}
     },
     ethereum: {
       network: 'gorli',
@@ -145,6 +145,7 @@ export const trayStore = TrayAppStore.create({
         defaultIndex: 0,
       },
       initialized: false,
+      conversions: {}
     },
     creationMode: 'default',
     sharingMode: 'anybody',

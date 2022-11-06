@@ -30,6 +30,7 @@ import nftabi from 'non-fungible-token-abi';
 import axios from 'axios';
 // @ts-ignore
 import bitcore from 'bitcore-lib';
+import { CoinList } from 'renderer/apps/Wallet/views/common/Detail/CoinList';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -69,10 +70,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
-    'realm.tray.wallet.get-ethereum-exchange-rate':
-      this.getEthereumExchangeRate,
-    'realm.tray.wallet.get-erc20-exchange-rate': this.getERC20ExchangeRate,
-    'realm.tray.wallet.get-bitcoin-exchange-rate': this.getBitcoinExchangeRate,
     'realm.tray.wallet.navigate': this.navigate,
     'realm.tray.wallet.navigateBack': this.navigateBack,
   };
@@ -256,18 +253,6 @@ export class WalletService extends BaseService {
     toggleNetwork: () => {
       return ipcRenderer.invoke('realm.tray.wallet.toggle-network');
     },
-    getEthereumExchangeRate: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.get-ethereum-exchange-rate');
-    },
-    getERC20ExchangeRate: (contractAddress: string) => {
-      return ipcRenderer.invoke(
-        'realm.tray.wallet.get-erc20-exchange-rate',
-        contractAddress
-      );
-    },
-    getBitcoinExchangeRate: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.get-bitcoin-exchange-rate');
-    },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -347,6 +332,7 @@ export class WalletService extends BaseService {
             defaultIndex: 0,
           },
           initialized: false,
+          conversions: {},
         },
         bitcoin: {
           settings: {
@@ -355,6 +341,7 @@ export class WalletService extends BaseService {
             blocked: [],
             defaultIndex: 0,
           },
+          conversions: {}
         },
         testnet: {
           settings: {
@@ -363,6 +350,7 @@ export class WalletService extends BaseService {
             blocked: [],
             defaultIndex: 0,
           },
+          conversions: {}
         },
         creationMode: 'default',
         sharingMode: 'anybody',
@@ -655,22 +643,22 @@ export class WalletService extends BaseService {
     );
   }
 
-  async getEthereumExchangeRate(_event: any) {
-    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=ethereum&vs_currencies=usd`;
-    const result = await axios.get(url);
-    console.log(result);
+  async getEthereumExchangeRate() {
+    const url = `https://api.coingecko.com/api/v3/simple/price/?ids=ethereum&vs_currencies=usd`;
+    const result: any = await axios.get(url);
+    return Number(result.data.ethereum.usd);
   }
 
-  async getERC20ExchangeRate(_event: any, contractAddress: string) {
+  async getERC20ExchangeRate(contractAddress: string) {
     const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`;
     const result = await axios.get(url);
-    console.log(result);
+    return Number(result.data.ethereum.usd);
   }
 
-  async getBitcoinExchangeRate(_event: any) {
+  async getBitcoinExchangeRate() {
     const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=bitcoin&vs_currencies=usd`;
-    const result = await axios.get(url);
-    console.log(result);
+    const result: any = await axios.get(url);
+    return Number(result.data.bitcoin.usd);
   }
 
   async setSettings(_events: any, network: string, settings: UISettingsType) {
@@ -876,7 +864,6 @@ export class WalletService extends BaseService {
   }
 
   async updateBitcoinInfo() {
-    console.log('updating')
     const btcStore = this.state!.navState.btcNetwork === 'mainnet'
     ? this.state!.bitcoin
     : this.state!.testnet;
@@ -890,11 +877,10 @@ export class WalletService extends BaseService {
             'Content-Type': 'application/json'
         }
       })
-      console.log(response)
-      console.log(response.data.balance.toString())
       wallet.setBalance(response.data.balance.toString());
       wallet.applyTransactions(response.data.txrefs);
     }
+    this.state!.bitcoin.setExchangeRate(await this.getBitcoinExchangeRate());
   }
 
   async getAllBitcoinBalances() {
@@ -935,6 +921,17 @@ export class WalletService extends BaseService {
     this.getAllCoins();
     this.getAllNfts();
     this.getAllEthereumTransactions();
+    this.updateEthereumExchangeRates();
+  }
+
+  async updateEthereumExchangeRates() {
+    this.state!.ethereum.setExchangeRate(await this.getEthereumExchangeRate());
+    for (var key in this.state!.ethereum.wallets.keys()) {
+      for (var coinKey in this.state!.ethereum.wallets.get(key)!.coins.keys()) {
+        let coin = this.state!.ethereum.wallets.get(key)!.coins.get(coinKey)!;
+        coin.setExchangeRate(await this.getERC20ExchangeRate(coin.address));
+      }
+    }
   }
 
   gweiToEther = (gwei: number) => {

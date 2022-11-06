@@ -90,13 +90,6 @@ const BitcoinWallet = types.model('BitcoinWallet', {
   address: types.string,
   nickname: types.string,
   balance: types.string,
-  conversions: types.maybe(
-    types.model({
-      usd: types.maybe(types.string),
-      cad: types.maybe(types.string),
-      euro: types.maybe(types.string),
-    })
-  ),
   transactions: types.map(types.map(BitcoinTransaction)),
 }).actions((self) => ({
   setBalance(balance: string) {
@@ -104,7 +97,7 @@ const BitcoinWallet = types.model('BitcoinWallet', {
   },
   applyTransactions(transactions: any) {
 
-  }
+  },
 }));
 
 export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
@@ -113,6 +106,16 @@ const BitcoinStore = types
   .model('BitcoinStore', {
     wallets: types.map(BitcoinWallet),
     settings: Settings,
+    conversions:
+      types.model({
+        usd: types.maybe(types.number),
+        cad: types.maybe(types.number),
+        euro: types.maybe(types.number),
+      }).actions((self) => ({
+        setUsd(usd: number) {
+          self.usd = usd;
+        }
+      })),
   })
   .views((self) => ({
     get list() {
@@ -160,6 +163,9 @@ const BitcoinStore = types
       for (var transaction in wallet.transactions) {
     //    self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
+    },
+    setExchangeRate(usd: number) {
+      self.conversions.setUsd(usd);
     }
   }));
 
@@ -170,11 +176,24 @@ const ERC20 = types
     address: types.string,
     balance: types.string,
     decimals: types.number,
+    conversions:
+      types.model({
+        usd: types.maybe(types.number),
+        cad: types.maybe(types.number),
+        euro: types.maybe(types.number),
+      }).actions((self) => ({
+        setUsd(usd: number) {
+          self.usd = usd;
+        }
+    })),
   })
   .actions((self) => ({
     setBalance(balance: string) {
       self.balance = balance;
     },
+    setExchangeRate(usd: number) {
+      self.conversions.setUsd(usd);
+    }
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;
@@ -245,13 +264,6 @@ const EthWallet = types
     coins: types.map(ERC20),
     nfts: types.map(ERC721),
     nickname: types.string,
-    conversions: types.maybe(
-      types.model({
-        usd: types.maybe(types.string),
-        cad: types.maybe(types.string),
-        euro: types.maybe(types.string),
-      })
-    ),
     transactions: types.map(types.map(EthTransaction)),
   })
   .actions((self) => ({
@@ -280,6 +292,7 @@ const EthWallet = types
           address: contractAddress,
           balance: '0',
           decimals: decimals,
+          conversions: {},
         });
         self.coins.set(contract.address, contract);
       }
@@ -294,6 +307,7 @@ const EthWallet = types
           address: coin.contractAddress,
           balance: coin.balance,
           decimals: coin.decimals,
+          conversions: {},
         };
       }
       const map = types.map(ERC20);
@@ -481,6 +495,16 @@ export const EthStore = types
     wallets: types.map(EthWallet),
     settings: Settings,
     initialized: types.boolean,
+    conversions:
+      types.model({
+        usd: types.maybe(types.number),
+        cad: types.maybe(types.number),
+        euro: types.maybe(types.number),
+      }).actions((self) => ({
+        setUsd(usd: number) {
+          self.usd = usd;
+        }
+      })),
   })
   .views((self) => ({
     get list() {
@@ -545,6 +569,9 @@ export const EthStore = types
     setSettings(settings: SettingsType) {
       self.settings = settings;
     },
+    setExchangeRate(usd: number) {
+      self.conversions.setUsd(usd);
+    }
   }));
 
 export enum NetworkType {

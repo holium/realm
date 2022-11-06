@@ -12,6 +12,10 @@ import {
   getBaseTheme,
   getMockCoinIcon,
   formatCoinAmount,
+  convertBtcAmountToUsd,
+  convertEthAmountToUsd,
+  convertERC20AmountToUsd,
+  formatBtcAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
@@ -71,7 +75,14 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           : `${
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`
-        : `${formatEthAmount(props.wallet.balance).eth} BTC`;
+        : `${formatBtcAmount(props.wallet.balance).btc} BTC`;
+    let amountUsdDisplay = 
+      walletApp.navState.network === 'ethereum'
+        ? !props.coin
+          ? '$' + `${convertEthAmountToUsd(formatEthAmount(props.wallet.balance), walletApp.ethereum.conversions.usd)}`
+          : '$' + `${convertERC20AmountToUsd(formatCoinAmount(props.coin.balance, props.coin.decimals), props.coin.conversions.usd)}`
+        : '$' + `${convertBtcAmountToUsd(formatBtcAmount(props.wallet.balance), walletApp.bitcoin.conversions.usd)}`;
+    console.log(amountUsdDisplay)
 
     let accountDisplay = !props.coin ? (
       props.wallet.nickname
@@ -177,6 +188,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           <Balance
             coin={props.coin!}
             amountDisplay={amountDisplay}
+            amountUsdDisplay={amountUsdDisplay}
             colors={themeData.colors}
           />
         </Box>
@@ -257,6 +269,7 @@ function SendReceiveButtons(props: {
 interface BalanceInterface {
   coin?: ERC20Type;
   amountDisplay: string;
+  amountUsdDisplay: string;
   colors: any;
 }
 function Balance(props: BalanceInterface) {
@@ -279,7 +292,7 @@ function Balance(props: BalanceInterface) {
         {props.amountDisplay}
       </Text>
       <Text variant="body" color={props.colors.text.secondary}>
-        $12,345.98
+        {props.amountUsdDisplay}
       </Text>
     </Flex>
   );

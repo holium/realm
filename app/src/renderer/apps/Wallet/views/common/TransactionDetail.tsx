@@ -135,8 +135,8 @@ export const TransactionDetail: FC = observer(() => {
           >
             $
             {isEth
-              ? convertEthAmountToUsd(ethAmount)
-              : convertBtcAmountToUsd(btcAmount)}
+              ? convertEthAmountToUsd(ethAmount, walletApp.ethereum.conversions.usd)
+              : convertBtcAmountToUsd(btcAmount, walletApp.bitcoin.conversions.usd)}
           </Text>
         </Flex>
       </Flex>

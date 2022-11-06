@@ -4,6 +4,7 @@ import { darken } from 'polished';
 
 import { Flex, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+import { useTrayApps } from 'renderer/apps/store';
 import {
   shortened,
   monthNames,
@@ -36,6 +37,7 @@ interface TransactionProps {
 }
 export const Transaction = observer((props: TransactionProps) => {
   const { theme } = useServices();
+  const { walletApp } = useTrayApps();
   let hoverBackground = darken(0.04, theme.currentTheme.windowColor);
 
   const { transaction } = props;
@@ -97,8 +99,8 @@ export const Transaction = observer((props: TransactionProps) => {
         <Text variant="body" fontSize={1} color="text.disabled">
           {transaction.type === 'sent' ? '-' : ''}$
           {isEth
-            ? convertEthAmountToUsd(ethAmount)
-            : convertBtcAmountToUsd(btcAmount)}{' '}
+            ? convertEthAmountToUsd(ethAmount, walletApp.ethereum.conversions.usd)
+            : convertBtcAmountToUsd(btcAmount, walletApp.bitcoin.conversions.usd)}{' '}
           USD
         </Text>
       </Flex>

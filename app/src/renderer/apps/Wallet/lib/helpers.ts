@@ -136,14 +136,34 @@ export function convertEthAmountToUsd(
 }
 
 export function formatBtcAmount(amount: string): BtcAmount {
+  const count = amount.match(/\./g);
+  var ethAmount = amount;
+  if (count) {
+    if (count.length > 1) {
+      ethAmount = ethAmount.replaceAll('.', '');
+    }
+  }
+  let wei = utils.parseEther(ethAmount)!;
   return {
-    btc: 'placeholder',
-    sats: 'placeholder',
+    btc: utils.formatUnits(wei, 'ether').slice(0, 6),
+    sats: 'placeholder'
   };
 }
 
-export function convertBtcAmountToUsd(amount: BtcAmount) {
-  return 'placeholder';
+export function convertBtcAmountToUsd(amount: BtcAmount, exchangeRate: number = 1647.37) {
+  if (amount.btc === '0') {
+    return 0;
+  }
+  let usd = Number(amount.btc) * exchangeRate;
+  return usd.toFixed(2);
+}
+
+export function convertERC20AmountToUsd(amount: any, exchangeRate: number = 1647.37) {
+  if (amount.btc === '0') {
+    return 0;
+  }
+  let usd = Number(amount.btc) * exchangeRate;
+  return usd.toFixed(2);
 }
 
 export const monthNames = [
