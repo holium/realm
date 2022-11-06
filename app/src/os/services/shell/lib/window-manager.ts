@@ -129,7 +129,6 @@ export const getInitialWindowDimensions = (
       const nativeApp: NativeAppType = app;
       const nativeConfig = nativeApps[app.id];
       if (nativeConfig.native?.openFullscreen) {
-        console.log('nativeApp window size', nativeApp);
         dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
         break;
       }
