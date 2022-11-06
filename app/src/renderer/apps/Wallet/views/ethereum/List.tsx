@@ -56,7 +56,7 @@ export const WalletList: FC<WalletListProps> = observer(
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
               You haven't created any{' '}
-              {walletApp.navState.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallets
+              {walletApp.navState.network === 'ethereum' ? 'Ethereum' : (walletApp.navState.network === 'bitcoin' ? 'Bitcoin' : 'Bitcoin Testnet')} wallets
               yet.
             </Text>
           </Flex>

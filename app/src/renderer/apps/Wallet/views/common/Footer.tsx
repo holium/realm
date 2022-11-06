@@ -34,7 +34,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
                   ? walletApp.ethereum.network === 'mainnet'
                     ? 'Ethereum Mainnet'
                     : 'Görli Testnet'
-                  : walletApp.bitcoin.network === 'mainnet'
+                  : walletApp.navState.network === 'bitcoin'
                   ? 'Bitcoin Mainnet'
                   : 'Bitcoin Testnet'
               }

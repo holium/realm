@@ -2,7 +2,7 @@
 ::  basic types
 ::
 +$  address  @u
-+$  network  ?(%bitcoin %bitcoin-testnet %ethereum)
++$  network  ?(%bitcoin %btctestnet %ethereum)
 +$  transaction
   $:  hash=@t
       =network

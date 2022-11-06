@@ -112,13 +112,21 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: {
-    currentView: WalletView.NEW,
     navState: {
       view: WalletView.NEW,
       network: NetworkType.ETHEREUM,
     },
     navHistory: [],
     bitcoin: {
+      network: 'mainnet',
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        blocked: [],
+        defaultIndex: 0,
+      },
+    },
+    testnet: {
       network: 'mainnet',
       settings: {
         walletCreationMode: WalletCreationMode.DEFAULT,

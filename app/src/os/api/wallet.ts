@@ -31,18 +31,6 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setWalletCreationMode: async (conduit: Conduit, mode: string) => {
-    const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
-      json: {
-        'set-wallet-creation-mode': {
-          mode: mode,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
   changeDefaultWallet: async (
     conduit: Conduit,
     network: string,
@@ -77,6 +65,7 @@ export const WalletApi = {
         },
       },
     };
+    console.log(payload)
     await conduit.poke(payload);
   },
   requestAddress: async (conduit: Conduit, network: string, from: string) => {

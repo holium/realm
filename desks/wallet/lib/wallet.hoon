@@ -5,7 +5,7 @@
   ^-  (map network @ud)
   %-  my
   :~  [%bitcoin 0]
-      [%bitcoin-testnet 1]
+      [%btctestnet 1]
       [%ethereum 60]
   ==
 ::
@@ -21,7 +21,7 @@
   :-  ?-  network
         %bitcoin
           (address:derived-pub %main)
-        %bitcoin-testnet
+        %btctestnet
           (address:derived-pub %testnet)
         %ethereum
           (address-from-pub:key:ethereum (serialize-point.ecc pub:derived-pub))
@@ -97,16 +97,16 @@
   ^-  action
   %.  jon
   %-  of
-  :~  [%set-xpub (ot ~[network+(su (perk %bitcoin %ethereum ~)) xpub+so])]
-      [%set-settings (ot ~[network+(su (perk %bitcoin %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni])]
+  :~  [%set-xpub (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) xpub+so])]
+      [%set-settings (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni])]
       [%set-wallet-creation-mode (ot ~[mode+(su (perk %on-demand %default ~))])]
       [%set-sharing-mode (ot ~[who+(su (perk %nobody %friends %anybody ~))])]
       [%set-sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
-      [%set-default-index (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni])]
-      [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %ethereum ~)) index+ni nickname+so])]
-      [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %ethereum ~)) nickname+so])]
-      [%set-transaction (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+json-to-ux transaction+json-to-transaction])]
-      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %ethereum ~)) net+so wallet+ni hash+so notes+so])]
+      [%set-default-index (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni])]
+      [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni nickname+so])]
+      [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %btctestnet %ethereum ~)) nickname+so])]
+      [%set-transaction (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) net+so wallet+ni hash+json-to-ux transaction+json-to-transaction])]
+      [%save-transaction-notes (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) net+so wallet+ni hash+so notes+so])]
   ==
 ::
 ++  json-to-ux
@@ -160,7 +160,7 @@
     :~  ['network' [%s network.update]]
         ['key' [%s +>-.update]]
         ?:  ?|  =(network.update %bitcoin)
-                =(network.update %bitcoin-testnet)
+                =(network.update %btctestnet)
             ==
           ['address' [%s (crip q:(trim 2 (scow %uc address.wallet.update)))]]
         ['address' [%s (crip (z-co:co address.wallet.update))]]
@@ -194,7 +194,7 @@
             %-  pairs
             ^-  (list [@t json])
             :~  ?:  ?|  =(network %bitcoin)
-                        =(network %bitcoin-testnet)
+                        =(network %btctestnet)
                     ==
                   ['address' [%s (crip q:(trim 2 (scow %uc address.wallet)))]]
                 ['address' [%s (crip (z-co:co address.wallet))]]

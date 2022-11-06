@@ -126,8 +126,7 @@ const BitcoinStore = types
     },
   }))
   .actions((self) => ({
-    initial(wallets: any) {
-      const bitcoinWallets = wallets.bitcoin;
+    initial(bitcoinWallets: any) {
       Object.entries(bitcoinWallets).forEach(([key, wallet]) => {
         const walletUpdate = {
           ...(wallet as any),
@@ -555,6 +554,7 @@ export const EthStore = types
 export enum NetworkType {
   ETHEREUM = 'ethereum',
   BITCOIN = 'bitcoin',
+  BITCOIN_TESTNET = 'btctestnet'
 }
 const Networks = types.enumeration(Object.values(NetworkType));
 
@@ -611,7 +611,9 @@ export const WalletStore = types
     get currentStore() {
       return self.navState.network === 'ethereum'
         ? self.ethereum
-        : self.bitcoin;
+        : (self.navState.network === 'bitcoin'
+          ? self.bitcoin
+          : self.testnet);
     },
 
     get currentWallet() {

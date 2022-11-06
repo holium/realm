@@ -1,5 +1,5 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import { ethers, utils, Wallet } from 'ethers';
+import { ethers, utils } from 'ethers';
 import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
 import {
@@ -354,6 +354,15 @@ export class WalletService extends BaseService {
             defaultIndex: 0,
           },
         },
+        testnet: {
+          network: 'mainnet',
+          settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
+            defaultIndex: 0,
+          },
+        },
         creationMode: 'default',
         sharingMode: 'anybody',
         ourPatp: ship,
@@ -389,21 +398,27 @@ export class WalletService extends BaseService {
         this.state!.ethereum.applyWalletUpdate(this.state!.ethereum.network, wallet);
         this.updateEthereumInfo();
       }
-      if (wallet.network === 'bitcoin') {
+      else if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);
+        this.updateBitcoinInfo();
+      }
+      else if (wallet.network === 'btctestnet') {
+        this.state!.testnet.applyWalletUpdate(wallet);
         this.updateBitcoinInfo();
       }
     });
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
       if (
         Object.keys(wallets.ethereum).length !== 0 ||
-        Object.keys(wallets.bitcoin).length !== 0
+        Object.keys(wallets.bitcoin).length !== 0 ||
+        Object.keys(wallets.btctestnet).length !== 0
       ) {
         this.state!.setInitialized(true);
       }
       this.state!.ethereum.initial(wallets);
       this.updateEthereumInfo();
-      this.state!.bitcoin.initial(wallets);
+      this.state!.bitcoin.initial(wallets.bitcoin);
+      this.state!.testnet.initial(wallets.btctestnet);
       this.updateBitcoinInfo();
     });
     WalletApi.subscribeToTransactions(
@@ -453,6 +468,7 @@ export class WalletService extends BaseService {
     const privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
+    const btcTestnetPath = "m/44'/1'/0'/0"
     // eth
     console.log('setting eth xpub');
     let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
@@ -463,6 +479,11 @@ export class WalletService extends BaseService {
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     console.log('btcxpub', xpub);
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+    // btc testnet
+    console.log('setting btc testnet xpub');
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
+    console.log('btctestnetxpub', xpub);
+    await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
 
     this.state!.ethereum.deleteWallets();
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
@@ -505,13 +526,17 @@ export class WalletService extends BaseService {
   async setXpub(_event: any) {
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
+    const btcTestnetPath = "m/44'/1'/0'/0"
     const privateKey = this.getPrivateKey();
-    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
     // eth
+    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
     xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+    // btc testnet
+    xpub = privateKey.derivePath(btcTestnetPath).neuter().extendedKey;
+    await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub)
   }
 
   navigate(
@@ -535,7 +560,7 @@ export class WalletService extends BaseService {
 
   async setNetwork(_event: any, network: NetworkType) {
     if (this.state!.navState.network !== network) {
-      if (network === 'bitcoin') {
+      if (network === 'bitcoin' || network === 'btctestnet') {
         this.ethProvider!.removeAllListeners();
         this.updateBitcoinInfo();
       }
@@ -544,7 +569,6 @@ export class WalletService extends BaseService {
       }
       this.state!.navigate(WalletView.LIST);
     }
-    this.state!.setNetwork(network);
   }
 
   async setChainNetwork(
@@ -981,12 +1005,13 @@ export class WalletService extends BaseService {
         this.setEthereumProviders();
       }
       this.updateEthereumInfo();
-    } else {
-      if (this.state!.bitcoin.network === 'mainnet') {
-        this.state!.bitcoin.setNetwork('testnet');
-      } else if (this.state!.bitcoin.network === 'testnet') {
-        this.state!.bitcoin.setNetwork('mainnet');
-      }
+    }
+    else if (this.state!.navState.network === 'bitcoin') {
+      this.state!.setNetwork(NetworkType.BITCOIN_TESTNET);
+      this.updateBitcoinInfo();
+    }
+    else if (this.state!.navState.network === 'btctestnet') {
+      this.state!.setNetwork(NetworkType.BITCOIN);
       this.updateBitcoinInfo();
     }
   }

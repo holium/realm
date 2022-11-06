@@ -78,7 +78,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
     >
       <WalletHeader
         theme={theme.currentTheme}
-        network={walletApp.navState.network}
+        network={walletApp.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'}
         onAddWallet={() => WalletActions.navigate(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={hideHeaderFooter}
