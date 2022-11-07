@@ -1,25 +1,26 @@
-/+  *realm
-|_  =config:store:realm
+/+  realm=realm
+|_  =config:realm
 ++  grow
   |%
   ++  mime  
     ^-  ^mime
-    [/text/x-config (as-octt:mimes:html (spit-config:mime:realm config:store:realm))]
-  ++  noun  config:store:realm
-  ++  json  (config:enjs:realm docket)
+    [/text/x-config (as-octt:mimes:html (spit-config:mime:realm config))]
+  ++  noun  config
+  ++  json  (config:enjs:realm config)
   --
 ++  grab
   |%
   ::
   ++  mime
     |=  [=mite len=@ud tex=@]
-    ^-  config:store:realm
+    ^-  config:realm
     %-  need
     %-  from-clauses:mime:realm
+::    =/  tex  '""'
     !<((list clause:realm) (slap !>(~) (ream tex)))
 
   ::
-  ++  noun  config:store:realm
+  ++  noun  config:realm
   --
 ++  grad  %noun
 --

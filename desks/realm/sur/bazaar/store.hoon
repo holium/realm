@@ -1,11 +1,6 @@
-/-  spaces=spaces-store, docket=bazaar-docket, treaty=bazaar-treaty
+/-  spaces=spaces-store, docket=bazaar-docket, treaty=bazaar-treaty, *realm
 |%
 +$  app-id  @tas
-+$  config
-  $:  size=[@ud @ud]            ::  (width, height) normalized to 0 - 10 units
-      titlebar-border=?         ::  should the bottom border show in the titlebar
-      show-titlebar=?           ::  tells realm to not render the titlebar (except the buttons)
-  ==
 +$  native-app
   $:  title=@t
       info=@t

@@ -1,4 +1,4 @@
-/-  store=bazaar-store
+/-  *realm
 |%
 ::
 ++  mime
@@ -11,7 +11,7 @@
   ::
   ++  finalize
     |=  =draft
-    ^-  (unit config:store)
+    ^-  (unit config)
     ?~  size.draft  ~
     ?~  titlebar-border.draft  ~
     ?~  show-titlebar.draft  ~
@@ -25,7 +25,7 @@
   ++  from-clauses
     =|  =draft
     |=  cls=(list clause)
-    ^-  (unit config:store)
+    ^-  (unit config)
     =*  loop  $
     ?~  cls  (finalize draft)
     =*  clause  i.cls
@@ -38,26 +38,25 @@
     loop(cls t.cls)
   ::
   ++  to-clauses
-    |=  c=config:store
+    |=  c=config
     ^-  (list clause)
-    %-  zing
-    :~  size+size.d
-        titlebar-border+titlebar-border.d
-        show-titlebar+show-titlebar.d
+    :~  size+size.c
+        titlebar-border+titlebar-border.c
+        show-titlebar+show-titlebar.c
     ==
   ::
   ++  spit-clause
     |=  =clause
     ^-  tape
     %+  weld  "  {(trip -.clause)}+"
-    ?+  -.clause  "'{(trip +.clause)}'"
+    ?-  -.clause  ::"'{(trip +.clause)}'"
       %size  "[{(scow %ud -.size.clause)} {(scow %ud +.size.clause)}]"
       %titlebar-border  ?:  titlebar-border.clause  "%.y"  "%.n"
       %show-titlebar  ?:  show-titlebar.clause  "%.y"  "%.n"
     ==
   ::
   ++  spit-config
-    |=  =config:store
+    |=  =config
     ^-  tape
     ;:  welp
       ":~\0a"
@@ -74,9 +73,9 @@
     |=  c=^config
     ^-  json
     %-  pairs
-    :~  size+o+[width+(numb -.size.d) height+(numb +.size.d)]
-        titlebar-border+b+titlebar-border.d
-        show-titlebar+b+show-titlebar.d
+    :~  ::size+o+[width+(numb -:size.c) height+(numb +:size.c)]
+        titlebar-border+b+titlebar-border.c
+        show-titlebar+b+show-titlebar.c
     ==
   ::
   --
