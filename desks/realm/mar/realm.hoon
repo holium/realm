@@ -1,25 +1,25 @@
-/+  store=bazaar-store
-|_  =config:store
+/+  *realm
+|_  =config:store:realm
 ++  grow
   |%
   ++  mime  
     ^-  ^mime
-    [/text/x-docket (as-octt:mimes:html (spit-docket:mime:dock docket))]
-  ++  noun  docket
-  ++  json  (docket:enjs:dock docket)
+    [/text/x-config (as-octt:mimes:html (spit-config:mime:realm config:store:realm))]
+  ++  noun  config:store:realm
+  ++  json  (config:enjs:realm docket)
   --
 ++  grab
   |%
   ::
   ++  mime
     |=  [=mite len=@ud tex=@]
-    ^-  docket:dock
+    ^-  config:store:realm
     %-  need
-    %-  from-clauses:mime:dock
-    !<((list clause:dock) (slap !>(~) (ream tex)))
+    %-  from-clauses:mime:realm
+    !<((list clause:realm) (slap !>(~) (ream tex)))
 
   ::
-  ++  noun  docket:dock
+  ++  noun  config:store:realm
   --
 ++  grad  %noun
 --

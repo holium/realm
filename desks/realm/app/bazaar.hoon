@@ -856,7 +856,7 @@
       ?:  (~(has in hide-desks) desk)
         `state
       =/  app                     (~(get by catalog.state) desk)
-      =/  app  ?~  app  [%urbit docket.charge ~ status *config:store]
+      =/  app  ?~  app  [%urbit docket.charge ~ status (config:scry desk)]
         ?>  ?=(%urbit -.u.app)
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
