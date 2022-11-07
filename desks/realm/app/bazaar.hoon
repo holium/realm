@@ -599,24 +599,15 @@
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
-        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed]) (set-grid-index desk grid-index.acc)]
+        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed *config:store]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
-      =/  bare-docket
-        [
-          %1
-          title=desk
-          info=''
-          color=`@ux`'0'
-          href=[%site /(scot %tas desk)]
-          image=~
-          version=[major=0 minor=0 patch=0]
-          website=''
-          license=''
-        ]
-      =/  new-app=urbit-app:store    [docket=bare-docket host=(some ship) install-status=%started]
-      new-app
+      ^-  urbit-app:store
+      =/  bare-docket  *docket:docket
+      =.  title.bare-docket  desk
+      =.  href.bare-docket  [%site /(scot %tas desk)]
+      [docket=bare-docket host=(some ship) install-status=%started *config:store]
     ::
     ++  skim-installed
       |=  [=app-id:store =app:store]
@@ -851,7 +842,7 @@
       ?:  (~(has in hide-desks) desk)
         `state
       =/  app                     (~(get by catalog.state) desk)
-      =/  app  ?~  app  [%urbit docket.charge ~ status]
+      =/  app  ?~  app  [%urbit docket.charge ~ status *config:store]
         ?>  ?=(%urbit -.u.app)
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge

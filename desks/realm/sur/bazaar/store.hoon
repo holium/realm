@@ -1,17 +1,24 @@
 /-  spaces=spaces-store, docket=bazaar-docket, treaty=bazaar-treaty
 |%
 +$  app-id  @tas
++$  config
+  $:  size=[@ud @ud]            ::  (width, height) normalized to 0 - 10 units
+      titlebar-border=?         ::  should the bottom border show in the titlebar
+      show-titlebar=?           ::  tells realm to not render the titlebar (except the buttons)
+  ==
 +$  native-app
   $:  title=@t
       info=@t
       color=cord
       icon=cord
+      =config
   ==
 ::
 +$  web-app
   $:  title=@t
       href=cord
       favicon=cord
+      =config
   ==
 ::
 +$  install-status   ?(%started %failed %suspended %installed %uninstalled %desktop %treaty)
@@ -19,12 +26,13 @@
   $:  =docket:docket
       host=(unit ship)
       =install-status
+      =config
   ==
 ::
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      [%urbit =docket:docket host=(unit ship) install-status=?(%started %failed %suspended %installed %uninstalled %desktop %treaty)]
+      [%urbit =docket:docket host=(unit ship) install-status=?(%started %failed %suspended %installed %uninstalled %desktop %treaty) =config]
   ==
 ::
 ::  $catalog: for efficiencies sake, this is the one "master" list of apps
