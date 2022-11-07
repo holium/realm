@@ -73,7 +73,8 @@
     |=  c=^config
     ^-  json
     %-  pairs
-    :~  ::size+o+[width+(numb -:size.c) height+(numb +:size.c)]
+    =/  size-map  (my [['width' (numb -:size.c)] ['height' (numb +:size.c)] ~])
+    :~  size+o+size-map
         titlebar-border+b+titlebar-border.c
         show-titlebar+b+show-titlebar.c
     ==
