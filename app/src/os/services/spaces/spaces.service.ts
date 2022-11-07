@@ -191,6 +191,10 @@ export class SpacesService extends BaseService {
     this.setTheme = this.setTheme.bind(this);
   }
 
+  get currentPath() {
+    return this.state?.selected?.path;
+  }
+
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
   }

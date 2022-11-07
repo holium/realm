@@ -91,6 +91,7 @@ const NativeApp = types.model('NativeApp', {
   title: types.string,
   info: types.string,
   color: types.string,
+  installStatus: types.optional(types.string, 'installed'),
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
 });
@@ -364,8 +365,12 @@ export const NewBazaarStore = types
       // })
       return Array.from(Object.values(getSnapshot(self.catalog))).filter(
         (app: AppType) => {
-          const urb = app as UrbitAppType;
-          return urb.installStatus === 'installed';
+          if (app.type === 'urbit') {
+            const urb = app as UrbitAppType;
+            return urb.installStatus === 'installed';
+          } else {
+            return true;
+          }
         }
       );
     },
