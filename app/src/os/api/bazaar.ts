@@ -167,15 +167,61 @@ export const BazaarApi = {
     });
   },
   addAlly: async (conduit: Conduit, ship: Patp): Promise<any> => {
-    conduit.poke({
-      app: 'treaty',
-      mark: 'ally-update-0',
-      json: {
-        add: ship,
-      },
-      onError: (e: any) => {
-        console.error(e);
-      },
+    return new Promise(async (resolve, reject) => {
+      let subscriptionId: number = -1;
+      let timeout: NodeJS.Timeout;
+      await conduit.watch({
+        app: 'treaty',
+        path: '/treaties',
+        onSubscribed: (subscription: number) => {
+          subscriptionId = subscription;
+          // upon subscribing, start a timer. if we don't get the 'add'
+          //  event (see below) within the allotted time, it "usually" means the configured
+          //  INSTALL_MOON does not have any apps available to install
+          timeout = setTimeout(async () => {
+            await conduit.unsubscribe(subscriptionId);
+            console.log(
+              `timeout forming alliance with ${ship}. is the ship running? are there apps published on '${ship}'?`
+            );
+            reject(`timeout forming alliance with ${ship}`);
+          }, 60000);
+
+          conduit
+            .poke({
+              app: 'treaty',
+              mark: 'ally-update-0',
+              json: {
+                add: ship,
+              },
+              onError: (e: any) => {
+                console.error(e);
+                reject(e);
+              },
+            })
+            .catch((e) => {
+              console.log(e);
+              if (timeout) clearTimeout(timeout);
+              reject('add ally error');
+            });
+        },
+        onEvent: async (data: any, _id?: number, mark?: string) => {
+          if (data.hasOwnProperty('add')) {
+            if (timeout) {
+              clearTimeout(timeout);
+            }
+            await conduit.unsubscribe(subscriptionId);
+            resolve(data);
+          }
+        },
+        onError: () => {
+          console.log('subscription [treaty/treaties] rejected');
+          reject('subscription [treaty/treaties] rejected');
+        },
+        onQuit: () => {
+          console.log('kicked from subscription [treaty/treaties]');
+          reject('kicked from subscription [treaty/treaties]');
+        },
+      });
     });
   },
 };
