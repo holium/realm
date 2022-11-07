@@ -21,9 +21,7 @@ import { getTransactions } from './lib/helpers';
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
 ) => ({
-  [WalletView.LIST]: (props: any) => (
-    <WalletList {...props} />
-  ),
+  [WalletView.LIST]: (props: any) => <WalletList {...props} />,
   [WalletView.WALLET_DETAIL]: (props: any) => <Detail {...props} />,
   [WalletView.TRANSACTION_DETAIL]: (props: any) => (
     <TransactionDetail {...props} />
@@ -46,7 +44,9 @@ export const WalletApp: FC<any> = observer((props: any) => {
   var transactions: any = [];
   for (var key of walletApp.currentStore.wallets.keys()) {
     const walletTransactions = getTransactions(
-      walletApp.currentStore.wallets.get(key)!.transactions.get(walletApp.currentStore.network!) || new Map()
+      walletApp.currentStore.wallets
+        .get(key)!
+        .transactions.get(walletApp.currentStore.network!) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
   }
@@ -78,7 +78,9 @@ export const WalletApp: FC<any> = observer((props: any) => {
     >
       <WalletHeader
         theme={theme.currentTheme}
-        network={walletApp.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'}
+        network={
+          walletApp.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
+        }
         onAddWallet={() => WalletActions.navigate(WalletView.CREATE_WALLET)}
         onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
         hide={hideHeaderFooter}

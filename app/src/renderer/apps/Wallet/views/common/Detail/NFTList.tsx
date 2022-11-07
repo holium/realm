@@ -98,17 +98,17 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
 
   return (
     <Flex flexDirection="column" alignItems="center">
-      {props.nfts.length ? (props.nfts.map((nft, index) => (
-        <NFT details={nft} key={index} />
-      ))) : (
-          <Text
-            mt={3}
-            variant="h4"
-            textAlign="center"
-            color={theme.currentTheme.iconColor}
-          >
-            No NFTs
-          </Text>
+      {props.nfts.length ? (
+        props.nfts.map((nft, index) => <NFT details={nft} key={index} />)
+      ) : (
+        <Text
+          mt={3}
+          variant="h4"
+          textAlign="center"
+          color={theme.currentTheme.iconColor}
+        >
+          No NFTs
+        </Text>
       )}
     </Flex>
   );

@@ -83,22 +83,22 @@ export const BitcoinTransaction = types.model('BitcoinTransaction', {
 
 export type BitcoinTransactionType = Instance<typeof BitcoinTransaction>;
 
-const BitcoinWallet = types.model('BitcoinWallet', {
-  index: types.number,
-  network: types.string,
-  path: types.string,
-  address: types.string,
-  nickname: types.string,
-  balance: types.string,
-  transactions: types.map(types.map(BitcoinTransaction)),
-}).actions((self) => ({
-  setBalance(balance: string) {
-    self.balance = balance;
-  },
-  applyTransactions(transactions: any) {
-
-  },
-}));
+const BitcoinWallet = types
+  .model('BitcoinWallet', {
+    index: types.number,
+    network: types.string,
+    path: types.string,
+    address: types.string,
+    nickname: types.string,
+    balance: types.string,
+    transactions: types.map(types.map(BitcoinTransaction)),
+  })
+  .actions((self) => ({
+    setBalance(balance: string) {
+      self.balance = balance;
+    },
+    applyTransactions(transactions: any) {},
+  }));
 
 export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
 
@@ -106,15 +106,16 @@ const BitcoinStore = types
   .model('BitcoinStore', {
     wallets: types.map(BitcoinWallet),
     settings: Settings,
-    conversions:
-      types.model({
+    conversions: types
+      .model({
         usd: types.maybe(types.number),
         cad: types.maybe(types.number),
         euro: types.maybe(types.number),
-      }).actions((self) => ({
+      })
+      .actions((self) => ({
         setUsd(usd: number) {
           self.usd = usd;
-        }
+        },
       })),
   })
   .views((self) => ({
@@ -161,12 +162,12 @@ const BitcoinStore = types
         self.wallets.set(wallet.key, bitcoinWallet);
       }
       for (var transaction in wallet.transactions) {
-    //    self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
+        //    self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
     },
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
-    }
+    },
   }));
 
 const ERC20 = types
@@ -176,16 +177,17 @@ const ERC20 = types
     address: types.string,
     balance: types.string,
     decimals: types.number,
-    conversions:
-      types.model({
+    conversions: types
+      .model({
         usd: types.maybe(types.number),
         cad: types.maybe(types.number),
         euro: types.maybe(types.number),
-      }).actions((self) => ({
+      })
+      .actions((self) => ({
         setUsd(usd: number) {
           self.usd = usd;
-        }
-    })),
+        },
+      })),
   })
   .actions((self) => ({
     setBalance(balance: string) {
@@ -193,7 +195,7 @@ const ERC20 = types
     },
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
-    }
+    },
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;
@@ -366,7 +368,7 @@ const EthWallet = types
     },*/
     getTransaction(network: string, hash: string) {
       const tx: any = self.transactions.get(network)!.get(hash);
-      console.log(tx)
+      console.log(tx);
       return {
         hash: tx.hash,
         walletIndex: self.index,
@@ -407,43 +409,46 @@ const EthWallet = types
         status: 'pending',
         notes: '',
       };
-      let netMap = self.transactions.get(network)?.toJSON() || types.map(EthTransaction).create().toJSON()
+      let netMap =
+        self.transactions.get(network)?.toJSON() ||
+        types.map(EthTransaction).create().toJSON();
       let newMap = {
         ...netMap,
-        [hash]: tx
-      }
-      self.transactions.set(network, getSnapshot(types.map(EthTransaction).create(newMap)));
+        [hash]: tx,
+      };
+      self.transactions.set(
+        network,
+        getSnapshot(types.map(EthTransaction).create(newMap))
+      );
     },
     applyTransactionUpdate(network: string, transaction: any) {
-      let netMap = self.transactions.get(network)
+      let netMap = self.transactions.get(network);
       if (!netMap) {
         self.transactions.set(network, {});
       }
       netMap = self.transactions.get(network)!;
       let tx = netMap?.get(transaction.hash);
-      console.log('applying update')
+      console.log('applying update');
       if (tx) {
         tx.walletIndex = self.index;
         tx.notes = transaction.notes;
-        netMap.set(transaction.hash, tx)
+        netMap.set(transaction.hash, tx);
         self.transactions.set(network, netMap);
-      }
-      else {
+      } else {
         let tx = {
           ...transaction,
           walletIndex: self.index,
           amount: '0',
           notes: '',
-        }
-        netMap.set(transaction.hash, tx)
+        };
+        netMap.set(transaction.hash, tx);
         self.transactions.set(network, netMap);
       }
     },
     applyTransactions(network: string, transactions: any) {
       var formattedTransactions: any = {};
       let previousTransactions = self.transactions.toJSON()[network];
-      if (!previousTransactions)
-        self.transactions.set(network, {})
+      if (!previousTransactions) self.transactions.set(network, {});
       previousTransactions = self.transactions.toJSON()[network];
       for (var transaction of transactions) {
         const previousTransaction = previousTransactions[transaction.hash];
@@ -477,10 +482,10 @@ const EthWallet = types
       formattedTransactions = {
         ...previousTransactions,
         ...formattedTransactions,
-      }
+      };
       formattedTransactions = {
-        [network]: formattedTransactions
-      }
+        [network]: formattedTransactions,
+      };
       const map = types.map(types.map(EthTransaction));
       const newTransactions = map.create(formattedTransactions);
       applySnapshot(self.transactions, getSnapshot(newTransactions));
@@ -495,15 +500,16 @@ export const EthStore = types
     wallets: types.map(EthWallet),
     settings: Settings,
     initialized: types.boolean,
-    conversions:
-      types.model({
+    conversions: types
+      .model({
         usd: types.maybe(types.number),
         cad: types.maybe(types.number),
         euro: types.maybe(types.number),
-      }).actions((self) => ({
+      })
+      .actions((self) => ({
         setUsd(usd: number) {
           self.usd = usd;
-        }
+        },
       })),
   })
   .views((self) => ({
@@ -557,7 +563,9 @@ export const EthStore = types
         self.wallets.set(wallet.key, ethWallet);
       }
       for (var transaction in wallet.transactions) {
-        self.wallets.get(wallet.key)!.applyTransactionUpdate(network, transaction);
+        self.wallets
+          .get(wallet.key)!
+          .applyTransactionUpdate(network, transaction);
       }
     }),
     setNetwork(network: string) {
@@ -571,7 +579,7 @@ export const EthStore = types
     },
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
-    }
+    },
   }));
 
 export enum NetworkType {
@@ -634,18 +642,18 @@ export const WalletStore = types
     get currentStore() {
       return self.navState.network === 'ethereum'
         ? self.ethereum
-        : (self.navState.btcNetwork === 'mainnet'
-          ? self.bitcoin
-          : self.testnet);
+        : self.navState.btcNetwork === 'mainnet'
+        ? self.bitcoin
+        : self.testnet;
     },
 
     get currentWallet() {
       let walletStore =
         self.navState.network === 'ethereum'
-        ? self.ethereum
-        : self.navState.btcNetwork === 'mainnet'
-        ? self.bitcoin
-        : self.testnet;
+          ? self.ethereum
+          : self.navState.btcNetwork === 'mainnet'
+          ? self.bitcoin
+          : self.testnet;
       return self.navState.walletIndex
         ? walletStore.wallets.get(self.navState.walletIndex)
         : null;
@@ -691,7 +699,7 @@ export const WalletStore = types
       self.navState = newState;
     },
     navigateBack() {
-      let DEFAULT_RETURN_VIEW = WalletView.LIST
+      let DEFAULT_RETURN_VIEW = WalletView.LIST;
       let returnSnapshot = getSnapshot(
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,

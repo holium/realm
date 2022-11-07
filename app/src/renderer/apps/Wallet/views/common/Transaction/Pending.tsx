@@ -54,12 +54,10 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   const { colors } = getBaseTheme(theme.currentTheme);
 
   const goToTransaction = () => {
-    WalletActions.navigate(WalletView.TRANSACTION_DETAIL,
-      {
-        walletIndex: props.transaction.walletIndex.toString(),
-        detail: { type: 'transaction', key: props.transaction.hash },
-      }
-    );
+    WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+      walletIndex: props.transaction.walletIndex.toString(),
+      detail: { type: 'transaction', key: props.transaction.hash },
+    });
   };
 
   let isEth = props.transaction.network === 'ethereum';
@@ -67,11 +65,14 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   let btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1');
   let themDisplay =
     props.transaction.theirPatp || shortened(props.transaction.theirAddress);
-  let unitsDisplay = 'BTC'
+  let unitsDisplay = 'BTC';
   if (isEth) {
-    unitsDisplay = props.transaction.ethType === 'ETH'
-      ? 'ETH'
-      : walletApp.ethereum.wallets.get(props.transaction.walletIndex.toString())!.coins.get(props.transaction.ethType!)!.name
+    unitsDisplay =
+      props.transaction.ethType === 'ETH'
+        ? 'ETH'
+        : walletApp.ethereum.wallets
+            .get(props.transaction.walletIndex.toString())!
+            .coins.get(props.transaction.ethType!)!.name;
   }
 
   return (

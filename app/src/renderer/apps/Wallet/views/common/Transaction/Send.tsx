@@ -65,7 +65,11 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
       <Box width="100%" hidden={props.hidden}>
         <Seperator />
         <TransactionPane
-          max={props.coin ? Number(props.coin.balance) : Number(props.wallet.balance)}
+          max={
+            props.coin
+              ? Number(props.coin.balance)
+              : Number(props.wallet.balance)
+          }
           onScreenChange={props.onScreenChange}
           close={props.close}
           coin={props.coin}

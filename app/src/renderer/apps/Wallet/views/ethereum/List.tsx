@@ -6,8 +6,7 @@ import { WalletCard } from '../common/WalletCard';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-interface WalletListProps {
-}
+interface WalletListProps {}
 
 export const WalletList: FC<WalletListProps> = observer(
   (props: WalletListProps) => {
@@ -18,9 +17,11 @@ export const WalletList: FC<WalletListProps> = observer(
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
-            console.log(walletEntry.key)
-            let fullWallet = walletApp.currentStore.wallets.get(walletEntry.key);
-            console.log(fullWallet)
+            console.log(walletEntry.key);
+            let fullWallet = walletApp.currentStore.wallets.get(
+              walletEntry.key
+            );
+            console.log(fullWallet);
             return (
               <WalletCard
                 key={walletEntry.address}
@@ -56,8 +57,12 @@ export const WalletList: FC<WalletListProps> = observer(
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
               You haven't created any{' '}
-              {walletApp.navState.network === 'ethereum' ? 'Ethereum' : (walletApp.navState.btcNetwork === 'mainnet' ? 'Bitcoin' : 'Bitcoin Testnet')} wallets
-              yet.
+              {walletApp.navState.network === 'ethereum'
+                ? 'Ethereum'
+                : walletApp.navState.btcNetwork === 'mainnet'
+                ? 'Bitcoin'
+                : 'Bitcoin Testnet'}{' '}
+              wallets yet.
             </Text>
           </Flex>
           <Flex mt={9} justifyContent="center">
@@ -75,7 +80,11 @@ export const WalletList: FC<WalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        {list.length ? <List /> : <Empty network={walletApp.navState.network} />}
+        {list.length ? (
+          <List />
+        ) : (
+          <Empty network={walletApp.navState.network} />
+        )}
       </Flex>
     );
   }

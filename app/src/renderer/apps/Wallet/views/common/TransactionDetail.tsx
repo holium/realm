@@ -61,9 +61,9 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = (
-    walletApp.currentWallet! as EthWalletType
-  ).transactions.get(walletApp.currentStore.network).get(walletApp.navState.detail!.key)!;
+  let transaction = (walletApp.currentWallet! as EthWalletType).transactions
+    .get(walletApp.currentStore.network)
+    .get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);
@@ -135,8 +135,14 @@ export const TransactionDetail: FC = observer(() => {
           >
             $
             {isEth
-              ? convertEthAmountToUsd(ethAmount, walletApp.ethereum.conversions.usd)
-              : convertBtcAmountToUsd(btcAmount, walletApp.bitcoin.conversions.usd)}
+              ? convertEthAmountToUsd(
+                  ethAmount,
+                  walletApp.ethereum.conversions.usd
+                )
+              : convertBtcAmountToUsd(
+                  btcAmount,
+                  walletApp.bitcoin.conversions.usd
+                )}
           </Text>
         </Flex>
       </Flex>

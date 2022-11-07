@@ -102,7 +102,7 @@ export function formatEthAmount(amount: string): EthAmount {
 export function formatCoinAmount(balance: string | BigInt, decimals: number) {
   let amount = typeof balance === 'string' ? balance : balance.toString();
   if (amount.length < decimals) {
-    let additionalDigits = '0'.repeat((decimals - amount.length) + 1);
+    let additionalDigits = '0'.repeat(decimals - amount.length + 1);
     amount = additionalDigits + amount;
   }
   let decimalPosition = amount.length - decimals;
@@ -146,11 +146,14 @@ export function formatBtcAmount(amount: string): BtcAmount {
   let wei = utils.parseEther(ethAmount)!;
   return {
     btc: utils.formatUnits(wei, 'ether').slice(0, 6),
-    sats: 'placeholder'
+    sats: 'placeholder',
   };
 }
 
-export function convertBtcAmountToUsd(amount: BtcAmount, exchangeRate: number = 1647.37) {
+export function convertBtcAmountToUsd(
+  amount: BtcAmount,
+  exchangeRate: number = 1647.37
+) {
   if (amount.btc === '0') {
     return 0;
   }
@@ -158,7 +161,10 @@ export function convertBtcAmountToUsd(amount: BtcAmount, exchangeRate: number = 
   return usd.toFixed(2);
 }
 
-export function convertERC20AmountToUsd(amount: any, exchangeRate: number = 1647.37) {
+export function convertERC20AmountToUsd(
+  amount: any,
+  exchangeRate: number = 1647.37
+) {
   if (amount.btc === '0') {
     return 0;
   }

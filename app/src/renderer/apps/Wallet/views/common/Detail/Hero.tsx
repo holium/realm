@@ -76,18 +76,30 @@ export const DetailHero: FC<DetailHeroProps> = observer(
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`
         : `${formatBtcAmount(props.wallet.balance).btc} BTC`;
-    let amountUsdDisplay = 
+    let amountUsdDisplay =
       walletApp.navState.network === 'ethereum'
         ? !props.coin
-          ? (walletApp.ethereum.conversions.usd
-            ? '$' + `${convertEthAmountToUsd(formatEthAmount(props.wallet.balance), walletApp.ethereum.conversions.usd)}`
-            : '')
-          : (props.coin.conversions.usd
-            ? '$' + `${convertERC20AmountToUsd(formatCoinAmount(props.coin.balance, props.coin.decimals), props.coin.conversions.usd)}`
-            : '')
-        : (walletApp.bitcoin.conversions.usd
-          ? '$' + `${convertBtcAmountToUsd(formatBtcAmount(props.wallet.balance), walletApp.bitcoin.conversions.usd)}`
-          : '');
+          ? walletApp.ethereum.conversions.usd
+            ? '$' +
+              `${convertEthAmountToUsd(
+                formatEthAmount(props.wallet.balance),
+                walletApp.ethereum.conversions.usd
+              )}`
+            : ''
+          : props.coin.conversions.usd
+          ? '$' +
+            `${convertERC20AmountToUsd(
+              formatCoinAmount(props.coin.balance, props.coin.decimals),
+              props.coin.conversions.usd
+            )}`
+          : ''
+        : walletApp.bitcoin.conversions.usd
+        ? '$' +
+          `${convertBtcAmountToUsd(
+            formatBtcAmount(props.wallet.balance),
+            walletApp.bitcoin.conversions.usd
+          )}`
+        : '';
 
     let accountDisplay = !props.coin ? (
       props.wallet.nickname

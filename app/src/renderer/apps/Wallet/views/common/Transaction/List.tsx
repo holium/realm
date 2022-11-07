@@ -67,13 +67,25 @@ export const Transaction = observer((props: TransactionProps) => {
     >
       <Flex flexDirection="column" justifyContent="center">
         <Text variant="h5" fontSize={3}>
-          {transaction.status !== 'pending' ? (wasSent ? 'Sent' : 'Received') : (wasSent ? 'Sending' : 'Receiving')}
+          {transaction.status !== 'pending'
+            ? wasSent
+              ? 'Sent'
+              : 'Received'
+            : wasSent
+            ? 'Sending'
+            : 'Receiving'}
         </Text>
         <Flex>
           <Text
             variant="body"
             fontSize={1}
-            color={transaction.status !== 'pending' ? (wasSent ? 'text.error' : 'text.success') : 'brand.primary'}
+            color={
+              transaction.status !== 'pending'
+                ? wasSent
+                  ? 'text.error'
+                  : 'text.success'
+                : 'brand.primary'
+            }
           >
             {`${
               monthNames[completedDate.getMonth()]
@@ -99,8 +111,14 @@ export const Transaction = observer((props: TransactionProps) => {
         <Text variant="body" fontSize={1} color="text.disabled">
           {transaction.type === 'sent' ? '-' : ''}$
           {isEth
-            ? convertEthAmountToUsd(ethAmount, walletApp.ethereum.conversions.usd)
-            : convertBtcAmountToUsd(btcAmount, walletApp.bitcoin.conversions.usd)}{' '}
+            ? convertEthAmountToUsd(
+                ethAmount,
+                walletApp.ethereum.conversions.usd
+              )
+            : convertBtcAmountToUsd(
+                btcAmount,
+                walletApp.bitcoin.conversions.usd
+              )}{' '}
           USD
         </Text>
       </Flex>

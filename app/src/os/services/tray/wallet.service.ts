@@ -320,7 +320,7 @@ export class WalletService extends BaseService {
         navState: {
           view: WalletView.NEW,
           network: NetworkType.ETHEREUM,
-          btcNetwork: 'mainnet'
+          btcNetwork: 'mainnet',
         },
         navHistory: [],
         ethereum: {
@@ -341,7 +341,7 @@ export class WalletService extends BaseService {
             blocked: [],
             defaultIndex: 0,
           },
-          conversions: {}
+          conversions: {},
         },
         testnet: {
           settings: {
@@ -350,7 +350,7 @@ export class WalletService extends BaseService {
             blocked: [],
             defaultIndex: 0,
           },
-          conversions: {}
+          conversions: {},
         },
         creationMode: 'default',
         sharingMode: 'anybody',
@@ -384,14 +384,15 @@ export class WalletService extends BaseService {
 
     WalletApi.subscribeToWallets(this.core.conduit!, async (wallet: any) => {
       if (wallet.network === 'ethereum') {
-        this.state!.ethereum.applyWalletUpdate(this.state!.ethereum.network, wallet);
+        this.state!.ethereum.applyWalletUpdate(
+          this.state!.ethereum.network,
+          wallet
+        );
         this.updateEthereumInfo();
-      }
-      else if (wallet.network === 'bitcoin') {
+      } else if (wallet.network === 'bitcoin') {
         this.state!.bitcoin.applyWalletUpdate(wallet);
         this.updateBitcoinInfo();
-      }
-      else if (wallet.network === 'btctestnet') {
+      } else if (wallet.network === 'btctestnet') {
         this.state!.testnet.applyWalletUpdate(wallet);
         this.updateBitcoinInfo();
       }
@@ -457,7 +458,7 @@ export class WalletService extends BaseService {
     const privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    const btcTestnetPath = "m/44'/1'/0'/0"
+    const btcTestnetPath = "m/44'/1'/0'/0";
     // eth
     console.log('setting eth xpub');
     let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
@@ -515,7 +516,7 @@ export class WalletService extends BaseService {
   async setXpub(_event: any) {
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
-    const btcTestnetPath = "m/44'/1'/0'/0"
+    const btcTestnetPath = "m/44'/1'/0'/0";
     const privateKey = this.getPrivateKey();
     // eth
     let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
@@ -525,7 +526,7 @@ export class WalletService extends BaseService {
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
     // btc testnet
     xpub = privateKey.derivePath(btcTestnetPath).neuter().extendedKey;
-    await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub)
+    await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
   }
 
   navigate(
@@ -553,9 +554,7 @@ export class WalletService extends BaseService {
       if (network === 'bitcoin') {
         this.ethProvider!.removeAllListeners();
         this.updateBitcoinInfo();
-
-      }
-      else {
+      } else {
         this.setEthereumProviders();
       }
       this.state!.setNetwork(network);
@@ -652,7 +651,9 @@ export class WalletService extends BaseService {
   async getERC20ExchangeRate(contractAddress: string) {
     const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`;
     const result = await axios.get(url);
-    return result.data[contractAddress] ? Number(result.data[contractAddress].usd) : undefined;
+    return result.data[contractAddress]
+      ? Number(result.data[contractAddress].usd)
+      : undefined;
   }
 
   async getBitcoinExchangeRate() {
@@ -686,14 +687,14 @@ export class WalletService extends BaseService {
     console.log(`creating with nickname: ${nickname}`);
     const sender: string = this.state!.ourPatp!;
     let network: string = this.state!.navState.network;
-    if (network === 'bitcoin' && this.state!.navState.btcNetwork === 'testnet') {
+    if (
+      network === 'bitcoin' &&
+      this.state!.navState.btcNetwork === 'testnet'
+    ) {
       network = 'btctestnet';
     }
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
-    this.state!.navigate(
-      WalletView.LIST,
-      { canReturn: false }
-    );
+    this.state!.navigate(WalletView.LIST, { canReturn: false });
   }
 
   async estimateCurrentGasFee(_event: any) {}
@@ -735,8 +736,11 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType
     );
-    console.log('740 here')
-    const stateTx = currentWallet.getTransaction(this.state!.ethereum.network, hash);
+    console.log('740 here');
+    const stateTx = currentWallet.getTransaction(
+      this.state!.ethereum.network,
+      hash
+    );
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
@@ -754,7 +758,7 @@ export class WalletService extends BaseService {
     to: string,
     amount: string,
     contractAddress: string,
-    toPatp?: string,
+    toPatp?: string
   ) {
     console.log(walletIndex);
     console.log(to);
@@ -787,7 +791,10 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractAddress
     );
-    const stateTx = currentWallet.getTransaction(this.state!.ethereum.network, hash);
+    const stateTx = currentWallet.getTransaction(
+      this.state!.ethereum.network,
+      hash
+    );
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
@@ -831,7 +838,10 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       'ERC721'
     );
-    const stateTx = currentWallet.getTransaction(this.state!.ethereum.network, hash);
+    const stateTx = currentWallet.getTransaction(
+      this.state!.ethereum.network,
+      hash
+    );
     console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
@@ -850,13 +860,24 @@ export class WalletService extends BaseService {
     amount: string
   ) {
     const senderPath = "m/44'/0'/0'/0/" + walletIndex;
-    let hash = await this.createBitcoinTransaction(senderPath, to, Number(amount))
+    let hash = await this.createBitcoinTransaction(
+      senderPath,
+      to,
+      Number(amount)
+    );
     /*const tx: any = {}
     const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'btc/main' : 'btc/test3';
     const url = `https://api.blockcypher.com/v1/${btcChain}/txs/push`;
     const response = await axios.get(url);
     console.log(response)*/
-    await WalletApi.setTransaction(this.core.conduit!, 'bitcoin', this.state!.navState.btcNetwork, this.state!.currentWallet!.index, hash, tx);
+    await WalletApi.setTransaction(
+      this.core.conduit!,
+      'bitcoin',
+      this.state!.navState.btcNetwork,
+      this.state!.currentWallet!.index,
+      hash,
+      tx
+    );
   }
 
   async requestAddress(_event: any, network: string, from: string) {
@@ -864,31 +885,37 @@ export class WalletService extends BaseService {
   }
 
   async updateBitcoinInfo() {
-    const btcStore = this.state!.navState.btcNetwork === 'mainnet'
-    ? this.state!.bitcoin
-    : this.state!.testnet;
+    const btcStore =
+      this.state!.navState.btcNetwork === 'mainnet'
+        ? this.state!.bitcoin
+        : this.state!.testnet;
     for (var key of btcStore.wallets.keys()) {
-      const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'btc/main' : 'btc/test3';
-      let wallet = btcStore.wallets.get(key)!
+      const btcChain =
+        this.state!.navState.btcNetwork === 'mainnet'
+          ? 'btc/main'
+          : 'btc/test3';
+      let wallet = btcStore.wallets.get(key)!;
       const url = `https://api.blockcypher.com/v1/${btcChain}/addrs/${wallet.address}`;
-      console.log(url)
+      console.log(url);
       const response: any = await axios.get(url, {
         headers: {
-            'Content-Type': 'application/json'
-        }
-      })
+          'Content-Type': 'application/json',
+        },
+      });
       wallet.setBalance(response.data.balance.toString());
       wallet.applyTransactions(response.data.txrefs);
     }
     this.state!.bitcoin.setExchangeRate(await this.getBitcoinExchangeRate());
   }
 
-  async getAllBitcoinBalances() {
-  }
+  async getAllBitcoinBalances() {}
 
   async getAllBitcoinTransactions() {
-    const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'bitcoin' : 'bitcoin/testnet'
-    const url = `https://api.blockchair.com/${btcChain}/raw/block/{:height}`
+    const btcChain =
+      this.state!.navState.btcNetwork === 'mainnet'
+        ? 'bitcoin'
+        : 'bitcoin/testnet';
+    const url = `https://api.blockchair.com/${btcChain}/raw/block/{:height}`;
   }
 
   setEthereumProviders() {
@@ -1019,13 +1046,11 @@ export class WalletService extends BaseService {
         this.setEthereumProviders();
       }
       this.updateEthereumInfo();
-    }
-    else if (this.state!.navState.network === 'bitcoin') {
+    } else if (this.state!.navState.network === 'bitcoin') {
       if (this.state!.navState.btcNetwork === 'mainnet') {
         this.state!.setBtcNetwork('testnet');
-      }
-      else if (this.state!.navState.btcNetwork === 'testnet') {
-        this.state!.setBtcNetwork('mainnet')
+      } else if (this.state!.navState.btcNetwork === 'testnet') {
+        this.state!.setBtcNetwork('mainnet');
       }
       this.updateBitcoinInfo();
     }
@@ -1049,8 +1074,12 @@ export class WalletService extends BaseService {
     }
   }
 
-  private async createBitcoinTransaction(senderPath: string, receiverAddress: string, amountToSend: number) {
-    const sochain_network = "BTCTEST";
+  private async createBitcoinTransaction(
+    senderPath: string,
+    receiverAddress: string,
+    amountToSend: number
+  ) {
+    const sochain_network = 'BTCTEST';
     const privateKey = this.getPrivateKey().derivePath(senderPath).privateKey;
     const sourceAddress = this.getPrivateKey().derivePath(senderPath).address;
     const satoshiToSend = amountToSend * 100000000;
@@ -1062,7 +1091,7 @@ export class WalletService extends BaseService {
     );
     const transaction = new bitcore.Transaction();
     let totalAmountAvailable = 0;
-    let inputs : any = [];
+    let inputs: any = [];
     utxos.data.data.txs.forEach(async (element: any) => {
       let utxo: any = {};
       utxo.satoshis = Math.floor(Number(element.value) * 100000000);
@@ -1074,10 +1103,11 @@ export class WalletService extends BaseService {
       inputCount += 1;
       inputs.push(utxo);
     });
-    let transactionSize: number = inputCount * 146 + outputCount * 34 + 10 - inputCount;
-    fee = transactionSize * 20
-    if (totalAmountAvailable - satoshiToSend - fee  < 0) {
-      throw new Error("Balance is too low for this transaction");
+    let transactionSize: number =
+      inputCount * 146 + outputCount * 34 + 10 - inputCount;
+    fee = transactionSize * 20;
+    if (totalAmountAvailable - satoshiToSend - fee < 0) {
+      throw new Error('Balance is too low for this transaction');
     }
     transaction.from(inputs);
     transaction.to(receiverAddress, satoshiToSend);
@@ -1086,12 +1116,12 @@ export class WalletService extends BaseService {
     transaction.sign(privateKey);
     const serializedTransaction = transaction.serialize();
     const result = await axios({
-      method: "POST",
+      method: 'POST',
       url: `https://sochain.com/api/v2/send_tx/${sochain_network}`,
       data: {
         tx_hex: serializedTransaction,
       },
     });
     return result.data.data;
-  };
+  }
 }
