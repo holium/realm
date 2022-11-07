@@ -1,4 +1,4 @@
-/-  *wallet
+/-  *realm-wallet
 /+  bech32=bip-b173, bip32, ethereum
 |%
 ++  bip44-codes

@@ -4,8 +4,8 @@ import { UISettingsType } from 'os/services/tray/wallet.model';
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'set-xpub': {
           network: network,
@@ -17,8 +17,8 @@ export const WalletApi = {
   },
   setSettings: async (conduit: Conduit, network: string, settings: UISettingsType) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'set-settings': {
           network: network,
@@ -37,8 +37,8 @@ export const WalletApi = {
     index: number
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'change-default-wallet': {
           network: network,
@@ -55,8 +55,8 @@ export const WalletApi = {
     nickname: string
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'create-wallet': {
           sndr: sender,
@@ -69,8 +69,8 @@ export const WalletApi = {
   },
   requestAddress: async (conduit: Conduit, network: string, from: string) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'request-address': {
           network: network,
@@ -83,7 +83,7 @@ export const WalletApi = {
   getAddress: async (conduit: Conduit, network: string, from: string) => {
     return new Promise<string>((resolve, reject) => {
       conduit.watch({
-        app: 'wallet',
+        app: 'realm-wallet',
         path: '/address/' + network + '/' + from,
         onEvent: (data: any) => {
           resolve(data);
@@ -107,8 +107,8 @@ export const WalletApi = {
     transaction: any,
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'set-transaction': {
           network,
@@ -130,8 +130,8 @@ export const WalletApi = {
     notes: string
   ) => {
     const payload = {
-      app: 'wallet',
-      mark: 'wallet-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'save-transaction-notes': {
           network,
@@ -149,7 +149,7 @@ export const WalletApi = {
     handler: (transaction: any) => void
   ) {
     conduit.watch({
-      app: 'wallet',
+      app: 'realm-wallet',
       path: '/transactions',
       onEvent: (data: any) => {
         handler(data);
@@ -160,7 +160,7 @@ export const WalletApi = {
   },
   getWallets: async (conduit: Conduit) => {
     return await conduit.scry({
-      app: 'wallet',
+      app: 'realm-wallet',
       path: '/wallets',
     });
   },
@@ -169,7 +169,7 @@ export const WalletApi = {
     handler: (transaction: any) => void
   ) => {
     conduit.watch({
-      app: 'wallet',
+      app: 'realm-wallet',
       path: '/wallets',
       onEvent: (data: any) => {
         handler(data);
@@ -180,7 +180,7 @@ export const WalletApi = {
   },
   getSettings: async (conduit: Conduit) => {
     return await conduit.scry({
-      app: 'wallet',
+      app: 'realm-wallet',
       path: '/settings'
     })
   }

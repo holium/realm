@@ -1,5 +1,5 @@
-/-  *wallet
-/+  default-agent, dbug, *wallet
+/-  *realm-wallet
+/+  default-agent, dbug, *realm-wallet
 |%
 +$  versioned-state
   $%  state-0
@@ -23,7 +23,7 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    :-  [%pass /init-wallet %agent [our.bowl %wallet] %poke %wallet-action !>([%initialize ~])]~
+    :-  [%pass /init-wallet %agent [our.bowl %realm-wallet] %poke %realm-wallet-action !>([%initialize ~])]~
     this
   ::
   ++  on-save
@@ -43,7 +43,7 @@
     |=  [=mark =vase]
     ^-  (quip card _this)
     ?+  mark  (on-poke:def mark vase)
-        %wallet-action
+        %realm-wallet-action
       =^  cards  state
         ^-  (quip card _state)
         (handle-wallet-action:core !<(action vase))
@@ -58,7 +58,7 @@
       =/  [%address =network from=@ta ~]  path
       =/  from=@p  (slav %p from)
       =/  wall-act=action  [%create-wallet our.bowl network (crip (scow %p our.bowl))]
-      =/  task  [%poke %wallet-action !>(`action`wall-act)]
+      =/  task  [%poke %realm-wallet-action !>(`action`wall-act)]
       :-  [%pass /addr/(scot %p from) %agent [from dap.bowl] task]~
       this
         [%transactions ~]
@@ -73,11 +73,11 @@
     ?>  (team:title our.bowl src.bowl)
     ?+    path  (on-peek:def path)
         [%x %wallets ~]
-      :^  ~  ~  %wallet-update
+      :^  ~  ~  %realm-wallet-update
       !>  ^-  update
       [%wallets wallets.state]
         [%x %settings ~]
-      :^  ~  ~  %wallet-update
+      :^  ~  ~  %realm-wallet-update
       !>  ^-  update
       [%settings settings.state]
     ==
@@ -181,7 +181,7 @@
     ::
     =/  null-address-card
       =/  wall-act=action  [%receive-address network.act ~]
-      =/  task  [%poke %wallet-action !>(`action`wall-act)]
+      =/  task  [%poke %realm-wallet-action !>(`action`wall-act)]
       [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
     ?:  =(who.sharing.settings %nobody)
       [null-address-card state]
@@ -204,11 +204,11 @@
       :_  state
       ?~  default-wallet
         ^-  (list card)
-        =/  task  [%poke %wallet-action !>(`action`[%receive-address network.act ~])]
+        =/  task  [%poke %realm-wallet-action !>(`action`[%receive-address network.act ~])]
         [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
       ^-  (list card)
       =/  wall-act=action  [%receive-address network.act `-:u.default-wallet]
-      =/  task  [%poke %wallet-action !>(`action`wall-act)]
+      =/  task  [%poke %realm-wallet-action !>(`action`wall-act)]
       [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
     ::  create new wallet
     ::
@@ -235,33 +235,33 @@
       :_  state
       ^-  (list card)
       ?.  (team:title our.bowl src.bowl)
-        =/  task  [%poke %wallet-action !>(`action`[%receive-address network.act ~])]
+        =/  task  [%poke %realm-wallet-action !>(`action`[%receive-address network.act ~])]
         [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
       ~
     ::  add wallet update and await-balance to cards
     =/  cards
       ^-  (list card)
       =/  key  [network.act `@ta`idx]
-      :~  `card`[%give %fact [/wallets]~ %wallet-update !>(`update`[%wallet network.act (scot %ud idx) u.wallet])]
+      :~  `card`[%give %fact [/wallets]~ %realm-wallet-update !>(`update`[%wallet network.act (scot %ud idx) u.wallet])]
       ==
     ::  send wallet to requester if not our
     =?  cards  !(team:title our.bowl src.bowl)
       =/  send-card
         ^-  (list card)
-        =/  task  [%poke %wallet-action !>(`action`[%receive-address network.act `-:u.wallet])]
+        =/  task  [%poke %realm-wallet-action !>(`action`[%receive-address network.act `-:u.wallet])]
         [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
       (weld cards send-card)
     [cards state]
     ::
       %request-address
-    =/  task  [%poke %wallet-action !>(`action`[%create-wallet our.bowl network.act (crip (scow %p our.bowl))])]
+    =/  task  [%poke %realm-wallet-action !>(`action`[%create-wallet our.bowl network.act (crip (scow %p our.bowl))])]
     :-  [%pass /addr/(scot %p from.act) %agent [from.act dap.bowl] task]~
     state
       %receive-address
     =/  upd  `update`[%address src.bowl network.act address.act]
     =/  update-path=path  /address/[(crip (scow %tas network.act))]/[(crip (scow %p src.bowl))]
     :-
-      :~  [%give %fact [update-path]~ %wallet-update !>(upd)]
+      :~  [%give %fact [update-path]~ %realm-wallet-update !>(upd)]
           [%give %kick ~[update-path] ~]
       ==
     state
@@ -297,7 +297,7 @@
           =.  our-address.transaction.act  their-address
           transaction.act
         =/  wall-act=action  [%set-transaction network.act net.act wallet.act hash.act transaction.act]
-        =/  task  [%poke %wallet-action !>(wall-act)]
+        =/  task  [%poke %realm-wallet-action !>(wall-act)]
         =/  new-card  
           ^-  (list card)
           :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
@@ -307,7 +307,7 @@
         !(team:title our.bowl src.bowl)
       =/  new-card
         ^-  (list card)
-        :~  `card`[%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction network.act net.act wallet.act hash.act transaction.act])]
+        :~  `card`[%give %fact ~[/transactions] %realm-wallet-update !>(`update`[%transaction network.act net.act wallet.act hash.act transaction.act])]
         ==
       (weld cards new-card)
     [cards state]
@@ -339,7 +339,7 @@
       =.  network-map  (~(put by network-map) [wallet.act wall-map])
       (~(put by wallets) [%ethereum network-map])
     :_  state
-    [%give %fact ~[/transactions] %wallet-update !>(`update`[%transaction %ethereum net.act wallet.act hash.act tx])]~
+    [%give %fact ~[/transactions] %realm-wallet-update !>(`update`[%transaction %ethereum net.act wallet.act hash.act tx])]~
     ::
   ==
 ::

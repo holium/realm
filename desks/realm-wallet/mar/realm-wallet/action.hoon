@@ -1,5 +1,5 @@
-/-  *wallet
-/+  *wallet
+/-  *realm-wallet
+/+  *realm-wallet
 |_  act=action
 ++  grow
   |%
