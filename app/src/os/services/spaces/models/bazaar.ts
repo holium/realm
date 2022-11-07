@@ -292,10 +292,14 @@ export const NewBazaarStore = types
     addAlly: flow(function* (conduit: Conduit, ship: Patp) {
       try {
         if (self.allies.has(ship)) return;
+        self.loadingTreaties = true;
         self.addingAlly.set(ship, 'adding');
-        return yield BazaarApi.addAlly(conduit, ship);
+        const result: any = yield BazaarApi.addAlly(conduit, ship);
+        self.loadingTreaties = false;
+        return result;
       } catch (error) {
         console.error(error);
+        self.loadingTreaties = false;
       }
     }),
     //
