@@ -1,8 +1,8 @@
 |%
 ::
-::  $clause: A key and value, as part of a docket
+::  $clause: A key and value, as part of a config
 ::
-::    Only used to parse $docket
+::    Only used to parse $config
 ::
 +$  clause
   $%  [%size size=[@ud @ud]]
