@@ -574,6 +574,20 @@
       ?>  ?=(%ini -.treaties)
       init.treaties
     ::
+    ++  config
+      |=  =desk
+      |^
+      .^(config:store %cx scry-path)
+      ++  scry-path
+        ^-  path
+        %+  weld  /(scot %p our.bowl)
+        (weld [desk]~ /(scot %da now.bowl)/config/realm)
+      ++  config-loc  `path`/config/realm
+      ++  config-exists
+::        ?:  =(0 ud:.^(cass:clay %cw scry-path))  %.n
+        .^(? %cu scry-path)
+      --
+    ::
     --
   ++  helpers
     |%
@@ -599,7 +613,7 @@
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
-        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed *config:store]) (set-grid-index desk grid-index.acc)]
+        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed (config:scry desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
