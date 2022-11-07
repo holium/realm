@@ -8,7 +8,7 @@ on:
       - main
 jobs:
   build-mac-production:
-    if: github.event.pull_request.merged == true && github.head_ref == 'staging'
+    if: github.event.pull_request.merged == true
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -60,7 +60,7 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
   #
   build-linux-production:
-    if: github.event.pull_request.merged == true && github.head_ref == 'staging'
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -90,7 +90,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   build-windows-production:
-    if: github.event.pull_request.merged == true && github.head_ref == 'staging'
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     container:
       image: electronuserland/builder:wine
