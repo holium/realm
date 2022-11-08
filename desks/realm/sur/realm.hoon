@@ -11,7 +11,7 @@
   ==
 ::
 +$  config
-  $:  size=[@ud @ud]     ::  (width, height) normalized to 0 - 10 units
+  $:  size=[@ud @ud]     ::  (width, height) normalized to 1 - 10 units
       titlebar-border=?  ::  should the bottom border show in the titlebar
       show-titlebar=?    ::  tells realm to not render the titlebar (except the buttons)
   ==
