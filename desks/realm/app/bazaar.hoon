@@ -56,18 +56,18 @@
     =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
     ?>  ?=(%spaces -.spaces-scry)
     =/  spaces                        spaces.spaces-scry
-    =/  stalls       
+    =/  stalls
       %+  turn  ~(tap by spaces)
         |=  [path=space-path:spaces-store =space:spaces-store]
         [path [suite=~ recommended=~]]
-    =/  docks       
+    =/  docks
       %+  turn  ~(tap by spaces)
         |=  [path=space-path:spaces-store =space:spaces-store]
         [path [~]]
     =.  stalls.state        (~(gas by stalls.state) stalls)
     =.  docks.state         (~(gas by docks.state) docks)
     :_  this
-    :~ 
+    :~
         [%pass /docket %agent [our.bowl %docket] %watch /charges]
         [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
         [%pass /allies %agent [our.bowl %treaty] %watch /allies]
@@ -129,7 +129,7 @@
       [%x %catalog ~]     ::  ~/scry/bazaar/catalog
         ``bazaar-view+!>([%catalog catalog.state])
       ::
-      [%x %installed ~]   ::  ~/scry/bazaar/installed 
+      [%x %installed ~]   ::  ~/scry/bazaar/installed
         =/  apps          (skim ~(tap by catalog.state) skim-installed:helpers:bazaar:core)
        ``bazaar-view+!>([%installed `catalog:store`(malt apps)])
       ::
@@ -292,7 +292,7 @@
     |=  =action:store
     ^-  (quip card _state)
     |^
-    ?-  -.action          
+    ?-  -.action
       %pin               (add-pin +.action)
       %unpin             (rem-pin +.action)
       %reorder-pins      (reorder-pins +.action)
@@ -310,7 +310,7 @@
       =/  upd-docks=dock:store      (~(gut by docks.state) path ~)
       =/  index                     ?~(index (lent upd-docks) u.index)
       =/  exists-at                 (find [app-id]~ upd-docks)
-      ?~  exists-at                 ::  should only pin if it doesnt exist              
+      ?~  exists-at                 ::  should only pin if it doesnt exist
         =.  upd-docks               (into upd-docks index app-id)
         =.  docks.state             (~(put by docks.state) [path upd-docks])
         :_  state
@@ -379,7 +379,7 @@
     ::
     ++  install-app
       |=  [=ship =desk]
-      ^-  (quip card _state)    
+      ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
@@ -439,7 +439,7 @@
         ?:  (we-host:helpers path)
           =/  rec-members             (~(gut by recommended.stall) app-id ~)
           =.  rec-members             (~(del in rec-members) our.bowl)
-          =.  recommended.stall       
+          =.  recommended.stall
             ?:  =(~(wyt in rec-members) 0)
               (~(del by recommended.stall) app-id)
             (~(put by recommended.stall) [app-id rec-members])
@@ -505,6 +505,12 @@
           |=  [entry=[=app-id:store =app:store] result=(list [=app-id:store =app:store])]
           ?:  (~(has by catalog.state) app-id.entry)  ::  if we already have the app
             result
+          =/  entry
+            ?+  -.app.entry  entry
+              %urbit
+                =.  install-status.app.entry  %uninstalled
+                entry
+            ==
           (snoc result entry)
       =.  catalog.state       (~(uni by catalog.state) (malt new-catalog-apps))
       :_  state
@@ -517,11 +523,11 @@
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall])]~
     --
-  ++  interaction 
+  ++  interaction
     |=  [itc=interaction:store]
     ^-  (quip card _state)
     |^
-    ?-  -.itc             
+    ?-  -.itc
       %member-recommend          (member-recommend +.itc)
       %member-unrecommend        (member-unrecommend +.itc)
     ==
@@ -544,13 +550,13 @@
       ?>  (check-member:security path src.bowl)
       ~&  >  ['unrecommending' path src.bowl app-id]
       =/  stall                   (~(got by stalls.state) path)
-      =/  rec-members=member-set:store           
+      =/  rec-members=member-set:store
         ?:  (~(has by recommended.stall) app-id)
           =/  members     (~(got by recommended.stall) app-id)
           =.  members     (~(del in members) src.bowl)
           members
         ~
-      =.  recommended.stall       
+      =.  recommended.stall
         ?:  =(~(wyt in rec-members) 0)
           (~(del by recommended.stall) app-id)
         (~(put by recommended.stall) [app-id rec-members])
@@ -594,7 +600,7 @@
       |=  [=app-id:store =grid-index:store]
       =/  grid-list       ~(val by grid-index)
       =/  current-index   (find [app-id]~ grid-list)
-      ?~  current-index   
+      ?~  current-index
         =.  grid-index    (~(put by grid-index) [(lent grid-list) app-id])
         grid-index
       grid-index
@@ -631,7 +637,7 @@
     ::
     ++  we-host
       |=  [path=space-path:spaces-store]
-      ?:  =('our' space.path)  
+      ?:  =('our' space.path)
         %.n
       =(our.bowl ship.path)
     ::
@@ -660,7 +666,7 @@
 ::
 ++  visas
   |%
-  ++  reaction 
+  ++  reaction
     |=  [rct=reaction:vstore]
     ^-  (quip card _state)
     |^
@@ -671,24 +677,24 @@
       |=  [path=space-path:spaces-store =ship]
       ^-  (quip card _state)
       =/  update-path    /bazaar/(scot %p ship.path)/(scot %tas space.path)
-      ?.  (is-host:core ship.path) 
+      ?.  (is-host:core ship.path)
         ?:  =(our.bowl ship)      ::  we were kicked
           =.  stalls.state        (~(del by stalls.state) path)
           =.  docks.state         (~(del by docks.state) path)
-          :_  state 
+          :_  state
           [%pass update-path %agent [our.bowl %bazaar] %leave ~]~
         ::  another member was kicked
         `state
       =/  stall               (~(got by stalls.state) path)
-      =/  cleaned-recs=[=recommended:store]        
+      =/  cleaned-recs=[=recommended:store]
         %-  ~(rep by recommended.stall)  ::  remove all recommendations from kicked
           |=  [app=[=app-id:store =member-set:store] result=[=recommended:store]]
           =/  rec-members      (~(del in member-set.app) ship)
-          =/  recommeded-map   
+          =/  recommeded-map
             ?:  =(~(wyt in rec-members) 0)
               (~(del by recommended.result) app-id.app)
             (~(put by recommended.result) [app-id.app rec-members])
-          =.  recommended.result    recommeded-map 
+          =.  recommended.result    recommeded-map
           result
       ::
       =.  recommended.stall   recommended.cleaned-recs
@@ -702,7 +708,7 @@
   --
 ++  spaces
   |%
-  ++  reaction 
+  ++  reaction
     |=  [rct=reaction:spaces-store]
     ^-  (quip card _state)
     |^
@@ -749,7 +755,7 @@
       :_  state
       %+  weld  recs
       ^-  (list card)
-      :~  
+      :~
         [%pass watch-path %agent [ship.path %bazaar] %watch watch-path]
       ==
     ::
@@ -759,7 +765,7 @@
 ++  treaty-update
   |=  [upd=update:treaty:treaty]
   ^-  (quip card _state)
-  |^  
+  |^
   ?+  -.upd    `state
     %add       (on-add +.upd)
     :: %del       (on-del +.upd)
@@ -779,9 +785,9 @@
       `state
     ::  trigger docker install
     :_  state
-    :~  
+    :~
       [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])]
-    == 
+    ==
   ::
   :: ++  on-del
   ::   |=  [=ship =desk]
@@ -814,17 +820,20 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}" ~)
     `state
   ::
   ++  on-add
     |=  [=ship]
     ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-add] => {<ship>}" ~)
     :: =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
     `state
   ::
   ++  on-del
     |=  [=ship]
     ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-del] => {<ship>}" ~)
     `state
   --
 ::  charge arms
@@ -840,7 +849,7 @@
   ::
   ++  add
     |=  [=desk =charge:docket]
-    ^-  (quip card _state) 
+    ^-  (quip card _state)
     ?-  -.chad.charge
       %install    (update-catalog-app desk charge %started)
       %hung       (update-catalog-app desk charge %failed)
