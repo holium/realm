@@ -594,7 +594,7 @@
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
-      =/  hidden     `(set desk)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ^-  [=catalog:store =grid-index:store]
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
@@ -648,6 +648,7 @@
       ^-  ?
       ?:  ?|  =(app-id %courier)
               =(app-id %realm)
+              =(app-id %realm-wallet)
               =(app-id %garden)
           ==
       %.y  %.n

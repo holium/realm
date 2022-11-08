@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { UISettingsType } from 'os/services/tray/wallet.model';
+import { SettingsType, UISettingsType } from 'os/services/tray/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -15,7 +15,11 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setSettings: async (conduit: Conduit, network: string, settings: UISettingsType) => {
+  setSettings: async (
+    conduit: Conduit,
+    network: string,
+    settings: SettingsType
+  ) => {
     const payload = {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
@@ -26,8 +30,8 @@ export const WalletApi = {
           who: settings.sharingMode,
           blocked: settings.blocked,
           'share-index': settings.defaultIndex,
-        }
-      }
+        },
+      },
     };
     await conduit.poke(payload);
   },
@@ -81,6 +85,7 @@ export const WalletApi = {
     await conduit.poke(payload);
   },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
+    console.log('get wallet address watch');
     return new Promise<string>((resolve, reject) => {
       conduit.watch({
         app: 'realm-wallet',
@@ -104,7 +109,7 @@ export const WalletApi = {
     net: string,
     wallet: number,
     hash: string,
-    transaction: any,
+    transaction: any
   ) => {
     const payload = {
       app: 'realm-wallet',
@@ -139,8 +144,8 @@ export const WalletApi = {
           wallet,
           hash,
           notes,
-        }
-      }
+        },
+      },
     };
     await conduit.poke(payload);
   },
@@ -148,6 +153,7 @@ export const WalletApi = {
     conduit: Conduit,
     handler: (transaction: any) => void
   ) {
+    console.log('GETTING subscribeToTransactions');
     conduit.watch({
       app: 'realm-wallet',
       path: '/transactions',
@@ -181,7 +187,7 @@ export const WalletApi = {
   getSettings: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'realm-wallet',
-      path: '/settings'
-    })
-  }
+      path: '/settings',
+    });
+  },
 };

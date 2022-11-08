@@ -20,6 +20,7 @@ import {
   SharingMode,
   UISettingsType,
   EthWalletType,
+  SettingsType,
 } from './wallet.model';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from 'alchemy-sdk';
@@ -440,7 +441,6 @@ export class WalletService extends BaseService {
       this.state.resetNavigation();
     }
     this.lock(); // lock wallet on login
-    console.log('onlogin', this.state);
   }
 
   get snapshot() {
@@ -662,7 +662,7 @@ export class WalletService extends BaseService {
     return Number(result.data.bitcoin.usd);
   }
 
-  async setSettings(_events: any, network: string, settings: UISettingsType) {
+  async setSettings(_events: any, network: string, settings: SettingsType) {
     if (network === 'ethereum') {
       this.state!.ethereum.setSettings(settings);
     }
@@ -865,11 +865,11 @@ export class WalletService extends BaseService {
       to,
       Number(amount)
     );
-    /*const tx: any = {}
-    const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'btc/main' : 'btc/test3';
-    const url = `https://api.blockcypher.com/v1/${btcChain}/txs/push`;
-    const response = await axios.get(url);
-    console.log(response)*/
+    const tx: any = {};
+    // const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'btc/main' : 'btc/test3';
+    // const url = `https://api.blockcypher.com/v1/${btcChain}/txs/push`;
+    // const response = await axios.get(url);
+    // console.log(response)
     await WalletApi.setTransaction(
       this.core.conduit!,
       'bitcoin',
