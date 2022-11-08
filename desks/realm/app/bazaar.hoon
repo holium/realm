@@ -585,7 +585,10 @@
       |^
       ?:  config-exists
         .^(config:store %cx scry-path)
-      *config:store
+      :*  size=[10 10]
+          titlebar-border=%.y
+          show-titlebar=%.y
+      ==
       ++  scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)/config/realm
       ++  exists-scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)
       ++  config-exists
