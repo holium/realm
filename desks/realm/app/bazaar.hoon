@@ -583,12 +583,21 @@
     ++  config
       |=  =desk
       |^
-      ?:  config-exists
-        .^(config:store %cx scry-path)
-      :*  size=[10 10]
-          titlebar-border=%.y
-          show-titlebar=%.y
-      ==
+      =/  config
+        ?:  config-exists
+          .^(config:store %cx scry-path)
+        :*  size=[10 10]
+            titlebar-border=%.y
+            show-titlebar=%.y
+        ==
+      =?  size.config
+          ?|  (lth -.size.config 1)
+              (lth +.size.config 1)
+              (gth -.size.config 10)
+              (gth +.size.config 10)
+          ==
+        [10 10]
+      config
       ++  scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)/config/realm
       ++  exists-scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)
       ++  config-exists
