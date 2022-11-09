@@ -26,6 +26,7 @@ export const AuthShip = types
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
     passwordHash: types.maybeNull(types.string),
+    code: types.maybe(types.string),
   })
   .actions((self) => ({
     setStatus(status: Instance<typeof StepList>) {
@@ -33,7 +34,7 @@ export const AuthShip = types
     },
     setMnemonic(mnemonic: string) {
       self.mnemonic = mnemonic;
-    }
+    },
   }));
 
 export type AuthShipType = Instance<typeof AuthShip>;
@@ -97,7 +98,7 @@ export const AuthStore = types
     },
     get mnemonic(): any {
       return self.selected!.mnemonic;
-    }
+    },
   }))
   .actions((self) => ({
     setFirstTime() {
@@ -133,9 +134,14 @@ export const AuthStore = types
     setShip(newShip: AuthShipType) {
       self.ships.set(newShip.id, newShip);
     },
-    setShipProfile(id: string, nickname: string, color:string, avatar:string) {
+    setShipProfile(
+      id: string,
+      nickname: string,
+      color: string,
+      avatar: string
+    ) {
       let ship = self.ships.get(id);
-      if(!ship) return;
+      if (!ship) return;
       ship.nickname = nickname;
       ship.color = color;
       ship.avatar = avatar;
@@ -200,7 +206,7 @@ export const AuthStore = types
     }),
     setMnemonic: (mnemonic: string) => {
       self.selected?.setMnemonic(mnemonic);
-    }
+    },
   }));
 
 export type AuthStoreType = Instance<typeof AuthStore>;

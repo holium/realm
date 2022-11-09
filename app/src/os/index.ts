@@ -21,6 +21,7 @@ export interface ISession {
   ship: string;
   url: string;
   cookie: string;
+  code: string;
 }
 
 export type ConnectParams = { reconnecting: boolean };
@@ -49,11 +50,15 @@ export class Realm extends EventEmitter {
     'realm.boot': this.boot,
     'realm.reconnect': this.reconnect,
     'realm.disconnect': this.disconnect,
+    'realm.refresh': this.refresh,
   };
 
   static preload = {
     boot: () => {
       return ipcRenderer.invoke('realm.boot');
+    },
+    refresh: () => {
+      return ipcRenderer.invoke('realm.refresh');
     },
     reconnect: () => {
       return ipcRenderer.invoke('realm.reconnect');
@@ -195,13 +200,37 @@ export class Realm extends EventEmitter {
     this.conduit = undefined;
   }
 
+  async refresh() {
+    if (!this.session) {
+      console.log('Conduit.refresh called with unexpected session');
+      return;
+    }
+    if (!this.conduit) {
+      console.log('Conduit.refresh called with unexpected conduit');
+      return;
+    }
+    if (!this.conduit) {
+      console.log('Conduit.refresh called with missing ship code');
+      return;
+    }
+    this.isReconnecting = true;
+    try {
+      console.log('refreshing token => %o', this.session);
+      return await this.conduit.refresh(this.session.url, this.session.code);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async reconnect() {
     this.conduit?.closeChannel();
     this.conduit = undefined;
 
     if (this.session) {
       this.isReconnecting = true;
-      return await this.connect(this.session, { reconnecting: true });
+      return await this.connect(this.session, {
+        reconnecting: true,
+      });
     }
   }
 
@@ -325,6 +354,10 @@ export class Realm extends EventEmitter {
       this.isResuming = false;
       this.isReconnecting = false;
       this.sendConnectionStatus(ConduitState.Failed);
+    });
+    conduit.on(ConduitState.Stale, () => {
+      this.sendLog('stale connection');
+      this.sendConnectionStatus(ConduitState.Stale);
     });
   }
 

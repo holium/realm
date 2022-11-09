@@ -392,6 +392,7 @@ export class OnboardingService extends BaseService {
         patp,
         cookie,
         url,
+        code: shipData.code,
       });
 
       return { url, cookie, patp };
@@ -514,6 +515,7 @@ export class OnboardingService extends BaseService {
       ...ship,
       id: `auth${ship.patp}`,
       passwordHash,
+      code: this.state.code,
     });
 
     this.core.services.identity.auth.storeNewShip(authShip);

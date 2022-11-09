@@ -75,6 +75,9 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
     const onReconnect = () => {
       OSActions.reconnect();
     };
+    const onRefresh = () => {
+      OSActions.refresh();
+    };
     let color = '#34C676';
     let statusText = 'Connected';
     let leftIcon = <div />;
@@ -93,6 +96,11 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
         leftIcon = <Icons name="Refresh" fill={lighten(0.34, color)} />;
         statusText = 'Reconnect';
       }
+    }
+    if (status === 'stale') {
+      color = '#C69D34';
+      leftIcon = <Icons name="Refresh" fill={lighten(0.34, color)} />;
+      statusText = 'Refresh Token';
     }
     let indicatorColor = lighten(0.34, color);
     useEffect(() => {
@@ -133,7 +141,11 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
             whileTap={{ scale: 0.95 }}
             onClick={() => {
               setIsReconnecting(true);
-              onReconnect();
+              if (connectionStatus === 'stale') {
+                onRefresh();
+              } else {
+                onReconnect();
+              }
             }}
           >
             {status === 'offline' && !isReconnecting && leftIcon}

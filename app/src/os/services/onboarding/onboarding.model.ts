@@ -74,6 +74,7 @@ export const OnboardingStore = types
     inviteCode: types.maybe(types.string),
     accessCode: types.maybe(AccessCodeModel),
     encryptedPassword: types.maybe(types.string),
+    code: types.maybe(types.string),
   })
   .actions((self) => ({
     setStep(step: OnboardingStep) {
@@ -115,6 +116,7 @@ export const OnboardingStore = types
       patp: string;
       url: string;
       cookie: string;
+      code: string;
     }) {
       self.ship = OnboardingShipModel.create({
         ...shipInfo,

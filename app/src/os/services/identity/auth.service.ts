@@ -33,12 +33,14 @@ export class AuthService extends BaseService {
     'realm.auth.set-mnemonic': this.setMnemonic,
     'realm.auth.set-ship-profile': this.setShipProfile,
     'realm.auth.cancel-login': this.cancelLogin,
+    'realm.auth.refresh': this.refresh,
   };
 
   static preload = {
     login: (ship: string, password: string) =>
       ipcRenderer.invoke('realm.auth.login', ship, password),
     logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
+    refresh: () => ipcRenderer.invoke('realm.auth.refresh'),
     setFirstTime: () => ipcRenderer.invoke('realm.auth.set-first-time'),
     cancelLogin: () => ipcRenderer.invoke('realm.auth.cancel-login'),
     setSelected: (ship: string) =>
@@ -145,6 +147,25 @@ export class AuthService extends BaseService {
     );
   }
 
+  async refresh(_event: any): Promise<string | undefined> {
+    if (!this.state.currentShip || !this.state.currentShip.code) {
+      return undefined;
+    }
+    const response = await axios.post(
+      `${this.state.currentShip.url}/~/login`,
+      `password=${this.state.currentShip.code.trim()}`,
+      {
+        withCredentials: true,
+      }
+    );
+    const cookie = response.headers['set-cookie']![0];
+    this.state.setShip({
+      ...this.state.currentShip,
+      cookie,
+    });
+    return cookie;
+  }
+
   async login(_event: any, ship: string, password: string): Promise<boolean> {
     let shipId = `auth${ship}`;
     this.state.setLoader('loading');
@@ -172,10 +193,19 @@ export class AuthService extends BaseService {
 
     // TODO decrypt stored snapshot
     const { url, cookie } = this.getCredentials(ship, password);
+
+    // not sure why getSession requires argument
+    const session = this.core.getSession({
+      ship,
+      url,
+      cookie,
+      code: '',
+    });
     this.core.setSession({
       ship,
       url,
       cookie,
+      code: session.code,
     });
 
     return true;
@@ -242,6 +272,7 @@ export class AuthService extends BaseService {
       url,
       cookie,
       patp: ship,
+      code: code,
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
     });

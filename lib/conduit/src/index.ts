@@ -46,13 +46,32 @@ export class Conduit extends EventEmitter {
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
+    this.handleError = this.handleError.bind(this);
     this.updateStatus = this.updateStatus.bind(this);
     this.reconnectToChannel = this.reconnectToChannel.bind(this);
     this.startSSE = this.startSSE.bind(this);
+    // Add a response interceptor
+    axios.interceptors.response.use(undefined, this.handleError);
   }
 
   generateUID() {
     return `${Math.floor(Date.now() / 1000)}-realm`;
+  }
+
+  /**
+   * Global error handler for axios errors. For now , hook 403 responses and use
+   *  to indicate that cookie has expired (stale connection).
+   *
+   * @param err
+   * @returns
+   */
+  handleError(err: any) {
+    console.log('Conduit.handleError: 403 [stale connection] error');
+    if (err.status === 403) {
+      this.updateStatus(ConduitState.Stale);
+      return;
+    }
+    Promise.reject(err);
   }
 
   updateStatus(status: ConduitState) {
@@ -71,6 +90,26 @@ export class Conduit extends EventEmitter {
     this.cookie = cookie;
     this.uid = this.generateUID();
     await this.startSSE(this.channelUrl(this.uid));
+  }
+
+  /**
+   * Refresh the underlying conduit cookie that's used for all interactions
+   *   with the ship.
+   * @param url ship root url (e.g. http://localhost:80)
+   * @returns
+   */
+  async refresh(url: string, code: string): Promise<void> {
+    this.url = url;
+    const cookie: string | undefined = await Conduit.fetchCookie(url, code);
+    if (cookie === undefined) {
+      console.log('Conduit.fetchCookie call failed with args => %o', {
+        url,
+        code,
+      });
+      return;
+    }
+    this.cookie = cookie;
+    return;
   }
 
   async startSSE(channelUrl: string): Promise<void> {
@@ -180,6 +219,10 @@ export class Conduit extends EventEmitter {
       };
       this.sse.onerror = async (error) => {
         console.log('sse error', error);
+        // @ts-ignore
+        if (error.status === 403) {
+          this.handleError(error);
+        }
         // @ts-ignore
         if (error.status === '404') {
           return;

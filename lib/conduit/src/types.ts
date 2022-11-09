@@ -10,6 +10,7 @@ export enum ConduitState {
   Disconnected = 'offline',
   Failed = 'failed',
   NoInternet = 'no-internet',
+  Stale = 'stale',
 }
 
 export type Actions =
