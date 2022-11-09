@@ -7,6 +7,7 @@ import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { pluralize } from 'renderer/logic/lib/text';
 import { observer } from 'mobx-react';
 
@@ -59,10 +60,6 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
   const { theme, membership, ship } = useServices();
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const isOwner = () => {
-    return membership.spaces.get(space.path)!.get(ship.patp)!.roles.includes('owner');
-  }
-
   // const {} =
   const rowRef = useRef<any>(null);
 
@@ -77,7 +74,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
         // DesktopActions.toggleDevTools();
       },
     },
-    isOwner()
+    false //membership.spaces.get(space.path)!.get(ship.patp)!.roles.includes('owner');
     ? {
         id: `space-row-${space.path}-btn-delete`,
         label: 'Delete',
@@ -95,11 +92,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
         label: 'Leave',
         loading: deleteLoading,
         onClick: (evt: any) => {
-          setDeleteLoading(true);
-          SpacesActions.deleteSpace(space.path).then((_response: any) => {
-            setDeleteLoading(false);
-          });
-          // DesktopActions.toggleDevTools();
+          ShellActions.openDialog('leave-space-dialog')
         },
       },
   ];

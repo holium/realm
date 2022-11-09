@@ -3,6 +3,7 @@ import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
 import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
+import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 
 export type BaseWorkflowProps = {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -38,6 +39,7 @@ export type DialogRenderers = {
 
 export const dialogRenderers: DialogRenderers = {
   'wallpaper-dialog': WallpaperDialogConfig,
+  'leave-space-dialog': LeaveSpaceDialogConfig,
   ...spacesDialogs,
   ...onboardingDialogs,
 };
