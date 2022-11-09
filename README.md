@@ -2,17 +2,17 @@
 
 A desktop environment for Urbit.
 
-## Getting started
-
-In order to run Urbit locally, you will need to create a local fake ship. Once these ships are
-created, you can then go to [`/app/README.md`](/app/README.md) to get started with Realm.
-
 We use yarn workspace to manage the multiple modules.
 
 ## Getting started
 Below is a detailed guide to getting things built or you can just download from Releases. If you download from releases, you will have to include a github token env when you open Realm for now, see docs in `/app` 
 
-In the debug buildt you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com`. 
+In the debug build you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com`. 
+
+## Dev setup
+
+In order to run Urbit locally, you will need to create a local fake ship. Once these ships are
+created, you can then go to [`/app/README.md`](/app/README.md) to get started with Realm.
 
 ### 1. Build UI
 
