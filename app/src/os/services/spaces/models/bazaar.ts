@@ -55,7 +55,7 @@ export const Glob = types.model('Glob', {
 
 export const RealmConfig = types.model('RealmConfig', {
   size: types.array(types.number),
-  showTitleBar: types.boolean,
+  showTitlebar: types.boolean,
   titlebarBorder: types.boolean,
 });
 
