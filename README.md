@@ -5,7 +5,7 @@ A desktop environment for Urbit.
 We use yarn workspace to manage the multiple modules.
 
 ## Getting started
-Below is a detailed guide to getting things built or you can just download from Releases. If you download from releases, you will have to include a github token env when you open Realm for now, see docs in `/app` 
+Below is a detailed guide to getting things built or you can just download from Releases. If you download from releases, you will have to include a github token env when you open Realm for now, see docs in [`/app/release/app`](https://github.com/holium/realm/tree/main/app/release/app/README.md).
 
 In the debug build you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com`. 
 
