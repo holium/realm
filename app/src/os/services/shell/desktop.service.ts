@@ -163,6 +163,7 @@ export class DesktopService extends BaseService {
       const appUrl = newWindow.href?.glob
         ? `${credentials.url}/apps/${selectedApp.id!}`
         : `${credentials.url}${newWindow.href?.site}`;
+      console.log('core credentials => %o', credentials);
       // Hit the main process handler for setting partition cookies
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
         url: appUrl,

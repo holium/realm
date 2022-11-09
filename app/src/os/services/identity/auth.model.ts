@@ -26,7 +26,7 @@ export const AuthShip = types
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
     passwordHash: types.maybeNull(types.string),
-    code: types.maybe(types.string),
+    code: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setStatus(status: Instance<typeof StepList>) {

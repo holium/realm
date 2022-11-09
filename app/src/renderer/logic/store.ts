@@ -147,6 +147,7 @@ export const CoreStore = types
       'offline',
       'failed',
       'stale',
+      'refreshed',
     ]),
     onboarded: types.optional(types.boolean, false),
     loggedIn: types.optional(types.boolean, false),

@@ -46,6 +46,7 @@ export const OnboardingShipModel = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
+    code: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setContactMetadata: (contactMetadata: {

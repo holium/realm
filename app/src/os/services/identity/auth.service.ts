@@ -13,6 +13,7 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import axios from 'axios';
+import { currentStore } from 'react-spaces/dist/core-react';
 
 /**
  * AuthService
@@ -89,6 +90,10 @@ export class AuthService extends BaseService {
     });
   }
 
+  get currentShip() {
+    return this.state.currentShip;
+  }
+
   get loggedIn() {
     return this.state.isLoaded;
   }
@@ -149,8 +154,13 @@ export class AuthService extends BaseService {
 
   async refresh(_event: any): Promise<string | undefined> {
     if (!this.state.currentShip || !this.state.currentShip.code) {
+      console.log('[auth.service.refresh] - missing code');
       return undefined;
     }
+    console.log(
+      '[auth.service.refresh] - code => %o',
+      this.state.currentShip.code
+    );
     const response = await axios.post(
       `${this.state.currentShip.url}/~/login`,
       `password=${this.state.currentShip.code.trim()}`,
@@ -159,9 +169,11 @@ export class AuthService extends BaseService {
       }
     );
     const cookie = response.headers['set-cookie']![0];
+    console.log('[auth.service.refresh] - cookie => %o', cookie);
     this.state.setShip({
       ...this.state.currentShip,
       cookie,
+      code: this.state.currentShip.code,
     });
     return cookie;
   }
@@ -193,19 +205,17 @@ export class AuthService extends BaseService {
 
     // TODO decrypt stored snapshot
     const { url, cookie } = this.getCredentials(ship, password);
-
-    // not sure why getSession requires argument
-    const session = this.core.getSession({
+    console.log('login => %o', {
       ship,
       url,
       cookie,
-      code: '',
+      code: this.currentShip?.code || '',
     });
     this.core.setSession({
       ship,
       url,
       cookie,
-      code: session.code,
+      code: this.currentShip?.code || '',
     });
 
     return true;

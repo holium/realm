@@ -395,6 +395,7 @@ export class ShipService extends BaseService {
       color: ship.color || null,
       nickname: ship.nickname || null,
       avatar: ship.avatar || null,
+      code: ship.code || null,
     });
 
     const storeParams = {

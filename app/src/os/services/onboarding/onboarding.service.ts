@@ -395,7 +395,7 @@ export class OnboardingService extends BaseService {
         code: shipData.code,
       });
 
-      return { url, cookie, patp };
+      return { url, cookie, patp, code: shipData.code };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
       throw new Error('Failed to connect to ship');
@@ -515,7 +515,7 @@ export class OnboardingService extends BaseService {
       ...ship,
       id: `auth${ship.patp}`,
       passwordHash,
-      code: this.state.code,
+      code: ship.code,
     });
 
     this.core.services.identity.auth.storeNewShip(authShip);

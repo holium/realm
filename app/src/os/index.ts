@@ -216,7 +216,19 @@ export class Realm extends EventEmitter {
     this.isReconnecting = true;
     try {
       console.log('refreshing token => %o', this.session);
-      return await this.conduit.refresh(this.session.url, this.session.code);
+      const cookie: string | undefined = await this.conduit.refresh(
+        this.session.url,
+        this.session.code
+      );
+      if (this.session) {
+        this.session = {
+          ...this.session,
+          cookie: cookie || '',
+        };
+        this.db.set(this.session);
+      } else {
+        console.warn('unexpected session => %o', this.session);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -250,7 +262,8 @@ export class Realm extends EventEmitter {
       await this.conduit.init(
         session.url,
         session.ship.substring(1),
-        session.cookie
+        session.cookie,
+        session.code
       );
       this.sendLog('after conduit init');
       this.sendLog('connection successful');
@@ -340,9 +353,15 @@ export class Realm extends EventEmitter {
         this.sendConnectionStatus(ConduitState.Initialized);
       }
     });
-    conduit.on(ConduitState.Connected, () =>
-      this.sendConnectionStatus(ConduitState.Connected)
-    );
+    conduit.on(ConduitState.Refreshed, (session) => {
+      console.info(`ConduitState.Refreshed => %o`, session);
+      this.session = session;
+      this.db.set(session);
+      this.sendConnectionStatus(ConduitState.Refreshed);
+    });
+    conduit.on(ConduitState.Connected, () => {
+      this.sendConnectionStatus(ConduitState.Connected);
+    });
     conduit.on(ConduitState.Disconnected, () =>
       this.sendConnectionStatus(ConduitState.Disconnected)
     );
