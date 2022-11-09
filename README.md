@@ -9,7 +9,7 @@ Below is a detailed guide to getting things built or you can just download from 
 
 In the debug build you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com`. 
 
-`~hostyv` hosts several of the desks needed for Realm.
+`~hostyv` hosts several of the desks needed for Realm, you may have to manually install them for now.
 
 ## Dev setup
 
