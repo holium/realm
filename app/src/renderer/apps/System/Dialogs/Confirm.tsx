@@ -14,6 +14,7 @@ import {
 } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
+import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 interface ConfirmDialogProps {
   title: string;
@@ -21,11 +22,18 @@ interface ConfirmDialogProps {
   onConfirm: () => any;
 }
 
-export const ConfirmDialog: FC = observer((props: ConfirmDialogProps) => {
-  const { theme, spaces } = useServices();
+export const ConfirmDialog: FC<ConfirmDialogProps> = observer((props: ConfirmDialogProps) => {
+  const { theme } = useServices();
   const [loading, setLoading] = useState(false);
-  const { inputColor, windowColor } = theme.currentTheme;
-  console.log('props', props)
+
+  const onConfirm = () => {
+    setLoading(true);
+    props.onConfirm().then(() => {
+      ShellActions.closeDialog();
+      ShellActions.setBlur(false);
+      setLoading(false);
+    })
+  }
 
   return (
     <Flex
@@ -59,7 +67,7 @@ export const ConfirmDialog: FC = observer((props: ConfirmDialogProps) => {
           highlightColor="#EC415A"
           textColor="#EC415A"
           style={{ fontWeight: 400 }}
-          onClick={() => props.onConfirm()}
+          onClick={() => onConfirm()}
         >
           {loading ? <Spinner size={0} /> : 'Confirm'}
         </TextButton>

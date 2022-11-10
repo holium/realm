@@ -5,24 +5,28 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useServices } from 'renderer/logic/store';
 import AppWindow from '../desktop/components/Window';
 import { getCenteredXY } from 'os/services/shell/lib/window-manager';
-import { dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { toJS } from 'mobx';
 
 type DialogManagerProps = {
   dialogId?: string;
+  dialogProps: any;
 };
 
 export const DialogManager: FC<DialogManagerProps> = observer(
   (props: DialogManagerProps) => {
-    const { dialogId } = props;
+    const { dialogId, dialogProps } = props;
 
     const { shell } = useServices();
 
     const desktopRef = useRef<any>(null);
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;
+
+    const dialogRenderer = dialogRenderers[dialogId];
+    let dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(dialogProps) : dialogRenderer;
 
     // clear dialog on escape pressed if closable
     useHotkeys(
@@ -34,7 +38,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         if (
           isOpen &&
           notOnboardingDialog &&
-          dialogRenderers[dialogId].hasCloseButton
+          dialogConfig.hasCloseButton
         ) {
           ShellActions.closeDialog();
           ShellActions.setBlur(false);
@@ -44,7 +48,12 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     );
 
     if (isOpen) {
-      const dialogConfig = dialogRenderers[dialogId];
+      /*const dialogRendererObject = dialogRenderers['leave-space-dialog-object'];
+      const dialogConfigObject: DialogConfig = (dialogRendererObject instanceof Function) ? dialogRendererObject(dialogProps) : dialogRendererObject;
+      console.log('dialogConfig', dialogConfig);
+      console.log('dialogConfigObject', dialogConfigObject);
+      console.log(JSON.stringify(dialogConfig) === JSON.stringify(dialogConfigObject));
+      dialogConfig = dialogConfigObject;*/
       const dimensions = {
         ...dialogConfig.window.dimensions,
         ...getCenteredXY(

@@ -14,10 +14,15 @@ export const ShellStore = types
       { width: 0, height: 0 }
     ),
     dialogId: types.maybe(types.string),
+    dialogProp: types.maybe(types.string)
   })
   .actions((self) => ({
     openDialog(dialogId: string) {
       self.dialogId = dialogId;
+    },
+    openDialogWithStringProp(dialogId: string, prop: string) {
+      self.dialogId = dialogId;
+      self.dialogProp = prop;
     },
     closeDialog() {
       self.dialogId = undefined;
