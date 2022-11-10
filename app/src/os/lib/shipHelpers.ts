@@ -32,7 +32,7 @@ export function storeCredentials(
   secretKey: string,
   credentials: ShipCredentials
 ) {
-  console.log('storeCredentials => %o', { patp, secretKey, credentials });
+  // console.log('storeCredentials => %o', { patp, secretKey, credentials });
   const storeParams = {
     name: 'credentials',
     cwd: `realm.${patp}`,
@@ -52,7 +52,7 @@ export function readCredentials(
   patp: string,
   secretKey: string
 ): ShipCredentials {
-  console.log('storeCredentials => %o', { patp, secretKey });
+  // console.log('readCredentials => %o', { patp, secretKey });
   const storeParams = {
     name: 'credentials',
     cwd: `realm.${patp}`,

@@ -214,10 +214,6 @@ export class Realm extends EventEmitter {
       console.log('Conduit.refresh called with unexpected conduit');
       return;
     }
-    if (!this.conduit) {
-      console.log('Conduit.refresh called with missing ship code');
-      return;
-    }
     this.isReconnecting = true;
     try {
       console.log('refreshing token => %o', this.session);
@@ -358,7 +354,7 @@ export class Realm extends EventEmitter {
       }
     });
     conduit.on(ConduitState.Refreshed, (session) => {
-      console.info(`ConduitState.Refreshed => %o`, session);
+      // console.info(`ConduitState.Refreshed => %o`, session);
       this.saveSession(session);
       this.sendConnectionStatus(ConduitState.Refreshed);
     });

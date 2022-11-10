@@ -153,7 +153,7 @@ export class AuthService extends BaseService {
 
     const { cookie } = this.core.getSession();
     const { code, passwordHash } = readCredentials(patp, password);
-    console.log({ cookie, code, password });
+    // console.log({ cookie, code, password });
     let passwordCorrect = await bcrypt.compare(password, passwordHash);
     this.core.sendLog(`passwordHash: ${passwordHash}`);
     this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);

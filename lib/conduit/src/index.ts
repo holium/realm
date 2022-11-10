@@ -69,36 +69,36 @@ export class Conduit extends EventEmitter {
   async handleError(err: any): Promise<any> {
     return new Promise(async (resolve, reject) => {
       if (err.status === 403 || err.response?.status === 403) {
-        if (!this.code) {
-          console.log(
-            'warn: http request 403 error. unable to refresh token due to missing code'
-          );
-          reject(err);
-          return;
-        }
-        if (err.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(err.response.data);
-          console.log(err.response.status);
-          console.log(err.response.headers);
-        } else if (err.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(err.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', err.message);
-        }
-        console.log(err.config);
+        // if (!this.code) {
+        //   console.log(
+        //     'warn: http request 403 error. unable to refresh token due to missing code'
+        //   );
+        //   reject(err);
+        //   return;
+        // }
+        // if (err.response) {
+        //   // The request was made and the server responded with a status code
+        //   // that falls out of the range of 2xx
+        //   console.log(err.response.data);
+        //   console.log(err.response.status);
+        //   console.log(err.response.headers);
+        // } else if (err.request) {
+        //   // The request was made but no response was received
+        //   // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        //   // http.ClientRequest in node.js
+        //   console.log(err.request);
+        // } else {
+        //   // Something happened in setting up the request that triggered an Error
+        //   console.log('Error', err.message);
+        // }
+        // console.log(err.config);
         console.log(
           '403 [stale connection] refreshing cookie => %o',
           this.code
         );
         let cookie: string | undefined = undefined;
         try {
-          cookie = await Conduit.fetchCookie(this.url, this.code);
+          cookie = await Conduit.fetchCookie(this.url, this.code!);
           console.log(cookie);
           if (cookie) {
             this.cookie = cookie;
@@ -167,10 +167,10 @@ export class Conduit extends EventEmitter {
     this.url = url;
     const cookie: string | undefined = await Conduit.fetchCookie(url, code);
     if (cookie === undefined) {
-      console.log('Conduit.fetchCookie call failed with args => %o', {
-        url,
-        code,
-      });
+      // console.log('Conduit.fetchCookie call failed with args => %o', {
+      //   url,
+      //   code,
+      // });
       return undefined;
     }
     this.cookie = cookie;
@@ -195,7 +195,7 @@ export class Conduit extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       // console.log(channelUrl);
 
-      console.log(`EventSource => ['${channelUrl}', '${this.cookie}']`);
+      // console.log(`EventSource => ['${channelUrl}', '${this.cookie}']`);
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie },
       });
