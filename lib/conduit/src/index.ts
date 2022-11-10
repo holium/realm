@@ -102,7 +102,12 @@ export class Conduit extends EventEmitter {
           console.log(cookie);
           if (cookie) {
             this.cookie = cookie;
-            this.updateStatus(ConduitState.Refreshed);
+            this.updateStatus(ConduitState.Refreshed, {
+              url: this.url,
+              ship: `~${this.ship}`,
+              cookie: this.cookie,
+              code: this.code,
+            });
             if (err.originator === 'sse') {
               await this.init(this.url, this.ship!, this.cookie, this.code);
               resolve(undefined);
@@ -128,17 +133,8 @@ export class Conduit extends EventEmitter {
     });
   }
 
-  updateStatus(status: ConduitState) {
+  updateStatus(status: ConduitState, ...args: any[]) {
     this.status = status;
-    let args = [];
-    if (status === ConduitState.Refreshed) {
-      args.push({
-        url: this.url,
-        ship: `~${this.ship}`,
-        cookie: this.cookie,
-        code: this.code,
-      });
-    }
     this.emit(status, ...args);
   }
 

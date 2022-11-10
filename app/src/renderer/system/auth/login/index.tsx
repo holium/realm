@@ -56,10 +56,6 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
 
   useEffect(() => {
     OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
-      if (status === ConduitState.Stale) {
-        AuthActions.refresh().then(() => login());
-        setIsStale(true);
-      }
       if (status === ConduitState.Failed) {
         AuthActions.cancelLogin();
         setHasFailed(true);

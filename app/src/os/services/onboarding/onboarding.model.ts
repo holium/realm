@@ -113,12 +113,7 @@ export const OnboardingStore = types
       self.encryptedPassword = passwordHash;
     },
 
-    setShip: flow(function* (shipInfo: {
-      patp: string;
-      url: string;
-      cookie: string;
-      code: string;
-    }) {
+    setShip: flow(function* (shipInfo: { patp: string; url: string }) {
       self.ship = OnboardingShipModel.create({
         ...shipInfo,
         id: `onboarding${shipInfo.patp}`,

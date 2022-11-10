@@ -21,6 +21,7 @@ import { DocketApi } from '../../api/docket';
 import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
+import { storeCredentials } from '../../lib/shipHelpers';
 
 export class OnboardingService extends BaseService {
   private db: Store<OnboardingStoreType>; // for persistance
@@ -209,12 +210,17 @@ export class OnboardingService extends BaseService {
    * @param patp
    * @param substring
    */
-  async tempConduit(url: string, patp: string, cookie: string) {
+  async tempConduit(
+    url: string,
+    patp: string,
+    cookie: string,
+    code: string | undefined = undefined
+  ) {
     if (this.conduit !== undefined) {
       await this.closeConduit();
     }
     this.conduit = new Conduit();
-    await this.conduit.init(url, patp.substring(1), cookie!);
+    await this.conduit.init(url, patp.substring(1), cookie!, code);
     return this.conduit;
   }
 
@@ -367,35 +373,33 @@ export class OnboardingService extends BaseService {
     const { auth } = this.core.services.identity;
     let ships = await this.core.holiumClient.getShips(auth.accountId!);
     let ship = ships.find((ship) => ship.patp === this.state.planet!.patp);
+    if (!ship) return false;
 
-    if (!ship?.code) {
-      return false;
-    }
+    const session = this.core.getSession();
 
     await this.addShip('_event', {
       patp: ship.patp,
       url: ship.link!,
-      code: ship.code,
+      code: session.code,
     });
     return true;
   }
 
   async addShip(
     _event: any,
-    shipData: { patp: string; url: string; code: string }
+    shipData: {
+      patp: string;
+      url: string;
+      code: string;
+    }
   ) {
     try {
-      let { patp, url } = shipData;
-      let cookie = await getCookie(shipData);
-
-      this.state.setShip({
-        patp,
-        cookie,
-        url,
-        code: shipData.code,
-      });
-
-      return { url, cookie, patp, code: shipData.code };
+      let { patp, url, code } = shipData;
+      let cookie = await getCookie({ patp, url, code });
+      const session = this.core.getSession();
+      this.core.saveSession({ ...session, cookie });
+      this.state.setShip({ patp, url });
+      return { url, cookie, patp, code: code };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
       throw new Error('Failed to connect to ship');
@@ -407,8 +411,9 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
     // await this.tempConduit.init(url, patp.substring(1), cookie!);
 
     if (!this.state.ship)
@@ -430,8 +435,9 @@ export class OnboardingService extends BaseService {
   ) {
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
 
     try {
       const updatedProfile = await ContactApi.saveContact(
@@ -471,8 +477,9 @@ export class OnboardingService extends BaseService {
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
       const response: string = await DocketApi.installDesk(
@@ -514,8 +521,13 @@ export class OnboardingService extends BaseService {
     const authShip = AuthShip.create({
       ...ship,
       id: `auth${ship.patp}`,
+    });
+
+    const session = this.core.getSession();
+    storeCredentials(ship.patp, decryptedPassword, {
+      cookie: session.cookie,
+      code: this.core.getSession().code,
       passwordHash,
-      code: ship.code,
     });
 
     this.core.services.identity.auth.storeNewShip(authShip);

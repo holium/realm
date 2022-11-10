@@ -36,7 +36,7 @@ export const ShipModel = types
       return self.loader.isLoading;
     },
     // get apps() {
-    //   return Array.from(self.docket.apps.values());
+    //   return Array .from(self.docket.apps.values());
     // },
   }))
   .actions((self) => ({

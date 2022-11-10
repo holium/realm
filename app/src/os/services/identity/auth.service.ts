@@ -13,7 +13,7 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import axios from 'axios';
-import { currentStore } from 'react-spaces/dist/core-react';
+import { readCredentials } from '../../lib/shipHelpers';
 
 /**
  * AuthService
@@ -34,7 +34,6 @@ export class AuthService extends BaseService {
     'realm.auth.set-mnemonic': this.setMnemonic,
     'realm.auth.set-ship-profile': this.setShipProfile,
     'realm.auth.cancel-login': this.cancelLogin,
-    'realm.auth.refresh': this.refresh,
   };
 
   static preload = {
@@ -126,13 +125,6 @@ export class AuthService extends BaseService {
     this.state.setFirstTime();
   }
 
-  getCredentials(ship: string, password: string) {
-    const authShip = this.state.ships.get(`auth${ship}`)!;
-    let url = authShip.url;
-    let cookie = authShip.cookie || '';
-    return { url, cookie };
-  }
-
   getShip(ship: string): AuthShipType {
     return this.db.get(`ships.auth${ship}`);
   }
@@ -152,37 +144,14 @@ export class AuthService extends BaseService {
     );
   }
 
-  async refresh(_event: any): Promise<string | undefined> {
-    if (!this.state.currentShip || !this.state.currentShip.code) {
-      console.log('[auth.service.refresh] - missing code');
-      return undefined;
-    }
-    console.log(
-      '[auth.service.refresh] - code => %o',
-      this.state.currentShip.code
-    );
-    const response = await axios.post(
-      `${this.state.currentShip.url}/~/login`,
-      `password=${this.state.currentShip.code.trim()}`,
-      {
-        withCredentials: true,
-      }
-    );
-    const cookie = response.headers['set-cookie']![0];
-    console.log('[auth.service.refresh] - cookie => %o', cookie);
-    this.state.setShip({
-      ...this.state.currentShip,
-      cookie,
-      code: this.state.currentShip.code,
-    });
-    return cookie;
-  }
-
-  async login(_event: any, ship: string, password: string): Promise<boolean> {
-    let shipId = `auth${ship}`;
+  async login(_event: any, patp: string, password: string): Promise<boolean> {
+    let shipId = `auth${patp}`;
     this.state.setLoader('loading');
 
-    let passwordHash = this.state.getPasswordHash(shipId);
+    let ship = this.state.ships.get(`auth${patp}`)!;
+    if (!ship) return false;
+
+    const { cookie, code, passwordHash } = readCredentials(patp, password);
     let passwordCorrect = await bcrypt.compare(password, passwordHash);
     this.core.sendLog(`passwordHash: ${passwordHash}`);
     this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
@@ -192,8 +161,8 @@ export class AuthService extends BaseService {
       this.state.setLoader('error');
       return false;
     }
-    this.core.sendLog(`ship: ${ship}`);
-    this.core.passwords.setPassword(ship, password);
+    this.core.sendLog(`ship: ${patp}`);
+    this.core.passwords.setPassword(patp, password);
     this.core.sendLog(
       `safeStorage isEncryptionAvailable: ${safeStorage.isEncryptionAvailable()}`
     );
@@ -203,20 +172,7 @@ export class AuthService extends BaseService {
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
     this.core.services.shell.setBlur(null, false);
 
-    // TODO decrypt stored snapshot
-    const { url, cookie } = this.getCredentials(ship, password);
-    console.log('login => %o', {
-      ship,
-      url,
-      cookie,
-      code: this.currentShip?.code || '',
-    });
-    this.core.setSession({
-      ship,
-      url,
-      cookie,
-      code: this.currentShip?.code || '',
-    });
+    this.core.setSession({ ship: patp, url: ship.url, cookie, code: code });
 
     return true;
   }
@@ -239,6 +195,7 @@ export class AuthService extends BaseService {
 
   storeNewShip(ship: AuthShipType) {
     console.log('storeNewShip', toJS(ship));
+
     const newShip = AuthShip.create(ship);
 
     this.state.setShip(newShip);
@@ -280,9 +237,7 @@ export class AuthService extends BaseService {
     const newAuthShip = AuthShip.create({
       id,
       url,
-      cookie,
       patp: ship,
-      code: code,
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
     });

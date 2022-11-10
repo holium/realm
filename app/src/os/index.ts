@@ -282,9 +282,13 @@ export class Realm extends EventEmitter {
     this.connect(session);
   }
 
-  getSession(session: ISession): ISession {
+  saveSession(session: ISession): void {
     this.session = session;
-    return this.db.store;
+    this.db.set(session);
+  }
+
+  getSession(): ISession {
+    return this.session!;
   }
 
   async clearSession(): Promise<void> {
