@@ -24,8 +24,16 @@
     "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
+    "@icons/material": "^0.4.1",
+    "alchemy-sdk": "^2.2.0",
+    "bitcore-lib": "^8.25.40",
+    "eth-block-tracker": "^6.0.0",
+    "eth-json-rpc-infura": "^5.1.0",
+    "eth-query": "^2.1.2",
     "ethers": "^5.7.0",
+    "human-standard-token-abi": "^2.0.0",
     "memoize-one": "^6.0.0",
+    "non-fungible-token-abi": "^1.0.1",
     "qrcode.react": "^3.1.0",
     "react-cool-virtual": "^0.7.0",
     "react-virtualized-auto-sizer": "^1.0.7",

@@ -15,7 +15,7 @@ import {
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { EthWalletType, WalletView } from 'os/services/tray/wallet.model';
 import {
   shortened,
   fullMonthNames,
@@ -61,10 +61,9 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = walletApp.ethereum.transactions.get(
-    walletApp.currentTransaction!
-  )!;
-  console.log(transaction);
+  let transaction = (walletApp.currentWallet! as EthWalletType).transactions
+    .get(walletApp.currentStore.network)
+    .get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();
   let themeData = getBaseTheme(theme.currentTheme);
@@ -72,7 +71,6 @@ export const TransactionDetail: FC = observer(() => {
   const [notes, setNotes] = useState(transaction.notes);
   const [loading, setLoading] = useState(false);
 
-  let goBack = () => WalletActions.setView(walletApp.returnView! as WalletView);
   let saveNotes = () => {
     setLoading(true);
     WalletActions.saveTransactionNotes(notes);
@@ -83,10 +81,12 @@ export const TransactionDetail: FC = observer(() => {
   let isEth = transaction.network === 'ethereum';
   let themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  let initiated = new Date(transaction.initiatedAt);
+  let completed = new Date(transaction.completedAt!);
   let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
-  let amountDisplay = isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`;
+  let amountDisplay = isEth
+    ? `${ethAmount.eth}` /* ETH`*/
+    : `${btcAmount.btc} BTC`;
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
@@ -135,8 +135,14 @@ export const TransactionDetail: FC = observer(() => {
           >
             $
             {isEth
-              ? convertEthAmountToUsd(ethAmount)
-              : convertBtcAmountToUsd(btcAmount)}
+              ? convertEthAmountToUsd(
+                  ethAmount,
+                  walletApp.ethereum.conversions.usd
+                )
+              : convertBtcAmountToUsd(
+                  btcAmount,
+                  walletApp.bitcoin.conversions.usd
+                )}
           </Text>
         </Flex>
       </Flex>
@@ -186,9 +192,9 @@ export const TransactionDetail: FC = observer(() => {
           DATE
         </Text>
         <Text variant="body" fontSize={1}>
-          {fullMonthNames[initiated.getMonth()]} {initiated.getDate()}{' '}
-          {initiated.getFullYear() !== new Date().getFullYear() &&
-            `, ${initiated.getFullYear()}`}
+          {fullMonthNames[completed.getMonth()]} {completed.getDate()}{' '}
+          {completed.getFullYear() !== new Date().getFullYear() &&
+            `, ${completed.getFullYear()}`}
         </Text>
       </Flex>
       <Flex
@@ -245,7 +251,12 @@ export const TransactionDetail: FC = observer(() => {
           </Button>
         </Flex>
       </Flex>
-      <Flex position="absolute" top="542px" zIndex={999} onClick={goBack}>
+      <Flex
+        position="absolute"
+        top="582px"
+        zIndex={999}
+        onClick={() => WalletActions.navigateBack()}
+      >
         <Icons
           name="ArrowLeftLine"
           size={2}

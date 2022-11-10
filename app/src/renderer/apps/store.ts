@@ -12,7 +12,7 @@ import {
 
 import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
-import { WalletStore } from 'os/services/tray/wallet.model';
+import { NetworkType, SharingMode, WalletCreationMode, WalletStore, WalletView } from 'os/services/tray/wallet.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
@@ -112,21 +112,46 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: {
-    network: 'ethereum',
-    currentView: 'ethereum:list',
+    navState: {
+      view: WalletView.NEW,
+      network: NetworkType.ETHEREUM,
+      btcNetwork: 'mainnet'
+    },
+    navHistory: [],
     bitcoin: {
       settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        blocked: [],
         defaultIndex: 0,
       },
+      conversions: {}
+    },
+    testnet: {
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        blocked: [],
+        defaultIndex: 0,
+      },
+      conversions: {}
     },
     ethereum: {
+      network: 'gorli',
       settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        blocked: [],
         defaultIndex: 0,
       },
       initialized: false,
+      conversions: {}
     },
     creationMode: 'default',
+    sharingMode: 'anybody',
     ourPatp: '~zod',
+    lastInteraction: new Date(),
+    initialized: false,
   },
   dmApp: {
     currentView: 'dm-list',
