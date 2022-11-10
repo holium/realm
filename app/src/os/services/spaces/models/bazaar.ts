@@ -13,6 +13,7 @@ import {
   applySnapshot,
   getSnapshot,
   flow,
+  SnapshotOut,
 } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
 import { toJS } from 'mobx';
@@ -52,6 +53,12 @@ export const Glob = types.model('Glob', {
   ),
 });
 
+export const RealmConfig = types.model('RealmConfig', {
+  size: types.array(types.number),
+  showTitlebar: types.boolean,
+  titlebarBorder: types.boolean,
+});
+
 export const DocketApp = types.model('DocketApp', {
   id: types.identifier,
   title: types.string,
@@ -84,6 +91,7 @@ const UrbitApp = types.model('UrbitApp', {
   website: types.string,
   license: types.string,
   installStatus: types.string,
+  config: types.maybeNull(RealmConfig),
 });
 
 const NativeApp = types.model('NativeApp', {
@@ -353,18 +361,15 @@ export const NewBazaarStore = types
   .views((self) => ({
     get installing() {
       return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-        (app: AppType) => {
+        (app: SnapshotOut<AppType>) => {
           if (self.installations.get(app.id)) return true;
           return false;
         }
       );
     },
     get installed() {
-      // return Array.from(self.gridIndex.entries()).sort((el: []) => {
-
-      // })
       return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-        (app: AppType) => {
+        (app: SnapshotOut<AppType>) => {
           if (app.type === 'urbit') {
             const urb = app as UrbitAppType;
             return urb.installStatus === 'installed';

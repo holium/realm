@@ -1,5 +1,5 @@
 /-  store=bazaar-store, spaces-store, docket=bazaar-docket, treaty=bazaar-treaty
-/+  docket-lib=docket
+/+  docket-lib=docket, realm=realm
 =<  [store .]
 =,  store
 |%
@@ -286,6 +286,7 @@
             ['info' s+info.native-app.app]
             ['color' s+color.native-app.app]
             ['icon' s+icon.native-app.app]
+            ['config' (config:enjs:realm config.native-app.app)]
         ==
       ::
       %web
@@ -295,6 +296,7 @@
             ['title' s+title.web-app.app]
             ['href' s+href.web-app.app]
             ['favicon' s+favicon.web-app.app]
+            ['config' (config:enjs:realm config.web-app.app)]
         ==
       ::
       %urbit   (urbit-app:encode app-id +.app)
@@ -308,6 +310,7 @@
     :~
       ['id' s+app-id]  
       ['installStatus' [%s `@t`install-status.app]]
+      ['config' (config:enjs:realm config.app)]
     ==  
   ::
   ++  dkt
