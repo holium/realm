@@ -90,12 +90,17 @@ export class Realm extends EventEmitter {
     this.onBoot = this.onBoot.bind(this);
     this.onConduit = this.onConduit.bind(this);
 
-    // Load session data
-    this.db = new Store({
+    const options = {
       name: 'realm.session',
       accessPropertiesByDotNotation: true,
       fileExtension: 'lock',
-    });
+    };
+    // this.db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store(options)
+    //     : new EncryptedStore(options);
+    // Load session data
+    this.db = new Store(options);
     if (this.db.size > 0) {
       this.isResuming = true;
       this.setSession(this.db.store);
@@ -221,11 +226,7 @@ export class Realm extends EventEmitter {
         this.session.code
       );
       if (this.session) {
-        this.session = {
-          ...this.session,
-          cookie: cookie || '',
-        };
-        this.db.set(this.session);
+        this.saveSession({ ...this.session, cookie: cookie || '' });
       } else {
         console.warn('unexpected session => %o', this.session);
       }
@@ -277,8 +278,7 @@ export class Realm extends EventEmitter {
   }
 
   setSession(session: ISession): void {
-    this.session = session;
-    this.db.set(session);
+    this.saveSession(session);
     this.connect(session);
   }
 
@@ -359,8 +359,7 @@ export class Realm extends EventEmitter {
     });
     conduit.on(ConduitState.Refreshed, (session) => {
       console.info(`ConduitState.Refreshed => %o`, session);
-      this.session = session;
-      this.db.set(session);
+      this.saveSession(session);
       this.sendConnectionStatus(ConduitState.Refreshed);
     });
     conduit.on(ConduitState.Connected, () => {

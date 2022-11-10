@@ -1,7 +1,7 @@
 import axios from 'axios';
 import http from 'http';
 import Store from 'electron-store';
-import EncryptedStore from './encryptedStore';
+// import EncryptedStore from './encryptedStore';
 
 export type ShipConnectionData = {
   patp: string;
@@ -39,11 +39,11 @@ export function storeCredentials(
     secretKey: secretKey,
     accessPropertiesByDotNotation: true,
   };
-
-  const db =
-    process.env.NODE_ENV === 'development'
-      ? new Store<ShipCredentials>(storeParams)
-      : new EncryptedStore<ShipCredentials>(storeParams);
+  // const db =
+  //   process.env.NODE_ENV === 'development'
+  //     ? new Store<ShipCredentials>(storeParams)
+  //     : new EncryptedStore<ShipCredentials>(storeParams);
+  const db = new Store<ShipCredentials>(storeParams);
   db.store = credentials;
   return credentials;
 }
@@ -59,11 +59,10 @@ export function readCredentials(
     secretKey: secretKey,
     accessPropertiesByDotNotation: true,
   };
-
-  const db =
-    process.env.NODE_ENV === 'development'
-      ? new Store<ShipCredentials>(storeParams)
-      : new EncryptedStore<ShipCredentials>(storeParams);
-
+  // const db =
+  //   process.env.NODE_ENV === 'development'
+  //     ? new Store<ShipCredentials>(storeParams)
+  //     : new EncryptedStore<ShipCredentials>(storeParams);
+  const db = new Store<ShipCredentials>(storeParams);
   return db.store;
 }
