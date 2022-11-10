@@ -9,7 +9,7 @@ export const LeaveSpaceDialogConfig: (dialogProp: any) => DialogConfig = (dialog
     const onConfirm = async () => {
       console.log('dialogProp', dialogProp);
       if (dialogProp) {
-        await SpacesActions.deleteSpace(dialogProp);
+        SpacesActions.deleteSpace(dialogProp);
       }
     }
     return <ConfirmDialog title="Leave Space" description={`Are you sure you want to leave?`} onConfirm={onConfirm} {...props} />
