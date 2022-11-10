@@ -11,7 +11,6 @@ import {
 import { darken, lighten, transparentize } from 'polished';
 import { useTrayApps } from 'renderer/apps/store';
 import { Wallet } from '../../../lib/wallet';
-import { WalletCard } from '../WalletCard';
 import { AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 import { theme } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';

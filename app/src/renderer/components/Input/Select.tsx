@@ -132,6 +132,7 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
         variants={showMenu}
         initial="exit"
         animate={open ? 'enter' : 'exit'}
+        customBg={props.customBg}
       >
         {options
           .filter((option: RadioOption) => !option.hidden)

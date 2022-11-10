@@ -272,12 +272,13 @@ export class OnboardingService extends BaseService {
   }
 
   async setEmail(_event: any, email: string) {
+    console.log('trying to set email');
     const { auth } = this.core.services.identity;
-    let account = await this.core.holiumClient.createAccount(email);
+    //let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
-    this.state.setVerificationCode(account.verificationCode);
+    //this.state.setVerificationCode(account.verificationCode);
 
-    auth.setAccountId(account.id);
+    //auth.setAccountId(account.id);
 
     if (
       (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') ||

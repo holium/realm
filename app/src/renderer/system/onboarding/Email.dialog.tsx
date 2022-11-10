@@ -10,8 +10,9 @@ import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { ThemeType } from 'renderer/theme';
 
 export const EmailDialog: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
-  const { onboarding, desktop } = useServices();
-  const theme = getBaseTheme(desktop);
+  const { onboarding } = useServices();
+  const { theme } = useServices();
+  const baseTheme = getBaseTheme(theme.currentTheme);
   const [view, setView] = useState('initial');
   const done = () => props.onNext && props.onNext();
 
@@ -19,7 +20,7 @@ export const EmailDialog: FC<BaseDialogProps> = observer((props: BaseDialogProps
     <Flex px={16} pt={12} width="100%" height="100%" flexDirection="column">
       {view === 'initial'
         ? <InitialScreen done={() => setView('verify')} />
-        : <VerifyScreen verificationCode={onboarding.verificationCode!} done={done} theme={theme as ThemeType} />
+        : <VerifyScreen verificationCode={onboarding.verificationCode!} done={done} theme={baseTheme as ThemeType} />
       }
     </Flex>
   );

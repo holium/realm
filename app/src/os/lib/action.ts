@@ -5,7 +5,7 @@
  * @returns string
  */
 export const cleanPath = (path: string): string => {
-  return path.replaceAll('/', '.').substring(1);
+  return path.('/', '.').substring(1);
 };
 
 export const fromPathString = (path: string, targetObject: any) => {

@@ -39,7 +39,7 @@
     =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
     ?>  ?=([%initial *] charge-update)
     =/  our-space                     [our.bowl 'our']
-    =/  init                          (init-catalog:helpers:bazaar initial.charge-update)
+    =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
     =|  =native-app:store
       =.  title.native-app            'Relic Browser'
       =.  color.native-app            '#92D4F9'
@@ -78,13 +78,28 @@
     ^-  vase
     !>(state)
   ::
+  :: ++  on-load
+  ::   |=  old-state=vase
+  ::   ^-  (quip card:agent:gall agent:gall)
+  ::   =/  old  !<(versioned-state old-state)
+  ::   ?-  -.old
+  ::     %0  `this(state old)
+  ::   ==
   ++  on-load
-    |=  old-state=vase
-    ^-  (quip card:agent:gall agent:gall)
-    =/  old  !<(versioned-state old-state)
-    ?-  -.old
-      %0  `this(state old)
-    ==
+    |=  =vase
+    ^-  (quip card _this)
+    =/  old=(unit state-0)
+      (mole |.(!<(state-0 vase)))  
+    ?^  old
+      `this(state u.old)
+    ~&  >>  'nuking old state' ::  temporarily doing this for making development easier
+    =^  cards  this  on-init
+    :_  this
+    =-  (welp - cards)
+    %+  turn  ~(tap in ~(key by wex.bowl))
+    |=  [=wire =ship =term] 
+    ^-  card
+    [%pass wire %agent [ship term] %leave ~]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -580,6 +595,31 @@
       ?>  ?=(%ini -.treaties)
       init.treaties
     ::
+    ++  config
+      |=  =desk
+      |^
+      =/  config
+        ?:  config-exists
+          .^(config:store %cx scry-path)
+        :*  size=[10 10]
+            titlebar-border=%.y
+            show-titlebar=%.y
+        ==
+      =?  size.config
+          ?|  (lth -.size.config 1)
+              (lth +.size.config 1)
+              (gth -.size.config 10)
+              (gth +.size.config 10)
+          ==
+        [10 10]
+      config
+      ++  scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)/config/realm
+      ++  exists-scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)
+      ++  config-exists
+        ?:  =(0 ud:.^(cass:clay %cw exists-scry-path))  %.n
+        .^(? %cu scry-path)
+      --
+    ::
     --
   ++  helpers
     |%
@@ -600,29 +640,20 @@
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
-      =/  hidden     `(set desk)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ^-  [=catalog:store =grid-index:store]
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
-        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed]) (set-grid-index desk grid-index.acc)]
+        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
-      =/  bare-docket
-        [
-          %1
-          title=desk
-          info=''
-          color=`@ux`'0'
-          href=[%site /(scot %tas desk)]
-          image=~
-          version=[major=0 minor=0 patch=0]
-          website=''
-          license=''
-        ]
-      =/  new-app=urbit-app:store    [docket=bare-docket host=(some ship) install-status=%started]
-      new-app
+      ^-  urbit-app:store
+      =/  bare-docket  *docket:docket
+      =.  title.bare-docket  desk
+      =.  href.bare-docket  [%site /(scot %tas desk)]
+      [docket=bare-docket host=(some ship) install-status=%started *config:store]
     ::
     ++  skim-installed
       |=  [=app-id:store =app:store]
@@ -654,6 +685,7 @@
       ^-  ?
       ?:  ?|  =(app-id %courier)
               =(app-id %realm)
+              =(app-id %realm-wallet)
               =(app-id %garden)
           ==
       %.y  %.n
@@ -860,7 +892,7 @@
       ?:  (~(has in hide-desks) desk)
         `state
       =/  app                     (~(get by catalog.state) desk)
-      =/  app  ?~  app  [%urbit docket.charge ~ status]
+      =/  app  ?~  app  [%urbit docket.charge ~ status (config:scry:bazaar:core desk)]
         ?>  ?=(%urbit -.u.app)
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
@@ -910,3 +942,4 @@
   =(our.bowl ship)
 ::
 --
+
