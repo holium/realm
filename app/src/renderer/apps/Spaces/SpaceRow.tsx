@@ -74,7 +74,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
         // DesktopActions.toggleDevTools();
       },
     },
-    false //membership.spaces.get(space.path)!.get(ship.patp)!.roles.includes('owner');
+    false // membership.spaces.get(space.path)!.get(ship.patp)!.roles.includes('owner')// false
     ? {
         id: `space-row-${space.path}-btn-delete`,
         label: 'Delete',

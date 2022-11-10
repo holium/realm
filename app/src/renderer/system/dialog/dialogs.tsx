@@ -37,13 +37,12 @@ export type DialogConfig = {
 } & BaseDialogProps;
 
 export type DialogRenderers = {
-  [key: string]: (DialogConfig | ((props: any) => DialogConfig));
+  [key: string]: DialogConfig | ((props: any) => DialogConfig);
 };
 
 export const dialogRenderers: DialogRenderers = {
   'wallpaper-dialog': WallpaperDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
-  'leave-space-dialog-object': LeaveSpaceDialogConfigObject,
   ...spacesDialogs,
   ...onboardingDialogs,
 };

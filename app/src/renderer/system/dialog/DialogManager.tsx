@@ -52,7 +52,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
 
     if (isOpen) {
       const dimensions = {
-        ...dialogConfig.window.dimensions,
+        ...dialogConfig!.window.dimensions,
         ...getCenteredXY(
           dialogConfig!.window.dimensions,
           shell.desktopDimensions
@@ -63,7 +63,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         <AppWindow
           desktopRef={desktopRef}
           window={{
-            ...dialogConfig.window,
+            ...dialogConfig!.window,
             dimensions,
           }}
         />

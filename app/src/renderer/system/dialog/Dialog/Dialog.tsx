@@ -8,7 +8,7 @@ import {
   IconButton,
   Icons,
 } from 'renderer/components';
-import { dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 
@@ -31,17 +31,23 @@ const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
 
 export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const { window } = props;
-  const { theme } = useServices();
+  const { theme, shell } = useServices();
   const elementRef = useRef(null);
 
   const [workflowState, setWorkflowState] = useState<any>({ loading: false });
   const [validated, setValidated] = useState<boolean>(false);
 
   const ViewComponent: FC<any> | undefined = useMemo(
-    () => dialogRenderers[window.id].component!,
+    () => {
+      const dialogRenderer = dialogRenderers[window.id];
+      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProp) : dialogRenderer;
+      return dialogConfig.component!;
+    },
     [window.id]
   );
 
+  const dialogRenderer = dialogRenderers[window.id];
+  const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProp) : dialogRenderer;
   const {
     workflow,
     customNext,
@@ -51,7 +57,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
     hasPrevious,
     onPrevious,
     isValidated,
-  } = dialogRenderers[window.id];
+  } = dialogConfig;
   useEffect(() => {
     if (firstStep) {
       setValidated(false);
