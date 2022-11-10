@@ -10,7 +10,6 @@ export type ShipConnectionData = {
 };
 
 export type ShipCredentials = {
-  cookie: string;
   // needed to refresh cookie when stale (403)
   code: string;
   passwordHash: string;
@@ -33,6 +32,7 @@ export function storeCredentials(
   secretKey: string,
   credentials: ShipCredentials
 ) {
+  console.log('storeCredentials => %o', { patp, secretKey, credentials });
   const storeParams = {
     name: 'credentials',
     cwd: `realm.${patp}`,
@@ -49,9 +49,10 @@ export function storeCredentials(
 }
 
 export function readCredentials(
-  secretKey: string,
-  patp: string
+  patp: string,
+  secretKey: string
 ): ShipCredentials {
+  console.log('storeCredentials => %o', { patp, secretKey });
   const storeParams = {
     name: 'credentials',
     cwd: `realm.${patp}`,

@@ -397,7 +397,7 @@ export class OnboardingService extends BaseService {
       let { patp, url, code } = shipData;
       let cookie = await getCookie({ patp, url, code });
       const session = this.core.getSession();
-      this.core.saveSession({ ...session, cookie });
+      this.core.saveSession({ ...session, cookie, code });
       this.state.setShip({ patp, url });
       return { url, cookie, patp, code: code };
     } catch (reason) {
@@ -525,8 +525,7 @@ export class OnboardingService extends BaseService {
 
     const session = this.core.getSession();
     storeCredentials(ship.patp, decryptedPassword, {
-      cookie: session.cookie,
-      code: this.core.getSession().code,
+      code: session.code,
       passwordHash,
     });
 

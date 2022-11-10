@@ -151,7 +151,9 @@ export class AuthService extends BaseService {
     let ship = this.state.ships.get(`auth${patp}`)!;
     if (!ship) return false;
 
-    const { cookie, code, passwordHash } = readCredentials(patp, password);
+    const { cookie } = this.core.getSession();
+    const { code, passwordHash } = readCredentials(patp, password);
+    console.log({ cookie, code, password });
     let passwordCorrect = await bcrypt.compare(password, passwordHash);
     this.core.sendLog(`passwordHash: ${passwordHash}`);
     this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
