@@ -25,8 +25,11 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;
 
-    const dialogRenderer = dialogRenderers[dialogId];
-    let dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(dialogProps) : dialogRenderer;
+    let dialogConfig: DialogConfig;
+    if (isOpen) {
+      const dialogRenderer = dialogRenderers[dialogId];
+      dialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(dialogProps) : dialogRenderer;
+    }
 
     // clear dialog on escape pressed if closable
     useHotkeys(
@@ -48,16 +51,10 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     );
 
     if (isOpen) {
-      /*const dialogRendererObject = dialogRenderers['leave-space-dialog-object'];
-      const dialogConfigObject: DialogConfig = (dialogRendererObject instanceof Function) ? dialogRendererObject(dialogProps) : dialogRendererObject;
-      console.log('dialogConfig', dialogConfig);
-      console.log('dialogConfigObject', dialogConfigObject);
-      console.log(JSON.stringify(dialogConfig) === JSON.stringify(dialogConfigObject));
-      dialogConfig = dialogConfigObject;*/
       const dimensions = {
         ...dialogConfig.window.dimensions,
         ...getCenteredXY(
-          dialogConfig.window.dimensions,
+          dialogConfig!.window.dimensions,
           shell.desktopDimensions
         ),
       };
