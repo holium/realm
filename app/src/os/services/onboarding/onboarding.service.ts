@@ -525,11 +525,14 @@ export class OnboardingService extends BaseService {
     });
 
     const session = this.core.getSession();
-    storeCredentials(ship.patp, decryptedPassword, {
-      code: session.code,
-      passwordHash,
-    });
-
+    this.core.services.identity.auth.storeCredentials(
+      ship.patp,
+      decryptedPassword,
+      {
+        code: session.code,
+        passwordHash,
+      }
+    );
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setFirstTime();
     this.core.services.ship.storeNewShip(authShip);

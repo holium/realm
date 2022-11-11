@@ -13,7 +13,13 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import axios from 'axios';
-import { readCredentials } from '../../lib/shipHelpers';
+// import { readCredentials } from '../../lib/shipHelpers';
+
+export type ShipCredentials = {
+  // needed to refresh cookie when stale (403)
+  code: string;
+  passwordHash: string;
+};
 
 /**
  * AuthService
@@ -144,6 +150,43 @@ export class AuthService extends BaseService {
     );
   }
 
+  storeCredentials(
+    patp: string,
+    secretKey: string,
+    credentials: ShipCredentials
+  ): ShipCredentials {
+    // console.log('storeCredentials => %o', { patp, secretKey, credentials });
+    const storeParams = {
+      name: 'credentials',
+      cwd: `realm.${patp}`,
+      secretKey: secretKey,
+      accessPropertiesByDotNotation: true,
+    };
+    // const db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store<ShipCredentials>(storeParams)
+    //     : new EncryptedStore<ShipCredentials>(storeParams);
+    const db = new Store<ShipCredentials>(storeParams);
+    db.store = credentials;
+    return credentials;
+  }
+
+  readCredentials(patp: string, secretKey: string): ShipCredentials {
+    // console.log('readCredentials => %o', { patp, secretKey });
+    const storeParams = {
+      name: 'credentials',
+      cwd: `realm.${patp}`,
+      secretKey: secretKey,
+      accessPropertiesByDotNotation: true,
+    };
+    // const db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store<ShipCredentials>(storeParams)
+    //     : new EncryptedStore<ShipCredentials>(storeParams);
+    const db = new Store<ShipCredentials>(storeParams);
+    return db.store;
+  }
+
   async login(_event: any, patp: string, password: string): Promise<boolean> {
     let shipId = `auth${patp}`;
     this.state.setLoader('loading');
@@ -152,7 +195,7 @@ export class AuthService extends BaseService {
     if (!ship) return false;
 
     const { cookie } = this.core.getSession();
-    const { code, passwordHash } = readCredentials(patp, password);
+    const { code, passwordHash } = this.readCredentials(patp, password);
     // console.log({ cookie, code, password });
     let passwordCorrect = await bcrypt.compare(password, passwordHash);
     this.core.sendLog(`passwordHash: ${passwordHash}`);
