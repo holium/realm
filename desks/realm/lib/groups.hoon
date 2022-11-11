@@ -6,58 +6,16 @@
 ++  our-groups
   |=  [our=ship now=@da]
   ^-  (list group-space)
-  =/  group-paths     .^((set resource) %gy /(scot %p our)/group-store/(scot %da now)/groups)
-  ::  now find ours
-  :: =/  hosted           (skim ~(tap by group-paths) skim-groups)
-  =/  hosted=(list resource)
-  %+  skim  ~(tap by group-paths)
-    |=  [resource=[entity=ship name=@tas]]
-    ?:  =(entity.resource our)
-      (skim-group-dms resource)    ::  removes group dms from group-paths
-    %.n
-  ::  get metadata for each
-  =/  our-groups=(list group-space)
-  %+  turn  hosted
-    |=  [rid=[entity=ship name=@tas]]
-    =/  grp-data      .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity.rid)/(scot %tas name.rid)/noun)
-    :: ~&  >>  [grp-data]
-    =/  mt-data=(unit association:mtd)
-      .^  (unit association:mtd)
-        %gx  (scot %p our)  %metadata-store  (scot %da now)
-        %metadata  %groups  (snoc `path`~[%ship (scot %p entity.rid) (scot %tas name.rid)] %noun) 
-      ==
-    ::  Get group data
-    =/  member-count=@u
-      ?~  grp-data  0   
-      ~(wyt in `(set @)`members.-.+.grp-data)
-    ::  Get metadata
-    =/  title=@t
-      ?~  mt-data  ''
-      title.metadatum.+.+.mt-data
-    =/  picture=@t
-      ?~  mt-data  ''
-      picture.metadatum.+.+.mt-data
-    =/  color=@ux
-      ?~  mt-data  `@ux`(scan "0" hex:ag)
-      color.metadatum.+.+.mt-data
-    [entity.rid name.rid title picture color member-count]
-  our-groups
-  ::
-++  our-groups-2
-  |=  [our=ship now=@da]
-  ^-  (list group-space)
-  =/  groups  .^(groups:g %gy /(scot %p our)/groups/(scot %da now)/groups)
+  =/  groups  .^(groups:g %gx /(scot %p our)/groups/(scot %da now)/groups/groups)
   ::  find ours
-  =/  hosted=(list group:g)
-    %+  turn
-        ^-  (list [f=flag:g g=group:g])
-        %+  skim  ~(tap by groups)
-          |=  [f=flag:g g=group:g]
-          =(our -.f)
-      |=([f=flag:g gr=group:g] gr)
+  =/  hosted
+    ^-  (list [f=flag:g g=group:g])
+    %+  skim  ~(tap by groups)
+      |=  [f=flag:g g=group:g]
+      =(our -.f)
   ::  get metadata for each
   %+  turn  hosted
-    |=  =group:g
+    |=  [=flag:g =group:g]
     ^-  group-space
     =/  metadata  meta.group
     ::  Get group data
@@ -67,7 +25,7 @@
     =/  title=@t  title.metadata
     =/  picture=@t  image.metadata
     =/  color=@ux  *@ux::cover.metadata
-    [our title title picture color member-count]
+    [our +.flag title picture color member-count]
   ::
 ++  skim-group-dms
   |=  [resource=[entity=ship name=@tas]]
@@ -79,7 +37,19 @@
   |=  [rid=[entity=ship name=@tas] our=ship now=@da]
   =/  grp-data      .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity.rid)/(scot %tas name.rid)/noun)
   grp-data
-  
+::
+++  get-groups-2-members
+  |=  [rid=[entity=ship name=@tas] our=ship now=@da]
+  ^-  group:store
+  =/  grp-data      .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity.rid)/(scot %tas name.rid)/noun)
+  =/  groups  .^(groups:g %gy /(scot %p our)/groups/(scot %da now)/groups)
+  =/  group  (~(got by groups) rid)
+::  :*  members=fleet
+::      tags  :: +$  tags  (jug tag ship)
+::      policy :: +$  policy [%invite diff]
+::      hidden :: +$  ?
+::  ==
+  *group:store
 ::
 ::  JSON
 ::
