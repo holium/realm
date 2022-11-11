@@ -325,38 +325,33 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 // @ts-ignore
                 onChange={handleFileChange}
               />
-              <Tooltip
-                show={!canUpload}
-                placement="top"
-                content={'No image store set up'}
-                id={`upload-tooltip`}
+
+              <IconButton
+                style={{ cursor: 'none' }}
+                color={canUpload ? iconColor : lighten(0.5, iconColor)}
+                customBg={dockColor}
+                ml={3}
+                mr={3}
+                size={28}
+                onClick={(evt: any) => {
+                  evt.stopPropagation();
+                  if (!canUpload) return;
+                  if (!containerRef.current) return;
+                  promptUpload(containerRef.current)
+                    .then((file: any) => {
+                      const params: FileUploadParams = {
+                        source: 'file',
+                        content: file.path,
+                        contentType: file.type,
+                      };
+                      uploadFile(params);
+                    })
+                    .catch((e) => console.error(e));
+                }}
               >
-                <IconButton
-                  style={{ cursor: 'none' }}
-                  color={canUpload ? iconColor : lighten(0.5, iconColor)}
-                  customBg={dockColor}
-                  ml={3}
-                  mr={3}
-                  size={28}
-                  onClick={(evt: any) => {
-                    evt.stopPropagation();
-                    if (!canUpload) return;
-                    if (!containerRef.current) return;
-                    promptUpload(containerRef.current)
-                      .then((file: File) => {
-                        const params: FileUploadParams = {
-                          source: 'file',
-                          content: file.path,
-                          contentType: file.type,
-                        };
-                        uploadFile(params);
-                      })
-                      .catch((e) => console.error(e));
-                  }}
-                >
-                  <Icons name="Attachment" />
-                </IconButton>
-              </Tooltip>
+                <Icons name="Attachment" />
+              </IconButton>
+
               <Input
                 as="textarea"
                 ref={chatInputRef}
