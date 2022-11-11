@@ -1,4 +1,4 @@
-/-  store=groups, member-store=membership, *resource, mtd=metadata-store
+/-  store=groups, member-store=membership, *resource, mtd=metadata-store, g=new-groups
 =<  [store .]
 =,  store
 |%
@@ -42,6 +42,32 @@
       color.metadatum.+.+.mt-data
     [entity.rid name.rid title picture color member-count]
   our-groups
+  ::
+++  our-groups-2
+  |=  [our=ship now=@da]
+  ^-  (list group-space)
+  =/  groups  .^(groups:g %gy /(scot %p our)/groups/(scot %da now)/groups)
+  ::  find ours
+  =/  hosted=(list group:g)
+    %+  turn
+        ^-  (list [f=flag:g g=group:g])
+        %+  skim  ~(tap by groups)
+          |=  [f=flag:g g=group:g]
+          =(our -.f)
+      |=([f=flag:g gr=group:g] gr)
+  ::  get metadata for each
+  %+  turn  hosted
+    |=  =group:g
+    ^-  group-space
+    =/  metadata  meta.group
+    ::  Get group data
+    =/  member-count=@u
+      (lent ~(tap by fleet.group))
+    ::  Get metadata
+    =/  title=@t  title.metadata
+    =/  picture=@t  image.metadata
+    =/  color=@ux  *@ux::cover.metadata
+    [our title title picture color member-count]
   ::
 ++  skim-group-dms
   |=  [resource=[entity=ship name=@tas]]
