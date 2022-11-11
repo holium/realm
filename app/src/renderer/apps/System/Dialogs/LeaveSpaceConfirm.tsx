@@ -2,17 +2,16 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from './Confirm';
 
-export const LeaveSpaceDialogConfig: (dialogProp: any) => DialogConfig = (dialogProp: any) => {
-  console.log('DIALOGPROP', dialogProp);
+export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (dialogProps: any) => {
   return ({
   component: (props: any) => {
+    console.log('my dialog props', dialogProps)
     const onConfirm = async () => {
-      console.log('dialogProp', dialogProp);
-      if (dialogProp) {
-        SpacesActions.deleteSpace(dialogProp);
+      if (dialogProps) {
+        SpacesActions.deleteSpace(dialogProps.path);
       }
     }
-    return <ConfirmDialog title="Leave Space" description={`Are you sure you want to leave?`} onConfirm={onConfirm} {...props} />
+    return <ConfirmDialog title="Leave Space" description={`Are you sure you want to leave ${dialogProps.name}?`} onConfirm={onConfirm} {...props} />
   },
   onClose: () => {},
   window: {

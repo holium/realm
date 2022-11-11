@@ -29,7 +29,6 @@ export const ConfirmDialog: FC<ConfirmDialogProps> = observer((props: ConfirmDia
   const onConfirm = () => {
     setLoading(true);
     props.onConfirm().then(() => {
-      console.log('finished')
       ShellActions.closeDialog();
       ShellActions.setBlur(false);
       setLoading(false);

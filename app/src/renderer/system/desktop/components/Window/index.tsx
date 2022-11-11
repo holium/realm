@@ -264,7 +264,8 @@ export const AppWindow: FC<AppWindowProps> = observer(
     if (window.type === 'dialog') {
       hideTitlebarBorder = true;
       const dialogRenderer = dialogRenderers[window.id];
-      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProp) : dialogRenderer;
+      console.log('OAEWOIWHRTOISAHRIO', shell.dialogProps)
+      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
       noTitlebar = dialogConfig.noTitlebar!;
       CustomTitlebar = DialogTitlebar;
       showDevToolsToggle = false;

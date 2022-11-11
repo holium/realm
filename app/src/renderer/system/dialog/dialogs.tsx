@@ -5,7 +5,6 @@ import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
 import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
 import {
   LeaveSpaceDialogConfig,
-  LeaveSpaceDialogConfigObject,
  } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 
 export type BaseWorkflowProps = {

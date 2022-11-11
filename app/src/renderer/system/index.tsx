@@ -43,8 +43,8 @@ export const Shell: FC = observer(() => {
   const hasWallpaper = bgImage ? true : false;
 
   const DialogLayer = useMemo(
-    () => <DialogManager dialogId={shell.dialogId} dialogProps={shell.dialogProp}/>,
-    [shell.dialogId, shell.dialogProp]
+    () => <DialogManager dialogId={shell.dialogId} dialogProps={shell.dialogProps}/>,
+    [shell.dialogId, shell.dialogProps.toJSON()]
   );
 
   const shipLoaded = ship?.loader.isLoaded;

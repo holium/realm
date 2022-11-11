@@ -14,12 +14,9 @@ import {
   Spinner,
 } from 'renderer/components';
 import * as yup from 'yup';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
-import { toJS } from 'mobx';
-import { darken, lighten } from 'polished';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 export const WallpaperDialogConfig: DialogConfig = {

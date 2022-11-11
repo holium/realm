@@ -92,7 +92,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
         label: 'Leave',
         loading: deleteLoading,
         onClick: (evt: any) => {
-          ShellActions.openDialogWithStringProp('leave-space-dialog', space.path)
+          ShellActions.openDialogWithStringProps('leave-space-dialog', {path: space.path, name: space.name})
         },
       },
   ];

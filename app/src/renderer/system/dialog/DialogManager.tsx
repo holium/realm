@@ -28,7 +28,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     let dialogConfig: DialogConfig;
     if (isOpen) {
       const dialogRenderer = dialogRenderers[dialogId];
-      dialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(dialogProps) : dialogRenderer;
+      dialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(dialogProps.toJSON()) : dialogRenderer;
     }
 
     // clear dialog on escape pressed if closable
