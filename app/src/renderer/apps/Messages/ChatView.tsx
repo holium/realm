@@ -64,6 +64,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   const submitRef = useRef(null);
   const chatInputRef = useRef(null);
   const inputRef = useRef(null);
+  const containerRef = useRef(null);
   const { selectedChat, setSelectedChat, height, theme, onSend } = props;
   const { iconColor, dockColor, textColor, windowColor, mode } = props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
@@ -293,6 +294,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             }}
           >
             <Flex flex={1} pr={3} alignItems="center">
+              <div ref={containerRef} style={{ display: 'none' }}></div>
               <input
                 style={{ display: 'none' }}
                 ref={inputRef}
@@ -311,7 +313,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onClick={(evt: any) => {
                   evt.stopPropagation();
                   // @ts-ignore
-                  promptUpload((err) => {
+                  promptUpload(containerRef.current, (err) => {
                     console.log(err);
                   }).then((url) => uploadSuccess(url, 'direct'));
                   // TODO add file uploading
