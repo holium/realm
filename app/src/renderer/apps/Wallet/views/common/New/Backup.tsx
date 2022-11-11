@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Button, Flex, Text, Box, Icons } from 'renderer/components';
 import { darken, transparentize } from 'polished';
 import { useServices } from 'renderer/logic/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { NewWalletScreen } from './index';
 
 interface BackupProps {
@@ -12,6 +13,7 @@ interface BackupProps {
 
 export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
   const { theme } = useServices();
+  const { walletApp } = useTrayApps();
 
   const panelBackground = darken(0.02, theme.currentTheme!.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
@@ -104,9 +106,15 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
       </Flex>
       <Flex
         position="absolute"
-        top="542px"
+        top="582px"
         zIndex={999}
-        onClick={() => props.setScreen(NewWalletScreen.CREATE)}
+        onClick={() =>
+          props.setScreen(
+            walletApp.initialized
+              ? NewWalletScreen.DETECTED_EXISTING
+              : NewWalletScreen.CREATE
+          )
+        }
       >
         <Icons
           name="ArrowLeftLine"

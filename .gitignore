@@ -120,3 +120,6 @@ dist
 .env.moon2
 !.env.local-example
 build
+
+# logs
+app/realmlog.txt

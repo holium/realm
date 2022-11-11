@@ -6,26 +6,30 @@ import { WalletCard } from '../common/WalletCard';
 import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-interface WalletListProps {
-  network: NetworkType;
-}
+interface WalletListProps {}
 
 export const WalletList: FC<WalletListProps> = observer(
   (props: WalletListProps) => {
     const { walletApp } = useTrayApps();
-    const list = walletApp.ethereum.list;
+    const list = walletApp.currentStore.list;
 
     const List: FC = () => {
       return (
         <Flex width="100%" flexDirection="column" overflowY="scroll">
-          {list.map((wallet) => {
-            console.log(wallet);
+          {list.map((walletEntry) => {
+            console.log(walletEntry.key);
+            let fullWallet = walletApp.currentStore.wallets.get(
+              walletEntry.key
+            );
+            console.log(fullWallet);
             return (
               <WalletCard
-                key={wallet.address}
-                wallet={wallet}
+                key={walletEntry.address}
+                wallet={fullWallet!}
                 onSelect={() => {
-                  WalletActions.setView(WalletView.ETH_DETAIL, wallet.key);
+                  WalletActions.navigate(WalletView.WALLET_DETAIL, {
+                    walletIndex: walletEntry.key,
+                  });
                 }}
               />
             );
@@ -36,7 +40,7 @@ export const WalletList: FC<WalletListProps> = observer(
 
     const Empty: FC<any> = (props: any) => {
       let onClick = () => {
-        WalletActions.setView(WalletView.CREATE_WALLET);
+        WalletActions.navigate(WalletView.CREATE_WALLET);
       };
 
       return (
@@ -53,7 +57,11 @@ export const WalletList: FC<WalletListProps> = observer(
           <Flex width="80%" justifyContent="center">
             <Text mt={4} variant="body" textAlign="center">
               You haven't created any{' '}
-              {props.network === NetworkType.ethereum ? 'ethereum' : 'bitcoin'}{' '}
+              {walletApp.navState.network === 'ethereum'
+                ? 'Ethereum'
+                : walletApp.navState.btcNetwork === 'mainnet'
+                ? 'Bitcoin'
+                : 'Bitcoin Testnet'}{' '}
               wallets yet.
             </Text>
           </Flex>
@@ -72,7 +80,11 @@ export const WalletList: FC<WalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        {list.length ? <List /> : <Empty network={props.network} />}
+        {list.length ? (
+          <List />
+        ) : (
+          <Empty network={walletApp.navState.network} />
+        )}
       </Flex>
     );
   }
