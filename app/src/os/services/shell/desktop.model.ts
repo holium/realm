@@ -1,11 +1,6 @@
 // import { osState, shipState } from './../store';
 import { types, applySnapshot, Instance } from 'mobx-state-tree';
-import { toJS } from 'mobx';
-// import { setPartitionCookies } from './api';
 import { getInitialWindowDimensions } from './lib/window-manager';
-import { NativeAppList } from 'renderer/apps';
-import { rgba } from 'polished';
-import { string } from 'yup';
 import { Glob } from '../ship/models/docket';
 
 // const Grid = types.model({
@@ -46,7 +41,7 @@ export type WindowModelProps = {
   id: string;
   title?: string;
   glob?: boolean;
-  href: { site: string; glob: any };
+  href?: { site: string; glob: any };
   zIndex: number;
   type: 'urbit' | 'web' | 'native' | 'dialog';
   dimensions: {

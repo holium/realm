@@ -3,7 +3,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from './Confirm';
 
-export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
+export const DeleteSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
   dialogProps: any
 ) => {
   return {
@@ -19,9 +19,9 @@ export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
       };
       return (
         <ConfirmDialog
-          title="Leave Space"
-          description={`Are you sure you want to leave ${dialogProps.name}?`}
-          confirmText="Leave"
+          title="Delete Space"
+          description={`Are you sure you want to delete ${dialogProps.name}?`}
+          confirmText="Delete"
           loading={loading}
           onConfirm={onConfirm}
           {...props}
@@ -30,8 +30,8 @@ export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
     },
     onClose: () => {},
     window: {
-      id: 'leave-space-dialog',
-      title: 'Leave Space Dialog',
+      id: 'delete-space-dialog',
+      title: 'Delete Space Dialog',
       zIndex: 13,
       type: 'dialog',
       dimensions: {

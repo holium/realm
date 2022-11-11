@@ -2,6 +2,7 @@ import { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { rgba } from 'polished';
 import {
   Button,
   Flex,
@@ -127,8 +128,9 @@ export const WallpaperDialog: FC = observer(() => {
         <TextButton
           tabIndex={2}
           style={{ fontWeight: 400 }}
-          highlightColor="#EC415A"
-          textColor="#EC415A"
+          showBackground
+          highlightColor={theme.currentTheme.backgroundColor}
+          textColor={rgba(theme.currentTheme.textColor, 0.7)}
           onClick={() => {
             ShellActions.closeDialog();
             ShellActions.setBlur(false);
@@ -139,6 +141,9 @@ export const WallpaperDialog: FC = observer(() => {
         <TextButton
           tabIndex={1}
           style={{ fontWeight: 400 }}
+          showBackground
+          highlightColor={theme.currentTheme.accentColor}
+          textColor={theme.currentTheme.accentColor}
           onClick={(evt: any) => onChange(evt)}
         >
           {loading ? <Spinner size={0} /> : 'Change'}

@@ -58,7 +58,6 @@ type SpaceRowProps = {
 export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { theme, membership, ship } = useServices();
-  const [deleteLoading, setDeleteLoading] = useState(false);
   // const {} =
   const rowRef = useRef<any>(null);
 
@@ -74,26 +73,28 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
       },
     },
     membership.spaces.get(space.path)!.get(ship!.patp)!.roles.includes('owner')
-    ? {
-        id: `space-row-${space.path}-btn-delete`,
-        label: 'Delete',
-        loading: deleteLoading,
-        onClick: (evt: any) => {
-          setDeleteLoading(true);
-          SpacesActions.deleteSpace(space.path).then((_response: any) => {
-            setDeleteLoading(false);
-          });
-          // DesktopActions.toggleDevTools();
+      ? {
+          id: `space-row-${space.path}-btn-delete`,
+          label: 'Delete',
+          onClick: (evt: any) => {
+            ShellActions.setBlur(true);
+            ShellActions.openDialogWithStringProps('delete-space-dialog', {
+              path: space.path,
+              name: space.name,
+            });
+          },
+        }
+      : {
+          id: `space-row-${space.path}-btn-leave`,
+          label: 'Leave',
+          onClick: (evt: any) => {
+            ShellActions.setBlur(true);
+            ShellActions.openDialogWithStringProps('leave-space-dialog', {
+              path: space.path,
+              name: space.name,
+            });
+          },
         },
-      }
-    : {
-        id: `space-row-${space.path}-btn-leave`,
-        label: 'Leave',
-        loading: deleteLoading,
-        onClick: (evt: any) => {
-          ShellActions.openDialogWithStringProps('leave-space-dialog', {path: space.path, name: space.name})
-        },
-      },
   ];
 
   const contextMenuButtonIds = contextMenuItems.map((item: any) => item.id);
