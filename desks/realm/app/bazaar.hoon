@@ -556,9 +556,12 @@
       =.  rec-members             (~(put in rec-members) src.bowl)
       =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
       =.  stalls.state            (~(put by stalls.state) [path stall])
+      =.  catalog.state           (~(put by catalog.state) [app-id app])
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
-      [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~
+      :~
+        [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]
+      ==
     ::
     ++  member-unrecommend
       |=  [path=space-path:spaces-store =app-id:store]
