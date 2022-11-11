@@ -1,5 +1,5 @@
 // import { osState, shipState } from './../store';
-import { types, Instance } from 'mobx-state-tree';
+import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
 
 export const ShellStore = types
   .model('ShellStore', {
@@ -14,10 +14,15 @@ export const ShellStore = types
       { width: 0, height: 0 }
     ),
     dialogId: types.maybe(types.string),
+    dialogProps: types.map(types.string)
   })
   .actions((self) => ({
     openDialog(dialogId: string) {
       self.dialogId = dialogId;
+    },
+    openDialogWithStringProps(dialogId: string, props: any) {
+      self.dialogId = dialogId;
+      applySnapshot(self.dialogProps, getSnapshot(types.map(types.string).create(props)));
     },
     closeDialog() {
       self.dialogId = undefined;
