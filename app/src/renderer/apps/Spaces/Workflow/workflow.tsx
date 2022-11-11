@@ -131,7 +131,7 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <InviteMembers {...props} />,
     hasPrevious: () => true,
-    nextButtonText: 'Create Place',
+    nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
       const createForm: NewSpace = state;
       delete createForm['archetypeTitle'];

@@ -24,7 +24,7 @@ import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from '../../../dialog/Dialog/DialogTitlebar';
-import { dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 
 type AppWindowStyleProps = {
   theme: ThemeType;
@@ -263,14 +263,16 @@ export const AppWindow: FC<AppWindowProps> = observer(
     }
     if (window.type === 'dialog') {
       hideTitlebarBorder = true;
-      noTitlebar = dialogRenderers[window.id].noTitlebar!;
+      const dialogRenderer = dialogRenderers[window.id];
+      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
+      noTitlebar = dialogConfig.noTitlebar!;
       CustomTitlebar = DialogTitlebar;
       showDevToolsToggle = false;
       preventClickEvents = false;
       maximizeButton = false;
       borderRadius = 16;
-      const onCloseDialog = dialogRenderers[window.id].onClose;
-      const onOpenDialog = dialogRenderers[window.id].onOpen;
+      const onCloseDialog = dialogConfig.onClose;
+      const onOpenDialog = dialogConfig.onOpen;
       useEffect(() => {
         // trigger onOpen only once
         onOpenDialog && onOpenDialog();
