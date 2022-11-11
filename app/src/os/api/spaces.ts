@@ -84,8 +84,6 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    console.log('deletingspace');
-    console.log(pathObj);
     return new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
@@ -97,11 +95,9 @@ export const SpacesApi = {
         },
         reaction: 'spaces-reaction.delete',
         onReaction: (data: any) => {
-          console.log('GOT REACTION')
           resolve(data);
         },
         onError: (e: any) => {
-          console.log('GOT REJECTION')
           reject(e);
         },
       });

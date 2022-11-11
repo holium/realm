@@ -23,7 +23,6 @@ export const ShellStore = types
     openDialogWithStringProps(dialogId: string, props: any) {
       self.dialogId = dialogId;
       applySnapshot(self.dialogProps, getSnapshot(types.map(types.string).create(props)));
-      console.log('aowiehroiwht', self.dialogProps)
     },
     closeDialog() {
       self.dialogId = undefined;

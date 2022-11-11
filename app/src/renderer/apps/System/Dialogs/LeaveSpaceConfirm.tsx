@@ -5,7 +5,6 @@ import { ConfirmDialog } from './Confirm';
 export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (dialogProps: any) => {
   return ({
   component: (props: any) => {
-    console.log('my dialog props', dialogProps)
     const onConfirm = async () => {
       if (dialogProps) {
         SpacesActions.deleteSpace(dialogProps.path);

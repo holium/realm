@@ -315,7 +315,6 @@ export class SpacesService extends BaseService {
   }
 
   async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
-    console.log('PATH', path);
     // if we have the deleted path already selected
     if (path === this.state?.selected?.path) {
       const selected = this.state?.selectSpace(
