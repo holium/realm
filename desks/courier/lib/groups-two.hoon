@@ -45,20 +45,60 @@
 ++  messages-from-writs
   |=  =writs:c
   ^-  (list graph-dm)
-  ~
+  %+  turn   (tap:on:writs:c writs)
+  |=  [=time [=seal:c =memo:c]]
+    :*  index=~[time]
+        author=author.memo
+        time-sent=time
+        (transform-content content.memo author.memo)
+    ==
+++  transform-content
+  |=  [cs=content:c author=ship]
+  ^-  (list content)
+  ?-  -.cs
+      %notice
+    ~[[%text (crip "{(trip pfix.p.cs)} {<author>} {(trip sfix.p.cs)}")]]
+      %story
+    %-  zing
+    :~
+      ::  block
+      %+  turn  p.p.cs
+        |=  =block:c
+        ^-  content
+        ?-  -.block
+          %image  [%url src.block]
+          ::  TODO handle references
+          %cite   [%text '']
+        ==
+      ::  inline
+      %+  turn  q.p.cs  inline-to-content
+    ==
+  ==
+++  inline-to-content
+  |=  =inline:c
+  ^-  content
+  ?@  inline
+  [%text inline]
+  ::  TODO recursively handle the formatting tags like %italics
+  ?+  -.inline  [%text '...']
+    %inline-code  [%text p.inline]
+    %ship  [%mention p.inline]
+    %code  [%text p.inline]
+    %tag  [%text p.inline]
+    %link  [%url p.inline]
+    %break  [%text '']
+  ==
 ++  previews-from-briefs
   |=  [=briefs:c =bowl:gall]
   ^-  (list message-preview)
   =/  whoms=(list whom:c)
     ~(tap in ~(key by briefs))
-  ::  just individual & group DMs, not channels
   %+  murn  whoms
     |=  =whom:c
     ^-  (unit message-preview)
     =/  rolo  (get-rolo bowl)
     ?-  -.whom
         %flag
-      ::  these are filtered out above
       ~
         %club
       =/  =crew:club:c
