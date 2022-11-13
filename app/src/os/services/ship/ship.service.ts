@@ -593,8 +593,8 @@ export class ShipService extends BaseService {
     ]);
 
     return {
-      credentials,
-      configuration,
+      ...credentials,
+      ...configuration,
     };
   }
   async getNotifications(_event: any, timestamp: number, length: number) {

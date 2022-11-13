@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
+import { BrowserWindow, ipcMain, ipcRenderer, dialog } from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
 // ---
@@ -49,6 +49,7 @@ export class Realm extends EventEmitter {
     'realm.boot': this.boot,
     'realm.reconnect': this.reconnect,
     'realm.disconnect': this.disconnect,
+    'realm.show-open-dialog': this.showOpenDialog,
   };
 
   static preload = {
@@ -63,6 +64,9 @@ export class Realm extends EventEmitter {
     },
     install: (ship: string) => {
       return ipcRenderer.invoke('core:install-realm', ship);
+    },
+    showOpenDialog: () => {
+      return ipcRenderer.invoke('realm.show-open-dialog');
     },
     onSetTheme: (callback: any) =>
       ipcRenderer.on('realm.change-theme', callback),
@@ -232,6 +236,18 @@ export class Realm extends EventEmitter {
       this.sendLog(e);
       this.clearSession();
     }
+  }
+
+  async showOpenDialog(_event: any) {
+    return dialog.showOpenDialogSync({
+      properties: ['openFile'],
+    });
+    // .then(result => {
+    //   console.log(result.canceled)
+    //   console.log(result.filePaths)
+    // }).catch(err => {
+    //   console.log(err)
+    // })
   }
 
   setSession(session: ISession): void {

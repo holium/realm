@@ -24,6 +24,7 @@ import {
   Grid,
   Box,
   Spinner,
+  Tooltip,
 } from 'renderer/components';
 import { ThemeModelType } from 'os/services/theme.model';
 import { createDmForm } from './forms/chatForm';
@@ -45,6 +46,8 @@ import {
 import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
+import { OSActions } from 'renderer/logic/actions/os';
+import { lighten, darken, rgba } from 'polished';
 
 type IProps = {
   theme: ThemeModelType;
@@ -303,24 +306,47 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 // @ts-ignore
                 onChange={handleFileChange}
               />
-              <IconButton
-                style={{ cursor: 'none' }}
-                color={iconColor}
-                customBg={dockColor}
-                ml={3}
-                mr={3}
-                size={28}
-                onClick={(evt: any) => {
-                  evt.stopPropagation();
-                  // @ts-ignore
-                  promptUpload(containerRef.current, (err) => {
-                    console.log(err);
-                  }).then((url) => uploadSuccess(url, 'direct'));
-                  // TODO add file uploading
-                }}
+              <Tooltip
+                show={!canUpload}
+                placement="top"
+                content={'No image store set up'}
+                id={`upload-tooltip`}
               >
-                <Icons name="Attachment" />
-              </IconButton>
+                <IconButton
+                  style={{ cursor: 'none' }}
+                  color={canUpload ? iconColor : lighten(0.5, iconColor)}
+                  customBg={dockColor}
+                  ml={3}
+                  mr={3}
+                  size={28}
+                  onClick={(evt: any) => {
+                    evt.stopPropagation();
+                    if (!canUpload) return;
+                    // @ts-ignore
+                    // OSActions.showOpenDialog()
+                    //   .then((result) => console.log(result))
+                    //   .catch((e) => console.error(e));
+                    promptUpload(containerRef.current, (err) => {
+                      console.log(err);
+                    }).then((url) => {
+                      setIsSending(true);
+                      const content = [{ url }];
+                      SoundActions.playDMSend();
+                      DmActions.sendDm(selectedChat.path, content)
+                        .then((res) => {
+                          setIsSending(false);
+                        })
+                        .catch((err) => {
+                          console.error('dm send error', err);
+                          setIsSending(false);
+                        });
+                    });
+                    // TODO add file uploading
+                  }}
+                >
+                  <Icons name="Attachment" />
+                </IconButton>
+              </Tooltip>
               <Input
                 as="textarea"
                 ref={chatInputRef}
