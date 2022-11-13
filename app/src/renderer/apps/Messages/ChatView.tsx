@@ -325,33 +325,46 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 // @ts-ignore
                 onChange={handleFileChange}
               />
-
-              <IconButton
-                style={{ cursor: 'none' }}
-                color={canUpload ? iconColor : lighten(0.5, iconColor)}
-                customBg={dockColor}
-                ml={3}
-                mr={3}
-                size={28}
-                onClick={(evt: any) => {
-                  evt.stopPropagation();
-                  if (!canUpload) return;
-                  if (!containerRef.current) return;
-                  promptUpload(containerRef.current)
-                    .then((file: any) => {
-                      const params: FileUploadParams = {
-                        source: 'file',
-                        content: file.path,
-                        contentType: file.type,
-                      };
-                      uploadFile(params);
-                    })
-                    .catch((e) => console.error(e));
-                }}
+              <Tooltip
+                show={!canUpload}
+                placement="top"
+                content={'No image store set up'}
+                id={`upload-tooltip`}
               >
-                <Icons name="Attachment" />
-              </IconButton>
-
+                <IconButton
+                  style={{ cursor: 'none' }}
+                  color={canUpload ? iconColor : lighten(0.5, iconColor)}
+                  customBg={dockColor}
+                  ml={3}
+                  mr={3}
+                  size={28}
+                  onClick={(evt: any) => {
+                    evt.stopPropagation();
+                    if (!canUpload) return;
+                    // @ts-ignore
+                    // OSActions.showOpenDialog()
+                    //   .then((result) => console.log(result))
+                    //   .catch((e) => console.error(e));
+                    promptUpload(containerRef.current, (err) => {
+                      console.log(err);
+                    }).then((url) => {
+                      setIsSending(true);
+                      const content = [{ url }];
+                      SoundActions.playDMSend();
+                      DmActions.sendDm(selectedChat.path, content)
+                        .then((res) => {
+                          setIsSending(false);
+                        })
+                        .catch((err) => {
+                          console.error('dm send error', err);
+                          setIsSending(false);
+                        });
+                    });
+                  }}
+                >
+                  <Icons name="Attachment" />
+                </IconButton>
+              </Tooltip>
               <Input
                 as="textarea"
                 ref={chatInputRef}
