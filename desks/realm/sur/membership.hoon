@@ -1,7 +1,7 @@
 /-  *spaces-path
 |%
 ::
-+$  role            ?(%initiate %member %admin %owner)
++$  role            ?(%initiate %member %admin %owner %moderator)
 +$  roles           (set role)
 +$  status          ?(%invited %joined %host)
 +$  alias           cord

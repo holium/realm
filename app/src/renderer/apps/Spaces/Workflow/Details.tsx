@@ -137,11 +137,18 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     useEffect(() => {
       // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
+      console.log(workflowState)
+      if (workflowState.type === 'group') {
+        setValidatedImageUrl(workflowState.image);
+        setCrestOption('image');
+      }
+      console.log('setting')
       setWorkspaceState({
         access: 'public',
         color: '#000000',
-        picture: '',
+        picture: workflowState.image || '',
       });
+      console.log('testing', workflowState);
       // props.setState!({
       //   type: 'space',
       //   archetype: 'community',
@@ -155,7 +162,19 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     }, []);
 
     const { spaceForm, name, description, picture, color } = useMemo(
-      () => createSpaceForm({ color: validatedColor }),
+      () => {
+        if (workflowState.type === 'group') {
+          return createSpaceForm({
+            name: workflowState.title,
+            //description: workflowState.description,
+            color: workflowState.color,
+            picture: workflowState.image,
+          });
+        }
+        else {
+          return createSpaceForm({ color: validatedColor });
+        }
+      },
       []
     );
 

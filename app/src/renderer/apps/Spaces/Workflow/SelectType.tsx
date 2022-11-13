@@ -77,10 +77,12 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                     setState &&
                       setState({
                         title,
+                        name: title,
                         image: data.picture,
                         subtitle,
                         type: 'group',
                         path: data.path,
+                        access: 'public'
                       });
                     props.onNext && props.onNext(_evt);
                   }}

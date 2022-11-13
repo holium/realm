@@ -101,8 +101,8 @@ export class ShipService extends BaseService {
     'realm.ship.opened-notifications': this.openedNotifications,
     'realm.ship.read-dm': this.readDm,
     'realm.ship.read-group-dm': this.readGroupDm,
-    'realm.ship.get-group-members': this.getGroupMembers,
     'realm.ship.upload-file': this.uploadFile,
+    'realm.ship.get-group': this.getGroup,
   };
 
   static preload = {
@@ -112,8 +112,8 @@ export class ShipService extends BaseService {
     getOurGroups: async () => {
       return await ipcRenderer.invoke('realm.ship.get-our-groups');
     },
-    getGroupMembers: async (path: string) => {
-      return await ipcRenderer.invoke('realm.ship.get-group-members', path);
+    getGroup: (path: string) => {
+      return ipcRenderer.invoke('realm.ship.get-group', path);
     },
     // getAppPreview: (ship: string, desk: string) => {
     //   return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
@@ -269,7 +269,7 @@ export class ShipService extends BaseService {
     const notificationStore = new DiskStore(
       'notifications',
       ship,
-      secretKey,
+      secretKey!,
       NotificationStore,
       { unseen: [], seen: [], all: [], recent: [] }
     );
@@ -277,14 +277,14 @@ export class ShipService extends BaseService {
     const courierStore = new DiskStore(
       'courier',
       ship,
-      secretKey,
+      secretKey!,
       CourierStore
     );
     this.models.courier = courierStore.model;
     const contactStore = new DiskStore(
       'contacts',
       ship,
-      secretKey,
+      secretKey!,
       ContactStore,
       { ourPatp: ship }
     );
@@ -292,7 +292,7 @@ export class ShipService extends BaseService {
     const friendsStore = new DiskStore(
       'friends',
       ship,
-      secretKey,
+      secretKey!,
       FriendsStore,
       { all: {} }
     );
@@ -450,9 +450,8 @@ export class ShipService extends BaseService {
   async getOurGroups(_event: any): Promise<any> {
     return await GroupsApi.getOur(this.core.conduit!);
   }
-
-  async getGroupMembers(_event: any, path: string): Promise<any> {
-    return await GroupsApi.getOur(this.core.conduit!);
+  async getGroup(_event: any, path: string): Promise<any> {
+    return await GroupsApi.getGroup(this.core.conduit!, path);
   }
 
   // ------------------------------------------
