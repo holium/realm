@@ -113,10 +113,8 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
 
     // Setting up options menu
     useEffect(() => {
-      console.log(workflowState);
       if (workflowState.type === 'group') {
         ShipActions.getGroup(workflowState.path).then((group: any) => {
-          console.log('members', JSON.stringify(group));
           let members: any = {}
           for (var member of Object.keys(group.fleet)) {
             const primaryRole: string =
@@ -127,7 +125,6 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
               : 'initiate';
             members[member] = { primaryRole, roles: group.fleet[member].sects, alias: '', status: 'joined'};
           }
-          console.log(members)
           const newMembers: any = {
             ...permissionMap,
             ...members
@@ -173,8 +170,6 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
 
     const RowRenderer = ({ index, style }: { index: number; style: any }) => {
       const patp = Array.from(selectedPatp.values())[index];
-      console.log('the patp', patp);
-      console.log('the permission map', permissionMap);
       const nickname = nicknameMap[patp];
       const isOur = patp === ship!.patp;
       // const contact = Shi

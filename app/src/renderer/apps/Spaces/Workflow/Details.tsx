@@ -137,18 +137,15 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     useEffect(() => {
       // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
-      console.log(workflowState)
       if (workflowState.type === 'group') {
         setValidatedImageUrl(workflowState.image);
         setCrestOption('image');
       }
-      console.log('setting')
       setWorkspaceState({
         access: 'public',
         color: '#000000',
         picture: workflowState.image || '',
       });
-      console.log('testing', workflowState);
       // props.setState!({
       //   type: 'space',
       //   archetype: 'community',
