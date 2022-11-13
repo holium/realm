@@ -1,4 +1,4 @@
-::  sur/spaces.hoon
+::  sur/spaces/store.hoon
 ::  Defines the types for the spaces concept.
 :: 
 ::  A space is a higher level concept above a %landscape group.
@@ -7,6 +7,7 @@
 ::
 +$  space-path    path:spaces-path
 +$  space-name    name:spaces-path
++$  space-description  cord
 +$  group-space   [creator=ship name=@tas title=@t picture=@t color=@ux]
 +$  token
   $:  chain=?(%ethereum %uqbar)
@@ -33,6 +34,7 @@
 +$  space
   $:  path=space-path
       name=space-name
+      description=space-description
       type=space-type
       access=space-access
       picture=@t
@@ -59,6 +61,7 @@
 ::
 +$  add-payload
   $:  name=space-name
+      description=space-description
       type=space-type
       access=space-access
       picture=@t
@@ -68,6 +71,7 @@
 ::
 +$  edit-payload
   $%  [%name name=@t]
+      [%description description=@t]
       [%picture picture=@t]
       [%color color=@t]
       [%theme =theme]

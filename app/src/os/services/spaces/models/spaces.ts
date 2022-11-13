@@ -23,6 +23,7 @@ export const SpaceModel = types
   .model('SpaceModel', {
     path: types.identifier,
     name: types.string,
+    description: types.string,
     color: types.maybeNull(types.string),
     type: types.enumeration(['group', 'our', 'space']),
     archetype: types.optional(types.enumeration(['home', 'community']), 'home'), //TODO remove the optional

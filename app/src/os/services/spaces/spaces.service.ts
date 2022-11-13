@@ -294,6 +294,7 @@ export class SpacesService extends BaseService {
         slug: spaceToSnake(body.name),
         payload: snakeify({
           name: body.name,
+          description: body.name || '',
           type: body.type,
           access: body.access,
           picture: body.picture,

@@ -51,6 +51,9 @@ export const createSpaceForm = (
     },
   });
 
+  console.log('THE NAME', defaults.name)
+  console.log('THE DESC', defaults.description)
+
   const name = createField({
     id: 'name',
     form: spaceForm,
@@ -144,21 +147,22 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       document.addEventListener('click', handleClickOutside, true);
       if (props.edit) {
         const space = spaces.spaces.get(props.edit.space)!;
-        console.log('SPACE', space);
-        setWorkspaceState({
-          name: space.name
-        });
+        console.log(space)
+        setWorkspaceState(space);
+        if (space.color) {
+          setValidatedColor(space.color!);
+        }
+        if (space.picture) {
+          setValidatedImageUrl(space.picture!);
+        }
       }
-      //else {
-        console.log(space.name)
+      else {
         setWorkspaceState({
           access: 'public',
           color: '#000000',
-          //picture: '',
-          name: space.name
+          picture: '',
         });
-        console.log('new state', workflowState);
-     // }
+      }
       // props.setState!({
       //   type: 'space',
       //   archetype: 'community',
@@ -172,8 +176,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     }, []);
 
     const { spaceForm, name, description, picture, color } = useMemo(
-      () => createSpaceForm({ color: validatedColor }),
-      []
+      () => createSpaceForm({ color: validatedColor, name: workflowState.name, picture: workflowState.picture, description: workflowState.description }),
+      [validatedColor, workflowState]
     );
 
     return (
