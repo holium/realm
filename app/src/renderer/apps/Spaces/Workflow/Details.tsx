@@ -24,6 +24,7 @@ import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import ReactDOM from 'react-dom';
+import { space } from 'styled-system';
 
 const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -95,8 +96,8 @@ type CrestOptionType = 'color' | 'image';
 type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
 export const SpacesCreateForm: FC<BaseDialogProps> = observer(
-  (props: BaseDialogProps) => {
-    const { theme } = useServices();
+  (props: any) => {
+    const { theme, spaces } = useServices();
     const { inputColor, windowColor, textColor } = theme.currentTheme;
     const { workflowState, setState } = props;
     const colorPickerRef = useRef(null);
@@ -141,11 +142,23 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     useEffect(() => {
       // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
-      setWorkspaceState({
-        access: 'public',
-        color: '#000000',
-        picture: '',
-      });
+      if (props.edit) {
+        const space = spaces.spaces.get(props.edit.space)!;
+        console.log('SPACE', space);
+        setWorkspaceState({
+          name: space.name
+        });
+      }
+      //else {
+        console.log(space.name)
+        setWorkspaceState({
+          access: 'public',
+          color: '#000000',
+          //picture: '',
+          name: space.name
+        });
+        console.log('new state', workflowState);
+     // }
       // props.setState!({
       //   type: 'space',
       //   archetype: 'community',

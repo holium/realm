@@ -63,13 +63,15 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
 
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
 
+  const roles = membership.spaces.get(space.path)!.get(ship!.patp)!.roles
   const contextMenuItems = [
+    (roles.includes('owner') || roles.includes('admin')) &&
     {
       id: `space-row-${space.path}-btn-edit`,
       label: 'Edit',
       onClick: (evt: any) => {
-        // evt.stopPropagation();
-        // DesktopActions.toggleDevTools();
+        ShellActions.setBlur(true);
+        ShellActions.openDialogWithStringProps('edit-space', {space: space.path});
       },
     },
     membership.spaces.get(space.path)!.get(ship!.patp)!.roles.includes('owner')

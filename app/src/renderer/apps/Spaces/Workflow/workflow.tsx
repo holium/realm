@@ -126,6 +126,47 @@ export const spacesDialogs: DialogRenderers = {
     },
     hasCloseButton: true,
   },
+  'edit-space': (dialogProps: any) => ({
+    workflow: true,
+    // stateKey: 'create-space',
+    component: (props: any) => <SpacesCreateForm edit={dialogProps} {...props} />,
+    hasPrevious: () => false,
+    onNext: (_evt: any) => {
+      ShellActions.nextDialog('create-space-4');
+    },
+    onPrevious: () => {
+      ShellActions.nextDialog('create-space-1');
+    },
+    onClose: () => {
+      ShellActions.setBlur(false);
+      ShellActions.closeDialog();
+    },
+    isValidated: (state: any) => {
+      if (
+        state &&
+        state.access &&
+        state.name &&
+        state.color &&
+        state.picture !== undefined
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    window: {
+      id: 'edit-space',
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 550,
+        height: 570,
+      },
+    },
+    hasCloseButton: true,
+  }),
   'create-space-4': {
     workflow: true,
     // stateKey: 'create-space',
