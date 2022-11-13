@@ -91,6 +91,7 @@ const UrbitApp = types.model('UrbitApp', {
   website: types.string,
   license: types.string,
   installStatus: types.string,
+  host: types.maybe(types.string),
   config: types.maybeNull(RealmConfig),
 });
 

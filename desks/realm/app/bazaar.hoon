@@ -891,7 +891,7 @@
     ::
     ++  update-catalog-app
       |=  [=desk =charge:docket status=?(%started %failed %suspended %installed)]
-      =/  hide-desks              `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      =/  hide-desks              `(set @tas)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ?:  (~(has in hide-desks) desk)
         `state
       =/  app                     (~(get by catalog.state) desk)

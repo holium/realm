@@ -28,7 +28,10 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     let dialogConfig: DialogConfig;
     if (isOpen) {
       const dialogRenderer = dialogRenderers[dialogId];
-      dialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(dialogProps.toJSON()) : dialogRenderer;
+      dialogConfig =
+        dialogRenderer instanceof Function
+          ? dialogRenderer(dialogProps.toJSON())
+          : dialogRenderer;
     }
 
     // clear dialog on escape pressed if closable
@@ -38,13 +41,9 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         let notOnboardingDialog = !Object.values(OnboardingStep).includes(
           dialogId as any
         );
-        if (
-          isOpen &&
-          notOnboardingDialog &&
-          dialogConfig.hasCloseButton
-        ) {
+        if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {
           ShellActions.closeDialog();
-          ShellActions.setBlur(false);
+          if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
         }
       },
       { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }

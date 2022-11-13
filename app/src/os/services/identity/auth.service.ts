@@ -150,6 +150,7 @@ export class AuthService extends BaseService {
     this.state.setLoader('loading');
 
     let passwordHash = this.state.getPasswordHash(shipId);
+    console.log(shipId, passwordHash);
     let passwordCorrect = await bcrypt.compare(password, passwordHash);
     this.core.sendLog(`passwordHash: ${passwordHash}`);
     this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);

@@ -1,4 +1,4 @@
-import { FC, useState, useMemo } from 'react';
+import { FC, useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 
@@ -8,6 +8,7 @@ import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import AppSearchApp from '../AppInstall/AppSearch';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type SidebarType = 'friends' | 'members' | null;
 

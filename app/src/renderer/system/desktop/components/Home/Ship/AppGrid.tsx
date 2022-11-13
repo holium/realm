@@ -6,6 +6,7 @@ import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type AppGridProps = {
   isOpen?: boolean;
@@ -64,10 +65,12 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 },
                 {
                   label: 'App info',
-                  disabled: true,
                   onClick: (evt: any) => {
-                    // evt.stopPropagation();
-                    console.log('open app info');
+                    evt.stopPropagation();
+                    ShellActions.openDialogWithStringProps(
+                      'app-detail-dialog',
+                      { appId: app.id }
+                    );
                   },
                 },
 
