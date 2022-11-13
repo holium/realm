@@ -134,6 +134,8 @@ export const spacesDialogs: DialogRenderers = {
     nextButtonText: 'Create Place',
     onNext: (_evt: any, state: any, setState: any) => {
       const createForm: NewSpace = state;
+      if (!createForm.archetype)
+        createForm.archetype = 'community';
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
       // DesktopActions.setDialogLoading(true);

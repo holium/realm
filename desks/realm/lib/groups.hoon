@@ -33,23 +33,16 @@
   =/  name-da   (slaw %da name)
   ?~  name-da   %.y   %.n
 ::
-++  get-members
+++  get-group
   |=  [rid=[entity=ship name=@tas] our=ship now=@da]
-  =/  grp-data      .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity.rid)/(scot %tas name.rid)/noun)
-  grp-data
-::
-++  get-groups-2-members
-  |=  [rid=[entity=ship name=@tas] our=ship now=@da]
-  ^-  group:store
-  =/  grp-data      .^((unit group) %gx /(scot %p our)/group-store/(scot %da now)/groups/ship/(scot %p entity.rid)/(scot %tas name.rid)/noun)
-  =/  groups  .^(groups:g %gy /(scot %p our)/groups/(scot %da now)/groups)
-  =/  group  (~(got by groups) rid)
+  ^-  group:g
+  =/  groups  .^(groups:g %gx /(scot %p our)/groups/(scot %da now)/groups/groups)
+  (~(got by groups) rid)
 ::  :*  members=fleet
 ::      tags  :: +$  tags  (jug tag ship)
 ::      policy :: +$  policy [%invite diff]
 ::      hidden :: +$  ?
 ::  ==
-  *group:store
 ::
 ::  JSON
 ::

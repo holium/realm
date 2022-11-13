@@ -288,6 +288,8 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
+    console.log(body)
+    console.log(body.archetype);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
