@@ -117,15 +117,19 @@ export const DesktopStore = types
       isFullscreen: boolean
     ) {
       let glob = app.glob;
+      let href = app.href;
 
       if (app.href) {
         glob = app.href.glob ? true : false;
+      }
+      if (app.type === 'web') {
+        href = { site: app.web.url };
       }
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
         glob,
-        href: app.href,
+        href,
         zIndex: self.windows.size + 1,
         type: app.type,
         dimensions: getInitialWindowDimensions(

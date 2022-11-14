@@ -20,6 +20,7 @@ import { toJS } from 'mobx';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
+import DevApps from '../../../../app.dev.json';
 // const util = require('util');
 
 export enum InstallStatus {
@@ -77,6 +78,7 @@ export const WebApp = types.model('WebApp', {
   href: types.string,
   favicon: types.maybeNull(types.string),
   type: types.literal(AppTypes.Web),
+  config: types.maybeNull(RealmConfig),
 });
 
 export const UrbitApp = types.model('UrbitApp', {
@@ -380,6 +382,9 @@ export const NewBazaarStore = types
         }
       );
     },
+    get devApps() {
+      return Object.values(DevApps) || [];
+    },
     getRecentApps() {
       return [];
     },
@@ -429,7 +434,12 @@ export const NewBazaarStore = types
       return self.recommendations.includes(appId);
     },
     getApp(appId: string) {
-      return self.catalog.get(appId);
+      const app = self.catalog.get(appId);
+      if (!app) {
+        // @ts-ignore
+        return DevApps[appId];
+      }
+      return app;
     },
     getDock(path: string) {
       return self.docks.get(path);
@@ -473,6 +483,8 @@ export const NewBazaarStore = types
       return suite;
     },
   }));
+
+export type WebAppType = Instance<typeof WebApp>;
 
 export type DocketAppType = Instance<typeof DocketApp>;
 export type UrbitAppType = Instance<typeof UrbitApp>;

@@ -169,6 +169,14 @@ export class DesktopService extends BaseService {
         name: `urbauth-${credentials.ship}`,
         value: credentials.cookie!.split('=')[1].split('; ')[0],
       });
+    } else if (selectedApp.type === 'web') {
+      const appUrl = selectedApp.web.url;
+      // Hit the main process handler for setting partition cookies
+      session.fromPartition(`${selectedApp.type}-web-webview`).cookies.set({
+        url: appUrl,
+        name: `urbauth-${credentials.ship}`,
+        value: credentials.cookie!.split('=')[1].split('; ')[0],
+      });
     }
   }
   closeAppWindow(_event: any, spaceId: string, selectedApp: any) {
