@@ -70,15 +70,15 @@ export const AppInstallStore = types
         case 'dev-app-detail':
           break;
         case 'app-summary':
-          console.log('appp summary');
-          self.dimensions = { height: 450, width: 600 };
-          self.coords = calculatePopoverAnchorById(self.popoverId, {
-            dimensions: self.dimensions,
-            anchorOffset: {
-              x: 40,
-              y: 20,
-            },
-          });
+          // TODO make the dimensions dynamic
+          // self.dimensions = { height: 450, width: 600 };
+          // self.coords = calculatePopoverAnchorById(self.popoverId, {
+          //   dimensions: self.dimensions,
+          //   anchorOffset: {
+          //     x: 40,
+          //     y: 20,
+          //   },
+          // });
           break;
         default:
           break;
