@@ -17,6 +17,7 @@ export type FileUploadParams = {
   //   content should be clipboard contents
   content: string;
   contentType: string;
+  filename?: string;
 };
 
 export const ShipModel = types
