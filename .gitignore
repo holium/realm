@@ -123,3 +123,5 @@ build
 
 # logs
 app/realmlog.txt
+
+app.dev.json

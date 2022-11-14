@@ -84,6 +84,14 @@ export const getCenteredDimensions = (
         ? app.dimensions.height
         : defaultAppDimensions.height,
     };
+  } else if (app.type === 'web' && app.web.dimensions) {
+    const defaultXY = getCenteredXY(app.web.dimensions, desktopDimensions);
+    return {
+      x: defaultXY.x,
+      y: defaultXY.y,
+      width: app.web.dimensions.width,
+      height: app.web.dimensions.height,
+    };
   } else {
     const fullDims = getFullscreenDimensions(desktopDimensions, true);
     return {

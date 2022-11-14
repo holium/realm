@@ -244,7 +244,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
             hasBorder={!hideTitlebarBorder}
             showDevToolsToggle={showDevToolsToggle}
             zIndex={window.zIndex}
-            // shareable
             dragControls={dragControls}
             onDevTools={onDevTools}
             onDragStart={() => onDragStart()}
@@ -252,10 +251,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
             onClose={() => onClose()}
             onMaximize={() => maximize()}
             theme={theme.currentTheme}
-            // theme={{
-            //   ...theme,
-            //   windowColor: darken(0.002, theme.windowColor!),
-            // }}
             app={window}
           />
         );
@@ -264,7 +259,10 @@ export const AppWindow: FC<AppWindowProps> = observer(
     if (window.type === 'dialog') {
       hideTitlebarBorder = true;
       const dialogRenderer = dialogRenderers[window.id];
-      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
+      const dialogConfig: DialogConfig =
+        dialogRenderer instanceof Function
+          ? dialogRenderer(shell.dialogProps.toJSON())
+          : dialogRenderer;
       noTitlebar = dialogConfig.noTitlebar!;
       CustomTitlebar = DialogTitlebar;
       showDevToolsToggle = false;

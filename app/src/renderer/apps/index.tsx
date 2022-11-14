@@ -15,6 +15,10 @@ export type NativeAppType = {
   };
   web?: {
     url: string;
+    dimensions?: {
+      width: number;
+      height: number;
+    };
     openFullscreen?: boolean;
     theme?: ThemeModelType;
     development?: boolean;

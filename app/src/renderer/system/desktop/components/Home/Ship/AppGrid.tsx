@@ -24,16 +24,18 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const dock = bazaar.getDock(currentSpace.path);
 
   return useMemo(() => {
-    const apps = [...bazaar.installed, ...bazaar.installing];
+    const apps = [...bazaar.installed, ...bazaar.installing, ...bazaar.devApps];
 
     return (
       <>
         {apps.map((app: any, index: number) => {
           const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
           const weRecommended = bazaar.isRecommended(app.id);
+          let canInstall = true;
           let isInstalling = app.installStatus !== InstallStatus.installed;
           if (app.type === AppTypes.Web) {
             isInstalling = false;
+            canInstall = false;
           }
           return (
             <AppTile
@@ -48,7 +50,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               contextMenu={[
                 {
                   label: isAppPinned ? 'Unpin app' : 'Pin app',
-                  disabled: false,
+                  disabled: app.type === 'web',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     isAppPinned
@@ -58,7 +60,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 },
                 {
                   label: weRecommended ? 'Unrecommend app' : 'Recommend app',
-                  disabled: false,
+                  disabled: app.type === 'web',
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     weRecommended
@@ -68,7 +70,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 },
                 {
                   label: 'App info',
-                  disabled: true,
+                  disabled: app.type === 'web',
                   onClick: (evt: any) => {
                     // evt.stopPropagation();
                     console.log('open app info');
@@ -92,7 +94,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                       {
                         label: 'Install',
                         section: 2,
-                        disabled: false,
+                        disabled: app.type === 'web',
                         onClick: (evt: any) => {
                           evt.stopPropagation();
                           // console.log(`start install`, toJS(app));
