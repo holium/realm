@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import { Instance, types, onSnapshot } from 'mobx-state-tree';
 import { Patp } from 'os/types';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
+import { DocketApp, DocketAppType } from 'os/services/spaces/models/bazaar';
 
 const searchMode = types.enumeration([
   'none',
@@ -24,8 +25,14 @@ const PopoverCoords = types.model({
   top: types.number,
 });
 
+const Dimensions = types.model({
+  width: types.number,
+  height: types.number,
+});
+
 export const AppInstallStore = types
   .model('AppInstallStore', {
+    popoverId: types.string,
     searchMode: searchMode,
     searchModeArgs: types.array(types.string),
     searchString: types.string,
@@ -34,8 +41,13 @@ export const AppInstallStore = types
     selectedDesk: types.string,
     loadingState: loadingState,
     coords: PopoverCoords,
+    dimensions: Dimensions,
+    selectedApp: types.maybe(DocketApp),
   })
   .actions((self) => ({
+    setApp(app: DocketAppType) {
+      self.selectedApp = app;
+    },
     setSearchMode(mode: SearchMode) {
       if (mode === self.searchMode) return;
       switch (mode) {
@@ -58,6 +70,15 @@ export const AppInstallStore = types
         case 'dev-app-detail':
           break;
         case 'app-summary':
+          console.log('appp summary');
+          self.dimensions = { height: 450, width: 600 };
+          self.coords = calculatePopoverAnchorById(self.popoverId, {
+            dimensions: self.dimensions,
+            anchorOffset: {
+              x: 40,
+              y: 20,
+            },
+          });
           break;
         default:
           break;
@@ -84,6 +105,8 @@ export const AppInstallStore = types
     },
     open(popoverId: string, dimensions: any) {
       self.searchMode = 'start';
+      self.popoverId = popoverId;
+      self.dimensions = dimensions;
       self.coords = calculatePopoverAnchorById(popoverId, {
         dimensions,
         anchorOffset: {
@@ -103,6 +126,7 @@ const loadSnapshot = () => {
 const persistedState = loadSnapshot();
 
 export const appInstallStore = AppInstallStore.create({
+  popoverId: '',
   searchMode: 'none',
   searchString: '',
   searchPlaceholder: 'Search...',
@@ -113,6 +137,7 @@ export const appInstallStore = AppInstallStore.create({
     left: 0,
     top: 0,
   },
+  dimensions: { height: 450, width: 550 },
 });
 
 onSnapshot(appInstallStore, (snapshot) => {

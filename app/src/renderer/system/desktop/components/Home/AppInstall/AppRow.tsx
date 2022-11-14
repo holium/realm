@@ -5,6 +5,7 @@ import { rgba, darken } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text, Icons, Box } from 'renderer/components';
 import { ThemeType } from '../../../../../theme';
+import { DocketAppType } from 'os/services/spaces/models/bazaar';
 
 const sizes = {
   sm: 32,
@@ -82,7 +83,7 @@ interface AppRowProps {
   caption: string;
   app: any;
   descriptionWidth?: number;
-  onClick?: (app: any) => void;
+  onClick?: (evt: React.MouseEvent<HTMLElement>, app: DocketAppType) => void;
   actionRenderer?: any;
 }
 
@@ -120,7 +121,9 @@ export const AppRow = ({
         gap={8}
         flex={1}
         // style={{ width: '100%' }}
-        onClick={(e) => onClick && onClick(app)}
+        onClick={(evt: React.MouseEvent<HTMLDivElement>) =>
+          onClick && onClick(evt, app)
+        }
       >
         <TileStyle
           onContextMenu={(evt: any) => {

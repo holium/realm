@@ -37,18 +37,20 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const [workflowState, setWorkflowState] = useState<any>({ loading: false });
   const [validated, setValidated] = useState<boolean>(false);
 
-  const ViewComponent: FC<any> | undefined = useMemo(
-    () => {
-      const dialogRenderer = dialogRenderers[window.id];
-      console.log('the props', shell.dialogProps.toJSON())
-      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
-      return dialogConfig.component!;
-    },
-    [window.id, shell.dialogProps.toJSON()]
-  );
+  const ViewComponent: FC<any> | undefined = useMemo(() => {
+    const dialogRenderer = dialogRenderers[window.id];
+    const dialogConfig: DialogConfig =
+      dialogRenderer instanceof Function
+        ? dialogRenderer(shell.dialogProps.toJSON())
+        : dialogRenderer;
+    return dialogConfig.component!;
+  }, [window.id, shell.dialogProps.toJSON()]);
 
   const dialogRenderer = dialogRenderers[window.id];
-  const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
+  const dialogConfig: DialogConfig =
+    dialogRenderer instanceof Function
+      ? dialogRenderer(shell.dialogProps.toJSON())
+      : dialogRenderer;
   const {
     workflow,
     customNext,

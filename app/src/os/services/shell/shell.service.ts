@@ -40,7 +40,11 @@ export class ShellService extends BaseService {
       return ipcRenderer.invoke('realm.shell.open-dialog', dialogId);
     },
     openDialogWithStringProps: (dialogId: string, props: any) => {
-      return ipcRenderer.invoke('realm.shell.open-dialog-with-string-props', dialogId, props);
+      return ipcRenderer.invoke(
+        'realm.shell.open-dialog-with-string-props',
+        dialogId,
+        props
+      );
     },
     nextDialog: (dialogId: string) => {
       return ipcRenderer.invoke('realm.shell.next-dialog', dialogId);

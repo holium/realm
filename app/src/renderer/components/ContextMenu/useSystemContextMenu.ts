@@ -33,7 +33,7 @@ const useContextMenu = () => {
       document.removeEventListener('contextmenu', handleContextMenu);
     };
   });
-  return { anchorPoint, show };
+  return { anchorPoint, show, setShow };
 };
 
 export default useContextMenu;

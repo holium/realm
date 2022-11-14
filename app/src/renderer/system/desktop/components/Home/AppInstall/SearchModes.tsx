@@ -21,6 +21,9 @@ import { InstallStatus, UrbitAppType } from 'os/services/spaces/models/bazaar';
 import { useAppInstaller } from './store';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { DocketAppType } from 'os/services/spaces/models/bazaar';
+import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 
 export const SearchModes: FC = observer(() => {
   const { bazaar, theme } = useServices();
@@ -153,18 +156,21 @@ const renderApps = (space: string, apps: any, theme: any) => {
     </div>
   ));
 };
-const installApp = (app: any) => {
+const installApp = (app: UrbitAppType) => {
   const tokens = app.id.split('/');
   SpacesActions.installDesk(tokens[0], tokens[1]);
 };
 
-const renderAppSummary = (app: any) => {
-  return (
-    <Flex height={450} flexDirection="column" gap={10}>
-      <Text fontWeight={'bold'}>{app.title}</Text>
-      <Button onClick={(e) => installApp(app)}>Install</Button>
-    </Flex>
-  );
+const renderAppSummary = (app: UrbitAppType) => {
+  const ViewComponent = AppDetailDialog({ type: 'app-install', loading: false })
+    .component!;
+  return <ViewComponent />;
+  // return (
+  //   <Flex height={450} flexDirection="column" gap={10}>
+  //     <Text fontWeight={'bold'}>{app.title}</Text>
+  //     <Button onClick={(e) => installApp(app)}>Install</Button>
+  //   </Flex>
+  // );
 };
 
 const renderDevs = (space: string, devs: any, theme: any) => {
@@ -248,12 +254,16 @@ const ShipSearch: FC<any> = observer(() => {
 
 const DevApps: FC = observer(() => {
   const { theme, bazaar } = useServices();
-  const { searchString, selectedShip } = useAppInstaller();
+  const { searchString, selectedShip, setSearchMode, setApp } =
+    useAppInstaller();
   const secondaryTextColor = useMemo(
     () => rgba(theme.currentTheme.textColor, 0.5),
     [theme.currentTheme.textColor]
   );
-  const apps = bazaar.searchTreaties(selectedShip, searchString);
+  const apps: DocketAppType[] = bazaar.searchTreaties(
+    selectedShip,
+    searchString
+  );
   if (bazaar.loadingTreaties) {
     return (
       <Flex flex={1} verticalAlign="middle">
@@ -266,11 +276,8 @@ const DevApps: FC = observer(() => {
     );
   }
 
-  if (!apps || apps.length === 0) {
-    return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
-  }
-  // console.log('rendering apps => %o', apps);
   const InstallButton = ({ app }: any) => {
+    const { bazaar } = useServices();
     const parts = app.id.split('/');
     let appEntry;
     let installed = false;
@@ -288,24 +295,41 @@ const DevApps: FC = observer(() => {
         onClick={(e) => {
           e.stopPropagation();
           !installed && SpacesActions.installApp(parts[0], parts[1]);
+          // TODO should we close app search on install?
+          setSearchMode('none');
         }}
       >
         {installed ? 'Installed' : 'Install'}
       </Button>
     );
   };
+
+  if (!apps || apps.length === 0) {
+    return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
+  }
+
   return (
     <>
-      {apps?.map((app, index) => (
+      {apps?.map((app: DocketAppType, index: number) => (
         <div key={index}>
           <AppRow
             caption={app.title}
             app={app}
-            actionRenderer={(app: any) => app.id && <InstallButton app={app} />}
-            // onClick={(app: any) => {
-            //   setData(app);
-            //   setSearchMode('app-summary');
-            // }}
+            actionRenderer={(app: DocketAppType) =>
+              app.id && <InstallButton app={app} />
+            }
+            onClick={(
+              evt: React.MouseEvent<HTMLElement>,
+              app: DocketAppType
+            ) => {
+              evt.stopPropagation();
+              setApp(app);
+              // console.log(app.id.split('/')[1]);
+              // ShellActions.openDialogWithStringProps('app-detail-dialog', {
+              //   type: 'app-install',
+              // });
+              setSearchMode('app-summary');
+            }}
           />
         </div>
       ))}
@@ -313,7 +337,7 @@ const DevApps: FC = observer(() => {
   );
 });
 
-const DevAppSearch: FC<any> = observer(() => {
+const DevAppSearch: FC = observer(() => {
   const { theme } = useServices();
   const { selectedShip } = useAppInstaller();
 

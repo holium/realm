@@ -298,7 +298,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           position="relative"
           ref={tileRef}
           variants={variants}
-          onClick={(evt: any) => {
+          onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
             evt.stopPropagation();
             onAppClick && !isUninstalled && !isInstalling && onAppClick(app);
           }}

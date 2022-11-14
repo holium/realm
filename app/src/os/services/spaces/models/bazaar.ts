@@ -31,7 +31,7 @@ export enum InstallStatus {
   treaty = 'treaty',
 }
 
-enum AppTypes {
+export enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
   Web = 'web',
@@ -79,7 +79,7 @@ export const WebApp = types.model('WebApp', {
   type: types.literal(AppTypes.Web),
 });
 
-const UrbitApp = types.model('UrbitApp', {
+export const UrbitApp = types.model('UrbitApp', {
   id: types.identifier,
   title: types.string,
   info: types.string,
