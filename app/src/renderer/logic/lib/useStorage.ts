@@ -10,10 +10,7 @@ export interface IuseStorage {
   upload: (file: File, bucket: string) => Promise<string>;
   uploadDefault: (file: File) => Promise<string>;
   uploading: boolean;
-  promptUpload: (
-    elem: HTMLElement,
-    onError?: (err: Error) => void
-  ) => Promise<string>;
+  promptUpload: (elem: HTMLElement) => Promise<File>;
 }
 
 const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
@@ -24,29 +21,6 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
     if (!s3) {
       ShipActions.getS3Bucket().then((response: any) => {
         console.log(response);
-        // @patrick - if there is an endpoint defined in settings, update the site's
-        //   content-security-policy to allow S3 bucket uploads/reads
-        if (response?.credentials?.endpoint) {
-          const csp = document.querySelector(
-            'meta[name="Content-Security-Policy"]'
-          );
-          if (csp) {
-            let content = csp.getAttribute('content');
-            if (content) {
-              const sources = content.split(';');
-              for (let idx = 0; idx < sources.length; idx++) {
-                const src = sources[idx].split(' ');
-                if (src[0].trim() === 'connect-src') {
-                  sources.push(response.credentials.endpoint);
-                }
-              }
-              // overwrite content with new content
-              content = sources.join(';');
-              // console.log('updating meta => %o');
-              csp.setAttribute('content', content);
-            }
-          }
-        }
         setS3(response);
       });
     }
@@ -124,7 +98,7 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
   );
 
   const promptUpload = useCallback(
-    (elem: HTMLElement, onError?: (err: Error) => void): Promise<string> => {
+    (elem: HTMLElement): Promise<File> => {
       return new Promise((resolve, reject) => {
         const fileSelector = document.createElement('input');
         fileSelector.setAttribute('type', 'file');
@@ -134,14 +108,9 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
           const files = fileSelector.files;
           if (!files || files.length <= 0) {
             reject();
-          } else if (onError) {
-            uploadDefault(files[0])
-              .then(resolve)
-              .catch((err) => onError(err));
-            elem.removeChild(fileSelector);
           } else {
-            uploadDefault(files[0]).then(resolve);
             elem.removeChild(fileSelector);
+            resolve(files[0]);
           }
         });
         elem.appendChild(fileSelector);
