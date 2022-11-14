@@ -242,12 +242,6 @@ export class Realm extends EventEmitter {
     return dialog.showOpenDialogSync({
       properties: ['openFile'],
     });
-    // .then(result => {
-    //   console.log(result.canceled)
-    //   console.log(result.filePaths)
-    // }).catch(err => {
-    //   console.log(err)
-    // })
   }
 
   setSession(session: ISession): void {

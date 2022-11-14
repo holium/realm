@@ -37,7 +37,7 @@ import {
   PreviewGroupDMType,
 } from 'os/services/ship/models/courier';
 import { ChatLog } from './components/ChatLog';
-import { ShipActions } from 'renderer/logic/actions/ship';
+import { ShipActions, FileUploadParams } from 'renderer/logic/actions/ship';
 import S3Client from 'renderer/logic/s3/S3Client';
 import {
   FileUploadSource,
@@ -322,26 +322,30 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                   onClick={(evt: any) => {
                     evt.stopPropagation();
                     if (!canUpload) return;
-                    // @ts-ignore
-                    // OSActions.showOpenDialog()
-                    //   .then((result) => console.log(result))
-                    //   .catch((e) => console.error(e));
-                    promptUpload(containerRef.current, (err) => {
-                      console.log(err);
-                    }).then((url) => {
-                      setIsSending(true);
-                      const content = [{ url }];
-                      SoundActions.playDMSend();
-                      DmActions.sendDm(selectedChat.path, content)
-                        .then((res) => {
-                          setIsSending(false);
-                        })
-                        .catch((err) => {
-                          console.error('dm send error', err);
-                          setIsSending(false);
-                        });
-                    });
-                    // TODO add file uploading
+                    if (!containerRef.current) return;
+                    promptUpload(containerRef.current)
+                      .then((file: File) => {
+                        const params: FileUploadParams = {
+                          filename: file.path,
+                          contentType: file.type,
+                        };
+                        ShipActions.uploadFile(params)
+                          .then((url) => {
+                            setIsSending(true);
+                            const content = [{ url }];
+                            SoundActions.playDMSend();
+                            DmActions.sendDm(selectedChat.path, content)
+                              .then((res) => {
+                                setIsSending(false);
+                              })
+                              .catch((err) => {
+                                console.error('dm send error', err);
+                                setIsSending(false);
+                              });
+                          })
+                          .catch((e) => console.error(e));
+                      })
+                      .catch((e) => console.error(e));
                   }}
                 >
                   <Icons name="Attachment" />
