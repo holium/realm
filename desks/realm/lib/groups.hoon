@@ -38,11 +38,6 @@
   ^-  group:g
   =/  groups  .^(groups:g %gx /(scot %p our)/groups/(scot %da now)/groups/groups)
   (~(got by groups) rid)
-::  :*  members=fleet
-::      tags  :: +$  tags  (jug tag ship)
-::      policy :: +$  policy [%invite diff]
-::      hidden :: +$  ?
-::  ==
 ::
 ::  JSON
 ::
