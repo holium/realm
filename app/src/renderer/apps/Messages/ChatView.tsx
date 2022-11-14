@@ -38,6 +38,7 @@ import {
 } from 'os/services/ship/models/courier';
 import { ChatLog } from './components/ChatLog';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { FileUploadParams } from 'os/services/ship/models/ship';
 import S3Client from 'renderer/logic/s3/S3Client';
 import {
   FileUploadSource,
@@ -47,7 +48,6 @@ import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
 import { OSActions } from 'renderer/logic/actions/os';
-import { FileUploadParams } from 'os/services/ship/models/ship';
 
 type IProps = {
   theme: ThemeModelType;
@@ -344,24 +344,11 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                     promptUpload(containerRef.current)
                       .then((file: File) => {
                         const params: FileUploadParams = {
-                          filename: file.path,
+                          source: 'file',
+                          content: file.path,
                           contentType: file.type,
                         };
-                        ShipActions.uploadFile(params)
-                          .then((url) => {
-                            setIsSending(true);
-                            const content = [{ url }];
-                            SoundActions.playDMSend();
-                            DmActions.sendDm(selectedChat.path, content)
-                              .then((res) => {
-                                setIsSending(false);
-                              })
-                              .catch((err) => {
-                                console.error('dm send error', err);
-                                setIsSending(false);
-                              });
-                          })
-                          .catch((e) => console.error(e));
+                        uploadFile(params);
                       })
                       .catch((e) => console.error(e));
                   }}
