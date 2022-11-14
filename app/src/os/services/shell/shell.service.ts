@@ -19,6 +19,7 @@ export class ShellService extends BaseService {
     'realm.shell.set-blur': this.setBlur,
     'realm.shell.set-fullscreen': this.setFullscreen,
     'realm.shell.open-dialog': this.openDialog,
+    'realm.shell.open-dialog-with-string-props': this.openDialogWithStringProps,
     'realm.shell.close-dialog': this.closeDialog,
     'realm.shell.next-dialog': this.nextDialog,
     'realm.shell.setIsMouseInWebview': this.setIsMouseInWebview,
@@ -37,6 +38,9 @@ export class ShellService extends BaseService {
     },
     openDialog: (dialogId: string) => {
       return ipcRenderer.invoke('realm.shell.open-dialog', dialogId);
+    },
+    openDialogWithStringProps: (dialogId: string, props: any) => {
+      return ipcRenderer.invoke('realm.shell.open-dialog-with-string-props', dialogId, props);
     },
     nextDialog: (dialogId: string) => {
       return ipcRenderer.invoke('realm.shell.next-dialog', dialogId);
@@ -111,6 +115,11 @@ export class ShellService extends BaseService {
   openDialog(_event: any, dialogId: string) {
     this.state?.closeDialog(); // must close old dialogs first
     this.state?.openDialog(dialogId);
+  }
+
+  openDialogWithStringProps(_event: any, dialogId: string, props: any) {
+    this.state?.closeDialog(); // must close old dialogs first
+    this.state?.openDialogWithStringProps(dialogId, props);
   }
 
   nextDialog(_event: any, dialogId: string) {
