@@ -29,6 +29,24 @@
     ^-  (quip card _this)
     =.  is-public.state     %.y
     ::  TODO import from pals if installed
+    =/  has-pals  .^(? %gu /(scot %p our.bowl)/pals/(scot %da now.bowl)/pals)
+    ?:  has-pals
+      =/  targets  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/pals/targets)
+      =/  mutuals  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/pals/mutuals)
+      =/  pals-friends
+        ^-  friends:store
+        =/  ship-list  ~(tap in targets)
+        =/  mylist
+          ^-  (list [ship friend:store])
+          %+  turn  ship-list
+            |=  =ship
+            [ship [pinned=%.n tags=*(set cord) mutual=%.y]]
+        =/  alist  ~[['a' 1] ['b' 2]]
+        ~&  alist
+        =/  wseoih  (my ~[['a' 1] ['b' 2]])
+        ~&  mylist
+        *friends:store
+      `this(friends pals-friends)
     `this
   ::
   ++  on-save
