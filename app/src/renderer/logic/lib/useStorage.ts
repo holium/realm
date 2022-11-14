@@ -24,6 +24,29 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
     if (!s3) {
       ShipActions.getS3Bucket().then((response: any) => {
         console.log(response);
+        // @patrick - if there is an endpoint defined in settings, update the site's
+        //   content-security-policy to allow S3 bucket uploads/reads
+        if (response?.credentials?.endpoint) {
+          const csp = document.querySelector(
+            'meta[name="Content-Security-Policy"]'
+          );
+          if (csp) {
+            let content = csp.getAttribute('content');
+            if (content) {
+              const sources = content.split(';');
+              for (let idx = 0; idx < sources.length; idx++) {
+                const src = sources[idx].split(' ');
+                if (src[0].trim() === 'connect-src') {
+                  sources.push(response.credentials.endpoint);
+                }
+              }
+              // overwrite content with new content
+              content = sources.join(';');
+              // console.log('updating meta => %o');
+              csp.setAttribute('content', content);
+            }
+          }
+        }
         setS3(response);
       });
     }
