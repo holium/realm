@@ -2,10 +2,15 @@ import { FC, useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
-import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
+import {
+  AppType,
+  AppTypes,
+  InstallStatus,
+} from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { devApps } from 'renderer/apps/development';
 
 type AppGridProps = {
   isOpen?: boolean;
@@ -14,30 +19,29 @@ type AppGridProps = {
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
-  const { spaces, bazaar, ship } = useServices();
-
+  const { spaces, bazaar } = useServices();
   const currentSpace = spaces.selected!;
   const dock = bazaar.getDock(currentSpace.path);
 
-  // const currentBazaar = useMemo(() => bazaar.getPinnedApps(currentSpace.path), [currentSpace]);
-  // const currentBazaar = bazaar.getBazaar(currentSpace.path);
-
   return useMemo(() => {
     const apps = [...bazaar.installed, ...bazaar.installing];
-    // apps.push(bazaar.installing);
+
     return (
       <>
         {apps.map((app: any, index: number) => {
           const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
           const weRecommended = bazaar.isRecommended(app.id);
+          let isInstalling = app.installStatus !== InstallStatus.installed;
+          if (app.type === AppTypes.Web) {
+            isInstalling = false;
+          }
           return (
             <AppTile
               key={app.title + index + 'grid'}
               isPinned={isAppPinned}
               isRecommended={weRecommended}
               allowContextMenu
-              // isInstalling
-              isInstalling={app.installStatus !== InstallStatus.installed}
+              isInstalling={isInstalling}
               tileSize={tileSize}
               app={app}
               isVisible={isOpen}
@@ -70,7 +74,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                     console.log('open app info');
                   },
                 },
-
                 ...(app.type === 'urbit' &&
                 app.installStatus === InstallStatus.installed
                   ? [
@@ -93,7 +96,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                         onClick: (evt: any) => {
                           evt.stopPropagation();
                           // console.log(`start install`, toJS(app));
-
                           // SpacesActions.installApp(toJS(app));
                         },
                       },

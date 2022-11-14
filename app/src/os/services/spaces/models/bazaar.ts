@@ -31,7 +31,7 @@ export enum InstallStatus {
   treaty = 'treaty',
 }
 
-enum AppTypes {
+export enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
   Web = 'web',
