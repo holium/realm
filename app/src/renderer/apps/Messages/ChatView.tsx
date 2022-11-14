@@ -37,7 +37,8 @@ import {
   PreviewGroupDMType,
 } from 'os/services/ship/models/courier';
 import { ChatLog } from './components/ChatLog';
-import { ShipActions, FileUploadParams } from 'renderer/logic/actions/ship';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import { FileUploadParams } from 'os/services/ship/models/ship';
 import S3Client from 'renderer/logic/s3/S3Client';
 import {
   FileUploadSource,
@@ -120,6 +121,24 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     dmApp.setSelectedChat(null);
     setIsSending(false);
     setLoading(false);
+  };
+
+  const uploadFile = (params: FileUploadParams) => {
+    ShipActions.uploadFile(params)
+      .then((url) => {
+        setIsSending(true);
+        const content = [{ url }];
+        SoundActions.playDMSend();
+        DmActions.sendDm(selectedChat.path, content)
+          .then((res) => {
+            setIsSending(false);
+          })
+          .catch((err) => {
+            console.error('dm send error', err);
+            setIsSending(false);
+          });
+      })
+      .catch((e) => console.error(e));
   };
 
   const handleFileChange = (event: ChangeEventHandler<HTMLInputElement>) => {
@@ -326,24 +345,11 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                     promptUpload(containerRef.current)
                       .then((file: File) => {
                         const params: FileUploadParams = {
-                          filename: file.path,
+                          source: 'file',
+                          content: file.path,
                           contentType: file.type,
                         };
-                        ShipActions.uploadFile(params)
-                          .then((url) => {
-                            setIsSending(true);
-                            const content = [{ url }];
-                            SoundActions.playDMSend();
-                            DmActions.sendDm(selectedChat.path, content)
-                              .then((res) => {
-                                setIsSending(false);
-                              })
-                              .catch((err) => {
-                                console.error('dm send error', err);
-                                setIsSending(false);
-                              });
-                          })
-                          .catch((e) => console.error(e));
+                        uploadFile(params);
                       })
                       .catch((e) => console.error(e));
                   }}
@@ -384,6 +390,46 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onChange={(e: any) =>
                   dmMessage.actions.onChange(e.target.value)
                 }
+                onPaste={async (evt) => {
+                  try {
+                    if (!canUpload) return;
+                    var fileReader = new FileReader();
+                    const clipboardItems = await navigator.clipboard.read();
+                    if (!clipboardItems || clipboardItems.length === 0) return;
+                    const clipboardItem = clipboardItems[0];
+                    if (
+                      !clipboardItem.types ||
+                      clipboardItem.types.length === 0
+                    )
+                      return;
+                    const type = clipboardItem.types[0];
+                    if (type.startsWith('image/')) {
+                      evt.preventDefault();
+                      evt.stopPropagation();
+                      const blob = await clipboardItem.getType(type);
+                      // we can now use blob here
+                      // const content = await blob.text();
+                      fileReader.addEventListener('loadend', () => {
+                        // reader.result contains the contents of blob as a data url
+                        var dataUrl = fileReader.result;
+                        if (dataUrl && typeof dataUrl === 'string') {
+                          var base64 = dataUrl.substring(
+                            dataUrl.indexOf(',') + 1
+                          );
+                          const params: FileUploadParams = {
+                            source: 'buffer',
+                            content: base64,
+                            contentType: type,
+                          };
+                          uploadFile(params);
+                        }
+                      });
+                      fileReader.readAsDataURL(blob);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
                 onFocus={() => dmMessage.actions.onFocus()}
                 onBlur={() => dmMessage.actions.onBlur()}
                 wrapperStyle={{

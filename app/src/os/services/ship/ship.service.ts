@@ -12,7 +12,7 @@ import moment from 'moment';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import EncryptedStore from '../../lib/encryptedStore';
-import { ShipModelType, ShipModel } from './models/ship';
+import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
 import { MSTAction, Patp } from '../../types';
 import { ContactApi } from '../../api/contacts';
 import { DmApi } from '../../api/dms';
@@ -48,11 +48,6 @@ export type ShipModels = {
   chat?: ChatStoreType;
   courier?: CourierStoreType;
   notifications: NotificationStoreType;
-};
-
-export type FileUploadParams = {
-  filename: string;
-  contentType: string;
 };
 
 /**
@@ -637,10 +632,18 @@ export class ShipService extends BaseService {
             endpoint: response.credentials.endpoint,
             signatureVersion: 'v4',
           });
-          const fileContent = fs.readFileSync(args.filename);
-          const fileParts = args.filename.split('.');
-          const fileName = fileParts.slice(0, -1);
-          const fileExtension = fileParts.pop();
+          let fileContent, fileName, fileExtension;
+          if (args.source === 'file' && typeof args.content === 'string') {
+            fileContent = fs.readFileSync(args.content);
+            // console.log(fileContent);
+            const fileParts = args.content.split('.');
+            fileName = fileParts.slice(0, -1);
+            fileExtension = fileParts.pop();
+          } else if (args.source === 'buffer') {
+            fileContent = await Buffer.from(args.content, 'base64');
+            fileName = 'clipboard';
+            fileExtension = args.contentType.split('/')[1];
+          }
           const params = {
             Bucket: response.configuration.currentBucket,
             Key: `${
