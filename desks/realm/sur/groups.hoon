@@ -8,7 +8,7 @@
       name=@tas
       title=@t
       picture=@t
-      color=@ux
+      color=@t
       member-count=@u
   ==
 ::

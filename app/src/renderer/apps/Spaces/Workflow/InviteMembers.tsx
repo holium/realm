@@ -20,6 +20,7 @@ import {
   Sigil,
   IconButton,
   Select,
+  Skeleton,
 } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
@@ -91,7 +92,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       theme.currentTheme;
     const { workflowState, setState } = props;
     const searchRef = useRef(null);
-
+    const [loading, setLoading] = useState(false);
     const { peopleForm, person } = useMemo(() => createPeopleForm(), []);
     const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
     const [nicknameMap, setNicknameMap] = useState<{ [patp: string]: string }>(
@@ -105,7 +106,12 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
         status: MemberStatus;
       };
     }>({
-      [ship!.patp]: { primaryRole: 'owner', roles: ['owner'], alias: '', status: 'host' },
+      [ship!.patp]: {
+        primaryRole: 'owner',
+        roles: ['owner'],
+        alias: '',
+        status: 'host',
+      },
     });
 
     const setWorkspaceState = (obj: any) => {
@@ -119,34 +125,51 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
     // Setting up options menu
     useEffect(() => {
       if (workflowState.type === 'group') {
+        setLoading(true);
+        setWorkspaceState({
+          ...workflowState,
+          members: {
+            [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
+          },
+        });
+        selectedPatp.add(ship!.patp);
         ShipActions.getGroup(workflowState.path).then((group: any) => {
-          let members: any = {}
+          let members: any = {};
           for (var member of Object.keys(group.fleet)) {
-            const primaryRole: string =
-              group.fleet[member].sects.includes('admin')
+            const primaryRole: string = group.fleet[member].sects.includes(
+              'admin'
+            )
               ? 'admin'
               : group.fleet[member].sects.includes('member')
               ? 'member'
               : 'initiate';
-            members[member] = { primaryRole, roles: group.fleet[member].sects, alias: '', status: 'joined'};
+            members[member] = {
+              primaryRole,
+              roles: group.fleet[member].sects,
+              alias: '',
+              status: 'joined',
+            };
           }
           const newMembers: any = {
             ...permissionMap,
-            ...members
-          }
+            ...members,
+          };
           setPermissionMap({
-            ...newMembers
+            ...newMembers,
           });
           setWorkspaceState({
-            members: newMembers
+            ...workflowState,
+            members: newMembers,
           });
           for (var member of Object.keys(members)) {
             selectedPatp.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
           }
+          setLoading(false);
         });
       } else {
         setWorkspaceState({
+          ...workflowState,
           members: {
             [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
           },
@@ -167,6 +190,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       };
       setPermissionMap(newMembers);
       setWorkspaceState({
+        ...workflowState,
         members: newMembers,
       });
     };
@@ -232,7 +256,12 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 onClick={(selected: Roles) => {
                   setPermissionMap({
                     ...permissionMap,
-                    [patp]: { primaryRole: selected, roles: [selected], alias: '', status: 'invited' },
+                    [patp]: {
+                      primaryRole: selected,
+                      roles: [selected],
+                      alias: '',
+                      status: 'invited',
+                    },
                   });
                 }}
               />
@@ -279,8 +308,8 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
           <Flex flexDirection="column" gap={16} height="calc(100% - 40px)">
             <Flex gap={16} flexDirection="row" alignItems="center">
               <Crest
-                color={workflowState.color}
-                picture={workflowState.picture}
+                color={!workflowState.image ? workflowState.color : ''}
+                picture={workflowState.image}
                 size="md"
               />
               <Flex gap={4} flexDirection="column">
