@@ -24,7 +24,7 @@
     ::  Get metadata
     =/  title=@t  title.metadata
     =/  image=@t  image.metadata
-    [our +.flag title picture color member-count]
+    [our +.flag title image *@ux member-count]
   ::
 ++  skim-group-dms
   |=  [resource=[entity=ship name=@tas]]
