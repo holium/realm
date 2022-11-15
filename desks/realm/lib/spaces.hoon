@@ -182,7 +182,7 @@
       ==
     ::
     ++  edit-payload
-      %-  of
+      %-  ot
       :~  [%name so]
           [%description so]
           [%picture so]

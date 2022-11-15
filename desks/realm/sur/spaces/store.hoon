@@ -70,11 +70,11 @@
   ==
 ::
 +$  edit-payload
-  $%  [%name name=@t]
-      [%description description=@t]
-      [%picture picture=@t]
-      [%color color=@t]
-      [%theme =theme]
+  $:  name=@t
+      description=@t
+      picture=@t
+      color=@t
+      =theme
   ==
 ::
 ::  Reaction via watch paths

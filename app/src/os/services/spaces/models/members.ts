@@ -52,7 +52,7 @@ export const MembershipStore = types
     },
     getSpaceMembers(path: SpacePath) {
       const members = self.spaces.get(path);
-      if (!members) return {};
+      if (!members) return types.map(MembersModel).create();
       return members;
     },
     getMembersList(path: SpacePath) {

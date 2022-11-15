@@ -52,7 +52,7 @@ export const SpacesApi = {
   updateSpace: async (
     conduit: Conduit,
     payload: { path: SpacePath; payload: any }
-  ) => {
+  ): Promise<SpacePath> => {
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],

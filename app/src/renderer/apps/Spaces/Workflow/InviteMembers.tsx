@@ -85,8 +85,8 @@ export const createPeopleForm = (
 const heightOffset = 0;
 
 export const InviteMembers: FC<BaseDialogProps> = observer(
-  (props: BaseDialogProps) => {
-    const { theme, ship } = useServices();
+  (props: any) => {
+    const { theme, ship, membership } = useServices();
     const { inputColor, iconColor, textColor, windowColor, mode, dockColor } =
       theme.currentTheme;
     const { workflowState, setState } = props;
@@ -118,6 +118,24 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
 
     // Setting up options menu
     useEffect(() => {
+/*      if (props.edit) {
+        const editMembers = membership.getSpaceMembers(workflowState.path)!.toJSON();
+        let members: any = {}
+        for (var member of Object.keys(editMembers)) {
+          const memberVal = editMembers[member]
+          const primaryRole: string =
+            memberVal.roles.includes('admin')
+            ? 'admin'
+            : memberVal.roles.includes('member')
+            ? 'member'
+            : 'initiate';
+          members[member] = { primaryRole, roles: memberVal.roles, alias: memberVal.alias, status: memberVal.status};
+          selectedPatp.add(member);
+          setNicknameMap({ ...nicknameMap, [member]: '' });
+        }
+        setPermissionMap(members);
+        setWorkspaceState({members});
+      }*/
       if (workflowState.type === 'group') {
         ShipActions.getGroup(workflowState.path).then((group: any) => {
           let members: any = {}
@@ -134,9 +152,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
             ...permissionMap,
             ...members
           }
-          setPermissionMap({
-            ...newMembers
-          });
+          setPermissionMap(newMembers);
           setWorkspaceState({
             members: newMembers
           });
@@ -145,7 +161,8 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
             setNicknameMap({ ...nicknameMap, [member]: '' });
           }
         });
-      } else {
+      }
+      else {
         setWorkspaceState({
           members: {
             [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },

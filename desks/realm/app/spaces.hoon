@@ -254,13 +254,12 @@
       ++  edit-space
         |=  [=space:store edit=edit-payload:store]
         ^-  space:store
-        ?-  -.edit
-          %name         space(name name.edit)
-          %description  space(description description.edit)  
-          %picture    space(picture picture.edit)
-          %color      space(color color.edit)
-          %theme      space(theme theme.edit)
-        ==
+        =.  name.space  name.edit
+        =.  description.space  description.edit
+        =.  picture.space  picture.edit
+        =.  color.space  color.edit
+        =.  theme.space  theme.edit
+        space
     ::
     ++  handle-remove
       |=  [path=space-path:store]

@@ -15,6 +15,7 @@ type NewSpace = {
   picture?: string;
   members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };
   name: string;
+  description: string;
   type: 'our' | 'group' | 'space';
 };
 
@@ -130,17 +131,39 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <SpacesCreateForm edit={dialogProps} {...props} />,
     hasPrevious: () => false,
-    onNext: (_evt: any) => {
-      ShellActions.nextDialog('create-space-4');
+    nextButtonText: 'Update Space',
+    onNext: (_evt: any, state: any, setState: any) => {
+      let createForm = state;
+      if (!createForm.archetype)
+        createForm.archetype = 'community';
+      delete createForm['archetypeTitle'];
+      setState({ ...state, loading: true });
+      // DesktopActions.setDialogLoading(true);
+      createForm = {
+        name: createForm.name,
+        description: createForm.description,
+        picture: createForm.picture,
+        color: createForm.color,
+        theme: createForm.theme.toJSON(),
+      }
+      console.log(createForm);
+      SpacesActions.updateSpace(state.path, createForm).then(() => {
+        // DesktopActions.closeDialog();
+        setState({ loading: false });
+        // DesktopActions.setBlur(false);
+      });
     },
-    onPrevious: () => {
-      ShellActions.nextDialog('create-space-1');
-    },
+    onPrevious: () => {},
     onClose: () => {
       ShellActions.setBlur(false);
       ShellActions.closeDialog();
     },
     isValidated: (state: any) => {
+      console.log(state)
+      console.log(state.access)
+      console.log(state.name)
+      console.log(state.color)
+      console.log(state.picture)
       if (
         state &&
         state.access &&
