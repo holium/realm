@@ -89,9 +89,9 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     const colorPickerRef = useRef(null);
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
-    const [crestOption, setCrestOption] = useState<CrestOptionType>('color');
-    const [validatedColor, setValidatedColor] = useState('#000000');
-    const [validatedImageUrl, setValidatedImageUrl] = useState('');
+    const [crestOption, setCrestOption] = useState<CrestOptionType>(
+      workflowState.image ? 'image' : 'color'
+    );
 
     const [accessOption, setAccessOption] =
       useState<AccessOptionType>('public');
@@ -119,59 +119,36 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
           ...workflowState,
           ...obj,
         });
-      // workflowState.set({
-      //   ...workflowState,
-      //   ...obj,
-      // });
     };
 
     useEffect(() => {
-      // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
       if (workflowState.type === 'group') {
-        if (isValidImageUrl(workflowState.image)) {
-          setValidatedImageUrl(workflowState.image);
+        if (workflowState.image) {
           setCrestOption('image');
         }
-        else if (isValidHexColor(workflowState.color)) {
-          setValidatedColor(workflowState.color);
-        }
+        setWorkspaceState({
+          access: 'public',
+        });
       }
-      const image = isValidImageUrl(workflowState.image) ? 'picture' : 'color';
-      const empty = image === 'picture' ? 'color' : 'picture';
-      setWorkspaceState({
-        access: 'public',
-        [image]: (image === 'picture' ? workflowState.image : workflowState.color) || '',
-        [empty]: empty === 'picture' ? '' : '#000000',
-      });
-      // props.setState!({
-      //   type: 'space',
-      //   archetype: 'community',
-      //   archetypeTitle: 'Community',
-      //   color: '#000000',
-      //   access: 'public',
-      // });
+
       () => {
         document.removeEventListener('click', handleClickOutside, true);
       };
     }, []);
 
-    const { spaceForm, name, description, picture, color } = useMemo(
-      () => {
-        if (workflowState.type === 'group') {
-          return createSpaceForm({
-            name: workflowState.title,
-            //description: workflowState.description,
-            color: workflowState.color,
-            picture: workflowState.image,
-          });
-        }
-        else {
-          return createSpaceForm({ color: validatedColor });
-        }
-      },
-      []
-    );
+    const { spaceForm, name, description, picture, color } = useMemo(() => {
+      if (workflowState.type === 'group') {
+        return createSpaceForm({
+          name: workflowState.title,
+          //description: workflowState.description,
+          color: workflowState.color,
+          picture: workflowState.image,
+        });
+      } else {
+        return createSpaceForm({ color: workflowState.color });
+      }
+    }, []);
 
     return (
       <Grid.Column noGutter lg={12} xl={12}>
@@ -187,8 +164,10 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
         <Flex flexDirection="column" gap={16} justifyContent="flex-start">
           <Flex flexDirection="row" alignItems="center" gap={16}>
             <Crest
-              color={validatedColor}
-              picture={validatedImageUrl}
+              color={
+                crestOption === 'color' ? workflowState.color : '#00000030'
+              }
+              picture={crestOption === 'image' ? workflowState.image : ''}
               size="md"
             />
             <Flex flex={1} flexDirection="column" gap={4}>
@@ -206,7 +185,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
               />
 
               <Flex
-                initial={{ display: 'flex' }}
                 animate={{
                   display: crestOption === 'color' ? 'flex' : 'none',
                 }}
@@ -226,7 +204,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                       <ColorTile
                         id="space-color-tile"
                         size={26}
-                        tileColor={validatedColor}
+                        tileColor={workflowState.color}
                         onClick={(_evt: any) => {
                           setColorPickerOpen(!colorPickerOpen);
                         }}
@@ -241,13 +219,13 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                         <TwitterPicker
                           width="inherit"
                           className="cursor-style"
-                          color={validatedColor}
+                          color={workflowState.color}
                           onChange={(newColor: { hex: string }) => {
                             color.actions.onChange(newColor.hex);
                             setWorkspaceState({
                               color: newColor.hex,
                             });
-                            setValidatedColor(newColor.hex);
+                            // setValidatedColor(newColor.hex);
                           }}
                           triangle="top-left"
                           colors={[
@@ -274,7 +252,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   error={color.computed.ifWasEverBlurredThenError}
                   onChange={(e: any) => {
                     if (isValidHexColor(`#${e.target.value}`)) {
-                      setValidatedColor(`#${e.target.value}`);
                       setWorkspaceState({
                         color: `#${e.target.value}`,
                       });
@@ -288,12 +265,11 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
 
               <Flex
                 flex={1}
-                initial={{ display: 'none' }}
+                initial={{ display: 'none', width: '100%' }}
                 animate={{
-                  width: '100%',
                   display: crestOption === 'image' ? 'flex' : 'none',
                 }}
-                // alignItems="flex-start"
+                alignItems="flex-start"
                 position="relative"
               >
                 <Input
@@ -312,9 +288,14 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   // error={!avatar.computed.isDirty || avatar.computed.error}
                   onChange={(e: any) => {
                     if (isValidImageUrl(e.target.value)) {
-                      setValidatedImageUrl(e.target.value);
                       setWorkspaceState({
-                        picture: e.target.value,
+                        image: e.target.value,
+                      });
+                    }
+                    if (e.target.value === '') {
+                      console.log('picture empty');
+                      setWorkspaceState({
+                        image: '',
                       });
                     }
                     picture.actions.onChange(e.target.value);
@@ -418,105 +399,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                 }}
               />
             </FormControl.Field>
-            {/* <FormControl.FieldSet>
-              <FormControl.Field>
-                <Label>Emblem</Label>
-                <Flex flex={1} alignItems="flex-start" position="relative">
-                  <ColorTile
-                    id="space-color-tile"
-                    tileColor={color.state.value}
-                    onClick={(evt: any) => {
-                      setColorPickerOpen(!colorPickerOpen);
-                    }}
-                  />
-                  <ColorTilePopover
-                    id="space-color-tile-popover"
-                    ref={colorPickerRef}
-                    isOpen={colorPickerOpen}
-                    data-is-open={colorPickerOpen}
-                  >
-                    <TwitterPicker
-                      width="inherit"
-                      className="cursor-style"
-                      color={color.state.value}
-                      onChange={(newColor: { hex: string }) => {
-                        color.actions.onChange(newColor.hex);
-                      }}
-                      triangle="top-left"
-                      colors={[
-                        '#D9682A',
-                        '#D9A839',
-                        '#52B278',
-                        '#3E89D1',
-                        '#96A0A8',
-                        '#CC314C',
-                        '#CF8194',
-                        '#8419D9',
-                      ]}
-                    />
-                  </ColorTilePopover>
-                </Flex>
-              </FormControl.Field>
-
-              <FormControl.Field>
-                <FormControl.Field>
-                  <Label>Space name</Label>
-                  <Input
-                    tabIndex={1}
-                    name="name"
-                    defaultValue={name.state.value}
-                    wrapperStyle={{ height: 35, backgroundColor: inputColor }}
-                    error={!name.computed.isDirty || name.computed.error}
-                    onChange={(e: any) => name.actions.onChange(e.target.value)}
-                    onFocus={() => name.actions.onFocus()}
-                    onBlur={() => name.actions.onBlur()}
-                  />
-                </FormControl.Field>
-                <Label>Avatar</Label>
-                <Flex>
-                  <Box
-                    display="flex"
-                    flex={1}
-                    borderRadius={4}
-                    borderColor="ui.input.borderColor"
-                    borderStyle="solid"
-                    borderWidth={1}
-                    backgroundColor="bg.tertiary"
-                    justifyContent="center"
-                    minWidth={32}
-                    minHeight={30}
-                    mr={2}
-                    alignItems="center"
-                  >
-                    {picture.state.value &&
-                    !picture.computed.ifWasEverBlurredThenError ? (
-                      <img
-                        src={picture.state.value}
-                        width="32"
-                        height="32"
-                        style={{ borderRadius: 4 }}
-                      />
-                    ) : (
-                      <Icons name="ProfileImage" color="#C1C1C1" size={24} />
-                    )}
-                  </Box>
-                  <Input
-                    tabIndex={3}
-                    name="picture"
-                    placeholder="Paste image link here"
-                    wrapperStyle={{ height: 35, backgroundColor: inputColor }}
-                    value={picture.state.value}
-                    // error={!avatar.computed.isDirty || avatar.computed.error}
-                    onChange={(e: any) =>
-                      picture.actions.onChange(e.target.value)
-                    }
-                    onFocus={() => picture.actions.onFocus()}
-                    onBlur={() => picture.actions.onBlur()}
-                  />
-                </Flex>
-              </FormControl.Field>
-
-            </FormControl.FieldSet> */}
           </Flex>
         </Flex>
       </Grid.Column>

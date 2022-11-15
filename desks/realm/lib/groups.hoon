@@ -22,9 +22,12 @@
     =/  member-count=@u
       (lent ~(tap by fleet.group))
     ::  Get metadata
-    =/  title=@t  title.metadata
-    =/  image=@t  image.metadata
-    [our +.flag title image *@ux member-count]
+    =/  title=@t     title.metadata
+    =/  image=@t     image.metadata
+    =/  first-char   (trim 1 (trip image))
+    ?:  =(p.first-char "#")
+      [our +.flag title '' image member-count]
+    [our +.flag title image '' member-count]
   ::
 ++  skim-group-dms
   |=  [resource=[entity=ship name=@tas]]
@@ -80,7 +83,7 @@
         ['path' s+(spat /(scot %p creator.grp)/(scot %tas name.grp))]
         ['name' s+title.grp]
         ['picture' s+picture.grp]
-        ['color' s+(scot %ux color.grp)]
+        ['color' s+color.grp]
         ['memberCount' n+(scot %u member-count.grp)]
     ==
   ::

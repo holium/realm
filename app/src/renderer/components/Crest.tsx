@@ -23,8 +23,8 @@ const crestSize = {
 
 const crestRadius = {
   xsm: 2,
-  sm: 6,
-  md: 12,
+  sm: 4,
+  md: 6,
   md2: 12,
   lg: 12,
   xlg: 16,
