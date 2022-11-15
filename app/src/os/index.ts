@@ -20,7 +20,7 @@ import { ThemeModelType } from './services/theme.model';
 export interface ISession {
   ship: string;
   url: string;
-  cookie: string;
+  cookie: string | null;
   code: string;
 }
 
@@ -105,7 +105,8 @@ export class Realm extends EventEmitter {
     //     : new EncryptedStore(options);
     // Load session data
     this.db = new Store(options);
-    if (this.db.size > 0) {
+    console.log('session size => %o', this.db.size);
+    if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
       this.setSession(this.db.store);
     }
@@ -226,7 +227,7 @@ export class Realm extends EventEmitter {
         this.session.code
       );
       if (this.session) {
-        this.saveSession({ ...this.session, cookie: cookie || '' });
+        this.saveSession({ ...this.session, cookie: cookie || null });
       } else {
         console.warn('unexpected session => %o', this.session);
       }
@@ -251,6 +252,10 @@ export class Realm extends EventEmitter {
     session: ISession,
     params: ConnectParams = { reconnecting: false }
   ) {
+    if (session.cookie === null) {
+      console.error('Realm.connect: unexpected cookie value is null');
+      return;
+    }
     this.sendLog('connecting conduit');
     if (!this.conduit) {
       this.conduit = new Conduit();

@@ -219,6 +219,10 @@ export class OnboardingService extends BaseService {
     if (this.conduit !== undefined) {
       await this.closeConduit();
     }
+    if (cookie === null) {
+      console.error('tempConduit: session cookie is null');
+      return;
+    }
     this.conduit = new Conduit();
     await this.conduit.init(url, patp.substring(1), cookie!, code);
     return this.conduit;
@@ -396,9 +400,8 @@ export class OnboardingService extends BaseService {
   ) {
     try {
       let { patp, url, code } = shipData;
-      let cookie = await getCookie({ patp, url, code });
-      const session = this.core.getSession();
-      this.core.saveSession({ ...session, cookie, code });
+      const cookie = await getCookie({ patp, url, code });
+      this.core.saveSession({ ship: patp, url, cookie, code });
       this.state.setShip({ patp, url });
       return { url, cookie, patp, code: code };
     } catch (reason) {
@@ -414,7 +417,9 @@ export class OnboardingService extends BaseService {
   async getProfile(_event: any) {
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+    if (cookie === null) throw new Error('getProfile: session cookie is null');
+
+    const tempConduit = await this.tempConduit(url, patp, cookie, code);
     // await this.tempConduit.init(url, patp.substring(1), cookie!);
 
     if (!this.state.ship)
@@ -438,7 +443,9 @@ export class OnboardingService extends BaseService {
       throw new Error('Cannot save profile, onboarding ship not set.');
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
-    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
+    if (cookie === null) throw new Error('setProfile: session cookie is null');
+
+    const tempConduit = await this.tempConduit(url, patp, cookie, code);
 
     try {
       const updatedProfile = await ContactApi.saveContact(
@@ -480,6 +487,8 @@ export class OnboardingService extends BaseService {
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
+    if (cookie === null)
+      throw new Error('installRealm: session cookie is null');
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
@@ -522,17 +531,21 @@ export class OnboardingService extends BaseService {
     const authShip = AuthShip.create({
       ...ship,
       id: `auth${ship.patp}`,
+      passwordHash,
     });
 
+    // force cookie to null to ensure user must login once onboarding is complete
     const session = this.core.getSession();
+    this.core.saveSession({ ...session, cookie: null });
+
     this.core.services.identity.auth.storeCredentials(
       ship.patp,
       decryptedPassword,
       {
         code: session.code,
-        passwordHash,
       }
     );
+
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setFirstTime();
     this.core.services.ship.storeNewShip(authShip);

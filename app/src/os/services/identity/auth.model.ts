@@ -24,6 +24,7 @@ export const AuthShip = types
     mnemonic: types.maybe(types.string),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
+    passwordHash: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setStatus(status: Instance<typeof StepList>) {
@@ -115,6 +116,9 @@ export const AuthStore = types
     },
     setClientSecret: (secret: string) => {
       self.clientSecret = secret;
+    },
+    getPasswordHash(id: string): string {
+      return self.ships.get(id)?.passwordHash!;
     },
     completeSignup(id: string) {
       self.selected = self.ships.get(id);

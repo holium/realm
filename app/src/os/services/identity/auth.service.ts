@@ -13,12 +13,11 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import axios from 'axios';
-// import { readCredentials } from '../../lib/shipHelpers';
+import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)
   code: string;
-  passwordHash: string;
 };
 
 /**
@@ -194,11 +193,11 @@ export class AuthService extends BaseService {
     let ship = this.state.ships.get(`auth${patp}`)!;
     if (!ship) return false;
 
-    const { cookie } = this.core.getSession();
-    const { code, passwordHash } = this.readCredentials(patp, password);
-    // console.log({ cookie, code, password });
-    let passwordCorrect = await bcrypt.compare(password, passwordHash);
-    this.core.sendLog(`passwordHash: ${passwordHash}`);
+    if (ship.passwordHash === null) {
+      throw new Error('login: passwordHash is null');
+    }
+    let passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
+    this.core.sendLog(`passwordHash: ${ship.passwordHash}`);
     this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
 
     if (!passwordCorrect) {
@@ -217,7 +216,18 @@ export class AuthService extends BaseService {
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
     this.core.services.shell.setBlur(null, false);
 
-    this.core.setSession({ ship: patp, url: ship.url, cookie, code: code });
+    // it appears this can happen if you finish onboarding and close the app/process
+    //  before logging in. since cookie will not exist in session.lock file under this condition
+    //  therefore grab and store it now
+    const { code } = this.readCredentials(patp, password);
+    const cookie = await getCookie({ patp, url: ship.url, code: code });
+
+    this.core.setSession({
+      ship: patp,
+      url: ship.url,
+      cookie,
+      code: code,
+    });
 
     return true;
   }
