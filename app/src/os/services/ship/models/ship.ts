@@ -11,6 +11,14 @@ import { LoaderModel } from '../../common.model';
 import { FriendsStore } from './friends';
 // import { NotificationsStore } from './notifications';
 
+export type FileUploadParams = {
+  source: 'file' | 'buffer';
+  // when source='file', content is filename; otherwise
+  //   content should be clipboard contents
+  content: string;
+  contentType: string;
+};
+
 export const ShipModel = types
   .model('ShipModel', {
     url: types.string,
