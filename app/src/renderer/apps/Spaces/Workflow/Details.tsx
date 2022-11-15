@@ -14,6 +14,8 @@ import {
   RadioGroup,
   FormControl,
   RadioList,
+  isValidImageUrl,
+  isValidHexColor,
 } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
@@ -24,17 +26,6 @@ import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import ReactDOM from 'react-dom';
-
-const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
-
-const isValidHexColor = (hex: string) => {
-  return hexRegex.test(`#${hex}`);
-};
-const urlRegex =
-  /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
-const isValidImageUrl = (url: string) => {
-  return urlRegex.test(url);
-};
 
 export const createSpaceForm = (
   defaults: any = {
@@ -103,8 +94,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
     const [crestOption, setCrestOption] = useState<CrestOptionType>('color');
-    const [validatedColor, setValidatedColor] = useState('#000000'); // todo add maybe group color
-    const [validatedImageUrl, setValidatedImageUrl] = useState(''); // todo add maybe group image url
+    const [validatedColor, setValidatedColor] = useState('#000000');
+    const [validatedImageUrl, setValidatedImageUrl] = useState('');
 
     const [accessOption, setAccessOption] =
       useState<AccessOptionType>('public');
@@ -142,13 +133,20 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
       if (workflowState.type === 'group') {
-        setValidatedImageUrl(workflowState.image);
-        setCrestOption('image');
+        if (isValidImageUrl(workflowState.image)) {
+          setValidatedImageUrl(workflowState.image);
+          setCrestOption('image');
+        }
+        else if (isValidHexColor(workflowState.color)) {
+          setValidatedColor(workflowState.color);
+        }
       }
+      const image = isValidImageUrl(workflowState.image) ? 'picture' : 'color';
+      const empty = image === 'picture' ? 'color' : 'picture';
       setWorkspaceState({
         access: 'public',
-        color: '#000000',
-        picture: workflowState.image || '',
+        [image]: (image === 'picture' ? workflowState.image : workflowState.color) || '',
+        [empty]: empty === 'picture' ? '' : '#000000',
       });
       // props.setState!({
       //   type: 'space',
@@ -279,7 +277,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   value={color.state.value.replace('#', '')}
                   error={color.computed.ifWasEverBlurredThenError}
                   onChange={(e: any) => {
-                    if (isValidHexColor(e.target.value)) {
+                    if (isValidHexColor(`#${e.target.value}`)) {
                       setValidatedColor(`#${e.target.value}`);
                       setWorkspaceState({
                         color: `#${e.target.value}`,
