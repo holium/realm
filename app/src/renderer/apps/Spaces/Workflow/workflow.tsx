@@ -105,8 +105,7 @@ export const spacesDialogs: DialogRenderers = {
         state &&
         state.access &&
         state.name &&
-        state.color &&
-        state.picture !== undefined
+        (state.picture !== undefined || state.color !== undefined)
       ) {
         return true;
       } else {
@@ -175,6 +174,8 @@ export const spacesDialogs: DialogRenderers = {
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
       const createForm: NewSpace = state;
+      if (!createForm.archetype)
+        createForm.archetype = 'community';
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
       // DesktopActions.setDialogLoading(true);
@@ -191,8 +192,11 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false);
       ShellActions.closeDialog();
     },
-    isValidated: () => {
-      return true;
+    isValidated: (state: any) => {
+      return (
+        state &&
+        state.members
+      );
     },
     window: {
       id: 'create-space-4',

@@ -2,10 +2,9 @@ import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 // import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
-import { Grid, Text, Flex, Skeleton } from 'renderer/components';
+import { Grid, Text, Flex, Skeleton, isValidImageUrl } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { SelectRow } from '../components/SelectionRow';
 import { ShipActions } from 'renderer/logic/actions/ship';
@@ -39,7 +38,6 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
     const [loading, setLoading] = useState(true);
     useEffect(() => {
       ShipActions.getOurGroups().then((ourGroups) => {
-        console.log(ourGroups);
         // hacky check to fix incorrectly formed %da
         setGroups(
           ourGroups.filter((group: any) => !group.path.includes('/~2'))
@@ -75,10 +73,12 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                   buttonText="Add Space"
                   subtitle={subtitle}
                   onButtonClick={(_evt: any) => {
+                    const image = isValidImageUrl(data.picture) ? 'image' : 'color';
                     setState &&
                       setState({
                         title,
-                        image: data.picture,
+                        name: title,
+                        [image]: data.picture,
                         subtitle,
                         type: 'group',
                         path: data.path,

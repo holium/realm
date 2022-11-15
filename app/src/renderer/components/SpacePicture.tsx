@@ -1,7 +1,7 @@
 import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
-import { Flex, Icons, Text } from 'renderer/components';
+import { Flex, Icons, Text, Crest } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { pluralize } from 'renderer/logic/lib/text';
 
@@ -44,8 +44,12 @@ export const SpacePicture: FC<SpacePictureProps> = (
   return (
     <Flex gap={12} flexDirection="row" alignItems="center">
       {/* Outer row */}
-      {space.picture ? (
-        <Picture height={size} width={size} src={space.picture} />
+      {(space.picture || space.color) ? (
+        <Crest
+          color={space.color || ''}
+          picture={space.picture || ''}
+          size="md"
+        />
       ) : (
         <EmptyPicture size={size} color={space.color || '#000000'} />
       )}

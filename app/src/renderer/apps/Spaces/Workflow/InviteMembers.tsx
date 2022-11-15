@@ -99,12 +99,13 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
     );
     const [permissionMap, setPermissionMap] = useState<{
       [patp: string]: {
-        roles: [MemberRole];
+        primaryRole: MemberRole;
+        roles: [string];
         alias: string;
         status: MemberStatus;
       };
     }>({
-      [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
+      [ship!.patp]: { primaryRole: 'owner', roles: ['owner'], alias: '', status: 'host' },
     });
 
     const setWorkspaceState = (obj: any) => {
@@ -117,10 +118,32 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
 
     // Setting up options menu
     useEffect(() => {
-      console.log(workflowState);
       if (workflowState.type === 'group') {
-        ShipActions.getGroupMembers(workflowState.path).then((members: any) => {
-          console.log(members);
+        ShipActions.getGroup(workflowState.path).then((group: any) => {
+          let members: any = {}
+          for (var member of Object.keys(group.fleet)) {
+            const primaryRole: string =
+              group.fleet[member].sects.includes('admin')
+              ? 'admin'
+              : group.fleet[member].sects.includes('member')
+              ? 'member'
+              : 'initiate';
+            members[member] = { primaryRole, roles: group.fleet[member].sects, alias: '', status: 'joined'};
+          }
+          const newMembers: any = {
+            ...permissionMap,
+            ...members
+          }
+          setPermissionMap({
+            ...newMembers
+          });
+          setWorkspaceState({
+            members: newMembers
+          });
+          for (var member of Object.keys(members)) {
+            selectedPatp.add(member);
+            setNicknameMap({ ...nicknameMap, [member]: '' });
+          }
         });
       } else {
         setWorkspaceState({
@@ -197,7 +220,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 customBg={windowColor}
                 textColor={textColor}
                 iconColor={iconColor}
-                selected={permissionMap[patp].roles[0]}
+                selected={permissionMap[patp].primaryRole}
                 disabled={isOur}
                 options={[
                   { label: 'Initiate', value: 'initiate' },
@@ -209,7 +232,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 onClick={(selected: Roles) => {
                   setPermissionMap({
                     ...permissionMap,
-                    [patp]: { roles: [selected], alias: '', status: 'invited' },
+                    [patp]: { primaryRole: selected, roles: [selected], alias: '', status: 'invited' },
                   });
                 }}
               />

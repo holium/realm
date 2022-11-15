@@ -236,6 +236,7 @@
       ?:  =('member' p.json)     %member
       ?:  =('admin' p.json)      %admin
       ?:  =('owner' p.json)      %owner
+      ?:  =('moderator' p.json)  %moderator
       !!
     ::
     ++  archetype

@@ -14,6 +14,8 @@ import {
   RadioGroup,
   FormControl,
   RadioList,
+  isValidImageUrl,
+  isValidHexColor,
 } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
@@ -24,18 +26,6 @@ import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import ReactDOM from 'react-dom';
-import { space } from 'styled-system';
-
-const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
-
-const isValidHexColor = (hex: string) => {
-  return hexRegex.test(`#${hex}`);
-};
-const urlRegex =
-  /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
-const isValidImageUrl = (url: string) => {
-  return urlRegex.test(url);
-};
 
 export const createSpaceForm = (
   defaults: any = {
@@ -107,8 +97,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
 
     const [colorPickerOpen, setColorPickerOpen] = useState(false);
     const [crestOption, setCrestOption] = useState<CrestOptionType>('color');
-    const [validatedColor, setValidatedColor] = useState('#000000'); // todo add maybe group color
-    const [validatedImageUrl, setValidatedImageUrl] = useState(''); // todo add maybe group image url
+    const [validatedColor, setValidatedColor] = useState('#000000');
+    const [validatedImageUrl, setValidatedImageUrl] = useState('');
 
     const [accessOption, setAccessOption] =
       useState<AccessOptionType>('public');
@@ -145,9 +135,19 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     useEffect(() => {
       // TODO remove after testing
       document.addEventListener('click', handleClickOutside, true);
+      if (workflowState.type === 'group') {
+        if (isValidImageUrl(workflowState.image)) {
+          setValidatedImageUrl(workflowState.image);
+          setCrestOption('image');
+        }
+        else if (isValidHexColor(workflowState.color)) {
+          setValidatedColor(workflowState.color);
+        }
+      }
+      const image = isValidImageUrl(workflowState.image) ? 'picture' : 'color';
+      const empty = image === 'picture' ? 'color' : 'picture';
       if (props.edit) {
         const space = spaces.spaces.get(props.edit.space)!;
-        console.log(space)
         setWorkspaceState(space);
         if (space.color) {
           setValidatedColor(space.color!);
@@ -159,8 +159,8 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       else {
         setWorkspaceState({
           access: 'public',
-          color: '#000000',
-          picture: '',
+          [image]: (image === 'picture' ? workflowState.image : workflowState.color) || '',
+          [empty]: empty === 'picture' ? '' : '#000000',
         });
       }
       // props.setState!({
@@ -176,8 +176,20 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
     }, []);
 
     const { spaceForm, name, description, picture, color } = useMemo(
-      () => createSpaceForm({ color: validatedColor, name: workflowState.name, picture: workflowState.picture, description: workflowState.description }),
-      [validatedColor, workflowState]
+      () => {
+        if (workflowState.type === 'group') {
+          return createSpaceForm({
+            name: workflowState.title,
+            //description: workflowState.description,
+            color: workflowState.color,
+            picture: workflowState.image,
+          });
+        }
+        else {
+          return createSpaceForm({ color: validatedColor });
+        }
+      },
+      []
     );
 
     return (
@@ -280,7 +292,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                   value={color.state.value.replace('#', '')}
                   error={color.computed.ifWasEverBlurredThenError}
                   onChange={(e: any) => {
-                    if (isValidHexColor(e.target.value)) {
+                    if (isValidHexColor(`#${e.target.value}`)) {
                       setValidatedColor(`#${e.target.value}`);
                       setWorkspaceState({
                         color: `#${e.target.value}`,
