@@ -27,6 +27,14 @@ yarn
 
 #### Yarn link /libs
 
+Link all libs (It'll take a little while):
+
+```zsh
+yarn link:all
+```
+
+Or link them individually:
+
 `@holium/realm-multiplayer`:
 
 ```zsh
