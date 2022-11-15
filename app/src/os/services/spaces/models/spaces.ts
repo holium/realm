@@ -111,6 +111,7 @@ export const SpacesStore = types
         data.spaces[key].theme.id = `${key}`;
       });
       // self.loader.set('loaded');
+      console.log('dataspaces', data.spaces);
       applySnapshot(self.spaces, castToSnapshot(data.spaces));
       if (!self.selected) self.selected = self.getSpaceByPath(`/${ship}/our`);
       self.loader.state = 'loaded';
