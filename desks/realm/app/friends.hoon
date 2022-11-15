@@ -31,20 +31,27 @@
     =/  has-pals  .^(? %gu /(scot %p our.bowl)/pals/(scot %da now.bowl))
     ?:  has-pals
       =/  pals-targets  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/targets/noun)
+      =/  pals-leeches  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/leeches/noun)
       =/  pals-mutuals  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/mutuals/noun)
-      =/  targets
+      =/  following
         ^-  (list [ship friend:store])
         =/  ship-list  ~(tap in pals-targets)
         %+  turn  ship-list
           |=  =ship
-          [ship [pinned=%.n tags=*(set cord) mutual=%.n]]
+          [ship [pinned=%.n tags=*(set cord) status=%following]]
+      =/  followers
+        ^-  (list [ship friend:store])
+        =/  ship-list  ~(tap in pals-leeches)
+        %+  turn  ship-list
+          |=  =ship
+          [ship [pinned=%.n tags=*(set cord) status=%follower]]
       =/  mutuals
         ^-  (list [ship friend:store])
         =/  ship-list  ~(tap in pals-mutuals)
         %+  turn  ship-list
           |=  =ship
-          [ship [pinned=%.n tags=*(set cord) mutual=%.y]]
-      =/  pals-friends  (malt (weld targets mutuals))
+          [ship [pinned=%.n tags=*(set cord) status=%fren]]
+      =/  pals-friends  (malt (weld mutuals (weld followers following)))
       `this(friends pals-friends)
     `this
   ::
@@ -122,7 +129,7 @@
   ~&  >  ['adding friend' ship]
   ?:  (~(has by friends.state) ship)   :: checks if is fren is added
       =/  added-fren            (~(got by friends.state) ship)
-      =.  mutual.added-fren     %.y
+      =.  status.added-fren     %fren
       =.  friends.state         (~(put by friends.state) [ship added-fren])
       :_  state
       :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%yes-fren ~])]  :: confirms you are mutual fren
@@ -133,7 +140,7 @@
     [
       pinned=%.n
       tags=(silt `(list cord)`[~])
-      mutual=%.n
+      status=%following
     ]
   =.  friends.state   (~(put by friends.state) [ship fren])
   :_  state
@@ -170,7 +177,9 @@
     [
       pinned=%.n
       tags=(silt `(list cord)`[~])
-      mutual=is-added
+      ?:  is-added
+        %fren
+      %follower
     ]
   ?:  is-added   :: checks if is fren is added
     =.  friends.state       (~(put by friends.state) [ship fren])
@@ -188,7 +197,7 @@
   ^-  (quip card _state)
   ?<  =(our.bowl src.bowl)              ::  we can't yes ourselves
   =/  prev-fren           (~(got by friends.state) ship)
-  =.  mutual.prev-fren    %.y
+  =.  status.prev-fren    %fren
   =.  friends.state       (~(put by friends.state) [ship prev-fren])
   :_  state
   :~  [%give %fact [/all ~] friends-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers
@@ -201,7 +210,7 @@
   ?.  (~(has by friends.state) ship)    ::  checks if is not fren is added
     `state
   =/  prev-fren           (~(got by friends.state) ship)
-  =.  mutual.prev-fren    %.n
+  =.  status.prev-fren    %following
   =.  friends.state       (~(put by friends.state) [ship prev-fren])
   :_  state
   :~  [%give %fact [/all ~] friends-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers
