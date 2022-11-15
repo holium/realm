@@ -48,7 +48,6 @@
     "@stripe/stripe-js": "^1.32.0",
     "@tlon/sigil-js": "^1.4.5",
     "@urbit/api": "^2.1.1",
-    "alchemy-sdk": "^2.1.1",
     "async-await-queue": "^1.2.1",
     "aws-sdk": "^2.1204.0",
     "axios": "^0.26.1",
