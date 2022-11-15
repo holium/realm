@@ -39,12 +39,11 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
 
   const ViewComponent: FC<any> | undefined = useMemo(() => {
     const dialogRenderer = dialogRenderers[window.id];
-    console.log('the props', shell.dialogProps.toJSON());
     const dialogConfig: DialogConfig =
       dialogRenderer instanceof Function
         ? dialogRenderer(shell.dialogProps.toJSON())
         : dialogRenderer;
-    return dialogConfig.component;
+    return dialogConfig.component!;
   }, [window.id, shell.dialogProps.toJSON()]);
 
   const dialogRenderer = dialogRenderers[window.id];

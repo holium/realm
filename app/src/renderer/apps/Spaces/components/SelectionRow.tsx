@@ -1,4 +1,13 @@
-import { Icons, Text, TextButton, Flex, IconTypes } from 'renderer/components';
+import {
+  Icons,
+  Text,
+  TextButton,
+  Flex,
+  IconTypes,
+  Crest,
+  isValidHexColor,
+  isValidImageUrl,
+} from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
 import { EmptyGroup } from '../SpaceRow';
@@ -36,8 +45,10 @@ export const SelectRow = (props: ISelectRow) => {
     leftIcon = <Icons size={32} name={icon} />;
   }
   if (image) {
+    const validatedColor = isValidHexColor(image) ? image : '';
+    const validatedImageUrl = isValidImageUrl(image) ? image : '';
     leftIcon = (
-      <img height={32} width={32} style={{ borderRadius: 4 }} src={image} />
+      <Crest color={validatedColor} picture={validatedImageUrl} size="md" />
     );
   }
   return (

@@ -23,8 +23,7 @@
       (lent ~(tap by fleet.group))
     ::  Get metadata
     =/  title=@t  title.metadata
-    =/  picture=@t  image.metadata
-    =/  color=@ux  *@ux::cover.metadata
+    =/  image=@t  image.metadata
     [our +.flag title picture color member-count]
   ::
 ++  skim-group-dms
