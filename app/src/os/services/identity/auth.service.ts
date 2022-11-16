@@ -216,29 +216,19 @@ export class AuthService extends BaseService {
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
     this.core.services.shell.setBlur(null, false);
 
-    let session = this.core.getSession();
-    // null is possible if the user logged out (which clears session), and is
-    //  now logging back in
-    if (session === undefined) {
-      const { code } = this.readCredentials(patp, password);
-      session = {
-        ship: ship.patp,
-        url: ship.url,
-        code,
-        cookie: null,
-      };
-    }
-    // this is possible if:
-    //   1) user logged out and is logging back in OR
-    //   2) user completed onboarding and is logging in for the first time
-    if (session.cookie === null) {
-      session.cookie = await getCookie({
-        patp,
-        url: ship.url,
-        code: session.code,
-      });
-    }
-    this.core.setSession(session);
+    const { code } = this.readCredentials(patp, password);
+    const cookie = await getCookie({
+      patp,
+      url: ship.url,
+      code,
+    });
+
+    this.core.setSession({
+      ship: ship.patp,
+      url: ship.url,
+      code,
+      cookie,
+    });
 
     return true;
   }

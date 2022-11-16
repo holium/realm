@@ -528,7 +528,7 @@ export class OnboardingService extends BaseService {
 
     // force cookie to null to ensure user must login once onboarding is complete
     const session = this.core.getSession();
-    // this.core.saveSession({ ...session, cookie: null });
+    this.core.saveSession({ ...session, cookie: null });
 
     this.core.services.identity.auth.storeCredentials(
       ship.patp,

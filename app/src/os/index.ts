@@ -263,7 +263,7 @@ export class Realm extends EventEmitter {
       await this.conduit.init(
         session.url,
         session.ship.substring(1),
-        session.cookie,
+        session.cookie!,
         session.code
       );
       this.sendLog('after conduit init');
