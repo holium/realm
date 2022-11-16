@@ -34,14 +34,14 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     webview?.addEventListener('did-start-loading', onStartLoading);
     webview?.addEventListener('did-stop-loading', onStopLoading);
     webview?.addEventListener('did-finish-load', () => {
-      webview!.send('mouse-color', desktop.mouseColor);
-      let css = '* { cursor: none !important; }';
-      webview!.insertCSS(css);
+      webview.send('mouse-color', desktop.mouseColor);
+      const css = '* { cursor: none !important; }';
+      webview.insertCSS(css);
     });
 
     webview?.addEventListener('close', () => {
-      // @ts-ignore
-      webview!.closeDevTools();
+      // @ts-expect-error
+      webview.closeDevTools();
     });
   }, []);
 

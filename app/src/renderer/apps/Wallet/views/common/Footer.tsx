@@ -3,7 +3,6 @@ import { FC } from 'react';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../lib/helpers';
 import { WalletNetwork } from './Network';
 import { WalletView } from 'os/services/tray/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
@@ -40,7 +39,11 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
               }
             />
           </Box>
-          <Box onClick={() => WalletActions.navigate(WalletView.SETTINGS)}>
+          <Box
+            onClick={async () =>
+              await WalletActions.navigate(WalletView.SETTINGS)
+            }
+          >
             <Icons name="Settings" color={theme.currentTheme.iconColor} />
           </Box>
         </Flex>

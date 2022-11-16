@@ -1,4 +1,3 @@
-import { Patp } from 'os/types';
 import proto_min from 'protobufjs/minimal';
 import { StatePayload, CursorPayload, Vec2 } from '@holium/realm-multiplayer';
 
@@ -55,7 +54,7 @@ export const CursorPacket = {
   ): CursorPacketType {
     const reader =
       input instanceof proto_min.Reader ? input : new proto_min.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseCursorPacket();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -102,7 +101,7 @@ export const DataPacket = {
   decode(input: proto_min.Reader | Uint8Array, length?: number): DataPacket {
     const reader =
       input instanceof proto_min.Reader ? input : new proto_min.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseDataPacket();
     while (reader.pos < end) {
       const tag = reader.uint32();

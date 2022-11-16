@@ -1,21 +1,10 @@
-import { darken, lighten, rgba } from 'polished';
+import { lighten, rgba } from 'polished';
 import styled from 'styled-components';
-import {
-  Flex,
-  EmbedBox,
-  Text,
-  Skeleton,
-  Mention,
-  IconButton,
-  Icons,
-} from 'renderer/components';
+import { Flex, Text, Skeleton, Mention } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
 import { FC, useEffect, useMemo } from 'react';
-import { useServices } from 'renderer/logic/store';
 import { motion } from 'framer-motion';
-import { pathToDmInbox } from 'os/lib/graph-store';
-import { useTrayApps } from 'renderer/apps/store';
 
 const EmptyIcon = styled.div`
   height: 48px;
@@ -24,7 +13,9 @@ const EmptyIcon = styled.div`
   border-radius: 6px;
 `;
 
-type ContentType = { [key: string]: string };
+interface ContentType {
+  [key: string]: string;
+}
 interface NotificationProps {
   loading?: boolean;
   dismissed?: boolean;

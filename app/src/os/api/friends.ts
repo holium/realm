@@ -88,17 +88,20 @@ export const FriendsApi = {
    * @param conduit the conduit instance
    * @param state the state-tree
    */
-  watchFriends: (conduit: Conduit, friendsStore: FriendsType): Promise<any> => {
-    return conduit.watch({
+  watchFriends: async (
+    conduit: Conduit,
+    friendsStore: FriendsType
+  ): Promise<any> => {
+    return await conduit.watch({
       app: 'friends',
       path: `/all`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        if (data['friends']) {
-          friendsStore.initial(data['friends']);
+        if (data.friends) {
+          friendsStore.initial(data.friends);
         }
-        if (data['friend']) {
-          const patp = data['friend'].ship;
-          const update = data['friend'].friend;
+        if (data.friend) {
+          const patp = data.friend.ship;
+          const update = data.friend.friend;
           friendsStore.update(patp, update);
         }
         if (data['new-friend']) {

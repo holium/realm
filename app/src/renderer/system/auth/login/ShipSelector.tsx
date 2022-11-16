@@ -48,7 +48,7 @@ export const ShipSelector: FC = observer(() => {
           setDragging(false);
         }}
         onDragEnd={(_event: any) => {
-          delay(() => AuthActions.setOrder(toJS(auth.order)), 1500);
+          delay(async () => await AuthActions.setOrder(toJS(auth.order)), 1500);
         }}
       >
         <Flex position="relative" height="100%">

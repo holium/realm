@@ -3,9 +3,8 @@ import { transparentize } from 'polished';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { Text, Flex } from 'renderer/components';
-import { ThemeType } from 'renderer/theme';
+import { ThemeType, theme as themes } from 'renderer/theme';
 import { useServices } from 'renderer/logic/store';
-import { theme as themes } from 'renderer/theme';
 import { useTrayApps } from 'renderer/apps/store';
 import {
   formatEthAmount,
@@ -18,10 +17,10 @@ import {
   BitcoinWalletType,
 } from 'os/services/tray/wallet.model';
 
-type CardStyleProps = {
+interface CardStyleProps {
   isSelected: boolean;
   mode: string;
-};
+}
 
 const CardStyle = styled(motion.div)<CardStyleProps>`
   ${(props: CardStyleProps) =>
@@ -60,12 +59,12 @@ export const WalletCard: FC<WalletCardProps> = ({
     coins = getCoins(wallet.coins);
   }
 
-  var transactions = getTransactions(
+  const transactions = getTransactions(
     wallet.transactions.get(walletApp.currentStore.network!) || new Map()
     //    wallet!.address
   );
 
-  let amountDisplay =
+  const amountDisplay =
     walletApp.navState.network === 'ethereum'
       ? `${formatEthAmount(wallet.balance).eth} ETH`
       : `${formatEthAmount(wallet.balance).eth} BTC`;
@@ -95,7 +94,7 @@ export const WalletCard: FC<WalletCardProps> = ({
           fontWeight={600}
           fontSize={7}
         >
-          {/* @ts-ignore */}
+          {/* @ts-expect-error */}
           {amountDisplay}
         </Text>
         <Flex pt={2} justifyContent="space-between" alignItems="center">

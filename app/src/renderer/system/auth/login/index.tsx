@@ -2,7 +2,6 @@ import { useRef, FC, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { toJS } from 'mobx';
 import {
   Flex,
   Box,
@@ -25,9 +24,9 @@ import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 
-type LoginProps = {
+interface LoginProps {
   addShip: () => void;
-};
+}
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip } = props;
@@ -88,10 +87,10 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     event.stopPropagation();
     setHasFailed(false);
 
-    let loggedIn = await AuthActions.login(
+    const loggedIn = await AuthActions.login(
       pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
+      // @ts-expect-error
+      passwordRef.current!.value
     );
     if (!loggedIn) {
       // @ts-expect-error
@@ -260,7 +259,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                             luminosity={theme.currentTheme.mode}
                             size={24}
                             canFocus
-                            onClick={(evt: any) => clickSubmit(evt)}
+                            onClick={async (evt: any) => await clickSubmit(evt)}
                           >
                             <Icons name="ArrowRightLine" />
                           </IconButton>

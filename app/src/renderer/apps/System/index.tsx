@@ -1,17 +1,8 @@
 import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Card,
-  Flex,
-  Box,
-  Text,
-  Sigil,
-  Input,
-  Icons,
-  RadioList,
-} from 'renderer/components';
+import { Flex, Text, Sigil, RadioList } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { darken, lighten } from 'polished';
+import { lighten } from 'polished';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';

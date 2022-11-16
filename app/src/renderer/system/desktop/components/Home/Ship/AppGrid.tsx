@@ -7,10 +7,10 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-type AppGridProps = {
+interface AppGridProps {
   isOpen?: boolean;
   tileSize: AppTileSize;
-};
+}
 
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
@@ -48,8 +48,8 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     isAppPinned
-                      ? SpacesActions.unpinApp(currentSpace?.path!, app.id)
-                      : SpacesActions.pinApp(currentSpace?.path!, app.id);
+                      ? SpacesActions.unpinApp(currentSpace?.path, app.id)
+                      : SpacesActions.pinApp(currentSpace?.path, app.id);
                   },
                 },
                 {
@@ -115,7 +115,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 }
               }
               onAppClick={(selectedApp: AppType) => {
-                // @ts-ignore
+                // @ts-expect-error
                 SpacesActions.addRecentApp(
                   spaces.selected!.path,
                   selectedApp.id

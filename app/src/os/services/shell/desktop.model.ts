@@ -37,7 +37,7 @@ const Window = types
   }));
 
 export type WindowModelType = Instance<typeof Window>;
-export type WindowModelProps = {
+export interface WindowModelProps {
   id: string;
   title?: string;
   glob?: boolean;
@@ -50,7 +50,7 @@ export type WindowModelProps = {
     width: number;
     height: number;
   };
-};
+}
 
 export const DesktopStore = types
   .model('DesktopStore', {
@@ -119,7 +119,7 @@ export const DesktopStore = types
       let glob = app.glob;
 
       if (app.href) {
-        glob = app.href.glob ? true : false;
+        glob = !!app.href.glob;
       }
       const newWindow = Window.create({
         id: app.id,

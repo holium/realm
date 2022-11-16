@@ -96,7 +96,7 @@ export class TrackPublication extends (EventEmitter as new () => TypedEventEmitt
   }
 }
 
-export type PublicationEventCallbacks = {
+export interface PublicationEventCallbacks {
   muted: () => void;
   unmuted: () => void;
   ended: (track?: Track) => void;
@@ -108,7 +108,7 @@ export type PublicationEventCallbacks = {
   // updateSubscription: (sub: UpdateSubscription) => void;
   subscribed: (track: RemoteTrack) => void;
   unsubscribed: (track: RemoteTrack) => void;
-};
+}
 
 export namespace TrackPublication {
   export enum SubscriptionStatus {

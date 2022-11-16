@@ -8,7 +8,7 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { rgba } from 'polished';
 
-type HomeButton = {};
+interface HomeButton {}
 
 export const HomeButton: FC<HomeButton> = observer(() => {
   const { ship, desktop, theme } = useServices();
@@ -16,11 +16,11 @@ export const HomeButton: FC<HomeButton> = observer(() => {
   const { dockColor, textColor } = useMemo(
     () => ({
       ...theme.currentTheme,
-      dockColor: rgba(theme.currentTheme.dockColor!, 0.55),
+      dockColor: rgba(theme.currentTheme.dockColor, 0.55),
       textColor:
         theme.currentTheme.mode === 'light'
-          ? rgba(theme.currentTheme.textColor!, 0.8)
-          : theme.currentTheme.textColor!,
+          ? rgba(theme.currentTheme.textColor, 0.8)
+          : theme.currentTheme.textColor,
     }),
     [theme.currentTheme.dockColor]
   );

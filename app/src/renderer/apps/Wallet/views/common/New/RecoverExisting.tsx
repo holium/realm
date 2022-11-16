@@ -38,7 +38,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
 
     const recoverSeedPhrase = async () => {
       setLoading(true);
-      let correct = await WalletActions.checkMnemonic(phrase);
+      const correct = await WalletActions.checkMnemonic(phrase);
       setLoading(false);
 
       if (correct) {

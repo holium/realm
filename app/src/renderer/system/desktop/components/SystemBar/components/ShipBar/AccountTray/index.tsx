@@ -9,9 +9,9 @@ import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 import { motion } from 'framer-motion';
 
-type AccountTrayProps = {
+interface AccountTrayProps {
   theme: ThemeModelType;
-};
+}
 
 export const AccountTray: FC<AccountTrayProps> = observer(
   (props: AccountTrayProps) => {

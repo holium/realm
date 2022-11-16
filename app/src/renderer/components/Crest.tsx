@@ -1,8 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import CrestSymbol from './Icons/crest';
-import { background } from 'styled-system';
 
 const crestSize = {
   xsm: 16,
@@ -22,12 +20,12 @@ const crestRadius = {
   xlg: 16,
 };
 
-type CrestStyleProps = {
+interface CrestStyleProps {
   height: number;
   width: number;
   background?: string;
   borderRadius: number;
-};
+}
 
 export const ColorCrest = styled(motion.div)<CrestStyleProps>`
   height: ${(p) => p.height}px;

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { rgba, darken } from 'polished';
+import { darken } from 'polished';
 
 import { Flex, RadioOption, Text, Icons } from '../';
 import { Row } from '../NewRow';

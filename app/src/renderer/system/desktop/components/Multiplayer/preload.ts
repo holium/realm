@@ -1,5 +1,5 @@
 import * as React from 'react';
-// @ts-ignore
+// @ts-expect-error
 import ReactDOM from 'react-dom/client';
 import { Presences } from './Presences';
 import { api } from './multiplayer';

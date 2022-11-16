@@ -1,11 +1,9 @@
 import { Patp } from 'os/types';
 import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
-import { Flex, Grid, Icons, Text } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 // import Row from 'renderer/components/Row';
 import styled from 'styled-components';
-import { Row } from 'renderer/components/NewRow';
-import { useServices } from 'renderer/logic/store';
 
 interface RoomInfoProps {}
 

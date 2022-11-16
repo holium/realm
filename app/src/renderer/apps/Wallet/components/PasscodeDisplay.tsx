@@ -15,7 +15,7 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
-  let Filled = () => (
+  const Filled = () => (
     <Flex
       mx="6px"
       height={35}
@@ -33,7 +33,7 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
     </Flex>
   );
 
-  let Empty = (props: any) => (
+  const Empty = (props: any) => (
     <Flex
       mx="6px"
       height={35}
@@ -52,7 +52,7 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
           <Empty
             key={index}
             border={`2px solid ${transparentize(0.9, '#000000')}`}
-            background={darken(0.02, theme.currentTheme!.windowColor)}
+            background={darken(0.02, theme.currentTheme.windowColor)}
           />
         );
       })}

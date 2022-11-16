@@ -3,7 +3,7 @@ import { rgba, darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../theme';
 
-type RowProps = {
+interface RowProps {
   small?: boolean;
   selected?: boolean;
   disabled?: boolean;
@@ -13,7 +13,7 @@ type RowProps = {
   noHover?: boolean;
   gap?: number;
   baseBg?: string;
-};
+}
 
 export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;

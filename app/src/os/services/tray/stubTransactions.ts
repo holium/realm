@@ -1,4 +1,4 @@
-import { TransactionType } from "./wallet.model";
+import { TransactionType } from './wallet.model';
 
 const transactionList = [
   {
@@ -16,8 +16,7 @@ const transactionList = [
 
     status: 'succeeded',
     notes: '',
-    failureReason: ''
-
+    failureReason: '',
   },
   {
     hash: '0x42768d919b34fa46cd982ec43ec733f25a7621d130d3ef3606819332f2513173',
@@ -34,8 +33,7 @@ const transactionList = [
 
     status: 'succeeded',
     notes: '',
-    failureReason: ''
-
+    failureReason: '',
   },
   {
     hash: '0x57c64aa7173f5cacf9ce42dcdc5ae405d2e23b7b1869506c9bf0f436e11f38c5',
@@ -52,9 +50,7 @@ const transactionList = [
 
     status: 'failed',
     notes: '',
-    failureReason: ''
-
-
+    failureReason: '',
   },
   {
     hash: '0xdc2365a4f6baa088697e1a242f5e88dbfb90a615532fc5e61d6b75932b8f27bc',
@@ -71,8 +67,7 @@ const transactionList = [
 
     status: 'succeeded',
     notes: '',
-    failureReason: ''
-
+    failureReason: '',
   },
   {
     hash: '0x42768d919b34fa46cd982ec43ec733f25a7621d130d3ef3606819332f2513173',
@@ -88,8 +83,7 @@ const transactionList = [
 
     status: 'succeeded',
     notes: '',
-    failureReason: ''
-
+    failureReason: '',
   },
   {
     hash: '0x57c64aa7173f5cacf9ce42dcdc5ae405d2e23b7b1869506c9bf0f436e11f38c5',
@@ -106,18 +100,22 @@ const transactionList = [
 
     status: 'succeeded',
     notes: '',
-    failureReason: ''
-
+    failureReason: '',
   },
 ];
 
-interface StringMap { [key: string]: TransactionType; }
-const stubTransactions = transactionList.reduce((accum, curr: any) => {
-  accum[curr.hash] = curr
-  return accum
-}, {} as StringMap)
+interface StringMap {
+  [key: string]: TransactionType;
+}
+const stubTransactions = transactionList.reduce<StringMap>(
+  (accum, curr: any) => {
+    accum[curr.hash] = curr;
+    return accum;
+  },
+  {}
+);
 
-export default stubTransactions
+export default stubTransactions;
 
 // export function genStubTransactions (address: string) {
 //   return transactionList.reduce((accum, curr) => {

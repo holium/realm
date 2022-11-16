@@ -7,7 +7,7 @@ import { compose, space, color, typography } from 'styled-system';
 import { Card, Box, MenuOrientation } from '.';
 import { Portal } from 'renderer/system/dialog/Portal';
 
-export type TooltipProps = {
+export interface TooltipProps {
   id: string;
   delay?: number; // 0.5
   style?: any;
@@ -16,7 +16,7 @@ export type TooltipProps = {
   children: React.ReactNode;
   position?: any;
   show?: boolean;
-};
+}
 
 const margin = 2;
 
@@ -63,7 +63,9 @@ const placementMaps = {
   `,
 };
 
-type TooltipStyleProps = { placement: MenuOrientation };
+interface TooltipStyleProps {
+  placement: MenuOrientation;
+}
 // Tooltip
 export const TooltipStyle = styled(
   styled.div<TooltipStyleProps>`
