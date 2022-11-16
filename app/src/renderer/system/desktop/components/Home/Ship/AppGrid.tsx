@@ -10,7 +10,6 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { devApps } from 'renderer/apps/development';
 
 interface AppGridProps {
   isOpen?: boolean;
@@ -25,7 +24,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
 
   return useMemo(() => {
     const apps = [...bazaar.installed, ...bazaar.installing, ...bazaar.devApps];
-
     return (
       <>
         {apps.map((app: any, index: number) => {
@@ -119,7 +117,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 }
               }
               onAppClick={(selectedApp: AppType) => {
-                // @ts-expect-error
                 SpacesActions.addRecentApp(
                   spaces.selected!.path,
                   selectedApp.id

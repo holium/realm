@@ -19,8 +19,6 @@ import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
-import DevApps from '../../../../app.dev.json';
-// const util = require('util');
 
 export enum InstallStatus {
   uninstalled = 'uninstalled',
@@ -69,6 +67,24 @@ export const DocketApp = types.model('DocketApp', {
   version: types.string,
   website: types.string,
   license: types.string,
+});
+
+export const DevAppModel = types.model('DevApp', {
+  id: types.identifier,
+  title: types.string,
+  type: types.literal(AppTypes.Web),
+  color: types.string,
+  icon: types.string,
+  web: types.model('WebConfig', {
+    dimensions: types.maybe(
+      types.model('WebConfigDimensions', {
+        width: types.number,
+        height: types.number,
+      })
+    ),
+    url: types.string,
+    openFullscreen: types.optional(types.boolean, false),
+  }),
 });
 
 export const WebApp = types.model('WebApp', {
@@ -140,6 +156,7 @@ export const NewBazaarStore = types
     loadingTreaties: false,
     addingAlly: types.map(types.string),
     installations: types.map(types.string),
+    devAppMap: types.map(DevAppModel),
   })
   .actions((self) => ({
     // Updates
@@ -358,6 +375,11 @@ export const NewBazaarStore = types
         throw error;
       }
     }),
+    loadDevApps(devApps: any) {
+      Object.values(devApps).forEach((app: any) => {
+        self.devAppMap.set(app.id, DevAppModel.create(app));
+      });
+    },
   }))
   .views((self) => ({
     get installing() {
@@ -381,7 +403,8 @@ export const NewBazaarStore = types
       );
     },
     get devApps() {
-      return Object.values(DevApps) || [];
+      if (self.devAppMap.size === 0) return [];
+      return Array.from(self.devAppMap.values()) || [];
     },
     getRecentApps() {
       return [];
@@ -435,7 +458,7 @@ export const NewBazaarStore = types
       const app = self.catalog.get(appId);
       if (!app) {
         // @ts-ignore
-        return DevApps[appId];
+        return self.devAppMap.get(appId);
       }
       return app;
     },
