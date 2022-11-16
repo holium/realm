@@ -76,19 +76,12 @@ export const DevAppModel = types.model('DevApp', {
   color: types.string,
   icon: types.string,
   web: types.model('WebConfig', {
-<<<<<<< HEAD
     dimensions: types.maybe(
       types.model('WebConfigDimensions', {
         width: types.number,
         height: types.number,
       })
     ),
-=======
-    dimensions: types.model('WebConfigDimensions', {
-      width: types.number,
-      height: types.number,
-    }),
->>>>>>> f1bbbec2 (fixed a file not found bug when dev.apps.json is not defined by a user)
     url: types.string,
     openFullscreen: types.optional(types.boolean, false),
   }),
