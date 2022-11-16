@@ -122,7 +122,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       if (workflowState.type === 'group') {
         setLoading(true);
         ShipActions.getGroupMembers(workflowState.path).then(
-          (groupMembers: any) => {
+          ({ members: groupMembers }: any) => {
             // Set up our ships
             groupMembers[ship!.patp].roles = ['owner'];
             groupMembers[ship!.patp].status = 'host';
@@ -259,6 +259,12 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                     const nickMap = nicknameMap;
                     delete nickMap[patp];
                     setNicknameMap(nickMap);
+                    const delMembers = workflowState.members;
+                    delete delMembers[patp];
+                    setWorkspaceState({
+                      ...workflowState,
+                      members: delMembers,
+                    });
                   }}
                 >
                   <Icons opacity={0.5} name="Close" />
