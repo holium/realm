@@ -141,12 +141,11 @@ export const spacesDialogs: DialogRenderers = {
       // DesktopActions.setDialogLoading(true);
       createForm = {
         name: createForm.name,
-        description: createForm.description,
+        description: createForm.description || '',
         picture: createForm.picture,
         color: createForm.color,
         theme: createForm.theme.toJSON(),
       }
-      console.log(createForm);
       SpacesActions.updateSpace(state.path, createForm).then(() => {
         // DesktopActions.closeDialog();
         setState({ loading: false });
@@ -168,8 +167,7 @@ export const spacesDialogs: DialogRenderers = {
         state &&
         state.access &&
         state.name &&
-        state.color &&
-        state.picture !== undefined
+        (state.picture !== undefined || state.color !== undefined)
       ) {
         return true;
       } else {
@@ -196,10 +194,14 @@ export const spacesDialogs: DialogRenderers = {
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
-      const createForm: NewSpace = state;
+      let createForm: NewSpace = state;
       delete createForm.archetypeTitle;
       setState({ ...state, loading: true });
       // DesktopActions.setDialogLoading(true);
+      createForm = {
+        ...createForm,
+        description: createForm.description || '',
+      }
       SpacesActions.createSpace(createForm).then(() => {
         // DesktopActions.closeDialog();
         setState({ loading: false });

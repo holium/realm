@@ -138,13 +138,14 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
         console.log('space', space)
         setWorkspaceState({
           ...space,
-          access: 'public'
+          access: 'public',
+          color: space.color,
+          image: space.picture,
         });
-        if (space.color) {
+        /*if (space.color) {
           setValidatedColor(space.color!);
-        }
+        }*/
         if (space.picture) {
-          setValidatedImageUrl(space.picture!);
           setCrestOption('image');
         }
       }
