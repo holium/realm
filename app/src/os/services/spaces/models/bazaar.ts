@@ -76,10 +76,12 @@ export const DevAppModel = types.model('DevApp', {
   color: types.string,
   icon: types.string,
   web: types.model('WebConfig', {
-    dimensions: types.model('WebConfigDimensions', {
-      width: types.number,
-      height: types.number,
-    }),
+    dimensions: types.maybe(
+      types.model('WebConfigDimensions', {
+        width: types.number,
+        height: types.number,
+      })
+    ),
     url: types.string,
     openFullscreen: types.optional(types.boolean, false),
   }),
