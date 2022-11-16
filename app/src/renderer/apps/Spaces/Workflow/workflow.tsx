@@ -158,11 +158,6 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.closeDialog();
     },
     isValidated: (state: any) => {
-      console.log(state)
-      console.log(state.access)
-      console.log(state.name)
-      console.log(state.color)
-      console.log(state.picture)
       if (
         state &&
         state.access &&
