@@ -1,8 +1,9 @@
 import { ThemeModelType } from '../theme.model';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import { toJS } from 'mobx';
+import fs from 'fs';
+import path from 'path';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
-
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
@@ -18,13 +19,21 @@ import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
 import { formPathObj } from '../../lib/path';
 
 export const getHost = (path: string) => path.split('/')[1];
+let devApps: any = null;
+
+// Loads the app.dev.json config file if it exists
+if (fs.existsSync(path.resolve(__dirname, '../../../app.dev.json'))) {
+  try {
+    devApps = require(path.resolve(__dirname, '../../../app.dev.json'));
+  } catch (err) {
+    console.error('Failed to load dev apps', err);
+  }
+}
 
 interface SpaceModels {
   bazaar: NewBazaarStoreType;
-  // newBazaar: NewBazaarStoreType;
   membership: any;
   visas: VisaModelType;
-  // friends: FriendsType;
 }
 /**
  * SpacesService
@@ -239,25 +248,28 @@ export class SpacesService extends BaseService {
 
   async load(patp: string, isReconnecting: boolean) {
     const secretKey: string | null = this.core.passwords.getPassword(patp);
-    this.db = new DiskStore('spaces', patp, secretKey, SpacesStore);
+    this.db = new DiskStore('spaces', patp, secretKey!, SpacesStore);
     this.state = this.db.model as SpacesStoreType;
     if (!isReconnecting) this.state.setLoader('loading');
     // Load sub-models
     const membershipStore = new DiskStore(
       'membership',
       patp,
-      secretKey,
+      secretKey!,
       MembershipStore
     );
     const bazaarStore = new DiskStore(
       'bazaar',
       patp,
-      secretKey,
+      secretKey!,
       NewBazaarStore,
       {}
     );
     this.models.membership = membershipStore.model;
     this.models.bazaar = bazaarStore.model;
+    if (devApps) {
+      this.models.bazaar.loadDevApps(devApps);
+    }
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -634,7 +646,7 @@ export class SpacesService extends BaseService {
     const space = this.state!.getSpaceByPath(spacePath)!;
 
     space.theme.setTheme(theme);
-    // @ts-expect-error
+
     delete theme.id;
     SpacesApi.updateSpace(this.core.conduit!, {
       path: space.path,

@@ -29,10 +29,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
     const [loading, setLoading] = useState(true);
     useEffect(() => {
       ShipActions.getOurGroups().then((ourGroups) => {
-        // hacky check to fix incorrectly formed %da
-        setGroups(
-          ourGroups.filter((group: any) => !group.path.includes('/~2'))
-        );
+        setGroups(ourGroups);
         setLoading(false);
       });
     }, []);
@@ -76,6 +73,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                         archetype: 'community',
                         archetypeTitle: 'Group',
                         path: data.path,
+                        access: data.access,
                       });
                     props.onNext && props.onNext(_evt);
                   }}
@@ -129,6 +127,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                 setState({
                   title: 'New Space',
                   type: 'space',
+                  color: '#000000',
                   archetype: 'community',
                   archetypeTitle: 'Community',
                 });

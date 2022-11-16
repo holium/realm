@@ -216,10 +216,7 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.closeDialog();
     },
     isValidated: (state: any) => {
-      return (
-        state &&
-        state.members
-      );
+      return state && state.members;
     },
     window: {
       id: 'create-space-4',
