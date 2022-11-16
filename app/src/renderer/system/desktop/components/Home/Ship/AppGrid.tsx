@@ -122,9 +122,12 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               }
               onAppClick={(selectedApp: AppType) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 // @ts-ignore
 =======
 >>>>>>> 88652192 (fixed a file not found bug when dev.apps.json is not defined by a user)
+=======
+>>>>>>> f1bbbec2 (fixed a file not found bug when dev.apps.json is not defined by a user)
                 SpacesActions.addRecentApp(
                   spaces.selected!.path,
                   selectedApp.id
