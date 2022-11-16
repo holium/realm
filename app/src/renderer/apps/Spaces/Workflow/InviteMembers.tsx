@@ -121,26 +121,19 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
     useEffect(() => {
       if (workflowState.type === 'group') {
         setLoading(true);
-        setWorkspaceState({
-          ...workflowState,
-          members: {
-            [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
-          },
-        });
-        selectedPatp.add(ship!.patp);
-        ShipActions.getGroup(workflowState.path).then((group: any) => {
+        ShipActions.getGroupMembers(workflowState.path).then((groupMembers: any) => {
           let members: any = {};
-          for (var member of Object.keys(group.fleet)) {
-            const primaryRole: string = group.fleet[member].sects.includes(
+          for (var member of Object.keys(groupMembers)) {
+            const primaryRole: string = groupMembers[member].sects.includes(
               'admin'
             )
               ? 'admin'
-              : group.fleet[member].sects.includes('member')
+              : groupMembers[member].sects.includes('member')
               ? 'member'
               : 'initiate';
             members[member] = {
               primaryRole,
-              roles: group.fleet[member].sects,
+              roles: groupMembers[member].sects,
               alias: '',
               status: 'joined',
             };
