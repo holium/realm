@@ -121,23 +121,30 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
     useEffect(() => {
       if (workflowState.type === 'group') {
         setLoading(true);
-        ShipActions.getGroupMembers(workflowState.path).then((result: any) => {
-          const groupMembers = result.members;
-          const newMembers: any = {
-            ...permissionMap,
-            ...groupMembers,
-          };
-          setPermissionMap(newMembers);
-          setWorkspaceState({
-            ...workflowState,
-            members: newMembers,
-          });
-          for (var member of Object.keys(groupMembers)) {
-            selectedPatp.add(member);
-            setNicknameMap({ ...nicknameMap, [member]: '' });
+        ShipActions.getGroupMembers(workflowState.path).then(
+          (groupMembers: any) => {
+            // Set up our ships
+            groupMembers[ship!.patp].roles = ['owner'];
+            groupMembers[ship!.patp].status = 'host';
+            groupMembers[ship!.patp].primaryRole = 'owner';
+            selectedPatp.add(ship!.patp);
+            setNicknameMap({ ...nicknameMap, [ship!.patp]: '' });
+            const newMembers: any = {
+              ...groupMembers,
+            };
+            setPermissionMap(newMembers);
+            setWorkspaceState({
+              ...workflowState,
+              members: newMembers,
+            });
+            delete groupMembers[ship!.patp];
+            for (var member of Object.keys(groupMembers)) {
+              selectedPatp.add(member);
+              setNicknameMap({ ...nicknameMap, [member]: '' });
+            }
+            setLoading(false);
           }
-          setLoading(false);
-        });
+        );
       } else {
         setWorkspaceState({
           ...workflowState,
@@ -294,10 +301,17 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                   <Text opacity={0.6} fontSize={3}>
                     {' • '}
                   </Text>
-
-                  <Text opacity={0.6} fontSize={3}>
-                    {memberCount} {pluralize('member', memberCount)}
-                  </Text>
+                  <Flex flexDirection="row" alignItems="center">
+                    {loading && (
+                      <Flex height={16} width={12} mr={1}>
+                        <Skeleton height={16} width={12} />{' '}
+                      </Flex>
+                    )}
+                    <Text opacity={0.6} fontSize={3}>
+                      {!loading && memberCount}{' '}
+                      {pluralize('member', memberCount)}
+                    </Text>
+                  </Flex>
                 </Flex>
               </Flex>
             </Flex>
@@ -311,6 +325,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 autoCapitalize="false"
                 autoCorrect="false"
                 autoComplete="false"
+                spellCheck="false"
                 name="person"
                 ref={searchRef}
                 height={34}
@@ -324,7 +339,10 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                   paddingRight: 4,
                 }}
                 value={person.state.value}
-                error={person.computed.ifWasEverBlurredThenError}
+                error={
+                  person.computed.isDirty &&
+                  person.computed.ifWasEverBlurredThenError
+                }
                 onKeyDown={(evt: any) => {
                   if (evt.key === 'Enter' && person.computed.parsed) {
                     onShipSelected([person.computed.parsed, '']);
@@ -356,19 +374,27 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
             <Flex position="relative" flexDirection="column" flex={1} gap={6}>
               <Label fontWeight={500}>Members</Label>
               <MemberList customBg={inputColor}>
-                <AutoSizer>
-                  {({ height, width }: { height: number; width: number }) => (
-                    <List
-                      className="List"
-                      height={height - heightOffset}
-                      itemCount={memberCount}
-                      itemSize={40}
-                      width={width - 2}
-                    >
-                      {RowRenderer}
-                    </List>
-                  )}
-                </AutoSizer>
+                {!loading ? (
+                  <AutoSizer>
+                    {({ height, width }: { height: number; width: number }) => (
+                      <List
+                        className="List"
+                        height={height - heightOffset}
+                        itemCount={memberCount}
+                        itemSize={40}
+                        width={width - 2}
+                      >
+                        {RowRenderer}
+                      </List>
+                    )}
+                  </AutoSizer>
+                ) : (
+                  <Flex flexDirection="column" gap={4}>
+                    <Skeleton height={30} />
+                    <Skeleton height={30} />
+                    <Skeleton height={30} />
+                  </Flex>
+                )}
               </MemberList>
             </Flex>
           </Flex>

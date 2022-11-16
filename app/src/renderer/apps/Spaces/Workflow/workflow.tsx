@@ -137,6 +137,7 @@ export const spacesDialogs: DialogRenderers = {
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
       // DesktopActions.setDialogLoading(true);
+      console.log(createForm);
       SpacesActions.createSpace(createForm).then(() => {
         // DesktopActions.closeDialog();
         setState({ loading: false });
@@ -151,10 +152,7 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.closeDialog();
     },
     isValidated: (state: any) => {
-      return (
-        state &&
-        state.members
-      );
+      return state && state.members;
     },
     window: {
       id: 'create-space-4',

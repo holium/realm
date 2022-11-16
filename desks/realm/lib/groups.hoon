@@ -89,6 +89,7 @@
     :~  ['creator' s+(scot %p creator.grp)]
         ['path' s+(spat /(scot %p creator.grp)/(scot %tas name.grp))]
         ['name' s+title.grp]
+        ['access' s+access.grp]
         ['picture' s+picture.grp]
         ['color' s+color.grp]
         ['memberCount' n+(scot %u member-count.grp)]

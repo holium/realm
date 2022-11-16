@@ -93,8 +93,9 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       workflowState.image ? 'image' : 'color'
     );
 
-    const [accessOption, setAccessOption] =
-      useState<AccessOptionType>('public');
+    const [accessOption, setAccessOption] = useState<AccessOptionType>(
+      workflowState.access || 'public'
+    );
 
     const handleClickOutside = (event: any) => {
       const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
@@ -127,6 +128,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
         if (workflowState.image) {
           setCrestOption('image');
         }
+      } else {
         setWorkspaceState({
           access: 'public',
         });
