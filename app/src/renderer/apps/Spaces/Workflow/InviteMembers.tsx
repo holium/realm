@@ -140,32 +140,16 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       if (workflowState.type === 'group') {
         setLoading(true);
         ShipActions.getGroupMembers(workflowState.path).then((groupMembers: any) => {
-          let members: any = {};
-          for (var member of Object.keys(groupMembers)) {
-            const primaryRole: string = groupMembers[member].sects.includes(
-              'admin'
-            )
-              ? 'admin'
-              : groupMembers[member].sects.includes('member')
-              ? 'member'
-              : 'initiate';
-            members[member] = {
-              primaryRole,
-              roles: groupMembers[member].sects,
-              alias: '',
-              status: 'joined',
-            };
-          }
           const newMembers: any = {
             ...permissionMap,
-            ...members
-          }
+            ...groupMembers,
+          };
           setPermissionMap(newMembers);
           setWorkspaceState({
             ...workflowState,
             members: newMembers,
           });
-          for (var member of Object.keys(members)) {
+          for (var member of Object.keys(groupMembers)) {
             selectedPatp.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
           }

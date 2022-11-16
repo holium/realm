@@ -5,7 +5,7 @@
 ++  grow
   |%
   ++  noun  group
-  ++  json  (fleet:enjs:j fleet.group)
+  ++  json  (members:enjs:j fleet.group)
   --
 ++  grab
   |%
