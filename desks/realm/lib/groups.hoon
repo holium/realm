@@ -58,12 +58,15 @@
     ^-  [cord json]
     :-  -.vi
     ?-  -.vi
-      :: ::
+      ::
         %group
       (group:encode group.vi)
       ::
         %groups
       (groups:encode groups.vi)
+      ::
+        %members
+      (members:encode members.vi)
     ==
   --
 ::
@@ -91,7 +94,25 @@
         ['memberCount' n+(scot %u member-count.grp)]
     ==
   ::
-::  ++  members
-  ::
+  ++  members
+    |=  fl=fleet:g
+    %-  pairs
+    %+  turn  ~(tap by fl)
+    |=  [her=@p v=vessel:fleet:g]
+    [(scot %p her) (member-vessel v)]
+  ++  member-vessel
+    |=  v=vessel:fleet:g
+    %-  pairs
+    =/  roles  (turn ~(tap in sects.v) (lead %s))
+    =?  roles  =(~ roles)
+      [s+%member]~
+    :~  :-  'primaryRole'
+            ?:  (~(has in (silt roles)) s+'admin')
+              s+'admin'
+            s+'member'
+        ['status' s+'joined']
+        ['alias' s+'']
+        [roles/a/[roles]]
+    ==
   --
 --

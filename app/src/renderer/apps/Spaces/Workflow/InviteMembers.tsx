@@ -139,7 +139,8 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       }*/
       if (workflowState.type === 'group') {
         setLoading(true);
-        ShipActions.getGroupMembers(workflowState.path).then((groupMembers: any) => {
+        ShipActions.getGroupMembers(workflowState.path).then((result: any) => {
+          const groupMembers = result.members;
           const newMembers: any = {
             ...permissionMap,
             ...groupMembers,
