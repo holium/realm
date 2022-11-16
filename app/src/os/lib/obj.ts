@@ -3,8 +3,8 @@ export const camelToSnake = (key: string) => {
 };
 
 export const snakeify = (obj: { [key: string]: any }) => {
-  let newObject: any = {};
-  for (var camel in obj) {
+  const newObject: any = {};
+  for (const camel in obj) {
     newObject[camelToSnake(camel)] = obj[camel];
   }
   return newObject;

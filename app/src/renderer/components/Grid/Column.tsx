@@ -16,7 +16,7 @@ type ColumnType = SpaceProps &
     order?: number | object;
     gap?: number;
     offset?: number | object;
-    reverse?: boolean | Array<any>;
+    reverse?: boolean | any[];
     noGutter?: boolean;
     children?: React.ReactNode;
     debug?: boolean;
@@ -105,7 +105,7 @@ const Column = styled(styled.div<ColumnType>`
               config(p).breakpoints[d] &&
               config(p).media[d]`
         flex-direction: ${
-          Array.isArray(p.reverse) && p.reverse.indexOf(d) !== -1
+          Array.isArray(p.reverse) && p.reverse.includes(d)
             ? 'column-reverse'
             : 'column'
         };

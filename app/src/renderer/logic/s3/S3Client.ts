@@ -18,11 +18,11 @@ export interface UploadResult {
 
 // Extra layer of indirection used by S3 client.
 export interface StorageUpload {
-  promise(): Promise<UploadResult>;
+  promise: () => Promise<UploadResult>;
 }
 
 export interface StorageClient {
-  upload(params: UploadParams): StorageUpload;
+  upload: (params: UploadParams) => StorageUpload;
 }
 
 export default class S3Client implements StorageClient {
@@ -43,13 +43,13 @@ export default class S3Client implements StorageClient {
       this.client = new this.S3(this.config);
     }
 
-    return this.client.upload(params).promise();
+    return await this.client.upload(params).promise();
   }
 
   upload(params: UploadParams): StorageUpload {
     const upload = this.initAndUpload.bind(this);
     return {
-      promise: () => upload(params),
+      promise: async () => await upload(params),
     };
   }
 

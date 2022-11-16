@@ -10,8 +10,7 @@ import {
   formatBtcAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
-import { TransactionType } from 'os/services/tray/wallet.model';
+import { WalletView, TransactionType } from 'os/services/tray/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 
 interface PendingTransactionDisplayProps {
@@ -60,10 +59,10 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
     });
   };
 
-  let isEth = props.transaction.network === 'ethereum';
-  let ethAmount = formatEthAmount(isEth ? props.transaction.amount : '1');
-  let btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1');
-  let themDisplay =
+  const isEth = props.transaction.network === 'ethereum';
+  const ethAmount = formatEthAmount(isEth ? props.transaction.amount : '1');
+  const btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1');
+  const themDisplay =
     props.transaction.theirPatp || shortened(props.transaction.theirAddress);
   let unitsDisplay = 'BTC';
   if (isEth) {

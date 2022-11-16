@@ -8,7 +8,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpaceHome } from './Space';
 import { OurHome } from './Ship';
 
-type HomeWindowProps = {};
+interface HomeWindowProps {}
 
 const HomeWindow = styled(motion.div)<HomeWindowProps>`
   height: 100%;

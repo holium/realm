@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { createPost, Post } from '@urbit/api';
+import { Post } from '@urbit/api';
 import { CourierStoreType } from '../services/ship/models/courier';
 import { Patp } from '../types';
 
@@ -9,7 +9,7 @@ export const CourierApi = {
       app: 'courier',
       path: `/dms`,
     });
-    return response['inbox'];
+    return response.inbox;
   },
   getDMLog: async (to: Patp, conduit: Conduit) => {
     const response = await conduit.scry({
@@ -19,8 +19,11 @@ export const CourierApi = {
     return response['dm-log'];
   },
 
-  dmUpdates: (conduit: Conduit, store: CourierStoreType): Promise<any> => {
-    return conduit.watch({
+  dmUpdates: async (
+    conduit: Conduit,
+    store: CourierStoreType
+  ): Promise<any> => {
+    return await conduit.watch({
       app: 'courier',
       path: `/updates`,
       onEvent: async (data: any) => {
@@ -91,7 +94,7 @@ export const CourierApi = {
     return await conduit.poke(payload);
   },
   createGroupDM: async (conduit: Conduit, ships: Patp[]) => {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'courier',
         mark: `graph-dm-action`,
@@ -121,7 +124,6 @@ export const CourierApi = {
         },
       },
     });
-    return;
   },
   readGroupDm: async (conduit: Conduit, host: Patp, name: string) => {
     await conduit.poke({
@@ -133,7 +135,6 @@ export const CourierApi = {
         },
       },
     });
-    return;
   },
   // Dm invite flow
   acceptDm: async (conduit: Conduit, toShip: string) => {

@@ -1,14 +1,12 @@
-import { FC, useEffect, useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, lighten, darken } from 'polished';
+import { FC } from 'react';
 
 import { ThemeModelType } from 'os/services/theme.model';
 import { Grid, Flex, Text } from '../../../components';
 import { CircleButton } from './CircleButton';
 
-type WalletMainProps = {
+interface WalletMainProps {
   theme: ThemeModelType;
-};
+}
 
 export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
   // const { walletStore } = useMst();

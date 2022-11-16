@@ -6,11 +6,11 @@ import { useServices } from 'renderer/logic/store';
 import { Flex, Text, Sigil } from 'renderer/components';
 import { ThemeType } from '../../../../../theme';
 
-type RowProps = {
+interface RowProps {
   theme: ThemeType;
   selected?: boolean;
   customBg: string;
-};
+}
 
 export const ProviderRowStyle = styled(motion.div)<RowProps>`
   height: 48px;

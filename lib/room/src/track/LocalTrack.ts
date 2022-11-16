@@ -219,7 +219,7 @@ export class LocalTrack extends Track {
     }
   }
 
-  private handleEnded = () => {
+  private readonly handleEnded = () => {
     if (this.isInBackground) {
       this.reacquireTrack = true;
     }
@@ -228,7 +228,7 @@ export class LocalTrack extends Track {
 
   async pauseUpstream() {
     this.muteQueue.run(async () => {
-      if (this._isUpstreamPaused === true) {
+      if (this._isUpstreamPaused) {
         return;
       }
       if (!this._sender) {
@@ -248,7 +248,7 @@ export class LocalTrack extends Track {
 
   async resumeUpstream() {
     this.muteQueue.run(async () => {
-      if (this._isUpstreamPaused === false) {
+      if (!this._isUpstreamPaused) {
         return;
       }
       if (!this._sender) {

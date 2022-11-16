@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { nativeApps, NativeAppType } from '../../../../renderer/apps';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';

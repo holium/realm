@@ -28,12 +28,12 @@ export const Row: React.FC<RowProps> = ({ gutter, children, ...props }) => {
   const spacing =
     gutter && Array.isArray(gutter)
       ? gutter.map((space) => space && space / 2)
-      : (gutter as number) / 2;
+      : gutter / 2;
 
   const mx =
     gutter && Array.isArray(gutter)
       ? gutter.map((space) => space && (space / 2) * -1)
-      : ((gutter as number) / 2) * -1;
+      : (gutter / 2) * -1;
 
   // const filteredChildren = React.Children.toArray(children).filter(Boolean)
 

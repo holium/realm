@@ -33,11 +33,11 @@ export const SelectRow = (props: ISelectRow) => {
   } = props;
   let leftIcon = <EmptyGroup />;
   if (icon) {
-    leftIcon = <Icons size={32} name={icon!} />;
+    leftIcon = <Icons size={32} name={icon} />;
   }
   if (image) {
     leftIcon = (
-      <img height={32} width={32} style={{ borderRadius: 4 }} src={image!} />
+      <img height={32} width={32} style={{ borderRadius: 4 }} src={image} />
     );
   }
   return (

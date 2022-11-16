@@ -59,7 +59,7 @@ export function cleanNounColor(ux: string) {
 }
 
 export function hexToRgb(hex: string) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
         r: parseInt(result[1], 16),
@@ -90,7 +90,7 @@ function dropWhile<T>(arr: T[], pred: (x: T) => boolean): T[] {
 
 function chunk<T>(arr: T[], size: number): T[][] {
   let chunk: T[] = [];
-  let newArray = [chunk];
+  const newArray = [chunk];
 
   for (let i = 0; i < arr.length; i++) {
     if (chunk.length < size) {

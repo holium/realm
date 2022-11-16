@@ -35,7 +35,7 @@ export const AccountPanel: FC<any> = observer(() => {
 
   const profileForm = useForm({
     async onSubmit({ values }: any) {
-      let profileData = {
+      const profileData = {
         color: values.avatarColor,
         nickname: values.nickname,
         avatar: values.avatarImage,
@@ -113,7 +113,7 @@ export const AccountPanel: FC<any> = observer(() => {
               Urbit ID
             </Text>
             <Text flex={3} mx={4}>
-              {ship!.patp!}
+              {ship!.patp}
               {/* ~sampel-palnet-sampel-palnet */}
             </Text>
           </Flex>

@@ -4,13 +4,9 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba } from 'polished';
 import {
-  Button,
   Flex,
   FormControl,
-  Grid,
-  Label,
   Input,
-  Text,
   TextButton,
   Spinner,
 } from 'renderer/components';
@@ -87,7 +83,7 @@ export const WallpaperDialog: FC = observer(() => {
   const onChange = (evt: any) => {
     const formData = wallpaperForm.actions.submit();
     setLoading(true);
-    theme.setWallpaper(spaces.selected!.path!, formData.imageUrl).then(() => {
+    theme.setWallpaper(spaces.selected!.path, formData.imageUrl).then(() => {
       ShellActions.closeDialog();
       ShellActions.setBlur(false);
       setLoading(false);

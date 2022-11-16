@@ -11,7 +11,7 @@ interface EncryptedStoreParams {
 
 export default class EncryptedStore<T> {
   private db;
-  private secretKey;
+  private readonly secretKey;
   private _store;
 
   constructor(params: EncryptedStoreParams) {
@@ -51,7 +51,7 @@ export default class EncryptedStore<T> {
   }
 
   decryptData(ciphertext: string) {
-    let bytes = CryptoJS.AES.decrypt(
+    const bytes = CryptoJS.AES.decrypt(
       ciphertext,
       safeStorage.decryptString(this.secretKey)
     );

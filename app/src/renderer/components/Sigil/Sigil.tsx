@@ -2,9 +2,8 @@
 import { FC, useMemo } from 'react';
 import { sigil, reactRenderer } from '@tlon/sigil-js';
 import { AvatarWrapper, SigilStyle } from './Sigil.styles';
-import { Skeleton } from '../Skeleton';
 
-export type SigilProps = {
+export interface SigilProps {
   patp: string;
   avatar?: string | null;
   nickname?: string;
@@ -16,7 +15,7 @@ export type SigilProps = {
   isLogin?: boolean;
   clickable?: boolean;
   opacity?: number;
-};
+}
 
 export const Sigil: FC<SigilProps> = (props: SigilProps) => {
   const {

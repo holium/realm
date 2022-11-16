@@ -5,7 +5,6 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
     'open-app',
     (_event, location: { url: string; cookies: any }, partition: string) => {
       session.fromPartition(partition).cookies.set(location.cookies);
-      return;
     }
   );
 
@@ -17,7 +16,7 @@ export const registerListeners = (mainWindow: BrowserWindow) => {
   );
 
   ipcMain.handle('close-app', async (event, location: any) => {
-    const views = mainWindow!.getBrowserViews();
+    const views = mainWindow.getBrowserViews();
   });
 };
 

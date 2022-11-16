@@ -1,26 +1,12 @@
-import { FC, useRef, useMemo, useState } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react-lite';
-import { createField, createForm } from 'mobx-easy-form';
-import { isValidPatp } from 'urbit-ob';
 import { FixedSizeList as List } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
 
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { rgba, lighten, darken } from 'polished';
+import { rgba, darken } from 'polished';
 
-import {
-  Flex,
-  Icons,
-  Text,
-  Input,
-  TextButton,
-  PersonRow,
-  ShipSearch,
-} from 'renderer/components';
+import { Flex, Text, PersonRow } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { toJS } from 'mobx';
 import { Member } from 'os/types';
 
 interface IMembersList {
@@ -44,7 +30,7 @@ export const MembersList: FC<IMembersList> = observer((props: IMembersList) => {
       member.roles.includes('member') || member.status.includes('invited')
   );
 
-  const ourIsAdmin = membership.isAdmin(path, ship!.patp!);
+  const ourIsAdmin = membership.isAdmin(path, ship!.patp);
 
   const RowRenderer = (
     { index, style }: { index: number; style: any },

@@ -10,8 +10,9 @@ import { Input, ContainerFlex, FlexHider } from './styled';
 import { ERC20Type } from 'os/services/tray/wallet.model';
 
 // TODO: replace with actual exchange rate
-let ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
-let usdToEth = (usd: number) => (isNaN(usd) ? 0 : (usd / 1715.66).toFixed(12));
+const ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
+const usdToEth = (usd: number) =>
+  isNaN(usd) ? 0 : (usd / 1715.66).toFixed(12);
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -33,11 +34,11 @@ export const AmountInput = observer(
     const [amountError, setAmountError] = useState(false);
 
     const themeData = getBaseTheme(theme.currentTheme);
-    const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
+    const panelBackground = darken(0.04, theme.currentTheme.windowColor);
 
     const check = (inCrypto: boolean, value: string | number) => {
-      let numVal = Number(value);
-      let amountInCrypto = inCrypto ? value : usdToEth(numVal);
+      const numVal = Number(value);
+      const amountInCrypto = inCrypto ? value : usdToEth(numVal);
       if (amountInCrypto > props.max) {
         setAmountError(true);
         return props.setValid(false);
@@ -50,10 +51,10 @@ export const AmountInput = observer(
     };
 
     const onChange = (e: any) => {
-      let value: string = e.target.value;
-      let isDecimal = value.includes('.');
-      let decimalPlaces = isDecimal && value.split('.')[1].length;
-      let isZero = Number(value) === 0;
+      const value: string = e.target.value;
+      const isDecimal = value.includes('.');
+      const decimalPlaces = isDecimal && value.split('.')[1].length;
+      const isZero = Number(value) === 0;
 
       if (value.length > 10) return;
       if (!inCrypto && isDecimal && decimalPlaces > 2) return;
@@ -63,18 +64,18 @@ export const AmountInput = observer(
     };
 
     const toggleInCrypto = () => {
-      let toggled = !inCrypto;
+      const toggled = !inCrypto;
 
       setInCrypto(toggled);
       check(toggled, amount);
 
-      if (toggled === false) {
+      if (!toggled) {
         setAmount(Number(amount).toFixed(2));
       }
     };
 
     const inputContainerClicked = () => {
-      (amountRef.current! as HTMLElement).focus();
+      (amountRef.current as HTMLElement).focus();
     };
 
     return (
@@ -91,7 +92,7 @@ export const AmountInput = observer(
           >
             AMOUNT
           </Text>
-          {/* @ts-ignore */}
+          {/* @ts-expect-error */}
           <ContainerFlex
             focusBorder={themeData.colors.brand.primary}
             px={1}
@@ -115,7 +116,7 @@ export const AmountInput = observer(
               alignItems="flex-start"
             >
               {inCrypto ? (
-                /* @ts-ignore */
+                /* @ts-expect-error */
                 <Input
                   autoFocus
                   ref={amountRef}
@@ -131,7 +132,7 @@ export const AmountInput = observer(
                   <Text pt="2px" fontSize="12px">
                     $
                   </Text>
-                  {/* @ts-ignore */}
+                  {/* @ts-expect-error */}
                   <Input
                     autoFocus
                     ref={amountRef}

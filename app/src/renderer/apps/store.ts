@@ -1,18 +1,23 @@
 import { calculateAnchorPointById } from './../logic/lib/position';
 import { createContext, useContext } from 'react';
-import { Room, RoomState } from '@holium/realm-room';
+import { Room } from '@holium/realm-room';
 import {
   applyPatch,
   Instance,
   types,
   onSnapshot,
-  onAction,
   applySnapshot,
 } from 'mobx-state-tree';
 
 import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
-import { NetworkType, SharingMode, WalletCreationMode, WalletStore, WalletView } from 'os/services/tray/wallet.model';
+import {
+  NetworkType,
+  SharingMode,
+  WalletCreationMode,
+  WalletStore,
+  WalletView,
+} from 'os/services/tray/wallet.model';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
@@ -21,7 +26,6 @@ import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomDiff } from 'os/services/tray/rooms.service';
 import { IpcMessageEvent } from 'electron';
 import { DmApp } from './Messages/store';
-import { toJS } from 'mobx';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -115,7 +119,7 @@ export const trayStore = TrayAppStore.create({
     navState: {
       view: WalletView.NEW,
       network: NetworkType.ETHEREUM,
-      btcNetwork: 'mainnet'
+      btcNetwork: 'mainnet',
     },
     navHistory: [],
     bitcoin: {
@@ -125,7 +129,7 @@ export const trayStore = TrayAppStore.create({
         blocked: [],
         defaultIndex: 0,
       },
-      conversions: {}
+      conversions: {},
     },
     testnet: {
       settings: {
@@ -134,7 +138,7 @@ export const trayStore = TrayAppStore.create({
         blocked: [],
         defaultIndex: 0,
       },
-      conversions: {}
+      conversions: {},
     },
     ethereum: {
       network: 'gorli',
@@ -145,7 +149,7 @@ export const trayStore = TrayAppStore.create({
         defaultIndex: 0,
       },
       initialized: false,
-      conversions: {}
+      conversions: {},
     },
     creationMode: 'default',
     sharingMode: 'anybody',
@@ -194,11 +198,11 @@ RoomsActions.onRoomUpdate(
   (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
     console.log('room diff in renderer', diff);
     LiveRoom.onDiff(diff, room);
-    // @ts-ignore
+    // @ts-expect-error
     if (diff.exit) {
       SoundActions.playRoomLeave();
     }
-    // @ts-ignore
+    // @ts-expect-error
     if (diff.enter) {
       SoundActions.playRoomEnter();
     }

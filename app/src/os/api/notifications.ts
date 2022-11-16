@@ -40,19 +40,12 @@
 
 // import { Conduit } from '@holium/conduit';
 
-import bigInt from 'big-integer';
-import { ShipModelType } from '../services/ship/models/ship';
-import { decToUd, unixToDa, daToUnix, udToDec } from '@urbit/api';
+import { decToUd, unixToDa } from '@urbit/api';
 import { Conduit } from '@holium/conduit';
 import {
-  RawTimeBoxType,
-  RawNotificationType,
-  RawNotificationBody,
   NotificationModelType,
-  NotificationModel,
   NotificationStoreType,
 } from '../services/ship/models/notifications';
-import { Patp } from 'os/types';
 import { CourierStoreType } from '../services/ship/models/courier';
 
 export const NotificationApi: any = {
@@ -88,7 +81,7 @@ export const NotificationApi: any = {
       path: '/updates',
       onEvent: async (data: any, id?: number, mark?: string) => {
         // console.log(data, mark);
-        if (data['more']) {
+        if (data.more) {
           // console.log(
           //   'unread notifications => %o',
           //   data['more'][0].timebox.notifications[1].body[0]
@@ -101,8 +94,8 @@ export const NotificationApi: any = {
       onQuit: () => console.log('Kicked from subscription'),
     });
   },
-  opened: (conduit: Conduit) => {
-    return conduit.poke({
+  opened: async (conduit: Conduit) => {
+    return await conduit.poke({
       app: 'hark-store',
       mark: 'hark-action',
       json: { opened: null },

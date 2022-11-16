@@ -53,10 +53,10 @@ export type BoxProps = {
   TypographyProps & {
     textDecoration?:
       | TextDecorationOption
-      | (TextDecorationOption | null | string)[];
+      | Array<TextDecorationOption | null | string>;
     textTransform?:
       | TextTransformOption
-      | (TextTransformOption | null | string)[];
+      | Array<TextTransformOption | null | string>;
   } & HTMLAttributes<any>;
 
 const textDecoration = style({

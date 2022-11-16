@@ -92,14 +92,14 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
       if (s3.configuration.currentBucket === '') {
         throw new Error('current bucket not set');
       }
-      return upload(file, s3.configuration.currentBucket);
+      return await upload(file, s3.configuration.currentBucket);
     },
     [s3, upload]
   );
 
   const promptUpload = useCallback(
-    (elem: HTMLElement): Promise<File> => {
-      return new Promise((resolve, reject) => {
+    async (elem: HTMLElement): Promise<File> => {
+      return await new Promise((resolve, reject) => {
         const fileSelector = document.createElement('input');
         fileSelector.setAttribute('type', 'file');
         fileSelector.setAttribute('accept', accept);

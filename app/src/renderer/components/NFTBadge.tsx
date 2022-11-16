@@ -7,11 +7,11 @@ import { Text } from 'renderer/components';
 
 type ThemeMode = 'light' | 'dark';
 
-type BadgeStyleProps = {
+interface BadgeStyleProps {
   theme: ThemeType;
   baseColor: string;
   mode: ThemeMode;
-};
+}
 
 const BadgeStyle = styled(motion.div)<BadgeStyleProps>`
   border-radius: 8px;
@@ -39,10 +39,10 @@ const BadgeStyle = styled(motion.div)<BadgeStyleProps>`
 `;
 
 // const
-type BadgeProps = {
+interface BadgeProps {
   color: string;
   mode: ThemeMode;
-};
+}
 
 export const NFTBadge: FC<BadgeProps> = (props: BadgeProps) => {
   const { color, mode } = props;

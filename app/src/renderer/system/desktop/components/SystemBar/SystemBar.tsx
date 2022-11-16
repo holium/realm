@@ -4,7 +4,7 @@ import { HomeButton } from './components/HomeButton';
 import { ShipTray } from './components/ShipBar';
 import { CommunityBar } from './components/CommunityBar';
 
-type SystemBarProps = {};
+interface SystemBarProps {}
 
 export const SystemBar: FC<SystemBarProps> = () => {
   return (

@@ -1,13 +1,4 @@
-import { WindowManager } from 'renderer/system/desktop/WindowManager';
-import Realm from '../../';
-import Store from 'electron-store';
 import { EventEmitter } from 'stream';
-import {
-  getSnapshot,
-  IModelType,
-  IType,
-  IStateTreeNode,
-} from 'mobx-state-tree';
 
 /**
  * Preference Service
@@ -30,9 +21,9 @@ export class PreferenceService extends EventEmitter {
   static preload = {};
 }
 
-export type PreloadTypes = {
+export interface PreloadTypes {
   // Note the type of the static preload functions
-};
+}
 /*
  *  - desktop
  *    - isolation-mode: boolean

@@ -44,22 +44,22 @@ export const RecipientInput = observer(
     const loading = currPromise !== null;
 
     const themeData = getBaseTheme(theme.currentTheme);
-    const panelBackground = darken(0.04, theme.currentTheme!.windowColor);
+    const panelBackground = darken(0.04, theme.currentTheme.windowColor);
 
     const stateRef = useRef();
-    /* @ts-ignore */
+    /* @ts-expect-error */
     stateRef.current = { recipient, currPromise };
 
     // TODO: rewrite logic here, was from when we had fewer agent/service guarentees
     const getRecipient = async (patp: string) => {
-      let promise: Promise<RecipientPayload> = new Promise(
+      const promise: Promise<RecipientPayload> = new Promise(
         async (resolve, reject) => {
-          let timer = setTimeout(
+          const timer = setTimeout(
             () => reject(new Error('Request timed out.')),
             5000
           );
           try {
-            let details = await WalletActions.getRecipient(patp);
+            const details = await WalletActions.getRecipient(patp);
             clearTimeout(timer);
             resolve(details);
           } catch (e) {
@@ -85,12 +85,12 @@ export const RecipientInput = observer(
         })
         .catch((err: Error) => {
           console.error(err);
-          /* @ts-ignore */
+          /* @ts-expect-error */
           if (patp !== stateRef.current!.recipient!) return;
           setRecipientDetails({ failed: true, details: { patp } });
         })
         .finally(() => {
-          /* @ts-ignore */
+          /* @ts-expect-error */
           if (stateRef.current!.currPromise! === promise) {
             setCurrPromise(null);
           }
@@ -104,7 +104,7 @@ export const RecipientInput = observer(
       ) {
         props.setValid(true, {
           patp: recipientDetails.details.patp,
-          patpAddress: recipientDetails!.details.address!,
+          patpAddress: recipientDetails.details.address!,
         });
       } else if (
         recipientDetails.failed &&
@@ -115,12 +115,12 @@ export const RecipientInput = observer(
     }, [recipientDetails]);
 
     const onChange = (e: any) => {
-      let value: string = e.target.value;
-      let validAddress =
+      const value: string = e.target.value;
+      const validAddress =
         walletApp.navState.network === 'ethereum'
           ? ethers.utils.isAddress(value)
           : false; // TODO add bitcoin validation
-      let validPatp = isValidPatp(value);
+      const validPatp = isValidPatp(value);
 
       if (validAddress) {
         setIcon('spy');
@@ -152,7 +152,7 @@ export const RecipientInput = observer(
 
     const RecipientIcon = (props: { icon: string }) => {
       if (recipientDetails.details?.recipientMetadata) {
-        let metadata = recipientDetails.details.recipientMetadata;
+        const metadata = recipientDetails.details.recipientMetadata;
         if (metadata.avatar) {
           return (
             <ImagePreview src={metadata.avatar} height="24px" width="24px" />
@@ -163,7 +163,7 @@ export const RecipientInput = observer(
               color={[metadata.color, 'white']}
               simple={true}
               size={24}
-              patp={valueCache!}
+              patp={valueCache}
             />
           );
         }
@@ -188,11 +188,11 @@ export const RecipientInput = observer(
             }
             simple={true}
             size={24}
-            patp={valueCache!}
+            patp={valueCache}
           />
         );
 
-      let blankBg =
+      const blankBg =
         theme.currentTheme.mode === 'light'
           ? lighten(0.1, themeData.colors.text.disabled)
           : darken(0.04, themeData.colors.text.disabled);
@@ -216,7 +216,7 @@ export const RecipientInput = observer(
           >
             TO
           </Text>
-          {/* @ts-ignore */}
+          {/* @ts-expect-error */}
           <ContainerFlex
             focusBorder={themeData.colors.brand.primary}
             px={1}

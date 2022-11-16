@@ -1,9 +1,7 @@
-import { FC, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import { FC, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Box, Icons } from 'renderer/components';
-import { darken, transparentize } from 'polished';
+import { Flex, Text, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../../lib/helpers';
 import { NewWalletScreen } from './index';
 import { PasscodeInput } from '../../../components/PasscodeInput';
 
