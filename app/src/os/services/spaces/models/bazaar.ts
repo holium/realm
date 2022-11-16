@@ -19,7 +19,6 @@ import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
-import DevApps from '../../../../app.dev.json';
 // const util = require('util');
 
 export enum InstallStatus {
