@@ -317,7 +317,6 @@ export class SpacesService extends BaseService {
   // ************************ SPACES ***************************
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
-    console.log('creating space', body);
     const members = body.members;
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
@@ -343,9 +342,7 @@ export class SpacesService extends BaseService {
   }
 
   async updateSpace(_event: IpcMainInvokeEvent, path: any, body: any) {
-    console.log('update space: ', path);
     // const members = body.members;
-    console.log('sending poke')
     SpacesApi.updateSpace(
       this.core.conduit!,
       {
@@ -372,7 +369,6 @@ export class SpacesService extends BaseService {
       }
       //members,
     );
-    console.log('closing dialog')
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
     const selected = this.state?.selectSpace(path);

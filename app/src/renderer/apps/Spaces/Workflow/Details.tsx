@@ -135,7 +135,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       const empty = image === 'picture' ? 'color' : 'picture';
       if (props.edit) {
         const space = spaces.spaces.get(props.edit.space)!;
-        console.log('space', space)
         setWorkspaceState({
           ...space,
           access: 'public',
