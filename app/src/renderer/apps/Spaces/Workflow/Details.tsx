@@ -293,7 +293,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                       });
                     }
                     if (e.target.value === '') {
-                      console.log('picture empty');
                       setWorkspaceState({
                         image: '',
                       });

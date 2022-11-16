@@ -32,7 +32,7 @@ export const SpacesApi = {
     conduit: Conduit,
     payload: { slug: string; payload: any; members: any }
   ): Promise<SpacePath> => {
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
