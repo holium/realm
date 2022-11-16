@@ -91,16 +91,11 @@
       =/  groups                (our-groups:grp our.bowl now.bowl)
       ``groups-view+!>([%groups groups])
       ::
-        [%x %groups @ @ ~]
-      =/  =ship                `@p`(slav %p i.t.t.path)
-      =/  name                 `@t`i.t.t.t.path
-      =/  group                (get-group:grp [ship name] our.bowl now.bowl)
-      ``groups-group+!>(group)
         [%x %groups @ @ %members ~]
       =/  =ship                `@p`(slav %p i.t.t.path)
       =/  name                 `@t`i.t.t.t.path
       =/  group                (get-group:grp [ship name] our.bowl now.bowl)
-      ``groups-members+!>(group)
+      ``groups-view+!>([%members fleet.group])
       ::
         [%x @ @ ~]
       =/  =ship                 `@p`(slav %p i.t.path)
