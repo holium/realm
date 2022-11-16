@@ -9,6 +9,10 @@
   ],
   "scripts": {
     "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:app",
+    "link:multiplayer": "yarn build --cwd lib/multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
+    "link:conduit": "yarn build --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
+    "link:room": "yarn build --cwd lib/rooom && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
+    "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room",
     "build:app": "yarn workspace @holium/realm build",
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
@@ -25,7 +29,7 @@
   },
   "dependencies": {
     "@icons/material": "^0.4.1",
-    "alchemy-sdk": "^2.2.0",
+    "alchemy-sdk": "^2.2.1",
     "bitcore-lib": "^8.25.40",
     "eth-block-tracker": "^6.0.0",
     "eth-json-rpc-infura": "^5.1.0",
