@@ -25,7 +25,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
 
   return useMemo(() => {
     const apps = [...bazaar.installed, ...bazaar.installing, ...bazaar.devApps];
-
     return (
       <>
         {apps.map((app: any, index: number) => {
@@ -122,7 +121,10 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 }
               }
               onAppClick={(selectedApp: AppType) => {
+<<<<<<< HEAD
                 // @ts-ignore
+=======
+>>>>>>> 88652192 (fixed a file not found bug when dev.apps.json is not defined by a user)
                 SpacesActions.addRecentApp(
                   spaces.selected!.path,
                   selectedApp.id
