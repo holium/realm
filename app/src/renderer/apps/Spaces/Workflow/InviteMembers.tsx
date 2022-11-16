@@ -161,9 +161,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
               setNicknameMap({ ...nicknameMap, [member]: '' });
             }
             setLoading(false);
-          }
-          setLoading(false);
-        });
+          });
       }
       else {
         setWorkspaceState({
