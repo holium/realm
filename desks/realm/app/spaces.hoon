@@ -96,6 +96,11 @@
       =/  name                 `@t`i.t.t.t.path
       =/  group                (get-group:grp [ship name] our.bowl now.bowl)
       ``groups-group+!>(group)
+        [%x %groups @ @ %members ~]
+      =/  =ship                `@p`(slav %p i.t.t.path)
+      =/  name                 `@t`i.t.t.t.path
+      =/  group                (get-group:grp [ship name] our.bowl now.bowl)
+      ``groups-members+!>(group)
       ::
         [%x @ @ ~]
       =/  =ship                 `@p`(slav %p i.t.path)
