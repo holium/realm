@@ -7,6 +7,7 @@
   $:  creator=ship
       name=@tas
       title=@t
+      access=?(%public %private)
       picture=@t
       color=@t
       member-count=@u

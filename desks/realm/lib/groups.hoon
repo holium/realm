@@ -17,6 +17,10 @@
   %+  turn  hosted
     |=  [=flag:g =group:g]
     ^-  group-space
+    =/  access
+      ?:  =(-.cordon.group %open)
+        %public
+      %private
     =/  metadata  meta.group
     ::  Get group data
     =/  member-count=@u
@@ -26,8 +30,8 @@
     =/  image=@t     image.metadata
     =/  first-char   (trim 1 (trip image))
     ?:  =(p.first-char "#")
-      [our +.flag title '' image member-count]
-    [our +.flag title image '' member-count]
+      [our +.flag title access '' image member-count]
+    [our +.flag title access image '' member-count]
   ::
 ++  skim-group-dms
   |=  [resource=[entity=ship name=@tas]]
