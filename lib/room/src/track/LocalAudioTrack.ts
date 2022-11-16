@@ -92,7 +92,7 @@ export default class LocalAudioTrack extends LocalTrack {
     }, monitorFrequency);
   }
 
-  private monitorSender = async () => {
+  private readonly monitorSender = async () => {
     if (!this._sender) {
       this._currentBitrate = 0;
       return;

@@ -1,5 +1,4 @@
-import styled, { css } from 'styled-components';
-import { rgba } from 'polished';
+import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import {
   compose,

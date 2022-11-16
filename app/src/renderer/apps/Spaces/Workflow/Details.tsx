@@ -1,15 +1,11 @@
 import { FC, useEffect, useMemo, useState, useRef } from 'react';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import {
   Grid,
   Text,
   Flex,
   Label,
-  Box,
   Input,
   Icons,
-  InlineEdit,
   Crest,
   RadioGroup,
   FormControl,
@@ -104,10 +100,10 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
       const pickerNode = document.getElementById('space-color-tile-popover');
       const isVisible = pickerNode
-        ? pickerNode!.getAttribute('data-is-open') === 'true'
+        ? pickerNode.getAttribute('data-is-open') === 'true'
         : false; // get if the picker is visible currently
       if (!domNode || !domNode.contains(event.target)) {
-        if ('space-color-tile' === event.target.id) {
+        if (event.target.id === 'space-color-tile') {
           return;
         }
         // You are clicking outside

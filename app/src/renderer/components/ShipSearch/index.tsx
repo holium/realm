@@ -1,8 +1,7 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { toJS } from 'mobx';
 import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -43,7 +42,7 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
   /* margin-top: 2px; */
   padding: 4px 4px;
   border-radius: 9px;
-  box-shadow: ${(props: IAutoCompleteBox) => props.theme.elevations['two']};
+  box-shadow: ${(props: IAutoCompleteBox) => props.theme.elevations.two};
   border: 1px solid
     ${(props: IAutoCompleteBox) => props.theme.colors.ui.borderColor};
 
@@ -156,7 +155,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
         </Flex>
       );
     }
-    let resultList = (
+    const resultList = (
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => (
           <List

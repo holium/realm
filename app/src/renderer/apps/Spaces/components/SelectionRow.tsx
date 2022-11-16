@@ -44,7 +44,7 @@ export const SelectRow = (props: ISelectRow) => {
   } = props;
   let leftIcon = <EmptyGroup />;
   if (icon) {
-    leftIcon = <Icons size={32} name={icon!} />;
+    leftIcon = <Icons size={32} name={icon} />;
   }
   if (image || color) {
     const validatedColor = color && isValidHexColor(color) ? color : '';

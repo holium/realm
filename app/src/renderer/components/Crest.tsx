@@ -1,8 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import CrestSymbol from './Icons/crest';
-import { background } from 'styled-system';
 
 const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 export const isValidHexColor = (hex: string) => {
@@ -32,12 +30,12 @@ const crestRadius = {
   xlg: 16,
 };
 
-type CrestStyleProps = {
+interface CrestStyleProps {
   height: number;
   width: number;
   background?: string;
   borderRadius: number;
-};
+}
 
 export const ColorCrest = styled(motion.div)<CrestStyleProps>`
   height: ${(p) => p.height}px;

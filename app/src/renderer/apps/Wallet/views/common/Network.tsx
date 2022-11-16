@@ -1,8 +1,7 @@
-import { darken, lighten } from 'polished';
+import { darken } from 'polished';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
 import { FC } from 'react';
-import { Box, Flex, Text, RadioGroup, IconButton } from 'renderer/components';
+import { Box, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';

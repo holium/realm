@@ -5,12 +5,12 @@
  * @returns string
  */
 export const cleanPath = (path: string): string => {
-  return path.('/', '.').substring(1);
+  return path.replace('/', '.').substring(1);
 };
 
 export const fromPathString = (path: string, targetObject: any) => {
   const pathArr = path.split('.');
-  for (var i = 0; i < pathArr.length; i++) {
+  for (let i = 0; i < pathArr.length; i++) {
     targetObject = targetObject[pathArr[i]]
       ? targetObject[pathArr[i]]
       : (targetObject[pathArr[i]] = {});

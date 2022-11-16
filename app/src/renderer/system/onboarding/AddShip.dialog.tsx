@@ -36,7 +36,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
         setLoading(true);
         try {
           // Parse the url, fail otherwise
-          values['url'] = new URL(values['url']).origin;
+          values.url = new URL(values.url).origin;
           await OnboardingActions.addShip(values);
 
           props.setState &&

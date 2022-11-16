@@ -37,7 +37,7 @@ const Window = types
   }));
 
 export type WindowModelType = Instance<typeof Window>;
-export type WindowModelProps = {
+export interface WindowModelProps {
   id: string;
   title?: string;
   glob?: boolean;
@@ -50,7 +50,7 @@ export type WindowModelProps = {
     width: number;
     height: number;
   };
-};
+}
 
 export const DesktopStore = types
   .model('DesktopStore', {
@@ -117,15 +117,19 @@ export const DesktopStore = types
       isFullscreen: boolean
     ) {
       let glob = app.glob;
+      let href = app.href;
 
       if (app.href) {
-        glob = app.href.glob ? true : false;
+        glob = !!app.href.glob;
+      }
+      if (app.type === 'web') {
+        href = { site: app.web.url };
       }
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
         glob,
-        href: app.href,
+        href,
         zIndex: self.windows.size + 1,
         type: app.type,
         dimensions: getInitialWindowDimensions(

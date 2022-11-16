@@ -1,4 +1,4 @@
-import { FC, useMemo, useState, useRef } from 'react';
+import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 
@@ -8,23 +8,14 @@ import { Desktop } from './desktop';
 import {
   BackgroundImage,
   BackgroundFill,
-  DimensionMeasurement,
   DragBar,
   ResumingOverlay,
 } from './system.styles';
 import { AnimatePresence } from 'framer-motion';
 import { DialogManager } from './dialog/DialogManager';
-import {
-  ActionButton,
-  Badge,
-  Flex,
-  Spinner,
-  Text,
-  ConnectionStatus,
-} from 'renderer/components';
+import { Spinner, ConnectionStatus } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { RealmActions } from 'renderer/logic/actions/main';
-import { OSActions } from 'renderer/logic/actions/os';
 
 // Get the initial dimensions from the main process
 RealmActions.onInitialDimensions((_e: any, dims: any) => {
@@ -40,10 +31,15 @@ export const Shell: FC = observer(() => {
   const firstTime = identity.auth.firstTime;
   const bgImage = useMemo(() => wallpaper, [wallpaper]);
 
-  const hasWallpaper = bgImage ? true : false;
+  const hasWallpaper = !!bgImage;
 
   const DialogLayer = useMemo(
-    () => <DialogManager dialogId={shell.dialogId} dialogProps={shell.dialogProps}/>,
+    () => (
+      <DialogManager
+        dialogId={shell.dialogId}
+        dialogProps={shell.dialogProps}
+      />
+    ),
     [shell.dialogId, shell.dialogProps.toJSON()]
   );
 

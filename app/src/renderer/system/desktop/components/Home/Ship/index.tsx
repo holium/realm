@@ -11,9 +11,9 @@ import AppSearchApp from '../AppInstall/AppSearch';
 
 type SidebarType = 'friends' | 'members' | null;
 
-type OurHomeProps = {
+interface OurHomeProps {
   isOpen?: boolean;
-};
+}
 
 export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   const { isOpen } = props;

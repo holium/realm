@@ -6,10 +6,10 @@ import styled from 'styled-components';
 
 import { ThemeType } from '../../../../../theme';
 
-type MiniAppStyleProps = {
+interface MiniAppStyleProps {
   theme: ThemeType;
   customBg?: string;
-};
+}
 
 export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   border-radius: 16px;
@@ -31,7 +31,7 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
   backgroundColor: (props: SystemBarStyleProps) => props.customBg || 'initial',
 });
 
-type MiniAppProps = {
+interface MiniAppProps {
   id: string;
   ref?: any;
   onClose?: () => void;
@@ -44,7 +44,7 @@ type MiniAppProps = {
   textColor?: string;
   buttonRef?: any;
   children: any | React.ReactNode;
-};
+}
 
 const DEFAULT_PROPS = {
   onClose: () => {},

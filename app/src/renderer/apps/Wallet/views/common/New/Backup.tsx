@@ -15,11 +15,11 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
 
-  const panelBackground = darken(0.02, theme.currentTheme!.windowColor);
+  const panelBackground = darken(0.02, theme.currentTheme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
-  let [blurred, setBlurred] = useState(false);
-  let [copied, setCopied] = useState(false);
+  const [blurred, setBlurred] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   function copy() {
     navigator.clipboard.writeText(props.seedPhrase);

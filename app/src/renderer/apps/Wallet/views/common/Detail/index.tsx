@@ -1,10 +1,7 @@
-import { FC, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
 
 import { Flex, Box, Text, Icons, TextButton } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -17,9 +14,8 @@ import {
 
 import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
-import { SendTransaction } from '../Transaction/Send';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { EthWalletType, WalletView } from 'os/services/tray/wallet.model';
+import { EthWalletType } from 'os/services/tray/wallet.model';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
@@ -48,41 +44,41 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   const wallet = walletApp.currentWallet!;
   let coins = null;
   let nfts = null;
-  let hasCoin =
+  const hasCoin =
     walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
   let coin = null;
   if (walletApp.navState.network === 'ethereum') {
     if (hasCoin) {
-      coin = (wallet! as EthWalletType).coins.get(
-        walletApp!.navState.detail!.key
+      coin = (wallet as EthWalletType).coins.get(
+        walletApp.navState.detail!.key
       )!;
     }
-    coins = getCoins((wallet! as EthWalletType).coins);
-    nfts = getNfts((wallet! as EthWalletType).nfts);
+    coins = getCoins((wallet as EthWalletType).coins);
+    nfts = getNfts((wallet as EthWalletType).nfts);
   }
 
   const walletTransactions =
     walletApp.navState.network === 'ethereum'
-      ? wallet.transactions.get(walletApp.ethereum.network!)
+      ? wallet.transactions.get(walletApp.ethereum.network)
       : wallet.transactions;
   const transactions = getTransactions(walletTransactions || new Map()).sort(
     (a, b) =>
       new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
   );
 
-  /*useEffect(() => {
+  /* useEffect(() => {
     if (coins.length) {
       setListView('coins');
     }
-  });*/
+  }); */
 
-  /* @ts-ignore */
+  /* @ts-expect-error */
   const themeData = getBaseTheme(theme.currentTheme);
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" px={3}>
       <DetailHero
-        wallet={wallet!}
+        wallet={wallet}
         coin={coin}
         QROpen={QROpen}
         setQROpen={setQROpen}
@@ -135,7 +131,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         position="absolute"
         top="582px"
         zIndex={999}
-        onClick={() => WalletActions.navigateBack()}
+        onClick={async () => await WalletActions.navigateBack()}
       >
         <Icons
           name="ArrowLeftLine"
@@ -156,7 +152,7 @@ function ListSelector(props: ListSelectorProps) {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 
-  let MenuButton = (props: any) => {
+  const MenuButton = (props: any) => {
     return props.selected ? (
       <TextButton onClick={props.onClick}>{props.children}</TextButton>
     ) : (

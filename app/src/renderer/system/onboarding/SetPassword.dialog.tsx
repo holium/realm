@@ -71,8 +71,18 @@ export const SetPassword: FC<BaseDialogProps> = observer(
           Your password will encrypt your local data. It is only needed for
           Realm.
         </Text>
-        <Flex width="100%" height="100%" justifyContent="center" alignItems="center">
-          <Flex flex={1} flexDirection="column" justifyContent="center" alignItems="center">
+        <Flex
+          width="100%"
+          height="100%"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Flex
+            flex={1}
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+          >
             <Sigil
               simple={false}
               size={52}
@@ -106,7 +116,12 @@ export const SetPassword: FC<BaseDialogProps> = observer(
               </Text>
             </Flex>
           </Flex>
-          <Flex flex={3} flexDirection="column" justifyContent="center" alignItems="center">
+          <Flex
+            flex={3}
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+          >
             <FormControl.FieldSet width="100%">
               <FormControl.Field>
                 <Label>Password</Label>
@@ -152,8 +167,9 @@ export const SetPassword: FC<BaseDialogProps> = observer(
                   onBlur={() => confirmPassword.actions.onBlur()}
                 />
                 <FormControl.Error>
-                    {confirmPassword.computed.ifWasEverBlurredThenError &&
-                  confirmPassword.computed.isDirty && confirmPassword.computed.error}
+                  {confirmPassword.computed.ifWasEverBlurredThenError &&
+                    confirmPassword.computed.isDirty &&
+                    confirmPassword.computed.error}
                 </FormControl.Error>
               </FormControl.Field>
             </FormControl.FieldSet>

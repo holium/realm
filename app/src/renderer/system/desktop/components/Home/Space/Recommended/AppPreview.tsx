@@ -14,15 +14,15 @@ const AppEmpty = styled(Box)`
   }
 `;
 
-type AppPreviewProps = {
+interface AppPreviewProps {
   app?: AppType;
   // isDownloaded?: boolean;
   // ?: string;
-};
+}
 
 export const AppPreview: FC<AppPreviewProps> = (props: AppPreviewProps) => {
   const { app } = props;
-  const info = app!.info!;
+  const info = app!.info;
   const length = 60;
   // console.log('AppPreview => %o', app);
   return (

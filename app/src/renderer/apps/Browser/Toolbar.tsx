@@ -17,7 +17,7 @@ const ToolbarStyle = styled(TitlebarStyle)`
   gap: 12px;
 `;
 
-export type BrowserToolbarProps = {
+export interface BrowserToolbarProps {
   dragControls: any;
   onDragStart: any;
   onDragStop: any;
@@ -26,7 +26,7 @@ export type BrowserToolbarProps = {
   showDevToolsToggle: boolean;
   onClose: () => any;
   onMaximize: () => any;
-};
+}
 
 export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
   (props: BrowserToolbarProps) => {
@@ -57,7 +57,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
 
     const onKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter') {
-        let term: string = searchForm.actions.submit()['search-query'];
+        const term: string = searchForm.actions.submit()['search-query'];
         if (
           term.match(
             /(?:^|\s)((https?:\/\/)?(?:localhost|[\w-]+(?:\.[\w-]+)+)(:\d+)?(\/\S*)?)/
@@ -118,7 +118,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
     };
 
     const [urlData, setUrlData] = useState<any>(
-      currentTab ? new URL(currentTab!.url) : null
+      currentTab ? new URL(currentTab.url) : null
     );
     const protocol = urlData ? urlData.protocol.slice(0, -1) : '';
 
@@ -173,7 +173,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
               }
             : {})}
           zIndex={zIndex}
-          customBg={windowColor!}
+          customBg={windowColor}
           hasBorder
         >
           <Icons name="AppIconCompass" size="28px" />
@@ -181,20 +181,20 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
             <WindowIcon
               icon="ArrowLeftLine"
               disabled={!canGoBack}
-              iconColor={iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={onBack}
             />
             <WindowIcon
               icon="ArrowRightLine"
               disabled={!canGoForward}
-              iconColor={iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={onForward}
             />
             <WindowIcon
               icon="Refresh"
-              iconColor={iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={onRefresh}
             />
@@ -232,7 +232,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
             {showDevToolsToggle && (
               <WindowIcon
                 icon="DevBox"
-                iconColor={iconColor!}
+                iconColor={iconColor}
                 bg="#97A3B2"
                 onClick={(evt: any) => {
                   evt.stopPropagation();
@@ -242,7 +242,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
             )}
             <WindowIcon
               icon="Expand"
-              iconColor={iconColor!}
+              iconColor={iconColor}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
@@ -251,7 +251,7 @@ export const BrowserToolbar: FC<BrowserToolbarProps> = observer(
             />
             <WindowIcon
               icon="Close"
-              iconColor={iconColor!}
+              iconColor={iconColor}
               bg="#FF6240"
               fillWithBg
               onClick={(evt: any) => {

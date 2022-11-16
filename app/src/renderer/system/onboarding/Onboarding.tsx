@@ -6,13 +6,13 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { Flex } from 'renderer/components';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
-type OnboardingProps = {
+interface OnboardingProps {
   firstTime: boolean;
   exit: () => void;
-};
+}
 export const Onboarding: FC<OnboardingProps> = observer(
   (props: OnboardingProps) => {
-    let { onboarding } = useServices();
+    const { onboarding } = useServices();
 
     useEffect(() => {
       ShellActions.openDialog(

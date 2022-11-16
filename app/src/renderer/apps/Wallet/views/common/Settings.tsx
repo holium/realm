@@ -1,6 +1,5 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { types } from 'mobx-state-tree';
 import validUrl from 'valid-url';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -21,7 +20,6 @@ import { getBaseTheme } from '../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
-  WalletView,
   WalletCreationMode,
   SharingMode,
   UISettingsType,
@@ -85,7 +83,7 @@ export const WalletSettings: FC = observer(() => {
       return;
     }
 
-    let validProvider = await WalletActions.checkProviderURL(newProviderURL);
+    const validProvider = await WalletActions.checkProviderURL(newProviderURL);
 
     if (validProvider) {
       setState({
@@ -114,13 +112,13 @@ export const WalletSettings: FC = observer(() => {
   }
 
   function setBlockList(action: 'add' | 'remove', patp: string) {
-    let currentList = state.blocked;
+    const currentList = state.blocked;
     if (action === 'add' && !currentList.includes(patp)) {
       currentList.push(patp);
     }
 
     if (action === 'remove' && currentList.includes(patp)) {
-      let patpIndex = currentList.findIndex((val) => val === patp);
+      const patpIndex = currentList.findIndex((val) => val === patp);
       currentList.splice(patpIndex, 1);
     }
 
@@ -129,7 +127,7 @@ export const WalletSettings: FC = observer(() => {
 
   async function saveSettings() {
     setSaving(true);
-    let { walletCreationMode, sharingMode, defaultIndex, provider, blocked } =
+    const { walletCreationMode, sharingMode, defaultIndex, provider, blocked } =
       state;
     await WalletActions.setSettings(network, {
       provider,
@@ -162,7 +160,7 @@ export const WalletSettings: FC = observer(() => {
         <Input
           placeholder="https://goerli.infura.io/v3/da1d4486d1254ddd"
           value={providerInput}
-          onChange={(e) => setProvider(e.target.value)}
+          onChange={async (e) => await setProvider(e.target.value)}
         />
         <Box hidden={!providerError}>
           <Text
@@ -245,7 +243,7 @@ export const WalletSettings: FC = observer(() => {
         width="100%"
         justifyContent="space-between"
       >
-        <Flex onClick={() => WalletActions.navigateBack()}>
+        <Flex onClick={async () => await WalletActions.navigateBack()}>
           <Icons
             name="ArrowLeftLine"
             size={2}
@@ -280,7 +278,7 @@ interface VisibilitySelectProps {
   sharingMode: SharingMode;
   defaultIndex: number;
   walletCreationMode: WalletCreationMode;
-  wallets: { nickname: string; index: number }[];
+  wallets: Array<{ nickname: string; index: number }>;
 }
 function VisibilitySelect(props: VisibilitySelectProps) {
   const selectBg = darken(0.025, props.theme.currentTheme.windowColor);

@@ -67,7 +67,7 @@ export const BazaarApi = {
     });
   },
   pinApp: async (conduit: Conduit, body: PinPoke) => {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'bazaar',
         mark: 'bazaar-action',
@@ -76,7 +76,7 @@ export const BazaarApi = {
         },
         reaction: 'bazaar-reaction.pinned',
         onReaction(data) {
-          resolve(data['pinned']);
+          resolve(data.pinned);
         },
         onError: (e: any) => {
           reject(e);
@@ -85,7 +85,7 @@ export const BazaarApi = {
     });
   },
   unpinApp: async (conduit: Conduit, body: UnpinPoke): Promise<any> => {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'bazaar',
         mark: 'bazaar-action',
@@ -94,7 +94,7 @@ export const BazaarApi = {
         },
         reaction: 'bazaar-reaction.unpinned',
         onReaction(data) {
-          resolve(data['unpinned']);
+          resolve(data.unpinned);
         },
         onError: (e: any) => {
           reject(e);
@@ -103,7 +103,7 @@ export const BazaarApi = {
     });
   },
   addToSuite: async (conduit: Conduit, body: AddToSuitePoke) => {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'bazaar',
         mark: 'bazaar-action',
@@ -124,7 +124,7 @@ export const BazaarApi = {
     conduit: Conduit,
     body: RemoveFromSuitePoke
   ): Promise<any> => {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'bazaar',
         mark: 'bazaar-action',
@@ -167,7 +167,7 @@ export const BazaarApi = {
     });
   },
   addAlly: async (conduit: Conduit, ship: Patp): Promise<any> => {
-    return new Promise(async (resolve, reject) => {
+    return await new Promise(async (resolve, reject) => {
       let subscriptionId: number = -1;
       let timeout: NodeJS.Timeout;
       await conduit.watch({
@@ -245,7 +245,7 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      model._initial(data['initial']);
+      model._initial(data.initial);
       break;
     case 'app-install-update':
       //  installed, uninstalled, started, etc.
@@ -253,10 +253,10 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._setAppStatus(appId, app);
       break;
     case 'pinned':
-      model._addPinned(data['pinned']);
+      model._addPinned(data.pinned);
       break;
     case 'unpinned':
-      model._removePinned(data['unpinned']);
+      model._removePinned(data.unpinned);
       break;
     case 'suite-added':
       model._suiteAdded(data['suite-added']);
@@ -265,10 +265,10 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._suiteRemoved(data['suite-removed']);
       break;
     case 'recommended':
-      model._addRecommended(data['recommended']);
+      model._addRecommended(data.recommended);
       break;
     case 'unrecommended':
-      model._removeRecommended(data['unrecommended']);
+      model._removeRecommended(data.unrecommended);
       break;
     case 'stall-update':
       model._updateStall(data['stall-update']);

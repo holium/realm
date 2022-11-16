@@ -14,7 +14,6 @@ import {
   SubscribeCallbacks,
   SubscribeParams,
   Thread,
-  UnsubscribeParams,
 } from './types';
 
 // For now, set it to 20
@@ -75,7 +74,7 @@ export class Conduit extends EventEmitter {
 
   async startSSE(channelUrl: string): Promise<void> {
     if (this.status === ConduitState.Connected) {
-      return Promise.resolve();
+      return await Promise.resolve();
     }
     if (this.prevMsgId === 0) {
       await this.poke({
@@ -88,7 +87,7 @@ export class Conduit extends EventEmitter {
 
     this.updateStatus(ConduitState.Initialized);
 
-    return new Promise(async (resolve, reject) => {
+    return await new Promise(async (resolve, reject) => {
       // console.log(channelUrl);
 
       this.sse = new EventSource(channelUrl, {
@@ -121,10 +120,10 @@ export class Conduit extends EventEmitter {
             if (this.pokes.has(eventId)) {
               const handler = this.pokes.get(eventId);
               if (parsedData.ok && handler) {
-                // @ts-ignore
+                // @ts-expect-error
                 handler.onSuccess();
               } else if (parsedData.err && handler) {
-                // @ts-ignore
+                // @ts-expect-error
                 handler.onError!(parsedData.err);
               } else {
                 console.error(new Error('poke sse error'));
@@ -180,17 +179,17 @@ export class Conduit extends EventEmitter {
       };
       this.sse.onerror = async (error) => {
         console.log('sse error', error);
-        // @ts-ignore
+        // @ts-expect-error
         if (error.status === '404') {
           return;
         }
-        // @ts-ignore
+        // @ts-expect-error
         if (error.status >= 500) {
-          // @ts-ignore
+          // @ts-expect-error
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
         }
-        // @ts-ignore
+        // @ts-expect-error
         if (!error.status) {
           // this happens when the ship is offline
           this.updateStatus(ConduitState.Failed);
@@ -283,7 +282,7 @@ export class Conduit extends EventEmitter {
     const message: Message = {
       id: this.nextMsgId,
       action: Action.Unsubscribe,
-      subscription: subscription,
+      subscription,
     };
     this.postToChannel(message).then(() => {
       this.watches.delete(subscription);
@@ -354,7 +353,7 @@ export class Conduit extends EventEmitter {
   }
 
   /**************************************************************/
-  /************************** Getters ***************************/
+  /** ************************ Getters ***************************/
   /**************************************************************/
   private get headers() {
     return {
@@ -368,13 +367,13 @@ export class Conduit extends EventEmitter {
   }
 
   private get nextMsgId() {
-    let next = this.prevMsgId + 1;
+    const next = this.prevMsgId + 1;
     this.prevMsgId = next;
     return next;
   }
 
   /**************************************************************/
-  /******************** Internal functions **********************/
+  /** ****************** Internal functions **********************/
   /**************************************************************/
 
   // TODO perhaps store a map for resubscribing
@@ -385,7 +384,7 @@ export class Conduit extends EventEmitter {
     this.watches.delete(eventId);
     console.log(`attempting re-subscribed to ${params?.app}${params?.path}`);
     if (this.retryTimeout !== 0) clearTimeout(this.retryTimeout);
-    this.watch(params!)
+    this.watch(params)
       .then(() => console.log(`re-subscribed to ${params?.app}${params?.path}`))
       .catch((e) => {
         this.retryTimeout = setTimeout(() => {

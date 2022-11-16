@@ -4,17 +4,13 @@
  * A room is a list of participants,
  * participants can stream various track types to the rooms participants.
  */
-import { EventEmitter, setMaxListeners } from 'events';
+import { EventEmitter } from 'events';
 import type TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
 import { LocalParticipant } from '../participant/LocalParticipant';
+import { RemoteParticipant } from '../participant/RemoteParticipant';
 import {
-  DataChannel,
-  RemoteParticipant,
-} from '../participant/RemoteParticipant';
-import { RoomState } from '../types';
-import { ParticipantEvent } from '../participant/events';
-import {
+  RoomState,
   EnterDiff,
   ExitDiff,
   DiffType,
@@ -22,6 +18,7 @@ import {
   RoomsModelType,
   SlipType,
 } from '../types';
+import { ParticipantEvent } from '../participant/events';
 
 const peerConnectionConfig = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
@@ -107,8 +104,8 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
 
   onDiff(roomDiff: DiffType, room: RoomsModelType) {
     // Cast to types
-    let enterDiff = roomDiff as EnterDiff;
-    let exitDiff = roomDiff as ExitDiff;
+    const enterDiff = roomDiff as EnterDiff;
+    const exitDiff = roomDiff as ExitDiff;
     // check if type has enter
     if (enterDiff.enter) {
       if (enterDiff.enter === this.our.patp) {
@@ -199,7 +196,7 @@ export class Room extends (EventEmitter as new () => TypedEmitter<RoomEventCallb
   }
 }
 
-export type RoomEventCallbacks = {
+export interface RoomEventCallbacks {
   started: () => void;
   connectionStateChanged: (state: RoomState) => void;
   mediaDevicesChanged: () => void;
@@ -276,4 +273,4 @@ export type RoomEventCallbacks = {
   // ) => void;
   // audioPlaybackChanged: (playing: boolean) => void;
   // signalConnected: () => void;
-};
+}

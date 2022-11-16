@@ -2,20 +2,15 @@ import { FC, useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
 
-import { motion } from 'framer-motion';
 import {
   Grid,
   Text,
   Flex,
-  useMenu,
-  Menu,
   Label,
   ShipSearch,
   Input,
   Icons,
   Crest,
-  TextButton,
-  Card,
   Box,
   Sigil,
   IconButton,

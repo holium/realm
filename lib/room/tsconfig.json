@@ -24,6 +24,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true
   },
-  "include": ["src"],
-  "exclude": ["test", "dist"]
+  "include": ["src", "tests"],
+  "exclude": ["dist"]
 }

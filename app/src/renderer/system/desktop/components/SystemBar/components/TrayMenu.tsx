@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/prop-types */
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
 import { Portal } from 'renderer/system/dialog/Portal';
 import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 
-export type TrayMenuProps = {
+export interface TrayMenuProps {
   id: TrayAppKeys;
   coords?: any;
   style?: any;
@@ -28,7 +28,7 @@ export type TrayMenuProps = {
     height: number;
     width: number;
   };
-};
+}
 
 const Wrapper = styled(motion.div)`
   position: absolute;
@@ -52,7 +52,7 @@ export const TrayMenu = (props: TrayMenuProps) => {
 
   const { setActiveApp, activeApp } = useTrayApps();
 
-  let body = content;
+  const body = content;
   const handleClickOutside = (event: any) => {
     // If we aren't clicking on a tray icon, close tray
     if (`${id}-icon` !== event.target.id) {

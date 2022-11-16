@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 import { Text, GroupLink } from 'renderer/components';
 import { AppLink } from 'renderer/components/Embeds/AppLink';
 import { TextParsed } from '../components/TextContent';

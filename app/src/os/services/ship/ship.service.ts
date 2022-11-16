@@ -2,9 +2,6 @@ import { S3Api } from './../../api/s3';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
-
-// upload support
-const fs = require('fs');
 import S3Client, { StorageAcl } from '../../s3/S3Client';
 import moment from 'moment';
 //
@@ -13,10 +10,9 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import EncryptedStore from '../../lib/encryptedStore';
 import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
-import { MSTAction, Patp } from '../../types';
+import { Patp } from '../../types';
 import { ContactApi } from '../../api/contacts';
 import { DmApi } from '../../api/dms';
-import { DocketApi } from '../../api/docket';
 import { MetadataApi } from '../../api/metadata';
 import { AuthShipType } from '../identity/auth.model';
 import { GroupsApi } from '../../api/groups';
@@ -26,7 +22,7 @@ import { FriendsApi } from '../../api/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { SlipService } from '../slip.service';
 import { ContactStore, ContactStoreType } from './models/contacts';
-import { ChatStoreType, ChatStore } from './models/dms';
+import { ChatStoreType } from './models/dms';
 import { CourierApi } from '../../api/courier';
 import {
   CourierStore,
@@ -41,14 +37,17 @@ import {
 import { NotificationApi } from '../../api/notifications';
 import { DiskStore } from '../base.store';
 
-export type ShipModels = {
+// upload support
+const fs = require('fs');
+
+export interface ShipModels {
   friends: FriendsType;
   contacts?: ContactStoreType;
   // docket: DocketStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
   notifications: NotificationStoreType;
-};
+}
 
 /**
  * ShipService
@@ -68,12 +67,14 @@ export class ShipService extends BaseService {
       recent: [],
     }),
   };
-  private metadataStore: {
+
+  private readonly metadataStore: {
     graph: { [key: string]: any };
   } = {
     graph: {},
   };
-  private services: { slip?: SlipService } = {};
+
+  private readonly services: { slip?: SlipService } = {};
   rooms: RoomsService;
   wallet: WalletService;
 
@@ -112,86 +113,97 @@ export class ShipService extends BaseService {
     getOurGroups: () => {
       return ipcRenderer.invoke('realm.ship.get-our-groups');
     },
-    getGroup: (path: string) => {
-      return ipcRenderer.invoke('realm.ship.get-group', path);
-    },
     getGroupMembers: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-group-members', path);
     },
     // getAppPreview: (ship: string, desk: string) => {
     //   return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
     // },
-    getMetadata: (path: string) => {
-      return ipcRenderer.invoke('realm.ship.get-metadata', path);
+    getMetadata: async (path: string) => {
+      return await ipcRenderer.invoke('realm.ship.get-metadata', path);
     },
-    getS3Bucket: () => {
-      return ipcRenderer.invoke('realm.ship.get-s3-bucket');
+    getS3Bucket: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-s3-bucket');
     },
-    getContact: (ship: string) => {
-      return ipcRenderer.invoke('realm.ship.get-contact', ship);
+    getContact: async (ship: string) => {
+      return await ipcRenderer.invoke('realm.ship.get-contact', ship);
     },
-    saveMyContact: (profileData: any) => {
-      return ipcRenderer.invoke('realm.ship.save-my-contact', profileData);
+    saveMyContact: async (profileData: any) => {
+      return await ipcRenderer.invoke(
+        'realm.ship.save-my-contact',
+        profileData
+      );
     },
-    getDMs: () => {
-      return ipcRenderer.invoke('realm.ship.get-dms');
+    getDMs: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-dms');
     },
-    getDMLog: (toShip: string) => {
-      return ipcRenderer.invoke('realm.ship.get-dm-log', toShip);
+    getDMLog: async (toShip: string) => {
+      return await ipcRenderer.invoke('realm.ship.get-dm-log', toShip);
     },
-    acceptDm: (toShip: string) => {
-      return ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
+    acceptDm: async (toShip: string) => {
+      return await ipcRenderer.invoke('realm.ship.accept-dm-request', toShip);
     },
-    declineDm: (toShip: string) => {
-      return ipcRenderer.invoke('realm.ship.decline-dm-request', toShip);
+    declineDm: async (toShip: string) => {
+      return await ipcRenderer.invoke('realm.ship.decline-dm-request', toShip);
     },
-    acceptGroupDm: (path: string) => {
-      return ipcRenderer.invoke('realm.ship.accept-group-dm-request', path);
+    acceptGroupDm: async (path: string) => {
+      return await ipcRenderer.invoke(
+        'realm.ship.accept-group-dm-request',
+        path
+      );
     },
-    declineGroupDm: (path: string) => {
-      return ipcRenderer.invoke('realm.ship.decline-group-dm-request', path);
+    declineGroupDm: async (path: string) => {
+      return await ipcRenderer.invoke(
+        'realm.ship.decline-group-dm-request',
+        path
+      );
     },
-    setScreen: (screen: boolean) => {
-      return ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
+    setScreen: async (screen: boolean) => {
+      return await ipcRenderer.invoke('realm.ship.set-dm-screen', screen);
     },
-    sendDm: (toShip: string, content: any) => {
-      return ipcRenderer.invoke('realm.ship.send-dm', toShip, content);
+    sendDm: async (toShip: string, content: any) => {
+      return await ipcRenderer.invoke('realm.ship.send-dm', toShip, content);
     },
-    draftDm: (patps: Patp[], metadata: any[]) => {
-      return ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
+    draftDm: async (patps: Patp[], metadata: any[]) => {
+      return await ipcRenderer.invoke('realm.ship.draft-dm', patps, metadata);
     },
-    removeDm: (ship: string, index: any) => {
-      return ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
+    removeDm: async (ship: string, index: any) => {
+      return await ipcRenderer.invoke('realm.ship.remove-dm', ship, index);
     },
-    readDm: (ship: Patp) => ipcRenderer.invoke('realm.ship.read-dm', ship),
+    readDm: async (ship: Patp) =>
+      await ipcRenderer.invoke('realm.ship.read-dm', ship),
     readGroupDm: async (path: string) =>
-      ipcRenderer.invoke('realm.ship.read-group-dm', path),
-    getFriends: () => {
-      return ipcRenderer.invoke('realm.ship.get-friends');
+      await ipcRenderer.invoke('realm.ship.read-group-dm', path),
+    getFriends: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-friends');
     },
     addFriend: async (patp: Patp) =>
-      ipcRenderer.invoke('realm.ship.add-friend', patp),
+      await ipcRenderer.invoke('realm.ship.add-friend', patp),
     //
     editFriend: async (
       patp: Patp,
       payload: { pinned: boolean; tags: string[] }
-    ) => ipcRenderer.invoke('realm.ship.edit-friend', patp, payload),
+    ) => await ipcRenderer.invoke('realm.ship.edit-friend', patp, payload),
     //
     removeFriend: async (patp: Patp) =>
-      ipcRenderer.invoke('realm.ship.remove-friend', patp),
+      await ipcRenderer.invoke('realm.ship.remove-friend', patp),
     getNotifications: async (timestamp: number, length: number) =>
-      ipcRenderer.invoke('realm.ship.get-notifications', timestamp, length),
-    openedNotifications: () =>
-      ipcRenderer.invoke('realm.ship.opened-notifications'),
+      await ipcRenderer.invoke(
+        'realm.ship.get-notifications',
+        timestamp,
+        length
+      ),
+    openedNotifications: async () =>
+      await ipcRenderer.invoke('realm.ship.opened-notifications'),
     uploadFile: async (params: FileUploadParams) =>
-      ipcRenderer.invoke('realm.ship.upload-file', params),
+      await ipcRenderer.invoke('realm.ship.upload-file', params),
   };
 
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
 
@@ -212,6 +224,7 @@ export class ShipService extends BaseService {
         : null,
     };
   }
+
   get snapshot() {
     return this.state ? getSnapshot(this.state) : null;
   }
@@ -219,7 +232,7 @@ export class ShipService extends BaseService {
   async subscribe(ship: string, shipInfo: any) {
     //
     console.log('subscribing');
-    let secretKey: string | null = this.core.passwords.getPassword(ship)!;
+    let secretKey: string | null = this.core.passwords.getPassword(ship);
     this.core.sendLog(`secretKey: ${secretKey}`);
     const storeParams = {
       name: 'ship',
@@ -235,7 +248,7 @@ export class ShipService extends BaseService {
 
     this.core.sendLog(`db: ${JSON.stringify(this.db)}`);
 
-    let persistedState: ShipModelType = this.db.store;
+    const persistedState: ShipModelType = this.db.store;
     this.core.sendLog(`persistedState: ${JSON.stringify(persistedState)}`);
 
     // TODO set up multiple ships properly
@@ -250,7 +263,7 @@ export class ShipService extends BaseService {
       loggedIn: true,
       loader: { state: 'initial' },
     });
-    this.state!.loader.set('loading');
+    this.state.loader.set('loading');
     console.log('before load froms disk');
     this.core.sendLog('before load from disk');
 
@@ -338,11 +351,11 @@ export class ShipService extends BaseService {
       CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
       NotificationApi.updates(
         this.core.conduit!,
-        this.models.notifications!,
+        this.models.notifications,
         this.models.courier
       );
 
-      this.state!.loader.set('loaded');
+      this.state.loader.set('loaded');
 
       this.services.slip?.subscribe();
       this.rooms?.onLogin(ship);
@@ -452,10 +465,12 @@ export class ShipService extends BaseService {
   async getFriends(_event: IpcMainInvokeEvent) {
     return await FriendsApi.getFriends(this.core.conduit!);
   }
+
   //
   async addFriend(_event: IpcMainInvokeEvent, patp: Patp) {
     return await FriendsApi.addFriend(this.core.conduit!, patp);
   }
+
   //
   async editFriend(
     _event: IpcMainInvokeEvent,
@@ -468,12 +483,14 @@ export class ShipService extends BaseService {
   async removeFriend(_event: IpcMainInvokeEvent, patp: Patp) {
     return await FriendsApi.removeFriend(this.core.conduit!, patp);
   }
+
   // ---
   getContact(_event: any, ship: string): any {
     const patp = ship.includes('~') ? ship : `~${ship}`;
     const contact = this.models.contacts?.getContactAvatarMetadata(patp);
     return contact;
   }
+
   //
   async saveMyContact(_event: IpcMainInvokeEvent, profileData: any) {
     await ContactApi.saveContact(
@@ -483,12 +500,10 @@ export class ShipService extends BaseService {
     );
 
     this.state?.setOurMetadata(profileData);
-
-    return;
   }
 
   getMetadata(_event: any, path: string): any {
-    return this.metadataStore['graph'][path];
+    return this.metadataStore.graph[path];
   }
 
   // async getAppPreview(_event: any, ship: string, desk: string): Promise<any> {
@@ -534,7 +549,6 @@ export class ShipService extends BaseService {
    */
   async readDm(_event: any, toShip: string) {
     CourierApi.readDm(this.core.conduit!, toShip);
-    return;
   }
 
   /**
@@ -557,7 +571,6 @@ export class ShipService extends BaseService {
     if (inviteId) {
       return await CourierApi.acceptGroupDm(this.core.conduit!, inviteId);
     }
-    return;
   }
 
   async declineGroupDm(_event: any, path: string) {
@@ -567,7 +580,6 @@ export class ShipService extends BaseService {
       await CourierApi.declineGroupDm(this.core.conduit!, inviteId);
       return this.models.courier?.declineDm(path);
     }
-    return;
   }
 
   async draftNewDm(_event: any, patps: Patp[], metadata: any[]) {
@@ -597,6 +609,7 @@ export class ShipService extends BaseService {
       return await CourierApi.sendDM(this.core.conduit!, path, post);
     }
   }
+
   async removeDm(_event: any, toShip: string, removeIndex: any) {
     const ourShip = this.state?.patp!;
     console.log('removingDM', ourShip, toShip, removeIndex);
@@ -613,15 +626,16 @@ export class ShipService extends BaseService {
       ...configuration,
     };
   }
+
   async getNotifications(_event: any, timestamp: number, length: number) {
     // console.log('getNotifications: %o, %o', timestamp, length);
     // const timeboxes = this.state?.notifications.timeboxes();
     // console.log(timeboxes);
     return [];
   }
+
   openedNotifications(_event: any) {
     NotificationApi.opened(this.core.conduit!);
-    return;
   }
 
   async uploadFile(
@@ -629,7 +643,7 @@ export class ShipService extends BaseService {
     args: FileUploadParams
   ): Promise<string | undefined> {
     // const args = params;
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       // console.log('ShipActions.uploadFile - getting S3 bucket...');
       this.getS3Bucket()
         .then(async (response: any) => {

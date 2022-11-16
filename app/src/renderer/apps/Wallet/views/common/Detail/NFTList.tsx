@@ -1,16 +1,10 @@
-import { FC, useState } from 'react';
-import styled from 'styled-components';
-import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
+import { FC } from 'react';
+import { darken } from 'polished';
 
-import { Flex, Box, Text, Icons, TextButton } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
+import { Flex, Text, Icons } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
-import { getBaseTheme, getTransactions } from '../../../lib/helpers';
-import { TransactionList } from '../Transaction/List';
-import { SendTransaction } from '../Transaction/Send';
+import { getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC721Type, WalletView } from 'os/services/tray/wallet.model';
 
@@ -34,8 +28,8 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
         justifyContent="space-between"
         backgroundColor={darken(0.03, theme.currentTheme.windowColor)}
         borderRadius="6px"
-        onClick={() =>
-          WalletActions.navigate(WalletView.NFT_DETAIL, {
+        onClick={async () =>
+          await WalletActions.navigate(WalletView.NFT_DETAIL, {
             detail: {
               type: 'nft',
               key: `${props.details.address}${props.details.tokenId}`,

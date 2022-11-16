@@ -1,7 +1,5 @@
-import { toJS } from 'mobx';
-import { flow, Instance, types } from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-import { ContactApi } from '../../../api/contacts';
 
 // const Reactions = types.model({
 //   likes: types.number,

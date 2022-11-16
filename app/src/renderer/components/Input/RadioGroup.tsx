@@ -59,7 +59,7 @@ const RadioHighlight = styled(motion.label)<IRadioLabel>`
         `}
 `;
 
-export type RadioOption = {
+export interface RadioOption {
   label: string;
   value: string;
   sublabel?: string;
@@ -67,7 +67,7 @@ export type RadioOption = {
   disabled?: boolean;
   hidden?: boolean;
   highlightColor?: string;
-};
+}
 
 interface IRadioGroup {
   customBg: string;
