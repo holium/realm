@@ -7,7 +7,7 @@ export const searchPatpOrNickname = (
   selected: Set<string>,
   our?: string
 ): Array<[string, ContactModelType]> => {
-  let results: Array<[string, ContactModelType]> = contacts;
+  const results: Array<[string, ContactModelType]> = contacts;
   // results from urbit-ob
   if (isValidPatp(search)) {
     results.push([

@@ -16,7 +16,6 @@ import {
   SnapshotOut,
 } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-import { toJS } from 'mobx';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
@@ -31,7 +30,7 @@ export enum InstallStatus {
   treaty = 'treaty',
 }
 
-enum AppTypes {
+export enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
   Web = 'web',
@@ -77,6 +76,7 @@ export const WebApp = types.model('WebApp', {
   href: types.string,
   favicon: types.maybeNull(types.string),
   type: types.literal(AppTypes.Web),
+  config: types.maybeNull(RealmConfig),
 });
 
 const UrbitApp = types.model('UrbitApp', {
@@ -334,7 +334,7 @@ export const NewBazaarStore = types
       self.loadingTreaties = true;
       try {
         const treaties = yield BazaarApi.scryTreaties(conduit, ship);
-        let formedTreaties = [];
+        const formedTreaties = [];
         for (const key in treaties) {
           const treaty = treaties[key];
           const formed = {
@@ -378,6 +378,9 @@ export const NewBazaarStore = types
           }
         }
       );
+    },
+    get devApps() {
+      return Object.values(DevApps) || [];
     },
     getRecentApps() {
       return [];
@@ -428,7 +431,12 @@ export const NewBazaarStore = types
       return self.recommendations.includes(appId);
     },
     getApp(appId: string) {
-      return self.catalog.get(appId);
+      const app = self.catalog.get(appId);
+      if (!app) {
+        // @ts-ignore
+        return DevApps[appId];
+      }
+      return app;
     },
     getDock(path: string) {
       return self.docks.get(path);
@@ -461,7 +469,7 @@ export const NewBazaarStore = types
     },
     getSuite(path: string) {
       const stall = self.stalls.get(path);
-      let suite = new Map();
+      const suite = new Map();
       if (!stall) return suite;
       Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
         (index: string) => {
@@ -472,6 +480,8 @@ export const NewBazaarStore = types
       return suite;
     },
   }));
+
+export type WebAppType = Instance<typeof WebApp>;
 
 export type DocketAppType = Instance<typeof DocketApp>;
 export type UrbitAppType = Instance<typeof UrbitApp>;

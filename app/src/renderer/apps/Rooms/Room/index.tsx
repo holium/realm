@@ -1,16 +1,8 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/theme.model';
 import { rgba } from 'polished';
-import { toJS } from 'mobx';
-import {
-  ContextMenu,
-  Flex,
-  Grid,
-  IconButton,
-  Icons,
-  Text,
-} from 'renderer/components';
+import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
 import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -22,13 +14,13 @@ import { RoomInvite } from './Invite';
 import { RoomInfo } from './Info';
 import { handleLocalEvents } from '../listeners';
 
-export type BaseRoomProps = {
+export interface BaseRoomProps {
   theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;
   };
-};
+}
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
@@ -96,7 +88,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
       : roomsApp.liveRoom?.creator;
 
   let peopleText = 'people';
-  if (present!.length === 1) {
+  if (present.length === 1) {
     peopleText = 'person';
   }
   // console.log(toJS(roomsApp.liveRoom));
@@ -210,7 +202,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               className="realm-cursor-hover"
               size={26}
               color={
-                roomsApp.isCreator(ship!.patp!, id)
+                roomsApp.isCreator(ship!.patp, id)
                   ? rgba('#E56262', 0.7)
                   : undefined
               }
@@ -221,7 +213,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                   // bad state
                   RoomsActions.resetLocal();
                 }
-                if (roomsApp.isCreator(ship!.patp!, id)) {
+                if (roomsApp.isCreator(ship!.patp, id)) {
                   // SoundActions.playRoomLeave();
                   RoomsActions.deleteRoom(id);
                 } else {

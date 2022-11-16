@@ -6,9 +6,9 @@ import { observer } from 'mobx-react';
 import { IconButton, Icons, Badge, Flex } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-type MessagesTrayProps = {
+interface MessagesTrayProps {
   theme: any;
-};
+}
 
 const iconSize = 28;
 const dimensions = {

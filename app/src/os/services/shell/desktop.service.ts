@@ -1,17 +1,7 @@
-import { theme } from './../../../renderer/theme';
 import { ThemeModelType } from './../theme.model';
 import { ipcMain, session, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import { toJS } from 'mobx';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-  clone,
-  cast,
-} from 'mobx-state-tree';
-import { rgba } from 'polished';
+import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
@@ -34,8 +24,8 @@ import { DesktopStoreType, DesktopStore } from './desktop.model';
  *      - google-font: "philosopher"
  */
 export class DesktopService extends BaseService {
-  private db?: Store<DesktopStoreType>; // for persistance
-  private state: DesktopStoreType; // for state management
+  private readonly db?: Store<DesktopStoreType>; // for persistance
+  private readonly state: DesktopStoreType; // for state management
   handlers = {
     'realm.desktop.change-wallpaper': this.changeWallpaper,
     'realm.desktop.set-active': this.setActive,
@@ -49,37 +39,52 @@ export class DesktopService extends BaseService {
 
   static preload = {
     changeWallpaper: async (spaceId: string, theme: ThemeModelType) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.desktop.change-wallpaper',
         spaceId,
         theme
       );
     },
-    setHomePane: (isHome: boolean) => {
-      return ipcRenderer.invoke('realm.desktop.set-home-pane', isHome);
+    setHomePane: async (isHome: boolean) => {
+      return await ipcRenderer.invoke('realm.desktop.set-home-pane', isHome);
     },
-    setActive: (spaceId: string, appId: string) => {
-      return ipcRenderer.invoke('realm.desktop.set-active', spaceId, appId);
+    setActive: async (spaceId: string, appId: string) => {
+      return await ipcRenderer.invoke(
+        'realm.desktop.set-active',
+        spaceId,
+        appId
+      );
     },
-    setAppDimensions: (
+    setAppDimensions: async (
       windowId: any,
       dimensions: { width: number; height: number; x: number; y: number }
     ) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.desktop.set-app-dimensions',
         windowId,
         dimensions
       );
     },
-    setMouseColor: (mouseColor: string) => {
-      return ipcRenderer.invoke('realm.desktop.set-mouse-color', mouseColor);
+    setMouseColor: async (mouseColor: string) => {
+      return await ipcRenderer.invoke(
+        'realm.desktop.set-mouse-color',
+        mouseColor
+      );
     },
 
-    openAppWindow: (spaceId: string, app: any) => {
-      return ipcRenderer.invoke('realm.desktop.open-app-window', spaceId, app);
+    openAppWindow: async (spaceId: string, app: any) => {
+      return await ipcRenderer.invoke(
+        'realm.desktop.open-app-window',
+        spaceId,
+        app
+      );
     },
-    closeAppWindow: (spaceId: string, app: any) => {
-      return ipcRenderer.invoke('realm.desktop.close-app-window', spaceId, app);
+    closeAppWindow: async (spaceId: string, app: any) => {
+      return await ipcRenderer.invoke(
+        'realm.desktop.close-app-window',
+        spaceId,
+        app
+      );
     },
   };
 
@@ -88,7 +93,7 @@ export class DesktopService extends BaseService {
 
     this.state = DesktopStore.create({});
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
   }
@@ -126,13 +131,12 @@ export class DesktopService extends BaseService {
     // if (newTheme) {
     //   this.state?.setTheme(newTheme!);
     // }
-
-    return;
   }
 
   setActive(_event: any, spaceId: string, appId: string) {
     this.state?.setActive(appId);
   }
+
   setHomePane(_event: any, isHome: boolean) {
     this.state?.setHomePane(isHome);
     this.core.services.shell.setBlur(null, isHome);
@@ -141,6 +145,7 @@ export class DesktopService extends BaseService {
   setMouseColor(_event: any, mouseColor: string) {
     this.state?.setMouseColor(mouseColor);
   }
+
   setAppDimensions(
     _event: any,
     windowId: any,
@@ -148,10 +153,11 @@ export class DesktopService extends BaseService {
   ) {
     this.state?.setDimensions(windowId, dimensions);
   }
-  openAppWindow(_event: any, spaceId: string, selectedApp: any) {
-    let { desktopDimensions, isFullscreen } = this.core.services.shell;
 
-    const newWindow = this.state!.openBrowserWindow(
+  openAppWindow(_event: any, spaceId: string, selectedApp: any) {
+    const { desktopDimensions, isFullscreen } = this.core.services.shell;
+
+    const newWindow = this.state.openBrowserWindow(
       selectedApp,
       desktopDimensions as any,
       isFullscreen as boolean
@@ -167,10 +173,19 @@ export class DesktopService extends BaseService {
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
         url: appUrl,
         name: `urbauth-${credentials.ship}`,
+        value: credentials.cookie.split('=')[1].split('; ')[0],
+      });
+    } else if (selectedApp.type === 'web') {
+      const appUrl = selectedApp.web.url;
+      // Hit the main process handler for setting partition cookies
+      session.fromPartition(`${selectedApp.type}-web-webview`).cookies.set({
+        url: appUrl,
+        name: `urbauth-${credentials.ship}`,
         value: credentials.cookie!.split('=')[1].split('; ')[0],
       });
     }
   }
+
   closeAppWindow(_event: any, spaceId: string, selectedApp: any) {
     this.state?.closeBrowserWindow(selectedApp.id);
   }

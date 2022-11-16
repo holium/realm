@@ -1,11 +1,11 @@
 import axios from 'axios';
 import http from 'http';
 
-export type ShipConnectionData = {
+export interface ShipConnectionData {
   patp: string;
   url: string;
   code: string;
-};
+}
 
 const httpAgent = new http.Agent({ family: 4 });
 

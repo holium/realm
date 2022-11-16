@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { Flex, Sigil } from 'renderer/components';
-import { toJS } from 'mobx';
 import { Patp } from 'os/types';
 
 interface GroupSigilProps {
@@ -53,7 +52,7 @@ export const GroupSigil: FC<GroupSigilProps> = (props: GroupSigilProps) => {
   }
   if (len > 4) {
     // todo add +n
-    let plusEl = <div>+ {len - 4}</div>;
+    const plusEl = <div>+ {len - 4}</div>;
   }
   return (
     <Flex

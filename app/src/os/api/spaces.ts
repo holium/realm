@@ -32,7 +32,7 @@ export const SpacesApi = {
     conduit: Conduit,
     payload: { slug: string; payload: any; members: any }
   ): Promise<SpacePath> => {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
@@ -58,7 +58,7 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
@@ -84,7 +84,7 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
@@ -180,7 +180,7 @@ export const SpacesApi = {
       ship: pathArr[1],
       space: pathArr[2],
     };
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
@@ -295,24 +295,24 @@ const handleSpacesReactions = (
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'initial':
-      spacesState.initialReaction(data['initial'], our);
-      membersState.initial(data['initial']['membership']);
-      if (data['initial']['invitations']) {
-        visaState.initialIncoming(data['initial']['invitations']);
+      spacesState.initialReaction(data.initial, our);
+      membersState.initial(data.initial.membership);
+      if (data.initial.invitations) {
+        visaState.initialIncoming(data.initial.invitations);
       }
       // roomService!.setProvider(null, getHost(spacesState.selected!.path));
       break;
     case 'add':
-      const newSpace = spacesState.addSpace(data['add']);
-      membersState.addMemberMap(newSpace, data['add'].members);
+      const newSpace = spacesState.addSpace(data.add);
+      membersState.addMemberMap(newSpace, data.add.members);
       break;
     case 'replace':
-      spacesState.updateSpace(data['replace']);
+      spacesState.updateSpace(data.replace);
       break;
     case 'remove':
       const deleted = spacesState.deleteSpace(
         `/${our}/our`,
-        data['remove'],
+        data.remove,
         setTheme
       );
 
@@ -364,7 +364,7 @@ const handleInviteReactions = (
 
       break;
     case 'kicked':
-      const kickedPayload = data['kicked'];
+      const kickedPayload = data.kicked;
       if (`~${ship}` === kickedPayload.ship) {
         spacesState.deleteSpace(
           `/~${ship}/our`,

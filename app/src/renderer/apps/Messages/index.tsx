@@ -1,23 +1,20 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import S3Client from 'renderer/logic/s3/S3Client';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
-import { DmViewType } from './store';
 
-type ChatProps = {
+interface ChatProps {
   theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;
   };
-};
+}
 
 // enum ChatViewTypes {
 //   New = 'new-chat',

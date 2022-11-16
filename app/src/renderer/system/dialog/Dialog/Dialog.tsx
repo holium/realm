@@ -37,8 +37,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const [workflowState, setWorkflowState] = useState<any>({ loading: false });
   const [validated, setValidated] = useState<boolean>(false);
 
-  const ViewComponent: FC<any> | undefined = useMemo(
-    () => {
+  const ViewComponent: FC<any> | undefined = useMemo(() => {
       const dialogRenderer = dialogRenderers[window.id];
       const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
       return dialogConfig.component!;
@@ -47,7 +46,10 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   );
 
   const dialogRenderer = dialogRenderers[window.id];
-  const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
+  const dialogConfig: DialogConfig =
+    dialogRenderer instanceof Function
+      ? dialogRenderer(shell.dialogProps.toJSON())
+      : dialogRenderer;
   const {
     workflow,
     customNext,
@@ -97,7 +99,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           width={customNext ? 30 : undefined}
         >
           <Flex alignItems="center" justifyContent="flex-start">
-            {onPrevious && hasPrevious && hasPrevious() !== false && (
+            {onPrevious && hasPrevious && hasPrevious() && (
               <IconButton
                 customBg={theme.currentTheme.windowColor}
                 onClick={() => {

@@ -7,8 +7,9 @@
   $:  creator=ship
       name=@tas
       title=@t
+      access=?(%public %private)
       picture=@t
-      color=@ux
+      color=@t
       member-count=@u
   ==
 ::

@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo } from 'react';
 import { Flex, Divider } from 'renderer/components';
 import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { AppTile } from 'renderer/components/AppTile';

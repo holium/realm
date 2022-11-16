@@ -2,8 +2,7 @@ import { FC, useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 
-import { TitlebarStyle } from 'renderer/system/desktop/components/Window/Titlebar';
-import { Flex, Spinner, Input } from 'renderer/components';
+import { Flex, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { useBrowser } from './store';
 
@@ -16,9 +15,9 @@ import { useBrowser } from './store';
 const View = styled.div<{ hasTitleBar?: boolean }>`
   transform: translateZ(0);
 `;
-export type BrowserTabProps = {
+export interface BrowserTabProps {
   isResizing?: boolean;
-};
+}
 
 export const TabView: FC<BrowserTabProps> = observer(
   (props: BrowserTabProps) => {
@@ -52,7 +51,7 @@ export const TabView: FC<BrowserTabProps> = observer(
       webview?.addEventListener('did-stop-loading', onStopLoading);
       webview?.addEventListener('load-commit', () => {
         // Sets the z-index to a reasonable number
-        var elms = webview.querySelectorAll('div[style]');
+        const elms = webview.querySelectorAll('div[style]');
 
         // Loop through them
         Array.prototype.forEach.call(elms, function (elm) {
@@ -63,10 +62,10 @@ export const TabView: FC<BrowserTabProps> = observer(
         });
       });
       webview?.addEventListener('did-finish-load', () => {
-        webview!.send('mouse-color', desktop.mouseColor, true);
-        let css = '* { cursor: none !important; }';
+        webview.send('mouse-color', desktop.mouseColor, true);
+        const css = '* { cursor: none !important; }';
 
-        webview!.insertCSS(css);
+        webview.insertCSS(css);
         // webview.setUserAgent(
         //   'Mozilla/5.0 (Macintosh; Intel Mac OS X 12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36'
         // );
@@ -85,8 +84,8 @@ export const TabView: FC<BrowserTabProps> = observer(
       // });
 
       webview?.addEventListener('close', () => {
-        // @ts-ignore
-        webview!.closeDevTools();
+        // @ts-expect-error
+        webview.closeDevTools();
       });
     }, [currentTab.url]);
 
@@ -118,7 +117,7 @@ export const TabView: FC<BrowserTabProps> = observer(
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             // allowpopups="true"
-            // @ts-ignore
+            // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
             style={{

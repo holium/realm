@@ -1,4 +1,13 @@
-import { Icons, Text, TextButton, Flex, IconTypes, Crest, isValidHexColor, isValidImageUrl } from 'renderer/components';
+import {
+  Icons,
+  Text,
+  TextButton,
+  Flex,
+  IconTypes,
+  Crest,
+  isValidHexColor,
+  isValidImageUrl,
+} from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
 import { EmptyGroup } from '../SpaceRow';
@@ -9,6 +18,7 @@ interface ISelectRow {
   disabled?: boolean;
   icon?: IconTypes;
   image?: string;
+  color?: string;
   customBg?: string;
   hideIcon?: boolean;
   buttonText?: string;
@@ -24,6 +34,7 @@ export const SelectRow = (props: ISelectRow) => {
     customBg,
     icon,
     image,
+    color,
     title,
     buttonText,
     subtitle,
@@ -33,19 +44,16 @@ export const SelectRow = (props: ISelectRow) => {
   } = props;
   let leftIcon = <EmptyGroup />;
   if (icon) {
-    leftIcon = <Icons size={32} name={icon!} />;
+    leftIcon = <Icons size={32} name={icon} />;
   }
-  if (image) {
-    const validatedColor = isValidHexColor(image) ? image : '';
-    const validatedImageUrl = isValidImageUrl(image) ? image : '';
+  if (image || color) {
+    const validatedColor = color && isValidHexColor(color) ? color : '';
+    const validatedImageUrl = image && isValidImageUrl(image) ? image : '';
     leftIcon = (
-      <Crest
-        color={validatedColor}
-        picture={validatedImageUrl}
-        size="md"
-      />
+      <Crest color={validatedColor} picture={validatedImageUrl} size="sm" />
     );
   }
+
   return (
     <Row
       selected={selected}

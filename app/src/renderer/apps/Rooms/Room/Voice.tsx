@@ -1,5 +1,5 @@
-import { FC, useState } from 'react';
-import { Flex, Text } from 'renderer/components';
+import { FC } from 'react';
+import { Flex } from 'renderer/components';
 import { Speaker } from '../components/Speaker';
 
 interface VoiceViewProps {

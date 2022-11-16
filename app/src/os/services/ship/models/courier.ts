@@ -1,4 +1,4 @@
-import { Instance, types, applySnapshot, cast } from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 import { createPost } from '@urbit/api';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from 'os/types';
@@ -287,7 +287,7 @@ const PreviewGroupDM = types
   .actions((self) => ({
     receiveDM: (dm: GraphDMType) => {
       // add the sender
-      // @ts-ignore
+      // @ts-expect-error
       self.lastMessage = [{ mention: dm.author }, ...dm.contents];
       self.lastTimeSent = dm.timeSent;
     },
@@ -321,7 +321,7 @@ export const CourierStore = types
   .views((self) => ({
     get list() {
       return Array.from(self.previews.values()).sort((a, b) => {
-        // @ts-ignore
+        // @ts-expect-error
         return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
       });
     },
@@ -332,9 +332,9 @@ export const CourierStore = types
       self.previews.set(preview.path, preview);
     },
     setNotificationUpdates: (update: any) => {
-      if (update['more'].length === 1) {
-        if (update['more'][0]['read-count']) {
-          const place = update['more'][0]['read-count'];
+      if (update.more.length === 1) {
+        if (update.more[0]['read-count']) {
+          const place = update.more[0]['read-count'];
           if (place.path.includes('dm-inbox')) {
             const dmPath = pathToDmInbox(place.path);
             const dmPreview = self.previews.get(dmPath);
@@ -348,9 +348,9 @@ export const CourierStore = types
           }
         }
       }
-      if (update['more'].length === 2) {
-        if (update['more'][0]['read-count']) {
-          const place = update['more'][0]['read-count'];
+      if (update.more.length === 2) {
+        if (update.more[0]['read-count']) {
+          const place = update.more[0]['read-count'];
           if (place.path.includes('dm-inbox')) {
             const dmPath = pathToDmInbox(place.path);
             const dmPreview = self.previews.get(dmPath);
@@ -364,8 +364,8 @@ export const CourierStore = types
           }
         }
         // then it is [{'opened'}]
-        if (update['more'][0]['unread-count']) {
-          const stats = update['more'][0]['unread-count'];
+        if (update.more[0]['unread-count']) {
+          const stats = update.more[0]['unread-count'];
           if (stats.place.path.includes('dm-inbox')) {
             const dmPath = pathToDmInbox(stats.place.path);
             const dmPreview = self.previews.get(dmPath);
@@ -488,7 +488,6 @@ export const CourierStore = types
     },
     declineDm: (path: string) => {
       self.previews.delete(path);
-      return;
     },
   }));
 

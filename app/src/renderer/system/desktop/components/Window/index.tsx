@@ -5,7 +5,6 @@ import { darken } from 'polished';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../theme';
-import { ThemeModelType } from 'os/services/theme.model';
 import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { Titlebar } from './Titlebar';
 import { AppView } from './AppView';
@@ -26,10 +25,10 @@ import {
 } from '../../../dialog/Dialog/DialogTitlebar';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 
-type AppWindowStyleProps = {
+interface AppWindowStyleProps {
   theme: ThemeType;
   customBg?: string;
-};
+}
 
 export const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
@@ -41,12 +40,12 @@ export const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
     ${(props: AppWindowStyleProps) => darken(0.1, props.customBg!)};
 `;
 
-type AppWindowProps = {
+interface AppWindowProps {
   window: WindowModelProps;
   hideTitlebar?: boolean;
   children?: React.ReactNode;
   desktopRef: any;
-};
+}
 
 export const AppWindow: FC<AppWindowProps> = observer(
   (props: AppWindowProps) => {
@@ -121,7 +120,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           width: mWidth.get(),
         });
         const offset = shell.isFullscreen ? 0 : 30;
-        // @ts-ignore
+        // @ts-expect-error
         const desktopDims = desktopRef.current!.getBoundingClientRect();
         mX.set(0);
         mY.set(8);
@@ -186,7 +185,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
     let CustomTitlebar:
       | React.FC<BrowserToolbarProps>
       | React.FC<DialogTitlebarProps>
-      | undefined = undefined; // todo fix typings
+      | undefined; // todo fix typings
     let showDevToolsToggle = true;
     let preventClickEvents = true;
     let maximizeButton = true;
@@ -225,7 +224,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         titlebar = (
           <CustomTitlebar
             zIndex={window.zIndex}
-            windowColor={darken(0.002, windowColor!)}
+            windowColor={darken(0.002, windowColor)}
             showDevToolsToggle
             dragControls={dragControls}
             onDragStart={() => onDragStart()}
@@ -244,7 +243,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
             hasBorder={!hideTitlebarBorder}
             showDevToolsToggle={showDevToolsToggle}
             zIndex={window.zIndex}
-            // shareable
             dragControls={dragControls}
             onDevTools={onDevTools}
             onDragStart={() => onDragStart()}
@@ -252,10 +250,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
             onClose={() => onClose()}
             onMaximize={() => maximize()}
             theme={theme.currentTheme}
-            // theme={{
-            //   ...theme,
-            //   windowColor: darken(0.002, theme.windowColor!),
-            // }}
             app={window}
           />
         );
@@ -264,7 +258,10 @@ export const AppWindow: FC<AppWindowProps> = observer(
     if (window.type === 'dialog') {
       hideTitlebarBorder = true;
       const dialogRenderer = dialogRenderers[window.id];
-      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
+      const dialogConfig: DialogConfig =
+        dialogRenderer instanceof Function
+          ? dialogRenderer(shell.dialogProps.toJSON())
+          : dialogRenderer;
       noTitlebar = dialogConfig.noTitlebar!;
       CustomTitlebar = DialogTitlebar;
       showDevToolsToggle = false;
@@ -283,7 +280,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
         titlebar = (
           <CustomTitlebar
             zIndex={window.zIndex}
-            windowColor={darken(0.002, windowColor!)}
+            windowColor={darken(0.002, windowColor)}
             showDevToolsToggle
             dragControls={dragControls}
             onDragStart={() => onDragStart()}
@@ -405,12 +402,12 @@ AppWindow.defaultProps = {
 
 export default AppWindow;
 
-type WindowTypeProps = {
+interface WindowTypeProps {
   hasTitlebar: boolean;
   isResizing: boolean;
   isDragging: boolean;
   window: WindowModelProps;
-};
+}
 
 export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
   const { hasTitlebar, isResizing, isDragging, window } = props;

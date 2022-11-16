@@ -26,13 +26,13 @@ const PopoverCoords = types.model({
 
 export const AppInstallStore = types
   .model('AppInstallStore', {
-    searchMode: searchMode,
+    searchMode,
     searchModeArgs: types.array(types.string),
     searchString: types.string,
     searchPlaceholder: types.string,
     selectedShip: types.string,
     selectedDesk: types.string,
-    loadingState: loadingState,
+    loadingState,
     coords: PopoverCoords,
   })
   .actions((self) => ({

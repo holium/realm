@@ -2,12 +2,12 @@ import { SystemApp } from './System';
 import { Browser, BrowserProps } from './Browser';
 import { BrowserToolbar, BrowserToolbarProps } from './Browser/Toolbar';
 
-export type NativeRenders = {
+export interface NativeRenders {
   [key: string]: {
     titlebar?: React.FC<any>;
     component: React.FC<any>;
   };
-};
+}
 
 export const nativeRenderers: NativeRenders = {
   'os-browser': {
@@ -16,5 +16,5 @@ export const nativeRenderers: NativeRenders = {
   },
   'os-settings': {
     component: (props: any) => <SystemApp {...props} />,
-  }
+  },
 };

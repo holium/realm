@@ -1,18 +1,10 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Grid,
-  Text,
-  Flex,
-  Icons,
-  Sigil,
-  IconButton,
-} from 'renderer/components';
-import { ThemeModelType } from 'os/services/theme.model';
+import { Text, Flex, Icons, IconButton } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
-import { rgba, darken, lighten } from 'polished';
+import { rgba, darken } from 'polished';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
 import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 // import { id } from 'ethers/lib/utils';
@@ -53,7 +45,9 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
     peopleText = 'person';
   }
   // const creator = roomsApp.liveRoom?.creator;
-  let peopleNoHost = present!.filter((person: string) => person !== ship?.patp);
+  const peopleNoHost = present!.filter(
+    (person: string) => person !== ship?.patp
+  );
   let titleText = title;
   if (titleText!.length > 16 && tray) {
     titleText = titleText!.substring(0, 16) + '...';

@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { SettingsType, UISettingsType } from 'os/services/tray/wallet.model';
+import { SettingsType } from 'os/services/tray/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -8,8 +8,8 @@ export const WalletApi = {
       mark: 'realm-wallet-action',
       json: {
         'set-xpub': {
-          network: network,
-          xpub: xpub,
+          network,
+          xpub,
         },
       },
     };
@@ -25,7 +25,7 @@ export const WalletApi = {
       mark: 'realm-wallet-action',
       json: {
         'set-settings': {
-          network: network,
+          network,
           mode: settings.walletCreationMode,
           who: settings.sharingMode,
           blocked: settings.blocked,
@@ -45,8 +45,8 @@ export const WalletApi = {
       mark: 'realm-wallet-action',
       json: {
         'change-default-wallet': {
-          network: network,
-          index: index,
+          network,
+          index,
         },
       },
     };
@@ -64,8 +64,8 @@ export const WalletApi = {
       json: {
         'create-wallet': {
           sndr: sender,
-          network: network,
-          nickname: nickname,
+          network,
+          nickname,
         },
       },
     };
@@ -77,8 +77,8 @@ export const WalletApi = {
       mark: 'realm-wallet-action',
       json: {
         'request-address': {
-          network: network,
-          from: from,
+          network,
+          from,
         },
       },
     };
@@ -86,7 +86,7 @@ export const WalletApi = {
   },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
     console.log('get wallet address watch');
-    return new Promise<string>((resolve, reject) => {
+    return await new Promise<string>((resolve, reject) => {
       conduit.watch({
         app: 'realm-wallet',
         path: '/address/' + network + '/' + from,
@@ -120,7 +120,7 @@ export const WalletApi = {
           net,
           wallet,
           hash,
-          transaction: transaction,
+          transaction,
         },
       },
     };

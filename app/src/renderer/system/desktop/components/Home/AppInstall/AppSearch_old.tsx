@@ -3,16 +3,7 @@ import { styled as stitch, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { isValidPatp } from 'urbit-ob';
 import { observer } from 'mobx-react';
-import {
-  Input,
-  Flex,
-  Box,
-  Text,
-  Icons,
-  Sigil,
-  Button,
-  Spinner,
-} from 'renderer/components';
+import { Input, Flex, Text, Button, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { AppRow } from './AppRow';
@@ -75,7 +66,7 @@ function Content({
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
-          // @ts-ignore
+          // @ts-expect-error
           document.activeElement?.blur();
           e.preventDefault();
         }}
@@ -141,7 +132,7 @@ const renderApps = (space: string, apps: any, theme: any) => {
 };
 
 const renderProviders = (
-  data: Array<any>,
+  data: any[],
   searchString: string,
   onProviderClick: (ship: string) => void
 ) => {
@@ -193,7 +184,7 @@ const renderStart = (space: string, bazaar: any, theme: any) => {
   );
 };
 const renderShipSearch = (
-  data: Array<any>,
+  data: any[],
   searchString: string,
   theme: any,
   onProviderClick: (ship: string) => void
@@ -349,11 +340,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
     [theme.currentTheme.textColor]
   );
 
-  const renderDevApps = (
-    ship: string,
-    loadingState: string,
-    apps: Array<any>
-  ) => {
+  const renderDevApps = (ship: string, loadingState: string, apps: any[]) => {
     if (loadingState === 'loading-published-apps') {
       return (
         <Flex flex={1} verticalAlign="middle">
@@ -387,7 +374,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
   const renderDevAppSearch = (
     ship: string,
     loadingState: string,
-    data: Array<any>
+    data: any[]
   ) => {
     return (
       <>

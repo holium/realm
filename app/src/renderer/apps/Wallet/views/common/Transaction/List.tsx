@@ -14,8 +14,7 @@ import {
   convertBtcAmountToUsd,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { TransactionType } from 'os/services/tray/wallet.model';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
@@ -38,19 +37,19 @@ interface TransactionProps {
 export const Transaction = observer((props: TransactionProps) => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
-  let hoverBackground = darken(0.04, theme.currentTheme.windowColor);
+  const hoverBackground = darken(0.04, theme.currentTheme.windowColor);
 
   const { transaction } = props;
-  let wasSent = transaction.type === 'sent';
-  let isEth = transaction.network === 'ethereum';
-  let themDisplay =
+  const wasSent = transaction.type === 'sent';
+  const isEth = transaction.network === 'ethereum';
+  const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  let completedDate = new Date(transaction.completedAt!);
+  const completedDate = new Date(transaction.completedAt!);
 
-  let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
-  let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
+  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
+  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
 
-  let onClick = () => {
+  const onClick = () => {
     WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
       detail: { type: 'transaction', key: transaction.hash },
     });
@@ -106,7 +105,7 @@ export const Transaction = observer((props: TransactionProps) => {
       >
         <Text variant="body" fontSize={2}>
           {transaction.type === 'sent' ? '-' : ''}{' '}
-          {isEth ? `${ethAmount.eth}` /* ETH`*/ : `${btcAmount.btc} BTC`}
+          {isEth ? `${ethAmount.eth}` /* ETH` */ : `${btcAmount.btc} BTC`}
         </Text>
         <Text variant="body" fontSize={1} color="text.disabled">
           {transaction.type === 'sent' ? '-' : ''}$

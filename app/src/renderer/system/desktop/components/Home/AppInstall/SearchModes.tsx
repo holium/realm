@@ -2,18 +2,8 @@ import { FC, useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 
-import { darken, rgba } from 'polished';
-import {
-  Input,
-  Flex,
-  Box,
-  Text,
-  Icons,
-  Sigil,
-  Button,
-  Spinner,
-  Card,
-} from 'renderer/components';
+import { rgba } from 'polished';
+import { Flex, Text, Button, Spinner } from 'renderer/components';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';

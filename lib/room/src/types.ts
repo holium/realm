@@ -1,15 +1,19 @@
 export type Patp = string;
 
-export type SlipType = {
+export interface SlipType {
   from: Patp;
   data: any;
-};
+}
 
-export type EnterDiff = { enter: Patp };
-export type ExitDiff = { exit: Patp };
+export interface EnterDiff {
+  enter: Patp;
+}
+export interface ExitDiff {
+  exit: Patp;
+}
 export type DiffType = EnterDiff | ExitDiff;
 
-export type RoomsModelType = {
+export interface RoomsModelType {
   id: string;
   provider: string;
   creator: string;
@@ -20,7 +24,7 @@ export type RoomsModelType = {
   capacity: number;
   space: string;
   cursors: boolean;
-};
+}
 
 export enum PeerConnectionState {
   Disconnected = 'disconnected',

@@ -1,13 +1,12 @@
-import { FC, useState, useEffect } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 import { AppPreview } from './AppPreview';
 
-type RecommendedAppsProps = {
+interface RecommendedAppsProps {
   isOpen?: boolean;
-};
+}
 
 export const RecommendedApps: FC<RecommendedAppsProps> = observer(
   (props: RecommendedAppsProps) => {

@@ -37,12 +37,12 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
-  let [hidePending, setHidePending] = useState(false);
-  let [transactionCount, setTransactionCount] = useState(0);
+  const [hidePending, setHidePending] = useState(false);
+  const [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
-  var transactions: any = [];
-  for (var key of walletApp.currentStore.wallets.keys()) {
+  let transactions: any = [];
+  for (const key of walletApp.currentStore.wallets.keys()) {
     const walletTransactions = getTransactions(
       walletApp.currentStore.wallets
         .get(key)!
@@ -57,16 +57,16 @@ export const WalletApp: FC<any> = observer((props: any) => {
     }
   }, [transactions]);
 
-  let hide = () => {
+  const hide = () => {
     setHidePending(true);
   };
 
-  let hideHeaderFooter = [
+  const hideHeaderFooter = [
     WalletView.NEW,
     WalletView.LOCKED,
     WalletView.SETTINGS,
   ].includes(walletApp.navState.view);
-  let View = WalletViews(walletApp.navState.network)[walletApp.navState.view];
+  const View = WalletViews(walletApp.navState.network)[walletApp.navState.view];
 
   return (
     <Flex
@@ -81,8 +81,12 @@ export const WalletApp: FC<any> = observer((props: any) => {
         network={
           walletApp.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
         }
-        onAddWallet={() => WalletActions.navigate(WalletView.CREATE_WALLET)}
-        onSetNetwork={(network: any) => WalletActions.setNetwork(network)}
+        onAddWallet={async () =>
+          await WalletActions.navigate(WalletView.CREATE_WALLET)
+        }
+        onSetNetwork={async (network: any) =>
+          await WalletActions.setNetwork(network)
+        }
         hide={hideHeaderFooter}
       />
       {!hidePending &&

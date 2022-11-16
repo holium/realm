@@ -1,6 +1,5 @@
 import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
 import Store from 'electron-store';
-import EncryptedStore from '../lib/encryptedStore';
 import { Patp } from 'os/types';
 
 export class DiskStore {
