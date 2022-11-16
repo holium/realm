@@ -104,6 +104,8 @@
     |=  v=vessel:fleet:g
     %-  pairs
     =/  roles  (turn ~(tap in sects.v) (lead %s))
+    =?  roles  =(~ roles)
+      [s+%member]~
     :~  :-  'primaryRole'
             ?:  (~(has in (silt roles)) s+'admin')
               s+'admin'
