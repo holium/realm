@@ -1,6 +1,7 @@
 ::  sur/groups.hoon
 ::  Defines the types for needed for group-store scries.
 /-  *resource
+/-  g=new-groups
 |%
 ::
 +$  group-space   :: [creator=ship name=@tas title=@t picture=@t color=@ux]
@@ -18,6 +19,7 @@
   $%  
       [%group group=group-space]
       [%groups groups=(list group-space)]
+      [%members members=fleet:g]
   ==
 ::
 ::
