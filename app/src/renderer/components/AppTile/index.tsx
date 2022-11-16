@@ -3,7 +3,6 @@ import styled, { css } from 'styled-components';
 import { lighten, rgba } from 'polished';
 import { Flex, Box, Text, ContextMenu, Spinner } from '..';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { toJS } from 'mobx';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
 import { Portal } from 'renderer/system/dialog/Portal';
@@ -149,7 +148,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     const isLight = lightOrDark === 'light';
     const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
     if (isAppGrid) {
-      // @ts-ignore
+      // @ts-expect-error
       const appColor = app.color;
       title = (
         <Text
@@ -322,7 +321,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
             <Portal>
               <AnimatePresence>
                 <ContextMenu
-                  position={contextPosition!}
+                  position={contextPosition}
                   isComponentContext
                   textColor={textColor}
                   customBg={app.color}

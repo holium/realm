@@ -1,9 +1,8 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Input, Text } from 'renderer/components';
+import { Flex } from 'renderer/components';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { SwatchesPicker, TwitterPicker } from 'react-color';
-import { useServices } from 'renderer/logic/store';
+import { TwitterPicker } from 'react-color';
 
 // TODO a lot of this is taken from Spaces/Workflow/Details.tsx
 // there should probably be a generic shared component
@@ -14,11 +13,11 @@ const isValidHexColor = (hex: string) => {
   return hexRegex.test(`${hex}`);
 };
 
-export type ColorPickerProps = {
+export interface ColorPickerProps {
   initialColor: string;
   swatches: string[];
   onChange: (color: string) => void;
-};
+}
 
 export const ColorPicker: FC<ColorPickerProps> = observer(
   (props: ColorPickerProps) => {

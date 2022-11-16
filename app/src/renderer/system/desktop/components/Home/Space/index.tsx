@@ -1,6 +1,6 @@
 import { FC, useEffect, useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
 
@@ -11,9 +11,9 @@ import { RecentActivity } from './RecentActivity';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
 
-type HomePaneProps = {
+interface HomePaneProps {
   isOpen?: boolean;
-};
+}
 
 type SidebarType = 'members' | null;
 
@@ -25,7 +25,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
 
-  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp!);
+  const isAdmin = membership.isAdmin(currentSpace?.path!, ship!.patp);
 
   useEffect(() => {
     if (currentSpace) {
@@ -58,7 +58,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   }, [sidebar, members]);
   if (!currentSpace) return null;
   const membersCount = membership.getMemberCount(currentSpace.path);
-  let maxWidth = 880;
+  const maxWidth = 880;
   const headerWidth = '50%';
   const paneWidth = '50%';
   return (
@@ -200,7 +200,7 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite patp={ship!.patp!} isAdmin={isAdmin as boolean} />
+              <AppSuite patp={ship!.patp} isAdmin={isAdmin as boolean} />
               <RecommendedApps />
               <RecentActivity />
             </Flex>

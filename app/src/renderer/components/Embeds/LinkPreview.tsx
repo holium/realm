@@ -3,7 +3,10 @@ import { Flex, Icons, EmbedBox } from '..';
 import styled from 'styled-components';
 import { ThemeType } from 'renderer/theme';
 
-type LinkPreviewStyleType = { theme: ThemeType; customTextColor?: string };
+interface LinkPreviewStyleType {
+  theme: ThemeType;
+  customTextColor?: string;
+}
 
 const LinkPreviewStyle = styled(Flex)<LinkPreviewStyleType>`
   /* border-radius: 6px; */

@@ -1,22 +1,11 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { styled as stitch, keyframes } from '@stitches/react';
 import { isValidPatp } from 'urbit-ob';
 import { observer } from 'mobx-react';
-import {
-  Input,
-  Flex,
-  Box,
-  Text,
-  Icons,
-  Sigil,
-  Button,
-  Spinner,
-  Card,
-} from 'renderer/components';
+import { Input, Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-import { darken, rgba } from 'polished';
+import { darken } from 'polished';
 import { useAppInstaller } from './store';
 import { RealmPopover } from '../Popover';
 import * as yup from 'yup';
@@ -147,7 +136,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         wrapperStyle={{
           borderRadius: 25,
           height: 42,
-          width: width,
+          width,
           paddingLeft: 12,
           paddingRight: 16,
         }}

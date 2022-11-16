@@ -3,9 +3,9 @@ import { SpaceProps } from 'styled-system';
 import { Box, Spinner, Text } from '../';
 import { ChildrenBox, MenuItemStyle } from './MenuItem.styles';
 
-export type IntentProps = {
+export interface IntentProps {
   intent?: 'primary' | 'alert' | 'caution' | 'success' | 'info';
-};
+}
 
 export type MenuItemProps = {
   id?: string;

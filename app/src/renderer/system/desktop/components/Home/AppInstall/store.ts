@@ -33,13 +33,13 @@ const Dimensions = types.model({
 export const AppInstallStore = types
   .model('AppInstallStore', {
     popoverId: types.string,
-    searchMode: searchMode,
+    searchMode,
     searchModeArgs: types.array(types.string),
     searchString: types.string,
     searchPlaceholder: types.string,
     selectedShip: types.string,
     selectedDesk: types.string,
-    loadingState: loadingState,
+    loadingState,
     coords: PopoverCoords,
     dimensions: Dimensions,
     selectedApp: types.maybe(DocketApp),

@@ -17,14 +17,14 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   const onChange = (event: any) => {
     if (accessCode.length > 21) return;
 
-    let value = event.target.value.trim();
+    const value = event.target.value.trim();
     setAccessCode(value);
     setError('');
   };
 
   const checkCode = async () => {
     setLoading(true);
-    let response = await OnboardingActions.checkGatedAccess(accessCode);
+    const response = await OnboardingActions.checkGatedAccess(accessCode);
     setLoading(false);
 
     if (!response.success) {

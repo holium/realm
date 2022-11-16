@@ -1,5 +1,4 @@
-import { motion } from 'framer-motion';
-import { rgba, darken, lighten } from 'polished';
+import { darken, lighten } from 'polished';
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 import {
@@ -46,11 +45,11 @@ const SvgComponent = forwardRef<
     >
       <g filter="url(#filter0_d_3863_14962)">
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M29.4001 15.0001C29.4001 22.953 22.953 29.4001 15.0001 29.4001C7.0472 29.4001 0.600098 22.953 0.600098 15.0001C0.600098 7.0472 7.0472 0.600098 15.0001 0.600098C22.953 0.600098 29.4001 7.0472 29.4001 15.0001ZM15.0001 29.0001C22.7321 29.0001 29.0001 22.7321 29.0001 15.0001C29.0001 7.26811 22.7321 1.0001 15.0001 1.0001C7.26811 1.0001 1.0001 7.26811 1.0001 15.0001C1.0001 22.7321 7.26811 29.0001 15.0001 29.0001Z"
           fill="url(#paint0_linear_3863_14962)"
-          shape-rendering="crispEdges"
+          shapeRendering="crispEdges"
         />
       </g>
       <path
@@ -59,11 +58,11 @@ const SvgComponent = forwardRef<
       />
       <g filter="url(#filter1_d_3863_14962)">
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M26.4526 15C26.4526 21.3251 21.3251 26.4526 15 26.4526C8.67488 26.4526 3.54736 21.3251 3.54736 15C3.54736 8.67488 8.67488 3.54736 15 3.54736C21.3251 3.54736 26.4526 8.67488 26.4526 15ZM15 26.0526C21.1042 26.0526 26.0526 21.1042 26.0526 15C26.0526 8.89579 21.1042 3.94736 15 3.94736C8.89579 3.94736 3.94736 8.89579 3.94736 15C3.94736 21.1042 8.89579 26.0526 15 26.0526Z"
           fill="url(#paint2_linear_3863_14962)"
-          shape-rendering="crispEdges"
+          shapeRendering="crispEdges"
         />
       </g>
       <path
@@ -72,11 +71,11 @@ const SvgComponent = forwardRef<
       />
       <g filter="url(#filter2_d_3863_14962)">
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M23.5052 14.9999C23.5052 19.6972 19.6972 23.5052 14.9999 23.5052C10.3026 23.5052 6.49463 19.6972 6.49463 14.9999C6.49463 10.3026 10.3026 6.49463 14.9999 6.49463C19.6972 6.49463 23.5052 10.3026 23.5052 14.9999ZM14.9999 23.1052C19.4763 23.1052 23.1052 19.4763 23.1052 14.9999C23.1052 10.5235 19.4763 6.89463 14.9999 6.89463C10.5235 6.89463 6.89463 10.5235 6.89463 14.9999C6.89463 19.4763 10.5235 23.1052 14.9999 23.1052Z"
           fill="url(#paint4_linear_3863_14962)"
-          shape-rendering="crispEdges"
+          shapeRendering="crispEdges"
         />
       </g>
       <path
@@ -85,11 +84,11 @@ const SvgComponent = forwardRef<
       />
       <g filter="url(#filter3_d_3863_14962)">
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M20.5579 15C20.5579 18.0696 18.0696 20.5579 15 20.5579C11.9305 20.5579 9.44214 18.0696 9.44214 15C9.44214 11.9305 11.9305 9.44214 15 9.44214C18.0696 9.44214 20.5579 11.9305 20.5579 15ZM15 20.1579C17.8487 20.1579 20.1579 17.8487 20.1579 15C20.1579 12.1514 17.8487 9.84214 15 9.84214C12.1514 9.84214 9.84214 12.1514 9.84214 15C9.84214 17.8487 12.1514 20.1579 15 20.1579Z"
           fill="url(#paint6_linear_3863_14962)"
-          shape-rendering="crispEdges"
+          shapeRendering="crispEdges"
         />
       </g>
       <path
@@ -104,9 +103,9 @@ const SvgComponent = forwardRef<
           width="28.9998"
           height="29"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -138,9 +137,9 @@ const SvgComponent = forwardRef<
           width="23.1053"
           height="23.1053"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -172,9 +171,9 @@ const SvgComponent = forwardRef<
           width="17.2105"
           height="17.2105"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -206,9 +205,9 @@ const SvgComponent = forwardRef<
           width="11.3157"
           height="11.3157"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -241,13 +240,13 @@ const SvgComponent = forwardRef<
           y2="23.2728"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darkerColor} stop-opacity="0.4" />
+          <stop stopColor={darkerColor} stopOpacity="0.4" />
           <stop
             offset="0.562223"
-            stop-color={darkerColor}
-            stop-opacity="0.737334"
+            stopColor={darkerColor}
+            stopOpacity="0.737334"
           />
-          <stop offset="1" stop-color={darkerColor} />
+          <stop offset="1" stopColor={darkerColor} />
         </linearGradient>
         <linearGradient
           id="paint1_linear_3863_14962"
@@ -257,8 +256,8 @@ const SvgComponent = forwardRef<
           y2="26.5"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darkColor} />
-          <stop offset="1" stop-color="#524C53" />
+          <stop stopColor={darkColor} />
+          <stop offset="1" stopColor="#524C53" />
         </linearGradient>
         <linearGradient
           id="paint2_linear_3863_14962"
@@ -268,8 +267,8 @@ const SvgComponent = forwardRef<
           y2="22"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darkerColor} stop-opacity="0.4" />
-          <stop offset="1" stop-color={darkerColor} />
+          <stop stopColor={darkerColor} stopOpacity="0.4" />
+          <stop offset="1" stopColor={darkerColor} />
         </linearGradient>
         <linearGradient
           id="paint3_linear_3863_14962"
@@ -279,8 +278,8 @@ const SvgComponent = forwardRef<
           y2="22.5"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darkColor} />
-          <stop offset="1" stop-color={baseColor} />
+          <stop stopColor={darkColor} />
+          <stop offset="1" stopColor={baseColor} />
         </linearGradient>
         <linearGradient
           id="paint4_linear_3863_14962"
@@ -290,8 +289,8 @@ const SvgComponent = forwardRef<
           y2="20.7271"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darkerColor} stop-opacity="0.4" />
-          <stop offset="1" stop-color={darkerColor} />
+          <stop stopColor={darkerColor} stopOpacity="0.4" />
+          <stop offset="1" stopColor={darkerColor} />
         </linearGradient>
         <linearGradient
           id="paint5_linear_3863_14962"
@@ -301,8 +300,8 @@ const SvgComponent = forwardRef<
           y2="20.5"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darkColor} />
-          <stop offset="1" stop-color={semiDark} />
+          <stop stopColor={darkColor} />
+          <stop offset="1" stopColor={semiDark} />
         </linearGradient>
         <linearGradient
           id="paint6_linear_3863_14962"
@@ -312,8 +311,8 @@ const SvgComponent = forwardRef<
           y2="19.4546"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darkerColor} stop-opacity="0.4" />
-          <stop offset="1" stop-color={darkerColor} />
+          <stop stopColor={darkerColor} stopOpacity="0.4" />
+          <stop offset="1" stopColor={darkerColor} />
         </linearGradient>
         <linearGradient
           id="paint7_linear_3863_14962"
@@ -323,9 +322,9 @@ const SvgComponent = forwardRef<
           y2="18.5"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={darken(0.05, baseColor)} />
-          <stop offset="1" stop-color={darkerColor} stop-opacity="0.22" />
-          <stop offset="1" stop-color={baseColor} />
+          <stop stopColor={darken(0.05, baseColor)} />
+          <stop offset="1" stopColor={darkerColor} stopOpacity="0.22" />
+          <stop offset="1" stopColor={baseColor} />
         </linearGradient>
       </defs>
     </svg>

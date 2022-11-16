@@ -1,6 +1,6 @@
 import React, { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card, RadioGroup, Checkbox } from 'renderer/components';
+import { Flex, Text, Card } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 

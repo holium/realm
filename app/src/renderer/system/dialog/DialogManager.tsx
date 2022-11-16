@@ -8,12 +8,11 @@ import { getCenteredXY } from 'os/services/shell/lib/window-manager';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { toJS } from 'mobx';
 
-type DialogManagerProps = {
+interface DialogManagerProps {
   dialogId?: string;
   dialogProps: any;
-};
+}
 
 export const DialogManager: FC<DialogManagerProps> = observer(
   (props: DialogManagerProps) => {
@@ -38,7 +37,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     useHotkeys(
       'esc',
       () => {
-        let notOnboardingDialog = !Object.values(OnboardingStep).includes(
+        const notOnboardingDialog = !Object.values(OnboardingStep).includes(
           dialogId as any
         );
         if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {

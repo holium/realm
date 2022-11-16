@@ -1,9 +1,8 @@
 import React, { FC } from 'react';
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { lighten, rgba } from 'polished';
+import { lighten } from 'polished';
 import { ThemeType } from '../theme';
-import { number } from 'yup';
 
 const Wrapper = styled(motion.div)<{ height: number; width: number }>`
   position: relative;
@@ -11,12 +10,12 @@ const Wrapper = styled(motion.div)<{ height: number; width: number }>`
   width: ${(props) => props.width}px;
 `;
 
-type BadgeStyleProps = {
+interface BadgeStyleProps {
   theme: ThemeType;
   minimal?: boolean;
   top: number;
   right: number;
-};
+}
 
 const BadgeStyle = styled(motion.div)<BadgeStyleProps>`
   position: absolute;
@@ -33,7 +32,7 @@ const BadgeStyle = styled(motion.div)<BadgeStyleProps>`
 `;
 
 // const
-type BadgeProps = {
+interface BadgeProps {
   wrapperHeight: number;
   wrapperWidth: number;
   children: React.ReactNode;
@@ -41,7 +40,7 @@ type BadgeProps = {
   count: number;
   top: number;
   right: number;
-};
+}
 
 export const Badge: FC<BadgeProps> = (props: BadgeProps) => {
   const { minimal, top, right, count, wrapperHeight, wrapperWidth, children } =

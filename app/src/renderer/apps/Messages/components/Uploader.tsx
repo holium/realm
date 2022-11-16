@@ -1,9 +1,4 @@
 import { FC, useState } from 'react';
-import {
-  FileUploadContainer,
-  FormField,
-  ImagePreview,
-} from 'renderer/components';
 
 export const Uploader: FC<any> = () => {
   const [file, setFile] = useState<any>({});

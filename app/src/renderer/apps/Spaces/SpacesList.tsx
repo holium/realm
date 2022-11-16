@@ -2,29 +2,28 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 
-import { Flex, Grid, Text, ActionButton, Icons } from 'renderer/components';
+import { Flex, Text, ActionButton, Icons } from 'renderer/components';
 import { SpaceRow } from './SpaceRow';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { VisaRow } from './components/VisaRow';
 import { VisaType } from 'os/services/spaces/models/visas';
-import { darken, rgba } from 'polished';
+import { rgba } from 'polished';
 
-export type Space = {
+export interface Space {
   color?: string;
   description?: string;
   picture: string;
   title: string;
   memberCount: number;
   token?: string;
-};
+}
 
-type SpacesListProps = {
+interface SpacesListProps {
   selected?: SpaceModelType;
   spaces: SpaceModelType[];
   onSelect: (spaceKey: string) => void;
-};
+}
 
 export const SpacesList: FC<SpacesListProps> = observer(
   (props: SpacesListProps) => {

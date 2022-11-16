@@ -1,11 +1,4 @@
-import {
-  types,
-  Instance,
-  cast,
-  getType,
-  applySnapshot,
-  castToSnapshot,
-} from 'mobx-state-tree';
+import { types, Instance, applySnapshot } from 'mobx-state-tree';
 
 export const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 
@@ -84,7 +77,7 @@ export const DocketStore = types
         .forEach((app: DocketAppType) => {
           let id = app.title;
           if (app.href.glob) {
-            id = app.href.glob!.base!;
+            id = app.href.glob.base!;
           }
           const appTile = DocketApp.create({
             title: app.title,

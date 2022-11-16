@@ -1,13 +1,13 @@
-import api from "../api";
-import { extendObservable, action } from "mobx";
-import { makePersistable } from "mobx-persist-store";
+import api from '../api';
+import { extendObservable, action } from 'mobx';
+import { makePersistable } from 'mobx-persist-store';
 
-export type ShipType = {
+export interface ShipType {
   patp: string;
   metadata?: {
     color: string;
   };
-};
+}
 
 class ShipStore {
   public ship?: ShipType;
@@ -17,13 +17,13 @@ class ShipStore {
       ship: {
         patp: api.ship,
         metadata: {
-          color: "#ff810a",
+          color: '#ff810a',
         },
       },
     });
     makePersistable(this, {
-      name: "ShipStore",
-      properties: ["ship"],
+      name: 'ShipStore',
+      properties: ['ship'],
       storage: window.localStorage,
     });
   }

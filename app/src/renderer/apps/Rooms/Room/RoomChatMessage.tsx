@@ -20,10 +20,10 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
   const [timeString, setTimeString] = useState('');
 
   useEffect(() => {
-    let dat = new Date(chat.timeReceived);
-    let hor = `${dat.getHours()}`.padStart(2, '0');
-    let min = `${dat.getMinutes()}`.padStart(2, '0');
-    let sec = `${dat.getSeconds()}`.padStart(2, '0');
+    const dat = new Date(chat.timeReceived);
+    const hor = `${dat.getHours()}`.padStart(2, '0');
+    const min = `${dat.getMinutes()}`.padStart(2, '0');
+    const sec = `${dat.getSeconds()}`.padStart(2, '0');
 
     setTimeString(`${hor}:${min}:${sec}`);
   }, [chat]);

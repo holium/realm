@@ -5,12 +5,12 @@ import { ShipModelType } from 'os/services/ship/models/ship';
 import { SpaceRowStyle } from './SpaceRow';
 import { useServices } from 'renderer/logic/store';
 
-type SpaceRowProps = {
+interface SpaceRowProps {
   colorTheme: string;
   ship: ShipModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;
-};
+}
 
 export const YouRow: FC<SpaceRowProps> = (props: SpaceRowProps) => {
   const { selected, colorTheme, onSelect } = props;

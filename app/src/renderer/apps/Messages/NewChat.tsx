@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -9,28 +9,24 @@ import {
   IconButton,
   FormControl,
   TextButton,
-  Box,
-  Badge,
   Tag,
   Spinner,
 } from 'renderer/components';
-import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten, rgba } from 'polished';
+import { darken, lighten } from 'polished';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useServices } from 'renderer/logic/store';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { ShipActions } from 'renderer/logic/actions/ship';
-import { DmActions } from 'renderer/logic/actions/chat';
 
-type IProps = {
+interface IProps {
   theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onBack: () => void;
   onCreateNewDm: (newDmKey: DMPreviewType) => void;
-};
+}
 
 export const NewChat: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
@@ -68,7 +64,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
     // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    selectedNickname.add(nickname ? nickname : '');
+    selectedNickname.add(nickname || '');
     setSelectedNickname(new Set(selectedNickname));
     setPatp('');
   };

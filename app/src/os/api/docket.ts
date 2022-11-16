@@ -28,7 +28,7 @@ export const DocketApi = {
     if (key in apps) {
       return apps[key];
     }
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       conduit.watch({
         app: 'treaty',
         path: `/treaty/${key}`,
@@ -73,10 +73,9 @@ export const DocketApi = {
     } catch (e) {
       console.log(e);
     }
-    return;
   },
   addAlly: async (conduit: Conduit, ship: string) => {
-    return new Promise(async (resolve, reject) => {
+    return await new Promise(async (resolve, reject) => {
       const isAlly = await DocketApi.isAlly(conduit, ship);
       if (isAlly) {
         console.log(`'${ship}' is already an ally. skipping...`);
@@ -132,7 +131,7 @@ export const DocketApi = {
     ship: string,
     desk: string
   ): Promise<string> => {
-    return new Promise(async (resolve) => {
+    return await new Promise(async (resolve) => {
       console.log(`checking if '/${ship}/${desk}' installed...`);
       const docket = await DocketApi.getDocket(conduit, desk);
       if (docket === undefined) {
@@ -170,7 +169,6 @@ export const DocketApi = {
         `unexpected state. ${desk} already exists in docket. bailing...`
       );
       resolve('unexpected');
-      return;
     });
   },
   installDesk: async (
@@ -178,7 +176,7 @@ export const DocketApi = {
     ship: string,
     desk: string
   ): Promise<string> => {
-    return new Promise(async (resolve) => {
+    return await new Promise(async (resolve) => {
       // check if the desk is already installed; if it is first unininstall it before
       const deskStatus = await DocketApi.getDeskStatus(conduit, ship, desk);
       // for now, if the app is currently installed; continue
@@ -232,9 +230,9 @@ export const DocketApi = {
     ship: string,
     desk: string
   ): Promise<any> => {
-    return new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1,
-        timeout: NodeJS.Timeout;
+    return await new Promise(async (resolve, reject) => {
+      let subscriptionId: number = -1;
+      let timeout: NodeJS.Timeout;
       await conduit.watch({
         app: 'docket',
         path: '/charges',

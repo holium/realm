@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-export type Wallet = {
+export interface Wallet {
   network: 'bitcoin' | 'ethereum';
   address: string;
   balance: string;
@@ -9,16 +9,18 @@ export type Wallet = {
     cad?: string;
     euro?: string;
   };
-};
+}
 
 type Addr = string;
 
 export class RealmWallet {
-  private nicknames: Map<Addr, string> = new Map();
+  private readonly nicknames: Map<Addr, string> = new Map();
   private hdNode?: ethers.utils.HDNode;
-  private ethProvider: ethers.providers.Provider = ethers.getDefaultProvider();
-  private wallets: Map<Addr, ethers.Wallet> = new Map();
-  private hdWallets: Map<Addr, ethers.utils.HDNode> = new Map();
+  private readonly ethProvider: ethers.providers.Provider =
+    ethers.getDefaultProvider();
+
+  private readonly wallets: Map<Addr, ethers.Wallet> = new Map();
+  private readonly hdWallets: Map<Addr, ethers.utils.HDNode> = new Map();
 
   constructor() {
     console.log('constructing RealmWallet');
@@ -52,7 +54,7 @@ export class RealmWallet {
     this.deriveNewWallet(2);
     const addrs = Array.from(this.hdWallets.keys());
     const wallets = await Promise.all(
-      addrs.map((addr: string) => this.getWalletMetadata(addr))
+      addrs.map(async (addr: string) => await this.getWalletMetadata(addr))
     );
     const addr0 = wallets[0].address;
     const addr1 = wallets[1].address;

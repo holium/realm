@@ -1,8 +1,7 @@
 import { FC, useRef, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
-import { ThemeModelType } from 'os/services/theme.model';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import {
   ContextMenu,
   Flex,
@@ -11,9 +10,8 @@ import {
   Sigil,
   FlexProps,
 } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
+import { useTrayApps, LiveRoom } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { LiveRoom } from 'renderer/apps/store';
 import { PeerConnectionState } from '@holium/realm-room';
 import { rgba, darken } from 'polished';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
@@ -58,9 +56,9 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   ];
 
   // only the creator can kick people
-  if (ship!.patp === roomsApp!.liveRoom!.creator) {
+  if (ship!.patp === roomsApp.liveRoom!.creator) {
     contextMenuItems.push({
-      // @ts-ignore
+      // @ts-expect-error
       style: { color: '#FD4E4E' },
       id: `room-speaker-${person}-kick`,
       label: 'Kick',

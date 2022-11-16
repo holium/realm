@@ -1,9 +1,8 @@
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import AnimatedCursor, { CurrentUserCursor, Vec2 } from './Cursor';
+import { CurrentUserCursor } from './Cursor';
 import { hexToRgb, rgbToString } from 'os/lib/color';
-import { useMemo } from 'react';
 
 export const MouseArea = styled(motion.div)`
   cursor: none;

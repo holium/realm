@@ -94,7 +94,7 @@ export const InstallAgent: FC<BaseDialogProps> = observer(
                   <Icons ml={2} size={1} name="DownloadCircle" />
                 )
               }
-              onClick={() => OnboardingActions.installRealm()}
+              onClick={async () => await OnboardingActions.installRealm()}
             >
               Install Realm
             </ActionButton>

@@ -7,7 +7,7 @@ import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceC
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 
-export type BaseWorkflowProps = {
+export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
   firstStep?: boolean; // identifies the first dialog in a workflow
   customNext?: boolean; // an override to remove the next button if the dialog has a custom "next" component
@@ -18,7 +18,7 @@ export type BaseWorkflowProps = {
   isValidated?: (state: any) => boolean; // a function that takes in the state and can then check for value.
   onNext?: (evt?: any, state?: any, setState?: any) => void; // is the function executes when the "next" button is clicked.
   onPrevious?: (data?: any) => void; // is the function that executes whent the back arrow is clicked.
-};
+}
 
 export type BaseDialogProps = {
   onOpen?: () => void; // is the funciton that executres when the dialog is opened
@@ -37,9 +37,9 @@ export type DialogConfig = {
   window: WindowModelProps;
 } & BaseDialogProps;
 
-export type DialogRenderers = {
+export interface DialogRenderers {
   [key: string]: DialogConfig | ((props: any) => DialogConfig);
-};
+}
 
 export const dialogRenderers: DialogRenderers = {
   'app-detail-dialog': AppDetailDialog,

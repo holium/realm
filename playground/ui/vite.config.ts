@@ -1,7 +1,7 @@
-import path from "path";
-import { loadEnv, defineConfig } from "vite";
-import reactRefresh from "@vitejs/plugin-react-refresh";
-import { urbitPlugin } from "@urbit/vite-plugin-urbit";
+import path from 'path';
+import { loadEnv, defineConfig } from 'vite';
+import reactRefresh from '@vitejs/plugin-react-refresh';
+import { urbitPlugin } from '@urbit/vite-plugin-urbit';
 
 // https://vitejs.dev/config/
 export default ({ mode }) => {
@@ -9,7 +9,7 @@ export default ({ mode }) => {
   const SHIP_URL =
     process.env.SHIP_URL ||
     process.env.VITE_SHIP_URL ||
-    "http://localhost:8080";
+    'http://localhost:8080';
 
   return defineConfig({
     server: {
@@ -17,12 +17,12 @@ export default ({ mode }) => {
     },
     resolve: {
       alias: {
-        react: path.resolve("../../node_modules/react"),
-        "@types/react": path.resolve("../../node_modules/@types/react"),
+        react: path.resolve('../../node_modules/react'),
+        '@types/react': path.resolve('../../node_modules/@types/react'),
       },
     },
     plugins: [
-      urbitPlugin({ base: "playground", target: SHIP_URL, secure: false }),
+      urbitPlugin({ base: 'playground', target: SHIP_URL, secure: false }),
       reactRefresh(),
     ],
   });

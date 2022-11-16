@@ -6,12 +6,12 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 const DisclaimerDialog: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    let [checked, setChecked] = useState(
+    const [checked, setChecked] = useState(
       props.workflowState?.disclaimerAccepted || false
     );
 
     function toggleChecked(): void {
-      let toggledValue = !checked;
+      const toggledValue = !checked;
       props.setState &&
         props.setState({
           ...props.workflowState,
@@ -37,7 +37,12 @@ const DisclaimerDialog: FC<BaseDialogProps> = observer(
           Possible addition, or separate instruction to users: Alpha users are
           encouraged to report any perceived bugs or problems in the software
           and system to Holium Corporation by email at &nbsp;
-          <Anchor color={theme.light.colors.brand.primary} m={0} p={0} href="mailto:bugs@holium.io">
+          <Anchor
+            color={theme.light.colors.brand.primary}
+            m={0}
+            p={0}
+            href="mailto:bugs@holium.io"
+          >
             bugs@holium.io
           </Anchor>
         </Text>

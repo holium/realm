@@ -1,30 +1,21 @@
 import { FC } from 'react';
 import { darken } from 'polished';
 
-import {
-  Grid,
-  Flex,
-  Box,
-  Input,
-  IconButton,
-  Icons,
-  Sigil,
-  Text,
-} from '../../../components';
+import { Flex, Icons, Text } from '../../../components';
 import { IconPathsType } from '../../../components/Icons/icons';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 
-type CircleButtonProps = {
+interface CircleButtonProps {
   icon: IconPathsType;
   iconColor?: string;
   title?: string;
-};
+}
 
-type StyleProps = {
+interface StyleProps {
   theme: ThemeType;
-};
+}
 
 const CircleBtn = styled(motion.div)`
   border-radius: 50%;

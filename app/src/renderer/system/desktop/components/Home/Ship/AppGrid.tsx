@@ -11,7 +11,6 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { devApps } from 'renderer/apps/development';
 
 type AppGridProps = {
   isOpen?: boolean;
@@ -71,10 +70,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 },
                 {
                   label: 'App info',
-<<<<<<< HEAD
-=======
                   disabled: app.type === 'web',
->>>>>>> 3a5f796b (new strategy for app development)
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     ShellActions.openDialogWithStringProps(

@@ -16,7 +16,6 @@ import {
   SnapshotOut,
 } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-import { toJS } from 'mobx';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
@@ -337,7 +336,7 @@ export const NewBazaarStore = types
       self.loadingTreaties = true;
       try {
         const treaties = yield BazaarApi.scryTreaties(conduit, ship);
-        let formedTreaties = [];
+        const formedTreaties = [];
         for (const key in treaties) {
           const treaty = treaties[key];
           const formed = {
@@ -472,7 +471,7 @@ export const NewBazaarStore = types
     },
     getSuite(path: string) {
       const stall = self.stalls.get(path);
-      let suite = new Map();
+      const suite = new Map();
       if (!stall) return suite;
       Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
         (index: string) => {

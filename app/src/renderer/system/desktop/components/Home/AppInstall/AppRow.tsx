@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
@@ -48,11 +48,11 @@ const TileStyle = styled(Box)<TileStyleProps>`
   }
 `;
 
-type RowProps = {
+interface RowProps {
   theme: ThemeType;
   selected?: boolean;
   customBg: string;
-};
+}
 
 export const AppRowStyle = styled(motion.div)<RowProps>`
   height: 48px;

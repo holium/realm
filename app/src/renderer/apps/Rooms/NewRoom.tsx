@@ -13,7 +13,6 @@ import {
   Checkbox,
   Spinner,
 } from 'renderer/components';
-import * as yup from 'yup';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
@@ -55,7 +54,7 @@ export const createRoomForm = (
 
   const isPrivate = createField({
     id: 'isPrivate',
-    form: form,
+    form,
     initialValue: defaults.isPrivate || false,
   });
 
@@ -65,13 +64,13 @@ export const createRoomForm = (
     isPrivate,
   };
 };
-export type BaseRoomProps = {
+export interface BaseRoomProps {
   theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;
   };
-};
+}
 export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
   const { theme, ship } = useServices();
@@ -89,7 +88,7 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
     RoomsActions.createRoom(
       `${roomsApp.provider}/${name}/${new Date().getTime()}`,
       isPrivate ? 'private' : 'public',
-      name,
+      name
     ).then(() => {
       setLoading(false);
     });

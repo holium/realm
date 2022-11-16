@@ -3,12 +3,12 @@ import { style, compose } from 'styled-system';
 import { Box, BoxProps } from './Box';
 
 type ColumnProps = BoxProps & {
-  col?: number | (number | null | string)[];
-  inset?: number | (number | null | string)[];
+  col?: number | Array<number | null | string>;
+  inset?: number | Array<number | null | string>;
 };
 
 function transformValue(n: string | number) {
-  if (!n || Number.isNaN(n as string | number)) {
+  if (!n || Number.isNaN(n)) {
     return n;
   }
 

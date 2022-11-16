@@ -1,8 +1,8 @@
-const isDev = true;
 import { devApps } from './development';
 import { ThemeModelType } from 'os/services/theme.model';
+const isDev = true;
 
-export type NativeAppType = {
+export interface NativeAppType {
   id: string;
   title: string;
   type: 'native' | 'web' | 'urbit';
@@ -23,11 +23,11 @@ export type NativeAppType = {
     theme?: ThemeModelType;
     development?: boolean;
   };
-};
+}
 
-type AppManifestMap = {
+interface AppManifestMap {
   [key: string]: NativeAppType;
-};
+}
 
 export const nativeApps: AppManifestMap = {
   'os-browser': {

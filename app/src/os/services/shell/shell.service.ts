@@ -1,19 +1,14 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-} from 'mobx-state-tree';
+import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { ShellStoreType, ShellStore } from './shell.model';
 
 export class ShellService extends BaseService {
-  private db?: Store<ShellStoreType>; // for persistance
-  private state?: ShellStoreType; // for state management
+  private readonly db?: Store<ShellStoreType>; // for persistance
+  private readonly state?: ShellStoreType; // for state management
   handlers = {
     'realm.shell.set-desktop-dimensions': this.setDesktopDimensions,
     'realm.shell.set-blur': this.setBlur,
@@ -26,37 +21,44 @@ export class ShellService extends BaseService {
   };
 
   static preload = {
-    setBlur: (blurred: boolean, checkDouble: boolean = false) => {
-      return ipcRenderer.invoke('realm.shell.set-blur', blurred, checkDouble);
+    setBlur: async (blurred: boolean, checkDouble: boolean = false) => {
+      return await ipcRenderer.invoke(
+        'realm.shell.set-blur',
+        blurred,
+        checkDouble
+      );
     },
-    setDesktopDimensions: (width: number, height: number) => {
-      return ipcRenderer.invoke(
+    setDesktopDimensions: async (width: number, height: number) => {
+      return await ipcRenderer.invoke(
         'realm.shell.set-desktop-dimensions',
         width,
         height
       );
     },
-    openDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.shell.open-dialog', dialogId);
+    openDialog: async (dialogId: string) => {
+      return await ipcRenderer.invoke('realm.shell.open-dialog', dialogId);
     },
-    openDialogWithStringProps: (dialogId: string, props: any) => {
-      return ipcRenderer.invoke(
+    openDialogWithStringProps: async (dialogId: string, props: any) => {
+      return await ipcRenderer.invoke(
         'realm.shell.open-dialog-with-string-props',
         dialogId,
         props
       );
     },
-    nextDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.shell.next-dialog', dialogId);
+    nextDialog: async (dialogId: string) => {
+      return await ipcRenderer.invoke('realm.shell.next-dialog', dialogId);
     },
-    closeDialog: () => {
-      return ipcRenderer.invoke('realm.shell.close-dialog');
+    closeDialog: async () => {
+      return await ipcRenderer.invoke('realm.shell.close-dialog');
     },
-    setFullscreen(isFullscreen: boolean) {
-      return ipcRenderer.invoke('realm.shell.set-fullscreen', isFullscreen);
+    async setFullscreen(isFullscreen: boolean) {
+      return await ipcRenderer.invoke(
+        'realm.shell.set-fullscreen',
+        isFullscreen
+      );
     },
-    setIsMouseInWebview(mouseInWebview: boolean) {
-      return ipcRenderer.invoke(
+    async setIsMouseInWebview(mouseInWebview: boolean) {
+      return await ipcRenderer.invoke(
         'realm.shell.setIsMouseInWebview',
         mouseInWebview
       );
@@ -95,7 +97,7 @@ export class ShellService extends BaseService {
     });
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
   }

@@ -166,7 +166,7 @@ export const InlineEdit: any = forwardRef<HTMLInputElement, InlineEditProps>(
     if (!ref) ref = React.createRef();
     const keypressHandler = (event: any) => {
       if (event.key === 'Enter') {
-        // @ts-ignore
+        // @ts-expect-error
         ref.current.blur();
       }
     };

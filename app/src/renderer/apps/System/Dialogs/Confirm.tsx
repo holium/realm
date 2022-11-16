@@ -1,17 +1,6 @@
-import { FC, useMemo, useState } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { motion } from 'framer-motion';
-import {
-  Button,
-  Flex,
-  FormControl,
-  Grid,
-  Label,
-  Input,
-  Text,
-  TextButton,
-  Spinner,
-} from 'renderer/components';
+import { Flex, Text, TextButton, Spinner } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 

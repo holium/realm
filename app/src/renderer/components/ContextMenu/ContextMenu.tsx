@@ -8,7 +8,7 @@ import { rgba } from 'polished';
 import Portal from 'renderer/system/dialog/Portal';
 import { MenuOrientation } from 'os/lib/anchor-point';
 
-export type ContextMenuProps = {
+export interface ContextMenuProps {
   isComponentContext?: boolean;
   position?: 'above' | 'below';
   orientation?: MenuOrientation;
@@ -19,8 +19,8 @@ export type ContextMenuProps = {
   parentRef: any;
   customBg?: string;
   menuItemtype?: 'neutral' | 'brand';
-  menu: MenuItemProps[] | (() => any[]);
-};
+  menu: any[] | (() => any[]);
+}
 
 export const ContextMenu = (props: ContextMenuProps) => {
   const {
@@ -125,7 +125,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
             duration: 0.1,
           },
         }}
-        // @ts-ignore
+        // @ts-expect-error
         ref={contextMenuRef}
         style={{
           y: anchorPoint.y,
@@ -137,7 +137,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
         {sectionsArray.map((menuSection: any[], index: number) => {
           let divider = <hr />;
           if (index === sectionsArray.length - 1) {
-            // @ts-ignore
+            // @ts-expect-error
             divider = undefined;
           }
           return (

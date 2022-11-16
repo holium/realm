@@ -24,7 +24,7 @@ export const PasscodeInput: FC<PasscodeInputProps> = observer(
     const { theme } = useServices();
     const baseTheme = getBaseTheme(theme.currentTheme);
 
-    let listener = async (event: KeyboardEvent) => {
+    const listener = async (event: KeyboardEvent) => {
       if (event.key === 'Backspace' || event.key === 'Delete') {
         if (inputCode.length) {
           setInputCode(inputCode.slice(0, inputCode.length - 1));
@@ -33,10 +33,10 @@ export const PasscodeInput: FC<PasscodeInputProps> = observer(
         return;
       }
 
-      let digit = Number(event.key);
+      const digit = Number(event.key);
       if (inputCode.length >= PASSCODE_LENGTH || isNaN(digit)) return;
 
-      let newInputCode = [...inputCode, digit];
+      const newInputCode = [...inputCode, digit];
       setInputCode(newInputCode);
 
       if (newInputCode.length === PASSCODE_LENGTH) {

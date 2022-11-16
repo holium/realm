@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { Flex, Sigil, Icons, Text, IconButton } from 'renderer/components';
+import { Flex, Sigil, Icons, IconButton } from 'renderer/components';
 import styled from 'styled-components';
 
 const sessionMembers: any[] = [
@@ -85,7 +85,7 @@ export const SharedAvatars: FC<SharedSessionProps> = (
           console.log('popup');
         }}
       >
-        <Icons name="Plus" color={rgba(iconColor!, 0.5)} />
+        <Icons name="Plus" color={rgba(iconColor, 0.5)} />
       </AddMember>
     </Flex>
   );
