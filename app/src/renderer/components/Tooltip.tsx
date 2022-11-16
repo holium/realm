@@ -15,6 +15,7 @@ export type TooltipProps = {
   content?: React.ReactNode | string;
   children: React.ReactNode;
   position?: any;
+  show?: boolean;
 };
 
 const margin = 2;
@@ -131,7 +132,7 @@ const baseMotionProps = {
 
 export const Tooltip = (props: TooltipProps) => {
   // const domNode = document.createElement('div');
-  const { id, style, content, delay, placement, children } = props;
+  const { id, style, content, delay, placement, children, show } = props;
   const tooltipRef = React.useRef(null);
   const [coords, setCoords] = React.useState({ left: 0, top: 0 });
   const [isVisible, setIsVisible] = React.useState(false);
@@ -180,7 +181,7 @@ export const Tooltip = (props: TooltipProps) => {
             top: rect.top - rect.height,
           });
           evt.stopPropagation();
-          setIsVisible(true);
+          show && setIsVisible(true);
         }}
         onMouseLeave={(evt: any) => {
           // evt.stopPropagation();

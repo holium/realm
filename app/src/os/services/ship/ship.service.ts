@@ -3,10 +3,16 @@ import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
 
+// upload support
+const fs = require('fs');
+import S3Client, { StorageAcl } from '../../s3/S3Client';
+import moment from 'moment';
+//
+
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import EncryptedStore from '../../lib/encryptedStore';
-import { ShipModelType, ShipModel } from './models/ship';
+import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
 import { MSTAction, Patp } from '../../types';
 import { ContactApi } from '../../api/contacts';
 import { DmApi } from '../../api/dms';
@@ -96,6 +102,7 @@ export class ShipService extends BaseService {
     'realm.ship.read-group-dm': this.readGroupDm,
     'realm.ship.get-group': this.getGroup,
     'realm.ship.get-group-members': this.getGroupMembers,
+    'realm.ship.upload-file': this.uploadFile,
   };
 
   static preload = {
@@ -176,6 +183,8 @@ export class ShipService extends BaseService {
       ipcRenderer.invoke('realm.ship.get-notifications', timestamp, length),
     openedNotifications: () =>
       ipcRenderer.invoke('realm.ship.opened-notifications'),
+    uploadFile: async (params: FileUploadParams) =>
+      ipcRenderer.invoke('realm.ship.upload-file', params),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -593,15 +602,15 @@ export class ShipService extends BaseService {
     console.log('removingDM', ourShip, toShip, removeIndex);
   }
 
-  async getS3Bucket(_event: any) {
+  async getS3Bucket(_event: any = undefined) {
     const [credentials, configuration] = await Promise.all([
       S3Api.getCredentials(this.core.conduit!),
       S3Api.getConfiguration(this.core.conduit!),
     ]);
 
     return {
-      credentials,
-      configuration,
+      ...credentials,
+      ...configuration,
     };
   }
   async getNotifications(_event: any, timestamp: number, length: number) {
@@ -613,5 +622,50 @@ export class ShipService extends BaseService {
   openedNotifications(_event: any) {
     NotificationApi.opened(this.core.conduit!);
     return;
+  }
+
+  async uploadFile(
+    _event: any,
+    args: FileUploadParams
+  ): Promise<string | undefined> {
+    // const args = params;
+    return new Promise((resolve, reject) => {
+      // console.log('ShipActions.uploadFile - getting S3 bucket...');
+      this.getS3Bucket()
+        .then(async (response: any) => {
+          console.log(response);
+          const client = new S3Client({
+            credentials: response.credentials,
+            endpoint: response.credentials.endpoint,
+            signatureVersion: 'v4',
+          });
+          let fileContent, fileName, fileExtension;
+          if (args.source === 'file' && typeof args.content === 'string') {
+            fileContent = fs.readFileSync(args.content);
+            // console.log(fileContent);
+            const fileParts = args.content.split('.');
+            fileName = fileParts.slice(0, -1);
+            fileExtension = fileParts.pop();
+          } else if (args.source === 'buffer') {
+            fileContent = await Buffer.from(args.content, 'base64');
+            fileName = 'clipboard';
+            fileExtension = args.contentType.split('/')[1];
+          }
+          const params = {
+            Bucket: response.configuration.currentBucket,
+            Key: `${
+              this.state!.patp
+            }/${moment().unix()}-${fileName}.${fileExtension}`,
+            Body: fileContent,
+            ACL: StorageAcl.PublicRead,
+            ContentType: args.contentType,
+          };
+          // console.log('uploading file => %o', params);
+          const { Location } = await client.upload(params).promise();
+          // console.log('Location => %o', Location);
+          resolve(Location);
+        })
+        .catch(reject);
+    });
   }
 }
