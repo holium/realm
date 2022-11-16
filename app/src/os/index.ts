@@ -105,7 +105,6 @@ export class Realm extends EventEmitter {
     //     : new EncryptedStore(options);
     // Load session data
     this.db = new Store(options);
-    console.log('session size => %o', this.db.size);
     if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
       this.setSession(this.db.store);
@@ -252,10 +251,6 @@ export class Realm extends EventEmitter {
     session: ISession,
     params: ConnectParams = { reconnecting: false }
   ) {
-    if (session.cookie === null) {
-      console.error('Realm.connect: unexpected cookie value is null');
-      return;
-    }
     this.sendLog('connecting conduit');
     if (!this.conduit) {
       this.conduit = new Conduit();

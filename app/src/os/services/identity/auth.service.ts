@@ -216,18 +216,29 @@ export class AuthService extends BaseService {
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
     this.core.services.shell.setBlur(null, false);
 
-    // it appears this can happen if you finish onboarding and close the app/process
-    //  before logging in. since cookie will not exist in session.lock file under this condition
-    //  therefore grab and store it now
-    const { code } = this.readCredentials(patp, password);
-    const cookie = await getCookie({ patp, url: ship.url, code: code });
-
-    this.core.setSession({
-      ship: patp,
-      url: ship.url,
-      cookie,
-      code: code,
-    });
+    let session = this.core.getSession();
+    // null is possible if the user logged out (which clears session), and is
+    //  now logging back in
+    if (session === undefined) {
+      const { code } = this.readCredentials(patp, password);
+      session = {
+        ship: ship.patp,
+        url: ship.url,
+        code,
+        cookie: null,
+      };
+    }
+    // this is possible if:
+    //   1) user logged out and is logging back in OR
+    //   2) user completed onboarding and is logging in for the first time
+    if (session.cookie === null) {
+      session.cookie = await getCookie({
+        patp,
+        url: ship.url,
+        code: session.code,
+      });
+    }
+    this.core.setSession(session);
 
     return true;
   }
