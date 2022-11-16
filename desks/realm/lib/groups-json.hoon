@@ -208,6 +208,28 @@
         meta/(meta meta.gr)
     ==
   ::
+  ++  members
+    |=  fl=fleet:g
+    %-  pairs
+    %+  turn  ~(tap by fl)
+    |=  [her=@p v=vessel:fleet:g]
+    ^-  [cord json]
+    [(scot %p her) (member-vessel v)]
+  ++  member-vessel
+    |=  v=vessel:fleet:g
+    %-  pairs
+    =/  roles  (turn ~(tap in sects.v) (lead %s))
+    :~  :-  'primaryRole'
+            ?:  (~(has in (silt roles)) s+'admin')
+              s+'admin'
+            ?:  (~(has in (silt roles)) s+'member')
+              s+'member'
+            s+'initiate'
+        ['status' s+'joined']
+        ['alias' s+'']
+        [roles/a/[roles]]
+    ==
+  ::
   ++  fleet
     |=  fl=fleet:g
     %-  pairs
