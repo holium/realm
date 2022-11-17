@@ -146,9 +146,17 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
         image: space.picture,
         crestOption: space.picture ? 'image' : 'color',
       });
-
       if (space.picture) {
         setCrestOption('image');
+      }
+      if (space.access) {
+        const spaceAccess: AccessOptionType =
+          space.access === 'public'
+          ? 'public'
+          : space.access === 'antechamber'
+          ? 'antechamber'
+          : 'private';
+        setAccessOption(spaceAccess);
       }
     }
 
@@ -160,7 +168,6 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
   const { name, description, picture, color } = useMemo(() => {
     if (props.edit) {
       const space = spaces.spaces.get(props.edit.space)!;
-      console.log(toJS(space));
       return createSpaceForm(space);
     } else if (workflowState.type === 'group') {
       return createSpaceForm({
