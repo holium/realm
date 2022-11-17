@@ -1,5 +1,7 @@
 import axios from 'axios';
 import http from 'http';
+import Store from 'electron-store';
+// import EncryptedStore from './encryptedStore';
 
 export interface ShipConnectionData {
   patp: string;
