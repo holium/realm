@@ -7,7 +7,7 @@ import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-type NewSpace = {
+interface NewSpace {
   access: 'public' | 'antechamber' | 'private';
   archetype: 'home' | 'community';
   archetypeTitle?: 'Home' | 'Community';
@@ -16,7 +16,7 @@ type NewSpace = {
   members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };
   name: string;
   type: 'our' | 'group' | 'space';
-};
+}
 
 export const spacesDialogs: DialogRenderers = {
   'create-space-1': {
@@ -134,7 +134,7 @@ export const spacesDialogs: DialogRenderers = {
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
       const createForm: NewSpace = state;
-      delete createForm['archetypeTitle'];
+      delete createForm.archetypeTitle;
       setState({ ...state, loading: true });
       // DesktopActions.setDialogLoading(true);
       SpacesActions.createSpace(createForm).then(() => {

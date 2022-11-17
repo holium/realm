@@ -25,7 +25,7 @@ export type ShipCredentials = {
  */
 export class AuthService extends BaseService {
   private db: Store<AuthStoreType>;
-  private state: AuthStoreType;
+  private readonly state: AuthStoreType;
 
   handlers = {
     'realm.auth.add-ship': this.addShip,
@@ -59,10 +59,10 @@ export class AuthService extends BaseService {
       ipcRenderer.invoke('realm.auth.remove-ship', ship),
     setMnemonic: (mnemonic: string) =>
       ipcRenderer.invoke('realm.auth.set-mnemonic', mnemonic),
-    setShipProfile: (
+    setShipProfile: async (
       patp: string,
       profile: { color: string; nickname: string; avatar: string }
-    ) => ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
+    ) => await ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -73,10 +73,10 @@ export class AuthService extends BaseService {
       defaults: AuthStore.create({ firstTime: true }),
     });
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
-    let persistedState: AuthStoreType = this.db.store;
+    const persistedState: AuthStoreType = this.db.store;
     this.state = AuthStore.create(castToSnapshot(persistedState));
 
     onSnapshot(this.state, (snapshot) => {
@@ -139,7 +139,7 @@ export class AuthService extends BaseService {
     patp: string,
     profile: { color: string; nickname: string; avatar: string }
   ) {
-    let ship = this.state.ships.get(`auth${patp}`)!;
+    const ship = this.state.ships.get(`auth${patp}`)!;
     if (!ship) return;
     this.state.setShipProfile(
       ship.id,
@@ -287,7 +287,7 @@ export class AuthService extends BaseService {
     const id = `auth${ship}`;
 
     const parts = new RegExp(/(urbauth-~[\w-]+)=(.*); Path=\/;/).exec(
-      cookie!.toString()
+      cookie.toString()
     )!;
 
     const newAuthShip = AuthShip.create({

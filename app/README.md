@@ -44,7 +44,7 @@ yarn dev:env bus
 
 ## Developing apps within Realm
 
-You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/renderer/apps/development.ts`.
+You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/app.dev.json`.
 
 You can add a record for your development application in the following format:
 
@@ -57,8 +57,12 @@ You can add a record for your development application in the following format:
     "color": "#cebef0",
     "icon": "https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg",
     "web": {
-      "openFullscreen": true,
-      "url": "http://localhost:3000/apps/ballot/" # the port for your dev server
+      // "openFullscreen": true,
+      "dimensions": {
+        "width": 1024,
+        "height": 768
+      },
+      "url": "http://localhost:3000/apps/ballot/"
     }
   }
 }

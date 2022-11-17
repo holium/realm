@@ -1,4 +1,3 @@
-import { AuthActions } from './actions/auth';
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
@@ -26,11 +25,9 @@ import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
 import { LiveRoom } from 'renderer/apps/store';
-import { RoomsActions } from './actions/rooms';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
-import { ThemeType } from 'renderer/theme';
 import { watchOnlineStatus } from './lib/offline';
 
 const loadSnapshot = (serviceKey: string) => {

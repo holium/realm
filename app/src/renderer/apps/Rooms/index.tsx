@@ -13,13 +13,13 @@ export const RoomViews: { [key: string]: any } = {
   room: (props: any) => <Room {...props} />,
 };
 
-export type RoomAppProps = {
+export interface RoomAppProps {
   theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;
   };
-};
+}
 
 export const RoomApp: FC<RoomAppProps> = observer((props: RoomAppProps) => {
   const { roomsApp } = useTrayApps();

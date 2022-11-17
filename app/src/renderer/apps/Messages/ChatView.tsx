@@ -11,9 +11,8 @@ import {
   useRef,
   ChangeEventHandler,
 } from 'react';
-import { rgba, darken, lighten } from 'polished';
+import { rgba, darken, lighten, lighten, darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 import {
   Flex,
   IconButton,
@@ -39,7 +38,6 @@ import {
 import { ChatLog } from './components/ChatLog';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { FileUploadParams } from 'os/services/ship/models/ship';
-import S3Client from 'renderer/logic/s3/S3Client';
 import {
   FileUploadSource,
   useFileUpload,
@@ -47,10 +45,8 @@ import {
 import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
-import { OSActions } from 'renderer/logic/actions/os';
-import { lighten, darken, rgba } from 'polished';
 
-type IProps = {
+interface IProps {
   theme: ThemeModelType;
   height: number;
   selectedChat: DMPreviewType;
@@ -62,7 +58,7 @@ type IProps = {
   };
   onSend: (message: any) => void;
   setSelectedChat: (chat: any) => void;
-};
+}
 
 export const ChatView: FC<IProps> = observer((props: IProps) => {
   const submitRef = useRef(null);
@@ -142,15 +138,15 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
   };
 
   const handleFileChange = (event: ChangeEventHandler<HTMLInputElement>) => {
-    // @ts-ignore
+    // @ts-expect-error
     const fileObj = event.target.files && event.target.files[0];
     if (!fileObj) {
       return;
     }
     console.log('fileObj is', fileObj);
-    // @ts-ignore
+    // @ts-expect-error
     event.target.value = null;
-    // @ts-ignore
+    // @ts-expect-error
     console.log(event.target.files);
     console.log(fileObj);
     console.log(fileObj.name);
@@ -160,18 +156,18 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     if (event.keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
       if (dmForm.computed.isValid) {
-        // @ts-ignore 2
+        // @ts-expect-error 2
         submitRef.current.focus();
-        // @ts-ignore
+        // @ts-expect-error
         submitRef.current.click();
         const formData = dmForm.actions.submit();
         const dmMessageContent = formData['dm-message'];
         setIsSending(true);
 
         SoundActions.playDMSend();
-        // @ts-ignore
+        // @ts-expect-error
         chatInputRef.current.value = '';
-        // @ts-ignore
+        // @ts-expect-error
         chatInputRef.current.focus();
 
         DmActions.sendDm(selectedChat.path, dmMessageContent)
@@ -184,7 +180,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           });
       }
     } else if (event.keyCode === 13 && event.shiftKey) {
-      // @ts-ignore
+      // @ts-expect-error
       chatInputRef.current.rows = chatInputRef.current.rows + 1;
     }
   };
@@ -322,7 +318,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 ref={inputRef}
                 type="file"
                 accept="image/*,.txt,.pdf"
-                // @ts-ignore
+                // @ts-expect-error
                 onChange={handleFileChange}
               />
               <Tooltip
@@ -393,7 +389,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onPaste={async (evt) => {
                   try {
                     if (!canUpload) return;
-                    var fileReader = new FileReader();
+                    const fileReader = new FileReader();
                     const clipboardItems = await navigator.clipboard.read();
                     if (!clipboardItems || clipboardItems.length === 0) return;
                     const clipboardItem = clipboardItems[0];
@@ -411,9 +407,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                       // const content = await blob.text();
                       fileReader.addEventListener('loadend', () => {
                         // reader.result contains the contents of blob as a data url
-                        var dataUrl = fileReader.result;
+                        const dataUrl = fileReader.result;
                         if (dataUrl && typeof dataUrl === 'string') {
-                          var base64 = dataUrl.substring(
+                          const base64 = dataUrl.substring(
                             dataUrl.indexOf(',') + 1
                           );
                           const params: FileUploadParams = {

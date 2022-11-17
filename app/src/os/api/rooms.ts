@@ -66,7 +66,6 @@ export const RoomsApi = {
       mark: 'rooms-action',
       json: { 'request-all': null },
     });
-    return;
   },
 
   setProvider: async (conduit: Conduit, patp: string) => {
@@ -75,7 +74,6 @@ export const RoomsApi = {
       mark: 'rooms-action',
       json: { 'set-provider': patp },
     });
-    return;
   },
 
   joinRoom: async (conduit: Conduit, roomId: string) => {
@@ -84,16 +82,14 @@ export const RoomsApi = {
       mark: 'rooms-action',
       json: { enter: roomId },
     });
-    return;
   },
 
   sendChat: async (conduit: Conduit, chat: string) => {
     const response = await conduit.poke({
       app: 'room',
       mark: 'rooms-action',
-      json: { chat: chat },
+      json: { chat },
     });
-    return;
   },
 
   createRoom: async (
@@ -110,8 +106,8 @@ export const RoomsApi = {
       json: {
         create: {
           rid: roomId,
-          access: access,
-          title: title,
+          access,
+          title,
         },
       },
       onSuccess: () => {
@@ -123,7 +119,6 @@ export const RoomsApi = {
     });
     // console.log('create');
     // console.log(response);
-    return;
   },
 
   leaveRoom: async (
@@ -144,7 +139,6 @@ export const RoomsApi = {
         console.error('rooms-leave', err);
       },
     });
-    return;
   },
   deleteRoom: async (
     conduit: Conduit,
@@ -156,7 +150,6 @@ export const RoomsApi = {
       mark: 'rooms-action',
       json: { delete: roomId },
     });
-    return;
   },
   invite: async (conduit: Conduit, roomId: string, patp: Patp) => {
     await conduit.poke({
@@ -169,7 +162,6 @@ export const RoomsApi = {
         },
       },
     });
-    return;
   },
 
   kick: async (conduit: Conduit, roomId: string, patp: Patp) => {
@@ -183,7 +175,6 @@ export const RoomsApi = {
         },
       },
     });
-    return;
   },
 
   exit: async (conduit: Conduit) => {
@@ -194,7 +185,6 @@ export const RoomsApi = {
         exit: null,
       },
     });
-    return;
   },
 
   /**
@@ -213,25 +203,25 @@ export const RoomsApi = {
       app: 'room',
       path: `/room/local`,
       onEvent: async (data: any) => {
-        let update = data['rooms-update'];
+        const update = data['rooms-update'];
         console.log('rooms update', update);
         if (!update) return;
-        if (update['room']) {
-          const { diff, room } = update['room'];
+        if (update.room) {
+          const { diff, room } = update.room;
           // Send diff as event to renderer
           if (diff) onDiff(diff, room);
           state.handleRoomUpdate(room, diff);
-        } else if (update['rooms']) {
+        } else if (update.rooms) {
           state.gotResponse();
-          state.setKnownRooms(update['rooms']);
-        } else if (update['invited']) {
-          state.handleInvite(update['invited']);
-        } else if (update['kicked']) {
-          console.log('kicked', update['kicked']);
+          state.setKnownRooms(update.rooms);
+        } else if (update.invited) {
+          state.handleInvite(update.invited);
+        } else if (update.kicked) {
+          console.log('kicked', update.kicked);
           //   state.leaveRoom()
-          const roomId = update['kicked'].id;
-          let room = toJS(state.knownRooms.get(roomId));
-          let diff = { exit: `~${conduit.ship!}` };
+          const roomId = update.kicked.id;
+          const room = toJS(state.knownRooms.get(roomId));
+          const diff = { exit: `~${conduit.ship!}` };
           if (room) {
             onDiff(diff, room);
           }
@@ -240,9 +230,9 @@ export const RoomsApi = {
           //   state.requestAllRooms();
 
           // TODO
-        } else if (update['chat']) {
+        } else if (update.chat) {
           // console.log('chat');
-          state.handleInboundChat(update.chat['from'], update.chat['content']);
+          state.handleInboundChat(update.chat.from, update.chat.content);
         }
       },
 

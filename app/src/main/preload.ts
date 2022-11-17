@@ -11,20 +11,24 @@ const appPreload = {
   setMouseColor(callback: any) {
     ipcRenderer.on('mouse-color', callback);
   },
-  openApp: (app: any, partition: string) => {
-    return ipcRenderer.invoke('open-app', app, partition);
+  openApp: async (app: any, partition: string) => {
+    return await ipcRenderer.invoke('open-app', app, partition);
   },
-  setPartitionCookies: (partition: any, cookies: any) => {
-    return ipcRenderer.invoke('set-partition-cookies', partition, cookies);
+  setPartitionCookies: async (partition: any, cookies: any) => {
+    return await ipcRenderer.invoke(
+      'set-partition-cookies',
+      partition,
+      cookies
+    );
   },
-  closeApp: (app: any) => {
-    return ipcRenderer.invoke('close-app', app);
+  closeApp: async (app: any) => {
+    return await ipcRenderer.invoke('close-app', app);
   },
-  askForMicrophone: () => {
-    return ipcRenderer.invoke('ask-for-microphone');
+  askForMicrophone: async () => {
+    return await ipcRenderer.invoke('ask-for-microphone');
   },
-  toggleDevTools: () => {
-    return ipcRenderer.invoke('toggle-devtools');
+  toggleDevTools: async () => {
+    return await ipcRenderer.invoke('toggle-devtools');
   },
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);

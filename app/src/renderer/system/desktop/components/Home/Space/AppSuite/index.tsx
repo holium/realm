@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { Flex, Text, Button } from 'renderer/components';
 import { SuiteApp } from './App';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -11,11 +11,11 @@ import { darken, rgba } from 'polished';
 import { RealmPopover } from '../../Popover';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
 
-type AppSuiteProps = {
+interface AppSuiteProps {
   patp: string;
   isAdmin: boolean;
   // suite?: AppModelType[];
-};
+}
 // const emptyArr = [1, 2, 3, 4, 5];
 
 const slideUpAndFade = keyframes({
@@ -67,7 +67,7 @@ function Content({ children, ...props }: any) {
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
-          // @ts-ignore
+          // @ts-expect-error
           if (document.activeElement) document.activeElement.blur();
           e.preventDefault();
         }}

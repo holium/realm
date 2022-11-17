@@ -1,15 +1,15 @@
 import styled, { css } from 'styled-components';
 import config, { DIMENSIONS } from './helpers';
 
-type RowType = {
+interface RowType {
   expand?: boolean;
-  reverse?: boolean | Array<any>;
+  reverse?: boolean | any[];
   align?: string | object;
   justify?: string | object;
   children?: React.ReactNode;
   noGutter?: boolean;
   debug?: boolean;
-};
+}
 
 const Row = styled.div<RowType>`
   box-sizing: border-box;
@@ -44,7 +44,7 @@ const Row = styled.div<RowType>`
               config(p).breakpoints[d] &&
               config(p).media[d]`
          ${
-           Array.isArray(p.reverse) && p.reverse.indexOf(d) !== -1
+           Array.isArray(p.reverse) && p.reverse.includes(d)
              ? `
              flex-direction: row-reverse;
              flex-wrap: wrap-reverse;

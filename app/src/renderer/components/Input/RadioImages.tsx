@@ -2,7 +2,7 @@ import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
-import { IconTypes, Flex } from '..';
+import { Flex } from '..';
 import { ThemeType } from 'renderer/theme';
 
 interface IRadioImage {
@@ -54,10 +54,10 @@ const RadioHighlight = styled(motion.label)<IRadioImage>`
         `}
 `;
 
-type RadioOption = {
+interface RadioOption {
   imageSrc: string;
   value: string;
-};
+}
 
 interface IRadioImages {
   customBg: string;
@@ -76,10 +76,10 @@ export const RadioImages: FC<IRadioImages> = (props: IRadioImages) => {
       p={1}
       flexDirection="row"
       width="fit-content"
-      maxWidth='100%'
+      maxWidth="100%"
       justifyContent="flex-start"
-      overflowX='scroll'
-    //   backgroundColor={optionBg}
+      overflowX="scroll"
+      //   backgroundColor={optionBg}
       mb={10}
       gap={6}
       borderRadius={6}
@@ -89,7 +89,7 @@ export const RadioImages: FC<IRadioImages> = (props: IRadioImages) => {
         return (
           <motion.div
             key={option.value}
-            style={{  position: 'relative', padding: '6px 6px', }}
+            style={{ position: 'relative', padding: '6px 6px' }}
           >
             {isSelected && (
               <RadioHighlight
@@ -102,12 +102,10 @@ export const RadioImages: FC<IRadioImages> = (props: IRadioImages) => {
             <RadioImage
               customBg={optionBg}
               accentColor={accentColor}
-
               src={option.imageSrc}
               selected={option.value === selected}
               onClick={(_evt: any) => onClick(option.value)}
-            >
-            </RadioImage>
+            ></RadioImage>
           </motion.div>
         );
       })}

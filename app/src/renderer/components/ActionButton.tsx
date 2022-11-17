@@ -1,25 +1,6 @@
 import React, { FC, forwardRef } from 'react';
 import styled, { css, StyledComponentProps } from 'styled-components';
-import {
-  border,
-  compose,
-  flexbox,
-  layout,
-  position,
-  background,
-  space,
-  color,
-  variant,
-  HeightProps,
-  BorderProps,
-  FlexboxProps,
-  LayoutProps,
-  PositionProps,
-  BackgroundProps,
-  SpaceProps,
-  ColorProps,
-  height,
-} from 'styled-system';
+import { compose, space, HeightProps, SpaceProps, height } from 'styled-system';
 import { darken } from 'polished';
 import { ThemeType } from '../theme';
 

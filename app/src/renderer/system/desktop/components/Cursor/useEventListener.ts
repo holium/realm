@@ -25,7 +25,7 @@ export function useEventListener(
       if (!isSupported) return;
 
       // Create event listener that calls handler function stored in ref
-      // @ts-ignore
+      // @ts-expect-error
       const eventListener = (event: any) => savedHandler.current(event);
 
       // Add event listener

@@ -16,11 +16,9 @@ import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
-import { WalletService } from './services/tray/wallet.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import HoliumAPI from './api/holium';
-import { RoomsService } from './services/tray/rooms.service';
 import PasswordStore from './lib/passwordStore';
 import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
@@ -32,7 +30,9 @@ export interface ISession {
   code: string;
 }
 
-export type ConnectParams = { reconnecting: boolean };
+export interface ConnectParams {
+  reconnecting: boolean;
+}
 
 export class Realm extends EventEmitter {
   conduit?: Conduit;
@@ -40,7 +40,7 @@ export class Realm extends EventEmitter {
   private isReconnecting: boolean = false;
   readonly mainWindow: BrowserWindow;
   private session?: ISession;
-  private db: Store<ISession>;
+  private readonly db: Store<ISession>;
   readonly services: {
     onboarding: OnboardingService;
     identity: {
@@ -51,6 +51,7 @@ export class Realm extends EventEmitter {
     desktop: DesktopService;
     shell: ShellService;
   };
+
   readonly holiumClient: HoliumAPI;
   readonly passwords: PasswordStore;
 
@@ -72,14 +73,14 @@ export class Realm extends EventEmitter {
     reconnect: () => {
       return ipcRenderer.invoke('realm.reconnect');
     },
-    disconnect: () => {
-      return ipcRenderer.invoke('realm.disconnect');
+    disconnect: async () => {
+      return await ipcRenderer.invoke('realm.disconnect');
     },
-    install: (ship: string) => {
-      return ipcRenderer.invoke('core:install-realm', ship);
+    install: async (ship: string) => {
+      return await ipcRenderer.invoke('core:install-realm', ship);
     },
-    showOpenDialog: () => {
-      return ipcRenderer.invoke('realm.show-open-dialog');
+    showOpenDialog: async () => {
+      return await ipcRenderer.invoke('realm.show-open-dialog');
     },
     onSetTheme: (callback: any) =>
       ipcRenderer.on('realm.change-theme', callback),
@@ -135,7 +136,7 @@ export class Realm extends EventEmitter {
     this.passwords = new PasswordStore();
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
 
@@ -174,8 +175,8 @@ export class Realm extends EventEmitter {
   async boot(_event: any) {
     let ship = null;
     let spaces = null;
-    let desktop = this.services.desktop.snapshot;
-    let shell = this.services.shell.snapshot;
+    const desktop = this.services.desktop.snapshot;
+    const shell = this.services.shell.snapshot;
     let membership = null;
     let bazaar = null;
     let rooms = null;
@@ -212,7 +213,7 @@ export class Realm extends EventEmitter {
       rooms,
       wallet,
       models,
-      loggedIn: this.session ? true : false,
+      loggedIn: !!this.session,
     };
     // if (spaces?.selected) {
     //   this.setTheme({ ...spaces!.selected!.theme, id: spaces?.selected.path });

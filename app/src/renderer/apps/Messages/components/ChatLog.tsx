@@ -1,6 +1,5 @@
-import { FC, useRef, useEffect, useState, memo } from 'react';
+import { FC, useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import ScrollView from 'react-inverted-scrollview';
 import { isEqual } from 'lodash';
 import { toJS } from 'mobx';
 import { ChatMessage } from './ChatMessage';
@@ -47,7 +46,7 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
   // todo better render prevention
   const isUpdated = isEqual(reduceToPending(all), reduceToPending(current));
 
-  let scrollView = useRef<any>(null);
+  const scrollView = useRef<any>(null);
   useEffect(() => {
     const all = toJS(messages);
     if (all.length > pageSize) {
@@ -151,7 +150,7 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
       <InfiniteScroll
         dataLength={chunk.length}
         next={onMore}
-        style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
+        style={{ display: 'flex', flexDirection: 'column-reverse' }} // To put endMessage and loader to the top.
         inverse={true} //
         hasMore={!listEnd}
         loader={<div></div>}
@@ -172,7 +171,7 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
         <Flex style={{ height: 58 }} />
       </InfiniteScroll>
 
-      {/*Put the scroll bar always on the bottom*/}
+      {/* Put the scroll bar always on the bottom */}
 
       {showJumpBtn && (
         <Flex position="absolute" bottom={64} right={12}>

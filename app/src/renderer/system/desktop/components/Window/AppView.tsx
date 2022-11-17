@@ -55,25 +55,21 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
 
     if (window && ship) {
       webview?.addEventListener('dom-ready', () => {
-        webview!.send('mouse-color', desktop.mouseColor);
-        let css = '* { cursor: none !important; }';
-        webview!.insertCSS(css);
+        webview.send('mouse-color', desktop.mouseColor);
+        const css = '* { cursor: none !important; }';
+        webview.insertCSS(css);
         setReady(true);
       });
 
       webview?.addEventListener('close', () => {
-        // @ts-ignore
-        webview!.closeDevTools();
+        // @ts-expect-error
+        webview.closeDevTools();
       });
 
-      let appUrl = `${ship!.url}/apps/${window.id!}/?spaceId=${
-        spaces.selected?.path
-      }`;
+      let appUrl = `${ship.url}/apps/${window.id}/?spaceId=${spaces.selected?.path}`;
 
       if (window.href?.site) {
-        appUrl = `${ship!.url}${window.href?.site}?spaceId=${
-          spaces.selected?.path
-        }`;
+        appUrl = `${ship.url}${window.href?.site}?spaceId=${spaces.selected?.path}`;
       }
 
       DesktopActions.openAppWindow('', toJS(window));
@@ -85,7 +81,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   }, [window?.id, ship]);
 
   useEffect(() => {
-    let css = `
+    const css = `
       :root {
         --rlm-font: 'Rubik', sans-serif;
         --rlm-base-color: ${theme.currentTheme.backgroundColor};
@@ -122,9 +118,9 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       const webview: any = document.getElementById(
         `${window.id}-urbit-webview`
       );
-      webview!.insertCSS(css);
+      webview.insertCSS(css);
       webview?.addEventListener('did-frame-finish-load', () => {
-        webview!.insertCSS(css);
+        webview.insertCSS(css);
       });
     }
   }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);

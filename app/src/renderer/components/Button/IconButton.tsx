@@ -13,7 +13,7 @@ import {
   TypographyProps,
 } from 'styled-system';
 import { motion } from 'framer-motion';
-import { rgba, darken, lighten } from 'polished';
+import { rgba, darken } from 'polished';
 import type { ThemeType } from '../../theme';
 
 type IProps = {

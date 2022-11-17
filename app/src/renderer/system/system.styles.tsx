@@ -78,7 +78,10 @@ export const BackgroundImage = styled(motion.img)`
     `}
 `;
 
-type BackgroundStyleProps = { hasWallpaper: boolean; theme: ThemeType };
+interface BackgroundStyleProps {
+  hasWallpaper: boolean;
+  theme: ThemeType;
+}
 
 export const BackgroundFill = styled(Fill)`
   position: relative;

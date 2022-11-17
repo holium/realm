@@ -11,10 +11,9 @@ import {
   IconButton,
 } from 'renderer/components';
 import { ContactRow } from './components/ContactRow';
-import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten, rgba } from 'polished';
+import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import {
   PreviewDMType,
@@ -22,13 +21,13 @@ import {
   DMPreviewType,
 } from 'os/services/ship/models/courier';
 
-type IProps = {
+interface IProps {
   theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onSelectDm: (dm: any) => void;
   onNewChat: (evt: any) => void;
-};
+}
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
@@ -37,7 +36,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
   const { textColor, iconColor, dockColor, windowColor, mode } = theme;
   const previews = useMemo(() => {
     return Array.from(courier.previews.values()).sort((a, b) => {
-      // @ts-ignore
+      // @ts-expect-error
       return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
     });
   }, [courier.previews]);

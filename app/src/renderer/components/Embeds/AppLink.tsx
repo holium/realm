@@ -1,4 +1,3 @@
-import { darken, rgba } from 'polished';
 import styled from 'styled-components';
 import { Flex, EmbedBox, Text, Skeleton } from '..';
 

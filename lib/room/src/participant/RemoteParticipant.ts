@@ -1,4 +1,3 @@
-import { debounce } from 'ts-debounce';
 import { action, makeObservable, observable } from 'mobx';
 import { ParticipantEvent, PeerConnectionState } from './events';
 import { Participant } from './Participant';
@@ -24,7 +23,7 @@ export class RemoteParticipant extends Participant {
   isLower?: boolean; // if the remote particpant is lower, they are recieving
   volume: number = 1;
   private peerConn: RTCPeerConnection;
-  private audioRef!: HTMLAudioElement;
+  private readonly audioRef!: HTMLAudioElement;
   private dataChannel!: RTCDataChannel;
   audioTracks: Map<string, RemoteTrackPublication>;
   videoTracks: Map<string, RemoteTrackPublication>;
@@ -65,6 +64,7 @@ export class RemoteParticipant extends Participant {
     this.onNegotiation = this.onNegotiation.bind(this);
     this.onIceError = this.onIceError.bind(this);
   }
+
   mute() {
     this.isMuted = true;
   }
@@ -72,6 +72,7 @@ export class RemoteParticipant extends Participant {
   unmute() {
     this.isMuted = false;
   }
+
   /**
    * sets the volume on the participant's microphone track
    * if no track exists the volume will be applied when the microphone track is added
@@ -96,7 +97,7 @@ export class RemoteParticipant extends Participant {
   }
 
   async streamAudioTrack(track: LocalAudioTrack) {
-    const audioTrack = track as LocalAudioTrack;
+    const audioTrack = track;
     this.sender = this.peerConn.addTrack(
       audioTrack.mediaStreamTrack,
       audioTrack.mediaStream!
@@ -213,15 +214,16 @@ export class RemoteParticipant extends Participant {
 
   // TODO this still doesnt fix the mobx warning
   // and its weird that the warning only happens some small % of the time
-  setConnectionState(connState : PeerConnectionState) {
+  setConnectionState(connState: PeerConnectionState) {
     this.connectionState = connState;
   }
-  onConnectionChange(event: Event) {
-          // @ts-ignore
 
-    this.setConnectionState(event.currentTarget.connectionState)
+  onConnectionChange(event: Event) {
+    // @ts-expect-error
+
+    this.setConnectionState(event.currentTarget.connectionState);
     if (
-      // @ts-ignore
+      // @ts-expect-error
       event.currentTarget.connectionState === PeerConnectionState.Connected
     ) {
       console.log('peers connected!');
@@ -233,7 +235,7 @@ export class RemoteParticipant extends Participant {
       }
     }
     if (
-      // @ts-ignore
+      // @ts-expect-error
       event.currentTarget.connectionState === PeerConnectionState.Connecting
     ) {
       console.log('peers connecting!');
@@ -241,7 +243,7 @@ export class RemoteParticipant extends Participant {
       this.emit(PeerConnectionState.Connecting);
     }
     if (
-      // @ts-ignore
+      // @ts-expect-error
       event.currentTarget.connectionState === PeerConnectionState.Disconnected
     ) {
       console.log('peers Disconnected!');
@@ -249,7 +251,7 @@ export class RemoteParticipant extends Participant {
       // this.audioRef.parentElement?.removeChild(this.audioRef);
     }
     if (
-      // @ts-ignore
+      // @ts-expect-error
       event.currentTarget.connectionState === PeerConnectionState.Failed
     ) {
       console.log('peer connect failed!');
@@ -257,7 +259,7 @@ export class RemoteParticipant extends Participant {
       // this.audioRef.parentElement?.removeChild(this.audioRef);
     }
     if (
-      // @ts-ignore
+      // @ts-expect-error
       event.currentTarget.connectionState === PeerConnectionState.Closed
     ) {
       console.log('peer connect closed!');
@@ -338,23 +340,23 @@ export class RemoteParticipant extends Participant {
     // this.sendAwaitingOfferHelper.bind(this);
     // this.sendAwaitingOfferHelper();
     this.sendSignal(this.patp, 'awaiting-offer', '');
-    this.interval = setInterval( () => {
+    this.interval = setInterval(() => {
       // console.log('sending ready help', this.interval, this.connectionState);
-      if(this.interval === null || this.interval === undefined) {
+      if (this.interval === null || this.interval === undefined) {
         // console.log('exiting sending ready')
         return;
       }
       // console.log('actually sending ready')
       this.sendSignal(this.patp, 'awaiting-offer', '');
-      // @ts-ignore
+      // @ts-expect-error
       this.retryAttempts = this.retryAttempts + 1;
       if (this.retryAttempts > RetryLimit) {
         // console.log("timed out")
-        clearInterval(this.interval)
+        clearInterval(this.interval);
       }
-    }, 5000)
-  };
-  
+    }, 5000);
+  }
+
   /**
    * handleSlip
    *
@@ -383,13 +385,13 @@ export class RemoteParticipant extends Participant {
     } else if (slipData['ice-candidate']) {
       if (!this.peerConn.remoteDescription) return;
       console.log('ice-candidate');
-      let iceCand = JSON.parse(slipData['ice-candidate']);
+      const iceCand = JSON.parse(slipData['ice-candidate']);
       await this.peerConn.addIceCandidate({
         candidate: iceCand.candidate,
         sdpMid: iceCand.sdpMid,
         sdpMLineIndex: iceCand.sdpMLineIndex,
       });
-    } else if (slipData['offer']) {
+    } else if (slipData.offer) {
       console.log('calling clear interval:', this.interval);
       clearInterval(this.interval);
       // this.interval = undefined;
@@ -397,13 +399,13 @@ export class RemoteParticipant extends Participant {
       if (!this.isLower) return;
       // isLower gets offer they were awaiting
       console.log('got offer');
-      await this.peerConn.setRemoteDescription(slipData['offer']);
+      await this.peerConn.setRemoteDescription(slipData.offer);
       const answer = await this.peerConn.createAnswer();
       await this.peerConn.setLocalDescription(answer);
       // isLower sends answer
       console.log('sending answer');
       this.sendSignal(this.patp, 'answer', this.peerConn.localDescription);
-    } else if (slipData['answer']) {
+    } else if (slipData.answer) {
       // console.log('answer');
       // this.interval = undefined;
       // isHigher receives answers
@@ -411,14 +413,14 @@ export class RemoteParticipant extends Participant {
         return;
       }
       console.log('got answer');
-      
-      await this.peerConn.setRemoteDescription(slipData['answer']);
+
+      await this.peerConn.setRemoteDescription(slipData.answer);
     }
   }
 
   onIceCandidate(event: RTCPeerConnectionIceEvent) {
     if (event.candidate === null) return;
-    let can = JSON.stringify(event.candidate!.toJSON());
+    const can = JSON.stringify(event.candidate.toJSON());
     this.sendSignal(this.patp, 'ice-candidate', can);
   }
 
@@ -430,8 +432,8 @@ export class RemoteParticipant extends Participant {
     if (!event) return;
     if (!event.target) return;
     if (!(event.target instanceof RTCPeerConnection)) return;
-    let connection: RTCPeerConnection = event.target;
-    switch (connection.iceGatheringState!) {
+    const connection: RTCPeerConnection = event.target;
+    switch (connection.iceGatheringState) {
       case 'gathering':
         /* collection of candidates has begun */
         // console.log('gathering');
@@ -480,7 +482,7 @@ export class RemoteParticipant extends Participant {
     this.dataChannel.onerror = this.handleDataError;
   }
 
-  private handleDataMessage = async (message: MessageEvent) => {
+  private readonly handleDataMessage = async (message: MessageEvent) => {
     // console.log(message);
     // decode
     let buffer: { type: DataChannelUpdate; data: any };
@@ -513,7 +515,7 @@ export class RemoteParticipant extends Participant {
     // }
   };
 
-  private handleDataError = (event: Event) => {
+  private readonly handleDataError = (event: Event) => {
     const channel = event.currentTarget as RTCDataChannel;
 
     if (event instanceof ErrorEvent) {
@@ -530,4 +532,8 @@ export class RemoteParticipant extends Participant {
 
 export type DataChannelUpdate = 'participant-metadata' | 'connected';
 
-export type ParticipantUpdate = { patp: Patp; muted: boolean; cursor: boolean };
+export interface ParticipantUpdate {
+  patp: Patp;
+  muted: boolean;
+  cursor: boolean;
+}

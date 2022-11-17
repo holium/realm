@@ -1,6 +1,6 @@
 export function isFireFox(): boolean {
   if (!isWeb()) return false;
-  return navigator.userAgent.indexOf('Firefox') !== -1;
+  return navigator.userAgent.includes('Firefox');
 }
 
 export function isSafari(): boolean {
@@ -18,5 +18,5 @@ export function isWeb(): boolean {
 }
 
 export async function sleep(duration: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, duration));
+  return await new Promise((resolve) => setTimeout(resolve, duration));
 }

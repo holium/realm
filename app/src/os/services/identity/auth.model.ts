@@ -6,8 +6,7 @@ import {
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { LoaderModel } from '../common.model';
-import { StepList } from '../common.model';
+import { LoaderModel, StepList } from '../common.model';
 import { Patp } from 'os/types';
 
 export const DEFAULT_WALLPAPER =
@@ -127,7 +126,6 @@ export const AuthStore = types
       ) {
         self.order.push(id.toString());
       }
-      return;
     },
     setShip(newShip: AuthShipType) {
       self.ships.set(newShip.id, newShip);

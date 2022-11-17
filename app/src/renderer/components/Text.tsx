@@ -141,7 +141,7 @@ export const Anchor = styled(motion.a)<TextProps>`
     css`
       color: ${props.color};
       &:hover {
-        color: ${darken(.02, props.color)};
+        color: ${darken(0.02, props.color)};
       }
     `}
 `;

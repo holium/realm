@@ -33,14 +33,14 @@ export const ContactApi = {
     try {
       await Promise.all(
         editJson.map(
-          (edit: any) =>
-            new Promise(async (resolve, reject) => {
+          async (edit: any) =>
+            await new Promise(async (resolve, reject) => {
               try {
                 const response = await conduit.poke({
                   app: 'contact-store',
                   mark: 'contact-update-0',
                   json: {
-                    ['edit']: {
+                    edit: {
                       ship,
                       'edit-field': {
                         [edit.key]: edit.data,

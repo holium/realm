@@ -1,4 +1,4 @@
-import { detach, Instance, types, destroy } from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 
 export const StepList = types.enumeration([
   'add-ship',

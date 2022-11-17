@@ -1,12 +1,12 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
 // import { Grid, Flex, Text } from '../../components';
 import { useBrowser } from './store';
 import { TabView } from './TabView';
 
-export type BrowserProps = {
+export interface BrowserProps {
   isResizing: boolean;
-};
+}
 
 export const Browser: FC<BrowserProps> = observer((props: BrowserProps) => {
   const { isResizing } = props;

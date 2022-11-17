@@ -1,28 +1,21 @@
-import { FC, useRef } from 'react';
+import { FC, useRef, useMemo, useState } from 'react';
 import {
   Flex,
   Text,
   Input,
-  TextButton,
   Spinner,
   IconButton,
   Icons,
-  Grid,
 } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 
-import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ChatMessage } from 'renderer/apps/Messages/components/ChatMessage';
 import { useTrayApps } from 'renderer/apps/store';
-import { ThemeModelType } from 'os/services/theme.model';
 import { ChatModelType } from 'os/services/tray/rooms.model';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useServices } from 'renderer/logic/store';
-import { lighten } from 'polished';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-import { Bubble } from 'renderer/apps/Messages/components/Bubble';
 import { RoomChatMessage } from './RoomChatMessage';
 
 interface RoomChatProps {}
@@ -69,7 +62,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
 
     if (chatInputRef.current === null) return;
 
-    let innerText = chatInputRef.current.value;
+    const innerText = chatInputRef.current.value;
 
     if (innerText === '') return;
 
@@ -108,7 +101,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
             marginLeft: '12px',
             display: 'flex',
             flexDirection: 'column-reverse',
-          }} //To put endMessage and loader to the top.
+          }} // To put endMessage and loader to the top.
           inverse={true} //
           hasMore={false}
           loader={<h4>Loading...</h4>}

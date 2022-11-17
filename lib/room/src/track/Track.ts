@@ -9,7 +9,7 @@ const BACKGROUND_REACTION_DELAY = 5000;
 
 // keep old audio elements when detached, we would re-use them since on iOS
 // Safari tracks which audio elements have been "blessed" by the user.
-const recycledElements: Array<HTMLAudioElement> = [];
+const recycledElements: HTMLAudioElement[] = [];
 
 export abstract class Track extends (EventEmitter as new () => TypedEventEmitter<TrackEventCallbacks>) {
   kind: Track.Kind;
@@ -207,7 +207,7 @@ export abstract class Track extends (EventEmitter as new () => TypedEventEmitter
     // update immediately if it comes back to focus
     if (document.visibilityState === 'hidden') {
       this.backgroundTimeout = setTimeout(
-        () => this.handleAppVisibilityChanged(),
+        async () => await this.handleAppVisibilityChanged(),
         BACKGROUND_REACTION_DELAY
       );
     } else {
@@ -344,7 +344,7 @@ export function detachTrack(
 //   }
 // }
 
-export type TrackEventCallbacks = {
+export interface TrackEventCallbacks {
   message: () => void;
   muted: (track?: any) => void;
   unmuted: (track?: any) => void;
@@ -365,4 +365,4 @@ export type TrackEventCallbacks = {
     previousTrack: RemoteTrack,
     publication: RemoteTrackPublication
   ) => void;
-};
+}

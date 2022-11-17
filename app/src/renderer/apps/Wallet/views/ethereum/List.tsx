@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from '../common/WalletCard';
-import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
+import { WalletView } from 'os/services/tray/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {}
@@ -18,7 +18,7 @@ export const WalletList: FC<WalletListProps> = observer(
         <Flex width="100%" flexDirection="column" overflowY="scroll">
           {list.map((walletEntry) => {
             console.log(walletEntry.key);
-            let fullWallet = walletApp.currentStore.wallets.get(
+            const fullWallet = walletApp.currentStore.wallets.get(
               walletEntry.key
             );
             console.log(fullWallet);
@@ -39,7 +39,7 @@ export const WalletList: FC<WalletListProps> = observer(
     };
 
     const Empty: FC<any> = (props: any) => {
-      let onClick = () => {
+      const onClick = () => {
         WalletActions.navigate(WalletView.CREATE_WALLET);
       };
 

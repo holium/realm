@@ -37,7 +37,7 @@ export class LocalParticipant extends Participant {
   videoTracks: Map<string, LocalTrackPublication>;
   /** map of track sid => all published tracks */
   tracks: Map<string, LocalTrackPublication>;
-  private pendingPublishing = new Set<Track.Source>();
+  private readonly pendingPublishing = new Set<Track.Source>();
   private microphoneError: Error | undefined;
 
   constructor(patp: Patp, room: Room) {
@@ -101,7 +101,7 @@ export class LocalParticipant extends Participant {
     console.log('streaming tracks TO ', peer.patp);
 
     this.audioTracks.forEach((pub: LocalTrackPublication) => {
-      // @ts-ignore
+      // @ts-expect-error
       peer.streamAudioTrack(pub.track!);
       console.log('peer.streamAudioTrack(pub.track!);', pub.track);
     });
@@ -124,12 +124,12 @@ export class LocalParticipant extends Participant {
    * If a track has already published, it'll mute or unmute the track.
    * Resolves with a `LocalTrackPublication` instance if successful and `undefined` otherwise
    */
-  setMicrophoneEnabled(
+  async setMicrophoneEnabled(
     enabled: boolean,
     options?: AudioCaptureOptions,
     publishOptions?: TrackPublishOptions
   ): Promise<LocalTrackPublication | undefined> {
-    return this.setTrackEnabled(
+    return await this.setTrackEnabled(
       Track.Source.Microphone,
       enabled,
       options,
@@ -192,7 +192,7 @@ export class LocalParticipant extends Participant {
   async createTracks(options: CreateLocalTracksOptions) {
     let stream: MediaStream | undefined;
     try {
-      if (options && options.audio) options! as AudioCaptureOptions;
+      if (options && options.audio) options as AudioCaptureOptions;
       stream = await navigator.mediaDevices.getUserMedia(options);
     } catch (err) {
       if (err instanceof Error) {
@@ -212,7 +212,7 @@ export class LocalParticipant extends Participant {
     }
 
     return stream.getTracks().map((mediaStreamTrack: MediaStreamTrack) => {
-      let track = new LocalAudioTrack(
+      const track = new LocalAudioTrack(
         mediaStreamTrack,
         options.audio as AudioCaptureOptions
       );
@@ -257,7 +257,7 @@ export class LocalParticipant extends Participant {
         return;
       }
       if (publication.track === track) {
-        existingPublication = publication as LocalTrackPublication;
+        existingPublication = publication;
       }
     });
 
@@ -303,7 +303,7 @@ export class LocalParticipant extends Participant {
     // const ti = await this.engine.addTrack(req);
     const publication = new LocalTrackPublication(
       Track.Kind.Audio,
-      // @ts-ignore
+      // @ts-expect-error
       { sid: track.id, source: track.source, name: 'our-audio' },
       track
     );
@@ -434,11 +434,11 @@ export class LocalParticipant extends Participant {
       if (track instanceof MediaStreamTrack) {
         if (localTrack instanceof LocalAudioTrack) {
           if (localTrack.mediaStreamTrack === track) {
-            publication = pub as LocalTrackPublication;
+            publication = pub;
           }
         }
       } else if (track === localTrack) {
-        publication = pub as LocalTrackPublication;
+        publication = pub;
       }
     });
     return publication;
@@ -461,14 +461,14 @@ export class LocalParticipant extends Participant {
   // ------------------------------------------------------------------------
   // ------------------------------- Handlers -------------------------------
   // ------------------------------------------------------------------------
-  private onTrackUnmuted = (track: LocalTrack) => {
+  private readonly onTrackUnmuted = (track: LocalTrack) => {
     // console.log('on track unmuted => LocalParticipant');
     this.onTrackMuted(track, track.isUpstreamPaused);
   };
 
   // when the local track changes in mute status, we'll notify server as such
   /** @internal */
-  private onTrackMuted = (track: LocalTrack, muted?: boolean) => {
+  private readonly onTrackMuted = (track: LocalTrack, muted?: boolean) => {
     console.log('on track muted => LocalParticipant');
     if (muted === undefined) {
       muted = true;
@@ -483,12 +483,12 @@ export class LocalParticipant extends Participant {
     // this.engine.updateMuteStatus(track.sid, muted);
   };
 
-  private onTrackUpstreamPaused = (track: LocalTrack) => {
+  private readonly onTrackUpstreamPaused = (track: LocalTrack) => {
     console.debug('upstream paused');
     this.onTrackMuted(track, true);
   };
 
-  private onTrackUpstreamResumed = (track: LocalTrack) => {
+  private readonly onTrackUpstreamResumed = (track: LocalTrack) => {
     console.debug('upstream resumed');
     this.onTrackMuted(track, track.isMuted);
   };
@@ -505,7 +505,7 @@ export class LocalParticipant extends Participant {
   //   this.unpublishTrack(track.track!);
   // };
 
-  private handleTrackEnded = async (track: LocalTrack) => {
+  private readonly handleTrackEnded = async (track: LocalTrack) => {
     if (
       track.source === Track.Source.ScreenShare ||
       track.source === Track.Source.ScreenShareAudio
@@ -522,7 +522,7 @@ export class LocalParticipant extends Participant {
           const currentPermissions = await navigator?.permissions.query({
             // the permission query for camera and microphone currently not supported in Safari and Firefox
             // track.source === 'video' ? 'microphone'
-            // @ts-ignore
+            // @ts-expect-error
             name: 'microphone',
           });
           if (currentPermissions && currentPermissions.state === 'denied') {

@@ -6,9 +6,9 @@ import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { Flex, Box, Text } from 'renderer/components';
 
-type RecentActivityProps = {
+interface RecentActivityProps {
   isOpen?: boolean;
-};
+}
 
 const Row = styled(Box)`
   border-radius: 12px;

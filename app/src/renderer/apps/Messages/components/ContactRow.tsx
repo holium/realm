@@ -1,7 +1,6 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { rgba, lighten, darken } from 'polished';
-import { toJS } from 'mobx';
+import { darken } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 import {
@@ -25,17 +24,17 @@ import { GroupSigil } from './GroupSigil';
 import { Patp } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
-type DMContact = {
+interface DMContact {
   theme: ThemeModelType;
   dm: DMPreviewType;
   onClick: (evt: any) => void;
-};
+}
 
-type RowProps = {
+interface RowProps {
   theme: ThemeType;
   customBg?: string;
   pending?: boolean;
-};
+}
 
 export const Row = styled(motion.div)<RowProps>`
   border-radius: 8px;
@@ -97,13 +96,13 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
         />
       </Box>
     );
-    let type = 'text',
-      lastMessage;
+    let type = 'text';
+    let lastMessage;
     if (dm.lastMessage.length > 0) {
-      let lastSender = dm.lastMessage[0];
+      const lastSender = dm.lastMessage[0];
       lastMessage = dm.lastMessage[1];
       type = Object.keys(lastMessage)[0];
-      // @ts-ignore
+      // @ts-expect-error
       lastMessage = { text: `${lastSender.mention}: ${lastMessage[type]}` };
     } else {
       lastMessage = {
