@@ -69,7 +69,7 @@ export class AppUpdater implements IAppUpdater {
           buttons: ['Yes', 'No'],
         })
         .then((result: MessageBoxReturnValue) => {
-          // @ts-expect-error
+          // @ts-ignore
           if (result.response === 0) {
             autoUpdater.downloadUpdate();
           }

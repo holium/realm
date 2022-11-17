@@ -89,7 +89,7 @@
     |=  =vase
     ^-  (quip card _this)
     =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))  
+      (mole |.(!<(state-0 vase)))
     ?^  old
       `this(state u.old)
     ~&  >>  'nuking old state' ::  temporarily doing this for making development easier
@@ -97,7 +97,7 @@
     :_  this
     =-  (welp - cards)
     %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term] 
+    |=  [=wire =ship =term]
     ^-  card
     [%pass wire %agent [ship term] %leave ~]
   ::
@@ -626,6 +626,24 @@
     --
   ++  helpers
     |%
+    ::
+    ++  determine-app-host
+      |=  [=app:store]
+      ^-  (unit ship)
+      ?>  ?=(%urbit -.app)
+      ::  if the app has a glob-reference of %ames, use the ship value as the
+      ::   host/origin of the app; otherwise, use the treaty ship
+      ?+  -.href.docket.app  host.app
+        ::
+        %glob
+          ::
+          ?+  -.location.glob-reference.href.docket.app  host.app
+            ::
+            %ames
+              (some ship.location.glob-reference.href.docket.app)
+          ==
+      ==
+
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
       =/  grid-list       ~(val by grid-index)
@@ -798,9 +816,31 @@
   ^-  (quip card _state)
   |^
   ?+  -.upd    `state
+    %ini       (on-ini +.upd)
     %add       (on-add +.upd)
     :: %del       (on-del +.upd)
   ==
+  ::
+  ::  @~lodlev-migdev - at this point, dockets have been loaded into the app catalog;
+  ::   therefore use this as an opportunity to set the host value of each app in the catalog
+  ++  on-ini
+    |=  [init=(map [=ship =desk] =treaty:treaty)]
+    ^-  (quip card _state)
+    :: %-  (slog leaf+"{<dap.bowl>}: treaty-update [on-ini] => {<[init]>}" ~)
+    =/  updated-catalog
+    %-  ~(rep by init)
+      |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
+      =/  app  (~(get by catalog.state) desk)
+      ?~  app  result
+      ::  host only applies to urbit apps
+      ?.  =(%urbit -.u.app)  (~(put by result) desk u.app)
+      :: update app host
+      ?>  ?=(%urbit -.u.app)
+      =.  host.u.app  (determine-app-host:helpers:bazaar u.app)
+      (~(put by result) desk u.app)
+    ::  update the app catalog with new information re: hosts
+    =.  catalog.state  updated-catalog
+    `state
   ::
   ++  on-add
     |=  [=treaty:treaty]
@@ -895,12 +935,14 @@
       ?:  (~(has in hide-desks) desk)
         `state
       =/  app                     (~(get by catalog.state) desk)
-      =/  app  ?~  app  [%urbit docket.charge ~ status (config:scry:bazaar:core desk)]
+      =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core desk)]
         ?>  ?=(%urbit -.u.app)
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
         u.app
       ?>  ?=(%urbit -.app)
+      :: update app host to reflect any changes to the app host (origin)
+      =.  host.app                (determine-app-host:helpers:bazaar app)
       =.  catalog.state           (~(put by catalog.state) desk app)
       =.  grid-index.state        (set-grid-index:helpers:bazaar desk grid-index.state)
       :_  state
