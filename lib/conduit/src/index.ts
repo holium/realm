@@ -98,6 +98,7 @@ export class Conduit extends EventEmitter {
         );
         let cookie: string | undefined = undefined;
         try {
+          this.updateStatus(ConduitState.Refreshing);
           cookie = await Conduit.fetchCookie(this.url, this.code!);
           // console.log(cookie);
           if (cookie) {
@@ -119,6 +120,7 @@ export class Conduit extends EventEmitter {
             return;
           }
           console.log('error: could not refresh token');
+          this.updateStatus(ConduitState.Failed);
           reject(undefined);
           return;
         } catch (e) {

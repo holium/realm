@@ -165,6 +165,11 @@ export class DesktopService extends BaseService {
         : `${credentials.url}${newWindow.href?.site}`;
       // console.log('core credentials => %o', credentials);
       // Hit the main process handler for setting partition cookies
+      // console.log('setting cookies => %o', {
+      //   url: appUrl,
+      //   name: `urbauth-${credentials.ship}`,
+      //   value: credentials.cookie!.split('=')[1].split('; ')[0],
+      // });
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
         url: appUrl,
         name: `urbauth-${credentials.ship}`,

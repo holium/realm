@@ -1,4 +1,12 @@
-import { BrowserWindow, ipcMain, ipcRenderer, dialog } from 'electron';
+import {
+  BrowserWindow,
+  ipcMain,
+  ipcRenderer,
+  WebContents,
+  dialog,
+  session,
+  WebPreferences,
+} from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
 // ---
@@ -14,8 +22,8 @@ import { toJS } from 'mobx';
 import HoliumAPI from './api/holium';
 import { RoomsService } from './services/tray/rooms.service';
 import PasswordStore from './lib/passwordStore';
-import { getSnapshot } from 'mobx-state-tree';
 import { ThemeModelType } from './services/theme.model';
+import { getCookie } from './lib/shipHelpers';
 
 export interface ISession {
   ship: string;
@@ -93,6 +101,8 @@ export class Realm extends EventEmitter {
     this.onEffect = this.onEffect.bind(this);
     this.onBoot = this.onBoot.bind(this);
     this.onConduit = this.onConduit.bind(this);
+    this.onWebViewAttached = this.onWebViewAttached.bind(this);
+    this.onWillRedirect = this.onWillRedirect.bind(this);
 
     const options = {
       name: 'realm.session',
@@ -140,6 +150,21 @@ export class Realm extends EventEmitter {
       this.services.shell.closeDialog(null);
       this.conduit = undefined;
     });
+
+    this.mainWindow.webContents.on(
+      'did-attach-webview',
+      this.onWebViewAttached
+    );
+    this.mainWindow.webContents.on(
+      'will-attach-webview',
+      (
+        event: Electron.Event,
+        webPreferences: WebPreferences,
+        params: Record<string, string>
+      ) => {
+        webPreferences.partition = 'urbit-webview';
+      }
+    );
   }
 
   static start(mainWindow: BrowserWindow) {
@@ -302,6 +327,72 @@ export class Realm extends EventEmitter {
     this.conduit = undefined;
     this.db.clear();
     this.session = undefined;
+  }
+
+  async onWillRedirect(e: Event, url: string, webContents: WebContents) {
+    try {
+      // console.log('onWillRedirect => %o', url);
+      const delim = '/~/login?redirect=';
+      const parts = url.split(delim);
+      // http://localhost/~/login?redirect=
+      if (parts.length > 0) {
+        let appPath = decodeURIComponent(parts[1]);
+        // console.log('appPath => %o', appPath);
+        appPath = appPath.split('?')[0];
+        if (appPath.endsWith('/')) {
+          appPath = appPath.substring(0, appPath.length - 1);
+        }
+        // const redirectUrl = parts[1];
+        // const newUrl = `${parts[0]}${redirectUrl}`;
+        e.preventDefault();
+
+        if (!this.session) {
+          console.log('unable to redirect. invalid session');
+          return;
+        }
+        const { ship, code } = this.session;
+        console.log(
+          'child window attempting to redirect to login. refreshing cookie...'
+        );
+        const cookie = await getCookie({
+          patp: ship,
+          url: this.session.url,
+          code: code,
+        });
+        console.log(
+          'new cookie generated. reloading child window and saving new cookie to session.'
+        );
+        // console.log(cookie);
+        // console.log('cookie => %o', cookie);
+        // console.log('session => %o', {
+        //   url: `${this.session.url}${appPath}`,
+        //   name: `urbauth-${ship}`,
+        //   value: cookie.split('=')[1].split('; ')[0],
+        // });
+        await session.fromPartition(`urbit-webview`).cookies.set({
+          url: `${this.session.url}${appPath}`,
+          name: `urbauth-${ship}`,
+          value: cookie.split('=')[1].split('; ')[0],
+          // value: cookie,
+        });
+        this.saveSession({
+          ...this.session,
+          cookie,
+        });
+        // console.log('navigating to => %o', newUrl);
+        // webContents.loadURL(newUrl);
+        webContents.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async onWebViewAttached(e: Event, webContents: WebContents) {
+    // console.log('onWebViewAttached');
+    webContents.on('will-redirect', (e: Event, url: string) =>
+      this.onWillRedirect(e, url, webContents)
+    );
   }
 
   async onConduit(params: ConnectParams) {

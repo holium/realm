@@ -11,6 +11,7 @@ export enum ConduitState {
   Failed = 'failed',
   NoInternet = 'no-internet',
   Stale = 'stale',
+  Refreshing = 'refreshing',
   Refreshed = 'refreshed',
 }
 
