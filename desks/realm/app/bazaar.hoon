@@ -556,6 +556,15 @@
       =.  rec-members             (~(put in rec-members) src.bowl)
       =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
       =.  stalls.state            (~(put by stalls.state) [path stall])
+      ::  per #319, ensure installed status is relative to our ship/catalog
+      =/  entry                   (~(get by catalog.state) app-id)
+      =/  local-install-status    ?~(entry %uninstalled (get-install-status:helpers:bazaar u.entry))
+      =/  app
+      ?+  -.app  app
+        %urbit
+          =.  install-status.app  local-install-status
+          app
+      ==
       =.  catalog.state           (~(put by catalog.state) [app-id app])
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
@@ -626,6 +635,12 @@
     --
   ++  helpers
     |%
+    ::
+    ++  get-install-status
+      |=  [=app:store]
+      ^-  install-status:store
+      ?>  ?=(%urbit -.app)
+      install-status.app
     ::
     ++  determine-app-host
       |=  [host=ship =app:store]

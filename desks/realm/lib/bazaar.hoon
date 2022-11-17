@@ -14,7 +14,7 @@
     |%
     ++  decode
       %-  of
-      :~  
+      :~
           [%pin add-pin]
           [%unpin rem-pin]
           [%reorder-pins reorder-pins]
@@ -308,10 +308,11 @@
     %+  merge  (dkt docket.app)
     %-  pairs
     :~
-      ['id' s+app-id]  
+      ['id' s+app-id]
       ['installStatus' [%s `@t`install-status.app]]
       ['config' (config:enjs:realm config.app)]
-    ==  
+      ['host' ?~(host.app ~ s+(scot %p u.host.app))]
+    ==
   ::
   ++  dkt
     |=  [=docket:docket]
@@ -407,14 +408,14 @@
     %+  frond  -.c
     ?-  -.c
       %da   s+(scot %da p.c)
-      %tas  s+(scot %tas p.c)  
+      %tas  s+(scot %tas p.c)
       %ud   (numb p.c)
     ==
   ::
   ++  alliance
     |=  a=alliance:treaty
     ^-  json
-    :-  %a 
+    :-  %a
     %+  turn  ~(tap in a)
       |=  [=^ship =desk]
       ^-  json
