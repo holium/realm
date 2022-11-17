@@ -10,8 +10,6 @@
     "pretty": true,
     "sourceMap": true,
     "baseUrl": "src",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -25,6 +23,5 @@
     "noImplicitThis": true,
     "isolatedModules": false
   },
-  "include": ["src"],
-  "exclude": ["test-ui", "tests"]
+  "include": ["src"]
 }
