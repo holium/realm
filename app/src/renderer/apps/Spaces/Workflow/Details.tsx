@@ -127,6 +127,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
       if (workflowState.type === 'group') {
         if (workflowState.image) {
           setCrestOption('image');
+          setWorkspaceState({ crestOption });
         }
       } else {
         setWorkspaceState({
@@ -148,7 +149,10 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
           picture: workflowState.image,
         });
       } else {
-        return createSpaceForm({ color: workflowState.color });
+        return createSpaceForm({
+          color: workflowState.color,
+          picture: '',
+        });
       }
     }, []);
 
@@ -183,6 +187,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                 ]}
                 onClick={(value: CrestOptionType) => {
                   setCrestOption(value);
+                  setWorkspaceState({ crestOption: value });
                 }}
               />
 
@@ -226,6 +231,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                             color.actions.onChange(newColor.hex);
                             setWorkspaceState({
                               color: newColor.hex,
+                              crestOption: 'color',
                             });
                             // setValidatedColor(newColor.hex);
                           }}
@@ -256,6 +262,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                     if (isValidHexColor(`#${e.target.value}`)) {
                       setWorkspaceState({
                         color: `#${e.target.value}`,
+                        crestOption: 'color',
                       });
                     }
                     color.actions.onChange(e.target.value);
@@ -292,11 +299,13 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer(
                     if (isValidImageUrl(e.target.value)) {
                       setWorkspaceState({
                         image: e.target.value,
+                        crestOption: 'image',
                       });
                     }
                     if (e.target.value === '') {
                       setWorkspaceState({
                         image: '',
+                        crestOption: 'image',
                       });
                     }
                     picture.actions.onChange(e.target.value);

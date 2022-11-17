@@ -128,6 +128,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                   title: 'New Space',
                   type: 'space',
                   color: '#000000',
+                  image: '',
                   archetype: 'community',
                   archetypeTitle: 'Community',
                 });

@@ -90,7 +90,7 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
-    onNext: (_evt: any) => {
+    onNext: (_evt: any, _state: any, _setState: any) => {
       ShellActions.nextDialog('create-space-4');
     },
     onPrevious: () => {
@@ -132,16 +132,14 @@ export const spacesDialogs: DialogRenderers = {
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
-      const createForm: NewSpace = state;
-      if (!createForm.archetype) createForm.archetype = 'community';
-      delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
-      // DesktopActions.setDialogLoading(true);
-      console.log(createForm);
+      delete state.archetypeTitle;
+      if (state.crestOption === 'color') {
+        state.image = '';
+      }
+      const createForm: NewSpace = state;
       SpacesActions.createSpace(createForm).then(() => {
-        // DesktopActions.closeDialog();
         setState({ loading: false });
-        // DesktopActions.setBlur(false);
       });
     },
     onPrevious: () => {
