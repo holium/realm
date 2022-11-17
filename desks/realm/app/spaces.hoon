@@ -256,6 +256,7 @@
         ^-  space:store
         =.  name.space  name.edit
         =.  description.space  description.edit
+        =.  access.space  access.edit
         =.  picture.space  picture.edit
         =.  color.space  color.edit
         =.  theme.space  theme.edit

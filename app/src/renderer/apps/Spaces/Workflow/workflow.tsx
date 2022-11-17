@@ -148,6 +148,7 @@ export const spacesDialogs: DialogRenderers = {
       createForm = {
         name: createForm.name,
         description: createForm.description || '',
+        access: createForm.access,
         picture: createForm.picture,
         color: createForm.color,
         theme: toJS(createForm.theme),

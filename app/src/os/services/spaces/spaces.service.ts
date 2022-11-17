@@ -361,6 +361,7 @@ export class SpacesService extends BaseService {
         payload: {
           name: body.name,
           description: body.description,
+          access: body.access,
           picture: body.picture,
           color: body.color,
           theme: {

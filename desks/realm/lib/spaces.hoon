@@ -185,6 +185,7 @@
       %-  ot
       :~  [%name so]
           [%description so]
+          [%access (su (perk %public %private ~))]
           [%picture so]
           [%color so]
           [%theme thm]
@@ -320,6 +321,7 @@
     :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
         ['name' s+name.space]
         ['description' s+description.space]
+        ['access' s+access.space]
         ['type' s+type.space]
         ['picture' s+picture.space]
         ['color' s+color.space]

@@ -72,6 +72,7 @@
 +$  edit-payload
   $:  name=@t
       description=@t
+      access=space-access
       picture=@t
       color=@t
       =theme
