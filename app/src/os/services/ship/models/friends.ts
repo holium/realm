@@ -10,7 +10,7 @@ import { Patp } from '../../../types';
 export const FriendModel = types.model({
   pinned: types.boolean,
   tags: types.optional(types.array(types.string), []),
-  mutual: types.boolean,
+  status: types.enumeration(['follower', 'following', 'fren']),
 });
 
 export type FriendType = Instance<typeof FriendModel>;
@@ -24,7 +24,7 @@ export const FriendsStore = types
           patp: value[0],
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
-          mutual: value[1].mutual,
+          status: value[1].status,
         }))
         .filter((friend: any) => friend.pinned);
       return list.filter((friend: any) => friend.pinned);
@@ -35,7 +35,7 @@ export const FriendsStore = types
           patp: value[0],
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
-          mutual: value[1].mutual,
+          status: value[1].status,
         })
       );
       return list.filter((friend: any) => !friend.pinned);
@@ -46,7 +46,7 @@ export const FriendsStore = types
           patp: value[0],
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
-          mutual: value[1].mutual,
+          status: value[1].status,
         })
       );
     },

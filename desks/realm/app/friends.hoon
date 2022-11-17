@@ -33,25 +33,28 @@
       =/  pals-targets  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/targets/noun)
       =/  pals-leeches  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/leeches/noun)
       =/  pals-mutuals  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/mutuals/noun)
+      =/  mutuals
+        %-  malt
+        ^-  (list [ship friend:store])
+        =/  ship-list  ~(tap in pals-mutuals)
+        %+  turn  ship-list
+          |=  =ship
+          [ship [pinned=%.n tags=*(set cord) status=%fren]]
       =/  following
+        %-  malt
         ^-  (list [ship friend:store])
         =/  ship-list  ~(tap in pals-targets)
         %+  turn  ship-list
           |=  =ship
           [ship [pinned=%.n tags=*(set cord) status=%following]]
       =/  followers
+        %-  malt
         ^-  (list [ship friend:store])
         =/  ship-list  ~(tap in pals-leeches)
         %+  turn  ship-list
           |=  =ship
           [ship [pinned=%.n tags=*(set cord) status=%follower]]
-      =/  mutuals
-        ^-  (list [ship friend:store])
-        =/  ship-list  ~(tap in pals-mutuals)
-        %+  turn  ship-list
-          |=  =ship
-          [ship [pinned=%.n tags=*(set cord) status=%fren]]
-      =/  pals-friends  (malt (weld mutuals (weld followers following)))
+      =/  pals-friends  (~(uni by followers) (~(uni by following) mutuals))
       `this(friends pals-friends)
     `this
   ::
