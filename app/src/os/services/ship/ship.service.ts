@@ -101,9 +101,9 @@ export class ShipService extends BaseService {
     'realm.ship.opened-notifications': this.openedNotifications,
     'realm.ship.read-dm': this.readDm,
     'realm.ship.read-group-dm': this.readGroupDm,
-    'realm.ship.upload-file': this.uploadFile,
     'realm.ship.get-group': this.getGroup,
     'realm.ship.get-group-members': this.getGroupMembers,
+    'realm.ship.upload-file': this.uploadFile,
   };
 
   static preload = {
