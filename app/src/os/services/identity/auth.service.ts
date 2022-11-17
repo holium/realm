@@ -42,23 +42,26 @@ export class AuthService extends BaseService {
   };
 
   static preload = {
-    login: (ship: string, password: string) =>
-      ipcRenderer.invoke('realm.auth.login', ship, password),
-    logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
-    refresh: () => ipcRenderer.invoke('realm.auth.refresh'),
-    setFirstTime: () => ipcRenderer.invoke('realm.auth.set-first-time'),
-    cancelLogin: () => ipcRenderer.invoke('realm.auth.cancel-login'),
-    setSelected: (ship: string) =>
-      ipcRenderer.invoke('realm.auth.set-selected', ship),
-    setOrder: (order: any[]) =>
-      ipcRenderer.invoke('realm.auth.set-order', order),
-    addShip: (newShip: { ship: string; url: string; code: string }) =>
-      ipcRenderer.invoke('realm.auth.add-ship', newShip),
-    getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
-    removeShip: (ship: string) =>
-      ipcRenderer.invoke('realm.auth.remove-ship', ship),
-    setMnemonic: (mnemonic: string) =>
-      ipcRenderer.invoke('realm.auth.set-mnemonic', mnemonic),
+    login: async (ship: string, password: string) =>
+      await ipcRenderer.invoke('realm.auth.login', ship, password),
+    logout: async (ship: string) =>
+      await ipcRenderer.invoke('realm.auth.logout', ship),
+    refresh: async () => await ipcRenderer.invoke('realm.auth.refresh'),
+    setFirstTime: async () =>
+      await ipcRenderer.invoke('realm.auth.set-first-time'),
+    cancelLogin: async () =>
+      await ipcRenderer.invoke('realm.auth.cancel-login'),
+    setSelected: async (ship: string) =>
+      await ipcRenderer.invoke('realm.auth.set-selected', ship),
+    setOrder: async (order: any[]) =>
+      await ipcRenderer.invoke('realm.auth.set-order', order),
+    addShip: async (newShip: { ship: string; url: string; code: string }) =>
+      await ipcRenderer.invoke('realm.auth.add-ship', newShip),
+    getShips: async () => await ipcRenderer.invoke('realm.auth.get-ships'),
+    removeShip: async (ship: string) =>
+      await ipcRenderer.invoke('realm.auth.remove-ship', ship),
+    setMnemonic: async (mnemonic: string) =>
+      await ipcRenderer.invoke('realm.auth.set-mnemonic', mnemonic),
     setShipProfile: async (
       patp: string,
       profile: { color: string; nickname: string; avatar: string }

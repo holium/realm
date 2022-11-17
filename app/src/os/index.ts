@@ -64,14 +64,14 @@ export class Realm extends EventEmitter {
   };
 
   static preload = {
-    boot: () => {
-      return ipcRenderer.invoke('realm.boot');
+    boot: async () => {
+      return await ipcRenderer.invoke('realm.boot');
     },
-    refresh: () => {
-      return ipcRenderer.invoke('realm.refresh');
+    refresh: async () => {
+      return await ipcRenderer.invoke('realm.refresh');
     },
-    reconnect: () => {
-      return ipcRenderer.invoke('realm.reconnect');
+    reconnect: async () => {
+      return await ipcRenderer.invoke('realm.reconnect');
     },
     disconnect: async () => {
       return await ipcRenderer.invoke('realm.disconnect');
@@ -454,6 +454,9 @@ export class Realm extends EventEmitter {
       if (!this.isReconnecting) {
         this.sendConnectionStatus(ConduitState.Initialized);
       }
+    });
+    conduit.on(ConduitState.Refreshing, (session) => {
+      this.sendConnectionStatus(ConduitState.Refreshing);
     });
     conduit.on(ConduitState.Refreshed, (session) => {
       // console.info(`ConduitState.Refreshed => %o`, session);

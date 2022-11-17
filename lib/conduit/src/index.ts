@@ -166,15 +166,23 @@ export class Conduit extends EventEmitter {
    */
   async refresh(url: string, code: string): Promise<string | undefined> {
     this.url = url;
+    this.updateStatus(ConduitState.Refreshing);
     const cookie: string | undefined = await Conduit.fetchCookie(url, code);
     if (cookie === undefined) {
       // console.log('Conduit.fetchCookie call failed with args => %o', {
       //   url,
       //   code,
       // });
+      this.updateStatus(ConduitState.Failed);
       return undefined;
     }
     this.cookie = cookie;
+    this.updateStatus(ConduitState.Refreshed, {
+      url: this.url,
+      ship: `~${this.ship}`,
+      cookie: this.cookie,
+      code: this.code,
+    });
     return this.cookie;
   }
 

@@ -23,7 +23,6 @@ export const ShipModel = types
     nickname: types.maybeNull(types.string),
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
-    code: types.maybeNull(types.string),
     loggedIn: types.optional(types.boolean, false),
     wallpaper: types.maybeNull(types.string),
     loader: types.optional(LoaderModel, { state: 'initial' }),
