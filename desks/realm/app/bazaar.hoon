@@ -628,19 +628,18 @@
     |%
     ::
     ++  determine-app-host
-      |=  [=app:store]
+      |=  [host=ship =app:store]
       ^-  (unit ship)
       ?>  ?=(%urbit -.app)
       ::  if the app has a glob-reference of %ames, use the ship value as the
       ::   host/origin of the app; otherwise, use the treaty ship
-      ?+  -.href.docket.app  host.app
+      ?+  -.href.docket.app  (some host)
         ::
         %glob
           ::
-          ?+  -.location.glob-reference.href.docket.app  host.app
+          ?+  -.location.glob-reference.href.docket.app  (some host)
             ::
-            %ames
-              (some ship.location.glob-reference.href.docket.app)
+            %ames  (some ship.location.glob-reference.href.docket.app)
           ==
       ==
 
@@ -836,7 +835,8 @@
       ?.  =(%urbit -.u.app)  (~(put by result) desk u.app)
       :: update app host
       ?>  ?=(%urbit -.u.app)
-      =.  host.u.app  (determine-app-host:helpers:bazaar u.app)
+      :: %-  (slog leaf+"on-ini: determine-app-host {<desk>}" ~)
+      =.  host.u.app  (determine-app-host:helpers:bazaar ship u.app)
       (~(put by result) desk u.app)
     ::  update the app catalog with new information re: hosts
     =.  catalog.state  updated-catalog
@@ -942,7 +942,7 @@
         u.app
       ?>  ?=(%urbit -.app)
       :: update app host to reflect any changes to the app host (origin)
-      =.  host.app                (determine-app-host:helpers:bazaar app)
+      =.  host.app                ?~(host.app ~ (determine-app-host:helpers:bazaar u.host.app app))
       =.  catalog.state           (~(put by catalog.state) desk app)
       =.  grid-index.state        (set-grid-index:helpers:bazaar desk grid-index.state)
       :_  state
