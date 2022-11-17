@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button, Label, Input, Icons } from 'renderer/components';
 import { useField, useForm } from 'mobx-easy-form';
-import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
+import { NetworkType } from 'os/services/tray/wallet.model';
 import { FieldSet } from 'renderer/components/Input/FormControl/Field';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
@@ -35,7 +35,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
 
     const nickname = useField({
       id: 'nickname',
-      form: form,
+      form,
       initialValue: '',
       validate: (nickname: string) => {
         return nickname.length
@@ -76,7 +76,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
           position="absolute"
           top="582px"
           zIndex={999}
-          onClick={() => WalletActions.navigateBack()}
+          onClick={async () => await WalletActions.navigateBack()}
         >
           <Icons
             name="ArrowLeftLine"

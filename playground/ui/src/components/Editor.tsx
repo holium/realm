@@ -1,10 +1,10 @@
-import React, { useCallback } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import Collaboration from "@tiptap/extension-collaboration";
-import StarterKit from "@tiptap/starter-kit";
-import * as Y from "yjs";
-import { useChannel, BaseRealmPayload } from "@holium/realm-multiplayer";
-import debounce from "lodash.debounce";
+import React, { useCallback } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import Collaboration from '@tiptap/extension-collaboration';
+import StarterKit from '@tiptap/starter-kit';
+import * as Y from 'yjs';
+import { useChannel, BaseRealmPayload } from '@holium/realm-multiplayer';
+import debounce from 'lodash.debounce';
 const ydoc = new Y.Doc();
 
 interface Props {
@@ -12,16 +12,16 @@ interface Props {
 }
 
 interface EditorChangesPayload extends BaseRealmPayload {
-  event: "update-text";
+  event: 'update-text';
   target: string;
   changes: Uint8Array;
 }
 
 function Editor({ id }: Props) {
-  const send = useChannel<EditorChangesPayload>("update-text", (payload) => {
+  const send = useChannel<EditorChangesPayload>('update-text', (payload) => {
     if (payload.target !== id) return;
     const updates = new Uint8Array(Object.values(payload.changes));
-    console.log("received updates", updates);
+    console.log('received updates', updates);
     Y.applyUpdate(ydoc, updates);
   });
 
@@ -29,7 +29,7 @@ function Editor({ id }: Props) {
     debounce(
       () => {
         send({
-          event: "update-text",
+          event: 'update-text',
           target: id,
           changes: Y.encodeStateAsUpdate(ydoc),
         });
@@ -44,7 +44,7 @@ function Editor({ id }: Props) {
     {
       editorProps: {
         attributes: {
-          style: "border: 1px solid black",
+          style: 'border: 1px solid black',
         },
       },
       extensions: [
@@ -57,7 +57,7 @@ function Editor({ id }: Props) {
           document: ydoc,
         }),
       ],
-      content: "<p>This is a text editor!</p>",
+      content: '<p>This is a text editor!</p>',
       onUpdate: () => {
         debouncedSend();
       },

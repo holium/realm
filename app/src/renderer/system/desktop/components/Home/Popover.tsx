@@ -1,21 +1,15 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/prop-types */
-import React, {
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
 import { Portal } from 'renderer/system/dialog/Portal';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { MiniApp } from '../SystemBar/components/MiniAppWindow';
 
-export type RealmPopoverProps = {
+export interface RealmPopoverProps {
   id: string;
   isOpen: boolean;
   coords?: any;
@@ -30,7 +24,7 @@ export type RealmPopoverProps = {
     width: number;
   };
   onClose: () => void;
-};
+}
 
 const Wrapper = styled(motion.div)`
   position: absolute;

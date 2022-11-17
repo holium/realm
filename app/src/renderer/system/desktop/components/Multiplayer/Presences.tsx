@@ -89,7 +89,7 @@ export function Presences() {
       RealmEvent.SyncPresenceState,
       (payload) => {
         if (payload.states.hasOwnProperty('ship')) {
-          setShips(payload.states['ship']);
+          setShips(payload.states.ship);
         }
       }
     );

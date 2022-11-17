@@ -1,16 +1,8 @@
 import { createPost } from '@urbit/api';
-import { toJS } from 'mobx';
-import {
-  getParent,
-  flow,
-  Instance,
-  types,
-  getParentOfType,
-} from 'mobx-state-tree';
+import { flow, Instance, types } from 'mobx-state-tree';
 import { LoaderModel } from '../../common.model';
-import { ShipModelType, ShipModel } from './ship';
 import { patp2dec, patp } from 'urbit-ob';
-import { Patp, PostType } from '../../../types';
+import { PostType } from '../../../types';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -194,7 +186,7 @@ export const Chat = types
       self.messages.unshift(
         NewChatMessage.create({
           index: post.index,
-          author: author,
+          author,
           pending: true,
           timeSent: post['time-sent'],
           // @ts-expect-error
@@ -238,7 +230,7 @@ export const ChatStore = types
   .views((self) => ({
     get list() {
       return Array.from(self.dms.values()).sort((a, b) => {
-        // @ts-ignore
+        // @ts-expect-error
         return b.pending - a.pending || b.lastSent - a.lastSent;
       });
     },

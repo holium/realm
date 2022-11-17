@@ -12,7 +12,7 @@ import LocalTrackPublication from '../track/LocalTrackPublication';
 import RemoteTrackPublication from '../track/RemoteTrackPublication';
 import RemoteTrack from '../track/RemoteTrack';
 import { Track } from '../track/Track';
-import { action, makeObservable, observable } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 
 export enum ConnectionState {
   Disconnected = 'disconnected',
@@ -40,7 +40,8 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
   audioTracks: Map<string, any>;
   videoTracks: Map<string, any>;
   lastSpokeAt?: Date | undefined;
-  private _connectionQuality: ConnectionQuality = ConnectionQuality.Unknown;
+  private readonly _connectionQuality: ConnectionQuality =
+    ConnectionQuality.Unknown;
 
   constructor(patp: string, room: Room) {
     super();
@@ -178,7 +179,7 @@ export class Participant extends (EventEmitter as new () => TypedEmitter<Partici
   }
 }
 
-export type ParticipantEventCallbacks = {
+export interface ParticipantEventCallbacks {
   // PeerConnectionState
   connected: () => void;
   disconnected: (reason?: DisconnectReason) => void;
@@ -213,4 +214,4 @@ export type ParticipantEventCallbacks = {
   trackPublished: (publication: RemoteTrackPublication) => void;
   trackUnpublished: (publication: RemoteTrackPublication) => void;
   isSpeakingChanged: (speaking: boolean) => void;
-};
+}

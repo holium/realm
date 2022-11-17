@@ -14,10 +14,10 @@ export type TokenTypes =
   | 'link'
   | 'tag'
   | 'emoticon';
-type TokenType = {
+interface TokenType {
   content: string;
   type: TokenTypes;
-};
+}
 
 const TextContainer = styled(Flex)`
   flex-direction: row;
@@ -26,7 +26,7 @@ const TextContainer = styled(Flex)`
 
 const detectTokens = (content: string): TokenType[] => {
   // TODO better token detection here
-  let tokens: TokenType[] = [];
+  const tokens: TokenType[] = [];
   // Pass 1, check for code
   // const colSections = content.split('```');
   // const inlineSections = content.split('`');

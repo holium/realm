@@ -6,7 +6,6 @@ import {
   BackgroundColorProps,
   ColorProps,
 } from 'styled-system';
-import { rgba, lighten } from 'polished';
 import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 

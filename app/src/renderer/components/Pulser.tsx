@@ -21,13 +21,13 @@ const PulseStyle = styled(motion.div)<{ background: string }>`
   background: ${(props: any) => rgba(props.background, 0.4)};
 `;
 
-type PulserProps = {
+interface PulserProps {
   style?: any;
   background: string;
   width: number | 'inherit';
   height: number | 'inherit';
   borderRadius: number;
-};
+}
 
 export const Pulser: FC<PulserProps> = (props: PulserProps) => {
   const { style, background, width, height, borderRadius } = props;

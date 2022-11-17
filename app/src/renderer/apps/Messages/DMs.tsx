@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -11,30 +11,47 @@ import {
   IconButton,
 } from 'renderer/components';
 import { ContactRow } from './components/ContactRow';
-import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
-import { darken, lighten, rgba } from 'polished';
+import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
+import {
+  PreviewDMType,
+  PreviewGroupDMType,
+  DMPreviewType,
+} from 'os/services/ship/models/courier';
 
-type IProps = {
+interface IProps {
   theme: ThemeModelType;
   headerOffset: number;
   height: number;
   onSelectDm: (dm: any) => void;
   onNewChat: (evt: any) => void;
-};
+}
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { courier } = useServices();
+  const [searchString, setSearchString] = useState<string>('');
   const { textColor, iconColor, dockColor, windowColor, mode } = theme;
   const previews = useMemo(() => {
     return Array.from(courier.previews.values()).sort((a, b) => {
-      // @ts-ignore
+      // @ts-expect-error
       return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
     });
   }, [courier.previews]);
+  const searchFilter = (preview: DMPreviewType) => {
+    if (!searchString || searchString.trim() === '') return true;
+    let to: string;
+    if (preview.type === 'group' || preview.type === 'group-pending') {
+      const dm = preview as PreviewGroupDMType;
+      to = Array.from(dm.to).join(', ');
+    } else {
+      const dm = preview as PreviewDMType;
+      to = dm.to;
+    }
+    return to.indexOf(searchString) === 0;
+  };
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -76,6 +93,10 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
                 theme.mode === 'dark'
                   ? lighten(0.1, windowColor)
                   : darken(0.055, windowColor),
+            }}
+            onChange={(evt: any) => {
+              evt.stopPropagation();
+              setSearchString(evt.target.value);
             }}
           />
         </Flex>
@@ -145,7 +166,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
                   </Text>
                 </Flex>
               )}
-              {previews.map((dm: any, index: number) => (
+              {previews.filter(searchFilter).map((dm: any, index: number) => (
                 <Box display="block" key={`${dm.to}-${index}`}>
                   <ContactRow
                     theme={theme}

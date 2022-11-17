@@ -29,7 +29,7 @@ export function getEmptyVideoStreamTrack() {
     canvas.width = 16;
     canvas.height = 16;
     canvas.getContext('2d')?.fillRect(0, 0, canvas.width, canvas.height);
-    // @ts-ignore
+    // @ts-expect-error
     const emptyStream = canvas.captureStream();
     [emptyVideoStreamTrack] = emptyStream.getTracks();
     if (!emptyVideoStreamTrack) {
@@ -72,7 +72,7 @@ export async function detectSilence(
 }
 
 export function getNewAudioContext(): AudioContext | void {
-  // @ts-ignore
+  // @ts-expect-error
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (AudioContext) {
     return new AudioContext();

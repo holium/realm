@@ -1,8 +1,7 @@
-import { FC, useRef, useMemo, useState } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react-lite';
 import { FixedSizeList as List } from 'react-window';
 import { rgba, darken } from 'polished';
-import { toJS } from 'mobx';
 
 import { Flex, Text, PersonRow } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';

@@ -1,9 +1,6 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Label, Input, Icons } from 'renderer/components';
-import { useField, useForm } from 'mobx-easy-form';
-import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
-import { FieldSet } from 'renderer/components/Input/FormControl/Field';
+import { Flex, Text, Icons } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
 import PasscodeInput from '../../components/PasscodeInput';
@@ -15,7 +12,7 @@ export const Locked: FC<LockedProps> = observer((props: LockedProps) => {
   const { walletApp } = useTrayApps();
   const { theme } = useServices();
 
-  let unlock = () => {
+  const unlock = () => {
     WalletActions.navigateBack();
   };
 

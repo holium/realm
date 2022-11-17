@@ -181,9 +181,9 @@ const raceRegexes = (str: string) => {
       content = { url: link[2] };
     }
   }
-  // @ts-ignore
+  // @ts-expect-error
   const perma = parsePermalink(convertToGroupRef(groupRef?.[2]));
-  // @ts-ignore
+  // @ts-expect-error
   const [, , host] = perma?.group.split('/') ?? [];
   if (
     groupRef &&
@@ -192,7 +192,7 @@ const raceRegexes = (str: string) => {
     urbitOb.isValidPatp(host)
   ) {
     pfix = groupRef[1];
-    // @ts-ignore
+    // @ts-expect-error
     content = permalinkToReference(perma);
     sfix = groupRef[3];
   }
@@ -242,11 +242,11 @@ const tokenizeMessage = (text: string) => {
       };
       const [pfix, content, sfix] = raceRegexes(str);
       if (content) {
-        // @ts-ignore
+        // @ts-expect-error
         pfix?.length > 0 && currBlock.push(pfix);
-        // @ts-ignore
+        // @ts-expect-error
         resetAndPush(content);
-        // @ts-ignore
+        // @ts-expect-error
         str = sfix;
       } else {
         currBlock.push(str);

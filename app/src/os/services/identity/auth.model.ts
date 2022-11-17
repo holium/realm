@@ -6,8 +6,7 @@ import {
   applySnapshot,
   castToSnapshot,
 } from 'mobx-state-tree';
-import { LoaderModel } from '../common.model';
-import { StepList } from '../common.model';
+import { LoaderModel, StepList } from '../common.model';
 import { Patp } from 'os/types';
 
 export const DEFAULT_WALLPAPER =
@@ -33,7 +32,7 @@ export const AuthShip = types
     },
     setMnemonic(mnemonic: string) {
       self.mnemonic = mnemonic;
-    }
+    },
   }));
 
 export type AuthShipType = Instance<typeof AuthShip>;
@@ -97,7 +96,7 @@ export const AuthStore = types
     },
     get mnemonic(): any {
       return self.selected!.mnemonic;
-    }
+    },
   }))
   .actions((self) => ({
     setFirstTime() {
@@ -128,14 +127,18 @@ export const AuthStore = types
       ) {
         self.order.push(id.toString());
       }
-      return;
     },
     setShip(newShip: AuthShipType) {
       self.ships.set(newShip.id, newShip);
     },
-    setShipProfile(id: string, nickname: string, color:string, avatar:string) {
-      let ship = self.ships.get(id);
-      if(!ship) return;
+    setShipProfile(
+      id: string,
+      nickname: string,
+      color: string,
+      avatar: string
+    ) {
+      const ship = self.ships.get(id);
+      if (!ship) return;
       ship.nickname = nickname;
       ship.color = color;
       ship.avatar = avatar;
@@ -200,7 +203,7 @@ export const AuthStore = types
     }),
     setMnemonic: (mnemonic: string) => {
       self.selected?.setMnemonic(mnemonic);
-    }
+    },
   }));
 
 export type AuthStoreType = Instance<typeof AuthStore>;

@@ -1,11 +1,4 @@
-import {
-  Instance,
-  types,
-  applySnapshot,
-  castToSnapshot,
-  clone,
-  applyPatch,
-} from 'mobx-state-tree';
+import { Instance, types, applySnapshot } from 'mobx-state-tree';
 
 export const Visa = types.model('Visa', {
   inviter: types.string,

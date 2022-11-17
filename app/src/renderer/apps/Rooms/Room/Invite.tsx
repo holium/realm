@@ -1,14 +1,13 @@
-import { FC, useRef, useState, useMemo } from 'react';
+import { FC, useRef, useState } from 'react';
 import {
   Flex,
-  IconButton,
   Icons,
   Input,
   Spinner,
   Text,
   TextButton,
 } from 'renderer/components';
-import { createField, createForm, useField, useForm } from 'mobx-easy-form';
+import { useField, useForm } from 'mobx-easy-form';
 import { useServices } from 'renderer/logic/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useTrayApps } from 'renderer/apps/store';
@@ -78,7 +77,7 @@ export const RoomInvite: FC<InviteRoomProps> = observer(
 
         if (inviteInputRef.current === null) return;
 
-        let innerInvite = inviteInputRef.current.value;
+        const innerInvite = inviteInputRef.current.value;
 
         // if (innerInvite === '') return;
 

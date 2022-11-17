@@ -4,10 +4,10 @@ import { rgba, darken } from 'polished';
 import { compose, space, color, typography } from 'styled-system';
 import { ThemeType } from 'renderer/theme';
 
-type MenuWrapperStyleProps = {
+interface MenuWrapperStyleProps {
   customBg?: string;
   theme: ThemeType;
-};
+}
 
 export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
   z-index: 1000;

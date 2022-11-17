@@ -1,17 +1,15 @@
 import { FC, useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 
 import { SystemBarStyle } from '../../SystemBar.styles';
-import { Flex, IconButton, Icons } from 'renderer/components';
+import { Flex } from 'renderer/components';
 import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
 import { useServices } from 'renderer/logic/store';
-import { TrayClock } from './Clock';
 import { darken, rgba } from 'polished';
 
-type ShipTrayProps = {};
+interface ShipTrayProps {}
 
 export const ShipTray: FC<ShipTrayProps> = observer(() => {
   const { theme } = useServices();
@@ -19,7 +17,7 @@ export const ShipTray: FC<ShipTrayProps> = observer(() => {
   const { dockColor, textColor } = useMemo(
     () => ({
       ...theme.currentTheme,
-      dockColor: rgba(theme.currentTheme.dockColor!, 0.55),
+      dockColor: rgba(theme.currentTheme.dockColor, 0.55),
     }),
     [theme.currentTheme.dockColor]
   );
