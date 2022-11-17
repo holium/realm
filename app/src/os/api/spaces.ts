@@ -59,6 +59,12 @@ export const SpacesApi = {
       space: pathArr[2],
     };
     return await new Promise((resolve, reject) => {
+      console.log({
+        update: {
+          path: pathObj,
+          payload: snakeify(payload.payload),
+        },
+      });
       conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',

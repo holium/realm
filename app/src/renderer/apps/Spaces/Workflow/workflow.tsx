@@ -6,6 +6,8 @@ import { SpacesCreateForm } from './Details';
 import { SelectArchetype } from './SelectArchetype';
 import { InviteMembers } from './InviteMembers';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { toJS } from 'mobx';
+import { snakeify } from 'os/lib/obj';
 
 interface NewSpace {
   access: 'public' | 'antechamber' | 'private';
@@ -91,7 +93,7 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
-    onNext: (_evt: any) => {
+    onNext: (_evt: any, _state: any, _setState: any) => {
       ShellActions.nextDialog('create-space-4');
     },
     onPrevious: () => {
@@ -128,24 +130,28 @@ export const spacesDialogs: DialogRenderers = {
   },
   'edit-space': (dialogProps: any) => ({
     workflow: true,
-    // stateKey: 'create-space',
-    component: (props: any) => <SpacesCreateForm edit={dialogProps} {...props} />,
+    component: (props: any) => (
+      <SpacesCreateForm edit={dialogProps} {...props} />
+    ),
     hasPrevious: () => false,
     nextButtonText: 'Update Space',
     onNext: (_evt: any, state: any, setState: any) => {
+      if (state.crestOption === 'color') {
+        state.image = '';
+      }
       let createForm = state;
-      if (!createForm.archetype)
-        createForm.archetype = 'community';
+      if (!createForm.archetype) createForm.archetype = 'community';
       delete createForm['archetypeTitle'];
       setState({ ...state, loading: true });
       // DesktopActions.setDialogLoading(true);
+
       createForm = {
         name: createForm.name,
         description: createForm.description || '',
         picture: createForm.picture,
         color: createForm.color,
-        theme: createForm.theme.toJSON(),
-      }
+        theme: toJS(createForm.theme),
+      };
       SpacesActions.updateSpace(state.path, createForm).then(() => {
         // DesktopActions.closeDialog();
         setState({ loading: false });
@@ -189,18 +195,18 @@ export const spacesDialogs: DialogRenderers = {
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
-      let createForm: NewSpace = state;
-      delete createForm.archetypeTitle;
-      setState({ ...state, loading: true });
-      // DesktopActions.setDialogLoading(true);
-      createForm = {
-        ...createForm,
-        description: createForm.description || '',
+      setState({
+        ...state,
+        loading: true,
+      });
+      delete state.archetypeTitle;
+      state.description = state.description || '';
+      if (state.crestOption === 'color') {
+        state.image = '';
       }
+      const createForm: NewSpace = state;
       SpacesActions.createSpace(createForm).then(() => {
-        // DesktopActions.closeDialog();
         setState({ loading: false });
-        // DesktopActions.setBlur(false);
       });
     },
     onPrevious: () => {
