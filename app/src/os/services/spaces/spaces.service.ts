@@ -358,25 +358,23 @@ export class SpacesService extends BaseService {
     SpacesApi.updateSpace(
       this.core.conduit!,
       {
-        payload: snakeify({
+        payload: {
           name: body.name,
           description: body.description,
           picture: body.picture,
           color: body.color,
           theme: {
-            'accent-color': body.theme.accentColor,
+            mode: body.theme.mode,
             'background-color': body.theme.backgroundColor,
+            'accent-color': body.theme.accentColor,
+            'input-color': body.theme.inputColor,
             'dock-color': body.theme.dockColor,
             'icon-color': body.theme.iconColor,
-            id: body.theme.id,
-            'input-color': body.theme.inputColor,
-            mode: body.theme.mode,
-            'mouse-color': body.theme.mouseColor,
             'text-color': body.theme.textColor,
+            'window-color': body.theme.windowColor,
             wallpaper: body.theme.wallpaper,
-            'window-color': body.theme.windowColor
           },
-        }),
+        },
         path: path,
       }
       //members,
