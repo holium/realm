@@ -1,14 +1,10 @@
-import { EthWalletType, WalletView } from 'os/services/tray/wallet.model';
+import { EthWalletType } from 'os/services/tray/wallet.model';
 import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Anchor, Icons } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
-import {
-  getBaseTheme,
-  convertEthAmountToUsd,
-  formatEthAmount,
-} from '../../lib/helpers';
+import { getBaseTheme } from '../../lib/helpers';
 
 export const NFTDetail: FC = () => {
   const { walletApp } = useTrayApps();
@@ -49,7 +45,7 @@ export const NFTDetail: FC = () => {
         position="absolute"
         top="582px"
         zIndex={999}
-        onClick={() => WalletActions.navigateBack()}
+        onClick={async () => await WalletActions.navigateBack()}
       >
         <Icons
           name="ArrowLeftLine"

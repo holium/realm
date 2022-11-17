@@ -24,14 +24,13 @@ import {
 } from './wallet.model';
 import EncryptedStore from '../../lib/encryptedStore';
 import { Network, Alchemy } from 'alchemy-sdk';
-// @ts-ignore
+// @ts-expect-error
 import abi from 'human-standard-token-abi';
-// @ts-ignore
+// @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
 import axios from 'axios';
-// @ts-ignore
+// @ts-expect-error
 import bitcore from 'bitcore-lib';
-import { CoinList } from 'renderer/apps/Wallet/views/common/Detail/CoinList';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -76,26 +75,32 @@ export class WalletService extends BaseService {
   };
 
   static preload = {
-    setMnemonic: (mnemonic: string, passcode: number[]) => {
-      return ipcRenderer.invoke(
+    setMnemonic: async (mnemonic: string, passcode: number[]) => {
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.set-mnemonic',
         mnemonic,
         passcode
       );
     },
-    checkMnemonic: (mnemonic: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.check-mnemonic', mnemonic);
+    checkMnemonic: async (mnemonic: string) => {
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.check-mnemonic',
+        mnemonic
+      );
     },
-    checkPasscode: (passcode: number[]) => {
-      return ipcRenderer.invoke('realm.tray.wallet.check-passcode', passcode);
+    checkPasscode: async (passcode: number[]) => {
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.check-passcode',
+        passcode
+      );
     },
-    checkProviderURL: (providerURL: string) => {
-      return ipcRenderer.invoke(
+    checkProviderURL: async (providerURL: string) => {
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.check-provider-url',
         providerURL
       );
     },
-    navigate: (
+    navigate: async (
       view: WalletView,
       options?: {
         canReturn?: boolean;
@@ -104,18 +109,22 @@ export class WalletService extends BaseService {
         action?: { type: string; data: any };
       }
     ) => {
-      return ipcRenderer.invoke('realm.tray.wallet.navigate', view, options);
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.navigate',
+        view,
+        options
+      );
     },
-    navigateBack: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.navigateBack');
+    navigateBack: async () => {
+      return await ipcRenderer.invoke('realm.tray.wallet.navigateBack');
     },
-    setView: (
+    setView: async (
       view: WalletView,
       index?: string,
       currentItem?: { type: 'transaction' | 'nft' | 'coin'; key: string },
       unsetCurrentItem?: boolean
     ) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.set-view',
         view,
         index,
@@ -123,59 +132,68 @@ export class WalletService extends BaseService {
         unsetCurrentItem
       );
     },
-    setReturnView: (view: WalletView) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-return-view', view);
+    setReturnView: async (view: WalletView) => {
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.set-return-view',
+        view
+      );
     },
-    setNetwork: (network: NetworkType) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-network', network);
+    setNetwork: async (network: NetworkType) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.set-network', network);
     },
-    getRecipient: (patp: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
+    getRecipient: async (patp: string) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
     },
-    saveTransactionNotes: (notes: string) => {
-      return ipcRenderer.invoke(
+    saveTransactionNotes: async (notes: string) => {
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.save-transaction-notes',
         notes
       );
     },
-    setXpub: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-xpub');
+    setXpub: async () => {
+      return await ipcRenderer.invoke('realm.tray.wallet.set-xpub');
     },
-    setSettings: (network: string, settings: UISettingsType) => {
-      return ipcRenderer.invoke(
+    setSettings: async (network: string, settings: UISettingsType) => {
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.set-settings',
         network,
         settings
       );
     },
-    setSharingMode: (who: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.set-sharing-mode', who);
+    setSharingMode: async (who: string) => {
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.set-sharing-mode',
+        who
+      );
     },
-    changeDefaultWallet: (network: string, index: number) => {
-      return ipcRenderer.invoke(
+    changeDefaultWallet: async (network: string, index: number) => {
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.change-default-wallet',
         network,
         index
       );
     },
-    setNetworkProvider: (network: string, provider: string) => {
-      return ipcRenderer.invoke(
+    setNetworkProvider: async (network: string, provider: string) => {
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.set-network-provider',
         network,
         provider
       );
     },
-    createWallet: (nickname: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.create-wallet', nickname);
+    createWallet: async (nickname: string) => {
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.create-wallet',
+        nickname
+      );
     },
-    sendEthereumTransaction: (
+    sendEthereumTransaction: async (
       walletIndex: string,
       to: string,
       amount: string,
       toPatp?: string,
       contractType?: string
     ) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.send-ethereum-transaction',
         walletIndex,
         to,
@@ -184,7 +202,7 @@ export class WalletService extends BaseService {
         contractType
       );
     },
-    sendERC20Transaction: (
+    sendERC20Transaction: async (
       walletIndex: string,
       to: string,
       amount: string,
@@ -192,7 +210,7 @@ export class WalletService extends BaseService {
       toPatp?: string,
       contractType?: string
     ) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.send-erc20-transaction',
         walletIndex,
         to,
@@ -202,7 +220,7 @@ export class WalletService extends BaseService {
         contractType
       );
     },
-    sendERC721Transaction: (
+    sendERC721Transaction: async (
       walletIndex: string,
       to: string,
       contractAddress: string,
@@ -210,7 +228,7 @@ export class WalletService extends BaseService {
       toPatp?: string,
       contractType?: string
     ) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.send-erc721-transaction',
         walletIndex,
         to,
@@ -220,26 +238,26 @@ export class WalletService extends BaseService {
         contractType
       );
     },
-    sendBitcoinTransaction: (
+    sendBitcoinTransaction: async (
       walletIndex: number,
       to: string,
       amount: string
     ) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.send-bitcoin-transaction',
         walletIndex,
         to,
         amount
       );
     },
-    addSmartContract: (
+    addSmartContract: async (
       contractId: string,
       contractType: string,
       name: string,
       contractAddress: string,
       walletIndex: string
     ) => {
-      return ipcRenderer.invoke(
+      return await ipcRenderer.invoke(
         'realm.tray.wallet.add-smart-contract',
         contractId,
         contractType,
@@ -248,11 +266,11 @@ export class WalletService extends BaseService {
         walletIndex
       );
     },
-    requestAddress: (from: string, network: string) => {
-      return ipcRenderer.invoke('realm.tray.wallet.request-address');
+    requestAddress: async (from: string, network: string) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.request-address');
     },
-    toggleNetwork: () => {
-      return ipcRenderer.invoke('realm.tray.wallet.toggle-network');
+    toggleNetwork: async () => {
+      return await ipcRenderer.invoke('realm.tray.wallet.toggle-network');
     },
   };
 
@@ -260,7 +278,7 @@ export class WalletService extends BaseService {
     super(core, options);
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       // ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
       ipcMain.handle(handlerName, this.wrapHandler(this.handlers[handlerName]));
     });
@@ -278,7 +296,7 @@ export class WalletService extends BaseService {
   }
 
   private autoLock() {
-    let shouldLock =
+    const shouldLock =
       this.state &&
       Date.now() - AUTO_LOCK_INTERVAL > this.state.lastInteraction.getTime();
     if (shouldLock) {
@@ -287,7 +305,7 @@ export class WalletService extends BaseService {
   }
 
   private lock() {
-    let hasPasscode = this.state && this.state.passcodeHash;
+    const hasPasscode = this.state && this.state.passcodeHash;
     if (hasPasscode) {
       this.state!.navigate(WalletView.LOCKED);
     }
@@ -300,7 +318,7 @@ export class WalletService extends BaseService {
   }
 
   async onLogin(ship: string) {
-    let secretKey: string = this.core.passwords.getPassword(ship)!;
+    const secretKey: string = this.core.passwords.getPassword(ship)!;
     const storeParams = {
       name: 'wallet',
       cwd: `realm.${ship}`,
@@ -312,7 +330,7 @@ export class WalletService extends BaseService {
         ? new Store<WalletStoreType>(storeParams)
         : new EncryptedStore<WalletStoreType>(storeParams);
 
-    let persistedState: WalletStoreType = this.db.store;
+    const persistedState: WalletStoreType = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {
       this.state = WalletStore.create(castToSnapshot(persistedState));
@@ -421,9 +439,9 @@ export class WalletService extends BaseService {
           )!.applyTransactionUpdate(transaction.net, transaction.transaction);
         //      else if (transaction.network == 'bitcoin')
         //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-        /*const tx = this.state!.ethereum.transactions.get(
+        /* const tx = this.state!.ethereum.transactions.get(
           transaction.transaction.hash
-        );*/
+        ); */
       }
     );
     WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
@@ -449,7 +467,7 @@ export class WalletService extends BaseService {
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
     console.log(this.state);
-    let passcodeHash = await bcrypt.hash(passcode.toString(), 12);
+    const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
@@ -499,7 +517,7 @@ export class WalletService extends BaseService {
 
   async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
     try {
-      let newProvider = new ethers.providers.JsonRpcProvider(providerURL);
+      const newProvider = new ethers.providers.JsonRpcProvider(providerURL);
       console.log('new provider: ', newProvider);
       const { chainId, name } = await newProvider.getNetwork();
       console.log('network name: ', name);
@@ -575,7 +593,7 @@ export class WalletService extends BaseService {
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
     console.log('hey from get rec');
     // TODO: fetch contact metadata (profile pic)
-    let recipientMetadata: {
+    const recipientMetadata: {
       color?: string;
       avatar?: string;
       nickname?: string;
@@ -605,7 +623,7 @@ export class WalletService extends BaseService {
 
       return {
         patp,
-        recipientMetadata: recipientMetadata,
+        recipientMetadata,
         address: address ? address.address : null,
         gasEstimate: 7,
       };
@@ -623,7 +641,7 @@ export class WalletService extends BaseService {
 
   async saveTransactionNotes(_event: any, notes: string) {
     const network = this.state!.navState.network;
-    var net;
+    let net;
     if (network === 'ethereum') {
       net = this.state!.ethereum.network;
     } else {
@@ -716,10 +734,10 @@ export class WalletService extends BaseService {
     // console.log(this.privateKey!.mnemonic!.phrase);
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
-    let signer = wallet.connect(this.ethProvider!);
+    const signer = wallet.connect(this.ethProvider!);
     console.log(amount);
-    let tx = {
-      to: to,
+    const tx = {
+      to,
       value: ethers.utils.parseEther(amount),
     };
     const { hash } = await signer.sendTransaction(tx);
@@ -769,11 +787,11 @@ export class WalletService extends BaseService {
     // console.log(this.privateKey!.mnemonic!.phrase);
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
-    let signer = wallet.connect(this.ethProvider!);
+    const signer = wallet.connect(this.ethProvider!);
     console.log(amount);
     const contract = new ethers.Contract(contractAddress, abi, signer);
     const ethAmount = ethers.utils.parseEther(amount);
-    let erc20Amount = ethers.utils.parseUnits(
+    const erc20Amount = ethers.utils.parseUnits(
       amount,
       this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!
         .decimals
@@ -823,7 +841,7 @@ export class WalletService extends BaseService {
     // console.log(this.privateKey!.mnemonic!.phrase);
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
-    let signer = wallet.connect(this.ethProvider!);
+    const signer = wallet.connect(this.ethProvider!);
     const contract = new ethers.Contract(contractAddress, nftabi, signer);
     const { hash } = await contract.transfer(to, tokenId);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
@@ -860,7 +878,7 @@ export class WalletService extends BaseService {
     amount: string
   ) {
     const senderPath = "m/44'/0'/0'/0/" + walletIndex;
-    let hash = await this.createBitcoinTransaction(
+    const hash = await this.createBitcoinTransaction(
       senderPath,
       to,
       Number(amount)
@@ -889,12 +907,12 @@ export class WalletService extends BaseService {
       this.state!.navState.btcNetwork === 'mainnet'
         ? this.state!.bitcoin
         : this.state!.testnet;
-    for (var key of btcStore.wallets.keys()) {
+    for (const key of btcStore.wallets.keys()) {
       const btcChain =
         this.state!.navState.btcNetwork === 'mainnet'
           ? 'btc/main'
           : 'btc/test3';
-      let wallet = btcStore.wallets.get(key)!;
+      const wallet = btcStore.wallets.get(key)!;
       const url = `https://api.blockcypher.com/v1/${btcChain}/addrs/${wallet.address}`;
       console.log(url);
       const response: any = await axios.get(url, {
@@ -919,7 +937,7 @@ export class WalletService extends BaseService {
   }
 
   setEthereumProviders() {
-    var alchemySettings;
+    let alchemySettings;
     if (this.state!.ethereum.network === 'mainnet') {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
         'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
@@ -953,9 +971,11 @@ export class WalletService extends BaseService {
 
   async updateEthereumExchangeRates() {
     this.state!.ethereum.setExchangeRate(await this.getEthereumExchangeRate());
-    for (var key of this.state!.ethereum.wallets.keys()) {
-      for (var coinKey of this.state!.ethereum.wallets.get(key)!.coins.keys()) {
-        let coin = this.state!.ethereum.wallets.get(key)!.coins.get(coinKey)!;
+    for (const key of this.state!.ethereum.wallets.keys()) {
+      for (const coinKey of this.state!.ethereum.wallets.get(
+        key
+      )!.coins.keys()) {
+        const coin = this.state!.ethereum.wallets.get(key)!.coins.get(coinKey)!;
         const exchange = await this.getERC20ExchangeRate(coin.address);
         if (exchange) {
           coin.setExchangeRate(exchange);
@@ -971,8 +991,8 @@ export class WalletService extends BaseService {
   async getAllEthereumBalances() {
     if (this.state!.navState.network === 'bitcoin') {
     } else if (this.state!.navState.network === 'ethereum') {
-      for (var key of this.state!.ethereum.wallets.keys()) {
-        let wallet: any = this.state!.ethereum.wallets.get(key);
+      for (const key of this.state!.ethereum.wallets.keys()) {
+        const wallet: any = this.state!.ethereum.wallets.get(key);
         const balance = await this.ethProvider!.getBalance(wallet.address);
         wallet.setBalance(utils.formatEther(balance));
       }
@@ -980,8 +1000,8 @@ export class WalletService extends BaseService {
   }
 
   async getAllCoins() {
-    for (var key of this.state!.ethereum.wallets.keys()) {
-      let wallet: any = this.state!.ethereum.wallets.get(key);
+    for (const key of this.state!.ethereum.wallets.keys()) {
+      const wallet: any = this.state!.ethereum.wallets.get(key);
       const balances = await this.alchemy!.core.getTokenBalances(
         wallet.address
       );
@@ -989,8 +1009,8 @@ export class WalletService extends BaseService {
       const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
         return token.tokenBalance !== '0';
       });
-      var coins = [];
-      for (let token of nonZeroBalances) {
+      const coins = [];
+      for (const token of nonZeroBalances) {
         const metadata = await this.alchemy!.core.getTokenMetadata(
           (token as any).contractAddress
         );
@@ -999,13 +1019,13 @@ export class WalletService extends BaseService {
           abi,
           this.ethProvider
         );
-        let wallet: any = this.state!.ethereum.wallets.get(key);
+        const wallet: any = this.state!.ethereum.wallets.get(key);
         const balance = (await contract.balanceOf(wallet.address)).toString();
         const coin = {
           name: metadata.symbol!,
           logo: metadata.logo || '',
           contractAddress: (token as any).contractAddress,
-          balance: balance,
+          balance,
           decimals: metadata.decimals!,
         };
         coins.push(coin);
@@ -1015,11 +1035,11 @@ export class WalletService extends BaseService {
   }
 
   async getAllNfts() {
-    for (var key of this.state!.ethereum.wallets.keys()) {
-      let wallet: any = this.state!.ethereum.wallets.get(key);
+    for (const key of this.state!.ethereum.wallets.keys()) {
+      const wallet: any = this.state!.ethereum.wallets.get(key);
       const nfts = await this.alchemy!.nft.getNftsForOwner(wallet.address);
-      var allNfts = [];
-      for (let nft of nfts.ownedNfts) {
+      const allNfts = [];
+      for (const nft of nfts.ownedNfts) {
         // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
         var floorPrice;
         const ownedNft = {
@@ -1058,7 +1078,7 @@ export class WalletService extends BaseService {
 
   async getAllEthereumTransactions() {
     // etherscan api call
-    for (var key of this.state!.ethereum.wallets.keys()) {
+    for (const key of this.state!.ethereum.wallets.keys()) {
       const address = this.state!.ethereum.wallets.get(key)!.address;
       const startBlock = 0;
       const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
@@ -1085,15 +1105,15 @@ export class WalletService extends BaseService {
     const satoshiToSend = amountToSend * 100000000;
     let fee = 0;
     let inputCount = 0;
-    let outputCount = 2;
+    const outputCount = 2;
     const utxos = await axios.get(
       `https://sochain.com/api/v2/get_tx_unspent/${sochain_network}/${sourceAddress}`
     );
     const transaction = new bitcore.Transaction();
     let totalAmountAvailable = 0;
-    let inputs: any = [];
+    const inputs: any = [];
     utxos.data.data.txs.forEach(async (element: any) => {
-      let utxo: any = {};
+      const utxo: any = {};
       utxo.satoshis = Math.floor(Number(element.value) * 100000000);
       utxo.script = element.script_hex;
       utxo.address = utxos.data.data.address;
@@ -1103,7 +1123,7 @@ export class WalletService extends BaseService {
       inputCount += 1;
       inputs.push(utxo);
     });
-    let transactionSize: number =
+    const transactionSize: number =
       inputCount * 146 + outputCount * 34 + 10 - inputCount;
     fee = transactionSize * 20;
     if (totalAmountAvailable - satoshiToSend - fee < 0) {

@@ -1,12 +1,11 @@
-import { FC, useMemo, useRef, useState } from 'react';
+import { FC, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, darken, lighten } from 'polished';
+import { rgba, darken } from 'polished';
 import styled, { css } from 'styled-components';
-import { ContextMenu, Flex, Icons, Text } from 'renderer/components';
+import { ContextMenu, Flex, Icons, Text, Crest } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { pluralize } from 'renderer/logic/lib/text';
 import { observer } from 'mobx-react';
@@ -18,11 +17,11 @@ export const EmptyGroup = styled.div`
   border-radius: 4px;
 `;
 
-type RowProps = {
+interface RowProps {
   theme: ThemeType;
   selected?: boolean;
   customBg: string;
-};
+}
 
 export const SpaceRowStyle = styled(motion.div)<RowProps>`
   height: 52px;
@@ -49,11 +48,11 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
         `}
 `;
 
-type SpaceRowProps = {
+interface SpaceRowProps {
   selected: boolean;
   space: SpaceModelType;
   onSelect: (spaceKey: string) => void;
-};
+}
 
 export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
@@ -110,7 +109,6 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
       onClick={(evt: any) => {
         // If a menu item is clicked
         if (contextMenuButtonIds.includes(evt.target.id)) {
-          return;
         } else {
           onSelect(space.path);
         }
@@ -136,7 +134,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
             src={space.picture}
           />
         ) : (
-          <EmptyGroup color={space.color! || '#000000'} />
+          <EmptyGroup color={space.color || '#000000'} />
         )}
         <Flex ml="10px" flexDirection="column">
           <Text

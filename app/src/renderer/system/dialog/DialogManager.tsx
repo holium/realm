@@ -8,12 +8,11 @@ import { getCenteredXY } from 'os/services/shell/lib/window-manager';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { toJS } from 'mobx';
 
-type DialogManagerProps = {
+interface DialogManagerProps {
   dialogId?: string;
   dialogProps: any;
-};
+}
 
 export const DialogManager: FC<DialogManagerProps> = observer(
   (props: DialogManagerProps) => {
@@ -28,21 +27,20 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     let dialogConfig: DialogConfig;
     if (isOpen) {
       const dialogRenderer = dialogRenderers[dialogId];
-      dialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(dialogProps.toJSON()) : dialogRenderer;
+      dialogConfig =
+        dialogRenderer instanceof Function
+          ? dialogRenderer(dialogProps.toJSON())
+          : dialogRenderer;
     }
 
     // clear dialog on escape pressed if closable
     useHotkeys(
       'esc',
       () => {
-        let notOnboardingDialog = !Object.values(OnboardingStep).includes(
+        const notOnboardingDialog = !Object.values(OnboardingStep).includes(
           dialogId as any
         );
-        if (
-          isOpen &&
-          notOnboardingDialog &&
-          dialogConfig.hasCloseButton
-        ) {
+        if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {
           ShellActions.closeDialog();
           ShellActions.setBlur(false);
         }

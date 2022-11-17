@@ -14,7 +14,6 @@ import { lighten } from 'polished';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;

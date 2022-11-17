@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
 
@@ -39,7 +39,7 @@ const AppEmpty = styled(Box)<AppEmptyProps>`
     `};
 `;
 
-type SuiteAppProps = {
+interface SuiteAppProps {
   id: string;
   index: number;
   selected: boolean;
@@ -49,7 +49,7 @@ type SuiteAppProps = {
   app?: AppType;
   isAdmin?: boolean;
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app?: any) => void;
-};
+}
 
 export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
   const { id, selected, index, accentColor, app, space, isAdmin, onClick } =
@@ -59,7 +59,7 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
     const isPinned = bazaar.isPinned(space.path, app.id);
     const weRecommended = bazaar.isRecommended(app.id);
 
-    let menu = [];
+    const menu = [];
     if (isAdmin) {
       menu.push({
         label: 'Remove from suite',

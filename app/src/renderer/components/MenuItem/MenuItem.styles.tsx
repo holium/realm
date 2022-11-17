@@ -1,4 +1,4 @@
-import { darken, rgba, lighten } from 'polished';
+import { darken, rgba } from 'polished';
 import styled, { css } from 'styled-components';
 import {
   compose,

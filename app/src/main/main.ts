@@ -14,11 +14,10 @@ import {
   BrowserWindow,
   shell,
   session,
-  screen,
   dialog,
   MessageBoxReturnValue,
 } from 'electron';
-import { autoUpdater, UpdateCheckResult } from 'electron-updater';
+import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
@@ -70,7 +69,7 @@ export class AppUpdater implements IAppUpdater {
           buttons: ['Yes', 'No'],
         })
         .then((result: MessageBoxReturnValue) => {
-          // @ts-ignore
+          // @ts-expect-error
           if (result.response === 0) {
             autoUpdater.downloadUpdate();
           }
@@ -105,6 +104,7 @@ export class AppUpdater implements IAppUpdater {
     }, 600000);
     autoUpdater.checkForUpdates();
   }
+
   checkForUpdates = () => {
     if (process.env.NODE_ENV === 'development') return;
     this.manualCheck = true;

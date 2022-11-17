@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
@@ -7,15 +7,14 @@ import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
 import { WindowIcon } from './WindowIcon';
 import { SharedAvatars } from './SharedAvatars';
-import { useCallback } from 'react';
 
-type TitlebarStyleProps = {
+interface TitlebarStyleProps {
   customBg: string;
   hasBorder: boolean;
   zIndex: number;
   isAppWindow?: boolean;
   hasBlur?: boolean;
-};
+}
 
 export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   box-sizing: border-box;
@@ -57,7 +56,7 @@ const TitleCentered = styled(Flex)`
   text-align: center;
 `;
 
-type TitlebarProps = {
+interface TitlebarProps {
   theme: Partial<ThemeModelType>;
   zIndex: number;
   showDevToolsToggle?: boolean;
@@ -82,7 +81,7 @@ type TitlebarProps = {
   };
   hasBlur?: boolean;
   children?: React.ReactNode;
-};
+}
 
 export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
   const {
@@ -108,7 +107,7 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
 
   let titleSection: any;
   if (props.app) {
-    const { title, icon } = props.app!;
+    const { title, icon } = props.app;
     titleSection = (
       <Flex gap={4} alignItems="center">
         <Flex justifyContent="center" alignItems="center">

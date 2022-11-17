@@ -4,7 +4,6 @@ import {
   types,
   flow,
   Instance,
-  clone,
   applySnapshot,
   getSnapshot,
 } from 'mobx-state-tree';

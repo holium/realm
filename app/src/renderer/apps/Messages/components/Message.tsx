@@ -17,17 +17,16 @@ import { motion } from 'framer-motion';
 import { Flex, Text, LinkPreview, Mention } from 'renderer/components';
 import { TextParsed } from './TextContent';
 
-import { toJS } from 'mobx';
 import { getReferenceView, getTextFromContent } from '../helpers/parser';
 
-type DMContact = {
+interface DMContact {
   type: 'text' | 'url' | 'mention' | 'code' | 'reference' | string;
   content: any;
   color?: string;
   textColor?: string;
   bgColor?: string;
   preview?: boolean;
-};
+}
 
 const isImage = (url: string) => {
   return /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);

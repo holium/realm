@@ -5,16 +5,15 @@ import { Bubble } from './Bubble';
 import { Message } from './Message';
 import { displayDate } from 'os/lib/time';
 import { GraphDMType } from 'os/services/ship/models/courier';
-import { ThemeType } from 'renderer/theme';
 
-type IProps = {
+interface IProps {
   isSending?: boolean;
   showAuthor: boolean;
   theme: any;
   our: string;
   ourColor: string;
   message: GraphDMType;
-};
+}
 
 export const ChatMessage: FC<IProps> = (props: IProps) => {
   const { theme, our, ourColor, message, showAuthor, isSending } = props;
@@ -43,8 +42,8 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
   const referenceColor = useMemo(
     () =>
       theme.mode === 'light'
-        ? darken(0.075, theme!.windowColor)
-        : theme!.windowColor,
+        ? darken(0.075, theme.windowColor)
+        : theme.windowColor,
     [theme.windowColor]
   );
 
@@ -94,7 +93,7 @@ export const ChatMessage: FC<IProps> = (props: IProps) => {
                     key={`${index}-message-${index}`}
                     type={type}
                     color={color}
-                    textColor={theme!.textColor}
+                    textColor={theme.textColor}
                     bgColor={referenceColor}
                     content={content}
                   />

@@ -10,7 +10,7 @@ export interface IuseStorage {
   upload: (file: File, bucket: string) => Promise<string>;
   uploadDefault: (file: File) => Promise<string>;
   uploading: boolean;
-  promptUpload: (onError?: (err: Error) => void) => Promise<string>;
+  promptUpload: (elem: HTMLElement) => Promise<File>;
 }
 
 const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
@@ -20,7 +20,7 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
   useEffect(() => {
     if (!s3) {
       ShipActions.getS3Bucket().then((response: any) => {
-        // console.log(response);
+        console.log(response);
         setS3(response);
       });
     }
@@ -92,14 +92,14 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
       if (s3.configuration.currentBucket === '') {
         throw new Error('current bucket not set');
       }
-      return upload(file, s3.configuration.currentBucket);
+      return await upload(file, s3.configuration.currentBucket);
     },
     [s3, upload]
   );
 
   const promptUpload = useCallback(
-    (onError?: (err: Error) => void): Promise<string> => {
-      return new Promise((resolve, reject) => {
+    async (elem: HTMLElement): Promise<File> => {
+      return await new Promise((resolve, reject) => {
         const fileSelector = document.createElement('input');
         fileSelector.setAttribute('type', 'file');
         fileSelector.setAttribute('accept', accept);
@@ -108,17 +108,12 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
           const files = fileSelector.files;
           if (!files || files.length <= 0) {
             reject();
-          } else if (onError) {
-            uploadDefault(files[0])
-              .then(resolve)
-              .catch((err) => onError(err));
-            document.body.removeChild(fileSelector);
           } else {
-            uploadDefault(files[0]).then(resolve);
-            document.body.removeChild(fileSelector);
+            elem.removeChild(fileSelector);
+            resolve(files[0]);
           }
         });
-        document.body.appendChild(fileSelector);
+        elem.appendChild(fileSelector);
         fileSelector.click();
       });
     },

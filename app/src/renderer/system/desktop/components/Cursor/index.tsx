@@ -1,14 +1,17 @@
 // @ts-nocheck
 import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
-import { m, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
 
 import { useEventListener } from './useEventListener';
 import IsDevice from './isDevice';
 
-export type Vec2 = { x: number; y: number };
+export interface Vec2 {
+  x: number;
+  y: number;
+}
 
-type AnimatedCursorProps = {
+interface AnimatedCursorProps {
   id?: string;
   color?: string;
   animateOut?: boolean;
@@ -26,7 +29,7 @@ type AnimatedCursorProps = {
   isResizeCursor?: boolean;
   initialRender?: boolean;
   // clickables: string[];
-};
+}
 
 const resizeMask = styled.div`
   .mask {
@@ -90,8 +93,8 @@ export const CursorCore: FC<AnimatedCursorProps> = ({
   const cursorInnerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef();
   const previousTimeRef = useRef();
-  let endX = useRef(0);
-  let endY = useRef(0);
+  const endX = useRef(0);
+  const endY = useRef(0);
 
   // Outer Cursor Animation Delay
   const animateOuterCursor = useCallback(

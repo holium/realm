@@ -15,7 +15,7 @@ const abbrMap = {
   bitcoin: 'BTC',
 };
 
-let ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
+const ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
 
 interface TransactionPaneProps {
   max: number;
@@ -134,7 +134,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
         ) : (
           <Flex mt={7} flexDirection="column">
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-              {/* @ts-ignore */}
+              {/* @ts-expect-error */}
               {transactionAmount}{' '}
               {props.coin
                 ? props.coin.name

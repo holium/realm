@@ -7,10 +7,10 @@ import { useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 
-type CommCircleProps = {
+interface CommCircleProps {
   customBg: string;
   theme: ThemeType;
-};
+}
 
 const ProviderStyle = styled(Flex)<CommCircleProps>`
   display: flex;

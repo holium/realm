@@ -1,37 +1,34 @@
 import { FC, useState } from 'react';
-import { darken } from 'polished';
+import { darken, transparentize } from 'polished';
 // @ts-expect-error its there...
-import UrbitSVG from '../../../../assets/urbit.svg';
-import {
-  Box,
-  Sigil,
-  Text,
-  Flex,
-  Icons,
-  Button,
-} from 'renderer/components';
+import { Box, Sigil, Text, Flex, Icons, Button } from 'renderer/components';
 import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { transparentize } from 'polished';
 
 interface SelectPlanProps extends BaseDialogProps {
   patp: string;
 }
 
 const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
-  let [subscribeLoading, setSubscribeLoading] = useState(false);
-  let [billingPeriod, setBillingPeriod] = useState('monthly');
-  let { onboarding } = useServices();
-  let planet = onboarding.planet!;
+  const [subscribeLoading, setSubscribeLoading] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState('monthly');
+  const { onboarding } = useServices();
+  const planet = onboarding.planet!;
 
   const panelBackground = darken(0.02, props.theme!.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
   const bulletIconColor = transparentize(0.1, props.theme!.iconColor);
-  const selectedBackground = transparentize(0.8, theme.light.colors.brand.primary);
-  const selectedBorder = `2px solid ${transparentize( 0.3, theme.light.colors.brand.primary)}`;
+  const selectedBackground = transparentize(
+    0.8,
+    theme.light.colors.brand.primary
+  );
+  const selectedBorder = `2px solid ${transparentize(
+    0.3,
+    theme.light.colors.brand.primary
+  )}`;
 
   async function subscribe() {
     setSubscribeLoading(true);
@@ -47,35 +44,31 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
           color={['black', 'white']}
           simple={false}
           size={48}
-          patp={planet.patp!}
+          patp={planet.patp}
         />
       </Box>
-      <Text> {planet.patp!} </Text>
+      <Text> {planet.patp} </Text>
     </Flex>
   );
 
   const HostingFeature = (props: any) => (
     <Flex pb={10} flexDirection="row">
-      <Icons
-        mr={14}
-        color={bulletIconColor}
-        name="CheckCircle"
-      />
+      <Icons mr={14} color={bulletIconColor} name="CheckCircle" />
       <Text variant="body">{props.children}</Text>
     </Flex>
   );
 
   const SubscriptionTier = (props: any) => (
     <Box
-        background={props.selected ? selectedBackground : panelBackground}
-        border={props.selected ? selectedBorder : panelBorder}
-        borderRadius={6}
-        padding={3}
-        display="flex"
-        width="100%"
-        mt={props.mt}
-        onClick={props.onClick}
-      >
+      background={props.selected ? selectedBackground : panelBackground}
+      border={props.selected ? selectedBorder : panelBorder}
+      borderRadius={6}
+      padding={3}
+      display="flex"
+      width="100%"
+      mt={props.mt}
+      onClick={props.onClick}
+    >
       <Flex width="100%" flexDirection="column" alignItems="center">
         <Flex width="100%" justifyContent="space-between">
           <Text variant="h6" mb={2}>
@@ -92,14 +85,25 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
         </Box>
       </Flex>
     </Box>
-  )
+  );
 
   return (
     <>
       <Flex width="100%" height="100%" flexDirection="row">
-        <Box flex={2} display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+        <Box
+          flex={2}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+        >
           <PlanetPreview />
-          <Flex pt={72} flexDirection="column" alignItems="left" justifyContent="center">
+          <Flex
+            pt={72}
+            flexDirection="column"
+            alignItems="left"
+            justifyContent="center"
+          >
             <HostingFeature> Backups </HostingFeature>
             <HostingFeature> Automatic OTA updates </HostingFeature>
             <HostingFeature> Customer support </HostingFeature>
@@ -107,15 +111,34 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
           </Flex>
         </Box>
         <Flex flex={3} px={50} flexDirection="column" justifyContent="center">
-          <SubscriptionTier title="Monthly subscription" price={`$${planet.priceMonthly}/month`} selected={billingPeriod === 'monthly'} onClick={() => setBillingPeriod('monthly')}>
+          <SubscriptionTier
+            title="Monthly subscription"
+            price={`$${planet.priceMonthly}/month`}
+            selected={billingPeriod === 'monthly'}
+            onClick={() => setBillingPeriod('monthly')}
+          >
             Pay monthly and own your planet after you first three payments.
           </SubscriptionTier>
-          <SubscriptionTier mt={56} title="Annual subscription" price={`$${planet.priceAnnual}/year`} selected={billingPeriod === 'annual'} onClick={() => setBillingPeriod('annual')}>
+          <SubscriptionTier
+            mt={56}
+            title="Annual subscription"
+            price={`$${planet.priceAnnual}/year`}
+            selected={billingPeriod === 'annual'}
+            onClick={() => setBillingPeriod('annual')}
+          >
             Pay annually and own your planet immediately upon purchase.
           </SubscriptionTier>
         </Flex>
       </Flex>
-      <Button position="absolute" top={495} left={640} isLoading={subscribeLoading} onClick={subscribe}>Subscribe</Button>
+      <Button
+        position="absolute"
+        top={495}
+        left={640}
+        isLoading={subscribeLoading}
+        onClick={subscribe}
+      >
+        Subscribe
+      </Button>
     </>
   );
 });

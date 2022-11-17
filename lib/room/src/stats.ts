@@ -118,10 +118,10 @@ export function computeBitrate<T extends ReceiverStats | SenderStats>(
   let bytesNow: number | undefined;
   let bytesPrev: number | undefined;
   if ('bytesReceived' in currentStats) {
-    bytesNow = (currentStats as ReceiverStats).bytesReceived;
+    bytesNow = currentStats.bytesReceived;
     bytesPrev = (prevStats as ReceiverStats).bytesReceived;
   } else if ('bytesSent' in currentStats) {
-    bytesNow = (currentStats as SenderStats).bytesSent;
+    bytesNow = currentStats.bytesSent;
     bytesPrev = (prevStats as SenderStats).bytesSent;
   }
   if (

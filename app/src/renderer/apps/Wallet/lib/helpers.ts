@@ -8,7 +8,7 @@ import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 
 export function getBaseTheme(currentTheme: ThemeType) {
-  // @ts-ignore
+  // @ts-expect-error
   return theme[currentTheme.mode];
 }
 
@@ -17,14 +17,14 @@ export function shortened(address: string) {
 }
 
 export function formatWei(wei: string) {
-  let amount = BigNumber.from(wei);
+  const amount = BigNumber.from(wei);
   return utils.formatEther(amount).slice(0, 7);
 }
 
 export function convertWeiToUsd(wei: string, exchangeRate: number = 1647.37) {
-  let amount = BigNumber.from(wei);
-  let eth = Number(utils.formatEther(amount));
-  let usd = eth * exchangeRate;
+  const amount = BigNumber.from(wei);
+  const eth = Number(utils.formatEther(amount));
+  const usd = eth * exchangeRate;
 
   return usd.toFixed(2);
 }
@@ -34,13 +34,13 @@ export function getTransactions(
   address?: string,
   coin?: ERC20Type | null
 ): TransactionType[] {
-  let coinFilter = (transaction: TransactionType) => {
+  const coinFilter = (transaction: TransactionType) => {
     // return coin ? transaction.coinName === coin!.name : true;
     // TODO: once we have hook to coin in transaction add this
-    return coin ? false : true;
+    return !coin;
   };
 
-  let addressFilter = (transaction: TransactionType) => {
+  const addressFilter = (transaction: TransactionType) => {
     return address ? transaction.ourAddress === address : true;
   };
 
@@ -78,13 +78,13 @@ export interface BtcAmount {
 
 export function formatEthAmount(amount: string): EthAmount {
   const count = amount.match(/\./g);
-  var ethAmount = amount;
+  let ethAmount = amount;
   if (count) {
     if (count.length > 1) {
       ethAmount = ethAmount.replaceAll('.', '');
     }
   }
-  let wei = utils.parseEther(ethAmount)!;
+  const wei = utils.parseEther(ethAmount)!;
   return {
     eth: utils.formatUnits(wei, 'ether').slice(0, 6),
     gwei: utils.formatUnits(wei, 'gwei').slice(0, 6),
@@ -102,20 +102,20 @@ export function formatEthAmount(amount: string): EthAmount {
 export function formatCoinAmount(balance: string | BigInt, decimals: number) {
   let amount = typeof balance === 'string' ? balance : balance.toString();
   if (amount.length < decimals) {
-    let additionalDigits = '0'.repeat(decimals - amount.length + 1);
+    const additionalDigits = '0'.repeat(decimals - amount.length + 1);
     amount = additionalDigits + amount;
   }
-  let decimalPosition = amount.length - decimals;
-  let includeDecimal = !amount
+  const decimalPosition = amount.length - decimals;
+  const includeDecimal = !amount
     .slice(decimalPosition)
     .split('')
     .every((char) => char === '0');
-  let parts = [amount.slice(0, decimalPosition)];
+  const parts = [amount.slice(0, decimalPosition)];
   if (includeDecimal) {
     parts.push('.');
     parts.push(amount.slice(decimalPosition));
   }
-  let adjustedAmount = parts.join('');
+  const adjustedAmount = parts.join('');
 
   return {
     big: BigInt(amount),
@@ -131,19 +131,19 @@ export function convertEthAmountToUsd(
   if (amount.eth === '0') {
     return 0;
   }
-  let usd = Number(amount.eth) * exchangeRate;
+  const usd = Number(amount.eth) * exchangeRate;
   return usd.toFixed(2);
 }
 
 export function formatBtcAmount(amount: string): BtcAmount {
   const count = amount.match(/\./g);
-  var ethAmount = amount;
+  let ethAmount = amount;
   if (count) {
     if (count.length > 1) {
       ethAmount = ethAmount.replaceAll('.', '');
     }
   }
-  let wei = utils.parseEther(ethAmount)!;
+  const wei = utils.parseEther(ethAmount)!;
   return {
     btc: utils.formatUnits(wei, 'ether').slice(0, 6),
     sats: 'placeholder',
@@ -157,7 +157,7 @@ export function convertBtcAmountToUsd(
   if (amount.btc === '0') {
     return 0;
   }
-  let usd = Number(amount.btc) * exchangeRate;
+  const usd = Number(amount.btc) * exchangeRate;
   return usd.toFixed(2);
 }
 
@@ -168,7 +168,7 @@ export function convertERC20AmountToUsd(
   if (amount.btc === '0') {
     return 0;
   }
-  let usd = Number(amount.btc) * exchangeRate;
+  const usd = Number(amount.btc) * exchangeRate;
   return usd.toFixed(2);
 }
 

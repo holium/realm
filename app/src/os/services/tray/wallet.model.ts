@@ -6,10 +6,7 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
-import { Network, Alchemy, Nft } from 'alchemy-sdk';
-import { IntelligentTieringAccessTier } from 'aws-sdk/clients/s3';
-import { TransactionDescription } from 'ethers/lib/utils';
-import { WalletApi } from 'os/api/wallet';
+import { Network, Alchemy } from 'alchemy-sdk';
 
 const alchemySettings = {
   apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
@@ -53,13 +50,13 @@ const Settings = types.model('Settings', {
 });
 
 export type SettingsType = Instance<typeof Settings>;
-export type UISettingsType = {
+export interface UISettingsType {
   walletCreationMode: WalletCreationMode;
   sharingMode: SharingMode;
   blocked: string[];
   defaultIndex: number;
   provider: string;
-};
+}
 
 export const BitcoinTransaction = types.model('BitcoinTransaction', {
   hash: types.identifier,
@@ -121,7 +118,7 @@ const BitcoinStore = types
   .views((self) => ({
     get list() {
       return Array.from(self.wallets).map(([key, wallet]) => ({
-        key: key,
+        key,
         nickname: wallet.nickname,
         address: wallet.address,
         balance: wallet.balance,
@@ -133,7 +130,7 @@ const BitcoinStore = types
       Object.entries(bitcoinWallets).forEach(([key, wallet]) => {
         const walletUpdate = {
           ...(wallet as any),
-          key: key,
+          key,
           transactions: {},
         };
         this.applyWalletUpdate(walletUpdate);
@@ -145,7 +142,7 @@ const BitcoinStore = types
     },
     // updates
     applyWalletUpdate(wallet: any) {
-      var walletObj;
+      let walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
           index: Number(wallet.key),
@@ -161,7 +158,7 @@ const BitcoinStore = types
         console.log(wallet.key);
         self.wallets.set(wallet.key, bitcoinWallet);
       }
-      for (var transaction in wallet.transactions) {
+      for (const transaction in wallet.transactions) {
         //    self.wallets.get(wallet.key)!.applyTransactionUpdate(transaction);
       }
     },
@@ -275,7 +272,7 @@ const EthWallet = types
       contractAddress: string,
       decimals: number
     ) {
-      /*if (contractType === 'erc721') {
+      /* if (contractType === 'erc721') {
         *const contract = ERC721.create({
           name: name,
           collectionName: '',
@@ -286,22 +283,22 @@ const EthWallet = types
           floorPrice: '',
         })
         self.nfts.set(contract.address, contract);
-      }*/
+      } */
       if (contractType === 'erc20') {
         const contract = ERC20.create({
-          name: name,
+          name,
           logo: '',
           address: contractAddress,
           balance: '0',
-          decimals: decimals,
+          decimals,
           conversions: {},
         });
         self.coins.set(contract.address, contract);
       }
     },
     setCoins(coins: any) {
-      var formattedCoins: any = {};
-      for (var Coin of coins) {
+      const formattedCoins: any = {};
+      for (const Coin of coins) {
         const coin: any = Coin;
         formattedCoins[coin.contractAddress] = {
           name: coin.name,
@@ -317,8 +314,8 @@ const EthWallet = types
       applySnapshot(self.coins, getSnapshot(newCoins));
     },
     setNFTs(nfts: any) {
-      var formattedNft: any = {};
-      for (var NFT of nfts) {
+      const formattedNft: any = {};
+      for (const NFT of nfts) {
         const nft: any = NFT;
         formattedNft[nft.contractAddress + nft.tokenId] = {
           name: nft.name,
@@ -340,7 +337,7 @@ const EthWallet = types
       self.coins.clear();
       self.nfts.clear();
     },
-    /*applyHistory(history: any) {
+    /* applyHistory(history: any) {
       console.log(history);
       let formattedHistory: any = {};
       Object.entries(history).forEach(([key, transaction]) => {
@@ -365,7 +362,7 @@ const EthWallet = types
       const map = types.map(EthTransaction);
       const newHistory = map.create(formattedHistory);
       applySnapshot(self.transactions, getSnapshot(newHistory));
-    },*/
+    }, */
     getTransaction(network: string, hash: string) {
       const tx: any = self.transactions.get(network)!.get(hash);
       console.log(tx);
@@ -395,8 +392,8 @@ const EthWallet = types
       timestamp: any,
       contractType?: string
     ) {
-      let tx = {
-        hash: hash,
+      const tx = {
+        hash,
         walletIndex: self.index,
         amount: gweiToEther(amount).toString(),
         network: 'ethereum',
@@ -409,10 +406,10 @@ const EthWallet = types
         status: 'pending',
         notes: '',
       };
-      let netMap =
+      const netMap =
         self.transactions.get(network)?.toJSON() ||
         types.map(EthTransaction).create().toJSON();
-      let newMap = {
+      const newMap = {
         ...netMap,
         [hash]: tx,
       };
@@ -427,7 +424,7 @@ const EthWallet = types
         self.transactions.set(network, {});
       }
       netMap = self.transactions.get(network)!;
-      let tx = netMap?.get(transaction.hash);
+      const tx = netMap?.get(transaction.hash);
       console.log('applying update');
       if (tx) {
         tx.walletIndex = self.index;
@@ -435,7 +432,7 @@ const EthWallet = types
         netMap.set(transaction.hash, tx);
         self.transactions.set(network, netMap);
       } else {
-        let tx = {
+        const tx = {
           ...transaction,
           walletIndex: self.index,
           amount: '0',
@@ -446,11 +443,11 @@ const EthWallet = types
       }
     },
     applyTransactions(network: string, transactions: any) {
-      var formattedTransactions: any = {};
+      let formattedTransactions: any = {};
       let previousTransactions = self.transactions.toJSON()[network];
       if (!previousTransactions) self.transactions.set(network, {});
       previousTransactions = self.transactions.toJSON()[network];
-      for (var transaction of transactions) {
+      for (const transaction of transactions) {
         const previousTransaction = previousTransactions[transaction.hash];
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,
@@ -515,7 +512,7 @@ export const EthStore = types
   .views((self) => ({
     get list() {
       return Array.from(self.wallets).map(([key, wallet]) => ({
-        key: key,
+        key,
         nickname: wallet.nickname,
         address: wallet.address,
         balance: wallet.balance,
@@ -528,7 +525,7 @@ export const EthStore = types
       Object.entries(ethWallets).forEach(([key, wallet]) => {
         const walletUpdate = {
           ...(wallet as any),
-          key: key,
+          key,
           coins: {},
           nfts: {},
           transactions: {},
@@ -541,10 +538,10 @@ export const EthStore = types
       self.settings.provider = provider;
     },
     setDefaultWallet(index: number) {
-      self.settings!.defaultIndex = index;
+      self.settings.defaultIndex = index;
     },
     applyWalletUpdate: flow(function* (network: string, wallet: any) {
-      var walletObj;
+      let walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
           index: Number(wallet.key),
@@ -562,7 +559,7 @@ export const EthStore = types
         console.log(wallet.key);
         self.wallets.set(wallet.key, ethWallet);
       }
-      for (var transaction in wallet.transactions) {
+      for (const transaction in wallet.transactions) {
         self.wallets
           .get(wallet.key)!
           .applyTransactionUpdate(network, transaction);
@@ -648,7 +645,7 @@ export const WalletStore = types
     },
 
     get currentWallet() {
-      let walletStore =
+      const walletStore =
         self.navState.network === 'ethereum'
           ? self.ethereum
           : self.navState.btcNetwork === 'mainnet'
@@ -665,30 +662,30 @@ export const WalletStore = types
     },
     setNetwork(network: NetworkType) {
       self.navState.network = network;
-      /* @ts-ignore */
+      /* @ts-expect-error */
       self.resetNavigation();
     },
     setBtcNetwork(network: string) {
       self.navState.btcNetwork = network;
-      // @ts-ignore
+      // @ts-expect-error
       self.resetNavigation();
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
-      let canReturn = options?.canReturn || true;
-      let walletIndex = options?.walletIndex || self.navState.walletIndex;
-      let detail = options?.detail;
-      let action = options?.action;
-      let network = options?.network || self.navState.network;
+      const canReturn = options?.canReturn || true;
+      const walletIndex = options?.walletIndex || self.navState.walletIndex;
+      const detail = options?.detail;
+      const action = options?.action;
+      const network = options?.network || self.navState.network;
 
       if (
         canReturn &&
         ![WalletView.LOCKED, WalletView.NEW].includes(self.navState.view)
       ) {
-        let returnSnapshot = getSnapshot(self.navState);
+        const returnSnapshot = getSnapshot(self.navState);
         self.navHistory.push(WalletNavState.create(returnSnapshot));
       }
 
-      let newState = WalletNavState.create({
+      const newState = WalletNavState.create({
         view,
         walletIndex,
         detail,
@@ -699,7 +696,7 @@ export const WalletStore = types
       self.navState = newState;
     },
     navigateBack() {
-      let DEFAULT_RETURN_VIEW = WalletView.LIST;
+      const DEFAULT_RETURN_VIEW = WalletView.LIST;
       let returnSnapshot = getSnapshot(
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,

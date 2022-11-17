@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Card } from 'renderer/components';
 import { lighten } from 'polished';

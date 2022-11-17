@@ -17,7 +17,7 @@ export const Input = styled.input<InputProps>`
   }
 `;
 
-/* @ts-ignore */
+/* @ts-expect-error */
 export const ContainerFlex = styled(Flex)<ContainerFlexProps>`
   :focus-within {
     /* @ts-ignore */

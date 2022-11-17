@@ -8,11 +8,11 @@ import { observer } from 'mobx-react';
 import { useCore, useServices } from 'renderer/logic/store';
 import { OSActions } from 'renderer/logic/actions/os';
 
-type ConnStatusStyleProps = {
+interface ConnStatusStyleProps {
   theme: ThemeType;
   baseColor: string;
   mode: 'light' | 'dark';
-};
+}
 
 const ConnStatusStyle = styled(motion.div)<ConnStatusStyleProps>`
   border-radius: 36px;
@@ -57,7 +57,7 @@ const ConnStatusStyle = styled(motion.div)<ConnStatusStyleProps>`
 `;
 
 // const
-type ConnStatusProps = {};
+interface ConnStatusProps {}
 
 const ConnIndicator = styled(motion.div)`
   height: 8px;
@@ -94,7 +94,7 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
         statusText = 'Reconnect';
       }
     }
-    let indicatorColor = lighten(0.34, color);
+    const indicatorColor = lighten(0.34, color);
     useEffect(() => {
       if (status === 'connected' && isReconnecting) {
         setIsReconnecting(false);

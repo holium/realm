@@ -1,21 +1,13 @@
-import { FC, useState } from 'react';
-import styled from 'styled-components';
-import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
+import { FC } from 'react';
+import { darken } from 'polished';
 
-import { Flex, Box, Text, Icons, TextButton } from 'renderer/components';
-import { CircleButton } from '../../../components/CircleButton';
-import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Text, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
 import {
   getBaseTheme,
-  getTransactions,
   getMockCoinIcon,
   formatCoinAmount,
 } from '../../../lib/helpers';
-import { TransactionList } from '../Transaction/List';
-import { SendTransaction } from '../Transaction/Send';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
 
@@ -28,8 +20,8 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
   const baseTheme = getBaseTheme(theme.currentTheme);
 
   const Coin = (props: { details: ERC20Type }) => {
-    let coinIcon = props.details.logo || getMockCoinIcon(props.details.name);
-    let amount = formatCoinAmount(
+    const coinIcon = props.details.logo || getMockCoinIcon(props.details.name);
+    const amount = formatCoinAmount(
       props.details.balance,
       props.details.decimals
     );
@@ -43,8 +35,8 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
         justifyContent="space-between"
         backgroundColor={darken(0.03, theme.currentTheme.windowColor)}
         borderRadius="6px"
-        onClick={() =>
-          WalletActions.navigate(WalletView.WALLET_DETAIL, {
+        onClick={async () =>
+          await WalletActions.navigate(WalletView.WALLET_DETAIL, {
             detail: { type: 'coin', key: props.details.address },
           })
         }
@@ -56,9 +48,9 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
               {' '}
               {amount.display} {props.details.name}{' '}
             </Text>
-            {/*<Text fontSize={1} color={baseTheme.colors.text.disabled}>
+            {/* <Text fontSize={1} color={baseTheme.colors.text.disabled}>
               $5780.67
-      </Text>*/}
+      </Text> */}
           </Flex>
         </Flex>
         <Icons

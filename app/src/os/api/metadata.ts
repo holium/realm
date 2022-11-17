@@ -5,13 +5,13 @@ export const MetadataApi = {
     conduit: Conduit,
     metadataStore: any
   ): Promise<any> => {
-    return conduit.watch({
+    return await conduit.watch({
       app: 'metadata-store',
       path: '/app-name/graph',
       onEvent: (data: any) => {
         if (data['metadata-update'] && data['metadata-update'].associations) {
           Object.assign(
-            metadataStore['graph'],
+            metadataStore.graph,
             data['metadata-update'].associations
           );
         }

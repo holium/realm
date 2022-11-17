@@ -7,10 +7,10 @@ import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
 import { Splash } from './Splash';
 
-type LoginProps = {
+interface LoginProps {
   hasWallpaper?: boolean;
   firstTime: boolean;
-};
+}
 
 export const Auth: FC<LoginProps> = observer((props: LoginProps) => {
   const { hasWallpaper, firstTime } = props;

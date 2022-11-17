@@ -7,10 +7,17 @@ import {
 import { toJS } from 'mobx';
 import { Patp } from '../../../types';
 
+const FriendStatus = types.enumeration('FriendStatus', [
+  'fren',
+  'follower',
+  'following',
+]);
+export type FriendStatus = Instance<typeof FriendStatus>;
+
 export const FriendModel = types.model({
   pinned: types.boolean,
   tags: types.optional(types.array(types.string), []),
-  status: types.enumeration(['follower', 'following', 'fren']),
+  status: FriendStatus,
 });
 
 export type FriendType = Instance<typeof FriendModel>;

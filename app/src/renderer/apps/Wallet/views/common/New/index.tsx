@@ -28,7 +28,7 @@ export enum NewWalletScreen {
 
 export const EthNew: FC<any> = observer(() => {
   const { walletApp } = useTrayApps();
-  let initialScreen = walletApp.initialized
+  const initialScreen = walletApp.initialized
     ? NewWalletScreen.DETECTED_EXISTING
     : NewWalletScreen.CREATE;
 
@@ -39,9 +39,9 @@ export const EthNew: FC<any> = observer(() => {
   const [seedPhrase, setSeedPhrase] = useState(
     ethers.Wallet.createRandom().mnemonic.phrase
   );
-  let phraseSetter = (phrase: string) => setSeedPhrase(phrase);
+  const phraseSetter = (phrase: string) => setSeedPhrase(phrase);
 
-  let setPasscodeWrapper = (passcode: number[]) => {
+  const setPasscodeWrapper = (passcode: number[]) => {
     setPasscode(passcode);
     setScreen(NewWalletScreen.CONFIRM_PASSCODE);
   };
@@ -73,7 +73,7 @@ export const EthNew: FC<any> = observer(() => {
       <RecoverExisting setSeedPhrase={phraseSetter} setScreen={setScreen} />
     ),
   };
-  const currentComponent = components[screen as NewWalletScreen];
+  const currentComponent = components[screen];
 
   return (
     <Box width="100%" height="100%" px={16} py={12}>

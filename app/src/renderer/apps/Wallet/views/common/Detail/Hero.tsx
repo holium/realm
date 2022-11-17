@@ -18,14 +18,13 @@ import {
   formatBtcAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
-import { ThemeModelType } from 'os/services/theme.model';
-import { CircleButton } from '../../../components/CircleButton';
-import { SendTransaction } from '../Transaction/Send';
 import {
+  ERC20Type,
   EthWalletType,
   BitcoinWalletType,
 } from 'os/services/tray/wallet.model';
+import { CircleButton } from '../../../components/CircleButton';
+import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';
 
 const usdc = {
@@ -66,9 +65,9 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const { walletApp } = useTrayApps();
 
     const themeData = getBaseTheme(theme.currentTheme);
-    const panelBorder = darken(0.08, theme.currentTheme!.windowColor);
+    const panelBorder = darken(0.08, theme.currentTheme.windowColor);
 
-    let amountDisplay =
+    const amountDisplay =
       walletApp.navState.network === 'ethereum'
         ? !props.coin
           ? `${formatEthAmount(props.wallet.balance).eth} ETH`
@@ -76,7 +75,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`
         : `${formatBtcAmount(props.wallet.balance).btc} BTC`;
-    let amountUsdDisplay =
+    const amountUsdDisplay =
       walletApp.navState.network === 'ethereum'
         ? !props.coin
           ? walletApp.ethereum.conversions.usd
@@ -101,10 +100,10 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           )}`
         : '';
 
-    let accountDisplay = !props.coin ? (
+    const accountDisplay = !props.coin ? (
       props.wallet.nickname
     ) : (
-      <Flex onClick={() => WalletActions.navigateBack()}>
+      <Flex onClick={async () => await WalletActions.navigateBack()}>
         <Icons
           name="ArrowLeftLine"
           size={2}
@@ -143,7 +142,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             <Flex>
               <Icons name="Ethereum" height="20px" mr={2} />
               <Text pt="2px" textAlign="center" fontSize="14px">
-                {shortened(props.wallet!.address)}
+                {shortened(props.wallet.address)}
               </Text>
             </Flex>
             <Flex>
@@ -155,7 +154,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
               ) : (
                 <>
                   <CopyButton
-                    content={props.wallet!.address}
+                    content={props.wallet.address}
                     colors={themeData.colors}
                   />
                   <Box onClick={() => props.setQROpen(!props.QROpen)}>
@@ -186,7 +185,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
               <QRCodeSVG
                 width="100%"
                 height="100%"
-                value={props.wallet!.address}
+                value={props.wallet.address}
               />
             </Flex>
           </Box>
@@ -209,7 +208,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             colors={themeData.colors}
           />
         </Box>
-        {/* @ts-ignore */}
+        {/* @ts-expect-error */}
         <SendReceiveButtons
           hidden={props.sendTrans}
           windowColor={theme.currentTheme.windowColor}
@@ -217,7 +216,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           receive={() => props.setQROpen(true)}
         />
         <SendTransaction
-          wallet={props.wallet!}
+          wallet={props.wallet}
           hidden={!props.sendTrans}
           onScreenChange={props.onScreenChange}
           close={props.close}
@@ -263,7 +262,7 @@ function SendReceiveButtons(props: {
   send: any;
   receive: any;
 }) {
-  let panelBackground = darken(0.04, props.windowColor);
+  const panelBackground = darken(0.04, props.windowColor);
 
   return (
     <Box width="100%" hidden={props.hidden}>
@@ -290,7 +289,7 @@ interface BalanceInterface {
   colors: any;
 }
 function Balance(props: BalanceInterface) {
-  let coinIcon = props.coin
+  const coinIcon = props.coin
     ? props.coin.logo || getMockCoinIcon(props.coin.name)
     : '';
   return !props.coin ? (

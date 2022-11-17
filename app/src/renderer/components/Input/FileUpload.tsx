@@ -123,17 +123,17 @@ export const FileUpload: FC<IProps> = ({
   const [files, setFiles] = useState<any>({});
 
   const handleUploadBtnClick = () => {
-    // @ts-ignore
+    // @ts-expect-error
     fileInputField.current!.click();
   };
 
   const addNewFiles = (newFiles: any) => {
-    for (let file of newFiles) {
+    for (const file of newFiles) {
       if (file.size <= maxFileSizeInBytes) {
         if (!multiple) {
           return { file };
         }
-        // @ts-ignore
+        // @ts-expect-error
         files[file.name] = file;
       }
     }
@@ -148,7 +148,7 @@ export const FileUpload: FC<IProps> = ({
   const handleNewFileUpload = (evt: any) => {
     const { files: newFiles } = evt.target;
     if (newFiles.length) {
-      let updatedFiles = addNewFiles(newFiles);
+      const updatedFiles = addNewFiles(newFiles);
       setFiles(updatedFiles);
       callUpdateFilesCb(updatedFiles);
       onChange(evt);
@@ -157,16 +157,16 @@ export const FileUpload: FC<IProps> = ({
 
   const removeFile = (fileName: string) => {
     delete files[fileName];
-    // @ts-ignore
+    // @ts-expect-error
     fileInputField.current.value = '';
     setFiles({ ...files });
     callUpdateFilesCb({ ...files });
   };
 
-  // @ts-ignore
-  let file = files['file'];
+  // @ts-expect-error
+  const file = files.file;
 
-  let isImageFile = file && file.type.split('/')[0] === 'image';
+  const isImageFile = file && file.type.split('/')[0] === 'image';
 
   return (
     <>
