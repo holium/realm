@@ -101,19 +101,20 @@ export class ShipService extends BaseService {
     'realm.ship.opened-notifications': this.openedNotifications,
     'realm.ship.read-dm': this.readDm,
     'realm.ship.read-group-dm': this.readGroupDm,
+    'realm.ship.get-group': this.getGroup,
     'realm.ship.get-group-members': this.getGroupMembers,
     'realm.ship.upload-file': this.uploadFile,
   };
 
   static preload = {
-    getApps: async () => {
-      return await ipcRenderer.invoke('realm.ship.get-apps');
+    getApps: () => {
+      return ipcRenderer.invoke('realm.ship.get-apps');
     },
-    getOurGroups: async () => {
-      return await ipcRenderer.invoke('realm.ship.get-our-groups');
+    getOurGroups: () => {
+      return ipcRenderer.invoke('realm.ship.get-our-groups');
     },
-    getGroupMembers: async (path: string) => {
-      return await ipcRenderer.invoke('realm.ship.get-group-members', path);
+    getGroupMembers: (path: string) => {
+      return ipcRenderer.invoke('realm.ship.get-group-members', path);
     },
     // getAppPreview: (ship: string, desk: string) => {
     //   return ipcRenderer.invoke('realm.ship.get-app-preview', ship, desk);
@@ -450,9 +451,11 @@ export class ShipService extends BaseService {
   async getOurGroups(_event: any): Promise<any> {
     return await GroupsApi.getOur(this.core.conduit!);
   }
-
+  async getGroup(_event: any, path: string): Promise<any> {
+    return await GroupsApi.getGroup(this.core.conduit!, path);
+  }
   async getGroupMembers(_event: any, path: string): Promise<any> {
-    return await GroupsApi.getOur(this.core.conduit!);
+    return await GroupsApi.getGroupMembers(this.core.conduit!, path);
   }
 
   // ------------------------------------------
