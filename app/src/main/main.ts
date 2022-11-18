@@ -47,6 +47,10 @@ export interface IAppUpdater {
   checkForUpdates: () => void;
 }
 
+log.transports.file.level = isDevelopment ? 'debug' : 'info';
+log.info(`INSTALL_MOON=${process.env.INSTALL_MOON}`);
+log.info(`GH_TOKEN=${process.env.GH_TOKEN}`);
+
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
   constructor() {
@@ -94,7 +98,6 @@ export class AppUpdater implements IAppUpdater {
           setImmediate(() => autoUpdater.quitAndInstall());
         });
     });
-    log.transports.file.level = isDevelopment ? 'debug' : 'info';
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
     setInterval(() => {
