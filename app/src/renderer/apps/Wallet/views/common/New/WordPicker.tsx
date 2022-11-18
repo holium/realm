@@ -18,6 +18,7 @@ export const WordPicker: FC<WordPickerProps> = observer(
       wordsToSelect: Array<{ word: string; available: boolean }>;
       selectedWords: string[];
     }>({ wordsToSelect: [], selectedWords: [] });
+    const [error, setError] = useState('');
     const { theme } = useServices();
     const themeData = getBaseTheme(theme.currentTheme);
 
@@ -34,7 +35,6 @@ export const WordPicker: FC<WordPickerProps> = observer(
     function selectWord(index: number) {
       let word = '';
       const updatedWordsToSelect = state.wordsToSelect.map((element, i) => {
-        console.log(element);
         if (i === index) {
           word = element.word;
           element.available = false;
@@ -52,7 +52,12 @@ export const WordPicker: FC<WordPickerProps> = observer(
       });
 
       if (updatedSelectedWords.join(' ') === props.seedPhrase) {
+        setError('');
         props.onValidChange(true);
+      } else if (updatedWordsToSelect.every(item => !item.available)) {
+        setError('Recovery phrase does not match.');
+      } else {
+        setError('');
       }
     }
 
@@ -218,6 +223,9 @@ export const WordPicker: FC<WordPickerProps> = observer(
           background={props.background}
           theme={theme.currentTheme}
         />
+        <Text mt={1} variant="body" color={themeData.colors.text.error}>
+          {error}
+        </Text>
       </>
     );
   }

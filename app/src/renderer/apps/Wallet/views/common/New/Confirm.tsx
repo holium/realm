@@ -13,21 +13,11 @@ interface ConfirmProps {
 }
 
 export const Confirm: FC<ConfirmProps> = observer((props: ConfirmProps) => {
-  const { setTrayAppDimensions, dimensions } = useTrayApps();
   const [valid, setValid] = useState(false);
   const { theme } = useServices();
 
   const panelBackground = darken(0.02, theme.currentTheme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
-
-  useEffect(() => {
-    const prevDims = dimensions;
-    setTrayAppDimensions({ height: 560, width: 360 });
-
-    return () => {
-      setTrayAppDimensions(prevDims);
-    };
-  }, []);
 
   return (
     <Flex
