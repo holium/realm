@@ -44,13 +44,15 @@
       =.  title.native-app            'Relic Browser'
       =.  color.native-app            '#92D4F9'
       =.  icon.native-app             'AppIconCompass'
-    =/  catalog                       (~(put by catalog.init) %os-browser [%native native-app])
+      =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
+    =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
     =|  =native-app:store
       =.  title.native-app            'Settings'
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
-    =.  catalog.state                 (~(put by catalog) %os-settings [%native native-app])
+      =.  config.native-app           [size=[6 5] titlebar-border=%.y show-titlebar=%.n]
+    =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
     =.  grid-index.state              grid-index.init
     =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
@@ -92,7 +94,7 @@
       (mole |.(!<(state-0 vase)))
     ?^  old
       `this(state u.old)
-    ~&  >>  'nuking old state' ::  temporarily doing this for making development easier
+    ~&  >>  'nuking old %bazaar state' ::  temporarily doing this for making development easier
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)
@@ -840,21 +842,18 @@
   ++  on-ini
     |=  [init=(map [=ship =desk] =treaty:treaty)]
     ^-  (quip card _state)
-    :: %-  (slog leaf+"{<dap.bowl>}: treaty-update [on-ini] => {<[init]>}" ~)
-    =/  updated-catalog
-    %-  ~(rep by init)
-      |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
-      =/  app  (~(get by catalog.state) desk)
-      ?~  app  result
-      ::  host only applies to urbit apps
-      ?.  =(%urbit -.u.app)  (~(put by result) desk u.app)
-      :: update app host
-      ?>  ?=(%urbit -.u.app)
-      :: %-  (slog leaf+"on-ini: determine-app-host {<desk>}" ~)
-      =.  host.u.app  (determine-app-host:helpers:bazaar ship u.app)
-      (~(put by result) desk u.app)
-    ::  update the app catalog with new information re: hosts
-    =.  catalog.state  updated-catalog
+    =/  updated-catalog=catalog:store
+      %-  ~(rep by init)
+        |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
+        =/  app  (~(get by catalog.state) desk)
+        ?~  app  result
+        
+        ?.  =(%urbit -.u.app)   (~(put by result) desk u.app) ::  host only applies to urbit apps
+        ?>  ?=(%urbit -.u.app)                                :: update app host
+        =.  host.u.app          (determine-app-host:helpers:bazaar ship u.app)
+        (~(put by result) desk u.app)
+    ::
+    =.  catalog.state     (~(uni by catalog.state) updated-catalog)
     `state
   ::
   ++  on-add
