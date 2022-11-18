@@ -10,7 +10,6 @@ interface RecommendedAppsProps {
 
 export const RecommendedApps: FC<RecommendedAppsProps> = observer(
   (props: RecommendedAppsProps) => {
-    const { isOpen } = props;
     const { spaces, bazaar } = useServices();
 
     const currentSpace = spaces.selected;

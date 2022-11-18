@@ -1,8 +1,18 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 import { rgba } from 'polished';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Flex, Text, Box, AppTile, Button } from 'renderer/components';
+import {
+  Flex,
+  Text,
+  Box,
+  AppTile,
+  Icons,
+  IconButton,
+  Button,
+  Spinner,
+} from 'renderer/components';
 import {
   AppType,
   InstallStatus,
@@ -10,6 +20,8 @@ import {
 } from 'os/services/spaces/models/bazaar';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 const AppEmpty = styled(Box)`
   border-radius: 16px;
@@ -30,7 +42,15 @@ interface AppPreviewProps {
 export const AppPreview: FC<AppPreviewProps> = observer(
   (props: AppPreviewProps) => {
     const { app } = props;
+    const { theme, spaces } = useServices();
+    const space = spaces.selected;
     const info = app.info;
+    const isUninstalled = app.installStatus === InstallStatus.uninstalled;
+    const isInstalled = app.installStatus === InstallStatus.installed;
+    const isInstalling =
+      (app as UrbitAppType).installStatus !== InstallStatus.installed &&
+      !isUninstalled;
+
     const length = 60;
     const showDetails = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
@@ -90,29 +110,58 @@ export const AppPreview: FC<AppPreviewProps> = observer(
             </Text>
           </Flex>
           <Flex flexGrow={0} gap={12}>
-            {/* {app?.type !== 'urbit' ||
-            (app?.type === 'urbit' &&
-              app?.installStatus === InstallStatus.installed) ? (
-              <Button borderRadius={6} opacity={0.3} variant="primary">
-                Installed
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                borderRadius={6}
+            {isUninstalled && (
+              <IconButton
+                size={26}
+                color={theme.currentTheme.accentColor}
+                customBg={rgba(theme.currentTheme.dockColor, 0.5)}
+                hoverFill={theme.currentTheme.accentColor}
                 onClick={onInstallation}
               >
-                Install
+                <Icons name="CloudDownload" />
+              </IconButton>
+            )}
+            {isInstalling && (
+              <Flex
+                height={26}
+                width={26}
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Spinner size={0} />
+              </Flex>
+            )}
+            {isInstalled && (
+              <Button
+                pt="2px"
+                pb="2px"
+                variant="minimal"
+                fontWeight={400}
+                borderRadius={6}
+                color={rgba(theme.currentTheme.textColor, 0.9)}
+                backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
+                onClick={(evt) => {
+                  DesktopActions.openAppWindow(space!.path, toJS(app));
+                  DesktopActions.setHomePane(false);
+                }}
+              >
+                Open
               </Button>
-            )} */}
-            <Button
+            )}
+            <IconButton
+              size={26}
+              customBg={rgba(theme.currentTheme.dockColor, 0.5)}
+            >
+              <Icons name="MoreHorizontal" />
+            </IconButton>
+            {/* <Button
               variant="minimal"
               fontWeight={400}
               borderRadius={6}
               onClick={showDetails}
             >
               App info
-            </Button>
+            </Button> */}
           </Flex>
         </Flex>
       </Flex>

@@ -118,8 +118,8 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
     return (
       <Box position="relative">
         {isUninstalled && (
-          <Box zIndex={6} position="absolute" right="12px" top="12px">
-            <IconButton size={32} onClick={onInstallation}>
+          <Box zIndex={6} position="absolute" right="14px" top="14px">
+            <IconButton size={26} color={accentColor} onClick={onInstallation}>
               <Icons name="CloudDownload" />
             </IconButton>
           </Box>
