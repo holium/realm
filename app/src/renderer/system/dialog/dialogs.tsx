@@ -5,6 +5,7 @@ import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
 import { WallpaperDialogConfig } from '../../apps/System/Dialogs/Wallpaper';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
+import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -24,6 +25,8 @@ export type BaseDialogProps = {
   onClose?: () => void; // is the funciton that executres when the dialog is closed
   hasCloseButton: boolean; // should the dialog have a close button in the top right
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
+  draggable?: boolean;
+  unblurOnClose?: boolean;
   theme?: ThemeModelType;
 } & BaseWorkflowProps;
 
@@ -39,6 +42,7 @@ export interface DialogRenderers {
 }
 
 export const dialogRenderers: DialogRenderers = {
+  'app-detail-dialog': AppDetailDialog,
   'wallpaper-dialog': WallpaperDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,

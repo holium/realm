@@ -27,8 +27,11 @@ const LinkPreviewStyle = styled(Flex)<LinkPreviewStyleType>`
     margin: 0;
     width: calc(100% - 20px);
     text-overflow: ellipsis;
-    font-size: 14px;
     color: ${(props: LinkPreviewStyleType) => props.customTextColor};
+    a:visited {
+      text-decoration: none;
+      color: ${(props: LinkPreviewStyleType) => props.customTextColor};
+    }
   }
 `;
 
@@ -36,7 +39,9 @@ interface ILinkPreview {
   link: string;
   canPreview?: boolean;
   textColor?: string;
+  fontSize?: number;
   customBg?: string;
+  onClick?: () => void;
 }
 
 export const LinkPreview: FC<ILinkPreview> = (props: ILinkPreview) => {
@@ -45,9 +50,12 @@ export const LinkPreview: FC<ILinkPreview> = (props: ILinkPreview) => {
       <LinkPreviewStyle
         customTextColor={props.textColor}
         className="realm-cursor-hover"
+        onClick={props.onClick}
       >
         <Icons name="Link" />
-        <a href={props.link}>{props.link}</a>
+        <a style={{ fontSize: props.fontSize || 14 }} href={props.link}>
+          {props.link}
+        </a>
       </LinkPreviewStyle>
     </EmbedBox>
   );

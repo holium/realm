@@ -31,7 +31,7 @@ export const DocketApp = types.model('DocketApp', {
   license: types.string,
 });
 
-export type DocketAppType = Instance<typeof DocketApp>;
+type DocketAppType = Instance<typeof DocketApp>;
 
 export const WebApp = types.model('WebApp', {
   id: types.identifier,
@@ -43,11 +43,7 @@ export const WebApp = types.model('WebApp', {
   href: types.string,
 });
 
-export type WebAppType = Instance<typeof WebApp>;
-
-export const AppModel = types.union({ eager: false }, DocketApp, WebApp);
-
-export type AppModelType = Instance<typeof AppModel>;
+const AppModel = types.union({ eager: false }, DocketApp, WebApp);
 
 export const DocketStore = types
   .model('DocketStore', {

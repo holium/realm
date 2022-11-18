@@ -107,11 +107,14 @@ export class ShipService extends BaseService {
   };
 
   static preload = {
-    getApps: () => {
-      return ipcRenderer.invoke('realm.ship.get-apps');
+    getApps: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-apps');
     },
-    getOurGroups: () => {
-      return ipcRenderer.invoke('realm.ship.get-our-groups');
+    getOurGroups: async () => {
+      return await ipcRenderer.invoke('realm.ship.get-our-groups');
+    },
+    getGroup: (path: string) => {
+      return ipcRenderer.invoke('realm.ship.get-group', path);
     },
     getGroupMembers: (path: string) => {
       return ipcRenderer.invoke('realm.ship.get-group-members', path);
@@ -269,7 +272,7 @@ export class ShipService extends BaseService {
     const notificationStore = new DiskStore(
       'notifications',
       ship,
-      secretKey,
+      secretKey!,
       NotificationStore,
       { unseen: [], seen: [], all: [], recent: [] }
     );
@@ -277,14 +280,14 @@ export class ShipService extends BaseService {
     const courierStore = new DiskStore(
       'courier',
       ship,
-      secretKey,
+      secretKey!,
       CourierStore
     );
     this.models.courier = courierStore.model;
     const contactStore = new DiskStore(
       'contacts',
       ship,
-      secretKey,
+      secretKey!,
       ContactStore,
       { ourPatp: ship }
     );
@@ -292,7 +295,7 @@ export class ShipService extends BaseService {
     const friendsStore = new DiskStore(
       'friends',
       ship,
-      secretKey,
+      secretKey!,
       FriendsStore,
       { all: {} }
     );
