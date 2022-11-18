@@ -15,6 +15,7 @@ import {
   Sigil,
   IconButton,
   Select,
+  Skeleton,
 } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
@@ -86,7 +87,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       theme.currentTheme;
     const { workflowState, setState } = props;
     const searchRef = useRef(null);
-
+    const [loading, setLoading] = useState(false);
     const { peopleForm, person } = useMemo(() => createPeopleForm(), []);
     const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
     const [nicknameMap, setNicknameMap] = useState<{ [patp: string]: string }>(
@@ -94,12 +95,18 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
     );
     const [permissionMap, setPermissionMap] = useState<{
       [patp: string]: {
-        roles: [MemberRole];
+        primaryRole: MemberRole;
+        roles: [string];
         alias: string;
         status: MemberStatus;
       };
     }>({
-      [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
+      [ship!.patp]: {
+        primaryRole: 'owner',
+        roles: ['owner'],
+        alias: '',
+        status: 'host',
+      },
     });
 
     const setWorkspaceState = (obj: any) => {
@@ -112,13 +119,36 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
 
     // Setting up options menu
     useEffect(() => {
-      console.log(workflowState);
       if (workflowState.type === 'group') {
-        ShipActions.getGroupMembers(workflowState.path).then((members: any) => {
-          console.log(members);
-        });
+        setLoading(true);
+        ShipActions.getGroupMembers(workflowState.path).then(
+          (groupMembers: any) => {
+            // Set up our ships
+            console.log(groupMembers);
+            groupMembers[ship!.patp].roles = ['owner'];
+            groupMembers[ship!.patp].status = 'host';
+            groupMembers[ship!.patp].primaryRole = 'owner';
+            selectedPatp.add(ship!.patp);
+            setNicknameMap({ ...nicknameMap, [ship!.patp]: '' });
+            const newMembers: any = {
+              ...groupMembers,
+            };
+            setPermissionMap(newMembers);
+            setWorkspaceState({
+              ...workflowState,
+              members: newMembers,
+            });
+            delete groupMembers[ship!.patp];
+            for (var member of Object.keys(groupMembers)) {
+              selectedPatp.add(member);
+              setNicknameMap({ ...nicknameMap, [member]: '' });
+            }
+            setLoading(false);
+          }
+        );
       } else {
         setWorkspaceState({
+          ...workflowState,
           members: {
             [ship!.patp]: { roles: ['owner'], alias: '', status: 'host' },
           },
@@ -139,6 +169,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
       };
       setPermissionMap(newMembers);
       setWorkspaceState({
+        ...workflowState,
         members: newMembers,
       });
     };
@@ -192,7 +223,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 customBg={windowColor}
                 textColor={textColor}
                 iconColor={iconColor}
-                selected={permissionMap[patp].roles[0]}
+                selected={permissionMap[patp].primaryRole}
                 disabled={isOur}
                 options={[
                   { label: 'Initiate', value: 'initiate' },
@@ -204,7 +235,12 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 onClick={(selected: Roles) => {
                   setPermissionMap({
                     ...permissionMap,
-                    [patp]: { roles: [selected], alias: '', status: 'invited' },
+                    [patp]: {
+                      primaryRole: selected,
+                      roles: [selected],
+                      alias: '',
+                      status: 'invited',
+                    },
                   });
                 }}
               />
@@ -224,6 +260,12 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                     const nickMap = nicknameMap;
                     delete nickMap[patp];
                     setNicknameMap(nickMap);
+                    const delMembers = workflowState.members;
+                    delete delMembers[patp];
+                    setWorkspaceState({
+                      ...workflowState,
+                      members: delMembers,
+                    });
                   }}
                 >
                   <Icons opacity={0.5} name="Close" />
@@ -251,8 +293,16 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
           <Flex flexDirection="column" gap={16} height="calc(100% - 40px)">
             <Flex gap={16} flexDirection="row" alignItems="center">
               <Crest
-                color={workflowState.color}
-                picture={workflowState.picture}
+                color={
+                  workflowState.crestOption === 'color'
+                    ? workflowState.color
+                    : ''
+                }
+                picture={
+                  workflowState.crestOption === 'image'
+                    ? workflowState.image
+                    : ''
+                }
                 size="md"
               />
               <Flex gap={4} flexDirection="column">
@@ -266,10 +316,17 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                   <Text opacity={0.6} fontSize={3}>
                     {' • '}
                   </Text>
-
-                  <Text opacity={0.6} fontSize={3}>
-                    {memberCount} {pluralize('member', memberCount)}
-                  </Text>
+                  <Flex flexDirection="row" alignItems="center">
+                    {loading && (
+                      <Flex height={16} width={12} mr={1}>
+                        <Skeleton height={16} width={12} />{' '}
+                      </Flex>
+                    )}
+                    <Text opacity={0.6} fontSize={3}>
+                      {!loading && memberCount}{' '}
+                      {pluralize('member', memberCount)}
+                    </Text>
+                  </Flex>
                 </Flex>
               </Flex>
             </Flex>
@@ -283,6 +340,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                 autoCapitalize="false"
                 autoCorrect="false"
                 autoComplete="false"
+                spellCheck="false"
                 name="person"
                 ref={searchRef}
                 height={34}
@@ -296,7 +354,10 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
                   paddingRight: 4,
                 }}
                 value={person.state.value}
-                error={person.computed.ifWasEverBlurredThenError}
+                error={
+                  person.computed.isDirty &&
+                  person.computed.ifWasEverBlurredThenError
+                }
                 onKeyDown={(evt: any) => {
                   if (evt.key === 'Enter' && person.computed.parsed) {
                     onShipSelected([person.computed.parsed, '']);
@@ -328,19 +389,27 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
             <Flex position="relative" flexDirection="column" flex={1} gap={6}>
               <Label fontWeight={500}>Members</Label>
               <MemberList customBg={inputColor}>
-                <AutoSizer>
-                  {({ height, width }: { height: number; width: number }) => (
-                    <List
-                      className="List"
-                      height={height - heightOffset}
-                      itemCount={memberCount}
-                      itemSize={40}
-                      width={width - 2}
-                    >
-                      {RowRenderer}
-                    </List>
-                  )}
-                </AutoSizer>
+                {!loading ? (
+                  <AutoSizer>
+                    {({ height, width }: { height: number; width: number }) => (
+                      <List
+                        className="List"
+                        height={height - heightOffset}
+                        itemCount={memberCount}
+                        itemSize={40}
+                        width={width - 2}
+                      >
+                        {RowRenderer}
+                      </List>
+                    )}
+                  </AutoSizer>
+                ) : (
+                  <Flex flexDirection="column" gap={4}>
+                    <Skeleton height={30} />
+                    <Skeleton height={30} />
+                    <Skeleton height={30} />
+                  </Flex>
+                )}
               </MemberList>
             </Flex>
           </Flex>

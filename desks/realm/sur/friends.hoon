@@ -16,7 +16,7 @@
 +$  friend  
   $:  pinned=?
       tags=friend-tags
-      mutual=?
+      status=?(%fren %following %follower)
   ==  
 ::
 ::

@@ -75,6 +75,7 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
     const onReconnect = () => {
       OSActions.reconnect();
     };
+    // console.log('render status => %o', status);
     let color = '#34C676';
     let statusText = 'Connected';
     let leftIcon = <div />;
@@ -93,6 +94,10 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
         leftIcon = <Icons name="Refresh" fill={lighten(0.34, color)} />;
         statusText = 'Reconnect';
       }
+    } else if (status === 'refreshing') {
+      color = '#C69D34';
+      leftIcon = <Icons name="Refresh" fill={lighten(0.34, color)} />;
+      statusText = 'Reestablishing connection...';
     }
     const indicatorColor = lighten(0.34, color);
     useEffect(() => {
@@ -108,7 +113,12 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
           initial={{ top: -50 }}
           animate={{
             display: !ship ? 'none' : 'flex',
-            top: status === 'connected' || status === 'initialized' ? -50 : 20,
+            top:
+              status === 'refreshed' ||
+              status === 'connected' ||
+              status === 'initialized'
+                ? -50
+                : 20,
           }}
           transition={{
             top: { duration: 0.25 },
@@ -131,16 +141,22 @@ export const ConnectionStatus: FC<ConnStatusProps> = observer(
             baseColor={color}
             mode={mode as any}
             whileTap={{ scale: 0.95 }}
+            style={{
+              cursor: status === 'offline' && online ? `pointer` : `default`,
+            }}
             onClick={() => {
-              setIsReconnecting(true);
-              onReconnect();
+              if (status === 'offline' && online) {
+                setIsReconnecting(true);
+                onReconnect();
+              }
             }}
           >
             {status === 'offline' && !isReconnecting && leftIcon}
             {status !== 'offline' && (
               <ConnIndicator style={{ background: color }} />
             )}
-            {status === 'offline' && isReconnecting && (
+            {(status === 'refreshing' ||
+              (status === 'offline' && isReconnecting)) && (
               <Spinner size={0} color={indicatorColor} />
             )}
             <Text fontWeight={500} color="white" fontSize={2}>

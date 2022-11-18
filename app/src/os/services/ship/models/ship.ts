@@ -23,7 +23,6 @@ export const ShipModel = types
     nickname: types.maybeNull(types.string),
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
-    cookie: types.maybeNull(types.string),
     loggedIn: types.optional(types.boolean, false),
     wallpaper: types.maybeNull(types.string),
     loader: types.optional(LoaderModel, { state: 'initial' }),
@@ -40,7 +39,7 @@ export const ShipModel = types
       return self.loader.isLoading;
     },
     // get apps() {
-    //   return Array.from(self.docket.apps.values());
+    //   return Array .from(self.docket.apps.values());
     // },
   }))
   .actions((self) => ({

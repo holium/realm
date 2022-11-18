@@ -33,6 +33,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
+  const [isStale, setIsStale] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -73,6 +74,19 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     }
   }, [pendingShip]);
 
+  const login = async () => {
+    let loggedIn = await AuthActions.login(
+      pendingShip!.patp,
+      // @ts-ignore
+      passwordRef!.current!.value
+    );
+    if (!loggedIn) {
+      // @ts-expect-error
+      submitRef.current.blur();
+      setIncorrectPassword(true);
+    }
+  };
+
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
       // @ts-expect-error typescript...
@@ -86,17 +100,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const clickSubmit = async (event: any) => {
     event.stopPropagation();
     setHasFailed(false);
-
-    const loggedIn = await AuthActions.login(
-      pendingShip!.patp,
-      // @ts-expect-error
-      passwordRef.current!.value
-    );
-    if (!loggedIn) {
-      // @ts-expect-error
-      submitRef.current.blur();
-      setIncorrectPassword(true);
-    }
+    login();
   };
 
   let colorProps = null;
@@ -272,6 +276,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     style={{ height: 15, fontSize: 14 }}
                     textShadow="0.5px 0.5px #080000"
                   >
+                    {isStale && 'Stale connection. Refreshing token...'}
                     {hasFailed && 'Connection to your ship has been refused.'}
                     {incorrectPassword && 'Incorrect password.'}
                   </FormControl.Error>

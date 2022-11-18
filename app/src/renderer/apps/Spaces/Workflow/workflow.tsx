@@ -90,7 +90,7 @@ export const spacesDialogs: DialogRenderers = {
     // stateKey: 'create-space',
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
-    onNext: (_evt: any) => {
+    onNext: (_evt: any, _state: any, _setState: any) => {
       ShellActions.nextDialog('create-space-4');
     },
     onPrevious: () => {
@@ -105,8 +105,7 @@ export const spacesDialogs: DialogRenderers = {
         state &&
         state.access &&
         state.name &&
-        state.color &&
-        state.picture !== undefined
+        (state.picture !== undefined || state.color !== undefined)
       ) {
         return true;
       } else {
@@ -133,14 +132,14 @@ export const spacesDialogs: DialogRenderers = {
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
-      const createForm: NewSpace = state;
-      delete createForm.archetypeTitle;
       setState({ ...state, loading: true });
-      // DesktopActions.setDialogLoading(true);
+      delete state.archetypeTitle;
+      if (state.crestOption === 'color') {
+        state.image = '';
+      }
+      const createForm: NewSpace = state;
       SpacesActions.createSpace(createForm).then(() => {
-        // DesktopActions.closeDialog();
         setState({ loading: false });
-        // DesktopActions.setBlur(false);
       });
     },
     onPrevious: () => {
@@ -150,8 +149,8 @@ export const spacesDialogs: DialogRenderers = {
       ShellActions.setBlur(false);
       ShellActions.closeDialog();
     },
-    isValidated: () => {
-      return true;
+    isValidated: (state: any) => {
+      return state && state.members;
     },
     window: {
       id: 'create-space-4',

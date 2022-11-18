@@ -2,7 +2,7 @@ import { FC, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
 import styled, { css } from 'styled-components';
-import { ContextMenu, Flex, Icons, Text } from 'renderer/components';
+import { ContextMenu, Flex, Icons, Text, Crest } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
@@ -134,7 +134,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
             src={space.picture}
           />
         ) : (
-          <EmptyGroup color={space.color! || '#000000'} />
+          <EmptyGroup color={space.color || '#000000'} />
         )}
         <Flex ml="10px" flexDirection="column">
           <Text

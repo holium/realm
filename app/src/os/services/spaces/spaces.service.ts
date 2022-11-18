@@ -338,7 +338,7 @@ export class SpacesService extends BaseService {
           name: body.name,
           type: body.type,
           access: body.access,
-          picture: body.picture,
+          picture: body.image,
           color: body.color,
           archetype: body.archetype,
         }),

@@ -20,7 +20,6 @@ export const AuthShip = types
     nickname: types.maybeNull(types.string),
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
-    cookie: types.maybeNull(types.string),
     mnemonic: types.maybe(types.string),
     wallpaper: types.optional(types.string, DEFAULT_WALLPAPER),
     status: types.optional(StepList, 'initial'),
@@ -137,7 +136,7 @@ export const AuthStore = types
       color: string,
       avatar: string
     ) {
-      const ship = self.ships.get(id);
+      let ship = self.ships.get(id);
       if (!ship) return;
       ship.nickname = nickname;
       ship.color = color;
