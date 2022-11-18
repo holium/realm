@@ -223,12 +223,17 @@ export class OnboardingService extends BaseService {
    * @param patp
    * @param substring
    */
-  async tempConduit(url: string, patp: string, cookie: string) {
+  async tempConduit(
+    url: string,
+    patp: string,
+    cookie: string,
+    code: string | undefined = undefined
+  ) {
     if (this.conduit !== undefined) {
       await this.closeConduit();
     }
     this.conduit = new Conduit();
-    await this.conduit.init(url, patp.substring(1), cookie);
+    await this.conduit.init(url, patp.substring(1), cookie!, code);
     return this.conduit;
   }
 
@@ -381,36 +386,34 @@ export class OnboardingService extends BaseService {
 
   async checkShipBooted(): Promise<boolean> {
     const { auth } = this.core.services.identity;
-    const ships = await this.core.holiumClient.getShips(auth.accountId!);
-    const ship = ships.find((ship) => ship.patp === this.state.planet!.patp);
+    let ships = await this.core.holiumClient.getShips(auth.accountId!);
+    let ship = ships.find((ship) => ship.patp === this.state.planet!.patp);
+    if (!ship) return false;
 
-    if (!ship?.code) {
-      return false;
-    }
+    const session = this.core.getSession();
 
     await this.addShip('_event', {
       patp: ship.patp,
       url: ship.link!,
-      code: ship.code,
+      code: session.code,
     });
     return true;
   }
 
   async addShip(
     _event: any,
-    shipData: { patp: string; url: string; code: string }
+    shipData: {
+      patp: string;
+      url: string;
+      code: string;
+    }
   ) {
     try {
-      const { patp, url } = shipData;
-      const cookie = await getCookie(shipData);
-
-      this.state.setShip({
-        patp,
-        cookie,
-        url,
-      });
-
-      return { url, cookie, patp };
+      let { patp, url, code } = shipData;
+      const cookie = await getCookie({ patp, url, code });
+      this.core.saveSession({ ship: patp, url, cookie, code });
+      this.state.setShip({ patp, url });
+      return { url, cookie, patp, code: code };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
       throw new Error('Failed to connect to ship');
@@ -422,8 +425,10 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
     // await this.tempConduit.init(url, patp.substring(1), cookie!);
 
     if (!this.state.ship)
@@ -445,8 +450,10 @@ export class OnboardingService extends BaseService {
   ) {
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
-    const { url, patp, cookie } = this.state.ship;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
 
     try {
       const updatedProfile = await ContactApi.saveContact(
@@ -486,8 +493,9 @@ export class OnboardingService extends BaseService {
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
       const response: string = await DocketApi.installDesk(
@@ -531,6 +539,18 @@ export class OnboardingService extends BaseService {
       id: `auth${ship.patp}`,
       passwordHash,
     });
+
+    // force cookie to null to ensure user must login once onboarding is complete
+    const session = this.core.getSession();
+    this.core.saveSession({ ...session, cookie: null });
+
+    this.core.services.identity.auth.storeCredentials(
+      ship.patp,
+      decryptedPassword,
+      {
+        code: session.code,
+      }
+    );
 
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setFirstTime();

@@ -214,6 +214,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
               onClick={(value: CrestOptionType) => {
                 setCrestOption(value);
                 setWorkspaceState({ crestOption: value });
+                  setWorkspaceState({ crestOption: value });
               }}
             />
 

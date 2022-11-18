@@ -46,6 +46,7 @@ export const OnboardingShipModel = types
     color: types.maybeNull(types.string),
     avatar: types.maybeNull(types.string),
     cookie: types.maybeNull(types.string),
+    code: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setContactMetadata: (contactMetadata: {
@@ -74,6 +75,7 @@ export const OnboardingStore = types
     inviteCode: types.maybe(types.string),
     accessCode: types.maybe(AccessCodeModel),
     encryptedPassword: types.maybe(types.string),
+    code: types.maybe(types.string),
   })
   .actions((self) => ({
     setStep(step: OnboardingStep) {
@@ -111,11 +113,7 @@ export const OnboardingStore = types
       self.encryptedPassword = passwordHash;
     },
 
-    setShip: flow(function* (shipInfo: {
-      patp: string;
-      url: string;
-      cookie: string;
-    }) {
+    setShip: flow(function* (shipInfo: { patp: string; url: string }) {
       self.ship = OnboardingShipModel.create({
         ...shipInfo,
         id: `onboarding${shipInfo.patp}`,

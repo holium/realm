@@ -259,7 +259,6 @@ export class ShipService extends BaseService {
       color: persistedState.color || null,
       nickname: persistedState.nickname || null,
       avatar: persistedState.avatar || null,
-      cookie: persistedState.cookie || shipInfo.cookie,
       loggedIn: true,
       loader: { state: 'initial' },
     });
@@ -416,7 +415,6 @@ export class ShipService extends BaseService {
     const newShip = ShipModel.create({
       patp: ship.patp,
       url: ship.url,
-      cookie: ship.cookie,
       wallpaper: ship.wallpaper || null,
       color: ship.color || null,
       nickname: ship.nickname || null,

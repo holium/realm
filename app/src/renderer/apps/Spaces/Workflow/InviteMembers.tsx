@@ -142,6 +142,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer(
         ShipActions.getGroupMembers(workflowState.path).then(
           ({members: groupMembers}: any) => {
             // Set up our ships
+            console.log(groupMembers);
             groupMembers[ship!.patp].roles = ['owner'];
             groupMembers[ship!.patp].status = 'host';
             groupMembers[ship!.patp].primaryRole = 'owner';
