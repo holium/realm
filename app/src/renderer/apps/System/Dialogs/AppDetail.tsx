@@ -1,5 +1,4 @@
 import { FC, useMemo } from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { getSnapshot } from 'mobx-state-tree';
 import {
@@ -10,23 +9,22 @@ import {
   Box,
   LinkPreview,
 } from 'renderer/components';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import {
   UrbitApp,
   AppType,
-  DocketAppType,
   NativeAppType,
   UrbitAppType,
-  Glob,
+  AppTypes,
+  InstallStatus,
 } from 'os/services/spaces/models/bazaar';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { rgba } from 'polished';
 import { IconPathsType } from 'renderer/components/Icons/icons';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
-import { AppTypes, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 const TileStyle = styled(Box)`
@@ -52,7 +50,10 @@ interface AppDetailProps {
   type: 'app-install' | 'app-grid' | null;
 }
 
-type KPIProps = { title: string; value: string | React.ReactNode };
+interface KPIProps {
+  title: string;
+  value: string | React.ReactNode;
+}
 const KPI: FC<KPIProps> = (props: KPIProps) => {
   let valueContent: React.ReactNode;
   if (typeof props.value === 'string') {
@@ -108,8 +109,10 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
               InstallStatus.uninstalled,
           })
         ) as AppType;
+      } else if (appId) {
+        app = bazaar.getApp(appId)! as AppType;
       } else {
-        app = bazaar.getApp(appId || 'campfire')! as AppType;
+        return null;
       }
 
       return useMemo(() => {
@@ -275,7 +278,12 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
             </Flex>
           </Flex>
         );
-      }, [loading, app]);
+      }, [
+        app,
+        theme.currentTheme.textColor,
+        theme.currentTheme.accentColor,
+        onClose,
+      ]);
     }),
     onClose: () => {
       ShellActions.closeDialog();
@@ -288,7 +296,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
         x: 0,
         y: 0,
         width: 600,
-        height: 450,
+        height: 480,
       },
     },
     hasCloseButton: true,
