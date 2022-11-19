@@ -38,12 +38,13 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const [validated, setValidated] = useState<boolean>(false);
 
   const ViewComponent: FC<any> | undefined = useMemo(() => {
-      const dialogRenderer = dialogRenderers[window.id];
-      const dialogConfig: DialogConfig = (dialogRenderer instanceof Function) ? dialogRenderer(shell.dialogProps.toJSON()) : dialogRenderer;
-      return dialogConfig.component!;
-    },
-    [window.id, shell.dialogProps.toJSON()]
-  );
+    const dialogRenderer = dialogRenderers[window.id];
+    const dialogConfig: DialogConfig =
+      dialogRenderer instanceof Function
+        ? dialogRenderer(shell.dialogProps.toJSON())
+        : dialogRenderer;
+    return dialogConfig.component!;
+  }, [window.id, shell.dialogProps.toJSON()]);
 
   const dialogRenderer = dialogRenderers[window.id];
   const dialogConfig: DialogConfig =

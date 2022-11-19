@@ -45,11 +45,11 @@ export const SpacePicture: FC<SpacePictureProps> = (
   return (
     <Flex gap={12} flexDirection="row" alignItems="center">
       {/* Outer row */}
-      {(space.picture || space.color) ? (
+      {space.picture || space.color ? (
         <Crest
           color={space.color || ''}
           picture={space.picture || ''}
-          size="md"
+          size="sm2"
         />
       ) : (
         <EmptyPicture size={size} color={space.color || '#000000'} />

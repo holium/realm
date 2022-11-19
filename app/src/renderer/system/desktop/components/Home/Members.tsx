@@ -27,8 +27,8 @@ interface HomeSidebarProps {
 
 const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
   position: relative;
-  backdrop-filter: var(--blur-enabled);
-  transform: transale3d(0, 0, 0);
+  /* --webkit-backdrop-filter: var(--blur-enabled);
+  --webkit-transform: transale3d(0, 0, 0); */
   border-radius: 12px;
   padding: 16px 16px 0 16px;
   width: 100%;

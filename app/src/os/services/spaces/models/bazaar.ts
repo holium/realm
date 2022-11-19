@@ -96,7 +96,7 @@ export const WebApp = types.model('WebApp', {
   config: types.maybeNull(RealmConfig),
 });
 
-const UrbitApp = types.model('UrbitApp', {
+export const UrbitApp = types.model('UrbitApp', {
   id: types.identifier,
   title: types.string,
   info: types.string,
@@ -108,6 +108,7 @@ const UrbitApp = types.model('UrbitApp', {
   website: types.string,
   license: types.string,
   installStatus: types.string,
+  host: types.maybe(types.string),
   config: types.maybeNull(RealmConfig),
 });
 

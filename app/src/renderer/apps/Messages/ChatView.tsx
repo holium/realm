@@ -11,7 +11,7 @@ import {
   useRef,
   ChangeEventHandler,
 } from 'react';
-import { rgba, darken, lighten, lighten, darken, rgba } from 'polished';
+import { lighten, darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
 import {
   Flex,

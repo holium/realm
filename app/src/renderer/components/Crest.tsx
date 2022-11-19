@@ -15,6 +15,7 @@ export const isValidImageUrl = (url: string) => {
 const crestSize = {
   xsm: 16,
   sm: 32,
+  sm2: 40,
   md: 64,
   md2: 80,
   lg: 128,
@@ -24,6 +25,7 @@ const crestSize = {
 const crestRadius = {
   xsm: 2,
   sm: 4,
+  sm2: 6,
   md: 6,
   md2: 12,
   lg: 12,

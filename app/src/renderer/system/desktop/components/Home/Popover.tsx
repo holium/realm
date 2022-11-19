@@ -47,7 +47,6 @@ export const RealmPopoverWrapper = styled(styled.div<
 export const RealmPopover = observer((props: RealmPopoverProps) => {
   const { id, isOpen, style, children, coords, dimensions, onClose } = props;
   const { theme } = useServices();
-  // const { searchMode, setSearchMode, coords } = useAppInstaller();
   // const isOpen = searchMode !== 'none';
   const handleClickOutside = useCallback(
     (event: any) => {
@@ -75,7 +74,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [handleClickOutside, isOpen]);
 
   return useMemo(
     () => (
@@ -85,18 +84,24 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
             {isOpen && (
               <Wrapper
                 key={`${id}-wrapper`}
-                style={{ ...coords }}
+                style={{
+                  ...coords,
+                  ...dimensions,
+                  maxHeight: dimensions.height,
+                }}
                 initial={{
                   opacity: 0,
                   y: -8,
                   width: dimensions.width,
                   height: 'fit-content',
+                  maxHeight: dimensions.height,
                 }}
                 animate={{
                   opacity: isOpen ? 1 : 0,
                   y: 0,
                   width: dimensions.width,
                   height: 'fit-content',
+                  maxHeight: dimensions.height,
                   transition: {
                     duration: 0.2,
                   },
@@ -106,6 +111,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
                   y: -8,
                   height: 'fit-content',
                   width: dimensions.width,
+                  maxHeight: dimensions.height,
                   transition: {
                     duration: 0.2,
                   },
@@ -127,6 +133,6 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
         </AnimatePresence>
       </RealmPopoverWrapper>
     ),
-    [isOpen, coords, theme.currentTheme]
+    [isOpen, coords, dimensions, theme.currentTheme]
   );
 });

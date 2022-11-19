@@ -2,7 +2,7 @@ import React from 'react';
 import useContextMenu from './useContextMenu';
 import useSystemContextMenu from './useSystemContextMenu';
 
-import { MenuItem } from '../MenuItem';
+import { MenuItem, MenuItemProps } from '../MenuItem';
 import { MenuWrapper } from '../Menu';
 import { rgba } from 'polished';
 import Portal from 'renderer/system/dialog/Portal';
@@ -39,7 +39,8 @@ export const ContextMenu = (props: ContextMenuProps) => {
   const contextMenuRef = React.useRef();
   let anchorPoint;
   let show;
-  const _menu: any[] =
+  let setShow: React.Dispatch<React.SetStateAction<boolean>>;
+  let _menu: any[] =
     (typeof menu === 'function' && menu()) || (menu as any[]) || [];
   if (isComponentContext) {
     const context = useContextMenu(
@@ -53,39 +54,52 @@ export const ContextMenu = (props: ContextMenuProps) => {
     );
     anchorPoint = context.anchorPoint;
     show = context.show;
+    setShow = context.setShow;
   } else {
     const systemContext = useSystemContextMenu();
     anchorPoint = systemContext.anchorPoint;
     show = systemContext.show;
+    setShow = systemContext.setShow;
   }
 
-  const sectionsArray = _menu.reduce((arr, obj: any, index: number) => {
-    if (!index || arr[arr.length - 1][0].section !== obj.section) {
-      return arr.concat([
-        [
-          <MenuItem
-            id={obj.id}
-            color={obj.disabled ? rgba(textColor, 0.7) : textColor}
-            customBg={customBg}
-            type={menuItemtype}
-            key={index}
-            {...obj}
-          />,
-        ],
-      ]);
-    }
-    arr[arr.length - 1].push(
-      <MenuItem
-        id={obj.id}
-        color={obj.disabled ? rgba(textColor, 0.7) : textColor}
-        customBg={customBg}
-        type={menuItemtype}
-        key={index}
-        {...obj}
-      />
-    );
-    return arr;
-  }, []);
+  const sectionsArray = _menu.reduce(
+    (arr, obj: MenuItemProps, index: number) => {
+      if (!index || arr[arr.length - 1][0].section !== obj.section) {
+        return arr.concat([
+          [
+            <MenuItem
+              key={index}
+              id={obj.id}
+              color={obj.disabled ? rgba(textColor, 0.7) : textColor}
+              customBg={customBg}
+              type={menuItemtype}
+              {...obj}
+              onClick={(evt: React.MouseEventHandler<HTMLElement>) => {
+                setShow(false);
+                obj.onClick(evt);
+              }}
+            />,
+          ],
+        ]);
+      }
+      arr[arr.length - 1].push(
+        <MenuItem
+          key={index}
+          id={obj.id}
+          color={obj.disabled ? rgba(textColor, 0.7) : textColor}
+          customBg={customBg}
+          type={menuItemtype}
+          {...obj}
+          onClick={(evt: React.MouseEventHandler<HTMLElement>) => {
+            setShow(false);
+            obj.onClick(evt);
+          }}
+        />
+      );
+      return arr;
+    },
+    []
+  );
 
   // if (show) {
   return (
@@ -97,7 +111,6 @@ export const ContextMenu = (props: ContextMenuProps) => {
         customBg={customBg}
         initial={{
           opacity: 0,
-          // y: 0,
         }}
         animate={{
           opacity: 1,
