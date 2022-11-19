@@ -1,5 +1,4 @@
 import { FC, useRef, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { isEqual } from 'lodash';
 import { toJS } from 'mobx';
 import { ChatMessage } from './ChatMessage';
@@ -8,20 +7,13 @@ import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, IconButton, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { VirtualizedList } from '@holium/design-system';
+import { Box, VirtualizedList } from '@holium/design-system';
 
 interface ChatLogProps {
   loading: boolean;
   isGroup: boolean;
   messages: GraphDMType[];
 }
-
-// TODO make our own scrollbar
-const Log = styled(Flex)`
-  ::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
-  }
-`;
 
 const reduceToPending = (arr: GraphDMType[]) => {
   return arr.map((val: GraphDMType) => val.pending);
@@ -64,55 +56,6 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
     setCurrent(messages);
   }, [messages.length, isUpdated, messages, currentPage]);
 
-  // const pendings = memo(reduceToPending(messages));
-
-  // useEffect(() => {
-  //   if (all.length > pageSize) {
-  //     const pageStart = currentPage * pageSize;
-  //     let pageEnd = pageStart + pageSize;
-  //     if (pageEnd > all.length) {
-  //       pageEnd = all.length;
-  //     }
-  //     setChunk(all.slice(pageStart, pageEnd));
-  //   } else {
-  //     setChunk(all);
-  //     setListEnd(true);
-  //   }
-  // }, [all]);
-
-  const onMore = () => {
-    const newCurrentPage = currentPage + 1;
-    const pageStart = newCurrentPage * pageSize;
-    let pageLeftSize = pageSize;
-    if (pageStart + pageSize > all.length) {
-      pageLeftSize = all.length - newCurrentPage * pageSize;
-    }
-
-    let pageEnd = pageStart + pageLeftSize;
-    if (pageEnd >= all.length) {
-      pageEnd = all.length;
-      setListEnd(true);
-    }
-
-    setCurrentPage(newCurrentPage);
-    setChunk(chunk.concat(all.slice(pageStart, pageEnd)));
-  };
-
-  // const handleScroll = ({
-  //   scrollTop,
-  //   scrollBottom,
-  // }: {
-  //   scrollTop: any;
-  //   scrollBottom: any;
-  // }) => {
-  //   if (scrollBottom > 200) {
-  //     setShowJumpBtn(true);
-  //   } else {
-  //     setShowJumpBtn(false);
-  //   }
-  //   // console.log({ scrollTop, scrollBottom });
-  // };
-
   const scrollToBottom = () => {
     if (!scrollView) return;
     scrollView.current.scrollToBottom();
@@ -137,20 +80,17 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
       </Text>
     </Flex>
   ) : (
-    <Log
-      id="scrollableDiv"
-      gap={2}
+    <Box
       height={dimensions.height}
       width="100%"
       position="relative"
-      overflowY="auto"
       alignContent="center"
-      flexDirection="column-reverse"
+      paddingY={60}
     >
       <VirtualizedList
         data={messages}
-        pageSize={10}
-        renderItem={(message, index) => (
+        sort={(a, b) => a.timeSent - b.timeSent}
+        renderRow={(message, index) => (
           <ChatMessage
             isSending={message.pending}
             showAuthor={isGroup}
@@ -184,6 +124,6 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
           </IconButton>
         </Flex>
       )}
-    </Log>
+    </Box>
   );
 });
