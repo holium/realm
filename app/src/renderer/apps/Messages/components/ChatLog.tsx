@@ -8,7 +8,7 @@ import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, IconButton, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import { VirtualizedList } from '@holium/design-system';
 
 interface ChatLogProps {
   loading: boolean;
@@ -62,7 +62,7 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
     }
     setAll(all);
     setCurrent(messages);
-  }, [messages.length, isUpdated]);
+  }, [messages.length, isUpdated, messages, currentPage]);
 
   // const pendings = memo(reduceToPending(messages));
 
@@ -147,17 +147,10 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
       alignContent="center"
       flexDirection="column-reverse"
     >
-      <InfiniteScroll
-        dataLength={chunk.length}
-        next={onMore}
-        style={{ display: 'flex', flexDirection: 'column-reverse' }} // To put endMessage and loader to the top.
-        inverse={true} //
-        hasMore={!listEnd}
-        loader={<div></div>}
-        scrollableTarget="scrollableDiv"
-      >
-        <Flex style={{ height: 58 }} />
-        {chunk.map((message: GraphDMType, index: number) => (
+      <VirtualizedList
+        data={messages}
+        pageSize={10}
+        renderItem={(message, index) => (
           <ChatMessage
             isSending={message.pending}
             showAuthor={isGroup}
@@ -167,9 +160,8 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
             ourColor={ship!.color || '#569BE2'}
             message={message}
           />
-        ))}
-        <Flex style={{ height: 58 }} />
-      </InfiniteScroll>
+        )}
+      />
 
       {/* Put the scroll bar always on the bottom */}
 

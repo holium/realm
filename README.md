@@ -35,6 +35,18 @@ yarn link:all
 
 Or link them individually:
 
+`@holium/design-system`:
+
+```zsh
+cd lib/design-system
+yarn build
+yarn link
+
+cd ...
+## In the root directory
+yarn link "@holium/design-system"
+```
+
 `@holium/realm-multiplayer`:
 
 ```zsh
@@ -73,6 +85,7 @@ cd ...
 ## In the root directory
 yarn link "@holium/realm-room"
 ```
+
 See additional docs in the `/app` directory
 
 ### 2. Fake ships and Urbit
