@@ -14,4 +14,5 @@ export type {
   RoomType,
 } from './types';
 
-export { PeerConnectionState, RoomState } from './types';
+export { RoomState } from './types';
+export { PeerConnectionState } from './peer/types';

@@ -5,6 +5,7 @@ import { Patp, RoomType, RoomState } from './types';
 
 import { BaseProtocol } from './connection/BaseProtocol';
 import { DataPacket } from './helpers/data';
+import { ProtocolEvent } from './connection/events';
 
 export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEventCallbacks>) {
   rid: string; // ~lomder-librun/Hey/1667915502757
@@ -13,6 +14,7 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
   state: RoomState = RoomState.Disconnected;
 
   constructor(rid: string, protocol: BaseProtocol) {
+    // eslint-disable-next-line constructor-super
     super();
     this.rid = rid;
     this.protocol = protocol;
@@ -23,6 +25,13 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
         this.room = room;
         this.state = RoomState.Started;
         this.emit(RoomState.Started);
+      })
+    );
+
+    this.protocol.on(
+      ProtocolEvent.RoomUpdated,
+      action((room: RoomType) => {
+        this.room = room;
       })
     );
 
@@ -53,8 +62,7 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
     return this.room.present.filter((patp: Patp) => patp !== this.protocol.our);
   }
 
-  async connect(our: Patp) {
-    this.addPresent(our);
+  async connect() {
     await this.protocol.connect(this.room);
     this.state = RoomState.Connected;
     this.emit(RoomState.Connected);
@@ -84,6 +92,7 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RoomEventCallbacks = {
   started: () => void;
   connected: () => void;

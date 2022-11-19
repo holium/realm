@@ -2,15 +2,16 @@ import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
 
-import { Patp } from '../types';
-import { RoomType } from '../types';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
+import { Patp, RoomType } from '../types';
 
 type AgentConnectParams = [RoomType];
 type LocalCommsParams = [RoomType];
 
-export type ProtocolConfig = { rtc: RTCConfiguration };
+export interface ProtocolConfig {
+  rtc: RTCConfiguration;
+}
 
 export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
   our: Patp;
@@ -25,6 +26,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   };
 
   constructor(our: Patp, config: ProtocolConfig, rooms: RoomType[] = []) {
+    // eslint-disable-next-line constructor-super
     super();
     this.our = our;
     this.provider = our;
@@ -56,7 +58,12 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract sendSignal(peer: Patp, msg: any): void;
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ProtocolEventCallbacks = {
   ready: () => void;
   providerUpdated: (provider: Patp) => void;
+  hostLeft: (host: Patp) => void;
+  peerAdded: (peer: RemotePeer) => void;
+  peerRemoved: (peer: RemotePeer) => void;
+  roomUpdated: (room: RoomType) => void;
 };

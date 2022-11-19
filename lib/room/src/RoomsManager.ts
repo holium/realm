@@ -5,12 +5,11 @@
  */
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
-import { action, makeObservable, observable, toJS } from 'mobx';
-import { Patp, RoomState } from './types';
+import { action, makeObservable, observable } from 'mobx';
+import { Patp, RoomState, RoomType } from './types';
 import { BaseProtocol } from './connection/BaseProtocol';
 import { RoomInstance } from './RoomInstance';
 import { LocalPeer } from './peer/LocalPeer';
-import { RoomType } from './types';
 
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
@@ -19,6 +18,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   roomMap: Map<string, RoomType> = new Map();
 
   constructor(protocol: BaseProtocol) {
+    // eslint-disable-next-line constructor-super
     super();
     this.protocol = protocol;
     this.local = new LocalPeer(this.protocol, this.protocol.our, {
@@ -46,6 +46,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   get currentRoom() {
     return this.presentRoom;
+  }
+
+  get currentProtocol() {
+    return this.protocol;
   }
 
   get rooms() {
@@ -85,11 +89,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.presentRoom = new RoomInstance(rid, this.protocol);
     // this.presentRoom.started
     this.presentRoom.on(RoomState.Started, () => {
-      this.presentRoom
-        ?.connect(this.our)
-        .then((peers) =>
-          console.log('entered Room done', toJS(peers), toJS(this.local))
-        );
+      this.presentRoom?.connect();
     });
     return this.presentRoom;
   }
@@ -98,8 +98,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     if (this.presentRoom?.rid !== rid) {
       throw new Error('must be in the room to leave');
     }
-    this.local.disableMedia();
-    this.presentRoom.removePresent(this.our);
+    // this.local.disableMedia();
     this.presentRoom.leave();
     this.presentRoom = undefined;
   }
@@ -113,6 +112,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RoomsManagerEventCallbacks = {
   createdRoom: () => void;
   deletedRoom: (state: RoomState) => void;

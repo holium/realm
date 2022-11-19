@@ -30,8 +30,9 @@ export const roomsManager = new RoomsManager(protocol);
 const App: FC = observer(() => {
   useEffect(() => {
     roomsManager.listRooms();
+
     return () => {
-      roomsManager.presentRoom?.leave();
+      roomsManager.presentRoom?.protocol.leave();
     };
   }, []);
 

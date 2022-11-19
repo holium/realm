@@ -1,4 +1,8 @@
 export enum ProtocolEvent {
   Ready = 'ready',
-  ProviderUpdated = 'provider-updated',
+  ProviderUpdated = 'providerUpdated',
+  HostLeft = 'hostLeft',
+  PeerAdded = 'peerAdded',
+  PeerRemoved = 'peerRemoved',
+  RoomUpdated = 'roomUpdated',
 }

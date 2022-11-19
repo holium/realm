@@ -1,6 +1,9 @@
+import { PeerEvent } from './events';
 import { BaseProtocol } from '../connection/BaseProtocol';
 import { Patp } from '../types';
 import { Peer, PeerConfig } from './Peer';
+import { RemotePeer } from './RemotePeer';
+import { PeerConnectionState, TrackKind } from './types';
 
 export const DEFAULT_AUDIO_OPTIONS = {
   channelCount: {
@@ -22,35 +25,40 @@ export class LocalPeer extends Peer {
   constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
     super(our, config);
     this.protocol = protocol;
-    // this.peerConn.onicecandidate = this.onIceCandidate;
   }
 
-  // async createOffer() {
-  //   return await this.peerConn.createOffer();
-  // }
+  streamTracks(peer: RemotePeer) {
+    if (!this.stream) {
+      console.log('no stream to stream');
+      return;
+    }
+    const currentStream: MediaStream = this.stream;
+    this.stream.getTracks().forEach((track: MediaStreamTrack) => {
+      if (this.isMuted && track.kind === TrackKind.Audio) {
+        track.enabled = false;
+      }
+      peer.peer.addTrack(track, currentStream);
+    });
+  }
 
-  // async setLocalDescription(offer: RTCLocalSessionDescriptionInit) {
-  //   return await this.peerConn.setLocalDescription(offer);
-  // }
+  clearTracks() {
+    this.audioTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+      this.emit(PeerEvent.AudioTrackRemoved, track);
+    });
+    this.audioTracks.clear();
+    this.videoTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+      this.emit(PeerEvent.VideoTrackRemoved, track);
+    });
+    this.videoTracks.clear();
+  }
 
-  async awaitOffer() {}
-
-  // onIceCandidate(event: RTCPeerConnectionIceEvent) {
-  //   const message: any = {
-  //     type: 'candidate',
-  //     peer: this.patp,
-  //     candidate: null,
-  //   };
-  //   if (event.candidate) {
-  //     message.candidate = event.candidate.candidate;
-  //     message.sdpMid = event.candidate.sdpMid;
-  //     message.sdpMLineIndex = event.candidate.sdpMLineIndex;
-  //   }
-  //   this.protocol.sendSignal(message);
-  //   // this.sendSignal(message);
-  //   // this.peerConn.ontrack = (e) => (remoteVideo.srcObject = e.streams[0]);
-  //   // localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
-  // }
+  pauseStream() {
+    this.stream?.getTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
+    });
+  }
 
   enableMedia(
     options: MediaStreamConstraints = {
@@ -58,6 +66,10 @@ export class LocalPeer extends Peer {
       video: false,
     }
   ) {
+    if (this.stream) {
+      console.log('already have stream');
+      return;
+    }
     navigator.mediaDevices
       .getUserMedia(options)
       .then(this.setMedia.bind(this))
@@ -68,24 +80,30 @@ export class LocalPeer extends Peer {
 
   setMedia(stream: MediaStream) {
     this.stream = stream;
-    this.stream.getAudioTracks().map((audio: MediaStreamTrack) => {
+    this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
       this.audioTracks.set(audio.id, audio);
-      // this.peerConn.addTrack(audio, stream);
+      this.emit(PeerEvent.AudioTrackAdded, stream, audio);
     });
     if (this.stream.getVideoTracks().length > 0) {
-      this.stream.getVideoTracks().map((video: MediaStreamTrack) => {
+      this.stream.getVideoTracks().forEach((video: MediaStreamTrack) => {
         this.videoTracks.set(video.id, video);
-        // this.peerConn.addTrack(video, stream);
+        this.emit(PeerEvent.VideoTrackAdded, stream, video);
       });
     }
+    this.status = PeerConnectionState.Broadcasting;
   }
 
   disableMedia() {
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.stop();
+      this.emit(PeerEvent.AudioTrackRemoved, track);
     });
+    this.audioTracks.clear();
     this.videoTracks.forEach((track: MediaStreamTrack) => {
       track.stop();
+      this.emit(PeerEvent.VideoTrackRemoved, track);
     });
+    this.videoTracks.clear();
+    this.stream = undefined;
   }
 }

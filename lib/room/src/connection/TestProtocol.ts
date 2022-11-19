@@ -1,7 +1,8 @@
+import { PeerEvent } from './../peer/events';
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { Patp, RoomType } from '../types';
 import { ProtocolEvent } from './events';
-import { autorun, action, makeObservable, observable } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
@@ -40,18 +41,17 @@ export class TestProtocol extends BaseProtocol {
 
   onSignal(ev: MessageEvent) {
     const payload = JSON.parse(ev.data);
-    console.log('TestProtocol onSignal', payload);
     if (payload['room-update']) {
       const roomUpdate = payload['room-update'];
       if (this.presentRoom && roomUpdate.room.rid === this.presentRoom.rid) {
         this.presentRoom = roomUpdate.room;
-        if (roomUpdate.diff['enter'] && roomUpdate.diff['enter'] !== this.our) {
-          const patp = roomUpdate.diff['enter'];
+        if (roomUpdate.diff.enter && roomUpdate.diff.enter !== this.our) {
+          const patp = roomUpdate.diff.enter;
           console.log('should dial', patp);
           this.dial(patp, false);
         }
-        if (roomUpdate.diff['leave'] && roomUpdate.diff['leave'] !== this.our) {
-          const patp = roomUpdate.diff['leave'];
+        if (roomUpdate.diff.leave && roomUpdate.diff.leave !== this.our) {
+          const patp = roomUpdate.diff.leave;
           console.log('should hangup', patp);
           const peer = this.peers.get(patp);
           if (peer) {
@@ -68,11 +68,11 @@ export class TestProtocol extends BaseProtocol {
           return room;
         });
       }
+      this.emit(ProtocolEvent.RoomUpdated, roomUpdate.room);
       return;
     }
     if (payload.from !== this.local?.patp) {
       const sender = this.peers.get(payload.from);
-      console.log('onSignal', sender);
       sender?.peer.signal(payload.data);
     }
   }
@@ -99,7 +99,11 @@ export class TestProtocol extends BaseProtocol {
   }
 
   async getRoom(rid: string): Promise<RoomType> {
-    return this.rooms.find((room: RoomType) => room.rid === rid)!;
+    const room = this.rooms.find((room) => room.rid === rid);
+    if (!room) {
+      throw new Error('Room not found');
+    }
+    return room;
   }
 
   async connect(room: RoomType): Promise<Map<Patp, RemotePeer>> {
@@ -108,13 +112,17 @@ export class TestProtocol extends BaseProtocol {
       (peer: Patp) => this.our !== peer
     );
     const remotePeers = await Promise.all(
-      peers.map(async (peer: Patp) => this.dial(peer, peer === room.creator))
+      peers.map(
+        async (peer: Patp) => await this.dial(peer, peer === room.creator)
+      )
     );
     action(() => {
       this.peers = new Map(
-        remotePeers.map((remotePeer) => {
-          return [remotePeer.patp, remotePeer];
-        })
+        remotePeers.map(
+          action((remotePeer) => {
+            return [remotePeer.patp, remotePeer];
+          })
+        )
       );
     });
 
@@ -129,17 +137,24 @@ export class TestProtocol extends BaseProtocol {
   }
 
   async dial(peer: Patp, isHost: boolean): Promise<RemotePeer> {
+    if (!this.local) {
+      throw new Error('No local peer created');
+    }
     const remotePeer = new RemotePeer(
       this.our,
       peer,
       {
         isHost,
-        isInitiator: RemotePeer.isInitiator(this.local!.patpId, peer),
+        isInitiator: RemotePeer.isInitiator(this.local.patpId, peer),
         rtc: this.rtc,
       },
       this.sendSignal
     );
     this.peers.set(remotePeer.patp, remotePeer);
+    // When we connect, lets stream our local tracks to the remote peer
+    remotePeer.on(PeerEvent.Connected, () => {
+      this.local?.streamTracks(remotePeer);
+    });
 
     return remotePeer;
   }
@@ -157,6 +172,5 @@ export class TestProtocol extends BaseProtocol {
     });
     this.peers.clear();
     this.presentRoom = undefined;
-    return;
   }
 }

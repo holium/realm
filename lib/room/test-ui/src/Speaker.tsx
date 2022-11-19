@@ -20,9 +20,14 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   // });
 
   if (!props.our) {
-    peer = roomsManager.presentRoom?.protocol.peers.get(peer);
+    peer = roomsManager.presentRoom?.protocol.peers.get(props.person);
+    roomsManager.presentRoom?.protocol.peers
+      .get(props.person)
+      ?.on('connected', () => {
+        console.log(props.person, 'connected');
+      });
   }
-  console.log(peer);
+  console.log(peer?.status);
   return (
     <div className="speaker-container">
       <p>{props.person}</p>
@@ -58,7 +63,10 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
 
       {!props.our ? (
         <div>
-          <p>Status: {'disconnected'}</p>
+          <p>
+            Status:{' '}
+            {roomsManager.presentRoom?.protocol.peers.get(props.person)?.status}
+          </p>
         </div>
       ) : (
         <div>
