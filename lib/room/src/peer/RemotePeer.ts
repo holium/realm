@@ -117,7 +117,6 @@ export class RemotePeer extends Peer {
         this.emit(PeerEvent.AudioTrackAdded, stream, audio);
       });
     }
-    console.log(this);
   }
 
   _onData(data: any) {
@@ -218,74 +217,6 @@ export class RemotePeer extends Peer {
     }
     return element;
   }
-
-  // init() {
-  //   // Clear any previous listeners
-  //   this.peerConn.ontrack = null;
-  //   this.peerConn.onconnectionstatechange = null;
-  //   this.peerConn.onicecandidate = null;
-  //   this.peerConn.onicecandidateerror = null;
-  //   this.peerConn.onicegatheringstatechange = null;
-  //   this.peerConn.onnegotiationneeded = null;
-  //   this.peerConn.ondatachannel = null;
-  //   // Register new listeners
-  //   this.peerConn.ontrack = this.onTrack;
-  //   this.peerConn.onconnectionstatechange = this.onConnectionChange;
-  //   this.peerConn.onicecandidate = this.onIceCandidate;
-  //   this.peerConn.onicecandidateerror = this.onIceError;
-  //   this.peerConn.onicegatheringstatechange = this.onGathering;
-  //   this.peerConn.onnegotiationneeded = this.onNegotiation;
-  //   this.peerConn.ondatachannel = (evt: RTCDataChannelEvent) => {
-  //     evt.channel.send(JSON.stringify({ type: 'connected', data: null }));
-  //     // this.dataChannel = evt.channel;
-  //     // this.dataChannel.onmessage = this.handleDataMessage;
-  //     // this.dataChannel.onopen = (evt: any) => {
-  //     //   console.log('data channel open');
-  //     // };
-  //     // this.dataChannel.onclose = (evt: any) => {
-  //     //   console.log('data channel closed');
-  //     // };
-  //   };
-  //   this.peerConn.sctp
-  // }
-
-  // onTrack(event: RTCTrackEvent) {
-  //   console.log('remote peer onTrack', event);
-  // }
-
-  // onConnectionChange(event: Event) {}
-
-  // onIceCandidate(event: RTCPeerConnectionIceEvent) {
-  //   if (event.candidate === null) return;
-  //   let can = JSON.stringify(event.candidate!.toJSON());
-  //   // this.sendSignal(this.patp, 'ice-candidate', can);
-  // }
-
-  // onIceError(event: Event) {
-  //   console.log('ice candidate error', event);
-  // }
-
-  // onGathering(event: Event) {
-  //   if (!event) return;
-  //   if (!event.target) return;
-  //   if (!(event.target instanceof RTCPeerConnection)) return;
-  //   let connection: RTCPeerConnection = event.target;
-  //   switch (connection.iceGatheringState!) {
-  //     case 'gathering':
-  //       /* collection of candidates has begun */
-  //       // console.log('gathering');
-  //       break;
-  //     case 'complete':
-  //       /* collection of candidates is finished */
-  //       // console.log('complete');
-  //       // this.waitInterval;
-  //       break;
-  //   }
-  // }
-
-  // async onNegotiation(event: Event) {
-  //   // console.log('negneeded', event);
-  // }
 }
 
 export function attachToElement(

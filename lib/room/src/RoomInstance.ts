@@ -6,10 +6,11 @@ import { Patp, RoomType, RoomState } from './types';
 import { BaseProtocol } from './connection/BaseProtocol';
 import { DataPacket } from './helpers/data';
 import { ProtocolEvent } from './connection/events';
+import { RemotePeer } from './peer/RemotePeer';
 
 export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEventCallbacks>) {
   rid: string; // ~lomder-librun/Hey/1667915502757
-  protocol: BaseProtocol;
+  protected protocol: BaseProtocol;
   room!: RoomType;
   state: RoomState = RoomState.Disconnected;
 
@@ -42,53 +43,81 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
     });
   }
 
-  get muteStatus() {
-    return this.protocol.local?.isMuted;
-  }
-
-  getPeer(peer: Patp) {
-    this.protocol.peers.get(peer);
-  }
-
+  /**
+   * mute - Mutes local peer
+   */
   mute() {
     this.protocol.local?.mute();
   }
 
+  /**
+   * unmute - Unmutes local peer
+   */
   unmute() {
     this.protocol.local?.unmute();
   }
 
-  get peerList(): Patp[] {
-    return this.room.present.filter((patp: Patp) => patp !== this.protocol.our);
+  /**
+   * muteStatus - Returns mute status of local peer
+   */
+  get muteStatus() {
+    return this.protocol.local?.isMuted;
   }
 
+  /**
+   * connect - Connects to a room
+   */
   async connect() {
     await this.protocol.connect(this.room);
     this.state = RoomState.Connected;
     this.emit(RoomState.Connected);
   }
 
+  /**
+   * leave - Leaves a room
+   */
   leave() {
     this.protocol.leave();
   }
 
-  addPresent(peer: Patp) {
-    // POKE room agent
-    this.room.present.push(peer);
+  /**
+   * getPeers - Returns a single peer
+   * @param peer: Patp (e.g. ~zod)
+   */
+  getPeer(peer: Patp): RemotePeer {
+    return this.protocol.peers.get(peer) as RemotePeer;
   }
 
-  removePresent(peer: Patp) {
-    // POKE room agent
-    const removeIdx = this.room.present.findIndex(
-      (present: Patp) => present === peer
-    );
-    this.room.present.splice(removeIdx, 1);
+  /**
+   * peers - Returns all peers
+   * @returns RemotePeer[]
+   */
+  get peers() {
+    return Array.from(this.protocol.peers.values());
   }
 
-  mutePeer(patp: Patp) {}
-  unmutePeer(patp: Patp) {}
+  /**
+   * mutePeer - Mutes a peer
+   * @param peer: Patp (e.g. ~zod)
+   */
+  mutePeer(peer: Patp) {
+    this.protocol.peers.get(peer)?.mute();
+  }
+
+  /**
+   * unmutePeer - Unmutes a peer
+   * @param peer: Patp (e.g. ~zod)
+   */
+  unmutePeer(peer: Patp) {
+    this.protocol.peers.get(peer)?.unmute();
+  }
+
+  /**
+   * sendData - Sends data to all connected peers
+   * @param data: DataPacket
+   */
   sendData(data: DataPacket) {
-    // this.protocol.
+    this.protocol.sendData(data);
   }
 }
 

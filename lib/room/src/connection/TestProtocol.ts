@@ -6,6 +6,7 @@ import { action, makeObservable, observable } from 'mobx';
 
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
+import { DataPacket } from 'helpers/data';
 
 export const RTCConfig: RTCConfiguration = {
   iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
@@ -134,6 +135,16 @@ export class TestProtocol extends BaseProtocol {
       body: JSON.stringify({ patp: this.our }),
     });
     return this.peers;
+  }
+
+  /**
+   * sendData - Send data to all peers
+   * @param data: DataPacket
+   */
+  sendData(data: DataPacket) {
+    this.peers.forEach((peer) => {
+      peer.sendData(data);
+    });
   }
 
   async dial(peer: Patp, isHost: boolean): Promise<RemotePeer> {

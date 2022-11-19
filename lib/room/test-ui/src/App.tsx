@@ -32,7 +32,7 @@ const App: FC = observer(() => {
     roomsManager.listRooms();
 
     return () => {
-      roomsManager.presentRoom?.protocol.leave();
+      roomsManager.presentRoom?.leave();
     };
   }, []);
 
@@ -79,22 +79,20 @@ const App: FC = observer(() => {
           />
         )}
         {roomsManager.presentRoom &&
-          Array.from(roomsManager.presentRoom!.protocol!.peers!.values()).map(
-            (peer: RemotePeer) => {
-              return (
-                <Speaker
-                  our={false}
-                  key={peer.patp}
-                  person={peer.patp}
-                  type={
-                    peer.patp === roomsManager.presentRoom?.room.creator
-                      ? 'host'
-                      : 'speaker'
-                  }
-                />
-              );
-            }
-          )}
+          roomsManager.presentRoom!.peers.map((peer: RemotePeer) => {
+            return (
+              <Speaker
+                our={false}
+                key={peer.patp}
+                person={peer.patp}
+                type={
+                  peer.patp === roomsManager.presentRoom?.room.creator
+                    ? 'host'
+                    : 'speaker'
+                }
+              />
+            );
+          })}
       </div>
     </div>
   );

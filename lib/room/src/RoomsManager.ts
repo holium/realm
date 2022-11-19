@@ -1,8 +1,3 @@
-/**
- * RoomsManager
- *
- * Top level class for managing the rooms primitive
- */
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
@@ -11,6 +6,9 @@ import { BaseProtocol } from './connection/BaseProtocol';
 import { RoomInstance } from './RoomInstance';
 import { LocalPeer } from './peer/LocalPeer';
 
+/**
+ * RoomsManager: top level class for managing the rooms primitive
+ */
 export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsManagerEventCallbacks>) {
   local: LocalPeer;
   protocol: BaseProtocol;
@@ -44,15 +42,15 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     return this.local.patp;
   }
 
-  get currentRoom() {
+  get currentRoom(): RoomInstance | undefined {
     return this.presentRoom;
   }
 
-  get currentProtocol() {
+  get currentProtocol(): BaseProtocol {
     return this.protocol;
   }
 
-  get rooms() {
+  get rooms(): RoomType[] {
     return Array.from(this.roomMap.values());
   }
 
@@ -64,23 +62,24 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 
   setRoom(room: RoomType) {
-    // provider/admin action
     this.roomMap.set(room.rid, room);
   }
 
-  async listRooms() {
+  async listRooms(): Promise<RoomType[]> {
     // returns the list of rooms from the current provider
     const rooms = await this.protocol.getRooms();
     rooms.forEach(this.setRoom);
     return rooms;
   }
 
-  enterRoom(rid: string) {
+  enterRoom(rid: string): RoomInstance {
     this.local.enableMedia();
     if (!this.rooms.find((room: RoomType) => room.rid === rid)) {
       throw new Error('Room not found');
     }
-    if (rid === this.presentRoom?.rid) return;
+    if (rid === this.presentRoom?.rid) {
+      return this.presentRoom;
+    }
 
     if (this.presentRoom) {
       this.leaveRoom(this.presentRoom.rid);
@@ -105,10 +104,12 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   createRoom() {
     // creates a room in the current provider
+    // this.protocol.createRoom()
   }
 
-  deleteRoom() {
+  deleteRoom(rid: string) {
     // provider/admin action
+    // this.protocol.deleteRoom(rid)
   }
 }
 

@@ -5,6 +5,7 @@ import { action, makeObservable, observable } from 'mobx';
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
 import { Patp, RoomType } from '../types';
+import { DataPacket } from '../helpers/data';
 
 type AgentConnectParams = [RoomType];
 type LocalCommsParams = [RoomType];
@@ -56,6 +57,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract dial(peer: Patp, isHost: boolean): Promise<RemotePeer>;
   abstract leave(): Promise<void>;
   abstract sendSignal(peer: Patp, msg: any): void;
+  abstract sendData(data: DataPacket): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
