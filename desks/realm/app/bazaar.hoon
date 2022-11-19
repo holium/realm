@@ -44,13 +44,15 @@
       =.  title.native-app            'Relic Browser'
       =.  color.native-app            '#92D4F9'
       =.  icon.native-app             'AppIconCompass'
-    =/  catalog                       (~(put by catalog.init) %os-browser [%native native-app])
+      =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
+    =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
     =|  =native-app:store
       =.  title.native-app            'Settings'
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
-    =.  catalog.state                 (~(put by catalog) %os-settings [%native native-app])
+      =.  config.native-app           [size=[6 5] titlebar-border=%.y show-titlebar=%.n]
+    =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
     =.  grid-index.state              grid-index.init
     =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
@@ -89,15 +91,15 @@
     |=  =vase
     ^-  (quip card _this)
     =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))  
+      (mole |.(!<(state-0 vase)))
     ?^  old
       `this(state u.old)
-    ~&  >>  'nuking old state' ::  temporarily doing this for making development easier
+    ~&  >>  'nuking old %bazaar state' ::  temporarily doing this for making development easier
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)
     %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term] 
+    |=  [=wire =ship =term]
     ^-  card
     [%pass wire %agent [ship term] %leave ~]
   ::
@@ -556,9 +558,21 @@
       =.  rec-members             (~(put in rec-members) src.bowl)
       =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
       =.  stalls.state            (~(put by stalls.state) [path stall])
+      ::  per #319, ensure installed status is relative to our ship/catalog
+      =/  entry                   (~(get by catalog.state) app-id)
+      =/  local-install-status    ?~(entry %uninstalled (get-install-status:helpers:bazaar u.entry))
+      =/  app
+      ?+  -.app  app
+        %urbit
+          =.  install-status.app  local-install-status
+          app
+      ==
+      =.  catalog.state           (~(put by catalog.state) [app-id app])
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
-      [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~
+      :~
+        [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]
+      ==
     ::
     ++  member-unrecommend
       |=  [path=space-path:spaces-store =app-id:store]
@@ -623,6 +637,29 @@
     --
   ++  helpers
     |%
+    ::
+    ++  get-install-status
+      |=  [=app:store]
+      ^-  install-status:store
+      ?>  ?=(%urbit -.app)
+      install-status.app
+    ::
+    ++  determine-app-host
+      |=  [host=ship =app:store]
+      ^-  (unit ship)
+      ?>  ?=(%urbit -.app)
+      ::  if the app has a glob-reference of %ames, use the ship value as the
+      ::   host/origin of the app; otherwise, use the treaty ship
+      ?+  -.href.docket.app  (some host)
+        ::
+        %glob
+          ::
+          ?+  -.location.glob-reference.href.docket.app  (some host)
+            ::
+            %ames  (some ship.location.glob-reference.href.docket.app)
+          ==
+      ==
+
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
       =/  grid-list       ~(val by grid-index)
@@ -795,9 +832,29 @@
   ^-  (quip card _state)
   |^
   ?+  -.upd    `state
+    %ini       (on-ini +.upd)
     %add       (on-add +.upd)
     :: %del       (on-del +.upd)
   ==
+  ::
+  ::  @~lodlev-migdev - at this point, dockets have been loaded into the app catalog;
+  ::   therefore use this as an opportunity to set the host value of each app in the catalog
+  ++  on-ini
+    |=  [init=(map [=ship =desk] =treaty:treaty)]
+    ^-  (quip card _state)
+    =/  updated-catalog=catalog:store
+      %-  ~(rep by init)
+        |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
+        =/  app  (~(get by catalog.state) desk)
+        ?~  app  result
+        
+        ?.  =(%urbit -.u.app)   (~(put by result) desk u.app) ::  host only applies to urbit apps
+        ?>  ?=(%urbit -.u.app)                                :: update app host
+        =.  host.u.app          (determine-app-host:helpers:bazaar ship u.app)
+        (~(put by result) desk u.app)
+    ::
+    =.  catalog.state     (~(uni by catalog.state) updated-catalog)
+    `state
   ::
   ++  on-add
     |=  [=treaty:treaty]
@@ -888,16 +945,18 @@
     ::
     ++  update-catalog-app
       |=  [=desk =charge:docket status=?(%started %failed %suspended %installed)]
-      =/  hide-desks              `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      =/  hide-desks              `(set @tas)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ?:  (~(has in hide-desks) desk)
         `state
       =/  app                     (~(get by catalog.state) desk)
-      =/  app  ?~  app  [%urbit docket.charge ~ status (config:scry:bazaar:core desk)]
+      =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core desk)]
         ?>  ?=(%urbit -.u.app)
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
         u.app
       ?>  ?=(%urbit -.app)
+      :: update app host to reflect any changes to the app host (origin)
+      =.  host.app                ?~(host.app ~ (determine-app-host:helpers:bazaar u.host.app app))
       =.  catalog.state           (~(put by catalog.state) desk app)
       =.  grid-index.state        (set-grid-index:helpers:bazaar desk grid-index.state)
       :_  state
@@ -942,4 +1001,3 @@
   =(our.bowl ship)
 ::
 --
-

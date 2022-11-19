@@ -42,7 +42,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         );
         if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {
           ShellActions.closeDialog();
-          ShellActions.setBlur(false);
+          if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
         }
       },
       { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }

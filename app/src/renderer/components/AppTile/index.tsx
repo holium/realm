@@ -148,7 +148,6 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     const isLight = lightOrDark === 'light';
     const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
     if (isAppGrid) {
-      // @ts-expect-error
       const appColor = app.color;
       title = (
         <Text
@@ -297,7 +296,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           position="relative"
           ref={tileRef}
           variants={variants}
-          onClick={(evt: any) => {
+          onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
             evt.stopPropagation();
             onAppClick && !isUninstalled && !isInstalling && onAppClick(app);
           }}

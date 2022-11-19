@@ -43,7 +43,7 @@ export const searchForm = (
 
 const AppSearchApp = observer((props: AppSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { spaces, bazaar, theme } = useServices();
+  const { spaces, theme } = useServices();
   const appInstaller = useAppInstaller();
   const searchString = appInstaller.searchString;
   const searchMode = appInstaller.searchMode;
@@ -100,10 +100,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         id={popoverId}
         isOpen={isOpen}
         coords={appInstaller.coords}
-        dimensions={{
-          height: 450,
-          width: 550,
-        }}
+        dimensions={appInstaller.dimensions}
         onClose={() => {
           appInstaller.setSearchMode('none');
         }}
@@ -119,7 +116,7 @@ const AppSearchApp = observer((props: AppSearchProps) => {
         <SearchModes />
       </RealmPopover>
     ),
-    [isOpen, appInstaller.coords, theme.currentTheme]
+    [isOpen, appInstaller.coords, appInstaller.dimensions, theme.currentTheme]
   );
 
   const width = props.mode === 'home' ? 500 : 450;

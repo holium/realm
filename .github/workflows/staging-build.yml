@@ -1,7 +1,6 @@
 name: staging-build
 run-name: Staging Build - ${{ github.actor }}
 on:
-  workflow_dispatch:
   push:
     branches:
       - staging
@@ -14,8 +13,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
-          cache: "npm"
+          node-version: '14'
+          cache: 'npm'
       - name: Install the Apple certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
@@ -58,12 +57,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-      - name: Increment version
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const script = require('./.github/workflows/scripts/verinc.js')
-            console.log(script({github, context}))
+      # - name: Increment version
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const script = require('./.github/workflows/scripts/verinc.js')
+      #       console.log(script({github, context}))
   # #
   build-linux-staging:
     runs-on: ubuntu-latest
@@ -73,8 +72,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
-          cache: "npm"
+          node-version: '14'
+          cache: 'npm'
       - name: Install yarn
         run: npm install -g yarn
       - name: Install app dependencies

@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
 
-import { Box, AppTile, Icons, BoxProps } from 'renderer/components';
+import { Box, AppTile, Icons, BoxProps, IconButton } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import {
   AppType,
@@ -13,6 +13,7 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { handleInstallation, installLabel } from '../../AppInstall/helpers';
 
 type AppEmptyProps = {
   isSelected: boolean;
@@ -55,10 +56,28 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
   const { id, selected, index, accentColor, app, space, isAdmin, onClick } =
     props;
   const { bazaar } = useServices();
+
   if (app) {
     const isPinned = bazaar.isPinned(space.path, app.id);
     const weRecommended = bazaar.isRecommended(app.id);
+    const isUninstalled = app.installStatus === InstallStatus.uninstalled;
+    const isInstalling =
+      (app as UrbitAppType).installStatus !== InstallStatus.installed &&
+      !isUninstalled;
 
+    const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
+      evt.stopPropagation();
+      const appHost = (app as UrbitAppType).host;
+      if (!appHost) {
+        console.error('No host found for app', app.id);
+        return;
+      }
+      return handleInstallation(
+        appHost,
+        app.id,
+        app.installStatus as InstallStatus
+      );
+    };
     const menu = [];
     if (isAdmin) {
       menu.push({
@@ -89,40 +108,38 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
     });
     if (app.type === 'urbit') {
       menu.push({
-        label:
-          app.installStatus === InstallStatus.installed
-            ? 'Uninstall app'
-            : 'Install app',
+        label: installLabel(app.installStatus as InstallStatus),
         disabled: false,
         section: 2,
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          // console.log('install app => %o', app);
-          if (app.installStatus === InstallStatus.installed) {
-            SpacesActions.uninstallApp(app.id);
-          } else {
-            // SpacesActions.installApp(app);
-          }
-        },
+        onClick: onInstallation,
       });
     }
 
     return (
-      <AppTile
-        tileSize="xl1"
-        app={app}
-        isUninstalled={
-          (app as UrbitAppType).installStatus === InstallStatus.uninstalled
-        }
-        isPinned={isPinned}
-        isRecommended={weRecommended}
-        allowContextMenu={true}
-        contextMenu={menu}
-        onAppClick={(selectedApp: AppType) => {
-          DesktopActions.openAppWindow(space.path, selectedApp);
-          DesktopActions.setHomePane(false);
-        }}
-      />
+      <Box position="relative">
+        {isUninstalled && (
+          <Box zIndex={6} position="absolute" right="14px" top="14px">
+            <IconButton size={26} color={accentColor} onClick={onInstallation}>
+              <Icons name="CloudDownload" />
+            </IconButton>
+          </Box>
+        )}
+        <AppTile
+          tileSize="xl1"
+          app={app}
+          isAnimated={app.installStatus === InstallStatus.installed}
+          isUninstalled={isUninstalled}
+          isInstalling={isInstalling}
+          isPinned={isPinned}
+          isRecommended={weRecommended}
+          allowContextMenu={true}
+          contextMenu={menu}
+          onAppClick={(selectedApp: AppType) => {
+            DesktopActions.openAppWindow(space.path, selectedApp);
+            DesktopActions.setHomePane(false);
+          }}
+        />
+      </Box>
     );
   }
   return (

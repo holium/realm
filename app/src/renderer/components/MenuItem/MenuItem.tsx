@@ -21,7 +21,7 @@ export type MenuItemProps = {
   type?: 'neutral' | 'brand';
   color?: string;
   customBg?: string;
-  onClick: (...args: any) => void;
+  onClick: (evt: React.MouseEventHandler<HTMLElement>) => void;
   subMenu?: any[];
 } & IntentProps &
   SpaceProps;
@@ -91,7 +91,7 @@ export const MenuItem: FC<MenuItemProps> = (props: Partial<MenuItemProps>) => {
           onClick(evt);
         }
       }}
-      onClick={(evt: any) => {
+      onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
         if (!disabled) {
           // @ts-expect-error i hate typescript
           onClick(evt);

@@ -6,10 +6,13 @@ import {
   AppType,
   AppTypes,
   InstallStatus,
+  UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { handleInstallation, installLabel } from '../AppInstall/helpers';
 
 interface AppGridProps {
   isOpen?: boolean;
@@ -19,6 +22,7 @@ interface AppGridProps {
 export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
   const { isOpen, tileSize } = props;
   const { spaces, bazaar } = useServices();
+
   const currentSpace = spaces.selected!;
   const dock = bazaar.getDock(currentSpace.path);
 
@@ -29,15 +33,13 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         {apps.map((app: any, index: number) => {
           const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
           const weRecommended = bazaar.isRecommended(app.id);
-          let canInstall = true;
           let isInstalling = app.installStatus !== InstallStatus.installed;
           if (app.type === AppTypes.Web) {
             isInstalling = false;
-            canInstall = false;
           }
           return (
             <AppTile
-              key={app.title + index + 'grid'}
+              key={`${app.title} ${index} grid`}
               isPinned={isAppPinned}
               isRecommended={weRecommended}
               allowContextMenu
@@ -70,59 +72,36 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   label: 'App info',
                   disabled: app.type === 'web',
                   onClick: (evt: any) => {
-                    // evt.stopPropagation();
-                    console.log('open app info');
+                    evt.stopPropagation();
+                    ShellActions.openDialogWithStringProps(
+                      'app-detail-dialog',
+                      { appId: app.id }
+                    );
                   },
                 },
-                ...(app.type === 'urbit' &&
-                app.installStatus === InstallStatus.installed
-                  ? [
-                      {
-                        label: 'Uninstall',
-                        section: 2,
-                        disabled: false,
-                        onClick: (evt: any) => {
-                          evt.stopPropagation();
-                          console.log(`start uninstall`);
-                          SpacesActions.uninstallApp(app.id);
-                        },
-                      },
-                    ]
-                  : [
-                      {
-                        label: 'Install',
-                        section: 2,
-                        disabled: app.type === 'web',
-                        onClick: (evt: any) => {
-                          evt.stopPropagation();
-                          // console.log(`start install`, toJS(app));
-                          // SpacesActions.installApp(toJS(app));
-                        },
-                      },
-                    ]),
-              ]}
-              variants={
                 {
-                  // hidden: {
-                  //   opacity: 0,
-                  //   top: 30,
-                  //   transition: { top: 3, opacity: 1 },
-                  // },
-                  // show: {
-                  //   opacity: 1,
-                  //   top: 0,
-                  //   transition: { top: 3, opacity: 1 },
-                  // },
-                  // exit: { opacity: 0, top: 100 },
-                }
-              }
+                  label: installLabel(app.installStatus as InstallStatus),
+                  section: 2,
+                  disabled: false,
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    const appHost = (app as UrbitAppType).host;
+                    if (!appHost) {
+                      console.error('No host found for app', app.id);
+                      return;
+                    }
+                    return handleInstallation(
+                      appHost,
+                      app.id,
+                      app.installStatus as InstallStatus
+                    );
+                  },
+                },
+              ]}
               onAppClick={(selectedApp: AppType) => {
-                SpacesActions.addRecentApp(
-                  spaces.selected!.path,
-                  selectedApp.id
-                );
+                SpacesActions.addRecentApp(currentSpace.path, selectedApp.id);
                 DesktopActions.openAppWindow(
-                  spaces.selected!.path,
+                  currentSpace.path,
                   toJS(selectedApp)
                 );
                 DesktopActions.setHomePane(false);
@@ -133,7 +112,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
       </>
     );
   }, [
-    currentSpace,
     bazaar.catalog,
     bazaar.installed.length,
     bazaar.installing.length,

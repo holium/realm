@@ -10,12 +10,10 @@ interface RecommendedAppsProps {
 
 export const RecommendedApps: FC<RecommendedAppsProps> = observer(
   (props: RecommendedAppsProps) => {
-    const { isOpen } = props;
     const { spaces, bazaar } = useServices();
 
-    const currentSpace = spaces.selected!;
-    const apps = bazaar.getRecommendedApps(currentSpace.path);
-    console.log(apps);
+    const currentSpace = spaces.selected;
+    const apps = bazaar.getRecommendedApps(currentSpace!.path);
 
     return (
       <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>
