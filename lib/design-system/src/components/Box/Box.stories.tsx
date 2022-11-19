@@ -5,19 +5,28 @@ export default {
   component: Box,
 } as ComponentMeta<typeof Box>;
 
-export const Unstyled: ComponentStory<typeof Box> = () => <Box>Unstyled</Box>;
+export const Demo: ComponentStory<typeof Box> = (args) => <Box {...args} />;
+Demo.args = {
+  bg: 'accent',
+  color: 'window',
+  padding: 10,
+  borderWidth: 1,
+  borderStyle: 'solid',
+  borderColor: 'border',
+  children: "I'm a box. Try changing the controls.",
+  textDecoration: undefined,
+};
 
-export const WithBackground: ComponentStory<typeof Box> = () => (
+export const TextDecoration: ComponentStory<typeof Box> = () => (
   <>
-    <Box bg="pink">Pink</Box>
-    <Box bg="primary">Primary (from theme)</Box>
-  </>
-);
-
-export const WithTextDecoration: ComponentStory<typeof Box> = () => (
-  <>
-    <Box textDecoration="overline">Overline</Box>
-    <Box textDecoration="underline">Underline</Box>
-    <Box textDecoration="line-through">Line-through</Box>
+    <Box mb="10px" textDecoration="overline">
+      Overline
+    </Box>
+    <Box mb="10px" textDecoration="underline">
+      Underline
+    </Box>
+    <Box mb="10px" textDecoration="line-through">
+      Line-through
+    </Box>
   </>
 );

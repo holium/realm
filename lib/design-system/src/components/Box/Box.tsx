@@ -7,10 +7,6 @@ import {
   border,
   BorderProps,
   ButtonStyleProps,
-  color,
-  ColorProps,
-  colorStyle,
-  ColorStyleProps,
   compose,
   flexbox,
   FlexboxProps,
@@ -31,6 +27,7 @@ import {
   TypographyProps,
   variant,
 } from 'styled-system';
+import { ColorProps, colorStyle } from '../../styles/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -40,7 +37,6 @@ export type BoxProps = {
 } & BackgroundProps &
   ButtonStyleProps &
   ColorProps &
-  ColorStyleProps &
   FlexboxProps &
   GridProps &
   BorderProps &
@@ -70,8 +66,6 @@ const textTransform = style({
 
 const boxStyles = compose(
   background,
-  color,
-  colorStyle,
   flexbox,
   grid,
   layout,
@@ -96,5 +90,6 @@ export const Box = styled(motion.div)<BoxProps>(
   {
     boxSizing: 'border-box',
   },
-  boxStyles
+  boxStyles,
+  colorStyle
 );

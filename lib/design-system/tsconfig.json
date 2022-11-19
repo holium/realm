@@ -24,6 +24,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true
   },
-  "include": ["src"],
-  "exclude": ["dist"]
+  "include": ["src", ".storybook"],
+  "exclude": ["dist", "node_modules"]
 }
