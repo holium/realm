@@ -1,7 +1,7 @@
 import { ComponentMeta, Story } from '@storybook/react';
 import { VirtualizedList } from './VirtualizedList';
-import { Flex } from '../Flex/Flex';
 import { Box } from '../Box/Box';
+import { VirtualizedRowWithDynamicHeight } from './VirtualizedRowWithDynamicHeight';
 
 export default {
   component: VirtualizedList,
@@ -9,9 +9,9 @@ export default {
     dataSize: {
       control: {
         type: 'range',
-        min: 1,
+        min: 0,
         max: 10000,
-        step: 1,
+        step: 10,
       },
     },
     containerHeight: {
@@ -22,7 +22,7 @@ export default {
         step: 1,
       },
     },
-    itemHeight: {
+    rowHeight: {
       control: {
         type: 'range',
         min: 10,
@@ -41,14 +41,14 @@ export default {
 
 interface DemoTemplateProps {
   dataSize: number;
-  itemHeight: number;
+  rowHeight: number;
   containerHeight: number;
   filter: 'none' | 'even' | 'odd';
 }
 
 const DemoTemplate: Story<DemoTemplateProps> = ({
   dataSize,
-  itemHeight,
+  rowHeight,
   containerHeight,
   filter,
   ...args
@@ -78,17 +78,18 @@ const DemoTemplate: Story<DemoTemplateProps> = ({
           {...args}
           data={data}
           filter={getFilterFunction()}
-          renderItem={(item, index) => (
-            <Flex
+          renderRow={(item, index, rerenderList) => (
+            <VirtualizedRowWithDynamicHeight
+              height={rowHeight}
+              rerenderList={rerenderList}
               bg={index % 2 === 0 ? 'accent' : 'card'}
               color="input"
               padding={12}
               justifyContent="center"
               alignItems="center"
-              height={itemHeight}
             >
               {item}
-            </Flex>
+            </VirtualizedRowWithDynamicHeight>
           )}
         />
       </Box>
@@ -98,8 +99,8 @@ const DemoTemplate: Story<DemoTemplateProps> = ({
 
 export const Demo = DemoTemplate.bind({});
 Demo.args = {
-  dataSize: 1000,
-  itemHeight: 50,
+  dataSize: 100,
+  rowHeight: 50,
   containerHeight: 500,
   filter: 'none',
 };
