@@ -56,6 +56,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.join-space': this.joinSpace,
+    'realm.spaces.leave-space': this.leaveSpace,
     'realm.spaces.accept-invite': this.acceptInvite,
     'realm.spaces.decline-invite': this.declineInvite,
     'realm.bazaar.scryTreaties': this.scryTreaties,
@@ -145,6 +147,12 @@ export class SpacesService extends BaseService {
     },
     deleteSpace: async (path: any) => {
       return await ipcRenderer.invoke('realm.spaces.delete-space', path);
+    },
+    joinSpace: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.join-space', path);
+    },
+    leaveSpace: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.leave-space', path);
     },
     getInvitations: async () => {
       return await ipcRenderer.invoke('realm.spaces.get-invitations');
@@ -365,6 +373,15 @@ export class SpacesService extends BaseService {
       this.setTheme(selected?.theme);
     }
     return await SpacesApi.deleteSpace(this.core.conduit!, { path });
+  }
+
+  async joinSpace(_event: IpcMainInvokeEvent, path: string) {
+    return await SpacesApi.joinSpace(this.core.conduit!, { path });
+  }
+
+  async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
+    console.log('leave path', path);
+    return await SpacesApi.leaveSpace(this.core.conduit!, { path });
   }
 
   setSelected(_event: IpcMainInvokeEvent, path: string) {

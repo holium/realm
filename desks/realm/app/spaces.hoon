@@ -142,6 +142,7 @@
         [%give %fact [/updates ~] spaces-reaction+!>([%initial spaces.state membership.state invitations.state])]~
         ::
           [%spaces @ @ ~]  :: The space level watch subscription
+        ~&  'got watch for space'
         =/  host                `@p`(slav %p i.t.path)
         =/  space-pth           `@t`i.t.t.path
         =/  space               (~(got by spaces.state) [host space-pth])
@@ -149,7 +150,9 @@
                 =(access.space %public)                               :: allow public spaces to be watched
             ==
         =/  update-paths        [/spaces/(scot %p host)/(scot %tas space-pth) ~]
+        ~&  update-paths
         =/  members             (~(got by membership.state) [host space-pth])
+        ~&  'sending spaces reaction'
         [%give %fact update-paths spaces-reaction+!>([%remote-space [host space-pth] space members])]~
         ::
       ==
@@ -158,6 +161,8 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
+    ~&  'got agent update'
+    ~&  sign
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
       [%spaces @ @ ~]  ::  only members will subscribe on this wire
@@ -177,6 +182,7 @@
           %fact
             ?+    p.cage.sign   (on-agent:def wire sign)
                 %spaces-reaction
+              ~&  'got spaces reaction'
               =^  cards  state
                 (reaction:spaces:core !<(=reaction:store q.cage.sign))
               [cards this]
@@ -277,6 +283,24 @@
       |=  [path=space-path:store]
       ^-  (quip card _state)
       ?:  (is-host:core ship.path)
+        (host-handle-join path src.bowl)
+      (member-handle-join path)
+      ::
+      ++  member-handle-join
+        |=  [path=space-path:store]
+        ^-  (quip card _state)
+        =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
+        ~&  'member-watch-path'
+        ~&  watch-path
+        =/  cards
+          :~  [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]
+              [%pass watch-path %agent [ship.path %spaces] %watch watch-path]
+          ==
+        [cards state]
+      ::
+      ++  host-handle-join
+        |=  [path=space-path:store =ship]
+        ^-  (quip card _state)
         =.  membership.state
           =/  space-members   (~(got by membership.state) path)
           =/  space  (~(got by spaces.state) path)
@@ -288,19 +312,13 @@
                   alias=''
                   status=%joined
               ==
-            (~(get by space-members) src.bowl)
+            (~(get by space-members) ship)
           =?  space-members  !=(~ member)
             ?~  member  !!
             =.  status.u.member  %joined
-            (~(put by space-members) [src.bowl u.member])
-          membership.state
+            (~(put by space-members) [ship u.member])
+          (~(put by membership.state) [path space-members])
         `state
-      =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
-      =/  cards
-        :~  [%pass watch-path %agent [ship.path %spaces] %watch watch-path]
-            [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]
-        ==
-      [cards state]
     ::
     ++  handle-leave
       |=  [path=space-path:store]
@@ -402,8 +420,11 @@
     ++  on-remote-space
       |=  [path=space-path:store =space:store =members:membership-store]
       ^-  (quip card _state)
+      ~&  'got remote space update'
+      ~&  path
       =.  spaces.state          (~(put by spaces.state) [path space])
       =.  membership.state      (~(put by membership.state) [path members])
+      ~&  'giving remote space update t ui'
       :_  state
       [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]~
     ::

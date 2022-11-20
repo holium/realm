@@ -131,7 +131,6 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
           autoCorrect="false"
           autoComplete="false"
           name="person"
-//          ref={searchRef}
           height={34}
           placeholder="Paste link..."
           bg={
@@ -164,10 +163,10 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
           rightIcon={
             <TextButton
 //              disabled={!person.computed.parsed}
-/*              onClick={(evt: any) => {
-                onShipSelected([person.computed.parsed!, '']);
-                person.actions.onChange('');
-              }}*/
+              onClick={(evt: any) => {
+                console.log('search', searchString);
+                SpacesActions.joinSpace(searchString);
+              }}
             >
               Join
             </TextButton>
@@ -182,9 +181,6 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
               person.actions.onChange('');
             }
           }}*/
-          onChange={(e: any) => {
-            //person.actions.onChange(e.target.value);
-          }}
           onFocus={() => {
             //person.actions.onFocus();
           }}
