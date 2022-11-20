@@ -79,7 +79,6 @@ export const SpacesApi = {
     });
   },
   deleteSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
-    console.log(payload.path)
     const pathArr = payload.path.split('/');
     const pathObj = {
       ship: pathArr[1],
@@ -369,7 +368,6 @@ const handleSpacesReactions = (
       membersState.removeMemberMap(deleted);
       break;
     case 'remote-space':
-      console.log('got remote space update')
       membersState.addMemberMap(
         data['remote-space'].path,
         data['remote-space'].members
