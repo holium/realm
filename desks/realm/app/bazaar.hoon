@@ -806,6 +806,17 @@
     |=  =snap:hood
     ^-  (quip card _state)
     %-  (slog leaf+"{<dap.bowl>}: [on-snap:hood] => {<snap>}" ~)
+    =/  catalog-apps=catalog:store
+    %-  ~(rep by snap)
+    |=  [[=desk ark=arak:hood] cat=catalog:store]
+      ?~  rail.ark  cat
+      :: :: find the app in the catalog (by desk)
+      =/  app  (~(get by catalog.state) desk)
+      ?~  app  cat
+      ?>  ?=(%urbit -.u.app)
+      =.  host.u.app      ?~(publisher.u.rail.ark (some ship.u.rail.ark) publisher.u.rail.ark)
+      (~(put by cat) `app-id:store`desk u.app)
+    =.  catalog.state  (~(uni by catalog.state) catalog-apps)
     `state
   ::
   :: [%commit desk=%groups arak=[rail=[~ [publisher=~ paused=%.n ship=~marnec-dozzod-marzod desk=%groups aeon=8 next=~]] rein=[liv=%.y add={} sub={}]]]
