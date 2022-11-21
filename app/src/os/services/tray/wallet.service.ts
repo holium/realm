@@ -325,11 +325,7 @@ export class WalletService extends BaseService {
       secretKey,
       accessPropertiesByDotNotation: true,
     };
-    this.db =
-      process.env.NODE_ENV === 'development'
-        ? new Store<WalletStoreType>(storeParams)
-        : new EncryptedStore<WalletStoreType>(storeParams);
-
+    this.db = new Store<WalletStoreType>(storeParams)
     const persistedState: WalletStoreType = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {

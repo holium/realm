@@ -21,7 +21,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
 
   const saveSeedPhrase = () => {
     props.setSeedPhrase(phrase);
-    props.setScreen(NewWalletScreen.PASSCODE); // TODO: change to confirm after demo
+    props.setScreen(NewWalletScreen.CONFIRM);
   };
 
   console.log(phrase);

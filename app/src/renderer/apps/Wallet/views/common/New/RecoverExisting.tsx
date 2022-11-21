@@ -43,7 +43,7 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
 
       if (correct) {
         props.setSeedPhrase(phrase);
-        props.setScreen(NewWalletScreen.PASSCODE); // TODO: change to confirm after demo
+        props.setScreen(NewWalletScreen.CONFIRM);
         setError('');
       } else {
         setError(
