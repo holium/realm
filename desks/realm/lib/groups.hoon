@@ -6,6 +6,8 @@
 ++  our-groups
   |=  [our=ship now=@da]
   ^-  (list group-space)
+  =/  has-groups  .^(? %gu /(scot %p our)/groups/(scot %da now))
+  ?.  has-groups  *(list group-space)
   =/  groups  .^(groups:g %gx /(scot %p our)/groups/(scot %da now)/groups/groups)
   ::  find ours
   =/  hosted
