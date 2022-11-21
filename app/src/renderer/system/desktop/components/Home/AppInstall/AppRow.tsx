@@ -59,6 +59,7 @@ export const AppRowStyle = styled(motion.div)<RowProps>`
   position: relative;
   border-radius: 8px;
   padding: 0 8px;
+  width: 100%;
   display: flex;
   flex-direction: row;
   overflow: visible;
@@ -117,61 +118,63 @@ export const AppRow = ({
     >
       <Flex
         flexDirection="row"
+        justifyContent="space-between"
         alignItems="center"
-        gap={8}
-        flex={1}
-        // style={{ width: '100%' }}
+        // flex={1}
+        style={{ width: 'inherit' }}
         onClick={(evt: React.MouseEvent<HTMLDivElement>) =>
           onClick && onClick(evt, app)
         }
       >
-        <TileStyle
-          onContextMenu={(evt: any) => {
-            evt.stopPropagation();
-          }}
-          minWidth={sizes.sm}
-          style={{
-            borderRadius: radius.sm,
-            overflow: 'hidden',
-          }}
-          height={sizes.sm}
-          width={sizes.sm}
-          backgroundColor={app.color || '#F2F3EF'}
-        >
-          {image && (
-            <img
-              style={{ pointerEvents: 'none' }}
-              draggable="false"
-              height={sizes.sm}
-              width={sizes.sm}
-              src={image}
-            />
-          )}
-          {app.icon && <Icons name={app.icon} height={16} width={16} />}
-        </TileStyle>
-        <Flex flexDirection="column" flex={1}>
-          <Text
-            fontWeight={500}
-            color={currentTheme.textColor}
-            style={{
-              textOverflow: 'ellipsis',
+        <Flex gap={8} alignItems="center" flexGrow={0} flexDirection="row">
+          <TileStyle
+            onContextMenu={(evt: any) => {
+              evt.stopPropagation();
             }}
-          >
-            {title}
-          </Text>
-          <Text
-            mt="2px"
+            minWidth={sizes.sm}
             style={{
-              width: descriptionWidth || 'fit-content',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
+              borderRadius: radius.sm,
               overflow: 'hidden',
             }}
-            fontSize={2}
-            color={rgba(currentTheme.textColor, 0.4)}
+            height={sizes.sm}
+            width={sizes.sm}
+            backgroundColor={app.color || '#F2F3EF'}
           >
-            {app.info}
-          </Text>
+            {image && (
+              <img
+                style={{ pointerEvents: 'none' }}
+                draggable="false"
+                height={sizes.sm}
+                width={sizes.sm}
+                src={image}
+              />
+            )}
+            {app.icon && <Icons name={app.icon} height={16} width={16} />}
+          </TileStyle>
+          <Flex flexDirection="column">
+            <Text
+              fontWeight={500}
+              color={currentTheme.textColor}
+              style={{
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {title}
+            </Text>
+            <Text
+              mt="2px"
+              style={{
+                width: descriptionWidth || 'fit-content',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+              }}
+              fontSize={2}
+              color={rgba(currentTheme.textColor, 0.4)}
+            >
+              {app.info}
+            </Text>
+          </Flex>
         </Flex>
         {actionRenderer && (
           <div style={{ whiteSpace: 'nowrap' }}>{actionRenderer(app)}</div>

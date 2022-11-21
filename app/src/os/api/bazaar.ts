@@ -179,11 +179,33 @@ export const BazaarApi = {
           //  event (see below) within the allotted time, it "usually" means the configured
           //  INSTALL_MOON does not have any apps available to install
           timeout = setTimeout(async () => {
-            await conduit.unsubscribe(subscriptionId);
             console.log(
               `timeout forming alliance with ${ship}. is the ship running? are there apps published on '${ship}'?`
             );
-            reject(`timeout forming alliance with ${ship}`);
+            timeout = setTimeout(async () => {
+              await conduit.unsubscribe(subscriptionId);
+              console.log(`timeout removing alliance with ${ship}`);
+            }, 60000);
+            // force removal of the ship, so that future attempts to install an app will restart
+            //  ally operation from scratch
+            conduit
+              .poke({
+                app: 'treaty',
+                mark: 'ally-update-0',
+                json: {
+                  del: ship,
+                },
+                onError: (e: any) => {
+                  console.error(e);
+                  reject(e);
+                },
+              })
+              .catch((e) => {
+                console.log(e);
+                if (timeout) clearTimeout(timeout);
+                reject('del ally error');
+              });
+            // reject(`timeout forming alliance with ${ship}`);
           }, 60000);
 
           conduit

@@ -33,7 +33,7 @@
   ++  on-init
     ^-  (quip card _this)
     =/  our-name                `@t`(scot %p our.bowl)
-    =/  our-space               (create-space:lib our.bowl 'our' [name=our-name %our %private '' '#000000' %home] now.bowl)
+    =/  our-space               (create-space:lib our.bowl 'our' [name=our-name '' %our %private '' '#000000' %home] now.bowl)
     =/  our-member              [roles=(silt `(list role:membership-store)`~[%owner %admin]) alias='' status=%host]
     =/  our-members             (malt `(list (pair ship member:membership-store))`~[[our.bowl our-member]])
     =/  initial-membs           `membership:membership-store`(malt `(list (pair space-path:store members:membership-store))`~[[path.our-space our-members]])
@@ -59,7 +59,7 @@
       (mole |.(!<(state-0 vase)))  
     ?^  old
       `this(state u.old)
-    ~&  >>  'nuking old state' ::  temporarily doing this for making development easier
+    ~&  >>  'nuking old %spaces state' ::  temporarily doing this for making development easier
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)
@@ -254,12 +254,13 @@
       ++  edit-space
         |=  [=space:store edit=edit-payload:store]
         ^-  space:store
-        ?-  -.edit
-          %name       space(name name.edit)
-          %picture    space(picture picture.edit)
-          %color      space(color color.edit)
-          %theme      space(theme theme.edit)
-        ==
+        =.  name.space  name.edit
+        =.  description.space  description.edit
+        =.  access.space  access.edit
+        =.  picture.space  picture.edit
+        =.  color.space  color.edit
+        =.  theme.space  theme.edit
+        space
     ::
     ++  handle-remove
       |=  [path=space-path:store]

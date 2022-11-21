@@ -6,7 +6,7 @@
 ::
 /-  store=bazaar-store, docket, spaces-store, vstore=visas
 /-  membership-store=membership, hark=hark-store
-/-  treaty
+/-  treaty, hood
 /+  verb, dbug, default-agent
 =>
   |%
@@ -44,13 +44,15 @@
       =.  title.native-app            'Relic Browser'
       =.  color.native-app            '#92D4F9'
       =.  icon.native-app             'AppIconCompass'
-    =/  catalog                       (~(put by catalog.init) %os-browser [%native native-app])
+      =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
+    =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
     =|  =native-app:store
       =.  title.native-app            'Settings'
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
-    =.  catalog.state                 (~(put by catalog) %os-settings [%native native-app])
+      =.  config.native-app           [size=[6 5] titlebar-border=%.y show-titlebar=%.n]
+    =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
     =.  grid-index.state              grid-index.init
     =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
@@ -72,6 +74,7 @@
         [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
         [%pass /allies %agent [our.bowl %treaty] %watch /allies]
         [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+        [%pass /kiln %agent [our.bowl %hood] %watch /kiln/vats]
     ==
   ::
   ++  on-save
@@ -92,7 +95,7 @@
       (mole |.(!<(state-0 vase)))
     ?^  old
       `this(state u.old)
-    ~&  >>  'nuking old state' ::  temporarily doing this for making development easier
+    ~&  >>  'nuking old %bazaar state' ::  temporarily doing this for making development easier
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)
@@ -196,6 +199,32 @@
                 =^  cards  state
                   (reaction:visas:core !<(=reaction:vstore q.cage.sign))
                 [cards this]
+            ==
+        ==
+
+      [%kiln ~]
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /kiln/vats" ~)  `this
+            ~&  >>>  "{<dap.bowl>}: /kiln/vats subscription failed"
+            `this
+      ::
+          %kick
+            ~&  >  "{<dap.bowl>}: /kiln/vats kicked us, resubscribing..."
+            :_  this
+            :~  [%pass /hood %agent [our.bowl %hood] %watch /vats]
+            ==
+      ::
+          %fact
+            ?+    p.cage.sign  (on-agent:def wire sign)
+                %kiln-vats-snap-0
+                  =^  cards  state
+                    (on-snap:kiln:core !<(snap:hood q.cage.sign))
+                  [cards this]
+                %kiln-vats-diff-0
+                  =^  cards  state
+                    (on-diff:kiln:core !<(diff:hood q.cage.sign))
+                  [cards this]
             ==
         ==
 
@@ -396,12 +425,13 @@
       |=  [=ship =desk]
       ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
+      %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
+      ::  queue this installation request, so that once alliance is complete,
+      ::  we can use this info to set the host in the app data. also can be used
+      ::  to automatically kick off an install once an alliance is made
+      =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
-        %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
-        ::  queue this installation request, so that once alliance is complete,
-        ::  we can automatically kick off the install
-        =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
         :_  state
         [%pass / %agent [our.bowl %treaty] %poke ally-update-0+!>([%add ship])]~
       :_  state
@@ -769,6 +799,34 @@
       ==
     --
   --
+++  kiln
+  |%
+  ::
+  ++  on-snap
+    |=  =snap:hood
+    ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: [on-snap:hood] => {<snap>}" ~)
+    `state
+  ::
+  :: [%commit desk=%groups arak=[rail=[~ [publisher=~ paused=%.n ship=~marnec-dozzod-marzod desk=%groups aeon=8 next=~]] rein=[liv=%.y add={} sub={}]]]
+  ++  on-diff
+    |=  =diff:hood
+    ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: [on-diff:hood] => {<diff>}" ~)
+    ?+    -.diff  `state
+      %commit
+        ?~  rail.arak.diff  `state
+        =/  rail  u.rail.arak.diff
+        =/  app  (~(get by catalog.state) desk.diff)
+        ?~  app  `state
+        ?>  ?=(%urbit -.u.app)
+        =.  host.u.app  ?~(publisher.rail (some ship.rail) publisher.rail)
+        =.  catalog.state  (~(put by catalog.state) desk.diff u.app)
+        `state
+      %suspend  `state
+      %revive   `state
+    ==
+  --
 ++  spaces
   |%
   ++  reaction
@@ -840,21 +898,18 @@
   ++  on-ini
     |=  [init=(map [=ship =desk] =treaty:treaty)]
     ^-  (quip card _state)
-    :: %-  (slog leaf+"{<dap.bowl>}: treaty-update [on-ini] => {<[init]>}" ~)
-    =/  updated-catalog
-    %-  ~(rep by init)
-      |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
-      =/  app  (~(get by catalog.state) desk)
-      ?~  app  result
-      ::  host only applies to urbit apps
-      ?.  =(%urbit -.u.app)  (~(put by result) desk u.app)
-      :: update app host
-      ?>  ?=(%urbit -.u.app)
-      :: %-  (slog leaf+"on-ini: determine-app-host {<desk>}" ~)
-      =.  host.u.app  (determine-app-host:helpers:bazaar ship u.app)
-      (~(put by result) desk u.app)
-    ::  update the app catalog with new information re: hosts
-    =.  catalog.state  updated-catalog
+    =/  updated-catalog=catalog:store
+      %-  ~(rep by init)
+        |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
+        =/  app  (~(get by catalog.state) desk)
+        ?~  app  result
+
+        ?.  =(%urbit -.u.app)   (~(put by result) desk u.app) ::  host only applies to urbit apps
+        ?>  ?=(%urbit -.u.app)                                :: update app host
+        =.  host.u.app          (determine-app-host:helpers:bazaar ship u.app)
+        (~(put by result) desk u.app)
+    ::
+    =.  catalog.state     (~(uni by catalog.state) updated-catalog)
     `state
   ::
   ++  on-add
@@ -956,14 +1011,14 @@
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
         u.app
-      ?>  ?=(%urbit -.app)
-      =/  installs=(list [ship desk])
-      %+  skim  ~(tap by pending-installs.state)
-        |=  [[=ship =desk]]
-        ?:  =(app-id desk)   %.y  %.n
-      =/  install=(unit [=ship =desk])
-        ?:  (gth (lent installs) 0)  (some (snag 0 installs))  ~
-      =/  host=(unit ship)  ?~(install ~ (some ship.u.install))
+      :: ?>  ?=(%urbit -.app)
+      :: =/  installs=(list [ship desk])
+      :: %+  skim  ~(tap by pending-installs.state)
+      ::   |=  [[=ship =desk]]
+      ::   ?:  =(app-id desk)   %.y  %.n
+      :: =/  install=(unit [=ship =desk])
+      ::   ?:  (gth (lent installs) 0)  (some (snag 0 installs))  ~
+      :: =/  host=(unit ship)  ?~(install ~ (some ship.u.install))
       :: doesn't look like it's safe to get rid of pending-installs, since a single
       ::  installation can install multiple apps (e.g. groups). i.e. how do we know
       ::  when to get rid of a pending install?
@@ -975,7 +1030,7 @@
       ::     (~(del by pending-installs.state) (need host))
       ::   pending-installs.state
       :: update app host to reflect any changes to the app host (origin)
-      =.  host.app                host
+      :: =.  host.app                host
       =.  catalog.state           (~(put by catalog.state) app-id app)
       =.  grid-index.state        (set-grid-index:helpers:bazaar app-id grid-index.state)
       :_  state
@@ -1020,4 +1075,3 @@
   =(our.bowl ship)
 ::
 --
-

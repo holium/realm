@@ -74,7 +74,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [handleClickOutside, isOpen]);
 
   return useMemo(
     () => (
@@ -84,18 +84,24 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
             {isOpen && (
               <Wrapper
                 key={`${id}-wrapper`}
-                style={{ ...coords, ...dimensions }}
+                style={{
+                  ...coords,
+                  ...dimensions,
+                  maxHeight: dimensions.height,
+                }}
                 initial={{
                   opacity: 0,
                   y: -8,
                   width: dimensions.width,
                   height: 'fit-content',
+                  maxHeight: dimensions.height,
                 }}
                 animate={{
                   opacity: isOpen ? 1 : 0,
                   y: 0,
                   width: dimensions.width,
                   height: 'fit-content',
+                  maxHeight: dimensions.height,
                   transition: {
                     duration: 0.2,
                   },
@@ -105,6 +111,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
                   y: -8,
                   height: 'fit-content',
                   width: dimensions.width,
+                  maxHeight: dimensions.height,
                   transition: {
                     duration: 0.2,
                   },
