@@ -34,7 +34,7 @@ export const GroupsApi = {
     return (await conduit.scry({
       app: 'spaces',
       path: `/groups${path}/members`, // the spaces scry is at the root of the path
-    })).members;
+    }));
     // return Array.from(Object.values(response.groups));
   },
 };

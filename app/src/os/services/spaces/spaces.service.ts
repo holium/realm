@@ -336,6 +336,7 @@ export class SpacesService extends BaseService {
         slug: spaceToSnake(body.name),
         payload: snakeify({
           name: body.name,
+          description: body.description,
           type: body.type,
           access: body.access,
           picture: body.image,
@@ -352,8 +353,38 @@ export class SpacesService extends BaseService {
     return spacePath;
   }
 
-  updateSpace(_event: IpcMainInvokeEvent, path: any, update: any) {
-    console.log('update space: ', path);
+  async updateSpace(_event: IpcMainInvokeEvent, path: any, body: any) {
+    // const members = body.members;
+    SpacesApi.updateSpace(
+      this.core.conduit!,
+      {
+        payload: {
+          name: body.name,
+          description: body.description,
+          access: body.access,
+          picture: body.picture,
+          color: body.color,
+          theme: {
+            mode: body.theme.mode,
+            'background-color': body.theme.backgroundColor,
+            'accent-color': body.theme.accentColor,
+            'input-color': body.theme.inputColor,
+            'dock-color': body.theme.dockColor,
+            'icon-color': body.theme.iconColor,
+            'text-color': body.theme.textColor,
+            'window-color': body.theme.windowColor,
+            wallpaper: body.theme.wallpaper,
+          },
+        },
+        path: path,
+      }
+      //members,
+    );
+    this.core.services.shell.closeDialog(_event);
+    this.core.services.shell.setBlur(_event, false);
+    const selected = this.state?.selectSpace(path);
+    this.setTheme({ ...selected!.theme!, id: selected!.path });
+    return path;
   }
 
   async deleteSpace(_event: IpcMainInvokeEvent, path: string) {
