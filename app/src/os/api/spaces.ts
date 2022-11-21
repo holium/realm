@@ -374,7 +374,6 @@ const handleSpacesReactions = (
       );
       spacesState.addSpace(data['remote-space']);
       spacesState.selectSpace(data['remote-space'].path)
-      // bazaarState.addBazaar(remoteSpace);
       break;
     default:
       // unknown
