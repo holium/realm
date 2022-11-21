@@ -23,6 +23,12 @@
   ==
 ::
 +$  rooms  (map rid room)
+::
++$  session
+  $:  provider=ship
+      current=(unit rid)
+      =rooms
+  ==
 :: 
 +$  host-state
   $:  =rooms
@@ -31,7 +37,7 @@
   ==
 ::
 +$  peer-state
-  $:  provider=(unit ship)
+  $:  provider=ship
       current=(unit rid)
       =rooms
   ==
@@ -39,42 +45,52 @@
 +$  peer-action
   $%  [%set-provider =ship]       
       [%reset-provider ~]
-
-      [%add-room =room]
-      [%remove-room =rid]
-      [%add-member =rid =ship]
-      [%remove-member =rid =ship]
-      [%set-whitelist =rid =whitelist]
+      [%create-room =rid =access =title]
+      [%delete-room =rid]
       [%set-title =rid =title]
       [%set-access =rid =access]
       [%set-capacity =rid =capacity]
       [%set-space =rid =path:spaces]
-      [%kick =rid =ship]
-
-      [%join-room =rid]
-      [%leave-room ~]
+      [%enter-room =rid]
+      [%leave-room =rid]
       [%invite =rid =ship]
-      [%chat =cord]
+      [%kick =rid =ship]
+      [%send-chat =cord]
   ==
 
 ::
-+$  reactions
-  $%  [%new-chat from=ship content=cord]
-      [%entered =rid =ship]
-      [%exited =rid =ship]
-      [%room =room]
-      [%rooms rooms=(set room)]
++$  reaction
+  $%  [%room-entered =rid =ship]
+      [%room-left =rid =ship]
+      [%room-created =room]
+      [%room-updated =room]
+      [%room-deleted =rid]
+      [%provider provider=ship =rooms]
       [%invited provider=ship =rid =title =ship]
       [%kicked provider=ship =rid =title =ship]  
+      [%new-chat from=ship content=cord]
   ==
+::
+:: +$  session-reaction
+::   $%  [%entered =rid =ship]
+::       [%exited =rid =ship]
+::       [%room =room]
+::       [%rooms provider=ship rooms=(set room)]
+::       [%invited provider=ship =rid =title =ship]
+::       [%kicked provider=ship =rid =title =ship]  
+::       [%new-chat from=ship content=cord]
+::   ==
 ::
 +$  host-action
   $%  [%set-online online=?]
       [%ban =ship]
       [%unban =ship]
-      [%ban-set ships=(set ship)]
-      [%unban-set ships=(set ship)]
-      [%unban-all ~]
+  ==
+::
++$  view
+  $%  [%session =session]
+      [%room =room]
+      [%provider =ship]
   ==
 ::
 --
