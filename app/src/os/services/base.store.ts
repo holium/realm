@@ -34,15 +34,10 @@ export class DiskStore {
     //       });
     this.persisted = new Store<any>(baseParams);
 
-    const isEmpty =
-      !this.persisted.store || Object.keys(this.persisted.store).length === 0;
-
     try {
       typecheck(store, this.persisted.store);
       // console.log(`typecheck passed: ${store.name}`);
-      this.model = store.create(
-        !isEmpty ? castToSnapshot(this.persisted.store) : defaults
-      );
+      this.model = store.create(castToSnapshot(this.persisted.store));
     } catch (err) {
       console.error(`typecheck failed: ${store.name} rebuilding...`);
       this.model = store.create(defaults);
