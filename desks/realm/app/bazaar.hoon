@@ -529,7 +529,7 @@
           (snoc result entry)
       =.  catalog.state       (~(uni by catalog.state) (malt new-catalog-apps))
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path catalog stall])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path catalog.state stall])]~
 
     ::
     ++  on-stall-update
@@ -945,23 +945,41 @@
     ==
     ::
     ++  update-catalog-app
-      |=  [=desk =charge:docket status=?(%started %failed %suspended %installed)]
+      |=  [app-id=desk =charge:docket status=?(%started %failed %suspended %installed)]
+      %-  (slog leaf+"{<dap.bowl>}: update-app-catalog [{<pending-installs.state>}]" ~)
       =/  hide-desks              `(set @tas)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
-      ?:  (~(has in hide-desks) desk)
+      ?:  (~(has in hide-desks) app-id)
         `state
-      =/  app                     (~(get by catalog.state) desk)
-      =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core desk)]
+      =/  app                     (~(get by catalog.state) app-id)
+      =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core app-id)]
         ?>  ?=(%urbit -.u.app)
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
         u.app
       ?>  ?=(%urbit -.app)
+      =/  installs=(list [ship desk])
+      %+  skim  ~(tap by pending-installs.state)
+        |=  [[=ship =desk]]
+        ?:  =(app-id desk)   %.y  %.n
+      =/  install=(unit [=ship =desk])
+        ?:  (gth (lent installs) 0)  (some (snag 0 installs))  ~
+      =/  host=(unit ship)  ?~(install ~ (some ship.u.install))
+      :: doesn't look like it's safe to get rid of pending-installs, since a single
+      ::  installation can install multiple apps (e.g. groups). i.e. how do we know
+      ::  when to get rid of a pending install?
+      :: :: get rid of pending install if status = %installed
+      :: =.  pending-installs.state
+      :: ?:  ?&  =(status %installed)
+      ::         !=(~ host)
+      ::     ==
+      ::     (~(del by pending-installs.state) (need host))
+      ::   pending-installs.state
       :: update app host to reflect any changes to the app host (origin)
-      =.  host.app                ?~(host.app ~ (determine-app-host:helpers:bazaar u.host.app app))
-      =.  catalog.state           (~(put by catalog.state) desk app)
-      =.  grid-index.state        (set-grid-index:helpers:bazaar desk grid-index.state)
+      =.  host.app                host
+      =.  catalog.state           (~(put by catalog.state) app-id app)
+      =.  grid-index.state        (set-grid-index:helpers:bazaar app-id grid-index.state)
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.app])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app])]~
 
   ::
   ++  rem

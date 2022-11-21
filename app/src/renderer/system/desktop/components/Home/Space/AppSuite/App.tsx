@@ -101,12 +101,16 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
           if (app.installStatus === InstallStatus.installed) {
             SpacesActions.uninstallApp(app.id);
           } else {
-            // SpacesActions.installApp(app);
+            console.log(app);
+            if (app.host) {
+              SpacesActions.installApp(app.host, app.id);
+            }
           }
         },
       });
     }
 
+    console.log(app.installStatus);
     return (
       <AppTile
         tileSize="xl1"
