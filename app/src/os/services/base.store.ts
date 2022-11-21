@@ -1,4 +1,10 @@
-import { castToSnapshot, onPatch, onSnapshot } from 'mobx-state-tree';
+import {
+  castToSnapshot,
+  IAnyType,
+  onPatch,
+  onSnapshot,
+  typecheck,
+} from 'mobx-state-tree';
 import Store from 'electron-store';
 import { Patp } from 'os/types';
 
@@ -10,7 +16,7 @@ export class DiskStore {
     name: string,
     patp: Patp,
     secretKey: string,
-    store: any,
+    store: IAnyType,
     defaults: any = {}
   ) {
     this.name = name;
@@ -31,9 +37,17 @@ export class DiskStore {
     const isEmpty =
       !this.persisted.store || Object.keys(this.persisted.store).length === 0;
 
-    this.model = store.create(
-      !isEmpty ? castToSnapshot(this.persisted.store) : defaults
-    );
+    try {
+      typecheck(store, this.persisted.store);
+      // console.log(`typecheck passed: ${store.name}`);
+      this.model = store.create(
+        !isEmpty ? castToSnapshot(this.persisted.store) : defaults
+      );
+    } catch (err) {
+      console.error(`typecheck failed: ${store.name} rebuilding...`);
+      this.model = store.create(defaults);
+    }
+
     // autosave snapshots
     onSnapshot(this.model, (snapshot) => {
       this.persisted.store = castToSnapshot(snapshot);
