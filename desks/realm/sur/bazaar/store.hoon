@@ -88,6 +88,8 @@
       [%joined-bazaar =path:spaces-path:spaces =catalog =stall]
       [%stall-update =path:spaces-path:spaces =stall]
       [%treaties-loaded =ship]
+      [%new-ally =ship =alliance:treaty]
+      [%ally-deleted =ship]
   ==
 +$  view
   $%  [%catalog =catalog]

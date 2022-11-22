@@ -172,6 +172,17 @@
       :~  [%ship s+(scot %p ship.rct)]
       ==
       ::
+        %new-ally
+      %-  pairs
+      :~  [%ship s+(scot %p ship.rct)]
+          [%desks (alliance:encode alliance.rct)]
+      ==
+      ::
+        %ally-deleted
+      %-  pairs
+      :~  [%ship s+(scot %p ship.rct)]
+      ==
+      ::
       ::   %treaty-added
       :: :-  %treaty-added
       :: %-  pairs

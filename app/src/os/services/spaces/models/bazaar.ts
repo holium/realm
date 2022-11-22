@@ -225,9 +225,31 @@ export const NewBazaarStore = types
     }) {
       self.stalls.set(data.path, data.stall);
     },
-    _allyAdded(ship: string) {
+    _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {
         self.addingAlly.delete(ship);
+      }
+      // extra desk name from full desk path (i.e. <ship>/<desk>)
+      for (let i = 0; i < desks.length; i++) {
+        desks[i] = desks[i].split('/')[1];
+      }
+      self.allies.set(ship, { ship, desks });
+      // this nice little 'new ally' event allows us to see if this ship
+      //  has any apps available. if not, end the search (i.e. don't wait for
+      //  treaties-loaded event since it will never happen)
+      if (desks.length === 0) {
+        self.loadingTreaties = false;
+        // hmm.wondering if we should use this use-case to send a del to the treaty to remove
+        //   this ally, to force a research if/when the user hits the ship again. keep
+        //   an eye on this
+      }
+    },
+    _allyDeleted(ship: string) {
+      if (self.addingAlly.get(ship)) {
+        self.addingAlly.delete(ship);
+      }
+      if (self.allies.has(ship)) {
+        self.allies.delete(ship);
       }
     },
     _addRecommended(data: { id: string; stalls: any }) {
@@ -242,6 +264,7 @@ export const NewBazaarStore = types
       applySnapshot(self.stalls, data.stalls);
     },
     _treatiesLoaded() {
+      self.loadingTreaties = false;
       self.treatiesLoaded = !self.treatiesLoaded;
     },
     installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
@@ -327,7 +350,7 @@ export const NewBazaarStore = types
         self.loadingTreaties = true;
         self.addingAlly.set(ship, 'adding');
         const result: any = yield BazaarApi.addAlly(conduit, ship);
-        self.loadingTreaties = false;
+        // self.loadingTreaties = false;
         return result;
       } catch (error) {
         console.error(error);

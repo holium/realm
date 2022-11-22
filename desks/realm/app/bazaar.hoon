@@ -425,7 +425,6 @@
       |=  [=ship =desk]
       ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
-      %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
       ::  queue this installation request, so that once alliance is complete,
       ::  we can use this info to set the host in the app data. also can be used
       ::  to automatically kick off an install once an alliance is made
@@ -999,7 +998,10 @@
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
     %-  (slog leaf+"{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}" ~)
-    `state
+    :_  state
+    :~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%new-ally ship alliance])]
+    ==
   ::
   ++  on-add
     |=  [=ship]
@@ -1012,7 +1014,10 @@
     |=  [=ship]
     ^-  (quip card _state)
     %-  (slog leaf+"{<dap.bowl>}: ally-update [on-del] => {<ship>}" ~)
-    `state
+    :_  state
+    :~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%ally-deleted ship])]
+    ==
   --
 ::  charge arms
 ++  ch

@@ -316,6 +316,15 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       console.log(data);
       model._treatiesLoaded();
       break;
+    case 'new-ally':
+      // console.log(data);
+      const ally = data['new-ally'];
+      model._allyAdded(ally.ship, ally.desks);
+      break;
+    case 'ally-deleted':
+      // console.log(data);
+      model._allyDeleted(data['ally-deleted'].ship);
+      break;
     default:
       break;
   }
