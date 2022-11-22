@@ -223,7 +223,7 @@ export const BazaarApi = {
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
           console.log(data);
-          if (data.hasOwnProperty('add') || data.hasOwnProperty('del')) {
+          if (data.hasOwnProperty('add')) {
             if (timeout) {
               clearTimeout(timeout);
             }
