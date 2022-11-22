@@ -36,7 +36,7 @@ export const BazaarApi = {
   getTreaties: (conduit: Conduit, patp: string) => null,
   scryAllies: async (conduit: Conduit): Promise<any> => {
     const response = await conduit.scry({
-      app: 'bazaar',
+      app: 'treaty',
       path: `/allies`,
     });
     return response.allies;
@@ -167,80 +167,97 @@ export const BazaarApi = {
     });
   },
   addAlly: async (conduit: Conduit, ship: Patp): Promise<any> => {
-    return await new Promise(async (resolve, reject) => {
-      let subscriptionId: number = -1;
-      let timeout: NodeJS.Timeout;
-      await conduit.watch({
+    conduit
+      .poke({
         app: 'treaty',
-        path: '/treaties',
-        onSubscribed: (subscription: number) => {
-          subscriptionId = subscription;
-          // upon subscribing, start a timer. if we don't get the 'add'
-          //  event (see below) within the allotted time, it "usually" means the configured
-          //  INSTALL_MOON does not have any apps available to install
-          timeout = setTimeout(async () => {
-            console.log(
-              `timeout forming alliance with ${ship}. is the ship running? are there apps published on '${ship}'?`
-            );
-            // force removal of the ship, so that future attempts to install an app will restart
-            //  ally operation from scratch
-            conduit
-              .poke({
-                app: 'treaty',
-                mark: 'ally-update-0',
-                json: {
-                  del: ship,
-                },
-                onError: (e: any) => {
-                  console.error(e);
-                  reject(e);
-                },
-              })
-              .catch((e) => {
-                console.log(e);
-                reject('del ally error');
-              });
-            reject(`timeout forming alliance with ${ship}`);
-          }, 60000);
-
-          conduit
-            .poke({
-              app: 'treaty',
-              mark: 'ally-update-0',
-              json: {
-                add: ship,
-              },
-              onError: (e: any) => {
-                console.error(e);
-                reject(e);
-              },
-            })
-            .catch((e) => {
-              console.log(e);
-              if (timeout) clearTimeout(timeout);
-              reject('add ally error');
-            });
+        mark: 'ally-update-0',
+        json: {
+          add: ship,
         },
-        onEvent: async (data: any, _id?: number, mark?: string) => {
-          console.log(data);
-          if (data.hasOwnProperty('add')) {
-            if (timeout) {
-              clearTimeout(timeout);
-            }
-            await conduit.unsubscribe(subscriptionId);
-            resolve(data);
-          }
+        onError: (e: any) => {
+          console.error(e);
+          // reject(e);
         },
-        onError: () => {
-          console.log('subscription [treaty/treaties] rejected');
-          reject('subscription [treaty/treaties] rejected');
-        },
-        onQuit: () => {
-          console.log('kicked from subscription [treaty/treaties]');
-          reject('kicked from subscription [treaty/treaties]');
-        },
+      })
+      .catch((e) => {
+        console.log(e);
+        // if (timeout) clearTimeout(timeout);
+        // reject('add ally error');
       });
-    });
+    // return await new Promise(async (resolve, reject) => {
+    //   let subscriptionId: number = -1;
+    //   let timeout: NodeJS.Timeout;
+    //   await conduit.watch({
+    //     app: 'bazaar',
+    //     path: '/updates',
+    //     onSubscribed: (subscription: number) => {
+    //       subscriptionId = subscription;
+    //       // upon subscribing, start a timer. if we don't get the 'add'
+    //       //  event (see below) within the allotted time, it "usually" means the configured
+    //       //  INSTALL_MOON does not have any apps available to install
+    //       timeout = setTimeout(async () => {
+    //         console.log(
+    //           `timeout forming alliance with ${ship}. is the ship running? are there apps published on '${ship}'?`
+    //         );
+    //         conduit
+    //           .poke({
+    //             app: 'treaty',
+    //             mark: 'ally-update-0',
+    //             json: {
+    //               del: ship,
+    //             },
+    //             onError: (e: any) => {
+    //               console.error(e);
+    //               reject(e);
+    //             },
+    //           })
+    //           .catch((e) => {
+    //             console.log(e);
+    //             if (timeout) clearTimeout(timeout);
+    //             reject('add ally error');
+    //           });
+    //         await conduit.unsubscribe(subscriptionId);
+    //         reject('timeout');
+    //       }, 60000);
+
+    //       conduit
+    //         .poke({
+    //           app: 'treaty',
+    //           mark: 'ally-update-0',
+    //           json: {
+    //             add: ship,
+    //           },
+    //           onError: (e: any) => {
+    //             console.error(e);
+    //             reject(e);
+    //           },
+    //         })
+    //         .catch((e) => {
+    //           console.log(e);
+    //           if (timeout) clearTimeout(timeout);
+    //           reject('add ally error');
+    //         });
+    //     },
+    //     onEvent: async (data: any, _id?: number, mark?: string) => {
+    //       console.log(data);
+    //       if (data.hasOwnProperty('treaties-loaded')) {
+    //         if (timeout) {
+    //           clearTimeout(timeout);
+    //         }
+    //         await conduit.unsubscribe(subscriptionId);
+    //         resolve(data);
+    //       }
+    //     },
+    //     onError: () => {
+    //       console.log('subscription [treaty/treaties] rejected');
+    //       reject('subscription [treaty/treaties] rejected');
+    //     },
+    //     onQuit: () => {
+    //       console.log('kicked from subscription [treaty/treaties]');
+    //       reject('kicked from subscription [treaty/treaties]');
+    //     },
+    //   });
+    // });
   },
 };
 
@@ -294,6 +311,10 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
     case 'joined-bazaar':
       // console.log('joined-bazaar', data['joined-bazaar']);
       model._addJoined(data['joined-bazaar']);
+      break;
+    case 'treaties-loaded':
+      console.log(data);
+      model._treatiesLoaded();
       break;
     default:
       break;

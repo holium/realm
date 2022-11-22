@@ -637,7 +637,7 @@
     ++  treaties
       |=  [=ship]
       =/  treaties  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
-      ~&  >  [treaties]
+      :: ~&  >  [treaties]
       ?>  ?=(%ini -.treaties)
       init.treaties
     ::
@@ -942,19 +942,30 @@
     |=  [=treaty:treaty]
     ^-  (quip card _state)
     :: ~&  >>  "{<dap.bowl>}: treaty-update [on-add] => {<[treaty]>}"
-    =|  app=app:store
-    :: =.  app            [%urbit docket.treaty `ship.treaty %treaty]
-    :: =.  catalog.state  (~(put by catalog.state) desk.treaty app)
-    ~&  >  app
+    =|  effects=(list card)
+      :: :~
+      ::   [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])]
+      :: ==
+    ::  if every desk in the alliance has been added to the treaties listing for the ship,
+    ::    send the UI and update indicating its safe to scry the treaties
+    =/  allis  allies:scry:bazaar:core
+    =/  treats  (treaties:scry:bazaar:core ship.treaty)
+    :: ?>  ?=(%ini allis)
+    =/  alli  (~(get by allis) ship.treaty)
+    =/  effects  ?~  alli  effects
+      ?:  %-  ~(all in u.alli)
+          |=  [[=ship =desk]]
+            (~(has by treats) [ship desk])
+        ~&  >>  "{<dap.bowl>}: sending treaties-loaded..."
+        (snoc effects [%give %fact [/updates ~] bazaar-reaction+!>([%treaties-loaded ship.treaty])])
+      effects
     ::  do we have a pending installation request for this ship/desk?
     =/  installation  (~(get by pending-installs.state) ship.treaty)
     ?~  installation  ::  if there is no pending-install, ignore
-      `state
+      [effects state]
+    =/  effects  (snoc effects [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])])
     ::  trigger docker install
-    :_  state
-    :~
-      [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])]
-    ==
+    [effects state]
   ::
   :: ++  on-del
   ::   |=  [=ship =desk]

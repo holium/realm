@@ -167,6 +167,11 @@
           [%stall (stall-js:encode stall.rct)]
       ==
       ::
+        %treaties-loaded
+      %-  pairs
+      :~  [%ship s+(scot %p ship.rct)]
+      ==
+      ::
       ::   %treaty-added
       :: :-  %treaty-added
       :: %-  pairs

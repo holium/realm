@@ -158,6 +158,7 @@ export const NewBazaarStore = types
     addingAlly: types.map(types.string),
     installations: types.map(types.string),
     devAppMap: types.map(DevAppModel),
+    treatiesLoaded: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     // Updates
@@ -239,6 +240,9 @@ export const NewBazaarStore = types
       )!;
       self.recommendations.splice(removeIndex, 1);
       applySnapshot(self.stalls, data.stalls);
+    },
+    _treatiesLoaded() {
+      self.treatiesLoaded = !self.treatiesLoaded;
     },
     installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
       self.installations.delete(body.desk);
