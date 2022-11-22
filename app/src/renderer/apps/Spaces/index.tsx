@@ -43,12 +43,8 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
     const pathArr = space.split('/');
     const ship = pathArr[0];
     const spaceName = pathArr[1];
-    return (
-      ship.length > 1
-      && isValidPatp(ship)
-      && spaceName.length > 0
-    );
-  }
+    return ship.length > 1 && isValidPatp(ship) && spaceName.length > 0;
+  };
 
   const themeInputColor = useMemo(
     () =>
@@ -146,85 +142,85 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
         </Flex>
       </Grid.Row>
       {searchVisible ? (
-                <Flex
-                position="absolute"
-                width="100%"
-                style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
-                overflowY="hidden"
-              >
-        <Grid.Column>
-          <Flex mt={2} mb={1} position="relative">
-            <Input
-              tabIndex={1}
-              autoCapitalize="false"
-              autoCorrect="false"
-              autoComplete="false"
-              name="person"
-              height={34}
-              placeholder="Paste link..."
-              bg={
-                mode === 'light'
-                  ? lighten(0.2, inputColor)
-                  : darken(0.005, inputColor)
-              }
-              wrapperMotionProps={{
-                initial: {
-                  backgroundColor: themeInputColor,
-                },
-                animate: {
-                  backgroundColor: themeInputColor,
-                },
-                transition: {
-                  backgroundColor: { duration: 0.3 },
-                  borderColor: { duration: 0.3 },
-                  color: { duration: 0.5 },
-                },
-              }}
-              wrapperStyle={{
-                borderRadius: 6,
-                paddingRight: 4,
-              }}
-              onChange={(evt: any) => {
-                evt.stopPropagation();
-                SpacesActions.setLoader('loaded');
-                setSearchString(evt.target.value);
-              }}
-              rightInteractive
-              rightIcon={
-                <TextButton
-                  disabled={!isValidSpace(searchString)}
-                  onClick={(evt: any) => {
-                    SpacesActions.joinSpace(searchString);
-                  }}
-                >
-                  Join
-                </TextButton>
-              }
-              onKeyDown={(evt: any) => {
-                if (evt.key === 'Enter' && isValidSpace(searchString)) {
-                  SpacesActions.joinSpace(searchString);
+        <Flex
+          position="absolute"
+          width="100%"
+          style={{ bottom: bottomHeight, top: 50, left: 0, right: 0 }}
+          overflowY="hidden"
+        >
+          <Grid.Column>
+            <Flex mt={2} mb={1} position="relative">
+              <Input
+                tabIndex={1}
+                autoCapitalize="false"
+                autoCorrect="false"
+                autoComplete="false"
+                name="person"
+                height={34}
+                placeholder="Paste link..."
+                bg={
+                  mode === 'light'
+                    ? lighten(0.2, inputColor)
+                    : darken(0.005, inputColor)
                 }
-              }}
-            />
-          </Flex>
-          <Flex width="100%" justifyContent="flex-end">
-          <Text
-            variant="body"
-            fontSize="11px"
-            color={themeData.colors.text.error}
-          >
-            {spaces.loader.state === 'error' &&
-              `Failed to join ${searchString}.`}
-            &nbsp;&nbsp;&nbsp;
-          </Text>
-        </Flex>
-          <Flex position="relative" width="100%" mt={3} ml={2}>
+                wrapperMotionProps={{
+                  initial: {
+                    backgroundColor: themeInputColor,
+                  },
+                  animate: {
+                    backgroundColor: themeInputColor,
+                  },
+                  transition: {
+                    backgroundColor: { duration: 0.3 },
+                    borderColor: { duration: 0.3 },
+                    color: { duration: 0.5 },
+                  },
+                }}
+                wrapperStyle={{
+                  borderRadius: 6,
+                  paddingRight: 4,
+                }}
+                onChange={(evt: any) => {
+                  evt.stopPropagation();
+                  SpacesActions.setLoader('loaded');
+                  setSearchString(evt.target.value);
+                }}
+                rightInteractive
+                rightIcon={
+                  <TextButton
+                    disabled={!isValidSpace(searchString)}
+                    onClick={(evt: any) => {
+                      SpacesActions.joinSpace(searchString);
+                    }}
+                  >
+                    Join
+                  </TextButton>
+                }
+                onKeyDown={(evt: any) => {
+                  if (evt.key === 'Enter' && isValidSpace(searchString)) {
+                    SpacesActions.joinSpace(searchString);
+                  }
+                }}
+              />
+            </Flex>
+            <Flex width="100%" justifyContent="flex-end">
+              <Text
+                variant="body"
+                fontSize="11px"
+                color={themeData.colors.text.error}
+              >
+                {spaces.loader.state === 'error' &&
+                  `Failed to join ${searchString}.`}
+                &nbsp;&nbsp;&nbsp;
+              </Text>
+            </Flex>
+            {/*<Flex position="relative" width="100%" mt={3} ml={2}>
             <Text opacity={0.8} color={textColor} fontWeight={450}>
               Featured spaces
             </Text>
-          </Flex>
-        </Grid.Column>
-                </Flex>
+            </Flex>*/}
+          </Grid.Column>
+        </Flex>
       ) : (
         <Flex
           position="absolute"
