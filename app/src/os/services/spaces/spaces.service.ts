@@ -384,7 +384,6 @@ export class SpacesService extends BaseService {
   }
 
   async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
-    console.log('leave path', path);
     return await SpacesApi.leaveSpace(this.core.conduit!, { path });
   }
 

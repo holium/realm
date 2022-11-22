@@ -96,7 +96,6 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
             }}
             onChange={(evt: any) => {
               evt.stopPropagation();
-              console.log('here')
               setSearchString(evt.target.value);
             }}
           />
