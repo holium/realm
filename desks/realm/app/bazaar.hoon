@@ -432,6 +432,10 @@
       =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
+        %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
+        ::  queue this installation request, so that once alliance is complete,
+        ::  we can automatically kick off the install
+        =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
         :_  state
         [%pass / %agent [our.bowl %treaty] %poke ally-update-0+!>([%add ship])]~
       :_  state
@@ -805,7 +809,7 @@
   ++  on-snap
     |=  =snap:hood
     ^-  (quip card _state)
-    %-  (slog leaf+"{<dap.bowl>}: [on-snap:hood] => {<snap>}" ~)
+    :: %-  (slog leaf+"{<dap.bowl>}: [on-snap:hood] => {<snap>}" ~)
     =/  catalog-apps=catalog:store
     %-  ~(rep by snap)
     |=  [[=desk ark=arak:hood] cat=catalog:store]
@@ -819,11 +823,10 @@
     =.  catalog.state  (~(uni by catalog.state) catalog-apps)
     `state
   ::
-  :: [%commit desk=%groups arak=[rail=[~ [publisher=~ paused=%.n ship=~marnec-dozzod-marzod desk=%groups aeon=8 next=~]] rein=[liv=%.y add={} sub={}]]]
   ++  on-diff
     |=  =diff:hood
     ^-  (quip card _state)
-    %-  (slog leaf+"{<dap.bowl>}: [on-diff:hood] => {<diff>}" ~)
+    :: %-  (slog leaf+"{<dap.bowl>}: [on-diff:hood] => {<diff>}" ~)
     ?+    -.diff  `state
       %commit
         ?~  rail.arak.diff  `state
@@ -832,6 +835,18 @@
         ?~  app  `state
         ?>  ?=(%urbit -.u.app)
         =.  host.u.app  ?~(publisher.rail (some ship.rail) publisher.rail)
+        =.  pending-installs.state  %-  malt
+        %+  skip  ~(tap by pending-installs.state)
+        |=  [[=ship =desk]]
+          :: %-  (slog leaf+"{<dap.bowl>}: {<[ship desk]>} = {<[host.u.app desk.diff]>}" ~)
+          ?:  ?&  !=(~ host.u.app)
+                   =((need host.u.app) ship)
+                   =(desk.diff desk)
+              ==
+              :: %-  (slog leaf+"{<dap.bowl>}: removing pending install {<[ship desk]>}..." ~)
+              %.y
+            :: %-  (slog leaf+"{<dap.bowl>}: keeping pending install {<[ship desk]>}..." ~)
+            %.n
         =.  catalog.state  (~(put by catalog.state) desk.diff u.app)
         `state
       %suspend  `state
@@ -1022,26 +1037,6 @@
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
         u.app
-      :: ?>  ?=(%urbit -.app)
-      :: =/  installs=(list [ship desk])
-      :: %+  skim  ~(tap by pending-installs.state)
-      ::   |=  [[=ship =desk]]
-      ::   ?:  =(app-id desk)   %.y  %.n
-      :: =/  install=(unit [=ship =desk])
-      ::   ?:  (gth (lent installs) 0)  (some (snag 0 installs))  ~
-      :: =/  host=(unit ship)  ?~(install ~ (some ship.u.install))
-      :: doesn't look like it's safe to get rid of pending-installs, since a single
-      ::  installation can install multiple apps (e.g. groups). i.e. how do we know
-      ::  when to get rid of a pending install?
-      :: :: get rid of pending install if status = %installed
-      :: =.  pending-installs.state
-      :: ?:  ?&  =(status %installed)
-      ::         !=(~ host)
-      ::     ==
-      ::     (~(del by pending-installs.state) (need host))
-      ::   pending-installs.state
-      :: update app host to reflect any changes to the app host (origin)
-      :: =.  host.app                host
       =.  catalog.state           (~(put by catalog.state) app-id app)
       =.  grid-index.state        (set-grid-index:helpers:bazaar app-id grid-index.state)
       :_  state

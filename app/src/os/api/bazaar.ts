@@ -182,10 +182,6 @@ export const BazaarApi = {
             console.log(
               `timeout forming alliance with ${ship}. is the ship running? are there apps published on '${ship}'?`
             );
-            timeout = setTimeout(async () => {
-              await conduit.unsubscribe(subscriptionId);
-              console.log(`timeout removing alliance with ${ship}`);
-            }, 60000);
             // force removal of the ship, so that future attempts to install an app will restart
             //  ally operation from scratch
             conduit
@@ -202,10 +198,9 @@ export const BazaarApi = {
               })
               .catch((e) => {
                 console.log(e);
-                if (timeout) clearTimeout(timeout);
                 reject('del ally error');
               });
-            // reject(`timeout forming alliance with ${ship}`);
+            reject(`timeout forming alliance with ${ship}`);
           }, 60000);
 
           conduit
@@ -227,7 +222,8 @@ export const BazaarApi = {
             });
         },
         onEvent: async (data: any, _id?: number, mark?: string) => {
-          if (data.hasOwnProperty('add')) {
+          console.log(data);
+          if (data.hasOwnProperty('add') || data.hasOwnProperty('del')) {
             if (timeout) {
               clearTimeout(timeout);
             }
