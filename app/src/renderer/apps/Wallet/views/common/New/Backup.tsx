@@ -98,10 +98,9 @@ export const Backup: FC<BackupProps> = observer((props: BackupProps) => {
           </Flex>
         </Flex>
         <Flex mt={2} width="100%" justifyContent="center">
-          <Button onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}>
+          <Button onClick={() => props.setScreen(NewWalletScreen.CONFIRM)}>
             I wrote it down
-          </Button>{' '}
-          {/* TODO: link to confirm instead after demo */}
+          </Button>
         </Flex>
       </Flex>
       <Flex

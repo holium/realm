@@ -22,10 +22,12 @@ export const SpaceModel = types
   .model('SpaceModel', {
     path: types.identifier,
     name: types.string,
+    description: types.maybeNull(types.string),
     color: types.maybeNull(types.string),
     type: types.enumeration(['group', 'our', 'space']),
     archetype: types.optional(types.enumeration(['home', 'community']), 'home'), // TODO remove the optional
     picture: types.maybeNull(types.string),
+    access: types.maybeNull(types.string),
     theme: ThemeModel,
     token: types.maybe(TokenModel),
     invitations: types.optional(VisaModel, {

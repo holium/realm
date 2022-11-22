@@ -13,6 +13,7 @@ import {
   isValidImageUrl,
   isValidHexColor,
 } from 'renderer/components';
+import { toJS } from 'mobx';
 import { createField, createForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import { observer } from 'mobx-react';
@@ -81,337 +82,362 @@ export const createSpaceForm = (
 type CrestOptionType = 'color' | 'image';
 type AccessOptionType = 'public' | 'antechamber' | 'private' | undefined;
 
-export const SpacesCreateForm: FC<BaseDialogProps> = observer(
-  (props: BaseDialogProps) => {
-    const { theme } = useServices();
-    const { inputColor, windowColor, textColor } = theme.currentTheme;
-    const { workflowState, setState } = props;
-    const colorPickerRef = useRef(null);
+export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
+  const { theme, spaces } = useServices();
+  const { inputColor, windowColor, textColor } = theme.currentTheme;
+  const { workflowState, setState } = props;
+  const colorPickerRef = useRef(null);
 
-    const [colorPickerOpen, setColorPickerOpen] = useState(false);
-    const [crestOption, setCrestOption] = useState<CrestOptionType>(
-      workflowState.image ? 'image' : 'color'
-    );
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [crestOption, setCrestOption] = useState<CrestOptionType>(
+    workflowState.image ? 'image' : 'color'
+  );
 
-    const [accessOption, setAccessOption] = useState<AccessOptionType>(
-      workflowState.access || 'public'
-    );
+  const [accessOption, setAccessOption] = useState<AccessOptionType>(
+    workflowState.access || 'public'
+  );
 
-    const handleClickOutside = (event: any) => {
-      const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
-      const pickerNode = document.getElementById('space-color-tile-popover');
-      const isVisible = pickerNode
-        ? pickerNode.getAttribute('data-is-open') === 'true'
-        : false; // get if the picker is visible currently
-      if (!domNode || !domNode.contains(event.target)) {
-        if (event.target.id === 'space-color-tile') {
-          return;
-        }
-        // You are clicking outside
-        if (isVisible) {
-          setColorPickerOpen(false);
-        }
+  const handleClickOutside = (event: any) => {
+    const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
+    const pickerNode = document.getElementById('space-color-tile-popover');
+    const isVisible = pickerNode
+      ? pickerNode.getAttribute('data-is-open') === 'true'
+      : false; // get if the picker is visible currently
+    if (!domNode || !domNode.contains(event.target)) {
+      if (event.target.id === 'space-color-tile') {
+        return;
       }
+      // You are clicking outside
+      if (isVisible) {
+        setColorPickerOpen(false);
+      }
+    }
+  };
+
+  const setWorkspaceState = (obj: any) => {
+    setState &&
+      setState({
+        ...workflowState,
+        ...obj,
+      });
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true);
+    if (workflowState.type === 'group') {
+      if (workflowState.image) {
+        setCrestOption('image');
+        setWorkspaceState({ crestOption });
+      }
+    } else {
+      setWorkspaceState({
+        access: 'public',
+      });
+    }
+    if (props.edit) {
+      const space = spaces.spaces.get(props.edit.space)!;
+      console.log('space', space)
+
+      setWorkspaceState({
+        ...space,
+        description: space.description || '',
+        access: space.access || 'public',
+        color: space.color,
+        image: space.picture,
+        crestOption: space.picture ? 'image' : 'color',
+      });
+      if (space.picture) {
+        setCrestOption('image');
+      }
+      if (space.access) {
+        const spaceAccess: AccessOptionType =
+          space.access === 'public'
+          ? 'public'
+          : space.access === 'antechamber'
+          ? 'antechamber'
+          : 'private';
+        setAccessOption(spaceAccess);
+      }
+    }
+
+    () => {
+      document.removeEventListener('click', handleClickOutside, true);
     };
+  }, []);
 
-    const setWorkspaceState = (obj: any) => {
-      setState &&
-        setState({
-          ...workflowState,
-          ...obj,
-        });
-    };
+  const { name, description, picture, color } = useMemo(() => {
+    if (props.edit) {
+      const space = spaces.spaces.get(props.edit.space)!;
+      return createSpaceForm(space);
+    } else if (workflowState.type === 'group') {
+      return createSpaceForm({
+        name: workflowState.title,
+        description: workflowState.description || '',
+        color: workflowState.color,
+        picture: workflowState.image,
+      });
+    } else {
+      return createSpaceForm({
+        color: workflowState.color,
+        picture: '',
+      });
+    }
+  }, []);
 
-    useEffect(() => {
-      document.addEventListener('click', handleClickOutside, true);
-      if (workflowState.type === 'group') {
-        if (workflowState.image) {
-          setCrestOption('image');
-          setWorkspaceState({ crestOption });
-        }
-      } else {
-        setWorkspaceState({
-          access: 'public',
-        });
-      }
-
-      () => {
-        document.removeEventListener('click', handleClickOutside, true);
-      };
-    }, []);
-
-    const { spaceForm, name, description, picture, color } = useMemo(() => {
-      if (workflowState.type === 'group') {
-        return createSpaceForm({
-          name: workflowState.title,
-          //description: workflowState.description,
-          color: workflowState.color,
-          picture: workflowState.image,
-        });
-      } else {
-        return createSpaceForm({
-          color: workflowState.color,
-          picture: '',
-        });
-      }
-    }, []);
-
-    return (
-      <Grid.Column noGutter lg={12} xl={12}>
-        <Text
-          fontSize={5}
-          lineHeight="24px"
-          fontWeight={500}
-          mb={16}
-          variant="body"
-        >
-          Edit details
-        </Text>
-        <Flex flexDirection="column" gap={16} justifyContent="flex-start">
-          <Flex flexDirection="row" alignItems="center" gap={16}>
-            <Crest
-              color={
-                crestOption === 'color' ? workflowState.color : '#00000030'
-              }
-              picture={crestOption === 'image' ? workflowState.image : ''}
-              size="md"
-            />
-            <Flex flex={1} flexDirection="column" gap={4}>
-              <RadioGroup
-                customBg={windowColor}
-                textColor={textColor}
-                selected={crestOption}
-                options={[
-                  { label: 'Color', value: 'color' },
-                  { label: 'Image', value: 'image' },
-                ]}
-                onClick={(value: CrestOptionType) => {
-                  setCrestOption(value);
+  return (
+    <Grid.Column noGutter lg={12} xl={12}>
+      <Text
+        fontSize={5}
+        lineHeight="24px"
+        fontWeight={500}
+        mb={16}
+        variant="body"
+      >
+        Edit details
+      </Text>
+      <Flex flexDirection="column" gap={16} justifyContent="flex-start">
+        <Flex flexDirection="row" alignItems="center" gap={16}>
+          <Crest
+            color={crestOption === 'color' ? workflowState.color : '#00000030'}
+            picture={crestOption === 'image' ? workflowState.image : ''}
+            size="md"
+          />
+          <Flex flex={1} flexDirection="column" gap={4}>
+            <RadioGroup
+              customBg={windowColor}
+              textColor={textColor}
+              selected={crestOption}
+              options={[
+                { label: 'Color', value: 'color' },
+                { label: 'Image', value: 'image' },
+              ]}
+              onClick={(value: CrestOptionType) => {
+                setCrestOption(value);
+                setWorkspaceState({ crestOption: value });
                   setWorkspaceState({ crestOption: value });
-                }}
-              />
+              }}
+            />
 
-              <Flex
-                animate={{
-                  display: crestOption === 'color' ? 'flex' : 'none',
-                }}
-                flex={1}
-                alignItems="flex-start"
-                position="relative"
-              >
-                <Input
-                  name="color"
-                  tabIndex={1}
-                  height={34}
-                  required
-                  leftIcon={<Text opacity={0.5}>#</Text>}
-                  rightInteractive
-                  rightIcon={
-                    <Flex position="relative" justifyContent="flex-end">
-                      <ColorTile
-                        id="space-color-tile"
-                        size={26}
-                        tileColor={workflowState.color}
-                        onClick={(_evt: any) => {
-                          setColorPickerOpen(!colorPickerOpen);
+            <Flex
+              animate={{
+                display: crestOption === 'color' ? 'flex' : 'none',
+              }}
+              flex={1}
+              alignItems="flex-start"
+              position="relative"
+            >
+              <Input
+                name="color"
+                tabIndex={1}
+                height={34}
+                required
+                leftIcon={<Text opacity={0.5}>#</Text>}
+                rightInteractive
+                rightIcon={
+                  <Flex position="relative" justifyContent="flex-end">
+                    <ColorTile
+                      id="space-color-tile"
+                      size={26}
+                      tileColor={workflowState.color}
+                      onClick={(_evt: any) => {
+                        setColorPickerOpen(!colorPickerOpen);
+                      }}
+                    />
+                    <ColorTilePopover
+                      id="space-color-tile-popover"
+                      size={26}
+                      ref={colorPickerRef}
+                      isOpen={colorPickerOpen}
+                      data-is-open={colorPickerOpen}
+                    >
+                      <TwitterPicker
+                        width="inherit"
+                        className="cursor-style"
+                        color={workflowState.color}
+                        onChange={(newColor: { hex: string }) => {
+                          color.actions.onChange(newColor.hex);
+                          setWorkspaceState({
+                            color: newColor.hex,
+                            crestOption: 'color',
+                          });
+                          // setValidatedColor(newColor.hex);
                         }}
+                        triangle="top-left"
+                        colors={[
+                          '#D9682A',
+                          '#D9A839',
+                          '#52B278',
+                          '#3E89D1',
+                          '#96A0A8',
+                          '#CC314C',
+                          '#CF8194',
+                          '#8419D9',
+                        ]}
                       />
-                      <ColorTilePopover
-                        id="space-color-tile-popover"
-                        size={26}
-                        ref={colorPickerRef}
-                        isOpen={colorPickerOpen}
-                        data-is-open={colorPickerOpen}
-                      >
-                        <TwitterPicker
-                          width="inherit"
-                          className="cursor-style"
-                          color={workflowState.color}
-                          onChange={(newColor: { hex: string }) => {
-                            color.actions.onChange(newColor.hex);
-                            setWorkspaceState({
-                              color: newColor.hex,
-                              crestOption: 'color',
-                            });
-                            // setValidatedColor(newColor.hex);
-                          }}
-                          triangle="top-left"
-                          colors={[
-                            '#D9682A',
-                            '#D9A839',
-                            '#52B278',
-                            '#3E89D1',
-                            '#96A0A8',
-                            '#CC314C',
-                            '#CF8194',
-                            '#8419D9',
-                          ]}
-                        />
-                      </ColorTilePopover>
-                    </Flex>
-                  }
-                  wrapperStyle={{
-                    width: 140,
-                    backgroundColor: inputColor,
-                    borderRadius: 6,
-                    paddingRight: 0,
-                  }}
-                  value={color.state.value.replace('#', '')}
-                  error={color.computed.ifWasEverBlurredThenError}
-                  onChange={(e: any) => {
-                    if (isValidHexColor(`#${e.target.value}`)) {
-                      setWorkspaceState({
-                        color: `#${e.target.value}`,
-                        crestOption: 'color',
-                      });
-                    }
-                    color.actions.onChange(e.target.value);
-                  }}
-                  onFocus={() => color.actions.onFocus()}
-                  onBlur={() => color.actions.onBlur()}
-                />
-              </Flex>
-
-              <Flex
-                flex={1}
-                initial={{ display: 'none', width: '100%' }}
-                animate={{
-                  display: crestOption === 'image' ? 'flex' : 'none',
+                    </ColorTilePopover>
+                  </Flex>
+                }
+                wrapperStyle={{
+                  width: 140,
+                  backgroundColor: inputColor,
+                  borderRadius: 6,
+                  paddingRight: 0,
                 }}
-                alignItems="flex-start"
-                position="relative"
-              >
-                <Input
-                  leftIcon={
-                    <Icons name="ProfileImage" color="#C1C1C1" size={24} />
+                value={color.state.value.replace('#', '')}
+                error={color.computed.ifWasEverBlurredThenError}
+                onChange={(e: any) => {
+                  if (isValidHexColor(`#${e.target.value}`)) {
+                    setWorkspaceState({
+                      color: `#${e.target.value}`,
+                      crestOption: 'color',
+                    });
                   }
-                  name="picture"
-                  placeholder="Paste image link here"
-                  height={34}
-                  wrapperStyle={{
-                    borderRadius: 6,
-                    paddingLeft: 6,
-                    backgroundColor: inputColor,
-                  }}
-                  value={picture.state.value}
-                  // error={!avatar.computed.isDirty || avatar.computed.error}
-                  onChange={(e: any) => {
-                    if (isValidImageUrl(e.target.value)) {
-                      setWorkspaceState({
-                        image: e.target.value,
-                        crestOption: 'image',
-                      });
-                    }
-                    if (e.target.value === '') {
-                      setWorkspaceState({
-                        image: '',
-                        crestOption: 'image',
-                      });
-                    }
-                    picture.actions.onChange(e.target.value);
-                  }}
-                  onFocus={() => picture.actions.onFocus()}
-                  onBlur={() => picture.actions.onBlur()}
-                />
-              </Flex>
+                  color.actions.onChange(e.target.value);
+                }}
+                onFocus={() => color.actions.onFocus()}
+                onBlur={() => color.actions.onBlur()}
+              />
+            </Flex>
+
+            <Flex
+              flex={1}
+              initial={{ display: 'none', width: '100%' }}
+              animate={{
+                display: crestOption === 'image' ? 'flex' : 'none',
+              }}
+              alignItems="flex-start"
+              position="relative"
+            >
+              <Input
+                leftIcon={
+                  <Icons name="ProfileImage" color="#C1C1C1" size={24} />
+                }
+                name="picture"
+                placeholder="Paste image link here"
+                height={34}
+                wrapperStyle={{
+                  borderRadius: 6,
+                  paddingLeft: 6,
+                  backgroundColor: inputColor,
+                }}
+                value={picture.state.value}
+                // error={!avatar.computed.isDirty || avatar.computed.error}
+                onChange={(e: any) => {
+                  if (isValidImageUrl(e.target.value)) {
+                    setWorkspaceState({
+                      image: e.target.value,
+                      crestOption: 'image',
+                    });
+                  }
+                  if (e.target.value === '') {
+                    setWorkspaceState({
+                      image: '',
+                      crestOption: 'image',
+                    });
+                  }
+                  picture.actions.onChange(e.target.value);
+                }}
+                onFocus={() => picture.actions.onFocus()}
+                onBlur={() => picture.actions.onBlur()}
+              />
             </Flex>
           </Flex>
-          <Flex mt={1} flex={1} gap={20} flexDirection="column">
-            <FormControl.Field>
-              <Label fontWeight={500} required>
-                Space name
-              </Label>
-              <Input
-                tabIndex={1}
-                name="name"
-                required
-                placeholder="Enter name"
-                wrapperStyle={{
-                  height: 36,
-                  borderRadius: 6,
-                  backgroundColor: inputColor,
-                }}
-                defaultValue={name.state.value}
-                error={name.computed.ifWasEverBlurredThenError}
-                onChange={(e: any) => {
-                  name.actions.onChange(e.target.value);
-                  setWorkspaceState({ name: e.target.value });
-                }}
-                onFocus={() => name.actions.onFocus()}
-                onBlur={(e: any) => {
-                  name.actions.onBlur();
-                }}
-              />
-            </FormControl.Field>
-            <FormControl.Field>
-              <Label fontWeight={500} adornment="optional">
-                Description
-              </Label>
-              <Input
-                tabIndex={1}
-                name="description"
-                fontWeight={400}
-                fontSize={2}
-                placeholder="Enter description"
-                wrapperStyle={{
-                  height: 36,
-                  borderRadius: 6,
-                  backgroundColor: inputColor,
-                }}
-                defaultValue={description.state.value}
-                error={description.computed.ifWasEverBlurredThenError}
-                onChange={(e: any) =>
-                  description.actions.onChange(e.target.value)
-                }
-                onFocus={() => description.actions.onFocus()}
-                onBlur={(e: any) => {
-                  setWorkspaceState({
-                    description: e.target.value,
-                  });
-                  description.actions.onBlur();
-                }}
-              />
-            </FormControl.Field>
-            <FormControl.Field>
-              <Label mb={1} fontWeight={500} required>
-                Access
-              </Label>
-              <RadioList
-                customBg={windowColor}
-                textColor={textColor}
-                selected={accessOption}
-                options={[
-                  {
-                    icon: 'Public',
-                    label: 'Public',
-                    value: 'public',
-                    sublabel: 'Anyone can join.',
-                  },
-                  {
-                    icon: 'EyeOff',
-                    label: 'Private',
-                    value: 'private',
-                    sublabel: 'An invitation is required to join.',
-                  },
-                  {
-                    disabled: true,
-                    icon: 'DoorOpen',
-                    label: 'Antechamber',
-                    value: 'antechamber',
-                    sublabel: 'Anyone can join a public holding area.',
-                  },
-                ]}
-                onClick={(value: AccessOptionType) => {
-                  setAccessOption(value);
-                  setWorkspaceState({
-                    access: value,
-                  });
-                }}
-              />
-            </FormControl.Field>
-          </Flex>
         </Flex>
-      </Grid.Column>
-    );
-  }
-);
+        <Flex mt={1} flex={1} gap={20} flexDirection="column">
+          <FormControl.Field>
+            <Label fontWeight={500} required>
+              Space name
+            </Label>
+            <Input
+              tabIndex={1}
+              name="name"
+              required
+              placeholder="Enter name"
+              wrapperStyle={{
+                height: 36,
+                borderRadius: 6,
+                backgroundColor: inputColor,
+              }}
+              defaultValue={name.state.value}
+              error={name.computed.ifWasEverBlurredThenError}
+              onChange={(e: any) => {
+                name.actions.onChange(e.target.value);
+                setWorkspaceState({ name: e.target.value });
+              }}
+              onFocus={() => name.actions.onFocus()}
+              onBlur={(e: any) => {
+                name.actions.onBlur();
+              }}
+            />
+          </FormControl.Field>
+          <FormControl.Field>
+            <Label fontWeight={500} adornment="optional">
+              Description
+            </Label>
+            <Input
+              tabIndex={1}
+              name="description"
+              fontWeight={400}
+              fontSize={2}
+              placeholder="Enter description"
+              wrapperStyle={{
+                height: 36,
+                borderRadius: 6,
+                backgroundColor: inputColor,
+              }}
+              defaultValue={description.state.value}
+              error={description.computed.ifWasEverBlurredThenError}
+              onChange={(e: any) =>
+                description.actions.onChange(e.target.value)
+              }
+              onFocus={() => description.actions.onFocus()}
+              onBlur={(e: any) => {
+                setWorkspaceState({
+                  description: e.target.value,
+                });
+                description.actions.onBlur();
+              }}
+            />
+          </FormControl.Field>
+          <FormControl.Field>
+            <Label mb={1} fontWeight={500} required>
+              Access
+            </Label>
+            <RadioList
+              customBg={windowColor}
+              textColor={textColor}
+              selected={accessOption}
+              options={[
+                {
+                  icon: 'Public',
+                  label: 'Public',
+                  value: 'public',
+                  sublabel: 'Anyone can join.',
+                },
+                {
+                  icon: 'EyeOff',
+                  label: 'Private',
+                  value: 'private',
+                  sublabel: 'An invitation is required to join.',
+                },
+                {
+                  disabled: true,
+                  icon: 'DoorOpen',
+                  label: 'Antechamber',
+                  value: 'antechamber',
+                  sublabel: 'Anyone can join a public holding area.',
+                },
+              ]}
+              onClick={(value: AccessOptionType) => {
+                setAccessOption(value);
+                setWorkspaceState({
+                  access: value,
+                });
+              }}
+            />
+          </FormControl.Field>
+        </Flex>
+      </Flex>
+    </Grid.Column>
+  );
+});
