@@ -165,7 +165,9 @@
           %watch-ack
             ?~  p.sign  `this
             ~&  >>>  "{<dap.bowl>}: spaces subscription failed"
-            `this
+            :_  this
+            ::  bunted update indicates failure
+            [%give %fact [/updates ~] spaces-reaction+!>([%remote-space [*ship *@t] *space:store ~])]~
           %kick
             =/  =ship           `@p`(slav %p i.t.wire)
             =/  space-pth       `@t`i.t.t.wire

@@ -368,12 +368,17 @@ const handleSpacesReactions = (
       membersState.removeMemberMap(deleted);
       break;
     case 'remote-space':
-      membersState.addMemberMap(
-        data['remote-space'].path,
-        data['remote-space'].members
-      );
-      spacesState.addSpace(data['remote-space']);
-      spacesState.selectSpace(data['remote-space'].path)
+      if (Object.keys(data['remote-space'].members).length === 0) {
+        spacesState.setLoader('error');
+      }
+      else {
+        membersState.addMemberMap(
+          data['remote-space'].path,
+          data['remote-space'].members
+        );
+        spacesState.addSpace(data['remote-space']);
+        spacesState.selectSpace(data['remote-space'].path)
+      }
       break;
     default:
       // unknown

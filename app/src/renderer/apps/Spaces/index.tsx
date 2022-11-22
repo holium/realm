@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useState, useEffect } from 'react';
 import {
   Grid,
   Flex,
@@ -16,6 +16,7 @@ import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { rgba, lighten, darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
+import { getBaseTheme } from '../Wallet/lib/helpers';
 
 interface SpacesProps {
   theme: any;
@@ -30,6 +31,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
 
   const { dimensions } = props;
 
+  const themeData = getBaseTheme(theme.currentTheme);
   const spaceTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
   const { dockColor, iconColor, textColor, windowColor, mode, inputColor } =
     spaceTheme;
@@ -72,6 +74,11 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   const [searchVisible, setSearchVisible] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    SpacesActions.setLoader('loaded');
+  }, []);
 
   return (
     <Grid.Column
@@ -146,7 +153,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                 overflowY="hidden"
               >
         <Grid.Column>
-          <Flex mb={5} position="relative">
+          <Flex mt={2} mb={1} position="relative">
             <Input
               tabIndex={1}
               autoCapitalize="false"
@@ -179,6 +186,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
               }}
               onChange={(evt: any) => {
                 evt.stopPropagation();
+                SpacesActions.setLoader('loaded');
                 setSearchString(evt.target.value);
               }}
               rightInteractive
@@ -199,7 +207,18 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
               }}
             />
           </Flex>
-          <Flex position="relative" width="100%" ml={2}>
+          <Flex width="100%" justifyContent="flex-end">
+          <Text
+            variant="body"
+            fontSize="11px"
+            color={themeData.colors.text.error}
+          >
+            {spaces.loader.state === 'error' &&
+              `Failed to join ${searchString}.`}
+            &nbsp;&nbsp;&nbsp;
+          </Text>
+        </Flex>
+          <Flex position="relative" width="100%" mt={3} ml={2}>
             <Text opacity={0.8} color={textColor} fontWeight={450}>
               Featured spaces
             </Text>
