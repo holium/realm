@@ -6,17 +6,11 @@ import { Row } from 'renderer/components/NewRow';
 import { FC, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
-const EmptyIcon = styled.div`
-  height: 48px;
-  width: 48px;
-  background: ${(p) => p.color || 'lightgray'};
-  border-radius: 6px;
-`;
-
 interface ContentType {
   [key: string]: string;
 }
-interface NotificationProps {
+
+export interface NotificationProps {
   loading?: boolean;
   dismissed?: boolean;
   image?: string;
@@ -145,44 +139,32 @@ export const Notification = (props: NotificationProps) => {
     );
   }
 
-  const colors = {
-    customBg: '',
-    customTextColor: '',
-  };
-  if (props.seen) {
-  }
-
   return (
-    <NotifRow
-      className="realm-cursor-hover"
-      // p={3}
-      // pr={3}
-      baseBg={bgColor}
-      customBg={bgColor}
-      // customBg={}
-      // customTextColor={}
-      // seen={props.seen}
-      onClick={(evt: any) => {
-        evt.stopPropagation();
-        // TODO make this open dm and load url
-        //
-        // const path = pathToDmInbox(props.link);
-        // if (path.includes('dm-inbox')) {
-        //   dmApp.setPath(path);
-        //   setActiveApp('messages-tray');
-        // }
-        evt.preventDefault();
-      }}
-    >
-      {innerContent}
-    </NotifRow>
+    <Flex pb={1}>
+      <NotifRow
+        className="realm-cursor-hover"
+        baseBg={bgColor}
+        customBg={bgColor}
+        onClick={(evt: any) => {
+          evt.stopPropagation();
+          // TODO make this open dm and load url
+          //
+          // const path = pathToDmInbox(props.link);
+          // if (path.includes('dm-inbox')) {
+          //   dmApp.setPath(path);
+          //   setActiveApp('messages-tray');
+          // }
+          evt.preventDefault();
+        }}
+      >
+        {innerContent}
+      </NotifRow>
+    </Flex>
   );
 };
 
 const NotifRow = styled(Row)`
   border-radius: 12px;
-  /* padding: 10px 12px; */
-  margin-bottom: 4px;
   padding: 12px;
   justify-content: space-between;
   width: 100%;
