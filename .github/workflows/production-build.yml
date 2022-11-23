@@ -16,8 +16,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
-          cache: "npm"
+          node-version: '14'
+          cache: 'npm'
       - name: Install the Apple certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
@@ -51,7 +51,7 @@ jobs:
       - name: Install app dependencies
         run: yarn install
       - name: Build and publish
-        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:mac
+        run: npx cross-env APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN DEBUG_PROD=true yarn package:release:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
@@ -68,8 +68,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
-          cache: "npm"
+          node-version: '14'
+          cache: 'npm'
       - name: Install yarn
         run: npm install -g yarn
       - name: Install app dependencies
@@ -118,8 +118,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
-          cache: "npm"
+          node-version: '14'
+          cache: 'npm'
       - name: Increment version
         run: |
           cd ./app/release/app
