@@ -1,11 +1,12 @@
-import { FC, useEffect, useRef, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+import { FC, useMemo, useRef } from 'react';
+import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 
 import { Flex, Text, PersonRow } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { FriendType } from 'os/services/ship/models/friends';
+import { WindowedList } from '@holium/design-system';
 
 interface IFriendsList {
   friends: any[];
@@ -13,23 +14,35 @@ interface IFriendsList {
 
 export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   const paneRef = useRef(null);
-  const { theme, ship, contacts, friends } = useServices();
-  const [height, setHeight] = useState(400);
+  const { theme, contacts, friends } = useServices();
   const { textColor, windowColor } = theme.currentTheme;
   const rowBg = rgba(darken(0.075, windowColor), 0.5);
 
-  const pinned = friends.pinned || [];
-  const all = friends.unpinned || [];
+  const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
+  const unpinned = useMemo(() => friends.unpinned || [], [friends.unpinned]);
 
-  useEffect(() => {
-    let pinnedHeight = 15 + (pinned.length ? pinned.length * 38 : 60);
-    let paneHeight = 400;
+  type ListData = {
+    type: string;
+    data: any;
+  };
 
-    if (paneRef.current) {
-      paneHeight = (paneRef.current as HTMLDivElement).clientHeight - 33; // 33 is the height of the header
-      setHeight(paneHeight - pinnedHeight);
-    }
-  }, [pinned, paneRef.current]);
+  const listData: ListData[] = useMemo(
+    () => [
+      { type: 'title', data: 'Pinned' },
+      ...(pinned.length === 0
+        ? friends.list.length === 0
+          ? [{ type: 'hint', data: 'No friends to pin' }]
+          : [{ type: 'hint', data: 'No pinned friends' }]
+        : pinned.map((n) => ({ type: 'friend', data: n }))),
+      { type: 'title', data: 'All' },
+      ...(unpinned.length === 0
+        ? pinned.length > 0
+          ? [{ type: 'hint', data: 'All your friends are pinned' }]
+          : [{ type: 'hint', data: 'Add some friends above' }]
+        : unpinned.map((n) => ({ type: 'friend', data: n }))),
+    ],
+    [friends.list.length, pinned, unpinned]
+  );
 
   const onUnpin = (person: any) => {
     ShipActions.editFriend(person.patp, {
@@ -45,10 +58,36 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
     });
   };
 
-  const RowRenderer = (
-    person: FriendType & { patp: string },
-    index: number
-  ) => {
+  const TitleRow = ({ title }: { title: string }) => (
+    <Text
+      key={title}
+      pt={16}
+      style={{ textTransform: 'uppercase' }}
+      fontSize={1}
+      fontWeight={600}
+      opacity={0.6}
+      ml="2px"
+      mb="4px"
+    >
+      {title}
+    </Text>
+  );
+
+  const HintRow = ({ hint }: { hint: string }) => (
+    <Flex
+      key={hint}
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      height={60}
+    >
+      <Text fontSize={2} opacity={0.5}>
+        {hint}
+      </Text>
+    </Flex>
+  );
+
+  const FriendRow = ({ person }: { person: FriendType & { patp: string } }) => {
     let pinOption = [
       {
         label: 'Unpin',
@@ -97,74 +136,30 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
     );
   };
 
-  //
-  const showHint =
-    friends.list.length === 0 || (pinned.length > 0 && all.length === 0);
-
   return (
     <Flex
       ref={paneRef}
-      mt={18}
+      mb={16}
       height="calc(100% - 90px)"
       flexDirection="column"
       overflowY="hidden"
     >
-      <Flex flexDirection="column">
-        <Text
-          style={{ textTransform: 'uppercase' }}
-          fontSize={1}
-          fontWeight={600}
-          opacity={0.6}
-          ml="2px"
-          mb="4px"
-        >
-          Pinned
-        </Text>
-        {pinned.length === 0 && (
-          <Flex
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            height={60}
-          >
-            <Text fontSize={2} opacity={0.5}>
-              {friends.list.length === 0
-                ? 'No friends to pin'
-                : 'No friends pinned'}
-            </Text>
-          </Flex>
-        )}
-        {pinned.map((person, index) => RowRenderer(person, index))}
-      </Flex>
-      <Flex mt={18} flexDirection="column">
-        <Text
-          style={{ textTransform: 'uppercase' }}
-          fontSize={1}
-          fontWeight={600}
-          opacity={0.6}
-          ml="2px"
-          mb="4px"
-        >
-          All
-        </Text>
-        {showHint && (
-          <Flex
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            height={40}
-          >
-            <Text fontSize={2} opacity={0.5}>
-              {pinned.length > 0 &&
-                all.length === 0 &&
-                'All your friends are pinned'}
-              {friends.list.length === 0 && 'Add some friends above'}
-            </Text>
-          </Flex>
-        )}
-        <Flex overflowY="auto" height={height} flexDirection="column">
-          {all.map((person, index) => RowRenderer(person, index))}
-        </Flex>
+      <Flex flexDirection="column" flex={1}>
+        <WindowedList
+          data={listData}
+          renderRowElement={(rowData, index) => {
+            if (rowData.type === 'friend') {
+              const friend = rowData.data;
+              return <FriendRow person={friend} />;
+            } else if (rowData.type === 'title') {
+              const title = rowData.data;
+              return <TitleRow title={title} />;
+            } else {
+              const hint = rowData.data;
+              return <HintRow hint={hint} />;
+            }
+          }}
+        />
       </Flex>
     </Flex>
   );
