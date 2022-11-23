@@ -1,5 +1,4 @@
-import { FC, useRef, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import { toJS } from 'mobx';
 import { ChatMessage } from './ChatMessage';
@@ -8,7 +7,7 @@ import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, IconButton, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import { WindowedList } from '@holium/design-system';
 
 interface ChatLogProps {
   loading: boolean;
@@ -16,18 +15,11 @@ interface ChatLogProps {
   messages: GraphDMType[];
 }
 
-// TODO make our own scrollbar
-const Log = styled(Flex)`
-  ::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
-  }
-`;
-
 const reduceToPending = (arr: GraphDMType[]) => {
   return arr.map((val: GraphDMType) => val.pending);
 };
 
-export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
+export const ChatLog = observer((props: ChatLogProps) => {
   const { loading, messages, isGroup } = props;
   const { dimensions } = useTrayApps();
   const { ship, theme } = useServices();
@@ -41,12 +33,10 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
   const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
     theme.currentTheme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
-  // console.log(reduceToPending(messages), reduceToPending(current));
 
   // todo better render prevention
   const isUpdated = isEqual(reduceToPending(all), reduceToPending(current));
 
-  const scrollView = useRef<any>(null);
   useEffect(() => {
     const all = toJS(messages);
     if (all.length > pageSize) {
@@ -64,112 +54,52 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
     setCurrent(messages);
   }, [messages.length, isUpdated]);
 
-  // const pendings = memo(reduceToPending(messages));
-
-  // useEffect(() => {
-  //   if (all.length > pageSize) {
-  //     const pageStart = currentPage * pageSize;
-  //     let pageEnd = pageStart + pageSize;
-  //     if (pageEnd > all.length) {
-  //       pageEnd = all.length;
-  //     }
-  //     setChunk(all.slice(pageStart, pageEnd));
-  //   } else {
-  //     setChunk(all);
-  //     setListEnd(true);
-  //   }
-  // }, [all]);
-
-  const onMore = () => {
-    const newCurrentPage = currentPage + 1;
-    const pageStart = newCurrentPage * pageSize;
-    let pageLeftSize = pageSize;
-    if (pageStart + pageSize > all.length) {
-      pageLeftSize = all.length - newCurrentPage * pageSize;
-    }
-
-    let pageEnd = pageStart + pageLeftSize;
-    if (pageEnd >= all.length) {
-      pageEnd = all.length;
-      setListEnd(true);
-    }
-
-    setCurrentPage(newCurrentPage);
-    setChunk(chunk.concat(all.slice(pageStart, pageEnd)));
-  };
-
-  // const handleScroll = ({
-  //   scrollTop,
-  //   scrollBottom,
-  // }: {
-  //   scrollTop: any;
-  //   scrollBottom: any;
-  // }) => {
-  //   if (scrollBottom > 200) {
-  //     setShowJumpBtn(true);
-  //   } else {
-  //     setShowJumpBtn(false);
-  //   }
-  //   // console.log({ scrollTop, scrollBottom });
-  // };
-
-  const scrollToBottom = () => {
-    if (!scrollView) return;
-    scrollView.current.scrollToBottom();
-  };
-
-  useEffect(() => {
-    scrollView.current?.scrollToBottom();
-  }, [scrollView]);
-
   const isBlank = !loading && messages.length === 0;
 
-  return isBlank ? (
+  if (isBlank) {
+    return (
+      <Flex
+        height={dimensions.height}
+        width="100%"
+        alignContent="center"
+        justifyContent="center"
+        flexDirection="column"
+      >
+        <Text textAlign="center" opacity={0.3} fontSize={3}>
+          No messages
+        </Text>
+      </Flex>
+    );
+  }
+
+  return (
     <Flex
-      height={dimensions.height}
-      width="100%"
-      alignContent="center"
-      justifyContent="center"
-      flexDirection="column"
-    >
-      <Text textAlign="center" opacity={0.3} fontSize={3}>
-        No messages
-      </Text>
-    </Flex>
-  ) : (
-    <Log
-      id="scrollableDiv"
-      gap={2}
       height={dimensions.height}
       width="100%"
       position="relative"
       overflowY="auto"
       alignContent="center"
       flexDirection="column-reverse"
+      paddingY={60}
     >
-      <InfiniteScroll
-        dataLength={chunk.length}
-        next={onMore}
-        style={{ display: 'flex', flexDirection: 'column-reverse' }} // To put endMessage and loader to the top.
-        inverse={true} //
-        hasMore={!listEnd}
-        loader={<div></div>}
-        scrollableTarget="scrollableDiv"
-      >
-        <Flex style={{ height: 58 }} />
-        {chunk.map((message: GraphDMType, index: number) => (
+      <WindowedList
+        startAtBottom
+        data={messages}
+        sort={(a, b) => a.timeSent - b.timeSent}
+        renderRowElement={(message, index) => (
           <ChatMessage
             isSending={message.pending}
             showAuthor={isGroup}
             key={`${message.index}-${message.timeSent}-${index}`}
             theme={theme.currentTheme}
-            our={ship!.patp}
+            author={message.author}
+            primaryBubble={ship!.patp === message.author}
             ourColor={ship!.color || '#569BE2'}
-            message={message}
+            contents={message.contents}
+            timeSent={message.timeSent}
           />
-        ))}
-        <Flex style={{ height: 58 }} />
-      </InfiniteScroll>
+        )}
+      />
 
       {/* Put the scroll bar always on the bottom */}
 
@@ -186,12 +116,11 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
               background: windowColor,
             }}
             size={28}
-            onClick={scrollToBottom}
           >
             <Icons name="ArrowDown" />
           </IconButton>
         </Flex>
       )}
-    </Log>
+    </Flex>
   );
 });

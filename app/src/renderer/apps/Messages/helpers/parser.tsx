@@ -14,7 +14,6 @@ export const getTextFromContent = (type: string, content: any) => {
 
 export const getReferenceView = async (
   reference: any,
-  setter: any,
   embedColor?: string,
   textColor?: string
 ) => {
@@ -25,7 +24,7 @@ export const getReferenceView = async (
         `${reference.group}/groups${reference.group}`
       ).then((response: any) => {
         if (response) {
-          setter(
+          return (
             <GroupLink
               {...response.metadata}
               textColor={textColor}
@@ -39,7 +38,7 @@ export const getReferenceView = async (
             />
           );
         } else {
-          setter(
+          return (
             <GroupLink
               textColor={textColor}
               bgColor={embedColor}
@@ -50,7 +49,7 @@ export const getReferenceView = async (
           );
         }
       });
-      setter(
+      return (
         <GroupLink
           bgColor={embedColor}
           textColor={textColor}
@@ -61,12 +60,11 @@ export const getReferenceView = async (
         />
       );
 
-      break;
     case 'app':
       // TODO reimplement
       // ShipActions.getAppPreview(reference.app.ship, reference.app.desk).then(
       //   (response: any) => {
-      //     setter(
+      //     return (
       //       <AppLink
       //         {...response}
       //         textColor={textColor}
@@ -76,7 +74,7 @@ export const getReferenceView = async (
       //     );
       //   }
       // );
-      setter(
+      return (
         <AppLink
           bgColor={embedColor}
           textColor={textColor}
@@ -88,16 +86,12 @@ export const getReferenceView = async (
           color=""
         />
       );
-      break;
     case 'code':
-      setter(<Text fontSize={2}>{reference.code.expression}</Text>);
-      break;
+      return <Text fontSize={2}>{reference.code.expression}</Text>;
     case 'graph':
-      setter(<Text fontSize={2}>{reference.graph.graph}</Text>);
-      break;
+      return <Text fontSize={2}>{reference.graph.graph}</Text>;
     default:
-      setter(<TextParsed content={reference[referenceType]} />);
-      break;
+      return <TextParsed content={reference[referenceType]} />;
   }
 };
 
