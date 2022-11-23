@@ -84,6 +84,7 @@ export const ChatLog = observer((props: ChatLogProps) => {
     >
       <WindowedList
         startAtBottom
+        scrollToBottomOnChange
         data={messages}
         sort={(a, b) => a.timeSent - b.timeSent}
         renderRowElement={(message, index) => (

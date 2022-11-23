@@ -35,7 +35,10 @@ export const WindowedList = <T,>({
     sizeMap.current = { ...sizeMap.current, [index]: size };
     listRef.current?.resetAfterIndex(index);
   }, []);
-  const getSize = (index: number) => sizeMap.current[index] || 50;
+  const getSize = useMemo(
+    () => (index: number) => sizeMap.current[index] || 50,
+    []
+  );
   const listItemsHeight = useMemo(
     () => data.reduce((acc, _, index) => acc + getSize(index), 0),
     [data, getSize]
