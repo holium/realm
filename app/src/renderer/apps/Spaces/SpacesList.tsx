@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 
@@ -7,8 +7,8 @@ import { SpaceRow } from './SpaceRow';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { VisaRow } from './components/VisaRow';
-import { VisaType } from 'os/services/spaces/models/visas';
 import { rgba } from 'polished';
+import { WindowedList } from '@holium/design-system';
 
 export interface Space {
   color?: string;
@@ -25,27 +25,31 @@ interface SpacesListProps {
   onSelect: (spaceKey: string) => void;
 }
 
-export const SpacesList: FC<SpacesListProps> = observer(
-  (props: SpacesListProps) => {
+export const SpacesList = observer(
+  ({ selected, spaces, onSelect }: SpacesListProps) => {
     const { theme, visas } = useServices();
-    const { textColor, windowColor } = theme.currentTheme;
-    const { selected, spaces, onSelect } = props;
-    // const [visas, setVisas] = useState([]);
-    const [loadingVisa, setLoading] = useState(true);
-
-    useEffect(() => {
-      // SpacesActions.getInvitations()
-      //   .then((invites: any) => {
-      //     console.log(invites);
-      //     setLoading(false);
-      //     setVisas(Object.values(invites));
-      //   })
-      //   .catch(() => setLoading(false));
-    }, []);
+    const { textColor } = theme.currentTheme;
 
     const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
 
     const incoming = Array.from(visas.incoming.values());
+
+    type ListData = {
+      visa?: typeof incoming[number];
+      space?: typeof spaces[number];
+    }[];
+
+    const listData: ListData = useMemo(
+      () => [
+        ...incoming.map((visa) => ({
+          visa,
+        })),
+        ...spaces.map((space) => ({
+          space,
+        })),
+      ],
+      [incoming, spaces]
+    );
 
     if (!spaces.length && !incoming.length) {
       return (
@@ -71,7 +75,7 @@ export const SpacesList: FC<SpacesListProps> = observer(
               height={36}
               rightContent={<Icons size={2} name="Plus" />}
               data-close-tray="true"
-              onClick={(evt: any) => {
+              onClick={() => {
                 ShellActions.openDialog('create-space-1');
               }}
             >
@@ -92,38 +96,35 @@ export const SpacesList: FC<SpacesListProps> = observer(
         </Flex>
       );
     }
+
     return (
-      <Flex
-        px={10}
-        gap={4}
-        flex={1}
-        width="100%"
-        flexDirection="column"
-        overflowY="scroll"
-      >
-        {incoming.map((visa: VisaType) => {
-          return (
-            <VisaRow
-              key={visa.name}
-              image={visa.picture}
-              color={visa.color}
-              path={visa.path}
-              customBg={highlightColor}
-              invitedBy={visa.inviter}
-              title={visa.name}
-            />
-          );
-        })}
-        {spaces.map((space: SpaceModelType) => {
-          return (
-            <SpaceRow
-              key={space.name}
-              space={space}
-              selected={selected?.path === space.path}
-              onSelect={onSelect}
-            />
-          );
-        })}
+      <Flex px={10} gap={4} flex={1} width="100%">
+        <WindowedList
+          data={listData}
+          renderRowElement={({ space, visa }) => {
+            if (space) {
+              return (
+                <SpaceRow
+                  key={space.name}
+                  space={space}
+                  selected={selected?.path === space.path}
+                  onSelect={onSelect}
+                />
+              );
+            }
+            return (
+              <VisaRow
+                key={visa!.name}
+                image={visa!.picture}
+                color={visa!.color}
+                path={visa!.path}
+                customBg={highlightColor}
+                invitedBy={visa!.inviter}
+                title={visa!.name}
+              />
+            );
+          }}
+        />
       </Flex>
     );
   }
