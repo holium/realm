@@ -83,8 +83,6 @@ export const ChatLog = observer((props: ChatLogProps) => {
       paddingY={60}
     >
       <WindowedList
-        startAtBottom
-        scrollToBottomOnChange
         data={messages}
         sort={(a, b) => a.timeSent - b.timeSent}
         renderRowElement={(message, index) => (
@@ -100,6 +98,7 @@ export const ChatLog = observer((props: ChatLogProps) => {
             timeSent={message.timeSent}
           />
         )}
+        scrollToBottomOnUpdate
       />
 
       {/* Put the scroll bar always on the bottom */}

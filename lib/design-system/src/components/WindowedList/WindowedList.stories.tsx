@@ -23,14 +23,6 @@ export default {
         step: 1,
       },
     },
-    rowHeight: {
-      control: {
-        type: 'range',
-        min: 10,
-        max: 500,
-        step: 1,
-      },
-    },
     filter: {
       control: {
         type: 'select',
@@ -42,7 +34,7 @@ export default {
         type: 'boolean',
       },
     },
-    scrollToBottomOnChange: {
+    scrollToBottomOnUpdate: {
       control: {
         type: 'boolean',
       },
@@ -52,20 +44,16 @@ export default {
 
 interface DemoTemplateProps {
   rows: number;
-  rowHeight: number;
   containerHeight: number;
   filter: 'none' | 'even' | 'odd';
   hideScrollbar: boolean;
-  scrollToBottomOnChange: boolean;
 }
 
 const DemoTemplate: Story<DemoTemplateProps> = ({
   rows,
-  rowHeight,
   containerHeight,
   filter,
   hideScrollbar,
-  scrollToBottomOnChange,
 }: DemoTemplateProps) => {
   const data = Array.from({ length: rows }, (_, i) => i);
 
@@ -93,7 +81,6 @@ const DemoTemplate: Story<DemoTemplateProps> = ({
           filter={getFilterFunction()}
           renderRowElement={(item, index) => (
             <Flex
-              height={rowHeight}
               padding={12}
               alignItems="center"
               justifyContent="center"
@@ -104,7 +91,6 @@ const DemoTemplate: Story<DemoTemplateProps> = ({
             </Flex>
           )}
           hideScrollbar={hideScrollbar}
-          scrollToBottomOnChange={scrollToBottomOnChange}
         />
       </Box>
     </>
@@ -114,11 +100,9 @@ const DemoTemplate: Story<DemoTemplateProps> = ({
 export const Demo = DemoTemplate.bind({});
 Demo.args = {
   rows: 100,
-  rowHeight: 50,
   containerHeight: 420,
   filter: 'none',
   hideScrollbar: false,
-  scrollToBottomOnChange: false,
 };
 
 export const Loading = () => (

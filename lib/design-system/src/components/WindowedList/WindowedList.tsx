@@ -1,16 +1,14 @@
-import { useMemo, useRef, useCallback, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useCallback } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { Box } from '../Box/Box';
-import { WindowedRow } from './WindowedRow';
 import { StyledList } from './WindowedList.styles';
 
 interface WindowedListProps<T> {
   data: T[];
   renderRowElement: (rowData: T, index: number) => JSX.Element;
   hideScrollbar?: boolean;
-  scrollToBottomOnChange?: boolean;
-  startAtBottom?: boolean;
+  scrollToBottomOnUpdate?: boolean;
   sort?: (a: T, b: T) => number;
   filter?: (rowData: T, index: number) => boolean;
 }
@@ -19,8 +17,7 @@ export const WindowedList = <T,>({
   data: rawData,
   renderRowElement,
   hideScrollbar = true,
-  scrollToBottomOnChange = false,
-  startAtBottom = false,
+  scrollToBottomOnUpdate = false,
   sort = () => 0,
   filter = () => true,
 }: WindowedListProps<T>) => {
@@ -28,72 +25,80 @@ export const WindowedList = <T,>({
     () => rawData.filter(filter).sort(sort),
     [rawData, filter, sort]
   );
+  const renderFinished = useRef(false);
 
   const listRef = useRef<List<any>>(null);
   const sizeMap = useRef<Record<number, number>>({});
-  const setSize = useCallback((index: number, size: number) => {
-    sizeMap.current = { ...sizeMap.current, [index]: size };
-    listRef.current?.resetAfterIndex(index);
-  }, []);
-  const getSize = useMemo(
-    () => (index: number) => sizeMap.current[index] || 50,
+
+  const getListItemSize = useCallback(
+    (index: number) => sizeMap.current[index] ?? 0,
     []
   );
-  const listItemsHeight = useMemo(
-    () => data.reduce((acc, _, index) => acc + getSize(index), 0),
-    [data, getSize]
+
+  const setListItemSize = useCallback(
+    (index: number, ref: HTMLDivElement | null) => {
+      if (ref && !sizeMap.current[index]) {
+        sizeMap.current = {
+          ...sizeMap.current,
+          [index]: ref.getBoundingClientRect().height,
+        };
+      }
+    },
+    []
   );
 
-  const scrollToBottom = useCallback(() => {
-    listRef.current?.scrollToItem(data.length - 1);
-  }, [data.length]);
+  const scrollToBottom = useCallback(
+    () => listRef.current?.scrollToItem(data.length - 1, 'end'),
+    [data.length]
+  );
 
   useEffect(() => {
-    if (scrollToBottomOnChange) scrollToBottom();
-  });
+    // Scroll to bottom if the list is updated (e.g. new message).
+    if (scrollToBottomOnUpdate) scrollToBottom();
+  }, [data.length, scrollToBottom, scrollToBottomOnUpdate]);
 
   useEffect(() => {
-    if (scrollToBottomOnChange) scrollToBottom();
-  }, [scrollToBottom, scrollToBottomOnChange]);
+    // On mount we poll 1-2 times until the DOM is loaded
+    // and we can refresh the list heights cache and scroll to botttom.
+    const interval = setInterval(() => {
+      const sizeMapFilled = Object.keys(sizeMap.current).length === data.length;
+      const listRefCurrent = listRef.current;
+      if (sizeMapFilled && listRefCurrent) {
+        listRefCurrent.resetAfterIndex(0);
+        if (scrollToBottomOnUpdate) scrollToBottom();
+        renderFinished.current = true;
+        clearInterval(interval);
+      }
+    }, 10);
+    return () => clearInterval(interval);
+  }, [data.length, scrollToBottom, scrollToBottomOnUpdate]);
 
   return (
     <Box style={{ position: 'relative', width: '100%', height: '100%' }}>
       <AutoSizer>
-        {({ height: containerHeight, width: containerWidth }) => {
-          let marginTop = 0;
-          let listHeight = containerHeight;
-
-          if (startAtBottom) {
-            // If the list is shorter than the container, we want to start at the bottom
-            // and have the list grow upwards.
-            if (listItemsHeight < containerHeight) {
-              marginTop = containerHeight - listItemsHeight;
-              listHeight = listItemsHeight;
-            }
-          }
-
-          return (
-            <StyledList
-              ref={listRef}
-              width={containerWidth}
-              height={listHeight}
-              itemCount={data.length}
-              itemSize={getSize}
-              hideScrollbar={hideScrollbar}
-              style={{
-                marginTop,
-              }}
-            >
-              {({ index, style }) => (
-                <div style={style}>
-                  <WindowedRow index={index} setSize={setSize}>
-                    {renderRowElement(data[index], index)}
-                  </WindowedRow>
+        {({ height, width }) => (
+          <StyledList
+            ref={listRef}
+            width={width}
+            height={height}
+            itemCount={data.length}
+            itemSize={getListItemSize}
+            hideScrollbar={hideScrollbar}
+          >
+            {({ index, style }) => (
+              <div
+                style={{
+                  ...style,
+                  opacity: !renderFinished.current ? 0 : 1,
+                }}
+              >
+                <div ref={(el) => setListItemSize(index, el)}>
+                  {renderRowElement(data[index], index)}
                 </div>
-              )}
-            </StyledList>
-          );
-        }}
+              </div>
+            )}
+          </StyledList>
+        )}
       </AutoSizer>
     </Box>
   );
