@@ -20,6 +20,7 @@ import {
   PreviewGroupDMType,
   DMPreviewType,
 } from 'os/services/ship/models/courier';
+import { WindowedList } from '@holium/design-system';
 
 interface IProps {
   theme: ThemeModelType;
@@ -40,6 +41,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
     });
   }, [courier.previews]);
+
   const searchFilter = (preview: DMPreviewType) => {
     if (!searchString || searchString.trim() === '') return true;
     let to: string;
@@ -52,6 +54,44 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
     }
     return to.indexOf(searchString) === 0;
   };
+
+  const DMList = () => {
+    if (previews.length === 0) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          gap={24}
+        >
+          <Text color={textColor} width={200} textAlign="center" opacity={0.3}>
+            No Direct Messages. Click the <b>+</b> to start.
+          </Text>
+        </Flex>
+      );
+    }
+
+    return (
+      <WindowedList
+        data={previews}
+        filter={searchFilter}
+        renderRowElement={(dm, index) => (
+          <Box display="block" key={`${dm.to}-${index}`}>
+            <ContactRow
+              theme={theme}
+              dm={dm}
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                onSelectDm(dm);
+              }}
+            />
+          </Box>
+        )}
+      />
+    );
+  };
+
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -140,44 +180,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {previews.length === 0 && (
-                <Flex
-                  flex={1}
-                  flexDirection="column"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap={24}
-                >
-                  {/* <Text
-                    color={textColor}
-                    width={200}
-                    textAlign="center"
-                    opacity={0.6}
-                  >
-                    No DMs
-                  </Text> */}
-                  <Text
-                    color={textColor}
-                    width={200}
-                    textAlign="center"
-                    opacity={0.3}
-                  >
-                    No Direct Messages. Click the <b>+</b> to start.
-                  </Text>
-                </Flex>
-              )}
-              {previews.filter(searchFilter).map((dm: any, index: number) => (
-                <Box display="block" key={`${dm.to}-${index}`}>
-                  <ContactRow
-                    theme={theme}
-                    dm={dm}
-                    onClick={(evt: any) => {
-                      evt.stopPropagation();
-                      onSelectDm(dm);
-                    }}
-                  />
-                </Box>
-              ))}
+              <DMList />
             </>
           )}
         </Grid.Column>
