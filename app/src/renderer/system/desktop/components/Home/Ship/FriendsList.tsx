@@ -139,7 +139,7 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   return (
     <Flex
       ref={paneRef}
-      mb={16}
+      mb={18}
       height="calc(100% - 90px)"
       flexDirection="column"
       overflowY="hidden"

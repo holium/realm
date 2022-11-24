@@ -50,7 +50,7 @@ export const ChatMessage: FC<IProps> = ({
     'text' in contents[0] &&
     contents[0].text === ''
   ) {
-    return <div></div>;
+    return <div />;
   }
 
   return (

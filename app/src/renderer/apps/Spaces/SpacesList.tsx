@@ -98,7 +98,7 @@ export const SpacesList = observer(
     }
 
     return (
-      <Flex px={10} gap={4} flex={1} width="100%">
+      <Flex flex={1} px={10} width="100%">
         <WindowedList
           data={listData}
           renderRowElement={({ space, visa }) => {

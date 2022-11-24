@@ -70,11 +70,11 @@ export const ChatLog = observer((props: ChatLogProps) => {
         outerRef={outerRef}
         scrollToBottomOnUpdate
         onScroll={() => {
-          const isScrolledToBottom =
+          const isCloseToBottom =
             outerRef?.current &&
-            outerRef.current.scrollHeight - outerRef.current.scrollTop ===
-              outerRef.current.clientHeight;
-          isScrolledToBottom ? setShowJumpBtn(false) : setShowJumpBtn(true);
+            outerRef.current.scrollHeight - outerRef.current.scrollTop <=
+              outerRef.current.clientHeight + 100;
+          isCloseToBottom ? setShowJumpBtn(false) : setShowJumpBtn(true);
         }}
       />
 
