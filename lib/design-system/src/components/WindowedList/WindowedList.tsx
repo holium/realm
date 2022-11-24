@@ -1,13 +1,22 @@
-import { useMemo, useRef, useCallback } from 'react';
-import { VariableSizeList as List } from 'react-window';
+import {
+  useMemo,
+  useRef,
+  useCallback,
+  RefObject,
+  useState,
+  useEffect,
+} from 'react';
+import { ListOnScrollProps, VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { Box } from '../Box/Box';
 import { StyledList } from './WindowedList.styles';
-import { ElementResizeListener } from './ElementResizeListener';
 
 interface WindowedListProps<T> {
   data: T[];
   renderRowElement: (rowData: T, index: number) => JSX.Element;
+  innerRef?: RefObject<HTMLDivElement>;
+  outerRef?: RefObject<HTMLDivElement>;
+  onScroll?: (e: ListOnScrollProps) => void;
   hideScrollbar?: boolean;
   scrollToBottomOnUpdate?: boolean;
   sort?: (a: T, b: T) => number;
@@ -17,6 +26,9 @@ interface WindowedListProps<T> {
 export const WindowedList = <T,>({
   data: rawData,
   renderRowElement,
+  innerRef,
+  outerRef,
+  onScroll,
   hideScrollbar = true,
   scrollToBottomOnUpdate = false,
   sort = () => 0,
@@ -27,6 +39,8 @@ export const WindowedList = <T,>({
     [rawData, filter, sort]
   );
   const componentMounted = useRef(false);
+  // Used to scroll after the component has mounted, e.g. on new messages.
+  const [asyncListRef, setAsyncListRef] = useState<List<any> | null>(null);
 
   const sizeMap = useRef<Record<number, number>>({});
 
@@ -35,6 +49,13 @@ export const WindowedList = <T,>({
     []
   );
 
+  useEffect(() => {
+    if (scrollToBottomOnUpdate && asyncListRef) {
+      asyncListRef?.resetAfterIndex(0);
+      asyncListRef?.scrollToItem(data.length - 1, 'end');
+    }
+  }, [data.length, asyncListRef, scrollToBottomOnUpdate]);
+
   const setListItemSize = useCallback(
     (index: number, ref: HTMLDivElement | null) => {
       if (ref && !sizeMap.current[index]) {
@@ -42,12 +63,9 @@ export const WindowedList = <T,>({
           ...sizeMap.current,
           [index]: ref.getBoundingClientRect().height,
         };
-        if (index === data.length - 1 && scrollToBottomOnUpdate) {
-          ref.scrollIntoView();
-        }
       }
     },
-    [data.length, scrollToBottomOnUpdate]
+    []
   );
 
   const onListRef = useCallback(
@@ -57,6 +75,7 @@ export const WindowedList = <T,>({
         listRef.resetAfterIndex(0);
         if (!componentMounted.current) {
           componentMounted.current = true;
+          setAsyncListRef(listRef);
           if (scrollToBottomOnUpdate) {
             listRef.scrollToItem(data.length - 1, 'end');
           }
@@ -72,11 +91,14 @@ export const WindowedList = <T,>({
         {({ height, width }) => (
           <StyledList
             ref={onListRef}
+            innerRef={innerRef}
+            outerRef={outerRef}
             width={width}
             height={height}
             itemCount={data.length}
             itemSize={getListItemSize}
             hideScrollbar={hideScrollbar}
+            onScroll={onScroll}
           >
             {({ index, style }) => (
               <div
@@ -93,7 +115,13 @@ export const WindowedList = <T,>({
           </StyledList>
         )}
       </AutoSizer>
-      <ElementResizeListener onResize={() => console.log('resize')} />
     </Box>
   );
+};
+
+export const useWindowedListRefs = () => {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
+
+  return { innerRef, outerRef };
 };

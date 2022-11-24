@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
-import { toJS } from 'mobx';
+import { useState } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { GraphDMType } from 'os/services/ship/models/courier';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, IconButton, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { WindowedList } from '@holium/design-system';
+import { useWindowedListRefs, WindowedList } from '@holium/design-system';
 
 interface ChatLogProps {
   loading: boolean;
@@ -15,44 +13,14 @@ interface ChatLogProps {
   messages: GraphDMType[];
 }
 
-const reduceToPending = (arr: GraphDMType[]) => {
-  return arr.map((val: GraphDMType) => val.pending);
-};
-
 export const ChatLog = observer((props: ChatLogProps) => {
   const { loading, messages, isGroup } = props;
+  const { innerRef, outerRef } = useWindowedListRefs();
   const { dimensions } = useTrayApps();
   const { ship, theme } = useServices();
-  const pageSize = 20;
-  const [listEnd, setListEnd] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
 
-  const [all, setAll] = useState<GraphDMType[]>(toJS(messages));
-  const [current, setCurrent] = useState<GraphDMType[]>(messages);
-  const [chunk, setChunk] = useState<GraphDMType[]>([]);
-  const { inputColor, iconColor, dockColor, textColor, windowColor, mode } =
-    theme.currentTheme;
+  const { iconColor, dockColor, windowColor } = theme.currentTheme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
-
-  // todo better render prevention
-  const isUpdated = isEqual(reduceToPending(all), reduceToPending(current));
-
-  useEffect(() => {
-    const all = toJS(messages);
-    if (all.length > pageSize) {
-      const pageStart = currentPage * pageSize;
-      let pageEnd = pageStart + pageSize;
-      if (pageEnd > all.length) {
-        pageEnd = all.length;
-      }
-      setChunk(all.slice(pageStart, pageEnd));
-    } else {
-      setChunk(all);
-      setListEnd(true);
-    }
-    setAll(all);
-    setCurrent(messages);
-  }, [messages.length, isUpdated]);
 
   const isBlank = !loading && messages.length === 0;
 
@@ -98,7 +66,16 @@ export const ChatLog = observer((props: ChatLogProps) => {
             timeSent={message.timeSent}
           />
         )}
+        innerRef={innerRef}
+        outerRef={outerRef}
         scrollToBottomOnUpdate
+        onScroll={() => {
+          const isScrolledToBottom =
+            outerRef?.current &&
+            outerRef.current.scrollHeight - outerRef.current.scrollTop ===
+              outerRef.current.clientHeight;
+          isScrolledToBottom ? setShowJumpBtn(false) : setShowJumpBtn(true);
+        }}
       />
 
       {/* Put the scroll bar always on the bottom */}
@@ -116,6 +93,12 @@ export const ChatLog = observer((props: ChatLogProps) => {
               background: windowColor,
             }}
             size={28}
+            onClick={() => {
+              outerRef?.current?.scrollTo({
+                top: innerRef?.current?.scrollHeight,
+                behavior: 'smooth',
+              });
+            }}
           >
             <Icons name="ArrowDown" />
           </IconButton>
