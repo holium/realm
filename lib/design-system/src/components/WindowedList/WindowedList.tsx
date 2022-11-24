@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useMemo, useRef, useCallback } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { Box } from '../Box/Box';
 import { StyledList } from './WindowedList.styles';
+import { ElementResizeListener } from './ElementResizeListener';
 
 interface WindowedListProps<T> {
   data: T[];
@@ -25,9 +26,8 @@ export const WindowedList = <T,>({
     () => rawData.filter(filter).sort(sort),
     [rawData, filter, sort]
   );
-  const renderFinished = useRef(false);
+  const componentMounted = useRef(false);
 
-  const listRef = useRef<List<any>>(null);
   const sizeMap = useRef<Record<number, number>>({});
 
   const getListItemSize = useCallback(
@@ -42,43 +42,36 @@ export const WindowedList = <T,>({
           ...sizeMap.current,
           [index]: ref.getBoundingClientRect().height,
         };
+        if (index === data.length - 1 && scrollToBottomOnUpdate) {
+          ref.scrollIntoView();
+        }
       }
     },
-    []
+    [data.length, scrollToBottomOnUpdate]
   );
 
-  const scrollToBottom = useCallback(
-    () => listRef.current?.scrollToItem(data.length - 1, 'end'),
-    [data.length]
-  );
-
-  useEffect(() => {
-    // Scroll to bottom if the list is updated (e.g. new message).
-    if (scrollToBottomOnUpdate) scrollToBottom();
-  }, [data.length, scrollToBottom, scrollToBottomOnUpdate]);
-
-  useEffect(() => {
-    // On mount we poll 1-2 times until the DOM is loaded
-    // and we can refresh the list heights cache and scroll to botttom.
-    const interval = setInterval(() => {
+  const onListRef = useCallback(
+    (listRef: List<any>) => {
       const sizeMapFilled = Object.keys(sizeMap.current).length === data.length;
-      const listRefCurrent = listRef.current;
-      if (sizeMapFilled && listRefCurrent) {
-        listRefCurrent.resetAfterIndex(0);
-        if (scrollToBottomOnUpdate) scrollToBottom();
-        renderFinished.current = true;
-        clearInterval(interval);
+      if (listRef && sizeMapFilled) {
+        listRef.resetAfterIndex(0);
+        if (!componentMounted.current) {
+          componentMounted.current = true;
+          if (scrollToBottomOnUpdate) {
+            listRef.scrollToItem(data.length - 1, 'end');
+          }
+        }
       }
-    }, 10);
-    return () => clearInterval(interval);
-  }, [data.length, scrollToBottom, scrollToBottomOnUpdate]);
+    },
+    [data.length, scrollToBottomOnUpdate]
+  );
 
   return (
     <Box style={{ position: 'relative', width: '100%', height: '100%' }}>
       <AutoSizer>
         {({ height, width }) => (
           <StyledList
-            ref={listRef}
+            ref={onListRef}
             width={width}
             height={height}
             itemCount={data.length}
@@ -89,7 +82,7 @@ export const WindowedList = <T,>({
               <div
                 style={{
                   ...style,
-                  opacity: !renderFinished.current ? 0 : 1,
+                  opacity: !componentMounted.current ? 0 : 1,
                 }}
               >
                 <div ref={(el) => setListItemSize(index, el)}>
@@ -100,6 +93,7 @@ export const WindowedList = <T,>({
           </StyledList>
         )}
       </AutoSizer>
+      <ElementResizeListener onResize={() => console.log('resize')} />
     </Box>
   );
 };
