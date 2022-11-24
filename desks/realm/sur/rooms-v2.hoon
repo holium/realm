@@ -10,6 +10,7 @@
 +$  access      ?(%public %private)
 +$  present     (set ship)
 +$  whitelist   (set ship)
++$  space-path  path:spaces
 +$  room
   $:  =rid
       provider=ship
@@ -24,40 +25,36 @@
 ::
 +$  rooms  (map rid room)
 ::
-+$  session
++$  session-state
   $:  provider=ship
       current=(unit rid)
       =rooms
   ==
 :: 
-+$  host-state
++$  provider-state
   $:  =rooms
       online=?
       banned=(set ship)
   ==
 ::
-+$  peer-state
-  $:  provider=ship
-      current=(unit rid)
-      =rooms
++$  edit-payload
+  $%  [%title =title]
+      [%access =access]
   ==
 ::
-+$  peer-action
++$  session-action
   $%  [%set-provider =ship]       
       [%reset-provider ~]
       [%create-room =rid =access =title]
+      :: [%create-room =rid =access =title =path:spaces]
+      [%edit-room =rid =title =access]
       [%delete-room =rid]
-      [%set-title =rid =title]
-      [%set-access =rid =access]
-      [%set-capacity =rid =capacity]
-      [%set-space =rid =path:spaces]
       [%enter-room =rid]
       [%leave-room =rid]
       [%invite =rid =ship]
       [%kick =rid =ship]
       [%send-chat =cord]
   ==
-
 ::
 +$  reaction
   $%  [%room-entered =rid =ship]
@@ -65,7 +62,7 @@
       [%room-created =room]
       [%room-updated =room]
       [%room-deleted =rid]
-      [%provider provider=ship =rooms]
+      [%provider-changed provider=ship =rooms]
       [%invited provider=ship =rid =title =ship]
       [%kicked provider=ship =rid =title =ship]  
       [%new-chat from=ship content=cord]
@@ -81,14 +78,19 @@
 ::       [%new-chat from=ship content=cord]
 ::   ==
 ::
-+$  host-action
++$  provider-action
   $%  [%set-online online=?]
       [%ban =ship]
       [%unban =ship]
   ==
 ::
++$  signal-action
+  $%  
+      [%signal from=ship to=ship data=cord]
+  ==
+::
 +$  view
-  $%  [%session =session]
+  $%  [%session =session-state]
       [%room =room]
       [%provider =ship]
   ==

@@ -30,16 +30,6 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
     <div className="speaker-container">
       <p>{props.person}</p>
       <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
-        {!props.our && (
-          <button
-            onClick={() => {
-              console.log('should connect');
-              console.log(toJS(peer));
-            }}
-          >
-            Dial
-          </button>
-        )}
         <button
           onClick={() => {
             if (props.our) {

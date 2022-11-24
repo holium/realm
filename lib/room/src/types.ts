@@ -25,6 +25,8 @@ export interface RoomType {
   space: string;
 }
 
+export type RoomMap = Map<string, RoomType>;
+
 export enum RoomState {
   Starting = 'starting',
   Started = 'started',

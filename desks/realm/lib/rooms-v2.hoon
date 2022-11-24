@@ -9,6 +9,23 @@
 ++  enjs
   =,  enjs:format
   |%
+  ++  signal-action
+    |=  act=^signal-action
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    :-  -.act
+    ?-  -.act
+        %signal
+      %-  pairs
+      :~
+        ['from' s+(scot %p from.act)]
+        ['to' s+(scot %p to.act)]
+        ['data' s+data.act]
+      ==
+    ==
+  ::
   ++  reaction
     |=  rct=reaction:sur
     ^-  json
@@ -42,7 +59,7 @@
       %-  pairs
       ['rid' %s rid.rct]~
       ::
-        %provider
+        %provider-changed
       %-  pairs
       :~
         ['provider' %s (scot %p provider.rct)]
@@ -83,7 +100,7 @@
     :-  -.vi
     ?-  -.vi
         %session
-      (session:encode session.vi)
+      (session:encode session-state.vi)
       ::
         %room
       (room:encode room.vi)
@@ -97,13 +114,13 @@
   =,  enjs:format
   |%
   ++  session
-    |=  =session:sur
+    |=  ses=session-state:sur
     ^-  json
     %-  pairs
     :~
-      ['provider' s+(scot %p provider.session)]
-      ['current' (current current.session)]
-      ['rooms' (rooms rooms.session)]
+      ['provider' s+(scot %p provider.ses)]
+      ['current' (current current.ses)]
+      ['rooms' (rooms rooms.ses)]
     ==
   ::
   ++  rooms
@@ -151,23 +168,40 @@
 ++  dejs
   =,  dejs:format
   |%
-  ++  peer-action
+  ++  signal-action
     |=  jon=json
-    ^-  ^peer-action
+    ^-  ^signal-action
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~
+        [%signal signal]
+      ==
+    ::
+    ++  signal
+      %-  ot
+      :~  [%from patp]
+          [%to patp]
+          [%data so]
+      ==
+    ++  patp
+      (su ;~(pfix sig fed:ag))
+  ::
+    ::
+  --
+  ++  session-action
+    |=  jon=json
+    ^-  ^session-action
     =<  (decode jon)
     |%
     ++  decode
       %-  of
       :~  [%set-provider patp]
           [%reset-provider ul]
-
           [%create-room add]
+          [%edit-room edit]
           [%delete-room so]
-          [%set-title set-title]
-          [%set-access set-access]
-          [%set-capacity set-capacity]
-          [%set-space set-space]
-
           [%enter-room so]
           [%leave-room so]
           [%invite invite]
@@ -182,27 +216,16 @@
       :~  [%rid so]
           [%access access]
           [%title so]
+          :: [%path spc-path]
       ==
-    ++  set-title
+    ::
+    ++  edit
       %-  ot
       :~  [%rid so]
           [%title so]
-      ==
-    ++  set-access
-      %-  ot
-      :~  [%rid so]
           [%access access]
       ==
-    ++  set-capacity
-      %-  ot
-      :~  [%rid so]
-          [%capacity ni]
-      ==
-    ++  set-space
-      %-  ot
-      :~  [%rid so]
-          [%space spc-pth]
-      ==
+    ::
     ++  invite
       %-  ot
       :~  [%rid so]
@@ -230,9 +253,9 @@
       ==
     --
   ::
-  ++  host-action
+  ++  provider-action
     |=  jon=json
-    ^-  host-action:sur
+    ^-  provider-action:sur
     =<  (decode jon)
     |%
     ++  decode

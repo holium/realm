@@ -4,7 +4,7 @@ import { action, makeObservable, observable } from 'mobx';
 
 import { RemotePeer } from '../peer/RemotePeer';
 import { LocalPeer } from '../peer/LocalPeer';
-import { Patp, RoomType } from '../types';
+import { Patp, RoomMap, RoomType } from '../types';
 import { DataPacket } from '../helpers/data';
 
 type AgentConnectParams = [RoomType];
@@ -19,14 +19,14 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   local?: LocalPeer;
   provider: string; // default is our
   presentRoom?: RoomType;
-  rooms: RoomType[];
+  rooms: RoomMap;
   peers: Map<Patp, RemotePeer> = new Map();
   rtc: RTCConfiguration = {
     iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
     iceTransportPolicy: 'relay',
   };
 
-  constructor(our: Patp, config: ProtocolConfig, rooms: RoomType[] = []) {
+  constructor(our: Patp, config: ProtocolConfig, rooms: RoomMap = new Map()) {
     // eslint-disable-next-line constructor-super
     super();
     this.our = our;
@@ -48,6 +48,8 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   }
   abstract registerLocal(local: LocalPeer): void;
   abstract setProvider(provider: Patp): Promise<RoomType[]>;
+  abstract createRoom(title: string, access: 'public' | 'private'): RoomType;
+  abstract deleteRoom(rid: string): void;
   abstract getRoom(rid: string): Promise<RoomType>;
   abstract getRooms(): Promise<RoomType[]>;
   //
@@ -67,5 +69,11 @@ export type ProtocolEventCallbacks = {
   hostLeft: (host: Patp) => void;
   peerAdded: (peer: RemotePeer) => void;
   peerRemoved: (peer: RemotePeer) => void;
+  creatingRoom: (room: RoomType) => void;
+  roomCreated: (room: RoomType) => void;
+  roomDeleted: (rid: string) => void;
   roomUpdated: (room: RoomType) => void;
+  roomInitial: (room: RoomType) => void;
+  roomEntered: (room: RoomType) => void;
+  roomLeft: (room: RoomType) => void;
 };

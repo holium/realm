@@ -15,6 +15,7 @@ body {
 
 .room-sidebar {
   flex: 1;
+  position: relative;
   padding: 12px;
   flex-direction: column;
   border-radius: 6px;
@@ -31,10 +32,19 @@ body {
   margin-bottom: 12px;
 }
 
-.room-list{
+.room-list {
   display: flex;
+  flex: 1;
+  justify-content: flex-start;
   flex-direction: column;
   gap: 4px;
+}
+
+.room-sidebar-footer {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
 }
 
 .room-row {

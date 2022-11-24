@@ -1863,6 +1863,11 @@
     fast-deep-equal "^3.1.3"
     superstruct "^0.16.5"
 
+"@microsoft/fetch-event-source@^2.0.0":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@microsoft/fetch-event-source/-/fetch-event-source-2.0.1.tgz#9ceecc94b49fbaa15666e38ae8587f64acce007d"
+  integrity sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==
+
 "@motionone/animation@^10.12.0":
   version "10.14.0"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.14.0.tgz#2f2a3517183bb58d82e389aac777fe0850079de6"
@@ -3341,6 +3346,16 @@
     immer "^9.0.1"
     urbit-ob "^5.0.1"
 
+"@urbit/http-api@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@urbit/http-api/-/http-api-2.3.0.tgz#3187c30e4d223da4245ad6282d5a6ca0da510bf6"
+  integrity sha512-3cKSdbBVcpoHqZLvoV23UK+nkqK0nFEBFKbaEwfBQE/NpkWf/7iP+mT7ldXTk7Uv/5bzDEBPqPB2fJNwdMQwcA==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    "@microsoft/fetch-event-source" "^2.0.0"
+    browser-or-node "^1.3.0"
+    core-js "^3.19.1"
+
 "@virtuoso.dev/react-urx@^0.2.12":
   version "0.2.13"
   resolved "https://registry.yarnpkg.com/@virtuoso.dev/react-urx/-/react-urx-0.2.13.tgz#e2cfc42d259d2a002695e7517d34cb97b64ee9c4"
@@ -4264,6 +4279,11 @@ brorand@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==
+
+browser-or-node@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/browser-or-node/-/browser-or-node-1.3.0.tgz#f2a4e8568f60263050a6714b2cc236bb976647a7"
+  integrity sha512-0F2z/VSnLbmEeBcUrSuDH5l0HxTXdQQzLjkmBR4cYfvg1zJrKSlmIZFqyFR8oX0NrwPhy3c3HQ6i3OxMbew4Tg==
 
 browser-process-hrtime@^1.0.0:
   version "1.0.0"

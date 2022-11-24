@@ -1,6 +1,11 @@
 import './App.css';
 import * as process from 'process';
-import { RemotePeer, RoomsManager, TestProtocol } from '@holium/realm-room';
+import {
+  RemotePeer,
+  RoomsManager,
+  TestProtocol,
+  RoomProtocol,
+} from '@holium/realm-room';
 import { Speaker } from './Speaker';
 import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
@@ -9,30 +14,48 @@ import { observer } from 'mobx-react';
 (window as any).process = process;
 (window as any).Buffer = [];
 
+const ShipConfig: { [ship: string]: any } = {
+  '~dev': {
+    ship: 'dev',
+    url: 'http://localhost:8081',
+    code: 'magsub-micsev-bacmug-moldex',
+  },
+  '~fes': {
+    ship: 'fes',
+    url: 'http://localhost:8083',
+    code: 'lagfep-borweb-sabler-dacnus',
+  },
+  '~sun': {
+    ship: 'sun',
+    url: 'http://localhost:8087',
+    code: 'parsyr-dibwyt-livpen-hatsym',
+  },
+};
+
 //
 // Set the ship with
 // http://localhost:3000/~dev
 //
-const testShip = window.location.href.split('/')[3] || '~sun';
-
-const protocol = new TestProtocol(
+const testShip = window.location.href.split('/')[3] || '~fes';
+const protocol = new RoomProtocol(
   testShip,
   {
     rtc: {
       iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
     },
   },
-  'http://localhost:3100'
+  ShipConfig[testShip]
 );
+
+protocol.init(ShipConfig[testShip]);
 
 export const roomsManager = new RoomsManager(protocol);
 
 const App: FC = observer(() => {
   useEffect(() => {
-    roomsManager.listRooms();
-
     return () => {
-      roomsManager.presentRoom?.leave();
+      // roomsManager.presentRoom?.leave();
+      protocol.api?.delete();
     };
   }, []);
 
@@ -67,6 +90,11 @@ const App: FC = observer(() => {
               </div>
             );
           })}
+        </div>
+        <div className="room-sidebar-footer">
+          <button onClick={() => roomsManager.createRoom('new room', 'public')}>
+            Create Room
+          </button>
         </div>
       </div>
 

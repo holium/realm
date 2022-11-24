@@ -1,7 +1,7 @@
 /-  store=rooms-v2
 /+  *rooms-v2
 ::
-|_  act=peer-action:store
+|_  act=session-action:store
 ++  grad  %noun
 ++  grow
   |%
@@ -10,7 +10,7 @@
 ::
 ++  grab
   |%
-  ++  noun  peer-action:store
-  ++  json  peer-action:dejs
+  ++  noun  session-action:store
+  ++  json  session-action:dejs
   --
 --
