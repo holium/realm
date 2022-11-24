@@ -33,8 +33,8 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
       key={chat.index}
       flexDirection="column"
       justifyContent="flex-end"
-      mt={doesPack ? 1 : 4}
-      mr={3}
+      pt={doesPack ? 1 : 4}
+      pr={3}
     >
       {!chat.isRightAligned && !doesPack && (
         // author string
