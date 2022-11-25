@@ -149,21 +149,7 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  subscribeToTransactions(
-    conduit: Conduit,
-    handler: (transaction: any) => void
-  ) {
-    console.log('GETTING subscribeToTransactions');
-    conduit.watch({
-      app: 'realm-wallet',
-      path: '/transactions',
-      onEvent: (data: any) => {
-        handler(data);
-      },
-      onError: () => console.log('Subscription rejected'),
-      onQuit: () => console.log('Kicked from subscription'),
-    });
-  },
+
   getWallets: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'realm-wallet',

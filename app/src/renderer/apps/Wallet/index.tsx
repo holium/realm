@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useMemo } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail';
@@ -41,12 +41,12 @@ export const WalletApp: FC<any> = observer((props: any) => {
   const [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
-  let transactions: any = [];
+  let transactions: any = useMemo(() => [], []);
   for (const key of walletApp.currentStore.wallets.keys()) {
+    const wallet = walletApp.currentStore.wallets.get(key);
+    if (!wallet) continue;
     const walletTransactions = getTransactions(
-      walletApp.currentStore.wallets
-        .get(key)!
-        .transactions.get(walletApp.currentStore.network!) || new Map()
+      wallet.transactions.get(walletApp.currentStore.network!) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
   }
@@ -55,7 +55,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
       setTransactionCount(transactions.length);
       setHidePending(false);
     }
-  }, [transactions]);
+  }, [transactionCount, transactions]);
 
   const hide = () => {
     setHidePending(true);

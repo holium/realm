@@ -325,7 +325,7 @@ export class WalletService extends BaseService {
       secretKey,
       accessPropertiesByDotNotation: true,
     };
-    this.db = new Store<WalletStoreType>(storeParams)
+    this.db = new Store<WalletStoreType>(storeParams);
     const persistedState: WalletStoreType = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {
@@ -426,20 +426,20 @@ export class WalletService extends BaseService {
       this.state!.testnet.initial(wallets.btctestnet);
       this.updateBitcoinInfo();
     });
-    WalletApi.subscribeToTransactions(
-      this.core.conduit!,
-      (transaction: any) => {
-        if (transaction.network == 'ethereum')
-          this.state!.ethereum.wallets.get(
-            transaction.index
-          )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-        //      else if (transaction.network == 'bitcoin')
-        //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-        /* const tx = this.state!.ethereum.transactions.get(
-          transaction.transaction.hash
-        ); */
-      }
-    );
+    // WalletApi.subscribeToTransactions(
+    //   this.core.conduit!,
+    //   (transaction: any) => {
+    //     if (transaction.network == 'ethereum')
+    //       this.state!.ethereum.wallets.get(
+    //         transaction.index
+    //       )!.applyTransactionUpdate(transaction.net, transaction.transaction);
+    //     //      else if (transaction.network == 'bitcoin')
+    //     //        this.state!.bitcoin.applyTransactionUpdate(transaction);
+    //     /* const tx = this.state!.ethereum.transactions.get(
+    //       transaction.transaction.hash
+    //     ); */
+    //   }
+    // );
     WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
       this.state!.ethereum.setSettings(settings);
     });
