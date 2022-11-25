@@ -11,17 +11,17 @@ body {
   gap: 12px;
   flex-direction: row;
   height: 600px;
+  width: 100%;
 }
 
 .room-sidebar {
-  flex: 1;
   position: relative;
   padding: 12px;
+  width: 30%;
   flex-direction: column;
   border-radius: 6px;
   background: #fcfcfc;
   border: 1px solid #00000020;
-  height: inherit;
 }
 
 .room-sidebar-header {
@@ -34,7 +34,7 @@ body {
 
 .room-list {
   display: flex;
-  flex: 1;
+  /* flex: 1; */
   justify-content: flex-start;
   flex-direction: column;
   gap: 4px;
@@ -70,24 +70,35 @@ body {
   background-color: #00000008;
 }
 
+.room-pane {
+  display: flex;
+  width: 70%;
+  gap: 12px;
+  flex-direction: column;
+  height: 100%;
+}
+
+.room-control-bar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 .speaker-grid {
   display: flex;
   border-radius: 6px;
-  justify-content: flex-start;
-  flex: 4;
+  flex-wrap: wrap;
+  flex-basis: calc(100% - 24px);
+  width: calc(100% - 24px);
   gap: 16px;
   padding: 12px;
-  flex-direction: row;
   background: #fcfcfc;
-  align-items: flex-start;
-  height: inherit;
   border: 1px solid #00000020;
 }
 
 .speaker-container {
-  display: inline-flex;    
+  display: flex;    
   background: #fff;
-  flex: 300px 300px;
   border: 1px solid #00000020;
   border-radius: 6px;
   padding: 8px;
@@ -95,5 +106,5 @@ body {
   align-items: center;
   justify-content: center;
   height: 200px;
-  width: 300px;
+  flex-basis: calc(50% - 32px);
 }

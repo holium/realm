@@ -14,7 +14,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   local: LocalPeer;
   protocol: BaseProtocol;
   presentRoom?: RoomInstance;
-  roomMap: Map<string, RoomType> = new Map();
 
   constructor(protocol: BaseProtocol) {
     // eslint-disable-next-line constructor-super
@@ -37,10 +36,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       }
     });
 
-    // this.protocol.on(ProtocolEvent.RoomEntered, (room: RoomType) => {
-    //   this.enterRoom(room.rid);
-    // });
-
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       // if we're in a deleted room, we should leave it
       console.log('ProtocolEvent.RoomDeleted', rid);
@@ -53,13 +48,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     makeObservable(this, {
       protocol: observable,
       presentRoom: observable,
-      roomMap: observable,
-      listRooms: action.bound,
       createRoom: action.bound,
       deleteRoom: action.bound,
       enterRoom: action.bound,
       leaveRoom: action.bound,
-      setRoom: action.bound,
     });
   }
 
@@ -86,22 +78,9 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.protocol.setProvider(provider);
   }
 
-  setRoom(room: RoomType) {
-    this.roomMap.set(room.rid, room);
-  }
-
-  async listRooms(): Promise<RoomType[]> {
-    // returns the list of rooms from the current provider
-    const rooms = await this.protocol.getRooms();
-    rooms.forEach(this.setRoom);
-    return rooms;
-  }
-
   enterRoom(rid: string): RoomInstance {
     if (this.presentRoom) {
-      console.log(`present: ${this.presentRoom.rid} new: ${rid}`);
       if (this.presentRoom.room.creator === this.our) {
-        console.log('deleting room');
         this.deleteRoom(this.presentRoom.rid);
       } else {
         this.leaveRoom(this.presentRoom.rid);
@@ -139,6 +118,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   deleteRoom(rid: string) {
     // provider/admin action
     this.protocol.deleteRoom(rid);
+  }
+
+  sendData(data: any) {
+    this.presentRoom?.sendData({ from: this.our, ...data });
   }
 }
 

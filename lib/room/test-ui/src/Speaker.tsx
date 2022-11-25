@@ -2,37 +2,52 @@ import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import './App.css';
+import {
+  RemotePeer,
+  RoomsManager,
+  TestProtocol,
+  RoomProtocol,
+} from '@holium/realm-room';
 import { roomsManager } from './App';
 import { toJS } from 'mobx';
+
 type ISpeaker = {
   our: boolean;
-  person: string;
+  patp: string;
+  peer?: RemotePeer;
   cursors?: boolean;
   type: 'host' | 'speaker' | 'listener';
 };
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   let peer: any;
+  const { our, patp } = props;
   // const [status, setStatus] = useState(PeerConnectionState.Disconnected);
 
   // roomsManager.presentRoom?.on('connected', () => {
   //   setStatus(PeerConnectionState.Connected);
   // });
 
-  if (!props.our) {
-    peer = roomsManager.presentRoom?.getPeer(props.person);
-    roomsManager.presentRoom?.getPeer(props.person)?.on('connected', () => {
-      console.log(props.person, 'connected');
-    });
+  // if (!props.our) {
+  //   peer = roomsManager.presentRoom?.getPeer(props.person);
+  //   roomsManager.presentRoom?.getPeer(props.person)?.on('connected', () => {
+  //     console.log(props.person, 'connected');
+  //   });
+  // }
+  if (!our) {
+    peer = roomsManager.protocol.peers.get(patp);
+    if (!peer) {
+      return null;
+    }
+    console.log(peer);
   }
-  console.log(peer?.status);
   return (
     <div className="speaker-container">
-      <p>{props.person}</p>
+      <p>{patp}</p>
       <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
         <button
           onClick={() => {
-            if (props.our) {
+            if (our) {
               if (roomsManager.presentRoom?.muteStatus) {
                 roomsManager.presentRoom?.unmute();
               } else {
@@ -41,7 +56,7 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
             }
           }}
         >
-          {props.our
+          {our
             ? roomsManager.presentRoom?.muteStatus
               ? 'Unmute'
               : 'Mute'
@@ -49,11 +64,10 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
         </button>
       </div>
 
-      {!props.our ? (
+      {!our ? (
         <div>
-          <p>
-            Status: {roomsManager.presentRoom?.getPeer(props.person).status}
-          </p>
+          <p>Status: {peer.status}</p>
+          <p>Audio streaming: {peer.isAudioAttached.toString()}</p>
         </div>
       ) : (
         <div>

@@ -2,7 +2,7 @@ import SimplePeer from 'simple-peer';
 import { action, makeObservable, observable } from 'mobx';
 import { patp2dec } from 'urbit-ob';
 import { Patp } from '../types';
-import { DataPacket, DataPacket_Kind } from '../helpers/data';
+import { DataPacket } from '../helpers/data';
 import { Peer, PeerConfig } from './Peer';
 import { PeerConnectionState, TrackKind } from './types';
 import { PeerEvent } from './events';
@@ -43,6 +43,7 @@ export class RemotePeer extends Peer {
       isVideoAttached: observable,
       attach: action.bound,
       detach: action.bound,
+      setStatus: action.bound,
       removeTracks: action.bound,
       _onConnect: action.bound,
       _onClose: action.bound,
@@ -60,23 +61,22 @@ export class RemotePeer extends Peer {
 
   _onConnect() {
     console.log('RemotePeer onConnect', this.patp);
-    this.status = PeerConnectionState.Connected;
+    this.setStatus(PeerConnectionState.Connected);
     this.emit(PeerEvent.Connected);
-    this.sendData({
-      kind: DataPacket_Kind.DATA,
-      value: {
-        data: {
-          from: this.our,
-          to: this.patp,
-          msg: 'Hi',
-        },
-      },
-    });
+    // this.sendData({
+    //   from: this.our,
+    //   kind: DataPacket_Kind.DATA,
+    //   value: {
+    //     data: {
+    //       msg: 'Hi',
+    //     },
+    //   },
+    // });
   }
 
   _onClose() {
     console.log('RemotePeer onClose');
-    this.status = PeerConnectionState.Closed;
+    this.setStatus(PeerConnectionState.Closed);
     this.removeTracks();
     this.emit(PeerEvent.Disconnected);
   }
@@ -91,7 +91,7 @@ export class RemotePeer extends Peer {
   _onSignal(data: SimplePeer.SignalData) {
     this.sendSignal(this.patp, data);
     if (this.status !== PeerConnectionState.Connected) {
-      this.status = PeerConnectionState.Connecting;
+      this.setStatus(PeerConnectionState.Connecting);
     }
   }
 
@@ -101,7 +101,6 @@ export class RemotePeer extends Peer {
   }
 
   _onTrack(track: MediaStreamTrack, stream: MediaStream) {
-    console.log(`${this.patp} streaming track`, track);
     this.tracks.set(track.id, track);
     if (track.kind === 'video') {
       stream.getVideoTracks().forEach((video: MediaStreamTrack) => {
@@ -121,6 +120,10 @@ export class RemotePeer extends Peer {
 
   _onData(data: any) {
     console.log('RemotePeer onData', JSON.parse(data));
+  }
+
+  setStatus(status: PeerConnectionState) {
+    this.status = status;
   }
 
   removeTracks() {
@@ -151,10 +154,6 @@ export class RemotePeer extends Peer {
   }
 
   attach(track: MediaStreamTrack): HTMLMediaElement {
-    console.log(
-      'element prior to attach',
-      document.getElementById(`${track.kind}-${this.patp}`)
-    );
     let element: HTMLMediaElement = this.getMediaElement(
       track.kind as TrackKind
     );
@@ -187,7 +186,7 @@ export class RemotePeer extends Peer {
     const element: HTMLMediaElement | null = document.getElementById(
       elementId
     ) as HTMLMediaElement;
-    console.log('detaching', element);
+    // console.log('detaching', element);
     if (element) {
       detachTrack(track, element);
     }

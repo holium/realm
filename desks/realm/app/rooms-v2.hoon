@@ -157,15 +157,15 @@
     ==
     ::
     ++  handle-signal
-      |=  [from=ship to=ship data=cord]
+      |=  [from=ship to=ship rid=cord data=cord]
       ^-  (quip card _state)
       ?:  =(from our.bol)
         ::  Sending a signal to another ship
         :_  state
-        [%pass / %agent [to %rooms-v2] %poke rooms-v2-signal+!>([%signal from to data])]~
+        [%pass / %agent [to %rooms-v2] %poke rooms-v2-signal+!>([%signal from to rid data])]~
       ::  Receiving a signal from another ship
       :_  state
-      [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to data])]~
+      [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
     ::
     --
   --

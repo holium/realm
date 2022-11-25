@@ -86,7 +86,7 @@
 ::
 +$  signal-action
   $%  
-      [%signal from=ship to=ship data=cord]
+      [%signal from=ship to=ship rid=cord data=cord]
   ==
 ::
 +$  view

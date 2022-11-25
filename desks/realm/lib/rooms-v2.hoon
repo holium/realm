@@ -22,6 +22,7 @@
       :~
         ['from' s+(scot %p from.act)]
         ['to' s+(scot %p to.act)]
+        ['rid' s+rid.act]
         ['data' s+data.act]
       ==
     ==
@@ -183,6 +184,7 @@
       %-  ot
       :~  [%from patp]
           [%to patp]
+          [%rid so]
           [%data so]
       ==
     ++  patp

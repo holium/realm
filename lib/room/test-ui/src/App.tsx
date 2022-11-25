@@ -98,31 +98,65 @@ const App: FC = observer(() => {
         </div>
       </div>
 
-      <div className="speaker-grid">
-        {roomsManager.presentRoom && (
-          <Speaker
-            our
-            person={roomsManager.our}
-            type={roomsManager.local.host ? 'host' : 'speaker'}
-          />
-        )}
-        {roomsManager.presentRoom &&
-          roomsManager.presentRoom!.peers.map((peer: RemotePeer) => {
-            return (
-              <Speaker
-                our={false}
-                key={peer.patp}
-                person={peer.patp}
-                type={
-                  peer.patp === roomsManager.presentRoom?.room.creator
-                    ? 'host'
-                    : 'speaker'
-                }
-              />
-            );
-          })}
+      <div className="room-pane">
+        <div className="room-control-bar">
+          <button
+            onClick={() =>
+              roomsManager.sendData({
+                kind: 0,
+                value: {
+                  app: 'rooms',
+                  data: {
+                    test: 'test',
+                  },
+                },
+              })
+            }
+          >
+            Send data to room
+          </button>
+        </div>
+        <div className="speaker-grid">
+          {roomsManager.presentRoom && (
+            <Speaker
+              our
+              patp={roomsManager.our}
+              type={roomsManager.local.host ? 'host' : 'speaker'}
+            />
+          )}
+          <PeerGrid />
+        </div>
       </div>
     </div>
+  );
+});
+
+const PeerGrid: FC = observer(() => {
+  if (!roomsManager.presentRoom) {
+    return null;
+  }
+  const peers = Array.from(roomsManager.protocol.peers.keys());
+  return (
+    <>
+      {peers.map((patp: string) => {
+        const peer = roomsManager.protocol.peers.get(patp);
+        if (!peer) {
+          return null;
+        }
+        return (
+          <Speaker
+            our={false}
+            key={patp}
+            patp={patp}
+            type={
+              patp === roomsManager.presentRoom?.room.creator
+                ? 'host'
+                : 'speaker'
+            }
+          />
+        );
+      })}
+    </>
   );
 });
 

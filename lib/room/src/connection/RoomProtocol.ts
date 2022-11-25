@@ -57,7 +57,12 @@ export class RoomProtocol extends BaseProtocol {
       app: 'rooms-v2',
       mark: 'rooms-v2-signal',
       json: {
-        signal: { from: this.local?.patp, to: peer, data: JSON.stringify(msg) },
+        signal: {
+          from: this.local?.patp,
+          to: peer,
+          rid: this.presentRoom?.rid,
+          data: JSON.stringify(msg),
+        },
       },
     });
   }
@@ -84,11 +89,18 @@ export class RoomProtocol extends BaseProtocol {
         if (sender) {
           sender?.peer.signal(payload.data);
         } else {
-          if (this.presentRoom?.present.includes(payload.from)) {
-            // this is a new peer
-            this.dial(payload.from, payload.data);
+          if (
+            this.presentRoom?.present.includes(payload.from) ||
+            payload.rid === this.presentRoom?.rid
+          ) {
+            // this is a new peer we haven't seen before, but they are joining the room
+            const newRemotePeer = this.dial(payload.from, payload.data);
+            newRemotePeer.then((newSender: RemotePeer) => {
+              newSender.peer.signal(payload.data);
+            });
+          } else {
+            console.warn('Received signal from unknown peer');
           }
-          console.warn('Received signal from unknown peer');
         }
       }
     }
@@ -115,6 +127,7 @@ export class RoomProtocol extends BaseProtocol {
       if (data['room-entered']) {
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
+        console.log('room entered reaction', payload, toJS(room));
         if (room) {
           room.present.push(payload.ship);
           this.rooms.set(payload.rid, room);
@@ -209,7 +222,6 @@ export class RoomProtocol extends BaseProtocol {
       path: '/rooms',
     });
     this.rooms = await res.json();
-    console.log('getting rooms');
     return Array.from(this.rooms.values());
   }
 
@@ -249,6 +261,7 @@ export class RoomProtocol extends BaseProtocol {
     if (!this.local) {
       throw new Error('No local peer created');
     }
+    console.log('dialing', peer);
     const remotePeer = new RemotePeer(
       this.our,
       peer,

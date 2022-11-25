@@ -38,6 +38,7 @@ export abstract class Peer extends (EventEmitter as new () => TypedEmitter<PeerE
       isSpeaking: observable,
       audioLevel: observable,
       lastSpokeAt: observable,
+      status: observable,
       mute: action.bound,
       unmute: action.bound,
       setHost: action.bound,

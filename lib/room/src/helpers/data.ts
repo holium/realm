@@ -24,6 +24,7 @@ export interface TrackMetaPayload {
 }
 
 export interface DataPacket {
+  from: Patp;
   kind: DataPacket_Kind;
   value:
     | { cursor: CursorPayload }
