@@ -27,6 +27,7 @@ ipcRenderer.on('load-window-id', (e, windowId) => {
 
 window.onload = function () {
   ipcRenderer.on('mouse-color', (event, color, initialRender) => {
+    console.log('mouse color', color);
     renderMouse(color);
   });
   renderMouse();
@@ -35,7 +36,11 @@ window.onload = function () {
 
 function renderMouse(color) {
   const container = createContainer('realm-mouse-container');
-  container.style.overflow = 'none';
+  container.style.overflow = 'hidden';
+  // container.style.overflowX = 'hidden';
+  // container.style.overflowY = 'hidden';
+  // container.style.width = 'inherit';
+  // container.style.height = 'inherit';
   // container.style.position = 'absolute';
   // container.style.left = 0;
   // container.style.right = 0;

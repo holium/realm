@@ -7,6 +7,7 @@ import {
   UninstallPoke,
   UnpinPoke,
 } from '../../../api/bazaar';
+
 import {
   types,
   Instance,
@@ -15,6 +16,7 @@ import {
   flow,
   SnapshotOut,
 } from 'mobx-state-tree';
+
 import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
@@ -33,6 +35,7 @@ export enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
   Web = 'web',
+  Dev = 'dev',
 }
 
 export const Glob = types.model('Glob', {
@@ -72,7 +75,7 @@ export const DocketApp = types.model('DocketApp', {
 export const DevAppModel = types.model('DevApp', {
   id: types.identifier,
   title: types.string,
-  type: types.literal(AppTypes.Web),
+  type: types.literal(AppTypes.Dev),
   color: types.string,
   icon: types.string,
   web: types.model('WebConfig', {
@@ -120,6 +123,7 @@ const NativeApp = types.model('NativeApp', {
   installStatus: types.optional(types.string, 'installed'),
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
+  config: types.maybeNull(RealmConfig),
 });
 
 const AppModel = types.union(
@@ -127,6 +131,8 @@ const AppModel = types.union(
     eager: true,
   },
   UrbitApp,
+  // WebApp,
+  DevAppModel,
   NativeApp
 );
 
@@ -511,6 +517,8 @@ export type WebAppType = Instance<typeof WebApp>;
 export type DocketAppType = Instance<typeof DocketApp>;
 export type UrbitAppType = Instance<typeof UrbitApp>;
 export type NativeAppType = Instance<typeof NativeApp>;
+export type DevAppType = Instance<typeof DevAppModel>;
 export type AppType = Instance<typeof AppModel>;
 export type AllyType = Instance<typeof AllyModel>;
 export type NewBazaarStoreType = Instance<typeof NewBazaarStore>;
+export type RealmConfigType = Instance<typeof RealmConfig>;

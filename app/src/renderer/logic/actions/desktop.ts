@@ -40,6 +40,12 @@ export const DesktopActions = {
   openAppWindow: async (spacePath: string, app: any) => {
     return await window.electron.os.desktop.openAppWindow(spacePath, app);
   },
+  toggleMinimized: async (spacePath: string, windowId: string) => {
+    return await window.electron.os.desktop.toggleMinimized(
+      spacePath,
+      windowId
+    );
+  },
   closeAppWindow: async (spacePath: string, app: any) => {
     return await window.electron.os.desktop.closeAppWindow(spacePath, app);
   },

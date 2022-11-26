@@ -20,7 +20,7 @@ export const TitlebarStyle = styled(motion.div)<TitlebarStyleProps>`
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  flex: 1 1 auto;
+  /* flex: 1 1 auto; */
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
@@ -68,6 +68,8 @@ interface TitlebarProps {
   closeButton?: boolean;
   onClose?: () => void;
   maximizeButton?: boolean;
+  minimizeButton?: boolean;
+  onMinimize?: () => void;
   onMaximize?: () => void;
   onDevTools?: () => void;
   isAppWindow?: boolean;
@@ -98,7 +100,9 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
     onClose,
     onDevTools,
     maximizeButton,
+    minimizeButton,
     onMaximize,
+    onMinimize,
     navigationButtons,
     shareable,
     hasBlur,
@@ -161,12 +165,23 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
           {titleSection}
         </TitleCentered>
       )}
-      {shareable || navigationButtons ? (
-        <Flex zIndex={zIndex + 1} gap={4} alignItems="center">
+      {shareable || navigationButtons || showDevToolsToggle ? (
+        <Flex ml="2px" zIndex={zIndex + 1} gap={4} alignItems="center">
           {shareable && (
             <SharedAvatars
               iconColor={iconColor!}
               backgroundColor={windowColor}
+            />
+          )}
+          {showDevToolsToggle && (
+            <WindowIcon
+              icon="DevBox"
+              iconColor={iconColor!}
+              bg="#97A3B2"
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                onDevTools && onDevTools();
+              }}
             />
           )}
           {navigationButtons && (
@@ -192,14 +207,14 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
       {children}
       {(maximizeButton || closeButton) && (
         <Flex gap={4} alignItems="center">
-          {showDevToolsToggle && (
+          {minimizeButton && (
             <WindowIcon
-              icon="DevBox"
+              icon="Minimize"
               iconColor={iconColor!}
               bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                onDevTools && onDevTools();
+                onMinimize && onMinimize();
               }}
             />
           )}
@@ -232,5 +247,7 @@ export const Titlebar: FC<TitlebarProps> = (props: TitlebarProps) => {
 Titlebar.defaultProps = {
   zIndex: 2,
   hasBorder: true,
-  showDevToolsToggle: true,
+  // minimizeButton: true,
+  // maximizeButton: true,
+  // showDevToolsToggle: true,
 };
