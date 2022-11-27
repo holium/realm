@@ -47,7 +47,6 @@
           |=  =ship
           [ship [pinned=%.n tags=*(set cord) status=%following]]
       =^  cards  state  abet:(spin-followers:core following)
-      ~&  cards
       =/  following  (malt following)
       =/  followers
         %-  malt
