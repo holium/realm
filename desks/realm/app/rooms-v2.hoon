@@ -249,7 +249,7 @@
         ?.  (is-host:hol provider)
           =/  leave-cards   (gen-leave-cards:helpers:rooms:hol rid)
           :_  state
-          %+  weld  leave-cards
+          %+  weld  leave-cards  
             ^-  (list card)
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%create-room rid access title])]~
         ::
@@ -408,7 +408,12 @@
       |=  [=rid:store =ship]
       =.  current.session.state 
         ::  if the left ship is us, update our current
-        ?:  =(our.bol ship)  ~  current.session.state
+        ?:  
+          ?&
+            =(our.bol ship)  
+            =((some rid) current.session.state)
+          ==
+          ~  current.session.state
       ~&  >>  "on-left: rid={<rid>} ship={<ship>}"
       =/  room                  (~(got by rooms.session.state) rid)
       ~&  >  room
@@ -422,6 +427,7 @@
       =.  current.session.state  
         ::  if we created the room, update our current
         ?:  =(our.bol creator.room)  (some rid.room)  current.session.state
+      ~&  >>  "on-created: current={<current.session.state>}"
       =.  rooms.session.state    (~(put by rooms.session.state) [rid.room room])
       :_  state
       [%give %fact [/lib ~] rooms-v2-reaction+!>([%room-created room])]~

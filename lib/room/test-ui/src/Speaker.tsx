@@ -1,15 +1,10 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react';
 
 import './App.css';
-import {
-  RemotePeer,
-  RoomsManager,
-  TestProtocol,
-  RoomProtocol,
-} from '@holium/realm-room';
+import { RemotePeer } from '@holium/realm-room';
 import { roomsManager } from './App';
-import { toJS } from 'mobx';
+// import { toJS } from 'mobx';
 
 type ISpeaker = {
   our: boolean;
@@ -22,28 +17,20 @@ type ISpeaker = {
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
   let peer: any;
   const { our, patp } = props;
-  // const [status, setStatus] = useState(PeerConnectionState.Disconnected);
 
-  // roomsManager.presentRoom?.on('connected', () => {
-  //   setStatus(PeerConnectionState.Connected);
-  // });
-
-  // if (!props.our) {
-  //   peer = roomsManager.presentRoom?.getPeer(props.person);
-  //   roomsManager.presentRoom?.getPeer(props.person)?.on('connected', () => {
-  //     console.log(props.person, 'connected');
-  //   });
-  // }
   if (!our) {
-    peer = roomsManager.protocol.peers.get(patp);
+    peer = useRef(roomsManager.protocol.peers.get(patp));
     if (!peer) {
       return null;
     }
-    console.log(peer);
   }
+
   return (
     <div className="speaker-container">
-      <p>{patp}</p>
+      <p style={{ margin: 0 }}>{patp}</p>
+      <p style={{ marginTop: 6, marginBottom: 12, opacity: 0.5, fontSize: 12 }}>
+        {peer?.current.patpId}
+      </p>
       <div style={{ display: 'flex', gap: 8, flexDirection: 'row' }}>
         <button
           onClick={() => {
@@ -66,8 +53,8 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
 
       {!our ? (
         <div>
-          <p>Status: {peer.status}</p>
-          <p>Audio streaming: {peer.isAudioAttached.toString()}</p>
+          <p>Status: {peer.current.status}</p>
+          <p>Audio streaming: {peer.current.isAudioAttached.toString()}</p>
         </div>
       ) : (
         <div>

@@ -1,10 +1,9 @@
 import './App.css';
 import * as process from 'process';
 import {
-  RemotePeer,
   RoomsManager,
-  TestProtocol,
   RoomProtocol,
+  RoomManagerEvent,
 } from '@holium/realm-room';
 import { Speaker } from './Speaker';
 import { FC, useEffect } from 'react';
@@ -50,7 +49,12 @@ const protocol = new RoomProtocol(
 protocol.init(ShipConfig[testShip]);
 
 export const roomsManager = new RoomsManager(protocol);
-
+roomsManager.on(
+  RoomManagerEvent.OnDataChannel,
+  (rid: string, peer: string, data: any) => {
+    console.log(rid, peer, data);
+  }
+);
 const App: FC = observer(() => {
   useEffect(() => {
     return () => {
@@ -139,10 +143,6 @@ const PeerGrid: FC = observer(() => {
   return (
     <>
       {peers.map((patp: string) => {
-        const peer = roomsManager.protocol.peers.get(patp);
-        if (!peer) {
-          return null;
-        }
         return (
           <Speaker
             our={false}

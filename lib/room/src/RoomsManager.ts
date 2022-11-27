@@ -1,11 +1,13 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
-import { action, makeObservable, observable, toJS } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 import { Patp, RoomState, RoomType } from './types';
 import { BaseProtocol } from './connection/BaseProtocol';
 import { RoomInstance } from './RoomInstance';
 import { LocalPeer } from './peer/LocalPeer';
 import { ProtocolEvent } from './connection/events';
+import { DataPacket } from './helpers/data';
+import { RoomManagerEvent } from './events';
 
 /**
  * RoomsManager: top level class for managing the rooms primitive
@@ -25,7 +27,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     });
     this.protocol.registerLocal(this.local);
     this.protocol.on(ProtocolEvent.RoomInitial, (room: RoomType) => {
-      console.log('initial room', room);
       this.enterRoom(room.rid);
     });
 
@@ -38,12 +39,24 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
     this.protocol.on(ProtocolEvent.RoomDeleted, (rid: string) => {
       // if we're in a deleted room, we should leave it
-      console.log('ProtocolEvent.RoomDeleted', rid);
       if (this.presentRoom?.rid === rid) {
-        console.log('ProtocolEvent.RoomDeleted is present');
         this.presentRoom = undefined;
       }
     });
+
+    this.protocol.on(
+      ProtocolEvent.PeerDataReceived,
+      (peer: Patp, data: DataPacket) => {
+        if (this.presentRoom) {
+          this.emit(
+            RoomManagerEvent.OnDataChannel,
+            this.presentRoom.rid,
+            peer,
+            data
+          );
+        }
+      }
+    );
 
     makeObservable(this, {
       protocol: observable,
@@ -127,9 +140,10 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RoomsManagerEventCallbacks = {
-  createdRoom: () => void;
-  deletedRoom: (state: RoomState) => void;
-  joinedRoom: () => void;
-  leftRoom: () => void;
-  setNewProvider: () => void;
+  createdRoom: (room: RoomType) => void;
+  deletedRoom: (rid: string, state: RoomState) => void;
+  joinedRoom: (rid: string) => void;
+  leftRoom: (rid: string) => void;
+  setNewProvider: (provider: Patp, rooms: RoomType[]) => void;
+  onDataChannel: (rid: string, peer: Patp, data: DataPacket) => void;
 };

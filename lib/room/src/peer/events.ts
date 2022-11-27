@@ -3,7 +3,7 @@ export enum PeerEvent {
   Disconnected = 'disconnected',
   Failed = 'failed',
   New = 'new',
-  Close = 'closed',
+  Closed = 'closed',
   Dialing = 'dialing',
   Redialing = 'redialing',
   MediaStreamAdded = 'mediaStreamAdded',
@@ -16,6 +16,7 @@ export enum PeerEvent {
   AudioPlaybackStopped = 'audioPlaybackStopped',
   AudioPlaybackFailed = 'audioPlaybackFailed',
   IsSpeakingChanged = 'isSpeakingChanged',
+  ReceivedData = 'receivedData',
   Muted = 'muted',
   Unmuted = 'unmuted',
 }

@@ -8,35 +8,27 @@ import { PeerConnectionState, TrackKind } from './types';
 import { PeerEvent } from './events';
 import { isFireFox, isSafari } from '../utils';
 
+type SignalData = SimplePeer.SignalData | { type: 'ready'; from: Patp };
 export class RemotePeer extends Peer {
   our: Patp;
-  peer: SimplePeer.Instance;
+  peer?: SimplePeer.Instance;
   isInitiator: boolean;
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
-  sendSignal: (peer: Patp, data: SimplePeer.SignalData) => void;
+  rtcConfig: RTCConfiguration;
+  sendSignal: (peer: Patp, data: SignalData) => void;
   constructor(
     our: Patp,
     peer: Patp,
     config: PeerConfig & { isInitiator: boolean },
-    sendSignal: (peer: Patp, data: SimplePeer.SignalData) => void
+    sendSignal: (peer: Patp, data: SignalData) => void
   ) {
     super(peer, config);
     this.our = our;
     this.isInitiator = config.isInitiator;
     this.sendSignal = sendSignal;
-    this.peer = new SimplePeer({
-      initiator: this.isInitiator,
-      config: config.rtc,
-      objectMode: true,
-    });
-    this.peer.on('connect', this._onConnect.bind(this));
-    this.peer.on('close', this._onClose.bind(this));
-    this.peer.on('error', this._onError.bind(this));
-    this.peer.on('signal', this._onSignal.bind(this));
-    this.peer.on('stream', this._onStream.bind(this));
-    this.peer.on('track', this._onTrack.bind(this));
-    this.peer.on('data', this._onData.bind(this));
+    this.rtcConfig = config.rtc;
+
     makeObservable(this, {
       peer: observable,
       isAudioAttached: observable,
@@ -45,6 +37,8 @@ export class RemotePeer extends Peer {
       detach: action.bound,
       setStatus: action.bound,
       removeTracks: action.bound,
+      createConnection: action.bound,
+      dial: action.bound,
       _onConnect: action.bound,
       _onClose: action.bound,
       _onError: action.bound,
@@ -59,33 +53,53 @@ export class RemotePeer extends Peer {
     return localPatpId < patp2dec(remotePatp);
   }
 
+  createConnection() {
+    this.setStatus(PeerConnectionState.Connecting);
+    this.peer?.removeAllListeners();
+    // create the peer connection
+    this.peer = new SimplePeer({
+      initiator: this.isInitiator,
+      config: this.rtcConfig,
+      objectMode: true,
+    });
+    this.peer.on('connect', this._onConnect.bind(this));
+    this.peer.on('close', this._onClose.bind(this));
+    this.peer.on('error', this._onError.bind(this));
+    this.peer.on('signal', this._onSignal.bind(this));
+    this.peer.on('stream', this._onStream.bind(this));
+    this.peer.on('track', this._onTrack.bind(this));
+    this.peer.on('data', this._onData.bind(this));
+  }
+
+  dial() {
+    if (!this.isInitiator) {
+      // notify the peer that we want to connect
+      this.sendSignal(this.patp, { type: 'ready', from: this.our });
+    }
+  }
+
+  peerSignal(data: SimplePeer.SignalData) {
+    this.peer?.signal(data);
+  }
+
   _onConnect() {
-    console.log('RemotePeer onConnect', this.patp);
+    // console.log('RemotePeer onConnect', this.patp);
     this.setStatus(PeerConnectionState.Connected);
     this.emit(PeerEvent.Connected);
-    // this.sendData({
-    //   from: this.our,
-    //   kind: DataPacket_Kind.DATA,
-    //   value: {
-    //     data: {
-    //       msg: 'Hi',
-    //     },
-    //   },
-    // });
   }
 
   _onClose() {
-    console.log('RemotePeer onClose');
+    // console.log('RemotePeer onClose', this.patp);
     this.setStatus(PeerConnectionState.Closed);
     this.removeTracks();
-    this.emit(PeerEvent.Disconnected);
+    this.emit(PeerEvent.Closed);
   }
 
   _onError(err: Error) {
-    console.log('RemotePeer onError', err);
-    this.status = PeerConnectionState.Failed;
+    // console.log('RemotePeer onError', err);
+    this.setStatus(PeerConnectionState.Failed);
     this.removeTracks();
-    this.emit(PeerEvent.Failed);
+    this.emit(PeerEvent.Failed, err);
   }
 
   _onSignal(data: SimplePeer.SignalData) {
@@ -96,7 +110,7 @@ export class RemotePeer extends Peer {
   }
 
   _onStream(stream: MediaStream) {
-    console.log('RemotePeer onStream', stream);
+    // console.log('RemotePeer onStream', stream);
     this.emit(PeerEvent.MediaStreamAdded, stream);
   }
 
@@ -119,11 +133,18 @@ export class RemotePeer extends Peer {
   }
 
   _onData(data: any) {
-    console.log('RemotePeer onData', JSON.parse(data));
+    this.emit(PeerEvent.ReceivedData, JSON.parse(data));
   }
 
   setStatus(status: PeerConnectionState) {
     this.status = status;
+  }
+
+  sendData(data: DataPacket): void {
+    if (this.status !== PeerConnectionState.Connected) {
+      throw new Error("can't send data unless connected");
+    }
+    this.peer?.send(JSON.stringify(data));
   }
 
   removeTracks() {
@@ -140,13 +161,6 @@ export class RemotePeer extends Peer {
     this.tracks.clear();
     this.audioTracks.clear();
     this.videoTracks.clear();
-  }
-
-  sendData(data: DataPacket): void {
-    if (this.status !== PeerConnectionState.Connected) {
-      throw new Error("can't send data unless connected");
-    }
-    this.peer?.send(JSON.stringify(data));
   }
 
   hangup() {

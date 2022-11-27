@@ -38,6 +38,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
       local: observable,
       peers: observable,
       rooms: observable,
+      presentRoom: observable,
       setProvider: action.bound,
       getRoom: action.bound,
       getRooms: action.bound,
@@ -76,4 +77,5 @@ export type ProtocolEventCallbacks = {
   roomInitial: (room: RoomType) => void;
   roomEntered: (room: RoomType) => void;
   roomLeft: (room: RoomType) => void;
+  peerDataReceived: (peer: Patp, data: DataPacket) => void;
 };

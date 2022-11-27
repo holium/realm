@@ -17,3 +17,4 @@ export type {
 
 export { RoomState } from './types';
 export { PeerConnectionState } from './peer/types';
+export { RoomManagerEvent } from './events';
