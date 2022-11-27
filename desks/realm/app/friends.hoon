@@ -41,12 +41,14 @@
           |=  =ship
           [ship [pinned=%.n tags=*(set cord) status=%fren]]
       =/  following
-        %-  malt
         ^-  (list [ship friend:store])
         =/  ship-list  ~(tap in pals-targets)
         %+  turn  ship-list
           |=  =ship
           [ship [pinned=%.n tags=*(set cord) status=%following]]
+      =^  cards  state  abet:(spin-followers:core following)
+      ~&  cards
+      =/  following  (malt following)
       =/  followers
         %-  malt
         ^-  (list [ship friend:store])
@@ -55,7 +57,7 @@
           |=  =ship
           [ship [pinned=%.n tags=*(set cord) status=%follower]]
       =/  pals-friends  (~(uni by followers) (~(uni by following) mutuals))
-      `this(friends pals-friends)
+      [cards this(friends pals-friends)]
     `this
   ::
   ++  on-save
@@ -122,6 +124,8 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  core  .
+++  abet  [(flop cards) state]
+++  emil  |=(new-cards=(list card) core(cards (weld new-cards cards)))
 ++  action
   |=  =action:store
   ^-  (quip card _state)
@@ -133,6 +137,21 @@
     %yes-fren       (yes-fren src.bowl)
     %bye-fren       (bye-fren src.bowl)
   ==
+::
+++  spin-followers
+  |=  following=(list [ship friend:store])
+  ^-  _core
+  =<  +
+  %^  spin  following
+    core
+  |=  [[=ship =friend:store] core=_core]
+  [[ship friend] (emil-add-fren:core ship)]
+::
+++  emil-add-fren
+  |=  [=ship]
+  ^-  _core
+  =^  cards  state  (add-fren ship)
+  (emil (flop cards))
 ::
 ++  add-fren
   |=  [=ship]
@@ -154,7 +173,15 @@
       status=%following
     ]
   =.  friends.state   (~(put by friends.state) [ship fren])
+  =/  share-contact  `(list card)`[%pass / %agent [ship %contact-push-hook] %poke contact-share+!>([%share our.bowl])]~ :: share our contact info
+  =/  is-public  .^(? %gx (scot %p our.bowl) %contact-store (scot %da now.bowl) /is-public/noun)
+  =?  share-contact  !is-public
+    ^-  (list card)
+    =/  allow-contact  `(list card)`[%pass / %agent [our.bowl %contact-store] %poke contact-update-0+!>([%allow %group ship %''])]~
+    (weld share-contact allow-contact)
   :_  state
+  %+  weld  share-contact
+  ^-  (list card)
   :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%be-fren ~])]  :: Ask new fren to be fren
       [%give %fact [/all ~] friends-reaction+!>([%new-friend ship fren])]      ::  Notify watchers
   ==
