@@ -172,7 +172,6 @@ export class RoomsService extends BaseService {
 
   removeHandlers() {
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-expect-error
       ipcMain.removeHandler(handlerName);
     });
   }

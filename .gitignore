@@ -125,3 +125,6 @@ build
 app/realmlog.txt
 
 app.dev.json
+
+# Storybook
+storybook-static

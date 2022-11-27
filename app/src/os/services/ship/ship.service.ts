@@ -75,7 +75,7 @@ export class ShipService extends BaseService {
   };
 
   private readonly services: { slip?: SlipService } = {};
-  rooms: RoomsService;
+  // rooms: RoomsService;
   wallet: WalletService;
 
   handlers = {
@@ -212,7 +212,7 @@ export class ShipService extends BaseService {
 
     this.subscribe = this.subscribe.bind(this);
     this.services.slip = new SlipService(core);
-    this.rooms = new RoomsService(core);
+    // this.rooms = new RoomsService(core);
     this.wallet = new WalletService(core);
   }
 
@@ -360,7 +360,7 @@ export class ShipService extends BaseService {
       this.state.loader.set('loaded');
 
       this.services.slip?.subscribe();
-      this.rooms?.onLogin(ship);
+      // this.rooms?.onLogin(ship);
       this.wallet?.onLogin(ship);
 
       // return ship state
@@ -383,9 +383,9 @@ export class ShipService extends BaseService {
     return { ship: this.state, models: this.modelSnapshots };
   }
 
-  get roomSnapshot() {
-    return this.rooms?.snapshot;
-  }
+  // get roomSnapshot() {
+  //   return this.rooms?.snapshot;
+  // }
 
   get walletSnapshot() {
     return this.wallet?.snapshot;
@@ -404,7 +404,7 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
-    this.rooms?.onLogout();
+    // this.rooms?.onLogout();
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;

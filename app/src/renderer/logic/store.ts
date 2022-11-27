@@ -24,7 +24,7 @@ import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
-import { LiveRoom } from 'renderer/apps/store';
+// import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
@@ -336,7 +336,7 @@ OSActions.onConnected(
 // Auth events
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
-  LiveRoom.leave();
+  // LiveRoom.leave();
   servicesStore.clearShip();
   coreStore.setLoggedIn(false);
   ShellActions.setBlur(true);
