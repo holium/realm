@@ -673,7 +673,14 @@ export class SpacesService extends BaseService {
     delete theme.id;
     SpacesApi.updateSpace(this.core.conduit!, {
       path: space.path,
-      payload: { theme: snakeify(theme) },
+      payload: {
+        name: space.name,
+        description: space.description,
+        access: space.access,
+        picture: space.picture,
+        color: space.color,
+        theme: snakeify(theme)
+      },
     });
   }
 }
