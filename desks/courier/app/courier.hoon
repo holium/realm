@@ -82,7 +82,7 @@
       %graph-dm-action
         ?-  groups-target
           %1  (on-graph-action:core !<(action:store vase))
-          %2  [(on-graph-action:groups-two vase) state]
+          %2  [(on-graph-action:groups-two !<(action:store vase)) state]
         ==
       %notify-action  (on-notify-action:core !<(action:notify vase))
       %set-groups-target  `[%1 !<(?(%1 %2) vase) +>:state]
@@ -113,6 +113,7 @@
     ?+    path  (on-peek:def path)
     ::
       [%x %devices ~]
+        ~&  "peeking at old groups still"
         ?>  =(our.bowl src.bowl)
         ``notify-view+!>([%devices devices.state])
     ::

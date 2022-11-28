@@ -1,9 +1,56 @@
 /-  notify, c=chat
 /-  *courier
 |%
+++  into-chat-inline-type
+  |=  con=content
+  ?-  -.con
+    %text       text.con
+    %mention    [%ship p=ship.con]
+    %url        [%link p=url.con q=url.con]
+    %code       [%code p=expression.con]
+    %reference  [%break ~] ::TODO actually map this properly
+  ==
 ++  on-graph-action
-  |=  =vase
-  ~
+  |=  [act=action]
+  |^
+  ?-  -.act
+    %send-dm               (send-dm +.act)
+    %read-dm               (read-dm +.act)
+    %create-group-dm       (create-group-dm +.act)
+    %send-group-dm         (send-group-dm +.act)
+    %read-group-dm         (read-group-dm +.act)
+  ==
+  ++  send-dm
+    |=  [=ship p=post]
+    ~&  %send-dm
+    =/  inlines
+      ^-  (list inline:c)
+      (turn contents.p into-chat-inline-type)
+    =/  delta-for-chat   [%add (memo:c ~ author.p time-sent.p [%story [*(list) (snoc inlines [%break ~])]])]
+    =/  diff-for-chat    [[ship time-sent.p] delta-for-chat]
+    ~&  "diff format for %chat agent:"
+    ~&  diff-for-chat
+    :~
+      [%pass / %agent [author.p %chat] %poke dm-action+!>([ship diff-for-chat])]
+    ==
+  ++  read-dm
+    |=  [=ship]
+    ~&  ship
+    ~
+  ++  create-group-dm
+    |=  [ships=(set ship)]
+    ~&  ships
+    ~
+  ++  send-group-dm
+    |=  [=resource =post]
+    ~&  resource
+    ~&  post
+    ~
+  ++  read-group-dm
+    |=  [=resource]
+    ~&  resource
+    ~
+  --
 ++  on-watch
   |=  =path
   ~
@@ -13,6 +60,7 @@
     ?>  =(our.bowl src.bowl)
     ?+  path  !!
       [%x %devices ~]
+        ~&  "peeking devices on groups-two"
     ``notify-view+!>([%devices devices])
       [%x %dms ~]
     :: Get DMs from x/briefs scy

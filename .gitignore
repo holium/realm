@@ -120,3 +120,5 @@ dist
 .env.moon2
 !.env.local-example
 build
+
+sync_app_code.sh
