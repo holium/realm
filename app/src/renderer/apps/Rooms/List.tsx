@@ -20,15 +20,13 @@ import { LiveRoom, useTrayApps } from 'renderer/apps/store';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomsModelType } from 'os/services/tray/rooms.model';
 import { ProviderSelector } from './components/ProviderSelector';
-import { textColor } from 'styled-system';
-import theme from 'renderer/theme';
-export type RoomListProps = {
+export interface RoomListProps {
   theme: ThemeModelType;
   dimensions: {
     height: number;
     width: number;
   };
-};
+}
 export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
   const { dimensions } = props;
   const { ship, theme } = useServices();
@@ -110,21 +108,21 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         {knownRooms.map((room: RoomsModelType, index: number) => {
           return (
             <RoomRow
-              key={`${room!.title}-${index}`}
-              id={room!.id}
-              title={room!.title}
-              provider={room!.provider}
-              present={room!.present}
-              cursors={room!.cursors}
-              creator={room!.creator}
-              access={room!.access}
-              capacity={room!.capacity}
+              key={`${room.title}-${index}`}
+              id={room.id}
+              title={room.title}
+              provider={room.provider}
+              present={room.present}
+              cursors={room.cursors}
+              creator={room.creator}
+              access={room.access}
+              capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (!roomsApp.isRoomValid(room!.id)) {
+                if (!roomsApp.isRoomValid(room.id)) {
                   console.log('invalid room!');
                   // TODO this check doesnt catch bad state
-                } else if (roomsApp.isLiveRoom(room!.id)) {
+                } else if (roomsApp.isLiveRoom(room.id)) {
                   RoomsActions.setView('room');
                 } else if (room.present.includes(ship!.patp)) {
                   RoomsActions.setLiveRoom(toJS(room));
@@ -133,7 +131,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
                   if (
                     // our old room was created by us
                     roomsApp.liveRoom! &&
-                    roomsApp.isCreator(ship!.patp!, roomsApp.liveRoom.id)
+                    roomsApp.isCreator(ship!.patp, roomsApp.liveRoom.id)
                   ) {
                     // conditionally delete old room
                     RoomsActions.deleteRoom(roomsApp.liveRoom.id);

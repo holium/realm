@@ -11,9 +11,8 @@ import {
   useRef,
   ChangeEventHandler,
 } from 'react';
-import { rgba, darken, lighten } from 'polished';
+import { lighten, darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 import {
   Flex,
   IconButton,
@@ -24,6 +23,7 @@ import {
   Grid,
   Box,
   Spinner,
+  Tooltip,
 } from 'renderer/components';
 import { ThemeModelType } from 'os/services/theme.model';
 import { createDmForm } from './forms/chatForm';
@@ -37,7 +37,7 @@ import {
 } from 'os/services/ship/models/courier';
 import { ChatLog } from './components/ChatLog';
 import { ShipActions } from 'renderer/logic/actions/ship';
-import S3Client from 'renderer/logic/s3/S3Client';
+import { FileUploadParams } from 'os/services/ship/models/ship';
 import {
   FileUploadSource,
   useFileUpload,
@@ -46,7 +46,7 @@ import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
 
-type IProps = {
+interface IProps {
   theme: ThemeModelType;
   height: number;
   selectedChat: DMPreviewType;
@@ -58,12 +58,13 @@ type IProps = {
   };
   onSend: (message: any) => void;
   setSelectedChat: (chat: any) => void;
-};
+}
 
 export const ChatView: FC<IProps> = observer((props: IProps) => {
   const submitRef = useRef(null);
   const chatInputRef = useRef(null);
   const inputRef = useRef(null);
+  const containerRef = useRef(null);
   const { selectedChat, setSelectedChat, height, theme, onSend } = props;
   const { iconColor, dockColor, textColor, windowColor, mode } = props.theme;
   const [showJumpBtn, setShowJumpBtn] = useState(false);
@@ -118,16 +119,34 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     setLoading(false);
   };
 
+  const uploadFile = (params: FileUploadParams) => {
+    ShipActions.uploadFile(params)
+      .then((url) => {
+        setIsSending(true);
+        const content = [{ url }];
+        SoundActions.playDMSend();
+        DmActions.sendDm(selectedChat.path, content)
+          .then((res) => {
+            setIsSending(false);
+          })
+          .catch((err) => {
+            console.error('dm send error', err);
+            setIsSending(false);
+          });
+      })
+      .catch((e) => console.error(e));
+  };
+
   const handleFileChange = (event: ChangeEventHandler<HTMLInputElement>) => {
-    // @ts-ignore
+    // @ts-expect-error
     const fileObj = event.target.files && event.target.files[0];
     if (!fileObj) {
       return;
     }
     console.log('fileObj is', fileObj);
-    // @ts-ignore
+    // @ts-expect-error
     event.target.value = null;
-    // @ts-ignore
+    // @ts-expect-error
     console.log(event.target.files);
     console.log(fileObj);
     console.log(fileObj.name);
@@ -137,18 +156,18 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     if (event.keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
       if (dmForm.computed.isValid) {
-        // @ts-ignore 2
+        // @ts-expect-error 2
         submitRef.current.focus();
-        // @ts-ignore
+        // @ts-expect-error
         submitRef.current.click();
         const formData = dmForm.actions.submit();
         const dmMessageContent = formData['dm-message'];
         setIsSending(true);
 
         SoundActions.playDMSend();
-        // @ts-ignore
+        // @ts-expect-error
         chatInputRef.current.value = '';
-        // @ts-ignore
+        // @ts-expect-error
         chatInputRef.current.focus();
 
         DmActions.sendDm(selectedChat.path, dmMessageContent)
@@ -161,7 +180,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           });
       }
     } else if (event.keyCode === 13 && event.shiftKey) {
-      // @ts-ignore
+      // @ts-expect-error
       chatInputRef.current.rows = chatInputRef.current.rows + 1;
     }
   };
@@ -293,32 +312,47 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             }}
           >
             <Flex flex={1} pr={3} alignItems="center">
+              <div ref={containerRef} style={{ display: 'none' }}></div>
               <input
                 style={{ display: 'none' }}
                 ref={inputRef}
                 type="file"
                 accept="image/*,.txt,.pdf"
-                // @ts-ignore
+                // @ts-expect-error
                 onChange={handleFileChange}
               />
-              <IconButton
-                style={{ cursor: 'none' }}
-                color={iconColor}
-                customBg={dockColor}
-                ml={3}
-                mr={3}
-                size={28}
-                onClick={(evt: any) => {
-                  evt.stopPropagation();
-                  // @ts-ignore
-                  promptUpload((err) => {
-                    console.log(err);
-                  }).then((url) => uploadSuccess(url, 'direct'));
-                  // TODO add file uploading
-                }}
+              <Tooltip
+                show={!canUpload}
+                placement="top"
+                content={'No image store set up'}
+                id={`upload-tooltip`}
               >
-                <Icons name="Attachment" />
-              </IconButton>
+                <IconButton
+                  style={{ cursor: 'none' }}
+                  color={canUpload ? iconColor : lighten(0.5, iconColor)}
+                  customBg={dockColor}
+                  ml={3}
+                  mr={3}
+                  size={28}
+                  onClick={(evt: any) => {
+                    evt.stopPropagation();
+                    if (!canUpload) return;
+                    if (!containerRef.current) return;
+                    promptUpload(containerRef.current)
+                      .then((file: File) => {
+                        const params: FileUploadParams = {
+                          source: 'file',
+                          content: file.path,
+                          contentType: file.type,
+                        };
+                        uploadFile(params);
+                      })
+                      .catch((e) => console.error(e));
+                  }}
+                >
+                  <Icons name="Attachment" />
+                </IconButton>
+              </Tooltip>
               <Input
                 as="textarea"
                 ref={chatInputRef}
@@ -352,6 +386,46 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 onChange={(e: any) =>
                   dmMessage.actions.onChange(e.target.value)
                 }
+                onPaste={async (evt) => {
+                  try {
+                    if (!canUpload) return;
+                    const fileReader = new FileReader();
+                    const clipboardItems = await navigator.clipboard.read();
+                    if (!clipboardItems || clipboardItems.length === 0) return;
+                    const clipboardItem = clipboardItems[0];
+                    if (
+                      !clipboardItem.types ||
+                      clipboardItem.types.length === 0
+                    )
+                      return;
+                    const type = clipboardItem.types[0];
+                    if (type.startsWith('image/')) {
+                      evt.preventDefault();
+                      evt.stopPropagation();
+                      const blob = await clipboardItem.getType(type);
+                      // we can now use blob here
+                      // const content = await blob.text();
+                      fileReader.addEventListener('loadend', () => {
+                        // reader.result contains the contents of blob as a data url
+                        const dataUrl = fileReader.result;
+                        if (dataUrl && typeof dataUrl === 'string') {
+                          const base64 = dataUrl.substring(
+                            dataUrl.indexOf(',') + 1
+                          );
+                          const params: FileUploadParams = {
+                            source: 'buffer',
+                            content: base64,
+                            contentType: type,
+                          };
+                          uploadFile(params);
+                        }
+                      });
+                      fileReader.readAsDataURL(blob);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
                 onFocus={() => dmMessage.actions.onFocus()}
                 onBlur={() => dmMessage.actions.onBlur()}
                 wrapperStyle={{

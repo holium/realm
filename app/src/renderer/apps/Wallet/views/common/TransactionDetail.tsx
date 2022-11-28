@@ -15,7 +15,7 @@ import {
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { EthWalletType } from 'os/services/tray/wallet.model';
 import {
   shortened,
   fullMonthNames,
@@ -61,32 +61,32 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  let transaction = walletApp.ethereum.transactions.get(
-    walletApp.currentTransaction!
-  )!;
-  console.log(transaction);
+  const transaction = (walletApp.currentWallet! as EthWalletType).transactions
+    .get(walletApp.currentStore.network)
+    .get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();
-  let themeData = getBaseTheme(theme.currentTheme);
+  const themeData = getBaseTheme(theme.currentTheme);
 
   const [notes, setNotes] = useState(transaction.notes);
   const [loading, setLoading] = useState(false);
 
-  let goBack = () => WalletActions.setView(walletApp.returnView! as WalletView);
-  let saveNotes = () => {
+  const saveNotes = () => {
     setLoading(true);
     WalletActions.saveTransactionNotes(notes);
     setLoading(false);
   };
 
-  let wasSent = transaction.type === 'sent';
-  let isEth = transaction.network === 'ethereum';
-  let themDisplay =
+  const wasSent = transaction.type === 'sent';
+  const isEth = transaction.network === 'ethereum';
+  const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  let initiated = new Date(transaction.initiatedAt);
-  let ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
-  let btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
-  let amountDisplay = isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`;
+  const completed = new Date(transaction.completedAt!);
+  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
+  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
+  const amountDisplay = isEth
+    ? `${ethAmount.eth}` /* ETH` */
+    : `${btcAmount.btc} BTC`;
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
@@ -135,8 +135,14 @@ export const TransactionDetail: FC = observer(() => {
           >
             $
             {isEth
-              ? convertEthAmountToUsd(ethAmount)
-              : convertBtcAmountToUsd(btcAmount)}
+              ? convertEthAmountToUsd(
+                  ethAmount,
+                  walletApp.ethereum.conversions.usd
+                )
+              : convertBtcAmountToUsd(
+                  btcAmount,
+                  walletApp.bitcoin.conversions.usd
+                )}
           </Text>
         </Flex>
       </Flex>
@@ -164,7 +170,7 @@ export const TransactionDetail: FC = observer(() => {
               }
               simple={true}
               size={20}
-              patp={transaction.theirPatp!}
+              patp={transaction.theirPatp}
             />
           )}
           <Text variant="body" fontSize={1} ml={2}>
@@ -186,9 +192,9 @@ export const TransactionDetail: FC = observer(() => {
           DATE
         </Text>
         <Text variant="body" fontSize={1}>
-          {fullMonthNames[initiated.getMonth()]} {initiated.getDate()}{' '}
-          {initiated.getFullYear() !== new Date().getFullYear() &&
-            `, ${initiated.getFullYear()}`}
+          {fullMonthNames[completed.getMonth()]} {completed.getDate()}{' '}
+          {completed.getFullYear() !== new Date().getFullYear() &&
+            `, ${completed.getFullYear()}`}
         </Text>
       </Flex>
       <Flex
@@ -226,7 +232,7 @@ export const TransactionDetail: FC = observer(() => {
         Notes
       </Text>
       <Flex width="100%" flexDirection="column" justifyContent="center">
-        {/* @ts-ignore */}
+        {/* @ts-expect-error */}
         <TextArea
           theme={themeData}
           desktopTheme={theme.currentTheme}
@@ -245,7 +251,12 @@ export const TransactionDetail: FC = observer(() => {
           </Button>
         </Flex>
       </Flex>
-      <Flex position="absolute" top="542px" zIndex={999} onClick={goBack}>
+      <Flex
+        position="absolute"
+        top="582px"
+        zIndex={999}
+        onClick={async () => await WalletActions.navigateBack()}
+      >
         <Icons
           name="ArrowLeftLine"
           size={2}

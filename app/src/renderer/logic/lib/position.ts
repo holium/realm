@@ -31,7 +31,7 @@ export const calculateAnchorPoint = (
       dimensions.width / 2;
     style = { ...style, left };
   }
-  let bottom = buttonEvent.srcElement.offsetHeight + anchorOffset.y;
+  const bottom = buttonEvent.srcElement.offsetHeight + anchorOffset.y;
   style = { ...style, bottom };
   return style;
 };
@@ -48,7 +48,7 @@ export const calculateAnchorPointById = (
     width: buttonWidth,
     height,
   } = el?.getBoundingClientRect();
-  const buttonTop = el.offsetHeight! + height;
+  const buttonTop = el.offsetHeight + height;
   let style: any = {};
 
   let left = null;
@@ -67,7 +67,7 @@ export const calculateAnchorPointById = (
     left = Math.round(buttonLeft - anchorOffset.x - dimensions.width / 2);
     style = { ...style, left };
   }
-  let bottom = Math.round(buttonTop - height + anchorOffset.y);
+  const bottom = Math.round(buttonTop - height + anchorOffset.y);
   style = { ...style, bottom };
   return style;
 };
@@ -82,7 +82,7 @@ export const calculatePopoverAnchorById = (
 ) => {
   const el = document.getElementById(popoverId)!;
   const { dimensions, anchorOffset } = config;
-  const divTop = el.offsetHeight!;
+  const divTop = el.offsetHeight;
 
   const {
     left: divLeft,
@@ -90,7 +90,7 @@ export const calculatePopoverAnchorById = (
     height: divHeight,
   } = el?.getBoundingClientRect();
 
-  let left = Math.round(divLeft - dimensions.width + divWidth);
+  const left = Math.round(divLeft - dimensions.width + divWidth);
   let coords: any = {
     top: divTop + divHeight + anchorOffset.y,
     left: left + anchorOffset.x,

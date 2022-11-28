@@ -1,9 +1,8 @@
-import { FC, useRef, useEffect, useState } from 'react';
+import { FC } from 'react';
 import styled from 'styled-components';
 
-import { isEqual } from 'lodash';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Flex, Label, Text } from 'renderer/components';
+import { Flex, Text } from 'renderer/components';
 import { Notification } from './Notification';
 import { useTrayApps } from 'renderer/apps/store';
 
@@ -102,7 +101,7 @@ export const NotificationList: FC<INotificationList> = (
         style={{
           display: 'flex',
           flexDirection: 'column',
-        }} //To put endMessage and loader to the top.
+        }} // To put endMessage and loader to the top.
         // hasMore={!listEnd}
         hasMore={true}
         loader={<div>Loading</div>}

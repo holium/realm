@@ -15,12 +15,6 @@
     "build": "preconstruct build",
     "build:prod": "preconstruct build"
   },
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
   "preconstruct": {
     "globals": {
       "mobx": "mobx"

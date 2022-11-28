@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button, Label, Input, Icons } from 'renderer/components';
 import { useField, useForm } from 'mobx-easy-form';
-import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
+import { NetworkType } from 'os/services/tray/wallet.model';
 import { FieldSet } from 'renderer/components/Input/FormControl/Field';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
@@ -35,7 +35,7 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
 
     const nickname = useField({
       id: 'nickname',
-      form: form,
+      form,
       initialValue: '',
       validate: (nickname: string) => {
         return nickname.length
@@ -50,9 +50,8 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
           Create Wallet
         </Text>
         <Text mt={3} variant="body">
-          A new{' '}
-          {props.network === NetworkType.ethereum ? 'ethererum' : 'bitcoin'}{' '}
-          wallet will be created. Give it a memorable nickname.
+          A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} wallet
+          will be created. Give it a memorable nickname.
         </Text>
         <FieldSet mt={8}>
           <Label required={true}>Nickname</Label>
@@ -75,9 +74,9 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
         </FieldSet>
         <Flex
           position="absolute"
-          top="542px"
+          top="582px"
           zIndex={999}
-          onClick={() => WalletActions.setView(WalletView.ETH_LIST)}
+          onClick={async () => await WalletActions.navigateBack()}
         >
           <Icons
             name="ArrowLeftLine"

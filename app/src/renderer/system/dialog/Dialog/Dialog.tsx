@@ -8,7 +8,7 @@ import {
   IconButton,
   Icons,
 } from 'renderer/components';
-import { dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 
@@ -31,17 +31,26 @@ const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
 
 export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
   const { window } = props;
-  const { theme } = useServices();
+  const { theme, shell } = useServices();
   const elementRef = useRef(null);
 
   const [workflowState, setWorkflowState] = useState<any>({ loading: false });
   const [validated, setValidated] = useState<boolean>(false);
 
-  const ViewComponent: FC<any> | undefined = useMemo(
-    () => dialogRenderers[window.id].component!,
-    [window.id]
-  );
+  const ViewComponent: FC<any> | undefined = useMemo(() => {
+    const dialogRenderer = dialogRenderers[window.id];
+    const dialogConfig: DialogConfig =
+      dialogRenderer instanceof Function
+        ? dialogRenderer(shell.dialogProps.toJSON())
+        : dialogRenderer;
+    return dialogConfig.component!;
+  }, [window.id, shell.dialogProps.toJSON()]);
 
+  const dialogRenderer = dialogRenderers[window.id];
+  const dialogConfig: DialogConfig =
+    dialogRenderer instanceof Function
+      ? dialogRenderer(shell.dialogProps.toJSON())
+      : dialogRenderer;
   const {
     workflow,
     customNext,
@@ -51,7 +60,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
     hasPrevious,
     onPrevious,
     isValidated,
-  } = dialogRenderers[window.id];
+  } = dialogConfig;
   useEffect(() => {
     if (firstStep) {
       setValidated(false);
@@ -91,7 +100,7 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
           width={customNext ? 30 : undefined}
         >
           <Flex alignItems="center" justifyContent="flex-start">
-            {onPrevious && hasPrevious && hasPrevious() !== false && (
+            {onPrevious && hasPrevious && hasPrevious() && (
               <IconButton
                 customBg={theme.currentTheme.windowColor}
                 onClick={() => {

@@ -1,7 +1,6 @@
 import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 
-import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { Flex } from 'renderer/components';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
@@ -10,7 +9,6 @@ import {
   HoliumAnimated,
   SplashWordMark,
 } from 'renderer/components/Icons/holium';
-import { BaseDialogProps } from '../dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { SoundActions } from 'renderer/logic/actions/sound';
 

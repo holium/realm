@@ -1,5 +1,3 @@
-import { average, prominent } from 'color.js';
-import { ThemeModelType } from 'os/services/theme.model';
 // const colors = ['#005050', '#000000', '#505050', '#000050', '#a05050'];
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
@@ -16,34 +14,37 @@ export const DesktopActions = {
     //   sample: 80,
     //   format: 'hex',
     // });
-    return window.electron.os.desktop.changeWallpaper(spacePath, theme);
+    return await window.electron.os.desktop.changeWallpaper(spacePath, theme);
   },
   setActive: async (spacePath: string, app: any) => {
-    return window.electron.os.desktop.setActive(spacePath, app);
+    return await window.electron.os.desktop.setActive(spacePath, app);
   },
   setHomePane: async (isHome: boolean) => {
-    return window.electron.os.desktop.setHomePane(isHome);
+    return await window.electron.os.desktop.setHomePane(isHome);
   },
   setMouseColor: async (mouseColor: string) => {
-    return window.electron.os.desktop.setMouseColor(mouseColor);
+    return await window.electron.os.desktop.setMouseColor(mouseColor);
   },
   setAppDimensions: async (
     windowId: any,
     dimensions: { width: number; height: number; x: number; y: number }
   ) => {
-    return window.electron.os.desktop.setAppDimensions(windowId, dimensions);
+    return await window.electron.os.desktop.setAppDimensions(
+      windowId,
+      dimensions
+    );
   },
-  setPartitionCookies: (partition: string, cookies: any) => {
-    return window.electron.app.setPartitionCookies(partition, cookies);
+  setPartitionCookies: async (partition: string, cookies: any) => {
+    return await window.electron.app.setPartitionCookies(partition, cookies);
   },
   openAppWindow: async (spacePath: string, app: any) => {
-    return window.electron.os.desktop.openAppWindow(spacePath, app);
+    return await window.electron.os.desktop.openAppWindow(spacePath, app);
   },
   closeAppWindow: async (spacePath: string, app: any) => {
-    return window.electron.os.desktop.closeAppWindow(spacePath, app);
+    return await window.electron.os.desktop.closeAppWindow(spacePath, app);
   },
   toggleDevTools: async () => {
-    return window.electron.app.toggleDevTools();
+    return await window.electron.app.toggleDevTools();
   },
 };
 

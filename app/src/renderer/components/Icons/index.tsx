@@ -47,7 +47,7 @@ const SvgComponent = forwardRef<
       {...props}
     >
       {title ? <title id={titleId}>{title}</title> : null}
-      {/* @ts-ignore */}
+      {/* @ts-expect-error */}
       {paths[name]}
     </motion.svg>
   );

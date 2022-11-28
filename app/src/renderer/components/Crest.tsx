@@ -1,12 +1,21 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import CrestSymbol from './Icons/crest';
-import { background } from 'styled-system';
+
+const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+export const isValidHexColor = (hex: string) => {
+  return hexRegex.test(`${hex}`);
+};
+const urlRegex =
+  /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
+export const isValidImageUrl = (url: string) => {
+  return urlRegex.test(url);
+};
 
 const crestSize = {
   xsm: 16,
   sm: 32,
+  sm2: 40,
   md: 64,
   md2: 80,
   lg: 128,
@@ -15,19 +24,20 @@ const crestSize = {
 
 const crestRadius = {
   xsm: 2,
-  sm: 6,
-  md: 12,
+  sm: 4,
+  sm2: 6,
+  md: 6,
   md2: 12,
   lg: 12,
   xlg: 16,
 };
 
-type CrestStyleProps = {
+interface CrestStyleProps {
   height: number;
   width: number;
   background?: string;
   borderRadius: number;
-};
+}
 
 export const ColorCrest = styled(motion.div)<CrestStyleProps>`
   height: ${(p) => p.height}px;

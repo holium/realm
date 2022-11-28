@@ -1,10 +1,10 @@
 import { createGlobalStyle, css } from 'styled-components';
 import { ThemeType } from './theme';
 
-type StyleProps = {
+interface StyleProps {
   theme: ThemeType;
   blur: boolean;
-};
+}
 
 export const GlobalStyle = createGlobalStyle<StyleProps>`
   * {

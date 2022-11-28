@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { Grid, Flex, IconButton, Icons, Text } from 'renderer/components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
@@ -7,13 +7,13 @@ import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { ShellActions } from 'renderer/logic/actions/shell';
 
-type SpacesProps = {
+interface SpacesProps {
   theme: any;
   dimensions: {
     height: number;
     width: number;
   };
-};
+}
 
 export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
   const { ship, theme, spaces } = useServices();
@@ -88,9 +88,11 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
         overflowY="hidden"
       >
         <SpacesList
-          selected={spaces.selected!}
+          selected={spaces.selected}
           spaces={spaces.spacesList}
-          onSelect={(path: string) => SpacesActions.selectSpace(path)}
+          onSelect={async (path: string) =>
+            await SpacesActions.selectSpace(path)
+          }
         />
       </Flex>
       <Grid.Row expand noGutter></Grid.Row>
@@ -109,7 +111,9 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
           colorTheme={windowColor}
           selected={`/${ship?.patp}/our` === spaces.selected?.path}
           ship={ship!}
-          onSelect={(path: string) => SpacesActions.selectSpace(path)}
+          onSelect={async (path: string) =>
+            await SpacesActions.selectSpace(path)
+          }
         />
       </Flex>
     </Grid.Column>

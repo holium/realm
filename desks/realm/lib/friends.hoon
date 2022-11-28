@@ -165,7 +165,7 @@
     %-  pairs:enjs:format
     :~  ['pinned' b+pinned.friend]
         ['tags' [%a (turn ~(tap in tags.friend) |=(tag=cord s+tag))]]
-        ['mutual' b+mutual.friend]
+        ['status' s+status.friend]
     ==
   ::
   --

@@ -1,17 +1,7 @@
 // import { osState, shipState } from './../store';
-import {
-  types,
-  applySnapshot,
-  Instance,
-  clone,
-  getSnapshot,
-} from 'mobx-state-tree';
-import { toJS } from 'mobx';
-// import { setPartitionCookies } from './api';
+import { types, applySnapshot, Instance } from 'mobx-state-tree';
 import { getInitialWindowDimensions } from './lib/window-manager';
-import { NativeAppList } from 'renderer/apps';
-import { rgba } from 'polished';
-import { string } from 'yup';
+import { Glob } from '../ship/models/docket';
 
 // const Grid = types.model({
 //   width: types.enumeration(['1', '2', '3']),
@@ -31,6 +21,7 @@ const Window = types
   .model('WindowModel', {
     id: types.identifier,
     glob: types.optional(types.boolean, false),
+    href: types.maybeNull(Glob),
     title: types.optional(types.string, ''),
     zIndex: types.number,
     type: types.optional(
@@ -46,10 +37,11 @@ const Window = types
   }));
 
 export type WindowModelType = Instance<typeof Window>;
-export type WindowModelProps = {
+export interface WindowModelProps {
   id: string;
   title?: string;
   glob?: boolean;
+  href?: { site: string; glob: any };
   zIndex: number;
   type: 'urbit' | 'web' | 'native' | 'dialog';
   dimensions: {
@@ -58,7 +50,7 @@ export type WindowModelProps = {
     width: number;
     height: number;
   };
-};
+}
 
 export const DesktopStore = types
   .model('DesktopStore', {
@@ -125,13 +117,19 @@ export const DesktopStore = types
       isFullscreen: boolean
     ) {
       let glob = app.glob;
+      let href = app.href;
+
       if (app.href) {
-        glob = app.href.glob ? true : false;
+        glob = !!app.href.glob;
+      }
+      if (app.type === 'web') {
+        href = { site: app.web.url };
       }
       const newWindow = Window.create({
         id: app.id,
         title: app.title,
         glob,
+        href,
         zIndex: self.windows.size + 1,
         type: app.type,
         dimensions: getInitialWindowDimensions(

@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 import { AppModelType } from 'os/services/ship/models/docket';
 import { nativeApps, NativeAppType } from '../../../../renderer/apps';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';
@@ -84,6 +83,14 @@ export const getCenteredDimensions = (
         ? app.dimensions.height
         : defaultAppDimensions.height,
     };
+  } else if (app.type === 'web' && app.web.dimensions) {
+    const defaultXY = getCenteredXY(app.web.dimensions, desktopDimensions);
+    return {
+      x: defaultXY.x,
+      y: defaultXY.y,
+      width: app.web.dimensions.width,
+      height: app.web.dimensions.height,
+    };
   } else {
     const fullDims = getFullscreenDimensions(desktopDimensions, true);
     return {
@@ -129,7 +136,6 @@ export const getInitialWindowDimensions = (
       const nativeApp: NativeAppType = app;
       const nativeConfig = nativeApps[app.id];
       if (nativeConfig.native?.openFullscreen) {
-        console.log('nativeApp window size', nativeApp);
         dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
         break;
       }

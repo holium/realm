@@ -25,5 +25,5 @@
     "noImplicitReturns": false,
     "noImplicitThis": false
   },
-  "include": ["./src"]
+  "include": ["./src", "vite.config.ts"]
 }

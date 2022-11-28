@@ -1,10 +1,10 @@
-import { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useField, useForm } from 'mobx-easy-form';
 import * as yup from 'yup';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { TwitterPicker, SwatchesPicker } from 'react-color';
+import { TwitterPicker } from 'react-color';
 
 import {
   Grid,
@@ -13,7 +13,6 @@ import {
   Input,
   Label,
   FormControl,
-  FileUpload,
   Icons,
   Box,
   Flex,
@@ -84,7 +83,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
         if (profileForm.computed.isDirty) {
           setLoading(true);
           try {
-            let profileData = {
+            const profileData = {
               color: values.color,
               nickname: values.nickname,
               avatar: values.avatar,
@@ -155,10 +154,10 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
       const domNode = ReactDOM.findDOMNode(colorPickerRef.current);
       const pickerNode = document.getElementById('signup-color-tile-popover');
       const isVisible = pickerNode
-        ? pickerNode!.getAttribute('data-is-open') === 'true'
+        ? pickerNode.getAttribute('data-is-open') === 'true'
         : false; // get if the picker is visible currently
       if (!domNode || !domNode.contains(event.target)) {
-        if ('signup-color-tile' === event.target.id) {
+        if (event.target.id === 'signup-color-tile') {
           return;
         }
         // You are clicking outside
@@ -327,7 +326,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                         error={
                           avatar.computed.isDirty &&
                           avatar.computed.ifWasEverBlurredThenError
-                          }
+                        }
                         onChange={(e: any) =>
                           avatar.actions.onChange(e.target.value)
                         }
@@ -346,7 +345,7 @@ export const ProfileSetup: FC<BaseDialogProps> = observer(
                       error={
                         nickname.computed.isDirty &&
                         nickname.computed.ifWasEverBlurredThenError
-                        }
+                      }
                       onChange={(e: any) =>
                         nickname.actions.onChange(e.target.value)
                       }

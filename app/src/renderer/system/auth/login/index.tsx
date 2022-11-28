@@ -2,7 +2,6 @@ import { useRef, FC, useEffect, useState } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { toJS } from 'mobx';
 import {
   Flex,
   Box,
@@ -25,15 +24,16 @@ import Portal from 'renderer/system/dialog/Portal';
 import { OSActions } from 'renderer/logic/actions/os';
 import { ConduitState } from '@holium/conduit/src/types';
 
-type LoginProps = {
+interface LoginProps {
   addShip: () => void;
-};
+}
 
 export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const { addShip } = props;
   const { identity, theme } = useServices();
   const { auth } = identity;
   const [hasFailed, setHasFailed] = useState(false);
+  const [isStale, setIsStale] = useState(false);
   const passwordRef = useRef(null);
   const wrapperRef = useRef(null);
   const submitRef = useRef(null);
@@ -74,6 +74,19 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
     }
   }, [pendingShip]);
 
+  const login = async () => {
+    let loggedIn = await AuthActions.login(
+      pendingShip!.patp,
+      // @ts-ignore
+      passwordRef!.current!.value
+    );
+    if (!loggedIn) {
+      // @ts-expect-error
+      submitRef.current.blur();
+      setIncorrectPassword(true);
+    }
+  };
+
   const submitPassword = (event: any) => {
     if (event.keyCode === 13) {
       // @ts-expect-error typescript...
@@ -87,17 +100,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
   const clickSubmit = async (event: any) => {
     event.stopPropagation();
     setHasFailed(false);
-
-    let loggedIn = await AuthActions.login(
-      pendingShip!.patp,
-      // @ts-ignore
-      passwordRef!.current!.value
-    );
-    if (!loggedIn) {
-      // @ts-expect-error
-      submitRef.current.blur();
-      setIncorrectPassword(true);
-    }
+    login();
   };
 
   let colorProps = null;
@@ -260,7 +263,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                             luminosity={theme.currentTheme.mode}
                             size={24}
                             canFocus
-                            onClick={(evt: any) => clickSubmit(evt)}
+                            onClick={async (evt: any) => await clickSubmit(evt)}
                           >
                             <Icons name="ArrowRightLine" />
                           </IconButton>
@@ -273,6 +276,7 @@ export const Login: FC<LoginProps> = observer((props: LoginProps) => {
                     style={{ height: 15, fontSize: 14 }}
                     textShadow="0.5px 0.5px #080000"
                   >
+                    {isStale && 'Stale connection. Refreshing token...'}
                     {hasFailed && 'Connection to your ship has been refused.'}
                     {incorrectPassword && 'Incorrect password.'}
                   </FormControl.Error>

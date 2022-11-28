@@ -13,13 +13,19 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import axios from 'axios';
+import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
+
+export type ShipCredentials = {
+  // needed to refresh cookie when stale (403)
+  code: string;
+};
 
 /**
  * AuthService
  */
 export class AuthService extends BaseService {
   private db: Store<AuthStoreType>;
-  private state: AuthStoreType;
+  private readonly state: AuthStoreType;
 
   handlers = {
     'realm.auth.add-ship': this.addShip,
@@ -36,26 +42,30 @@ export class AuthService extends BaseService {
   };
 
   static preload = {
-    login: (ship: string, password: string) =>
-      ipcRenderer.invoke('realm.auth.login', ship, password),
-    logout: (ship: string) => ipcRenderer.invoke('realm.auth.logout', ship),
-    setFirstTime: () => ipcRenderer.invoke('realm.auth.set-first-time'),
-    cancelLogin: () => ipcRenderer.invoke('realm.auth.cancel-login'),
-    setSelected: (ship: string) =>
-      ipcRenderer.invoke('realm.auth.set-selected', ship),
-    setOrder: (order: any[]) =>
-      ipcRenderer.invoke('realm.auth.set-order', order),
-    addShip: (newShip: { ship: string; url: string; code: string }) =>
-      ipcRenderer.invoke('realm.auth.add-ship', newShip),
-    getShips: () => ipcRenderer.invoke('realm.auth.get-ships'),
-    removeShip: (ship: string) =>
-      ipcRenderer.invoke('realm.auth.remove-ship', ship),
-    setMnemonic: (mnemonic: string) =>
-      ipcRenderer.invoke('realm.auth.set-mnemonic', mnemonic),
-    setShipProfile: (
+    login: async (ship: string, password: string) =>
+      await ipcRenderer.invoke('realm.auth.login', ship, password),
+    logout: async (ship: string) =>
+      await ipcRenderer.invoke('realm.auth.logout', ship),
+    refresh: async () => await ipcRenderer.invoke('realm.auth.refresh'),
+    setFirstTime: async () =>
+      await ipcRenderer.invoke('realm.auth.set-first-time'),
+    cancelLogin: async () =>
+      await ipcRenderer.invoke('realm.auth.cancel-login'),
+    setSelected: async (ship: string) =>
+      await ipcRenderer.invoke('realm.auth.set-selected', ship),
+    setOrder: async (order: any[]) =>
+      await ipcRenderer.invoke('realm.auth.set-order', order),
+    addShip: async (newShip: { ship: string; url: string; code: string }) =>
+      await ipcRenderer.invoke('realm.auth.add-ship', newShip),
+    getShips: async () => await ipcRenderer.invoke('realm.auth.get-ships'),
+    removeShip: async (ship: string) =>
+      await ipcRenderer.invoke('realm.auth.remove-ship', ship),
+    setMnemonic: async (mnemonic: string) =>
+      await ipcRenderer.invoke('realm.auth.set-mnemonic', mnemonic),
+    setShipProfile: async (
       patp: string,
       profile: { color: string; nickname: string; avatar: string }
-    ) => ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
+    ) => await ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -66,10 +76,10 @@ export class AuthService extends BaseService {
       defaults: AuthStore.create({ firstTime: true }),
     });
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
-    let persistedState: AuthStoreType = this.db.store;
+    const persistedState: AuthStoreType = this.db.store;
     this.state = AuthStore.create(castToSnapshot(persistedState));
 
     onSnapshot(this.state, (snapshot) => {
@@ -85,6 +95,10 @@ export class AuthService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
+  }
+
+  get currentShip() {
+    return this.state.currentShip;
   }
 
   get loggedIn() {
@@ -119,13 +133,6 @@ export class AuthService extends BaseService {
     this.state.setFirstTime();
   }
 
-  getCredentials(ship: string, password: string) {
-    const authShip = this.state.ships.get(`auth${ship}`)!;
-    let url = authShip.url;
-    let cookie = authShip.cookie || '';
-    return { url, cookie };
-  }
-
   getShip(ship: string): AuthShipType {
     return this.db.get(`ships.auth${ship}`);
   }
@@ -135,7 +142,7 @@ export class AuthService extends BaseService {
     patp: string,
     profile: { color: string; nickname: string; avatar: string }
   ) {
-    let ship = this.state.ships.get(`auth${patp}`)!;
+    const ship = this.state.ships.get(`auth${patp}`)!;
     if (!ship) return;
     this.state.setShipProfile(
       ship.id,
@@ -145,13 +152,55 @@ export class AuthService extends BaseService {
     );
   }
 
-  async login(_event: any, ship: string, password: string): Promise<boolean> {
-    let shipId = `auth${ship}`;
+  storeCredentials(
+    patp: string,
+    secretKey: string,
+    credentials: ShipCredentials
+  ): ShipCredentials {
+    // console.log('storeCredentials => %o', { patp, secretKey, credentials });
+    const storeParams = {
+      name: 'credentials',
+      cwd: `realm.${patp}`,
+      secretKey: secretKey,
+      accessPropertiesByDotNotation: true,
+    };
+    // const db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store<ShipCredentials>(storeParams)
+    //     : new EncryptedStore<ShipCredentials>(storeParams);
+    const db = new Store<ShipCredentials>(storeParams);
+    db.store = credentials;
+    return credentials;
+  }
+
+  readCredentials(patp: string, secretKey: string): ShipCredentials {
+    // console.log('readCredentials => %o', { patp, secretKey });
+    const storeParams = {
+      name: 'credentials',
+      cwd: `realm.${patp}`,
+      secretKey: secretKey,
+      accessPropertiesByDotNotation: true,
+    };
+    // const db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store<ShipCredentials>(storeParams)
+    //     : new EncryptedStore<ShipCredentials>(storeParams);
+    const db = new Store<ShipCredentials>(storeParams);
+    return db.store;
+  }
+
+  async login(_event: any, patp: string, password: string): Promise<boolean> {
+    let shipId = `auth${patp}`;
     this.state.setLoader('loading');
 
-    let passwordHash = this.state.getPasswordHash(shipId);
-    let passwordCorrect = await bcrypt.compare(password, passwordHash);
-    this.core.sendLog(`passwordHash: ${passwordHash}`);
+    let ship = this.state.ships.get(`auth${patp}`)!;
+    if (!ship) return false;
+
+    if (ship.passwordHash === null) {
+      throw new Error('login: passwordHash is null');
+    }
+    let passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
+    this.core.sendLog(`passwordHash: ${ship.passwordHash}`);
     this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
 
     if (!passwordCorrect) {
@@ -159,8 +208,8 @@ export class AuthService extends BaseService {
       this.state.setLoader('error');
       return false;
     }
-    this.core.sendLog(`ship: ${ship}`);
-    this.core.passwords.setPassword(ship, password);
+    this.core.sendLog(`ship: ${patp}`);
+    this.core.passwords.setPassword(patp, password);
     this.core.sendLog(
       `safeStorage isEncryptionAvailable: ${safeStorage.isEncryptionAvailable()}`
     );
@@ -170,11 +219,17 @@ export class AuthService extends BaseService {
     this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
     this.core.services.shell.setBlur(null, false);
 
-    // TODO decrypt stored snapshot
-    const { url, cookie } = this.getCredentials(ship, password);
+    const { code } = this.readCredentials(patp, password);
+    const cookie = await getCookie({
+      patp,
+      url: ship.url,
+      code,
+    });
+
     this.core.setSession({
-      ship,
-      url,
+      ship: ship.patp,
+      url: ship.url,
+      code,
       cookie,
     });
 
@@ -199,6 +254,7 @@ export class AuthService extends BaseService {
 
   storeNewShip(ship: AuthShipType) {
     console.log('storeNewShip', toJS(ship));
+
     const newShip = AuthShip.create(ship);
 
     this.state.setShip(newShip);
@@ -234,13 +290,12 @@ export class AuthService extends BaseService {
     const id = `auth${ship}`;
 
     const parts = new RegExp(/(urbauth-~[\w-]+)=(.*); Path=\/;/).exec(
-      cookie!.toString()
+      cookie.toString()
     )!;
 
     const newAuthShip = AuthShip.create({
       id,
       url,
-      cookie,
       patp: ship,
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',

@@ -13,12 +13,12 @@ import {
   applySnapshot,
   getSnapshot,
   flow,
+  SnapshotOut,
 } from 'mobx-state-tree';
 import { cleanNounColor } from '../../../lib/color';
-import { toJS } from 'mobx';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
-// const util = require('util');
+import { DocketApi } from '../../../api/docket';
 
 export enum InstallStatus {
   uninstalled = 'uninstalled',
@@ -29,7 +29,7 @@ export enum InstallStatus {
   treaty = 'treaty',
 }
 
-enum AppTypes {
+export enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
   Web = 'web',
@@ -51,6 +51,12 @@ export const Glob = types.model('Glob', {
   ),
 });
 
+export const RealmConfig = types.model('RealmConfig', {
+  size: types.array(types.number),
+  showTitlebar: types.boolean,
+  titlebarBorder: types.boolean,
+});
+
 export const DocketApp = types.model('DocketApp', {
   id: types.identifier,
   title: types.string,
@@ -63,15 +69,34 @@ export const DocketApp = types.model('DocketApp', {
   license: types.string,
 });
 
+export const DevAppModel = types.model('DevApp', {
+  id: types.identifier,
+  title: types.string,
+  type: types.literal(AppTypes.Web),
+  color: types.string,
+  icon: types.string,
+  web: types.model('WebConfig', {
+    dimensions: types.maybe(
+      types.model('WebConfigDimensions', {
+        width: types.number,
+        height: types.number,
+      })
+    ),
+    url: types.string,
+    openFullscreen: types.optional(types.boolean, false),
+  }),
+});
+
 export const WebApp = types.model('WebApp', {
   id: types.identifier,
   title: types.string,
   href: types.string,
   favicon: types.maybeNull(types.string),
   type: types.literal(AppTypes.Web),
+  config: types.maybeNull(RealmConfig),
 });
 
-const UrbitApp = types.model('UrbitApp', {
+export const UrbitApp = types.model('UrbitApp', {
   id: types.identifier,
   title: types.string,
   info: types.string,
@@ -83,6 +108,8 @@ const UrbitApp = types.model('UrbitApp', {
   website: types.string,
   license: types.string,
   installStatus: types.string,
+  host: types.maybeNull(types.string),
+  config: types.maybeNull(RealmConfig),
 });
 
 const NativeApp = types.model('NativeApp', {
@@ -90,6 +117,7 @@ const NativeApp = types.model('NativeApp', {
   title: types.string,
   info: types.string,
   color: types.string,
+  installStatus: types.optional(types.string, 'installed'),
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
 });
@@ -129,6 +157,7 @@ export const NewBazaarStore = types
     loadingTreaties: false,
     addingAlly: types.map(types.string),
     installations: types.map(types.string),
+    devAppMap: types.map(DevAppModel),
   })
   .actions((self) => ({
     // Updates
@@ -211,6 +240,16 @@ export const NewBazaarStore = types
       self.recommendations.splice(removeIndex, 1);
       applySnapshot(self.stalls, data.stalls);
     },
+    installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
+      self.installations.delete(body.desk);
+      self.installations.set(body.desk, InstallStatus.started);
+      try {
+        return yield DocketApi.installApp(conduit, body.ship, body.desk);
+      } catch (error) {
+        self.installations.delete(body.desk);
+        console.error(error);
+      }
+    }),
     installApp: flow(function* (conduit: Conduit, body: InstallPoke) {
       self.installations.delete(body.desk);
       self.installations.set(body.desk, InstallStatus.started);
@@ -281,10 +320,14 @@ export const NewBazaarStore = types
     addAlly: flow(function* (conduit: Conduit, ship: Patp) {
       try {
         if (self.allies.has(ship)) return;
+        self.loadingTreaties = true;
         self.addingAlly.set(ship, 'adding');
-        return yield BazaarApi.addAlly(conduit, ship);
+        const result: any = yield BazaarApi.addAlly(conduit, ship);
+        self.loadingTreaties = false;
+        return result;
       } catch (error) {
         console.error(error);
+        self.loadingTreaties = false;
       }
     }),
     //
@@ -310,7 +353,7 @@ export const NewBazaarStore = types
       self.loadingTreaties = true;
       try {
         const treaties = yield BazaarApi.scryTreaties(conduit, ship);
-        let formedTreaties = [];
+        const formedTreaties = [];
         for (const key in treaties) {
           const treaty = treaties[key];
           const formed = {
@@ -333,26 +376,36 @@ export const NewBazaarStore = types
         throw error;
       }
     }),
+    loadDevApps(devApps: any) {
+      Object.values(devApps).forEach((app: any) => {
+        self.devAppMap.set(app.id, DevAppModel.create(app));
+      });
+    },
   }))
   .views((self) => ({
     get installing() {
       return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-        (app: AppType) => {
+        (app: SnapshotOut<AppType>) => {
           if (self.installations.get(app.id)) return true;
           return false;
         }
       );
     },
     get installed() {
-      // return Array.from(self.gridIndex.entries()).sort((el: []) => {
-
-      // })
       return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-        (app: AppType) => {
-          const urb = app as UrbitAppType;
-          return urb.installStatus === 'installed';
+        (app: SnapshotOut<AppType>) => {
+          if (app.type === 'urbit') {
+            const urb = app as UrbitAppType;
+            return urb.installStatus === 'installed';
+          } else {
+            return true;
+          }
         }
       );
+    },
+    get devApps() {
+      if (self.devAppMap.size === 0) return [];
+      return Array.from(self.devAppMap.values()) || [];
     },
     getRecentApps() {
       return [];
@@ -403,7 +456,12 @@ export const NewBazaarStore = types
       return self.recommendations.includes(appId);
     },
     getApp(appId: string) {
-      return self.catalog.get(appId);
+      const app = self.catalog.get(appId);
+      if (!app) {
+        // @ts-ignore
+        return self.devAppMap.get(appId);
+      }
+      return app;
     },
     getDock(path: string) {
       return self.docks.get(path);
@@ -436,7 +494,7 @@ export const NewBazaarStore = types
     },
     getSuite(path: string) {
       const stall = self.stalls.get(path);
-      let suite = new Map();
+      const suite = new Map();
       if (!stall) return suite;
       Array.from(Object.keys(getSnapshot(stall.suite))).forEach(
         (index: string) => {
@@ -447,6 +505,8 @@ export const NewBazaarStore = types
       return suite;
     },
   }));
+
+export type WebAppType = Instance<typeof WebApp>;
 
 export type DocketAppType = Instance<typeof DocketApp>;
 export type UrbitAppType = Instance<typeof UrbitApp>;

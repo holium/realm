@@ -1,54 +1,64 @@
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
-import {
-  onPatch,
-  onSnapshot,
-  getSnapshot,
-  castToSnapshot,
-} from 'mobx-state-tree';
+import { onPatch, getSnapshot } from 'mobx-state-tree';
 
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { ShellStoreType, ShellStore } from './shell.model';
 
 export class ShellService extends BaseService {
-  private db?: Store<ShellStoreType>; // for persistance
-  private state?: ShellStoreType; // for state management
+  private readonly db?: Store<ShellStoreType>; // for persistance
+  private readonly state?: ShellStoreType; // for state management
   handlers = {
     'realm.shell.set-desktop-dimensions': this.setDesktopDimensions,
     'realm.shell.set-blur': this.setBlur,
     'realm.shell.set-fullscreen': this.setFullscreen,
     'realm.shell.open-dialog': this.openDialog,
+    'realm.shell.open-dialog-with-string-props': this.openDialogWithStringProps,
     'realm.shell.close-dialog': this.closeDialog,
     'realm.shell.next-dialog': this.nextDialog,
     'realm.shell.setIsMouseInWebview': this.setIsMouseInWebview,
   };
 
   static preload = {
-    setBlur: (blurred: boolean, checkDouble: boolean = false) => {
-      return ipcRenderer.invoke('realm.shell.set-blur', blurred, checkDouble);
+    setBlur: async (blurred: boolean, checkDouble: boolean = false) => {
+      return await ipcRenderer.invoke(
+        'realm.shell.set-blur',
+        blurred,
+        checkDouble
+      );
     },
-    setDesktopDimensions: (width: number, height: number) => {
-      return ipcRenderer.invoke(
+    setDesktopDimensions: async (width: number, height: number) => {
+      return await ipcRenderer.invoke(
         'realm.shell.set-desktop-dimensions',
         width,
         height
       );
     },
-    openDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.shell.open-dialog', dialogId);
+    openDialog: async (dialogId: string) => {
+      return await ipcRenderer.invoke('realm.shell.open-dialog', dialogId);
     },
-    nextDialog: (dialogId: string) => {
-      return ipcRenderer.invoke('realm.shell.next-dialog', dialogId);
+    openDialogWithStringProps: async (dialogId: string, props: any) => {
+      return await ipcRenderer.invoke(
+        'realm.shell.open-dialog-with-string-props',
+        dialogId,
+        props
+      );
     },
-    closeDialog: () => {
-      return ipcRenderer.invoke('realm.shell.close-dialog');
+    nextDialog: async (dialogId: string) => {
+      return await ipcRenderer.invoke('realm.shell.next-dialog', dialogId);
     },
-    setFullscreen(isFullscreen: boolean) {
-      return ipcRenderer.invoke('realm.shell.set-fullscreen', isFullscreen);
+    closeDialog: async () => {
+      return await ipcRenderer.invoke('realm.shell.close-dialog');
     },
-    setIsMouseInWebview(mouseInWebview: boolean) {
-      return ipcRenderer.invoke(
+    async setFullscreen(isFullscreen: boolean) {
+      return await ipcRenderer.invoke(
+        'realm.shell.set-fullscreen',
+        isFullscreen
+      );
+    },
+    async setIsMouseInWebview(mouseInWebview: boolean) {
+      return await ipcRenderer.invoke(
         'realm.shell.setIsMouseInWebview',
         mouseInWebview
       );
@@ -87,7 +97,7 @@ export class ShellService extends BaseService {
     });
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
   }
@@ -111,6 +121,11 @@ export class ShellService extends BaseService {
   openDialog(_event: any, dialogId: string) {
     this.state?.closeDialog(); // must close old dialogs first
     this.state?.openDialog(dialogId);
+  }
+
+  openDialogWithStringProps(_event: any, dialogId: string, props: any) {
+    this.state?.closeDialog(); // must close old dialogs first
+    this.state?.openDialogWithStringProps(dialogId, props);
   }
 
   nextDialog(_event: any, dialogId: string) {

@@ -1,8 +1,5 @@
-import { FC, useRef, useEffect, useState, memo } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import ScrollView from 'react-inverted-scrollview';
-import { isEqual } from 'lodash';
-import { toJS } from 'mobx';
 import useVirtual from 'react-cool-virtual';
 
 import { ChatMessage } from './ChatMessage';
@@ -11,7 +8,6 @@ import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, IconButton, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import InfiniteScroll from 'react-infinite-scroll-component';
 
 interface ChatLogProps {
   loading: boolean;
@@ -225,7 +221,7 @@ export const ChatLog: FC<ChatLogProps> = observer((props: ChatLogProps) => {
         <Flex style={{ height: 58 }} />
       </InfiniteScroll> */}
 
-      {/*Put the scroll bar always on the bottom*/}
+      {/* Put the scroll bar always on the bottom */}
 
       {!shouldSticky && (
         <Flex position="absolute" bottom={64} right={12}>

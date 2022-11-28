@@ -1,5 +1,5 @@
 import { FC, useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { rgba, lighten, darken } from 'polished';
 
 import { Flex, Text, TextButton, IconButton, Icons } from 'renderer/components';

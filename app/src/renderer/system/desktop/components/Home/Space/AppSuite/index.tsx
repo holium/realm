@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { Flex, Text, Button } from 'renderer/components';
 import { SuiteApp } from './App';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -11,11 +11,11 @@ import { darken, rgba } from 'polished';
 import { RealmPopover } from '../../Popover';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
 
-type AppSuiteProps = {
+interface AppSuiteProps {
   patp: string;
   isAdmin: boolean;
   // suite?: AppModelType[];
-};
+}
 // const emptyArr = [1, 2, 3, 4, 5];
 
 const slideUpAndFade = keyframes({
@@ -67,7 +67,7 @@ function Content({ children, ...props }: any) {
       <StyledContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
-          // @ts-ignore
+          // @ts-expect-error
           if (document.activeElement) document.activeElement.blur();
           e.preventDefault();
         }}
@@ -128,52 +128,43 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
           outline: 'none',
           boxShadow: '0px 0px 9px rgba(0, 0, 0, 0.12)',
           borderRadius: 12,
-          maxHeight: '50vh',
+          maxHeight: dimensions.height,
           overflowY: 'auto',
           background: backgroundColor,
         }}
       >
-        <Flex flexDirection={'column'}>
-          <Text variant="h6" fontWeight={500} color={textColor}>
+        <Flex flexDirection="column" gap={12}>
+          <Text variant="h6" mb={1} fontWeight={500} color={textColor}>
             Installed Apps
           </Text>
-          <div style={{ marginTop: '2px', marginBottom: '2px' }}>
-            <hr
-              style={{
-                backgroundColor: rgba(iconColor, 0.3),
-                height: '1px',
-                border: 0,
-              }}
-            />
-          </div>
           {(apps.length === 0 && (
             <Text color={rgba(textColor, 0.4)}>No apps found</Text>
           )) || (
             <Flex flexDirection={'column'} gap={10}>
               {apps.map((item, index) => (
-                <div key={index}>
-                  <AppRow
-                    caption={item.id}
-                    app={item}
-                    actionRenderer={() => (
-                      <Button
-                        borderRadius={6}
-                        onClick={(e) => {
-                          setSearchMode('none');
-                          setSuiteIndex(-1);
-                          SpacesActions.addToSuite(
-                            space.path,
-                            item.id,
-                            suiteIndex
-                          );
-                        }}
-                      >
-                        Add to Suite
-                      </Button>
-                    )}
-                    onClick={() => {}}
-                  />
-                </div>
+                <AppRow
+                  key={index}
+                  caption={item.id}
+                  app={item}
+                  descriptionWidth={dimensions.width - 225}
+                  actionRenderer={() => (
+                    <Button
+                      borderRadius={6}
+                      onClick={(e) => {
+                        setSearchMode('none');
+                        setSuiteIndex(-1);
+                        SpacesActions.addToSuite(
+                          space.path,
+                          item.id,
+                          suiteIndex
+                        );
+                      }}
+                    >
+                      Add to Suite
+                    </Button>
+                  )}
+                  onClick={() => {}}
+                />
               ))}
             </Flex>
           )}

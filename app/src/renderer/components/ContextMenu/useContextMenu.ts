@@ -18,7 +18,6 @@ const useContextMenu = (
     (event) => {
       // If the id of the context menu matches the parent of the click, show the context menu
       if (event.target.id === containerId) {
-        // console.log('context click');
         event.preventDefault();
         event.stopPropagation();
 
@@ -43,28 +42,30 @@ const useContextMenu = (
 
   // Closes the menu on menuItem click
   const handleClick = useCallback(
-    (evt: any) => {
-      if (show) {
-        const preventMenuClose = evt.target.getAttribute(
+    (evt: MouseEvent) => {
+      if (show && evt.target) {
+        const preventMenuClose = (evt.target as HTMLElement).getAttribute(
           'data-prevent-context-close'
         );
         !preventMenuClose && setShow(false);
+        evt.preventDefault();
       }
     },
     [show]
   );
 
-  const handleClickOutside = (event: any) => {
+  const handleClickOutside = (evt: MouseEvent) => {
     const domNode = ReactDOM.findDOMNode(menuRef.current);
-    if (!domNode || !domNode.contains(event.target)) {
+    if (!domNode || !domNode.contains(evt.target as Node)) {
       // Check if you arent clicking outside on the button that opens this:
       // clickableRef && event.target.id === clickableRef.current.id;
       if (show) {
-        event.preventDefault();
+        evt.preventDefault();
         setShow(false);
       }
     }
   };
+
   useEffect(() => {
     ref.current.addEventListener('click', handleClick);
     ref.current.addEventListener('contextmenu', handleContextMenu);

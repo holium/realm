@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect } from 'react';
 import {
   Grid,
   Flex,
@@ -7,9 +7,7 @@ import {
   Text,
   IconButton,
   TextButton,
-  Label,
 } from 'renderer/components';
-import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
 import { nativeApps } from '..';
@@ -22,9 +20,9 @@ import { ShipActions } from 'renderer/logic/actions/ship';
 import { lighten, rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
 
-type ProfileProps = {
+interface ProfileProps {
   theme: ThemeModelType;
-};
+}
 
 export const AccountTrayApp: FC<ProfileProps> = observer(
   (props: ProfileProps) => {
@@ -36,7 +34,7 @@ export const AccountTrayApp: FC<ProfileProps> = observer(
     const currentShip = ship!;
 
     useEffect(() => {
-      // @ts-ignore
+      // @ts-expect-error
       // navigator.getBattery().then((battery: any) => {
       //   const level = battery.level;
       //   // console.log(battery);

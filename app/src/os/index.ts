@@ -1,4 +1,12 @@
-import { BrowserWindow, ipcMain, ipcRenderer } from 'electron';
+import {
+  BrowserWindow,
+  ipcMain,
+  ipcRenderer,
+  WebContents,
+  dialog,
+  session,
+  WebPreferences,
+} from 'electron';
 import { EventEmitter } from 'stream';
 import Store from 'electron-store';
 // ---
@@ -8,22 +16,23 @@ import { ShipService } from './services/ship/ship.service';
 import { SpacesService } from './services/spaces/spaces.service';
 import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
-import { WalletService } from './services/tray/wallet.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
 import HoliumAPI from './api/holium';
-import { RoomsService } from './services/tray/rooms.service';
 import PasswordStore from './lib/passwordStore';
-import { getSnapshot } from 'mobx-state-tree';
 import { ThemeModelType } from './services/theme.model';
+import { getCookie } from './lib/shipHelpers';
 
 export interface ISession {
   ship: string;
   url: string;
-  cookie: string;
+  cookie: string | null;
+  code: string;
 }
 
-export type ConnectParams = { reconnecting: boolean };
+export interface ConnectParams {
+  reconnecting: boolean;
+}
 
 export class Realm extends EventEmitter {
   conduit?: Conduit;
@@ -31,7 +40,7 @@ export class Realm extends EventEmitter {
   private isReconnecting: boolean = false;
   readonly mainWindow: BrowserWindow;
   private session?: ISession;
-  private db: Store<ISession>;
+  private readonly db: Store<ISession>;
   readonly services: {
     onboarding: OnboardingService;
     identity: {
@@ -42,6 +51,7 @@ export class Realm extends EventEmitter {
     desktop: DesktopService;
     shell: ShellService;
   };
+
   readonly holiumClient: HoliumAPI;
   readonly passwords: PasswordStore;
 
@@ -49,20 +59,28 @@ export class Realm extends EventEmitter {
     'realm.boot': this.boot,
     'realm.reconnect': this.reconnect,
     'realm.disconnect': this.disconnect,
+    'realm.refresh': this.refresh,
+    'realm.show-open-dialog': this.showOpenDialog,
   };
 
   static preload = {
-    boot: () => {
-      return ipcRenderer.invoke('realm.boot');
+    boot: async () => {
+      return await ipcRenderer.invoke('realm.boot');
     },
-    reconnect: () => {
-      return ipcRenderer.invoke('realm.reconnect');
+    refresh: async () => {
+      return await ipcRenderer.invoke('realm.refresh');
     },
-    disconnect: () => {
-      return ipcRenderer.invoke('realm.disconnect');
+    reconnect: async () => {
+      return await ipcRenderer.invoke('realm.reconnect');
     },
-    install: (ship: string) => {
-      return ipcRenderer.invoke('core:install-realm', ship);
+    disconnect: async () => {
+      return await ipcRenderer.invoke('realm.disconnect');
+    },
+    install: async (ship: string) => {
+      return await ipcRenderer.invoke('core:install-realm', ship);
+    },
+    showOpenDialog: async () => {
+      return await ipcRenderer.invoke('realm.show-open-dialog');
     },
     onSetTheme: (callback: any) =>
       ipcRenderer.on('realm.change-theme', callback),
@@ -84,14 +102,21 @@ export class Realm extends EventEmitter {
     this.onEffect = this.onEffect.bind(this);
     this.onBoot = this.onBoot.bind(this);
     this.onConduit = this.onConduit.bind(this);
+    this.onWebViewAttached = this.onWebViewAttached.bind(this);
+    this.onWillRedirect = this.onWillRedirect.bind(this);
 
-    // Load session data
-    this.db = new Store({
+    const options = {
       name: 'realm.session',
       accessPropertiesByDotNotation: true,
       fileExtension: 'lock',
-    });
-    if (this.db.size > 0) {
+    };
+    // this.db =
+    //   process.env.NODE_ENV === 'development'
+    //     ? new Store(options)
+    //     : new EncryptedStore(options);
+    // Load session data
+    this.db = new Store(options);
+    if (this.db.size > 0 && this.db.store.cookie !== null) {
       this.isResuming = true;
       this.setSession(this.db.store);
     }
@@ -111,7 +136,7 @@ export class Realm extends EventEmitter {
     this.passwords = new PasswordStore();
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
 
@@ -126,6 +151,21 @@ export class Realm extends EventEmitter {
       this.services.shell.closeDialog(null);
       this.conduit = undefined;
     });
+
+    this.mainWindow.webContents.on(
+      'did-attach-webview',
+      this.onWebViewAttached
+    );
+    this.mainWindow.webContents.on(
+      'will-attach-webview',
+      (
+        event: Electron.Event,
+        webPreferences: WebPreferences,
+        params: Record<string, string>
+      ) => {
+        webPreferences.partition = 'urbit-webview';
+      }
+    );
   }
 
   static start(mainWindow: BrowserWindow) {
@@ -135,8 +175,8 @@ export class Realm extends EventEmitter {
   async boot(_event: any) {
     let ship = null;
     let spaces = null;
-    let desktop = this.services.desktop.snapshot;
-    let shell = this.services.shell.snapshot;
+    const desktop = this.services.desktop.snapshot;
+    const shell = this.services.shell.snapshot;
     let membership = null;
     let bazaar = null;
     let rooms = null;
@@ -173,7 +213,7 @@ export class Realm extends EventEmitter {
       rooms,
       wallet,
       models,
-      loggedIn: this.session ? true : false,
+      loggedIn: !!this.session,
     };
     // if (spaces?.selected) {
     //   this.setTheme({ ...spaces!.selected!.theme, id: spaces?.selected.path });
@@ -195,13 +235,41 @@ export class Realm extends EventEmitter {
     this.conduit = undefined;
   }
 
+  async refresh() {
+    if (!this.session) {
+      console.log('Conduit.refresh called with unexpected session');
+      return;
+    }
+    if (!this.conduit) {
+      console.log('Conduit.refresh called with unexpected conduit');
+      return;
+    }
+    this.isReconnecting = true;
+    try {
+      console.log('refreshing token => %o', this.session);
+      const cookie: string | undefined = await this.conduit.refresh(
+        this.session.url,
+        this.session.code
+      );
+      if (this.session) {
+        this.saveSession({ ...this.session, cookie: cookie || null });
+      } else {
+        console.warn('unexpected session => %o', this.session);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   async reconnect() {
     this.conduit?.closeChannel();
     this.conduit = undefined;
 
     if (this.session) {
       this.isReconnecting = true;
-      return await this.connect(this.session, { reconnecting: true });
+      return await this.connect(this.session, {
+        reconnecting: true,
+      });
     }
   }
 
@@ -221,7 +289,8 @@ export class Realm extends EventEmitter {
       await this.conduit.init(
         session.url,
         session.ship.substring(1),
-        session.cookie
+        session.cookie!,
+        session.code
       );
       this.sendLog('after conduit init');
       this.sendLog('connection successful');
@@ -234,15 +303,24 @@ export class Realm extends EventEmitter {
     }
   }
 
+  async showOpenDialog(_event: any) {
+    return dialog.showOpenDialogSync({
+      properties: ['openFile'],
+    });
+  }
+
   setSession(session: ISession): void {
-    this.session = session;
-    this.db.set(session);
+    this.saveSession(session);
     this.connect(session);
   }
 
-  getSession(session: ISession): ISession {
+  saveSession(session: ISession): void {
     this.session = session;
-    return this.db.store;
+    this.db.set(session);
+  }
+
+  getSession(): ISession {
+    return this.session!;
   }
 
   async clearSession(): Promise<void> {
@@ -250,6 +328,72 @@ export class Realm extends EventEmitter {
     this.conduit = undefined;
     this.db.clear();
     this.session = undefined;
+  }
+
+  async onWillRedirect(e: Event, url: string, webContents: WebContents) {
+    try {
+      // console.log('onWillRedirect => %o', url);
+      const delim = '/~/login?redirect=';
+      const parts = url.split(delim);
+      // http://localhost/~/login?redirect=
+      if (parts.length > 0) {
+        let appPath = decodeURIComponent(parts[1]);
+        // console.log('appPath => %o', appPath);
+        appPath = appPath.split('?')[0];
+        if (appPath.endsWith('/')) {
+          appPath = appPath.substring(0, appPath.length - 1);
+        }
+        // const redirectUrl = parts[1];
+        // const newUrl = `${parts[0]}${redirectUrl}`;
+        e.preventDefault();
+
+        if (!this.session) {
+          console.log('unable to redirect. invalid session');
+          return;
+        }
+        const { ship, code } = this.session;
+        console.log(
+          'child window attempting to redirect to login. refreshing cookie...'
+        );
+        const cookie = await getCookie({
+          patp: ship,
+          url: this.session.url,
+          code: code,
+        });
+        console.log(
+          'new cookie generated. reloading child window and saving new cookie to session.'
+        );
+        // console.log(cookie);
+        // console.log('cookie => %o', cookie);
+        // console.log('session => %o', {
+        //   url: `${this.session.url}${appPath}`,
+        //   name: `urbauth-${ship}`,
+        //   value: cookie.split('=')[1].split('; ')[0],
+        // });
+        await session.fromPartition(`urbit-webview`).cookies.set({
+          url: `${this.session.url}${appPath}`,
+          name: `urbauth-${ship}`,
+          value: cookie.split('=')[1].split('; ')[0],
+          // value: cookie,
+        });
+        this.saveSession({
+          ...this.session,
+          cookie,
+        });
+        // console.log('navigating to => %o', newUrl);
+        // webContents.loadURL(newUrl);
+        webContents.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async onWebViewAttached(e: Event, webContents: WebContents) {
+    // console.log('onWebViewAttached');
+    webContents.on('will-redirect', (e: Event, url: string) =>
+      this.onWillRedirect(e, url, webContents)
+    );
   }
 
   async onConduit(params: ConnectParams) {
@@ -311,9 +455,17 @@ export class Realm extends EventEmitter {
         this.sendConnectionStatus(ConduitState.Initialized);
       }
     });
-    conduit.on(ConduitState.Connected, () =>
-      this.sendConnectionStatus(ConduitState.Connected)
-    );
+    conduit.on(ConduitState.Refreshing, (session) => {
+      this.sendConnectionStatus(ConduitState.Refreshing);
+    });
+    conduit.on(ConduitState.Refreshed, (session) => {
+      // console.info(`ConduitState.Refreshed => %o`, session);
+      this.saveSession(session);
+      this.sendConnectionStatus(ConduitState.Refreshed);
+    });
+    conduit.on(ConduitState.Connected, () => {
+      this.sendConnectionStatus(ConduitState.Connected);
+    });
     conduit.on(ConduitState.Disconnected, () =>
       this.sendConnectionStatus(ConduitState.Disconnected)
     );
@@ -325,6 +477,10 @@ export class Realm extends EventEmitter {
       this.isResuming = false;
       this.isReconnecting = false;
       this.sendConnectionStatus(ConduitState.Failed);
+    });
+    conduit.on(ConduitState.Stale, () => {
+      this.sendLog('stale connection');
+      this.sendConnectionStatus(ConduitState.Stale);
     });
   }
 

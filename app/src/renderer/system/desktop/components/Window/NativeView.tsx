@@ -1,9 +1,6 @@
 import { FC, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  WindowModelType,
-  WindowModelProps,
-} from 'os/services/shell/desktop.model';
+import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { nativeRenderers } from 'renderer/apps/native';
 
 export interface NativeViewProps {
@@ -19,7 +16,7 @@ export const NativeView: FC<NativeViewProps> = (props: NativeViewProps) => {
 
   const elementRef = useRef(null);
   const ViewComponent: FC<any> | undefined =
-    nativeRenderers[window.id].component!;
+    nativeRenderers[window.id].component;
 
   return (
     <View

@@ -17,19 +17,18 @@ import {
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { FriendsList } from './Ship/FriendsList';
-import { toJS } from 'mobx';
 import { MembersList } from './Space/MembersList';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
-type HomeSidebarProps = {
+interface HomeSidebarProps {
   filterMode: 'light' | 'dark';
   customBg: string;
-};
+}
 
 const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
   position: relative;
-  backdrop-filter: var(--blur-enabled);
-  transform: transale3d(0, 0, 0);
+  /* --webkit-backdrop-filter: var(--blur-enabled);
+  --webkit-transform: transale3d(0, 0, 0); */
   border-radius: 12px;
   padding: 16px 16px 0 16px;
   width: 100%;
@@ -101,7 +100,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
     // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    selectedNickname.add(nickname ? nickname : '');
+    selectedNickname.add(nickname || '');
     setSelectedNickname(new Set(selectedNickname));
     // const updatedAll = all;
     // // TODO check the contact store for metadata

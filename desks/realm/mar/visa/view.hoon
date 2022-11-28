@@ -1,4 +1,4 @@
-/-  store=spaces
+/-  store=spaces-store
 /+  *visas
 ::
 |_  view=view:store

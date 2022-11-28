@@ -12,7 +12,7 @@ const ToolbarStyle = styled(TitlebarStyle)`
   border-bottom: none;
 `;
 
-export type DialogTitlebarProps = {
+export interface DialogTitlebarProps {
   dragControls: any;
   onDragStart: any;
   onDragStop: any;
@@ -21,7 +21,7 @@ export type DialogTitlebarProps = {
   windowColor: string;
   onClose?: () => void;
   onMaximize: () => void;
-};
+}
 
 export const DialogTitlebar: FC<DialogTitlebarProps> = (
   props: DialogTitlebarProps
@@ -54,14 +54,14 @@ export const DialogTitlebar: FC<DialogTitlebarProps> = (
             }
           : {})}
         zIndex={zIndex}
-        customBg={windowColor!}
+        customBg={windowColor}
         hasBorder
       >
         {onClose && (
           <WindowIcon
             icon="Close"
             size={26}
-            iconColor={iconColor!}
+            iconColor={iconColor}
             bg="#FF6240"
             fillWithBg
             onClick={(evt: any) => {

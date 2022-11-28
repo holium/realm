@@ -21,7 +21,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
 
   const saveSeedPhrase = () => {
     props.setSeedPhrase(phrase);
-    props.setScreen(NewWalletScreen.PASSCODE); // TODO: change to confirm after demo
+    props.setScreen(NewWalletScreen.CONFIRM);
   };
 
   console.log(phrase);
@@ -60,7 +60,7 @@ export const Import: FC<ImportProps> = observer((props: ImportProps) => {
       </Flex>
       <Flex
         position="absolute"
-        top="542px"
+        top="582px"
         zIndex={999}
         onClick={() => props.setScreen(NewWalletScreen.CREATE)}
       >

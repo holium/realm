@@ -1,5 +1,5 @@
 /-  store=bazaar-store, spaces-store, docket=bazaar-docket, treaty=bazaar-treaty
-/+  docket-lib=docket
+/+  docket-lib=docket, realm=realm
 =<  [store .]
 =,  store
 |%
@@ -14,7 +14,7 @@
     |%
     ++  decode
       %-  of
-      :~  
+      :~
           [%pin add-pin]
           [%unpin rem-pin]
           [%reorder-pins reorder-pins]
@@ -286,6 +286,7 @@
             ['info' s+info.native-app.app]
             ['color' s+color.native-app.app]
             ['icon' s+icon.native-app.app]
+            ['config' (config:enjs:realm config.native-app.app)]
         ==
       ::
       %web
@@ -295,6 +296,7 @@
             ['title' s+title.web-app.app]
             ['href' s+href.web-app.app]
             ['favicon' s+favicon.web-app.app]
+            ['config' (config:enjs:realm config.web-app.app)]
         ==
       ::
       %urbit   (urbit-app:encode app-id +.app)
@@ -306,9 +308,11 @@
     %+  merge  (dkt docket.app)
     %-  pairs
     :~
-      ['id' s+app-id]  
+      ['id' s+app-id]
       ['installStatus' [%s `@t`install-status.app]]
-    ==  
+      ['config' (config:enjs:realm config.app)]
+      ['host' ?~(host.app ~ s+(scot %p u.host.app))]
+    ==
   ::
   ++  dkt
     |=  [=docket:docket]
@@ -404,14 +408,14 @@
     %+  frond  -.c
     ?-  -.c
       %da   s+(scot %da p.c)
-      %tas  s+(scot %tas p.c)  
+      %tas  s+(scot %tas p.c)
       %ud   (numb p.c)
     ==
   ::
   ++  alliance
     |=  a=alliance:treaty
     ^-  json
-    :-  %a 
+    :-  %a
     %+  turn  ~(tap in a)
       |=  [=^ship =desk]
       ^-  json

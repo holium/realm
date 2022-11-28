@@ -122,3 +122,8 @@ dist
 build
 
 sync_app_code.sh
+
+# logs
+app/realmlog.txt
+
+app.dev.json

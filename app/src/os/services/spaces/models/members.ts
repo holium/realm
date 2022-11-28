@@ -1,18 +1,15 @@
 import {
   applySnapshot,
   castToSnapshot,
-  getSnapshot,
   cast,
   Instance,
   types,
-  IMSTMap,
-  onSnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { Patp, SpacePath } from '../../../types';
 // import { InvitationsModel } from './invitations';
 
-const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner']);
+const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner', 'moderator']);
 const Status = types.enumeration(['invited', 'joined', 'host']);
 
 export const MembersModel = types.model({
@@ -52,7 +49,7 @@ export const MembershipStore = types
     },
     getSpaceMembers(path: SpacePath) {
       const members = self.spaces.get(path);
-      if (!members) return {};
+      if (!members) return types.map(MembersModel).create();
       return members;
     },
     getMembersList(path: SpacePath) {

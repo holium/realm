@@ -5,18 +5,18 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useServices } from 'renderer/logic/store';
 import AppWindow from '../desktop/components/Window';
 import { getCenteredXY } from 'os/services/shell/lib/window-manager';
-import { dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { toJS } from 'mobx';
 
-type DialogManagerProps = {
+interface DialogManagerProps {
   dialogId?: string;
-};
+  dialogProps: any;
+}
 
 export const DialogManager: FC<DialogManagerProps> = observer(
   (props: DialogManagerProps) => {
-    const { dialogId } = props;
+    const { dialogId, dialogProps } = props;
 
     const { shell } = useServices();
 
@@ -24,31 +24,35 @@ export const DialogManager: FC<DialogManagerProps> = observer(
     let dialogWindow: React.ReactNode | undefined;
     const isOpen = dialogId !== undefined;
 
+    let dialogConfig: DialogConfig;
+    if (isOpen) {
+      const dialogRenderer = dialogRenderers[dialogId];
+      dialogConfig =
+        dialogRenderer instanceof Function
+          ? dialogRenderer(dialogProps.toJSON())
+          : dialogRenderer;
+    }
+
     // clear dialog on escape pressed if closable
     useHotkeys(
       'esc',
       () => {
-        let notOnboardingDialog = !Object.values(OnboardingStep).includes(
+        const notOnboardingDialog = !Object.values(OnboardingStep).includes(
           dialogId as any
         );
-        if (
-          isOpen &&
-          notOnboardingDialog &&
-          dialogRenderers[dialogId].hasCloseButton
-        ) {
+        if (isOpen && notOnboardingDialog && dialogConfig.hasCloseButton) {
           ShellActions.closeDialog();
-          ShellActions.setBlur(false);
+          if (dialogConfig.unblurOnClose) ShellActions.setBlur(false);
         }
       },
       { enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'] }
     );
 
     if (isOpen) {
-      const dialogConfig = dialogRenderers[dialogId];
       const dimensions = {
-        ...dialogConfig.window.dimensions,
+        ...dialogConfig!.window.dimensions,
         ...getCenteredXY(
-          dialogConfig.window.dimensions,
+          dialogConfig!.window.dimensions,
           shell.desktopDimensions
         ),
       };
@@ -57,7 +61,7 @@ export const DialogManager: FC<DialogManagerProps> = observer(
         <AppWindow
           desktopRef={desktopRef}
           window={{
-            ...dialogConfig.window,
+            ...dialogConfig!.window,
             dimensions,
           }}
         />

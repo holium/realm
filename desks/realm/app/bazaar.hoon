@@ -39,35 +39,37 @@
     =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
     ?>  ?=([%initial *] charge-update)
     =/  our-space                     [our.bowl 'our']
-    =/  init                          (init-catalog:helpers:bazaar initial.charge-update)
+    =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
     =|  =native-app:store
       =.  title.native-app            'Relic Browser'
       =.  color.native-app            '#92D4F9'
       =.  icon.native-app             'AppIconCompass'
-    =/  catalog                       (~(put by catalog.init) %os-browser [%native native-app])
+      =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
+    =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
     =|  =native-app:store
       =.  title.native-app            'Settings'
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
+      =.  config.native-app           [size=[6 5] titlebar-border=%.y show-titlebar=%.n]
     =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
     =.  grid-index.state              grid-index.init
     =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
     ?>  ?=(%spaces -.spaces-scry)
     =/  spaces                        spaces.spaces-scry
-    =/  stalls       
+    =/  stalls
       %+  turn  ~(tap by spaces)
         |=  [path=space-path:spaces-store =space:spaces-store]
         [path [suite=~ recommended=~]]
-    =/  docks       
+    =/  docks
       %+  turn  ~(tap by spaces)
         |=  [path=space-path:spaces-store =space:spaces-store]
         [path [~]]
     =.  stalls.state        (~(gas by stalls.state) stalls)
     =.  docks.state         (~(gas by docks.state) docks)
     :_  this
-    :~ 
+    :~
         [%pass /docket %agent [our.bowl %docket] %watch /charges]
         [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
         [%pass /allies %agent [our.bowl %treaty] %watch /allies]
@@ -78,13 +80,28 @@
     ^-  vase
     !>(state)
   ::
+  :: ++  on-load
+  ::   |=  old-state=vase
+  ::   ^-  (quip card:agent:gall agent:gall)
+  ::   =/  old  !<(versioned-state old-state)
+  ::   ?-  -.old
+  ::     %0  `this(state old)
+  ::   ==
   ++  on-load
-    |=  old-state=vase
-    ^-  (quip card:agent:gall agent:gall)
-    =/  old  !<(versioned-state old-state)
-    ?-  -.old
-      %0  `this(state old)
-    ==
+    |=  =vase
+    ^-  (quip card _this)
+    =/  old=(unit state-0)
+      (mole |.(!<(state-0 vase)))
+    ?^  old
+      `this(state u.old)
+    ~&  >>  'nuking old %bazaar state' ::  temporarily doing this for making development easier
+    =^  cards  this  on-init
+    :_  this
+    =-  (welp - cards)
+    %+  turn  ~(tap in ~(key by wex.bowl))
+    |=  [=wire =ship =term]
+    ^-  card
+    [%pass wire %agent [ship term] %leave ~]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -124,13 +141,12 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-
     ?+    path  (on-peek:def path)
       ::
       [%x %catalog ~]     ::  ~/scry/bazaar/catalog
         ``bazaar-view+!>([%catalog catalog.state])
       ::
-      [%x %installed ~]   ::  ~/scry/bazaar/installed 
+      [%x %installed ~]   ::  ~/scry/bazaar/installed
         =/  apps          (skim ~(tap by catalog.state) skim-installed:helpers:bazaar:core)
        ``bazaar-view+!>([%installed `catalog:store`(malt apps)])
       ::
@@ -293,7 +309,7 @@
     |=  =action:store
     ^-  (quip card _state)
     |^
-    ?-  -.action          
+    ?-  -.action
       %pin               (add-pin +.action)
       %unpin             (rem-pin +.action)
       %reorder-pins      (reorder-pins +.action)
@@ -311,7 +327,7 @@
       =/  upd-docks=dock:store      (~(gut by docks.state) path ~)
       =/  index                     ?~(index (lent upd-docks) u.index)
       =/  exists-at                 (find [app-id]~ upd-docks)
-      ?~  exists-at                 ::  should only pin if it doesnt exist              
+      ?~  exists-at                 ::  should only pin if it doesnt exist
         =.  upd-docks               (into upd-docks index app-id)
         =.  docks.state             (~(put by docks.state) [path upd-docks])
         :_  state
@@ -380,7 +396,7 @@
     ::
     ++  install-app
       |=  [=ship =desk]
-      ^-  (quip card _state)    
+      ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
@@ -440,7 +456,7 @@
         ?:  (we-host:helpers path)
           =/  rec-members             (~(gut by recommended.stall) app-id ~)
           =.  rec-members             (~(del in rec-members) our.bowl)
-          =.  recommended.stall       
+          =.  recommended.stall
             ?:  =(~(wyt in rec-members) 0)
               (~(del by recommended.stall) app-id)
             (~(put by recommended.stall) [app-id rec-members])
@@ -506,6 +522,12 @@
           |=  [entry=[=app-id:store =app:store] result=(list [=app-id:store =app:store])]
           ?:  (~(has by catalog.state) app-id.entry)  ::  if we already have the app
             result
+          =/  entry
+            ?+  -.app.entry  entry
+              %urbit
+                =.  install-status.app.entry  %uninstalled
+                entry
+            ==
           (snoc result entry)
       =.  catalog.state       (~(uni by catalog.state) (malt new-catalog-apps))
       :_  state
@@ -518,11 +540,11 @@
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall])]~
     --
-  ++  interaction 
+  ++  interaction
     |=  [itc=interaction:store]
     ^-  (quip card _state)
     |^
-    ?-  -.itc             
+    ?-  -.itc
       %member-recommend          (member-recommend +.itc)
       %member-unrecommend        (member-unrecommend +.itc)
     ==
@@ -536,22 +558,34 @@
       =.  rec-members             (~(put in rec-members) src.bowl)
       =.  recommended.stall       (~(put by recommended.stall) [app-id rec-members])
       =.  stalls.state            (~(put by stalls.state) [path stall])
+      ::  per #319, ensure installed status is relative to our ship/catalog
+      =/  entry                   (~(get by catalog.state) app-id)
+      =/  local-install-status    ?~(entry %uninstalled (get-install-status:helpers:bazaar u.entry))
+      =/  app
+      ?+  -.app  app
+        %urbit
+          =.  install-status.app  local-install-status
+          app
+      ==
+      =.  catalog.state           (~(put by catalog.state) [app-id app])
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
-      [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]~
+      :~
+        [%give %fact paths bazaar-reaction+!>([%stall-update path stall])]
+      ==
     ::
     ++  member-unrecommend
       |=  [path=space-path:spaces-store =app-id:store]
       ?>  (check-member:security path src.bowl)
       ~&  >  ['unrecommending' path src.bowl app-id]
       =/  stall                   (~(got by stalls.state) path)
-      =/  rec-members=member-set:store           
+      =/  rec-members=member-set:store
         ?:  (~(has by recommended.stall) app-id)
           =/  members     (~(got by recommended.stall) app-id)
           =.  members     (~(del in members) src.bowl)
           members
         ~
-      =.  recommended.stall       
+      =.  recommended.stall
         ?:  =(~(wyt in rec-members) 0)
           (~(del by recommended.stall) app-id)
         (~(put by recommended.stall) [app-id rec-members])
@@ -575,14 +609,62 @@
       ?>  ?=(%ini -.treaties)
       init.treaties
     ::
+    ++  config
+      |=  =desk
+      |^
+      =/  config
+        ?:  config-exists
+          .^(config:store %cx scry-path)
+        :*  size=[10 10]
+            titlebar-border=%.y
+            show-titlebar=%.y
+        ==
+      =?  size.config
+          ?|  (lth -.size.config 1)
+              (lth +.size.config 1)
+              (gth -.size.config 10)
+              (gth +.size.config 10)
+          ==
+        [10 10]
+      config
+      ++  scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)/config/realm
+      ++  exists-scry-path  `path`/(scot %p our.bowl)/[desk]/(scot %da now.bowl)
+      ++  config-exists
+        ?:  =(0 ud:.^(cass:clay %cw exists-scry-path))  %.n
+        .^(? %cu scry-path)
+      --
+    ::
     --
   ++  helpers
     |%
+    ::
+    ++  get-install-status
+      |=  [=app:store]
+      ^-  install-status:store
+      ?>  ?=(%urbit -.app)
+      install-status.app
+    ::
+    ++  determine-app-host
+      |=  [host=ship =app:store]
+      ^-  (unit ship)
+      ?>  ?=(%urbit -.app)
+      ::  if the app has a glob-reference of %ames, use the ship value as the
+      ::   host/origin of the app; otherwise, use the treaty ship
+      ?+  -.href.docket.app  (some host)
+        ::
+        %glob
+          ::
+          ?+  -.location.glob-reference.href.docket.app  (some host)
+            ::
+            %ames  (some ship.location.glob-reference.href.docket.app)
+          ==
+      ==
+
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
       =/  grid-list       ~(val by grid-index)
       =/  current-index   (find [app-id]~ grid-list)
-      ?~  current-index   
+      ?~  current-index
         =.  grid-index    (~(put by grid-index) [(lent grid-list) app-id])
         grid-index
       grid-index
@@ -595,29 +677,20 @@
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
-      =/  hidden     `(set desk)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ^-  [=catalog:store =grid-index:store]
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
-        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed]) (set-grid-index desk grid-index.acc)]
+        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
-      =/  bare-docket
-        [
-          %1
-          title=desk
-          info=''
-          color=`@ux`'0'
-          href=[%site /(scot %tas desk)]
-          image=~
-          version=[major=0 minor=0 patch=0]
-          website=''
-          license=''
-        ]
-      =/  new-app=urbit-app:store    [docket=bare-docket host=(some ship) install-status=%started]
-      new-app
+      ^-  urbit-app:store
+      =/  bare-docket  *docket:docket
+      =.  title.bare-docket  desk
+      =.  href.bare-docket  [%site /(scot %tas desk)]
+      [docket=bare-docket host=(some ship) install-status=%started *config:store]
     ::
     ++  skim-installed
       |=  [=app-id:store =app:store]
@@ -628,7 +701,7 @@
     ::
     ++  we-host
       |=  [path=space-path:spaces-store]
-      ?:  =('our' space.path)  
+      ?:  =('our' space.path)
         %.n
       =(our.bowl ship.path)
     ::
@@ -649,6 +722,7 @@
       ^-  ?
       ?:  ?|  =(app-id %courier)
               =(app-id %realm)
+              =(app-id %realm-wallet)
               =(app-id %garden)
           ==
       %.y  %.n
@@ -657,7 +731,7 @@
 ::
 ++  visas
   |%
-  ++  reaction 
+  ++  reaction
     |=  [rct=reaction:vstore]
     ^-  (quip card _state)
     |^
@@ -668,24 +742,24 @@
       |=  [path=space-path:spaces-store =ship]
       ^-  (quip card _state)
       =/  update-path    /bazaar/(scot %p ship.path)/(scot %tas space.path)
-      ?.  (is-host:core ship.path) 
+      ?.  (is-host:core ship.path)
         ?:  =(our.bowl ship)      ::  we were kicked
           =.  stalls.state        (~(del by stalls.state) path)
           =.  docks.state         (~(del by docks.state) path)
-          :_  state 
+          :_  state
           [%pass update-path %agent [our.bowl %bazaar] %leave ~]~
         ::  another member was kicked
         `state
       =/  stall               (~(got by stalls.state) path)
-      =/  cleaned-recs=[=recommended:store]        
+      =/  cleaned-recs=[=recommended:store]
         %-  ~(rep by recommended.stall)  ::  remove all recommendations from kicked
           |=  [app=[=app-id:store =member-set:store] result=[=recommended:store]]
           =/  rec-members      (~(del in member-set.app) ship)
-          =/  recommeded-map   
+          =/  recommeded-map
             ?:  =(~(wyt in rec-members) 0)
               (~(del by recommended.result) app-id.app)
             (~(put by recommended.result) [app-id.app rec-members])
-          =.  recommended.result    recommeded-map 
+          =.  recommended.result    recommeded-map
           result
       ::
       =.  recommended.stall   recommended.cleaned-recs
@@ -699,7 +773,7 @@
   --
 ++  spaces
   |%
-  ++  reaction 
+  ++  reaction
     |=  [rct=reaction:spaces-store]
     ^-  (quip card _state)
     |^
@@ -746,7 +820,7 @@
       :_  state
       %+  weld  recs
       ^-  (list card)
-      :~  
+      :~
         [%pass watch-path %agent [ship.path %bazaar] %watch watch-path]
       ==
     ::
@@ -756,11 +830,31 @@
 ++  treaty-update
   |=  [upd=update:treaty:treaty]
   ^-  (quip card _state)
-  |^  
+  |^
   ?+  -.upd    `state
+    %ini       (on-ini +.upd)
     %add       (on-add +.upd)
     :: %del       (on-del +.upd)
   ==
+  ::
+  ::  @~lodlev-migdev - at this point, dockets have been loaded into the app catalog;
+  ::   therefore use this as an opportunity to set the host value of each app in the catalog
+  ++  on-ini
+    |=  [init=(map [=ship =desk] =treaty:treaty)]
+    ^-  (quip card _state)
+    =/  updated-catalog=catalog:store
+      %-  ~(rep by init)
+        |=  [[[=ship =desk] =treaty:treaty] result=(map app-id:store app:store)]
+        =/  app  (~(get by catalog.state) desk)
+        ?~  app  result
+        
+        ?.  =(%urbit -.u.app)   (~(put by result) desk u.app) ::  host only applies to urbit apps
+        ?>  ?=(%urbit -.u.app)                                :: update app host
+        =.  host.u.app          (determine-app-host:helpers:bazaar ship u.app)
+        (~(put by result) desk u.app)
+    ::
+    =.  catalog.state     (~(uni by catalog.state) updated-catalog)
+    `state
   ::
   ++  on-add
     |=  [=treaty:treaty]
@@ -776,9 +870,9 @@
       `state
     ::  trigger docker install
     :_  state
-    :~  
+    :~
       [%pass /docket-install %agent [our.bowl %docket] %poke docket-install+!>([ship.treaty desk.treaty])]
-    == 
+    ==
   ::
   :: ++  on-del
   ::   |=  [=ship =desk]
@@ -811,17 +905,20 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-new] => {<[ship alliance]>}" ~)
     `state
   ::
   ++  on-add
     |=  [=ship]
     ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-add] => {<ship>}" ~)
     :: =/  =update:treaty:treaty  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
     `state
   ::
   ++  on-del
     |=  [=ship]
     ^-  (quip card _state)
+    %-  (slog leaf+"{<dap.bowl>}: ally-update [on-del] => {<ship>}" ~)
     `state
   --
 ::  charge arms
@@ -837,7 +934,7 @@
   ::
   ++  add
     |=  [=desk =charge:docket]
-    ^-  (quip card _state) 
+    ^-  (quip card _state)
     ?-  -.chad.charge
       %install    (update-catalog-app desk charge %started)
       %hung       (update-catalog-app desk charge %failed)
@@ -848,16 +945,18 @@
     ::
     ++  update-catalog-app
       |=  [=desk =charge:docket status=?(%started %failed %suspended %installed)]
-      =/  hide-desks              `(set @tas)`(silt ~['realm' 'wallet' 'courier' 'garden'])
+      =/  hide-desks              `(set @tas)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ?:  (~(has in hide-desks) desk)
         `state
       =/  app                     (~(get by catalog.state) desk)
-      =/  app  ?~  app  [%urbit docket.charge ~ status]
+      =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core desk)]
         ?>  ?=(%urbit -.u.app)
         =.  install-status.u.app  status
         =.  docket.u.app          docket.charge
         u.app
       ?>  ?=(%urbit -.app)
+      :: update app host to reflect any changes to the app host (origin)
+      =.  host.app                ?~(host.app ~ (determine-app-host:helpers:bazaar u.host.app app))
       =.  catalog.state           (~(put by catalog.state) desk app)
       =.  grid-index.state        (set-grid-index:helpers:bazaar desk grid-index.state)
       :_  state

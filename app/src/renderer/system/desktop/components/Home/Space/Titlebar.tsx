@@ -1,25 +1,19 @@
-import { FC, MouseEvent, useEffect, useMemo } from 'react';
+import { FC, MouseEvent, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
-import {
-  Flex,
-  SpacePicture,
-  Input,
-  Icons,
-  IconButton,
-} from 'renderer/components';
+import { Flex, SpacePicture, Icons, IconButton } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import AppSearchApp from '../AppInstall/AppSearch';
 import { useServices } from 'renderer/logic/store';
 
-type SpaceTitlebarProps = {
+interface SpaceTitlebarProps {
   space: SpaceModelType;
   membersCount: number;
   showAppGrid: boolean;
   showMembers: boolean;
   onMemberClick: (evt: MouseEvent) => void;
   onToggleApps: (evt: MouseEvent) => void;
-};
+}
 
 export const SpaceTitlebar: FC<SpaceTitlebarProps> = observer(
   (props: SpaceTitlebarProps) => {

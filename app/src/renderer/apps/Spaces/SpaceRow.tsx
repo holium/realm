@@ -1,12 +1,12 @@
-import { FC, useMemo, useRef, useState } from 'react';
+import { FC, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, darken, lighten } from 'polished';
+import { rgba, darken } from 'polished';
 import styled, { css } from 'styled-components';
-import { ContextMenu, Flex, Icons, Text } from 'renderer/components';
+import { ContextMenu, Flex, Icons, Text, Crest } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { pluralize } from 'renderer/logic/lib/text';
 import { observer } from 'mobx-react';
 
@@ -17,11 +17,11 @@ export const EmptyGroup = styled.div`
   border-radius: 4px;
 `;
 
-type RowProps = {
+interface RowProps {
   theme: ThemeType;
   selected?: boolean;
   customBg: string;
-};
+}
 
 export const SpaceRowStyle = styled(motion.div)<RowProps>`
   height: 52px;
@@ -48,42 +48,54 @@ export const SpaceRowStyle = styled(motion.div)<RowProps>`
         `}
 `;
 
-type SpaceRowProps = {
+interface SpaceRowProps {
   selected: boolean;
   space: SpaceModelType;
   onSelect: (spaceKey: string) => void;
-};
+}
 
 export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { theme, membership } = useServices();
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const { theme, membership, ship } = useServices();
   // const {} =
   const rowRef = useRef<any>(null);
 
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
 
+  const roles = membership.spaces.get(space.path)!.get(ship!.patp)!.roles
   const contextMenuItems = [
+    (roles.includes('owner') || roles.includes('admin')) &&
     {
       id: `space-row-${space.path}-btn-edit`,
       label: 'Edit',
       onClick: (evt: any) => {
-        // evt.stopPropagation();
-        // DesktopActions.toggleDevTools();
+        ShellActions.setBlur(true);
+        ShellActions.openDialogWithStringProps('edit-space', {space: space.path});
       },
     },
-    {
-      id: `space-row-${space.path}-btn-delete`,
-      label: 'Delete',
-      loading: deleteLoading,
-      onClick: (evt: any) => {
-        setDeleteLoading(true);
-        SpacesActions.deleteSpace(space.path).then((_response: any) => {
-          setDeleteLoading(false);
-        });
-        // DesktopActions.toggleDevTools();
-      },
-    },
+    membership.spaces.get(space.path)!.get(ship!.patp)!.roles.includes('owner')
+      ? {
+          id: `space-row-${space.path}-btn-delete`,
+          label: 'Delete',
+          onClick: (evt: any) => {
+            ShellActions.setBlur(true);
+            ShellActions.openDialogWithStringProps('delete-space-dialog', {
+              path: space.path,
+              name: space.name,
+            });
+          },
+        }
+      : {
+          id: `space-row-${space.path}-btn-leave`,
+          label: 'Leave',
+          onClick: (evt: any) => {
+            ShellActions.setBlur(true);
+            ShellActions.openDialogWithStringProps('leave-space-dialog', {
+              path: space.path,
+              name: space.name,
+            });
+          },
+        },
   ];
 
   const contextMenuButtonIds = contextMenuItems.map((item: any) => item.id);
@@ -99,7 +111,6 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
       onClick={(evt: any) => {
         // If a menu item is clicked
         if (contextMenuButtonIds.includes(evt.target.id)) {
-          return;
         } else {
           onSelect(space.path);
         }
@@ -125,7 +136,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
             src={space.picture}
           />
         ) : (
-          <EmptyGroup color={space.color! || '#000000'} />
+          <EmptyGroup color={space.color || '#000000'} />
         )}
         <Flex ml="10px" flexDirection="column">
           <Text

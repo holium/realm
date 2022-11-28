@@ -28,7 +28,34 @@
   ++  on-init
     ^-  (quip card _this)
     =.  is-public.state     %.y
-    ::  TODO import from pals if installed
+    =/  has-pals  .^(? %gu /(scot %p our.bowl)/pals/(scot %da now.bowl))
+    ?:  has-pals
+      =/  pals-targets  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/targets/noun)
+      =/  pals-leeches  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/leeches/noun)
+      =/  pals-mutuals  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/mutuals/noun)
+      =/  mutuals
+        %-  malt
+        ^-  (list [ship friend:store])
+        =/  ship-list  ~(tap in pals-mutuals)
+        %+  turn  ship-list
+          |=  =ship
+          [ship [pinned=%.n tags=*(set cord) status=%fren]]
+      =/  following
+        %-  malt
+        ^-  (list [ship friend:store])
+        =/  ship-list  ~(tap in pals-targets)
+        %+  turn  ship-list
+          |=  =ship
+          [ship [pinned=%.n tags=*(set cord) status=%following]]
+      =/  followers
+        %-  malt
+        ^-  (list [ship friend:store])
+        =/  ship-list  ~(tap in pals-leeches)
+        %+  turn  ship-list
+          |=  =ship
+          [ship [pinned=%.n tags=*(set cord) status=%follower]]
+      =/  pals-friends  (~(uni by followers) (~(uni by following) mutuals))
+      `this(friends pals-friends)
     `this
   ::
   ++  on-save
@@ -36,12 +63,20 @@
     !>(state)
   ::
   ++  on-load
-    |=  old-state=vase
+    |=  =vase
     ^-  (quip card:agent:gall agent:gall)
-    =/  old  !<(versioned-state old-state)
-    ?-  -.old
-      %0  `this(state old)
-    ==
+    =/  old=(unit state-0)
+      (mole |.(!<(state-0 vase)))  
+    ?^  old
+      `this(state u.old)
+    ~&  >>  'nuking old %friends state' ::  temporarily doing this for making development easier
+    =^  cards  this  on-init
+    :_  this
+    =-  (welp - cards)
+    %+  turn  ~(tap in ~(key by wex.bowl))
+    |=  [=wire =ship =term] 
+    ^-  card
+    [%pass wire %agent [ship term] %leave ~]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -105,7 +140,7 @@
   ~&  >  ['adding friend' ship]
   ?:  (~(has by friends.state) ship)   :: checks if is fren is added
       =/  added-fren            (~(got by friends.state) ship)
-      =.  mutual.added-fren     %.y
+      =.  status.added-fren     %fren
       =.  friends.state         (~(put by friends.state) [ship added-fren])
       :_  state
       :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%yes-fren ~])]  :: confirms you are mutual fren
@@ -116,7 +151,7 @@
     [
       pinned=%.n
       tags=(silt `(list cord)`[~])
-      mutual=%.n
+      status=%following
     ]
   =.  friends.state   (~(put by friends.state) [ship fren])
   :_  state
@@ -153,7 +188,9 @@
     [
       pinned=%.n
       tags=(silt `(list cord)`[~])
-      mutual=is-added
+      ?:  is-added
+        %fren
+      %follower
     ]
   ?:  is-added   :: checks if is fren is added
     =.  friends.state       (~(put by friends.state) [ship fren])
@@ -171,7 +208,7 @@
   ^-  (quip card _state)
   ?<  =(our.bowl src.bowl)              ::  we can't yes ourselves
   =/  prev-fren           (~(got by friends.state) ship)
-  =.  mutual.prev-fren    %.y
+  =.  status.prev-fren    %fren
   =.  friends.state       (~(put by friends.state) [ship prev-fren])
   :_  state
   :~  [%give %fact [/all ~] friends-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers
@@ -184,7 +221,7 @@
   ?.  (~(has by friends.state) ship)    ::  checks if is not fren is added
     `state
   =/  prev-fren           (~(got by friends.state) ship)
-  =.  mutual.prev-fren    %.n
+  =.  status.prev-fren    %following
   =.  friends.state       (~(put by friends.state) [ship prev-fren])
   :_  state
   :~  [%give %fact [/all ~] friends-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers

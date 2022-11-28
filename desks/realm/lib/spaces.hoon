@@ -23,6 +23,7 @@
     [
       path=[ship slug]
       name=name:payload
+      description=description:payload
       type=type:payload
       access=access:payload
       picture=picture:payload
@@ -172,6 +173,7 @@
     ++  add-payload
       %-  ot
       :~  [%name so]
+          [%description so]
           [%type space-type]
           [%access access]
           [%picture so]
@@ -180,8 +182,10 @@
       ==
     ::
     ++  edit-payload
-      %-  of
+      %-  ot
       :~  [%name so]
+          [%description so]
+          [%access (su (perk %public %private ~))]
           [%picture so]
           [%color so]
           [%theme thm]
@@ -315,6 +319,8 @@
     %-  pairs
     :~  ['path' s+(spat /(scot %p ship.path.space)/(scot %tas space.path.space))]
         ['name' s+name.space]
+        ['description' s+description.space]
+        ['access' s+access.space]
         ['type' s+type.space]
         ['picture' s+picture.space]
         ['color' s+color.space]

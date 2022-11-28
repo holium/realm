@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { darken } from 'polished';
+import { darken, transparentize } from 'polished';
 // @ts-expect-error its there...
 import UrbitSVG from '../../../../assets/urbit.svg';
 import {
@@ -16,7 +16,6 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { HostingPlanet } from 'os/api/holium';
 import { theme } from 'renderer/theme';
-import { transparentize } from 'polished';
 
 interface AvailablePlanetProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -103,13 +102,13 @@ const AvailablePlanet: FC<AvailablePlanetProps> = (
 };
 
 const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
-  let [planets, setPlanets] = useState<HostingPlanet[]>([]);
-  let [selectedIndex, setSelectedIndex] = useState<number>(0);
-  let loading = planets.length === 0;
+  const [planets, setPlanets] = useState<HostingPlanet[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const loading = planets.length === 0;
 
   useEffect(() => {
-    let getPlanets = async () => {
-      let result = await OnboardingActions.getAvailablePlanets();
+    const getPlanets = async () => {
+      const result = await OnboardingActions.getAvailablePlanets();
       setPlanets(result);
     };
 
@@ -117,7 +116,7 @@ const SelectPatp: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   }, []);
 
   function selectPlanet() {
-    let selectedPlanet = planets[selectedIndex];
+    const selectedPlanet = planets[selectedIndex];
     OnboardingActions.selectPlanet(selectedPlanet);
     props.onNext && props.onNext();
   }

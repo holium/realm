@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo } from 'react';
+import { FC, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
 
@@ -7,12 +7,12 @@ import { ThemeModelType } from 'os/services/theme.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 
-type WalletTrayProps = {
+interface WalletTrayProps {
   theme: ThemeModelType;
-};
+}
 
 const dimensions = {
-  height: 580,
+  height: 620,
   width: 330,
 };
 

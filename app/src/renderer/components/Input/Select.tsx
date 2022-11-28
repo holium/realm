@@ -6,10 +6,10 @@ import { ThemeType } from 'renderer/theme';
 import MenuItemStyle from '../MenuItem/MenuItem.styles';
 import ReactDOM from 'react-dom';
 
-type SelectWrapperStyle = {
+interface SelectWrapperStyle {
   customBg?: string;
   theme: ThemeType;
-};
+}
 
 // const SelectItem = styled(MenuItemStyle)``;
 
@@ -58,10 +58,10 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
     const domNode = ReactDOM.findDOMNode(selectRef.current);
     const dropdownNode = document.getElementById('select-dropdown');
     const isVisible = dropdownNode
-      ? dropdownNode!.getAttribute('data-is-open') === 'true'
+      ? dropdownNode.getAttribute('data-is-open') === 'true'
       : false; // get if the picker is visible currently
     if (!domNode || !domNode.contains(event.target)) {
-      if ('select-input' === event.target.id) {
+      if (event.target.id === 'select-input') {
         return;
       }
       // You are clicking outside
@@ -132,6 +132,7 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
         variants={showMenu}
         initial="exit"
         animate={open ? 'enter' : 'exit'}
+        customBg={props.customBg}
       >
         {options
           .filter((option: RadioOption) => !option.hidden)

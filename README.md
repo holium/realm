@@ -2,12 +2,19 @@
 
 A desktop environment for Urbit.
 
+We use yarn workspace to manage the multiple modules.
+
 ## Getting started
+Below is a detailed guide to getting things built or you can just download from Releases. If you download from releases, you will have to include a github token env when you open Realm for now, see docs in [`/app/release/app`](https://github.com/holium/realm/tree/main/app/release/app/README.md).
+
+In the debug build you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com`. 
+
+`~hostyv` hosts several of the desks needed for Realm, you may have to manually install them for now.
+
+## Dev setup
 
 In order to run Urbit locally, you will need to create a local fake ship. Once these ships are
 created, you can then go to [`/app/README.md`](/app/README.md) to get started with Realm.
-
-We use yarn workspace to manage the multiple modules.
 
 ### 1. Build UI
 
@@ -19,6 +26,14 @@ yarn
 ```
 
 #### Yarn link /libs
+
+Link all libs (It'll take a little while):
+
+```zsh
+yarn link:all
+```
+
+Or link them individually:
 
 `@holium/realm-multiplayer`:
 

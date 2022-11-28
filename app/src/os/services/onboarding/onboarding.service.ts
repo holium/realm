@@ -23,8 +23,8 @@ import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
 
 export class OnboardingService extends BaseService {
-  private db: Store<OnboardingStoreType>; // for persistance
-  private state: OnboardingStoreType; // for state management
+  private readonly db: Store<OnboardingStoreType>; // for persistance
+  private readonly state: OnboardingStoreType; // for state management
   private conduit?: Conduit;
 
   handlers = {
@@ -54,106 +54,120 @@ export class OnboardingService extends BaseService {
   };
 
   static preload = {
-    setStep(step: OnboardingStep) {
-      return ipcRenderer.invoke('realm.onboarding.setStep', step);
+    async setStep(step: OnboardingStep) {
+      return await ipcRenderer.invoke('realm.onboarding.setStep', step);
     },
 
-    agreedToDisclaimer() {
-      return ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
+    async agreedToDisclaimer() {
+      return await ipcRenderer.invoke('realm.onboarding.agreedToDisclaimer');
     },
 
-    checkGatedAccess(code: string) {
-      return ipcRenderer.invoke('realm.onboarding.checkGatedAccess', code);
+    async checkGatedAccess(code: string) {
+      return await ipcRenderer.invoke(
+        'realm.onboarding.checkGatedAccess',
+        code
+      );
     },
 
-    setEmail(email: string) {
-      return ipcRenderer.invoke('realm.onboarding.setEmail', email);
+    async setEmail(email: string) {
+      return await ipcRenderer.invoke('realm.onboarding.setEmail', email);
     },
 
-    verifyEmail(verificationCode: string) {
-      return ipcRenderer.invoke(
+    async verifyEmail(verificationCode: string) {
+      return await ipcRenderer.invoke(
         'realm.onboarding.verifyEmail',
         verificationCode
       );
     },
 
-    resendEmailConfirmation() {
-      return ipcRenderer.invoke('realm.onboarding.resendEmailConfirmation');
+    async resendEmailConfirmation() {
+      return await ipcRenderer.invoke(
+        'realm.onboarding.resendEmailConfirmation'
+      );
     },
 
-    setSeenSplash() {
-      return ipcRenderer.invoke('realm.onboarding.setSeenSplash');
+    async setSeenSplash() {
+      return await ipcRenderer.invoke('realm.onboarding.setSeenSplash');
     },
 
-    closeConduit() {
-      return ipcRenderer.invoke('realm.onboarding.closeConduit');
+    async closeConduit() {
+      return await ipcRenderer.invoke('realm.onboarding.closeConduit');
     },
 
-    setSelfHosted(selfHosted: boolean) {
-      return ipcRenderer.invoke('realm.onboarding.selfHosted', selfHosted);
+    async setSelfHosted(selfHosted: boolean) {
+      return await ipcRenderer.invoke(
+        'realm.onboarding.selfHosted',
+        selfHosted
+      );
     },
 
-    getAvailablePlanets() {
-      return ipcRenderer.invoke('realm.onboarding.getAvailablePlanets');
+    async getAvailablePlanets() {
+      return await ipcRenderer.invoke('realm.onboarding.getAvailablePlanets');
     },
 
-    prepareCheckout(billingPeriod: string) {
-      return ipcRenderer.invoke(
+    async prepareCheckout(billingPeriod: string) {
+      return await ipcRenderer.invoke(
         'realm.onboarding.prepareCheckout',
         billingPeriod
       );
     },
 
-    completeCheckout() {
-      return ipcRenderer.invoke('realm.onboarding.completeCheckout');
+    async completeCheckout() {
+      return await ipcRenderer.invoke('realm.onboarding.completeCheckout');
     },
 
-    getAccessCode(code: string) {
-      return ipcRenderer.invoke('realm.onboarding.getAccessCode', code);
+    async getAccessCode(code: string) {
+      return await ipcRenderer.invoke('realm.onboarding.getAccessCode', code);
     },
 
-    setAccessCode(accessCode: AccessCode) {
-      return ipcRenderer.invoke('realm.onboarding.setAccessCode', accessCode);
+    async setAccessCode(accessCode: AccessCode) {
+      return await ipcRenderer.invoke(
+        'realm.onboarding.setAccessCode',
+        accessCode
+      );
     },
 
-    checkShipBooted() {
-      return ipcRenderer.invoke('realm.onboarding.checkShipBooted');
+    async checkShipBooted() {
+      return await ipcRenderer.invoke('realm.onboarding.checkShipBooted');
     },
 
-    addShip(shipInfo: ShipConnectionData) {
-      return ipcRenderer.invoke('realm.onboarding.addShip', shipInfo);
+    async addShip(shipInfo: ShipConnectionData) {
+      return await ipcRenderer.invoke('realm.onboarding.addShip', shipInfo);
     },
 
-    selectPlanet(patp: HostingPlanet) {
-      return ipcRenderer.invoke('realm.onboarding.selectPlanet', patp);
+    async selectPlanet(patp: HostingPlanet) {
+      return await ipcRenderer.invoke('realm.onboarding.selectPlanet', patp);
     },
 
-    getProfile() {
-      return ipcRenderer.invoke('realm.onboarding.getProfile');
+    async getProfile() {
+      return await ipcRenderer.invoke('realm.onboarding.getProfile');
     },
 
-    setProfile(profileData: {
+    async setProfile(profileData: {
       nickname: string;
       color: string;
       avatar: string | null;
     }) {
-      return ipcRenderer.invoke('realm.onboarding.setProfile', profileData);
+      return await ipcRenderer.invoke(
+        'realm.onboarding.setProfile',
+        profileData
+      );
     },
 
-    setPassword(password: string) {
-      return ipcRenderer.invoke('realm.onboarding.setPassword', password);
+    async setPassword(password: string) {
+      return await ipcRenderer.invoke('realm.onboarding.setPassword', password);
     },
 
-    installRealm() {
-      return ipcRenderer.invoke('realm.onboarding.installRealm');
+    async installRealm() {
+      return await ipcRenderer.invoke('realm.onboarding.installRealm');
     },
 
-    completeOnboarding() {
-      return ipcRenderer.invoke('realm.onboarding.completeOnboarding');
+    async completeOnboarding() {
+      return await ipcRenderer.invoke('realm.onboarding.completeOnboarding');
     },
 
-    exitOnboarding() {
-      return ipcRenderer.invoke('realm.onboarding.exit');
+    async exitOnboarding() {
+      return await ipcRenderer.invoke('realm.onboarding.exit');
     },
 
     onExit: (callback: any) =>
@@ -168,14 +182,14 @@ export class OnboardingService extends BaseService {
       accessPropertiesByDotNotation: true,
     });
 
-    let persistedState: OnboardingStoreType = this.db.store;
+    const persistedState: OnboardingStoreType = this.db.store;
     this.state =
       Object.keys(persistedState).length !== 0
         ? OnboardingStore.create(castToSnapshot(persistedState))
         : OnboardingStore.create();
 
     onSnapshot(this.state, (snapshot) => {
-      this.db!.store = castToSnapshot(snapshot);
+      this.db.store = castToSnapshot(snapshot);
     });
 
     onPatch(this.state, (patch) => {
@@ -188,7 +202,7 @@ export class OnboardingService extends BaseService {
     });
 
     Object.keys(this.handlers).forEach((handlerName: any) => {
-      // @ts-ignore
+      // @ts-expect-error
       ipcMain.handle(handlerName, this.handlers[handlerName].bind(this));
     });
 
@@ -209,12 +223,17 @@ export class OnboardingService extends BaseService {
    * @param patp
    * @param substring
    */
-  async tempConduit(url: string, patp: string, cookie: string) {
+  async tempConduit(
+    url: string,
+    patp: string,
+    cookie: string,
+    code: string | undefined = undefined
+  ) {
     if (this.conduit !== undefined) {
       await this.closeConduit();
     }
     this.conduit = new Conduit();
-    await this.conduit.init(url, patp.substring(1), cookie!);
+    await this.conduit.init(url, patp.substring(1), cookie!, code);
     return this.conduit;
   }
 
@@ -244,7 +263,7 @@ export class OnboardingService extends BaseService {
       return { success: true, message: 'Access succeeded.' };
     }
 
-    let accessCode = await this.core.holiumClient.getAccessCode(code);
+    const accessCode = await this.core.holiumClient.getAccessCode(code);
     if (accessCode && accessCode.type === 'ACCESS') {
       if (accessCode.singleUse && accessCode.redeemed) {
         return {
@@ -266,12 +285,13 @@ export class OnboardingService extends BaseService {
   }
 
   async setEmail(_event: any, email: string) {
+    console.log('trying to set email');
     const { auth } = this.core.services.identity;
-    let account = await this.core.holiumClient.createAccount(email);
+    // let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
-    this.state.setVerificationCode(account.verificationCode);
+    // this.state.setVerificationCode(account.verificationCode);
 
-    auth.setAccountId(account.id);
+    // auth.setAccountId(account.id);
 
     if (
       (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') ||
@@ -286,7 +306,7 @@ export class OnboardingService extends BaseService {
     if (!auth.accountId)
       throw new Error('Accout must be set before resending verification code.');
 
-    let newVerificationCode =
+    const newVerificationCode =
       await this.core.holiumClient.resendVerificationCode(auth.accountId);
     this.state.setVerificationCode(newVerificationCode);
 
@@ -297,7 +317,7 @@ export class OnboardingService extends BaseService {
     if (!this.state.verificationCode)
       throw new Error('Verification code must be set before verifying.');
 
-    let verified = this.state.verificationCode === verificationCode;
+    const verified = this.state.verificationCode === verificationCode;
     if (verified) this.state.setVerificationCode(null);
 
     return verified;
@@ -306,6 +326,7 @@ export class OnboardingService extends BaseService {
   setSeenSplash(_event: any) {
     this.state.setSeenSplash();
   }
+
   setSelfHosted(_event: any, selfHosted: boolean) {
     this.state.setSelfHosted(selfHosted);
   }
@@ -315,7 +336,7 @@ export class OnboardingService extends BaseService {
     if (!auth.accountId)
       throw new Error('Accout must be set before getting available planets.');
 
-    let planets = await this.core.holiumClient.getPlanets(
+    const planets = await this.core.holiumClient.getPlanets(
       auth.accountId,
       this.state.accessCode?.id
     );
@@ -326,8 +347,8 @@ export class OnboardingService extends BaseService {
     _event: any,
     code: string
   ): Promise<{ invalid: boolean; accessCode: AccessCode | null }> {
-    let accessCode = await this.core.holiumClient.getAccessCode(code);
-    return { invalid: accessCode ? false : true, accessCode };
+    const accessCode = await this.core.holiumClient.getAccessCode(code);
+    return { invalid: !accessCode, accessCode };
   }
 
   async prepareCheckout(_event: any, billingPeriod: string) {
@@ -335,7 +356,7 @@ export class OnboardingService extends BaseService {
       throw new Error('invalid billing period');
 
     const { auth } = this.core.services.identity;
-    let { clientSecret } = await this.core.holiumClient.prepareCheckout(
+    const { clientSecret } = await this.core.holiumClient.prepareCheckout(
       auth.accountId!,
       this.state.planet!.patp,
       billingPeriod
@@ -350,7 +371,7 @@ export class OnboardingService extends BaseService {
 
   async completeCheckout() {
     const { auth } = this.core.services.identity;
-    let { checkoutComplete } = await this.core.holiumClient.completeCheckout(
+    const { checkoutComplete } = await this.core.holiumClient.completeCheckout(
       auth.accountId!,
       this.state.planet!.patp
     );
@@ -367,34 +388,32 @@ export class OnboardingService extends BaseService {
     const { auth } = this.core.services.identity;
     let ships = await this.core.holiumClient.getShips(auth.accountId!);
     let ship = ships.find((ship) => ship.patp === this.state.planet!.patp);
+    if (!ship) return false;
 
-    if (!ship?.code) {
-      return false;
-    }
+    const session = this.core.getSession();
 
     await this.addShip('_event', {
       patp: ship.patp,
       url: ship.link!,
-      code: ship.code,
+      code: session.code,
     });
     return true;
   }
 
   async addShip(
     _event: any,
-    shipData: { patp: string; url: string; code: string }
+    shipData: {
+      patp: string;
+      url: string;
+      code: string;
+    }
   ) {
     try {
-      let { patp, url } = shipData;
-      let cookie = await getCookie(shipData);
-
-      this.state.setShip({
-        patp,
-        cookie,
-        url,
-      });
-
-      return { url, cookie, patp };
+      let { patp, url, code } = shipData;
+      const cookie = await getCookie({ patp, url, code });
+      this.core.saveSession({ ship: patp, url, cookie, code });
+      this.state.setShip({ patp, url });
+      return { url, cookie, patp, code: code };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
       throw new Error('Failed to connect to ship');
@@ -406,8 +425,10 @@ export class OnboardingService extends BaseService {
   }
 
   async getProfile(_event: any) {
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
     // await this.tempConduit.init(url, patp.substring(1), cookie!);
 
     if (!this.state.ship)
@@ -429,8 +450,10 @@ export class OnboardingService extends BaseService {
   ) {
     if (!this.state.ship)
       throw new Error('Cannot save profile, onboarding ship not set.');
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
 
     try {
       const updatedProfile = await ContactApi.saveContact(
@@ -449,7 +472,7 @@ export class OnboardingService extends BaseService {
   }
 
   async setPassword(_event: any, password: string) {
-    let encryptedPassword = safeStorage
+    const encryptedPassword = safeStorage
       .encryptString(password)
       .toString('base64');
     this.state.setEncryptedPassword(encryptedPassword);
@@ -470,8 +493,9 @@ export class OnboardingService extends BaseService {
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
     console.log('installing realm from %o...', process.env.INSTALL_MOON);
-    const { url, patp, cookie } = this.state.ship!;
-    const tempConduit = await this.tempConduit(url, patp, cookie!);
+    const { url, patp } = this.state.ship!;
+    const { cookie, code } = this.core.getSession();
+    const tempConduit = await this.tempConduit(url, patp, cookie!, code);
     this.state.beginRealmInstall();
     for (let idx = 0; idx < desks.length; idx++) {
       const response: string = await DocketApi.installDesk(
@@ -503,11 +527,11 @@ export class OnboardingService extends BaseService {
       }
     }
 
-    let decryptedPassword = safeStorage.decryptString(
+    const decryptedPassword = safeStorage.decryptString(
       Buffer.from(this.state.encryptedPassword!, 'base64')
     );
     this.core.passwords.setPassword(this.state.ship.patp, decryptedPassword);
-    let passwordHash = await bcrypt.hash(decryptedPassword, 12);
+    const passwordHash = await bcrypt.hash(decryptedPassword, 12);
 
     const ship = toJS(this.state.ship);
     const authShip = AuthShip.create({
@@ -515,6 +539,18 @@ export class OnboardingService extends BaseService {
       id: `auth${ship.patp}`,
       passwordHash,
     });
+
+    // force cookie to null to ensure user must login once onboarding is complete
+    const session = this.core.getSession();
+    this.core.saveSession({ ...session, cookie: null });
+
+    this.core.services.identity.auth.storeCredentials(
+      ship.patp,
+      decryptedPassword,
+      {
+        code: session.code,
+      }
+    );
 
     this.core.services.identity.auth.storeNewShip(authShip);
     this.core.services.identity.auth.setFirstTime();

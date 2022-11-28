@@ -1,10 +1,7 @@
 import { FC, useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Spinner, Flex } from 'renderer/components';
-import {
-  WindowModelType,
-  WindowModelProps,
-} from 'os/services/shell/desktop.model';
+import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
@@ -24,9 +21,8 @@ const View = styled.div<{ hasTitleBar?: boolean }>`
 
 export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   const { isResizing, isDragging, window } = props;
-  const { ship, shell, desktop, theme } = useServices();
+  const { ship, shell, desktop, theme, spaces } = useServices();
   const [ready, setReady] = useState(false);
-  const [cssId, setCssId] = useState(0);
   const elementRef = useRef(null);
   const webViewRef = useRef<any>(null);
 
@@ -58,21 +54,23 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
     webview?.addEventListener('did-stop-loading', onStopLoading);
 
     if (window && ship) {
-      webview?.addEventListener('did-finish-load', () => {
-        webview!.send('mouse-color', desktop.mouseColor);
-        let css = '* { cursor: none !important; }';
-        webview!.insertCSS(css);
+      webview?.addEventListener('dom-ready', () => {
+        webview.send('mouse-color', desktop.mouseColor);
+        const css = '* { cursor: none !important; }';
+        webview.insertCSS(css);
         setReady(true);
       });
 
       webview?.addEventListener('close', () => {
-        // @ts-ignore
-        webview!.closeDevTools();
+        // @ts-expect-error
+        webview.closeDevTools();
       });
 
-      let appUrl = window.glob
-        ? `${ship!.url}/apps/${window.id!}`
-        : `${ship!.url}/${window.id!}`;
+      let appUrl = `${ship.url}/apps/${window.id}/?spaceId=${spaces.selected?.path}`;
+
+      if (window.href?.site) {
+        appUrl = `${ship.url}${window.href?.site}?spaceId=${spaces.selected?.path}`;
+      }
 
       DesktopActions.openAppWindow('', toJS(window));
       setAppConfig({ url: appUrl });
@@ -83,7 +81,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
   }, [window?.id, ship]);
 
   useEffect(() => {
-    let css = `
+    const css = `
       :root {
         --rlm-font: 'Rubik', sans-serif;
         --rlm-base-color: ${theme.currentTheme.backgroundColor};
@@ -120,12 +118,12 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       const webview: any = document.getElementById(
         `${window.id}-urbit-webview`
       );
-      setCssId(webview!.insertCSS(css));
+      webview.insertCSS(css);
       webview?.addEventListener('did-frame-finish-load', () => {
-        setCssId(webview!.insertCSS(css));
+        webview.insertCSS(css);
       });
     }
-  }, [theme.currentTheme.id, theme.currentTheme.mode, ready]);
+  }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
 
   const onMouseEnter = useCallback(() => {
     shell.setIsMouseInWebview(true);
@@ -163,7 +161,8 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           style={{
-            width: 'inherit',
+            display: 'flex',
+            // width: 'inherit',
             height: '100%',
             position: 'relative',
             background: theme.currentTheme.windowColor,

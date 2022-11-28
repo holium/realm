@@ -1,25 +1,36 @@
-import { FC, useRef, useMemo, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { FixedSizeList as List } from 'react-window';
 import { rgba, darken } from 'polished';
-import { toJS } from 'mobx';
 
 import { Flex, Text, PersonRow } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
+import { FriendType } from 'os/services/ship/models/friends';
 
 interface IFriendsList {
   friends: any[];
 }
 
 export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
+  const paneRef = useRef(null);
   const { theme, ship, contacts, friends } = useServices();
-
+  const [height, setHeight] = useState(400);
   const { textColor, windowColor } = theme.currentTheme;
   const rowBg = rgba(darken(0.075, windowColor), 0.5);
 
   const pinned = friends.pinned || [];
   const all = friends.unpinned || [];
+
+  useEffect(() => {
+    let pinnedHeight = 15 + (pinned.length ? pinned.length * 38 : 60);
+    let paneHeight = 400;
+
+    if (paneRef.current) {
+      paneHeight = (paneRef.current as HTMLDivElement).clientHeight - 33; // 33 is the height of the header
+      setHeight(paneHeight - pinnedHeight);
+    }
+  }, [pinned, paneRef.current]);
+
   const onUnpin = (person: any) => {
     ShipActions.editFriend(person.patp, {
       pinned: false,
@@ -35,10 +46,9 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
   };
 
   const RowRenderer = (
-    { index, style }: { index: number; style: any },
-    usePinnedList: boolean
+    person: FriendType & { patp: string },
+    index: number
   ) => {
-    const person = usePinnedList ? pinned[index] : all[index];
     let pinOption = [
       {
         label: 'Unpin',
@@ -47,7 +57,7 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
         },
       },
     ];
-    if (!usePinnedList) {
+    if (!person.pinned) {
       pinOption = [
         {
           label: 'Pin',
@@ -62,6 +72,7 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
 
     return (
       <PersonRow
+        key={person.patp}
         patp={person.patp}
         nickname={contact.nickname}
         sigilColor={contact.color}
@@ -69,7 +80,6 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
         description={contact.bio}
         listId="member-list"
         rowBg={rowBg}
-        style={{ ...style }}
         theme={{
           textColor,
           windowColor,
@@ -92,12 +102,14 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
     friends.list.length === 0 || (pinned.length > 0 && all.length === 0);
 
   return (
-    <>
-      <Flex
-        mt={18}
-        height={pinned.length === 0 ? 60 : 24 + pinned.length * 42}
-        flexDirection="column"
-      >
+    <Flex
+      ref={paneRef}
+      mt={18}
+      height="calc(100% - 90px)"
+      flexDirection="column"
+      overflowY="hidden"
+    >
+      <Flex flexDirection="column">
         <Text
           style={{ textTransform: 'uppercase' }}
           fontSize={1}
@@ -113,7 +125,7 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
-            height={40}
+            height={60}
           >
             <Text fontSize={2} opacity={0.5}>
               {friends.list.length === 0
@@ -122,18 +134,9 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
             </Text>
           </Flex>
         )}
-        <List
-          height={40 * (pinned.length + 1)}
-          width="100%"
-          itemSize={40}
-          itemCount={pinned.length}
-        >
-          {(pinProps: { index: number; style: any }) =>
-            RowRenderer(pinProps, true)
-          }
-        </List>
+        {pinned.map((person, index) => RowRenderer(person, index))}
       </Flex>
-      <Flex mt={18} height={24 + all.length * 42} flexDirection="column">
+      <Flex mt={18} flexDirection="column">
         <Text
           style={{ textTransform: 'uppercase' }}
           fontSize={1}
@@ -159,12 +162,10 @@ export const FriendsList: FC<IFriendsList> = observer((props: IFriendsList) => {
             </Text>
           </Flex>
         )}
-        <List height={400} width="100%" itemSize={40} itemCount={all.length}>
-          {(pinProps: { index: number; style: any }) =>
-            RowRenderer(pinProps, false)
-          }
-        </List>
+        <Flex overflowY="auto" height={height} flexDirection="column">
+          {all.map((person, index) => RowRenderer(person, index))}
+        </Flex>
       </Flex>
-    </>
+    </Flex>
   );
 });

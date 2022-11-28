@@ -1,6 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
-import styled, { css } from 'styled-components';
-import { darken } from 'polished';
+import React, { FC, useState } from 'react';
 import {
   Elements,
   PaymentElement,
@@ -9,22 +7,11 @@ import {
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 // @ts-expect-error its there...
-import UrbitSVG from '../../../../assets/urbit.svg';
-import {
-  Box,
-  Sigil,
-  Grid,
-  Text,
-  Flex,
-  Icons,
-  Button,
-  ActionButton,
-} from 'renderer/components';
+import { Box, Sigil, Text, Flex, Button } from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { AccessCode, HostingPlanet } from 'os/api/holium';
 import { ShellActions } from 'renderer/logic/actions/shell';
 
 interface StripePaymentProps extends BaseDialogProps {
@@ -42,8 +29,8 @@ const stripePromise = loadStripe(
   'pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM'
 );
 const StripePayment: FC<StripePaymentProps> = (props: StripePaymentProps) => {
-  let { identity } = useServices();
-  let clientSecret = identity.auth.clientSecret!;
+  const { identity } = useServices();
+  const clientSecret = identity.auth.clientSecret!;
   return (
     <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
       <MainComponent {...props} />
@@ -53,12 +40,12 @@ const StripePayment: FC<StripePaymentProps> = (props: StripePaymentProps) => {
 
 const MainComponent: FC<StripePaymentProps> = observer(
   (props: StripePaymentProps) => {
-    let stripe = useStripe();
+    const stripe = useStripe();
     const elements = useElements();
-    let { onboarding } = useServices();
+    const { onboarding } = useServices();
 
-    let [message, setMessage] = useState({ type: 'notification', text: '' });
-    let [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState({ type: 'notification', text: '' });
+    const [loading, setLoading] = useState(false);
 
     async function completeCheckout() {
       try {
@@ -127,7 +114,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
                 color={['black', 'white']}
                 simple={false}
                 size={48}
-                patp={onboarding.planet!.patp!}
+                patp={onboarding.planet!.patp}
               />
               <Box>
                 <Text mt={3} flex={1}>
@@ -187,8 +174,12 @@ const MainComponent: FC<StripePaymentProps> = observer(
             <Flex flexDirection="column">
               <Flex
                 flex={6}
-                onMouseEnter={() => ShellActions.setIsMouseInWebview(true)}
-                onMouseLeave={() => ShellActions.setIsMouseInWebview(false)}
+                onMouseEnter={async () =>
+                  await ShellActions.setIsMouseInWebview(true)
+                }
+                onMouseLeave={async () =>
+                  await ShellActions.setIsMouseInWebview(false)
+                }
               >
                 <PaymentElement />
               </Flex>

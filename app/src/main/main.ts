@@ -14,11 +14,10 @@ import {
   BrowserWindow,
   shell,
   session,
-  screen,
   dialog,
   MessageBoxReturnValue,
 } from 'electron';
-import { autoUpdater, UpdateCheckResult } from 'electron-updater';
+import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import isDev from 'electron-is-dev';
 import MenuBuilder from './menu';
@@ -47,6 +46,10 @@ const isDevelopment =
 export interface IAppUpdater {
   checkForUpdates: () => void;
 }
+
+log.transports.file.level = isDevelopment ? 'debug' : 'info';
+log.info(`INSTALL_MOON=${process.env.INSTALL_MOON}`);
+log.info(`GH_TOKEN=${process.env.GH_TOKEN}`);
 
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
@@ -95,7 +98,6 @@ export class AppUpdater implements IAppUpdater {
           setImmediate(() => autoUpdater.quitAndInstall());
         });
     });
-    log.transports.file.level = isDevelopment ? 'debug' : 'info';
     autoUpdater.logger = log;
     // run auto check once every 10 minutes after app starts
     setInterval(() => {
@@ -105,6 +107,7 @@ export class AppUpdater implements IAppUpdater {
     }, 600000);
     autoUpdater.checkForUpdates();
   }
+
   checkForUpdates = () => {
     if (process.env.NODE_ENV === 'development') return;
     this.manualCheck = true;

@@ -1,4 +1,4 @@
-/-  spaces=spaces-store, docket=bazaar-docket, treaty=bazaar-treaty
+/-  spaces=spaces-store, docket=bazaar-docket, treaty=bazaar-treaty, *realm
 |%
 +$  app-id  @tas
 +$  native-app
@@ -6,12 +6,14 @@
       info=@t
       color=cord
       icon=cord
+      =config
   ==
 ::
 +$  web-app
   $:  title=@t
       href=cord
       favicon=cord
+      =config
   ==
 ::
 +$  install-status   ?(%started %failed %suspended %installed %uninstalled %desktop %treaty)
@@ -19,12 +21,13 @@
   $:  =docket:docket
       host=(unit ship)
       =install-status
+      =config
   ==
 ::
 +$  app
   $%  [%native =native-app]
       [%web =web-app]
-      [%urbit =docket:docket host=(unit ship) install-status=?(%started %failed %suspended %installed %uninstalled %desktop %treaty)]
+      [%urbit =docket:docket host=(unit ship) install-status=?(%started %failed %suspended %installed %uninstalled %desktop %treaty) =config]
   ==
 ::
 ::  $catalog: for efficiencies sake, this is the one "master" list of apps
@@ -92,3 +95,4 @@
       [%treaties treaties=(map [=ship =desk] =treaty:treaty)]
   ==
 --
+
