@@ -412,6 +412,7 @@ export class WalletService extends BaseService {
         this.updateBitcoinInfo();
       }
     });
+
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
       if (
         Object.keys(wallets.ethereum).length !== 0 ||
@@ -424,31 +425,33 @@ export class WalletService extends BaseService {
       this.updateEthereumInfo();
       this.state!.bitcoin.initial(wallets.bitcoin);
       this.state!.testnet.initial(wallets.btctestnet);
-      this.updateBitcoinInfo();
+      // this.updateBitcoinInfo();
     });
-    // WalletApi.subscribeToTransactions(
-    //   this.core.conduit!,
-    //   (transaction: any) => {
-    //     if (transaction.network == 'ethereum')
-    //       this.state!.ethereum.wallets.get(
-    //         transaction.index
-    //       )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-    //     //      else if (transaction.network == 'bitcoin')
-    //     //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-    //     /* const tx = this.state!.ethereum.transactions.get(
-    //       transaction.transaction.hash
-    //     ); */
-    //   }
-    // );
+
+    WalletApi.subscribeToTransactions(
+      this.core.conduit!,
+      (transaction: any) => {
+        if (transaction.network === 'ethereum')
+          this.state!.ethereum.wallets.get(
+            transaction.index
+          )!.applyTransactionUpdate(transaction.net, transaction.transaction);
+        //      else if (transaction.network == 'bitcoin')
+        //        this.state!.bitcoin.applyTransactionUpdate(transaction);
+        /* const tx = this.state!.ethereum.transactions.get(
+          transaction.transaction.hash
+        ); */
+      }
+    );
+
     WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
       this.state!.ethereum.setSettings(settings);
     });
 
     this.setNetworkProvider(
-      'realm.tray.wallet.set-network-provider',
+      null,
       'ethereum',
       'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-      //      'http://127.0.0.1:8545'
+      // 'http://127.0.0.1:8545'
     );
 
     if (this.state.navState.view !== WalletView.NEW) {
@@ -497,7 +500,7 @@ export class WalletService extends BaseService {
       this.updateBitcoinInfo();
     });
 
-    console.log('okay transitioning');
+    // console.log('okay transitioning');
     this.state!.navigate(WalletView.LIST);
   }
 
@@ -692,8 +695,8 @@ export class WalletService extends BaseService {
   }
 
   async setNetworkProvider(_event: any, network: string, provider: string) {
-    if (network == 'ethereum') this.state!.ethereum.setProvider(provider);
-    else if (network == 'bitcoin') this.state!.bitcoin.setProvider(provider);
+    if (network === 'ethereum') this.state!.ethereum.setProvider(provider);
+    else if (network === 'bitcoin') this.state!.bitcoin.setProvider(provider);
     // await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
   }
 
@@ -721,17 +724,17 @@ export class WalletService extends BaseService {
     toPatp?: string,
     contractType?: string
   ) {
-    console.log(walletIndex);
-    console.log(to);
-    console.log(amount);
-    console.log(toPatp);
+    // console.log(walletIndex);
+    // console.log(to);
+    // console.log(amount);
+    // console.log(toPatp);
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    console.log(path);
+    // console.log(path);
     // console.log(this.privateKey!.mnemonic!.phrase);
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     const signer = wallet.connect(this.ethProvider!);
-    console.log(amount);
+    // console.log(amount);
     const tx = {
       to,
       value: ethers.utils.parseEther(amount),

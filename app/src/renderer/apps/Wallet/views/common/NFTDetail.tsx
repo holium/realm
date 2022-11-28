@@ -2,7 +2,6 @@ import { EthWalletType } from 'os/services/tray/wallet.model';
 import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Anchor, Icons } from 'renderer/components';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 
@@ -39,19 +38,6 @@ export const NFTDetail: FC = () => {
         >
           {nft.address.slice(0, 18)}... <Icons mb={1} name="Link" size={1} />
         </Anchor>
-      </Flex>
-
-      <Flex
-        position="absolute"
-        top="582px"
-        zIndex={999}
-        onClick={async () => await WalletActions.navigateBack()}
-      >
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
       </Flex>
     </Flex>
   );

@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { darken, lighten } from 'polished';
-
 import { Flex, Icons, Text, Spinner } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -27,24 +26,21 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
         new Date(a.initiatedAt!).getTime() - new Date(b.initiatedAt!).getTime()
     );
 
-  return (
+  return pendingTransactions.length ? (
     <Flex mt={4} width="100%">
-      {pendingTransactions.length ? (
-        <PendingTransaction
-          transaction={pendingTransactions[0]}
-          hide={props.hide}
-        />
-      ) : (
-        <></>
-      )}
+      <PendingTransaction
+        transaction={pendingTransactions[0]}
+        hide={props.hide}
+      />
     </Flex>
-  );
+  ) : null;
 };
 
 interface PendingTransactionProps {
   transaction: TransactionType;
   hide: any;
 }
+
 export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
 ) => {

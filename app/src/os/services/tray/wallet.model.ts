@@ -143,6 +143,7 @@ const BitcoinStore = types
     // updates
     applyWalletUpdate(wallet: any) {
       let walletObj;
+      console.log('applyWalletUpdate', wallet);
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
           index: Number(wallet.key),

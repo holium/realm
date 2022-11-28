@@ -183,7 +183,6 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
-      allowRunningInsecureContent: false,
       sandbox: false,
       contextIsolation: true,
       preload: app.isPackaged

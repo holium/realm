@@ -37,7 +37,7 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
-  const [hidePending, setHidePending] = useState(false);
+  const [hidePending, setHidePending] = useState(true);
   const [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
@@ -46,9 +46,10 @@ export const WalletApp: FC<any> = observer((props: any) => {
     const wallet = walletApp.currentStore.wallets.get(key);
     if (!wallet) continue;
     const walletTransactions = getTransactions(
-      wallet.transactions.get(walletApp.currentStore.network!) || new Map()
+      wallet.transactions.get(walletApp.currentStore.network) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
+    // console.log(transactions, transactionCount);
   }
   useEffect(() => {
     if (transactions.length !== transactionCount) {
@@ -61,11 +62,16 @@ export const WalletApp: FC<any> = observer((props: any) => {
     setHidePending(true);
   };
 
-  const hideHeaderFooter = [
+  const hideFooter = [
     WalletView.NEW,
     WalletView.LOCKED,
     WalletView.SETTINGS,
   ].includes(walletApp.navState.view);
+
+  const hideHeader = [WalletView.NEW, WalletView.LOCKED].includes(
+    walletApp.navState.view
+  );
+
   const View = WalletViews(walletApp.navState.network)[walletApp.navState.view];
 
   return (
@@ -77,6 +83,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
       flexDirection="column"
     >
       <WalletHeader
+        showBack={walletApp.navState.view !== WalletView.LIST}
         theme={theme.currentTheme}
         network={
           walletApp.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
@@ -87,14 +94,14 @@ export const WalletApp: FC<any> = observer((props: any) => {
         onSetNetwork={async (network: any) =>
           await WalletActions.setNetwork(network)
         }
-        hide={hideHeaderFooter}
+        hide={hideHeader}
       />
       {!hidePending &&
         walletApp.navState.view !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <View {...props} hidePending={hidePending} />
-      <WalletFooter hidden={hideHeaderFooter} />
+      <WalletFooter hidden={hideFooter} />
     </Flex>
   );
 });

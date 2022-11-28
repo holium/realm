@@ -15,13 +15,19 @@ export const WalletList: FC<WalletListProps> = observer(
 
     const List: FC = () => {
       return (
-        <Flex width="100%" flexDirection="column" overflowY="scroll">
+        <Flex
+          p={4}
+          width="100%"
+          flexDirection="column"
+          layoutScroll
+          gap={6}
+          overflowX="visible"
+          overflowY="scroll"
+        >
           {list.map((walletEntry) => {
-            console.log(walletEntry.key);
             const fullWallet = walletApp.currentStore.wallets.get(
               walletEntry.key
             );
-            console.log(fullWallet);
             return (
               <WalletCard
                 key={walletEntry.address}
@@ -72,7 +78,9 @@ export const WalletList: FC<WalletListProps> = observer(
       );
     };
 
-    return (
+    return list.length ? (
+      <List />
+    ) : (
       <Flex
         p={4}
         height="100%"
@@ -80,11 +88,7 @@ export const WalletList: FC<WalletListProps> = observer(
         flexDirection="column"
         alignItems="center"
       >
-        {list.length ? (
-          <List />
-        ) : (
-          <Empty network={walletApp.navState.network} />
-        )}
+        <Empty network={walletApp.navState.network} />
       </Flex>
     );
   }

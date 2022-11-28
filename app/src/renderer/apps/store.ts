@@ -88,7 +88,6 @@ export const TrayAppStore = types
           dimensions
         );
         self.dimensions = dimensions;
-        // console.log(toJS(self.coords));
       }
     },
   }));

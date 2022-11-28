@@ -1,10 +1,13 @@
 import { FC } from 'react';
 import { Icons, Flex, RadioGroup, IconButton } from 'renderer/components';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type Network = 'ethereum' | 'bitcoin';
 
 interface WalletHeader {
+  showBack: boolean;
   theme: {
+    iconColor: string;
     windowColor: string;
     textColor: string;
   };
@@ -15,9 +18,8 @@ interface WalletHeader {
 }
 
 export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
-  const { network, onSetNetwork, onAddWallet } = props;
-  const { windowColor, textColor } = props.theme;
-  // WalletNew;
+  const { showBack, network, onSetNetwork, onAddWallet } = props;
+  const { windowColor, textColor, iconColor } = props.theme;
   return (
     <Flex
       width="100%"
@@ -25,10 +27,19 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
       alignItems="center"
       pl={3}
       pr={3}
-      pt="12px"
-      // height="40px"
+      // height={48}
+      pt="8px"
     >
-      <Icons name="WalletNew" size="20px" opacity={0.7} />
+      {showBack ? (
+        <IconButton onClick={async () => await WalletActions.navigateBack()}>
+          <Icons name="ArrowLeftLine" size={1} color={iconColor} />
+        </IconButton>
+      ) : (
+        <Flex justifyContent="center" alignItems="center" width="24px">
+          <Icons name="WalletNew" size="20px" opacity={0.7} />
+        </Flex>
+      )}
+
       {props.hide ? (
         <></>
       ) : (

@@ -1,5 +1,6 @@
 /-  *realm-wallet
 /+  default-agent, dbug, *realm-wallet
+::
 |%
 +$  versioned-state
   $%  state-0
@@ -49,6 +50,7 @@
         (handle-wallet-action:core !<(action vase))
       [cards this]
     ==
+  ::
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
@@ -66,6 +68,7 @@
         [%wallets ~]
       `this
     ==
+  ::
   ++  on-leave  on-leave:def
   ++  on-peek
     |=  =path
@@ -257,6 +260,7 @@
     =/  task  [%poke %realm-wallet-action !>(`action`[%create-wallet our.bowl network.act (crip (scow %p our.bowl))])]
     :-  [%pass /addr/(scot %p from.act) %agent [from.act dap.bowl] task]~
     state
+    ::
       %receive-address
     =/  upd  `update`[%address src.bowl network.act address.act]
     =/  update-path=path  /address/[(crip (scow %tas network.act))]/[(crip (scow %p src.bowl))]

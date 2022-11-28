@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import validUrl from 'valid-url';
-import _ from 'lodash';
+// import _ from 'lodash';
 import styled from 'styled-components';
 import { darken, lighten } from 'polished';
 import { isValidPatp } from 'urbit-ob';
@@ -41,13 +41,6 @@ interface WalletSettingsState {
   sharedWallet?: string;
   blockList: string[];
 }
-
-const INIT_STATE = {
-  provider: 'https://goerli.infura.io/v3/da1d4486d1254ddd',
-  creationMode: 'default' as CreateMode,
-  visibility: 'anyone' as WalletVisibility,
-  blockList: ['~latter-bolden', '~hex'],
-};
 
 export const WalletSettings: FC = observer(() => {
   const { walletApp } = useTrayApps();
@@ -142,17 +135,32 @@ export const WalletSettings: FC = observer(() => {
 
   return (
     <Flex px={3} width="100%" height="100%" flexDirection="column">
-      <Flex>
+      <Flex justifyContent="space-between" alignItems="center" pt={3}>
         <Text variant="h4">Settings</Text>
+        <Button
+          py={1}
+          variant="minimal"
+          fontWeight={400}
+          // disabled={
+          //   providerError !== '' ||
+          //   (_.isEqual(state, settings) &&
+          //     _.isEqual(state.blocked, [...settings.blocked]))
+          // }
+          isLoading={saving}
+          onClick={saveSettings}
+        >
+          Save
+        </Button>
       </Flex>
 
       <Flex mt={3} flexDirection="column" width="100%">
-        <Text variant="h6">Provider</Text>
+        <Text variant="label">Provider</Text>
         <Text
           mt={1}
           mb={2}
           variant="body"
           fontSize={1}
+          opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
           The API endpoint for connecting to Ethereum nodes.
@@ -175,18 +183,19 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
 
       <Flex mt={3} flexDirection="column">
-        <Text variant="h6">Wallet Creation Mode</Text>
+        <Text variant="label">Wallet Creation Mode</Text>
         <Text
           mt={1}
           mb={2}
           variant="body"
           fontSize={1}
+          opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
           If set to on-demand, anytime you're sent funds a new wallet will be
           created to receive them.
         </Text>
-        <Flex width="160px">
+        <Flex width="140px">
           <Select
             customBg={selectBg}
             textColor={baseTheme.colors.text.primary}
@@ -202,12 +211,13 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
 
       <Flex mt={3} flexDirection="column">
-        <Text variant="h6">Wallet Visibility</Text>
+        <Text variant="label">Wallet Visibility</Text>
         <Text
           mt={1}
           mb={2}
           variant="body"
           fontSize={1}
+          opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
           Determine how you want to share addresses with other people on the
@@ -225,7 +235,7 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
 
       <Flex mt={3} flexDirection="column">
-        <Text mb={2} variant="h6">
+        <Text mb={2} variant="label">
           Blocked IDs
         </Text>
         <BlockedInput
@@ -234,36 +244,6 @@ export const WalletSettings: FC = observer(() => {
           blocked={state.blocked}
           onChange={setBlockList}
         />
-      </Flex>
-
-      <Flex
-        position="absolute"
-        top="582px"
-        zIndex={999}
-        width="100%"
-        justifyContent="space-between"
-      >
-        <Flex onClick={async () => await WalletActions.navigateBack()}>
-          <Icons
-            name="ArrowLeftLine"
-            size={2}
-            color={theme.currentTheme.iconColor}
-          />
-        </Flex>
-        <Flex position="absolute" bottom="1px" right="28px">
-          <Button
-            variant="primary"
-            disabled={
-              providerError !== '' ||
-              (_.isEqual(state, settings) &&
-                _.isEqual(state.blocked, [...settings.blocked]))
-            }
-            isLoading={saving}
-            onClick={saveSettings}
-          >
-            Save
-          </Button>
-        </Flex>
       </Flex>
     </Flex>
   );
@@ -301,7 +281,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
 
   return (
     <>
-      <Flex width="160px">
+      <Flex width="140px">
         <Select
           customBg={selectBg}
           textColor={props.baseTheme.colors.text.primary}

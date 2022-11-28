@@ -90,7 +90,7 @@ export const TransactionDetail: FC = observer(() => {
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
-      <Text fontSize={1} color={themeData.colors.text.disabled}>
+      <Text fontSize={2} color={themeData.colors.text.disabled}>
         Transaction
       </Text>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
@@ -232,7 +232,6 @@ export const TransactionDetail: FC = observer(() => {
         Notes
       </Text>
       <Flex width="100%" flexDirection="column" justifyContent="center">
-        {/* @ts-expect-error */}
         <TextArea
           theme={themeData}
           desktopTheme={theme.currentTheme}
@@ -250,18 +249,6 @@ export const TransactionDetail: FC = observer(() => {
             Save notes
           </Button>
         </Flex>
-      </Flex>
-      <Flex
-        position="absolute"
-        top="582px"
-        zIndex={999}
-        onClick={async () => await WalletActions.navigateBack()}
-      >
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
       </Flex>
     </Flex>
   );

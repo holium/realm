@@ -1,10 +1,10 @@
 import { FC, useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
+import { darken, lighten, rgba } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text } from 'renderer/components';
+import { Flex, Box, Icons, Text, Card } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
@@ -17,7 +17,6 @@ import {
   convertERC20AmountToUsd,
   formatBtcAmount,
 } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   ERC20Type,
   EthWalletType,
@@ -26,18 +25,15 @@ import {
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';
+import { motion } from 'framer-motion';
+// import { CoinList } from './CoinList';
 
-const usdc = {
-  ticker: 'USDC',
-  amount: '5765.2',
-  icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
-};
-
-const FlexWithShadow = styled(Flex)`
-  box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
+const CardWithShadow = styled(Card)`
+  box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.1);
 `;
 
 interface DetailHeroProps {
+  coinView?: any | null;
   wallet: EthWalletType | BitcoinWalletType;
   coin: ERC20Type | null;
   QROpen: boolean;
@@ -47,7 +43,6 @@ interface DetailHeroProps {
   onScreenChange: any;
   setSendTrans: any;
   close: any;
-
   qr?: {
     open: boolean;
     set: any;
@@ -59,10 +54,16 @@ interface DetailHeroProps {
   };
 }
 
+const transitionConfig = {
+  layout: { duration: 0.1 },
+  // opacity: { ease: 'smooth' },
+};
+
 export const DetailHero: FC<DetailHeroProps> = observer(
   (props: DetailHeroProps) => {
     const { theme } = useServices();
     const { walletApp } = useTrayApps();
+    const { coinView } = props;
 
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme.windowColor);
@@ -101,44 +102,93 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         : '';
 
     const accountDisplay = !props.coin ? (
-      props.wallet.nickname
+      <Flex
+        layoutId={`wallet-name-${props.wallet.address}`}
+        layout="position"
+        transition={transitionConfig}
+        mt={2}
+        fontWeight={600}
+        color={rgba(theme.currentTheme.textColor, 0.4)}
+        style={{ textTransform: 'uppercase' }}
+      >
+        {props.wallet.nickname}
+      </Flex>
     ) : (
-      <Flex onClick={async () => await WalletActions.navigateBack()}>
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          mr={2}
-          color={theme.currentTheme.iconColor}
-        />
-        {props.wallet.nickname} /{' '}
-        <span
-          style={{ color: themeData.colors.text.secondary, marginLeft: '4px' }}
-        >
-          {props.coin.name}
-        </span>
+      <Flex
+        mt={2}
+        layoutId={`wallet-name-${props.wallet.address}`}
+        layout="position"
+        alignItems="center"
+        gap={8}
+        transition={transitionConfig}
+      >
+        {/* <IconButton onClick={async () => await WalletActions.navigateBack()}>
+          <Icons
+            name="ArrowLeftLine"
+            size={1}
+            color={theme.currentTheme.iconColor}
+          />
+        </IconButton> */}
+        <Flex flexDirection="row" alignItems="center">
+          <Text
+            fontWeight={500}
+            fontSize={2}
+            color={rgba(theme.currentTheme.textColor, 0.4)}
+            style={{ textTransform: 'uppercase' }}
+          >
+            {`${props.wallet.nickname} / `}
+          </Text>
+
+          <Text
+            fontSize={2}
+            style={{
+              color: themeData.colors.text.secondary,
+              marginLeft: '4px',
+            }}
+          >
+            {props.coin.name}
+          </Text>
+        </Flex>
       </Flex>
     );
 
     return (
-      <FlexWithShadow
-        mt={4}
-        p={3}
+      <CardWithShadow
+        layout="size"
+        layoutId={`wallet-card-${props.wallet.address}`}
+        transition={transitionConfig}
+        padding="16px 12px"
+        minHeight="240px"
+        height="auto"
         width="100%"
         flexDirection="column"
-        background={lighten(0.02, theme.currentTheme.windowColor)}
+        justifyContent="flex-start"
+        customBg={lighten(0.04, theme.currentTheme.windowColor)}
+        borderColor={
+          theme.currentTheme.mode === 'dark'
+            ? darken(0.1, theme.currentTheme.backgroundColor)
+            : darken(0.1, theme.currentTheme.windowColor)
+        }
         borderRadius="16px"
       >
         <Flex
           p={2}
           width="100%"
-          background={darken(0.03, theme.currentTheme.windowColor)}
+          minHeight="38px"
+          transition={transitionConfig}
+          style={{ height: props.QROpen ? 242 : 38 }}
+          background={
+            theme.currentTheme.mode === 'dark'
+              ? lighten(0.025, theme.currentTheme.inputColor)
+              : darken(0.025, theme.currentTheme.inputColor)
+          }
           border={`solid 1px ${panelBorder}`}
           borderRadius="8px"
           flexDirection="column"
-          justifyContent="center"
+          justifyContent="flex-start"
           alignItems="center"
         >
-          <Flex width="100%" justifyContent="space-between">
+          <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
               <Icons name="Ethereum" height="20px" mr={2} />
               <Text pt="2px" textAlign="center" fontSize="14px">
@@ -173,7 +223,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
               )}
             </Flex>
           </Flex>
-          <Box width="100%" hidden={!props.QROpen}>
+          <Box width="100%" height={204} hidden={!props.QROpen}>
             <Flex
               mt={1}
               p={3}
@@ -190,39 +240,48 @@ export const DetailHero: FC<DetailHeroProps> = observer(
             </Flex>
           </Box>
         </Flex>
-        <Box p={2} width="100%" hidden={props.hideWalletHero}>
-          <Flex
-            mt={2}
-            opacity={0.5}
-            fontWeight={600}
-            color={lighten(0.04, themeData.colors.text.secondary)}
-            style={{ textTransform: 'uppercase' }}
-            animate={false}
-          >
-            {accountDisplay}
-          </Flex>
+        <Box
+          layout="position"
+          transition={transitionConfig}
+          py={2}
+          width="100%"
+          hidden={props.hideWalletHero}
+        >
+          {accountDisplay}
           <Balance
+            address={props.wallet.address}
             coin={props.coin!}
             amountDisplay={amountDisplay}
             amountUsdDisplay={amountUsdDisplay}
             colors={themeData.colors}
           />
         </Box>
-        {/* @ts-expect-error */}
-        <SendReceiveButtons
-          hidden={props.sendTrans}
-          windowColor={theme.currentTheme.windowColor}
-          send={() => props.setSendTrans(true)}
-          receive={() => props.setQROpen(true)}
-        />
-        <SendTransaction
-          wallet={props.wallet}
-          hidden={!props.sendTrans}
-          onScreenChange={props.onScreenChange}
-          close={props.close}
-          coin={props.coin}
-        />
-      </FlexWithShadow>
+        <Flex
+          flexDirection="row"
+          layout="position"
+          layoutId={`wallet-buttons-${props.wallet.address}`}
+          // mt={props.coin ? 0 : 3}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={transitionConfig}
+        >
+          <SendReceiveButtons
+            hidden={props.sendTrans}
+            windowColor={theme.currentTheme.windowColor}
+            send={() => props.setSendTrans(true)}
+            receive={() => props.setQROpen(true)}
+          />
+          <SendTransaction
+            wallet={props.wallet}
+            hidden={!props.sendTrans}
+            onScreenChange={props.onScreenChange}
+            close={props.close}
+            coin={props.coin}
+          />
+        </Flex>
+        {coinView}
+      </CardWithShadow>
     );
   }
 );
@@ -283,6 +342,7 @@ function SendReceiveButtons(props: {
 }
 
 interface BalanceInterface {
+  address: string;
   coin?: ERC20Type;
   amountDisplay: string;
   amountUsdDisplay: string;
@@ -294,25 +354,54 @@ function Balance(props: BalanceInterface) {
     : '';
   return !props.coin ? (
     <>
-      <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+      <Text
+        mt={1}
+        layout="position"
+        transition={transitionConfig}
+        layoutId={`wallet-balance-${props.address}`}
+        fontWeight={600}
+        fontSize={7}
+      >
         {props.amountDisplay}
       </Text>
-      <Text variant="body" color={props.colors.text.secondary}>
+      <Text
+        mt={1}
+        layout="position"
+        layoutId={`wallet-usd-${props.address}`}
+        transition={transitionConfig}
+        variant="body"
+        color={props.colors.text.secondary}
+      >
         {props.amountUsdDisplay}
       </Text>
     </>
   ) : (
     <Flex
       mt={1}
+      layout="position"
+      transition={transitionConfig}
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
     >
-      <img height="26px" src={coinIcon} />
-      <Text mt={1} opacity={0.9} fontWeight={600} fontSize={5} animate={false}>
+      <motion.img layout="position" height="26px" src={coinIcon} />
+      <Text
+        mt={1}
+        layout="position"
+        layoutId={`wallet-coin-balance`}
+        opacity={0.9}
+        fontWeight={600}
+        fontSize={5}
+      >
         {props.amountDisplay}
       </Text>
-      <Text variant="body" color={props.colors.text.secondary}>
+      <Text
+        mt={1}
+        layout="position"
+        layoutId={`wallet-coin-usd`}
+        variant="body"
+        color={props.colors.text.secondary}
+      >
         {props.amountUsdDisplay}
       </Text>
     </Flex>

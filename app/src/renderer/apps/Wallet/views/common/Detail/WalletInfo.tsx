@@ -11,11 +11,6 @@ import {
   BitcoinWalletType,
 } from 'os/services/tray/wallet.model';
 
-const abbrMap = {
-  ethereum: 'ETH',
-  bitcoin: 'BTC',
-};
-
 interface WalletInfoProps {
   wallet: EthWalletType | BitcoinWalletType;
   QROpen: boolean;
@@ -137,7 +132,6 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
             {props.wallet.nickname}
           </Text>
           <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-            {/* @ts-expect-error */}
             {amountDisplay}
           </Text>
         </Box>

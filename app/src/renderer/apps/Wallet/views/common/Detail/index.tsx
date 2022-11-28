@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, Box, Text, Icons, TextButton } from 'renderer/components';
+import { Flex, Box, Text, TextButton } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
@@ -14,7 +14,6 @@ import {
 
 import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { EthWalletType } from 'os/services/tray/wallet.model';
 
 import { CoinList } from './CoinList';
@@ -46,7 +45,7 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   let nfts = null;
   const hasCoin =
     walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
-  let coin = null;
+  let coin: any = null;
   if (walletApp.navState.network === 'ethereum') {
     if (hasCoin) {
       coin = (wallet as EthWalletType).coins.get(
@@ -72,11 +71,16 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
     }
   }); */
 
-  /* @ts-expect-error */
   const themeData = getBaseTheme(theme.currentTheme);
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column" px={3}>
+    <Flex
+      width="100%"
+      height="100%"
+      justifyContent="flex-start"
+      flexDirection="column"
+      p={4}
+    >
       <DetailHero
         wallet={wallet}
         coin={coin}
@@ -87,15 +91,43 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         onScreenChange={(newScreen: string) => onScreenChange(newScreen)} // changed
         setSendTrans={(send: boolean) => setSendTrans(send)} // changed
         close={close}
+        coinView={
+          coin && (
+            <Flex
+              layout="position"
+              transition={{
+                layout: { duration: 0.1 },
+                opacity: { ease: 'linear' },
+              }}
+              flexDirection="column"
+              mt={6}
+            >
+              <Box pb={1}>
+                <Text
+                  color={themeData.colors.text.disabled}
+                  fontWeight={500}
+                  variant="body"
+                >
+                  Transactions
+                </Text>
+              </Box>
+              <TransactionList
+                transactions={transactions}
+                hidePending={props.hidePending}
+                ethType={coin?.address}
+              />
+            </Flex>
+          )
+        }
       />
       <Box width="100%" hidden={QROpen || sendTrans}>
         <Flex
           width="100%"
-          pt={6}
+          pt={4}
           flexDirection="column"
           justifyContent="center"
         >
-          {!coin ? (
+          {!coin && (
             <>
               <ListSelector
                 network={walletApp.navState.network}
@@ -111,34 +143,9 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
               {listView === 'coins' && <CoinList coins={coins!} />}
               {listView === 'nfts' && <NFTList nfts={nfts!} />}
             </>
-          ) : (
-            <>
-              <Box pb={1}>
-                <Text variant="body" fontSize={2} color="text.tertiary">
-                  Transactions
-                </Text>
-              </Box>
-              <TransactionList
-                transactions={transactions}
-                hidePending={props.hidePending}
-                ethType={coin?.address}
-              />
-            </>
           )}
         </Flex>
       </Box>
-      <Flex
-        position="absolute"
-        top="582px"
-        zIndex={999}
-        onClick={async () => await WalletActions.navigateBack()}
-      >
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
-      </Flex>
     </Flex>
   );
 });
@@ -159,7 +166,7 @@ function ListSelector(props: ListSelectorProps) {
       <TextButton
         onClick={props.onClick}
         textColor={baseTheme.colors.text.disabled}
-        fontWeight={400}
+        fontWeight={500}
       >
         {props.children}
       </TextButton>
