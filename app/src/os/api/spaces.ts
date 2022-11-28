@@ -375,15 +375,24 @@ const handleSpacesReactions = (
       break;
     case 'remote-space':
       if (Object.keys(data['remote-space'].members).length === 0) {
-        spacesState.setLoader('error');
+        spacesState.setJoin('error');
       }
       else {
+        spacesState.setJoin('loaded');
         membersState.addMemberMap(
           data['remote-space'].path,
           data['remote-space'].members
         );
         spacesState.addSpace(data['remote-space']);
-        spacesState.selectSpace(data['remote-space'].path)
+        //SpacesActions.setSelected(data['remote-space'].path)
+
+/*        const selected = spacesState.selectSpace(path);
+        this.setTheme(selected?.theme!);
+        // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
+        // setting provider to current space host
+        const spaceHost = getHost(this.state!.selected!.path);
+        // if (currentRoomProvider !== spaceHost)
+        this.core.services.ship.rooms.setProvider(null, spaceHost);*/
       }
       break;
     default:

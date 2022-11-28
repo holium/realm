@@ -7,6 +7,7 @@ import {
   Text,
   Input,
   TextButton,
+  Spinner,
 } from 'renderer/components';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
@@ -70,11 +71,14 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   const [searchVisible, setSearchVisible] = useState(false);
-  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    SpacesActions.setLoader('loaded');
-  }, []);
+    if (spaces.spaces.has(searchString)) {
+      SpacesActions.selectSpace(searchString);
+      setSearchVisible(false);
+    }
+    SpacesActions.setJoin('initial');
+  }, [spaces.spaces]);
 
   return (
     <Grid.Column
@@ -120,6 +124,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
             color={iconColor}
             data-close-tray="false"
             onClick={(evt: any) => {
+              SpacesActions.setJoin('initial')
               setSearchVisible(!searchVisible);
             }}
             mr={1}
@@ -141,7 +146,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
           </IconButton>
         </Flex>
       </Grid.Row>
-      {searchVisible ? (
+      {searchVisible && spaces.join.state !== 'loaded' ? (
         <Flex
           position="absolute"
           width="100%"
@@ -157,7 +162,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                 autoComplete="false"
                 name="person"
                 height={34}
-                placeholder="Paste link..."
+                placeholder="Enter space path (e.g. ~zod/galaxy-space)"
                 bg={
                   mode === 'light'
                     ? lighten(0.2, inputColor)
@@ -182,7 +187,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                 }}
                 onChange={(evt: any) => {
                   evt.stopPropagation();
-                  SpacesActions.setLoader('loaded');
+                  SpacesActions.setJoin('initial');
                   setSearchString(evt.target.value);
                 }}
                 rightInteractive
@@ -190,10 +195,13 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                   <TextButton
                     disabled={!isValidSpace(searchString)}
                     onClick={(evt: any) => {
+                      SpacesActions.setJoin('loading');
                       SpacesActions.joinSpace(searchString);
                     }}
                   >
-                    Join
+                    {spaces.join.state === 'loading'
+                    ? <Spinner size={0} />
+                    : "Join"}
                   </TextButton>
                 }
                 onKeyDown={(evt: any) => {
@@ -209,7 +217,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                 fontSize="11px"
                 color={themeData.colors.text.error}
               >
-                {spaces.loader.state === 'error' &&
+                {spaces.join.state === 'error' &&
                   `Failed to join ${searchString}.`}
                 &nbsp;&nbsp;&nbsp;
               </Text>

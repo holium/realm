@@ -65,6 +65,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.get-members': this.getMembers,
     'realm.spaces.get-invitations': this.getInvitations,
     'realm.spaces.set-loader': this.setLoader,
+    'realm.spaces.set-join': this.setJoin,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
     'realm.spaces.bazaar.get-apps': this.getApps,
@@ -160,6 +161,9 @@ export class SpacesService extends BaseService {
     },
     setLoader: async (status: 'initial' | 'loading' | 'error' | 'loaded') => {
       return await ipcRenderer.invoke('realm.spaces.set-loader', status);
+    },
+    setJoin: async (status: 'initial' | 'loading' | 'error' | 'loaded') => {
+      return await ipcRenderer.invoke('realm.spaces.set-join', status);
     },
     acceptInvite: async (path: any) => {
       return await ipcRenderer.invoke('realm.spaces.accept-invite', path);
@@ -463,6 +467,10 @@ export class SpacesService extends BaseService {
 
   async setLoader(_event: IpcMainInvokeEvent, status: 'initial' | 'loading' | 'error' | 'loaded') {
     this.state!.setLoader(status);
+  }
+
+  async setJoin(_event: IpcMainInvokeEvent, status: 'initial' | 'loading' | 'error' | 'loaded') {
+    this.state!.selectSpace(status);
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
