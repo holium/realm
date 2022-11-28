@@ -38,6 +38,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
       address?: string;
       patp?: string;
       patpAddress?: string;
+      color?: string;
     }>({});
 
     const { theme } = useServices();
@@ -134,7 +135,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
         ) : (
           <Flex mt={7} flexDirection="column">
             <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
-              {/* @ts-expect-error */}
               {transactionAmount}{' '}
               {props.coin
                 ? props.coin.name
@@ -156,26 +156,45 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 </Text>
                 <Flex justifyContent="center">
                   <Flex mr={2}>
-                    {transactionRecipient.address ? (
-                      <Icons
-                        name="Spy"
-                        size="24px"
-                        color={themeData.colors.text.secondary}
-                      />
-                    ) : (
-                      <Sigil
-                        color={
-                          theme.currentTheme.mode === 'light'
-                            ? ['black', 'white']
-                            : ['white', 'black']
-                        }
-                        simple={true}
-                        size={24}
-                        patp={transactionRecipient.patp!}
-                      />
+                    {!transactionRecipient.patp &&
+                      transactionRecipient.address && (
+                        <Flex flexDirection="column" justifyContent="center">
+                          <Icons
+                            name="Spy"
+                            size="24px"
+                            color={themeData.colors.text.secondary}
+                          />
+                          <Text variant="body">
+                            {shortened(transactionRecipient.address)}
+                          </Text>
+                        </Flex>
+                      )}
+                    {transactionRecipient.patp && transactionRecipient.address && (
+                      <Flex gap={8} alignItems="center">
+                        <Sigil
+                          color={[
+                            transactionRecipient.color || 'black',
+                            'white',
+                          ]}
+                          simple={true}
+                          size={24}
+                          patp={transactionRecipient.patp!}
+                        />{' '}
+                        <Flex flexDirection="column" justifyContent="center">
+                          <Text variant="body">
+                            {transactionRecipient.patp}
+                          </Text>
+                          <Text
+                            variant="body"
+                            color={themeData.colors.text.tertiary}
+                          >
+                            {shortened(transactionRecipient.address)}
+                          </Text>
+                        </Flex>
+                      </Flex>
                     )}
                   </Flex>
-                  <Flex flexDirection="column" justifyContent="center">
+                  {/* <Flex flexDirection="column" justifyContent="center">
                     {transactionRecipient.address ? (
                       <Text variant="body">
                         {shortened(transactionRecipient.address)}
@@ -193,7 +212,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                         </Text>
                       </>
                     )}
-                  </Flex>
+                  </Flex> */}
                 </Flex>
               </Flex>
               <Flex mt={5} width="100%" justifyContent="space-between">

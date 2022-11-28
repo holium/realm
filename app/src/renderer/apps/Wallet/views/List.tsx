@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
-import { WalletCard } from '../common/WalletCard';
+import { WalletCard } from './common/WalletCard';
 import { WalletView } from 'os/services/tray/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 

@@ -3,7 +3,7 @@ import { FC, useEffect, useState, useMemo } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail';
-import { WalletList } from './views/ethereum/List';
+import { WalletList } from './views/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletFooter } from './views/common/Footer';
@@ -68,7 +68,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
     WalletView.SETTINGS,
   ].includes(walletApp.navState.view);
 
-  const hideHeader = [WalletView.NEW, WalletView.LOCKED].includes(
+  const hideHeader = [WalletView.LOCKED, WalletView.SETTINGS].includes(
     walletApp.navState.view
   );
 
@@ -83,6 +83,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
       flexDirection="column"
     >
       <WalletHeader
+        isOnboarding={WalletView.NEW === walletApp.navState.view}
         showBack={walletApp.navState.view !== WalletView.LIST}
         theme={theme.currentTheme}
         network={

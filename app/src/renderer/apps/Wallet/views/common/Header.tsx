@@ -6,6 +6,7 @@ type Network = 'ethereum' | 'bitcoin';
 
 interface WalletHeader {
   showBack: boolean;
+  isOnboarding: boolean;
   theme: {
     iconColor: string;
     windowColor: string;
@@ -18,9 +19,9 @@ interface WalletHeader {
 }
 
 export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
-  const { showBack, network, onSetNetwork, onAddWallet } = props;
+  const { showBack, isOnboarding, network, onSetNetwork, onAddWallet } = props;
   const { windowColor, textColor, iconColor } = props.theme;
-  return (
+  return !props.hide ? (
     <Flex
       width="100%"
       justifyContent="space-between"
@@ -30,19 +31,25 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
       // height={48}
       pt="8px"
     >
-      {showBack ? (
-        <IconButton onClick={async () => await WalletActions.navigateBack()}>
+      {showBack && !isOnboarding ? (
+        <IconButton
+          mt={isOnboarding ? 1 : 0}
+          onClick={async () => await WalletActions.navigateBack()}
+        >
           <Icons name="ArrowLeftLine" size={1} color={iconColor} />
         </IconButton>
       ) : (
-        <Flex justifyContent="center" alignItems="center" width="24px">
+        <Flex
+          mt={isOnboarding ? 1 : 0}
+          justifyContent="center"
+          alignItems="center"
+          width="24px"
+        >
           <Icons name="WalletNew" size="20px" opacity={0.7} />
         </Flex>
       )}
 
-      {props.hide ? (
-        <></>
-      ) : (
+      {!isOnboarding && (
         <>
           <RadioGroup
             customBg={windowColor}
@@ -72,5 +79,5 @@ export const WalletHeader: FC<WalletHeader> = (props: WalletHeader) => {
         </>
       )}
     </Flex>
-  );
+  ) : null;
 };

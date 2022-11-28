@@ -449,6 +449,7 @@ const EthWallet = types
       if (!previousTransactions) self.transactions.set(network, {});
       previousTransactions = self.transactions.toJSON()[network];
       for (const transaction of transactions) {
+        // console.log('applyTransaction', transaction);
         const previousTransaction = previousTransactions[transaction.hash];
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,

@@ -92,7 +92,8 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
         setSendTrans={(send: boolean) => setSendTrans(send)} // changed
         close={close}
         coinView={
-          coin && (
+          coin &&
+          !sendTrans && (
             <Flex
               layout="position"
               transition={{

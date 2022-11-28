@@ -1,7 +1,7 @@
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { darken } from 'polished';
-
 import { Flex, Icons, Text } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
@@ -39,7 +39,9 @@ export const Transaction = observer((props: TransactionProps) => {
   const isEth = transaction.network === 'ethereum';
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  const completedDate = new Date(transaction.completedAt!);
+  const completedDate = new Date(
+    transaction.completedAt || transaction.initiatedAt
+  );
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
@@ -122,10 +124,24 @@ interface TransactionListProps {
 }
 export const TransactionList = observer((props: TransactionListProps) => {
   const { theme } = useServices();
+  // const {walletApp} = useTrayApps();
 
   const pending = props.transactions.filter(
     (trans) => trans.status === 'pending'
   ).length;
+
+  // const [coinTransactions, setCoinTransactions] = useState(null);
+  useEffect(() => {
+    if (props.ethType !== 'ethereum' && props.ethType) {
+      const ourAddress = props.transactions[0].ourAddress;
+      // console.log('ourAddress', ourAddress, props.ethType);
+      WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
+        (txns: any) => {
+          console.log(txns);
+        }
+      );
+    }
+  }, [props.ethType, props.transactions]);
 
   const transactions = props.transactions.filter((trans) =>
     props.ethType ? trans.ethType === props.ethType : true
