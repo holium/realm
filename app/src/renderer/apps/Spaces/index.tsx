@@ -72,8 +72,11 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
 
   const [searchVisible, setSearchVisible] = useState(false);
 
-  useEffect(() => {
-    if (spaces.spaces.has(searchString)) {
+  useMemo(() => {
+    console.log('got new space')
+    console.log(searchString)
+    if (spaces.spaces.has('/' + searchString)) {
+      console.log('selecting space')
       SpacesActions.selectSpace(searchString);
       setSearchVisible(false);
     }

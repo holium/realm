@@ -470,7 +470,7 @@ export class SpacesService extends BaseService {
   }
 
   async setJoin(_event: IpcMainInvokeEvent, status: 'initial' | 'loading' | 'error' | 'loaded') {
-    this.state!.selectSpace(status);
+    this.state!.setJoin(status);
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
