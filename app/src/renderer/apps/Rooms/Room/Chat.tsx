@@ -8,14 +8,11 @@ import {
   Icons,
 } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
-
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
-import { ChatModelType } from 'os/services/tray/rooms.model';
 import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useServices } from 'renderer/logic/store';
-import InfiniteScroll from 'react-infinite-scroll-component';
-
+import { Box, WindowedList } from '@holium/design-system';
 import { RoomChatMessage } from './RoomChatMessage';
 
 interface RoomChatProps {}
@@ -44,7 +41,7 @@ export const chatForm = (
 };
 
 export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
-  const { form, text } = useMemo(() => chatForm(), []);
+  const { text } = useMemo(() => chatForm(), []);
   const [loading, setLoading] = useState(false);
   const { roomsApp } = useTrayApps();
   const { theme: themeStore, ship } = useServices();
@@ -52,7 +49,6 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   const theme = themeStore.currentTheme;
 
   const chatInputRef = useRef<HTMLInputElement>(null);
-  const chatGridRef = useRef(null);
 
   const chats = roomsApp.chats.slice(0).reverse();
 
@@ -76,125 +72,106 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
     });
   };
 
-  // const chatToMessageType = (chat: ChatModelType) => {
-  //   let message : MessageType = {
-  //     author : chat.author,
-  //     contents : [{'text': chat.contents}],
-  //     index : String(chat.index),
-  //     timeSent : chat.timeReceived,
-  //     position : chat.isRightAligned ? 'right' : 'left'
-  //     };
-  //   return message;
-  // }
-
-  return (
-    <Flex flex={2} gap={16} flexDirection="row" alignItems="center">
-      <Flex flex={1} flexDirection="column">
-        <InfiniteScroll
-          // TODO disable scroller
-          dataLength={chats.length}
+  const ChatList = useMemo(() => {
+    if (chats.length === 0) {
+      return (
+        <Flex
           height={330}
-          next={() => {
-            console.log('load more');
-          }}
-          style={{
-            marginLeft: '12px',
-            display: 'flex',
-            flexDirection: 'column-reverse',
-          }} // To put endMessage and loader to the top.
-          inverse={true} //
-          hasMore={false}
-          loader={<h4>Loading...</h4>}
-          // scrollableTarget="scrollableDiv"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
         >
-          {chats.length === 0 && (
-            <Flex
-              flex={1}
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              // mb={46}
-            >
-              <Text fontWeight={500} opacity={0.5}>
-                No Chat History
-              </Text>
-              {/* <Text opacity={0.5}>
-              There are no logs, and no guarantees.
-            </Text> */}
-            </Flex>
-          )}
-          {chats.map((chat: ChatModelType, index: number) => (
+          <Text fontWeight={500} opacity={0.5}>
+            No Chat History
+          </Text>
+        </Flex>
+      );
+    }
+
+    return (
+      <Box height={330}>
+        <WindowedList
+          width={354}
+          data={chats}
+          sort={(a, b) => a.timeReceived - b.timeReceived}
+          rowRenderer={(chat, index) => (
             <RoomChatMessage
               key={chat.index}
               chat={chat}
-              // pack if last guy is the same as the current guy
               doesPack={
-                index < chats.length - 1 &&
-                chats[index + 1].author === chat.author
+                index === 0 ||
+                // pack if last guy is the same as the current guy
+                chats[index - 1].author === chat.author
+                // and the last guy isn't too old (2 minutes)
+                // chats[index - 1].timeReceived + 1000 < chat.timeReceived
               }
-              //     and the last guy isnt too old (2 minutes)
-              // && (chats[index+1].timeReceived >= chat.timeReceived - 1000) }
             />
-          ))}
-        </InfiniteScroll>
+          )}
+          startAtBottom
+        />
+      </Box>
+    );
+  }, [chats]);
 
-        <Flex
-          flexDirection="row"
-          alignItems="center"
-          mt={2}
-          mx={3}
-          style={{
-            gap: 8,
+  return (
+    <Flex flex={1} flexDirection="column">
+      {ChatList}
+
+      <Flex
+        flexDirection="row"
+        alignItems="center"
+        pt={2}
+        px={3}
+        style={{
+          gap: 8,
+        }}
+      >
+        <Input
+          tabIndex={2}
+          className="realm-cursor-text-cursor"
+          type="text"
+          placeholder="whats up dawg"
+          autoFocus
+          ref={chatInputRef}
+          spellCheck={false}
+          wrapperStyle={{
+            cursor: 'none',
+            borderRadius: 6,
+            backgroundColor: theme.inputColor,
           }}
-        >
-          <Input
-            tabIndex={2}
-            className="realm-cursor-text-cursor"
-            type="text"
-            placeholder="whats up dawg"
-            autoFocus
-            ref={chatInputRef}
-            spellCheck={false}
-            wrapperStyle={{
-              cursor: 'none',
-              borderRadius: 6,
-              backgroundColor: theme.inputColor,
-            }}
-            value={text.state.value}
-            // value={''}
-            error={
-              text.computed.isDirty && text.computed.ifWasEverBlurredThenError
+          value={text.state.value}
+          error={
+            text.computed.isDirty && text.computed.ifWasEverBlurredThenError
+          }
+          onChange={(e: any) => {
+            text.actions.onChange(e.target.value);
+          }}
+          onKeyDown={(evt: any) => {
+            if (evt.key === 'Enter') {
+              handleChat(evt);
             }
-            onChange={(e: any) => {
-              text.actions.onChange(e.target.value);
-            }}
-            onKeyDown={(evt: any) => {
-              if (evt.key === 'Enter') {
-                handleChat(evt);
-              }
-            }}
-            onFocus={() => text.actions.onFocus()}
-            onBlur={() => text.actions.onBlur()}
-            rightIcon={
-              <Flex justifyContent="center" alignItems="center">
-                <IconButton
-                  luminosity={theme.mode}
-                  size={24}
-                  canFocus
-                  onClick={(evt: any) => {
-                    handleChat(evt);
-                  }}
-                >
-                  {loading ? (
-                    <Spinner size={0} />
-                  ) : (
-                    <Icons opacity={0.5} name="ArrowRightLine" />
-                  )}
-                </IconButton>
-              </Flex>
-            }
-          />
-        </Flex>
+          }}
+          onFocus={() => text.actions.onFocus()}
+          onBlur={() => text.actions.onBlur()}
+          rightIcon={
+            <Flex justifyContent="center" alignItems="center">
+              <IconButton
+                luminosity={theme.mode}
+                size={24}
+                canFocus
+                onClick={(evt: any) => {
+                  handleChat(evt);
+                }}
+              >
+                {loading ? (
+                  <Spinner size={0} />
+                ) : (
+                  <Icons opacity={0.5} name="ArrowRightLine" />
+                )}
+              </IconButton>
+            </Flex>
+          }
+        />
       </Flex>
     </Flex>
   );

@@ -140,6 +140,7 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
           flexDirection="row"
           alignItems="center"
           flex={1}
+          maxWidth="100%"
           style={{ pointerEvents: 'none' }}
         >
           <Box>
@@ -151,16 +152,17 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
               color={[sigilColor || '#000000', 'white']}
             />
           </Box>
-          <Flex flex={1} justifyContent="space-between">
-            {nickname ? (
-              <>
-                <Text fontSize={2}>
-                  {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-                </Text>
-              </>
-            ) : (
-              <Text fontSize={2}>{patp}</Text>
-            )}
+          <Flex flex={1} height="22px" overflow="hidden" alignItems="center">
+            <Text
+              fontSize={2}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {nickname ? nickname : patp}
+            </Text>
           </Flex>
         </Flex>
         {children}
