@@ -72,16 +72,16 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
 
   const [searchVisible, setSearchVisible] = useState(false);
 
-  useMemo(() => {
-    console.log('got new space')
-    console.log(searchString)
-    if (spaces.spaces.has('/' + searchString)) {
-      console.log('selecting space')
-      SpacesActions.selectSpace(searchString);
+  useEffect(() => {
+    SpacesActions.setJoin('initial');
+  }, []);
+  if (spaces.join.state === 'loading' && spaces.spaces.has('/' + searchString)) {
+    SpacesActions.selectSpace('/' + searchString);
+    if (searchVisible === true) {
       setSearchVisible(false);
     }
-    SpacesActions.setJoin('initial');
-  }, [spaces.spaces]);
+    SpacesActions.setJoin('loaded');
+  }
 
   return (
     <Grid.Column
@@ -209,6 +209,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                 }
                 onKeyDown={(evt: any) => {
                   if (evt.key === 'Enter' && isValidSpace(searchString)) {
+                    SpacesActions.setJoin('loading');
                     SpacesActions.joinSpace(searchString);
                   }
                 }}

@@ -378,7 +378,6 @@ const handleSpacesReactions = (
         spacesState.setJoin('error');
       }
       else {
-        spacesState.setJoin('loaded');
         membersState.addMemberMap(
           data['remote-space'].path,
           data['remote-space'].members
