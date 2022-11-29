@@ -39,7 +39,7 @@ export const BazaarApi = {
       app: 'treaty',
       path: `/allies`,
     });
-    return response.allies;
+    return response.ini;
   },
   scryTreaties: async (conduit: Conduit, ship: Patp): Promise<any> => {
     const response = await conduit.scry({
