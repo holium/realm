@@ -502,7 +502,6 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
-    // console.log(this.state);
     const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
@@ -982,11 +981,8 @@ export class WalletService extends BaseService {
     }
     this.ethProvider?.removeAllListeners();
     // TODO this is where the apis are querying too much
-    // this.ethProvider.on
     // this.ethProvider?.on('block', () => this.updateEthereumInfo());
-    // this.ethProvider?.on('')
     this.alchemy = new Alchemy(alchemySettings);
-    // this.alchemy.ws.on('')
   }
 
   updateEthereumInfo() {
@@ -1058,20 +1054,7 @@ export class WalletService extends BaseService {
           balance,
           decimals: metadata.decimals!,
         };
-        // console.log('getAssetTransfers', wallet.address, token.contractAddress);
-        // if (token.contractAddress) {
-        // const coinTxns = await this.alchemy!.core.getAssetTransfers({
-        //   fromAddress: wallet.address,
-        //   contractAddresses: [token.contractAddress],
-        //   category: [AssetTransfersCategory.ERC20],
-        // });
-        //  const coinTxns = await this.alchemy!.core.getAssetTransfers({
-        //    toAddress: wallet.address,
-        //    contractAddresses: [token.contractAddress],
-        //    category: [AssetTransfersCategory.ERC20],
-        //  });
-        //   console.log('coinTxns', coinTxns);
-        // }
+
         coins.push(coin);
       }
 
