@@ -6,6 +6,7 @@ import { onPatch, getSnapshot } from 'mobx-state-tree';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { DesktopStoreType, DesktopStore } from './desktop.model';
+import { AppType } from '../spaces/models/bazaar';
 
 /**
  * DesktopService
@@ -34,6 +35,7 @@ export class DesktopService extends BaseService {
     'realm.desktop.set-mouse-color': this.setMouseColor,
     // 'realm.desktop.set-fullscreen': this.setFullscreen,
     'realm.desktop.open-app-window': this.openAppWindow,
+    'realm.desktop.toggle-minimized': this.toggleMinimized,
     'realm.desktop.close-app-window': this.closeAppWindow,
   };
 
@@ -77,6 +79,13 @@ export class DesktopService extends BaseService {
         'realm.desktop.open-app-window',
         spaceId,
         app
+      );
+    },
+    toggleMinimized: async (spaceId: string, windowId: string) => {
+      return await ipcRenderer.invoke(
+        'realm.desktop.toggle-minimized',
+        spaceId,
+        windowId
       );
     },
     closeAppWindow: async (spaceId: string, app: any) => {
@@ -154,7 +163,7 @@ export class DesktopService extends BaseService {
     this.state?.setDimensions(windowId, dimensions);
   }
 
-  openAppWindow(_event: any, spaceId: string, selectedApp: any) {
+  openAppWindow(_event: any, spaceId: string, selectedApp: AppType) {
     const { desktopDimensions, isFullscreen } = this.core.services.shell;
 
     const newWindow = this.state.openBrowserWindow(
@@ -169,19 +178,13 @@ export class DesktopService extends BaseService {
       const appUrl = newWindow.href?.glob
         ? `${credentials.url}/apps/${selectedApp.id!}`
         : `${credentials.url}${newWindow.href?.site}`;
-      // console.log('core credentials => %o', credentials);
-      // Hit the main process handler for setting partition cookies
-      // console.log('setting cookies => %o', {
-      //   url: appUrl,
-      //   name: `urbauth-${credentials.ship}`,
-      //   value: credentials.cookie!.split('=')[1].split('; ')[0],
-      // });
+
       session.fromPartition(`${selectedApp.type}-webview`).cookies.set({
         url: appUrl,
         name: `urbauth-${credentials.ship}`,
-        value: credentials.cookie!.split('=')[1].split('; ')[0],
+        value: credentials.cookie?.split('=')[1].split('; ')[0],
       });
-    } else if (selectedApp.type === 'web') {
+    } else if (selectedApp.type === 'dev') {
       const appUrl = selectedApp.web.url;
       // Hit the main process handler for setting partition cookies
       session.fromPartition(`${selectedApp.type}-web-webview`).cookies.set({
@@ -192,6 +195,9 @@ export class DesktopService extends BaseService {
     }
   }
 
+  toggleMinimized(_event: any, spaceId: string, windowId: string) {
+    this.state?.toggleMinimize(windowId);
+  }
   closeAppWindow(_event: any, spaceId: string, selectedApp: any) {
     this.state?.closeBrowserWindow(selectedApp.id);
   }

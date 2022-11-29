@@ -2,6 +2,7 @@
 import { types, applySnapshot, Instance } from 'mobx-state-tree';
 import { getInitialWindowDimensions } from './lib/window-manager';
 import { Glob } from '../ship/models/docket';
+import { AppType } from '../spaces/models/bazaar';
 
 // const Grid = types.model({
 //   width: types.enumeration(['1', '2', '3']),
@@ -29,6 +30,7 @@ const Window = types
       'urbit'
     ),
     dimensions: DimensionsModel,
+    minimized: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     setZIndex(newZ: number) {
@@ -50,6 +52,7 @@ export interface WindowModelProps {
     width: number;
     height: number;
   };
+  minimized?: boolean;
 }
 
 export const DesktopStore = types
@@ -84,6 +87,9 @@ export const DesktopStore = types
     isActiveWindow(appId: string) {
       return self.activeWindow?.id === appId;
     },
+    isMinimized(appId: string) {
+      return self.windows.get(appId)?.minimized;
+    },
   }))
   .actions((self) => ({
     setMouseColor(newMouseColor: string = '#4E9EFD') {
@@ -112,17 +118,19 @@ export const DesktopStore = types
       windowDimensions && applySnapshot(windowDimensions, dimensions);
     },
     openBrowserWindow(
-      app: any,
+      app: AppType,
       desktopDimensions: { width: number; height: number },
       isFullscreen: boolean
     ) {
-      let glob = app.glob;
-      let href = app.href;
-
-      if (app.href) {
-        glob = !!app.href.glob;
+      let glob;
+      let href;
+      if (app.type === 'urbit') {
+        glob = app.href.glob ? true : false;
+        href = app.href;
       }
-      if (app.type === 'web') {
+
+      if (app.type === 'dev') {
+        // app as DevApp
         href = { site: app.web.url };
       }
       const newWindow = Window.create({
@@ -145,11 +153,28 @@ export const DesktopStore = types
       }
       return newWindow;
     },
+    toggleMinimize(windowId: string) {
+      const window = self.windows.get(windowId);
+      if (!window) {
+        return console.error('Window not found');
+      }
+      if (window) {
+        window.minimized = !window.minimized;
+        if (window.minimized) {
+          self.activeWindow?.id === windowId && (self.activeWindow = undefined);
+        } else {
+          self.activeWindow = window;
+        }
+        self.windows.set(windowId, window);
+      }
+    },
     closeBrowserWindow(appId: any) {
       if (self.activeWindow?.id === appId) {
-        const nextWindow = Array.from(self.windows.values())[0].id;
+        const nextWindow = Array.from(self.windows.values()).filter(
+          (app: WindowModelType) => !app.minimized
+        )[0];
         if (nextWindow) {
-          this.setActive(nextWindow);
+          this.setActive(nextWindow.id);
         }
       }
       self.windows.delete(appId);

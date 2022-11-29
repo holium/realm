@@ -325,7 +325,7 @@ export class WalletService extends BaseService {
       secretKey,
       accessPropertiesByDotNotation: true,
     };
-    this.db = new Store<WalletStoreType>(storeParams)
+    this.db = new Store<WalletStoreType>(storeParams);
     const persistedState: WalletStoreType = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {
@@ -426,20 +426,20 @@ export class WalletService extends BaseService {
       this.state!.testnet.initial(wallets.btctestnet);
       this.updateBitcoinInfo();
     });
-    WalletApi.subscribeToTransactions(
-      this.core.conduit!,
-      (transaction: any) => {
-        if (transaction.network == 'ethereum')
-          this.state!.ethereum.wallets.get(
-            transaction.index
-          )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-        //      else if (transaction.network == 'bitcoin')
-        //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-        /* const tx = this.state!.ethereum.transactions.get(
-          transaction.transaction.hash
-        ); */
-      }
-    );
+    // WalletApi.subscribeToTransactions(
+    //   this.core.conduit!,
+    //   (transaction: any) => {
+    //     if (transaction.network == 'ethereum')
+    //       this.state!.ethereum.wallets.get(
+    //         transaction.index
+    //       )!.applyTransactionUpdate(transaction.net, transaction.transaction);
+    //     //      else if (transaction.network == 'bitcoin')
+    //     //        this.state!.bitcoin.applyTransactionUpdate(transaction);
+    //     /* const tx = this.state!.ethereum.transactions.get(
+    //       transaction.transaction.hash
+    //     ); */
+    //   }
+    // );
     WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
       this.state!.ethereum.setSettings(settings);
     });
@@ -935,26 +935,26 @@ export class WalletService extends BaseService {
   setEthereumProviders() {
     let alchemySettings;
     if (this.state!.ethereum.network === 'mainnet') {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
-      );
+      // this.ethProvider = new ethers.providers.JsonRpcProvider(
+      //   'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
+      // );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_MAINNET, // Replace with your network.
       };
       // etherscan
     } else {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://goerli.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
-      );
+      // this.ethProvider = new ethers.providers.JsonRpcProvider(
+      //   'https://goerli.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
+      // );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_GOERLI, // Replace with your network.
       };
     }
-    this.ethProvider.removeAllListeners();
-    this.ethProvider.on('block', () => this.updateEthereumInfo());
-    this.alchemy = new Alchemy(alchemySettings);
+    // this.ethProvider.removeAllListeners();
+    // this.ethProvider.on('block', () => this.updateEthereumInfo());
+    // this.alchemy = new Alchemy(alchemySettings);
   }
 
   updateEthereumInfo() {

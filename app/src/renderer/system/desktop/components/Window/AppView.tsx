@@ -1,6 +1,6 @@
 import { FC, useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { Spinner, Flex } from 'renderer/components';
+// import { Spinner, Flex } from 'renderer/components';
 import { WindowModelProps } from 'os/services/shell/desktop.model';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -35,13 +35,13 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
 
   const [loading, setLoading] = useState(false);
 
-  const onStartLoading = () => {
-    setLoading(true);
-  };
+  // const onStartLoading = () => {
+  //   setLoading(true);
+  // };
 
-  const onStopLoading = () => {
-    setLoading(false);
-  };
+  // const onStopLoading = () => {
+  //   setLoading(false);
+  // };
 
   const lockView = useMemo(
     () => isResizing || isDragging || loading || !isActive,
@@ -50,8 +50,8 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
 
   useEffect(() => {
     const webview: any = document.getElementById(`${window.id}-urbit-webview`);
-    webview?.addEventListener('did-start-loading', onStartLoading);
-    webview?.addEventListener('did-stop-loading', onStopLoading);
+    // webview?.addEventListener('did-start-loading', onStartLoading);
+    // webview?.addEventListener('did-stop-loading', onStopLoading);
 
     if (window && ship) {
       webview?.addEventListener('dom-ready', () => {
@@ -62,14 +62,13 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       });
 
       webview?.addEventListener('close', () => {
-        // @ts-expect-error
         webview.closeDevTools();
       });
 
       let appUrl = `${ship.url}/apps/${window.id}/?spaceId=${spaces.selected?.path}`;
 
       if (window.href?.site) {
-        appUrl = `${ship.url}${window.href?.site}?spaceId=${spaces.selected?.path}`;
+        appUrl = `${ship.url}${window.href?.site}`; // ?spaceId=${spaces.selected?.path}`;
       }
 
       DesktopActions.openAppWindow('', toJS(window));
@@ -78,7 +77,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
     () => {
       setReady(false);
     };
-  }, [window?.id, ship]);
+  }, [ship, window, spaces.selected?.path, desktop.mouseColor]);
 
   useEffect(() => {
     const css = `
@@ -105,13 +104,18 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       div[data-radix-portal] {
         z-index: 2000 !important;
       }
-   
+
+      body {
+        overflow-x: hidden;
+        overflow-y: hidden;
+      }
+
       #rlm-cursor {
         position: absolute;
         z-index: 2147483646 !important;
       }
-      
-      
+
+
     `;
 
     if (ready) {
@@ -139,10 +143,11 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           overflow: 'hidden',
           width: 'inherit',
           height: 'inherit',
+          position: 'relative',
         }}
         ref={elementRef}
       >
-        {loading && (
+        {/* {loading && (
           <Flex
             position="absolute"
             left="calc(50% - 4px)"
@@ -150,7 +155,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           >
             <Spinner size={1} />
           </Flex>
-        )}
+        )} */}
         <webview
           ref={webViewRef}
           id={`${window.id}-urbit-webview`}
@@ -161,12 +166,13 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           style={{
-            display: 'flex',
-            // width: 'inherit',
-            height: '100%',
-            position: 'relative',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            right: 0,
+            position: 'absolute',
             background: theme.currentTheme.windowColor,
-            overflow: 'none',
+            overflow: 'hidden',
             pointerEvents: lockView ? 'none' : 'auto',
           }}
         />
