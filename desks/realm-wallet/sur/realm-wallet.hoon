@@ -40,7 +40,6 @@
 +$  sharing
   $:  who=?(%nobody %friends %anybody)
       wallet-creation=mode
-      whitelist=(set @p)
       blocked=(set @p)
   ==
 ::  poke actions

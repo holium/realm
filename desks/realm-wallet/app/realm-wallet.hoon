@@ -149,11 +149,8 @@
     ?>  (team:title our.bowl src.bowl)
     =.  sharing.settings
       ?-  type.act
-        %allow
-      =.  whitelist.sharing.settings  (~(put in whitelist.sharing.settings) who.act)
-      sharing.settings
         %block
-      =.  blocked.sharing.settings  (~(put in whitelist.sharing.settings) who.act)
+      =.  blocked.sharing.settings  (~(put in blocked.sharing.settings) who.act)
       sharing.settings
       ==
     `state
@@ -188,7 +185,8 @@
     ?:  (~(has in blocked.sharing.settings) src.bowl)
       [null-address-card state]
     ?:  ?&  =(who.sharing.settings %friends)
-            !(~(has in whitelist.sharing.settings) src.bowl)
+            =/  friends  .^(json %gx /(scot %p our.bowl)/(scot %da now.bowl)/realm/friends/all)
+            !(~(has in friends) src.bowl)
         ==
       [null-address-card state]
     ::  send default wallet if requested
