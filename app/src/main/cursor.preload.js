@@ -27,7 +27,6 @@ ipcRenderer.on('load-window-id', (e, windowId) => {
 
 window.onload = function () {
   ipcRenderer.on('mouse-color', (event, color, initialRender) => {
-    console.log('mouse color', color);
     renderMouse(color);
   });
   renderMouse();
