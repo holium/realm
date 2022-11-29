@@ -44,7 +44,7 @@ type Props = {
    * Callback invoked whenever the scroll offset changes within the inner scrollable region.
    * This callback can be used to sync scrolling between lists, tables, or grids.
    */
-  onScroll: (params: Scroll) => void;
+  onScroll?: (params: Scroll) => void;
 
   /** See Grid#overscanIndicesGetter */
   overscanIndicesGetter: OverscanIndicesGetter;
@@ -99,10 +99,6 @@ export default class List extends PureComponent<Props> {
     style: {},
   };
   Grid: ElementRef<typeof Grid> | null | undefined;
-
-  componentDidMount() {
-    console.log('H', this.props.height);
-  }
 
   forceUpdateGrid() {
     if (this.Grid) {
@@ -243,7 +239,7 @@ export default class List extends PureComponent<Props> {
   };
   _onScroll = ({ clientHeight, scrollHeight, scrollTop }: any) => {
     const { onScroll } = this.props;
-    onScroll({
+    onScroll?.({
       clientHeight,
       scrollHeight,
       scrollTop,

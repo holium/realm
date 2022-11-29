@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { Box } from '../Box/Box';
 import AutoSizer from './source/AutoSizer/AutoSizer';
 import CellMeasurer from './source/CellMeasurer/CellMeasurer';
 import CellMeasurerCache from './source/CellMeasurer/CellMeasurerCache';
-import List from './source/List/List';
+import { Scroll } from './source/List/types';
 import { StyledList } from './WindowedList.styles';
 
 type WindowedListProps<T> = {
@@ -24,6 +24,7 @@ type WindowedListProps<T> = {
    * It is preferred to set this value if known ahead of time, to save render time.
    */
   rowHeight?: number;
+  onScroll?: (params: Scroll) => void;
   hideScrollbar?: boolean;
   startAtBottom?: boolean;
   sort?: (a: T, b: T) => number;
@@ -36,12 +37,12 @@ export const WindowedList = <T,>({
   width,
   height,
   rowHeight,
+  onScroll,
   hideScrollbar = true,
   startAtBottom = false,
   sort = () => 0,
   filter = () => true,
 }: WindowedListProps<T>) => {
-  const listRef = useRef<List>(null);
   const data = useMemo(
     () => rawData.filter(filter).sort(sort),
     [rawData, filter, sort]
@@ -56,11 +57,6 @@ export const WindowedList = <T,>({
     })
   );
 
-  useEffect(() => {
-    // clear cache on unmount
-    return () => cache.current.clearAll();
-  }, []);
-
   return (
     <Box style={{ width: '100%', height: '100%' }}>
       <AutoSizer
@@ -71,7 +67,6 @@ export const WindowedList = <T,>({
       >
         {({ width: maybeAutoWidth, height: maybeAutoHeight }) => (
           <StyledList
-            ref={listRef}
             width={width ?? maybeAutoWidth}
             height={height ?? maybeAutoHeight}
             rowCount={data.length}
@@ -91,9 +86,10 @@ export const WindowedList = <T,>({
                 )}
               </CellMeasurer>
             )}
+            onScroll={onScroll}
             hideScrollbar={hideScrollbar}
             startAtBottom={startAtBottom}
-            // scrollToIndex={startAtBottom ? data.length - 1 : 0}
+            scrollToIndex={startAtBottom ? data.length - 1 : 0}
             scrollToAlignment={startAtBottom ? 'end' : 'auto'}
           />
         )}
