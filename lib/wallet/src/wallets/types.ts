@@ -6,10 +6,18 @@ export type Account = {
   nickname: string | null;
   pubkey: string; // raw public key
   privkey: string; // raw private key
+  assets: Asset[];
   transactions: any[];
-  // assets: ContractAddr[];
 };
 
+export type Asset = {
+  addr: ContractAddr; // smart contract address for eth
+  id?: string; // chainId for eth, id for uqbar
+  type: 'coin' | 'token' | 'multisig' | string;
+  data: NFTAsset | CoinAsset | MultiAsset;
+};
+
+// ERC-20
 export type CoinAsset = {
   logo: string | null; // url of token logo image
   symbol: string; // USDC, DAI, BNB, etc
@@ -19,6 +27,7 @@ export type CoinAsset = {
   allowances: { [addr: string]: number };
 };
 
+// ERC-721
 export type NFTAsset = {
   name: string;
   description: string;
@@ -27,6 +36,7 @@ export type NFTAsset = {
   properties: { [key: string]: string | object };
 };
 
+// ERC-1155
 export type MultiAsset = {
   name: string;
   decimals: number; // 8 - used to convert to human readable number
@@ -34,13 +44,6 @@ export type MultiAsset = {
   image: string;
   balance: number; // current account balance
   properties: { [key: string]: string | object };
-};
-
-export type Asset = {
-  addr: ContractAddr; // smart contract address for eth
-  id?: string; // chainId for eth, id for uqbar
-  type: 'coin' | 'token' | 'multisig' | string;
-  data: NFTAsset | CoinAsset | MultiAsset;
 };
 
 export type ContractAddr = string;
