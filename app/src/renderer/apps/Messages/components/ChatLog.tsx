@@ -6,7 +6,8 @@ import { ChatMessage } from './ChatMessage';
 import { GraphDMType } from 'os/services/ship/models/courier';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
-import { Flex, IconButton, Icons, Text } from 'renderer/components';
+import { IconButton, Icons, Text } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
