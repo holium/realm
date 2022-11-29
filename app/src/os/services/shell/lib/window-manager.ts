@@ -1,6 +1,13 @@
-import { AppModelType } from 'os/services/ship/models/docket';
-import { nativeApps, NativeAppType } from '../../../../renderer/apps';
+import {
+  AppType,
+  UrbitAppType,
+  NativeAppType,
+  DevAppType,
+  RealmConfigType,
+} from 'os/services/spaces/models/bazaar';
 import { DEFAULT_APP_WINDOW_DIMENSIONS } from './dimensions';
+type DesktopDimensions = { width: number; height: number };
+type AppDimensions = { x: number; y: number; width: number; height: number };
 
 /**
  * getCenteredXY
@@ -16,15 +23,16 @@ export const getCenteredXY = (
     width: number;
     height: number;
   },
-  desktopDimensions: { width: number; height: number }
+  desktopDimensions: DesktopDimensions,
+  offset: number = 58
 ): { x: number; y: number } => {
   const appWidth = appDimensions.width;
   const appHeight = appDimensions.height;
   const desktopWidth = desktopDimensions.width;
   const desktopHeight = desktopDimensions.height;
 
-  const x = desktopWidth / 2 - appWidth / 2;
-  const y = desktopHeight / 2 - appHeight / 2 - 58;
+  const x = Math.floor(desktopWidth / 2 - appWidth / 2);
+  const y = Math.floor(desktopHeight / 2 - appHeight / 2) - offset;
   return { x, y };
 };
 
@@ -37,9 +45,9 @@ export const getCenteredXY = (
  * @returns { x: number; y: number; width: number; height: number }
  */
 export const getFullscreenDimensions = (
-  desktopDimensions: { width: number; height: number },
+  desktopDimensions: DesktopDimensions,
   isFullscreen?: boolean
-): { x: number; y: number; width: number; height: number } => {
+): AppDimensions => {
   const offset = isFullscreen ? 0 : 30;
   const { width, height } = desktopDimensions;
   const windowHeight = height - (16 + offset) - 50;
@@ -62,8 +70,8 @@ export const getFullscreenDimensions = (
  */
 export const getCenteredDimensions = (
   app: any,
-  desktopDimensions: { width: number; height: number }
-): { x: number; y: number; width: number; height: number } => {
+  desktopDimensions: DesktopDimensions
+): AppDimensions => {
   const { width, height } = desktopDimensions;
   if (DEFAULT_APP_WINDOW_DIMENSIONS[app.id]) {
     const defaultAppDimensions = {
@@ -113,42 +121,83 @@ export const getCenteredDimensions = (
  * @returns dimensions: { x: number; y: number; width: number; height: number }
  */
 export const getInitialWindowDimensions = (
-  app: any,
-  desktopDimensions: { width: number; height: number },
+  app: AppType,
+  desktopDimensions: DesktopDimensions,
   isFullscreen?: boolean
-): { x: number; y: number; width: number; height: number } => {
+): AppDimensions => {
   let dimensions: { x: number; y: number; width: number; height: number };
-  console.log(app);
+  let realmConfig: RealmConfigType | null;
   switch (app.type) {
     case 'urbit':
-      const urbitApp: AppModelType = app;
-      dimensions = getCenteredDimensions(urbitApp, desktopDimensions);
+      realmConfig = (app as UrbitAppType).config;
+      if (realmConfig) {
+        dimensions = normalizeConfigSize(desktopDimensions, realmConfig);
+        break;
+      }
+      dimensions = getCenteredDimensions(
+        app as UrbitAppType,
+        desktopDimensions
+      );
       break;
-    case 'web':
-      const webApp: NativeAppType = app;
-      if (webApp.web?.openFullscreen) {
+    case 'dev':
+      if ((app as DevAppType).web?.openFullscreen) {
         dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
         break;
       }
-      dimensions = getCenteredDimensions(webApp, desktopDimensions);
+      dimensions = getCenteredDimensions(app as DevAppType, desktopDimensions);
       break;
     case 'native':
-      const nativeApp: NativeAppType = app;
-      const nativeConfig = nativeApps[app.id];
-      if (nativeConfig.native?.openFullscreen) {
-        dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
+      realmConfig = (app as NativeAppType).config;
+      if (realmConfig) {
+        dimensions = normalizeConfigSize(desktopDimensions, realmConfig);
         break;
       }
-      dimensions = getCenteredDimensions(nativeApp, desktopDimensions);
+      dimensions = getCenteredDimensions(
+        app as NativeAppType,
+        desktopDimensions
+      );
       break;
-    case 'dialog':
-      const dialog: NativeAppType = app;
-      if (dialog.native?.openFullscreen) {
-        dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
-        break;
-      }
-      dimensions = getCenteredDimensions(dialog, desktopDimensions);
-      break;
+    // case 'dialog':
+    //   const dialog: any = app;
+    //   if (dialog.native?.openFullscreen) {
+    //     dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
+    //     break;
+    //   }
+    //   dimensions = getCenteredDimensions(dialog, desktopDimensions);
+    //   break;
   }
   return dimensions!;
+};
+
+/**
+ * normalizeConfigSize - computes the dimensions of a window based on the realm.config 1-10 scale
+ *
+ * @param desktopDimensions - { width: number; height: number }
+ * @param config - RealmConfigType { size: [number, number], showTitlebar: boolean, titlebarBorder: boolean }
+ * @returns dimensions: { x: number; y: number; width: number; height: number }
+ */
+export const normalizeConfigSize = (
+  desktopDimensions: DesktopDimensions,
+  config: RealmConfigType
+): AppDimensions => {
+  const xUnit = config.size[0];
+  const yUnit = config.size[1];
+  const xUnitSize = desktopDimensions.width / 10;
+  const yUnitSize = desktopDimensions.height / 10;
+  const appWidth = xUnit * xUnitSize;
+  const appHeight = yUnit * yUnitSize - 58 - 8;
+  const appXY = getCenteredXY(
+    {
+      width: appWidth,
+      height: appHeight,
+    },
+    desktopDimensions,
+    24
+  );
+  return {
+    x: appXY.x,
+    y: appXY.y,
+    width: appWidth - 16,
+    height: appHeight,
+  };
 };
