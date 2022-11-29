@@ -51,7 +51,7 @@
       =.  title.native-app            'Settings'
       =.  color.native-app            '#ACBCCB'
       =.  icon.native-app             'AppIconSettings'
-      =.  config.native-app           [size=[6 5] titlebar-border=%.y show-titlebar=%.n]
+      =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
     =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
     =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
     =.  grid-index.state              grid-index.init
