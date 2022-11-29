@@ -109,6 +109,10 @@
         ?>  (team:title our.bowl src.bowl)
         ``noun+!>((view:enjs:lib [%friends friends.state]))
     ::
+      [%x %ships ~]
+        ?>  (team:title our.bowl src.bowl)
+        ``noun+!>(~(key by friends.state))
+    ::
     ==
   ::
   ++  on-agent    on-agent:def

@@ -50,7 +50,7 @@
       [%set-settings =network =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud]
       [%set-wallet-creation-mode =mode]
       [%set-sharing-mode who=?(%nobody %friends %anybody)]
-      [%set-sharing-permissions type=?(%allow %block) who=@p]
+      [%set-sharing-permissions type=%block who=@p]
       [%set-default-index =network index=@ud]
       [%set-wallet-nickname =network index=@ud nickname=@t]
       [%create-wallet sndr=ship =network nickname=@t]

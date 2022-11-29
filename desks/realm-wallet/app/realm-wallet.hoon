@@ -185,7 +185,7 @@
     ?:  (~(has in blocked.sharing.settings) src.bowl)
       [null-address-card state]
     ?:  ?&  =(who.sharing.settings %friends)
-            =/  friends  .^(json %gx /(scot %p our.bowl)/(scot %da now.bowl)/realm/friends/all)
+            =/  friends  .^((set @p) %gx /(scot %p our.bowl)/realm/(scot %da now.bowl)/all-set/noun)
             !(~(has in friends) src.bowl)
         ==
       [null-address-card state]
