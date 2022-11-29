@@ -100,6 +100,7 @@ const services = Services.create({
   ship: undefined,
   spaces: {
     loader: { state: 'initial' },
+    join: { state: 'initial' },
     spaces: undefined,
   },
   bazaar: {},

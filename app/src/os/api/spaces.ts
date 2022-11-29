@@ -384,15 +384,6 @@ const handleSpacesReactions = (
           data['remote-space'].members
         );
         spacesState.addSpace(data['remote-space']);
-        //SpacesActions.setSelected(data['remote-space'].path)
-
-/*        const selected = spacesState.selectSpace(path);
-        this.setTheme(selected?.theme!);
-        // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
-        // setting provider to current space host
-        const spaceHost = getHost(this.state!.selected!.path);
-        // if (currentRoomProvider !== spaceHost)
-        this.core.services.ship.rooms.setProvider(null, spaceHost);*/
       }
       break;
     default:
