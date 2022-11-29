@@ -82,7 +82,7 @@
       %graph-dm-action
         ?-  groups-target
           %1  (on-graph-action:core !<(action:store vase))
-          %2  [(on-graph-action:groups-two !<(action:store vase)) state]
+          %2  [(on-graph-action:groups-two !<(action:store vase) [our.bowl now.bowl]) state]
         ==
       %notify-action  (on-notify-action:core !<(action:notify vase))
       %set-groups-target  `[%1 !<(?(%1 %2) vase) +>:state]
@@ -94,6 +94,8 @@
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
+    ~&  "on-watch called in %courier"
+    ~&  path
     =/  cards=(list card)
       ?:  =(groups-target %2)
         (on-watch:groups-two path)
@@ -326,6 +328,8 @@
   |=  [upd=update:graph-store now=@da our=ship]
   ^-  (quip card _state)
   |^
+  ~&  "on-graph-update called"
+  ~&  upd
   ?+  -.q.upd   `state
     %add-nodes
       ?:  =(name.resource.+.q.upd %dm-inbox) :: is dm-inbox
@@ -405,6 +409,8 @@
 ++  on-hook-action
   |=  [act=action:dm-hook-sur now=@da our=ship]
   ^-  (quip card _state)
+  ~&  "on-hook-action called"
+  ~&  act
   |^
   ?+  -.act                 `state
     %pendings               (pending-dm +.act)

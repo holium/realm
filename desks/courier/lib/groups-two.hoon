@@ -1,5 +1,6 @@
 /-  notify, c=chat
 /-  *courier
+/+  lib=courier
 |%
 ++  into-chat-inline-type
   |=  con=content
@@ -11,12 +12,12 @@
     %reference  [%break ~] ::TODO actually map this properly
   ==
 ++  on-graph-action
-  |=  [act=action]
+  |=  [act=action bowl=[our=ship now=@da]]
   |^
   ?-  -.act
     %send-dm               (send-dm +.act)
     %read-dm               (read-dm +.act)
-    %create-group-dm       (create-group-dm +.act)
+    %create-group-dm       (create-group-dm +.act bowl)
     %send-group-dm         (send-group-dm +.act)
     %read-group-dm         (read-group-dm +.act)
   ==
@@ -38,9 +39,24 @@
     ~&  ship
     ~
   ++  create-group-dm
-    |=  [ships=(set ship)]
+    |=  [ships=(set ship) bowl=[our=ship now=@da]]
     ~&  ships
-    ~
+    =/  to-set        (~(put in ships) our.bowl)
+    =/  new-grp-prev  [
+          path=(spat /club/(scot %uv now.bowl)/ui)
+          to=to-set
+          type=%group
+          source=%graph-store
+          last-time-sent=now.bowl
+          last-message=[~]
+          metadata=(get-metadata:gs:lib to-set our.bowl now.bowl)
+          invite-hash=~
+          unread-count=0
+      ]
+    :~
+      [%pass / %agent [our.bowl %chat] %poke club-create+!>([id=`@uvH`now.bowl hive=ships])]
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
+    ==
   ++  send-group-dm
     |=  [=resource =post]
     ~&  resource
@@ -53,6 +69,7 @@
   --
 ++  on-watch
   |=  =path
+  ~&  "groups-two on-watch called"
   ~
 ++  peek
   |=  [=path =bowl:gall =devices:notify]
