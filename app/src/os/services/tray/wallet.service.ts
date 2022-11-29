@@ -464,20 +464,20 @@ export class WalletService extends BaseService {
       // this.updateBitcoinInfo();
     });
 
-    WalletApi.subscribeToTransactions(
-      this.core.conduit!,
-      (transaction: any) => {
-        if (transaction.network === 'ethereum')
-          this.state!.ethereum.wallets.get(
-            transaction.index
-          )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-        //      else if (transaction.network == 'bitcoin')
-        //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-        /* const tx = this.state!.ethereum.transactions.get(
-          transaction.transaction.hash
-        ); */
-      }
-    );
+    // WalletApi.subscribeToTransactions(
+    //   this.core.conduit!,
+    //   (transaction: any) => {
+    //     if (transaction.network == 'ethereum')
+    //       this.state!.ethereum.wallets.get(
+    //         transaction.index
+    //       )!.applyTransactionUpdate(transaction.net, transaction.transaction);
+    //     //      else if (transaction.network == 'bitcoin')
+    //     //        this.state!.bitcoin.applyTransactionUpdate(transaction);
+    //     /* const tx = this.state!.ethereum.transactions.get(
+    //       transaction.transaction.hash
+    //     ); */
+    //   }
+    // );
 
     WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
       this.state!.ethereum.setSettings(settings);
@@ -963,9 +963,9 @@ export class WalletService extends BaseService {
   setEthereumProviders() {
     let alchemySettings;
     if (this.state!.ethereum.network === 'mainnet') {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
-      );
+      // this.ethProvider = new ethers.providers.JsonRpcProvider(
+      //   'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
+      // );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_MAINNET, // Replace with your network.
@@ -980,11 +980,13 @@ export class WalletService extends BaseService {
         network: Network.ETH_GOERLI, // Replace with your network.
       };
     }
-    this.ethProvider.removeAllListeners();
+    this.ethProvider?.removeAllListeners();
     // TODO this is where the apis are querying too much
     // this.ethProvider.on
-    this.ethProvider.on('block', () => this.updateEthereumInfo());
+    // this.ethProvider?.on('block', () => this.updateEthereumInfo());
+    // this.ethProvider?.on('')
     this.alchemy = new Alchemy(alchemySettings);
+    // this.alchemy.ws.on('')
   }
 
   updateEthereumInfo() {

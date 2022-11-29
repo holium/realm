@@ -1,5 +1,3 @@
-/* eslint global-require: off, no-console: off, promise/always-return: off */
-
 /**
  * This module executes inside of electron's main process. You can start
  * electron renderer process from here and communicate with the other processes
@@ -48,8 +46,8 @@ export interface IAppUpdater {
 }
 
 log.transports.file.level = isDevelopment ? 'debug' : 'info';
-log.info(`INSTALL_MOON=${process.env.INSTALL_MOON}`);
-log.info(`GH_TOKEN=${process.env.GH_TOKEN}`);
+// log.info(`INSTALL_MOON=${process.env.INSTALL_MOON}`);
+// log.info(`GH_TOKEN=${process.env.GH_TOKEN}`);
 
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
@@ -173,8 +171,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    // width: 1920 / factor,
-    // height: 1440 / factor,
+    // width: 1920,
+    // height: 1440,
     titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
