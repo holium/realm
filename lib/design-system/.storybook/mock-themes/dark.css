@@ -1,0 +1,12 @@
+:root {
+  --rlm-font: 'Rubik', sans-serif;
+  --rlm-base-color: #c4c3bf;
+  --rlm-accent-color: #4E9EFD;
+  --rlm-input-color: #FFFFFF;
+  --rlm-border-color: #001933;
+  --rlm-window-color: #f5f5f4;
+  --rlm-card-color: #0063c6;
+  --rlm-theme-mode: dark;
+  --rlm-text-color: #2a2927;
+  --rlm-icon-color: #333333;
+}

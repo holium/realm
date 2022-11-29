@@ -181,10 +181,17 @@ export const AppDock: FC<AppDockProps> = observer(() => {
               ]}
               onAppClick={(selectedApp: any) => {
                 if (desktop.isOpenWindow(selectedApp.id)) {
-                  DesktopActions.setActive(
-                    spaces.selected!.path,
-                    selectedApp.id
-                  );
+                  if (desktop.isMinimized(selectedApp.id)) {
+                    DesktopActions.toggleMinimized(
+                      spaces.selected!.path,
+                      selectedApp.id
+                    );
+                  } else {
+                    DesktopActions.setActive(
+                      spaces.selected!.path,
+                      selectedApp.id
+                    );
+                  }
                 } else {
                   DesktopActions.openAppWindow(
                     spaces.selected!.path,

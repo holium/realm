@@ -13,6 +13,7 @@ module.exports = {
       './lib/room/tsconfig.json',
       './lib/conduit/tsconfig.json',
       './lib/multiplayer/tsconfig.json',
+      './lib/design-system/tsconfig.json',
       './playground/ui/tsconfig.json',
       './tsconfig.eslint.json',
     ],
