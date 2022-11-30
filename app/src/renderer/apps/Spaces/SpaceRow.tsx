@@ -99,7 +99,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
             });
           },
         },
-  ];
+  ].filter(el => el !== false);
 
   const contextMenuButtonIds = contextMenuItems.map((item) => item?.id);
   const memberCount = membership.getMemberCount(space.path);

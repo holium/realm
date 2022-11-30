@@ -51,6 +51,7 @@ export type SpaceModelType = Instance<typeof SpaceModel>;
 export const SpacesStore = types
   .model('SpacesStore', {
     loader: types.optional(LoaderModel, { state: 'initial' }),
+    join: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
     spaces: types.map(SpaceModel),
     // friends: types.optional(FriendsStore, { all: {} }),
@@ -151,6 +152,9 @@ export const SpacesStore = types
     },
     setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.loader.state = status;
+    },
+    setJoin(status: 'initial' | 'loading' | 'error' | 'loaded') {
+      self.join.state = status;
     },
     setOurSpace(ourSpace: any) {
       // self.our = ourSpace;

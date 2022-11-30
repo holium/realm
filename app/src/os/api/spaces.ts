@@ -109,6 +109,56 @@ export const SpacesApi = {
       });
     });
   },
+  joinSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[0],
+      space: pathArr[1],
+    };
+    return await new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          join: {
+            path: pathObj,
+          },
+        },
+        reaction: 'spaces-reaction.join',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
+  leaveSpace: async (conduit: Conduit, payload: { path: SpacePath }) => {
+    const pathArr = payload.path.split('/');
+    const pathObj = {
+      ship: pathArr[1],
+      space: pathArr[2],
+    };
+    return await new Promise((resolve, reject) => {
+      conduit.poke({
+        app: 'spaces',
+        mark: 'spaces-action',
+        json: {
+          leave: {
+            path: pathObj,
+          },
+        },
+        reaction: 'spaces-reaction.delete',
+        onReaction: (data: any) => {
+          resolve(data);
+        },
+        onError: (e: any) => {
+          reject(e);
+        },
+      });
+    });
+  },
   /**
    * inviteMember: invite a member to a space
    *
@@ -321,16 +371,19 @@ const handleSpacesReactions = (
         data.remove,
         setTheme
       );
-
       membersState.removeMemberMap(deleted);
       break;
     case 'remote-space':
-      // membersState.addMemberMap(
-      //   data['remote-space'].path,
-      //   data['remote-space'].members
-      // );
-      // spacesState.addSpace(data['remote-space']);
-      // bazaarState.addBazaar(remoteSpace);
+      if (Object.keys(data['remote-space'].members).length === 0) {
+        spacesState.setJoin('error');
+      }
+      else {
+        membersState.addMemberMap(
+          data['remote-space'].path,
+          data['remote-space'].members
+        );
+        spacesState.addSpace(data['remote-space']);
+      }
       break;
     default:
       // unknown
