@@ -129,3 +129,7 @@ jobs:
           git add package.json
           git commit -m "patch version"
           git push
+      # Workaround to avoid "Post Run actions/setup-node" failures.
+      # See: https://codesti.com/issue/actions/setup-node/317
+      - run: mkdir -p /home/runner/.npm
+        continue-on-error: true
