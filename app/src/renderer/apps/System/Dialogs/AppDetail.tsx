@@ -261,11 +261,14 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
                     borderRadius={6}
                     paddingTop="6px"
                     paddingBottom="6px"
-                    variant="disabled"
+                    // variant="disabled"
                     fontWeight={500}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // TODO
+                      const content = `web+urbitgraph://${app.host || ''}/${
+                        app.id
+                      }`;
+                      navigator.clipboard.writeText(content);
                     }}
                   >
                     Copy app link
