@@ -36,45 +36,8 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
-    ?>  ?=([%initial *] charge-update)
-    =/  our-space                     [our.bowl 'our']
-    =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
-    =|  =native-app:store
-      =.  title.native-app            'Relic Browser'
-      =.  color.native-app            '#92D4F9'
-      =.  icon.native-app             'AppIconCompass'
-      =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
-    =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
-    =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
-    =|  =native-app:store
-      =.  title.native-app            'Settings'
-      =.  color.native-app            '#ACBCCB'
-      =.  icon.native-app             'AppIconSettings'
-      =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
-    =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
-    =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
-    =.  grid-index.state              grid-index.init
-    =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
-    ?>  ?=(%spaces -.spaces-scry)
-    =/  spaces                        spaces.spaces-scry
-    =/  stalls
-      %+  turn  ~(tap by spaces)
-        |=  [path=space-path:spaces-store =space:spaces-store]
-        [path [suite=~ recommended=~]]
-    =/  docks
-      %+  turn  ~(tap by spaces)
-        |=  [path=space-path:spaces-store =space:spaces-store]
-        [path [~]]
-    =.  stalls.state        (~(gas by stalls.state) stalls)
-    =.  docks.state         (~(gas by docks.state) docks)
     :_  this
-    :~
-        [%pass /docket %agent [our.bowl %docket] %watch /charges]
-        [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
-        [%pass /allies %agent [our.bowl %treaty] %watch /allies]
-        [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
-        [%pass /kiln %agent [our.bowl %hood] %watch /kiln/vats]
+    :~  [%pass / %agent [our.bowl %bazaar] %poke bazaar-action+!>([%initialize ~])]
     ==
   ::
   ++  on-save
@@ -157,7 +120,7 @@
       ::
       [%x %treaties ship=@ ~]     ::  ~/scry/bazaar/allies
         =/  =ship      (slav %p i.t.t.path)
-        =/  treaties   (treaties:scry:bazaar:core ship)
+        =/  treaties   (treaties:scry:bazaar:core ship %.y)
         ``bazaar-view+!>([%treaties treaties])
       ::
       :: [%x %treaties @ @ ~]     ::  ~/scry/bazaar/allies
@@ -346,6 +309,9 @@
       %suite-remove      (rem-suite +.action)
       %install-app       (install-app +.action)
       %uninstall-app     (uninstall-app +.action)
+      :: sent during onboarding after realm desk is fully installed and ready
+      ::  use this opportunity to refresh app-catalog
+      %initialize        (initialize +.action)
     ==
     ::
     ++  add-pin
@@ -441,6 +407,18 @@
       :~
         [%pass / %agent [our.bowl %docket] %poke docket-install+!>([ship desk])]
       ==
+    ::
+    ++  initialize
+      |=  [args=(map cord cord)]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: initializing bazaar..." ~)
+      =^  cards  state  initialize:helpers:bazaar:core
+      :_  state
+      =-  (welp - cards)
+      %+  turn  ~(tap in ~(key by wex.bowl))
+      |=  [=wire =ship =term]
+      ^-  card
+      [%pass wire %agent [ship term] %leave ~]
     ::
     ++  uninstall-app
       |=  [=desk]
@@ -634,11 +612,18 @@
       init.allies
     ::
     ++  treaties
-      |=  [=ship]
-      =/  treaties  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p ship)/noun)
+      |=  [shp=ship filter=?]
+      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
+      =/  treaties  .^(update:treaty:treaty %gx /(scot %p our.bowl)/treaty/(scot %da now.bowl)/treaties/(scot %p shp)/noun)
       :: ~&  >  [treaties]
       ?>  ?=(%ini -.treaties)
-      init.treaties
+      ?:  =(filter %.n)  init.treaties
+      %-  malt
+      %+  skip  ~(tap by init.treaties)
+        |=  [[trty-ship=ship =desk] trty=treaty:treaty]
+        ?:  ?&  =(trty-ship shp)
+                (~(has in hidden) desk)
+            ==  %.y  %.n
     ::
     ++  config
       |=  =desk
@@ -668,6 +653,48 @@
     --
   ++  helpers
     |%
+    ::
+    ++  initialize
+      ^-  (quip card _state)
+      =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+      ?>  ?=([%initial *] charge-update)
+      =/  our-space                     [our.bowl 'our']
+      =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
+      =|  =native-app:store
+        =.  title.native-app            'Relic Browser'
+        =.  color.native-app            '#92D4F9'
+        =.  icon.native-app             'AppIconCompass'
+        =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
+      =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-browser grid-index.init)
+      =|  =native-app:store
+        =.  title.native-app            'Settings'
+        =.  color.native-app            '#ACBCCB'
+        =.  icon.native-app             'AppIconSettings'
+        =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
+      =.  catalog.state                 (~(put by catalog.init) %os-settings [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar %os-settings grid-index.init)
+      =.  grid-index.state              grid-index.init
+      =/  spaces-scry                   .^(view:spaces-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
+      ?>  ?=(%spaces -.spaces-scry)
+      =/  spaces                        spaces.spaces-scry
+      =/  stalls
+        %+  turn  ~(tap by spaces)
+          |=  [path=space-path:spaces-store =space:spaces-store]
+          [path [suite=~ recommended=~]]
+      =/  docks
+        %+  turn  ~(tap by spaces)
+          |=  [path=space-path:spaces-store =space:spaces-store]
+          [path [~]]
+      =.  stalls.state        (~(gas by stalls.state) stalls)
+      =.  docks.state         (~(gas by docks.state) docks)
+      :_  state
+      :~  [%pass /docket %agent [our.bowl %docket] %watch /charges]
+          [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
+          [%pass /allies %agent [our.bowl %treaty] %watch /allies]
+          [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          [%pass /kiln %agent [our.bowl %hood] %watch /kiln/vats]
+      ==
     ::
     ++  get-install-status
       |=  [=app:store]
@@ -948,7 +975,7 @@
     ::  if every desk in the alliance has been added to the treaties listing for the ship,
     ::    send the UI and update indicating its safe to scry the treaties
     =/  allis  allies:scry:bazaar:core
-    =/  treats  (treaties:scry:bazaar:core ship.treaty)
+    =/  treats  (treaties:scry:bazaar:core ship.treaty %.n)
     :: ?>  ?=(%ini allis)
     =/  alli  (~(get by allis) ship.treaty)
     =/  effects  ?~  alli  effects

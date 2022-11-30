@@ -24,6 +24,12 @@
           [%suite-remove suite-remove]
           [%install-app install-app]
           [%uninstall-app uninstall-app]
+          [%initialize initialize]
+      ==
+    ::
+    ++  initialize
+      %-  ot
+      :~  [%args (om so)]
       ==
     ::
     ++  install-app

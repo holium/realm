@@ -36,10 +36,10 @@ export const BazaarApi = {
   getTreaties: (conduit: Conduit, patp: string) => null,
   scryAllies: async (conduit: Conduit): Promise<any> => {
     const response = await conduit.scry({
-      app: 'treaty',
+      app: 'bazaar',
       path: `/allies`,
     });
-    return response.ini;
+    return response.allies;
   },
   scryTreaties: async (conduit: Conduit, ship: Patp): Promise<any> => {
     const response = await conduit.scry({

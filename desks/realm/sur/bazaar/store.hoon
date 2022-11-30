@@ -67,6 +67,7 @@
       [%suite-remove path=space-path:spaces index=@ud]
       [%install-app =ship =desk]
       [%uninstall-app =desk]
+      [%initialize args=(map cord cord)]
   ==
 ::
 +$  interaction
