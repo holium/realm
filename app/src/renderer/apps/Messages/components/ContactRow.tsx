@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, MouseEvent, useState, useMemo, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { darken } from 'polished';
 import { motion } from 'framer-motion';
@@ -21,7 +21,6 @@ import { ThemeModelType } from 'os/services/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
 import { GroupSigil } from './GroupSigil';
-import { Patp } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
 interface DMContact {
@@ -33,7 +32,7 @@ interface DMContact {
 interface RowProps {
   theme: ThemeType;
   customBg?: string;
-  pending?: boolean;
+  isPending?: boolean;
 }
 
 export const Row = styled(motion.div)<RowProps>`
@@ -47,7 +46,7 @@ export const Row = styled(motion.div)<RowProps>`
   align-items: center;
   transition: ${(props: RowProps) => props.theme.transition};
   ${(props: RowProps) =>
-    !props.pending &&
+    !props.isPending &&
     css`
       &:hover {
         transition: ${props.theme.transition};
@@ -67,210 +66,236 @@ export const MessagePreview = styled(motion.div)`
   user-select: text;
 `;
 
-const getNickname = (patp: Patp, metadata: any[]) => {};
-
 export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
-  // const { ship } = useShip();
-  const pending = dm.type === 'pending' || dm.type === 'group-pending';
+  const isGroup = dm.type === 'group' || dm.type === 'group-isPending';
+  const isPending = dm.type === 'pending' || dm.type === 'group-isPending';
+
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
 
-  let onAccept,
-    onDecline,
-    subTitle,
-    sigil,
-    to: string,
-    dmModel: PreviewDMType,
-    groupModel: PreviewGroupDMType;
+  const dmModel = dm as PreviewDMType;
+  const groupModel = dm as PreviewGroupDMType;
+  const to = useMemo(
+    () => (isGroup ? Array.from(groupModel.to).join(', ') : dmModel.to),
+    [dmModel.to, groupModel.to, isGroup]
+  );
+  const lastTimeSent = useMemo(
+    () => fromNow(dm.lastTimeSent),
+    [dm.lastTimeSent]
+  );
 
-  if (dm.type === 'group' || dm.type === 'group-pending') {
-    groupModel = dm as PreviewGroupDMType;
-    to = Array.from(groupModel.to).join(', ');
-    sigil = (
-      <Box opacity={pending ? 0.4 : 1}>
-        <GroupSigil
-          path={groupModel.path}
-          patps={groupModel.to}
-          metadata={groupModel.metadata}
-        />
-      </Box>
-    );
-    let type = 'text';
-    let lastMessage;
-    if (dm.lastMessage.length > 0) {
-      const lastSender = dm.lastMessage[0];
-      lastMessage = dm.lastMessage[1];
-      type = Object.keys(lastMessage)[0];
-      // @ts-expect-error
-      lastMessage = { text: `${lastSender.mention}: ${lastMessage[type]}` };
+  const subTitle = useMemo(() => {
+    if (isGroup) {
+      let type = 'text';
+      let lastMessage;
+      if (dm.lastMessage.length > 0) {
+        const lastSender = dm.lastMessage[0];
+        lastMessage = dm.lastMessage[1];
+        type = Object.keys(lastMessage)[0];
+        // @ts-expect-error
+        lastMessage = { text: `${lastSender.mention}: ${lastMessage[type]}` };
+      } else {
+        lastMessage = {
+          text: isPending ? 'Group chat invite' : 'No messages yet',
+        };
+      }
+
+      return <Message preview type={type} content={lastMessage} />;
     } else {
-      lastMessage = {
-        text: pending ? 'Group chat invite' : 'No messages yet',
-      };
-    }
-    subTitle = <Message preview type={type} content={lastMessage} />;
-    onAccept = (evt: any) => {
-      evt.stopPropagation();
-      setAcceptLoading(true);
+      if (isPending) {
+        return (
+          <Message
+            preview
+            type="text"
+            content={{ text: 'invited you to chat' }}
+          />
+        );
+      } else {
+        let type = 'text';
+        let lastMessage = dm.lastMessage[0];
+        if (lastMessage) {
+          type = Object.keys(lastMessage)[0];
+        } else {
+          lastMessage = { text: 'No messages yet' };
+        }
 
-      ShipActions.acceptGroupDm(groupModel.path)
-        .then((response: any) => {
-          console.log('accept ContactRow response', response);
-          setAcceptLoading(false);
-        })
-        .catch(() => {
-          setAcceptLoading(false);
-        });
-      console.log('accepting group dm');
-    };
-    onDecline = (evt: any) => {
-      evt.stopPropagation();
-      setRejectLoading(true);
-      ShipActions.declineGroupDm(groupModel.path)
-        .then((response: any) => {
-          console.log('response', response);
-          setRejectLoading(false);
-        })
-        .catch(() => {
-          setRejectLoading(false);
-        });
-      console.log('rejecting group dm');
-    };
-  } else {
-    dmModel = dm as PreviewDMType;
-    to = dmModel.to;
-    sigil = (
-      <Box mt="2px" opacity={pending ? 0.6 : 1}>
-        <Sigil
-          simple
-          size={28}
-          avatar={dmModel.metadata.avatar}
-          patp={dmModel.to}
-          color={[dmModel.metadata.color || '#000000', 'white']}
-        />
-      </Box>
-    );
-    onAccept = (evt: any) => {
-      evt.stopPropagation();
-      setAcceptLoading(true);
-      ShipActions.acceptDm(dmModel.to)
-        .then((response: any) => {
-          console.log('accept ContactRow response', response);
-          setAcceptLoading(false);
-        })
-        .catch(() => {
-          setAcceptLoading(false);
-        });
-      console.log('accepting');
-    };
-    onDecline = (evt: any) => {
-      evt.stopPropagation();
-      setRejectLoading(true);
-      DmActions.declineDm(dmModel.to)
-        .then((response: any) => {
-          console.log('response', response);
-          setRejectLoading(false);
-        })
-        .catch(() => {
-          setRejectLoading(false);
-        });
-      console.log('rejecting');
-    };
-    if (pending) {
-      subTitle = (
-        <Message
-          preview
-          type="text"
-          content={{ text: 'invited you to chat' }}
-        />
+        return <Message preview type={type} content={lastMessage} />;
+      }
+    }
+  }, [dm.lastMessage, isGroup, isPending]);
+
+  const sigil = useMemo(() => {
+    if (isGroup) {
+      return (
+        <Box opacity={isPending ? 0.4 : 1}>
+          <GroupSigil
+            path={groupModel.path}
+            patps={groupModel.to}
+            metadata={groupModel.metadata}
+          />
+        </Box>
       );
     } else {
-      let lastMessage = dm.lastMessage[0];
-      let type = 'text';
-      if (lastMessage) {
-        type = Object.keys(lastMessage)[0];
-      } else {
-        lastMessage = { text: 'No messages yet' };
-      }
-      subTitle = <Message preview type={type} content={lastMessage} />;
+      return (
+        <Box mt="2px" opacity={isPending ? 0.6 : 1}>
+          <Sigil
+            simple
+            size={28}
+            avatar={dmModel.metadata.avatar}
+            patp={dmModel.to}
+            color={[dmModel.metadata.color || '#000000', 'white']}
+          />
+        </Box>
+      );
     }
-  }
+  }, [
+    dmModel.metadata.avatar,
+    dmModel.metadata.color,
+    dmModel.to,
+    groupModel.metadata,
+    groupModel.path,
+    groupModel.to,
+    isGroup,
+    isPending,
+  ]);
 
-  const unreadCount = dm.unreadCount;
+  const onAccept = useCallback(
+    (evt: MouseEvent) => {
+      evt.stopPropagation();
+      setAcceptLoading(true);
 
-  // TODO better ellipsis handling in Text
-  let toString = to;
-  if (toString.length > 21) {
-    toString = toString.substring(0, 20) + '...';
-  }
+      if (isGroup) {
+        ShipActions.acceptGroupDm(groupModel.path)
+          .then((response: any) => {
+            console.log('accept ContactRow response', response);
+            setAcceptLoading(false);
+          })
+          .catch(() => {
+            setAcceptLoading(false);
+          });
+        console.log('accepting group dm');
+      } else {
+        ShipActions.acceptDm(dmModel.to)
+          .then((response: any) => {
+            console.log('accept ContactRow response', response);
+            setAcceptLoading(false);
+          })
+          .catch(() => {
+            setAcceptLoading(false);
+          });
+        console.log('accepting');
+      }
+    },
+    [dmModel.to, groupModel.path, isGroup]
+  );
+
+  const onDecline = useCallback(
+    (evt: MouseEvent) => {
+      evt.stopPropagation();
+      setRejectLoading(true);
+
+      if (isGroup) {
+        ShipActions.declineGroupDm(groupModel.path)
+          .then((response: any) => {
+            console.log('response', response);
+            setRejectLoading(false);
+          })
+          .catch(() => {
+            setRejectLoading(false);
+          });
+        console.log('rejecting group dm');
+      } else {
+        DmActions.declineDm(dmModel.to)
+          .then((response: any) => {
+            console.log('response', response);
+            setRejectLoading(false);
+          })
+          .catch(() => {
+            setRejectLoading(false);
+          });
+        console.log('rejecting');
+      }
+    },
+    [dmModel.to, groupModel.path, isGroup]
+  );
 
   return (
     <Row
-      pending={pending}
-      className={pending ? '' : 'realm-cursor-hover'}
+      isPending={isPending}
+      className={isPending ? '' : 'realm-cursor-hover'}
       customBg={theme.windowColor}
-      onClick={(evt: any) => !pending && onClick(evt)}
+      onClick={(evt: any) => !isPending && onClick(evt)}
     >
-      <Flex flex={1} gap={10}>
+      <Flex flex={1} gap={10} maxWidth="100%">
         {sigil}
-        <Flex flexDirection="column" flex={1}>
-          <Text opacity={pending ? 0.7 : 1} fontSize={3} fontWeight={500}>
-            {toString}
+        <Flex flexDirection="column" flex={1} overflow="hidden" minWidth={0}>
+          <Text
+            opacity={isPending ? 0.7 : 1}
+            fontSize={3}
+            fontWeight={500}
+            height="19px"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {to}
           </Text>
           {subTitle}
         </Flex>
-      </Flex>
-      {pending ? (
-        <Flex
-          flex={1}
-          flexDirection="row"
-          alignItems="center"
-          justifyContent="flex-end"
-          width="fit-content"
-        >
-          {/* <Message
-            preview
-            type={'text'}
-            content={{ text: 'has invited you to a DM' }}
-          /> */}
-          <Flex gap={4} flexDirection="row" alignItems="center">
-            <TextButton
-              highlightColor="#EC415A"
-              textColor="#EC415A"
-              onClick={onDecline}
-            >
-              {rejectLoading ? <Spinner size={0} /> : 'Reject'}
-            </TextButton>
-            <TextButton onClick={onAccept}>
-              {acceptLoading ? <Spinner size={0} /> : 'Accept'}
-            </TextButton>
-          </Flex>
-        </Flex>
-      ) : (
-        <Flex gap={2} flexDirection="column" alignItems="flex-end" flexGrow={0}>
-          <Text opacity={0.3} fontSize={2}>
-            {fromNow(dm.lastTimeSent)}
-          </Text>
+        {isPending ? (
           <Flex
-            px="10px"
-            py="1px"
-            justifyContent="center"
+            flex={1}
+            flexDirection="row"
             alignItems="center"
+            justifyContent="flex-end"
             width="fit-content"
-            borderRadius={12}
-            height={20}
-            minWidth={12}
-            background={unreadCount ? '#569BE2' : 'transparent'}
           >
-            {unreadCount > 0 && (
-              <Text fontSize={2} color="white" fontWeight={400}>
-                {unreadCount}
-              </Text>
-            )}
+            <Flex gap={4} flexDirection="row" alignItems="center">
+              <TextButton
+                highlightColor="#EC415A"
+                textColor="#EC415A"
+                onClick={onDecline}
+              >
+                {rejectLoading ? <Spinner size={0} /> : 'Reject'}
+              </TextButton>
+              <TextButton onClick={onAccept}>
+                {acceptLoading ? <Spinner size={0} /> : 'Accept'}
+              </TextButton>
+            </Flex>
           </Flex>
-        </Flex>
-      )}
+        ) : (
+          <Flex
+            gap={2}
+            flexDirection="column"
+            alignItems="flex-end"
+            flexGrow={0}
+          >
+            <Text opacity={0.3} fontSize={2}>
+              {lastTimeSent}
+            </Text>
+            <Flex
+              px="10px"
+              py="1px"
+              justifyContent="center"
+              alignItems="center"
+              width="fit-content"
+              borderRadius={12}
+              height={20}
+              minWidth={12}
+              background={dm.unreadCount ? '#569BE2' : 'transparent'}
+            >
+              {dm.unreadCount > 0 && (
+                <Text fontSize={2} color="white" fontWeight={400}>
+                  {dm.unreadCount}
+                </Text>
+              )}
+            </Flex>
+          </Flex>
+        )}
+      </Flex>
     </Row>
   );
 };
