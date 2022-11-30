@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { getSnapshot } from 'mobx-state-tree';
 import {
@@ -83,6 +83,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
     component: observer(() => {
       const { theme, bazaar } = useServices();
       const { loading, appId, type } = dialogProps;
+      const [copied, setCopied] = useState<boolean>(false);
       let app: AppType;
       let onClose: any = ShellActions.closeDialog;
       if (type === 'app-install') {
@@ -114,6 +115,12 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
       } else {
         return null;
       }
+
+      useEffect(() => {
+        if (copied) {
+          setTimeout(() => setCopied(false), 1000);
+        }
+      }, [copied]);
 
       return useMemo(() => {
         let graphic;
@@ -269,9 +276,19 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
                         app.id
                       }`;
                       navigator.clipboard.writeText(content);
+                      setCopied(true);
                     }}
                   >
-                    Copy app link
+                    <>
+                      <div style={{ marginRight: '3px', fontWeight: '500' }}>
+                        Copy app link
+                      </div>
+                      {!copied ? (
+                        <Icons name="Copy" />
+                      ) : (
+                        <Icons name="CheckCircle" />
+                      )}
+                    </>
                   </Button>
                 </Flex>
               </Flex>
@@ -286,6 +303,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
         theme.currentTheme.textColor,
         theme.currentTheme.accentColor,
         onClose,
+        copied,
       ]);
     }),
     onClose: () => {

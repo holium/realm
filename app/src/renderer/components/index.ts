@@ -37,3 +37,4 @@ export * from './SpacePicture';
 export * from './AppTile';
 export * from './Notification/InnerNotification';
 export * from './ConnectionStatus';
+export * from './useClipboardButton';
