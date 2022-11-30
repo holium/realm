@@ -1,4 +1,4 @@
-import { FC, useState, useMemo, useEffect } from 'react';
+import { FC, useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
 
@@ -8,7 +8,6 @@ import { useServices } from 'renderer/logic/store';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import AppSearchApp from '../AppInstall/AppSearch';
-import { ShellActions } from 'renderer/logic/actions/shell';
 
 type SidebarType = 'friends' | 'members' | null;
 
@@ -18,7 +17,7 @@ interface OurHomeProps {
 
 export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
   const { isOpen } = props;
-  const { friends, theme, ship } = useServices();
+  const { theme, ship } = useServices();
   const [sidebar, setSidebar] = useState<SidebarType>(null);
 
   const sidebarComponent = useMemo(() => {
@@ -30,9 +29,9 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
             right="8px"
             top="8px"
             bottom={58}
-            initial={{ opacity: 0, width: 40 }}
-            animate={{ opacity: 1, width: 330 }}
-            exit={{ opacity: 0, width: 40 }}
+            initial={{ opacity: 0, x: '88%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '88%' }}
             transition={{ duration: 0.25 }}
             flexDirection="column"
             flex={2}
@@ -42,13 +41,13 @@ export const OurHome: FC<OurHomeProps> = observer((props: OurHomeProps) => {
         )}
       </AnimatePresence>
     );
-  }, [sidebar, friends.all]);
+  }, [sidebar]);
 
   const highlightColor = '#4E9EFD';
 
   const iconHoverColor = useMemo(
     () => rgba(darken(0.03, theme.currentTheme.iconColor), 0.1),
-    [theme.currentTheme.windowColor]
+    [theme.currentTheme.iconColor]
   );
 
   return (

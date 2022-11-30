@@ -30,15 +30,23 @@ export const SearchModes: FC = observer(() => {
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
+      SpacesActions.scryTreaties(selectedShip)
+        .catch((e) => console.error(e))
+        .finally(() => appInstaller.setLoadingState(''));
+    }
+  }, [bazaar.treatiesLoaded]);
+
+  useEffect(() => {
+    if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaar.hasAlly(selectedShip)) {
         if (loadingState !== 'loading-published-apps') {
           appInstaller.setLoadingState('loading-published-apps');
           SpacesActions.addAlly(selectedShip)
             .then((result) => {
-              SpacesActions.scryTreaties(selectedShip);
+              // SpacesActions.scryTreaties(selectedShip);
             })
-            .catch((e) => console.error(e))
-            .finally(() => appInstaller.setLoadingState(''));
+            .catch((e) => console.error(e));
+          // .finally(() => appInstaller.setLoadingState(''));
         }
       } else {
         SpacesActions.scryTreaties(selectedShip);

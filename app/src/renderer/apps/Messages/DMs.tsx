@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useCallback, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -20,6 +20,7 @@ import {
   PreviewGroupDMType,
   DMPreviewType,
 } from 'os/services/ship/models/courier';
+import { WindowedList } from '@holium/design-system';
 
 interface IProps {
   theme: ThemeModelType;
@@ -31,27 +32,74 @@ interface IProps {
 
 export const DMs: FC<IProps> = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
+  const { textColor, iconColor, dockColor, windowColor } = theme;
+
   const { courier } = useServices();
   const [searchString, setSearchString] = useState<string>('');
-  const { textColor, iconColor, dockColor, windowColor, mode } = theme;
+
   const previews = useMemo(() => {
     return Array.from(courier.previews.values()).sort((a, b) => {
       // @ts-expect-error
       return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
     });
   }, [courier.previews]);
-  const searchFilter = (preview: DMPreviewType) => {
-    if (!searchString || searchString.trim() === '') return true;
-    let to: string;
-    if (preview.type === 'group' || preview.type === 'group-pending') {
-      const dm = preview as PreviewGroupDMType;
-      to = Array.from(dm.to).join(', ');
-    } else {
-      const dm = preview as PreviewDMType;
-      to = dm.to;
+
+  const searchFilter = useCallback(
+    (preview: DMPreviewType) => {
+      if (!searchString || searchString.trim() === '') return true;
+      let to: string;
+      if (preview.type === 'group' || preview.type === 'group-pending') {
+        const dm = preview as PreviewGroupDMType;
+        to = Array.from(dm.to).join(', ');
+      } else {
+        const dm = preview as PreviewDMType;
+        to = dm.to;
+      }
+      return to.indexOf(searchString) === 0;
+    },
+    [searchString]
+  );
+
+  const dMList = useMemo(() => {
+    if (previews.length === 0) {
+      return (
+        <Flex
+          flex={1}
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          gap={24}
+        >
+          <Text color={textColor} width={200} textAlign="center" opacity={0.3}>
+            No Direct Messages. Click the <b>+</b> to start.
+          </Text>
+        </Flex>
+      );
     }
-    return to.indexOf(searchString) === 0;
-  };
+
+    return (
+      <WindowedList
+        width={388}
+        height={528}
+        rowHeight={57}
+        data={previews}
+        filter={searchFilter}
+        rowRenderer={(dm, index) => (
+          <Box display="block" key={`${dm.to}-${index}`}>
+            <ContactRow
+              theme={theme}
+              dm={dm}
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                onSelectDm(dm);
+              }}
+            />
+          </Box>
+        )}
+      />
+    );
+  }, [onSelectDm, previews, searchFilter, textColor, theme]);
+
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -140,44 +188,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {previews.length === 0 && (
-                <Flex
-                  flex={1}
-                  flexDirection="column"
-                  justifyContent="center"
-                  alignItems="center"
-                  gap={24}
-                >
-                  {/* <Text
-                    color={textColor}
-                    width={200}
-                    textAlign="center"
-                    opacity={0.6}
-                  >
-                    No DMs
-                  </Text> */}
-                  <Text
-                    color={textColor}
-                    width={200}
-                    textAlign="center"
-                    opacity={0.3}
-                  >
-                    No Direct Messages. Click the <b>+</b> to start.
-                  </Text>
-                </Flex>
-              )}
-              {previews.filter(searchFilter).map((dm: any, index: number) => (
-                <Box display="block" key={`${dm.to}-${index}`}>
-                  <ContactRow
-                    theme={theme}
-                    dm={dm}
-                    onClick={(evt: any) => {
-                      evt.stopPropagation();
-                      onSelectDm(dm);
-                    }}
-                  />
-                </Box>
-              ))}
+              {dMList}
             </>
           )}
         </Grid.Column>

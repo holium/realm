@@ -187,7 +187,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         expand
         marginTop={headerOffset}
         overflowY="hidden"
-        height={height}
+        height={height - headerOffset}
         style={{ backgroundColor: windowColor, position: 'relative' }}
       >
         <FormControl.Field mt={2}>
@@ -235,7 +235,6 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
         {contactArray}
         <Flex pl={2} pr={2} flex={1} flexDirection="column">
           <ShipSearch
-            heightOffset={50}
             search={patp}
             selected={selectedPatp}
             customBg={windowColor}

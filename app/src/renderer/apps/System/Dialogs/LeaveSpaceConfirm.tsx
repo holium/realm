@@ -12,7 +12,7 @@ export const LeaveSpaceDialogConfig: (dialogProps: any) => DialogConfig = (
       const onConfirm = async () => {
         if (dialogProps) {
           setLoading(true);
-          SpacesActions.deleteSpace(dialogProps.path).then(() => {
+          SpacesActions.leaveSpace(dialogProps.path).then(() => {
             setLoading(false);
           });
         }
