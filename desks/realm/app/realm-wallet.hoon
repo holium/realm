@@ -1,26 +1,27 @@
 /-  *realm-wallet
 /+  default-agent, dbug, *realm-wallet
-::  a
-|%
-+$  versioned-state
-  $%  state-0
-  ==
-+$  state-0
-  $:  %0
-      =wallets
-      =settings
-  ==
-+$  card  card:agent:gall
---
-%-  agent:dbug
+^-  agent:gall
+::
+=>
+  |%
+  +$  card  card:agent:gall
+  +$  versioned-state
+    $%  state-0
+    ==
+  +$  state-0
+    $:  %0
+        =wallets
+        =settings
+    ==
+  --
 =|  state-0
 =*  state  -
-^-  agent:gall
 =<
+  %-  agent:dbug
   |_  =bowl:gall
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
-      core   ~(. +> bowl)
+      core   ~(. +> [bowl ~])
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -40,7 +41,6 @@
     ==
   ::
   ++  on-poke
-    ~/  %on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
     ?+  mark  (on-poke:def mark vase)
@@ -88,8 +88,9 @@
   ++  on-arvo   on-arvo:def
   ++  on-fail   on-fail:def
   --
-|_  =bowl:gall
+|_  [=bowl:gall cards=(list card)]
 ::
+++  core  .
 ++  handle-wallet-action
   |=  act=action
   ^-  (quip card _state)
