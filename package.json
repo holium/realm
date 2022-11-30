@@ -44,7 +44,6 @@
     "non-fungible-token-abi": "^1.0.1",
     "qrcode.react": "^3.1.0",
     "react-cool-virtual": "^0.7.0",
-    "react-virtualized-auto-sizer": "^1.0.7",
     "react-virtuoso": "^2.18.0",
     "react-window": "^1.8.7"
   },

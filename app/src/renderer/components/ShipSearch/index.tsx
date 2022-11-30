@@ -2,9 +2,6 @@ import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FixedSizeList as List } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
-
 import { searchPatpOrNickname } from './helpers';
 import { Flex, Text, Box, Sigil, IconButton, Icons } from '../';
 import { Row } from '../NewRow';
@@ -12,12 +9,12 @@ import { ContactModelType } from 'os/services/ship/models/contacts';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
+import { WindowedList } from '@holium/design-system';
 
 const resultHeight = 50;
 
 interface ShipSearchProps {
   isDropdown?: boolean;
-  heightOffset: number;
   search: string;
   selected: Set<string>;
   customBg?: string;
@@ -50,79 +47,72 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
 `;
 
 export const ShipSearch: FC<ShipSearchProps> = observer(
-  (props: ShipSearchProps) => {
-    const { search, isDropdown, selected, customBg, heightOffset, onSelected } =
-      props;
+  ({ search, isDropdown, selected, customBg, onSelected }: ShipSearchProps) => {
     const { theme, ship, contacts } = useServices();
     const { mode, dockColor, windowColor } = theme.currentTheme;
-    const contactsList = ship ? Array.from(contacts.rolodex.entries()) : [];
-    const isAddingDisabled = selected.size > 0;
 
-    const results = useMemo<Array<[string, ContactModelType]>>(
-      () => searchPatpOrNickname(search, contactsList, selected, ship?.patp),
-      [search, contactsList, selected]
-    );
+    const results = useMemo<Array<[string, ContactModelType]>>(() => {
+      const contactsList = ship ? Array.from(contacts.rolodex.entries()) : [];
+      return searchPatpOrNickname(search, contactsList, selected, ship?.patp);
+    }, [contacts.rolodex, search, selected, ship]);
 
     const isOpen = useMemo(
       () => search.length && results.length,
-      [search.length > 0, results.length]
+      [results.length, search.length]
     );
 
-    const RowRenderer = ({ index, style }: { index: number; style: any }) => {
-      const contact = results[index];
+    const RowRenderer = (contact: typeof results[number]) => {
       const nickname = contact[1].nickname!;
       const sigilColor = contact[1].color!;
       const avatar = contact[1].avatar!;
       return (
-        <div style={style}>
-          <Row
-            key={contact[0]}
-            style={{ justifyContent: 'space-between' }}
-            customBg={customBg}
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              isDropdown && onSelected([contact[0], nickname], contact[1]);
-            }}
-          >
-            <Flex gap={10} flexDirection="row" alignItems="center">
-              <Box>
-                <Sigil
-                  simple
-                  size={22}
-                  avatar={avatar}
-                  patp={contact[0]}
-                  color={[sigilColor || '#000000', 'white']}
-                />
-              </Box>
-              <Text fontSize={2}>{contact[0]}</Text>
-              {nickname ? (
-                <Text fontSize={2} opacity={0.7}>
-                  {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-                </Text>
-              ) : (
-                []
-              )}
-            </Flex>
+        <Row
+          key={contact[0]}
+          style={{ justifyContent: 'space-between' }}
+          customBg={customBg}
+          onClick={(evt: any) => {
+            evt.stopPropagation();
+            isDropdown && onSelected([contact[0], nickname], contact[1]);
+          }}
+        >
+          <Flex gap={10} flexDirection="row" alignItems="center">
+            <Box>
+              <Sigil
+                simple
+                size={22}
+                avatar={avatar}
+                patp={contact[0]}
+                color={[sigilColor || '#000000', 'white']}
+              />
+            </Box>
+            <Text fontSize={2}>{contact[0]}</Text>
+            {nickname ? (
+              <Text fontSize={2} opacity={0.7}>
+                {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
+              </Text>
+            ) : (
+              []
+            )}
+          </Flex>
 
-            <Flex justifyContent="center" alignItems="center">
-              {!isDropdown && (
-                <IconButton
-                  luminosity={mode}
-                  customBg={dockColor}
-                  size={24}
-                  canFocus
-                  isDisabled={isAddingDisabled}
-                  onClick={(evt: any) => {
-                    evt.stopPropagation();
-                    onSelected([contact[0], nickname]);
-                  }}
-                >
-                  <Icons opacity={0.5} name="Plus" />
-                </IconButton>
-              )}
-            </Flex>
-          </Row>
-        </div>
+          <Flex justifyContent="center" alignItems="center">
+            {!isDropdown && (
+              <IconButton
+                luminosity={mode}
+                customBg={dockColor}
+                size={24}
+                canFocus
+                isDisabled={selected.size > 0}
+                onClick={(evt: any) => {
+                  evt.stopPropagation();
+                  onSelected([contact[0], nickname]);
+                }}
+              >
+                <Icons opacity={0.5} name="Plus" />
+              </IconButton>
+            )}
+          </Flex>
+        </Row>
       );
     };
     // Todo, move the show logic in here
@@ -156,20 +146,9 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
       );
     }
     const resultList = (
-      <AutoSizer>
-        {({ height, width }: { height: number; width: number }) => (
-          <List
-            className="List"
-            height={height - heightOffset}
-            itemCount={results.length}
-            itemSize={40}
-            width={width}
-          >
-            {RowRenderer}
-          </List>
-        )}
-      </AutoSizer>
+      <WindowedList data={results} rowRenderer={RowRenderer} />
     );
+
     if (isDropdown) {
       return (
         <AutoCompleteBox
@@ -208,24 +187,5 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
     } else {
       return resultList;
     }
-    //   return (
-    //     <AutoSizer>
-    //       {({ height, width }: { height: number; width: number }) => (
-    //         <List
-    //           className="List"
-    //           height={height - heightOffset}
-    //           itemCount={results.length}
-    //           itemSize={40}
-    //           width={width}
-    //         >
-    //           {RowRenderer}
-    //         </List>
-    //       )}
-    //     </AutoSizer>
-    //   );
   }
 );
-
-ShipSearch.defaultProps = {
-  heightOffset: 0,
-};

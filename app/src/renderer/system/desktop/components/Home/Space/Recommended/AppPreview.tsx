@@ -154,14 +154,14 @@ export const AppPreview: FC<AppPreviewProps> = observer(
             >
               <Icons name="MoreHorizontal" />
             </IconButton>
-            {/* <Button
+            <Button
               variant="minimal"
               fontWeight={400}
               borderRadius={6}
               onClick={showDetails}
             >
               App info
-            </Button> */}
+            </Button>
           </Flex>
         </Flex>
       </Flex>

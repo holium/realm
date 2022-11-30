@@ -21,6 +21,7 @@ const View = styled.div<{ hasTitleBar?: boolean; background: string }>`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   width: inherit;
@@ -73,62 +74,70 @@ export const DialogView: FC<DialogViewProps> = (props: DialogViewProps) => {
 
   return (
     <View ref={elementRef} background={theme.currentTheme.windowColor}>
-      <Flex flex={1}>
-        {ViewComponent && (
-          <ViewComponent
-            onNext={(data: any) => {
-              setValidated(false);
-              onNext && onNext(data);
-            }}
-            isValidated={isValidated}
-            onPrevious={onPrevious}
-            setState={setWorkflowState}
-            workflowState={workflowState}
-            theme={theme.currentTheme}
-          />
+      <Flex
+        flex={1}
+        flexDirection="column"
+        justifyContent="space-between"
+        gap={16}
+        minHeight={0}
+      >
+        <Flex flex={1} minHeight={0}>
+          {ViewComponent && (
+            <ViewComponent
+              onNext={(data: any) => {
+                setValidated(false);
+                onNext && onNext(data);
+              }}
+              isValidated={isValidated}
+              onPrevious={onPrevious}
+              setState={setWorkflowState}
+              workflowState={workflowState}
+              theme={theme.currentTheme}
+            />
+          )}
+        </Flex>
+        {workflow && (
+          <Flex
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
+            width={customNext ? 30 : undefined}
+          >
+            <Flex alignItems="center" justifyContent="flex-start">
+              {onPrevious && hasPrevious && hasPrevious() && (
+                <IconButton
+                  customBg={theme.currentTheme.windowColor}
+                  onClick={() => {
+                    onPrevious();
+                  }}
+                >
+                  <Icons name="ArrowLeftLine" />
+                </IconButton>
+              )}
+            </Flex>
+            <Flex
+              alignItems="center"
+              justifyContent="space-between"
+              height={26}
+            >
+              {!customNext && onNext && (
+                <TextButton
+                  disabled={!validated || workflowState.loading}
+                  onClick={(evt: any) => {
+                    onNext(evt, workflowState, setWorkflowState);
+                  }}
+                >
+                  {workflowState.loading ? (
+                    <Spinner size={0} />
+                  ) : (
+                    <>{nextButtonText || 'Next'}</>
+                  )}
+                </TextButton>
+              )}
+            </Flex>
+          </Flex>
         )}
       </Flex>
-      {workflow && (
-        <Flex
-          position="absolute"
-          flexDirection="row"
-          justifyContent="space-between"
-          alignItems="center"
-          bottom={20}
-          right={20}
-          left={20}
-          width={customNext ? 30 : undefined}
-        >
-          <Flex alignItems="center" justifyContent="flex-start">
-            {onPrevious && hasPrevious && hasPrevious() && (
-              <IconButton
-                customBg={theme.currentTheme.windowColor}
-                onClick={() => {
-                  onPrevious();
-                }}
-              >
-                <Icons name="ArrowLeftLine" />
-              </IconButton>
-            )}
-          </Flex>
-          <Flex alignItems="center" justifyContent="space-between">
-            {!customNext && onNext && (
-              <TextButton
-                disabled={!validated || workflowState.loading}
-                onClick={(evt: any) => {
-                  onNext(evt, workflowState, setWorkflowState);
-                }}
-              >
-                {workflowState.loading ? (
-                  <Spinner size={0} />
-                ) : (
-                  <>{nextButtonText || 'Next'}</>
-                )}
-              </TextButton>
-            )}
-          </Flex>
-        </Flex>
-      )}
     </View>
   );
 };

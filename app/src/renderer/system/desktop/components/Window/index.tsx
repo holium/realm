@@ -33,6 +33,7 @@ interface AppWindowStyleProps {
 export const AppWindowStyle = styled(motion.div)<AppWindowStyleProps>`
   position: absolute;
   border-radius: 9px;
+  overflow: hidden;
   box-sizing: content-box;
   transform: transale3d(0, 0, 0);
   box-shadow: ${(props: AppWindowStyleProps) => props.theme.elevations.two};
@@ -120,7 +121,6 @@ export const AppWindow: FC<AppWindowProps> = observer(
           width: mWidth.get(),
         });
         const offset = shell.isFullscreen ? 0 : 30;
-        // @ts-expect-error
         const desktopDims = desktopRef.current!.getBoundingClientRect();
         mX.set(0);
         mY.set(8);
@@ -159,13 +159,13 @@ export const AppWindow: FC<AppWindowProps> = observer(
 
     const onClose = () => {
       desktop.activeWindow
-        ? DesktopActions.closeAppWindow('', toJS(desktop.activeWindow))
+        ? DesktopActions.closeAppWindow('', toJS(activeWindow))
         : {};
     };
 
-    let webviewId = `${desktop.activeWindow?.id}-urbit-webview`;
+    let webviewId = `${activeWindow.id}-urbit-webview`;
     if (window.type === 'web') {
-      webviewId = `${desktop.activeWindow?.id}-web-webview`;
+      webviewId = `${activeWindow.id}-web-webview`;
     }
 
     const onDevTools = useCallback(() => {
@@ -194,11 +194,11 @@ export const AppWindow: FC<AppWindowProps> = observer(
       <Titlebar
         isAppWindow
         maximizeButton={maximizeButton}
+        minimizeButton
         closeButton
         noTitlebar={noTitlebar}
         hasBorder={!hideTitlebarBorder}
         showDevToolsToggle={showDevToolsToggle}
-        // shareable
         zIndex={window.zIndex}
         dragControls={dragControls}
         onDevTools={onDevTools}
@@ -206,11 +206,10 @@ export const AppWindow: FC<AppWindowProps> = observer(
         onDragStop={() => onDragStop()}
         onClose={() => onClose()}
         onMaximize={() => maximize()}
+        onMinimize={() => {
+          DesktopActions.toggleMinimized('', window.id);
+        }}
         theme={theme.currentTheme}
-        // theme={{
-        //   ...theme,
-        //   windowColor: darken(0.002, theme.windowColor!),
-        // }}
         app={window}
       />
     );
@@ -238,6 +237,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
           <Titlebar
             isAppWindow
             maximizeButton={maximizeButton}
+            minimizeButton
             closeButton
             noTitlebar={noTitlebar}
             hasBorder={!hideTitlebarBorder}
@@ -248,6 +248,9 @@ export const AppWindow: FC<AppWindowProps> = observer(
             onDragStart={() => onDragStart()}
             onDragStop={() => onDragStop()}
             onClose={() => onClose()}
+            onMinimize={() => {
+              DesktopActions.toggleMinimized('', window.id);
+            }}
             onMaximize={() => maximize()}
             theme={theme.currentTheme}
             app={window}
@@ -273,7 +276,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
       useEffect(() => {
         // trigger onOpen only once
         onOpenDialog && onOpenDialog();
-      }, []);
+      }, [onOpenDialog]);
       if (noTitlebar) {
         titlebar = <div />;
       } else {
@@ -311,6 +314,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             transition: {
               duration: 0.15,
             },
+            // display: window.minimized ? 'none' : 'block',
           }}
           transition={{
             background: { duration: 0.25 },
@@ -329,6 +333,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
             zIndex: window.zIndex,
             borderRadius,
             background: windowColor,
+            display: window.minimized ? 'none' : 'block',
           }}
           color={textColor}
           customBg={windowColor}
@@ -384,6 +389,7 @@ export const AppWindow: FC<AppWindowProps> = observer(
       [
         theme.currentTheme,
         window.dimensions,
+        window.minimized,
         unmaximize,
         isResizing,
         isDragging,
