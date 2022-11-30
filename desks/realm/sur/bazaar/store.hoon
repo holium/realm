@@ -46,7 +46,7 @@
 +$  recommended       (map app-id member-set)
 +$  suite             (map @ud app-id)
 +$  stalls            (map space-path:spaces stall)
-+$  stall 
++$  stall
   $:  =suite
       =recommended
     ==
@@ -57,7 +57,7 @@
 +$  dock               (list app-id)
 ::
 +$  action
-  $%  
+  $%
       [%pin path=space-path:spaces =app-id index=(unit @ud)]
       [%unpin path=space-path:spaces =app-id]
       [%reorder-pins path=space-path:spaces =dock]
@@ -67,12 +67,13 @@
       [%suite-remove path=space-path:spaces index=@ud]
       [%install-app =ship =desk]
       [%uninstall-app =desk]
+      [%initialize args=(map cord cord)]
   ==
 ::
 +$  interaction
   $%
       [%member-recommend path=space-path:spaces =app-id =app]
-      [%member-unrecommend path=space-path:spaces =app-id]  
+      [%member-unrecommend path=space-path:spaces =app-id]
   ==
 ::
 +$  reaction
@@ -87,6 +88,9 @@
       [%app-install-update =app-id =urbit-app]
       [%joined-bazaar =path:spaces-path:spaces =catalog =stall]
       [%stall-update =path:spaces-path:spaces =stall]
+      [%treaties-loaded =ship]
+      [%new-ally =ship =alliance:treaty]
+      [%ally-deleted =ship]
   ==
 +$  view
   $%  [%catalog =catalog]
