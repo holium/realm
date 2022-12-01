@@ -1,32 +1,14 @@
-import styled, { css } from 'styled-components';
+import { twMerge } from 'tailwind-merge';
+import { Box, BoxProps } from '../Box/Box';
 
-interface ISkeleton {
-  height: number;
-  width?: number;
-  borderRadius?: number;
-}
-
-export const Skeleton = styled.div<ISkeleton>`
-  ${(props: ISkeleton) =>
-    css`
-      height: ${props.height}px;
-      width: ${props.width ? `${props.width}px` : '100%'};
-      border-radius: ${props.borderRadius || 4}px;
-    `}
-  display: block;
-  animation: skeleton-loading 1s linear infinite alternate;
-
-  @keyframes skeleton-loading {
-    0% {
-      background-color: #78787806;
-    }
-    100% {
-      background-color: #6b6b6b14;
-    }
-  }
-  @keyframes shine {
-    to {
-      background-position: 100% 0;
-    }
-  }
-`;
+export const Skeleton = ({ children, className, ...rest }: BoxProps) => (
+  <Box
+    className={twMerge(
+      'w-full rounded-md bg-[#6b6b6b14] animate-pulse',
+      className
+    )}
+    {...rest}
+  >
+    {children}
+  </Box>
+);

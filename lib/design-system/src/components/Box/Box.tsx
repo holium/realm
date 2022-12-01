@@ -1,95 +1,36 @@
-import { HTMLAttributes } from 'react';
-import { motion } from 'framer-motion';
-import styled from 'styled-components';
-import {
-  background,
-  BackgroundProps,
-  border,
-  BorderProps,
-  ButtonStyleProps,
-  compose,
-  flexbox,
-  FlexboxProps,
-  grid,
-  GridProps,
-  layout,
-  LayoutProps,
-  opacity,
-  OpacityProps,
-  position,
-  PositionProps,
-  space,
-  SpaceProps,
-  style,
-  textStyle,
-  TextStyleProps,
-  typography,
-  TypographyProps,
-  variant,
-} from 'styled-system';
-import { ColorProps, colorStyle } from '../../styles/colors';
+import { HTMLMotionProps, motion } from 'framer-motion';
+import { FlexProps, flexToTailwindClass } from '../../styles/flex';
+import { ColorProps, colorToTailwindClass } from '../../styles/color';
+import { MarginProps, marginToTailwindClass } from '../../styles/margin';
+import { PaddingProps, paddingToTailwindClass } from '../../styles/padding';
+import { SizeProps, sizeToTailwindClass } from '../../styles/size';
+import { twMerge } from 'tailwind-merge';
 
-type TextDecorationOption = 'overline' | 'line-through' | 'underline';
-type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
-
-export type BoxProps = {
-  gap?: string | number | undefined;
-} & BackgroundProps &
-  ButtonStyleProps &
+export type BoxProps = HTMLMotionProps<'div'> &
   ColorProps &
-  FlexboxProps &
-  GridProps &
-  BorderProps &
-  LayoutProps &
-  OpacityProps &
-  PositionProps &
-  SpaceProps &
-  TextStyleProps &
-  TypographyProps & {
-    textDecoration?:
-      | TextDecorationOption
-      | Array<TextDecorationOption | null | string>;
-    textTransform?:
-      | TextTransformOption
-      | Array<TextTransformOption | null | string>;
-  } & HTMLAttributes<any>;
+  PaddingProps &
+  MarginProps &
+  FlexProps &
+  SizeProps;
 
-const textDecoration = style({
-  prop: 'textDecoration',
-  cssProperty: 'textDecoration',
-});
+export const Box = ({ children, className, ...rest }: BoxProps) => {
+  const colorClasses = colorToTailwindClass(rest);
+  const paddingClasses = paddingToTailwindClass(rest);
+  const marginClasses = marginToTailwindClass(rest);
+  const flexClasses = flexToTailwindClass(rest);
+  const sizeClasses = sizeToTailwindClass(rest);
+  const classNames = [
+    className,
+    ...colorClasses,
+    ...paddingClasses,
+    ...marginClasses,
+    ...flexClasses,
+    ...sizeClasses,
+  ].filter(Boolean) as string[];
 
-const textTransform = style({
-  prop: 'textTransform',
-  cssProperty: 'textTransform',
-});
-
-const boxStyles = compose(
-  background,
-  flexbox,
-  grid,
-  layout,
-  opacity,
-  position,
-  space,
-  textStyle,
-  textDecoration,
-  textTransform,
-  typography,
-  border,
-  variant({
-    prop: 'variant',
-    scale: 'buttons',
-    variants: {
-      primary: {},
-    },
-  })
-);
-
-export const Box = styled(motion.div)<BoxProps>(
-  {
-    boxSizing: 'border-box',
-  },
-  boxStyles,
-  colorStyle
-);
+  return (
+    <motion.div className={twMerge(...classNames)} {...rest}>
+      {children}
+    </motion.div>
+  );
+};

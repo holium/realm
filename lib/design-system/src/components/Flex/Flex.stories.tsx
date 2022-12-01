@@ -7,10 +7,10 @@ export default {
 
 export const FlexDemo: ComponentStory<typeof Flex> = () => (
   <Flex>
-    <Flex bg="card" color="base" flex={1} padding={12}>
+    <Flex flex={1} p={12} color="base" bg="card">
       Flex 1
     </Flex>
-    <Flex color="text" flex={1} padding={12}>
+    <Flex flex={1} p={12} color="text">
       Flex 1
     </Flex>
   </Flex>

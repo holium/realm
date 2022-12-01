@@ -22,11 +22,11 @@ export const ChatLog = observer((props: ChatLogProps) => {
   if (isBlank) {
     return (
       <Flex
-        height={dimensions.height}
-        width="100%"
-        alignContent="center"
-        justifyContent="center"
-        flexDirection="column"
+        width="full"
+        align="center"
+        justify="center"
+        flexCol
+        className={`h-[${dimensions.height}px]`}
       >
         <Text textAlign="center" opacity={0.3} fontSize={3}>
           No messages
@@ -37,13 +37,11 @@ export const ChatLog = observer((props: ChatLogProps) => {
 
   return (
     <Flex
-      height={dimensions.height}
-      width="100%"
-      position="relative"
-      overflowY="auto"
-      alignContent="center"
-      flexDirection="column-reverse"
-      paddingY={60}
+      width="full"
+      flexCol
+      align="center"
+      justify="center"
+      className={`h-[${dimensions.height}px] p-[60px]`}
     >
       <WindowedList
         width={388}

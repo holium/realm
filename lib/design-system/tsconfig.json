@@ -25,6 +25,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": false
   },
-  "include": ["src", ".storybook"],
+  "include": ["src", ".storybook", "tailwind.config.js", "postcss.config.js"],
   "exclude": ["dist", "node_modules"]
 }

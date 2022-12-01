@@ -80,17 +80,22 @@ const DemoTemplate: Story<DemoTemplateProps> = ({
         kept in the DOM. You can experiment by changing the container's height
         and the data size.
       </p>
-      <Box height={containerHeight} borderRadius={12} overflow="hidden">
+      <Box
+        style={{
+          height: containerHeight,
+        }}
+        className="rounded-md overflow-hidden"
+      >
         <WindowedList
           data={data}
           filter={getFilterFunction()}
           rowRenderer={(row, index) => (
             <Flex
-              height={itemHeight}
-              padding={12}
-              alignItems="center"
-              justifyContent="center"
-              color="input"
+              p={3}
+              style={{
+                height: itemHeight,
+              }}
+              className={`align-center justify-center text-input`}
               bg={index % 2 === 0 ? 'accent' : 'card'}
             >
               {row}
@@ -113,12 +118,12 @@ Demo.args = {
 };
 
 export const Loading = () => (
-  <Box height={420}>
+  <Box className="h-96">
     <WindowedList
       data={Array.from({ length: 10 }, (_, i) => i)}
       rowRenderer={() => (
-        <Box py="4px">
-          <Skeleton height={50} borderRadius={12} />
+        <Box className="p-1">
+          <Skeleton className="h-12 rounded-xl" />
         </Box>
       )}
     />

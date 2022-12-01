@@ -4,7 +4,7 @@ import AutoSizer from './source/AutoSizer/AutoSizer';
 import CellMeasurer from './source/CellMeasurer/CellMeasurer';
 import CellMeasurerCache from './source/CellMeasurer/CellMeasurerCache';
 import { Scroll } from './source/List/types';
-import { StyledList } from './WindowedList.styles';
+import List from './source/List/List';
 
 type WindowedListProps<T> = {
   data: T[];
@@ -66,7 +66,7 @@ export const WindowedList = <T,>({
         disableHeight={Boolean(height)}
       >
         {({ width: maybeAutoWidth, height: maybeAutoHeight }) => (
-          <StyledList
+          <List
             width={width ?? maybeAutoWidth}
             height={height ?? maybeAutoHeight}
             rowCount={data.length}
@@ -87,10 +87,10 @@ export const WindowedList = <T,>({
               </CellMeasurer>
             )}
             onScroll={onScroll}
-            hideScrollbar={hideScrollbar}
             startAtBottom={startAtBottom}
             scrollToIndex={startAtBottom ? data.length - 1 : 0}
             scrollToAlignment={startAtBottom ? 'end' : 'auto'}
+            className={hideScrollbar ? 'hide-scrollbar' : ''}
           />
         )}
       </AutoSizer>

@@ -7,8 +7,8 @@ export default {
 } as ComponentMeta<typeof Skeleton>;
 
 export const SkeletonDemo: ComponentStory<typeof Skeleton> = () => (
-  <Skeleton width={250} height={50}>
-    <Flex height="100%" justifyContent="center" alignItems="center">
+  <Skeleton width={250} height={52}>
+    <Flex height="full" justifyContent="center" alignItems="center">
       250px X 50px
     </Flex>
   </Skeleton>

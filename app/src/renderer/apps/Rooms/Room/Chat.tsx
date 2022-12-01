@@ -89,7 +89,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
     }
 
     return (
-      <Box height={330}>
+      <Box className="h-[330px]">
         <WindowedList
           width={354}
           data={chats}
