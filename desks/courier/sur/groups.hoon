@@ -1,4 +1,4 @@
-/-  meta
+/-  meta, e=epic
 |%
 ::  $flag: ID for a group
 ::
@@ -14,7 +14,7 @@
 ::
 ::  $zone: channel grouping
 ::
-::    includes its own metadata for display and keeps the order of
+::    includes its own metadata for display and keeps the order of 
 ::    channels within.
 ::
 ::    zone: the term that represents the ID of a zone
@@ -25,7 +25,7 @@
 ::      %edit: modify the zone metadata
 ::      %mov: reorders the zone in the group
 ::      %mov-nest: reorders a channel within the zone
-::
+::  
 ++  zone
   =<  zone
   |%
@@ -39,7 +39,7 @@
     $%  [%add meta=data:meta]
         [%del ~]
         [%edit meta=data:meta]
-        [%mov idx=@ud]
+        [%mov idx=@ud]            
         [%mov-nest =nest idx=@ud]
     ==
   --
@@ -95,7 +95,7 @@
     ==
   ::
   ::  $diff: represents the set of actions you can take on a channel
-  ::
+  ::  
   ::    add: create a channel, should be called from agent
   ::    del: delete a channel
   ::    add-sects: add sects to readers
@@ -104,10 +104,10 @@
   ::    join: toggle default join
   ::
   +$  diff
-    $%  [%add =channel]
+    $%  [%add =channel]                 
         [%del ~]
       ::
-        [%add-sects sects=(set sect)]
+        [%add-sects sects=(set sect)]   
         [%del-sects sects=(set sect)]
       ::
         [%zone =zone]
@@ -129,6 +129,7 @@
       =bloc
       =channels:channel
       =cordon
+      secret=?
       meta=data:meta
   ==
 ::
@@ -237,6 +238,7 @@
       [%cordon p=diff:cordon]
       [%zone p=diff:zone]
       [%meta p=data:meta]
+      [%secret p=?]
       [%create p=group]
       [%del ~]
   ==
@@ -257,16 +259,19 @@
   $:  name=term
       title=cord
       description=cord
-      image=cord
+      image=cord  
       cover=cord
       =cordon
       members=(jug ship sect)
+      secret=?
   ==
 ::
 +$  init  [=time =group]
 ::
 +$  groups
   (map flag group)
++$  net-groups
+  (map flag [net group])
 ::
 ::  $log: a time ordered map of all modifications to groups
 ::
@@ -281,8 +286,7 @@
 +$  net
   $~  [%pub ~]
   $%  [%pub p=log]
-      [%sub p=time]
-      [%load ~]
+      [%sub p=time load=_| =saga:e]
   ==
 ::
 ::  $join: a join request, can elect to join all channels
@@ -296,7 +300,7 @@
 ::
 +$  knock  flag
 ::
-::  $progress: the state of a group join
+::  $progress: the state of a group join 
 ::
 +$  progress
   ?(%knocking %adding %watching %done %error)
@@ -310,11 +314,12 @@
 ::
 ::  $preview: the metadata and entry policy for a group
 ::
-+$  preview
++$  preview  
   $:  =flag
       meta=data:meta
       =cordon
       =time
+      secret=?
   ==
 ::
 +$  previews  (map flag preview)

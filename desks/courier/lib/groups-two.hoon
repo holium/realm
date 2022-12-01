@@ -4,6 +4,7 @@
 |%
 ++  into-chat-inline-type
   |=  con=content
+  ^-  inline:c
   ?-  -.con
     %text       text.con
     %mention    [%ship p=ship.con]
@@ -13,6 +14,7 @@
   ==
 ++  on-graph-action
   |=  [act=action bowl=[our=ship now=@da]]
+  ~&  -.act
   |^
   ?-  -.act
     %send-dm               (send-dm +.act)
@@ -23,7 +25,6 @@
   ==
   ++  send-dm
     |=  [=ship p=post]
-    ~&  %send-dm
     =/  inlines
       ^-  (list inline:c)
       (turn contents.p into-chat-inline-type)
@@ -40,13 +41,14 @@
     ~
   ++  create-group-dm
     |=  [ships=(set ship) bowl=[our=ship now=@da]]
+    ~&  %create-group-dm
     ~&  ships
     =/  to-set        (~(put in ships) our.bowl)
     =/  new-grp-prev  [
-          path=(spat /club/(scot %uv now.bowl)/ui)
+          path=(spat /(scot %p our.bowl)/(scot %uv now.bowl))
           to=to-set
           type=%group
-          source=%graph-store
+          source=%talk
           last-time-sent=now.bowl
           last-message=[~]
           metadata=(get-metadata:gs:lib to-set our.bowl now.bowl)
@@ -59,9 +61,11 @@
     ==
   ++  send-group-dm
     |=  [=resource =post]
-    ~&  resource
-    ~&  post
-    ~
+    =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource)
+    ?~  club-id-unit  !!
+    :~
+      [%pass / %agent [author.post %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post))]
+    ==
   ++  read-group-dm
     |=  [=resource]
     ~&  resource
@@ -75,9 +79,10 @@
   |=  [=path =bowl:gall =devices:notify]
   ^-  (unit (unit cage))
     ?>  =(our.bowl src.bowl)
+    ~&  "peeking groups-two"
+    ~&  path
     ?+  path  !!
       [%x %devices ~]
-        ~&  "peeking devices on groups-two"
     ``notify-view+!>([%devices devices])
       [%x %dms ~]
     :: Get DMs from x/briefs scy
@@ -103,7 +108,7 @@
     path=(spat /(scot %p ship))
     to=(~(put in *(set ^ship)) ship)
     type=%dm
-    source=%chatstead
+    source=%talk
     messages=(messages-from-writs writs)
     metadata=~[(form-contact-mtd rolo ship)]
   ==
@@ -174,7 +179,7 @@
       :*  path=`@t`(scot %uvh p.whom)
           to=team.crew
           type=%group
-          source=%chatstead
+          source=%talk
           last-time-sent=*@da
           last-message=~
           metadata=meta
@@ -186,7 +191,7 @@
       :*  path=(scot %p p.whom)
           to=(~(put in *(set ship)) p.whom)
           type=%dm
-          source=%chatstead
+          source=%talk
           last-time-sent=*@da
           last-message=~
           metadata=~[(form-contact-mtd rolo p.whom)]
@@ -212,4 +217,14 @@
       ?~  mtd  ''
       nickname.u.mtd
     [color avatar nickname]
+++  create-club-action-from-courier-post
+    |=  [id=@uvH =post]
+    ~&  id
+    ^-  action:club:c
+    =/  inlines
+      ^-  (list inline:c)
+      (turn contents.post into-chat-inline-type)
+    =/  delta-for-chat   [%add (memo:c ~ author.post time-sent.post [%story [*(list) (snoc inlines [%break ~])]])]
+    =/  writ-diff  [[author.post time-sent.post] delta-for-chat]
+    [id `diff:club:c`[0 `delta:club:c`[%writ writ-diff]]]
 --
