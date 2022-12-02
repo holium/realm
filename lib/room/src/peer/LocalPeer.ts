@@ -13,10 +13,9 @@ export const DEFAULT_AUDIO_OPTIONS = {
   },
   sampleRate: 48000,
   sampleSize: 16,
-  volume: 1,
   noiseSuppresion: true,
-  // echoCancellation: false,
-  // autoGainControl: true,
+  echoCancellation: true,
+  autoGainControl: false,
 };
 
 export class LocalPeer extends Peer {

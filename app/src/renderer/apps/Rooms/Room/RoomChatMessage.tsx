@@ -34,6 +34,7 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
       flexDirection="column"
       justifyContent="flex-end"
       pt={doesPack ? 1 : 4}
+      pl={3}
       pr={3}
     >
       {!chat.isRightAligned && !doesPack && (
