@@ -429,7 +429,7 @@ export class SpacesService extends BaseService {
     // setting provider to current space host
     const spaceHost = getHost(this.state!.selected!.path);
     // if (currentRoomProvider !== spaceHost)
-    this.core.services.ship.rooms.setProvider(null, spaceHost);
+    this.core.services.ship.rooms.setProvider(spaceHost);
   }
 
   // ***********************************************************
@@ -465,11 +465,17 @@ export class SpacesService extends BaseService {
     return await SpacesApi.getInvitations(this.core.conduit!);
   }
 
-  async setLoader(_event: IpcMainInvokeEvent, status: 'initial' | 'loading' | 'error' | 'loaded') {
+  async setLoader(
+    _event: IpcMainInvokeEvent,
+    status: 'initial' | 'loading' | 'error' | 'loaded'
+  ) {
     this.state!.setLoader(status);
   }
 
-  async setJoin(_event: IpcMainInvokeEvent, status: 'initial' | 'loading' | 'error' | 'loaded') {
+  async setJoin(
+    _event: IpcMainInvokeEvent,
+    status: 'initial' | 'loading' | 'error' | 'loaded'
+  ) {
     this.state!.setJoin(status);
   }
 
@@ -687,7 +693,7 @@ export class SpacesService extends BaseService {
         access: space.access,
         picture: space.picture,
         color: space.color,
-        theme: snakeify(theme)
+        theme: snakeify(theme),
       },
     });
   }

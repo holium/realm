@@ -61,9 +61,9 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract leave(): Promise<void>;
   abstract sendSignal(peer: Patp, msg: any): void;
   abstract sendData(data: DataPacket): void;
+  abstract sendChat(content: string): void;
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ProtocolEventCallbacks = {
   ready: () => void;
   providerUpdated: (provider: Patp) => void;
@@ -78,4 +78,5 @@ export type ProtocolEventCallbacks = {
   roomEntered: (room: RoomType) => void;
   roomLeft: (room: RoomType) => void;
   peerDataReceived: (peer: Patp, data: DataPacket) => void;
+  chatReceived: (peer: Patp, content: string) => void;
 };

@@ -13,14 +13,21 @@ export const VoiceView: FC<VoiceViewProps> = ({
   present,
   audio,
 }: VoiceViewProps) => {
+  const presentPeers = present.filter((person: string) => person !== host);
   return (
-    <Flex flex={2} gap={16} p={2} flexDirection="row" alignItems="center">
+    <Flex
+      flex={2}
+      gap={12}
+      py={2}
+      display="grid"
+      gridTemplateColumns={presentPeers.length ? `repeat(2, 1fr)` : '.5fr'}
+      gridAutoColumns="1fr"
+      gridAutoRows={'.5fr'}
+    >
       <Speaker type="host" person={host} audio={audio} />
-      {present
-        .filter((person: string) => person !== host)
-        .map((person: string, index: number) => (
-          <Speaker key={person} type="speaker" person={person} audio={audio} />
-        ))}
+      {presentPeers.map((person: string) => (
+        <Speaker key={person} type="speaker" person={person} audio={audio} />
+      ))}
     </Flex>
   );
 };

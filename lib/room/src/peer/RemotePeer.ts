@@ -71,6 +71,13 @@ export class RemotePeer extends Peer {
     this.peer.on('data', this._onData.bind(this));
   }
 
+  get hasMuted() {
+    return (
+      this.audioTracks.size > 0 &&
+      Array.from(this.audioTracks.values())[0].enabled === false
+    );
+  }
+
   dial() {
     if (!this.isInitiator) {
       // notify the peer that we want to connect

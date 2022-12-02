@@ -1,10 +1,18 @@
 import { RoomProtocol } from './connection/RoomProtocol';
-import { RoomsManager } from './RoomsManager';
+import { RealmProtocol } from './connection/RealmProtocol';
 import { TestProtocol } from './connection/TestProtocol';
+import { RoomsManager } from './RoomsManager';
 import { RemotePeer } from './peer/RemotePeer';
 import { LocalPeer } from './peer/LocalPeer';
 
-export { RoomsManager, RoomProtocol, TestProtocol, RemotePeer, LocalPeer };
+export {
+  RoomsManager,
+  RoomProtocol,
+  TestProtocol,
+  RealmProtocol,
+  RemotePeer,
+  LocalPeer,
+};
 
 export type {
   Patp,
@@ -18,3 +26,4 @@ export type {
 export { RoomState } from './types';
 export { PeerConnectionState } from './peer/types';
 export { RoomManagerEvent } from './events';
+export type { ChatModelType } from './RoomInstance';

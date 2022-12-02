@@ -8,8 +8,9 @@ import { useServices } from 'renderer/logic/store';
 // import { Roompps } from 'renderer/logic/Roomore';
 import { RoomRow } from 'renderer/apps/Rooms/components/RoomRow';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useTrayApps } from 'renderer/apps/store';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+
 interface RoomTrayProps {}
 
 const iconSize = 28;
@@ -27,6 +28,7 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
   } = useTrayApps();
   const { dockColor, textColor } = theme.currentTheme;
   const roomsButtonRef = createRef<HTMLButtonElement>();
+  const roomsManager = useRooms();
 
   const dimensions = {
     height: 500,
@@ -35,6 +37,12 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
 
   const position = 'top-left';
   const anchorOffset = { x: 8, y: 26 };
+
+  const presentRoom = useMemo(() => {
+    if (!roomsManager) return;
+    if (!roomsManager.presentRoom) return;
+    return roomsManager.presentRoom.room;
+  }, [roomsManager?.presentRoom?.room]);
 
   const onButtonClick = useCallback(
     (evt: any) => {
@@ -60,7 +68,7 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
       // RoomsActions.requestAllRooms();
       setActiveApp('rooms-tray');
       if (roomsApp.liveRoom) {
-        RoomsActions.setView('room');
+        // RoomsActions.setView('room');
       }
     },
     [activeApp, anchorOffset, position, dimensions]
@@ -82,14 +90,17 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
       position="relative"
       onClick={onButtonClick}
     >
-      {roomsApp.liveRoom ? (
+      {presentRoom ? (
         <Flex style={{ pointerEvents: 'none' }}>
           <RoomRow
             tray={true}
-            {...roomsApp.liveRoom}
+            rid={presentRoom.rid}
+            title={presentRoom.title}
+            present={presentRoom.present}
+            creator={presentRoom.creator}
+            provider={presentRoom.provider}
             rightChildren={
               <Icons
-                // mb="2px"
                 size={iconSize - 4}
                 color={textColor}
                 name="Connect"
@@ -106,7 +117,6 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
           customBg={iconHoverColor}
           color={textColor}
           mt="2px"
-          // mb="-2px"
         >
           <Icons name="Connect" pointerEvents="none" />
         </IconButton>

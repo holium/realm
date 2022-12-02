@@ -72,7 +72,11 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-    [~ ~]
+    ?+    path  (on-peek:def path)
+        [%x %session ~]  ::  ~/scry/rooms/session.json
+      ?>  =(our.bowl src.bowl)
+      ``rooms-v2-view+!>([%session session.state])
+    ==
   ::
   ++  on-watch
     |=  =path
@@ -153,7 +157,7 @@
     ^-  (quip card _state)
     |^
     ?-  -.act       
-      %signal       (handle-signal +.act)
+      %signal         (handle-signal +.act)
     ==
     ::
     ++  handle-signal
@@ -215,7 +219,7 @@
         %leave-room         (leave-room +.act)
         %invite             `state
         %kick               `state
-        %send-chat          `state
+        %send-chat          (handle-send-chat +.act)
       ==
       ::
       ++  set-provider
@@ -327,7 +331,6 @@
             ^-  (list card)
             [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%enter-room rid])]~
         ::
-        ~&  >>  ['enter-room' src.bol]
         ?>  (~(has by rooms.provider.state) rid)  ::  room exists
         ?>  (can-enter:hol rid src.bol)       ::  src.bol can enter
         ::  TODO remove from other rooms if present
@@ -364,6 +367,25 @@
         =.  rooms.provider.state      (~(put by rooms.provider.state) [rid room])
         :_  state
         [%give %fact [/provider-updates ~] rooms-v2-reaction+!>([%room-left rid src.bol])]~
+      ::   
+      ++  handle-send-chat
+        |=  [content=cord]
+        ^-  (quip card _state)
+        ?~  current.session.state
+            ~&  >>>  'must be in a room to send or receive chat'
+            `state
+        ?:  =(src.bol our.bol)
+          ::  send all present users the chat message
+          =/  room    (~(got by rooms.session.state) u.current.session.state)
+          =/  peers   (skim ~(tap in present.room) skim-self:helpers:rooms:hol)
+          :_  state
+          %+  turn  (skim ~(tap in present.room) skim-self:helpers:rooms:hol)
+            |=  =ship
+            ^-  card
+            [%pass / %agent [ship dap.bol] %poke rooms-v2-session-action+!>([%send-chat content])]
+        ::  Receiving a signal from another ship
+        :_  state
+        [%give %fact [/lib ~] rooms-v2-reaction+!>([%chat-received src.bol content])]~
       --
   ::
   ++  reaction
@@ -385,7 +407,6 @@
       :: %present          (on-suite-add +.rct)
       :: %invited          (on-joined +.rct)
       :: %kicked           (on-stall-update +.rct)
-      :: %new-chat         (on-stall-update +.rct)
 
     ==
     ::
@@ -514,6 +535,11 @@
       |=  [=ship =room:store]
       ^-  ?
       (~(has in present.room) ship)
+    ::
+    ++  skim-self
+      |=  =ship
+      ^-  ?
+      ?!  =(ship our.bol)
     ::
     --
 ::

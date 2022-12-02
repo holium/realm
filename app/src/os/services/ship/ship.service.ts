@@ -75,7 +75,7 @@ export class ShipService extends BaseService {
   };
 
   private readonly services: { slip?: SlipService } = {};
-  // rooms: RoomsService;
+  rooms: RoomsService;
   wallet: WalletService;
 
   handlers = {
@@ -212,7 +212,7 @@ export class ShipService extends BaseService {
 
     this.subscribe = this.subscribe.bind(this);
     this.services.slip = new SlipService(core);
-    // this.rooms = new RoomsService(core);
+    this.rooms = new RoomsService(core);
     this.wallet = new WalletService(core);
   }
 
@@ -360,7 +360,7 @@ export class ShipService extends BaseService {
       this.state.loader.set('loaded');
 
       this.services.slip?.subscribe();
-      // this.rooms?.onLogin(ship);
+      this.rooms?.watch();
       this.wallet?.onLogin(ship);
 
       // return ship state

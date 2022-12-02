@@ -79,7 +79,6 @@ export abstract class Peer extends (EventEmitter as new () => TypedEmitter<PeerE
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PeerEventCallbacks = {
   connected: () => void;
   disconnected: (reason?: any) => void;

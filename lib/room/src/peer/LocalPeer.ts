@@ -4,6 +4,7 @@ import { Patp } from '../types';
 import { Peer, PeerConfig } from './Peer';
 import { RemotePeer } from './RemotePeer';
 import { PeerConnectionState, TrackKind } from './types';
+import { action, makeObservable, observable } from 'mobx';
 
 export const DEFAULT_AUDIO_OPTIONS = {
   channelCount: {
@@ -25,6 +26,10 @@ export class LocalPeer extends Peer {
   constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
     super(our, config);
     this.protocol = protocol;
+    makeObservable(this, {
+      stream: observable,
+      setMedia: action.bound,
+    });
   }
 
   streamTracks(peer: RemotePeer) {
@@ -37,7 +42,7 @@ export class LocalPeer extends Peer {
       if (this.isMuted && track.kind === TrackKind.Audio) {
         track.enabled = false;
       }
-      peer.peer.addTrack(track, currentStream);
+      peer.peer?.addTrack(track, currentStream);
     });
   }
 

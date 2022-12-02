@@ -24,6 +24,12 @@
   "preconstruct": {
     "globals": {
       "mobx": "mobx"
+    },
+    "exports": {
+      "envConditions": [
+        "browser",
+        "worker"
+      ]
     }
   },
   "peerDependencies": {

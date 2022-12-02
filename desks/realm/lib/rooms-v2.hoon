@@ -85,7 +85,7 @@
         ['kickedBy' %s (scot %p ship.rct)]
       ==
       ::
-        %new-chat 
+        %chat-received 
       %-  pairs
       :~
         ['from' %s (scot %p from.rct)]

@@ -138,7 +138,6 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RoomsManagerEventCallbacks = {
   createdRoom: (room: RoomType) => void;
   deletedRoom: (rid: string, state: RoomState) => void;

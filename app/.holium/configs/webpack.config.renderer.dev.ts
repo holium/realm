@@ -112,7 +112,9 @@ const configuration: webpack.Configuration = {
             sourceType: 'var',
           }),
         ]),
-
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
     new webpack.NoEmitOnErrorsPlugin(),
 
     /**

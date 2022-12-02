@@ -12,4 +12,5 @@ export enum ProtocolEvent {
   RoomCreated = 'roomCreated',
   RoomDeleted = 'roomDeleted',
   PeerDataReceived = 'peerDataReceived',
+  ChatReceived = 'chatReceived',
 }

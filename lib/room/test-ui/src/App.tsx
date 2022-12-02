@@ -49,12 +49,7 @@ const protocol = new RoomProtocol(
 protocol.init(ShipConfig[testShip]);
 
 export const roomsManager = new RoomsManager(protocol);
-roomsManager.on(
-  RoomManagerEvent.OnDataChannel,
-  (rid: string, peer: string, data: any) => {
-    console.log(rid, peer, data);
-  }
-);
+
 const App: FC = observer(() => {
   useEffect(() => {
     return () => {

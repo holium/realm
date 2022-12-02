@@ -8,10 +8,19 @@ import { DataPacket } from './helpers/data';
 import { ProtocolEvent } from './connection/events';
 import { RemotePeer } from './peer/RemotePeer';
 
+export type ChatModelType = {
+  author: string;
+  index: number;
+  content: string;
+  timeReceived: number;
+  isRightAligned: boolean;
+};
+
 export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEventCallbacks>) {
   rid: string; // ~lomder-librun/Hey/1667915502757
   protected protocol: BaseProtocol;
   room!: RoomType;
+  chat: ChatModelType[] = [];
   state: RoomState = RoomState.Disconnected;
 
   constructor(rid: string, protocol: BaseProtocol) {
@@ -36,10 +45,25 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
       })
     );
 
+    this.protocol.on(
+      ProtocolEvent.ChatReceived,
+      action((peer: Patp, content: string) => {
+        this.chat.push({
+          author: peer,
+          index: this.chat.length,
+          content,
+          timeReceived: Date.now(),
+          isRightAligned: false,
+        });
+      })
+    );
+
     makeObservable(this, {
       state: observable,
+      chat: observable,
       room: observable,
       connect: action.bound,
+      sendChat: action.bound,
     });
   }
 
@@ -119,9 +143,19 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
   sendData(data: DataPacket) {
     this.protocol.sendData(data);
   }
+
+  sendChat(content: string) {
+    this.chat.push({
+      author: this.protocol.our,
+      index: this.chat.length,
+      content,
+      timeReceived: Date.now(),
+      isRightAligned: true,
+    });
+    this.protocol.sendChat(content);
+  }
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RoomEventCallbacks = {
   started: () => void;
   connected: () => void;
