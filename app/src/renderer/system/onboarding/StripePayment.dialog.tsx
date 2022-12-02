@@ -6,46 +6,60 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-// @ts-expect-error its there...
-import { Box, Sigil, Text, Flex, Button } from 'renderer/components';
+import { Box, Sigil, Text, Flex, Button, Icons } from 'renderer/components';
+import { transparentize, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { useServices } from 'renderer/logic/store';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
 interface StripePaymentProps extends BaseDialogProps {
   patp: string;
 }
 
-const appearance = {
-  variables: {
-    fontFamily: '"Rubik", sans-serif',
-    fontWeight: 500,
-  },
-};
-
 const stripePromise = loadStripe(
-  'pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM'
+  'pk_test_51LORWpK2cENWZ1NMPDaAEo5kKPJFMLdWWiDJozLMatmSMGrxcNG0pVAfFzjURClqdGmWA3PkIET6feGZbFGjNkN100c1dlascb'
 );
-const StripePayment: FC<StripePaymentProps> = (props: StripePaymentProps) => {
-  const { identity } = useServices();
-  const clientSecret = identity.auth.clientSecret!;
-  return (
-    <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-      <MainComponent {...props} />
-    </Elements>
-  );
-};
+const StripePayment: FC<StripePaymentProps> = observer(
+  (props: StripePaymentProps) => {
+    const { identity, theme } = useServices();
+    const baseTheme = getBaseTheme(theme.currentTheme);
+    const clientSecret = identity.auth.clientSecret!;
+    const appearance = {
+      variables: {
+        fontFamily: '"Rubik", sans-serif',
+        fontWeight: 500,
+        colorBackground: darken(0.02, theme.currentTheme.windowColor),
+        colorText: baseTheme.colors.text.primary,
+        colorTextSecondary: baseTheme.colors.text.primary,
+      },
+    };
+    return (
+      <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+        <MainComponent {...props} />
+      </Elements>
+    );
+  }
+);
 
 const MainComponent: FC<StripePaymentProps> = observer(
   (props: StripePaymentProps) => {
     const stripe = useStripe();
     const elements = useElements();
-    const { onboarding } = useServices();
+    const { onboarding, theme } = useServices();
 
     const [message, setMessage] = useState({ type: 'notification', text: '' });
     const [loading, setLoading] = useState(false);
+
+    const bulletIconColor = transparentize(0.1, theme.currentTheme.iconColor);
+    const HostingFeature = (props: any) => (
+      <Flex pb={10} flexDirection="row">
+        <Icons mr={14} color={bulletIconColor} name="CheckCircle" />
+        <Text variant="body">{props.children}</Text>
+      </Flex>
+    );
 
     async function completeCheckout() {
       try {
@@ -57,7 +71,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
         setLoading(false);
         setMessage({
           type: 'error',
-          text: 'There was an error completing your checkout.',
+          text: 'There was an error verifying your payment in our system. Please contact support@holium.com.',
         });
       }
     }
@@ -73,23 +87,38 @@ const MainComponent: FC<StripePaymentProps> = observer(
 
       setLoading(true);
 
-      const { paymentIntent, error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: 'https://holium.network',
-        },
-        redirect: 'if_required',
-      });
+      try {
+        const { paymentIntent, error } = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: 'https://holium.network',
+          },
+          redirect: 'if_required',
+        });
 
-      if (paymentIntent) {
-        if (paymentIntent?.status === 'succeeded') {
-          await completeCheckout();
+        if (paymentIntent) {
+          if (paymentIntent?.status === 'succeeded') {
+            await completeCheckout();
+          } else {
+            setMessage({
+              type: 'error',
+              text: 'Your payment was not successful, please try again.',
+            });
+          }
         } else {
           setMessage({
             type: 'error',
-            text: 'Your payment was not successful, please try again.',
+            text:
+              error.message ||
+              'Your payment was not successful, please try again!',
           });
         }
+      } catch (e) {
+        console.log(`submitting stripe payment threw:`, e);
+        setMessage({
+          type: 'error',
+          text: 'Something went wrong processing your payment, please try again.'
+        });
       }
 
       setLoading(false);
@@ -105,6 +134,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
             alignItems="center"
           >
             <Flex
+              pt={64}
               flex={2}
               flexDirection="column"
               alignItems="center"
@@ -152,9 +182,22 @@ const MainComponent: FC<StripePaymentProps> = observer(
                 </Flex>
               </Flex>
             )}
+            {!onboarding?.accessCode && (
+              <Flex
+                pt={72}
+                flexDirection="column"
+                alignItems="left"
+                justifyContent="center"
+              >
+                <HostingFeature> Backups </HostingFeature>
+                <HostingFeature> Automatic OTA updates </HostingFeature>
+                <HostingFeature> Customer support </HostingFeature>
+                <HostingFeature> 2GB block storage included </HostingFeature>
+              </Flex>
+            )}
           </Flex>
           <Flex
-            mt={56}
+            mt={8}
             width="100%"
             flex={1}
             justifyContent="center"
@@ -169,7 +212,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
             </Text>
           </Flex>
         </Box>
-        <Flex flex={3} alignItems="center" justifyContent="center">
+        <Flex flex={3} alignItems="center" justifyContent="center" mt={8}>
           <form onSubmit={handleSubmit}>
             <Flex flexDirection="column">
               <Flex

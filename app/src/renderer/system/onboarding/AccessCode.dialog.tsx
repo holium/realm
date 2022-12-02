@@ -1,5 +1,4 @@
 import { FC, useState, useCallback } from 'react';
-// @ts-expect-error its there...
 import {
   Grid,
   Text,
@@ -14,6 +13,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import _ from 'lodash';
 import { AccessCode } from 'os/api/holium';
+import { useServices } from 'renderer/logic/store';
 
 const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
   const accessCode = props.accessCode;
@@ -55,6 +55,7 @@ const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
 };
 
 const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+  const { theme } = useServices();
   const [inputText, setInputText] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
   const [accessCode, setAccessCode] = useState<AccessCode | null>(null);
@@ -109,7 +110,11 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
           alignItems="center"
           justifyContent="center"
         >
-          <Icons name="Holium" size={30} color="black" />
+          <Icons
+            name="Holium"
+            size={30}
+            color={theme.currentTheme.mode === 'light' ? 'black' : 'white'}
+          />
           {accessCode ? (
             <Text ml={12} fontSize={3} fontWeight={400} color="text.success">
               Access code found!

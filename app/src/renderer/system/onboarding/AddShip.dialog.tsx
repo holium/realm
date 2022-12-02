@@ -11,9 +11,8 @@ import {
   Spinner,
   Flex,
   TextButton,
+  UrbitSVG,
 } from 'renderer/components';
-// @ts-expect-error its there...
-import UrbitSVG from '../../../../assets/urbit.svg';
 import { observer } from 'mobx-react';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -23,6 +22,7 @@ import { useServices } from 'renderer/logic/store';
 
 export const AddShip: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
+    const { theme } = useServices();
     const [loading, setLoading] = useState(false);
     const { identity } = useServices();
 
@@ -96,7 +96,12 @@ export const AddShip: FC<BaseDialogProps> = observer(
       <Grid.Column xl={12} noGutter>
         <Grid.Column lg={7} xl={7} px={50}>
           <Grid.Column gap={12}>
-            <img height={56} src={UrbitSVG} alt="urbit logo" />
+            <Flex width="100%" justifyContent="center">
+              <UrbitSVG
+                mode={theme.currentTheme.mode as 'light' | 'dark'}
+                size={56}
+              />
+            </Flex>
             <Flex mt={2} flexDirection="column">
               <FormControl.FieldSet>
                 <FormControl.Field>
@@ -164,6 +169,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     autoCapitalize="false"
                     autoCorrect="false"
                     spellCheck="false"
+                    type="password"
                     error={
                       accessKey.computed.ifWasEverBlurredThenError &&
                       accessKey.computed.isDirty
