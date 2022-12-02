@@ -44,6 +44,7 @@ export const AuthStore = types
     ships: types.map(AuthShip),
     order: types.optional(types.array(types.string), []), // patp string
     accountId: types.maybe(types.string),
+    email: types.maybe(types.string),
     clientSecret: types.maybe(types.string),
   })
   .views((self) => ({
@@ -112,6 +113,9 @@ export const AuthStore = types
     },
     setAccountId: (accountId: string) => {
       self.accountId = accountId;
+    },
+    setEmail: (email: string) => {
+      self.email = email;
     },
     setClientSecret: (secret: string) => {
       self.clientSecret = secret;

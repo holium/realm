@@ -53,11 +53,69 @@ export class HoliumAPI {
     return { id: data.id, verificationCode: data.verificationCode };
   }
 
-  async resendVerificationCode(accountId: string): Promise<string> {
+  async resendVerificationCode(accountId: string): Promise<boolean> {
     const { data } = await client.post(
       `accounts/${accountId}/resend-email-verification`
     );
-    return data.verificationCode;
+    return data.success;
+  }
+
+  async resendNewEmailVerificationCode(accountId: string): Promise<boolean> {
+    const { data } = await client.post(
+      `/accounts/${accountId}/resend-new-email-verification-code`
+    );
+    return data.success;
+  }
+
+  async checkVerificationCode(
+    accountId: string,
+    verificationCode: string
+  ): Promise<{ success: boolean; email: string | null }> {
+    const { data } = await client.post(
+      `/accounts/${accountId}/check-verification-code?verificationCode=${verificationCode}`
+    );
+    return { success: data.success, email: data.email };
+  }
+
+  async changeEmail(
+    accountId: string,
+    newEmail: string
+  ): Promise<{
+    success: boolean;
+    verificationCode: string | null;
+    errorCode: number | null;
+  }> {
+    console.log(`api: change email ${newEmail}`);
+    try {
+      const { data } = await client.post(
+        `/accounts/${accountId}/change-email?email=${newEmail}`
+      );
+      return {
+        success: data.verificationCode !== null,
+        verificationCode: data.verificationCode,
+        errorCode: null,
+      };
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.status &&
+        error.response.status === 441
+      ) {
+        return { success: false, verificationCode: null, errorCode: 441 };
+      }
+      return { success: false, verificationCode: null, errorCode: null };
+    }
+  }
+
+  async verifyNewEmail(
+    accountId: string,
+    verificationCode: string
+  ): Promise<{ success: boolean; email: string | null }> {
+    const { data } = await client.post(
+      `/accounts/${accountId}/verify-new-email?verificationCode=${verificationCode}`
+    );
+    console.log(data);
+    return { success: data.success, email: data.newEmail };
   }
 
   async getPlanets(

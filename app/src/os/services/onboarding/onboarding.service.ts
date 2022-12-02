@@ -312,21 +312,23 @@ export class OnboardingService extends BaseService {
     if (!auth.accountId)
       throw new Error('Accout must be set before resending verification code.');
 
-    const newVerificationCode =
-      await this.core.holiumClient.resendVerificationCode(auth.accountId);
-    this.state.setVerificationCode(newVerificationCode);
+    const success = await this.core.holiumClient.resendVerificationCode(
+      auth.accountId
+    );
 
-    return newVerificationCode;
+    return success;
   }
 
-  verifyEmail(_event: any, verificationCode: string): boolean {
-    if (!this.state.verificationCode)
-      throw new Error('Verification code must be set before verifying.');
+  async verifyEmail(_event: any, verificationCode: string): Promise<boolean> {
+    const { auth } = this.core.services.identity;
+    if (!auth.accountId)
+      throw new Error('Account must be set before verifying email.');
 
-    const verified = this.state.verificationCode === verificationCode;
-    if (verified) this.state.setVerificationCode(null);
-
-    return verified;
+    const result = await this.core.holiumClient.checkVerificationCode(
+      auth.accountId,
+      verificationCode
+    );
+    return result.success;
   }
 
   setSeenSplash(_event: any) {
@@ -581,6 +583,7 @@ export class OnboardingService extends BaseService {
     );
 
     this.core.services.identity.auth.storeNewShip(authShip);
+    this.core.services.identity.auth.setEmail(this.state.email!);
     this.core.services.identity.auth.setFirstTime();
     this.core.services.ship.storeNewShip(authShip);
     this.core.services.shell.closeDialog(null);
