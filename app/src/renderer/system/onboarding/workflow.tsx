@@ -182,7 +182,6 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <ProfileSetup {...props} />,
-    hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.ADD_SHIP),
     onNext: async () =>
