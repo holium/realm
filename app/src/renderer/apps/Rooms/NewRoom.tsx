@@ -69,7 +69,7 @@ export interface BaseRoomProps {
 }
 export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { dimensions } = props;
-  const { theme } = useServices();
+  const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
@@ -82,7 +82,9 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
     // setLoading(true);
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
-    roomsManager.createRoom(name, isPrivate ? 'private' : 'public');
+    let spacePath =
+      spaces.selected?.type !== 'our' ? spaces.selected : undefined;
+    roomsManager.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };
 
@@ -180,7 +182,7 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           </TextButton>
         </Flex>
         <Flex mt={3} justifyContent="flex-start">
-          <Checkbox
+          {/* <Checkbox
             tabIndex={2}
             label="Private"
             onKeyDown={(e: any) => {
@@ -194,7 +196,7 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             }}
             onFocus={() => isPrivate.actions.onFocus()}
             onBlur={() => isPrivate.actions.onBlur()}
-          />
+          /> */}
         </Flex>
       </Flex>
     </Grid.Column>

@@ -82,9 +82,16 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
                 {present!.length} {peopleText}{' '}
                 {/* {present!.includes(ship!.patp) && ` - (You)`} */}
               </Text>
-              <Text ml={2} opacity={0.5} fontWeight={200} fontSize={2}>
-                {present!.includes(ship!.patp) && ` - (You)`}
-              </Text>
+              {creator === ship!.patp && (
+                <>
+                  <Text mx="6px" fontSize={2} fontWeight={200} opacity={0.5}>
+                    •
+                  </Text>
+                  <Text opacity={0.5} fontWeight={200} fontSize={2}>
+                    Host
+                  </Text>
+                </>
+              )}
             </Flex>
           )}
         </Flex>

@@ -186,7 +186,6 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['kicked']) {
-        console.log('kicked from room', data['kicked']);
         const payload = data['kicked'];
         const room = this.rooms.get(payload.rid);
         if (room) {
@@ -251,7 +250,11 @@ export class RealmProtocol extends BaseProtocol {
     });
   }
 
-  createRoom(title: string, access: 'public' | 'private') {
+  createRoom(
+    title: string,
+    access: 'public' | 'private',
+    spacePath: string = ''
+  ) {
     const newRoom: RoomType = {
       rid: ridFromTitle(this.provider, title),
       title,
@@ -261,8 +264,16 @@ export class RealmProtocol extends BaseProtocol {
       present: [this.our],
       whitelist: [],
       capacity: 6,
-      space: '',
+      space: spacePath,
     };
+    let space = null;
+    if (spacePath) {
+      const [ship, name] = spacePath.split('/');
+      space = {
+        ship,
+        name,
+      };
+    }
     this.rooms.set(newRoom.rid, newRoom);
     this.poke({
       app: 'rooms-v2',
@@ -272,6 +283,7 @@ export class RealmProtocol extends BaseProtocol {
           rid: newRoom.rid,
           title,
           access,
+          space,
         },
       },
     });
@@ -299,7 +311,6 @@ export class RealmProtocol extends BaseProtocol {
         app: 'rooms-v2',
         path: '/session',
       });
-      console.log(response);
       this.setSessionData(response['session']);
     } catch (e) {
       console.error(e);

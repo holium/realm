@@ -31,7 +31,7 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
     this.state = RoomState.Starting;
     this.onChat = this.onChat.bind(this);
     this.onRoomUpdate = this.onRoomUpdate.bind(this);
-    // this.protocol.setProvider(rid.split('/')[0]);
+
     this.protocol.getRoom(this.rid).then(
       action((room: RoomType) => {
         this.room = room;

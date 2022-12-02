@@ -216,7 +216,7 @@
       :~  [%rid so]
           [%access access]
           [%title so]
-          :: [%path spc-path]
+          [%path spc-pth]
       ==
     ::
     ++  edit
@@ -247,11 +247,12 @@
       !!
     ::
     ++  spc-pth
-      %-  ot
-      :~  [%ship (su ;~(pfix sig fed:ag))]
-          [%space so]
-      ==
-    --
+      =,  dejs-soft:format
+      |=  jon=json
+      ^-  (unit space-path)
+      ?.  ?=([%o *] jon)  ~
+      (need (ot ship+(su ;~(pfix sig fed:ag)) space+so ~):dejs-soft:format)
+      --
   ::
   ++  provider-action
     |=  jon=json

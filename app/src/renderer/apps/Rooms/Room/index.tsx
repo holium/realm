@@ -1,6 +1,5 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/theme.model';
 import { rgba, darken } from 'polished';
 import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
@@ -153,7 +152,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         flex={1}
         flexDirection="column"
       >
-        {roomView === 'voice' && <VoiceView host={creator} />}
+        {roomView === 'voice' && <VoiceView host={ship!.patp} />}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
         {roomView === 'info' && <RoomInfo />}

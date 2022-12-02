@@ -50,7 +50,11 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   }
   abstract registerLocal(local: LocalPeer): void;
   abstract setProvider(provider: Patp): Promise<RoomType[]>;
-  abstract createRoom(title: string, access: 'public' | 'private'): RoomType;
+  abstract createRoom(
+    title: string,
+    access: 'public' | 'private',
+    spacePath?: string
+  ): RoomType;
   abstract deleteRoom(rid: string): void;
   abstract getRoom(rid: string): Promise<RoomType>;
   abstract getRooms(): Promise<RoomType[]>;
