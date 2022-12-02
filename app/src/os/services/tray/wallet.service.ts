@@ -65,7 +65,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-erc20-transaction': this.sendERC20Transaction,
     'realm.tray.wallet.send-erc721-transaction': this.sendERC721Transaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
-    'realm.tray.wallet.request-address': this.requestAddress,
     'realm.tray.wallet.check-passcode': this.checkPasscode,
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.toggle-network': this.toggleNetwork,
@@ -266,9 +265,6 @@ export class WalletService extends BaseService {
         contractAddress,
         walletIndex
       );
-    },
-    requestAddress: async (from: string, network: string) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.request-address');
     },
     getCoinTxns: async (
       walletAddr: string,
@@ -545,8 +541,7 @@ export class WalletService extends BaseService {
   }
 
   async checkMnemonic(_event: any, mnemonic: string) {
-    // TODO: Leo, can you implement this? Just needs to check against the existing
-    // pub key and return true if it matches
+    // TODO: implement
     return true;
   }
 
@@ -918,10 +913,6 @@ export class WalletService extends BaseService {
       hash,
       tx
     );
-  }
-
-  async requestAddress(_event: any, network: string, from: string) {
-    await WalletApi.requestAddress(this.core.conduit!, network, from);
   }
 
   async updateBitcoinInfo() {

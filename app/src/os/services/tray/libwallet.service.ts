@@ -18,9 +18,27 @@ import {
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from 'os/api/wallet';
+import bcrypt from 'bcryptjs';
+import {
+  onPatch,
+  onSnapshot,
+  getSnapshot,
+  castToSnapshot,
+} from 'mobx-state-tree';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
+
+export interface RecipientPayload {
+  recipientMetadata?: {
+    color?: string;
+    avatar?: string;
+    nickname?: string;
+  };
+  patp: string;
+  address?: string | null;
+  gasEstimate?: number;
+}
 
 export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
@@ -39,7 +57,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-erc20-transaction': this.sendERC20Transaction,
     'realm.tray.wallet.send-erc721-transaction': this.sendERC721Transaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
-    'realm.tray.wallet.request-address': this.requestAddress,
     'realm.tray.wallet.check-passcode': this.checkPasscode,
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
     'realm.tray.wallet.set-network-protocol': this.setNetworkProtocol,
@@ -238,9 +255,6 @@ export class WalletService extends BaseService {
         walletIndex
       );
     },
-    requestAddress: async (from: string, network: string) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.request-address');
-    },
     getCoinTxns: async (
       walletAddr: string,
       tokenType: 'erc20' | 'erc721' | 'erc1155',
@@ -270,6 +284,101 @@ export class WalletService extends BaseService {
     setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
   }
 
+  async onLogin(ship: string) {
+    const secretKey: string = this.core.passwords.getPassword(ship)!;
+    const storeParams = {
+      name: 'wallet',
+      cwd: `realm.${ship}`,
+      secretKey,
+      accessPropertiesByDotNotation: true,
+    };
+    this.db = new Store<WalletStoreType>(storeParams);
+    const persistedState: WalletStoreType = this.db.store;
+
+    if (Object.keys(persistedState).length !== 0) {
+      this.state = WalletStore.create(castToSnapshot(persistedState));
+    } else {
+      this.state = WalletStore.create({
+        navState: {
+          view: WalletView.NEW,
+          network: NetworkType.ETHEREUM,
+          btcNetwork: 'mainnet',
+        },
+        navHistory: [],
+        ethereum: {
+          network: 'gorli',
+          settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
+            defaultIndex: 0,
+          },
+          initialized: false,
+          conversions: {},
+        },
+        bitcoin: {
+          settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
+            defaultIndex: 0,
+          },
+          conversions: {},
+        },
+        testnet: {
+          settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
+            defaultIndex: 0,
+          },
+          conversions: {},
+        },
+        creationMode: 'default',
+        sharingMode: 'anybody',
+        ourPatp: ship,
+        lastInteraction: Date.now(),
+        initialized: false,
+      });
+    }
+
+    onSnapshot(this.state, (snapshot: any) => {
+      this.db!.store = snapshot;
+    });
+
+    const patchEffect = {
+      model: getSnapshot(this.state),
+      resource: 'wallet',
+      response: 'initial',
+    };
+    this.core.onEffect(patchEffect);
+
+    onPatch(this.state, (patch) => {
+      const patchEffect = {
+        patch,
+        resource: 'wallet',
+        response: 'patch',
+      };
+      this.core.onEffect(patchEffect);
+    });
+
+    WalletApi.watchUpdates(this.core.conduit!, this.state!);
+
+    if (this.state.navState.view !== WalletView.NEW) {
+      this.state.resetNavigation();
+    }
+    this.lock(); // lock wallet on login
+  }
+
+  private wrapHandler(handler: any) {
+    return (...args: any) => {
+      if (this.state) {
+        this.state.setLastInteraction(new Date());
+      }
+      return handler.apply(this, args);
+    };
+  }
+
   private autoLock() {
     const shouldLock =
       this.state &&
@@ -293,29 +402,16 @@ export class WalletService extends BaseService {
     const ethPath = "m/44'/60'/0'/0";
     const btcPath = "m/44'/0'/0'/0";
     const btcTestnetPath = "m/44'/1'/0'/0";
+    let xpub: string;
     // eth
-    console.log('setting eth xpub');
-    let xpub: string = this.signer.getXpub(ethPath);
-    console.log('ethxpub', xpub);
+    xpub = this.signer.getXpub(ethPath);
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
-    console.log('setting btc xpub');
-    let xpub: string = this.signer.getXpub(btcPath);
-    console.log('btcxpub', xpub);
+    xpub = this.signer.getXpub(btcPath);
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
     // btc testnet
-    console.log('setting btc testnet xpub');
-    let xpub: string = this.signer.getXpub(btcTestnetPath);
-    console.log('btctestnetxpub', xpub);
+    xpub = this.signer.getXpub(btcTestnetPath);
     await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
-
-    this.state!.ethereum.deleteWallets();
-    WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
-      this.state!.ethereum.initial(wallets);
-      this.updateEthereumInfo();
-      this.state!.bitcoin.initial(wallets);
-      this.updateBitcoinInfo();
-    });
 
     this.state!.navigate(WalletView.LIST);
   }
@@ -324,28 +420,83 @@ export class WalletService extends BaseService {
 
   }
 
-  getRecipient() {
+  async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
+    const recipientMetadata: {
+      color?: string;
+      avatar?: string;
+      nickname?: string;
+    } = await this.core.services.ship.getContact(null, patp);
 
+    try {
+      const address: any = await WalletApi.getAddress(
+        this.core.conduit!,
+        this.state!.navState.network,
+        patp
+      );
+      console.log('got address: ', address);
+
+      return {
+        patp,
+        recipientMetadata,
+        address: address ? address.address : null,
+        gasEstimate: 7,
+      };
+    } catch (e) {
+      console.error(e);
+      return {
+        patp,
+        gasEstimate: 7,
+        recipientMetadata: {},
+        address: null,
+      };
+    }
   }
 
-  saveTransactionNotes() {
-
+  async saveTransactionNotes(_event: any, notes: string) {
+    const network = this.state!.navState.network;
+    let net;
+    if (network === 'ethereum') {
+      net = this.state!.ethereum.network;
+    } else {
+      net = 'mainnet';
+    }
+    // const hash = this.state!.currentItem!.key;
+    const hash = this.state!.navState.detail!.key;
+    const index = this.state!.currentWallet!.index;
+    await WalletApi.saveTransactionNotes(
+      this.core.conduit!,
+      network,
+      net,
+      index,
+      hash,
+      notes
+    );
   }
 
-  setSettings() {
-
+  async setSettings(_events: any, network: string, settings: SettingsType) {
+    await WalletApi.setSettings(this.core.conduit!, network, settings);
   }
 
-  changeDefaultWallet() {
-
+  async changeDefaultWallet(_event: any, network: string, index: number) {
+    await WalletApi.changeDefaultWallet(this.core.conduit!, network, index);
   }
 
   setNetworkProvider() {
 
   }
 
-  createWallet() {
-
+  async createWallet(_event: any, nickname: string) {
+    console.log(`creating with nickname: ${nickname}`);
+    const sender: string = this.state!.ourPatp!;
+    let network: string = this.state!.navState.network;
+    if (
+      network === 'bitcoin' &&
+      this.state!.navState.btcNetwork === 'testnet'
+    ) {
+      network = 'btctestnet';
+    }
+    await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
+    this.state!.navigate(WalletView.LIST, { canReturn: false });
   }
 
   sendEthereumTransaction() {
@@ -364,12 +515,8 @@ export class WalletService extends BaseService {
 
   }
 
-  requestAddress() {
-
-  }
-
-  checkPasscode() {
-
+  async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
+    return await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
   }
   
   checkProviderUrl() {
@@ -380,16 +527,26 @@ export class WalletService extends BaseService {
 
   }
 
-  checkMnemonic() {
-
+  async checkMnemonic(_event: any, mnemonic: string) {
+    // TODO: implement
+    return true;
   }
 
-  navigate() {
-
+  navigate(
+    _event: any,
+    view: WalletView,
+    options?: {
+      canReturn?: boolean;
+      walletIndex?: string;
+      detail?: { type: 'transaction' | 'coin' | 'nft'; key: string };
+      action?: { type: string; data: any };
+    }
+  ) {
+    this.state!.navigate(view, options);
   }
 
   navigateBack() {
-
+    this.state!.navigateBack();
   }
 
   getCoinTxns() {

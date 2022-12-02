@@ -72,19 +72,6 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  requestAddress: async (conduit: Conduit, network: string, from: string) => {
-    const payload = {
-      app: 'realm-wallet',
-      mark: 'realm-wallet-action',
-      json: {
-        'request-address': {
-          network,
-          from,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
     console.log('get wallet address watch');
     return await new Promise<string>((resolve, reject) => {

@@ -10,6 +10,7 @@ import { Account, Asset, ContractAddr } from './types';
  */
 export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
   our: Patp;
+  accounts: Account[] = [];
 
   constructor(our: Patp) {
     super();
@@ -23,6 +24,14 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
   abstract subscribe(): void;
 
   abstract unsubscribe(): void;
+
+  /**
+   * Get all accounts via this protocol
+   * @returns {Promise<Account[]>}
+   */
+  getAccounts(): Promise<Account[]> | Account[]{
+    return this.accounts;
+  }
 
   abstract getAccountBalance(addr: string): number | Promise<number>;
 
