@@ -185,6 +185,23 @@ export class RealmProtocol extends BaseProtocol {
           this.emit(ProtocolEvent.RoomCreated, room);
         }
       }
+      if (data['kicked']) {
+        console.log('kicked from room', data['kicked']);
+        const payload = data['kicked'];
+        const room = this.rooms.get(payload.rid);
+        if (room) {
+          if (this.presentRoom?.rid === payload.rid) {
+            // if we are in the room, hangup the peer
+            if (payload.ship !== this.our) {
+              this.hangup(payload.ship);
+            } else {
+              this.emit(ProtocolEvent.RoomKicked, payload.rid);
+            }
+          }
+          room.present.splice(room.present.indexOf(payload.ship), 1);
+          this.rooms.set(payload.rid, room);
+        }
+      }
     }
   }
 
@@ -218,6 +235,20 @@ export class RealmProtocol extends BaseProtocol {
       },
     });
     return Array.from(this.rooms.values());
+  }
+
+  kick(peer: Patp) {
+    console.log('kicking peer', this.presentRoom?.rid, peer);
+    this.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        kick: {
+          rid: this.presentRoom?.rid,
+          ship: peer,
+        },
+      },
+    });
   }
 
   createRoom(title: string, access: 'public' | 'private') {
@@ -344,6 +375,9 @@ export class RealmProtocol extends BaseProtocol {
     remotePeer.dial();
     // When we connect, lets stream our local tracks to the remote peer
     remotePeer.on(PeerEvent.Connected, () => {
+      this.local?.streamTracks(remotePeer);
+    });
+    this.local.on(PeerEvent.AudioTrackAdded, () => {
       this.local?.streamTracks(remotePeer);
     });
     remotePeer.on(PeerEvent.Closed, () => {

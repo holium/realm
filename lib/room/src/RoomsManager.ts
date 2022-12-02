@@ -44,6 +44,11 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       }
     });
 
+    this.protocol.on(ProtocolEvent.RoomKicked, (rid: string) => {
+      // if we're in a kicked room, we should leave it
+      this.leaveRoom(rid);
+    });
+
     this.protocol.on(
       ProtocolEvent.PeerDataReceived,
       (peer: Patp, data: DataPacket) => {
@@ -82,6 +87,41 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
 
   get rooms(): RoomType[] {
     return Array.from(this.protocol.rooms.values());
+  }
+
+  // Setup audio
+  async getAudioInputSources() {
+    const devices: MediaDeviceInfo[] =
+      await navigator.mediaDevices.enumerateDevices();
+    return formSourceOptions(
+      devices.filter((device: MediaDeviceInfo) => {
+        return device.kind === 'audioinput';
+      })
+    );
+  }
+
+  async getAudioOutputSources() {
+    const devices: MediaDeviceInfo[] =
+      await navigator.mediaDevices.enumerateDevices();
+    return formSourceOptions(
+      devices.filter((device: MediaDeviceInfo) => {
+        return device.kind === 'audiooutput';
+      })
+    );
+  }
+
+  async getVideoInputSources() {
+    const devices: MediaDeviceInfo[] =
+      await navigator.mediaDevices.enumerateDevices();
+    return formSourceOptions(
+      devices.filter((device: MediaDeviceInfo) => {
+        return device.kind === 'videoinput';
+      })
+    );
+  }
+
+  setAudioInput(deviceId: string) {
+    this.local.setAudioInputDevice(deviceId);
   }
 
   setProvider(provider: string) {
@@ -145,4 +185,13 @@ export type RoomsManagerEventCallbacks = {
   leftRoom: (rid: string) => void;
   setNewProvider: (provider: Patp, rooms: RoomType[]) => void;
   onDataChannel: (rid: string, peer: Patp, data: DataPacket) => void;
+};
+
+const formSourceOptions = (sources: MediaDeviceInfo[]) => {
+  return sources.map((source) => {
+    return {
+      label: source.label,
+      value: source.deviceId,
+    };
+  });
 };

@@ -1,7 +1,8 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import { ThemeModelType } from 'os/services/theme.model';
-import { rgba } from 'polished';
+import { rgba, darken } from 'polished';
 import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
@@ -29,7 +30,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
 
-  const { dockColor, windowColor, accentColor, inputColor, textColor } =
+  const { dockColor, windowColor, accentColor, inputColor, textColor, mode } =
     theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const muted = roomsManager.protocol.local?.isMuted;
@@ -38,24 +39,22 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
     if (!roomsManager) return;
     if (!roomsManager.presentRoom) return;
     return roomsManager.presentRoom.room;
-  }, [roomsManager?.presentRoom]);
+  }, [roomsManager?.presentRoom?.room]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');
   }, [presentRoom, roomsApp]);
 
   if (!presentRoom) return <div />;
-  const { present, rid, creator } = presentRoom;
+  const { rid, creator } = roomsManager!.presentRoom!.room;
+  const presentCount = roomsManager.protocol.peers.size + 1; // to include self
   const creatorStr =
-    presentRoom.creator.length > 14
-      ? `${presentRoom.creator.substring(0, 14)}...`
-      : presentRoom.creator;
+    creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
   let peopleText = 'people';
-  if (present.length === 1) {
+  if (presentCount === 1) {
     peopleText = 'person';
   }
-  // console.log(toJS(roomsApp.liveRoom));
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -112,13 +111,13 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
                 •
               </Text>
               <Text fontSize={2} fontWeight={400} opacity={0.5}>
-                {`${presentRoom.present.length} ${peopleText}`}
+                {`${presentCount} ${peopleText}`}
               </Text>
             </Flex>
           </Flex>
         </Flex>
         <Flex gap={12} ml={1} pl={2} pr={2}>
-          <IconButton
+          {/* <IconButton
             className="realm-cursor-hover"
             size={26}
             customBg={dockColor}
@@ -132,8 +131,8 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             }}
           >
             <Icons name="UserAdd" />
-          </IconButton>
-          <IconButton
+          </IconButton> */}
+          {/* <IconButton
             className="realm-cursor-hover"
             size={26}
             style={{ cursor: 'none' }}
@@ -145,7 +144,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             }}
           >
             <Icons name="InfoCircle" />
-          </IconButton>
+          </IconButton> */}
         </Flex>
       </Titlebar>
       <Flex
@@ -154,9 +153,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         flex={1}
         flexDirection="column"
       >
-        {roomView === 'voice' && (
-          <VoiceView host={creator} present={present} audio={null} />
-        )}
+        {roomView === 'voice' && <VoiceView host={creator} />}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
         {roomView === 'info' && <RoomInfo />}
@@ -189,7 +186,11 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
               icon={muted ? 'MicOff' : 'MicOn'}
-              customBg={dockColor}
+              customBg={
+                mode === 'light'
+                  ? darken(0.04, dockColor)
+                  : darken(0.01, dockColor)
+              }
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (muted) {

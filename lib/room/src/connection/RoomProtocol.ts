@@ -192,6 +192,23 @@ export class RoomProtocol extends BaseProtocol {
           this.emit(ProtocolEvent.RoomCreated, room);
         }
       }
+      if (data['kicked']) {
+        console.log('kicked from room', data['kicked']);
+        const payload = data['kicked'];
+        const room = this.rooms.get(payload.rid);
+        if (room) {
+          if (this.presentRoom?.rid === payload.rid) {
+            // if we are in the room, hangup the peer
+            if (payload.ship !== this.our) {
+              this.hangup(payload.ship);
+            } else {
+              this.emit(ProtocolEvent.RoomKicked, payload.rid);
+            }
+          }
+          room.present.splice(room.present.indexOf(payload.ship), 1);
+          this.rooms.set(payload.rid, room);
+        }
+      }
     }
   }
 
@@ -208,6 +225,19 @@ export class RoomProtocol extends BaseProtocol {
   async setProvider(provider: Patp): Promise<RoomType[]> {
     this.provider = provider;
     return Array.from(this.rooms.values());
+  }
+
+  kick(peer: Patp) {
+    this.api?.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        kick: {
+          rid: this.presentRoom?.rid,
+          ship: peer,
+        },
+      },
+    });
   }
 
   createRoom(title: string, access: 'public' | 'private') {
@@ -290,6 +320,20 @@ export class RoomProtocol extends BaseProtocol {
   sendData(data: DataPacket) {
     this.peers.forEach((peer) => {
       peer.sendData(data);
+    });
+  }
+
+  /**
+   * sendChat - Send data to all peers
+   * @param data: DataPacket
+   */
+  sendChat(content: string) {
+    this.api?.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'send-chat': content,
+      },
     });
   }
 

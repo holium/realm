@@ -19,4 +19,5 @@ export enum PeerEvent {
   ReceivedData = 'receivedData',
   Muted = 'muted',
   Unmuted = 'unmuted',
+  DeviceSourceChanged = 'deviceSourceChanged',
 }

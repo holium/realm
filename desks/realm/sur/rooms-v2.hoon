@@ -64,7 +64,7 @@
       [%room-deleted =rid]
       [%provider-changed provider=ship =rooms]
       [%invited provider=ship =rid =title =ship]
-      [%kicked provider=ship =rid =title =ship] 
+      [%kicked =rid =ship] 
       [%chat-received from=ship content=cord] 
   ==
 ::

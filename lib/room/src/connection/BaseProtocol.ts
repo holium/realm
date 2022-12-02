@@ -44,6 +44,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
       getRooms: action.bound,
       connect: action.bound,
       dial: action.bound,
+      kick: action.bound,
       leave: action.bound,
     });
   }
@@ -58,6 +59,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
     ...args: AgentConnectParams | LocalCommsParams
   ): Promise<Map<Patp, RemotePeer>>;
   abstract dial(peer: Patp, isHost: boolean): Promise<RemotePeer>;
+  abstract kick(peer: Patp): void;
   abstract leave(): Promise<void>;
   abstract sendSignal(peer: Patp, msg: any): void;
   abstract sendData(data: DataPacket): void;
@@ -73,6 +75,7 @@ export type ProtocolEventCallbacks = {
   creatingRoom: (room: RoomType) => void;
   roomCreated: (room: RoomType) => void;
   roomDeleted: (rid: string) => void;
+  roomKicked: (rid: string) => void;
   roomUpdated: (room: RoomType) => void;
   roomInitial: (room: RoomType) => void;
   roomEntered: (room: RoomType) => void;

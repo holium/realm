@@ -86,6 +86,7 @@ export type PeerEventCallbacks = {
   closed: () => void;
   dialing: () => void;
   redialing: () => void;
+  deviceSourceChanged: (deviceId: string) => void;
   mediaStreamAdded: (stream: MediaStream) => void;
   mediaStreamRemoved: (stream: MediaStream) => void;
   audioTrackAdded: (stream: MediaStream, track: MediaStreamTrack) => void;

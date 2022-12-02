@@ -218,7 +218,7 @@
         %enter-room         (enter-room +.act)
         %leave-room         (leave-room +.act)
         %invite             `state
-        %kick               `state
+        %kick               (handle-kick +.act)
         %send-chat          (handle-send-chat +.act)
       ==
       ::
@@ -386,6 +386,23 @@
         ::  Receiving a signal from another ship
         :_  state
         [%give %fact [/lib ~] rooms-v2-reaction+!>([%chat-received src.bol content])]~
+      ::
+      ++  handle-kick
+        |=  [rid=cord =ship]
+        ^-  (quip card _state)
+        =/  room                  (~(got by rooms.session.state) rid)
+        ?.  (is-host:hol provider.room)
+          :_  state
+          [%pass / %agent [ship dap.bol] %poke rooms-v2-session-action+!>([%kick rid ship])]~
+        ::
+        ?.  =(creator.room src.bol)  `state
+        =.  present.room          (~(del in present.room) ship)
+        =.  rooms.provider.state  (~(put by rooms.provider.state) [rid room])
+        :_  state
+        :~
+          [%give %fact [/provider-updates ~] rooms-v2-reaction+!>([%kicked rid ship])]
+        ==
+      ::
       --
   ::
   ++  reaction
@@ -406,7 +423,7 @@
       %room-left          (on-left +.rct)
       :: %present          (on-suite-add +.rct)
       :: %invited          (on-joined +.rct)
-      :: %kicked           (on-stall-update +.rct)
+      %kicked             (on-kicked +.rct)
 
     ==
     ::
@@ -437,11 +454,25 @@
           ~  current.session.state
       ~&  >>  "on-left: rid={<rid>} ship={<ship>}"
       =/  room                  (~(got by rooms.session.state) rid)
-      ~&  >  room
       =.  present.room          (~(del in present.room) ship)
       =.  rooms.session.state   (~(put by rooms.session.state) [rid room])
       :_  state
       [%give %fact [/lib ~] rooms-v2-reaction+!>([%room-left rid ship])]~
+    ::
+    ++  on-kicked
+      |=  [=rid:store =ship]
+      ~&  >>  "on-kicked: rid={<rid>} ship={<ship>}"
+      =.  current.session.state  ::  if the left ship is us, update our current
+        ?:  ?&
+              =(our.bol ship)  
+              =((some rid) current.session.state)
+            ==
+          ~  current.session.state
+      =/  room                  (~(got by rooms.session.state) rid)
+      =.  present.room          (~(del in present.room) ship)
+      =.  rooms.session.state   (~(put by rooms.session.state) [rid room])
+      :_  state
+      [%give %fact [/lib ~] rooms-v2-reaction+!>([%kicked rid ship])]~
     ::
     ++  on-created
       |=  [=room:store]
@@ -458,7 +489,6 @@
       =.  rooms.session.state    (~(put by rooms.session.state) [rid.room room])
       :_  state
       [%give %fact [/lib ~] rooms-v2-reaction+!>([%room-updated room])]~
-    
     ::
     ++  on-deleted
       |=  [=rid:store]

@@ -3,10 +3,11 @@ import { observer } from 'mobx-react';
 import {
   Grid,
   Flex,
-  Icons,
   Text,
   TextButton,
+  Icons,
   Tooltip,
+  IconButton,
 } from 'renderer/components';
 import { ThemeModelType } from 'os/services/theme.model';
 import { RoomRow } from './components/RoomRow';
@@ -31,10 +32,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
 
-  const inviteColor = '#F08735';
-  // const amHosting =
-  //   knownRooms.findIndex((a: any) => a.host === ship?.patp) !== -1;
-
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -51,7 +48,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         }}
       >
         <Flex pl={3} pr={4} mr={3} justifyContent="center" alignItems="center">
-          <Icons opacity={0.8} name="Connect" size={26} mr={2} />
+          <Icons opacity={0.8} name="Connect" size={24} mr={3} />
           <Text
             opacity={0.8}
             style={{ textTransform: 'uppercase' }}
@@ -63,7 +60,6 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         </Flex>
         <Flex ml={1} pl={2} pr={2}>
           <TextButton
-            // disabled={amHosting}
             onClick={(evt: any) => {
               evt.stopPropagation();
               roomsApp.setView('new-room');
@@ -138,7 +134,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
           />
         </Flex>
       ))} */}
-      <Flex mt={3} pb={4} justifyContent="flex-start">
+      <Flex mt={3} pb={4} justifyContent="space-between">
         {/* {roomsApp.provider !== ship!.patp && (
           <IconButton
             // Temporary way to get back to your provider
@@ -176,6 +172,16 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
             }}
           />
         </Tooltip>
+        <IconButton
+          onClick={(evt: any) => {
+            evt.stopPropagation();
+            roomsApp.setView('settings');
+          }}
+          color={theme.currentTheme.iconColor}
+          customBg={theme.currentTheme.windowColor}
+        >
+          <Icons name="AudioControls" size={2} />
+        </IconButton>
       </Flex>
     </Grid.Column>
   );

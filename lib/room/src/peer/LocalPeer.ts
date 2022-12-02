@@ -21,6 +21,10 @@ export const DEFAULT_AUDIO_OPTIONS = {
 export class LocalPeer extends Peer {
   stream?: MediaStream;
   protocol: BaseProtocol;
+  constraints: MediaStreamConstraints = {
+    audio: DEFAULT_AUDIO_OPTIONS,
+    video: false,
+  };
 
   constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
     super(our, config);
@@ -29,6 +33,27 @@ export class LocalPeer extends Peer {
       stream: observable,
       setMedia: action.bound,
     });
+  }
+
+  setAudioInputDevice(deviceId: string) {
+    localStorage.setItem('rooms-audio-input', deviceId);
+    if (this.stream?.active) {
+      this.disableMedia();
+      this.enableMedia({
+        audio: {
+          ...(this.constraints.audio as MediaTrackConstraints),
+          deviceId: {
+            exact: deviceId,
+          },
+        },
+        video: this.constraints.video,
+      });
+    }
+  }
+
+  // TODO
+  setAudioOutputDevice(deviceId: string) {
+    localStorage.setItem('rooms-audio-output', deviceId);
   }
 
   streamTracks(peer: RemotePeer) {
@@ -41,7 +66,9 @@ export class LocalPeer extends Peer {
       if (this.isMuted && track.kind === TrackKind.Audio) {
         track.enabled = false;
       }
-      peer.peer?.addTrack(track, currentStream);
+      if (!peer.peer?.destroyed) {
+        peer.peer?.addTrack(track, currentStream);
+      }
     });
   }
 
@@ -73,6 +100,13 @@ export class LocalPeer extends Peer {
     if (this.stream) {
       console.log('already have stream');
       return;
+    }
+    const storedDeviceId = localStorage.getItem('rooms-audio-input');
+    if (storedDeviceId) {
+      options.audio = {
+        ...DEFAULT_AUDIO_OPTIONS,
+        deviceId: { exact: storedDeviceId },
+      };
     }
     navigator.mediaDevices
       .getUserMedia(options)

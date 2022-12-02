@@ -29,6 +29,8 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
     this.rid = rid;
     this.protocol = protocol;
     this.state = RoomState.Starting;
+    this.onChat = this.onChat.bind(this);
+    this.onRoomUpdate = this.onRoomUpdate.bind(this);
     // this.protocol.setProvider(rid.split('/')[0]);
     this.protocol.getRoom(this.rid).then(
       action((room: RoomType) => {
@@ -38,25 +40,11 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
       })
     );
 
-    this.protocol.on(
-      ProtocolEvent.RoomUpdated,
-      action((room: RoomType) => {
-        this.room = room;
-      })
-    );
+    this.protocol.removeListener(ProtocolEvent.RoomUpdated, this.onRoomUpdate);
+    this.protocol.on(ProtocolEvent.RoomUpdated, this.onRoomUpdate);
 
-    this.protocol.on(
-      ProtocolEvent.ChatReceived,
-      action((peer: Patp, content: string) => {
-        this.chat.push({
-          author: peer,
-          index: this.chat.length,
-          content,
-          timeReceived: Date.now(),
-          isRightAligned: false,
-        });
-      })
-    );
+    this.protocol.removeListener(ProtocolEvent.ChatReceived, this.onChat);
+    this.protocol.on(ProtocolEvent.ChatReceived, this.onChat);
 
     makeObservable(this, {
       state: observable,
@@ -64,6 +52,22 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
       room: observable,
       connect: action.bound,
       sendChat: action.bound,
+      onChat: action.bound,
+      onRoomUpdate: action.bound,
+    });
+  }
+
+  onRoomUpdate(room: RoomType) {
+    this.room = room;
+  }
+
+  onChat(peer: Patp, content: string) {
+    this.chat.push({
+      author: peer,
+      index: this.chat.length,
+      content,
+      timeReceived: Date.now(),
+      isRightAligned: false,
     });
   }
 

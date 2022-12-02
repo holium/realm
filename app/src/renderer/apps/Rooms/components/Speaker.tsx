@@ -18,7 +18,6 @@ import { useRooms } from '../useRooms';
 
 interface ISpeaker {
   person: string;
-  audio: any;
   cursors?: boolean;
   type: 'host' | 'speaker' | 'listener';
 }
@@ -30,7 +29,7 @@ const speakerType = {
 };
 
 export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
-  const { person, audio, type } = props;
+  const { person, type } = props;
   const { ship, theme, contacts } = useServices();
   const { roomsApp } = useTrayApps();
   const speakerRef = useRef<any>(null);
@@ -72,10 +71,11 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       loading: false,
       onClick: (evt: any) => {
         // if (!roomsApp.liveRoom) return;
+        evt.stopPropagation();
+        roomsManager.protocol.kick(person);
         console.log('kicking user?');
         // RoomsActions.kickUser(roomsApp.liveRoom.id, person);
         // LiveRoom.kickParticipant(person);
-        evt.stopPropagation();
       },
     });
   }

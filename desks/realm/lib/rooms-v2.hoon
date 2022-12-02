@@ -79,10 +79,8 @@
         %kicked
       %-  pairs
       :~
-        ['provider' %s (scot %p provider.rct)]
         ['rid' %s rid.rct]
-        ['title' %s title.rct]
-        ['kickedBy' %s (scot %p ship.rct)]
+        ['ship' %s (scot %p ship.rct)]
       ==
       ::
         %chat-received 

@@ -6,12 +6,14 @@ import { useTrayApps } from 'renderer/apps/store';
 import { Rooms, RoomListProps } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
+import { Settings } from './Settings';
 import { useRooms } from './useRooms';
 
 export const RoomViews: { [key: string]: any } = {
   list: (props: RoomListProps) => <Rooms {...props} />,
   'new-room': (props: any) => <NewRoom {...props} />,
   room: (props: any) => <Room {...props} />,
+  settings: (props: any) => <Settings {...props} />,
 };
 
 export interface RoomAppProps {

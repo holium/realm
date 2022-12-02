@@ -4,7 +4,7 @@ import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
-import { rgba, darken } from 'polished';
+import { darken } from 'polished';
 import { useTrayApps } from 'renderer/apps/store';
 // import { id } from 'ethers/lib/utils';
 import { RoomType } from '@holium/realm-room';
@@ -36,10 +36,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
 
   // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
-  const isLiveColor = useMemo(
-    () => rgba(darken(0.01, accentColor), 0.15),
-    [accentColor]
-  );
+  const isLiveColor = useMemo(() => darken(0.02, bgColor), [bgColor]);
 
   let peopleText = 'people';
   if (present!.length === 1) {
