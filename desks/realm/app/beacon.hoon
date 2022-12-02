@@ -73,8 +73,18 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
       ::
-      [%x %latest ~]     ::  ~/scry/bazaar/catalog
-        ``beacon-view+!>([%latest ~])
+      [%x %latest ~]     ::  ~/scry/beacon/latest
+        :: determine active provider by checking active subscriptions.
+        ::  first match (should only be one) will be used.
+        :: =/  prov=@tas  get-active-provider:helpers:core
+        =/  prov=@tas     %hark
+        ::
+        ?+  prov          (on-peek:def path)
+          :: scry new hark, transform notifications into beacon friendly format
+          :: %hark-store     (transform-hark-store:helpers:core (hark-store:scry:core /scry-path))
+          %hark           latest:hark:scry:beacon:core
+          :: %beacon         (beacon:scry:core /scry-path)
+        ==
     ==
   ::
   ++  on-agent
@@ -155,7 +165,7 @@
               =(wire /beacon)
           ==  acc
         (snoc acc [%pass wire %agent [ship term] %leave ~])
-      ::
+      ::  subscribe to new provider
       :_  state
       %+  weld  adios
       ?+  prov   `(list card)`~
@@ -193,6 +203,13 @@
   ++  scry
     |%
     ::
+    ++  hark
+      |%
+      ::
+      ++  latest
+        ^-  (unit (unit cage))
+        ``beacon-view+!>([%latest ~])
+      --
     --
   ++  helpers
     |%
