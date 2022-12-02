@@ -14,9 +14,8 @@ export class EthereumProtocol implements BaseProtocol {
   private alchemy: Alchemy;
   private network: string;
 
-  constructor(our: string, accounts: any, network: any) {
+  constructor(our: string, network: any) {
     this.our = our;
-    this.accounts = accounts;
     this.network = network;
     let alchemySettings;
     if (network === 'mainnet') {

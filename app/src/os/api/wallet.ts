@@ -1,5 +1,6 @@
 import { Conduit } from '@holium/conduit';
-import { SettingsType } from 'os/services/tray/wallet.model';
+import { SettingsType, WalletStoreType } from 'os/services/tray/wallet.model';
+import { Patp } from 'os/types';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -149,7 +150,18 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-
+  setPasscodeHash: async (conduit: Conduit, passcodeHash: string) => {
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'set-passcode-hash': {
+          hash: passcodeHash,
+        },
+      },
+    };
+    await conduit.poke(payload);
+  },
   getWallets: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'realm-wallet',
@@ -190,4 +202,54 @@ export const WalletApi = {
       path: '/settings',
     });
   },
+    /**
+   * watchUpdates
+   *
+   * @param conduit
+   * @param walletState
+   */
+     watchUpdates: (
+      conduit: Conduit,
+      walletState: WalletStoreType,
+    ): void => {
+      conduit.watch({
+        app: 'spaces',
+        path: `/updates`,
+        onEvent: async (data: any, _id?: number, mark?: string) => {
+          // console.log(mark, data);
+          if (mark === 'wallet-update') {
+            handleWalletReactions(
+              data,
+              `~${conduit.ship}`,
+              walletState,
+            );
+          }
+        },
+  
+        onError: () => console.log('Subscription rejected'),
+        onQuit: () => console.log('Kicked from subscription %spaces'),
+      });
+    },
+};
+
+const handleWalletReactions = (
+  data: any,
+  our: Patp,
+  walletState: WalletStoreType,
+) => {
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
+    case 'initial':
+      break;
+    case 'add':
+      break;
+    case 'replace':
+      break;
+    case 'remove':
+      break;
+    case 'remote-space':
+      break;
+    default:
+      break;
+  }
 };

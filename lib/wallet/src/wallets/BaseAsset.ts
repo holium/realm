@@ -26,27 +26,6 @@ export abstract class BaseAsset extends (EventEmitter as new () => TypedEmitter<
   abstract unsubscribe(): void;
 
   /**
-   * Get all accounts via this protocol
-   * @returns {Promise<Account[]>}
-   */
-  abstract getAccounts(): Promise<Account[]> | Account[];
-
-  abstract getAccountBalance(addr: string): number;
-
-  abstract getAccountTransactions(addr: string): Promise<any[]>;
-
-  abstract getAccountAssets(addr: string): Promise<Asset[]> | Asset[];
-  /**
-   * Sends a signed transaction to the network
-   * @param signedTx
-   */
-  abstract sendTransaction(signedTx: string): Promise<any>;
-
-  /**
-   * Assets are tokens, coins, or multitoken contracts
-   */
-
-  /**
    * Gets asset data for a given address
    *
    * Equivalent to calling all of the following:
