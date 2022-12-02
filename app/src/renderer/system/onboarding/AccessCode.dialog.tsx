@@ -15,6 +15,14 @@ import _ from 'lodash';
 import { AccessCode } from 'os/api/holium';
 import { useServices } from 'renderer/logic/store';
 
+const stubAccessCode = {
+  title: 'Combine DAO',
+  description: 'Investing in Urbit companies together since 2022.',
+  image: 'https://pbs.twimg.com/profile_images/1488203488655917060/9pP-2qTZ_400x400.jpg',
+  id: 'combine-dao',
+  type: 'DAO',
+};
+
 const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
   const accessCode = props.accessCode;
 
@@ -67,14 +75,24 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
       return;
     }
 
-    setCodeLoading(true);
-    const result = await OnboardingActions.getAccessCode(code);
-    setCodeLoading(false);
+    // setCodeLoading(true);
+    // const result = await OnboardingActions.getAccessCode(code);
+    // setCodeLoading(false);
 
-    setAccessCode(result.accessCode);
-    result.invalid
-      ? setErrorMessage('Invalid access code.')
-      : setErrorMessage('');
+    // setAccessCode(result.accessCode);
+    // result.invalid
+    //   ? setErrorMessage('Invalid access code.')
+    //   : setErrorMessage('');
+
+    // TODO: Remove when fixed
+    setCodeLoading(true);
+    if (code === stubAccessCode.id) {
+      setAccessCode(stubAccessCode);
+      setErrorMessage('');
+    } else {
+      setErrorMessage('Invalid access code.');
+    }
+    setCodeLoading(false);
   }
   const debouncedGetAccessCode = useCallback(
     _.debounce(getAccessCode, 500, { leading: true }),
