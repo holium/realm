@@ -41,6 +41,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.completeCheckout': this.completeCheckout,
     'realm.onboarding.getAccessCode': this.getAccessCode,
     'realm.onboarding.setAccessCode': this.setAccessCode,
+    'realm.onboarding.getShipCode': this.getShipCode,
     'realm.onboarding.checkShipBooted': this.checkShipBooted,
     'realm.onboarding.addShip': this.addShip,
     'realm.onboarding.selectPlanet': this.selectPlanet,
@@ -125,6 +126,10 @@ export class OnboardingService extends BaseService {
         'realm.onboarding.setAccessCode',
         accessCode
       );
+    },
+
+    async getShipCode() {
+      return await ipcRenderer.invoke('realm.onboarding.getShipCode');
     },
 
     async checkShipBooted() {
@@ -289,15 +294,16 @@ export class OnboardingService extends BaseService {
     const { auth } = this.core.services.identity;
     // let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
-    // this.state.setVerificationCode(account.verificationCode);
-
-    // auth.setAccountId(account.id);
 
     if (
       (process.env.NODE_ENV === 'development' && email === 'admin@admin.com') ||
       (process.env.DEBUG_PROD === 'true' && email === 'admin@admin.com')
     ) {
+      auth.setAccountId('dev-admin');
       this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
+    } else {
+      let account = await this.core.holiumClient.createAccount(email);
+      auth.setAccountId(account.id);
     }
   }
 
@@ -369,6 +375,14 @@ export class OnboardingService extends BaseService {
     this.state.setAccessCode(accessCode);
   }
 
+  async getShipCode(_event: any): Promise<string> {
+    if (this.state.currentStep !== OnboardingStep.VIEW_CODE) {
+      throw new Error('Cannot access code outside of view step.');
+    }
+    const session = this.core.getSession();
+    return session.code;
+  }
+
   async completeCheckout() {
     const { auth } = this.core.services.identity;
     const { checkoutComplete } = await this.core.holiumClient.completeCheckout(
@@ -387,16 +401,18 @@ export class OnboardingService extends BaseService {
   async checkShipBooted(): Promise<boolean> {
     const { auth } = this.core.services.identity;
     let ships = await this.core.holiumClient.getShips(auth.accountId!);
-    let ship = ships.find((ship) => ship.patp === this.state.planet!.patp);
-    if (!ship) return false;
+    let ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
+    if (!ship.code) return false;
 
-    const session = this.core.getSession();
+    // TODO: remove, session shouldn't be set yet here?
+    // const session = this.core.getSession();
 
     await this.addShip('_event', {
       patp: ship.patp,
       url: ship.link!,
-      code: session.code,
+      code: ship.code,
     });
+
     return true;
   }
 
