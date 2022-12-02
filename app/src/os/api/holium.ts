@@ -1,8 +1,11 @@
 import axios from 'axios';
 
-const baseURL = process.env.USE_LOCAL_API
-  ? 'http://localhost:8080'
-  : `https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+let baseURL = `https://lionfish-app-s8nvw.ondigitalocean.app`; // staging URL
+if (process.env.USE_LOCAL_API && process.env.NODE_ENV !== 'production') {
+  baseURL = 'http://localhost:8080';
+} else if (process.env.NODE_ENV === 'production') {
+  baseURL = 'https://realm-api-prod-jjzzq.ondigitalocean.app';
+}
 
 const client = axios.create({ baseURL });
 
