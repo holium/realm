@@ -16,7 +16,7 @@
   =+  ecc=secp256k1
   =/  code  (~(got by bip44-codes) network)
   =/  xpub-bip32  (from-extended:bip32 (trip xpub))
-  =/  path  "{<idx>}"
+  =/  path  "0/{<idx>}"
   =/  derived-pub  (derive-path:xpub-bip32 path)
   :-  ?-  network
         %bitcoin

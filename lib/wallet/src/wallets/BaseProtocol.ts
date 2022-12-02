@@ -10,7 +10,6 @@ import { Account, Asset, ContractAddr } from './types';
  */
 export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
   our: Patp;
-  accounts: any[] = [];
 
   constructor(our: Patp) {
     super();
@@ -25,13 +24,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
 
   abstract unsubscribe(): void;
 
-  /**
-   * Get all accounts via this protocol
-   * @returns {Promise<Account[]>}
-   */
-  abstract getAccounts(): Promise<Account[]> | Account[];
-
-  abstract getAccountBalance(addr: string): number;
+  abstract getAccountBalance(addr: string): number | Promise<number>;
 
   abstract getAccountTransactions(addr: string): Promise<any[]>;
 
@@ -59,7 +52,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
    */
   abstract getAsset(contract: ContractAddr, addr: string): Asset;
 
-  abstract getAssetBalance(contract: ContractAddr, addr: string): number;
+  abstract getAssetBalance(contract: ContractAddr, addr: string): number | Promise<number>;
 
   abstract getAssetMetadata(
     contract: ContractAddr,
@@ -90,7 +83,7 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
     contract: ContractAddr,
     toAddr: string,
     amountOrTokenId: number | string
-  ): void;
+  ): void | Promise<void>;
 
   /**
    * Fee / gas functions

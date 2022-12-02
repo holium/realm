@@ -567,9 +567,9 @@ export class WalletService extends BaseService {
   }
 
   async setXpub(_event: any) {
-    const ethPath = "m/44'/60'/0'/0";
-    const btcPath = "m/44'/0'/0'/0";
-    const btcTestnetPath = "m/44'/1'/0'/0";
+    const ethPath = "m/44'/60'/0'";
+    const btcPath = "m/44'/0'/0'";
+    const btcTestnetPath = "m/44'/1'/0'";
     const privateKey = this.getPrivateKey();
     // eth
     let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
@@ -811,7 +811,6 @@ export class WalletService extends BaseService {
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     const signer = wallet.connect(this.ethProvider!);
-    console.log(amount);
     const contract = new ethers.Contract(contractAddress, abi, signer);
     const ethAmount = ethers.utils.parseEther(amount);
     const erc20Amount = ethers.utils.parseUnits(
