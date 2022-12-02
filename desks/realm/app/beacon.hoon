@@ -134,8 +134,35 @@
     ^-  (quip card _state)
     |^
     ?-  -.action
-      %seen    (on-seen +.action)
+      %connect-provider           (on-connect-provider +.action)
+      %seen                       (on-seen +.action)
     ==
+    ::  'connect' to the underlying agent by subscribing to its updates
+    ::   also 'activate' the provider so that scries use this provider when
+    ::   retrieving data
+    ++  on-connect-provider
+      |=  [prov=@tas]
+      ^-  (quip card _state)
+      ?.  (~(has in supported-providers:store) prov)
+        ~&  >>>  "{<dap.bowl>}: {<prov>} not supported"
+        `state
+      :: is there an active provider? if yes, disconnect/leave
+      =/  adios=(list card)
+      %-  ~(rep by wex.bowl)
+      |=  [[[=wire =ship =term] [acked=? =path]] acc=(list card)]
+      ?.  ?|  =(wire /hark-store)
+              =(wire /hark)
+              =(wire /beacon)
+          ==  acc
+        (snoc acc [%pass wire %agent [ship term] %leave ~])
+      ::
+      :_  state
+      %+  weld  adios
+      ?+  prov   `(list card)`~
+        %hark-store    [%pass /hark-store %agent [our.bowl %hark-store] %watch /updates]~
+        %hark          [%pass /hark %agent [our.bowl %hark] %watch /ui]~
+        %beacon        [%pass /beacon %agent [our.bowl %beacon] %watch /updates]~
+      ==
     ::
     ++  on-seen
       |=  [id=@ud]
