@@ -22,7 +22,7 @@ export interface RoomType {
   present: string[];
   whitelist: string[];
   capacity: number;
-  space: string;
+  path: string | null;
 }
 
 export type RoomMap = Map<string, RoomType>;

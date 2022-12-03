@@ -253,7 +253,7 @@ export class RealmProtocol extends BaseProtocol {
   createRoom(
     title: string,
     access: 'public' | 'private',
-    spacePath: string = ''
+    spacePath: string | null = null
   ) {
     const newRoom: RoomType = {
       rid: ridFromTitle(this.provider, title),
@@ -264,16 +264,8 @@ export class RealmProtocol extends BaseProtocol {
       present: [this.our],
       whitelist: [],
       capacity: 6,
-      space: spacePath,
+      path: spacePath,
     };
-    let space = null;
-    if (spacePath) {
-      const [ship, name] = spacePath.split('/');
-      space = {
-        ship,
-        name,
-      };
-    }
     this.rooms.set(newRoom.rid, newRoom);
     this.poke({
       app: 'rooms-v2',
@@ -283,7 +275,7 @@ export class RealmProtocol extends BaseProtocol {
           rid: newRoom.rid,
           title,
           access,
-          space,
+          path: spacePath,
         },
       },
     });
@@ -319,6 +311,10 @@ export class RealmProtocol extends BaseProtocol {
 
   async getRooms(): Promise<RoomType[]> {
     return Array.from(this.rooms.values());
+  }
+
+  getSpaceRooms(path: string): RoomType[] {
+    return Array.from(this.rooms.values()).filter((room) => room.path === path);
   }
 
   async getRoom(rid: string): Promise<RoomType> {

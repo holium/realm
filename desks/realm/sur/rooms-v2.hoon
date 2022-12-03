@@ -11,6 +11,7 @@
 +$  present     (set ship)
 +$  whitelist   (set ship)
 +$  space-path  path:spaces
+
 +$  room
   $:  =rid
       provider=ship
@@ -20,7 +21,7 @@
       =present
       =whitelist
       capacity=@ud
-      space=path:spaces
+      path=(unit cord)
   ==
 ::
 +$  rooms  (map rid room)
@@ -45,8 +46,7 @@
 +$  session-action
   $%  [%set-provider =ship]       
       [%reset-provider ~]
-      [%create-room =rid =access =title path=(unit path:spaces)]
-      :: [%create-room =rid =access =title =path:spaces]
+      [%create-room =rid =access =title path=(unit cord)]
       [%edit-room =rid =title =access]
       [%delete-room =rid]
       [%enter-room =rid]

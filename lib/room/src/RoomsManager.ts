@@ -163,7 +163,11 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
     this.presentRoom = undefined;
   }
 
-  createRoom(title: string, access: 'public' | 'private', spacePath?: string) {
+  createRoom(
+    title: string,
+    access: 'public' | 'private',
+    spacePath: string | null
+  ) {
     // creates a room in the current provider
     this.protocol.createRoom(title, access, spacePath);
   }

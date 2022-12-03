@@ -144,7 +144,7 @@
       ['present' (set-ship present.room)]
       ['whitelist' (set-ship whitelist.room)]
       ['capacity' (numb capacity.room)]
-      ['space' s+(spat /(scot %p ship.space.room)/(scot %tas space.space.room))]
+      ['path' ?~(path.room ~ s+u.path.room)]
     ==
   ++  set-ship
     |=  ships=(set @p)
@@ -216,7 +216,7 @@
       :~  [%rid so]
           [%access access]
           [%title so]
-          [%path spc-pth]
+          [%path (mu so)]
       ==
     ::
     ++  edit
@@ -247,12 +247,13 @@
       !!
     ::
     ++  spc-pth
-      =,  dejs-soft:format
-      |=  jon=json
-      ^-  (unit space-path)
-      ?.  ?=([%o *] jon)  ~
-      (need (ot ship+(su ;~(pfix sig fed:ag)) space+so ~):dejs-soft:format)
-      --
+      %-  ot
+      :~  [%ship patp]
+          [%space so]
+      ==
+     
+    ::
+    --
   ::
   ++  provider-action
     |=  jon=json

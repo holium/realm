@@ -16,7 +16,7 @@ import { useServices } from 'renderer/logic/store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { useRooms } from './useRooms';
 import { useTrayApps } from '../store';
-import { RoomType } from '@holium/realm-room';
+import { RealmProtocol, RoomType } from '@holium/realm-room';
 export interface RoomListProps {
   theme: ThemeModelType;
   dimensions: {
@@ -26,11 +26,19 @@ export interface RoomListProps {
 }
 export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
   const { dimensions } = props;
-  const { ship, theme } = useServices();
+  const { spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const [muted, setMuted] = useState(false);
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms();
+
+  const ourSpace = spaces.selected?.type === 'our';
+
+  const rooms = ourSpace
+    ? roomsManager.rooms
+    : (roomsManager.protocol as RealmProtocol).getSpaceRooms(
+        spaces.selected!.path
+      );
 
   return (
     <Grid.Column
@@ -76,7 +84,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         flexDirection="column"
         overflowY={'scroll'}
       >
-        {roomsManager?.rooms.length === 0 && (
+        {rooms.length === 0 && (
           <Flex
             flex={1}
             flexDirection="column"
@@ -92,7 +100,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
             </Text>
           </Flex>
         )}
-        {roomsManager.rooms.map((room: RoomType, index: number) => {
+        {rooms.map((room: RoomType, index: number) => {
           return (
             <RoomRow
               key={`${room.title}-${index}`}

@@ -337,6 +337,9 @@ export class SpacesService extends BaseService {
     //   null,
     //   getHost(this.state.selected!.path)
     // );
+    this.core.services.ship.rooms.setProvider(
+      getHost(this.state.selected!.path)
+    );
     // BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
   }
@@ -427,8 +430,9 @@ export class SpacesService extends BaseService {
     this.setTheme(selected?.theme!);
     // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
-    const spaceHost = getHost(this.state!.selected!.path);
+    const spaceHost = getHost(selected!.path);
     // if (currentRoomProvider !== spaceHost)
+    console.log(spaceHost);
     this.core.services.ship.rooms.setProvider(spaceHost);
   }
 

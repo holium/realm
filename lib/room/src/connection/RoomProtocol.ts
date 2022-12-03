@@ -250,7 +250,7 @@ export class RoomProtocol extends BaseProtocol {
       present: [this.our],
       whitelist: [],
       capacity: 6,
-      space: '',
+      path: null,
     };
     this.rooms.set(newRoom.rid, newRoom);
     this.api?.poke({
@@ -261,6 +261,7 @@ export class RoomProtocol extends BaseProtocol {
           rid: newRoom.rid,
           title,
           access,
+          path: null,
         },
       },
     });

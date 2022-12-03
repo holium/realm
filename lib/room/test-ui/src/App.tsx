@@ -91,7 +91,9 @@ const App: FC = observer(() => {
           })}
         </div>
         <div className="room-sidebar-footer">
-          <button onClick={() => roomsManager.createRoom('new room', 'public')}>
+          <button
+            onClick={() => roomsManager.createRoom('new room', 'public', null)}
+          >
             Create Room
           </button>
         </div>

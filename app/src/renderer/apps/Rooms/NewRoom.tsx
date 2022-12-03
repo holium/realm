@@ -82,8 +82,8 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
     // setLoading(true);
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
-    let spacePath =
-      spaces.selected?.type !== 'our' ? spaces.selected : undefined;
+    const spacePath =
+      spaces.selected?.type !== 'our' ? spaces.selected!.path : null;
     roomsManager.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };
