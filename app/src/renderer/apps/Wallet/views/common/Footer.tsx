@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { FC } from 'react';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { Box, Flex, Icons } from 'renderer/components';
+import { Box, Flex, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { WalletNetwork } from './Network';
 import { WalletView } from 'os/services/tray/wallet.model';
@@ -21,10 +21,10 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
         <Flex
           position="absolute"
           bottom={0}
-          pr="12px"
+          px="12px"
           pb="12px"
           width="100%"
-          justifyContent="flex-end"
+          justifyContent="space-between"
         >
           <Box mr={1}>
             <WalletNetwork
@@ -39,13 +39,13 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
               }
             />
           </Box>
-          <Box
+          <IconButton
             onClick={async () =>
               await WalletActions.navigate(WalletView.SETTINGS)
             }
           >
-            <Icons name="Settings" color={theme.currentTheme.iconColor} />
-          </Box>
+            <Icons name="Settings" size={2} />
+          </IconButton>
         </Flex>
       </Box>
     );

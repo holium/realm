@@ -17,6 +17,7 @@
   $:  pinned=?
       tags=friend-tags
       status=?(%fren %following %follower)
+      :: metadata=(map cord cord)
   ==  
 ::
 ::

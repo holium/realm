@@ -112,7 +112,7 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
       hasPointerEvents
       position="relative"
       flexDirection="row"
-      justifyContent="center"
+      justifyContent="space-between"
       alignItems="center"
       gap={8}
       onClick={() => !disabled && (open ? setOpen(false) : setOpen(true))}

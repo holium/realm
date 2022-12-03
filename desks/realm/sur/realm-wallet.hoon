@@ -16,6 +16,7 @@
       failure-reason=(unit @t)
       notes=@t
   ==
+::
 +$  help-transaction
   $:  hash=@t
       =network
@@ -29,6 +30,7 @@
       failure-reason=(unit @t)
       notes=@t
   ==
+::
 +$  status  ?(%pending %failed %succeeded)
 +$  eth-type  ?(%erc20 %erc721 %eth)
 +$  wallet  [=address path=@t nickname=@t transactions=(map net=@t (map @t transaction))]

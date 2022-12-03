@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ethers } from 'ethers';
 
-import { Box } from 'renderer/components';
+import { Box, Flex, Icons, IconButton } from 'renderer/components';
 import { Create } from './Create';
 import { Backup } from './Backup';
 import { Import } from './Import';
@@ -13,6 +13,7 @@ import { Finalizing } from './Finalizing';
 import DetectedExisting from './DetectedExisting';
 import { RecoverExisting } from './RecoverExisting';
 import { useTrayApps } from 'renderer/apps/store';
+import { useServices } from 'renderer/logic/store';
 
 export enum NewWalletScreen {
   CREATE = 'create',
@@ -27,6 +28,7 @@ export enum NewWalletScreen {
 }
 
 export const EthNew: FC<any> = observer(() => {
+  const { theme } = useServices();
   const { walletApp } = useTrayApps();
   const initialScreen = walletApp.initialized
     ? NewWalletScreen.DETECTED_EXISTING
@@ -78,6 +80,36 @@ export const EthNew: FC<any> = observer(() => {
   return (
     <Box width="100%" height="100%" px={16} py={12}>
       {currentComponent}
+      {NewWalletScreen.CREATE !== screen && (
+        <Flex
+          position="absolute"
+          top="582px"
+          zIndex={999}
+          onClick={() =>
+            setScreen(
+              walletApp.initialized
+                ? NewWalletScreen.DETECTED_EXISTING
+                : NewWalletScreen.CREATE
+            )
+          }
+        >
+          <IconButton
+            onClick={() =>
+              setScreen(
+                walletApp.initialized
+                  ? NewWalletScreen.DETECTED_EXISTING
+                  : NewWalletScreen.CREATE
+              )
+            }
+          >
+            <Icons
+              name="ArrowLeftLine"
+              size={1}
+              color={theme.currentTheme.iconColor}
+            />
+          </IconButton>
+        </Flex>
+      )}
     </Box>
   );
 });

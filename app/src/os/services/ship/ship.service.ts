@@ -360,7 +360,7 @@ export class ShipService extends BaseService {
       this.state.loader.set('loaded');
 
       this.services.slip?.subscribe();
-      this.rooms?.onLogin(ship);
+      // this.rooms?.onLogin(ship);
       this.wallet?.onLogin(ship);
 
       // return ship state

@@ -20,7 +20,8 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
       mx="6px"
       height={35}
       width={32}
-      border={`solid 1px ${baseTheme.colors.brand.primary}`}
+      border={`solid 2px ${baseTheme.colors.brand.primary}`}
+      borderRadius={4}
       alignItems="center"
       justifyContent="center"
     >
@@ -39,6 +40,7 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
       height={35}
       width={32}
       border={props.border}
+      borderRadius={4}
       background={props.background}
     ></Flex>
   );
