@@ -1,13 +1,12 @@
 import {
   BaseSigner,
-  WalletEventCallbacks,
 } from '@holium/realm-wallet/src/wallets/BaseSigner';
 
 export class LedgerSigner implements BaseSigner {
   signTransaction(transaction: any): any {
 
   }
-  getXpub(path: string) {
+  getXpub(path: string): string {
 
   }
 }
