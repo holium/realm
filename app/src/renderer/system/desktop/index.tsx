@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Bottom, Layer, Fill } from 'react-spaces';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { WindowManager } from './WindowManager';
@@ -9,8 +9,8 @@ import { TrayManager } from './TrayManager';
 import { createManager, RoomsProvider } from 'renderer/apps/Rooms/useRooms';
 import { RoomsManager } from '@holium/realm-room';
 
-export const Desktop: FC = observer(() => {
-  const { ship, desktop } = useServices();
+export const Desktop = observer(() => {
+  const { desktop } = useServices();
 
   const manager = useMemo<RoomsManager>(() => createManager(ship!.patp), []);
 

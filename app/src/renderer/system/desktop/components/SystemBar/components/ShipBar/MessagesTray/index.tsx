@@ -11,20 +11,16 @@ interface MessagesTrayProps {
 }
 
 const iconSize = 28;
-const dimensions = {
-  height: 600,
-  width: 390,
-};
+const position = 'top-left';
+const anchorOffset = { x: 4, y: 26 };
+const dimensions = { height: 600, width: 390 };
 
 export const MessagesTray: FC<MessagesTrayProps> = observer(
   (props: MessagesTrayProps) => {
     const { theme } = props;
-    const { dockColor, textColor } = theme;
+    const { textColor } = theme;
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
       useTrayApps();
-
-    const position = 'top-left';
-    const anchorOffset = { x: 4, y: 26 };
 
     const onButtonClick = useCallback(
       (evt: any) => {
@@ -46,12 +42,12 @@ export const MessagesTray: FC<MessagesTrayProps> = observer(
         setTrayAppDimensions(dimensions);
         setActiveApp('messages-tray');
       },
-      [activeApp, anchorOffset, position, dimensions]
+      [activeApp, setTrayAppCoords, setTrayAppDimensions, setActiveApp]
     );
 
     const iconHoverColor = useMemo(
       () => rgba(darken(0.05, theme.dockColor), 0.5),
-      [theme.windowColor]
+      [theme.dockColor]
     );
 
     return (
@@ -72,10 +68,8 @@ export const MessagesTray: FC<MessagesTrayProps> = observer(
           count={0}
         >
           <IconButton
-            id="messages-tray-icon"
             size={iconSize}
             customBg={iconHoverColor}
-            // data-selected
             color={textColor}
             whileTap={{ scale: 0.9 }}
             transition={{ scale: 0.1 }}

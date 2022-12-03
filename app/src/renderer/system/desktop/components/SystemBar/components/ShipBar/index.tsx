@@ -1,4 +1,4 @@
-import { FC, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 
 import { SystemBarStyle } from '../../SystemBar.styles';
@@ -7,26 +7,18 @@ import { WalletTray } from './WalletTray';
 import { MessagesTray } from './MessagesTray';
 import { AccountTray } from './AccountTray';
 import { useServices } from 'renderer/logic/store';
-import { darken, rgba } from 'polished';
+import { rgba } from 'polished';
 
-interface ShipTrayProps {}
-
-export const ShipTray: FC<ShipTrayProps> = observer(() => {
+export const ShipTray = observer(() => {
   const { theme } = useServices();
 
-  const { dockColor, textColor } = useMemo(
+  const { dockColor } = useMemo(
     () => ({
       ...theme.currentTheme,
       dockColor: rgba(theme.currentTheme.dockColor, 0.55),
     }),
-    [theme.currentTheme.dockColor]
+    [theme.currentTheme]
   );
-
-  const iconHoverColor = useMemo(
-    () => rgba(darken(0.05, theme.currentTheme.dockColor), 0.5),
-    [theme.currentTheme.windowColor]
-  );
-  const [voiceOn, setVoiceOn] = useState(false);
 
   return (
     <SystemBarStyle
