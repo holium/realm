@@ -16,7 +16,7 @@ import {
 } from './wallet.model';
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { RealmSigner } from './wallet/signers/realm';
-import { WalletApi } from 'os/api/wallet';
+import { WalletApi } from '../../api/wallet';
 import bcrypt from 'bcryptjs';
 import {
   onPatch,
