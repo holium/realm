@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 // import { action, makeObservable, observable } from 'mobx';
-import { makeAutoObservable } from 'mobx';
-import { Address, Asset, ContractAddr } from './types';
+import { Account, Asset, ContractAddr } from './types';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.
