@@ -15,11 +15,11 @@ export abstract class BaseAddress extends (EventEmitter as new () => TypedEmitte
 
     makeObservable(this, {
       protocol: observable,
-      getWallets: action.bound,
+      getAssets: action.bound,
     });
   }
 
-  abstract getWallets(): void;
+  abstract getAssets(): void;
 }
 
 export type WalletEventCallbacks = {

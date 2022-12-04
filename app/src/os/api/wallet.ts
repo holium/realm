@@ -1,6 +1,5 @@
 import { Conduit } from '@holium/conduit';
 import { SettingsType, WalletStoreType } from 'os/services/tray/wallet.model';
-import { Patp } from 'os/types';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -207,7 +206,6 @@ export const WalletApi = {
           if (mark === 'wallet-update') {
             handleWalletReactions(
               data,
-              `~${conduit.ship}`,
               walletState,
             );
           }
@@ -221,20 +219,27 @@ export const WalletApi = {
 
 const handleWalletReactions = (
   data: any,
-  our: Patp,
   walletState: WalletStoreType,
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
-    case 'initial':
+    case 'wallet':
+      if (data.network === 'ethereum') {
+        walletState.ethereum.applyWalletUpdate(
+          walletState.ethereum.network,
+          data
+        );
+      } else if (data.network === 'bitcoin') {
+        walletState.bitcoin.applyWalletUpdate(data);
+      } else if (data.network === 'btctestnet') {
+        walletState.testnet.applyWalletUpdate(data);
+      }
       break;
-    case 'add':
+    case 'wallets':
+      walletState.ethereum.initial(data);
       break;
-    case 'replace':
-      break;
-    case 'remove':
-      break;
-    case 'remote-space':
+    case 'settings':
+      walletState.ethereum.setSettings(data);
       break;
     default:
       break;

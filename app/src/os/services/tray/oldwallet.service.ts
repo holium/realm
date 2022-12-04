@@ -695,9 +695,6 @@ export class WalletService extends BaseService {
   }
 
   async setSettings(_events: any, network: string, settings: SettingsType) {
-    if (network === 'ethereum') {
-      this.state!.ethereum.setSettings(settings);
-    }
     await WalletApi.setSettings(this.core.conduit!, network, settings);
   }
 
