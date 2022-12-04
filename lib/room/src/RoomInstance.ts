@@ -5,7 +5,6 @@ import { Patp, RoomType, RoomState } from './types';
 
 import { BaseProtocol } from './connection/BaseProtocol';
 import { DataPacket } from './helpers/data';
-import { ProtocolEvent } from './connection/events';
 import { RemotePeer } from './peer/RemotePeer';
 
 export type ChatModelType = {
@@ -30,7 +29,6 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
     this.protocol = protocol;
     this.state = RoomState.Starting;
     this.onChat = this.onChat.bind(this);
-    this.onRoomUpdate = this.onRoomUpdate.bind(this);
 
     this.protocol.getRoom(this.rid).then(
       action((room: RoomType) => {
@@ -40,12 +38,6 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
       })
     );
 
-    this.protocol.removeListener(ProtocolEvent.RoomUpdated, this.onRoomUpdate);
-    this.protocol.on(ProtocolEvent.RoomUpdated, this.onRoomUpdate);
-
-    this.protocol.removeListener(ProtocolEvent.ChatReceived, this.onChat);
-    this.protocol.on(ProtocolEvent.ChatReceived, this.onChat);
-
     makeObservable(this, {
       state: observable,
       chat: observable,
@@ -53,11 +45,11 @@ export class RoomInstance extends (EventEmitter as new () => TypedEmitter<RoomEv
       connect: action.bound,
       sendChat: action.bound,
       onChat: action.bound,
-      onRoomUpdate: action.bound,
+      setRoom: action.bound,
     });
   }
 
-  onRoomUpdate(room: RoomType) {
+  setRoom(room: RoomType) {
     this.room = room;
   }
 

@@ -101,7 +101,15 @@ export class RoomProtocol extends BaseProtocol {
             this.queuedPeers.push(payload.from);
           }
         }
-        if (signalData.type !== 'ready') {
+        if (signalData.type === 'retry') {
+          const retryingPeer = this.peers.get(payload.from);
+          if (retryingPeer?.isInitiator) {
+            retryingPeer.createConnection();
+          } else {
+            retryingPeer?.dial();
+          }
+        }
+        if (signalData.type !== 'ready' && signalData.type !== 'retry') {
           // we are receiving a WebRTC signaling data
           if (remotePeer) {
             // we already have a peer for this patp, so we can just pass the signal to it
@@ -131,6 +139,9 @@ export class RoomProtocol extends BaseProtocol {
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
+        if (this.presentRoom?.rid) {
+          this.emit(ProtocolEvent.RoomDeleted, this.presentRoom?.rid);
+        }
         this.rooms = new Map(Object.entries(payload.rooms));
       }
       if (data['room-deleted']) {
@@ -214,6 +225,11 @@ export class RoomProtocol extends BaseProtocol {
 
   registerLocal(local: LocalPeer) {
     this.local = local;
+    this.local.on(PeerEvent.AudioTrackAdded, () => {
+      this.peers.forEach((peer: RemotePeer) => {
+        this.local?.streamTracks(peer);
+      });
+    });
   }
 
   /**
@@ -242,7 +258,7 @@ export class RoomProtocol extends BaseProtocol {
 
   createRoom(title: string, access: 'public' | 'private') {
     const newRoom: RoomType = {
-      rid: ridFromTitle(this.provider, title),
+      rid: ridFromTitle(this.provider, this.our, title),
       title,
       access,
       provider: this.provider,
@@ -359,17 +375,17 @@ export class RoomProtocol extends BaseProtocol {
     remotePeer.on(PeerEvent.Connected, () => {
       this.local?.streamTracks(remotePeer);
     });
-    remotePeer.on(PeerEvent.Closed, () => {
-      if (this.presentRoom?.present.includes(peer)) {
-        if (!remotePeer.isInitiator) {
-          // TODO this is a hack to get around the fact that we can't dial
-          // the 3 retries is a default for now
-          retry(() => remotePeer.dial(), 3);
-        } else {
-          remotePeer.createConnection();
-        }
-      }
-    });
+    // remotePeer.on(PeerEvent.Closed, () => {
+    //   if (this.presentRoom?.present.includes(peer)) {
+    //     if (!remotePeer.isInitiator) {
+    //       // TODO this is a hack to get around the fact that we can't dial
+    //       // the 3 retries is a default for now
+    //       retry(() => remotePeer.dial(), 3);
+    //     } else {
+    //       remotePeer.createConnection();
+    //     }
+    //   }
+    // });
     remotePeer.on(PeerEvent.ReceivedData, (data: DataPacket) => {
       this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
     });

@@ -12,7 +12,7 @@ import {
 } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
-import { PeerConnectionState, RemotePeer } from '@holium/realm-room';
+import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
 import { rgba, darken } from 'polished';
 import { useRooms } from '../useRooms';
 
@@ -51,11 +51,12 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       disabled: peer?.status === PeerConnectionState.Connected,
       onClick: (evt: any) => {
         console.log('reconnect', peer);
-        if (peer) {
-          (peer as RemotePeer).dial();
-        } else {
-          roomsManager.protocol.dial(person, false);
-        }
+        // if (peer) {
+        //   (peer as RemotePeer).dial();
+        // } else {
+        //   roomsManager.protocol.retry(person);
+        // }
+        (roomsManager.protocol as RealmProtocol).retry(person);
         evt.stopPropagation();
       },
     },
@@ -70,12 +71,8 @@ export const Speaker: FC<ISpeaker> = observer((props: ISpeaker) => {
       label: 'Kick',
       loading: false,
       onClick: (evt: any) => {
-        // if (!roomsApp.liveRoom) return;
         evt.stopPropagation();
         roomsManager.protocol.kick(person);
-        console.log('kicking user?');
-        // RoomsActions.kickUser(roomsApp.liveRoom.id, person);
-        // LiveRoom.kickParticipant(person);
       },
     });
   }

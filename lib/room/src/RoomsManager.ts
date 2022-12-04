@@ -26,9 +26,22 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
       rtc: this.protocol.rtc,
     });
     this.protocol.registerLocal(this.local);
+
+    // Setting up listeners
     this.protocol.on(ProtocolEvent.RoomInitial, (room: RoomType) => {
       this.enterRoom(room.rid);
     });
+
+    this.protocol.on(ProtocolEvent.RoomUpdated, (room: RoomType) => {
+      this.presentRoom?.setRoom(room);
+    });
+
+    this.protocol.on(
+      ProtocolEvent.ChatReceived,
+      (peer: Patp, content: string) => {
+        this.presentRoom?.onChat(peer, content);
+      }
+    );
 
     this.protocol.on(ProtocolEvent.RoomCreated, (room: RoomType) => {
       // When we create a room, we should enter it instantly
