@@ -51,8 +51,21 @@
   =/  tx
     ^-  help-transaction
     %.  json
+    :: %-  ot
+    :: :~  [%hash so]
+    ::     [%network (su (perk %bitcoin %ethereum ~))]
+    ::     [%type (su (perk %sent %received ~))]
+    ::     [%initiated-at so]
+    ::     [%completed-at so]
+    ::     [%our-address so]
+    ::     [%their-patp so]
+    ::     [%their-address so]
+    ::     [%status (su (perk %pending %failed %succeeded ~))]
+    ::     [%failure-reason so]
+    ::     [%notes so]
+    ::   ==
     :~  (ot ~[hash+so network+(su (perk %bitcoin %ethereum ~)) type+(su (perk %sent %received ~)) initiated-at+so completed-at+so:dejs-soft:format our-address+so their-patp+so:dejs-soft:format their-address+so status+(su (perk %pending %failed %succeeded ~)) failure-reason+so:dejs-soft:format notes+so])
-    ==
+     ==
   :*  hash.tx
       network.tx
       type.tx

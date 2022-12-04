@@ -143,6 +143,7 @@ const BitcoinStore = types
     // updates
     applyWalletUpdate(wallet: any) {
       let walletObj;
+      console.log('applyWalletUpdate', wallet);
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
           index: Number(wallet.key),
@@ -448,6 +449,7 @@ const EthWallet = types
       if (!previousTransactions) self.transactions.set(network, {});
       previousTransactions = self.transactions.toJSON()[network];
       for (const transaction of transactions) {
+        // console.log('applyTransaction', transaction);
         const previousTransaction = previousTransactions[transaction.hash];
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,

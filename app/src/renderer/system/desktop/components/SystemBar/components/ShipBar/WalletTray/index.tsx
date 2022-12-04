@@ -13,7 +13,7 @@ interface WalletTrayProps {
 
 const dimensions = {
   height: 620,
-  width: 330,
+  width: 340,
 };
 
 const position = 'top-left';
@@ -27,8 +27,8 @@ export const WalletTray: FC<WalletTrayProps> = observer(
       useTrayApps();
 
     const iconHoverColor = useMemo(
-      () => rgba(darken(0.05, theme.dockColor), 0.5),
-      [theme.windowColor]
+      () => rgba(darken(0.05, dockColor), 0.5),
+      [dockColor]
     );
 
     const onButtonClick = useCallback(
@@ -51,7 +51,7 @@ export const WalletTray: FC<WalletTrayProps> = observer(
         setTrayAppDimensions(dimensions);
         setActiveApp('wallet-tray');
       },
-      [activeApp, anchorOffset, position, dimensions]
+      [activeApp]
     );
 
     return (

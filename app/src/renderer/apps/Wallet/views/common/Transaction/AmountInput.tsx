@@ -92,7 +92,6 @@ export const AmountInput = observer(
           >
             AMOUNT
           </Text>
-          {/* @ts-expect-error */}
           <ContainerFlex
             focusBorder={themeData.colors.brand.primary}
             px={1}

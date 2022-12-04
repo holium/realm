@@ -86,10 +86,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   onClick: (evt: any) => {
                     evt.stopPropagation();
                     const appHost = (app as UrbitAppType).host;
-                    if (!appHost) {
-                      console.error('No host found for app', app.id);
-                      return;
-                    }
                     return handleInstallation(
                       appHost,
                       app.id,

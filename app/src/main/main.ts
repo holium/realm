@@ -14,6 +14,7 @@ import {
   session,
   dialog,
   MessageBoxReturnValue,
+  net,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -41,6 +42,15 @@ ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 const isDevelopment =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
+// a note on isOnline...
+//  from this: https://www.electronjs.org/docs/latest/api/net#netisonline
+// "A return value of false is a pretty strong indicator that the user won't
+//  be able to connect to remote sites. However, a return value of true is
+//  inconclusive; even if some link is up, it is uncertain whether a particular
+//  connection attempt to a particular remote site will be successful."
+//
+//  so it appears there is not 100% guarantee the checkForUpdates will successfully
+//    connect, even if isOnline is true. something to keep in mind.
 export interface IAppUpdater {
   checkForUpdates: () => void;
 }
@@ -100,16 +110,32 @@ export class AppUpdater implements IAppUpdater {
     // run auto check once every 10 minutes after app starts
     setInterval(() => {
       if (!this.manualCheck) {
-        autoUpdater.checkForUpdates();
+        // gracefully ignore if no internet when attempting to auto update
+        if (net.isOnline()) {
+          autoUpdater.checkForUpdates();
+        }
       }
     }, 600000);
-    autoUpdater.checkForUpdates();
+    // gracefully ignore if no internet when attempting to auto update
+    if (net.isOnline()) {
+      autoUpdater.checkForUpdates();
+    }
   }
 
+  // for manual update checks, report errors on internet connectivity. for
+  //   auto update checks, gracefully ignore.
   checkForUpdates = () => {
     if (process.env.NODE_ENV === 'development') return;
-    this.manualCheck = true;
-    autoUpdater.checkForUpdates().finally(() => (this.manualCheck = false));
+    if (net.isOnline()) {
+      this.manualCheck = true;
+      autoUpdater.checkForUpdates().finally(() => (this.manualCheck = false));
+    } else {
+      dialog.showMessageBox({
+        title: 'Offline',
+        message:
+          'It appears you do not have internet connectivity. Check your internet connection and try again.',
+      });
+    }
   };
 }
 
@@ -181,7 +207,6 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
-      allowRunningInsecureContent: false,
       sandbox: false,
       contextIsolation: true,
       preload: app.isPackaged

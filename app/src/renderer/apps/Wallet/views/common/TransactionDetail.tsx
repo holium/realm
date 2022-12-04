@@ -30,7 +30,7 @@ import styled from 'styled-components';
 
 interface TextAreaInput {
   theme: ThemeType;
-  desktopTheme: ThemeModelType;
+  desktopTheme: Partial<ThemeModelType>;
 }
 const TextArea = styled.textarea<TextAreaInput>`
   resize: none;
@@ -42,11 +42,16 @@ const TextArea = styled.textarea<TextAreaInput>`
   outline: none;
   border-radius: 6px;
   color: ${(props) => props.theme.colors.text.primary};
+  border: 1px solid transparent;
+
   background-color: ${(props) =>
     darken(
       props.desktopTheme.mode === 'light' ? 0.05 : 0.02,
-      props.desktopTheme.windowColor
+      props.desktopTheme.windowColor!
     )};
+  &:focus {
+    border: 1px solid ${(props) => props.theme.colors.brand.primary};
+  }
   ::placeholder {
     color: ${(props) =>
       transparentize(
@@ -73,15 +78,18 @@ export const TransactionDetail: FC = observer(() => {
 
   const saveNotes = () => {
     setLoading(true);
-    WalletActions.saveTransactionNotes(notes);
-    setLoading(false);
+    WalletActions.saveTransactionNotes(notes).then(() => {
+      setLoading(false);
+    });
   };
 
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  const completed = new Date(transaction.completedAt!);
+  const completed = new Date(
+    transaction.completedAt || transaction.initiatedAt
+  );
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
   const amountDisplay = isEth
@@ -90,7 +98,7 @@ export const TransactionDetail: FC = observer(() => {
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" p={3}>
-      <Text fontSize={1} color={themeData.colors.text.disabled}>
+      <Text fontSize={2} color={themeData.colors.text.disabled}>
         Transaction
       </Text>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
@@ -112,7 +120,6 @@ export const TransactionDetail: FC = observer(() => {
           </Text>
         )}
         <Flex
-          mt="18px"
           flexDirection="column"
           justifyContent="center"
           alignItems="flex-end"
@@ -214,7 +221,7 @@ export const TransactionDetail: FC = observer(() => {
           <Anchor
             fontSize={1}
             color={themeData.colors.text.primary}
-            href={`https://etherscan.io/tx/${transaction.hash}`}
+            href={`https://goerli.etherscan.io/tx/${transaction.hash}`}
           >
             {transaction.hash.slice(0, 12)}...{' '}
             <Icons mb={1} name="Link" size={1} />
@@ -225,15 +232,15 @@ export const TransactionDetail: FC = observer(() => {
         mt={8}
         mb={2}
         ml={1}
-        variant="body"
+        variant="label"
         color={themeData.colors.text.secondary}
         fontSize={1}
       >
         Notes
       </Text>
       <Flex width="100%" flexDirection="column" justifyContent="center">
-        {/* @ts-expect-error */}
         <TextArea
+          className="realm-cursor-text-cursor"
           theme={themeData}
           desktopTheme={theme.currentTheme}
           value={notes}
@@ -250,18 +257,6 @@ export const TransactionDetail: FC = observer(() => {
             Save notes
           </Button>
         </Flex>
-      </Flex>
-      <Flex
-        position="absolute"
-        top="582px"
-        zIndex={999}
-        onClick={async () => await WalletActions.navigateBack()}
-      >
-        <Icons
-          name="ArrowLeftLine"
-          size={2}
-          color={theme.currentTheme.iconColor}
-        />
       </Flex>
     </Flex>
   );

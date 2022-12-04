@@ -1,9 +1,9 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import validUrl from 'valid-url';
-import _ from 'lodash';
+// import _ from 'lodash';
 import styled from 'styled-components';
-import { darken, lighten } from 'polished';
+import { darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
 
 import {
@@ -14,6 +14,8 @@ import {
   Icons,
   Box,
   Button,
+  IconButton,
+  TextButton,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
@@ -41,13 +43,6 @@ interface WalletSettingsState {
   sharedWallet?: string;
   blockList: string[];
 }
-
-const INIT_STATE = {
-  provider: 'https://goerli.infura.io/v3/da1d4486d1254ddd',
-  creationMode: 'default' as CreateMode,
-  visibility: 'anyone' as WalletVisibility,
-  blockList: ['~latter-bolden', '~hex'],
-};
 
 export const WalletSettings: FC = observer(() => {
   const { walletApp } = useTrayApps();
@@ -142,23 +137,47 @@ export const WalletSettings: FC = observer(() => {
 
   return (
     <Flex px={3} width="100%" height="100%" flexDirection="column">
-      <Flex>
-        <Text variant="h4">Settings</Text>
+      <Flex justifyContent="space-between" alignItems="center" pt={3}>
+        <Flex alignItems="center" gap={8}>
+          <IconButton onClick={async () => await WalletActions.navigateBack()}>
+            <Icons
+              name="ArrowLeftLine"
+              size={1}
+              color={theme.currentTheme.iconColor}
+            />
+          </IconButton>
+          <Text variant="h5">Settings</Text>
+        </Flex>
+        <Button
+          py={1}
+          variant="minimal"
+          fontWeight={400}
+          // disabled={
+          //   providerError !== '' ||
+          //   (_.isEqual(state, settings) &&
+          //     _.isEqual(state.blocked, [...settings.blocked]))
+          // }
+          isLoading={saving}
+          onClick={saveSettings}
+        >
+          Save
+        </Button>
       </Flex>
 
       <Flex mt={3} flexDirection="column" width="100%">
-        <Text variant="h6">Provider</Text>
+        <Text variant="label">Provider</Text>
         <Text
           mt={1}
           mb={2}
           variant="body"
           fontSize={1}
+          opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
           The API endpoint for connecting to Ethereum nodes.
         </Text>
         <Input
-          placeholder="https://goerli.infura.io/v3/da1d4486d1254ddd"
+          placeholder="http://localhost:8545"
           value={providerInput}
           onChange={async (e) => await setProvider(e.target.value)}
         />
@@ -175,18 +194,19 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
 
       <Flex mt={3} flexDirection="column">
-        <Text variant="h6">Wallet Creation Mode</Text>
+        <Text variant="label">Wallet Creation Mode</Text>
         <Text
           mt={1}
           mb={2}
           variant="body"
           fontSize={1}
+          opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
           If set to on-demand, anytime you're sent funds a new wallet will be
           created to receive them.
         </Text>
-        <Flex width="160px">
+        <Flex width="140px">
           <Select
             customBg={selectBg}
             textColor={baseTheme.colors.text.primary}
@@ -202,12 +222,13 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
 
       <Flex mt={3} flexDirection="column">
-        <Text variant="h6">Wallet Visibility</Text>
+        <Text variant="label">Wallet Visibility</Text>
         <Text
           mt={1}
           mb={2}
           variant="body"
           fontSize={1}
+          opacity={0.8}
           color={baseTheme.colors.text.secondary}
         >
           Determine how you want to share addresses with other people on the
@@ -225,7 +246,7 @@ export const WalletSettings: FC = observer(() => {
       </Flex>
 
       <Flex mt={3} flexDirection="column">
-        <Text mb={2} variant="h6">
+        <Text mb={2} variant="label">
           Blocked IDs
         </Text>
         <BlockedInput
@@ -234,36 +255,6 @@ export const WalletSettings: FC = observer(() => {
           blocked={state.blocked}
           onChange={setBlockList}
         />
-      </Flex>
-
-      <Flex
-        position="absolute"
-        top="582px"
-        zIndex={999}
-        width="100%"
-        justifyContent="space-between"
-      >
-        <Flex onClick={async () => await WalletActions.navigateBack()}>
-          <Icons
-            name="ArrowLeftLine"
-            size={2}
-            color={theme.currentTheme.iconColor}
-          />
-        </Flex>
-        <Flex position="absolute" bottom="1px" right="28px">
-          <Button
-            variant="primary"
-            disabled={
-              providerError !== '' ||
-              (_.isEqual(state, settings) &&
-                _.isEqual(state.blocked, [...settings.blocked]))
-            }
-            isLoading={saving}
-            onClick={saveSettings}
-          >
-            Save
-          </Button>
-        </Flex>
       </Flex>
     </Flex>
   );
@@ -301,7 +292,7 @@ function VisibilitySelect(props: VisibilitySelectProps) {
 
   return (
     <>
-      <Flex width="160px">
+      <Flex width="140px">
         <Select
           customBg={selectBg}
           textColor={props.baseTheme.colors.text.primary}
@@ -338,9 +329,7 @@ interface BlockedInputProps {
 }
 function BlockedInput(props: BlockedInputProps) {
   const [input, setInput] = useState('');
-  const blockButtonColor = isValidPatp(input)
-    ? props.baseTheme.colors.text.error
-    : lighten(0.3, props.baseTheme.colors.text.error);
+  const blockButtonColor = props.baseTheme.colors.text.error;
 
   function block() {
     if (isValidPatp(input)) {
@@ -358,17 +347,21 @@ function BlockedInput(props: BlockedInputProps) {
           placeholder="~tasdul-tasdul"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          rightInteractive
+          rightIcon={
+            <TextButton
+              // position="absolute"
+              // top="9px"
+              // right="12px"
+              disabled={!isValidPatp(input)}
+              highlightColor={blockButtonColor}
+              textColor={blockButtonColor}
+              onClick={block}
+            >
+              Block
+            </TextButton>
+          }
         />
-        <Text
-          position="absolute"
-          top="9px"
-          right="12px"
-          variant="body"
-          color={blockButtonColor}
-          onClick={block}
-        >
-          Block
-        </Text>
       </Flex>
       <NoScrollBar
         height="70px"
@@ -382,16 +375,18 @@ function BlockedInput(props: BlockedInputProps) {
             mt={1}
             width="100%"
             px={2}
+            alignItems="center"
             justifyContent="space-between"
             key={patp}
           >
             <Text variant="body">{patp}</Text>
-            <Text
-              color={props.theme.currentTheme.iconColor}
-              onClick={() => props.onChange('remove', patp)}
-            >
-              x
-            </Text>
+            <IconButton onClick={() => props.onChange('remove', patp)}>
+              <Icons
+                name="Close"
+                size="15px"
+                color={props.theme.currentTheme.iconColor}
+              />
+            </IconButton>
           </Flex>
         ))}
       </NoScrollBar>

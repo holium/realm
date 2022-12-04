@@ -27,7 +27,7 @@ export const Create: FC<CreateProps> = observer((props: CreateProps) => {
   return (
     <Flex width="100%" height="100%" flexDirection="column">
       <Flex flex={4} flexDirection="column" alignItems="center">
-        <Text mt={6} variant="h4">
+        <Text mt="100px" variant="h4">
           No Wallet Found
         </Text>
         <Text
