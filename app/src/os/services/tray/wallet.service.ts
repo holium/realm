@@ -359,7 +359,7 @@ export class WalletService extends BaseService {
     });
 
     WalletApi.watchUpdates(this.core.conduit!, this.state!);
-    this.protocol = new EthereumProtocol('', 'mainnet');
+    this.protocol = new EthereumProtocol('mainnet');
     // TODO: subscribe to protocol updates
 
     if (this.state.navState.view !== WalletView.NEW) {
@@ -573,15 +573,15 @@ export class WalletService extends BaseService {
     switch (protocol) {
       case 'mainnet':
         this.state!.ethereum.setNetwork(protocol);
-        this.protocol = new EthereumProtocol('', protocol);
+        this.protocol = new EthereumProtocol(protocol);
         break;
       case 'gorli':
         this.state!.ethereum.setNetwork(protocol);
-        this.protocol = new EthereumProtocol('', protocol);
+        this.protocol = new EthereumProtocol(protocol);
         break;
       case 'uqbar':
         this.state!.ethereum.setNetwork(protocol);
-        this.protocol = new UqbarProtocol('');
+        this.protocol = new UqbarProtocol();
         break;
     }
   }

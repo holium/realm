@@ -5,7 +5,7 @@ import { Patp } from '../types';
 import { BaseProtocol } from './BaseProtocol';
 import { BaseSigner } from 'wallets/BaseSigner';
 
-export abstract class BaseAccount extends (EventEmitter as new () => TypedEmitter<WalletEventCallbacks>) {
+export abstract class BaseAddress extends (EventEmitter as new () => TypedEmitter<WalletEventCallbacks>) {
   protocol: BaseProtocol;
   assets: any[] = [];
 

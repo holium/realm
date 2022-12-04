@@ -2,21 +2,12 @@ import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 // import { action, makeObservable, observable } from 'mobx';
 import { makeAutoObservable } from 'mobx';
-import { Patp } from '../types';
-import { Account, Asset, ContractAddr } from './types';
+import { Address, Asset, ContractAddr } from './types';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.
  */
 export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
-  our: Patp;
-  accounts: Account[] = [];
-
-  constructor(our: Patp) {
-    super();
-    this.our = our;
-    makeAutoObservable(this);
-  }
 
   /**
    * Subscribes to protocol events and updates the state

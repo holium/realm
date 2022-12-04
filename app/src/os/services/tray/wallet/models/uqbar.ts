@@ -9,11 +9,7 @@ import abi from 'human-standard-token-abi';
 import nftabi from 'non-fungible-token-abi';
 
 export class UqbarProtocol implements BaseProtocol {
-  our: string;
   accounts: Account[] = [];
-  constructor(our: string) {
-    this.our = our;
-  }
   subscribe(): void {
     throw new Error('Method not implemented.');
   }

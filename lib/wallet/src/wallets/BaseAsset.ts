@@ -1,29 +1,19 @@
-import { EventEmitter } from 'events';
-import TypedEmitter from 'typed-emitter';
 // import { action, makeObservable, observable } from 'mobx';
-import { makeAutoObservable } from 'mobx';
-import { Patp } from '../types';
 import { Account, Asset, ContractAddr } from './types';
 
 /**
  * BaseAsset is an abstract class that defines the interface for chain communication.
  */
-export abstract class BaseAsset extends (EventEmitter as new () => TypedEmitter<AssetEventCallbacks>) {
-  our: Patp;
-  accounts: any[] = [];
+export abstract class BaseAsset {
+  asset: Asset;
 
-  constructor(our: Patp) {
-    super();
-    this.our = our;
-    makeAutoObservable(this);
+  constructor(assetType: string) {
+    this.assetType = assetType;
   }
 
-  /**
-   * Subscribes to protocol events and updates the state
-   */
-  abstract subscribe(): void;
+  abstract getBalance();
 
-  abstract unsubscribe(): void;
+  abstract getTokenId();
 
   /**
    * Gets asset data for a given address

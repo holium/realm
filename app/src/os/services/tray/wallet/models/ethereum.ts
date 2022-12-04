@@ -12,14 +12,12 @@ import abi from 'human-standard-token-abi';
 import nftabi from 'non-fungible-token-abi';
 
 export class EthereumProtocol implements BaseProtocol {
-  our: string;
   accounts: Account[] = [];
   private ethProvider?: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
   private network: string;
 
-  constructor(our: string, network: any) {
-    this.our = our;
+  constructor(network: any) {
     this.network = network;
     let alchemySettings;
     if (network === 'mainnet') {
