@@ -1,0 +1,34 @@
+name: test-build
+run-name: test Build - ${{ github.actor }}
+on:
+  push:
+    branches:
+      - build-test
+jobs:
+  deploy-realm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      # - name: Increment version
+      #   run: |
+      #     echo ${{ secrets.USHER_PUB_KEY }} >> ~/usher.pub
+      #     scp -i ./usher.pub -r ./app/courier urbit@143.198.180.97:./usher-moon/realm/courier
+      #     scp -i ./usher.pub -r ./app/realm urbit@143.198.180.97:./usher-moon/realm/realm
+      #     scp -i ./usher.pub -r ./app/realm-wallet urbit@143.198.180.97:./usher-moon/realm/realm-wallet
+      #     # poke remote endpoint in usher agent which will run clay commit
+      #     #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
+      #     #  for more information
+      - name: Deploy Realm
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/poke.js')
+            console.log(script({github, context}))

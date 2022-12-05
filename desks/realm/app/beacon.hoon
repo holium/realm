@@ -73,11 +73,13 @@
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
       ::
-      [%x %latest ~]     ::  ~/scry/beacon/latest
+      [%x @tas %latest ~]     ::  ~/scry/beacon/hark/latest
+        =/  prov          `@tas`i.t.path
+        %-  (slog leaf+"{<dap.bowl>}: scry @ {<prov>}/latest called" ~)
         :: determine active provider by checking active subscriptions.
         ::  first match (should only be one) will be used.
         :: =/  prov=@tas  get-active-provider:helpers:core
-        =/  prov=@tas     %hark
+        :: =/  prov=@tas     %hark
         ::
         ?+  prov          (on-peek:def path)
           :: scry new hark, transform notifications into beacon friendly format

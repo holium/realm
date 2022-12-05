@@ -125,7 +125,7 @@ jobs:
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
           git pull
-          npm version patch          
+          npm version patch
           git add package.json
           git commit -m "patch version"
           git push
@@ -133,3 +133,25 @@ jobs:
       # See: https://codesti.com/issue/actions/setup-node/317
       - run: mkdir -p /home/runner/.npm
         continue-on-error: true
+  #
+  deploy-realm:
+    # needs: [build-mac-production]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Increment version
+        run: |
+          scp -r ./app/courier urbit@143.198.180.97:./usher-moon/realm/courier
+          scp -r ./app/realm urbit@143.198.180.97:./usher-moon/realm/realm
+          scp -r ./app/realm-wallet urbit@143.198.180.97:./usher-moon/realm/realm-wallet
+          # poke remote endpoint in usher agent which will run clay commit
+          #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
+          #  for more information
