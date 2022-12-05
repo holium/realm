@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
 import { Patp } from '../types';
-import { BaseProtocol } from './BaseProtocol';
+import { BaseProtocol } from './wallets/BaseProtocol';
 import { BaseSigner } from 'wallets/BaseSigner';
 
 export abstract class BaseAddress extends (EventEmitter as new () => TypedEmitter<WalletEventCallbacks>) {

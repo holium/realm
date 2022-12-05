@@ -7,13 +7,13 @@ import { Account, Asset, ContractAddr } from './types';
 export abstract class BaseAsset {
   asset: Asset;
 
-  constructor(assetType: string) {
-    this.assetType = assetType;
+  constructor(asset: Asset) {
+    this.asset = asset;
   }
 
-  abstract getBalance();
+  abstract getBalance(): number;
 
-  abstract getTokenId();
+  abstract getTokenId(): number;
 
   /**
    * Gets asset data for a given address
