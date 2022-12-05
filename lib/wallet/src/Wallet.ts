@@ -34,6 +34,10 @@ export class Wallet extends (EventEmitter as new () => TypedEmitter<WalletEventC
   setCurrentNetwork(currentNetwork: NetworkType) {
     this.currentNetwork = currentNetwork;
   }
+  setNetwork(network: NetworkType) {
+    this.navState.network = network;
+    this.resetNavigation();
+  }
 
   setCurrentProtocol(currentProtocol: ProtocolType) {
     this.currentProtocol = currentProtocol;

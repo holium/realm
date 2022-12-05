@@ -27,6 +27,8 @@ export interface UISettingsType {
   provider: string;
 }
 
+export type SettingsType = Instance<typeof Settings>;
+
 export enum WalletCreationMode {
   DEFAULT = 'default',
   ON_DEMAND = 'on-demand',
@@ -37,6 +39,14 @@ export enum SharingMode {
   FRIENDS = 'friends',
   ANYBODY = 'anybody',
 }
+
+const Settings = types.model('Settings', {
+  walletCreationMode: types.enumeration(Object.values(WalletCreationMode)),
+  sharingMode: types.enumeration(Object.values(SharingMode)),
+  blocked: types.array(types.string),
+  defaultIndex: types.integer,
+  provider: types.maybe(types.string),
+});
 
 export interface WalletNavOptions {
   canReturn?: boolean;

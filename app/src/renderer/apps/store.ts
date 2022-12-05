@@ -248,18 +248,11 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'rooms') {
       applyPatch(trayStore.roomsApp, value.patch);
     }
-    if (value.resource === 'wallet') {
-      applyPatch(trayStore.walletApp, value.patch);
-    }
   }
 });
 // After boot, set the initial data
 OSActions.onBoot((_event: any, response: any) => {
   if (response.rooms) {
     applySnapshot(trayStore.roomsApp, response.rooms);
-  }
-
-  if (response.wallet) {
-    applySnapshot(trayStore.walletApp, response.wallet);
   }
 });

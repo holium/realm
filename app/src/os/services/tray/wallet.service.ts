@@ -14,7 +14,7 @@ import Realm from '../..';
   EthWalletType,
   SettingsType,
 } from './wallet.model';*/
-import { UISettingsType, WalletView, NetworkType, ProtocolType, WalletCreationMode, SharingMode } from '@holium/realm-wallet/src/wallets/types';
+import { UISettingsType, WalletView, NetworkType, ProtocolType, SettingsType } from '@holium/realm-wallet/src/wallets/types';
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
@@ -23,14 +23,12 @@ import {
   onPatch,
   onSnapshot,
   getSnapshot,
-  castToSnapshot,
 } from 'mobx-state-tree';
 import { ethers } from 'ethers';
 import { ProtocolWallet } from '@holium/realm-wallet/src/wallets/ProtocolWallet';
 import { EthereumProtocol } from './wallet/models/ethereum';
 import { UqbarProtocol } from './wallet/models/uqbar';
 import { Wallet } from '@holium/realm-wallet/src/Wallet';
-import { Network } from 'alchemy-sdk';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -295,65 +293,34 @@ export class WalletService extends BaseService {
     const persistedState: Wallet = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {
-      this.state = WalletStore.create(castToSnapshot(persistedState));
       this.wallet = persistedState;
     } else {
-      this.state = WalletStore.create({
-        navState: {
-          view: WalletView.NEW,
-          network: NetworkType.ETHEREUM,
-          btcNetwork: 'mainnet',
-        },
-        navHistory: [],
-        ethereum: {
-          network: 'gorli',
-          settings: {
-            walletCreationMode: WalletCreationMode.DEFAULT,
-            sharingMode: SharingMode.ANYBODY,
-            blocked: [],
-            defaultIndex: 0,
-          },
-          initialized: false,
-          conversions: {},
-        },
-        bitcoin: {
-          settings: {
-            walletCreationMode: WalletCreationMode.DEFAULT,
-            sharingMode: SharingMode.ANYBODY,
-            blocked: [],
-            defaultIndex: 0,
-          },
-          conversions: {},
-        },
-        testnet: {
-          settings: {
-            walletCreationMode: WalletCreationMode.DEFAULT,
-            sharingMode: SharingMode.ANYBODY,
-            blocked: [],
-            defaultIndex: 0,
-          },
-          conversions: {},
-        },
-        creationMode: 'default',
-        sharingMode: 'anybody',
-        ourPatp: ship,
-        lastInteraction: Date.now(),
-        initialized: false,
-      });
+      const ethereumMainnetWallet = new ProtocolWallet(this.signer, new EthereumProtocol('mainnet'));
+      const ethereumGorliWallet = new ProtocolWallet(this.signer, new EthereumProtocol('gorli'))
+      const uqbarWallet = new ProtocolWallet(this.signer, new UqbarProtocol());
+      const ethMap = new Map<ProtocolType, ProtocolWallet>([
+        ['ethmain', ethereumMainnetWallet],
+        ['ethgorli', ethereumGorliWallet],
+        ['uqbar', uqbarWallet],
+      ]);
+      const walletMap = new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>([
+        [NetworkType.ETHEREUM, ethMap]
+      ])
+      this.wallet = new Wallet(walletMap, NetworkType.ETHEREUM, 'ethmain');
     }
 
-    onSnapshot(this.state!, (snapshot: any) => {
+    onSnapshot(this.wallet!, (snapshot: any) => {
       this.db!.store = snapshot;
     });
 
     const patchEffect = {
-      model: getSnapshot(this.state),
+      model: getSnapshot(this.wallet),
       resource: 'wallet',
       response: 'initial',
     };
     this.core.onEffect(patchEffect);
 
-    onPatch(this.state, (patch) => {
+    onPatch(this.wallet, (patch) => {
       const patchEffect = {
         patch,
         resource: 'wallet',
@@ -362,7 +329,6 @@ export class WalletService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    // WalletApi.watchUpdates(this.core.conduit!, this.state!);
     const ethereumMainnetWallet = new ProtocolWallet(this.signer, new EthereumProtocol('mainnet'));
     const ethereumGorliWallet = new ProtocolWallet(this.signer, new EthereumProtocol('gorli'))
     const uqbarWallet = new ProtocolWallet(this.signer, new UqbarProtocol());
@@ -432,7 +398,7 @@ export class WalletService extends BaseService {
   async setNetwork(_event: any, network: NetworkType) {
     this.wallet!.navigate(WalletView.LIST);
     if (this.wallet!.navState.network !== network) {
-      this.wallet!.setCurrentNetwork(network);
+      this.wallet!.setNetwork(network);
     }
   }
 
@@ -610,7 +576,7 @@ export class WalletService extends BaseService {
     tokenType: 'erc20' | 'erc721' | 'erc1155',
     contractAddr: string
   ) {
-    let coinTxns = this.wallet!.wallets.get('ethereum')!.get(this.wallet!.currentProtocol)!.getAccountAssets(walletAddr);
+    let coinTxns = this.wallet!.wallets.get(NetworkType.ETHEREUM)!.get(this.wallet!.currentProtocol)!.getAccountAssets(walletAddr);
     return coinTxns;
   }
 
