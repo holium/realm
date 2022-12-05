@@ -141,6 +141,12 @@
         ?>  =(our.bowl src.bowl)      ::  only host should get all updates
         [%give %fact [/updates ~] spaces-reaction+!>([%initial spaces.state membership.state invitations.state])]~
         ::
+          [%spaces ~]  :: Sends %add reaction when user joins a new space
+        ?>  =(our.bowl src.bowl)
+        %+  turn  ~(tap in ~(key by spaces.state))
+        |=  =space-path:store
+        [%give %fact ~ spaces-reaction+!>([%add (~(got by spaces.state) space-path) (~(got by membership.state) space-path)])]
+        ::
           [%spaces @ @ ~]  :: The space level watch subscription
         =/  host                `@p`(slav %p i.t.path)
         =/  space-pth           `@t`i.t.t.path
@@ -236,8 +242,10 @@
       :_  state
       %+  weld   visa-cards
       ^-  (list card)
-      [%give %fact [/updates ~] spaces-reaction+!>([%add new-space members])]~
-      
+      :~
+        [%give %fact [/updates ~] spaces-reaction+!>([%add new-space members])]
+        [%give %fact [/spaces ~] spaces-reaction+!>([%add new-space members])]
+      ==
     ::
     ++  handle-update
       |=  [path=space-path:store edit-payload=edit-payload:store]
