@@ -11,37 +11,6 @@ process to include this step.
 
 Start the app in dev mode with `yarn start` or `npm run start`.
 
-### Starting two instances for Playground testing
-
-You can start two instances of Realm by placing the `PORT` environment variable in front of the `yarn start` command.
-
-#### Start zod
-
-```bash
-PORT=1212 PLAYGROUND_PORT=3010 yarn start
-```
-
-Make sure to logout of any current session once the window opens. Login with the accounts after both instances and the playground app ui is running for each.
-I would not try to log in on the same account for now. This is not supported currently. Sign into separate accounts.
-
-#### Start bus
-
-```bash
-PORT=1213 PLAYGROUND_PORT=3011 yarn start
-```
-
-#### Start playground dev servers
-
-The env format is `.env.<patp>` as seen in the commands below.
-
-```bash
-yarn dev:env zod
-```
-
-```bash
-yarn dev:env bus
-```
-
 ## Developing apps within Realm
 
 You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/app.dev.json`.
