@@ -1,4 +1,75 @@
+import { types } from 'mobx-state-tree';
+
 export type ProtocolType = 'ethmain' | 'ethgorli' | 'btcmain' | 'btctest' | 'uqbar' | string;
+
+export enum WalletView {
+  LIST = 'list',
+  NEW = 'new',
+  WALLET_DETAIL = 'detail',
+  TRANSACTION_DETAIL = 'transaction',
+  NFT_DETAIL = 'ethereum:nft',
+  LOCKED = 'locked',
+  SETTINGS = 'settings',
+  CREATE_WALLET = 'create-wallet',
+}
+
+export enum NetworkType {
+  ETHEREUM = 'ethereum',
+  BITCOIN = 'bitcoin',
+}
+const Networks = types.enumeration(Object.values(NetworkType));
+
+export interface UISettingsType {
+  walletCreationMode: WalletCreationMode;
+  sharingMode: SharingMode;
+  blocked: string[];
+  defaultIndex: number;
+  provider: string;
+}
+
+export enum WalletCreationMode {
+  DEFAULT = 'default',
+  ON_DEMAND = 'on-demand',
+}
+
+export enum SharingMode {
+  NOBODY = 'nobody',
+  FRIENDS = 'friends',
+  ANYBODY = 'anybody',
+}
+
+export interface WalletNavOptions {
+  canReturn?: boolean;
+  network?: NetworkType;
+  walletIndex?: string;
+  detail?: {
+    type: 'transaction' | 'coin' | 'nft';
+    key: string;
+  };
+  action?: {
+    type: string;
+    data: any;
+  };
+}
+
+export const WalletNavState = types.model('WalletNavState', {
+  view: types.enumeration(Object.values(WalletView)),
+  network: Networks,
+  btcNetwork: types.enumeration(['mainnet', 'testnet']),
+  walletIndex: types.maybe(types.string),
+  detail: types.maybe(
+    types.model({
+      type: types.enumeration(['transaction', 'coin', 'nft']),
+      key: types.string,
+    })
+  ),
+  action: types.maybe(
+    types.model({
+      type: types.string,
+      data: types.frozen(),
+    })
+  ),
+});
 
 export type AccountType = {
   addr: string; // public address

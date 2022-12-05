@@ -244,7 +244,7 @@ const handleWalletReactions = (
     case 'transactions':
       break;
     case 'settings':
-      walletState.ethereum.setSettings(data);
+      walletState.setSettings(data);
       break;
     default:
       break;

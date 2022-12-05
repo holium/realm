@@ -66,7 +66,8 @@
         [%transactions ~]
       `this
         [%wallets ~]
-      `this
+      :_  this
+      [%give %fact [/wallets]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]~
     ==
   ::
   ++  on-leave  on-leave:def
