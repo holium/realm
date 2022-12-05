@@ -25,7 +25,7 @@ import {
   WalletCreationMode,
   SharingMode,
   UISettingsType,
-} from 'os/services/tray/wallet.model';
+} from '@holium/realm-wallet/src/wallets/types';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {

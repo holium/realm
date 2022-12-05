@@ -15,9 +15,8 @@ import {
   NetworkType,
   SharingMode,
   WalletCreationMode,
-  WalletStore,
   WalletView,
-} from 'os/services/tray/wallet.model';
+} from '@holium/realm-wallet/src/wallets/types';
 import { SoundActions } from '../logic/actions/sound';
 import { OSActions } from '../logic/actions/os';
 import { Patp } from 'os/types';
@@ -58,7 +57,6 @@ export const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
-    walletApp: WalletStore,
     dmApp: DmApp,
   })
   .actions((self) => ({
@@ -113,48 +111,6 @@ export const trayStore = TrayAppStore.create({
   },
   roomsApp: {
     currentView: 'list',
-  },
-  walletApp: {
-    navState: {
-      view: WalletView.NEW,
-      network: NetworkType.ETHEREUM,
-      btcNetwork: 'mainnet',
-    },
-    navHistory: [],
-    bitcoin: {
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    testnet: {
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    ethereum: {
-      network: 'gorli',
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      initialized: false,
-      conversions: {},
-    },
-    creationMode: 'default',
-    sharingMode: 'anybody',
-    ourPatp: '~zod',
-    lastInteraction: new Date(),
-    initialized: false,
   },
   dmApp: {
     currentView: 'dm-list',

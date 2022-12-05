@@ -374,7 +374,7 @@ export class WalletService extends BaseService {
     const walletMap = new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>([
       [NetworkType.ETHEREUM, ethMap]
     ])
-    this.wallet = new Wallet(walletMap, 'ethereum', 'ethmain');
+    this.wallet = new Wallet(walletMap, NetworkType.ETHEREUM, 'ethmain');
     WalletApi.watchUpdates(this.core.conduit!, this.wallet!);
 
     if (this.wallet.navState.view !== WalletView.NEW) {

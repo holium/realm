@@ -605,6 +605,7 @@ export const WalletNavState = types.model('WalletNavState', {
     })
   ),
 });
+export type WalletNavStateType = Instance<typeof WalletNavState>;
 
 export interface WalletNavOptions {
   canReturn?: boolean;

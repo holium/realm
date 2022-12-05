@@ -1,4 +1,4 @@
-import { types } from 'mobx-state-tree';
+import { types, Instance } from 'mobx-state-tree';
 
 export type ProtocolType = 'ethmain' | 'ethgorli' | 'btcmain' | 'btctest' | 'uqbar' | string;
 
@@ -70,6 +70,7 @@ export const WalletNavState = types.model('WalletNavState', {
     })
   ),
 });
+export type WalletNavStateType = Instance<typeof WalletNavState>;
 
 export type AccountType = {
   addr: string; // public address

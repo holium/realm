@@ -4,7 +4,7 @@ import { Sigil, Flex, Box, Text, Icons } from '../';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { WalletView } from '@holium/realm-wallet/src/wallets/types';
 
 interface IPassport {
   patp: string;

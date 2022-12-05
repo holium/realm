@@ -3,7 +3,7 @@ import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
 import { Patp } from 'types';
 import { ProtocolWallet } from 'wallets/ProtocolWallet';
-import { NetworkType, ProtocolType, WalletView, WalletNavState, WalletNavOptions } from 'wallets/types';
+import { NetworkType, ProtocolType, WalletView, WalletNavState, WalletNavStateType, WalletNavOptions } from './wallets/types';
 import { getSnapshot, cast } from 'mobx-state-tree';
 
 export class Wallet extends (EventEmitter as new () => TypedEmitter<WalletEventCallback>) {
@@ -20,6 +20,7 @@ export class Wallet extends (EventEmitter as new () => TypedEmitter<WalletEventC
     this.wallets = wallets;
     this.currentNetwork = currentNetwork;
     this.currentProtocol = currentProtocol;
+    this.navState = WalletNavState.create();
     this.lastInteraction = new Date();
 
     makeObservable(this, {

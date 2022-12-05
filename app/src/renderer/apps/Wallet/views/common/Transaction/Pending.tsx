@@ -9,7 +9,7 @@ import {
   formatBtcAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView, TransactionType } from 'os/services/tray/wallet.model';
+import { WalletView, TransactionType } from '@holium/realm-wallet/src/wallets/types';
 import { useTrayApps } from 'renderer/apps/store';
 
 interface PendingTransactionDisplayProps {

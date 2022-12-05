@@ -6,7 +6,7 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ERC721Type, WalletView } from 'os/services/tray/wallet.model';
+import { ERC721Type, WalletView } from '@holium/realm-wallet/src/wallets/types';
 import { Row } from 'renderer/components/NewRow';
 
 interface NFTListProps {
