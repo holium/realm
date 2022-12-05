@@ -1,4 +1,6 @@
-export type Account = {
+export type ProtocolType = 'ethmain' | 'ethgorli' | 'btcmain' | 'btctest' | 'uqbar' | string;
+
+export type AccountType = {
   addr: string; // public address
   type: 'eth' | 'btc' | 'uqbar' | string;
   path: string | null; // HD path
@@ -6,8 +8,9 @@ export type Account = {
   nickname: string | null;
   pubkey: string; // raw public key
   privkey: string; // raw private key
-  assets: Asset[];
+  balance: number;
   transactions: any[];
+  assets: Asset[];
 };
 
 export type Asset = {

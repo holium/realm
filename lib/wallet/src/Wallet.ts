@@ -1,28 +1,25 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
-import { Patp } from '../types';
-import { BaseProtocol } from './wallets/BaseProtocol';
-import { BaseSigner } from 'wallets/BaseSigner';
+import { Patp } from 'types';
+import { ProtocolWallet } from 'wallets/ProtocolWallet';
+import { ProtocolType } from 'wallets/types';
 
-export abstract class BaseAddress extends (EventEmitter as new () => TypedEmitter<WalletEventCallbacks>) {
-  protocol: BaseProtocol;
-  assets: any[] = [];
+export class Wallet extends (EventEmitter as new () => TypedEmitter<WalletEventCallback>) {
+  wallets: Map<ProtocolType, ProtocolWallet>;
 
-  constructor(protocol: BaseProtocol, signer: BaseSigner) {
+  constructor(wallets: Map<string, ProtocolWallet>) {
     super();
-    this.protocol = protocol;
+    this.wallets = wallets;
 
     makeObservable(this, {
-      protocol: observable,
-      getAssets: action.bound,
+      wallets: observable,
     });
   }
 
-  abstract getAssets(): void;
 }
 
-export type WalletEventCallbacks = {
+export type WalletEventCallback = {
   ready: () => void;
   providerUpdated: (provider: Patp) => void;
   hostLeft: (host: Patp) => void;

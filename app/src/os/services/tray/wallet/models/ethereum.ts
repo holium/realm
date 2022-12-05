@@ -1,8 +1,8 @@
 import {
   BaseProtocol,
-  ProtocolEventCallbacks,
 } from '@holium/realm-wallet/src/wallets/BaseProtocol';
-import { Account, Asset } from '@holium/realm-wallet/src/wallets/types';
+import { Asset, CoinAsset } from '@holium/realm-wallet/src/wallets/types';
+import { BaseAsset } from '@holium/realm-wallet/src/wallets/BaseAsset';
 import { Alchemy, Network } from 'alchemy-sdk';
 import axios from 'axios';
 import { ethers } from 'ethers';
@@ -11,13 +11,71 @@ import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
 
+export class ERC20 implements BaseAsset {
+  asset: Asset;
+  private address: string;
+  private protocol: BaseProtocol;
+
+  constructor(asset: Asset, address: string, protocol: BaseProtocol) {
+    this.asset = asset;
+    this.address = address;
+    this.protocol = protocol;
+  }
+
+  updateAsset(): void {
+    this.protocol.getAssetBalance(this.asset.addr, this.address)
+      .then(balance => (this.asset.data as CoinAsset).balance = balance);
+    this.protocol.getAssetTransfers(this.asset.addr, this.address)
+      .then(transfers => {});
+    this.protocol.getAssetAllowance(this.asset.addr, this.address)
+      .then(allowance => {});
+  }
+}
+
+export class ERC721 implements BaseAsset {
+  asset: Asset;
+  private address: string;
+  private protocol: BaseProtocol;
+
+  constructor(asset: Asset, address: string, protocol: BaseProtocol) {
+    this.asset = asset;
+    this.address = address;
+    this.protocol = protocol;
+  }
+
+  updateAsset(): void {
+    this.protocol.getAssetTransfers(this.asset.addr, this.address)
+      .then(transfers => {});
+    this.protocol.getAssetAllowance(this.asset.addr, this.address)
+      .then(allowance => {});
+  }
+}
+
+export class ERC721 implements BaseAsset {
+  asset: Asset;
+  private address: string;
+  private protocol: BaseProtocol;
+
+  constructor(asset: Asset, address: string, protocol: BaseProtocol) {
+    this.asset = asset;
+    this.address = address;
+    this.protocol = protocol;
+  }
+
+  updateAsset(): void {
+    this.protocol.getAssetTransfers(this.asset.addr, this.address)
+      .then(transfers => {});
+    this.protocol.getAssetAllowance(this.asset.addr, this.address)
+      .then(allowance => {});
+  }
+}
+
 export class EthereumProtocol implements BaseProtocol {
-  accounts: Account[] = [];
   private ethProvider?: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
-  private network: string;
+  private network: 'mainnet' | 'gorli';
 
-  constructor(network: any) {
+  constructor(network: 'mainnet' | 'gorli') {
     this.network = network;
     let alchemySettings;
     if (network === 'mainnet') {
@@ -44,15 +102,10 @@ export class EthereumProtocol implements BaseProtocol {
     this.alchemy = new Alchemy(alchemySettings);
   }
 
-  subscribe(): void {
-    throw new Error('Method not implemented.');
+  onBlock(callback: () => void) {
+    this.ethProvider!.on('block', callback);
   }
-  unsubscribe(): void {
-    throw new Error('Method not implemented.');
-  }
-  getAccounts(): Account[] {
-    return this.accounts;
-  }
+
   async getAccountBalance(addr: string): Promise<number> {
     return await (await this.ethProvider!.getBalance(addr)).toNumber();
   }
@@ -64,7 +117,7 @@ export class EthereumProtocol implements BaseProtocol {
     const URL = this.network === 'mainnet' ? mainnetURL : goerliURL;
     return await axios.get(URL);
   }
-  getAccountAssets(addr: string): Asset[] | Promise<Asset[]> {
+  getAccountAssets(addr: string): Promise<BaseAsset[]> {
     throw new Error('Method not implemented.');
   }
   async sendTransaction(signedTx: string): Promise<any> {
@@ -77,10 +130,10 @@ export class EthereumProtocol implements BaseProtocol {
     const ethContract = new ethers.Contract(contract, abi, this.ethProvider);
     return (await ethContract.balanceOf(addr)).toString();
   }
-  getAssetMetadata(contract: string, addr: string): Asset | Promise<Asset> {
+  getAssetMetadata(contract: string, addr: string): Promise<Asset> {
     throw new Error('Method not implemented.');
   }
-  getAssetAllowance(contract: string, addr: string): number {
+  getAssetAllowance(contract: string, addr: string): Promise<number> {
     const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
     throw new Error('Method not implemented.');
   }
@@ -111,79 +164,5 @@ export class EthereumProtocol implements BaseProtocol {
   ): number | Promise<number> {
     throw new Error('Method not implemented.');
   }
-  addListener<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    listener: ProtocolEventCallbacks[E]
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  on<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    listener: ProtocolEventCallbacks[E]
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  once<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    listener: ProtocolEventCallbacks[E]
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  prependListener<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    listener: ProtocolEventCallbacks[E]
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  prependOnceListener<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    listener: ProtocolEventCallbacks[E]
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  off<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    listener: ProtocolEventCallbacks[E]
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  removeAllListeners<E extends keyof ProtocolEventCallbacks>(
-    event?: E | undefined
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  removeListener<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    listener: ProtocolEventCallbacks[E]
-  ): this {
-    throw new Error('Method not implemented.');
-  }
-  emit<E extends keyof ProtocolEventCallbacks>(
-    event: E,
-    ...args: Parameters<ProtocolEventCallbacks[E]>
-  ): boolean {
-    throw new Error('Method not implemented.');
-  }
-  eventNames(): (string | symbol)[] {
-    throw new Error('Method not implemented.');
-  }
-  rawListeners<E extends keyof ProtocolEventCallbacks>(
-    event: E
-  ): ProtocolEventCallbacks[E][] {
-    throw new Error('Method not implemented.');
-  }
-  listeners<E extends keyof ProtocolEventCallbacks>(
-    event: E
-  ): ProtocolEventCallbacks[E][] {
-    throw new Error('Method not implemented.');
-  }
-  listenerCount<E extends keyof ProtocolEventCallbacks>(event: E): number {
-    throw new Error('Method not implemented.');
-  }
-  getMaxListeners(): number {
-    throw new Error('Method not implemented.');
-  }
-  setMaxListeners(maxListeners: number): this {
-    throw new Error('Method not implemented.');
-  }
+
 }

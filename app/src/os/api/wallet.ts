@@ -1,4 +1,5 @@
 import { Conduit } from '@holium/conduit';
+import { Wallet } from '@holium/realm-wallet/src/Wallet';
 import { SettingsType, WalletStoreType } from 'os/services/tray/wallet.model';
 
 export const WalletApi = {
@@ -196,7 +197,7 @@ export const WalletApi = {
    */
      watchUpdates: (
       conduit: Conduit,
-      walletState: WalletStoreType,
+      walletState: Wallet,
     ): void => {
       conduit.watch({
         app: 'spaces',
@@ -219,7 +220,7 @@ export const WalletApi = {
 
 const handleWalletReactions = (
   data: any,
-  walletState: WalletStoreType,
+  walletState: Wallet,
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
@@ -237,6 +238,10 @@ const handleWalletReactions = (
       break;
     case 'wallets':
       walletState.ethereum.initial(data);
+      break;
+    case 'transaction':
+      break;
+    case 'transactions':
       break;
     case 'settings':
       walletState.ethereum.setSettings(data);

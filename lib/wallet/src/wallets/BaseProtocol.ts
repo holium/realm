@@ -1,33 +1,20 @@
-import { EventEmitter } from 'events';
-import TypedEmitter from 'typed-emitter';
 // import { action, makeObservable, observable } from 'mobx';
-import { Account, Asset, ContractAddr } from './types';
+import { ContractAddr, Asset } from './types';
+import { BaseAsset } from './BaseAsset';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.
  */
-export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitter<ProtocolEventCallbacks>) {
+export abstract class BaseProtocol {
 
-  /**
-   * Subscribes to protocol events and updates the state
-   */
-  abstract subscribe(): void;
+  abstract onBlock(callback: () => {}): void;
 
-  abstract unsubscribe(): void;
-
-  /**
-   * Get all accounts via this protocol
-   * @returns {Promise<Account[]>}
-   */
-  getAccounts(): Promise<Account[]> | Account[]{
-    return this.accounts;
-  }
-
-  abstract getAccountBalance(addr: string): number | Promise<number>;
+  abstract getAccountBalance(addr: string): Promise<number>;
 
   abstract getAccountTransactions(addr: string): Promise<any[]>;
 
-  abstract getAccountAssets(addr: string): Promise<Asset[]> | Asset[];
+  abstract getAccountAssets(addr: string): Promise<BaseAsset[]>;
+
   /**
    * Sends a signed transaction to the network
    * @param signedTx
@@ -38,27 +25,14 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
    * Assets are tokens, coins, or multitoken contracts
    */
 
-  /**
-   * Gets asset data for a given address
-   *
-   * Equivalent to calling all of the following:
-   * - getAssetBalance
-   * - getAssetMetadata
-   * - getAssetAllowance
-   *
-   * @param contract
-   * @param addr
-   */
-  abstract getAsset(contract: ContractAddr, addr: string): Asset;
-
-  abstract getAssetBalance(contract: ContractAddr, addr: string): number | Promise<number>;
+  abstract getAssetBalance(contract: ContractAddr, addr: string): Promise<number>;
 
   abstract getAssetMetadata(
     contract: ContractAddr,
     addr: string
-  ): Promise<Asset> | Asset;
+  ): Promise<Asset>;
 
-  abstract getAssetAllowance(contract: ContractAddr, addr: string): number;
+  abstract getAssetAllowance(contract: ContractAddr, addr: string): Promise<number>;
 
   /**
    * Gets to and from transfers for a given address
@@ -94,19 +68,3 @@ export abstract class BaseProtocol extends (EventEmitter as new () => TypedEmitt
     value: number
   ): Promise<number> | number;
 }
-
-export type ProtocolEventCallbacks = {
-  subscribed: () => void;
-  unsubscribed: () => void;
-  accounts: (accounts: Account[]) => void;
-  transactionSent: (tx: any) => void;
-  transactionReceived: (tx: any) => void;
-  transactionCompleted: (tx: any) => void;
-  transactionFailed: (tx: any, err: Error) => void;
-  accountBalanceUpdated: (addr: string, balance: number) => void;
-  assetTransferred: (
-    contract: ContractAddr,
-    addr: string,
-    asset: Asset
-  ) => void;
-};

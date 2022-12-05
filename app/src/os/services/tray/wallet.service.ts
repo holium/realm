@@ -25,9 +25,10 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { ethers } from 'ethers';
-import { BaseProtocol } from '@holium/realm-wallet/src/wallets/BaseProtocol';
+import { ProtocolWallet } from '@holium/realm-wallet/src/wallets/ProtocolWallet';
 import { EthereumProtocol } from './wallet/models/ethereum';
 import { UqbarProtocol } from './wallet/models/uqbar';
+import { Wallet } from '@holium/realm-wallet/src/Wallet';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -47,7 +48,7 @@ export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
   private signer?: BaseSigner;
-  private protocol?: BaseProtocol;
+  private wallet?: Wallet;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-network': this.setNetwork,
@@ -358,9 +359,16 @@ export class WalletService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    WalletApi.watchUpdates(this.core.conduit!, this.state!);
-    this.protocol = new EthereumProtocol('mainnet');
-    // TODO: subscribe to protocol updates
+    // WalletApi.watchUpdates(this.core.conduit!, this.state!);
+    const ethereumMainnetWallet = new ProtocolWallet(this.signer, new EthereumProtocol('mainnet'));
+    const ethereumGorliWallet = new ProtocolWallet(this.signer, new EthereumProtocol('gorli'))
+    const uqbarWallet = new ProtocolWallet(this.signer, new UqbarProtocol());
+    this.wallet = new Wallet(new Map<string, ProtocolWallet>([
+      ['ethmain', ethereumMainnetWallet],
+      ['ethgorli', ethereumGorliWallet],
+      ['uqbar', uqbarWallet],
+    ]));
+    WalletApi.watchUpdates(this.core.conduit!, this.wallet!);
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -510,7 +518,7 @@ export class WalletService extends BaseService {
       value: ethers.utils.parseEther(amount),
     };
     const transaction = this.signer?.signTransaction(path, tx);
-    const hash = await this.protocol!.sendTransaction(transaction)
+    const hash = await this.wallet?.protocols[0].sendTransaction(transaction)
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -538,7 +546,6 @@ export class WalletService extends BaseService {
   }
 
   sendERC20Transaction() {
-
   }
 
   sendERC721Transaction() {
@@ -573,15 +580,12 @@ export class WalletService extends BaseService {
     switch (protocol) {
       case 'mainnet':
         this.state!.ethereum.setNetwork(protocol);
-        this.protocol = new EthereumProtocol(protocol);
         break;
       case 'gorli':
         this.state!.ethereum.setNetwork(protocol);
-        this.protocol = new EthereumProtocol(protocol);
         break;
       case 'uqbar':
         this.state!.ethereum.setNetwork(protocol);
-        this.protocol = new UqbarProtocol();
         break;
     }
   }
