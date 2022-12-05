@@ -59,7 +59,6 @@ const configuration: webpack.Configuration = {
       type: 'umd',
     },
   },
-
   module: {
     rules: [
       {
@@ -93,13 +92,6 @@ const configuration: webpack.Configuration = {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
-      // {
-      //   test: /\.(wav)$/i,
-      //   type: 'asset/resource',
-      //   // generator: {
-      //   //   filename: 'sounds/[name]',
-      //   // },
-      // },
     ],
   },
   plugins: [
