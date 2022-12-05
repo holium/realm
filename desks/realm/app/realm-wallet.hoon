@@ -1,6 +1,5 @@
 /-  *realm-wallet
 /+  default-agent, dbug, *realm-wallet
-::  a
 |%
 +$  versioned-state
   $%  state-0
@@ -31,13 +30,28 @@
     ^-  vase
     !>(state)
   ::
+  :: ++  on-load
+  ::   |=  old-state=vase
+  ::   ^-  (quip card _this)
+  ::   =/  old  !<(versioned-state old-state)
+  ::   ?-  -.old
+  ::     %0  `this(state old)
+  ::   ==
   ++  on-load
-    |=  old-state=vase
-    ^-  (quip card _this)
-    =/  old  !<(versioned-state old-state)
-    ?-  -.old
-      %0  `this(state old)
-    ==
+    |=  =vase
+    ^-  (quip card:agent:gall agent:gall)
+    =/  old=(unit state-0)
+      (mole |.(!<(state-0 vase)))  
+    ?^  old
+      `this(state u.old)
+    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easier
+    =^  cards  this  on-init
+    :_  this
+    =-  (welp - cards)
+    %+  turn  ~(tap in ~(key by wex.bowl))
+    |=  [=wire =ship =term] 
+    ^-  card
+    [%pass wire %agent [ship term] %leave ~]
   ::
   ++  on-poke
     ~/  %on-poke
@@ -50,7 +64,6 @@
         (handle-wallet-action:core !<(action vase))
       [cards this]
     ==
-  ::
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
@@ -68,7 +81,6 @@
         [%wallets ~]
       `this
     ==
-  ::
   ++  on-leave  on-leave:def
   ++  on-peek
     |=  =path
@@ -152,11 +164,8 @@
     ?>  (team:title our.bowl src.bowl)
     =.  sharing.settings
       ?-  type.act
-        %allow
-      =.  whitelist.sharing.settings  (~(put in whitelist.sharing.settings) who.act)
-      sharing.settings
         %block
-      =.  blocked.sharing.settings  (~(put in whitelist.sharing.settings) who.act)
+      =.  blocked.sharing.settings  (~(put in blocked.sharing.settings) who.act)
       sharing.settings
       ==
     `state
@@ -191,7 +200,8 @@
     ?:  (~(has in blocked.sharing.settings) src.bowl)
       [null-address-card state]
     ?:  ?&  =(who.sharing.settings %friends)
-            !(~(has in whitelist.sharing.settings) src.bowl)
+            =/  friends  .^((set @p) %gx /(scot %p our.bowl)/friends/(scot %da now.bowl)/ships/noun)
+            !(~(has in friends) src.bowl)
         ==
       [null-address-card state]
     ::  send default wallet if requested
@@ -260,7 +270,6 @@
     =/  task  [%poke %realm-wallet-action !>(`action`[%create-wallet our.bowl network.act (crip (scow %p our.bowl))])]
     :-  [%pass /addr/(scot %p from.act) %agent [from.act dap.bowl] task]~
     state
-    ::
       %receive-address
     =/  upd  `update`[%address src.bowl network.act address.act]
     =/  update-path=path  /address/[(crip (scow %tas network.act))]/[(crip (scow %p src.bowl))]
