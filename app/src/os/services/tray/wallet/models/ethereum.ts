@@ -51,7 +51,7 @@ export class ERC721 implements BaseAsset {
   }
 }
 
-export class ERC721 implements BaseAsset {
+export class ERC1155 implements BaseAsset {
   asset: Asset;
   private address: string;
   private protocol: BaseProtocol;

@@ -518,7 +518,7 @@ export class WalletService extends BaseService {
       value: ethers.utils.parseEther(amount),
     };
     const transaction = this.signer?.signTransaction(path, tx);
-    const hash = await this.wallet?.protocols[0].sendTransaction(transaction)
+    const hash = await this.wallet!.wallets.get(this.state!.ethereum.network).accounts[walletIndex].sendTransaction(transaction);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(

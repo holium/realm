@@ -139,15 +139,26 @@
     =.  wallet-creation.sharing.settings  mode.act
     =.  who.sharing.settings  who.act
     =.  blocked.sharing.settings  blocked.act
-    `state
+    :_  state
+    [%give %fact [/settings]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
+    ::
+      %set-passcode-hash
+    ?>  (team:title our.bowl src.bowl)
+    =.  passcode-hash.settings  hash.act
+    :_  state
+    [%give %fact [/settings]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-wallet-creation-mode
     ?>  (team:title our.bowl src.bowl)
-    `state(wallet-creation.sharing.settings mode.act)
+    =.  wallet-creation.sharing.settings.state  mode.act
+    :_  state
+    [%give %fact [/settings]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-sharing-mode
     ?>  (team:title our.bowl src.bowl)
-    `state(who.sharing.settings who.act)
+    =.  who.sharing.settings  who.act
+    :_  state
+    [%give %fact [/settings]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-sharing-permissions
     ?>  (team:title our.bowl src.bowl)
@@ -160,14 +171,16 @@
       =.  blocked.sharing.settings  (~(put in whitelist.sharing.settings) who.act)
       sharing.settings
       ==
-    `state
+    :_  state
+    [%give %fact [/settings]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-default-index
     ?>  (team:title our.bowl src.bowl)
     =.  networks.settings.state
       =/  prev-set  (~(got by networks.settings.state) network.act)
       (~(put by networks.settings.state) [network.act [xpub.prev-set index.act]])
-    `state
+    :_  state
+    [%give %fact [/settings]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-wallet-nickname
     ?>  (team:title our.bowl src.bowl)

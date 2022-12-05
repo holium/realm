@@ -7,7 +7,7 @@ import { BaseAsset } from './BaseAsset';
  */
 export abstract class BaseProtocol {
 
-  abstract onBlock(callback: () => {}): void;
+  abstract onBlock(callback: () => void): void;
 
   abstract getAccountBalance(addr: string): Promise<number>;
 

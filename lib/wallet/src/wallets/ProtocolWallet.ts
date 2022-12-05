@@ -16,7 +16,7 @@ export class ProtocolWallet extends (EventEmitter as new () => TypedEmitter<Prot
     super();
     this.signer = signer;
     this.protocol = protocol;
-    this.protocol.onBlock('block', this.updateAccounts);
+    this.protocol.onBlock(this.updateAccounts);
 
     makeObservable(this, {
       accounts: observable,

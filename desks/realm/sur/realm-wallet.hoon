@@ -51,6 +51,7 @@
   $%  [%initialize ~]
       [%set-xpub =network xpub=@t]
       [%set-settings =network =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud]
+      [%set-passcode-hash hash=@t]
       [%set-wallet-creation-mode =mode]
       [%set-sharing-mode who=?(%nobody %friends %anybody)]
       [%set-sharing-permissions type=?(%allow %block) who=@p]
@@ -76,7 +77,8 @@
 ::
 +$  wallets  (map =network (map @ud wallet))
 +$  settings
-  $:  =sharing
+  $:  passcode-hash=@t
+      =sharing
       networks=(map network [xpub=(unit @t) default-index=@ud])
   ==
 --
