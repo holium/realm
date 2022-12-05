@@ -16,6 +16,7 @@ export const ChatLog = observer((props: ChatLogProps) => {
   const { loading, messages, isGroup } = props;
   const { dimensions } = useTrayApps();
   const { ship, theme } = useServices();
+  console.log(loading);
 
   const isBlank = !loading && messages.length === 0;
 

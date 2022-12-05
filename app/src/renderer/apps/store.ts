@@ -1,6 +1,6 @@
 import { calculateAnchorPointById } from './../logic/lib/position';
 import { createContext, useContext } from 'react';
-import { Room } from '@holium/realm-room';
+
 import {
   applyPatch,
   Instance,
@@ -9,8 +9,7 @@ import {
   applySnapshot,
 } from 'mobx-state-tree';
 
-import { SlipActions } from './../logic/actions/slip';
-import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
+import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
   NetworkType,
   SharingMode,
@@ -18,13 +17,8 @@ import {
   WalletStore,
   WalletView,
 } from 'os/services/tray/wallet.model';
-import { SoundActions } from '../logic/actions/sound';
+
 import { OSActions } from '../logic/actions/os';
-import { Patp } from 'os/types';
-import { SlipType } from 'os/services/slip.service';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
-import { RoomDiff } from 'os/services/tray/rooms.service';
-import { IpcMessageEvent } from 'electron';
 import { DmApp } from './Messages/store';
 
 const TrayAppCoords = types.model({
@@ -185,28 +179,39 @@ export function useTrayApps() {
 }
 
 // Set up room listeners
-export const LiveRoom = new Room((to: Patp[], data: any) => {
-  SlipActions.sendSlip(to, data);
-});
+// const protocol = new RealmProtocol(
+//   testShip,
+//   {
+//     rtc: {
+//       iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+//     },
+//   },
+//   ShipConfig[testShip]
+// );
+// export const RoomManager = new RoomManager()
 
-SlipActions.onSlip((_event: Event, slip: SlipType) => {
-  LiveRoom.onSlip(slip);
-});
+// export const LiveRoom = new Room((to: Patp[], data: any) => {
+//   SlipActions.sendSlip(to, data);
+// });
 
-RoomsActions.onRoomUpdate(
-  (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
-    console.log('room diff in renderer', diff);
-    LiveRoom.onDiff(diff, room);
-    // @ts-expect-error
-    if (diff.exit) {
-      SoundActions.playRoomLeave();
-    }
-    // @ts-expect-error
-    if (diff.enter) {
-      SoundActions.playRoomEnter();
-    }
-  }
-);
+// SlipActions.onSlip((_event: Event, slip: SlipType) => {
+//   LiveRoom.onSlip(slip);
+// });
+
+// RoomsActions.onRoomUpdate(
+//   (_event: IpcMessageEvent, diff: RoomDiff, room: RoomsModelType) => {
+//     console.log('room diff in renderer', diff);
+//     LiveRoom.onDiff(diff, room);
+//     // @ts-expect-error
+//     if (diff.exit) {
+//       SoundActions.playRoomLeave();
+//     }
+//     // @ts-expect-error
+//     if (diff.enter) {
+//       SoundActions.playRoomEnter();
+//     }
+//   }
+// );
 
 // Watch actions for sound trigger
 // onAction(trayStore, (call) => {
@@ -237,38 +242,51 @@ RoomsActions.onRoomUpdate(
 //   }
 // });
 
-OSActions.onBoot((_event: any, response: any) => {
+OSActions.onBoot((_event: any, response: any, session: any) => {
+  console.log('session', session);
   if (response.loggedIn && response.ship) {
     // RoomsActions.resetLocal();
     // RoomsActions.exitRoom();
     // LiveRoom.leave();
-    console.log('ON BOOT, LIVEROOM', response.ship);
-    if (response.ship.patp) LiveRoom.init(response.ship.patp!);
+    // const protocol = new RoomProtocol(
+    //   session.ship,
+    //   {
+    //     rtc: {
+    //       iceServers: [{ urls: ['stun:coturn.holium.live:3478'] }],
+    //     },
+    //   },
+    //   session
+    // );
+    // const roomManager = new RoomsManager(protocol);
+    // protocol.init(session);
+    // console.log(roomManager);
+    // if (response.ship.patp) LiveRoom.init(response.ship.patp!);
   }
 });
 
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
-  console.log('on connected');
-  if (LiveRoom.state === 'disconnected') {
-    console.log('LiveRoom.init in OSActions.onConnected ');
-    LiveRoom.init(response.ship.patp!);
-  }
-  if (response.rooms) {
-    // LiveRoom.init(response.ship.patp!);
-    console.log('OSActions.onConnected', response.rooms);
-    applySnapshot(trayStore.roomsApp, response.rooms);
-    if (trayStore.roomsApp.liveRoom) {
-      console.log(
-        '210: if (trayStore.roomsApp.liveRoom) {',
-        trayStore.roomsApp.liveRoom
-      );
-      const { liveRoom } = trayStore.roomsApp;
-      if (liveRoom) {
-        LiveRoom.connect(liveRoom);
-      }
-    }
-  }
+  console.log('on connected', response);
+
+  // if (LiveRoom.state === 'disconnected') {
+  //   console.log('LiveRoom.init in OSActions.onConnected ');
+  //   LiveRoom.init(response.ship.patp!);
+  // }
+  // if (response.rooms) {
+  //   // LiveRoom.init(response.ship.patp!);
+  //   console.log('OSActions.onConnected', response.rooms);
+  //   applySnapshot(trayStore.roomsApp, response.rooms);
+  //   if (trayStore.roomsApp.liveRoom) {
+  //     console.log(
+  //       '210: if (trayStore.roomsApp.liveRoom) {',
+  //       trayStore.roomsApp.liveRoom
+  //     );
+  //     const { liveRoom } = trayStore.roomsApp;
+  //     if (liveRoom) {
+  //       LiveRoom.connect(liveRoom);
+  //     }
+  //   }
+  // }
 });
 
 // OSActions.onLogout((_event: any) => {
@@ -289,9 +307,9 @@ OSActions.onConnected((_event: any, response: any) => {
 // Listen for all patches
 OSActions.onEffect((_event: any, value: any) => {
   if (value.response === 'patch') {
-    if (value.resource === 'rooms') {
-      applyPatch(trayStore.roomsApp, value.patch);
-    }
+    // if (value.resource === 'rooms') {
+    //   applyPatch(trayStore.roomsApp, value.patch);
+    // }
     if (value.resource === 'wallet') {
       applyPatch(trayStore.walletApp, value.patch);
     }
@@ -299,9 +317,9 @@ OSActions.onEffect((_event: any, value: any) => {
 });
 // After boot, set the initial data
 OSActions.onBoot((_event: any, response: any) => {
-  if (response.rooms) {
-    applySnapshot(trayStore.roomsApp, response.rooms);
-  }
+  // if (response.rooms) {
+  //   applySnapshot(trayStore.roomsApp, response.rooms);
+  // }
 
   if (response.wallet) {
     applySnapshot(trayStore.walletApp, response.wallet);

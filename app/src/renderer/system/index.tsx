@@ -40,7 +40,7 @@ export const Shell: FC = observer(() => {
         dialogProps={shell.dialogProps}
       />
     ),
-    [shell.dialogId, shell.dialogProps.toJSON()]
+    [shell.dialogId, shell.dialogProps]
   );
 
   const shipLoaded = ship?.loader.isLoaded;
