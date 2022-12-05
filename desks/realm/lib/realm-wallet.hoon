@@ -51,21 +51,8 @@
   =/  tx
     ^-  help-transaction
     %.  json
-    :: %-  ot
-    :: :~  [%hash so]
-    ::     [%network (su (perk %bitcoin %ethereum ~))]
-    ::     [%type (su (perk %sent %received ~))]
-    ::     [%initiated-at so]
-    ::     [%completed-at so]
-    ::     [%our-address so]
-    ::     [%their-patp so]
-    ::     [%their-address so]
-    ::     [%status (su (perk %pending %failed %succeeded ~))]
-    ::     [%failure-reason so]
-    ::     [%notes so]
-    ::   ==
     :~  (ot ~[hash+so network+(su (perk %bitcoin %ethereum ~)) type+(su (perk %sent %received ~)) initiated-at+so completed-at+so:dejs-soft:format our-address+so their-patp+so:dejs-soft:format their-address+so status+(su (perk %pending %failed %succeeded ~)) failure-reason+so:dejs-soft:format notes+so])
-     ==
+    ==
   :*  hash.tx
       network.tx
       type.tx
@@ -114,7 +101,7 @@
       [%set-settings (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni])]
       [%set-wallet-creation-mode (ot ~[mode+(su (perk %on-demand %default ~))])]
       [%set-sharing-mode (ot ~[who+(su (perk %nobody %friends %anybody ~))])]
-      [%set-sharing-permissions (ot ~[type+(su (perk %allow %block ~)) who+(se %p)])]
+      [%set-sharing-permissions (ot ~[type+(su (perk %block ~)) who+(se %p)])]
       [%set-default-index (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni nickname+so])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %btctestnet %ethereum ~)) nickname+so])]
@@ -235,4 +222,3 @@
 
     ==
   ==
---
