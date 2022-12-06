@@ -22,9 +22,11 @@ jobs:
           mkdir ~/.ssh
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm urbit@143.198.180.97:./usher-moon
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier urbit@143.198.180.97:./usher-moon
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:./usher-moon
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:./usher-moon
         env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
       #
       # poke remote endpoint in usher agent which will run clay commit
