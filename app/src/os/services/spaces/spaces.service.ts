@@ -35,7 +35,6 @@ interface SpaceModels {
   bazaar: NewBazaarStoreType;
   membership: any;
   visas: VisaModelType;
-  featured: FeaturedModelType;
 }
 /**
  * SpacesService
@@ -50,7 +49,6 @@ export class SpacesService extends BaseService {
       outgoing: {},
     }),
     bazaar: NewBazaarStore.create(),
-    featured: FeaturedModel.create()
     // bazaar: BazaarStore.create({ my: {} }),
   };
 
