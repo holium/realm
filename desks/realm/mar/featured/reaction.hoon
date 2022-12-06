@@ -5,7 +5,7 @@
 ++  grow
   |%
   ++  noun  rxn
-  ++  json  (reaction:enjs rxn)
+  ++  json  (space-map:encode +:rxn)
   --
 ::
 ++  grab

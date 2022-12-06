@@ -35,6 +35,7 @@ interface SpaceModels {
   bazaar: NewBazaarStoreType;
   membership: any;
   visas: VisaModelType;
+  featured: FeaturedModelType;
 }
 /**
  * SpacesService
@@ -49,6 +50,7 @@ export class SpacesService extends BaseService {
       outgoing: {},
     }),
     bazaar: NewBazaarStore.create(),
+    featured: FeaturedModel.create()
     // bazaar: BazaarStore.create({ my: {} }),
   };
 
@@ -91,6 +93,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.add-ally': this.addAlly,
     'realm.spaces.bazaar.add-app': this.addApp,
     'realm.spaces.bazaar.remove-app': this.removeApp,
+    'realm.spaces.featured.get-featured-spaces': this.getFeaturedSpaces,
   };
 
   static preload = {
@@ -235,6 +238,8 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.add-app', ship, desk),
     removeApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.remove-app', appId),
+    getFeaturedSpaces: async () =>
+      await ipcRenderer.invoke('realm.spaces.featured.get-featured-spaces')
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -677,6 +682,10 @@ export class SpacesService extends BaseService {
 
   async removeApp(_event: IpcMainInvokeEvent, appId: string) {
     // return await BazaarApi.removeApp(this.core.conduit!, appId);
+  }
+
+  async getFeaturedSpaces(_event: IpcMainInvokeEvent) {
+    return await FeaturedApi.getFeaturedSpaces(this.core.conduit!);
   }
 
   async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {

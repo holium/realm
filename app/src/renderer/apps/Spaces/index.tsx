@@ -231,11 +231,11 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                 &nbsp;&nbsp;&nbsp;
               </Text>
             </Flex>
-            {/*<Flex position="relative" width="100%" mt={3} ml={2}>
-            <Text opacity={0.8} color={textColor} fontWeight={450}>
-              Featured spaces
-            </Text>
-            </Flex>*/}
+            <Flex position="relative" width="100%" mt={3} ml={2}>
+              <Text opacity={0.8} color={textColor} fontWeight={450}>
+                {SpacesActions.getFeaturedSpaces()}
+              </Text>
+            </Flex>
           </Grid.Column>
         </Flex>
       ) : (
