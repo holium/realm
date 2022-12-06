@@ -10,20 +10,20 @@ import { ethers } from 'ethers';
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
-import { WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
+import { ProtocolType, WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export class EthereumProtocol implements BaseProtocol {
-  private network: 'mainnet' | 'gorli';
-  private ethProvider?: ethers.providers.JsonRpcProvider;
+  private network: ProtocolType;
+  private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
 
-  constructor(network: 'mainnet' | 'gorli') {
+  constructor(network: ProtocolType) {
     this.network = network;
     let alchemySettings;
-    if (network === 'mainnet') {
-      // this.ethProvider = new ethers.providers.JsonRpcProvider(
-      //   'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
-      // );
+    if (network === ProtocolType.ETH_MAIN) {
+      this.ethProvider = new ethers.providers.JsonRpcProvider(
+        'https://eth.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
+      );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_MAINNET, // Replace with your network.
@@ -49,7 +49,7 @@ export class EthereumProtocol implements BaseProtocol {
   }
 
   removeListener() {
-    this.ethProvider!.removeAllListeners();
+    this.ethProvider?.removeAllListeners();
   }
 
   updateWalletState(walletState: WalletStoreType) {
@@ -64,7 +64,7 @@ export class EthereumProtocol implements BaseProtocol {
     const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
     const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
     const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
-    const URL = this.network === 'mainnet' ? mainnetURL : goerliURL;
+    const URL = this.network === ProtocolType.ETH_MAIN ? mainnetURL : goerliURL;
     return await axios.get(URL);
   }
   getAccountAssets(addr: string): Promise<BaseAsset[]> {

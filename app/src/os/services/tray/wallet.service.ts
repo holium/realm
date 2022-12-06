@@ -14,6 +14,7 @@ import {
   EthWalletType,
   SettingsType,
   ProtocolType,
+  NetworkStoreType,
 } from '@holium/realm-wallet/src/wallet.model'
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { BaseProtocol } from '@holium/realm-wallet/src/wallets';
@@ -302,12 +303,13 @@ export class WalletService extends BaseService {
         navState: {
           view: WalletView.NEW,
           network: NetworkType.ETHEREUM,
+          networkStore: NetworkStoreType.ETHEREUM,
           protocol: ProtocolType.ETH_MAIN,
           btcNetwork: 'mainnet',
         },
-        networks: {
-          [ProtocolType.ETH_MAIN]: {
-            network: 'gorli',
+        wallets: {
+          [NetworkStoreType.ETHEREUM]: {
+            protocol: ProtocolType.ETH_MAIN,
             settings: {
               walletCreationMode: WalletCreationMode.DEFAULT,
               sharingMode: SharingMode.ANYBODY,
@@ -317,7 +319,7 @@ export class WalletService extends BaseService {
             initialized: false,
             conversions: {},
           },
-          [ProtocolType.BTC_MAIN]: {
+          [NetworkStoreType.BTC_MAIN]: {
             settings: {
               walletCreationMode: WalletCreationMode.DEFAULT,
               sharingMode: SharingMode.ANYBODY,
@@ -326,7 +328,7 @@ export class WalletService extends BaseService {
             },
             conversions: {},
           },
-          [ProtocolType.BTC_TEST]: {
+          [NetworkStoreType.BTC_TEST]: {
             settings: {
               walletCreationMode: WalletCreationMode.DEFAULT,
               sharingMode: SharingMode.ANYBODY,
@@ -369,13 +371,10 @@ export class WalletService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    const ethereumMainnetWallet = new EthereumProtocol('mainnet');
-    const ethereumGorliWallet = new EthereumProtocol('gorli');
-    const uqbarWallet = new UqbarProtocol();
     const protocolMap = new Map<ProtocolType, BaseProtocol>([
-      [ProtocolType.ETH_MAIN, ethereumMainnetWallet],
-      [ProtocolType.ETH_GORLI, ethereumGorliWallet],
-      [ProtocolType.UQBAR, uqbarWallet],
+      [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
+      [ProtocolType.ETH_GORLI, new EthereumProtocol(ProtocolType.ETH_GORLI)],
+      [ProtocolType.UQBAR, new UqbarProtocol()],
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 

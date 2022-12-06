@@ -137,6 +137,9 @@
   =,  enjs:format
   |=  =update
   ^-  json
+  %-  pairs
+  :_  ~
+  :-  `cord`-.update
   ?-    -.update
       %address
     %-  pairs

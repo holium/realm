@@ -30,6 +30,7 @@ export enum NewWalletScreen {
 export const EthNew: FC<any> = observer(() => {
   const { theme } = useServices();
   const { walletApp } = useTrayApps();
+  console.log('mywalletapp', walletApp);
   const initialScreen = walletApp.initialized
     ? NewWalletScreen.DETECTED_EXISTING
     : NewWalletScreen.CREATE;

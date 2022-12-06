@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { ProtocolType, SettingsType, WalletStoreType, WalletCreationMode } from '@holium/realm-wallet/src/wallet.model';
+import { ProtocolType, SettingsType, WalletStoreType, WalletCreationMode, NetworkStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -69,7 +69,6 @@ export const WalletApi = {
         },
       },
     };
-    console.log(payload)
     await conduit.poke(payload);
   },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
@@ -200,18 +199,16 @@ export const WalletApi = {
       walletState: WalletStoreType,
     ): void => {
       conduit.watch({
-        app: 'spaces',
-        path: `/updates`,
+        app: 'realm-wallet',
+        path: '/updates',
         onEvent: async (data: any, _id?: number, mark?: string) => {
-          // console.log(mark, data);
-          if (mark === 'wallet-update') {
+          if (mark === 'realm-wallet-update') {
             handleWalletReactions(
               data,
               walletState,
             );
           }
         },
-  
         onError: () => console.log('Subscription rejected'),
         onQuit: () => console.log('Kicked from subscription %spaces'),
       });
@@ -227,22 +224,38 @@ export const handleWalletReactions = (
     case 'wallet':
       const wallet = data.wallet;
       if (wallet.network === 'ethereum') {
-        this.state!.ethereum.applyWalletUpdate(
-          this.state!.ethereum.network,
+        walletState!.wallets.get(NetworkStoreType.ETHEREUM)!.applyWalletUpdate(
+          walletState!.navState.protocol,
           wallet
         );
       } else if (wallet.network === 'bitcoin') {
-        walletState!.networks.get(ProtocolType.BTC_MAIN)!.applyWalletUpdate(wallet);
-        this.updateBitcoinInfo();
+        // walletState!.wallets.get(NetworkStoreType.BTC_MAIN)!.applyWalletUpdate(wallet);
       } else if (wallet.network === 'btctestnet') {
-        this.state!.testnet.applyWalletUpdate(wallet);
-        this.updateBitcoinInfo();
+        // walletState!.wallets.get(NetworkStoreType.BTC_TEST)!.applyWalletUpdate(wallet);
       }
       break;
     case 'wallets':
-      walletState.networks.get(ProtocolType.ETH_MAIN)!.initial(data);
+      const wallets = data.wallets;
+      if (
+        Object.keys(wallets.ethereum).length !== 0 ||
+        Object.keys(wallets.bitcoin).length !== 0 ||
+        Object.keys(wallets.btctestnet).length !== 0
+      ) {
+        walletState!.setInitialized(true);
+      }
+      walletState!.wallets.get(NetworkStoreType.ETHEREUM)!.initial(wallets);
+      walletState!.wallets.get(NetworkStoreType.BTC_MAIN)!.initial(wallets.bitcoin);
+      walletState!.wallets.get(NetworkStoreType.BTC_TEST)!.initial(wallets.btctestnet);
       break;
     case 'transaction':
+      const transaction = data.transaction;
+      if (transaction.network == 'ethereum')
+        walletState!.wallets.get(NetworkStoreType.ETHEREUM)!.wallets.get(
+          transaction.index
+        )!.applyTransactions(transaction.net, transaction.transaction);
+        else if (transaction.network == 'bitcoin') {
+          // walletState!.wallets.get(NetworkStoreType.BTC_MAIN)!.wallets.get(transaction.index)!.applyTransactionUpdate(transaction);
+        }
       break;
     case 'settings':
       walletState.setSettings(data);

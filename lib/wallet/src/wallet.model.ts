@@ -6,7 +6,6 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
-import { isTemplateLiteralTypeSpan } from 'typescript';
 
 export enum WalletView {
   LIST = 'list',
@@ -56,6 +55,21 @@ export const WalletSettings = types
     networkSettings: types.map(Settings),
     passcodeHash: types.string,
   })
+
+export enum NetworkType {
+  ETHEREUM = 'ethereum',
+  BITCOIN = 'bitcoin',
+}
+const Networks = types.enumeration(Object.values(NetworkType));
+
+export enum ProtocolType {
+  ETH_MAIN = 'Ethereum Mainnet',
+  ETH_GORLI = 'Görli Testnet',
+  BTC_MAIN = 'Bitcoin Mainnet',
+  BTC_TEST = 'Bitcoin Testnet',
+  UQBAR = 'Uqbar Network',
+}
+const Protocols = types.enumeration(Object.values(ProtocolType));
 
 export const BitcoinTransaction = types.model('BitcoinTransaction', {
   hash: types.identifier,
@@ -494,7 +508,7 @@ export type EthWalletType = Instance<typeof EthWallet>;
 
 export const EthStore = types
   .model('EthStore', {
-    network: types.enumeration(['mainnet', 'gorli']),
+    protocol: Protocols,
     wallets: types.map(EthWallet),
     settings: Settings,
     initialized: types.boolean,
@@ -531,7 +545,7 @@ export const EthStore = types
           nfts: {},
           transactions: {},
         };
-        this.applyWalletUpdate(self.network, walletUpdate);
+        this.applyWalletUpdate(self.protocol, walletUpdate);
       });
     },
     // pokes
@@ -566,8 +580,8 @@ export const EthStore = types
           .applyTransactionUpdate(network, transaction);
       }
     }),
-    setNetwork(network: string) {
-      self.network = network;
+    setProtocol(protocol: ProtocolType) {
+      self.protocol = protocol;
     },
     deleteWallets() {
       self.wallets.clear();
@@ -580,24 +594,19 @@ export const EthStore = types
     },
   }));
 
-export enum NetworkType {
-  ETHEREUM = 'ethereum',
-  BITCOIN = 'bitcoin',
-}
-const Networks = types.enumeration(Object.values(NetworkType));
 
-export enum ProtocolType {
-  ETH_MAIN = 'Ethereum Mainnet',
-  ETH_GORLI = 'Görli Testnet',
+
+export enum NetworkStoreType {
+  ETHEREUM = 'Ethereum',
   BTC_MAIN = 'Bitcoin Mainnet',
   BTC_TEST = 'Bitcoin Testnet',
-  UQBAR = 'Uqbar Network',
 }
-const Protocols = types.enumeration(Object.values(ProtocolType));
+const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
 export const WalletNavState = types.model('WalletNavState', {
   view: types.enumeration(Object.values(WalletView)),
   network: Networks,
+  networkStore: NetworkStores,
   protocol: Protocols,
   btcNetwork: types.enumeration(['mainnet', 'testnet']),
   walletIndex: types.maybe(types.string),
@@ -619,6 +628,7 @@ export type WalletNavStateType = Instance<typeof WalletNavState>;
 export interface WalletNavOptions {
   canReturn?: boolean;
   network?: NetworkType;
+  networkStore?: NetworkStoreType;
   protocol?: ProtocolType;
   walletIndex?: string;
   detail?: {
@@ -634,7 +644,7 @@ export interface WalletNavOptions {
 export const WalletStore = types
   .model('WalletStore', {
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
-    networks: types.map(types.union(BitcoinStore, EthStore)),
+    wallets: types.map(types.union(BitcoinStore, EthStore)),
     creationMode: types.string,
     sharingMode: types.string,
     whitelist: types.map(types.string),
@@ -649,11 +659,11 @@ export const WalletStore = types
   })
   .views((self) => ({
     get currentStore() {
-      return self.networks.get(self.navState.protocol)!;
+      return self.wallets.get(self.navState.networkStore)!;
     },
 
     get currentWallet() {
-      const walletStore = self.networks.get(self.navState.protocol)!;
+      const walletStore = self.wallets.get(self.navState.networkStore)!;
       return self.navState.walletIndex
         ? walletStore.wallets.get(self.navState.walletIndex)
         : null;
@@ -661,6 +671,7 @@ export const WalletStore = types
   }))
   .actions((self) => ({
     setInitialized(initialized: boolean) {
+      console.log('setting init')
       self.initialized = initialized;
     },
     setNetwork(network: NetworkType) {
@@ -684,6 +695,7 @@ export const WalletStore = types
       const detail = options?.detail;
       const action = options?.action;
       const network = options?.network || self.navState.network;
+      const networkStore = options?.networkStore || self.navState.networkStore;
       const protocol = options?.protocol || self.navState.protocol;
 
       if (
@@ -700,6 +712,7 @@ export const WalletStore = types
         detail,
         action,
         network,
+        networkStore,
         protocol,
         btcNetwork: self.navState.btcNetwork,
       });
@@ -711,6 +724,7 @@ export const WalletStore = types
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,
           network: self.navState.network,
+          networkStore: self.navState.networkStore,
           protocol: self.navState.protocol,
           btcNetwork: self.navState.btcNetwork,
         })
@@ -726,6 +740,7 @@ export const WalletStore = types
       self.navState = WalletNavState.create({
         view: WalletView.LIST,
         network: self.navState.network,
+        networkStore: self.navState.networkStore,
         protocol: self.navState.protocol,
         btcNetwork: self.navState.btcNetwork,
       });
@@ -735,7 +750,7 @@ export const WalletStore = types
       self.returnView = view;
     },
     setNetworkProvider(protocol: string, provider: string) {
-      self.networks.get(protocol)!.setProvider(provider);
+      self.wallets.get(protocol)!.setProvider(provider);
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;

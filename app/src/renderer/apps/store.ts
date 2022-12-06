@@ -11,6 +11,7 @@ import {
 
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
+  NetworkStoreType,
   NetworkType,
   ProtocolType,
   SharingMode,
@@ -117,13 +118,14 @@ export const trayStore = TrayAppStore.create({
     navState: {
       view: WalletView.NEW,
       network: NetworkType.ETHEREUM,
+      networkStore: NetworkStoreType.ETHEREUM,
       protocol: ProtocolType.ETH_MAIN,
       btcNetwork: 'mainnet',
     },
     navHistory: [],
-    networks: {
-      [ProtocolType.ETH_MAIN]: {
-        network: 'gorli',
+    wallets: {
+      [NetworkStoreType.ETHEREUM]: {
+        protocol: ProtocolType.ETH_MAIN,
         settings: {
           walletCreationMode: WalletCreationMode.DEFAULT,
           sharingMode: SharingMode.ANYBODY,
@@ -133,7 +135,8 @@ export const trayStore = TrayAppStore.create({
         initialized: false,
         conversions: {},
       },
-      [ProtocolType.BTC_MAIN]: {
+      [NetworkStoreType.BTC_MAIN]: {
+        protocol: ProtocolType.BTC_MAIN,
         settings: {
           walletCreationMode: WalletCreationMode.DEFAULT,
           sharingMode: SharingMode.ANYBODY,
@@ -142,7 +145,8 @@ export const trayStore = TrayAppStore.create({
         },
         conversions: {},
       },
-      [ProtocolType.BTC_TEST]: {
+      [NetworkStoreType.BTC_TEST]: {
+        protocol: ProtocolType.BTC_TEST,
         settings: {
           walletCreationMode: WalletCreationMode.DEFAULT,
           sharingMode: SharingMode.ANYBODY,
