@@ -7,6 +7,7 @@
 /+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify, groups-two
 |%
 +$  card  card:agent:gall
++$  targetable-groups  ?(%1 %2)
 +$  versioned-state
   $%  state-0
       state-1
@@ -20,7 +21,7 @@
   ==
 +$  state-1
   $:  %1
-      groups-target=?(%1 %2)
+      groups-target=targetable-groups
       =app-id:notify         :: constant
       =uuid:notify           :: (sham @p)
       =devices:notify        :: (map device-id player-id)
@@ -60,10 +61,12 @@
   ++  on-load
     |=  =vase
     ^-  (quip card _this)
+    ~&  %on-load
     =/  old=(unit versioned-state)
       (mole |.(!<(versioned-state vase)))
+    ~&  old
     ?^  old
-      `this(state (migrate-state u.old))
+      `this(state (migrate-state u.old)) 
     ~&  >>  'nuking old state'
     =^  cards  this  on-init
     :_  this
@@ -79,14 +82,34 @@
     |^
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
+      %test
+        (test-scry:groups-two 0 bowl)
+      %accept-dm
+        ?-  groups-target
+          %1
+            =/  dm-hook-action  !<(action:dm-hook-sur vase)
+            ?-  -.dm-hook-action
+              %decline  !!
+              %pendings  !!
+              %screen  !!
+              %accept
+              :-
+                [%pass / %agent [our.bowl %dm-hook] %poke dm-hook-action+!>([%accept ship.dm-hook-action])]~
+                state
+            ==
+          %2  [(accept-dm:groups-two !<(action:dm-hook-sur vase) bowl) state]
+        ==
       %graph-dm-action
         ?-  groups-target
           %1  (on-graph-action:core !<(action:store vase))
           %2  [(on-graph-action:groups-two !<(action:store vase) [our.bowl now.bowl]) state]
         ==
       %notify-action  (on-notify-action:core !<(action:notify vase))
-      %set-groups-target  `[%1 !<(?(%1 %2) vase) +>:state]
-      :: %next-dm-action    (on-action:core !<(action:store vase))
+      %set-groups-target
+      ::   :courier &set-groups-target %2
+      :-
+        (set-groups-target-cards:core !<(targetable-groups vase))
+        [%1 !<(targetable-groups vase) +>:state]
     ==
     [cards this]
   --
@@ -94,14 +117,14 @@
   ++  on-watch
     |=  =path
     ^-  (quip card _this)
-    ~&  "on-watch called in %courier"
-    ~&  path
+    ?>  =(our.bowl src.bowl)
     =/  cards=(list card)
       ?:  =(groups-target %2)
-        (on-watch:groups-two path)
+        (on-watch:groups-two path bowl)
+      ~&  "on-watch called in %courier"
+      ~&  path
       ?+    path      (on-watch:def path)
           [%updates ~]
-        ?>  =(our.bowl src.bowl)
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
         [%give %fact [/updates ~] graph-dm-reaction+!>([%previews dm-previews])]~
       ==
@@ -147,7 +170,7 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    =/  wirepath  `path`wire
+    ~&  wire
     ?+    wire  (on-agent:def wire sign)
       [%graph-store ~]
         ?+    -.sign  (on-agent:def wire sign)
@@ -187,6 +210,138 @@
               =^  cards  state
                 (on-hook-action !<(=action:dm-hook-sur q.cage.sign) now.bowl our.bowl)
               [cards this]
+            ==
+        ==
+      [%g2 %ui ~]
+        ~&  -.sign
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: groups-two /ui subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: groups-two /ui kicked us, resubscribing..."
+            :_  this
+            :~
+              [%pass /g2/ui %agent [our.bowl %chat] %watch /ui]
+            ==
+          %fact
+            ~&  'groups-two /ui fact'
+            ~&  sign
+            [~ this]
+            ::  [cards this]
+        ==
+      [%g2 %briefs ~]
+        ~&  -.sign
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: groups-two /briefs subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: groups-two /briefs kicked us, resubscribing..."
+            :_  this
+            :~
+              [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
+            ==
+          %fact
+            ~&  'groups-two /briefs fact'
+            ~&  sign
+            [(propagate-briefs-fact:groups-two cage.sign bowl) this]
+            :: [whom:c brief:briefs:c]
+
+::[ %fact
+::    cage
+::  [ p=%chat-brief-update
+::      q
+::    [ #t/[?([%club p=@uvH] [%flag p=[p=@p q=@tas]] [%ship p=@p]) last=@da count=@ud read-id=u([p=@p q=@da])]
+::      q=[[1.885.956.211 182] 170.141.184.505.963.463.907.794.262.005.666.283.520 0 0 0 170.141.184.505.963.463.907.794.262.005.666.283.520]
+::    ]
+::  ]
+::]
+        ==
+      [%g2 %dm %ui ~]
+        ~&  -.sign
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: groups-two /dm/ui subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: groups-two /dm/ui kicked us, giving up..."
+            `this
+          %fact
+            [(handle-dm-ui-fact:groups-two cage.sign bowl) this]
+        ==
+      [%g2 %club %new ~]
+        ~&  -.sign
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: groups-two /club/new subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: groups-two /club/new kicked us, resubscribing..."
+            :_  this
+            :~
+              [%pass /g2/club/new %agent [our.bowl %chat] %watch /club/new]
+            ==
+          %fact
+            ~&  'groups-two /club/new fact'
+            ~&  sign
+:: [ %fact
+::     cage
+::   [ p=%club-invite
+::       q
+::     [ #t/[@uvH team=nlr(@p) hive=nlr(@p) met=[title=@t description=@t image=@t cover=@t]]
+::       q=[170.141.184.505.959.953.826.191.296.933.732.695.408 [182 0 0] [0 [179 0 0] 0] 0 0 0 0]
+::     ]
+::   ]
+:: ]
+            [~ this]
+        ==
+      [%g2 %dm %invited ~]
+        ~&  -.sign
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: groups-two /dm/invited subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: groups-two /dm/invited kicked us, resubscribing..."
+            :_  this
+            :~
+              [%pass /g2/dm/invited %agent [our.bowl %chat] %watch /dm/invited]
+            ==
+          %fact
+            ~&  'groups-two /dm/invited fact'
+            ~&  sign
+:: [%fact cage=[
+::   p=%ships
+::   q=[
+::     #t/?(?(%~ [n=@p l=nlr(@p) r=nlr(@p)]) nlr(@p))
+::     q=[182 0 0]
+::   ]
+:: ]]
+            =/  possible-fact  !<(?(%~ [n=@p l=(set @p) r=(set @p)]) q.cage.sign)
+            =/  to-ship  -.possible-fact
+::            =/  new-dm
+::            ^-  chat:store
+::            :*
+::              path=(spat /dm-inbox/(scot %p to-ship))
+::              to=(silt ~[to-ship])
+::              type=%dm
+::              source=%talk
+::              messages=~
+::              metadata=~
+::            ==
+::            =/  upds            (send-updates new-dm our.bowl)
+            =/  the-invite      (form-pending:groups-two to-ship now.bowl (get-rolo:groups-two bowl))
+            ~&  >  the-invite
+            :_
+            this
+            :~
+              [%give %fact [/updates ~] graph-dm-reaction+!>([%invite-dm the-invite])]
             ==
         ==
     ==
@@ -327,9 +482,9 @@
 ++  on-graph-update    ::  Handles graph-store updates
   |=  [upd=update:graph-store now=@da our=ship]
   ^-  (quip card _state)
-  |^
   ~&  "on-graph-update called"
   ~&  upd
+  |^
   ?+  -.q.upd   `state
     %add-nodes
       ?:  =(name.resource.+.q.upd %dm-inbox) :: is dm-inbox
@@ -405,6 +560,40 @@
       ::  Send to onesignal
     ==
   --
+++  send-updates
+  |=  [new-dm=chat:store our=ship]
+  ?:  =(%.n push-enabled.state) ::  we've disabled push
+    :_  state
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+  ?:  (is-our-message:gs:lib our new-dm) :: its our message (outgoing)
+    :_  state
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+      ::
+  ?:  =((lent ~(tap by devices.state)) 0) :: there are no devices
+    :_  state
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+  =/  notify   (generate-push-notification:notif-lib our app-id.state new-dm)
+  ::  send http request
+  ::
+  =/  =header-list:http
+    :~  ['Content-Type' 'application/json']
+    ==
+  =|  =request:http
+  =:  method.request       %'POST'
+      url.request          'https://onesignal.com/api/v1/notifications'
+      header-list.request  header-list
+      body.request
+        :-  ~
+        %-  as-octt:mimes:html
+        %-  en-json:html
+        (request:enjs:notif-lib notify devices.state)
+  ==
+  :_  state
+  :~
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
+    [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
+    ::  Send to onesignal
+  ==
 ::
 ++  on-hook-action
   |=  [act=action:dm-hook-sur now=@da our=ship]
@@ -457,4 +646,24 @@
   ::
   --
 
+++  set-groups-target-cards
+    |=  [new-target=targetable-groups]
+    ^-  (list card)
+    ~&  'setting groups target'
+    ~&  new-target
+    ?-  new-target
+      %1  ~ :: no cards to change for old groups
+      %2
+      :~  :: define list of cards to update subscriptions
+        :: don't care about graph-store&dm-hook anymore
+        :: if we're on groups-two
+        [%pass /updates %agent [our.bowl %graph-store] %leave ~]
+        [%pass /updates %agent [our.bowl %dm-hook] %leave ~]
+        :: and sub to new junk
+        [%pass /g2/ui %agent [our.bowl %chat] %watch /ui]
+        [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
+        [%pass /g2/club/new %agent [our.bowl %chat] %watch /club/new]
+        [%pass /g2/dm/invited %agent [our.bowl %chat] %watch /dm/invited]
+      ==
+    ==
 --

@@ -8,6 +8,7 @@
 /+  res=resource
 =<  [sur .]
 =,  sur
+!:
 |%
 +$  hark-places   (map place:hark stats:hark)
 ::
@@ -410,6 +411,8 @@
   ::
   ++  is-our-message
     |=  [our=ship =chat:sur]
+    ^-  ?
+    ?~  messages.chat  %.n
     =/  message       (rear messages.chat)
     =(author.message our)
   ::
@@ -643,6 +646,8 @@
   ++  preview
     |=  cha=message-preview
     ^-  json
+    ~&  >  'type.cha'
+    ~&  >  type.cha
     =/  to-field    
       ?:  
         ?| 

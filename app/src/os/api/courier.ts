@@ -140,8 +140,8 @@ export const CourierApi = {
   acceptDm: async (conduit: Conduit, toShip: string) => {
     console.log('accepting dm');
     const payload = {
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
+      app: 'courier',
+      mark: 'accept-dm',
       json: {
         accept: toShip,
       },
