@@ -9,7 +9,6 @@ import {
 } from 'renderer/components';
 import { useField, useForm } from 'mobx-easy-form';
 import { useServices } from 'renderer/logic/store';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
@@ -85,12 +84,12 @@ export const RoomInvite: FC<InviteRoomProps> = observer(
 
         console.log('sending invite:', innerInvite);
 
-        RoomsActions.invite(room.id, innerInvite).then(() => {
-          setLoading(false);
-          // chatInputRef.current!.value = '';
-          invitePatp.actions.onChange('');
-          setInvited((prevInvited) => [...prevInvited, innerInvite]);
-        });
+        // RoomsActions.invite(room.id, innerInvite).then(() => {
+        //   setLoading(false);
+        //   // chatInputRef.current!.value = '';
+        //   invitePatp.actions.onChange('');
+        //   setInvited((prevInvited) => [...prevInvited, innerInvite]);
+        // });
       },
     });
 
@@ -139,7 +138,10 @@ export const RoomInvite: FC<InviteRoomProps> = observer(
             }}
             value={invitePatp.state.value}
             // value={''}
-            error={!invitePatp.computed.isDirty || invitePatp.computed.error}
+            error={
+              invitePatp.computed.isDirty &&
+              invitePatp.computed.ifWasEverBlurredThenError
+            }
             onChange={(e: any) => {
               invitePatp.actions.onChange(e.target.value);
             }}

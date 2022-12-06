@@ -360,7 +360,7 @@ export class ShipService extends BaseService {
       this.state.loader.set('loaded');
 
       this.services.slip?.subscribe();
-      // this.rooms?.onLogin(ship);
+      this.rooms?.watch();
       this.wallet?.onLogin(ship);
 
       // return ship state
@@ -383,9 +383,9 @@ export class ShipService extends BaseService {
     return { ship: this.state, models: this.modelSnapshots };
   }
 
-  get roomSnapshot() {
-    return this.rooms?.snapshot;
-  }
+  // get roomSnapshot() {
+  //   return this.rooms?.snapshot;
+  // }
 
   get walletSnapshot() {
     return this.wallet?.snapshot;
@@ -404,7 +404,7 @@ export class ShipService extends BaseService {
   logout() {
     this.db = undefined;
     this.state = undefined;
-    this.rooms?.onLogout();
+    // this.rooms?.onLogout();
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;

@@ -9,7 +9,7 @@
     "lib/room"
   ],
   "scripts": {
-    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:app && yarn build:design-system",
+    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn build:app",
     "link:multiplayer": "yarn build --cwd lib/multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
     "link:conduit": "yarn build --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
     "link:room": "yarn build --cwd lib/rooom && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
@@ -42,10 +42,7 @@
     "human-standard-token-abi": "^2.0.0",
     "memoize-one": "^6.0.0",
     "non-fungible-token-abi": "^1.0.1",
-    "qrcode.react": "^3.1.0",
-    "react-cool-virtual": "^0.7.0",
-    "react-virtuoso": "^2.18.0",
-    "react-window": "^1.8.7"
+    "qrcode.react": "^3.1.0"
   },
   "version": "0.0.1",
   "devDependencies": {

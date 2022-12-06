@@ -75,7 +75,10 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
   useEffect(() => {
     SpacesActions.setJoin('initial');
   }, []);
-  if (spaces.join.state === 'loading' && spaces.spaces.has('/' + searchString)) {
+  if (
+    spaces.join.state === 'loading' &&
+    spaces.spaces.has('/' + searchString)
+  ) {
     SpacesActions.selectSpace('/' + searchString);
     if (searchVisible === true) {
       setSearchVisible(false);
@@ -127,7 +130,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
             color={iconColor}
             data-close-tray="false"
             onClick={(evt: any) => {
-              SpacesActions.setJoin('initial')
+              SpacesActions.setJoin('initial');
               setSearchVisible(!searchVisible);
             }}
             mr={1}
@@ -202,9 +205,11 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                       SpacesActions.joinSpace(searchString);
                     }}
                   >
-                    {spaces.join.state === 'loading'
-                    ? <Spinner size={0} />
-                    : "Join"}
+                    {spaces.join.state === 'loading' ? (
+                      <Spinner size={0} />
+                    ) : (
+                      'Join'
+                    )}
                   </TextButton>
                 }
                 onKeyDown={(evt: any) => {
