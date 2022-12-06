@@ -1,6 +1,7 @@
 // import { action, makeObservable, observable } from 'mobx';
 import { ContractAddr, Asset } from './types';
 import { BaseAsset } from './BaseAsset';
+import { WalletStoreType } from '../wallet.model';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.
@@ -8,6 +9,10 @@ import { BaseAsset } from './BaseAsset';
 export abstract class BaseProtocol {
 
   abstract onBlock(callback: () => void): void;
+  
+  abstract removeListener(): void;
+
+  abstract updateWalletState(walletState: WalletStoreType): void;
 
   abstract getAccountBalance(addr: string): Promise<number>;
 

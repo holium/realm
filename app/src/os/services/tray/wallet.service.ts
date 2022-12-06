@@ -3,7 +3,7 @@ import { BaseService } from '../base.service';
 import Store from 'electron-store';
 import EncryptedStore from '../../lib/encryptedStore';
 import Realm from '../..';
-/*import {
+import {
   WalletStore,
   WalletStoreType,
   WalletView,
@@ -13,8 +13,8 @@ import Realm from '../..';
   UISettingsType,
   EthWalletType,
   SettingsType,
-} from './wallet.model';*/
-import { UISettingsType, WalletView, NetworkType, ProtocolType, SettingsType } from '@holium/realm-wallet/src/wallets/types';
+  ProtocolType,
+} from '@holium/realm-wallet/src/wallet.model'
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
@@ -45,13 +45,14 @@ export interface RecipientPayload {
 }
 
 export class WalletService extends BaseService {
-  private db?: Store<Wallet> | EncryptedStore<Wallet>; // for persistence
-  // private state?: WalletStoreType; // for state management
+  private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
+  private state?: WalletStoreType; // for state management
   private signer?: BaseSigner;
   private wallet?: Wallet;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-network': this.setNetwork,
+    'realm.tray.wallet.set-network-protocol': this.setProtocol,
     'realm.tray.wallet.get-recipient': this.getRecipient,
     'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
     'realm.tray.wallet.set-settings': this.setSettings,
@@ -63,7 +64,6 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
     'realm.tray.wallet.check-passcode': this.checkPasscode,
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
-    'realm.tray.wallet.set-network-protocol': this.setNetworkProtocol,
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
     'realm.tray.wallet.navigate': this.navigate,
     'realm.tray.wallet.navigateBack': this.navigateBack,
@@ -264,9 +264,6 @@ export class WalletService extends BaseService {
         contractAddr
       );
     },
-    setNetworkProtocol: async (protocol: string) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.set-network-protocol', protocol);
-    },
     onAgentUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-agent-update', callback),
     onNetworkUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-network-update', callback),
   };
@@ -291,19 +288,19 @@ export class WalletService extends BaseService {
       secretKey,
       accessPropertiesByDotNotation: true,
     };
-    this.db = new Store<Wallet>(storeParams);
-    const persistedState: Wallet = this.db.store;
+    this.db = new Store<WalletStoreType>(storeParams);
+    const persistedState: WalletStoreType = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {
-      this.wallet = persistedState;
+      this.state = persistedState;
     } else {
-      const ethereumMainnetWallet = new ProtocolWallet(this.signer, new EthereumProtocol('mainnet'));
-      const ethereumGorliWallet = new ProtocolWallet(this.signer, new EthereumProtocol('gorli'))
-      const uqbarWallet = new ProtocolWallet(this.signer, new UqbarProtocol());
-      const ethMap = new Map<ProtocolType, ProtocolWallet>([
-        ['ethmain', ethereumMainnetWallet],
-        ['ethgorli', ethereumGorliWallet],
-        ['uqbar', uqbarWallet],
+      const ethereumMainnetWallet = new EthereumProtocol('mainnet');
+      const ethereumGorliWallet = new EthereumProtocol('gorli');
+      const uqbarWallet = new UqbarProtocol();
+      const ethMap = new Map<ProtocolType, BaseProtocol>([
+        [ProtocolType.ETH_MAIN, ethereumMainnetWallet],
+        [ProtocolType.ETH_GORLI, ethereumGorliWallet],
+        [ProtocolType.UQBAR, uqbarWallet],
       ]);
       const walletMap = new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>([
         [NetworkType.ETHEREUM, ethMap]
@@ -311,18 +308,18 @@ export class WalletService extends BaseService {
       this.wallet = new Wallet(walletMap, NetworkType.ETHEREUM, 'ethmain');
     }
 
-    onSnapshot(this.wallet!, (snapshot: any) => {
+    onSnapshot(this.state!, (snapshot: any) => {
       this.db!.store = snapshot;
     });
 
     const patchEffect = {
-      model: getSnapshot(this.wallet),
+      model: getSnapshot(this.state!),
       resource: 'wallet',
       response: 'initial',
     };
     this.core.onEffect(patchEffect);
 
-    onPatch(this.wallet, (patch) => {
+    onPatch(this.state!, (patch) => {
       const patchEffect = {
         patch,
         resource: 'wallet',
@@ -331,23 +328,19 @@ export class WalletService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    WalletApi.watchUpdates(this.core.conduit!, this.wallet!, (data: any) => {
-      this.core.mainWindow.webContents.send(
-        'realm.on-wallet-agent-update',
-        data,
-      );
-    });
+    WalletApi.watchUpdates(this.core.conduit!, this.state!);
+    this.wallet.watchUpdates(this.state!);
 
-    if (this.wallet.navState.view !== WalletView.NEW) {
-      this.wallet.resetNavigation();
+    if (this.state!.navState.view !== WalletView.NEW) {
+      this.state!.resetNavigation();
     }
     this.lock(); // lock wallet on login
   }
 
   private wrapHandler(handler: any) {
     return (...args: any) => {
-      if (this.wallet) {
-        this.wallet.setLastInteraction(new Date());
+      if (this.state) {
+        this.state.setLastInteraction(new Date());
       }
       return handler.apply(this, args);
     };
@@ -355,17 +348,17 @@ export class WalletService extends BaseService {
 
   private autoLock() {
     const shouldLock =
-      this.wallet &&
-      Date.now() - AUTO_LOCK_INTERVAL > this.wallet.lastInteraction.getTime();
+      this.state &&
+      Date.now() - AUTO_LOCK_INTERVAL > this.state.lastInteraction.getTime();
     if (shouldLock) {
       this.lock();
     }
   }
 
   private lock() {
-    const hasPasscode = this.wallet && this.wallet.settings.passcodeHash;
+    const hasPasscode = this.state && this.state.settings.passcodeHash;
     if (hasPasscode) {
-      this.wallet!.navigate(WalletView.LOCKED);
+      this.state!.navigate(WalletView.LOCKED);
     }
   }
 
@@ -391,9 +384,17 @@ export class WalletService extends BaseService {
   }
 
   async setNetwork(_event: any, network: NetworkType) {
-    this.wallet!.navigate(WalletView.LIST);
-    if (this.wallet!.navState.network !== network) {
-      this.wallet!.setNetwork(network);
+    this.state!.navigate(WalletView.LIST);
+    if (this.state!.navState.network !== network) {
+      this.state!.setNetwork(network);
+    }
+  }
+
+  setProtocol(_event: any, protocol: string) {
+    this.state!.navigate(WalletView.LIST);
+    if (this.state!.navState.protocol !== protocol) {
+      this.state!.setProtocol(protocol);
+      this.wallet!.watchProtocol()
     }
   }
 
@@ -407,7 +408,7 @@ export class WalletService extends BaseService {
     try {
       const address: any = await WalletApi.getAddress(
         this.core.conduit!,
-        this.wallet!.navState.network,
+        this.state!.navState.network,
         patp
       );
       console.log('got address: ', address);
@@ -430,11 +431,11 @@ export class WalletService extends BaseService {
   }
 
   async saveTransactionNotes(_event: any, notes: string) {
-    const network = this.wallet!.currentNetwork;
-    const net = this.wallet!.currentProtocol;
+    const network = this.state!.currentNetwork;
+    const net = this.state!.currentProtocol;
     // const hash = this.state!.currentItem!.key;
-    const hash = this.wallet!.navState.detail!.key;
-    const index = this.wallet!.currentWallet!.index;
+    const hash = this.state!.navState.detail!.key;
+    const index = this.state!.currentWallet!.index;
     await WalletApi.saveTransactionNotes(
       this.core.conduit!,
       network,
@@ -456,15 +457,15 @@ export class WalletService extends BaseService {
   async createWallet(_event: any, nickname: string) {
     console.log(`creating with nickname: ${nickname}`);
     const sender: string = this.core.conduit!.ship!;
-    let network: string = this.wallet!.navState.network;
+    let network: string = this.state!.navState.network;
     if (
       network === 'bitcoin' &&
-      this.wallet!.navState.btcNetwork === 'testnet'
+      this.state!.navState.btcNetwork === 'testnet'
     ) {
       network = 'btctestnet';
     }
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
-    this.wallet!.navigate(WalletView.LIST, { canReturn: false });
+    this.state!.navigate(WalletView.LIST, { canReturn: false });
   }
 
   async sendEthereumTransaction(
@@ -481,11 +482,11 @@ export class WalletService extends BaseService {
       value: ethers.utils.parseEther(amount),
     };
     const transaction = this.signer?.signTransaction(path, tx);
-    const hash = await this.wallet!.wallets.get(this.wallet!.currentNetwork)!.get(this.wallet!.currentProtocol).accounts[walletIndex].sendTransaction(transaction);
-    const currentWallet = this.wallet!.currentWallet! as EthWalletType;
+    const hash = await this.state!.wallets.get(this.wallet!.currentNetwork)!.get(this.wallet!.currentProtocol).accounts[walletIndex].sendTransaction(transaction);
+    const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
-      this.wallet!.currentProtocol,
+      this.state!.currentProtocol,
       hash,
       tx.to,
       toPatp,
@@ -495,13 +496,13 @@ export class WalletService extends BaseService {
       contractType
     );
     const stateTx = currentWallet.getTransaction(
-      this.wallet!.currentProtocol,
+      this.state!.currentProtocol,
       hash
     );
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
-      this.wallet!.currentProtocol,
+      this.state!.currentProtocol,
       currentWallet.index,
       hash,
       stateTx
@@ -520,7 +521,7 @@ export class WalletService extends BaseService {
   }
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
-    return await bcrypt.compare(passcode.toString(), this.wallet!.settings.passcodeHash!);
+    return await bcrypt.compare(passcode.toString(), this.state!.settings.passcodeHash!);
   }
   
   async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
@@ -539,9 +540,6 @@ export class WalletService extends BaseService {
     }
   }
 
-  setNetworkProtocol(_event: any, protocol: string) {
-    this.wallet!.setCurrentProtocol(protocol);
-  }
 
   async checkMnemonic(_event: any, mnemonic: string) {
     // TODO: implement
@@ -558,11 +556,11 @@ export class WalletService extends BaseService {
       action?: { type: string; data: any };
     }
   ) {
-    this.wallet!.navigate(view, options);
+    this.state!.navigate(view, options);
   }
 
   navigateBack() {
-    this.wallet!.navigateBack();
+    this.state!.navigateBack();
   }
 
   async getCoinTxns(
@@ -571,7 +569,7 @@ export class WalletService extends BaseService {
     tokenType: 'erc20' | 'erc721' | 'erc1155',
     contractAddr: string
   ) {
-    let coinTxns = this.wallet!.wallets.get(NetworkType.ETHEREUM)!.get(this.wallet!.currentProtocol)!.getAccountAssets(walletAddr);
+    this.state!.networks.get(this.state!.navState.protocol)!
     return coinTxns;
   }
 

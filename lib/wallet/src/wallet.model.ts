@@ -6,14 +6,6 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
-import { Network, Alchemy } from 'alchemy-sdk';
-
-const alchemySettings = {
-  apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
-  network: Network.ETH_GOERLI, // Replace with your network.
-};
-
-const alchemy = new Alchemy(alchemySettings);
 
 export enum WalletView {
   LIST = 'list',
@@ -587,9 +579,19 @@ export enum NetworkType {
 }
 const Networks = types.enumeration(Object.values(NetworkType));
 
+export enum ProtocolType {
+  ETH_MAIN = 'eth_main',
+  ETH_GORLI = 'eth_gorli',
+  BTC_MAIN = 'btc_main',
+  BTC_TEST = 'btc_test',
+  UQBAR = 'uqbar',
+}
+const Protocols = types.enumeration(Object.values(ProtocolType));
+
 export const WalletNavState = types.model('WalletNavState', {
   view: types.enumeration(Object.values(WalletView)),
   network: Networks,
+  protocol: Protocols,
   btcNetwork: types.enumeration(['mainnet', 'testnet']),
   walletIndex: types.maybe(types.string),
   detail: types.maybe(
@@ -610,6 +612,7 @@ export type WalletNavStateType = Instance<typeof WalletNavState>;
 export interface WalletNavOptions {
   canReturn?: boolean;
   network?: NetworkType;
+  protocol?: ProtocolType;
   walletIndex?: string;
   detail?: {
     type: 'transaction' | 'coin' | 'nft';
@@ -624,9 +627,7 @@ export interface WalletNavOptions {
 export const WalletStore = types
   .model('WalletStore', {
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
-    bitcoin: BitcoinStore,
-    testnet: BitcoinStore,
-    ethereum: EthStore,
+    networks: types.map(types.map(types.union(BitcoinStore, EthStore))),
     creationMode: types.string,
     sharingMode: types.string,
     whitelist: types.map(types.string),
@@ -640,20 +641,11 @@ export const WalletStore = types
   })
   .views((self) => ({
     get currentStore() {
-      return self.navState.network === 'ethereum'
-        ? self.ethereum
-        : self.navState.btcNetwork === 'mainnet'
-        ? self.bitcoin
-        : self.testnet;
+      return self.networks.get(self.navState.network)!.get(self.navState.protocol)!;
     },
 
     get currentWallet() {
-      const walletStore =
-        self.navState.network === 'ethereum'
-          ? self.ethereum
-          : self.navState.btcNetwork === 'mainnet'
-          ? self.bitcoin
-          : self.testnet;
+      const walletStore = self.networks.get(self.navState.network)!.get(self.navState.protocol)!;
       return self.navState.walletIndex
         ? walletStore.wallets.get(self.navState.walletIndex)
         : null;
@@ -668,6 +660,11 @@ export const WalletStore = types
       /* @ts-expect-error */
       self.resetNavigation();
     },
+    setProtocol(protocol: ProtocolType) {
+      self.navState.protocol = protocol;
+      /* @ts-expect-error */
+      self.resetNavigation();
+    },
     setBtcNetwork(network: string) {
       self.navState.btcNetwork = network;
       // @ts-expect-error
@@ -679,6 +676,7 @@ export const WalletStore = types
       const detail = options?.detail;
       const action = options?.action;
       const network = options?.network || self.navState.network;
+      const protocol = options?.protocol || self.navState.protocol;
 
       if (
         canReturn &&
@@ -694,6 +692,7 @@ export const WalletStore = types
         detail,
         action,
         network,
+        protocol,
         btcNetwork: self.navState.btcNetwork,
       });
       self.navState = newState;
@@ -704,6 +703,7 @@ export const WalletStore = types
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,
           network: self.navState.network,
+          protocol: self.navState.protocol,
           btcNetwork: self.navState.btcNetwork,
         })
       );
@@ -718,6 +718,7 @@ export const WalletStore = types
       self.navState = WalletNavState.create({
         view: WalletView.LIST,
         network: self.navState.network,
+        protocol: self.navState.protocol,
         btcNetwork: self.navState.btcNetwork,
       });
       self.navHistory = cast([]);
@@ -725,9 +726,8 @@ export const WalletStore = types
     setReturnView(view: WalletView) {
       self.returnView = view;
     },
-    setNetworkProvider(network: 'bitcoin' | 'ethereum', provider: string) {
-      if (network == 'bitcoin') self.bitcoin.setProvider(provider);
-      else if (network == 'ethereum') self.ethereum.setProvider(provider);
+    setNetworkProvider(network: NetworkType, protocol: string, provider: string) {
+      self.networks.get(network)!.get(protocol)!.setProvider(provider);
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;

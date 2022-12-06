@@ -1,6 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { Wallet } from '@holium/realm-wallet/src/Wallet';
-import { Wallet } from '@holium/realm-wallet/src/Wallet';
+import { WalletStoreType } from 'os/services/tray/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -197,8 +196,7 @@ export const WalletApi = {
    */
      watchUpdates: (
       conduit: Conduit,
-      walletState: Wallet,
-      notifyUI: (data: any) => void,
+      walletState: WalletStoreType,
     ): void => {
       conduit.watch({
         app: 'spaces',
@@ -210,7 +208,6 @@ export const WalletApi = {
               data,
               walletState,
             );
-            notifyUI(data);
           }
         },
   
@@ -222,7 +219,7 @@ export const WalletApi = {
 
 export const handleWalletReactions = (
   data: any,
-  walletState: Wallet,
+  walletState: WalletStoreType,
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {

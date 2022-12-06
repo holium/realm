@@ -10,70 +10,12 @@ import { ethers } from 'ethers';
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
-
-export class ERC20 implements BaseAsset {
-  asset: Asset;
-  private address: string;
-  private protocol: BaseProtocol;
-
-  constructor(asset: Asset, address: string, protocol: BaseProtocol) {
-    this.asset = asset;
-    this.address = address;
-    this.protocol = protocol;
-  }
-
-  updateAsset(): void {
-    this.protocol.getAssetBalance(this.asset.addr, this.address)
-      .then(balance => (this.asset.data as CoinAsset).balance = balance);
-    this.protocol.getAssetTransfers(this.asset.addr, this.address)
-      .then(transfers => {});
-    this.protocol.getAssetAllowance(this.asset.addr, this.address)
-      .then(allowance => {});
-  }
-}
-
-export class ERC721 implements BaseAsset {
-  asset: Asset;
-  private address: string;
-  private protocol: BaseProtocol;
-
-  constructor(asset: Asset, address: string, protocol: BaseProtocol) {
-    this.asset = asset;
-    this.address = address;
-    this.protocol = protocol;
-  }
-
-  updateAsset(): void {
-    this.protocol.getAssetTransfers(this.asset.addr, this.address)
-      .then(transfers => {});
-    this.protocol.getAssetAllowance(this.asset.addr, this.address)
-      .then(allowance => {});
-  }
-}
-
-export class ERC1155 implements BaseAsset {
-  asset: Asset;
-  private address: string;
-  private protocol: BaseProtocol;
-
-  constructor(asset: Asset, address: string, protocol: BaseProtocol) {
-    this.asset = asset;
-    this.address = address;
-    this.protocol = protocol;
-  }
-
-  updateAsset(): void {
-    this.protocol.getAssetTransfers(this.asset.addr, this.address)
-      .then(transfers => {});
-    this.protocol.getAssetAllowance(this.asset.addr, this.address)
-      .then(allowance => {});
-  }
-}
+import { WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export class EthereumProtocol implements BaseProtocol {
+  private network: 'mainnet' | 'gorli';
   private ethProvider?: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
-  private network: 'mainnet' | 'gorli';
 
   constructor(network: 'mainnet' | 'gorli') {
     this.network = network;
@@ -104,6 +46,14 @@ export class EthereumProtocol implements BaseProtocol {
 
   onBlock(callback: () => void) {
     this.ethProvider!.on('block', callback);
+  }
+
+  removeListener() {
+    this.ethProvider!.removeAllListeners();
+  }
+
+  updateWalletState(walletState: WalletStoreType) {
+
   }
 
   async getAccountBalance(addr: string): Promise<number> {

@@ -7,10 +7,17 @@ import { BaseAsset } from '@holium/realm-wallet/src/wallets/BaseAsset';
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
+import { WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export class UqbarProtocol extends BaseProtocol {
   onBlock(callback: () => void): void {
     throw new Error('Method not implemented.');
+  }
+  removeListener() {
+
+  }
+  updateWalletState(walletState: WalletStoreType) {
+
   }
   getAccountBalance(addr: string): Promise<number> {
     throw new Error('Method not implemented.');
