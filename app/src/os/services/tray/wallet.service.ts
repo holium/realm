@@ -619,7 +619,7 @@ export class WalletService extends BaseService {
     tokenType: 'erc20' | 'erc721' | 'erc1155',
     contractAddr: string
   ) {
-    const coin = (this.state!.networks.get(this.state!.navState.protocol)! as unknown as EthWalletType).coins.get(contractAddr);
+    // const coin = (this.state!.networks.get(this.state!.navState.protocol)! as unknown as EthWalletType).coins.get(contractAddr);
     return undefined;// coinTxns;
   }
 

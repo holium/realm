@@ -241,6 +241,7 @@ export const handleWalletReactions = (
         Object.keys(wallets.bitcoin).length !== 0 ||
         Object.keys(wallets.btctestnet).length !== 0
       ) {
+        console.log('initializing wallet')
         walletState!.setInitialized(true);
       }
       walletState!.wallets.get(NetworkStoreType.ETHEREUM)!.initial(wallets);
