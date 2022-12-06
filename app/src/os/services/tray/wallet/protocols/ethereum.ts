@@ -1,7 +1,7 @@
 import {
   BaseProtocol,
 } from '@holium/realm-wallet/src/wallets/BaseProtocol';
-import { Asset, CoinAsset } from '@holium/realm-wallet/src/wallets/types';
+//import { Asset, CoinAsset } from '@holium/realm-wallet/src/wallets/types';
 import { BaseAsset } from '@holium/realm-wallet/src/wallets/BaseAsset';
 import { Alchemy, Network } from 'alchemy-sdk';
 import axios from 'axios';

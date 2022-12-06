@@ -305,47 +305,45 @@ export class WalletService extends BaseService {
           protocol: ProtocolType.ETH_MAIN,
           btcNetwork: 'mainnet',
         },
-        wallets: {
-          [NetworkStoreType.ETHEREUM]: {
-            protocol: ProtocolType.ETH_MAIN,
-            settings: {
-              walletCreationMode: WalletCreationMode.DEFAULT,
-              sharingMode: SharingMode.ANYBODY,
-              blocked: [],
-              defaultIndex: 0,
-            },
-            initialized: false,
-            conversions: {},
+        ethereum: {
+          protocol: ProtocolType.ETH_MAIN,
+          settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
+            defaultIndex: 0,
           },
-          [NetworkStoreType.BTC_MAIN]: {
-            settings: {
-              walletCreationMode: WalletCreationMode.DEFAULT,
-              sharingMode: SharingMode.ANYBODY,
-              blocked: [],
-              defaultIndex: 0,
-            },
-            conversions: {},
+          initialized: false,
+          conversions: {},
+        },
+        bitcoin: {
+          settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
+            defaultIndex: 0,
           },
-          [NetworkStoreType.BTC_TEST]: {
-            settings: {
-              walletCreationMode: WalletCreationMode.DEFAULT,
-              sharingMode: SharingMode.ANYBODY,
-              blocked: [],
-              defaultIndex: 0,
-            },
-            conversions: {},
+          conversions: {},
+        },
+        btctest: {
+          settings: {
+            walletCreationMode: WalletCreationMode.DEFAULT,
+            sharingMode: SharingMode.ANYBODY,
+            blocked: [],
+            defaultIndex: 0,
           },
+          conversions: {},
         },
         navHistory: [],
         creationMode: 'default',
         sharingMode: 'anybody',
-        ourPatp: ship,
         lastInteraction: Date.now(),
         initialized: false,
         settings: {
           networkSettings: {},
           passcodeHash: '',
-        }
+        },
+        ourPatp: ship,
       });
     }
 
@@ -377,7 +375,6 @@ export class WalletService extends BaseService {
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 
     WalletApi.watchUpdates(this.core.conduit!, this.state!);
-    this.state.setInitialized(true);
     this.wallet!.watchProtocol(this.state!.navState.protocol, this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {

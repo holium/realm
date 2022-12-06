@@ -4,7 +4,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { WalletNetwork } from './Network';
-import { WalletView } from '@holium/realm-wallet/src/wallets/types';
+import { WalletView } from '@holium/realm-wallet/src/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 
 interface WalletFooterProps {

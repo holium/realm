@@ -118,36 +118,34 @@ export const trayStore = TrayAppStore.create({
       protocol: ProtocolType.ETH_MAIN,
       btcNetwork: 'mainnet',
     },
-    wallets: {
-      [NetworkStoreType.ETHEREUM]: {
-        protocol: ProtocolType.ETH_MAIN,
-        settings: {
-          walletCreationMode: WalletCreationMode.DEFAULT,
-          sharingMode: SharingMode.ANYBODY,
-          blocked: [],
-          defaultIndex: 0,
-        },
-        initialized: false,
-        conversions: {},
+    ethereum: {
+      protocol: ProtocolType.ETH_MAIN,
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        blocked: [],
+        defaultIndex: 0,
       },
-      [NetworkStoreType.BTC_MAIN]: {
-        settings: {
-          walletCreationMode: WalletCreationMode.DEFAULT,
-          sharingMode: SharingMode.ANYBODY,
-          blocked: [],
-          defaultIndex: 0,
-        },
-        conversions: {},
+      initialized: false,
+      conversions: {},
+    },
+    bitcoin: {
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        blocked: [],
+        defaultIndex: 0,
       },
-      [NetworkStoreType.BTC_TEST]: {
-        settings: {
-          walletCreationMode: WalletCreationMode.DEFAULT,
-          sharingMode: SharingMode.ANYBODY,
-          blocked: [],
-          defaultIndex: 0,
-        },
-        conversions: {},
+      conversions: {},
+    },
+    btctest: {
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        blocked: [],
+        defaultIndex: 0,
       },
+      conversions: {},
     },
     navHistory: [],
     creationMode: 'default',
@@ -157,7 +155,7 @@ export const trayStore = TrayAppStore.create({
     settings: {
       networkSettings: {},
       passcodeHash: '',
-    }
+    },
   },
   dmApp: {
     currentView: 'dm-list',

@@ -181,6 +181,8 @@ const BitcoinStore = types
     },
   }));
 
+export type BitcoinStoreType = Instance<typeof BitcoinStore>;
+
 const ERC20 = types
   .model('ERC20', {
     name: types.string,
@@ -593,6 +595,7 @@ export const EthStore = types
       self.conversions.setUsd(usd);
     },
   }));
+export type EthStoreType = Instance<typeof EthStore>;
 
 
 
@@ -644,7 +647,9 @@ export interface WalletNavOptions {
 export const WalletStore = types
   .model('WalletStore', {
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
-    wallets: types.map(types.union(BitcoinStore, EthStore)),
+    ethereum: EthStore,
+    bitcoin: BitcoinStore,
+    btctest: BitcoinStore,
     creationMode: types.string,
     sharingMode: types.string,
     whitelist: types.map(types.string),
@@ -659,11 +664,21 @@ export const WalletStore = types
   })
   .views((self) => ({
     get currentStore() {
-      return self.wallets.get(self.navState.networkStore)!;
+      // return self.[self.navState.networkStore];
+      switch (self.navState.networkStore) {
+        case NetworkStoreType.ETHEREUM:
+          return self.ethereum;
+        case NetworkStoreType.BTC_MAIN:
+          return self.bitcoin;
+        case NetworkStoreType.BTC_MAIN:
+          return self.btctest;
+        default:
+          return self.ethereum;
+      }
     },
 
     get currentWallet() {
-      const walletStore = self.wallets.get(self.navState.networkStore)!;
+      const walletStore = this.currentStore;
       return self.navState.walletIndex
         ? walletStore.wallets.get(self.navState.walletIndex)
         : null;
@@ -671,7 +686,6 @@ export const WalletStore = types
   }))
   .actions((self) => ({
     setInitialized(initialized: boolean) {
-      console.log('setting init')
       self.initialized = initialized;
     },
     setNetwork(network: NetworkType) {
@@ -749,8 +763,8 @@ export const WalletStore = types
     setReturnView(view: WalletView) {
       self.returnView = view;
     },
-    setNetworkProvider(protocol: string, provider: string) {
-      self.wallets.get(protocol)!.setProvider(provider);
+    setNetworkProvider(provider: string) {
+      self.currentStore.setProvider(provider);
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;

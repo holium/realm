@@ -212,8 +212,9 @@
       %settings
     %-  pairs
     ^-  (list [@t json])
-    :~  ['sharingMode' [%s who.sharing.update]]
-        ['walletCreationMode' [%s wallet-creation.sharing.update]]
+    :~  ['passcodeHash' s+passcode-hash.update]
+        ['sharingMode' s+who.sharing.update]
+        ['walletCreationMode' s+wallet-creation.sharing.update]
         :: ['whitelist' [%s 'test']]
         ['defaultIndex' (numb 0)]
         :-  'blocked'

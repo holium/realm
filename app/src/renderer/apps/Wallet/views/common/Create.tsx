@@ -72,18 +72,6 @@ export const CreateWallet: FC<CreateWalletProps> = observer(
             </Button>
           </Flex>
         </FieldSet>
-        <Flex
-          position="absolute"
-          top="582px"
-          zIndex={999}
-          onClick={async () => await WalletActions.navigateBack()}
-        >
-          <Icons
-            name="ArrowLeftLine"
-            size={2}
-            color={theme.currentTheme.iconColor}
-          />
-        </Flex>
       </Flex>
     );
   }
