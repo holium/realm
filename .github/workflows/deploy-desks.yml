@@ -39,6 +39,7 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:./usher-moon
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:./usher-moon
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:./usher-moon
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -60,7 +61,7 @@ jobs:
               ship: process.env.DEPLOY_SHIP,
               code: process.env.DEPLOY_SHIP_CODE,
               rootUrl: process.env.DEPLOY_ROOT_URL,
-              mounts: ['realm', 'courier']
+              mounts: ['usher', 'realm', 'courier']
             }))
       # Workaround to avoid "Post Run actions/setup-node" failures.
       # See: https://codesti.com/issue/actions/setup-node/317
