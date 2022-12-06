@@ -198,6 +198,7 @@ export const WalletApi = {
      watchUpdates: (
       conduit: Conduit,
       walletState: Wallet,
+      notifyUI: (data: any) => void,
     ): void => {
       conduit.watch({
         app: 'spaces',
@@ -209,6 +210,7 @@ export const WalletApi = {
               data,
               walletState,
             );
+            notifyUI(data);
           }
         },
   
@@ -218,7 +220,7 @@ export const WalletApi = {
     },
 };
 
-const handleWalletReactions = (
+export const handleWalletReactions = (
   data: any,
   walletState: Wallet,
 ) => {

@@ -173,22 +173,14 @@ export function useTrayApps() {
 //   }
 // );
 
-// set up wallet listeners
-export const walletApp = new Wallet(new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>(), NetworkType.ETHEREUM, 'ethmain');
-WalletActions.onWalletUpdate(
-  (_event: IpcMessageEvent, diff: RoomDiff) => {
-    walletApp.onDiff(diff);
-  }
-)
-
 
 // set up wallet listeners
 export const walletApp = new Wallet(new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>(), NetworkType.ETHEREUM, 'ethmain');
-WalletActions.onWalletUpdate(
+/*WalletActions.onWalletUpdate(
   (_event: IpcMessageEvent, diff: RoomDiff) => {
     walletApp.onDiff(diff);
   }
-)
+)*/
 
 
 // Watch actions for sound trigger
@@ -295,8 +287,4 @@ OSActions.onBoot((_event: any, response: any) => {
   // if (response.rooms) {
   //   applySnapshot(trayStore.roomsApp, response.rooms);
   // }
-
-  if (response.wallet) {
-    applySnapshot(trayStore.walletApp, response.wallet);
-  }
 });

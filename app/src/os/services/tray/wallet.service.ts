@@ -267,7 +267,8 @@ export class WalletService extends BaseService {
     setNetworkProtocol: async (protocol: string) => {
       return await ipcRenderer.invoke('realm.tray.wallet.set-network-protocol', protocol);
     },
-    onWalletUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-update', callback),
+    onAgentUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-agent-update', callback),
+    onNetworkUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-network-update', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -330,19 +331,12 @@ export class WalletService extends BaseService {
       this.core.onEffect(patchEffect);
     });
 
-    const ethereumMainnetWallet = new ProtocolWallet(this.signer, new EthereumProtocol('mainnet'));
-    const ethereumGorliWallet = new ProtocolWallet(this.signer, new EthereumProtocol('gorli'))
-    const uqbarWallet = new ProtocolWallet(this.signer, new UqbarProtocol());
-    const ethMap = new Map<ProtocolType, ProtocolWallet>([
-      ['ethmain', ethereumMainnetWallet],
-      ['ethgorli', ethereumGorliWallet],
-      ['uqbar', uqbarWallet],
-    ]);
-    const walletMap = new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>([
-      [NetworkType.ETHEREUM, ethMap]
-    ])
-    this.wallet = new Wallet(walletMap, NetworkType.ETHEREUM, 'ethmain');
-    WalletApi.watchUpdates(this.core.conduit!, this.wallet!);
+    WalletApi.watchUpdates(this.core.conduit!, this.wallet!, (data: any) => {
+      this.core.mainWindow.webContents.send(
+        'realm.on-wallet-agent-update',
+        data,
+      );
+    });
 
     if (this.wallet.navState.view !== WalletView.NEW) {
       this.wallet.resetNavigation();
