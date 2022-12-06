@@ -123,7 +123,8 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         `${window.id}-urbit-webview`
       );
       webview.insertCSS(css);
-      webview.webContents.session.setPermissionRequestHandler();
+      // TODO request permission for campfire
+      // webview.webContents.session.setPermissionRequestHandler();
       webview?.addEventListener('did-frame-finish-load', () => {
         webview.insertCSS(css);
       });
