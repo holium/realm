@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { SettingsType, WalletStoreType, WalletCreationMode } from '@holium/realm-wallet/src/wallet.model';
+import { ProtocolType, SettingsType, WalletStoreType, WalletCreationMode } from '@holium/realm-wallet/src/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -225,23 +225,24 @@ export const handleWalletReactions = (
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'wallet':
-      if (data.network === 'ethereum') {
-        walletState.ethereum.applyWalletUpdate(
-          walletState.ethereum.network,
-          data
+      const wallet = data.wallet;
+      if (wallet.network === 'ethereum') {
+        this.state!.ethereum.applyWalletUpdate(
+          this.state!.ethereum.network,
+          wallet
         );
-      } else if (data.network === 'bitcoin') {
-        walletState.bitcoin.applyWalletUpdate(data);
-      } else if (data.network === 'btctestnet') {
-        walletState.testnet.applyWalletUpdate(data);
+      } else if (wallet.network === 'bitcoin') {
+        walletState!.networks.get(ProtocolType.BTC_MAIN)!.applyWalletUpdate(wallet);
+        this.updateBitcoinInfo();
+      } else if (wallet.network === 'btctestnet') {
+        this.state!.testnet.applyWalletUpdate(wallet);
+        this.updateBitcoinInfo();
       }
       break;
     case 'wallets':
-      walletState.ethereum.initial(data);
+      walletState.networks.get(ProtocolType.ETH_MAIN)!.initial(data);
       break;
     case 'transaction':
-      break;
-    case 'transactions':
       break;
     case 'settings':
       walletState.setSettings(data);

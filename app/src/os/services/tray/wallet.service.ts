@@ -24,6 +24,7 @@ import {
   onPatch,
   onSnapshot,
   getSnapshot,
+  castToSnapshot
 } from 'mobx-state-tree';
 import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
@@ -295,7 +296,7 @@ export class WalletService extends BaseService {
     const persistedState: WalletStoreType = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {
-      this.state = persistedState;
+      this.state = WalletStore.create(castToSnapshot(persistedState));
     } else {
       this.state = WalletStore.create({
         navState: {
@@ -347,15 +348,6 @@ export class WalletService extends BaseService {
         }
       });
     }
-    const ethereumMainnetWallet = new EthereumProtocol('mainnet');
-    const ethereumGorliWallet = new EthereumProtocol('gorli');
-    const uqbarWallet = new UqbarProtocol();
-    const protocolMap = new Map<ProtocolType, BaseProtocol>([
-      [ProtocolType.ETH_MAIN, ethereumMainnetWallet],
-      [ProtocolType.ETH_GORLI, ethereumGorliWallet],
-      [ProtocolType.UQBAR, uqbarWallet],
-    ]);
-    this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 
     onSnapshot(this.state!, (snapshot: any) => {
       this.db!.store = snapshot;
@@ -376,6 +368,16 @@ export class WalletService extends BaseService {
       };
       this.core.onEffect(patchEffect);
     });
+
+    const ethereumMainnetWallet = new EthereumProtocol('mainnet');
+    const ethereumGorliWallet = new EthereumProtocol('gorli');
+    const uqbarWallet = new UqbarProtocol();
+    const protocolMap = new Map<ProtocolType, BaseProtocol>([
+      [ProtocolType.ETH_MAIN, ethereumMainnetWallet],
+      [ProtocolType.ETH_GORLI, ethereumGorliWallet],
+      [ProtocolType.UQBAR, uqbarWallet],
+    ]);
+    this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 
     WalletApi.watchUpdates(this.core.conduit!, this.state!);
     this.wallet!.watchProtocol(this.state!.navState.protocol, this.state!);
@@ -505,7 +507,7 @@ export class WalletService extends BaseService {
 
   async createWallet(_event: any, nickname: string) {
     console.log(`creating with nickname: ${nickname}`);
-    const sender: string = this.core.conduit!.ship!;
+    const sender: string = this.state!.ourPatp!;
     let network: string = this.state!.navState.network;
     if (
       network === 'bitcoin' &&
