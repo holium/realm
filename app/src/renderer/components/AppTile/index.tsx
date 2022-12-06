@@ -10,6 +10,7 @@ import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { ContextMenuItem } from '../ContextMenu/ContextMenu';
 
 const sizes = {
   sm: 32,
@@ -97,7 +98,7 @@ interface AppTileProps {
   isPinned?: boolean;
   contextPosition?: 'above' | 'below';
   allowContextMenu?: boolean;
-  contextMenu?: any[] | (() => any[]); // todo types
+  contextMenu?: ContextMenuItem[];
   onAppClick?: (app: AppType) => void;
   selected?: boolean;
   open?: boolean;
