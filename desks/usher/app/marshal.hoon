@@ -100,7 +100,7 @@
   ++  on-arvo
     |=  [wire sign-arvo]
     %-  (slog leaf+"{<dap.bowl>}: on-arvo on wire {<wire>} => {<sign-arvo>}" ~)
-    (on-arvo:def wire sign-arvo)
+    !!
   ::
   ++  on-leave  |=(path `..on-init)
   ::
