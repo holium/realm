@@ -14,7 +14,7 @@ import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
-import { NetworkType, WalletView } from '@holium/realm-wallet/src/wallets/types';
+import { NetworkType, WalletView } from '@holium/realm-wallet/src/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 

@@ -320,7 +320,6 @@ OSActions.onEffect((_event: any, value: any) => {
     //   applyPatch(trayStore.roomsApp, value.patch);
     // }
     if (value.resource === 'wallet') {
-      console.log('got wallet patch')
       applyPatch(trayStore.walletApp, value.patch);
     }
   }
@@ -331,7 +330,6 @@ OSActions.onBoot((_event: any, response: any) => {
   //   applySnapshot(trayStore.roomsApp, response.rooms);
   // }
   if (response.wallet) {
-    console.log('got wallet snapshot')
     applySnapshot(trayStore.walletApp, response.wallet);
   }
 });

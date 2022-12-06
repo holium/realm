@@ -269,8 +269,6 @@ export class WalletService extends BaseService {
         contractAddr
       );
     },
-    onAgentUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-agent-update', callback),
-    onNetworkUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-network-update', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -386,6 +384,10 @@ export class WalletService extends BaseService {
       this.state.resetNavigation();
     }
     this.lock(); // lock wallet on login
+  }
+
+  get snapshot() {
+    return this.state ? getSnapshot(this.state) : null;
   }
 
   private wrapHandler(handler: any) {

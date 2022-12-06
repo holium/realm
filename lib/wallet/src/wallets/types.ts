@@ -1,4 +1,4 @@
-import { types, Instance } from 'mobx-state-tree';
+/*import { types, Instance } from 'mobx-state-tree';
 
 export type ProtocolType = 'ethmain' | 'ethgorli' | 'btcmain' | 'btctest' | 'uqbar' | string;
 
@@ -132,3 +132,4 @@ export type MultiAsset = {
 };
 
 export type ContractAddr = string;
+*/
