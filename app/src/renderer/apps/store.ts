@@ -13,6 +13,8 @@ import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
   NetworkType,
   ProtocolType,
+  SharingMode,
+  WalletCreationMode,
   WalletStore,
   WalletView,
 } from '@holium/realm-wallet/src/wallet.model';
@@ -119,7 +121,37 @@ export const trayStore = TrayAppStore.create({
       btcNetwork: 'mainnet',
     },
     navHistory: [],
-    networks: {},
+    networks: {
+      [ProtocolType.ETH_MAIN]: {
+        network: 'gorli',
+        settings: {
+          walletCreationMode: WalletCreationMode.DEFAULT,
+          sharingMode: SharingMode.ANYBODY,
+          blocked: [],
+          defaultIndex: 0,
+        },
+        initialized: false,
+        conversions: {},
+      },
+      [ProtocolType.BTC_MAIN]: {
+        settings: {
+          walletCreationMode: WalletCreationMode.DEFAULT,
+          sharingMode: SharingMode.ANYBODY,
+          blocked: [],
+          defaultIndex: 0,
+        },
+        conversions: {},
+      },
+      [ProtocolType.BTC_TEST]: {
+        settings: {
+          walletCreationMode: WalletCreationMode.DEFAULT,
+          sharingMode: SharingMode.ANYBODY,
+          blocked: [],
+          defaultIndex: 0,
+        },
+        conversions: {},
+      },
+    },
     creationMode: 'default',
     sharingMode: 'anybody',
     ourPatp: '~zod',

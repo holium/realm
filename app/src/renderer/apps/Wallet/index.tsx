@@ -42,16 +42,14 @@ export const WalletApp: FC<any> = observer((props: any) => {
 
   const { walletApp } = useTrayApps();
   let transactions: any = useMemo(() => [], []);
-  if (walletApp.currentStore) {
-    for (const key of walletApp.currentStore.wallets.keys()) {
-      const wallet = walletApp.currentStore.wallets.get(key);
-      if (!wallet) continue;
-      const walletTransactions = getTransactions(
-        wallet.transactions.get(walletApp.currentStore.network) || new Map()
-      );
-      transactions = [...walletTransactions, ...transactions];
-      // console.log(transactions, transactionCount);
-    }
+  for (const key of walletApp.currentStore.wallets.keys()) {
+    const wallet = walletApp.currentStore.wallets.get(key);
+    if (!wallet) continue;
+    const walletTransactions = getTransactions(
+      wallet.transactions.get(walletApp.currentStore.network) || new Map()
+    );
+    transactions = [...walletTransactions, ...transactions];
+    // console.log(transactions, transactionCount);
   }
   useEffect(() => {
     if (transactions.length !== transactionCount) {

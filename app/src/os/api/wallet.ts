@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
+import { SettingsType, WalletStoreType, WalletCreationMode } from '@holium/realm-wallet/src/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {

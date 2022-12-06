@@ -52,7 +52,7 @@ export class WalletService extends BaseService {
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-network': this.setNetwork,
-    'realm.tray.wallet.set-network-protocol': this.setProtocol,
+    'realm.tray.wallet.set-protocol': this.setProtocol,
     'realm.tray.wallet.get-recipient': this.getRecipient,
     'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
     'realm.tray.wallet.set-settings': this.setSettings,
@@ -136,6 +136,9 @@ export class WalletService extends BaseService {
     },
     setNetwork: async (network: NetworkType) => {
       return await ipcRenderer.invoke('realm.tray.wallet.set-network', network);
+    },
+    setProtocol: async (protocol: ProtocolType) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.set-protocol', protocol);
     },
     getRecipient: async (patp: string) => {
       return await ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
@@ -359,13 +362,13 @@ export class WalletService extends BaseService {
     });
 
     const patchEffect = {
-      model: getSnapshot(this.state!),
+      model: getSnapshot(this.state),
       resource: 'wallet',
       response: 'initial',
     };
     this.core.onEffect(patchEffect);
 
-    onPatch(this.state!, (patch) => {
+    onPatch(this.state, (patch) => {
       const patchEffect = {
         patch,
         resource: 'wallet',
@@ -377,8 +380,8 @@ export class WalletService extends BaseService {
     WalletApi.watchUpdates(this.core.conduit!, this.state!);
     this.wallet!.watchProtocol(this.state!.navState.protocol, this.state!);
 
-    if (this.state!.navState.view !== WalletView.NEW) {
-      this.state!.resetNavigation();
+    if (this.state.navState.view !== WalletView.NEW) {
+      this.state.resetNavigation();
     }
     this.lock(); // lock wallet on login
   }
