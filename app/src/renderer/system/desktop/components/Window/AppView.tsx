@@ -124,7 +124,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       );
       webview.insertCSS(css);
       // TODO request permission for campfire
-      // webview.webContents.session.setPermissionRequestHandler();
+      webview.webContents?.session?.setPermissionRequestHandler();
       webview?.addEventListener('did-frame-finish-load', () => {
         webview.insertCSS(css);
       });

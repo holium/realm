@@ -5,11 +5,13 @@ import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
 import { useRooms } from './useRooms';
+import { Settings } from './Settings';
 
 export const RoomViews: { [key: string]: any } = {
   list: () => <Rooms />,
   'new-room': () => <NewRoom />,
   room: () => <Room />,
+  settings: () => <Settings />,
 };
 
 export const RoomApp = observer(() => {
