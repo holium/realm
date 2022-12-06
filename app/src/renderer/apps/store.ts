@@ -111,10 +111,6 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: {
-    settings: {
-      passcodeHash: '',
-      networkSettings: {}
-    },
     navState: {
       view: WalletView.NEW,
       network: NetworkType.ETHEREUM,
@@ -122,7 +118,6 @@ export const trayStore = TrayAppStore.create({
       protocol: ProtocolType.ETH_MAIN,
       btcNetwork: 'mainnet',
     },
-    navHistory: [],
     wallets: {
       [NetworkStoreType.ETHEREUM]: {
         protocol: ProtocolType.ETH_MAIN,
@@ -136,7 +131,6 @@ export const trayStore = TrayAppStore.create({
         conversions: {},
       },
       [NetworkStoreType.BTC_MAIN]: {
-        protocol: ProtocolType.BTC_MAIN,
         settings: {
           walletCreationMode: WalletCreationMode.DEFAULT,
           sharingMode: SharingMode.ANYBODY,
@@ -146,7 +140,6 @@ export const trayStore = TrayAppStore.create({
         conversions: {},
       },
       [NetworkStoreType.BTC_TEST]: {
-        protocol: ProtocolType.BTC_TEST,
         settings: {
           walletCreationMode: WalletCreationMode.DEFAULT,
           sharingMode: SharingMode.ANYBODY,
@@ -156,11 +149,15 @@ export const trayStore = TrayAppStore.create({
         conversions: {},
       },
     },
+    navHistory: [],
     creationMode: 'default',
     sharingMode: 'anybody',
-    ourPatp: '~zod',
-    lastInteraction: new Date(),
+    lastInteraction: Date.now(),
     initialized: false,
+    settings: {
+      networkSettings: {},
+      passcodeHash: '',
+    }
   },
   dmApp: {
     currentView: 'dm-list',
@@ -323,6 +320,7 @@ OSActions.onEffect((_event: any, value: any) => {
     //   applyPatch(trayStore.roomsApp, value.patch);
     // }
     if (value.resource === 'wallet') {
+      console.log('got wallet patch')
       applyPatch(trayStore.walletApp, value.patch);
     }
   }
@@ -332,8 +330,8 @@ OSActions.onBoot((_event: any, response: any) => {
   // if (response.rooms) {
   //   applySnapshot(trayStore.roomsApp, response.rooms);
   // }
-
   if (response.wallet) {
+    console.log('got wallet snapshot')
     applySnapshot(trayStore.walletApp, response.wallet);
   }
 });

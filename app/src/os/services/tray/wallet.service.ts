@@ -379,6 +379,7 @@ export class WalletService extends BaseService {
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 
     WalletApi.watchUpdates(this.core.conduit!, this.state!);
+    this.state.setInitialized(true);
     this.wallet!.watchProtocol(this.state!.navState.protocol, this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {
