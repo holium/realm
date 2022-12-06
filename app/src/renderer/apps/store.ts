@@ -13,6 +13,7 @@ import { SlipActions } from './../logic/actions/slip';
 import { RoomsAppState, RoomsModelType } from 'os/services/tray/rooms.model';
 import {
   NetworkType,
+  ProtocolType,
   SharingMode,
   WalletCreationMode,
   WalletView,
@@ -25,6 +26,9 @@ import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { RoomDiff } from 'os/services/tray/rooms.service';
 import { IpcMessageEvent } from 'electron';
 import { DmApp } from './Messages/store';
+import { Wallet } from '@holium/realm-wallet/src/Wallet';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { ProtocolWallet } from '@holium/realm-wallet/src/wallets/ProtocolWallet';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -163,6 +167,15 @@ RoomsActions.onRoomUpdate(
     }
   }
 );
+
+// set up wallet listeners
+export const walletApp = new Wallet(new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>(), NetworkType.ETHEREUM, 'ethmain');
+WalletActions.onWalletUpdate(
+  (_event: IpcMessageEvent, diff: RoomDiff) => {
+    walletApp.onDiff(diff);
+  }
+)
+
 
 // Watch actions for sound trigger
 // onAction(trayStore, (call) => {

@@ -267,6 +267,7 @@ export class WalletService extends BaseService {
     setNetworkProtocol: async (protocol: string) => {
       return await ipcRenderer.invoke('realm.tray.wallet.set-network-protocol', protocol);
     },
+    onWalletUpdate: (callback: any) => ipcRenderer.on('realm.on-wallet-update', callback),
   };
 
   constructor(core: Realm, options: any = {}) {
