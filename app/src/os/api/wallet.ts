@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { WalletStoreType } from 'os/services/tray/wallet.model';
+import { WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -69,6 +69,7 @@ export const WalletApi = {
         },
       },
     };
+    console.log(payload)
     await conduit.poke(payload);
   },
   getAddress: async (conduit: Conduit, network: string, from: string) => {

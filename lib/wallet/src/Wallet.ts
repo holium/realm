@@ -6,37 +6,22 @@ import { BaseProtocol } from 'wallets';
 import { NetworkType, ProtocolType } from './wallets/types';
 import { WalletStoreType } from '../src/wallet.model';
 
-export class Wallet extends (EventEmitter as new () => TypedEmitter<WalletEventCallback>) {
-  wallets: Map<ProtocolType, BaseProtocol>;
-  currentNetwork: NetworkType;
+export class Wallet {
+  protocols: Map<ProtocolType, BaseProtocol>;
   currentProtocol: ProtocolType;
-  lastInteraction: Date;
 
-  constructor(wallets: Map<ProtocolType, BaseProtocol>, currentNetwork: NetworkType, currentProtocol: ProtocolType) {
-    super();
-    this.wallets = wallets;
-    this.currentNetwork = currentNetwork;
+  constructor(protocols: Map<ProtocolType, BaseProtocol>, currentProtocol: ProtocolType) {
+    this.protocols = protocols;
     this.currentProtocol = currentProtocol;
-    this.lastInteraction = new Date();
-
-    makeObservable(this, {
-      wallets: observable,
-      currentNetwork: observable,
-      currentProtocol: observable,
-    });
-  }
-
-  setCurrentNetwork(currentNetwork: NetworkType) {
-    this.currentNetwork = currentNetwork;
   }
   
   watchProtocol(currentProtocol: ProtocolType, walletState: WalletStoreType) {
-    const lastProtocol: BaseProtocol = this.wallets.get(this.currentProtocol)!;
+    const lastProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
     lastProtocol.removeListener();
     this.currentProtocol = currentProtocol;
-    const newProtocol: BaseProtocol = this.wallets.get(this.currentProtocol)!;
+    const newProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
     newProtocol.onBlock(() => {
-      this.wallets.get(this.currentProtocol)!.updateWalletState(walletState);
+      this.protocols.get(this.currentProtocol)!.updateWalletState(walletState);
     })
   }
 }

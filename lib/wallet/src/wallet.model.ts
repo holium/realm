@@ -6,6 +6,7 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
+import { isTemplateLiteralTypeSpan } from 'typescript';
 
 export enum WalletView {
   LIST = 'list',
@@ -49,6 +50,12 @@ export interface UISettingsType {
   defaultIndex: number;
   provider: string;
 }
+
+export const WalletSettings = types
+  .model('WalletSettings', {
+    networkSettings: types.map(Settings),
+    passcodeHash: types.string,
+  })
 
 export const BitcoinTransaction = types.model('BitcoinTransaction', {
   hash: types.identifier,
@@ -580,11 +587,11 @@ export enum NetworkType {
 const Networks = types.enumeration(Object.values(NetworkType));
 
 export enum ProtocolType {
-  ETH_MAIN = 'eth_main',
-  ETH_GORLI = 'eth_gorli',
-  BTC_MAIN = 'btc_main',
-  BTC_TEST = 'btc_test',
-  UQBAR = 'uqbar',
+  ETH_MAIN = 'Ethereum Mainnet',
+  ETH_GORLI = 'Görli Testnet',
+  BTC_MAIN = 'Bitcoin Mainnet',
+  BTC_TEST = 'Bitcoin Testnet',
+  UQBAR = 'Uqbar Network',
 }
 const Protocols = types.enumeration(Object.values(ProtocolType));
 
@@ -627,7 +634,7 @@ export interface WalletNavOptions {
 export const WalletStore = types
   .model('WalletStore', {
     returnView: types.maybe(types.enumeration(Object.values(WalletView))),
-    networks: types.map(types.map(types.union(BitcoinStore, EthStore))),
+    networks: types.map(types.union(BitcoinStore, EthStore)),
     creationMode: types.string,
     sharingMode: types.string,
     whitelist: types.map(types.string),
@@ -638,14 +645,15 @@ export const WalletStore = types
     initialized: types.boolean,
     navState: WalletNavState,
     navHistory: types.array(WalletNavState),
+    settings: WalletSettings,
   })
   .views((self) => ({
     get currentStore() {
-      return self.networks.get(self.navState.network)!.get(self.navState.protocol)!;
+      return self.networks.get(self.navState.protocol)!;
     },
 
     get currentWallet() {
-      const walletStore = self.networks.get(self.navState.network)!.get(self.navState.protocol)!;
+      const walletStore = self.networks.get(self.navState.protocol)!;
       return self.navState.walletIndex
         ? walletStore.wallets.get(self.navState.walletIndex)
         : null;
@@ -726,8 +734,8 @@ export const WalletStore = types
     setReturnView(view: WalletView) {
       self.returnView = view;
     },
-    setNetworkProvider(network: NetworkType, protocol: string, provider: string) {
-      self.networks.get(network)!.get(protocol)!.setProvider(provider);
+    setNetworkProvider(protocol: string, provider: string) {
+      self.networks.get(protocol)!.setProvider(provider);
     },
     setPasscodeHash(hash: string) {
       self.passcodeHash = hash;
@@ -735,6 +743,9 @@ export const WalletStore = types
     setLastInteraction(date: Date) {
       self.lastInteraction = date;
     },
+    setSettings(settings: any) {
+      self.settings = settings;
+    }
   }));
 
 export type WalletStoreType = Instance<typeof WalletStore>;

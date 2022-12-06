@@ -11,7 +11,7 @@ interface WalletListProps {}
 export const WalletList: FC<WalletListProps> = observer(
   (props: WalletListProps) => {
     const { walletApp } = useTrayApps();
-    const list = walletApp.currentStore.list;
+    const list = walletApp.currentStore?.list;
 
     const List: FC = () => {
       return (
@@ -78,7 +78,7 @@ export const WalletList: FC<WalletListProps> = observer(
       );
     };
 
-    return list.length ? (
+    return list?.length ? (
       <List />
     ) : (
       <Flex

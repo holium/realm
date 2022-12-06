@@ -13,16 +13,12 @@ import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
   NetworkType,
   ProtocolType,
-  SharingMode,
-  WalletCreationMode,
+  WalletStore,
   WalletView,
-} from '@holium/realm-wallet/src/wallets/types';
+} from '@holium/realm-wallet/src/wallet.model';
 
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';
-import { Wallet } from '@holium/realm-wallet/src/Wallet';
-import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ProtocolWallet } from '@holium/realm-wallet/src/wallets/ProtocolWallet';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -55,6 +51,7 @@ export const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
+    walletApp: WalletStore,
     dmApp: DmApp,
   })
   .actions((self) => ({
@@ -109,6 +106,25 @@ export const trayStore = TrayAppStore.create({
   },
   roomsApp: {
     currentView: 'list',
+  },
+  walletApp: {
+    settings: {
+      passcodeHash: '',
+      networkSettings: {}
+    },
+    navState: {
+      view: WalletView.NEW,
+      network: NetworkType.ETHEREUM,
+      protocol: ProtocolType.ETH_MAIN,
+      btcNetwork: 'mainnet',
+    },
+    navHistory: [],
+    networks: {},
+    creationMode: 'default',
+    sharingMode: 'anybody',
+    ourPatp: '~zod',
+    lastInteraction: new Date(),
+    initialized: false,
   },
   dmApp: {
     currentView: 'dm-list',
@@ -172,16 +188,6 @@ export function useTrayApps() {
 //     }
 //   }
 // );
-
-
-// set up wallet listeners
-export const walletApp = new Wallet(new Map<NetworkType, Map<ProtocolType, ProtocolWallet>>(), NetworkType.ETHEREUM, 'ethmain');
-/*WalletActions.onWalletUpdate(
-  (_event: IpcMessageEvent, diff: RoomDiff) => {
-    walletApp.onDiff(diff);
-  }
-)*/
-
 
 // Watch actions for sound trigger
 // onAction(trayStore, (call) => {
@@ -280,6 +286,9 @@ OSActions.onEffect((_event: any, value: any) => {
     // if (value.resource === 'rooms') {
     //   applyPatch(trayStore.roomsApp, value.patch);
     // }
+    if (value.resource === 'wallet') {
+      applyPatch(trayStore.walletApp, value.patch);
+    }
   }
 });
 // After boot, set the initial data
@@ -287,4 +296,8 @@ OSActions.onBoot((_event: any, response: any) => {
   // if (response.rooms) {
   //   applySnapshot(trayStore.roomsApp, response.rooms);
   // }
+
+  if (response.wallet) {
+    applySnapshot(trayStore.walletApp, response.wallet);
+  }
 });

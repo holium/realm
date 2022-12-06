@@ -28,15 +28,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
         >
           <Box mr={1}>
             <WalletNetwork
-              network={
-                walletApp.navState.network === 'ethereum'
-                  ? walletApp.ethereum.network === 'mainnet'
-                    ? 'Ethereum Mainnet'
-                    : 'Görli Testnet'
-                  : walletApp.navState.btcNetwork === 'mainnet'
-                  ? 'Bitcoin Mainnet'
-                  : 'Bitcoin Testnet'
-              }
+              network={walletApp.navState.protocol}
             />
           </Box>
           <IconButton

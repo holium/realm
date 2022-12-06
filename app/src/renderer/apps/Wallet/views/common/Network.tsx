@@ -9,11 +9,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 type Network = 'ethereum' | 'bitcoin';
 
 interface WalletNetworkProps {
-  network:
-    | 'Ethereum Mainnet'
-    | 'Görli Testnet'
-    | 'Bitcoin Mainnet'
-    | 'Bitcoin Testnet';
+  network: ProtocolType;
 }
 
 export const WalletNetwork: FC<WalletNetworkProps> = observer(
