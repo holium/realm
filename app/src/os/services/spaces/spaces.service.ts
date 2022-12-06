@@ -17,6 +17,7 @@ import { DiskStore } from '../base.store';
 import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
 import { formPathObj } from '../../lib/path';
+import { FeaturedApi } from '../../api/featured';
 
 export const getHost = (path: string) => path.split('/')[1];
 let devApps: any = null;
@@ -428,6 +429,7 @@ export class SpacesService extends BaseService {
     // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
     const spaceHost = getHost(this.state!.selected!.path);
+    const featured = FeaturedApi.getFeatured(this.core.conduit!).then(result => console.log(JSON.stringify(result)))
     // if (currentRoomProvider !== spaceHost)
     this.core.services.ship.rooms.setProvider(null, spaceHost);
   }
