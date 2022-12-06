@@ -1,5 +1,5 @@
-name: test-build
-run-name: test Build - ${{ github.actor }}
+name: Deploy Desks
+run-name: Deploy Desks - ${{ github.actor }}
 on:
   push:
     branches:
@@ -28,9 +28,6 @@ jobs:
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm urbit@143.198.180.97:./usher-moon
         env:
           DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
-          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
-          DEPLOY_PUBKEY: $${{ secrets.DEPLOY_PUBKEY }}
-          DEPLOY_CREDENTIALS: $${{ secrets.DEPLOY_CREDENTIALS }}
       #
       # poke remote endpoint in usher agent which will run clay commit
       #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
