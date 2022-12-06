@@ -15,7 +15,9 @@ module.exports = ({ github }, pkgfile, desks) => {
   console.log(`bump.js: package version = ${pkg.version}`);
   for (let i = 0; i < desks.length; i++) {
     const desk = desks[i];
+    console.log(`bump.js: reading file '${desk}/desk.docket-0'...`);
     const docketInfo = fs.readFileSync(`${desk}/desk.docket-0`);
+    console.log(`bump.js: docketInfo = ${docketInfo}`);
     let lines = docketInfo.split('\\r\\n');
     for (let j = 0; j < lines.length; j++) {
       const parts = lines[j].split('+');
