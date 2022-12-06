@@ -41,6 +41,53 @@
         [%pass /g2/dm/ui %agent [our.bowl %chat] %watch /dm/(scot %p +.action)/ui]
       ==
   ==
+++  accept-group-dm
+  |=  [a=[%accept id=@uvH] =bowl:gall]
+  ^-  (list card:agent:gall)
+  =/  crew  (get-crew id.a bowl)
+  =/  group-ships   (~(uni in team.crew) hive.crew)
+  =/  new-grp-prev  [
+        path=(spat /(scot %p our.bowl)/(scot %uv id.a))
+        to=group-ships
+        type=%group
+        source=%talk
+        last-time-sent=now.bowl
+        last-message=[~]
+        metadata=(get-metadata:gs:lib group-ships our.bowl now.bowl)
+        invite-id=~
+        unread-count=1
+    ]
+  :~
+    [%pass / %agent [our.bowl %chat] %poke club-action+!>([id.a [0 [%team ship=our.bowl ok=%.y]]])]
+    :: watch the new chat channel that we accepted
+    [%pass /g2/club/ui %agent [our.bowl %chat] %watch /club/(scot %uv id.a)/ui]
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
+  ==
+++  handle-club-invite
+  |=  [=cage =bowl:gall]
+  ^-  (list card:agent:gall)
+  ~&  'groups-two /club/new fact'
+  ~&  cage
+  =/  invite  !<(invite:club:c q.cage)
+  =/  to-set  (~(uni in team.invite) hive.invite)
+  =/  new-grp-prev  [
+        path=(spat /(scot %p our.bowl)/(scot %uv id.invite))
+        to=to-set
+        type=%group-pending
+        source=%talk
+        last-time-sent=now.bowl
+        last-message=[~]
+        metadata=(get-metadata:gs:lib to-set our.bowl now.bowl)
+        invite-id=`id.invite
+        unread-count=0
+    ]
+  ~&  >  'giving group-dm-created-fact'
+::  =/  crew  (get-crew id.invite bowl)
+::  =/  new-dm  (chat-from-crew id.invite crew bowl)
+  :~
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
+::    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
+  ==
 ++  handle-dm-ui-fact
   |=  [=cage =bowl:gall]
   ^-  (list card:agent:gall)
@@ -49,16 +96,7 @@
     %writ-diff
       =/  diff  !<(diff:writs:c q.cage)
       =/  originating-ship  ^-(ship p.p.diff)
-      =/  newest-msg  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p originating-ship)/writs/newest/1/noun)
-      =/  new-dm  ^-  chat
-      :*
-        path=(spat /dm-inbox/(scot %p originating-ship))
-        to=(~(put in *(set ^ship)) originating-ship)
-        type=%dm
-        source=%talk
-        messages=(messages-from-writs newest-msg)
-        metadata=~[(form-contact-mtd (get-rolo bowl) originating-ship)]
-      ==
+      =/  new-dm  (chat-from-newest-writ originating-ship bowl)
       ~&  >  'giving /updates a dm-received'
       ~&  >  new-dm
       [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
@@ -112,6 +150,8 @@
     :~
       [%pass / %agent [our.bowl %chat] %poke club-create+!>([id=`@uvH`now.bowl hive=ships])]
       [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
+      :: watch the new club that we created
+      [%pass /g2/club/ui %agent [our.bowl %chat] %watch /club/(scot %uv now.bowl)/ui/writs]
     ==
   ++  send-group-dm
     |=  [=resource =post]
@@ -171,23 +211,26 @@
     =/  =briefs:c
       .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
     ``graph-dm-view+!>([%inbox (previews-from-briefs briefs bowl)])
-      [%x %dms %group @ @ ~]    ::  ~/scry/courier/dms/group/~dev/~2022.8.28..20.32.55.json
-    ~
+      [%x %dms %group @ @ ~]    ::  ~/scry/courier/dms/group/~dev/0v4.00000.qchdp.006ht.e2hte.2hte2.json
+    ``graph-dm-view+!>([%dm-log (crew-messages `@uvH`(slav %uv i.t.t.t.t.path) bowl)])
       [%x %dms @ ~]             ::  ~/scry/courier/dms/~dev.json
     ``graph-dm-view+!>([%dm-log (messages-with `@p`(slav %p i.t.t.path) bowl)])
   ==
-::++  writ-diff-to-courier-chat
-::  |=  [=diff:writs:c]
-::  ^-  chat
-::  =/  
-:::*
-::  path=(spat /dm-inbox/(scot %p other-ship))
-::  to=(silt ~[other-ship])
-::  type=%dm
-::  source=%talk
-::  messages=~
-::  metadata=~
-::==
+++  crew-messages
+  |=  [id=@uvH =bowl:gall]
+  ^-  chat
+  =/  rolo  (get-rolo bowl)
+  =/  crew  (get-crew id bowl)
+  =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/999/noun)
+  ~&  (messages-from-writs writs)
+  :*
+    path=(spat /(scot %p our.bowl)/(scot %uv id))
+    to=(~(uni in team.crew) hive.crew)
+    type=%group
+    source=%talk
+    messages=(flop (messages-from-writs writs))
+    metadata=~[(form-contact-mtd rolo our.bowl)]
+  ==
 ++  messages-with
   |=  [=ship =bowl:gall]
   ^-  chat
@@ -262,13 +305,13 @@
     :-  ~
     :*  path=(spat /(scot %p our.bowl)/(scot %uv p.whom))
     ::(spat /(scot %p entity)/(cord name))
-        to=team.crew
-        type=%group
+        to=(~(uni in team.crew) hive.crew)
+        type=?:((~(has in team.crew) our.bowl) %group %group-pending)
         source=%talk
         last-time-sent=last.brief
         last-message=~
         metadata=meta
-        invite-id=~
+        invite-id=`p.whom
         unread-count=count.brief
     ==
       %ship
@@ -292,11 +335,14 @@
   =/  newest-msg  (snag 0 (tap:on:writs:c newest-msg-list))
   =/  memo  ^-(memo:c +.+.newest-msg)
   (transform-content content.memo author.memo)
-
 ++  get-rolo
   |=  =bowl:gall
   ^-  rolodex
   .^(rolodex %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun)
+++  get-crew
+  |=  [id=@uvH =bowl:gall]
+  ^-  crew:club:c
+  .^(crew:club:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/crew/noun)
 ++  form-contact-mtd
     |=  [rolo=rolodex =ship]
     ^-  contact-mtd
@@ -331,27 +377,56 @@
     =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource)
     ?~  club-id-unit  !!
     [^-(whom:c [%club +:club-id-unit]) ^-(remark-diff:c [%read ~])]
+++  chat-from-crew
+  |=  [id=@uvH =crew:club:c =bowl:gall]
+  ^-  chat
+  =/  new-writs  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/1/noun)
+  =/  group-ships   (~(uni in team.crew) hive.crew)
+  :*
+    path=(spat /(scot %p our.bowl)/(scot %uv id))
+    to=group-ships
+    type=?:((~(has in team.crew) our.bowl) %group %group-pending)
+    source=%talk
+    messages=(messages-from-writs new-writs)
+    metadata=~[(form-contact-mtd (get-rolo bowl) our.bowl)]
+  ==
+++  chat-from-newest-writ
+  |=  [=ship =bowl:gall]
+  ^-  chat
+  =/  new-writs  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ship)/writs/newest/1/noun)
+  :*
+    path=(spat /dm-inbox/(scot %p ship))
+    to=(~(put in *(set ^ship)) ship)
+    type=%dm
+    source=%talk
+    messages=(messages-from-writs new-writs)
+    metadata=~[(form-contact-mtd (get-rolo bowl) ship)]
+  ==
 ++  propagate-briefs-fact
     |=  [cg=cage =bowl:gall]
     ^-  (list card:agent:gall)
     ?+  p.cg   !!
       %chat-brief-update
-::[ %fact
-::    cage
-::  [ p=%chat-brief-update
-::      q
-      :: [whom:c brief:briefs:c]
-::    [ #t/[?([%club p=@uvH] [%flag p=[p=@p q=@tas]] [%ship p=@p]) last=@da count=@ud read-id=u([p=@p q=@da])]
-::      q=[[1.885.956.211 182] 170.141.184.505.963.463.907.794.262.005.666.283.520 0 0 0 170.141.184.505.963.463.907.794.262.005.666.283.520]
-::    ]
-::  ]
-::]
         =/  the-fact      !<([whom:c brief:briefs:c] q.cg)
+        ~&  the-fact
+        =/  dm-received-card
+        ?-  -.-.the-fact
+          %club  !!
+          %flag  !!
+          %ship
+            =/  new-dm  (chat-from-newest-writ p.-.the-fact bowl)
+            ~&  >  'giving /updates a dm-received'
+            ~&  >  new-dm
+            [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
+        ==
         =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl])
         ~&  >  'the-preview in propagate-briefs-fact'
         ~&  >  the-preview
-        ?~  the-preview  ~
-        [%give %fact [/updates ~] graph-dm-reaction+!>([%previews [+.the-preview ~]])]~
+        ?~  the-preview  [dm-received-card ~]
+        :~
+          [%give %fact [/updates ~] graph-dm-reaction+!>([%previews [+.the-preview ~]])]
+          dm-received-card
+        ==
     ==
 ++  form-pending
   |=  [=ship now=@da rolo=rolodex]

@@ -37,9 +37,9 @@ export const CourierApi = {
             store.setReceivedDM(payload);
             break;
           case 'group-dm-created':
-            // console.log('group-dm-created', payload);
+            console.log('group-dm-created', payload);
             // if()
-            // store.setReceivedDM(payload);
+            store.setNewPreview(payload);
             break;
           case 'invite-dm':
             console.log('invited to dm', payload);
@@ -167,7 +167,7 @@ export const CourierApi = {
   },
   // Group invite flow
   acceptGroupDm: async (conduit: Conduit, inviteId: string) => {
-    const payload = {
+    /*const payload = {
       app: 'invite-store',
       mark: 'invite-action',
       json: {
@@ -175,6 +175,13 @@ export const CourierApi = {
           term: 'graph',
           uid: inviteId,
         },
+      },
+    };*/
+    const payload = {
+      app: 'courier',
+      mark: 'accept-group-dm',
+      json: {
+        accept: inviteId,
       },
     };
     console.log('accepting dm', payload);

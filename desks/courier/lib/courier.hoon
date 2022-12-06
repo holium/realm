@@ -646,8 +646,6 @@
   ++  preview
     |=  cha=message-preview
     ^-  json
-    ~&  >  'type.cha'
-    ~&  >  type.cha
     =/  to-field    
       ?:  
         ?| 

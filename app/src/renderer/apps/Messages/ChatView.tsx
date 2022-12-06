@@ -189,7 +189,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     dmModel: PreviewDMType,
     groupModel: PreviewGroupDMType;
 
-  if (selectedChat.type === 'group') {
+  if (selectedChat.type === 'group' || selectedChat.type === 'group-pending') {
     groupModel = selectedChat as PreviewGroupDMType;
     to = Array.from(groupModel.to).join(', ');
     sigil = (

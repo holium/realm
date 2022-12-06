@@ -99,6 +99,15 @@
             ==
           %2  [(accept-dm:groups-two !<(action:dm-hook-sur vase) bowl) state]
         ==
+      %accept-group-dm
+        ?-  groups-target
+          %1
+            =/  accept-action  !<([%accept id=@uvH] vase)
+            :-
+            [%pass / %agent [our.bowl %invite-store] %poke invite-action+!>([%accept term=%group uid=id.accept-action])]~
+            state
+          %2  [(accept-group-dm:groups-two !<([%accept id=@uvH] vase) bowl) state]
+        ==
       %graph-dm-action
         ?-  groups-target
           %1  (on-graph-action:core !<(action:store vase))
@@ -212,6 +221,22 @@
               [cards this]
             ==
         ==
+      [%g2 %club %ui ~]
+        ~&  -.sign
+        ?+    -.sign  (on-agent:def wire sign)
+          %watch-ack
+            ?~  p.sign  `this
+            ~&  >>>  "{<dap.bowl>}: groups-two /club/id/ui subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: groups-two /club/id/ui kicked us, giving up..."
+            `this
+          %fact
+            ~&  >>>  'groups-two /club/ui fact'
+            ~&  >>>  cage.sign
+            [~ this]
+            ::  [cards this]
+        ==
       [%g2 %ui ~]
         ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
@@ -287,18 +312,7 @@
               [%pass /g2/club/new %agent [our.bowl %chat] %watch /club/new]
             ==
           %fact
-            ~&  'groups-two /club/new fact'
-            ~&  sign
-:: [ %fact
-::     cage
-::   [ p=%club-invite
-::       q
-::     [ #t/[@uvH team=nlr(@p) hive=nlr(@p) met=[title=@t description=@t image=@t cover=@t]]
-::       q=[170.141.184.505.959.953.826.191.296.933.732.695.408 [182 0 0] [0 [179 0 0] 0] 0 0 0 0]
-::     ]
-::   ]
-:: ]
-            [~ this]
+            [(handle-club-invite:groups-two cage.sign bowl) this]
         ==
       [%g2 %dm %invited ~]
         ~&  -.sign
@@ -314,28 +328,10 @@
               [%pass /g2/dm/invited %agent [our.bowl %chat] %watch /dm/invited]
             ==
           %fact
-            ~&  'groups-two /dm/invited fact'
-            ~&  sign
-:: [%fact cage=[
-::   p=%ships
-::   q=[
-::     #t/?(?(%~ [n=@p l=nlr(@p) r=nlr(@p)]) nlr(@p))
-::     q=[182 0 0]
-::   ]
-:: ]]
             =/  possible-fact  !<(?(%~ [n=@p l=(set @p) r=(set @p)]) q.cage.sign)
             =/  to-ship  -.possible-fact
-::            =/  new-dm
-::            ^-  chat:store
-::            :*
-::              path=(spat /dm-inbox/(scot %p to-ship))
-::              to=(silt ~[to-ship])
-::              type=%dm
-::              source=%talk
-::              messages=~
-::              metadata=~
-::            ==
-::            =/  upds            (send-updates new-dm our.bowl)
+            ~&  'groups-two /dm/invited fact'
+            ~&  to-ship
             =/  the-invite      (form-pending:groups-two to-ship now.bowl (get-rolo:groups-two bowl))
             ~&  >  the-invite
             :_
@@ -544,6 +540,8 @@
       :~  ['Content-Type' 'application/json']
       ==
     =|  =request:http
+    :: TODO when porting to groups-two handle group-dms by adding set of
+    :: participants in metadata
     =:  method.request       %'POST'
         url.request          'https://onesignal.com/api/v1/notifications'
         header-list.request  header-list
@@ -560,40 +558,6 @@
       ::  Send to onesignal
     ==
   --
-++  send-updates
-  |=  [new-dm=chat:store our=ship]
-  ?:  =(%.n push-enabled.state) ::  we've disabled push
-    :_  state
-    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
-  ?:  (is-our-message:gs:lib our new-dm) :: its our message (outgoing)
-    :_  state
-    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
-      ::
-  ?:  =((lent ~(tap by devices.state)) 0) :: there are no devices
-    :_  state
-    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
-  =/  notify   (generate-push-notification:notif-lib our app-id.state new-dm)
-  ::  send http request
-  ::
-  =/  =header-list:http
-    :~  ['Content-Type' 'application/json']
-    ==
-  =|  =request:http
-  =:  method.request       %'POST'
-      url.request          'https://onesignal.com/api/v1/notifications'
-      header-list.request  header-list
-      body.request
-        :-  ~
-        %-  as-octt:mimes:html
-        %-  en-json:html
-        (request:enjs:notif-lib notify devices.state)
-  ==
-  :_  state
-  :~
-    [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
-    [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
-    ::  Send to onesignal
-  ==
 ::
 ++  on-hook-action
   |=  [act=action:dm-hook-sur now=@da our=ship]
