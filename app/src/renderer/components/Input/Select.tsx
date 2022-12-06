@@ -1,10 +1,9 @@
-import { FC, useState, useRef, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { RadioOption, Text, Icons, InputWrapper } from '../';
 import { ThemeType } from 'renderer/theme';
 import MenuItemStyle from '../MenuItem/MenuItem.styles';
-import ReactDOM from 'react-dom';
 
 interface SelectWrapperStyle {
   customBg?: string;
@@ -16,7 +15,8 @@ interface SelectWrapperStyle {
 const SelectDropdown = styled(motion.ul)<SelectWrapperStyle>`
   z-index: 20;
   top: 32px;
-  right: 0px;
+  left: 0px;
+  /* right: 0px; */
   padding: 4px;
   position: absolute;
   border-radius: 6px;
@@ -25,6 +25,7 @@ const SelectDropdown = styled(motion.ul)<SelectWrapperStyle>`
   border: 1px solid
     ${(props: SelectWrapperStyle) => props.theme.colors.ui.borderColor};
   background-color: ${(props: SelectWrapperStyle) => props.customBg};
+  box-shadow: ${(props: SelectWrapperStyle) => props.theme.elevations.one};
 `;
 
 interface ISelectInput {
@@ -36,11 +37,14 @@ interface ISelectInput {
   iconColor: string;
   options: RadioOption[];
   selected?: string;
+  height?: number;
+  inputColor?: string;
   onClick: (value: any) => void;
 }
 
 export const Select: FC<ISelectInput> = (props: ISelectInput) => {
   const {
+    height,
     options,
     placeholder,
     selected,
@@ -49,13 +53,13 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
     iconColor,
     disabled,
     onClick,
+    inputColor,
   } = props;
-  const selectRef = useRef(null);
 
   const [open, setOpen] = useState(false);
 
   const handleClickOutside = (event: any) => {
-    const domNode = ReactDOM.findDOMNode(selectRef.current);
+    const domNode = document.getElementById('select-input');
     const dropdownNode = document.getElementById('select-dropdown');
     const isVisible = dropdownNode
       ? dropdownNode.getAttribute('data-is-open') === 'true'
@@ -81,7 +85,7 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
   const showMenu = {
     enter: {
       opacity: 1,
-      y: 0,
+      y: 4,
       display: 'block',
       transition: {
         duration: 0.3,
@@ -109,11 +113,13 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
       disabled={disabled}
       shouldHighlightOnFocus={false}
       minHeight={30}
+      height={height || 'min-content'}
       hasPointerEvents
       position="relative"
       flexDirection="row"
       justifyContent="space-between"
       alignItems="center"
+      background={inputColor}
       gap={8}
       onClick={() => !disabled && (open ? setOpen(false) : setOpen(true))}
     >
@@ -130,6 +136,7 @@ export const Select: FC<ISelectInput> = (props: ISelectInput) => {
       <SelectDropdown
         id="select-dropdown"
         variants={showMenu}
+        data-is-open={open}
         initial="exit"
         animate={open ? 'enter' : 'exit'}
         customBg={props.customBg}

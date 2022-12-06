@@ -2,8 +2,8 @@ import { Patp } from 'os/types';
 import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text } from 'renderer/components';
-// import Row from 'renderer/components/Row';
 import styled from 'styled-components';
+import { useRooms } from '../useRooms';
 
 interface RoomInfoProps {}
 
@@ -24,7 +24,8 @@ const Value = styled(Text)`
 
 export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
   const { roomsApp } = useTrayApps();
-  const room = roomsApp.liveRoom!;
+  const roomsManager = useRooms();
+  const room = roomsManager.presentRoom!.room;
 
   const rowGap = 16;
 
@@ -32,8 +33,9 @@ export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
     <Flex
       flex={2}
       p={2}
-      mt={6}
+      // mt={6}
       flexDirection="column"
+      justifyContent="center"
       alignItems="center"
       opacity={0.7}
       style={{
@@ -42,10 +44,7 @@ export const RoomInfo: FC<RoomInfoProps> = (props: RoomInfoProps) => {
     >
       <Flex flexDirection="row" gap={16} width={'80%'} pb={16}>
         <Key>Creator:</Key>
-        <Value>
-          {/* {room.creator} */}
-          ~sampel-palnet-sampel-palnet
-        </Value>
+        <Value>{room.creator}</Value>
       </Flex>
 
       <Flex flexDirection="row" gap={16} width={'80%'} pb={16}>

@@ -1,16 +1,16 @@
 import React, { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { Text, Flex, Icons, IconButton } from 'renderer/components';
+import { Text, Flex } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { useServices } from 'renderer/logic/store';
 import { AvatarRow } from './AvatarRow';
-import { rgba, darken } from 'polished';
-import { RoomsModelType } from 'os/services/tray/rooms.model';
-import { LiveRoom, useTrayApps } from 'renderer/apps/store';
+import { darken } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
 // import { id } from 'ethers/lib/utils';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
+import { RoomType } from '@holium/realm-room';
+import { useRooms } from '../useRooms';
 
-type RoomRowProps = Partial<RoomsModelType> & {
+type RoomRowProps = Partial<RoomType> & {
   tray?: boolean;
   onClick?: (evt: any) => any;
   rightChildren?: any;
@@ -18,27 +18,25 @@ type RoomRowProps = Partial<RoomsModelType> & {
 
 export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   const {
-    id,
+    rid,
     tray,
     title,
     present,
     creator,
     provider,
-    cursors,
+    // cursors,
     onClick,
     rightChildren,
   } = props;
   const { theme, ship } = useServices();
+  const roomsManager = useRooms();
   const { roomsApp } = useTrayApps();
 
   const { mode, dockColor, windowColor, accentColor } = theme.currentTheme;
 
   // TODO do light and dark mode coloring
   const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
-  const isLiveColor = useMemo(
-    () => rgba(darken(0.01, accentColor), 0.15),
-    [accentColor]
-  );
+  const isLiveColor = useMemo(() => darken(0.02, bgColor), [bgColor]);
 
   let peopleText = 'people';
   if (present!.length === 1) {
@@ -52,7 +50,7 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
   if (titleText!.length > 16 && tray) {
     titleText = titleText!.substring(0, 16) + '...';
   }
-  const isLive = roomsApp.liveRoom?.id === id;
+  const isLive = roomsManager.presentRoom?.rid === rid;
 
   return (
     <Row
@@ -84,11 +82,16 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
                 {present!.length} {peopleText}{' '}
                 {/* {present!.includes(ship!.patp) && ` - (You)`} */}
               </Text>
-              <Text ml={2} opacity={0.5} fontWeight={200} fontSize={2}>
-                {/* {creator === ship!.patp ? '(You)' : ''} */}
-
-                {present!.includes(ship!.patp) && ` - (You)`}
-              </Text>
+              {creator === ship!.patp && (
+                <>
+                  <Text mx="6px" fontSize={2} fontWeight={200} opacity={0.5}>
+                    •
+                  </Text>
+                  <Text opacity={0.5} fontWeight={200} fontSize={2}>
+                    Host
+                  </Text>
+                </>
+              )}
             </Flex>
           )}
         </Flex>
@@ -99,21 +102,21 @@ export const RoomRow: FC<RoomRowProps> = observer((props: RoomRowProps) => {
         />
       </Flex>
       {/* room deletion button */}
-      {tray !== true && (creator === ship!.patp || provider === ship!.patp) && (
+      {/* {tray !== true && (creator === ship!.patp || provider === ship!.patp) && (
         <IconButton
           size={26}
           customBg={bgColor}
           onClick={(evt: any) => {
             evt.stopPropagation();
-            RoomsActions.deleteRoom(id!);
-            if (roomsApp.liveRoom && id! === roomsApp.liveRoom.id) {
-              LiveRoom.leave();
-            }
+            // RoomsActions.deleteRoom(id!);
+            // if (roomsApp.liveRoom && id! === roomsApp.liveRoom.id) {
+            //   LiveRoom.leave();
+            // }
           }}
         >
           <Icons name="Trash" />
         </IconButton>
-      )}
+      )} */}
       {rightChildren || <div />}
     </Row>
   );
