@@ -3,9 +3,9 @@ run-name: test Build - ${{ github.actor }}
 on:
   push:
     branches:
-      - build-test
+      - deploy-desks
 jobs:
-  deploy-realm:
+  deploy-desks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -50,3 +50,7 @@ jobs:
               rootUrl: process.env.DEPLOY_ROOT_URL,
               mounts: ['realm', 'courier']
             }))
+      # Workaround to avoid "Post Run actions/setup-node" failures.
+      # See: https://codesti.com/issue/actions/setup-node/317
+      - run: mkdir -p /home/runner/.npm
+        continue-on-error: true
