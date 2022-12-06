@@ -510,6 +510,18 @@ export class OnboardingService extends BaseService {
         return;
       }
     }
+    // send one last poke to bazaar to inform it that it is now safe to initialize
+    //   its internal app catalog
+    // const result = await this.conduit!.poke({
+    //   app: 'bazaar',
+    //   mark: 'bazaar-action',
+    //   json: {
+    //     initialize: {
+    //       args: {},
+    //     },
+    //   },
+    // });
+    // console.log('refresh-app-catalog => %o', result);
     await this.closeConduit();
     this.state.endRealmInstall('success');
     console.log('realm installation complete.');

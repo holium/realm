@@ -1,5 +1,5 @@
-import { ChatModelType } from 'os/services/tray/rooms.model';
-import { lighten } from 'polished';
+import { ChatModelType } from '@holium/realm-room';
+import { lighten, darken } from 'polished';
 import { FC, useEffect, useState } from 'react';
 import { Bubble } from 'renderer/apps/Messages/components/Bubble';
 import { Flex, Text, Tooltip } from 'renderer/components';
@@ -33,8 +33,9 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
       key={chat.index}
       flexDirection="column"
       justifyContent="flex-end"
-      mt={doesPack ? 1 : 4}
-      mr={3}
+      pt={doesPack ? 1 : 4}
+      pl={3}
+      pr={3}
     >
       {!chat.isRightAligned && !doesPack && (
         // author string
@@ -47,20 +48,22 @@ export const RoomChatMessage: FC<RoomChatMessageProps> = ({
         <Tooltip placement="top" content={timeString} id={`${chat.index}`}>
           <Bubble
             primary={chat.isRightAligned}
+            color={chat.isRightAligned ? '#FFF' : theme.textColor}
             customBg={
               chat.isRightAligned
                 ? theme.accentColor
+                : theme.mode === 'light'
+                ? darken(0.1, theme.windowColor)
                 : lighten(0.1, theme.windowColor)
             }
           >
             <Text
-              color={theme.textColor}
               fontSize={2}
               style={{
                 maxWidth: '200px',
               }}
             >
-              {`${chat.contents}`}
+              {`${chat.content}`}
             </Text>
           </Bubble>
         </Tooltip>

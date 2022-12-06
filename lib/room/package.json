@@ -15,9 +15,21 @@
     "build": "preconstruct build",
     "build:prod": "preconstruct build"
   },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
   "preconstruct": {
     "globals": {
       "mobx": "mobx"
+    },
+    "exports": {
+      "envConditions": [
+        "browser",
+        "worker"
+      ]
     }
   },
   "peerDependencies": {
@@ -29,13 +41,17 @@
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
     "@preconstruct/cli": "^2.2.1",
+    "@types/simple-peer": "^9.11.5",
     "ts-node": "^10.9.1",
     "tsc": "^2.0.4"
   },
   "dependencies": {
+    "@urbit/http-api": "^2.3.0",
     "async-await-queue": "^1.2.1",
     "babel-loader": "^8.2.5",
     "protobufjs": "^7.0.0",
+    "simple-peer": "^9.11.1",
+    "ts-debounce": "^4.0.0",
     "typescript": "^4.7.4",
     "urbit-ob": "^5.0.1"
   }

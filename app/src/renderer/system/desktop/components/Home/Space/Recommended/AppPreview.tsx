@@ -22,6 +22,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { handleInstallation, installLabel } from '../../AppInstall/helpers';
 
 const AppEmpty = styled(Box)`
   border-radius: 16px;
@@ -62,26 +63,11 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
       const appHost = (app as UrbitAppType).host;
-      if (!appHost) {
-        console.error('No host found for app', app.id);
-        return;
-      }
-      switch (app.installStatus) {
-        case InstallStatus.installed:
-          SpacesActions.uninstallApp(app.id);
-          return;
-        case InstallStatus.uninstalled:
-          SpacesActions.installApp(appHost, app.id);
-          return;
-        case InstallStatus.started:
-          SpacesActions.uninstallApp(app.id);
-          return;
-        case InstallStatus.failed:
-          SpacesActions.installApp(appHost, app.id);
-          return;
-        default:
-          console.error('Unknown install status', app.installStatus);
-      }
+      return handleInstallation(
+        appHost,
+        app.id,
+        app.installStatus as InstallStatus
+      );
     };
     return (
       <Flex flexGrow={0} flexDirection="row" gap={16}>
@@ -154,14 +140,14 @@ export const AppPreview: FC<AppPreviewProps> = observer(
             >
               <Icons name="MoreHorizontal" />
             </IconButton>
-            {/* <Button
+            <Button
               variant="minimal"
               fontWeight={400}
               borderRadius={6}
               onClick={showDetails}
             >
               App info
-            </Button> */}
+            </Button>
           </Flex>
         </Flex>
       </Flex>

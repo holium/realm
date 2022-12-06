@@ -24,6 +24,12 @@
           [%suite-remove suite-remove]
           [%install-app install-app]
           [%uninstall-app uninstall-app]
+          [%initialize initialize]
+      ==
+    ::
+    ++  initialize
+      %-  ot
+      :~  [%args (om so)]
       ==
     ::
     ++  install-app
@@ -165,6 +171,22 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%stall (stall-js:encode stall.rct)]
+      ==
+      ::
+        %treaties-loaded
+      %-  pairs
+      :~  [%ship s+(scot %p ship.rct)]
+      ==
+      ::
+        %new-ally
+      %-  pairs
+      :~  [%ship s+(scot %p ship.rct)]
+          [%desks (alliance:encode alliance.rct)]
+      ==
+      ::
+        %ally-deleted
+      %-  pairs
+      :~  [%ship s+(scot %p ship.rct)]
       ==
       ::
       ::   %treaty-added

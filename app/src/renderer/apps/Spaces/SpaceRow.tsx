@@ -2,7 +2,7 @@ import { FC, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { rgba, darken } from 'polished';
 import styled, { css } from 'styled-components';
-import { ContextMenu, Flex, Icons, Text, Crest } from 'renderer/components';
+import { ContextMenu, Flex, Icons, Text } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
@@ -62,22 +62,25 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
 
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
 
-  const roles = membership.spaces.get(space.path)!.get(ship!.patp)!.roles
+  const roles = membership.spaces.get(space.path)!.get(ship!.patp)?.roles;
   const contextMenuItems = [
-    (roles.includes('owner') || roles.includes('admin')) &&
-    {
-      id: `space-row-${space.path}-btn-edit`,
-      label: 'Edit',
-      onClick: (evt: any) => {
-        ShellActions.setBlur(true);
-        ShellActions.openDialogWithStringProps('edit-space', {space: space.path});
-      },
-    },
-    membership.spaces.get(space.path)!.get(ship!.patp)!.roles.includes('owner')
+    roles?.includes('owner') || roles?.includes('admin')
+      ? {
+          id: `space-row-${space.path}-btn-edit`,
+          label: 'Edit',
+          onClick: () => {
+            ShellActions.setBlur(true);
+            ShellActions.openDialogWithStringProps('edit-space', {
+              space: space.path,
+            });
+          },
+        }
+      : {},
+    membership.spaces.get(space.path)!.get(ship!.patp)?.roles.includes('owner')
       ? {
           id: `space-row-${space.path}-btn-delete`,
           label: 'Delete',
-          onClick: (evt: any) => {
+          onClick: () => {
             ShellActions.setBlur(true);
             ShellActions.openDialogWithStringProps('delete-space-dialog', {
               path: space.path,
@@ -88,7 +91,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
       : {
           id: `space-row-${space.path}-btn-leave`,
           label: 'Leave',
-          onClick: (evt: any) => {
+          onClick: () => {
             ShellActions.setBlur(true);
             ShellActions.openDialogWithStringProps('leave-space-dialog', {
               path: space.path,
@@ -96,9 +99,9 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
             });
           },
         },
-  ];
+  ].filter((el: any) => el !== false);
 
-  const contextMenuButtonIds = contextMenuItems.map((item: any) => item.id);
+  const contextMenuButtonIds = contextMenuItems.map((item) => item?.id);
   const memberCount = membership.getMemberCount(space.path);
   return (
     <SpaceRowStyle
@@ -110,12 +113,10 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
       customBg={currentTheme.windowColor}
       onClick={(evt: any) => {
         // If a menu item is clicked
-        if (contextMenuButtonIds.includes(evt.target.id)) {
-        } else {
+        if (!contextMenuButtonIds.includes(evt.target.id)) {
           onSelect(space.path);
         }
       }}
-      // onContextMenu={(evt: any) => evt.stopPropagation()}
     >
       <ContextMenu
         isComponentContext

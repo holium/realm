@@ -22,8 +22,9 @@
     "strictFunctionTypes": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+    "isolatedModules": false
   },
-  "include": ["src", "tests"],
-  "exclude": ["dist"]
+  "include": ["src"],
+  "exclude": ["test-ui", "tests"]
 }

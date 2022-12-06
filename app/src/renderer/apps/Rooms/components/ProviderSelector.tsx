@@ -6,6 +6,7 @@ import { ThemeType } from 'renderer/theme';
 import { useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { useRooms } from '../useRooms';
 
 interface CommCircleProps {
   customBg: string;
@@ -36,9 +37,10 @@ interface ProviderSelectorProps {
 
 export const ProviderSelector: FC<ProviderSelectorProps> = observer(
   ({ seedColor, onClick }: ProviderSelectorProps) => {
-    const { theme } = useServices();
+    const { ship, theme } = useServices();
     const { windowColor, textColor } = theme.currentTheme;
-    const { roomsApp } = useTrayApps();
+    const roomsManager = useRooms(ship!.patp);
+
     // const accentColor = '#F08735';
     return (
       <ProviderStyle
@@ -47,7 +49,7 @@ export const ProviderSelector: FC<ProviderSelectorProps> = observer(
       >
         <Icons size={18} fill={rgba(textColor, 0.7)} name="BaseStation" />
         <Text fontSize={1} color={rgba(textColor, 0.7)}>
-          {roomsApp.provider}
+          {roomsManager?.protocol.provider}
         </Text>
       </ProviderStyle>
     );
