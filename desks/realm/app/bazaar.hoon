@@ -136,7 +136,7 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    `state
+    `this
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
       [%spaces ~]
