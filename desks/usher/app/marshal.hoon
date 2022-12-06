@@ -97,9 +97,14 @@
           `this
   ==
   ::
-  ++  on-arvo   |=([wire sign-arvo] !!)
+  ++  on-arvo
+    |=  [wire sign-arvo]
+    %-  (slog leaf+"{<dap.bowl>}: on-arvo on wire {<wire>} => {<sign-arvo>}" ~)
+    (on-arvo:def wire sign-arvo)
+  ::
   ++  on-leave  |=(path `..on-init)
-  ++  on-fail ::  |=([term tang] `..on-init)
+  ::
+  ++  on-fail
     |=  [=term =tang]
     ^-  (quip card _this)
     %-  (slog leaf+"error in {<dap.bowl>}" >term< tang)
