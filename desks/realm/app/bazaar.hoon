@@ -136,9 +136,10 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
+    `this
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
-      [%spaces ~] kjioj
+      [%spaces ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to spaces" ~)  `this
