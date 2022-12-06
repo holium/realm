@@ -18,7 +18,7 @@ module.exports = ({ github }, pkgfile, desks) => {
     console.log(`bump.js: reading file '${desk}/desk.docket-0'...`);
     const docketInfo = fs.readFileSync(`${desk}/desk.docket-0`).toString();
     console.log(`bump.js: docketInfo = ${typeof docketInfo} ${docketInfo}`);
-    let lines = docketInfo.split('\\r\\n');
+    let lines = docketInfo.split('\\n');
     for (let j = 0; j < lines.length; j++) {
       const parts = lines[j].split('+');
       if (parts[0].trim() === 'version') {
@@ -44,7 +44,7 @@ module.exports = ({ github }, pkgfile, desks) => {
         //   mmb[1] = (Number.parseInt(mmb[1]) + 1).toString();
         // }
         lines[j] = `${parts[0]}+[${mmb[0]} ${mmb[1]} ${mmb[2]}]`;
-        fs.writeFileSync(`${desk}/desk.docket-0`, lines.join('\\r\\n'));
+        fs.writeFileSync(`${desk}/desk.docket-0`, lines.join('\\n'));
         break;
       }
     }
