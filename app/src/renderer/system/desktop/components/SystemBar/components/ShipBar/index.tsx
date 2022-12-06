@@ -46,7 +46,7 @@ export const ShipTray = observer(() => {
             />
           </motion.div>
         </IconButton> */}
-        <WalletTray theme={theme.currentTheme} />
+        <WalletTray theme={theme.currentTheme as any} />
         <MessagesTray theme={theme.currentTheme} />
         {/* <IconButton
           id="notification-tray-icon"
@@ -59,7 +59,7 @@ export const ShipTray = observer(() => {
         >
           <Icons name="Notifications" pointerEvents="none" />
         </IconButton> */}
-        <AccountTray theme={theme.currentTheme} />
+        <AccountTray theme={theme.currentTheme as any} />
         {/* <TrayClock /> */}
       </Flex>
     </SystemBarStyle>

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { rgba } from 'polished';
+import { rgba, darken } from 'polished';
 import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
@@ -10,14 +10,16 @@ import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { RoomInfo } from './Info';
+import { useRooms } from '../useRooms';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 export const Room = observer(() => {
   const { ship, theme } = useServices();
   const { roomsApp, dimensions } = useTrayApps();
+  const roomsManager = useRooms();
 
-  const { dockColor, windowColor, accentColor } = theme.currentTheme;
+  const { dockColor, windowColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const muted = roomsManager.protocol.local?.isMuted;
 

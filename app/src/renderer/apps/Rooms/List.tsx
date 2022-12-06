@@ -13,10 +13,13 @@ import { RoomRow } from './components/RoomRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
 import { ProviderSelector } from './components/ProviderSelector';
+import { useRooms } from './useRooms';
+import { useTrayApps } from '../store';
+import { RealmProtocol, RoomType } from '@holium/realm-room';
 
 export const Rooms = observer(() => {
   const { dimensions } = useTrayApps();
-  const { ship, theme } = useServices();
+  const { spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const [muted, setMuted] = useState(false);
   const { roomsApp } = useTrayApps();

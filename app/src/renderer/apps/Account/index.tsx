@@ -27,7 +27,6 @@ export const AccountTrayApp = observer(() => {
   const currentShip = ship!;
 
   useEffect(() => {
-    // @ts-expect-error
     // navigator.getBattery().then((battery: any) => {
     //   const level = battery.level;
     //   // console.log(battery);
@@ -105,8 +104,8 @@ export const AccountTrayApp = observer(() => {
         </Flex>
       </Flex>
       <NotificationList
-        unseen={notifications.unseen}
-        seen={notifications.seen}
+        unseen={notifications.unseen as any}
+        seen={notifications.seen as any}
       />
 
       <Flex

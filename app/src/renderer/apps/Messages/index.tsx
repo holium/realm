@@ -33,7 +33,7 @@ export const MessagesTrayApp = observer(() => {
     case 'new-chat':
       viewSwitcher = (
         <NewChat
-          theme={theme.currentTheme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onBack={() => {
@@ -49,7 +49,7 @@ export const MessagesTrayApp = observer(() => {
     case 'dm-list':
       viewSwitcher = (
         <DMs
-          theme={theme.currentTheme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onNewChat={(evt: any) => {
@@ -69,7 +69,7 @@ export const MessagesTrayApp = observer(() => {
           headerOffset={headerSize}
           height={dimensions.height}
           dimensions={dimensions}
-          theme={theme.currentTheme}
+          theme={theme.currentTheme as any}
           // s3Client={s3Client}
           selectedChat={dmApp.selectedChat!}
           setSelectedChat={(chat: any) => {

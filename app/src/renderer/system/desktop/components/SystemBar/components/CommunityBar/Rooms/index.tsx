@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { createRef, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
 import { Flex, IconButton, Icons } from 'renderer/components';
@@ -28,6 +28,7 @@ export const RoomTray = observer(() => {
     setTrayAppDimensions,
   } = useTrayApps();
   const { textColor } = theme.currentTheme;
+  const roomsButtonRef = createRef<HTMLButtonElement>();
   const roomsManager = useRooms();
 
   const presentRoom = useMemo(() => {
@@ -106,6 +107,7 @@ export const RoomTray = observer(() => {
       ) : (
         <IconButton
           id="rooms-tray-icon"
+          ref={roomsButtonRef}
           size={iconSize}
           customBg={iconHoverColor}
           color={textColor}
