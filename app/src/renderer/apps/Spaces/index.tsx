@@ -72,6 +72,10 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
 
   const [searchVisible, setSearchVisible] = useState(false);
 
+  const [featuredSpaces, setFeaturedSpaces] = useState('');
+
+  SpacesActions.getFeaturedSpaces().then(spaces => setFeaturedSpaces(JSON.stringify(spaces)));
+
   useEffect(() => {
     SpacesActions.setJoin('initial');
   }, []);
@@ -233,7 +237,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
             </Flex>
             <Flex position="relative" width="100%" mt={3} ml={2}>
               <Text opacity={0.8} color={textColor} fontWeight={450}>
-                {SpacesActions.getFeaturedSpaces()}
+                {featuredSpaces}
               </Text>
             </Flex>
           </Grid.Column>

@@ -5,7 +5,10 @@
 ++  grow
   |%
   ++  noun  rxn
-  ++  json  (space-map:encode +:rxn)
+  ++  json
+    ?+  -.rxn  !!
+      %initial  (spaces-map:encode +.rxn)
+    ==
   --
 ::
 ++  grab
