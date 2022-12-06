@@ -17,6 +17,21 @@ jobs:
         with:
           node-version: '14'
           cache: 'npm'
+      - name: Bump desks version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/bump.js')
+            console.log(script({github}, './app/release/app/package.json', ['./desks/realm']))
+      #
+      - name: Push desk version update
+        run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git add ./desks/realm/desk.docket-0
+          git commit -m "patch realm desk version"
+          git push
+      #
       - name: Publish ship updates
         run: |
           mkdir ~/.ssh

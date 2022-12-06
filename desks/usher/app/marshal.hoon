@@ -67,10 +67,35 @@
     ^-  (unit (unit cage))
     ~
   ::
-  ++  on-agent
-    |=  [=wire =sign:agent:gall]
-    ^-  (quip card _this)
-    `this
+++  on-agent
+  |=  [=wire =sign:agent:gall]
+  ^-  (quip card _this)
+  ?-    -.sign
+          ::
+          :: Print error if poke failed
+          ::
+        %poke-ack
+          %-  (slog leaf+"{<dap.bowl>}: %poke-ack on wire {<wire>} => {<sign>}" ~)
+          `this
+          ::
+          :: Print error if subscription failed
+          ::
+        %watch-ack
+          %-  (slog leaf+"{<dap.bowl>}: %watch-ack on wire {<wire>} => {<sign>}" ~)
+          `this
+          ::
+          :: Do nothing if unsubscribed
+          ::
+        %kick
+          %-  (slog leaf+"{<dap.bowl>}: %kick on wire {<wire>} => {<sign>}" ~)
+          `this
+          ::
+          :: Update remote counter when we get a subscription update
+          ::
+        %fact
+          %-  (slog leaf+"{<dap.bowl>}: %fact on wire {<wire>} => {<sign>}" ~)
+          `this
+  ==
   ::
   ++  on-arvo   |=([wire sign-arvo] !!)
   ++  on-leave  |=(path `..on-init)
