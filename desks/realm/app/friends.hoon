@@ -1,20 +1,21 @@
-::  friends [realm]:
 ::
-::  Friend list management within Realm
+::  %friends [realm]:
+::
+::  friend list management
+::
 ::
 /-  store=friends, membership-store=membership
 /+  dbug, default-agent, lib=friends
+::
 |%
-+$  card  card:agent:gall
-+$  versioned-state
-    $%  state-0
-    ==
-+$  state-0
-  $:  %0
-      is-public=?
-      =friends:store
-  ==
++$  card     card:agent:gall
++$  f-act    action:store
++$  f-react  reaction:store
+::
++$  versioned-state  $%(state-0)
++$  state-0  [%0 is-public=? =friends:store]
 --
+::
 =|  state-0
 =*  state  -
 %-  agent:dbug
@@ -23,217 +24,213 @@
   |_  =bowl:gall
   +*  this  .
       def   ~(. (default-agent this %.n) bowl)
-      core   ~(. +> [bowl ~])
+      core   ~(. +> bowl ~)
   ::
   ++  on-init
     ^-  (quip card _this)
-    =.  is-public.state     %.y
-    =/  has-pals  .^(? %gu /(scot %p our.bowl)/pals/(scot %da now.bowl))
-    ?:  has-pals
-      =/  pals-targets  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/targets/noun)
-      =/  pals-leeches  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/leeches/noun)
-      =/  pals-mutuals  .^((set ship) %gx /(scot %p our.bowl)/pals/(scot %da now.bowl)/mutuals/noun)
-      =/  mutuals
-        %-  malt
-        ^-  (list [ship friend:store])
-        =/  ship-list  ~(tap in pals-mutuals)
-        %+  turn  ship-list
-          |=  =ship
-          [ship [pinned=%.n tags=*(set cord) status=%fren]]
-      =/  following
-        %-  malt
-        ^-  (list [ship friend:store])
-        =/  ship-list  ~(tap in pals-targets)
-        %+  turn  ship-list
-          |=  =ship
-          [ship [pinned=%.n tags=*(set cord) status=%following]]
-      =/  followers
-        %-  malt
-        ^-  (list [ship friend:store])
-        =/  ship-list  ~(tap in pals-leeches)
-        %+  turn  ship-list
-          |=  =ship
-          [ship [pinned=%.n tags=*(set cord) status=%follower]]
-      =/  pals-friends  (~(uni by followers) (~(uni by following) mutuals))
-      `this(friends pals-friends)
-    `this
+    =^  cards  state  abet:init:core
+    [cards this]
   ::
   ++  on-save
     ^-  vase
     !>(state)
   ::
   ++  on-load
-    |=  =vase
-    ^-  (quip card:agent:gall agent:gall)
-    =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))  
-    ?^  old
-      `this(state u.old)
-    ~&  >>  'nuking old %friends state' ::  temporarily doing this for making development easier
-    =^  cards  this  on-init
-    :_  this
-    =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term] 
-    ^-  card
-    [%pass wire %agent [ship term] %leave ~]
+    |=  ole=vase
+    =^  cards  state  abet:(load:core ole)
+    [cards this]
   ::
   ++  on-poke
-    |=  [=mark =vase]
-    ^-  (quip card _this)
-    =^  cards  state
-    ?+  mark  (on-poke:def mark vase)
-      %friends-action    (action:core !<(action:store vase))
-    ==
+    |=  cag=cage
+    =^  cards  state  abet:(poke:core cag)
     [cards this]
   ::
   ++  on-watch
-    |=  =path
+    |=  pat=path
     ^-  (quip card _this)
-    =/  cards=(list card)
-      ?+    path      (on-watch:def path)
-          [%all ~]
-        ::  only host should get all updates
-        ?>  =(our.bowl src.bowl)
-        (send-reaction [%friends friends.state] [/all ~])
-      ==
+    =^  cards  state  abet:(peer:core pat)
     [cards this]
+  ::  +on-peek: w/ ~/scry/friends/all.json, ./ships.json
   ::
   ++  on-peek
-    |=  =path
+    |=  pat=path
     ^-  (unit (unit cage))
-    ?+    path  (on-peek:def path)
-    ::
-    ::  ~/scry/friends/all.json
+    (peek:core pat)
+  ::
+  ++  on-arvo   on-arvo:def
+  ++  on-fail   on-fail:def
+  ++  on-agent  on-agent:def
+  ++  on-leave  on-leave:def
+  --
+|_  [bol=bowl:gall dek=(list card)]
++*  core  .
+::
+++  emit  |=(=card core(dek [card dek]))
+++  emil  |=(lac=(list card) core(dek (welp lac dek)))
+++  abet  ^-((quip card _state) [(flop dek) state])
+::
+++  poke
+  |=  [mar=mark vaz=vase]
+  ^+  core
+  ?>  ?=(%friends-action mar)
+  (action !<(action:store vaz))
+::
+++  peer
+  |=  pat=path
+  ^+  core
+  ?>  &(?=([%all ~] pat) =(our.bol src.bol))
+  =-  (emit %give %fact [/all]~ -)
+  friend-reaction+!>(`f-react`friends+friends.state)
+::
+++  peek
+  |=  pat=path
+  ^-  (unit (unit cage))
+  ?+    pat  !!
       [%x %all ~]
-        ?>  (team:title our.bowl src.bowl)
-        ``noun+!>((view:enjs:lib [%friends friends.state]))
-    ::
+    ?>  (team:title our.bol src.bol)
+    ``noun+!>((view:enjs:lib `view:store`friends+friends.state))
+  ::
       [%x %ships ~]
-        ?>  (team:title our.bowl src.bowl)
-        ``noun+!>(~(key by friends.state))
+    ?>  (team:title our.bol src.bol)
+    ``noun+!>(~(key by friends.state))
+  ==
+::
+++  load
+  |=  ole=vase
+  ^+  core
+  :: ::  prod
+  :: =/  old  !<(versioned-state ole)
+  :: ?>  ?=(%0 -.old)
+  :: core(state old)
+  ::  test
+  ?^  old=(mole |.(!<(state-0 ole)))
+    core(state u.old)
+  ~&  >>  'nuking old %friends state'
+  %-  emil:init
+  %+  turn  ~(tap in ~(key by wex.bol))
+  |=([w=wire s=@p t=@t] [%pass w %agent [s t] %leave ~])
+::
+++  init
+  ^+  core
+  =+  fan=friends:store
+  =;  [following=fan followers=fan mutuals=fan]
+    %=  core
+      is-public.state  %.y
     ::
+        friends
+      %-  ~(uni by followers)
+      (~(uni by following) mutuals)
     ==
   ::
-  ++  on-agent    on-agent:def
-  ::
-  ++  on-leave    on-leave:def
-  ::
-  ++  on-arvo     on-arvo:def
-  ::
-  ++  on-fail     on-fail:def
-  --
-|_  [=bowl:gall cards=(list card)]
+  ::  XX: note you can cast interchangeably between a
+  ::      (set (pair)) and a (map) for your purposes.
+  =+  pals=/(scot %p our.bol)/pals/(scot %da now.bol)
+  :+  %.  |=(p=@p [p [| ~ %following]])
+      ~(run in .^((set ship) %gx (welp pals /targets/noun)))
+    %.  |=(p=@p [p [| ~ %follower]])
+    ~(run in .^((set ship) %gx (welp pals /leeches/noun)))
+  %.  |=(p=@p [p [| ~ %fren]])
+  ~(run in .^((set ship) %gx (welp pals /mutuals/noun)))
 ::
-++  core  .
 ++  action
   |=  =action:store
-  ^-  (quip card _state)
+  ^+  core
   ?-  -.action
     %add-friend     (add-fren +.action)
     %edit-friend    (edit-fren +.action)
     %remove-friend  (remove-fren +.action)
-    %be-fren        (be-fren src.bowl)
-    %yes-fren       (yes-fren src.bowl)
-    %bye-fren       (bye-fren src.bowl)
+    %be-fren        (be-fren src.bol)
+    %yes-fren       (yes-fren src.bol)
+    %bye-fren       (bye-fren src.bol)
   ==
 ::
 ++  add-fren
-  |=  [=ship]
-  ^-  (quip card _state)
-  ~&  >  ['adding friend' ship]
-  ?:  (~(has by friends.state) ship)   :: checks if is fren is added
-      =/  added-fren            (~(got by friends.state) ship)
-      =.  status.added-fren     %fren
-      =.  friends.state         (~(put by friends.state) [ship added-fren])
-      :_  state
-      :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%yes-fren ~])]  :: confirms you are mutual fren
-          [%give %fact [/all ~] friends-reaction+!>([%new-friend ship added-fren])]
-      ==
-  ::  If the fren is not added yet
-  =/  fren
-    [
-      pinned=%.n
-      tags=(silt `(list cord)`[~])
-      status=%following
-    ]
-  =.  friends.state   (~(put by friends.state) [ship fren])
-  :_  state
-  :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%be-fren ~])]  :: Ask new fren to be fren
-      [%give %fact [/all ~] friends-reaction+!>([%new-friend ship fren])]      ::  Notify watchers
+  |=  sip=ship
+  ::  checks if fren is added
+  ?:  (~(has by friends.state) sip)
+    ::  ole chum
+    =+  ole=(~(got by friends.state) sip)
+    =.  ole  ole(status %fren)
+    %-  emil(friends.state (~(put by friends.state) sip ole))
+    :~  =-  [%pass / %agent [sip %friends] %poke -]
+        friends-action+!>([%yes-fren ~])                ::  confirms mutuality
+      ::
+        =-  [%give %fact [/all]~ friends-reaction+-]
+        !>(`f-react`[%new-friend sip ole])
+    ==
+  ::  new fren
+  =+  fren=`friend:store`[| ~ %following]
+  %-  emil(friends.state (~(put by friends.state) sip fren))
+  :~  =-  [%pass / %agent [sip %friends] %poke -]
+      friends-action+!>(`f-act`[%be-fren ~])
+  ::
+      =-  [%give %fact [/all]~ -]
+      friends-reaction+!>(`f-react`[%new-friend sip fren])
   ==
 ::
 ++  edit-fren
-  |=  [=ship pinned=? tags=friend-tags:store]
-  ^-  (quip card _state)
-  =/  prev-fren           (~(got by friends.state) ship)
-  =.  pinned.prev-fren    pinned
-  =.  tags.prev-fren      tags
-  =.  friends.state       (~(put by friends.state) [ship prev-fren])
-  :_  state
-  :~  [%give %fact [/all ~] friends-reaction+!>([%friend ship prev-fren])]      ::  Notify watchers
-  ==
+  |=  [sip=ship pin=? tag=friend-tags:store]
+  ^+  core
+  =+  ole=(~(got by friends.state) sip)
+  =/  neu=friend:store  ole(pinned pin, tags tag)
+  =.  friends.state  (~(put by friends.state) [sip neu])
+  ::  notify watchers
+  %-  emit(friends.state (~(put by friends.state) sip neu))
+  [%give %fact [/all]~ friends-reaction+!>(`f-react`[%friend sip neu])]
 ::
 ++  remove-fren
-  |=  [=ship]
-  ^-  (quip card _state)
-  =.  friends.state   (~(del by friends.state) ship)
-  :_  state
-  :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%bye-fren ~])]  :: Ask new fren to be fren
-      [%give %fact [/all ~] friends-reaction+!>([%bye-friend ship])]       ::  Notify watchers
+  |=  sip=ship
+  ^+  core
+  ::  XX: this comment is not correct
+  ::  ask new fren to be fren, notify watchers
+  %-  emil(friends.state (~(del by friends.state) sip))
+  :~  =-  [%pass / %agent [sip dap.bol] %poke -]
+      friends-action+!>(`f-act`[%bye-fren ~])
+    ::
+      [%give %fact [/all]~ friends-reaction+!>(`f-react`[%bye-friend sip])]
   ==
-::
-++  be-fren
-  |=  [=ship]
-  ^-  (quip card _state)
-  ?<  =(our.bowl src.bowl)              ::  we can't be-fren ourselves
-  =/  is-added    (~(has by friends.state) ship)
-  =/  fren
-    [
-      pinned=%.n
-      tags=(silt `(list cord)`[~])
-      ?:  is-added
-        %fren
-      %follower
-    ]
-  ?:  is-added   :: checks if is fren is added
-    =.  friends.state       (~(put by friends.state) [ship fren])
-    :_  state
-    :~  [%pass / %agent [ship dap.bowl] %poke friends-action+!>([%yes-fren ~])]  :: confirms you are mutual fren
-    ==
-  :: if not, we will add new non-mutual fren
-  =.  friends.state       (~(put by friends.state) [ship fren])
-  :_  state
-  [%give %fact [/all ~] friends-reaction+!>([%friend ship fren])]~        ::  Notify watchers
-::
 ::
 ++  yes-fren
-  |=  [=ship]
-  ^-  (quip card _state)
-  ?<  =(our.bowl src.bowl)              ::  we can't yes ourselves
-  =/  prev-fren           (~(got by friends.state) ship)
-  =.  status.prev-fren    %fren
-  =.  friends.state       (~(put by friends.state) [ship prev-fren])
-  :_  state
-  :~  [%give %fact [/all ~] friends-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers
-  ==
+  |=  sip=ship
+  ^+  core
+  ::  cant yes ourselves
+  ?<  =(our.bol src.bol)
+  =+  ole=(~(got by friends.state) sip)
+  =/  neu=friend:store  ole(status %fren)
+  %-  emit(friends.state (~(put by friends.state) sip neu))
+  [%give %fact [/all]~ friends-reaction+!>(`f-react`[%friend sip neu])]
 ::
 ++  bye-fren
-  |=  [=ship]
-  ^-  (quip card _state)
-  ?<  =(our.bowl src.bowl)              ::  we can't bye ourselves
-  ?.  (~(has by friends.state) ship)    ::  checks if is not fren is added
-    `state
-  =/  prev-fren           (~(got by friends.state) ship)
-  =.  status.prev-fren    %following
-  =.  friends.state       (~(put by friends.state) [ship prev-fren])
-  :_  state
-  :~  [%give %fact [/all ~] friends-reaction+!>([%friend ship prev-fren])]       ::  Notify watchers
-  ==
+  |=  sip=ship
+  ^+  core
+  ::  cant bye yourself
+  ?<  =(our.bol src.bol)
+  ::  XX: this comment is strange
+  ::  checks if is not fren is added
+  ?.  (~(has by friends.state) sip)  core
+  =+  ole=(~(got by friends.state) sip)
+  =/  neu=friend:store  ole(status %following)
+  ::  notify watchers
+  %-  emit(friends.state (~(put by friends.state) [sip neu]))
+  [%give %fact [/all]~ friends-reaction+!>([%friend sip neu])]
 ::
-++  send-reaction
-  |=  [rct=reaction:store paths=(list path)]
-  ^-  (list card)
-  [%give %fact paths friends-reaction+!>(rct)]~
-::
+++  be-fren
+  |=  sip=ship
+  ^+  core
+  ::  we can't be-fren ourselves
+  ?<  =(our.bol src.bol)
+  =+  added=(~(has by friends.state) sip)  
+  :: checks if is fren is added
+  ?.  added
+    ::  if we don't already know you, add a follower
+    =.  friends.state
+      (~(put by friends.state) sip [| ~ %follower])
+    ::  and notify watchers
+    %-  emit
+    =-  [%give %fact [/all]~ -]
+    friends-reaction+!>(`f-react`[%friend sip [| ~ %follower]])
+  :: if we're mutuals, confirm it
+  =.  friends.state  (~(put by friends.state) sip [| ~ %fren])
+  %-  emit
+  [%pass / %agent [sip %friends] %poke friends-action+!>(`f-act`[%yes-fren ~])]
 --
