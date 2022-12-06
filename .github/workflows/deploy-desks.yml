@@ -21,9 +21,6 @@ jobs:
         run: |
           mkdir ~/.ssh
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
-          cat ~/.ssh/usher_rsa
-          chmod 700 ~/.ssh
-          chmod 600 ~/.ssh/usher_rsa
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm urbit@143.198.180.97:./usher-moon
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm urbit@143.198.180.97:./usher-moon
         env:
