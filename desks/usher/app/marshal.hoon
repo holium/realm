@@ -99,8 +99,9 @@
   ::
   ++  on-arvo
     |=  [wire sign-arvo]
+    ^-  (quip card _this)
     %-  (slog leaf+"{<dap.bowl>}: on-arvo on wire {<wire>} => {<sign-arvo>}" ~)
-    !!
+    `this
   ::
   ++  on-leave  |=(path `..on-init)
   ::
