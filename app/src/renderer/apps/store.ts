@@ -38,7 +38,7 @@ export type TrayAppKeys =
   | 'wallet-tray'
   | 'spaces-tray';
 
-export const TrayAppStore = types
+const TrayAppStore = types
   .model('TrayAppStore', {
     activeApp: types.maybeNull(
       types.enumeration([
@@ -60,7 +60,6 @@ export const TrayAppStore = types
       self.coords = coords;
     },
     setTrayAppDimensions(dimensions: Instance<typeof TrayAppDimensions>) {
-      // const calculatedDimensions =
       self.dimensions = dimensions;
     },
     setActiveApp(
@@ -153,10 +152,6 @@ export const trayStore = TrayAppStore.create({
   dmApp: {
     currentView: 'dm-list',
   },
-  // roomsApp: (persistedState && persistedState.roomsApp) || {
-  //   currentView: 'list',
-  //   // rooms: [], TODO
-  // },
 });
 
 onSnapshot(trayStore, (snapshot) => {
@@ -166,7 +161,7 @@ onSnapshot(trayStore, (snapshot) => {
 // -------------------------------
 // Create core context
 // -------------------------------
-export type TrayInstance = Instance<typeof TrayAppStore>;
+type TrayInstance = Instance<typeof TrayAppStore>;
 export const TrayStateContext = createContext<null | TrayInstance>(trayStore);
 
 export const TrayProvider = TrayStateContext.Provider;

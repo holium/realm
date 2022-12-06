@@ -7,21 +7,16 @@ import { ThemeModelType } from 'os/services/theme.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
 
+const position = 'top-left';
+const anchorOffset = { x: 4, y: 26 };
+const dimensions = { height: 620, width: 340 };
+
 interface WalletTrayProps {
   theme: ThemeModelType;
 }
 
-const dimensions = {
-  height: 620,
-  width: 340,
-};
-
-const position = 'top-left';
-const anchorOffset = { x: 4, y: 26 };
-
 export const WalletTray: FC<WalletTrayProps> = observer(
-  (props: WalletTrayProps) => {
-    const { theme } = props;
+  ({ theme }: WalletTrayProps) => {
     const { dockColor, textColor } = theme;
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
       useTrayApps();
@@ -51,7 +46,7 @@ export const WalletTray: FC<WalletTrayProps> = observer(
         setTrayAppDimensions(dimensions);
         setActiveApp('wallet-tray');
       },
-      [activeApp]
+      [activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions]
     );
 
     return (
