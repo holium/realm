@@ -1,0 +1,52 @@
+name: test-build
+run-name: test Build - ${{ github.actor }}
+on:
+  push:
+    branches:
+      - build-test
+jobs:
+  deploy-realm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Publish ship updates
+        run: |
+          mkdir ~/.ssh
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          cat ~/.ssh/usher_rsa
+          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh/usher_rsa
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm urbit@143.198.180.97:./usher-moon
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm urbit@143.198.180.97:./usher-moon
+        env:
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          DEPLOY_PUBKEY: $${{ secrets.DEPLOY_PUBKEY }}
+          DEPLOY_CREDENTIALS: $${{ secrets.DEPLOY_CREDENTIALS }}
+      #
+      # poke remote endpoint in usher agent which will run clay commit
+      #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
+      #  for more information
+      - name: Deploy ship updates
+        uses: actions/github-script@v6
+        env:
+          DEPLOY_SHIP: ${{ secrets.DEPLOY_SHIP }}
+          DEPLOY_SHIP_CODE: ${{ secrets.DEPLOY_SHIP_CODE }}
+          DEPLOY_ROOT_URL: ${{ secrets.DEPLOY_ROOT_URL }}
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/deploy.js')
+            console.log(script({github}, {
+              ship: process.env.DEPLOY_SHIP,
+              code: process.env.DEPLOY_SHIP_CODE,
+              rootUrl: process.env.DEPLOY_ROOT_URL,
+              mounts: ['realm', 'courier']
+            }))
