@@ -120,20 +120,13 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 Open
               </Button>
             )}
+            {/* TODO add menu on click  */}
             <IconButton
               size={26}
               customBg={rgba(theme.currentTheme.dockColor, 0.5)}
             >
               <Icons name="MoreHorizontal" />
             </IconButton>
-            {/* <Button
-              variant="minimal"
-              fontWeight={400}
-              borderRadius={6}
-              onClick={showDetails}
-            >
-              App info
-            </Button> */}
           </Flex>
         </Flex>
       </Flex>
