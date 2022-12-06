@@ -9,7 +9,7 @@
     version+[major minor build] (e.g. version+[0 0 1])
 */
 var fs = require('fs');
-module.exports = ({ github, pkgfile, desks }) => {
+module.exports = ({ github }, pkgfile, desks) => {
   const pkg = JSON.parse(fs.readFileSync(pkgfile));
   const pkgver = pkg.version.split('.');
   console.log(`bump.js: package version = ${pkg.version}`);
