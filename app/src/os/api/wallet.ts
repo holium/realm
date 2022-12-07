@@ -24,7 +24,7 @@ export const WalletApi = {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
-        'set-settings': {
+        'set-network-settings': {
           network,
           mode: settings.walletCreationMode,
           who: settings.sharingMode,

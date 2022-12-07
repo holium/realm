@@ -525,7 +525,6 @@ export class WalletService extends BaseService {
       network = 'btctestnet';
     }
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
-    this.wallet.
     this.state!.navigate(WalletView.LIST, { canReturn: false });
   }
 

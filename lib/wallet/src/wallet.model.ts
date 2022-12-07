@@ -840,8 +840,17 @@ export const WalletStore = types
     setSettings(settings: any) {
       self.settings.passcodeHash = settings.passcodeHash;
       self.blacklist = settings.blocked;
-      self.currentStore.settings.setWalletCreationMode(settings.walletCreationMode);
-      self.currentStore.settings.setSharingMode(settings.sharingMode);
+      for (let network of Object.keys(settings.networks)) {
+        const store = network === 'ethereum'
+          ? self.ethereum
+          : network === 'bitcoin'
+          ? self.bitcoin
+          : self.btctest;
+        const netSettings = settings.networks[network];
+        store.settings.setDefaultIndex(netSettings.defaultIndex);
+        store.settings.setWalletCreationMode(netSettings.walletCreationMode);
+        store.settings.setSharingMode(netSettings.sharingMode);
+      }
     }
   }));
 

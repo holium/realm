@@ -212,7 +212,18 @@
       %settings
     %-  pairs
     ^-  (list [@t json])
-    :~  ['passcode-hash' s+passcode-hash.update]
+    :~  ['passcodeHash' s+passcode-hash.update]
+        :-  'networks'
+        %-  pairs
+        %+  turn  ~(tap by networks.update)
+        |=  [=network [xpub=(unit @t) default-index=@ud =sharing]]
+        ^-  [@t json]
+        :-  `cord`network
+        %-  pairs
+        :~  ['defaultIndex' (numb default-index)]
+            ['walletCreationMode' s+`cord`wallet-creation.sharing]
+            ['sharingMode' s+`cord`who.sharing]
+        ==
         =/  blocked
           ^-  (list json)
           =/  blocklist  ~(tap in blocked.update)
