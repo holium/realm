@@ -554,8 +554,7 @@
   ::
   =/  =header-list:http    ['Content-Type' 'application/json']~
   =|  =request:http
-  :: TODO when porting to groups-two handle group-dms by adding set of
-  :: participants in metadata
+  :: TODO include the unread count in the push notif (perhaps global?)
   =:  method.request       %'POST'
       url.request          'https://onesignal.com/api/v1/notifications'
       header-list.request  header-list
