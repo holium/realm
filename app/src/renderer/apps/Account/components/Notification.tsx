@@ -116,23 +116,25 @@ export const Notification = (props: NotificationProps) => {
     innerContent = (
       <>
         <motion.div style={{ display: 'inline-grid' }}>
-          {/* <motion.div
-            style={{
-              margin: 0,
-              display: '-webkit-inline-box',
-              verticalAlign: 'middle',
-              gap: 4,
-              alignItems: 'center',
-            }}
-          >
-            {props.title.map((content: ContentType, index: number) => (
-              <NotifTitle
-                key={`title-${index}`}
-                fontSize={2}
-                content={content}
-              />
-            ))}
-          </motion.div> */}
+          {props.title && (
+            <motion.div
+              style={{
+                margin: 0,
+                display: '-webkit-inline-box',
+                verticalAlign: 'middle',
+                gap: 4,
+                alignItems: 'center',
+              }}
+            >
+              {props.title.map((content: ContentType, index: number) => (
+                <NotifTitle
+                  key={`title-${index}`}
+                  fontSize={2}
+                  content={content}
+                />
+              ))}
+            </motion.div>
+          )}
           <motion.div style={{ display: '-webkit-inline-box' }}>
             {props.content.map((content: ContentType, index: number) => (
               <NotifTitle

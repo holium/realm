@@ -14,7 +14,6 @@ export const NotificationList: FC<INotificationList> = ({
   seen,
 }: INotificationList) => {
   const { dimensions } = useTrayApps();
-  console.log('notes => %o', { seen, unseen });
 
   type ListData = {
     type: string;
