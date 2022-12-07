@@ -46,27 +46,25 @@ Once started, you should run the following commands on your ship.
 For `%realm`:
 
 ```hoon
-> |merge %realm our %base
->=
+> |merge %realm our %garden
 > |mount %realm
->=
+```
+
+Then we want to delete the contents of the mounted folder now in `ships/zod/realm`.
+
+```zsh
+sudo rm -r ships/zod/realm/*
 ```
 
 For `%courier`:
 
 ```hoon
-> |merge %courier our %base
->=
+> |merge %courier our %garden
 > |mount %courier
->=
 ```
 
-Then we want to delete the contents of the mounted folder now in `ships/zod/realm` and `ships/zod/courier`.
-
 ```zsh
-cd ships/zod
-sudo rm -r realm/*
-sudo rm -r courier/*
+sudo rm -r ships/zod/courier/*
 ```
 
 ### Copying the dev desk to a fake ship.
@@ -95,14 +93,14 @@ This is how we can update and write new code from a dev folder. To have the upda
 
 ```hoon
 |commit %realm
-|commit %realm
+|commit %courier
 ```
 
 #### Installing %realm and %courier
 
 ```hoon
-|install our %realm
-|install our %courier
+|revive %realm
+|revive %courier
 ```
 
 #### Hosting Realm for other test ships
