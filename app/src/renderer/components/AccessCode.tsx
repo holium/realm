@@ -14,7 +14,7 @@ interface AccessCodeProps {
   code: string;
 }
 
-export const AccessCode: FC<AccessCodeProps> = (props: AccessCodeProps) => {
+export const AccessCode = (props: AccessCodeProps) => {
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
   const [hidden, setHidden] = useState(true);
