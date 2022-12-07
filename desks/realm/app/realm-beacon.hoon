@@ -1,5 +1,5 @@
 ::
-/-  store=realm-beacon :: ha=hark
+/-  store=realm-beacon, hark-store ::, hark
 /+  default-agent, verb, dbug
 ::
 =>
@@ -24,7 +24,10 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    `this
+    :_  this
+    :~  [%pass /hark-store %agent [our.bowl %hark-store] %watch /updates]
+        [%pass /hark %agent [our.bowl %hark] %watch /ui]
+    ==
   ::
   ++  on-save
     ^-  vase
@@ -107,7 +110,13 @@
             :~  [%pass /hark-store %agent [our.bowl %hark-store] %watch t.wire]
             ==
       ::
-          %fact  (on-agent:def wire sign)
+          %fact
+            ?+    p.cage.sign  (on-agent:def wire sign)
+                %hark-update
+                  =^  cards  state
+                    (on:hark-store-updates:core !<(=update:hark-store q.cage.sign))
+                  [cards this]
+            ==
         ==
 
       [%hark ~]
@@ -124,6 +133,12 @@
             ==
       ::
           %fact  (on-agent:def wire sign)
+            :: ?+    p.cage.sign  (on-agent:def wire sign)
+            ::     %hark-action
+            ::       =^  cards  state
+            ::         (on:hark-updates:core !<(=action:hark q.cage.sign))
+            ::       [cards this]
+            :: ==
         ==
     ==
   ::
@@ -218,6 +233,99 @@
     ::
     --
   --
+::
+++  hark-store-updates
+  |%
+  ++  on
+    |=  [upd=update:hark-store]
+    ^-  (quip card _state)
+    |^
+    ?+  -.upd    `state
+      %archived        (on-archived +.upd)
+      %more            (on-more +.upd)
+      %note-read       (on-note-read +.upd)
+      %added           (on-added +.upd)
+      %timebox         (on-timebox +.upd)
+      %place-stats     (on-place-stats +.upd)
+      %all-stats       (on-all-stats +.upd)
+    ==
+    ::
+    ++  on-archived
+      |=  [=time =lid:hark-store =notification:hark-store]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: on-archived => {<[time lid notification]>}" ~)
+      `state
+    ::
+    ++  on-more
+      |=  [more=(list update:hark-store)]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: on-more => {<more>}" ~)
+      `state
+    ::
+    ++  on-note-read
+      |=  [=time =bin:hark-store]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: on-note-read => {<[time bin]>}" ~)
+      `state
+    ::
+    ++  on-added
+      |=  [=notification:hark-store]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: on-added => {<notification>}" ~)
+      `state
+    ::
+    ++  on-timebox
+      |=  [=lid:hark-store notifications=(list notification:hark-store)]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: on-timebox => {<[lid notifications]>}" ~)
+      `state
+    ::
+    ++  on-place-stats
+      |=  [=place:hark-store =stats:hark-store]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: on-place-stats => {<[place stats]>}" ~)
+      `state
+    ::
+    ++  on-all-stats
+      |=  [places=(map place:hark-store stats:hark-store)]
+      ^-  (quip card _state)
+      %-  (slog leaf+"{<dap.bowl>}: on-all-stats => {<places>}" ~)
+      `state
+    --
+  --
+::
+:: ++  hark-updates
+::   |%
+::   ++  on
+::     |=  [act=action:hark]
+::     ^-  (quip card _state)
+::     |^
+::     ?+  -.act    `state
+::       %add-yarn        (on-add-yarn +.act)
+::       %saw-seam        (on-saw-seam +.act)
+::       %saw-rope        (on-saw-rope +.act)
+::     ==
+::     ::
+::     ++  on-add-yarn
+::       |=  [all=? desk=? =yarn:hark]
+::       ^-  (quip card _state)
+::       %-  (slog leaf+"{<dap.bowl>}: on-add-yarn => {<[all desk yarn]>}" ~)
+::       `state
+::     ::
+::     ++  on-saw-seam
+::       |=  [=seam:hark]
+::       ^-  (quip card _state)
+::       %-  (slog leaf+"{<dap.bowl>}: on-saw-seam => {<seam>}" ~)
+::       `state
+::     ::
+::     ++  on-saw-rope
+::       |=  [=rope:hark]
+::       ^-  (quip card _state)
+::       %-  (slog leaf+"{<dap.bowl>}: on-saw-rope => {<rope>}" ~)
+::       `state
+::     --
+::   --
+::
 ++  is-host
   |=  [=ship]
   =(our.bowl ship)

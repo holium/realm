@@ -24,6 +24,7 @@ import { SlipService } from '../slip.service';
 import { ContactStore, ContactStoreType } from './models/contacts';
 import { ChatStoreType } from './models/dms';
 import { CourierApi } from '../../api/courier';
+import { BeaconApi } from '../../api/beacon';
 import {
   CourierStore,
   CourierStoreType,
@@ -36,7 +37,6 @@ import {
 } from './models/notifications';
 import { NotificationApi } from '../../api/notifications';
 import { DiskStore } from '../base.store';
-import { BeaconApi } from 'os/api/beacon';
 
 // upload support
 const fs = require('fs');

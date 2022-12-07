@@ -21,7 +21,7 @@ export const BeaconApi = {
     courier: CourierStoreType
   ) => {
     conduit.watch({
-      app: 'hark-store',
+      app: 'realm-beacon',
       path: '/updates',
       onEvent: async (data: any, id?: number, mark?: string) => {
         // console.log(data, mark);

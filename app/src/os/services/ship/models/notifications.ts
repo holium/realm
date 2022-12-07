@@ -1,8 +1,8 @@
+import { Conduit } from '@holium/conduit';
 import { NotificationApi } from '../../../api/notifications';
 import { cast, Instance, types, flow } from 'mobx-state-tree';
 import { daToUnix, decToUd, udToDec, unixToDa } from '@urbit/api';
 import bigInt from 'big-integer';
-import { Conduit } from '@holium/conduit';
 
 const NotificationContentTypes = types.union(
   { eager: true },
@@ -69,42 +69,12 @@ export type AllStatsModelType = Instance<typeof AllStatsModel>;
 
 export const NotificationStore = types
   .model('NotificationStore', {
-    providers: types.map(NotificationProviderModel),
-
     unseen: types.array(NotificationModel),
     seen: types.array(NotificationModel),
     all: types.array(AllStatsModel),
     recent: types.array(NotificationModel),
   })
   .actions((self) => ({
-    loadProviders: flow(function* (conduit: Conduit) {
-      self.providers.clear();
-      try {
-        const providers = yield NotificationApi.getProviders(conduit);
-        self.providers.merge(providers);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
-    setActiveProvider(name: string) {
-      self.activeProvider = name;
-      try {
-        let provider: INotificationProvider | null = null;
-        switch (provider) {
-          case NotificationProviders.HarkStore: // old hark (hark-store)
-            NotificationApi.setActiveProvider(HarkStoreProvider.instance());
-            break;
-          case NotificationProviders.Hark: // new hark (groups 2)
-            NotificationApi.setActiveProvider(HarkProvider.instance());
-            break;
-          case NotificationProviders.Beacon: // future
-            // NotificationApi.setActiveProvider(BeaconProvider.instance());
-            break;
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
     setInitial(data: any) {
       let allTimeboxes: NotificationModelType[] = [];
       data.more.forEach(({ timebox }: { timebox: RawTimeBoxType }) => {
