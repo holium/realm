@@ -66,7 +66,8 @@
       [%updates ~]
         ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
         ?>  (is-host:core src.bowl)
-        [%give %fact [/updates ~] realm-beacon-reaction+!>([%initial ~])]~
+        ~
+        :: [%give %fact [/updates ~] realm-beacon-reaction+!>([%initial ~])]~
       ::
     ==
     [cards this]
@@ -74,23 +75,24 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-    ?+    path  (on-peek:def path)
-      ::
-      [%x @tas %latest ~]     ::  ~/scry/beacon/hark/latest
-        =/  prov          `@tas`i.t.path
-        %-  (slog leaf+"{<dap.bowl>}: scry @ {<prov>}/latest called" ~)
-        :: determine active provider by checking active subscriptions.
-        ::  first match (should only be one) will be used.
-        :: =/  prov=@tas  get-active-provider:helpers:core
-        :: =/  prov=@tas     %hark
-        ::
-        ?+  prov          (on-peek:def path)
-          :: scry new hark, transform notifications into beacon friendly format
-          :: %hark-store     (transform-hark-store:helpers:core (hark-store:scry:core /scry-path))
-          %hark           latest:hark:scry:beacon:core
-          :: %beacon         (beacon:scry:core /scry-path)
-        ==
-    ==
+    ~
+    :: ?+    path  (on-peek:def path)
+    ::   ::
+    ::   [%x @tas %latest ~]     ::  ~/scry/beacon/hark/latest
+    ::     =/  prov          `@tas`i.t.path
+    ::     %-  (slog leaf+"{<dap.bowl>}: scry @ {<prov>}/latest called" ~)
+    ::     :: determine active provider by checking active subscriptions.
+    ::     ::  first match (should only be one) will be used.
+    ::     :: =/  prov=@tas  get-active-provider:helpers:core
+    ::     :: =/  prov=@tas     %hark
+    ::     ::
+    ::     ?+  prov          (on-peek:def path)
+    ::       :: scry new hark, transform notifications into beacon friendly format
+    ::       :: %hark-store     (transform-hark-store:helpers:core (hark-store:scry:core /scry-path))
+    ::       %hark           latest:hark:scry:beacon:core
+    ::       :: %beacon         (beacon:scry:core /scry-path)
+    ::     ==
+    :: ==
   ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
@@ -203,12 +205,18 @@
     :: `state
     |^
     ?-  -.rct
-      %seen    (on-seen +.rct)
+      :: %seen         (on-seen +.rct)
+      %new-note     (on-new-note +.rct)
     ==
     ::
     ++  on-seen
       |=  [id=@ud]
-      %-  (slog leaf+"{<dap.bowl>}: seen called" ~)
+      %-  (slog leaf+"{<dap.bowl>}: seen called => {<id>}" ~)
+      `state
+    ::
+    ++  on-new-note
+      |=  [=note:store]
+      %-  (slog leaf+"{<dap.bowl>}: on-new-note called => {<note>}" ~)
       `state
     --
   ::  interactions not yet supported
@@ -223,9 +231,9 @@
     ++  hark
       |%
       ::
-      ++  latest
-        ^-  (unit (unit cage))
-        ``beacon-view+!>([%latest ~])
+      :: ++  latest
+      ::   ^-  (unit (unit cage))
+      ::   ``beacon-view+!>([%latest ~])
       --
     --
   ++  helpers
@@ -306,11 +314,40 @@
       %saw-rope        (on-saw-rope +.act)
     ==
     ::
+    ::  sample:
+    ::  [%.y %.y
+          :: id=0v3.u5n39.2rhgq.sg25g.hauvb.g5d4e
+          :: rop=[
+          ::     gop=[~ [p=~ritnys-tonnev-lodlev-migdev q=%new-group]]
+          ::             can=~ des=%groups ted=/~ritnys-tonnev-lodlev-migdev/new-group/joins]
+          :: tim=~2022.12.7..17.41.26..c0e8
+          :: con=~[[%ship p=~lodlev-migdev] ' has joined ' [%emph p='new-group']]
+          :: wer=/groups/~ritnys-tonnev-lodlev-migdev/new-group/info/members
+          :: but=[~ [title='View all members'
+          :: handler=/groups/~ritnys-tonnev-lodlev-migdev/new-group/info/members]]]
     ++  on-add-yarn
       |=  [all=? desk=? =yarn:hark]
       ^-  (quip card _state)
       %-  (slog leaf+"{<dap.bowl>}: on-add-yarn => {<[all desk yarn]>}" ~)
-      `state
+      :: =/  markdown=tape
+      :: %+  roll  con.yarn
+      ::   |=  [=content:hark acc=tape]
+      ::   ^-  tape
+      ::   %+  weld  acc
+      ::   ?@  content  "{<content>}"
+      ::   ?-  -.content
+      ::     %ship  (scow %p p.content)
+      ::     %emph  (weld "**" (weld (trip p.content) "**"))
+      ::   ==
+      :: %-  (slog leaf+"{<dap.bowl>}: markdown => {<(crip markdown)>}" ~)
+      =|  =note:store
+      =.  id.note           id.yarn
+      :: =.  content.note      (crip markdown)
+      =.  content.note      con.yarn
+      =.  tim.note          tim.yarn
+      :_  state
+      :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%new-note note])]
+      ==
     ::
     ++  on-saw-seam
       |=  [=seam:hark]
@@ -318,6 +355,9 @@
       %-  (slog leaf+"{<dap.bowl>}: on-saw-seam => {<seam>}" ~)
       `state
     ::
+    ::  sample:
+    ::  [gop=[~ [p=~ritnys-tonnev-lodlev-migdev q=%new-group]]
+    ::      can=~ des=%groups ted=/~ritnys-tonnev-lodlev-migdev/new-group/joins]
     ++  on-saw-rope
       |=  [=rope:hark]
       ^-  (quip card _state)

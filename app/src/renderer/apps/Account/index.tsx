@@ -15,12 +15,12 @@ import { NotificationList } from './components/NotificationList';
 import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from '../store';
-import { ShipActions } from 'renderer/logic/actions/ship';
+// import { ShipActions } from 'renderer/logic/actions/ship';
 import { lighten, rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
 
 export const AccountTrayApp = observer(() => {
-  const { ship, theme, notifications } = useServices();
+  const { ship, theme, beacon } = useServices();
   const { dimensions, setActiveApp } = useTrayApps();
   const { backgroundColor, textColor, windowColor, iconColor } =
     theme.currentTheme;
@@ -33,11 +33,11 @@ export const AccountTrayApp = observer(() => {
     //   setBatteryLevel(level);
     // });
     return () => {
-      ShipActions.openedNotifications()
-        .then(() => {})
-        .catch((err) => {
-          console.error(err);
-        });
+      // ShipActions.openedNotifications()
+      //   .then(() => {})
+      //   .catch((err) => {
+      //     console.error(err);
+      //   });
     };
   }, []);
 
@@ -84,7 +84,7 @@ export const AccountTrayApp = observer(() => {
             Notifications
           </Text>
           <Text opacity={0.5} fontSize={2}>
-            {notifications.unseen.length}
+            {beacon.unseen.length}
           </Text>
         </Flex>
         <Flex gap={10} alignItems="center">
@@ -104,8 +104,8 @@ export const AccountTrayApp = observer(() => {
         </Flex>
       </Flex>
       <NotificationList
-        unseen={notifications.unseen as any}
-        seen={notifications.seen as any}
+        unseen={beacon.unseen as any}
+        seen={beacon.seen as any}
       />
 
       <Flex

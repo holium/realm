@@ -23,7 +23,8 @@ import { ContactStore } from 'os/services/ship/models/contacts';
 import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
-import { NotificationStore } from 'os/services/ship/models/notifications';
+// import { NotificationStore } from 'os/services/ship/models/notifications';
+import { NotificationStore } from 'os/services/spaces/models/beacon';
 // import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
@@ -48,7 +49,7 @@ const Services = types
     courier: CourierStore,
     contacts: ContactStore,
     friends: FriendsStore,
-    notifications: NotificationStore,
+    beacon: NotificationStore,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -106,7 +107,7 @@ const services = Services.create({
   courier: {},
   contacts: { ourPatp: '' },
   friends: {},
-  notifications: { unseen: [], seen: [], all: [], recent: [] },
+  beacon: { unseen: [], seen: [], all: [], recent: [] },
 });
 
 export const servicesStore = services;
@@ -222,12 +223,12 @@ OSActions.onBoot((_event: any, response: any) => {
         castToSnapshot(response.models.courier)
       );
     }
-    if (response.models.notifications) {
-      applySnapshot(
-        servicesStore.notifications,
-        castToSnapshot(response.models.notifications)
-      );
-    }
+    // if (response.models.notifications) {
+    //   applySnapshot(
+    //     servicesStore.notifications,
+    //     castToSnapshot(response.models.notifications)
+    //   );
+    // }
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
@@ -254,6 +255,9 @@ OSActions.onBoot((_event: any, response: any) => {
   }
   if (response.bazaar) {
     applySnapshot(servicesStore.bazaar, response.bazaar);
+  }
+  if (response.beacon) {
+    applySnapshot(servicesStore.beacon, response.beacon);
   }
   if (response.loggedIn) {
     coreStore.setLoggedIn(true);
@@ -316,10 +320,7 @@ OSActions.onConnected(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
     );
-    applySnapshot(
-      servicesStore.notifications,
-      castToSnapshot(initials.models.notifications)
-    );
+    applySnapshot(servicesStore.beacon, castToSnapshot(initials.models.beacon));
     servicesStore.setShip(ShipModel.create(initials.ship));
 
     coreStore.setLoggedIn(true);
@@ -350,8 +351,8 @@ OSActions.onEffect((_event: any, value: any) => {
     if (value.resource === 'bazaar') {
       applyPatch(servicesStore.bazaar, value.patch);
     }
-    if (value.resource === 'notifications') {
-      applyPatch(servicesStore.notifications, value.patch);
+    if (value.resource === 'beacon') {
+      applyPatch(servicesStore.beacon, value.patch);
     }
     if (value.resource === 'onboarding') {
       applyPatch(servicesStore.onboarding, value.patch);
@@ -400,6 +401,7 @@ OSActions.onEffect((_event: any, value: any) => {
     }
     if (value.resource === 'spaces') {
       applySnapshot(servicesStore.bazaar, castToSnapshot(value.model.bazaar));
+      applySnapshot(servicesStore.beacon, castToSnapshot(value.model.beacon));
       applySnapshot(servicesStore.spaces, castToSnapshot(value.model.spaces));
       applySnapshot(
         servicesStore.membership,

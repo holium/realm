@@ -1,6 +1,11 @@
+/-  hark
 |%
 ::
-:: ++  supported-providers  (silt `(list @t)`['hark-store' 'hark' 'beacon' ~])
++$  note
+  $:  id=@uvH                         :: note id (from hark)
+      content=(list content:hark)     :: content as markdown (cord)
+      tim=time                        :: note time sent
+  ==
 ::
 +$  action
   $%
@@ -9,11 +14,12 @@
   ==
 ::
 +$  reaction
-  $%  [%seen id=@ud]
+  $%  ::[%seen id=@ud]
+      [%new-note =note]
   ==
 ::
-+$  view
-  $%  [%latest =(list @ud)]
-  ==
+:: +$  view
+::   $%  [%latest =(list @ud)]
+::   ==
 --
 

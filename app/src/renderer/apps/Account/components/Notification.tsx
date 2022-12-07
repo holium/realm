@@ -16,6 +16,7 @@ export interface NotificationProps {
   image?: string;
   title: ContentType[];
   content: ContentType[];
+  // content: string;
   seen?: boolean;
   link: string;
   time: string;
@@ -40,13 +41,32 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
           ? content.text.substring(0, 44) + '...'
           : content.text;
       token = (
-        <Text fontWeight={400} opacity={fontOpacity} fontSize={fontSize}>
+        <Text
+          paddingLeft={'3px'}
+          paddingRight={'3px'}
+          fontWeight={400}
+          opacity={fontOpacity}
+          fontSize={fontSize}
+        >
           {trimmed}
         </Text>
       );
       break;
     case 'ship':
       token = <Mention height={19} mb={2} patp={content.ship} />;
+      break;
+    case 'emph':
+      token = (
+        <Text
+          paddingLeft={'3px'}
+          paddingRight={'3px'}
+          fontWeight={'bold'}
+          opacity={fontOpacity}
+          fontSize={fontSize}
+        >
+          {Object.values(content)[0]}
+        </Text>
+      );
       break;
     default:
       token = (
@@ -96,7 +116,7 @@ export const Notification = (props: NotificationProps) => {
     innerContent = (
       <>
         <motion.div style={{ display: 'inline-grid' }}>
-          <motion.div
+          {/* <motion.div
             style={{
               margin: 0,
               display: '-webkit-inline-box',
@@ -112,7 +132,7 @@ export const Notification = (props: NotificationProps) => {
                 content={content}
               />
             ))}
-          </motion.div>
+          </motion.div> */}
           <motion.div style={{ display: '-webkit-inline-box' }}>
             {props.content.map((content: ContentType, index: number) => (
               <NotifTitle

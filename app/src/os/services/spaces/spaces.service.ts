@@ -3,7 +3,11 @@ import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import { toJS } from 'mobx';
 import fs from 'fs';
 import path from 'path';
-import { onPatch, getSnapshot } from 'mobx-state-tree';
+import {
+  onPatch,
+  getSnapshot,
+  isActionContextThisOrChildOf,
+} from 'mobx-state-tree';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
@@ -16,7 +20,9 @@ import { MembershipStore } from './models/members';
 import { DiskStore } from '../base.store';
 import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
+import { BeaconApi } from '../../api/beacon';
 import { formPathObj } from '../../lib/path';
+import { NotificationStore, NotificationStoreType } from './models/beacon';
 
 export const getHost = (path: string) => path.split('/')[1];
 let devApps: any = null;
@@ -34,6 +40,7 @@ interface SpaceModels {
   bazaar: NewBazaarStoreType;
   membership: any;
   visas: VisaModelType;
+  beacon: NotificationStoreType;
 }
 /**
  * SpacesService
@@ -48,6 +55,7 @@ export class SpacesService extends BaseService {
       outgoing: {},
     }),
     bazaar: NewBazaarStore.create(),
+    beacon: NotificationStore.create(),
     // bazaar: BazaarStore.create({ my: {} }),
   };
 
@@ -259,6 +267,7 @@ export class SpacesService extends BaseService {
       membership: getSnapshot(this.models.membership),
       bazaar: getSnapshot(this.models.bazaar),
       visas: getSnapshot(this.models.visas),
+      beacon: getSnapshot(this.models.beacon),
     };
   }
 
@@ -281,11 +290,19 @@ export class SpacesService extends BaseService {
       NewBazaarStore,
       {}
     );
+    const beaconStore = new DiskStore(
+      'beacon',
+      patp,
+      secretKey!,
+      NotificationStore,
+      {}
+    );
     this.models.membership = membershipStore.model;
     this.models.bazaar = bazaarStore.model;
     if (devApps) {
       this.models.bazaar.loadDevApps(devApps);
     }
+    this.models.beacon = beaconStore.model;
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -308,6 +325,7 @@ export class SpacesService extends BaseService {
         spaces: getSnapshot(this.state),
         membership: getSnapshot(this.models.membership),
         bazaar: getSnapshot(this.models.bazaar),
+        beacon: getSnapshot(this.models.beacon),
       },
       resource: 'spaces',
       key: null,
@@ -320,6 +338,7 @@ export class SpacesService extends BaseService {
     this.db.registerPatches(this.core.onEffect);
     membershipStore.registerPatches(this.core.onEffect);
     bazaarStore.registerPatches(this.core.onEffect);
+    beaconStore.registerPatches(this.core.onEffect);
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(
@@ -339,6 +358,7 @@ export class SpacesService extends BaseService {
       );
     }
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
+    BeaconApi.watchUpdates(this.core.conduit!, this.models.beacon);
   }
 
   // ***********************************************************

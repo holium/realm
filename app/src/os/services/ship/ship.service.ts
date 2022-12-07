@@ -47,7 +47,7 @@ export interface ShipModels {
   // docket: DocketStoreType;
   chat?: ChatStoreType;
   courier?: CourierStoreType;
-  notifications: NotificationStoreType;
+  // notifications: NotificationStoreType;
 }
 
 /**
@@ -61,12 +61,12 @@ export class ShipService extends BaseService {
     contacts: undefined,
     // docket: DocketStore.create({ apps: {} }),
     chat: undefined,
-    notifications: NotificationStore.create({
-      unseen: [],
-      seen: [],
-      all: [],
-      recent: [],
-    }),
+    // notifications: NotificationStore.create({
+    //   unseen: [],
+    //   seen: [],
+    //   all: [],
+    //   recent: [],
+    // }),
   };
 
   private readonly metadataStore: {
@@ -191,14 +191,14 @@ export class ShipService extends BaseService {
     //
     removeFriend: async (patp: Patp) =>
       await ipcRenderer.invoke('realm.ship.remove-friend', patp),
-    getNotifications: async (timestamp: number, length: number) =>
-      await ipcRenderer.invoke(
-        'realm.ship.get-notifications',
-        timestamp,
-        length
-      ),
-    openedNotifications: async () =>
-      await ipcRenderer.invoke('realm.ship.opened-notifications'),
+    // getNotifications: async (timestamp: number, length: number) =>
+    //   await ipcRenderer.invoke(
+    //     'realm.ship.get-notifications',
+    //     timestamp,
+    //     length
+    //   ),
+    // openedNotifications: async () =>
+    //   await ipcRenderer.invoke('realm.ship.opened-notifications'),
     uploadFile: async (params: FileUploadParams) =>
       await ipcRenderer.invoke('realm.ship.upload-file', params),
   };
@@ -223,9 +223,9 @@ export class ShipService extends BaseService {
       courier: this.models.courier ? getSnapshot(this.models.courier) : null,
       contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,
-      notifications: this.models.notifications
-        ? getSnapshot(this.models.notifications)
-        : null,
+      // notifications: this.models.notifications
+      //   ? getSnapshot(this.models.notifications)
+      //   : null,
     };
   }
 
@@ -270,14 +270,14 @@ export class ShipService extends BaseService {
     console.log('before load froms disk');
     this.core.sendLog('before load from disk');
 
-    const notificationStore = new DiskStore(
-      'notifications',
-      ship,
-      secretKey!,
-      NotificationStore,
-      { unseen: [], seen: [], all: [], recent: [] }
-    );
-    this.models.notifications = notificationStore.model;
+    // const notificationStore = new DiskStore(
+    //   'notifications',
+    //   ship,
+    //   secretKey!,
+    //   NotificationStore,
+    //   { unseen: [], seen: [], all: [], recent: [] }
+    // );
+    // this.models.notifications = notificationStore.model;
     const courierStore = new DiskStore(
       'courier',
       ship,
@@ -304,7 +304,7 @@ export class ShipService extends BaseService {
 
     secretKey = null;
     this.core.sendLog('after load from disk');
-    notificationStore.registerPatches(this.core.onEffect);
+    // notificationStore.registerPatches(this.core.onEffect);
     courierStore.registerPatches(this.core.onEffect);
     contactStore.registerPatches(this.core.onEffect);
     friendsStore.registerPatches(this.core.onEffect);
@@ -357,11 +357,6 @@ export class ShipService extends BaseService {
       //   this.models.notifications,
       //   this.models.courier
       // );
-      BeaconApi.updates(
-        this.core.conduit!,
-        this.models.notifications,
-        this.models.courier
-      );
 
       this.state.loader.set('loaded');
 
@@ -414,7 +409,7 @@ export class ShipService extends BaseService {
     this.models.chat = undefined;
     this.models.contacts = undefined;
     this.models.courier = undefined;
-    this.models.notifications = NotificationStore.create({});
+    // this.models.notifications = NotificationStore.create({});
     // this.models.docket = undefined;
     // this.models.friends = undefined;
     this.core.mainWindow.webContents.send('realm.on-logout');

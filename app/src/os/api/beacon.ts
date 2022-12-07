@@ -10,28 +10,19 @@ export const BeaconApi = {
   // get new notifications (anything not yet read/seen)
   getLatest: async (conduit: Conduit) => {
     const response = await conduit.scry({
-      app: 'beacon',
+      app: 'realm-beacon',
       path: `/latest`,
     });
     return response.latest;
   },
-  updates: (
-    conduit: Conduit,
-    notifications: NotificationStoreType,
-    courier: CourierStoreType
-  ) => {
+  watchUpdates: (conduit: Conduit, beacon: NotificationStoreType) => {
     conduit.watch({
       app: 'realm-beacon',
       path: '/updates',
       onEvent: async (data: any, id?: number, mark?: string) => {
-        // console.log(data, mark);
-        if (data.more) {
-          // console.log(
-          //   'unread notifications => %o',
-          //   data['more'][0].timebox.notifications[1].body[0]
-          // );
-          notifications.setWatchUpdate(data);
-          courier.setNotificationUpdates(data);
+        console.log(data, mark);
+        if ('new-note' in data) {
+          beacon.newNotification(data['new-note']);
         }
       },
       onError: () => console.log('Subscription rejected'),
