@@ -98,10 +98,10 @@
   %.  jon
   %-  of
   :~  [%set-xpub (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) xpub+so])]
-      [%set-settings (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni])]
+      [%set-network-settings (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni who+(su (perk %nobody %friends %anybody ~)) mode+(su (perk %on-demand %default ~))])]
       [%set-passcode-hash (ot ~[hash+so])]
-      [%set-wallet-creation-mode (ot ~[mode+(su (perk %on-demand %default ~))])]
-      [%set-sharing-mode (ot ~[who+(su (perk %nobody %friends %anybody ~))])]
+      [%set-wallet-creation-mode (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %on-demand %default ~))])]
+      [%set-sharing-mode (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) who+(su (perk %nobody %friends %anybody ~))])]
       [%set-sharing-permissions (ot ~[type+(su (perk %block ~)) who+(se %p)])]
       [%set-default-index (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni])]
       [%set-wallet-nickname (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni nickname+so])]
@@ -212,16 +212,14 @@
       %settings
     %-  pairs
     ^-  (list [@t json])
-    :~  ['passcodeHash' s+passcode-hash.update]
-        ['sharingMode' s+who.sharing.update]
-        ['walletCreationMode' s+wallet-creation.sharing.update]
-        :-  'blocked'
-          :-  %a
-            ^-  (list json)
-            =/  blocklist  ~(tap in blocked.sharing.update)
-            %+  turn  blocklist
-              |=  blocked=@p
-              [%s (scot %p blocked)]
+    :~  ['passcode-hash' s+passcode-hash.update]
+        =/  blocked
+          ^-  (list json)
+          =/  blocklist  ~(tap in blocked.update)
+          %+  turn  blocklist
+            |=  blocked=@p
+            [%s (scot %p blocked)]
+        ['blocked' a+blocked]
     ==
   ==
 --

@@ -1,13 +1,11 @@
 import {
   BaseProtocol,
 } from '@holium/realm-wallet/src/wallets/BaseProtocol';
-import { Asset } from '@holium/realm-wallet/src/wallets/types';
-import { BaseAsset } from '@holium/realm-wallet/src/wallets/BaseAsset';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
-import { WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
+import { WalletStoreType, Asset } from '@holium/realm-wallet/src/wallet.model';
 
 export class UqbarProtocol extends BaseProtocol {
   watchUpdates(walletState: WalletStoreType) {
@@ -22,7 +20,7 @@ export class UqbarProtocol extends BaseProtocol {
   getAccountTransactions(addr: string, startBlock: number): Promise<any[]> {
     throw new Error('Method not implemented.');
   }
-  getAccountAssets(addr: string): Promise<BaseAsset[]> {
+  getAccountAssets(addr: string): Promise<Asset[]> {
     throw new Error('Method not implemented.');
   }
   sendTransaction(signedTx: string): Promise<any> {

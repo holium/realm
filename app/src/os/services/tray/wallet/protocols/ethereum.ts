@@ -9,7 +9,7 @@ import { ethers } from 'ethers';
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
-import { ProtocolType, WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
+import { ProtocolType, WalletStoreType, Asset } from '@holium/realm-wallet/src/wallet.model';
 import { parseEther } from 'ethers/lib/utils';
 
 export class EthereumProtocol implements BaseProtocol {
@@ -66,6 +66,7 @@ export class EthereumProtocol implements BaseProtocol {
         .then((response: any) => {
           ethWallet.applyTransactions(this.network, response.data.result)
         })
+      this.getAccountAssets(ethWallet.address).then();
     }
   }
 
@@ -79,8 +80,11 @@ export class EthereumProtocol implements BaseProtocol {
     const URL = this.network === ProtocolType.ETH_MAIN ? mainnetURL : goerliURL;
     return await axios.get(URL);
   }
-  getAccountAssets(addr: string): Promise<BaseAsset[]> {
-    throw new Error('Method not implemented.');
+  async getAccountAssets(addr: string): Promise<Asset[] | undefined> {
+    console.log('getting account assets')
+    const metadata = await this.alchemy.core.getTokenMetadata(addr)
+    console.log(metadata);
+    return undefined;
   }
   async sendTransaction(signedTx: string): Promise<any> {
     return (await this.ethProvider!.sendTransaction(signedTx)).hash;

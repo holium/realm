@@ -111,20 +111,19 @@
   ?-  -.act
       %initialize
     ?>  (team:title our.bowl src.bowl)
-    =.  who.sharing.settings.state  %anybody
-    =.  wallet-creation.sharing.settings.state  %default
     =.  wallets.state
       (~(put by wallets.state) [%ethereum ~])
     =.  wallets.state
       (~(put by wallets.state) [%bitcoin ~])
     =.  wallets.state
       (~(put by wallets.state) [%btctestnet ~])
+    =/  default-net-settings  [~ 0 %anybody %default]
     =.  networks.settings.state
-      (~(put by networks.settings.state) [%ethereum [~ 0]])
+      (~(put by networks.settings.state) [%ethereum default-net-settings])
     =.  networks.settings.state
-      (~(put by networks.settings.state) [%bitcoin [~ 0]])
+      (~(put by networks.settings.state) [%bitcoin default-net-settings])
     =.  networks.settings.state
-      (~(put by networks.settings.state) [%btctestnet [~ 0]])
+      (~(put by networks.settings.state) [%btctestnet default-net-settings])
     `state
     ::
       %set-xpub
@@ -144,15 +143,15 @@
       (~(put by networks.settings.state) [network.act net])
     `state
     ::
-      %set-settings
+      %set-network-settings
     ?>  (team:title our.bowl src.bowl)
     =.  networks.settings
       =/  net-settings  (~(got by networks.settings) network.act)
       =.  default-index.net-settings  share-index.act
+      =.  wallet-creation.sharing.net-settings  mode.act
+      =.  who.sharing.net-settings  who.act
       (~(put by networks.settings) [network.act net-settings])
-    =.  wallet-creation.sharing.settings  mode.act
-    =.  who.sharing.settings  who.act
-    =.  blocked.sharing.settings  blocked.act
+    =.  blocked.settings  blocked.act
     :_  state
     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
@@ -164,24 +163,23 @@
     ::
       %set-wallet-creation-mode
     ?>  (team:title our.bowl src.bowl)
-    =.  wallet-creation.sharing.settings.state  mode.act
+    =/  net-settings  (~(got by networks.settings.state) network.act)
+    =.  wallet-creation.sharing.net-settings  mode.act
+    =.  networks.settings.state  (~(put by networks.settings.state) [network.act net-settings])
     :_  state
     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-sharing-mode
     ?>  (team:title our.bowl src.bowl)
-    =.  who.sharing.settings  who.act
+    =/  net-settings  (~(got by networks.settings.state) network.act)
+    =.  who.sharing.net-settings  who.act
+    =.  networks.settings.state  (~(put by networks.settings.state) [network.act net-settings])
     :_  state
     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
       %set-sharing-permissions
     ?>  (team:title our.bowl src.bowl)
-    =.  sharing.settings
-      ?-  type.act
-        %block
-      =.  blocked.sharing.settings  (~(put in blocked.sharing.settings) who.act)
-      sharing.settings
-      ==
+    =.  blocked.settings  (~(put in blocked.settings) who.act)
     :_  state
     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
@@ -189,7 +187,7 @@
     ?>  (team:title our.bowl src.bowl)
     =.  networks.settings.state
       =/  prev-set  (~(got by networks.settings.state) network.act)
-      (~(put by networks.settings.state) [network.act [xpub.prev-set index.act]])
+      (~(put by networks.settings.state) [network.act [xpub.prev-set index.act sharing.prev-set]])
     :_  state
     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
     ::
@@ -211,24 +209,26 @@
       =/  wall-act=action  [%receive-address network.act ~]
       =/  task  [%poke %realm-wallet-action !>(`action`wall-act)]
       [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
-    ?:  =(who.sharing.settings %nobody)
+    =/  net-settings  (~(got by networks.settings.state) network.act)
+    ?:  =(who.sharing.net-settings %nobody)
       [null-address-card state]
-    ?:  (~(has in blocked.sharing.settings) src.bowl)
+    ?:  (~(has in blocked.settings) src.bowl)
       [null-address-card state]
-    ?:  ?&  =(who.sharing.settings %friends)
+    ?:  ?&  =(who.sharing.net-settings %friends)
             =/  friends  .^((set @p) %gx /(scot %p our.bowl)/friends/(scot %da now.bowl)/ships/noun)
             !(~(has in friends) src.bowl)
         ==
       [null-address-card state]
     ::  send default wallet if requested
     ::
+    =/  net-settings  (~(got by networks.settings.state) network.act)
     ?:  ?&  !(team:title our.bowl src.bowl)
-            =(%default wallet-creation.sharing.settings.state)
+            =(%default wallet-creation.sharing.net-settings)
             =/  net-wallets  ~(tap by (~(got by wallets) network.act))
             =/  num-wallets  (lent net-wallets)
             (gth num-wallets 0)
         ==
-      =/  default-idx  default-index:(~(got by networks.settings.state) network.act)
+      =/  default-idx  default-index.net-settings
       =/  default-wallet  (~(get by (~(got by wallets) network.act)) default-idx)
       :_  state
       ?~  default-wallet

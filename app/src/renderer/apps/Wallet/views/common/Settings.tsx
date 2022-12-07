@@ -61,7 +61,7 @@ export const WalletSettings: FC = observer(() => {
   const [state, setState] = useState<UISettingsType>({
     ...settings,
     provider: settings.provider!,
-    blocked: [...settings.blocked],
+    blocked: [...walletApp.blacklist],
   });
 
   const { theme } = useServices();

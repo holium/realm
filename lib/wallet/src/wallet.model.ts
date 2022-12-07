@@ -33,13 +33,27 @@ export enum SharingMode {
   ANYBODY = 'anybody',
 }
 
-const Settings = types.model('Settings', {
-  walletCreationMode: types.enumeration(Object.values(WalletCreationMode)),
-  sharingMode: types.enumeration(Object.values(SharingMode)),
-  blocked: types.array(types.string),
-  defaultIndex: types.integer,
-  provider: types.maybe(types.string),
-});
+const Settings = types
+  .model('Settings', {
+    walletCreationMode: types.enumeration(Object.values(WalletCreationMode)),
+    sharingMode: types.enumeration(Object.values(SharingMode)),
+    defaultIndex: types.integer,
+    provider: types.maybe(types.string),
+  })
+  .actions((self) => ({
+    setWalletCreationMode(mode: WalletCreationMode) {
+      self.walletCreationMode = mode;
+    },
+    setSharingMode(mode: SharingMode) {
+      self.sharingMode = mode
+    },
+    setDefaultIndex(index: number) {
+      self.defaultIndex = index;
+    },
+    setProvider(provider: string) {
+      self.provider = provider;
+    }
+  }));
 
 export type SettingsType = Instance<typeof Settings>;
 export interface UISettingsType {
@@ -52,7 +66,6 @@ export interface UISettingsType {
 
 export const WalletSettings = types
   .model('WalletSettings', {
-    networkSettings: types.map(Settings),
     passcodeHash: types.string,
   })
 
@@ -70,6 +83,42 @@ export enum ProtocolType {
   UQBAR = 'Uqbar Network',
 }
 const Protocols = types.enumeration(Object.values(ProtocolType));
+
+export type Asset = {
+  addr: string; // smart contract address for eth
+  id?: string; // chainId for eth, id for uqbar
+  type: 'coin' | 'token' | 'multisig' | string;
+  data: NFTAsset | CoinAsset | MultiAsset;
+};
+
+// ERC-20
+export type CoinAsset = {
+  logo: string | null; // url of token logo image
+  symbol: string; // USDC, DAI, BNB, etc
+  decimals: number; // 8 - used to convert to human readable number
+  balance: number; // current account balance
+  totalSupply: number; // total supply of the coin
+  allowances: { [addr: string]: number };
+};
+
+// ERC-721
+export type NFTAsset = {
+  name: string;
+  description: string;
+  image: string;
+  transferable?: boolean;
+  properties: { [key: string]: string | object };
+};
+
+// ERC-1155
+export type MultiAsset = {
+  name: string;
+  decimals: number; // 8 - used to convert to human readable number
+  description: string;
+  image: string;
+  balance: number; // current account balance
+  properties: { [key: string]: string | object };
+};
 
 export const BitcoinTransaction = types.model('BitcoinTransaction', {
   hash: types.identifier,
@@ -179,6 +228,9 @@ const BitcoinStore = types
     },
     setBlock(block: number) {
       self.block = block;
+    },
+    setSettings(settings: Settings) {
+      self.settings = settings
     }
   }));
 
@@ -350,10 +402,10 @@ const EthWallet = types
     setBalance(balance: string) {
       self.balance = balance;
     },
-    clearWallet() {
+    /*clearWallet() {
       self.coins.clear();
       self.nfts.clear();
-    },
+    },*/
     /* applyHistory(history: any) {
       console.log(history);
       let formattedHistory: any = {};
@@ -788,8 +840,8 @@ export const WalletStore = types
     setSettings(settings: any) {
       self.settings.passcodeHash = settings.passcodeHash;
       self.blacklist = settings.blocked;
-      self.sharingMode = settings.sharingMode;
-      self.creationMode = settings.walletCreationMode;
+      self.currentStore.settings.setWalletCreationMode(settings.walletCreationMode);
+      self.currentStore.settings.setSharingMode(settings.sharingMode);
     }
   }));
 

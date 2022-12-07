@@ -14,6 +14,7 @@ import {
 import {
   EthWalletType,
   BitcoinWalletType,
+  NetworkType,
 } from '@holium/realm-wallet/src/wallet.model';
 
 interface CardStyleProps {
@@ -59,10 +60,11 @@ export const WalletCard: FC<WalletCardProps> = ({
     coins = getCoins(wallet.coins);
   }
 
-  const transactions = getTransactions(
-    wallet.transactions.get(walletApp.currentStore.network!) || new Map()
-    //    wallet!.address
-  );
+  const walletTransactions =
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? wallet.transactions.get(walletApp.navState.protocol)
+      : wallet.transactions;
+  const transactions = getTransactions(walletTransactions || new Map());
 
   const amountDisplay =
     walletApp.navState.network === 'ethereum'

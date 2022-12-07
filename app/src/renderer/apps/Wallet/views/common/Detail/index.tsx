@@ -14,7 +14,7 @@ import {
 
 import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
-import { EthWalletType } from 'os/services/tray/wallet.model';
+import { EthWalletType, NetworkType } from '@holium/realm-wallet/src/wallet.model';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
@@ -57,8 +57,8 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   }
 
   const walletTransactions =
-    walletApp.navState.network === 'ethereum'
-      ? wallet.transactions.get(walletApp.ethereum.network)
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? wallet.transactions.get(walletApp.navState.protocol)
       : wallet.transactions;
   const transactions = getTransactions(walletTransactions || new Map()).sort(
     (a, b) =>

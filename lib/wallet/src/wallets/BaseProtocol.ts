@@ -1,7 +1,4 @@
-// import { action, makeObservable, observable } from 'mobx';
-import { ContractAddr, Asset } from './w';
-import { BaseAsset } from './BaseAsset';
-import { WalletStoreType } from '../wallet.model';
+import { WalletStoreType, Asset } from '../wallet.model';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.
@@ -16,7 +13,7 @@ export abstract class BaseProtocol {
 
   abstract getAccountTransactions(addr: string, startBlock?: number): Promise<any[]>;
 
-  abstract getAccountAssets(addr: string): Promise<BaseAsset[]>;
+  abstract getAccountAssets(addr: string): Promise<Asset[] | undefined>;
 
   /**
    * Sends a signed transaction to the network
@@ -27,15 +24,14 @@ export abstract class BaseProtocol {
   /**
    * Assets are tokens, coins, or multitoken contracts
    */
-
-  abstract getAssetBalance(contract: ContractAddr, addr: string): Promise<number>;
+  abstract getAssetBalance(contract: string, addr: string): Promise<number>;
 
   abstract getAssetMetadata(
-    contract: ContractAddr,
+    contract: string,
     addr: string
   ): Promise<Asset>;
 
-  abstract getAssetAllowance(contract: ContractAddr, addr: string): Promise<number>;
+  abstract getAssetAllowance(contract: string, addr: string): Promise<number>;
 
   /**
    * Gets to and from transfers for a given address
@@ -44,7 +40,7 @@ export abstract class BaseProtocol {
    * @param addr
    */
   abstract getAssetTransfers(
-    contract: ContractAddr,
+    contract: string,
     addr: string,
     startBlock?: number
   ): Promise<any[]>;
@@ -57,7 +53,7 @@ export abstract class BaseProtocol {
    * @param amountOrTokenId
    */
   abstract transferAsset(
-    contract: ContractAddr,
+    contract: string,
     toAddr: string,
     amountOrTokenId: number | string
   ): void | Promise<void>;
