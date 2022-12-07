@@ -708,7 +708,7 @@
     ^-  json
     %-  pairs
     :~ 
-        ['avatar' ?~(avatar.mtd ~ s+u.avatar.mtd)]
+        ['avatar' ?~(avatar.mtd s+'' s+u.avatar.mtd)]
         ['nickname' s+nickname.mtd]
         ['color' s+(scot %ux color.mtd)]  ::  todo convert this to hex string here
     ==
