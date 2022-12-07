@@ -164,33 +164,33 @@
                 [cards this]
             ==
         ==
-
-      [%kiln ~]
-        ?+    -.sign  (on-agent:def wire sign)
-          %watch-ack
-            ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /kiln/vats" ~)  `this
-            ~&  >>>  "{<dap.bowl>}: /kiln/vats subscription failed"
-            `this
-      ::
-          %kick
-            ~&  >  "{<dap.bowl>}: /kiln/vats kicked us, resubscribing..."
-            :_  this
-            :~  [%pass /hood %agent [our.bowl %hood] %watch /vats]
-            ==
-      ::
-          %fact
-            ?+    p.cage.sign  (on-agent:def wire sign)
-                %kiln-vats-snap-0
-                  =^  cards  state
-                    (on-snap:kiln:core !<(snap:hood q.cage.sign))
-                  [cards this]
-                %kiln-vats-diff-0
-                  =^  cards  state
-                    (on-diff:kiln:core !<(diff:hood q.cage.sign))
-                  [cards this]
-            ==
-        ==
-
+      :: [%kiln ~]
+      ::  depricating - see +on-arvo
+      ::   ?+    -.sign  (on-agent:def wire sign)
+      ::     %watch-ack
+      ::       ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /kiln/vats" ~)  `this
+      ::       ~&  >>>  "{<dap.bowl>}: /kiln/vats subscription failed"
+      ::       `this
+      :: ::
+      ::     %kick
+      ::       ~&  >  "{<dap.bowl>}: /kiln/vats kicked us, resubscribing..."
+      ::       :_  this
+      ::       ::  need to subscribe to tire from clay
+      ::       :~  [%pass /hood %agent [our.bowl %hood] %watch /vats]
+      ::       ==
+      :: ::
+      ::     %fact
+      ::       ?+    p.cage.sign  (on-agent:def wire sign)
+      ::           %kiln-vats-snap-0
+      ::             =^  cards  state
+      ::               (on-snap:kiln:core !<(snap:hood q.cage.sign))
+      ::             [cards this]
+      ::           %kiln-vats-diff-0
+      ::             =^  cards  state
+      ::               (on-diff:kiln:core !<(diff:hood q.cage.sign))
+      ::             [cards this]
+      ::       ==
+      ::   ==
       [%docket ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
@@ -281,7 +281,138 @@
           ==
       ==
   ::
-  ++  on-arvo   |=([wire sign-arvo] !!)
+  ::  on-arvo:
+  ::
+  ::    [%tire ~]:
+  ::    requires: `[%tire p=(unit ~)]`
+  ::      > note: `~ turns on ~ turns off sub
+  ::
+  ::      > note: likely a stub for future controls
+  ::              e.g. `(unit desk)` to subscribe to
+  ::              just one desk.
+  ::    handles: tire information from clay
+  ::             returns an (each rock wave)
+  ::
+  ::    +$  rock  (map desk [=zest wic=(set weft)])
+  ::    +$  wave
+  ::      $%  [wait =desk =weft]
+  ::          [%warp =desk =weft]
+  ::          [%zest =desk =zest]
+  ::      ==
+  ::    +$  desk  @tas
+  ::    +$  zest  $~(%dead ?(%dead %live %held))
+  ::    +$  weft  [lal=@tas num=@ud]  :: kelvin ver.
+  ::
+  ++  on-arvo
+    |=  [wir=wire sig=sign-arvo]
+    ?>  ?=([%tire ~] wir)
+    |^  ^-  (quip card _this)
+      =^  cards  state
+        ?>  ?=([%clay %tire *] sig)
+        ?-  -.p.sig
+          %&  (on-rock p.p.sig)
+          %|  (on-wave p.p.sig)  
+        ==
+      [cards this]
+    ::  +pre: prefix for scries to hood
+    ::
+    ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
+    ::  +get-sources:  (map desk [ship desk])
+    ::
+    ++  get-sources
+      ^-  (map desk [=ship =desk])
+      .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
+    ::  +get-syncs:
+    ::
+    ::    (map kiln-sync sync-state)
+    ::    where:
+    ::    %+  map
+    ::       (map [local=desk foreign=ship foreign=desk])
+    ::    [nun=@ta kid=(unit desk) let=@ud]
+    ++  get-syncs
+      ^-  (map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])
+      .^  (map [@tas @p @tas] [@ta (unit @tas) @ud])
+        %gx
+        (welp pre /kiln/syncs/noun)
+      ==
+    ::  +get-pikes:  (map desk [(unit [@p desk]) hash zest wic])
+    ++  get-pikes
+      ^-  pikes:hood
+      .^(pikes:hood %gx (welp pre /kiln/pikes/noun))
+    ::  +on-rock:  handles rock:tire from kiln, see XX
+    ::
+    ++  on-rock
+      |=  =rock:tire:clay
+      ^-  (quip card _state)
+      =+  peaks=get-pikes
+      =;  catalog-apps=catalog:store
+        `state(catalog (~(uni by catalog.state) catalog-apps))
+      %-  ~(rep by rock)
+      |=  [[=desk z=zest:clay wic=(set weft)] cat=catalog:store]
+      ?~  app=(~(get by catalog.state) desk)  cat
+      ?>  ?=(%urbit -.u.app)
+      ::  XX: should we only act on some zests?
+      ::  XX: should we only act if we have a peak?
+      ?~  pyk=(~(get by peaks) desk)  cat
+      ?.  =(%live z)
+        ?.  =(%held z)  cat
+        ::  XX: should we be modulating pending installs as:
+        :: :-  ~
+        :: %=    state
+        ::     pending-installs
+        ::   %-  ~(put by pending-installs.state)
+        ::   ?~(sync.u.pyk our.bowl ship.u.sync.u.pyk)
+        :: ==
+        cat
+      =.  host.u.app
+        ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk)
+      (~(put by cat) `app-id:store`desk u.app)
+    ::  +on-wave: handles wave:tire from kiln, see XXs
+    ::
+    ::    $%(wait+[=desk =weft] warp+[=desk =weft] zest+[=desk =weft]
+    ::
+    ++  on-wave
+      |=  =wave:tire:clay
+      ^-  (quip card _state)
+      =+  peaks=get-pikes
+      ?-  -.wave
+        %wait  `state  ::  XX: blocked - take action?
+        %warp  `state  ::  XX: unblocked - take action?
+      ::
+          %zest
+        ?~  app=(~(get by catalog.state) desk.wave)  `state
+        ?>  ?=(%urbit -.u.app)
+        ?-  zest.wave
+        ::  XX: is it right to no-op here?
+          %dead  `state
+        ::  XX: is it right to remove only here from pending?
+            %live
+          ?~  pyk=(~(get by peaks) desk.wave)  `state
+          :-  ~
+          %=  state
+              pending-installs
+            (~(del by pending-installs.state) desk.wave)
+          ::
+              catalog
+            %+  ~(put by catalog.state)  desk.wave
+            ::  XX: is it right to add our bowl as the host here?
+            u.app(host ?~(sync.u.pyk (some our.bowl) `ship.u.sync.u.pyk))
+          ==
+        ::  XX: is it right to add to pending here?
+            %held
+          ?~  pyk=(~(get by peaks) desk.wave)  `state
+          :-  ~
+          %=    state
+              pending-installs
+            ::  XX: is this right to put our bowl in?
+            %-  ~(put by pending-installs.state)
+            :_  desk.wave
+            ?~(sync.u.pyk our.bowl ship.u.sync.u.pyk)
+          ==
+        ==
+      ==
+
+    --
   ++  on-leave  |=(path `..on-init)
   ++  on-fail ::  |=([term tang] `..on-init)
     |=  [=term =tang]
@@ -693,7 +824,7 @@
           [%pass /treaties %agent [our.bowl %treaty] %watch /treaties]
           [%pass /allies %agent [our.bowl %treaty] %watch /allies]
           [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
-          [%pass /kiln %agent [our.bowl %hood] %watch /kiln/vats]
+          [%pass /tire %arvo %c %tire `~]
       ==
     ::
     ++  get-install-status
@@ -829,56 +960,56 @@
       ==
     --
   --
-++  kiln
-  |%
-  ::
-  ++  on-snap
-    |=  =snap:hood
-    ^-  (quip card _state)
-    :: %-  (slog leaf+"{<dap.bowl>}: [on-snap:hood] => {<snap>}" ~)
-    =/  catalog-apps=catalog:store
-    %-  ~(rep by snap)
-    |=  [[=desk ark=arak:hood] cat=catalog:store]
-      ?~  rail.ark  cat
-      :: :: find the app in the catalog (by desk)
-      =/  app  (~(get by catalog.state) desk)
-      ?~  app  cat
-      ?>  ?=(%urbit -.u.app)
-      =.  host.u.app      ?~(publisher.u.rail.ark (some ship.u.rail.ark) publisher.u.rail.ark)
-      (~(put by cat) `app-id:store`desk u.app)
-    =.  catalog.state  (~(uni by catalog.state) catalog-apps)
-    `state
-  ::
-  ++  on-diff
-    |=  =diff:hood
-    ^-  (quip card _state)
-    :: %-  (slog leaf+"{<dap.bowl>}: [on-diff:hood] => {<diff>}" ~)
-    ?+    -.diff  `state
-      %commit
-        ?~  rail.arak.diff  `state
-        =/  rail  u.rail.arak.diff
-        =/  app  (~(get by catalog.state) desk.diff)
-        ?~  app  `state
-        ?>  ?=(%urbit -.u.app)
-        =.  host.u.app  ?~(publisher.rail (some ship.rail) publisher.rail)
-        =.  pending-installs.state  %-  malt
-        %+  skip  ~(tap by pending-installs.state)
-        |=  [[=ship =desk]]
-          :: %-  (slog leaf+"{<dap.bowl>}: {<[ship desk]>} = {<[host.u.app desk.diff]>}" ~)
-          ?:  ?&  !=(~ host.u.app)
-                   =((need host.u.app) ship)
-                   =(desk.diff desk)
-              ==
-              :: %-  (slog leaf+"{<dap.bowl>}: removing pending install {<[ship desk]>}..." ~)
-              %.y
-            :: %-  (slog leaf+"{<dap.bowl>}: keeping pending install {<[ship desk]>}..." ~)
-            %.n
-        =.  catalog.state  (~(put by catalog.state) desk.diff u.app)
-        `state
-      %suspend  `state
-      %revive   `state
-    ==
-  --
+:: ++  kiln
+::   |%
+::   ::
+::   ++  on-snap
+::     |=  =snap:hood
+::     ^-  (quip card _state)
+::     :: %-  (slog leaf+"{<dap.bowl>}: [on-snap:hood] => {<snap>}" ~)
+::     =/  catalog-apps=catalog:store
+::     %-  ~(rep by snap)
+::     |=  [[=desk ark=arak:hood] cat=catalog:store]
+::       ?~  rail.ark  cat
+::       :: :: find the app in the catalog (by desk)
+::       =/  app  (~(get by catalog.state) desk)
+::       ?~  app  cat
+::       ?>  ?=(%urbit -.u.app)
+::       =.  host.u.app      ?~(publisher.u.rail.ark (some ship.u.rail.ark) publisher.u.rail.ark)
+::       (~(put by cat) `app-id:store`desk u.app)
+::     =.  catalog.state  (~(uni by catalog.state) catalog-apps)
+::     `state
+::   ::
+::   ++  on-diff
+::     |=  =diff:hood
+::     ^-  (quip card _state)
+::     :: %-  (slog leaf+"{<dap.bowl>}: [on-diff:hood] => {<diff>}" ~)
+::     ?+    -.diff  `state
+::       %commit
+::         ?~  rail.arak.diff  `state
+::         =/  rail  u.rail.arak.diff
+::         =/  app  (~(get by catalog.state) desk.diff)
+::         ?~  app  `state
+::         ?>  ?=(%urbit -.u.app)
+::         =.  host.u.app  ?~(publisher.rail (some ship.rail) publisher.rail)
+::         =.  pending-installs.state  %-  malt
+::         %+  skip  ~(tap by pending-installs.state)
+::         |=  [[=ship =desk]]
+::           :: %-  (slog leaf+"{<dap.bowl>}: {<[ship desk]>} = {<[host.u.app desk.diff]>}" ~)
+::           ?:  ?&  !=(~ host.u.app)
+::                    =((need host.u.app) ship)
+::                    =(desk.diff desk)
+::               ==
+::               :: %-  (slog leaf+"{<dap.bowl>}: removing pending install {<[ship desk]>}..." ~)
+::               %.y
+::             :: %-  (slog leaf+"{<dap.bowl>}: keeping pending install {<[ship desk]>}..." ~)
+::             %.n
+::         =.  catalog.state  (~(put by catalog.state) desk.diff u.app)
+::         `state
+::       %suspend  `state
+::       %revive   `state
+::     ==
+::   --
 ++  spaces
   |%
   ++  reaction
