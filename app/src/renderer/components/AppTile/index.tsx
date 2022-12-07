@@ -189,7 +189,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       graphic = (
         <TileStyle
           id={tileId}
-          canHover={highlightOnHover}
+          highlightOnHover={highlightOnHover}
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
