@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable react/prop-types */
-import React, { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
 import { Portal } from 'renderer/system/dialog/Portal';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { MiniApp } from '../SystemBar/components/MiniAppWindow';
+import { MiniAppWindow } from '../SystemBar/components/MiniAppWindow';
 
 export interface RealmPopoverProps {
   id: string;
@@ -47,6 +46,7 @@ export const RealmPopoverWrapper = styled(styled.div<
 export const RealmPopover = observer((props: RealmPopoverProps) => {
   const { id, isOpen, style, children, coords, dimensions, onClose } = props;
   const { theme } = useServices();
+  const { textColor, windowColor } = theme.currentTheme;
   // const isOpen = searchMode !== 'none';
   const handleClickOutside = useCallback(
     (event: any) => {
@@ -117,16 +117,22 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
                   },
                 }}
               >
-                <MiniApp
+                <MiniAppWindow
                   id={`${id}-app`}
-                  dimensions={{ ...dimensions, height: 'fit-content' }}
-                  backgroundColor={theme.currentTheme.windowColor}
-                  textColor={theme.currentTheme.textColor}
+                  style={{
+                    ...dimensions,
+                    height: 'fit-content',
+                    overflowY: 'auto',
+                    maxHeight: '50vh',
+                  }}
+                  color={textColor}
+                  customBg={windowColor}
+                  onContextMenu={(evt) => evt.stopPropagation()}
                 >
                   <motion.div style={{ ...coords, padding: 20 }}>
                     {children}
                   </motion.div>
-                </MiniApp>
+                </MiniAppWindow>
               </Wrapper>
             )}
           </Portal>

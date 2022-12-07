@@ -75,7 +75,10 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
     `}
 `;
 
-interface TileStyleProps {}
+interface TileStyleProps {
+  highlightOnHover?: boolean;
+}
+
 const TileStyle = styled(Box)<TileStyleProps>`
   position: relative;
   display: flex;
@@ -83,6 +86,16 @@ const TileStyle = styled(Box)<TileStyleProps>`
   justify-content: center;
   align-items: center;
   user-select: none;
+  transition: var(--transition);
+  ${(props: TileStyleProps) =>
+    props.highlightOnHover &&
+    css`
+      &:hover {
+        transition: var(--transition);
+        filter: brightness(0.92);
+      }
+    `}
+
   img {
     --webkit-user-select: none;
     --khtml-user-select: none;
@@ -109,6 +122,7 @@ interface AppTileProps {
   isInstalling?: boolean;
   isUninstalled?: boolean;
   hasTitle?: boolean;
+  highlightOnHover?: boolean;
   isRecommended?: boolean;
 }
 
@@ -129,6 +143,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     isRecommended,
     isInstalling,
     isUninstalled,
+    highlightOnHover,
   } = props;
   const { theme } = useServices();
 
@@ -174,6 +189,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       graphic = (
         <TileStyle
           id={tileId}
+          highlightOnHover={highlightOnHover}
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
@@ -222,6 +238,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       graphic = (
         <TileStyle
           id={tileId}
+          highlightOnHover={highlightOnHover}
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
@@ -256,6 +273,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       graphic = (
         <TileStyle
           id={tileId}
+          highlightOnHover={highlightOnHover}
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
