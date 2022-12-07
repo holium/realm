@@ -120,13 +120,18 @@ export const AppRow = ({
         flexDirection="row"
         justifyContent="space-between"
         alignItems="center"
-        // flex={1}
-        style={{ width: 'inherit' }}
+        maxWidth="100%"
         onClick={(evt: React.MouseEvent<HTMLDivElement>) =>
           onClick && onClick(evt, app)
         }
       >
-        <Flex gap={8} alignItems="center" flexGrow={0} flexDirection="row">
+        <Flex
+          gap={8}
+          alignItems="center"
+          flexGrow={0}
+          flexDirection="row"
+          minWidth={0}
+        >
           <TileStyle
             onContextMenu={(evt: any) => {
               evt.stopPropagation();
@@ -151,12 +156,15 @@ export const AppRow = ({
             )}
             {app.icon && <Icons name={app.icon} height={16} width={16} />}
           </TileStyle>
-          <Flex flexDirection="column">
+          <Flex flexDirection="column" overflow="hidden">
             <Text
               fontWeight={500}
               color={currentTheme.textColor}
               style={{
                 textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                maxWidth: '100%',
               }}
             >
               {title}
@@ -165,9 +173,10 @@ export const AppRow = ({
               mt="2px"
               style={{
                 width: descriptionWidth || 'fit-content',
-                whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
                 overflow: 'hidden',
+                maxWidth: '100%',
               }}
               fontSize={2}
               color={rgba(currentTheme.textColor, 0.4)}
