@@ -57,9 +57,7 @@ interface SpaceRowProps {
 export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { theme, membership, ship } = useServices();
-  // const {} =
   const rowRef = useRef<any>(null);
-
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
 
   const roles = membership.spaces.get(space.path)!.get(ship!.patp)?.roles;
@@ -99,7 +97,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
             });
           },
         },
-  ].filter(el => el !== false);
+  ].filter((el: any) => el !== false);
 
   const contextMenuButtonIds = contextMenuItems.map((item) => item?.id);
   const memberCount = membership.getMemberCount(space.path);
@@ -122,7 +120,7 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
         isComponentContext
         textColor={currentTheme.textColor}
         customBg={rgba(currentTheme.windowColor, 0.9)}
-        containerId={`space-row-${space.path}`}
+        containerId={`space-row-context-menu-${space.path}`}
         parentRef={rowRef}
         style={{ minWidth: 180 }}
         position="below"

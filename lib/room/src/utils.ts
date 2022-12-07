@@ -16,7 +16,3 @@ export function isMobile(): boolean {
 export function isWeb(): boolean {
   return typeof document !== 'undefined';
 }
-
-export async function sleep(duration: number): Promise<void> {
-  return await new Promise((resolve) => setTimeout(resolve, duration));
-}

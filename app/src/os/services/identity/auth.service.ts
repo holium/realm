@@ -13,7 +13,7 @@ import Realm from '../..';
 import { BaseService } from '../base.service';
 import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 import axios from 'axios';
-import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
+import { getCookie } from '../../lib/shipHelpers';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)
@@ -241,9 +241,9 @@ export class AuthService extends BaseService {
   }
 
   async logout(_event: any, ship: string) {
-    this.core.services.ship.rooms.resetLocal(null);
+    // this.core.services.ship.rooms.resetLocal(null);
     try {
-      await this.core.services.ship.rooms.exitRoom(null);
+      // await this.core.services.ship.rooms.exitRoom(null);
     } catch (err) {
       console.log(err);
     }

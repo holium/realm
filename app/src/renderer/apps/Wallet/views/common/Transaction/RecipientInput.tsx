@@ -23,7 +23,12 @@ export const RecipientInput = observer(
   (props: {
     setValid: (
       valid: boolean,
-      recipient: { address?: string; patp?: string; patpAddress?: string }
+      recipient: {
+        address?: string;
+        patp?: string;
+        color?: string;
+        patpAddress?: string;
+      }
     ) => void;
   }) => {
     const { theme } = useServices();
@@ -104,7 +109,8 @@ export const RecipientInput = observer(
       ) {
         props.setValid(true, {
           patp: recipientDetails.details.patp,
-          patpAddress: recipientDetails.details.address!,
+          color: recipientDetails.details.recipientMetadata?.color!,
+          address: recipientDetails.details.address!,
         });
       } else if (
         recipientDetails.failed &&
@@ -131,19 +137,20 @@ export const RecipientInput = observer(
       } else if (validPatp) {
         setIcon('sigil');
         setValueCache(value);
-
         getRecipient(value);
         // props.setValid(true, { patp: value });
-      } else if (isValidPatp(`~${value}`)) {
-        setIcon('sigil');
-        setValueCache(`~${value}`);
-
-        getRecipient(value);
-        // props.setValid(true, { patp: value });
-        return setRecipient(`~${value}`);
-      } else {
+      }
+      // else if (isValidPatp(`~${value}`)) {
+      //   // setIcon('sigil');
+      //   // setValueCache(`~${value}`);
+      //   // getRecipient(value);
+      //   // props.setValid(true, { patp: value });
+      //   return setRecipient(`~${value}`);
+      // }
+      else {
         setIcon('blank');
-        setValueCache(value);
+        setValueCache('');
+        setRecipientDetails({ failed: false, details: null });
         props.setValid(false, {});
       }
 
@@ -216,7 +223,6 @@ export const RecipientInput = observer(
           >
             TO
           </Text>
-          {/* @ts-expect-error */}
           <ContainerFlex
             focusBorder={themeData.colors.brand.primary}
             px={1}
@@ -235,14 +241,26 @@ export const RecipientInput = observer(
             <Flex ml={1} mr={2}>
               <RecipientIcon icon={icon} />
             </Flex>
-            <Input
-              mode={theme.currentTheme.mode === 'light' ? 'light' : 'dark'}
-              width="100%"
-              placeholder="@p or recipient’s address"
-              spellCheck="false"
-              value={recipient}
-              onChange={onChange}
-            />
+            <Flex flexDirection="column">
+              <Input
+                mode={theme.currentTheme.mode === 'light' ? 'light' : 'dark'}
+                width="100%"
+                placeholder="@p or recipient’s address"
+                spellCheck="false"
+                value={recipient}
+                onChange={onChange}
+              />
+              {recipientDetails.details?.address && (
+                <Text
+                  fontSize={1}
+                  variant="body"
+                  opacity={0.7}
+                  color={themeData.colors.text.tertiary}
+                >
+                  {shortened(recipientDetails.details?.address)}
+                </Text>
+              )}
+            </Flex>
             {loading && (
               <Flex mr={2}>
                 <Spinner

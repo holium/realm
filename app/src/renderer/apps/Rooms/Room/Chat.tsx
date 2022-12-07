@@ -1,4 +1,4 @@
-import { FC, useRef, useMemo, useState } from 'react';
+import { FC, useRef, useMemo, useState, useCallback } from 'react';
 import {
   Flex,
   Text,
@@ -10,10 +10,10 @@ import {
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useServices } from 'renderer/logic/store';
 import { Box, WindowedList } from '@holium/design-system';
 import { RoomChatMessage } from './RoomChatMessage';
+import { useRooms } from '../useRooms';
 
 interface RoomChatProps {}
 
@@ -44,33 +44,27 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   const { text } = useMemo(() => chatForm(), []);
   const [loading, setLoading] = useState(false);
   const { roomsApp } = useTrayApps();
-  const { theme: themeStore, ship } = useServices();
+  const roomsManager = useRooms();
+  const { theme: themeStore } = useServices();
 
   const theme = themeStore.currentTheme;
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  const chats = roomsApp.chats.slice(0).reverse();
+  const chats = roomsManager.presentRoom!.chat.slice(0);
 
-  const handleChat = (evt: any) => {
-    evt.preventDefault();
-    evt.stopPropagation();
-
-    if (chatInputRef.current === null) return;
-
-    const innerText = chatInputRef.current.value;
-
-    if (innerText === '') return;
-
-    setLoading(true);
-
-    console.log('sending chat:', innerText);
-
-    RoomsActions.sendChat(ship!.patp, innerText).then(() => {
-      setLoading(false);
+  const handleChat = useCallback(
+    (evt: any) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      if (chatInputRef.current === null) return;
+      const innerText = chatInputRef.current.value;
+      if (innerText === '') return;
+      roomsManager.presentRoom?.sendChat(innerText);
       text.actions.onChange('');
-    });
-  };
+    },
+    [roomsManager.presentRoom, text.actions]
+  );
 
   const ChatList = useMemo(() => {
     if (chats.length === 0) {
@@ -99,7 +93,7 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
               key={chat.index}
               chat={chat}
               doesPack={
-                index === 0 ||
+                chats[index - 1] &&
                 // pack if last guy is the same as the current guy
                 chats[index - 1].author === chat.author
                 // and the last guy isn't too old (2 minutes)
@@ -116,11 +110,10 @@ export const RoomChat: FC<RoomChatProps> = observer((props: RoomChatProps) => {
   return (
     <Flex flex={1} flexDirection="column">
       {ChatList}
-
       <Flex
         flexDirection="row"
         alignItems="center"
-        pt={2}
+        pt={4}
         px={3}
         style={{
           gap: 8,

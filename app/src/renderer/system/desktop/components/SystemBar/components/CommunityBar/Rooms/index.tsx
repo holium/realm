@@ -1,20 +1,22 @@
-import { FC, createRef, useCallback, useMemo } from 'react';
+import { createRef, useCallback, useMemo } from 'react';
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
 import { Flex, IconButton, Icons } from 'renderer/components';
 import { observer } from 'mobx-react';
 
 import { useServices } from 'renderer/logic/store';
-// import { Roompps } from 'renderer/logic/Roomore';
 import { RoomRow } from 'renderer/apps/Rooms/components/RoomRow';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { useTrayApps } from 'renderer/apps/store';
-interface RoomTrayProps {}
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 
 const iconSize = 28;
-export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
-  const { theme, ship } = useServices();
+const position = 'top-left';
+const anchorOffset = { x: 8, y: 26 };
+const dimensions = { height: 500, width: 380 };
+
+export const RoomTray = observer(() => {
+  const { theme } = useServices();
   // TODO ship.cookie
   // ship
   //
@@ -25,16 +27,15 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
     setTrayAppCoords,
     setTrayAppDimensions,
   } = useTrayApps();
-  const { dockColor, textColor } = theme.currentTheme;
+  const { textColor } = theme.currentTheme;
   const roomsButtonRef = createRef<HTMLButtonElement>();
+  const roomsManager = useRooms();
 
-  const dimensions = {
-    height: 500,
-    width: 380,
-  };
-
-  const position = 'top-left';
-  const anchorOffset = { x: 8, y: 26 };
+  const presentRoom = useMemo(() => {
+    if (!roomsManager) return;
+    if (!roomsManager.presentRoom) return;
+    return roomsManager.presentRoom.room;
+  }, [roomsManager?.presentRoom?.room]);
 
   const onButtonClick = useCallback(
     (evt: any) => {
@@ -60,36 +61,41 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
       // RoomsActions.requestAllRooms();
       setActiveApp('rooms-tray');
       if (roomsApp.liveRoom) {
-        RoomsActions.setView('room');
+        // RoomsActions.setView('room');
       }
     },
-    [activeApp, anchorOffset, position, dimensions]
+    [
+      activeApp,
+      roomsApp.liveRoom,
+      setActiveApp,
+      setTrayAppCoords,
+      setTrayAppDimensions,
+    ]
   );
 
   const iconHoverColor = useMemo(
     () => rgba(darken(0.05, theme.currentTheme.dockColor), 0.5),
-    [theme.currentTheme.windowColor]
+    [theme.currentTheme.dockColor]
   );
 
   return (
     <motion.div
       id="rooms-tray-icon"
       className="realm-cursor-hover"
-      // @ts-expect-error -
-      ref={roomsButtonRef}
       whileTap={{ scale: 0.975 }}
-      transRoom={{ scale: 0.2 }}
-      position="relative"
       onClick={onButtonClick}
     >
-      {roomsApp.liveRoom ? (
+      {presentRoom ? (
         <Flex style={{ pointerEvents: 'none' }}>
           <RoomRow
             tray={true}
-            {...roomsApp.liveRoom}
+            rid={presentRoom.rid}
+            title={presentRoom.title}
+            present={presentRoom.present}
+            creator={presentRoom.creator}
+            provider={presentRoom.provider}
             rightChildren={
               <Icons
-                // mb="2px"
                 size={iconSize - 4}
                 color={textColor}
                 name="Connect"
@@ -106,7 +112,6 @@ export const RoomTray: FC<RoomTrayProps> = observer((props: RoomTrayProps) => {
           customBg={iconHoverColor}
           color={textColor}
           mt="2px"
-          // mb="-2px"
         >
           <Icons name="Connect" pointerEvents="none" />
         </IconButton>

@@ -262,7 +262,6 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
       variant,
       borderColor,
       wrapperMotionProps,
-      // eslint-disable-next-line @typescript-eslint/no-shadow
       color,
       bg,
       width,
@@ -334,7 +333,7 @@ export const Input: FC<FullProps> = forwardRef<HTMLInputElement, FullProps>(
     );
   }
 );
-
+Input.displayName = 'Input';
 Input.defaultProps = {
   error: false,
   leftInteractive: false,

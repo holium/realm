@@ -1,4 +1,4 @@
-import { FC, useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   Grid,
   Flex,
@@ -15,22 +15,14 @@ import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { rgba, lighten, darken } from 'polished';
+import { lighten, darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
 import { getBaseTheme } from '../Wallet/lib/helpers';
+import { useTrayApps } from '../store';
 
-interface SpacesProps {
-  theme: any;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-
-export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
+export const SpacesTrayApp = observer(() => {
   const { ship, theme, spaces } = useServices();
-
-  const { dimensions } = props;
+  const { dimensions } = useTrayApps();
 
   const themeData = getBaseTheme(theme.currentTheme);
   const spaceTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
@@ -50,32 +42,20 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
   const themeInputColor = useMemo(
     () =>
       mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
-    [inputColor]
-  );
-
-  const backgroundColor = useMemo(
-    () =>
-      mode === 'light'
-        ? lighten(0.025, rgba(dockColor, 0.9))
-        : darken(0.05, rgba(dockColor, 0.9)),
-    [dockColor]
+    [inputColor, mode]
   );
 
   const bottomHeight = 58;
-
-  const [coords, setCoords] = useState<{
-    left: number;
-    bottom: number;
-  }>({ left: 0, bottom: 48 });
-
-  const [isVisible, setIsVisible] = useState(true);
 
   const [searchVisible, setSearchVisible] = useState(false);
 
   useEffect(() => {
     SpacesActions.setJoin('initial');
   }, []);
-  if (spaces.join.state === 'loading' && spaces.spaces.has('/' + searchString)) {
+  if (
+    spaces.join.state === 'loading' &&
+    spaces.spaces.has('/' + searchString)
+  ) {
     SpacesActions.selectSpace('/' + searchString);
     if (searchVisible === true) {
       setSearchVisible(false);
@@ -127,7 +107,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
             color={iconColor}
             data-close-tray="false"
             onClick={(evt: any) => {
-              SpacesActions.setJoin('initial')
+              SpacesActions.setJoin('initial');
               setSearchVisible(!searchVisible);
             }}
             mr={1}
@@ -141,7 +121,7 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
             size={28}
             color={iconColor}
             data-close-tray="true"
-            onClick={(evt: any) => {
+            onClick={() => {
               ShellActions.openDialog('create-space-1');
             }}
           >
@@ -202,9 +182,11 @@ export const SpacesTrayApp: FC<SpacesProps> = observer((props: SpacesProps) => {
                       SpacesActions.joinSpace(searchString);
                     }}
                   >
-                    {spaces.join.state === 'loading'
-                    ? <Spinner size={0} />
-                    : "Join"}
+                    {spaces.join.state === 'loading' ? (
+                      <Spinner size={0} />
+                    ) : (
+                      'Join'
+                    )}
                   </TextButton>
                 }
                 onKeyDown={(evt: any) => {

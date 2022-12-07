@@ -42,8 +42,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     });
 
     webview?.addEventListener('close', () => {
-      // @ts-expect-error
-      webview.closeDevTools();
+      webview?.closeDevTools();
     });
   }, []);
 

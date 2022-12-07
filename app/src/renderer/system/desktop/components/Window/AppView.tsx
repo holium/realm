@@ -68,7 +68,7 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
       let appUrl = `${ship.url}/apps/${window.id}/?spaceId=${spaces.selected?.path}`;
 
       if (window.href?.site) {
-        appUrl = `${ship.url}${window.href?.site}`; // ?spaceId=${spaces.selected?.path}`;
+        appUrl = `${ship.url}${window.href?.site}?spaceId=${spaces.selected?.path}`;
       }
 
       DesktopActions.openAppWindow('', toJS(window));
@@ -123,6 +123,8 @@ export const AppView: FC<AppViewProps> = observer((props: AppViewProps) => {
         `${window.id}-urbit-webview`
       );
       webview.insertCSS(css);
+      // TODO request permission for campfire
+      webview.webContents?.session?.setPermissionRequestHandler();
       webview?.addEventListener('did-frame-finish-load', () => {
         webview.insertCSS(css);
       });

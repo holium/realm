@@ -1,97 +1,49 @@
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
-import { rgba } from 'polished';
+import { rgba, darken } from 'polished';
 import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
-import { LiveRoom, useTrayApps } from 'renderer/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { CommButton } from '../components/CommButton';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
 import { VoiceView } from './Voice';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { RoomInfo } from './Info';
-import { handleLocalEvents } from '../listeners';
-
-export interface BaseRoomProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
+import { useRooms } from '../useRooms';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
-export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
-  const { dimensions } = props;
+export const Room = observer(() => {
   const { ship, theme } = useServices();
-  const { roomsApp } = useTrayApps();
+  const { roomsApp, dimensions } = useTrayApps();
+  const roomsManager = useRooms();
 
-  const { dockColor, windowColor, accentColor, inputColor, textColor } =
-    theme.currentTheme;
+  const { dockColor, windowColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const muted = LiveRoom.our?.isMuted;
-  console.log('muted', muted);
+  const muted = roomsManager.protocol.local?.isMuted;
+
+  const presentRoom = useMemo(() => {
+    if (!roomsManager) return;
+    if (!roomsManager.presentRoom) return;
+    return roomsManager.presentRoom.room;
+  }, [roomsManager?.presentRoom?.room]);
 
   useEffect(() => {
-    handleLocalEvents(
-      RoomsActions.setMuted,
-      RoomsActions.setCursors,
-      LiveRoom.our
-    );
-  }, []);
+    if (!presentRoom) roomsApp.setView('list');
+  }, [presentRoom, roomsApp]);
 
-  // const getMicrophone = async () => {
-  //   LiveRoom.our.audio?.unmute();
-  //   const track = await LiveRoom.our.setMicrophoneEnabled(true);
-  //   console.log(track);
-  //   // const audioMedia = await navigator.mediaDevices.getUserMedia({
-  //   //   audio: true,
-  //   //   video: false,
-  //   // });
-  //   // setAudio(audioMedia);
-  // };
-
-  // const stopMicrophone = () => {
-  //   LiveRoom.our.audio?.mute();
-  //   audio?.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-  //   setAudio(null);
-  // };
-
-  // useEffect(() => {
-  //   window.electron.app.askForMicrophone().then((hasMic: any) => {
-  //    console.log('hasMic', hasMic);
-  //   });
-  // }, []);
-
-  // TODO exit routine
-  // // logout on window close or refresh
-  // useEffect(() => {
-  //   window.addEventListener("beforeunload", logout);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", logout);
-  //   };
-  // }, []);
-  // //
-
-  useEffect(() => {
-    if (!roomsApp.liveRoom) RoomsActions.setView('list');
-  }, [roomsApp.liveRoom]);
-
-  if (!roomsApp.liveRoom) return <div />;
-  const { present, id, creator } = roomsApp.liveRoom;
+  if (!presentRoom) return <div />;
+  const { rid, creator } = roomsManager!.presentRoom!.room;
+  const presentCount = roomsManager.protocol.peers.size + 1; // to include self
   const creatorStr =
-    roomsApp.liveRoom?.creator.length > 14
-      ? `${roomsApp.liveRoom?.creator.substring(0, 14)}...`
-      : roomsApp.liveRoom?.creator;
+    creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
   let peopleText = 'people';
-  if (present.length === 1) {
+  if (presentCount === 1) {
     peopleText = 'person';
   }
-  // console.log(toJS(roomsApp.liveRoom));
+
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -103,11 +55,18 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         hasBorder={false}
         zIndex={5}
         theme={{
-          ...props.theme,
+          ...theme,
           windowColor,
         }}
       >
-        <Flex pl={3} pr={4} mr={3} justifyContent="center" alignItems="center">
+        <Flex
+          mt={2}
+          gap={10}
+          ml={3}
+          mr={2}
+          justifyContent="center"
+          alignItems="center"
+        >
           <IconButton
             className="realm-cursor-hover"
             size={26}
@@ -115,39 +74,39 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             customBg={dockColor}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              RoomsActions.setView('list');
+              roomsApp.setView('list');
             }}
           >
             <Icons name="ArrowLeftLine" />
           </IconButton>
-          <Flex ml={2} flexDirection="column">
+          <Flex flexDirection="column">
             <Text
-              fontSize={2}
+              fontSize={3}
               fontWeight={600}
+              opacity={0.8}
               style={{
                 wordWrap: 'normal',
                 textOverflow: 'ellipsis',
                 textTransform: 'uppercase',
               }}
             >
-              {roomsApp.liveRoom?.title}
+              {presentRoom.title}
             </Text>
-
-            <Flex>
-              {/* <Text fontSize={2} fontWeight={400} opacity={0.7}>
+            <Flex mt="2px">
+              <Text fontSize={2} fontWeight={400} opacity={0.5}>
                 {creatorStr}
               </Text>
-              <Text mx="6px" fontSize={2} fontWeight={400} opacity={0.7}>
+              <Text mx="6px" fontSize={2} fontWeight={400} opacity={0.5}>
                 •
-              </Text> */}
-              <Text fontSize={2} fontWeight={400} opacity={0.7}>
-                {`${roomsApp.liveRoom?.present.length} ${peopleText}`}
+              </Text>
+              <Text fontSize={2} fontWeight={400} opacity={0.5}>
+                {`${presentCount} ${peopleText}`}
               </Text>
             </Flex>
           </Flex>
         </Flex>
         <Flex gap={12} ml={1} pl={2} pr={2}>
-          <IconButton
+          {/* <IconButton
             className="realm-cursor-hover"
             size={26}
             customBg={dockColor}
@@ -161,20 +120,19 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             }}
           >
             <Icons name="UserAdd" />
-          </IconButton>
-          <IconButton
+          </IconButton> */}
+          {/* <IconButton
             className="realm-cursor-hover"
             size={26}
             style={{ cursor: 'none' }}
             color={roomView === 'info' ? accentColor : undefined}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              console.log('clicked room info button');
               roomView === 'info' ? setRoomView('voice') : setRoomView('info');
             }}
           >
             <Icons name="InfoCircle" />
-          </IconButton>
+          </IconButton> */}
         </Flex>
       </Titlebar>
       <Flex
@@ -183,9 +141,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         flex={1}
         flexDirection="column"
       >
-        {roomView === 'voice' && (
-          <VoiceView host={creator} present={present} audio={null} />
-        )}
+        {roomView === 'voice' && <VoiceView host={ship!.patp} />}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
         {roomView === 'info' && <RoomInfo />}
@@ -202,24 +158,14 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
               className="realm-cursor-hover"
               size={26}
               color={
-                roomsApp.isCreator(ship!.patp, id)
+                presentRoom.creator === ship!.patp
                   ? rgba('#E56262', 0.7)
                   : undefined
               }
               customBg={dockColor}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                if (!id || !roomsApp.knownRooms.get(id)) {
-                  // bad state
-                  RoomsActions.resetLocal();
-                }
-                if (roomsApp.isCreator(ship!.patp, id)) {
-                  // SoundActions.playRoomLeave();
-                  RoomsActions.deleteRoom(id);
-                } else {
-                  RoomsActions.leaveRoom(id);
-                }
-                LiveRoom.leave();
+                roomsManager.leaveRoom(rid);
               }}
             >
               <Icons name="RoomLeave" />
@@ -228,17 +174,19 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
               icon={muted ? 'MicOff' : 'MicOn'}
-              customBg={dockColor}
+              customBg={
+                mode === 'light'
+                  ? darken(0.04, dockColor)
+                  : darken(0.01, dockColor)
+              }
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 if (muted) {
                   console.log('unmuting time');
-                  console.log(LiveRoom.our);
-                  LiveRoom.our?.unmute();
+                  roomsManager!.presentRoom!.unmute();
                 } else {
                   console.log('muting time');
-                  console.log(LiveRoom.our);
-                  LiveRoom.our?.mute();
+                  roomsManager!.presentRoom!.mute();
                 }
               }}
             />

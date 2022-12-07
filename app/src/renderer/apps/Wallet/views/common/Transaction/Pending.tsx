@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { darken, lighten } from 'polished';
-
-import { Flex, Icons, Text, Spinner } from 'renderer/components';
+import { Flex, Icons, Text, Spinner, IconButton } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import {
   shortened,
@@ -27,24 +26,21 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
         new Date(a.initiatedAt!).getTime() - new Date(b.initiatedAt!).getTime()
     );
 
-  return (
+  return pendingTransactions.length ? (
     <Flex mt={4} width="100%">
-      {pendingTransactions.length ? (
-        <PendingTransaction
-          transaction={pendingTransactions[0]}
-          hide={props.hide}
-        />
-      ) : (
-        <></>
-      )}
+      <PendingTransaction
+        transaction={pendingTransactions[0]}
+        hide={props.hide}
+      />
     </Flex>
-  );
+  ) : null;
 };
 
 interface PendingTransactionProps {
   transaction: TransactionType;
   hide: any;
 }
+
 export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
 ) => {
@@ -88,11 +84,12 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
       borderRadius="9px"
     >
       <Flex
+        mx={2}
         justifyContent="center"
         alignItems="center"
         onClick={goToTransaction}
       >
-        <Flex pl={2} pr={3} height="100%" alignItems="center">
+        <Flex pr={3} height="100%" alignItems="center">
           <Spinner size={1} color={colors.brand.primary} />
         </Flex>
         <Flex flexDirection="column">
@@ -106,15 +103,18 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
           </Text>
         </Flex>
       </Flex>
-      <Flex justifyContent="center" alignItems="center" pr={2}>
-        <Text
+      <Flex justifyContent="center" alignItems="center">
+        <IconButton onClick={props.hide}>
+          <Icons name="Close" size="15px" color={colors.text.disabled} />
+        </IconButton>
+        {/* <Text
           variant="body"
           color={colors.brand.primary}
           fontSize={3}
           onClick={props.hide}
         >
           x
-        </Text>
+        </Text> */}
       </Flex>
     </Flex>
   );

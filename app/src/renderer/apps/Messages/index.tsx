@@ -1,50 +1,16 @@
-import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
+import { useServices } from '../../logic/store';
 
-interface ChatProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-
-// enum ChatViewTypes {
-//   New = 'new-chat',
-//   List = 'chat-list',
-//   Chat = 'chat',
-// }
-type ChatViewType = 'dm-list' | 'dm-chat' | 'new-chat' | 'loading';
-
-export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
-  const { dimensions } = props;
-  // const [currentView, setCurrentView] = useState<ChatViewType>('dm-list');
-  // const [selectedChat, setSelectedChat] = useState<DMPreviewType | undefined>(
-  //   undefined
-  // );
+export const MessagesTrayApp = observer(() => {
+  const { theme } = useServices();
+  const { dimensions } = useTrayApps();
   const { dmApp } = useTrayApps();
-  const [s3Config, setS3Config] = useState<any>();
-  // const [s3Client, setS3Client] = useState<any>();
-
-  // useEffect(() => {
-  //   ShipActions.getS3Bucket().then((response) => {
-  //     setS3Config(response);
-  //     setS3Client(
-  //       new S3Client({
-  //         credentials: response.credentials,
-  //         endpoint: response.credentials.endpoint,
-  //         signatureVersion: 'v4',
-  //       })
-  //     );
-  //   });
-  // }, []);
 
   const headerSize = 50;
   let viewSwitcher: React.ReactElement = (
@@ -67,7 +33,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
     case 'new-chat':
       viewSwitcher = (
         <NewChat
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onBack={() => {
@@ -83,7 +49,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
     case 'dm-list':
       viewSwitcher = (
         <DMs
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onNewChat={(evt: any) => {
@@ -103,7 +69,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           headerOffset={headerSize}
           height={dimensions.height}
           dimensions={dimensions}
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           // s3Client={s3Client}
           selectedChat={dmApp.selectedChat!}
           setSelectedChat={(chat: any) => {
@@ -119,115 +85,4 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
   }
 
   return viewSwitcher;
-
-  // return (
-  //   <>
-  //     {selectedChat ? (
-  //       <Grid.Column
-  //         style={{ position: 'relative', color: textColor }}
-  //         expand
-  //         noGutter
-  //         overflowY="hidden"
-  //       >
-  //         {/* <Grid.Row
-  //           style={{
-  //             position: 'absolute',
-  //             zIndex: 5,
-  //             top: 0,
-  //             left: 0,
-  //             right: 0,
-  //             height: headerSize,
-  //             background: rgba(lighten(0.23, backgroundColor), 0.9),
-  //             backdropFilter: 'blur(8px)',
-  //             borderBottom: `1px solid ${rgba(backgroundColor, 0.7)}`,
-  //           }}
-  //           expand
-  //           noGutter
-  //           align="center"
-  //         > */}
-  //         <Titlebar
-  //           hasBlur
-  //           closeButton={false}
-  //           hasBorder
-  //           zIndex={5}
-  //           theme={{
-  //             ...props.theme,
-  //             windowColor: rgba(lighten(0.225, props.theme.windowColor), 0.8),
-  //           }}
-  //         >
-  //           <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
-  //             <IconButton
-  //               className="realm-cursor-hover"
-  //               size={26}
-  //               style={{ cursor: 'none' }}
-  //               customBg={dockColor}
-  //               onClick={(evt: any) => {
-  //                 evt.stopPropagation();
-  //                 setSelectedChat(null);
-  //               }}
-  //             >
-  //               <Icons name="ArrowLeftLine" />
-  //             </IconButton>
-  //           </Flex>
-  //           <Flex flex={1} gap={10} alignItems="center" flexDirection="row">
-  //             <Box>
-  //               <Sigil
-  //                 simple
-  //                 size={28}
-  //                 avatar={null}
-  //                 patp={selectedChat.contact}
-  //                 color={['#000000', 'white']}
-  //               />
-  //             </Box>
-  //             <Text fontSize={3} fontWeight={500}>
-  //               {selectedChat.contact}
-  //             </Text>
-  //           </Flex>
-  //           <Flex pl={2} pr={2} mr={3}>
-  //             <IconButton
-  //               className="realm-cursor-hover"
-  //               customBg={dockColor}
-  //               style={{ cursor: 'none' }}
-  //               size={26}
-  //             >
-  //               <Icons name="Phone" />
-  //             </IconButton>
-  //           </Flex>
-  //         </Titlebar>
-  //         <Flex
-  //           style={{
-  //             zIndex: 4,
-  //             position: 'relative',
-  //             bottom: 0,
-  //             left: 0,
-  //             right: 0,
-  //             backfaceVisibility: 'hidden',
-  //             transform: 'translate3d(0, 0, 0)',
-  //           }}
-  //           overflowY="hidden"
-  //         >
-  //           <ChatView
-  //             headerOffset={headerSize}
-  //             dimensions={dimensions}
-  //             theme={props.theme}
-  //             contact={selectedChat.contact}
-  //             height={dimensions.height}
-  //             onSend={(message: any) => {
-  //               console.log('dm message', message);
-  //             }}
-  //           />
-  //         </Flex>
-  //       </Grid.Column>
-  //     ) : (
-  //       <DMs
-  //         theme={props.theme}
-  //         headerOffset={headerSize}
-  //         height={dimensions.height}
-  //         onSelectDm={(dm: any) => {
-  //           setSelectedChat(dm);
-  //         }}
-  //       />
-  //     )}
-  //   </>
-  // );
 });
