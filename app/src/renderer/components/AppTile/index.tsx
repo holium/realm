@@ -76,7 +76,7 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
 `;
 
 interface TileStyleProps {
-  canHover?: boolean;
+  highlightOnHover?: boolean;
 }
 
 const TileStyle = styled(Box)<TileStyleProps>`
@@ -88,7 +88,7 @@ const TileStyle = styled(Box)<TileStyleProps>`
   user-select: none;
   transition: var(--transition);
   ${(props: TileStyleProps) =>
-    props.canHover &&
+    props.highlightOnHover &&
     css`
       &:hover {
         transition: var(--transition);
@@ -238,7 +238,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       graphic = (
         <TileStyle
           id={tileId}
-          canHover={highlightOnHover}
+          highlightOnHover={highlightOnHover}
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
@@ -273,7 +273,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       graphic = (
         <TileStyle
           id={tileId}
-          canHover={highlightOnHover}
+          highlightOnHover={highlightOnHover}
           onContextMenu={(evt: any) => {
             evt.stopPropagation();
           }}
