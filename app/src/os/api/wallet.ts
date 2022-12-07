@@ -224,11 +224,11 @@ export const handleWalletReactions = (
       if (transaction.network == 'ethereum')
         walletState!.ethereum.wallets.get(
           transaction.index
-        )!.applyTransactions(transaction.net, transaction.transaction);
+        )!.applyTransactionUpdate(transaction.net, transaction.transaction);
       else if (transaction.network == 'bitcoin') {
         walletState!.ethereum.wallets.get(
           transaction.index
-        )!.applyTransactions(transaction.net, transaction.transaction);
+        )!.applyTransactionUpdate(transaction.net, transaction.transaction);
         // walletState!.wallets.get(NetworkStoreType.BTC_MAIN)!.wallets.get(transaction.index)!.applyTransactionUpdate(transaction);
       }
       else if (transaction.network == 'btctest') {

@@ -2,18 +2,16 @@ import { FC } from 'react';
 import { darken } from 'polished';
 
 import { Flex, Text, Icons } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ERC721Type, WalletView } from '@holium/realm-wallet/src/wallets/types';
+import { ERC721Type, WalletView } from '@holium/realm-wallet/src/wallet.model';
 import { Row } from 'renderer/components/NewRow';
 
 interface NFTListProps {
   nfts: ERC721Type[];
 }
 export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
-  const { walletApp } = useTrayApps();
   const { theme } = useServices();
   const baseTheme = getBaseTheme(theme.currentTheme);
 

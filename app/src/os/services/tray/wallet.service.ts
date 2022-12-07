@@ -329,7 +329,6 @@ export class WalletService extends BaseService {
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
-            blocked: [],
             defaultIndex: 0,
           },
           conversions: {},
@@ -339,7 +338,6 @@ export class WalletService extends BaseService {
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
-            blocked: [],
             defaultIndex: 0,
           },
           conversions: {},
@@ -350,7 +348,6 @@ export class WalletService extends BaseService {
         lastInteraction: Date.now(),
         initialized: false,
         settings: {
-          networkSettings: {},
           passcodeHash: '',
         },
         ourPatp: ship,
@@ -506,7 +503,7 @@ export class WalletService extends BaseService {
     );
   }
 
-  async setSettings(_events: any, network: string, settings: SettingsType) {
+  async setSettings(_events: any, network: string, settings: UISettingsType) {
     await WalletApi.setSettings(this.core.conduit!, network, settings);
   }
 

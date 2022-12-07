@@ -1,3 +1,4 @@
+import { AssetTransfersCategory } from 'alchemy-sdk';
 import {
   applySnapshot,
   types,
@@ -104,6 +105,7 @@ export type CoinAsset = {
 // ERC-721
 export type NFTAsset = {
   name: string;
+  tokenId: string,
   description: string;
   image: string;
   transferable?: boolean;
@@ -229,9 +231,6 @@ const BitcoinStore = types
     setBlock(block: number) {
       self.block = block;
     },
-    setSettings(settings: Settings) {
-      self.settings = settings
-    }
   }));
 
 export type BitcoinStoreType = Instance<typeof BitcoinStore>;
@@ -265,27 +264,6 @@ const ERC20 = types
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;
-
-// const ERC721Token = types
-//   .model('ERC721Token', {
-//     name: types.string,
-//     // collection name - null if single
-//     // last price or floor price
-//     imageUrl: types.string,
-//     tokenId: types.number,
-//   })
-// const ERC721Token = types
-//   .model('ERC721Token', {
-//     name: types.string,
-//     imageUrl: types.string,
-//     tokenId: types.string,
-//   })
-
-// const ERC721 = types.model('ERC721', {
-//   name: types.string,
-//   address: types.string,
-//   tokens: types.map(ERC721Token),//types.map(types.number),
-// });
 
 const ERC721 = types.model('ERC721', {
   name: types.string,
@@ -399,13 +377,66 @@ const EthWallet = types
       const newNft = map.create(formattedNft);
       applySnapshot(self.nfts, getSnapshot(newNft));
     },
+    /*updateAssets(assets: Asset[]) {
+      this.clearWallet();
+      for (let asset of assets) {
+        if (asset.type === 'coin') {
+          self.coins.set(asset.addr, {
+            name: '',
+            logo: '',
+            address: asset.addr,
+            balance: '',
+            decimals: 0,
+            conversions: {},
+          })
+        }
+        else if (asset.type === 'nft') {
+          self.nfts.set(asset.addr, {
+            name: '',
+            collectionName: '',
+            address: asset.addr,
+            tokenId: 0,
+            imageUrl: '',
+            lastPrice: ''
+          })
+        }
+      }
+    },*/
+    updateCoin(coin: Asset) {
+      const coinData = coin.data as CoinAsset;
+      self.coins.set(coin.addr, {
+        name: coinData.symbol,
+        logo: coinData.logo || '',
+        address: coin.addr,
+        balance: coinData.balance.toString(),
+        decimals: coinData.decimals,
+        conversions: {},
+      })
+    },
+    updateCoinTransfers(transfers: any) {
+
+    },
+    updateNft(nft: Asset) {
+      const nftData = nft.data as NFTAsset;
+      self.nfts.set(nft.addr, {
+        name: nftData.name,
+        collectionName: '',
+        address: nft.addr,
+        tokenId: nftData.tokenId,
+        imageUrl: nftData.image,
+        lastPrice: '',
+      })
+    },
+    updateNftTransfers(transfers: any) {
+
+    },
     setBalance(balance: string) {
       self.balance = balance;
     },
-    /*clearWallet() {
+    clearWallet() {
       self.coins.clear();
       self.nfts.clear();
-    },*/
+    },
     /* applyHistory(history: any) {
       console.log(history);
       let formattedHistory: any = {};

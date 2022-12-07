@@ -5,7 +5,7 @@ import { Flex, Text, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getMockCoinIcon, formatCoinAmount } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ERC20Type, WalletView } from '@holium/realm-wallet/src/wallets/types';
+import { ERC20Type, WalletView } from '@holium/realm-wallet/src/wallet.model';
 import { Row } from 'renderer/components/NewRow';
 
 interface CoinListProps {

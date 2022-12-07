@@ -13,7 +13,7 @@ export abstract class BaseProtocol {
 
   abstract getAccountTransactions(addr: string, startBlock?: number): Promise<any[]>;
 
-  abstract getAccountAssets(addr: string): Promise<Asset[] | undefined>;
+  abstract getAccountAssets(addr: string): Promise<Asset[]>;
 
   /**
    * Sends a signed transaction to the network
@@ -24,14 +24,7 @@ export abstract class BaseProtocol {
   /**
    * Assets are tokens, coins, or multitoken contracts
    */
-  abstract getAssetBalance(contract: string, addr: string): Promise<number>;
-
-  abstract getAssetMetadata(
-    contract: string,
-    addr: string
-  ): Promise<Asset>;
-
-  abstract getAssetAllowance(contract: string, addr: string): Promise<number>;
+  abstract getAsset(contract: string, addr: string, type?: string, tokenId?: string): Promise<Asset>;
 
   /**
    * Gets to and from transfers for a given address

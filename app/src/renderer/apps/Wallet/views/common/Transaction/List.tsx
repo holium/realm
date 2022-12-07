@@ -15,7 +15,7 @@ import {
   convertBtcAmountToUsd,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { TransactionType, WalletView } from '@holium/realm-wallet/src/wallets/types';
+import { TransactionType, WalletView } from '@holium/realm-wallet/src/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {

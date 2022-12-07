@@ -1,7 +1,6 @@
 import {
   BaseProtocol,
 } from '@holium/realm-wallet/src/wallets/BaseProtocol';
-import { BaseAsset } from '@holium/realm-wallet/src/wallets/BaseAsset';
 import { Alchemy, AssetTransfersCategory, Network } from 'alchemy-sdk';
 import axios from 'axios';
 import { ethers, utils } from 'ethers';
@@ -9,7 +8,7 @@ import { ethers, utils } from 'ethers';
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
-import { ProtocolType, WalletStoreType, Asset, CoinAsset, NFTAsset } from '@holium/realm-wallet/src/wallet.model';
+import { ProtocolType, WalletStoreType, Asset, CoinAsset, NFTAsset, NetworkStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export class EthereumProtocol implements BaseProtocol {
   private network: ProtocolType;
@@ -57,18 +56,30 @@ export class EthereumProtocol implements BaseProtocol {
     });*/
   }
 
-  updateWalletState(walletStore: WalletStoreType) {
-    for (let wallet of walletStore.ethereum.wallets.keys()) {
-      const ethWallet = walletStore.ethereum.wallets.get(wallet)!;
-      this.getAccountBalance(ethWallet.address).then(ethWallet.setBalance);
-      this.getAccountTransactions(ethWallet.address, walletStore.ethereum.block)
+  async updateWalletState(walletStore: WalletStoreType) {
+    for (let walletKey of walletStore.currentStore.wallets.keys()) {
+      const wallet = walletStore.currentStore.wallets.get(walletKey)!;
+      this.getAccountBalance(wallet.address).then(wallet.setBalance);
+      this.getAccountTransactions(wallet.address, walletStore.currentStore.block)
         .then((response: any) => {
-          ethWallet.applyTransactions(this.network, response.data.result)
+          wallet.applyTransactions(this.network, response.data.result)
         })
-      this.getAccountAssets(ethWallet.address).then(console.log);
+      if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
+        const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
+        const assets = await this.getAccountAssets(ethWallet.address);
+        for (let asset of assets) {
+          if (asset.type === 'coin') {
+            this.getAsset(asset.addr, ethWallet.address, 'coin').then(ethWallet.updateCoin);
+            this.getAssetTransfers(asset.addr, ethWallet.address, walletStore.currentStore.block).then(ethWallet.updateCoinTransfers)
+          }
+          if (asset.type === 'nft') {
+            this.getAsset(asset.addr, ethWallet.address, 'nft', (asset.data as NFTAsset).tokenId).then(ethWallet.updateNft);
+            this.getAssetTransfers(asset.addr, ethWallet.address, walletStore.ethereum.block).then(ethWallet.updateNftTransfers);
+          }
+        }
+      }
     }
   }
-
   async getAccountBalance(addr: string): Promise<string> {
     return utils.formatEther(await this.ethProvider!.getBalance(addr));
   }
@@ -83,73 +94,81 @@ export class EthereumProtocol implements BaseProtocol {
     const coins = await this.alchemy.core.getTokenBalances(addr);
     const nfts = await this.alchemy.nft.getNftsForOwner(addr);
     let assets: Asset[] = [];
-    for (let coin of coins.tokenBalances) {
-      console.log('getting account assets')
-      const metadata = await this.alchemy.core.getTokenMetadata(coin.contractAddress);
-      console.log(metadata);
-      console.log(metadata);
-      const data: CoinAsset = {
-        logo: metadata.logo,
-        symbol: metadata.symbol || '',
-        decimals: metadata.decimals || 0,
-        balance: 1, // coin.tokenBalance?,
-        totalSupply: 1,
-        allowances: {},
+    let data: NFTAsset = {
+        name: '',
+        tokenId: '',
+        description: '',
+        image: '',
+        transferable: true,
+        properties: {}
       }
-      const asset: Asset = {
+    for (let coin of coins.tokenBalances) {
+      assets.push({
         addr: coin.contractAddress,
         type: 'coin',
-        data
-      }
-      assets.push(asset)
+        data,
+      })
     }
+    console.log(nfts)
     for (let nft of nfts.ownedNfts) {
-      const data: NFTAsset = {
-        name: nft.title,
-        description: nft.description,
-        image: nft.rawMetadata?.image || '',
-        transferable: true,
-        properties: {},
-      }
-      const asset: Asset = {
+      console.log(nft)
+      data.tokenId = nft.tokenId;
+      assets.push({
         addr: nft.contract.address,
-        id: nft.tokenId,
         type: 'nft',
-        data
-      }
-      assets.push(asset);
+        data,
+      })
     }
     return assets
   }
   async sendTransaction(signedTx: string): Promise<any> {
     return (await this.ethProvider!.sendTransaction(signedTx)).hash;
   }
-  getAsset(contract: string, addr: string): Asset {
-    throw new Error('Method not implemented.');
+  async getAsset(contract: string, addr: string, type: string, tokenId?: string): Promise<Asset> {
+    if (type === 'coin') {
+      const metadata = await this.alchemy.core.getTokenMetadata(contract);
+      const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
+      const balance = (await ethContract.balanceOf(addr)).toString();
+      const data: CoinAsset = {
+        logo: metadata.logo,
+        symbol: metadata.symbol || '',
+        decimals: metadata.decimals || 0,
+        balance,
+        totalSupply: 1,
+        allowances: {},
+      }
+      return {
+        addr: contract,
+        type,
+        data
+      }
+    }
+    else {
+      console.log('getting nft for ', tokenId);
+      const nft = await this.alchemy.nft.getNftMetadata(contract, ethers.BigNumber.from(tokenId!));
+      const data: NFTAsset = {
+        name: nft.title,
+        description: nft.description,
+        image: nft.rawMetadata?.image || '',
+        tokenId: tokenId!,
+        transferable: true,
+        properties: {},
+      }
+      return {
+        addr: contract,
+        type: 'nft',
+        data
+      }
+    }
   }
-  async getAssetBalance(contract: string, addr: string): Promise<number> {
-    const ethContract = new ethers.Contract(contract, abi, this.ethProvider);
-    return (await ethContract.balanceOf(addr)).toString();
-  }
-  async getAssetMetadata(contract: string): Promise<Asset> {
-    console.log('getting account assets')
-    const metadata = await this.alchemy.core.getTokenMetadata(contract)
-    console.log(metadata);
-    let asset: Asset;
-    return asset;
-  }
-  getAssetAllowance(contract: string, addr: string): Promise<number> {
-    const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
-    throw new Error('Method not implemented.');
-  }
-  getAssetTransfers(contract: string, addr: string, startBlock: number): Promise<any[]> {
-    this.alchemy.core.getAssetTransfers({
+  async getAssetTransfers(contract: string, addr: string, startBlock: number): Promise<any[]> {
+    return (await this.alchemy.core.getAssetTransfers({
       fromBlock: ethers.utils.hexlify(startBlock),
       fromAddress: addr,
+      contractAddresses: [contract],
       excludeZeroValue: true,
-      category: []//["erc721", "erc1155"],
-    })
-    throw new Error('Method not implemented.');
+      category: [AssetTransfersCategory.ERC20, AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
+    })).transfers;
   }
   async transferAsset(
     contract: string,
