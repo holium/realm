@@ -127,7 +127,7 @@ export const RealmPopover = observer((props: RealmPopoverProps) => {
                   }}
                   color={textColor}
                   customBg={windowColor}
-                  onContextMenu={(evt: any) => evt.stopPropagation()}
+                  onContextMenu={(evt) => evt.stopPropagation()}
                 >
                   <motion.div style={{ ...coords, padding: 20 }}>
                     {children}
