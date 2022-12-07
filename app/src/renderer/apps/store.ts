@@ -116,9 +116,11 @@ export const trayStore = TrayAppStore.create({
       network: NetworkType.ETHEREUM,
       networkStore: NetworkStoreType.ETHEREUM,
       protocol: ProtocolType.ETH_MAIN,
-      btcNetwork: 'mainnet',
+      btcNetwork: NetworkStoreType.BTC_MAIN,
     },
     ethereum: {
+      block: 0,
+      gorliBlock: 0,
       protocol: ProtocolType.ETH_MAIN,
       settings: {
         walletCreationMode: WalletCreationMode.DEFAULT,
@@ -130,6 +132,7 @@ export const trayStore = TrayAppStore.create({
       conversions: {},
     },
     bitcoin: {
+      block: 0,
       settings: {
         walletCreationMode: WalletCreationMode.DEFAULT,
         sharingMode: SharingMode.ANYBODY,
@@ -139,6 +142,7 @@ export const trayStore = TrayAppStore.create({
       conversions: {},
     },
     btctest: {
+      block: 0,
       settings: {
         walletCreationMode: WalletCreationMode.DEFAULT,
         sharingMode: SharingMode.ANYBODY,

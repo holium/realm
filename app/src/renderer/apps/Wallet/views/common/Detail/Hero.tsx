@@ -21,7 +21,8 @@ import {
   ERC20Type,
   EthWalletType,
   BitcoinWalletType,
-} from 'os/services/tray/wallet.model';
+  NetworkType,
+} from '@holium/realm-wallet/src/wallet.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';
@@ -190,7 +191,10 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         >
           <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
-              <Icons name="Ethereum" height="20px" mr={2} />
+              {walletApp.navState.network === NetworkType.ETHEREUM
+                ? <Icons name="Ethereum" height="20px" mr={2} />
+                : <Icons name="Bitcoin" height="20px" mr={2} />
+              }
               <Text pt="2px" textAlign="center" fontSize="14px">
                 {shortened(props.wallet.address)}
               </Text>

@@ -1,7 +1,6 @@
 import {
   BaseProtocol,
 } from '@holium/realm-wallet/src/wallets/BaseProtocol';
-//import { Asset, CoinAsset } from '@holium/realm-wallet/src/wallets/types';
 import { BaseAsset } from '@holium/realm-wallet/src/wallets/BaseAsset';
 import { Alchemy, Network } from 'alchemy-sdk';
 import axios from 'axios';
@@ -38,29 +37,39 @@ export class EthereumProtocol implements BaseProtocol {
         network: Network.ETH_GOERLI, // Replace with your network.
       };
     }
-    this.ethProvider?.removeAllListeners();
-    // TODO this is where the apis are querying too much
-    // this.ethProvider?.on('block', () => this.updateEthereumInfo());
+    this.ethProvider!.removeAllListeners();
     this.alchemy = new Alchemy(alchemySettings);
   }
 
-  onBlock(callback: () => void) {
-    this.ethProvider!.on('block', callback);
-  }
-
   removeListener() {
-    this.ethProvider?.removeAllListeners();
+    this.ethProvider!.removeAllListeners();
   }
 
-  updateWalletState(walletState: WalletStoreType) {
+  watchUpdates(walletStore: WalletStoreType) {
+    this.updateWalletState(walletStore);
+    this.ethProvider!.on('block', (block: number) => {
+      this.updateWalletState(walletStore);
 
+      if (!(walletStore.navState.protocol === ProtocolType.ETH_GORLI)
+      && !(walletStore.navState.protocol === ProtocolType.UQBAR)) {
+        walletStore.currentStore.block = block;
+      }
+    });
   }
 
-  async getAccountBalance(addr: string): Promise<number> {
-    return await (await this.ethProvider!.getBalance(addr)).toNumber();
+  updateWalletState(walletStore: WalletStoreType) {
+    for (let wallet of walletStore.ethereum.wallets.keys()) {
+      const ethWallet = walletStore.ethereum.wallets.get(wallet)!;
+      this.getAccountBalance(ethWallet.address).then(ethWallet.setBalance);
+      // this.getAccountTransactions(ethWallet.address, ethWallet.currentBlock)
+      //   .then((transactions: any) => ethWallet.applyTransactions(this.network, transactions))
+    }
   }
-  async getAccountTransactions(addr: string): Promise<any[]> {
-    const startBlock = 0;
+
+  async getAccountBalance(addr: string): Promise<string> {
+    return (await this.ethProvider!.getBalance(addr)).toString();
+  }
+  async getAccountTransactions(addr: string, startBlock: number): Promise<any[]> {
     const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
     const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
     const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
@@ -114,5 +123,4 @@ export class EthereumProtocol implements BaseProtocol {
   ): number | Promise<number> {
     throw new Error('Method not implemented.');
   }
-
 }

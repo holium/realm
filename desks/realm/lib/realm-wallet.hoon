@@ -215,8 +215,6 @@
     :~  ['passcodeHash' s+passcode-hash.update]
         ['sharingMode' s+who.sharing.update]
         ['walletCreationMode' s+wallet-creation.sharing.update]
-        :: ['whitelist' [%s 'test']]
-        ['defaultIndex' (numb 0)]
         :-  'blocked'
           :-  %a
             ^-  (list json)
@@ -224,7 +222,6 @@
             %+  turn  blocklist
               |=  blocked=@p
               [%s (scot %p blocked)]
-
     ==
   ==
 --

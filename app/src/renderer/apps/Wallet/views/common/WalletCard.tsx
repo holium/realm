@@ -14,7 +14,7 @@ import {
 import {
   EthWalletType,
   BitcoinWalletType,
-} from 'os/services/tray/wallet.model';
+} from '@holium/realm-wallet/src/wallet.model';
 
 interface CardStyleProps {
   isSelected: boolean;

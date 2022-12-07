@@ -15,7 +15,6 @@ import {
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { ThemeModelType } from 'os/services/theme.model';
-import { EthWalletType } from 'os/services/tray/wallet.model';
 import {
   shortened,
   fullMonthNames,
@@ -66,8 +65,8 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  const transaction = (walletApp.currentWallet! as EthWalletType).transactions
-    .get(walletApp.currentStore.network)
+  const transaction = walletApp.currentWallet!.transactions
+    .get(walletApp.navState.protocol)!
     .get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();

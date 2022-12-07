@@ -114,6 +114,7 @@ export type BitcoinWalletType = Instance<typeof BitcoinWallet>;
 
 const BitcoinStore = types
   .model('BitcoinStore', {
+    block: types.number,
     wallets: types.map(BitcoinWallet),
     settings: Settings,
     conversions: types
@@ -510,6 +511,8 @@ export type EthWalletType = Instance<typeof EthWallet>;
 
 export const EthStore = types
   .model('EthStore', {
+    block: types.number,
+    gorliBlock: types.number,
     protocol: Protocols,
     wallets: types.map(EthWallet),
     settings: Settings,
@@ -611,7 +614,7 @@ export const WalletNavState = types.model('WalletNavState', {
   network: Networks,
   networkStore: NetworkStores,
   protocol: Protocols,
-  btcNetwork: types.enumeration(['mainnet', 'testnet']),
+  btcNetwork: NetworkStores,
   walletIndex: types.maybe(types.string),
   detail: types.maybe(
     types.model({
@@ -653,7 +656,7 @@ export const WalletStore = types
     creationMode: types.string,
     sharingMode: types.string,
     whitelist: types.map(types.string),
-    blacklist: types.map(types.string),
+    blacklist: types.array(types.string),
     ourPatp: types.maybe(types.string),
     passcodeHash: types.maybe(types.string),
     lastInteraction: types.Date,
@@ -689,6 +692,21 @@ export const WalletStore = types
       self.initialized = initialized;
     },
     setNetwork(network: NetworkType) {
+      if (network !== self.navState.network) {
+        switch (network) {
+          case NetworkType.ETHEREUM:
+            self.navState.networkStore = NetworkStoreType.ETHEREUM
+            self.navState.protocol = self.ethereum.protocol;
+            this.setProtocol
+            break;
+          case NetworkType.BITCOIN:
+            self.navState.networkStore = self.navState.btcNetwork;
+            self.navState.protocol = self.navState.btcNetwork === NetworkStoreType.BTC_MAIN
+            ? ProtocolType.BTC_MAIN
+            : ProtocolType.BTC_TEST
+            break;
+        }
+      }
       self.navState.network = network;
       /* @ts-expect-error */
       self.resetNavigation();
@@ -696,11 +714,6 @@ export const WalletStore = types
     setProtocol(protocol: ProtocolType) {
       self.navState.protocol = protocol;
       /* @ts-expect-error */
-      self.resetNavigation();
-    },
-    setBtcNetwork(network: string) {
-      self.navState.btcNetwork = network;
-      // @ts-expect-error
       self.resetNavigation();
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
@@ -773,7 +786,10 @@ export const WalletStore = types
       self.lastInteraction = date;
     },
     setSettings(settings: any) {
-      self.settings = settings;
+      self.settings.passcodeHash = settings.passcodeHash;
+      self.blacklist = settings.blocked;
+      self.sharingMode = settings.sharingMode;
+      self.creationMode = settings.walletCreationMode;
     }
   }));
 

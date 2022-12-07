@@ -303,9 +303,11 @@ export class WalletService extends BaseService {
           network: NetworkType.ETHEREUM,
           networkStore: NetworkStoreType.ETHEREUM,
           protocol: ProtocolType.ETH_MAIN,
-          btcNetwork: 'mainnet',
+          btcNetwork: NetworkStoreType.BTC_MAIN,
         },
         ethereum: {
+          block: 0,
+          gorliBlock: 0,
           protocol: ProtocolType.ETH_MAIN,
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
@@ -317,6 +319,7 @@ export class WalletService extends BaseService {
           conversions: {},
         },
         bitcoin: {
+          block: 0,
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
@@ -326,6 +329,7 @@ export class WalletService extends BaseService {
           conversions: {},
         },
         btctest: {
+          block: 0,
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
@@ -375,7 +379,7 @@ export class WalletService extends BaseService {
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 
     WalletApi.watchUpdates(this.core.conduit!, this.state!);
-    this.wallet!.watchProtocol(this.state!.navState.protocol, this.state!);
+    this.wallet!.watchUpdates(this.state!.navState.protocol, this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -444,7 +448,7 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.protocol !== protocol) {
       this.state!.setProtocol(protocol);
-      this.wallet!.watchProtocol(protocol, this.state!);
+      this.wallet!.watchUpdates(protocol, this.state!);
     }
   }
 
@@ -510,7 +514,7 @@ export class WalletService extends BaseService {
     let network: string = this.state!.navState.network;
     if (
       network === 'bitcoin' &&
-      this.state!.navState.btcNetwork === 'testnet'
+      this.state!.navState.btcNetwork === NetworkStoreType.BTC_TEST
     ) {
       network = 'btctestnet';
     }
@@ -589,7 +593,6 @@ export class WalletService extends BaseService {
       return false;
     }
   }
-
 
   async checkMnemonic(_event: any, mnemonic: string) {
     // TODO: implement

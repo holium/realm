@@ -15,14 +15,11 @@ export class Wallet {
     this.currentProtocol = currentProtocol;
   }
   
-  watchProtocol(currentProtocol: ProtocolType, walletState: WalletStoreType) {
+  watchUpdates(currentProtocol: ProtocolType, walletState: WalletStoreType) {
     const lastProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
     lastProtocol.removeListener();
     this.currentProtocol = currentProtocol;
-    const newProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
-    newProtocol.onBlock(() => {
-      this.protocols.get(this.currentProtocol)!.updateWalletState(walletState);
-    })
+    this.protocols.get(this.currentProtocol)!.watchUpdates(walletState);
   }
 }
 

@@ -1,5 +1,5 @@
 // import { action, makeObservable, observable } from 'mobx';
-import { ContractAddr, Asset } from './types';
+import { ContractAddr, Asset } from './w';
 import { BaseAsset } from './BaseAsset';
 import { WalletStoreType } from '../wallet.model';
 
@@ -8,15 +8,13 @@ import { WalletStoreType } from '../wallet.model';
  */
 export abstract class BaseProtocol {
 
-  abstract onBlock(callback: () => void): void;
+  abstract watchUpdates(walletState: WalletStoreType): void;
   
   abstract removeListener(): void;
 
-  abstract updateWalletState(walletState: WalletStoreType): void;
+  abstract getAccountBalance(addr: string): Promise<string>;
 
-  abstract getAccountBalance(addr: string): Promise<number>;
-
-  abstract getAccountTransactions(addr: string): Promise<any[]>;
+  abstract getAccountTransactions(addr: string, startBlock: number): Promise<any[]>;
 
   abstract getAccountAssets(addr: string): Promise<BaseAsset[]>;
 

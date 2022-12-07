@@ -195,9 +195,7 @@ export const handleWalletReactions = (
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
     case 'wallet':
-      console.log('got wallet update')
       const wallet = data.wallet;
-      console.log(wallet);
       if (wallet.network === 'ethereum') {
         walletState!.ethereum.applyWalletUpdate(
           walletState!.navState.protocol,
@@ -210,7 +208,6 @@ export const handleWalletReactions = (
       }
       break;
     case 'wallets':
-      console.log('got wallets update')
       const wallets = data.wallets;
       if (
         Object.keys(wallets.ethereum).length !== 0 ||
@@ -242,7 +239,7 @@ export const handleWalletReactions = (
       }
       break;
     case 'settings':
-      walletState.setSettings(data);
+      walletState.setSettings(data.settings);
       break;
     default:
       break;

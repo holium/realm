@@ -10,19 +10,16 @@ import nftabi from 'non-fungible-token-abi';
 import { WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export class UqbarProtocol extends BaseProtocol {
-  onBlock(callback: () => void): void {
-    throw new Error('Method not implemented.');
+  watchUpdates(walletState: WalletStoreType) {
+    
   }
   removeListener() {
 
   }
-  updateWalletState(walletState: WalletStoreType) {
-
-  }
-  getAccountBalance(addr: string): Promise<number> {
+  getAccountBalance(addr: string): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  getAccountTransactions(addr: string): Promise<any[]> {
+  getAccountTransactions(addr: string, startBlock: number): Promise<any[]> {
     throw new Error('Method not implemented.');
   }
   getAccountAssets(addr: string): Promise<BaseAsset[]> {
