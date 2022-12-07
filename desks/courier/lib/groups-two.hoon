@@ -2,6 +2,24 @@
 /-  *courier
 /+  lib=courier
 |%
+++  into-chat-block-type
+  |=  con=content
+  ^-  (unit block:c)
+  ?-  -.con
+    %text       ~
+    %mention    ~
+    %url        ~
+    %code       ~
+    %reference
+    =/  ref
+    ?-  -.reference.con
+      %graph  ~
+      %group  `block:c`[%cite [%group group.reference.con]]
+      %app    `block:c`[%cite [%desk flag=[ship.reference.con desk.reference.con] path.reference.con]]
+    ==
+    ?~  ref  ~
+    `ref
+  ==
 ++  into-chat-inline-type
   |=  con=content
   ^-  inline:c
@@ -10,21 +28,50 @@
     %mention    [%ship p=ship.con]
     %url        [%link p=url.con q=url.con]
     %code       [%code p=expression.con]
-    %reference  [%break ~] ::TODO actually map this properly
+    %reference
+    ?-  -.reference.con
+      %graph  ''
+      %group  ''
+      %app    ''
+    ==
   ==
+++  textified-content
+  |=  =content
+  ^-  @t
+  ?-  -.content
+    %text       text.content
+    %mention    (scot %p ship.content)
+    %url        url.content
+    %code       expression.content
+    %reference
+    ?-  -.reference.content
+      %graph  name.group.reference.content
+      %group  (crip (join ' ' `(list @t)`[(scot %p entity.group.reference.content) 'group called' name.group.reference.content ~]))
+      %app    (crip (join '/' `(list @t)`['' (scot %p ship.reference.content) desk.reference.content path.reference.content]))
+    ==
+  ==
+++  flat-crip-inline-list
+  |=  [inlines=(list inline:c) pre=@t post=@t]
+  ^-  @t
+  =/  content-ified  (turn inlines inline-to-content)
+  =/  flattened      [pre (turn content-ified textified-content)]
+  (crip (join '' (weld flattened [post ~])))
 ++  inline-to-content
   |=  =inline:c
   ^-  content
   ?@  inline
   [%text inline]
-  ::  TODO recursively handle the formatting tags like %italics
-  ?+  -.inline  [%text '...']
-    %inline-code  [%text p.inline]
-    %ship  [%mention p.inline]
-    %code  [%text p.inline]
-    %tag  [%text p.inline]
-    %link  [%url p.inline]
-    %break  [%text '']
+  ?+  -.inline      [%text '...']
+    %ship           [%mention p.inline]
+    %link           [%url p.inline]
+    %inline-code    [%code expression=p.inline output=*(list tank)]
+    %code           [%code expression=p.inline output=*(list tank)]
+    %tag            [%text p.inline]
+    %break          [%text ''] :: TODO when ui handles newlines we will need to indicate them
+    %italics        [%text (flat-crip-inline-list p.inline '_' '_')]
+    %blockquote     [%text (flat-crip-inline-list p.inline '> ' '')]
+    %bold           [%text (flat-crip-inline-list p.inline '**' '**')]
+    %strike         [%text (flat-crip-inline-list p.inline '~~' '~~')]
   ==
 ++  accept-dm
   |=  [=action:dm-hook-sur =bowl:gall]
@@ -60,7 +107,7 @@
   :~
     [%pass / %agent [our.bowl %chat] %poke club-action+!>([id.a [0 [%team ship=our.bowl ok=%.y]]])]
     :: watch the new chat channel that we accepted
-    [%pass /g2/club/ui %agent [our.bowl %chat] %watch /club/(scot %uv id.a)/ui]
+    [%pass /g2/club/(scot %uv id.a)/ui %agent [our.bowl %chat] %watch /club/(scot %uv id.a)/ui/writs]
     [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
   ==
 ++  handle-club-invite
@@ -101,15 +148,33 @@
       ~&  >  new-dm
       [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
   ==
+++  handle-club-ui-fact
+  |=  [=wire =cage =bowl:gall]
+  ^-  (list card:agent:gall)
+  ~&  >>>  'groups-two /club/ui fact'
+  ~&  >>>  wire
+  ?+  p.cage  ~
+    %writ-diff
+      =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`-.+.+.wire)
+      ?~  club-id-unit  ~
+      =/  club-id       +:club-id-unit
+      =/  diff  !<(diff:writs:c q.cage)
+      ~&  >>>  diff
+      =/  crew  (get-crew club-id bowl)
+      =/  new-dm  (chat-from-crew club-id crew bowl)
+      ~&  >>>  'giving /updates a dm-received'
+      ~&  >>>  new-dm
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
+  ==
 ++  on-graph-action
-  |=  [act=action bowl=[our=ship now=@da]]
+  |=  [act=action =bowl:gall]
   ~&  -.act
   |^
   ?-  -.act
     %send-dm               (send-dm +.act)
     %read-dm               (read-dm +.act bowl)
     %create-group-dm       (create-group-dm +.act bowl)
-    %send-group-dm         (send-group-dm +.act)
+    %send-group-dm         (send-group-dm +.act bowl)
     %read-group-dm         (read-group-dm +.act bowl)
   ==
   ++  send-dm
@@ -117,7 +182,10 @@
     =/  inlines
       ^-  (list inline:c)
       (turn contents.p into-chat-inline-type)
-    =/  delta-for-chat   [%add (memo:c ~ author.p time-sent.p [%story [*(list) (snoc inlines [%break ~])]])]
+    =/  blocks
+      ^-  (list block:c)
+      (murn contents.p into-chat-block-type)
+    =/  delta-for-chat   [%add (memo:c ~ author.p time-sent.p [%story [blocks (snoc inlines [%break ~])]])]
     =/  diff-for-chat    [[ship time-sent.p] delta-for-chat]
     ~&  "diff format for %chat agent:"
     ~&  diff-for-chat
@@ -125,14 +193,14 @@
       [%pass / %agent [author.p %chat] %poke dm-action+!>([ship diff-for-chat])]
     ==
   ++  read-dm
-    |=  [=ship bowl=[our=ship now=@da]]
+    |=  [=ship =bowl:gall]
     ~&  %read-dm
     ~&  ship
     :~
       [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-ship ship))]
     ==
   ++  create-group-dm
-    |=  [ships=(set ship) bowl=[our=ship now=@da]]
+    |=  [ships=(set ship) =bowl:gall]
     ~&  %create-group-dm
     ~&  ships
     =/  to-set        (~(put in ships) our.bowl)
@@ -151,17 +219,38 @@
       [%pass / %agent [our.bowl %chat] %poke club-create+!>([id=`@uvH`now.bowl hive=ships])]
       [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
       :: watch the new club that we created
-      [%pass /g2/club/ui %agent [our.bowl %chat] %watch /club/(scot %uv now.bowl)/ui/writs]
+      [%pass /g2/club/(scot %uv now.bowl)/ui %agent [our.bowl %chat] %watch /club/(scot %uv now.bowl)/ui/writs]
     ==
   ++  send-group-dm
-    |=  [=resource =post]
-    =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource)
+    |=  [act=[=resource =post] =bowl:gall]
+    =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource.act)
     ?~  club-id-unit  !!
+    =/  crew  (get-crew +:club-id-unit bowl)
+    =/  group-ships   (~(uni in team.crew) hive.crew)
+    =/  messages  :_  ~
+    :*  index=~[now.bowl]
+        author=our.bowl
+        time-sent=now.bowl
+        contents.post.act
+    ==
+    =/  new-dm
+    ^-  chat
+    :*
+      path=(spat /(scot %p our.bowl)/(scot %uv +:club-id-unit))
+      to=group-ships
+      type=?:((~(has in team.crew) our.bowl) %group %group-pending)
+      source=%talk
+      messages=messages
+      metadata=~[(form-contact-mtd (get-rolo bowl) our.bowl)]
+    ==
+    ~&  >  'giving /updates a dm-received'
+    ~&  >  new-dm
     :~
-      [%pass / %agent [author.post %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post))]
+      [%pass / %agent [author.post.act %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post.act))]
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
     ==
   ++  read-group-dm
-    |=  [=resource bowl=[our=ship now=@da]]
+    |=  [=resource =bowl:gall]
     ~&  %read-group-dm
     ~&  resource
     :~
@@ -210,6 +299,7 @@
     :: Get DMs from x/briefs scy
     =/  =briefs:c
       .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
+      ~&  briefs
     ``graph-dm-view+!>([%inbox (previews-from-briefs briefs bowl)])
       [%x %dms %group @ @ ~]    ::  ~/scry/courier/dms/group/~dev/0v4.00000.qchdp.006ht.e2hte.2hte2.json
     ``graph-dm-view+!>([%dm-log (crew-messages `@uvH`(slav %uv i.t.t.t.t.path) bowl)])
@@ -222,6 +312,7 @@
   =/  rolo  (get-rolo bowl)
   =/  crew  (get-crew id bowl)
   =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/999/noun)
+  ~&  writs
   ~&  (messages-from-writs writs)
   :*
     path=(spat /(scot %p our.bowl)/(scot %uv id))
@@ -275,7 +366,12 @@
         ?-  -.block
           %image  [%url src.block]
           ::  TODO handle references
-          %cite   [%text '']
+          %cite
+          ?-  -.cite.block
+            %chan   [%text '']
+            %group  [%reference [%group flag.cite.block]]
+            %desk   [%text '']
+          ==
         ==
       ::  inline
       %+  turn  q.p.cs  inline-to-content
@@ -298,20 +394,23 @@
       %flag
     ~
       %club
-    =/  =crew:club:c
-      .^(crew:club:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uvh p.whom)/crew/noun)
+    =/  =crew:club:c  (get-crew `@uvh`p.whom bowl)
     =/  meta
       (turn ~(tap in team.crew) |=(=ship (form-contact-mtd rolo ship)))
+    =/  our-in-team    (~(has in team.crew) our.bowl)
+    =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv `@uvh`p.whom)/writs/newest/1/noun)
+    ~&  writs
+    =/  recent-msg    (snag 0 (messages-from-writs writs))
     :-  ~
     :*  path=(spat /(scot %p our.bowl)/(scot %uv p.whom))
     ::(spat /(scot %p entity)/(cord name))
         to=(~(uni in team.crew) hive.crew)
-        type=?:((~(has in team.crew) our.bowl) %group %group-pending)
+        type=?:(our-in-team %group %group-pending)
         source=%talk
         last-time-sent=last.brief
-        last-message=~
+        last-message=contents.recent-msg
         metadata=meta
-        invite-id=`p.whom
+        invite-id=?:(our-in-team ~ `p.whom)
         unread-count=count.brief
     ==
       %ship
@@ -411,7 +510,13 @@
         ~&  the-fact
         =/  dm-received-card
         ?-  -.-.the-fact
-          %club  !!
+          %club
+            =/  crew    (get-crew +.-.the-fact bowl)
+            =/  group-ships   (~(uni in team.crew) hive.crew)
+            =/  new-dm  (chat-from-crew +.-.the-fact crew bowl)
+            ~&  >  'giving /updates a dm-received'
+            ~&  >  new-dm
+            [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]
           %flag  !!
           %ship
             =/  new-dm  (chat-from-newest-writ p.-.the-fact bowl)

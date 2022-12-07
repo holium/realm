@@ -111,7 +111,7 @@
       %graph-dm-action
         ?-  groups-target
           %1  (on-graph-action:core !<(action:store vase))
-          %2  [(on-graph-action:groups-two !<(action:store vase) [our.bowl now.bowl]) state]
+          %2  [(on-graph-action:groups-two !<(action:store vase) bowl) state]
         ==
       %notify-action  (on-notify-action:core !<(action:notify vase))
       %set-groups-target
@@ -221,7 +221,7 @@
               [cards this]
             ==
         ==
-      [%g2 %club %ui ~]
+      [%g2 %club @ %ui ~]
         ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
@@ -232,9 +232,7 @@
             ~&  >  "{<dap.bowl>}: groups-two /club/id/ui kicked us, giving up..."
             `this
           %fact
-            ~&  >>>  'groups-two /club/ui fact'
-            ~&  >>>  cage.sign
-            [~ this]
+            [(handle-club-ui-fact:groups-two wire cage.sign bowl) this]
             ::  [cards this]
         ==
       [%g2 %ui ~]
