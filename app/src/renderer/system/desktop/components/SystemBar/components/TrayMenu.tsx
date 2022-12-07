@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable react/prop-types */
-import React, { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
 import { compose, space, color, typography } from 'styled-system';
@@ -9,25 +7,8 @@ import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 
 export interface TrayMenuProps {
   id: TrayAppKeys;
-  coords?: any;
-  style?: any;
-  content?: any | string;
-  children?: any;
-  buttonOffset?: {
-    x?: number;
-    y?: number;
-  };
-  position?:
-    | 'top-right'
-    | 'top-left'
-    | 'top'
-    | 'bottom-left'
-    | 'bottom-right'
-    | 'bottom';
-  dimensions: {
-    height: number;
-    width: number;
-  };
+  coords: any;
+  body: JSX.Element;
 }
 
 const Wrapper = styled(motion.div)`
@@ -47,43 +28,43 @@ export const TrayMenuWrapper = styled(styled.div<Partial<TrayMenuProps>>`
   will-change: transform;
 `)(compose(space, color, typography));
 
-export const TrayMenu = (props: TrayMenuProps) => {
-  const { id, style, content, dimensions, coords } = props;
-
+export const TrayMenu = ({ id, body, coords }: TrayMenuProps) => {
   const { setActiveApp, activeApp } = useTrayApps();
 
-  const body = content;
-  const handleClickOutside = (event: any) => {
-    // If we aren't clicking on a tray icon, close tray
-    if (`${id}-icon` !== event.target.id) {
-      // we are clicking on an element that should close the tray
-      if (event.target.getAttribute('data-close-tray') === 'true') {
-        setActiveApp(null);
-        event.stopPropagation();
-        return;
+  const handleClickOutside = useCallback(
+    (event: any) => {
+      // If we aren't clicking on a tray icon, close tray
+      if (`${id}-icon` !== event.target.id) {
+        // we are clicking on an element that should close the tray
+        if (event.target.getAttribute('data-close-tray') === 'true') {
+          setActiveApp(null);
+          event.stopPropagation();
+          return;
+        }
+        // If the app id matches the target, don't close
+        if (`${id}-app` === event.target.id) {
+          return;
+        }
+        // If the app node does not contain the click event target, close it.
+        const appNode = document.getElementById(`${id}-app`);
+        // TODO: fix wallet containing element detection
+        if (appNode && !appNode.contains(event.target)) {
+          setActiveApp(null);
+        }
       }
-      // If the app id matches the target, don't close
-      if (`${id}-app` === event.target.id) {
-        return;
-      }
-      // If the app node does not contain the click event target, close it.
-      const appNode = document.getElementById(`${id}-app`);
-      // TODO: fix wallet containing element detection
-      if (appNode && !appNode.contains(event.target)) {
-        setActiveApp(null);
-      }
-    }
-  };
+    },
+    [id, setActiveApp]
+  );
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [id]);
+  }, [handleClickOutside]);
 
   return (
-    <TrayMenuWrapper id={id} data-visible={id} style={style}>
+    <TrayMenuWrapper id={id} data-visible={id}>
       <Portal>
         <AnimatePresence>
           {id && (
@@ -93,14 +74,10 @@ export const TrayMenu = (props: TrayMenuProps) => {
               initial={{
                 opacity: 0,
                 y: 8,
-                width: dimensions.width,
-                height: dimensions.height,
               }}
               animate={{
                 opacity: activeApp ? 1 : 0,
                 y: 0,
-                width: dimensions.width,
-                height: dimensions.height,
                 transition: {
                   duration: 0.2,
                 },
@@ -108,23 +85,16 @@ export const TrayMenu = (props: TrayMenuProps) => {
               exit={{
                 opacity: 0,
                 y: 8,
-                height: dimensions.height / 2,
-                width: dimensions.width,
                 transition: {
                   duration: 0.2,
                 },
               }}
             >
-              <motion.div style={coords}>{body}</motion.div>
+              {body}
             </Wrapper>
           )}
         </AnimatePresence>
       </Portal>
     </TrayMenuWrapper>
   );
-};
-
-TrayMenu.defaultProps = {
-  position: 'top-left',
-  defaultIsVisible: false,
 };

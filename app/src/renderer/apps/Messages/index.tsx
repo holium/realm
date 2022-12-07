@@ -1,23 +1,15 @@
-import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
 import { Grid, Flex, Spinner } from 'renderer/components';
 import { DMs } from './DMs';
 import { ChatView } from './ChatView';
 import { NewChat } from './NewChat';
 import { DMPreviewType } from 'os/services/ship/models/courier';
 import { useTrayApps } from '../store';
+import { useServices } from '../../logic/store';
 
-interface ChatProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-
-export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
-  const { dimensions } = props;
+export const MessagesTrayApp = observer(() => {
+  const { theme } = useServices();
+  const { dimensions } = useTrayApps();
   const { dmApp } = useTrayApps();
 
   const headerSize = 50;
@@ -41,7 +33,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
     case 'new-chat':
       viewSwitcher = (
         <NewChat
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onBack={() => {
@@ -57,7 +49,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
     case 'dm-list':
       viewSwitcher = (
         <DMs
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           headerOffset={headerSize}
           height={dimensions.height}
           onNewChat={(evt: any) => {
@@ -77,7 +69,7 @@ export const MessagesTrayApp: FC<any> = observer((props: ChatProps) => {
           headerOffset={headerSize}
           height={dimensions.height}
           dimensions={dimensions}
-          theme={props.theme}
+          theme={theme.currentTheme as any}
           // s3Client={s3Client}
           selectedChat={dmApp.selectedChat!}
           setSelectedChat={(chat: any) => {
