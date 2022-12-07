@@ -333,14 +333,11 @@ export class SpacesService extends BaseService {
     );
 
     // setting provider to current space host
-    // this.core.services.ship.rooms!.setProvider(
-    //   null,
-    //   getHost(this.state.selected!.path)
-    // );
-    this.core.services.ship.rooms.setProvider(
-      getHost(this.state.selected!.path)
-    );
-    // BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
+    if (this.state.selected) {
+      this.core.services.ship.rooms.setProvider(
+        getHost(this.state.selected!.path)
+      );
+    }
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
   }
 
