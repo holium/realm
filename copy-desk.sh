@@ -18,13 +18,13 @@ cp -R -f ships/$1/landscape/lib/dm-hook.hoon ships/$1/realm/lib/dm-hook.hoon
 
 # groups 2 (hark)
 # cp -R -f ships/$1/groups/lib/hark-json.hoon ships/$1/realm/lib/hark-json.hoon
-# cp -R -f ships/$1/groups/mar/hark/action.hoon ships/$1/realm/mar/hark/action.hoon
-# cp -R -f ships/$1/groups/mar/hark/blanket.hoon ships/$1/realm/mar/hark/blanket.hoon
-# cp -R -f ships/$1/groups/mar/hark/carpet.hoon ships/$1/realm/mar/hark/carpet.hoon
-# cp -R -f ships/$1/groups/mar/hark/yarn.hoon ships/$1/realm/mar/hark/yarn.hoon
+# cp -R -f ships/$1/groups/mar/hark/action.hoon ships/$1/realm/mar/new-hark/action.hoon
+# cp -R -f ships/$1/groups/mar/hark/blanket.hoon ships/$1/realm/mar/new-hark/blanket.hoon
+# cp -R -f ships/$1/groups/mar/hark/carpet.hoon ships/$1/realm/mar/new-hark/carpet.hoon
+# cp -R -f ships/$1/groups/mar/hark/yarn.hoon ships/$1/realm/mar/new-hark/yarn.hoon
 # cp -R -f ships/$1/groups/sur/hark.hoon ships/$1/realm/sur/hark.hoon
 # cp -R -f ships/$1/groups/sur/groups.hoon ships/$1/realm/sur/groups.hoon
 # cp -R -f ships/$1/groups/sur/meta.hoon ships/$1/realm/sur/meta.hoon
 # cp -R -f ships/$1/groups/sur/epic.hoon ships/$1/realm/sur/epic.hoon
 
-cp -R -f ships/$1/garden/mar/hark ships/$1/realm/mar/hark
+cp -R -f ships/$1/garden/mar/hark ships/$1/realm/mar
