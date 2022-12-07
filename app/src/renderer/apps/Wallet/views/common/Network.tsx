@@ -5,6 +5,7 @@ import { Box, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { ProtocolType } from '@holium/realm-wallet/src/wallet.model';
 
 type Network = 'ethereum' | 'bitcoin';
 

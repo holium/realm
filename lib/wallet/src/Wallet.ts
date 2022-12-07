@@ -1,9 +1,7 @@
-import { EventEmitter } from 'events';
-import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
 import { Patp } from 'types';
 import { BaseProtocol } from 'wallets';
-import { NetworkType, ProtocolType } from './wallets/types';
+import { NetworkType, ProtocolType } from './wallet.model';
 import { WalletStoreType } from '../src/wallet.model';
 
 export class Wallet {
@@ -15,10 +13,10 @@ export class Wallet {
     this.currentProtocol = currentProtocol;
   }
   
-  watchUpdates(currentProtocol: ProtocolType, walletState: WalletStoreType) {
+  watchUpdates(walletState: WalletStoreType) {
     const lastProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
     lastProtocol.removeListener();
-    this.currentProtocol = currentProtocol;
+    this.currentProtocol = walletState.navState.protocol;
     this.protocols.get(this.currentProtocol)!.watchUpdates(walletState);
   }
 }

@@ -10,6 +10,7 @@ import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
 import { ProtocolType, WalletStoreType } from '@holium/realm-wallet/src/wallet.model';
+import { parseEther } from 'ethers/lib/utils';
 
 export class EthereumProtocol implements BaseProtocol {
   private network: ProtocolType;
@@ -47,22 +48,24 @@ export class EthereumProtocol implements BaseProtocol {
 
   watchUpdates(walletStore: WalletStoreType) {
     this.updateWalletState(walletStore);
-    this.ethProvider!.on('block', (block: number) => {
+/*    this.ethProvider!.on('block', (block: number) => {
       this.updateWalletState(walletStore);
 
       if (!(walletStore.navState.protocol === ProtocolType.ETH_GORLI)
       && !(walletStore.navState.protocol === ProtocolType.UQBAR)) {
-        walletStore.currentStore.block = block;
+        walletStore.currentStore.setBlock(block);
       }
-    });
+    });*/
   }
 
   updateWalletState(walletStore: WalletStoreType) {
     for (let wallet of walletStore.ethereum.wallets.keys()) {
       const ethWallet = walletStore.ethereum.wallets.get(wallet)!;
       this.getAccountBalance(ethWallet.address).then(ethWallet.setBalance);
-      // this.getAccountTransactions(ethWallet.address, ethWallet.currentBlock)
-      //   .then((transactions: any) => ethWallet.applyTransactions(this.network, transactions))
+      this.getAccountTransactions(ethWallet.address, walletStore.ethereum.block)
+        .then((response: any) => {
+          ethWallet.applyTransactions(this.network, response.data.result)
+        })
     }
   }
 
@@ -96,7 +99,13 @@ export class EthereumProtocol implements BaseProtocol {
     const ethContract = new ethers.Contract(contract, abi, this.ethProvider!);
     throw new Error('Method not implemented.');
   }
-  getAssetTransfers(contract: string, addr: string): Promise<any[]> {
+  getAssetTransfers(contract: string, addr: string, startBlock: number): Promise<any[]> {
+    this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(startBlock),
+      fromAddress: addr,
+      excludeZeroValue: true,
+      category: []//["erc721", "erc1155"],
+    })
     throw new Error('Method not implemented.');
   }
   async transferAsset(
@@ -114,13 +123,17 @@ export class EthereumProtocol implements BaseProtocol {
     return (await ethContract.transfer(toAddr, amountOrTokenId)).hash;
   }
   getFeePrice(): number | Promise<number> {
-    throw new Error('Method not implemented.');
+    return 0;
   }
-  getFeeEstimate(
+  async getFeeEstimate(
     from: string,
     to: string,
     value: number
-  ): number | Promise<number> {
-    throw new Error('Method not implemented.');
+  ): Promise<number> {
+    return (await this.alchemy.core.estimateGas({
+      to,
+      from,
+      value
+    })).toNumber();
   }
 }

@@ -157,7 +157,6 @@ const BitcoinStore = types
     // updates
     applyWalletUpdate(wallet: any) {
       let walletObj;
-      console.log('applyWalletUpdate', wallet);
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
           index: Number(wallet.key),
@@ -168,9 +167,7 @@ const BitcoinStore = types
           nickname: wallet.nickname,
           transactions: {},
         };
-        console.log(self.wallets);
         const bitcoinWallet = BitcoinWallet.create(walletObj);
-        console.log(wallet.key);
         self.wallets.set(wallet.key, bitcoinWallet);
       }
       for (const transaction in wallet.transactions) {
@@ -180,6 +177,9 @@ const BitcoinStore = types
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
     },
+    setBlock(block: number) {
+      self.block = block;
+    }
   }));
 
 export type BitcoinStoreType = Instance<typeof BitcoinStore>;
@@ -382,7 +382,6 @@ const EthWallet = types
     }, */
     getTransaction(network: string, hash: string) {
       const tx: any = self.transactions.get(network)!.get(hash);
-      console.log(tx);
       return {
         hash: tx.hash,
         walletIndex: self.index,
@@ -442,7 +441,6 @@ const EthWallet = types
       }
       netMap = self.transactions.get(network)!;
       const tx = netMap?.get(transaction.hash);
-      console.log('applying update');
       if (tx) {
         tx.walletIndex = self.index;
         tx.notes = transaction.notes;
@@ -574,9 +572,7 @@ export const EthStore = types
           nickname: wallet.nickname,
           transactions: {},
         };
-        console.log(self.wallets);
         const ethWallet = EthWallet.create(walletObj);
-        console.log(wallet.key);
         self.wallets.set(wallet.key, ethWallet);
       }
       for (const transaction in wallet.transactions) {
@@ -597,6 +593,9 @@ export const EthStore = types
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
     },
+    setBlock(block: number) {
+      self.block = block;
+    }
   }));
 export type EthStoreType = Instance<typeof EthStore>;
 
@@ -713,6 +712,7 @@ export const WalletStore = types
     },
     setProtocol(protocol: ProtocolType) {
       self.navState.protocol = protocol;
+      self.ethereum.setProtocol(protocol);
       /* @ts-expect-error */
       self.resetNavigation();
     },

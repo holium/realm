@@ -175,7 +175,6 @@ export const WalletApi = {
         path: '/updates',
         onEvent: async (data: any, _id?: number, mark?: string) => {
           if (mark === 'realm-wallet-update') {
-            console.log('got update')
             handleWalletReactions(
               data,
               walletState,

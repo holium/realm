@@ -70,6 +70,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.navigate': this.navigate,
     'realm.tray.wallet.navigateBack': this.navigateBack,
     'realm.wallet.get-coin-txns': this.getCoinTxns,
+    'realm.wallet.toggle-network': this.toggleNetwork,
   };
 
   static preload = {
@@ -269,6 +270,11 @@ export class WalletService extends BaseService {
         contractAddr
       );
     },
+    toggleNetwork: async () => {
+      return await ipcRenderer.invoke(
+        'realm.wallet.toggle-network'
+      )
+    }
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -379,7 +385,7 @@ export class WalletService extends BaseService {
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 
     WalletApi.watchUpdates(this.core.conduit!, this.state!);
-    this.wallet!.watchUpdates(this.state!.navState.protocol, this.state!);
+    this.wallet!.watchUpdates(this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -420,9 +426,9 @@ export class WalletService extends BaseService {
     this.signer = new RealmSigner(this.core, mnemonic);
     const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     await WalletApi.setPasscodeHash(this.core.conduit!, passcodeHash);
-    const ethPath = "m/44'/60'/0'/0";
-    const btcPath = "m/44'/0'/0'/0";
-    const btcTestnetPath = "m/44'/1'/0'/0";
+    const ethPath = "m/44'/60'/0'";
+    const btcPath = "m/44'/0'/0'";
+    const btcTestnetPath = "m/44'/1'/0'";
     let xpub: string;
     // eth
     xpub = this.signer.getXpub(ethPath);
@@ -448,7 +454,7 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.protocol !== protocol) {
       this.state!.setProtocol(protocol);
-      this.wallet!.watchUpdates(protocol, this.state!);
+      this.wallet!.watchUpdates(this.state!);
     }
   }
 
@@ -626,4 +632,16 @@ export class WalletService extends BaseService {
     return undefined;// coinTxns;
   }
 
+  toggleNetwork(_evt: any) {
+    if (this.state!.navState.network === NetworkType.ETHEREUM) {
+      if (this.state!.navState.protocol === ProtocolType.ETH_MAIN) {
+        this.state!.setProtocol(ProtocolType.ETH_GORLI)
+        this.wallet!.watchUpdates(this.state!);
+      }
+      else if (this.state!.navState.protocol === ProtocolType.ETH_GORLI) {
+        this.state!.setProtocol(ProtocolType.ETH_MAIN)
+        this.wallet!.watchUpdates(this.state!);
+      }
+    }
+  }
 }
