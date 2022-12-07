@@ -121,6 +121,7 @@ export const AppRow = ({
         justifyContent="space-between"
         alignItems="center"
         maxWidth="100%"
+        flex={1}
         onClick={(evt: React.MouseEvent<HTMLDivElement>) =>
           onClick && onClick(evt, app)
         }
