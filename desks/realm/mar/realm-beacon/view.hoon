@@ -1,5 +1,5 @@
-/-  store=beacon-store
-/+  *beacon
+/-  store=realm-beacon
+/+  *realm-beacon
 ::
 |_  vi=view:store
 ++  grad  %noun

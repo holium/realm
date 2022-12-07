@@ -1,19 +1,7 @@
+// @ts-nocheck
 import { types, Instance, flow } from 'mobx-state-tree';
 import { Conduit } from '@holium/conduit';
 import { BeaconApi } from 'os/api/beacon';
-import {
-  NotificationProviders,
-  NotificationProviderFactory,
-  INotificationProvider,
-} from 'os/providers/notifications';
-
-// set the default notification provider to the default notification provider (mock)
-let activeProvider: INotificationProvider | null = null;
-
-function getActiveProvider(): INotificationProvider {
-  if (activeProvider) return activeProvider;
-  return NotificationProviderFactory.create(NotificationProviders.Default);
-}
 
 export const NotificationModel = types
   .model('BeaconNotificationModel', {
@@ -25,28 +13,20 @@ export const NotificationModel = types
   })
   .actions((self) => ({}));
 
+export type NotificationModelType = Instance<typeof NotificationModel>;
+
 export const NotificationStore = types
   .model('BeaconNotificationStore', {
-    activeProvider: types.optional(types.string, NotificationProviders.Beacon),
-    providers: types.array(types.string),
     latest: types.array(NotificationModel),
   })
   .actions((self) => ({
-    loadProviders: flow(function* (conduit: Conduit) {
-      self.providers.clear();
-      try {
-        self.providers = yield BeaconApi.getProviders(conduit);
-      } catch (error) {
-        console.error(error);
-      }
-    }),
     fetchRecent: flow(function* (conduit: Conduit) {
       try {
-        self.latest = yield BeaconApi.getLatest(conduit, self.activeProvider);
+        self.latest = yield BeaconApi.getLatest(conduit);
       } catch (error) {
         console.error(error);
       }
     }),
   }));
 
-export type NotificationModelType = Instance<typeof NotificationModel>;
+export type NotificationStoreType = Instance<typeof NotificationStore>;

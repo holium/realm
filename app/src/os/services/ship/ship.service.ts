@@ -36,6 +36,7 @@ import {
 } from './models/notifications';
 import { NotificationApi } from '../../api/notifications';
 import { DiskStore } from '../base.store';
+import { BeaconApi } from 'os/api/beacon';
 
 // upload support
 const fs = require('fs');
@@ -351,7 +352,12 @@ export class ShipService extends BaseService {
       // register dm update handler
       DmApi.updates(this.core.conduit!, this.models.courier!);
       CourierApi.dmUpdates(this.core.conduit!, this.models.courier!);
-      NotificationApi.updates(
+      // NotificationApi.updates(
+      //   this.core.conduit!,
+      //   this.models.notifications,
+      //   this.models.courier
+      // );
+      BeaconApi.updates(
         this.core.conduit!,
         this.models.notifications,
         this.models.courier

@@ -1,4 +1,4 @@
-/-  store=beacon-store
+/-  store=realm-beacon
 =<  [store .]
 =,  store
 |%

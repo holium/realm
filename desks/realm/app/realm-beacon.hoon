@@ -1,5 +1,5 @@
 ::
-/-  store=beacon :: ha=hark
+/-  store=realm-beacon :: ha=hark
 /+  default-agent, verb, dbug
 ::
 =>

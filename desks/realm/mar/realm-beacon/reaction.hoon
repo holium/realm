@@ -1,4 +1,4 @@
-/+  *beacon
+/+  *realm-beacon
 ::
 |_  rct=reaction
 ++  grad  %noun
