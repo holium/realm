@@ -262,29 +262,25 @@
   =/  =briefs:c
     .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
   ~&  briefs
-  =/  s=(set ship)
-    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/noun)
-  ~&  s
-  =/  s2=(set ship)
-    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/invited/noun)
-  ~&  s2
-  =/  fs=(set flag:c)
-    .^((set flag:c) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/chat/noun)
-  ~&  fs
-  =/  =writs:writs:c
-    .^(writs:writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ~bus)/writs/newest/50/noun)
-  ~&  writs
+::  =/  s=(set ship)
+::    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/noun)
+::  ~&  s
+::  =/  s2=(set ship)
+::    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/invited/noun)
+::  ~&  s2
+::  =/  fs=(set flag:c)
+::    .^((set flag:c) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/chat/noun)
+::  ~&  fs
+::  =/  =writs:writs:c
+::    .^(writs:writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ~bus)/writs/newest/50/noun)
+::  ~&  writs
   ~
 ++  on-watch
   |=  [=path =bowl:gall]
   ?+  path      !!
     [%updates ~]
-      =/  =briefs:c
-        .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
-      =/  dm-previews   (previews-from-briefs briefs bowl)
-      ~&  'dm-previews in on-watch g2'
-      ~&  dm-previews
-      [%give %fact [/updates ~] graph-dm-reaction+!>([%previews dm-previews])]~
+      ~&  'previews in on-watch g2'
+      [%give %fact [/updates ~] graph-dm-reaction+!>([%previews (previews-for-inbox bowl)])]~
   ==
 ++  peek
   |=  [=path =bowl:gall =devices:notify]
@@ -296,16 +292,22 @@
       [%x %devices ~]
     ``notify-view+!>([%devices devices])
       [%x %dms ~]
-    :: Get DMs from x/briefs scy
-    =/  =briefs:c
-      .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
-      ~&  briefs
-    ``graph-dm-view+!>([%inbox (previews-from-briefs briefs bowl)])
+    ``graph-dm-view+!>([%inbox (previews-for-inbox bowl)])
       [%x %dms %group @ @ ~]    ::  ~/scry/courier/dms/group/~dev/0v4.00000.qchdp.006ht.e2hte.2hte2.json
     ``graph-dm-view+!>([%dm-log (crew-messages `@uvH`(slav %uv i.t.t.t.t.path) bowl)])
       [%x %dms @ ~]             ::  ~/scry/courier/dms/~dev.json
     ``graph-dm-view+!>([%dm-log (messages-with `@p`(slav %p i.t.t.path) bowl)])
   ==
+++  previews-for-inbox
+  |=  [=bowl:gall]
+  ^-  (list message-preview)
+    :: Get DMs from x/briefs scy
+  =/  =briefs:c    .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
+    :: Get invited DMs from x/dm/invited scy
+  =/  invited-dms  .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/invited/noun)
+  =/  prevs        (weld (previews-from-briefs briefs bowl) (previews-from-ship-set invited-dms bowl))
+  ~&  prevs
+  prevs
 ++  crew-messages
   |=  [id=@uvH =bowl:gall]
   ^-  chat
@@ -377,6 +379,26 @@
       ::  inline
       %+  turn  q.p.cs  inline-to-content
     ==
+  ==
+++  previews-from-ship-set
+  |=  [s=(set ship) =bowl:gall]
+  ^-  (list message-preview)
+  %:  turn
+    ~(tap in s)
+    |=([=ship] (ship-to-preview ship bowl))
+  ==
+++  ship-to-preview
+  |=  [sh=ship =bowl:gall]
+  ^-  message-preview
+  :*  path=(spat /dm-inbox/(scot %p sh))
+      to=(~(put in *(set ship)) sh)
+      type=%pending
+      source=%talk
+      last-time-sent=now.bowl
+      last-message=[~]
+      metadata=~[(form-contact-mtd (get-rolo bowl) sh)]
+      invite-id=~
+      unread-count=0
   ==
 ++  previews-from-briefs
   |=  [=briefs:c =bowl:gall]
