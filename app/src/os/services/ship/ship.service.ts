@@ -57,7 +57,6 @@ export class ShipService extends BaseService {
   private state?: ShipModelType;
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
-    contacts: undefined,
     // docket: DocketStore.create({ apps: {} }),
     chat: undefined,
     notifications: NotificationStore.create({

@@ -1,6 +1,6 @@
 ::  friends [realm]
 ::
-/-  resource, contact-store, membership
+/-  resource, *contact-store, membership
 |%
 ::
 ::  $friends: specifically used for the our space.
@@ -14,10 +14,20 @@
 +$  friend-state  ?(%added %mutual)
 +$  friend-tags   (set cord)
 +$  friend  
-  $:  pinned=?
+  $:  pinned=_|
       tags=friend-tags
-      status=?(%fren %following %follower)
+      status=?(%fren %following %follower %contact)
       :: metadata=(map cord cord)
+      is-contact=_|
+      ::
+      :: from %contact-store
+      nickname=@t
+      bio=@t
+      color=@ux
+      avatar=(unit @t)
+      cover=(unit @t)
+      groups=(set resource)
+      :: last-updated=@da
   ==  
 ::
 ::
@@ -30,14 +40,16 @@
       [%be-fren ~]
       [%yes-fren ~]
       [%bye-fren ~]
+      :: Test pokes
+      [%add-hostyv ~]
   ==
 ::
 +$  reaction
   $%  
       [%friends =friends]
-      [%friend =ship =friend]     ::  reacts when on update to existing friend
-      [%new-friend =ship =friend] ::  reacts when a new friend is addedd
-      [%bye-friend =ship]         ::  reacts when a friend is removed 
+      [%friend =ship =friend]     :: reacts when old friend is updated
+      [%new-friend =ship =friend] :: reacts when a new friend is added
+      [%bye-friend =ship]         :: reacts when a friend is removed 
   ==
 ::
 ::  Scry views
@@ -46,5 +58,4 @@
   $%  
       [%friends =friends]
   ==
-::
 --

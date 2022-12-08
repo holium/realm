@@ -6,11 +6,13 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { Patp } from '../../../types';
+import { cleanNounColor } from '../../../lib/color';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',
   'follower',
   'following',
+  'contact',
 ]);
 export type FriendStatus = Instance<typeof FriendStatus>;
 
@@ -18,6 +20,12 @@ export const FriendModel = types.model({
   pinned: types.boolean,
   tags: types.optional(types.array(types.string), []),
   status: FriendStatus,
+  nickname: types.string,
+  bio: types.string,
+  color: types.string,
+  avatar: types.maybeNull(types.string),
+  cover: types.maybeNull(types.string),
+  groups: types.maybeNull(types.array(types.string)),
 });
 
 export type FriendType = Instance<typeof FriendModel>;
@@ -28,6 +36,8 @@ export const FriendsStore = types
     get pinned() {
       const list = Array.from(self.all.entries())
         .map((value: [patp: string, friend: FriendType]) => ({
+          ...value[1],
+          color: cleanNounColor(value[1].color),
           patp: value[0],
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
@@ -39,6 +49,8 @@ export const FriendsStore = types
     get unpinned() {
       const list = Array.from(self.all.entries()).map(
         (value: [patp: string, friend: FriendType]) => ({
+          ...value[1],
+          color: cleanNounColor(value[1].color),
           patp: value[0],
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
@@ -50,6 +62,8 @@ export const FriendsStore = types
     get list() {
       return Array.from(self.all.entries()).map(
         (value: [patp: string, friend: FriendType]) => ({
+          ...value[1],
+          color: cleanNounColor(value[1].color),
           patp: value[0],
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
