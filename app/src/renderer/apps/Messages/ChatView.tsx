@@ -1,5 +1,4 @@
 import {
-  FC,
   useEffect,
   useState,
   useMemo,
@@ -56,7 +55,7 @@ interface IProps {
   setSelectedChat: (chat: any) => void;
 }
 
-export const ChatView: FC<IProps> = observer((props: IProps) => {
+export const ChatView = observer((props: IProps) => {
   const { selectedChat, height, theme } = props;
   const { iconColor, dockColor, textColor, windowColor, mode } = theme;
 
