@@ -107,9 +107,9 @@
       ~&  >  "{<dap.bowl>}: kicked, resubscribing..."
       :_(this [(~(watch-our pass:io /contacts) %contact-store /all)]~)
         %fact
-      ?.  =(p.cage.sign %contact-update-0)  `this
+      ?.  =(p.cage.sign %contact-update-0)  (on-agent:def wire sign)
       =/  upd  !<(update:store q.cage.sign)
-      ?+    -.upd  (on-agent:def wire sign)
+      ?+    -.upd  `this
           %initial
         `this(friends (rolodex-to-friends:lib friends rolodex.upd))
           %add
