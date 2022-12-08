@@ -9,8 +9,7 @@
 ::
 +$  action
   $%
-      :: [%connect-provider prov=@tas]
-      [%seen id=@ud]
+      [%seen =id:hark]
   ==
 ::
 +$  reaction

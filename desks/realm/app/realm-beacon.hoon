@@ -1,4 +1,8 @@
 ::
+::  agent: realm-beacon
+::  purpose:
+::    Notifications hub for realm.
+::
 /-  store=realm-beacon, hark
 /+  default-agent, verb, dbug
 ::
@@ -166,37 +170,19 @@
       :: %connect-provider           (on-connect-provider +.action)
       %seen                       (on-seen +.action)
     ==
-    ::  'connect' to the underlying agent by subscribing to its updates
-    ::   also 'activate' the provider so that scries use this provider when
-    ::   retrieving data
-    :: ++  on-connect-provider
-    ::   |=  [prov=@tas]
-    ::   ^-  (quip card _state)
-    ::   ?.  (~(has in supported-providers:store) prov)
-    ::     ~&  >>>  "{<dap.bowl>}: {<prov>} not supported"
-    ::     `state
-    ::   :: is there an active provider? if yes, disconnect/leave
-    ::   =/  adios=(list card)
-    ::   %-  ~(rep by wex.bowl)
-    ::   |=  [[[=wire =ship =term] [acked=? =path]] acc=(list card)]
-    ::   ?.  ?|  =(wire /hark-store)
-    ::           =(wire /hark)
-    ::           =(wire /beacon)
-    ::       ==  acc
-    ::     (snoc acc [%pass wire %agent [ship term] %leave ~])
-    ::   ::  subscribe to new provider
-    ::   :_  state
-    ::   %+  weld  adios
-    ::   ?+  prov   `(list card)`~
-    ::     :: %hark-store    [%pass /hark-store %agent [our.bowl %hark-store] %watch /updates]~
-    ::     %hark          [%pass /hark %agent [our.bowl %hark] %watch /ui]~
-    ::     %beacon        [%pass /beacon %agent [our.bowl %beacon] %watch /updates]~
-    ::   ==
+    ::
+    ::  $on-seen: scry hark for notification by id and use the resulting
+    ::   yarn to poke hark with the corresponding rope.
     ::
     ++  on-seen
-      |=  [id=@ud]
+      |=  [=id:hark]
       %-  (slog leaf+"{<dap.bowl>}: seen called" ~)
-      `state
+      :: sample:
+      ::  http://localhost/~/scry/hark/yarn/0v1.31ngs.h064p.c6u00.1m9n6.pk9ho.json
+      =/  yar=yarn:hark  .^(yarn:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/yarn/(scot %uv id)/noun)
+      :_  state
+      :~  [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop.yar])]
+      ==
     ::
     --
   ++  reaction
@@ -367,13 +353,13 @@
       :_  state
       :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%seen id.u.yar])]
       ==
-    ::
+    ::  $find-yarn: locate a hark yarn by its rope
     ++  find-yarn
       |=  [=rope:hark]
       ^-  (unit yarn:hark)
       ?~  gop.rope  ~
       =/  par  u.gop.rope
-      :: :: http://localhost/~/scry/hark/group/~lodlev-migdev/remote-group-1/quilt/1.json
+      :: http://localhost/~/scry/hark/group/~lodlev-migdev/remote-group-1/quilt/1.json
       =/  blan=blanket:hark  .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/[+.par]/noun)
       :: locate the yarn in the blanket
       =/  elems=(list [=id:hark =yarn:hark])
