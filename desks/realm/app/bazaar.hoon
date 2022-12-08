@@ -136,7 +136,6 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    `this
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
       [%spaces ~]
@@ -312,7 +311,7 @@
         ?>  ?=([%clay %tire *] sig)
         ?-  -.p.sig
           %&  (on-rock p.p.sig)
-          %|  (on-wave p.p.sig)  
+          %|  (on-wave p.p.sig)
         ==
       [cards this]
     ::  +pre: prefix for scries to hood
