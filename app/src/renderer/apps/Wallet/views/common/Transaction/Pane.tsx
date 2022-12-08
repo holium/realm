@@ -8,7 +8,7 @@ import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
-import { ERC20Type } from 'os/services/tray/wallet.model';
+import { ERC20Type, NetworkType } from '@holium/realm-wallet/src/wallet.model';
 import { ProtocolType } from '@holium/realm-wallet/src/wallet.model';
 
 const abbrMap = {
@@ -58,7 +58,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const sendTransaction = async () => {
       try {
         setTransactionSending(true);
-        if (walletApp.navState.network === 'ethereum') {
+        if (walletApp.navState.network === NetworkType.ETHEREUM) {
           props.coin
             ? await WalletActions.sendERC20Transaction(
                 walletApp.currentWallet!.index.toString(),

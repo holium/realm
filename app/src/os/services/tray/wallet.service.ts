@@ -49,7 +49,7 @@ export interface RecipientPayload {
 export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
-  private signer?: BaseSigner;
+  private signer: BaseSigner;
   private wallet?: Wallet;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
@@ -293,6 +293,7 @@ export class WalletService extends BaseService {
     });
 
     setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
+    this.signer = new RealmSigner(this.core);
   }
 
   async onLogin(ship: string) {
@@ -424,7 +425,7 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
-    this.signer = new RealmSigner(this.core, mnemonic);
+    (this.signer as RealmSigner).setMnemonic(mnemonic);
     const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     await WalletApi.setPasscodeHash(this.core.conduit!, passcodeHash);
     const ethPath = "m/44'/60'/0'";
@@ -542,8 +543,8 @@ export class WalletService extends BaseService {
       to,
       value: ethers.utils.parseEther(amount),
     };
-    const signedTx = this.signer?.signTransaction(path, tx);
-    const hash = this.wallet!.protocols.get(this.state!.navState.protocol).sendTransaction(signedTx);
+    const signedTx = await this.signer!.signTransaction(path, tx);
+    const hash = await this.wallet!.protocols.get(this.state!.navState.protocol).sendTransaction(signedTx);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -603,6 +604,7 @@ export class WalletService extends BaseService {
 
   async checkMnemonic(_event: any, mnemonic: string) {
     // TODO: implement
+    (this.signer as RealmSigner).setMnemonic(mnemonic);
     return true;
   }
 

@@ -6,8 +6,10 @@ import Realm from '../../../..';
 
 export class RealmSigner implements BaseSigner {
   private core: Realm;
-  constructor(core: Realm, mnemonic: string) {
+  constructor(core: Realm) {
     this.core = core;
+  }
+  setMnemonic(mnemonic: string) {
     this.core.services.identity.auth.setMnemonic(
       'realm.auth.set-mnemonic',
       mnemonic
