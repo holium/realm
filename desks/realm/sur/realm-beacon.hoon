@@ -14,7 +14,7 @@
   ==
 ::
 +$  reaction
-  $%  ::[%seen id=@ud]
+  $%  [%seen id:hark]
       [%new-note =note]
   ==
 ::

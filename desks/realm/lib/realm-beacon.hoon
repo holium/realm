@@ -37,10 +37,11 @@
     ^-  [cord json]
     :-  -.rct
     ?-  -.rct
-      ::   %seen
-      :: %-  pairs
-      :: :~  [%id s+id.rct]
-      :: ==
+        %seen
+      %-  pairs
+      :~  id/s/(scot %uv i)
+      ==
+      ::
         %new-note
       %-  pairs
       :~  id/s/(scot %uv id.note.rct)

@@ -205,12 +205,12 @@
     :: `state
     |^
     ?-  -.rct
-      :: %seen         (on-seen +.rct)
+      %seen         (on-seen +.rct)
       %new-note     (on-new-note +.rct)
     ==
     ::
     ++  on-seen
-      |=  [id=@ud]
+      |=  [=id:hark]
       %-  (slog leaf+"{<dap.bowl>}: seen called => {<id>}" ~)
       `state
     ::
@@ -362,7 +362,28 @@
       |=  [=rope:hark]
       ^-  (quip card _state)
       %-  (slog leaf+"{<dap.bowl>}: on-saw-rope => {<rope>}" ~)
-      `state
+      =/  yar=(unit yarn:hark)       (find-yarn rope)
+      ?~  yar  ~|('on-saw-rope find-yarn unexpected result' !!)
+      :_  state
+      :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%seen id.u.yar])]
+      ==
+    ::
+    ++  find-yarn
+      |=  [=rope:hark]
+      ^-  (unit yarn:hark)
+      ?~  gop.rope  ~
+      =/  par  u.gop.rope
+      :: :: http://localhost/~/scry/hark/group/~lodlev-migdev/remote-group-1/quilt/1.json
+      =/  blan=blanket:hark  .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/[+.par]/noun)
+      :: locate the yarn in the blanket
+      =/  elems=(list [=id:hark =yarn:hark])
+      %+  skim  ~(tap by yarns.blan)
+        |=  [=id:hark =yarn:hark]
+        ?:  =(ted.rop.yarn ted.rope)  %.y  %.n
+      ?:  (gth (lent elems) 0)
+        =/  elem  (snag 0 elems)
+        (some yarn.elem)
+      ~
     --
   --
 ::
