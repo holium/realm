@@ -293,9 +293,24 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             <Icons name="ArrowLeftLine" />
           </IconButton>
         </Flex>
-        <Flex flex={1} gap={10} alignItems="center" flexDirection="row">
+        <Flex
+          flex={1}
+          gap={10}
+          alignItems="center"
+          flexDirection="row"
+          maxWidth="100%"
+          minWidth={0}
+        >
           <Box>{sigil}</Box>
-          <Text fontSize={3} fontWeight={500}>
+          <Text
+            fontSize={3}
+            fontWeight={500}
+            style={{
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+            }}
+          >
             {to}
           </Text>
         </Flex>
