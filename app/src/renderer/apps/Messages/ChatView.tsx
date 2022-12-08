@@ -302,17 +302,24 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           minWidth={0}
         >
           <Box>{sigil}</Box>
-          <Text
-            fontSize={3}
-            fontWeight={500}
-            style={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {to}
-          </Text>
+          <Flex flexDirection="column" maxWidth="100%" minWidth={0}>
+            <Text
+              fontSize={3}
+              fontWeight={500}
+              style={{
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {to}
+            </Text>
+            {isGroup && (
+              <Text fontSize={1} fontWeight={500} opacity={0.3}>
+                {selectedChat.to.length} people
+              </Text>
+            )}
+          </Flex>
         </Flex>
         <Flex pl={2} pr={2}>
           {/* <IconButton
