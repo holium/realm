@@ -8,11 +8,18 @@ import {
   FontSizeProps,
   FontWeightProps,
 } from 'styled-system';
-// @ts-expect-error its there...
-import UrbitSVG from '../../../../assets/urbit.svg';
-import { Grid, Text, Flex, Button, TextButton } from 'renderer/components';
+import {
+  Grid,
+  Text,
+  Flex,
+  Button,
+  TextButton,
+  UrbitSVG,
+} from 'renderer/components';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { useServices } from 'renderer/logic/store';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 // import { TextButton } from 'renderer/components/Button/TextButton';
 
 const SecondaryButtonText = styled(TextButton)<
@@ -30,6 +37,9 @@ const SecondaryButtonText = styled(TextButton)<
 
 const HaveUrbitDialog: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
+    const { theme } = useServices();
+    const baseTheme = getBaseTheme(theme.currentTheme);
+
     function selectSelfHosted() {
       props.setState &&
         props.setState({ ...props.workflowState, selfHosted: true });
@@ -51,7 +61,10 @@ const HaveUrbitDialog: FC<BaseDialogProps> = observer(
             alignItems="center"
             justifyContent="center"
           >
-            <img height={40} src={UrbitSVG} alt="urbit logo" />
+            <UrbitSVG
+              mode={theme.currentTheme.mode as 'light' | 'dark'}
+              size={40}
+            />
             <Text ml={12} fontSize={3} fontWeight={400}>
               Have an Urbit ID?
             </Text>
@@ -90,14 +103,15 @@ const HaveUrbitDialog: FC<BaseDialogProps> = observer(
               >
                 Sign up
               </Button>
-              <SecondaryButtonText
+              <Text
                 mt={20}
                 fontSize={2}
                 fontWeight={400}
+                color={baseTheme.colors.text.disabled}
                 onClick={selectSelfHosted}
               >
                 Already have one?
-              </SecondaryButtonText>
+              </Text>
             </Flex>
           </Flex>
         </Grid.Row>

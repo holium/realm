@@ -14,6 +14,7 @@ export enum OnboardingStep {
   SELECT_HOSTING_PLAN = 'onboarding:hosted:select-hosting-plan',
   STRIPE_PAYMENT = 'onboarding:hosted:stripe_payment',
   CONFIRMATION = 'onboarding:hosted:confirmation',
+  VIEW_CODE = 'onboarding:hosted:view-code',
   CONNECTING_SHIP = 'onboarding:connecting-ship',
   PROFILE_SETUP = 'onboarding:profile-setup',
   SET_PASSWORD = 'onboarding:set-password',
@@ -23,8 +24,8 @@ export enum OnboardingStep {
 export const PlanetModel = types.model({
   patp: types.string,
   booted: types.boolean,
-  priceMonthly: types.number,
-  priceAnnual: types.number,
+  priceMonthly: types.maybe(types.number),
+  priceAnnual: types.maybe(types.number),
 });
 
 export const AccessCodeModel = types.model({

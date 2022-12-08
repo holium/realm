@@ -15,8 +15,6 @@ const AccessGate: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
   const [error, setError] = useState('');
 
   const onChange = (event: any) => {
-    if (accessCode.length > 21) return;
-
     const value = event.target.value.trim();
     setAccessCode(value);
     setError('');
