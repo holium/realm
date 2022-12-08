@@ -143,7 +143,7 @@ export const Transaction = types.model('Transaction', {
   notes: types.string,
 });
 
-export type BitcoinTransactionType = Instance<typeof Transaction>;
+export type TransactionType = Instance<typeof Transaction>;
 
 const BitcoinWallet = types
   .model('BitcoinWallet', {
