@@ -28,22 +28,9 @@
       =.  friends  pals-friends:core
       abet:(add-frens:core ~(tap in ~(key by pals-following:core)))
     ::
-    :: test add initial frens
-    =^  cards  state
-      =.  friends  (~(put by friends) ~nec *friend:store)
-      =.  friends  (~(put by friends) ~bud *friend:store)
-      abet:(add-frens:(cc cards) ~[~nec ~bud])
-    ::
     ?.  has-contact-store:core  [cards this]
-    =.  friends  (rolodex-to-friends:lib friends rolodex:core)
-    :_  this
-    ;:  welp
-      cards
-      :: =;  new-ships
-      ::   (new-contacts:core new-ships)
-      :: ~(tap in (~(dif in ~(key by rolodex:core)) ~(key by friends)))
-      [(~(watch-our pass:io /contacts) %contact-store /all)]~
-    ==
+    :_  this(friends (rolodex-to-friends:lib friends rolodex:core))
+    (welp cards [(~(watch-our pass:io /contacts) %contact-store /all)]~)
   ::
   ++  on-save
     ^-  vase
@@ -83,7 +70,11 @@
           [%all ~]
         ::  only host should get all updates
         ?>  =(our.bowl src.bowl)
-        [(fact:io friends-reaction+!>([%friends friends]) ~[/all])]~
+        :~  %+  fact:io 
+              :-  %friends-reaction
+              !>([%friends (non-contacts:core friends)])
+            ~[/all]
+        ==
       ==
     [cards this]
   ::
@@ -91,13 +82,13 @@
     |=  =path
     ^-  (unit (unit cage))
     ?+    path  (on-peek:def path)
-        [%x %all ~]
+        [%x %all ~] :: ~/scry/friends/all.json
       ?>  (team:title our.bowl src.bowl)
-      ``noun+!>((view:enjs:lib [%friends friends]))
+      ``noun+!>((view:enjs:lib [%friends (non-contacts:core friends)]))
       ::
         [%x %ships ~]
       ?>  =(our.bowl src.bowl)
-      ``noun+!>(~(key by friends))
+      ``noun+!>(~(key by (non-contacts:core friends)))
     ==
   ::
   ++  on-agent
@@ -120,33 +111,22 @@
       =/  upd  !<(update:store q.cage.sign)
       ?+    -.upd  (on-agent:def wire sign)
           %initial
-        =.  friends  (rolodex-to-friends:lib friends rolodex.upd)
-        =/  new-ships
-          ~(tap in (~(dif in ~(key by rolodex.upd)) ~(key by friends)))
-        [(new-contacts:core new-ships) this]
+        `this(friends (rolodex-to-friends:lib friends rolodex.upd))
           %add
         =/  ufren  (~(get by friends) ship.upd)
-        =/  fren  (contact-to-friend:lib ship.upd ufren contact.upd)
-        :_  this(friends (~(put by friends) ship.upd fren))
-        ~&  >  ['new contact' ship.upd]
-        [(fact:io friends-reaction+!>([%new-friend ship.upd fren]) ~[/all])]~
+        =/  fren  (contact-to-friend:lib ufren contact.upd)
+        `this(friends (~(put by friends) ship.upd fren))
           %remove
         =/  ufren  (~(get by friends) ship.upd)
         ?~  ufren=(~(get by friends) ship.upd)  `this
         ?:  =(%contact status.u.ufren)
-          :_  this(friends (~(del by friends) ship.upd))
-          ~&  >  ['remove contact' ship.upd]
-          [(fact:io friends-reaction+!>([%bye-friend ship.upd]) ~[/all])]~
+          `this(friends (~(del by friends) ship.upd))
         =/  fren  (purge-contact-info:lib u.ufren)
-        :_  this(friends (~(put by friends) ship.upd fren))
-        ~&  >  ['remove contact info' ship.upd]
-        [(fact:io friends-reaction+!>([%friend ship.upd fren]) ~[/all])]~
+        `this(friends (~(put by friends) ship.upd fren))
           %edit
         =/  fren
           (field-edit:lib (~(got by friends) ship.upd) edit-field.upd)
-        :_  this(friends (~(put by friends) ship.upd fren))
-        ~&  >  ['edit contact' ship.upd]
-        [(fact:io friends-reaction+!>([%friend ship.upd fren]) ~[/all])]~
+        `this(friends (~(put by friends) ship.upd fren))
       ==
     ==
   ==
@@ -171,22 +151,7 @@
     %be-fren        abet:(be-fren src.bowl)
     %yes-fren       abet:(yes-fren src.bowl)
     %bye-fren       abet:(bye-fren src.bowl)
-    %add-hostyv     abet:(add-hostyv)
   ==
-::
-++  test-nickname
-  |=  [=ship =friend:store]
-  :-  ship
-  %=  friend
-    nickname
-      (crip :(weld (scow %p ship) " (" (trip status.friend) ")"))
-  ==
-::
-++  test-nicknames
-  |=  =friends:store
-  ^-  friends:store
-  %-  ~(gas by *friends:store)
-  (turn ~(tap by friends) test-nickname)
 ::
 ++  add-fren
   |=  =ship
@@ -254,7 +219,7 @@
       (fact:io friends-reaction+!>([%bye-friend ship]) ~[/all])
   ==
 ::
-:: ship confirms following you
+:: ship confirms it is your follower
 ++  be-fren
   |=  =ship
   ^-  _core
@@ -279,7 +244,7 @@
     (emit (fact:io friends-reaction+!>([%friend ship fren]) ~[/all]))
   ==
 ::
-:: ship confirms following you
+:: ship confirms it is your fren
 ++  yes-fren
   |=  =ship
   ^-  _core
@@ -289,7 +254,7 @@
   =.  friends             (~(put by friends) ship fren)
   (emit (fact:io friends-reaction+!>([%friend ship fren]) ~[/all]))
 ::
-:: ship stops following you
+:: ship notifies you that it is no longer your follower
 ++  bye-fren
   |=  =ship
   ^-  _core
@@ -308,20 +273,16 @@
     (emit (fact:io friends-reaction+!>([%bye-friend ship]) ~[/all]))
   ==
 ::
-++  new-contacts
-  |=  ships=(list ship)
-  ^-  (list card)
-  %+  turn  ships
-  |=  =ship
-  =/  fren  (~(got by friends) ship)
-  ~&  >  ['new contact' ship]
-  (fact:io friends-reaction+!>([%new-friend ship fren]) ~[/all])
-::
-:: Test pokes ...
-++  add-hostyv  |.(`_core`!!)
-:: Add pokes to test 
-::   |.
-::   ^-  _core
+++  non-contacts
+  |=  =friends:store
+  ^-  friends:store
+  %-  ~(gas by *friends:store)
+  %+  murn
+    ~(tap by friends)
+  |=  [=ship =friend:store]
+  ^-  (unit [^ship friend:store])
+  ?:  =(status.friend %contact)  ~
+  (some [ship friend])  
 ::
 ++  sour  (scot %p our.bowl)
 ++  snow  (scot %da now.bowl)

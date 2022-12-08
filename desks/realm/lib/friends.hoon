@@ -14,12 +14,12 @@
 =,  sur
 |%
 ++  contact-to-friend
-  |=  [=ship ufriend=(unit friend:sur) =contact:sur]
+  |=  [ufriend=(unit friend:sur) =contact:sur]
   ^-  friend:sur
   =/  friend  ?~(ufriend *friend:sur u.ufriend)
   %=  friend
     is-contact    %.y
-    nickname      (crip :(weld (scow %p ship) " (contact)")) :: nickname.contact
+    nickname      nickname.contact
     bio           bio.contact
     color         color.contact
     avatar        avatar.contact
@@ -35,7 +35,7 @@
   |=  [=ship =contact:sur]
   ^-  [^ship friend:sur]
   =/  ufriend  (~(get by friends) ship)
-  [ship (contact-to-friend ship ufriend contact)]
+  [ship (contact-to-friend ufriend contact)]
 ::
 ++  purge-contact-info
   |=  =old=friend:sur
@@ -138,12 +138,6 @@
     ::
         %bye-fren
       :-  %bye-fren
-      ~
-    ::
-    :: Testing
-    ::
-        %add-hostyv
-      :-  %add-hostyv
       ~
     ==
   ::

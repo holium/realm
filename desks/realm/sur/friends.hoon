@@ -40,8 +40,6 @@
       [%be-fren ~]
       [%yes-fren ~]
       [%bye-fren ~]
-      :: Test pokes
-      [%add-hostyv ~]
   ==
 ::
 +$  reaction
