@@ -1,7 +1,6 @@
 import { FC, useState, useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
-
 import { rgba } from 'polished';
 import { Flex, Text, Button, Spinner } from 'renderer/components';
 import { AppRow } from './AppRow';
@@ -17,32 +16,33 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 
-export const SearchModes: FC = observer(() => {
+export const SearchModes = observer(() => {
   const { bazaar, theme } = useServices();
-
-  const appInstaller = useAppInstaller();
   const [data, setData] = useState<any>([]);
-  const searchMode = appInstaller.searchMode;
-  const searchString = appInstaller.searchString;
-  const selectedShip = appInstaller.selectedShip;
-  const selectedDesk = appInstaller.selectedDesk;
-  const loadingState = appInstaller.loadingState;
+  const {
+    searchMode,
+    searchString,
+    selectedShip,
+    selectedDesk,
+    loadingState,
+    setLoadingState,
+  } = useAppInstaller();
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       SpacesActions.scryTreaties(selectedShip)
         .catch((e) => console.error(e))
-        .finally(() => appInstaller.setLoadingState(''));
+        .finally(() => setLoadingState(''));
     }
-  }, [bazaar.treatiesLoaded]);
+  }, [bazaar.treatiesLoaded, searchMode, selectedShip, setLoadingState]);
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaar.hasAlly(selectedShip)) {
         if (loadingState !== 'loading-published-apps') {
-          appInstaller.setLoadingState('loading-published-apps');
+          setLoadingState('loading-published-apps');
           SpacesActions.addAlly(selectedShip)
-            .then((result) => {
+            .then(() => {
               // SpacesActions.scryTreaties(selectedShip);
             })
             .catch((e) => console.error(e));
@@ -52,7 +52,7 @@ export const SearchModes: FC = observer(() => {
         SpacesActions.scryTreaties(selectedShip);
       }
     }
-  }, [searchMode, selectedShip]);
+  }, [bazaar, loadingState, searchMode, selectedShip, setLoadingState]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {
@@ -62,7 +62,7 @@ export const SearchModes: FC = observer(() => {
       const apps = bazaar.searchTreaties(selectedShip, searchString);
       setData(apps);
     }
-  }, [searchString]);
+  }, [bazaar, searchMode, searchString, selectedShip]);
 
   useEffect(() => {
     if (searchMode === 'ship-search') {
@@ -76,7 +76,7 @@ export const SearchModes: FC = observer(() => {
         setData([treaty]);
       }
     }
-  }, [searchMode]);
+  }, [bazaar, searchMode, selectedDesk, selectedShip]);
 
   return (
     <>
@@ -89,7 +89,7 @@ export const SearchModes: FC = observer(() => {
   );
 });
 
-const AppInstallStart: FC = observer(() => {
+const AppInstallStart = observer(() => {
   const { bazaar, theme, spaces } = useServices();
   const spacePath: string = spaces.selected?.path!;
 
@@ -121,7 +121,7 @@ const AppInstallStart: FC = observer(() => {
           Recent Developers
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderDevs(spacePath, bazaar.getRecentDevs(), theme.currentTheme)}
+          {renderDevs(bazaar.getRecentDevs(), theme.currentTheme)}
         </Flex>
       </Flex>
     </>
@@ -149,7 +149,7 @@ const renderApps = (space: string, apps: any, theme: any) => {
       caption={app.title}
       app={app}
       descriptionWidth={450}
-      onClick={(e: any) => {
+      onClick={() => {
         DesktopActions.openAppWindow(space, app);
         DesktopActions.setHomePane(false);
       }}
@@ -157,7 +157,7 @@ const renderApps = (space: string, apps: any, theme: any) => {
   ));
 };
 
-const renderAppSummary = (app?: UrbitAppType) => {
+const renderAppSummary = () => {
   const ViewComponent = AppDetailDialog({
     type: 'app-install',
     loading: false,
@@ -165,7 +165,7 @@ const renderAppSummary = (app?: UrbitAppType) => {
   return <ViewComponent />;
 };
 
-const renderDevs = (space: string, devs: any, theme: any) => {
+const renderDevs = (devs: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
   if (!devs || devs.length === 0) {
@@ -244,7 +244,7 @@ const ShipSearch: FC<any> = observer(() => {
   );
 });
 
-const DevApps: FC = observer(() => {
+const DevApps = observer(() => {
   const { theme, bazaar } = useServices();
   const {
     searchString,
@@ -255,7 +255,6 @@ const DevApps: FC = observer(() => {
     setApp,
   } = useAppInstaller();
 
-  console.log('DevApps', selectedShip, searchString);
   const secondaryTextColor = useMemo(
     () => rgba(theme.currentTheme.textColor, 0.5),
     [theme.currentTheme.textColor]
@@ -264,6 +263,7 @@ const DevApps: FC = observer(() => {
     selectedShip,
     searchString
   );
+
   if (bazaar.loadingTreaties) {
     return (
       <Flex flex={1} verticalAlign="middle">

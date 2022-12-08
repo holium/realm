@@ -106,13 +106,13 @@ export const SpacesTrayApp = observer(() => {
             size={28}
             color={iconColor}
             data-close-tray="false"
-            onClick={(evt: any) => {
+            onClick={() => {
               SpacesActions.setJoin('initial');
               setSearchVisible(!searchVisible);
             }}
             mr={1}
           >
-            <Icons name="Search" opacity={0.7} />
+            <Icons name="SearchSm" opacity={0.7} />
           </IconButton>
           <IconButton
             className="realm-cursor-hover"
