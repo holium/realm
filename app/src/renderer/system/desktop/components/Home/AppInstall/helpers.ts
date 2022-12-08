@@ -11,6 +11,8 @@ export const installLabel = (status: InstallStatus) => {
       return 'Cancel install';
     case InstallStatus.failed:
       return 'Retry install';
+    case InstallStatus.suspended:
+      return 'Revive app';
     default:
       return 'Cancel install';
   }
@@ -40,6 +42,10 @@ export const handleInstallation = (
       return;
     case InstallStatus.failed:
       SpacesActions.installApp(host!, desk);
+      return;
+    case InstallStatus.suspended:
+      console.log('Reviving app', desk);
+      // SpacesActions.installApp(host!, desk);
       return;
     default:
       console.error('Unknown install status', status);

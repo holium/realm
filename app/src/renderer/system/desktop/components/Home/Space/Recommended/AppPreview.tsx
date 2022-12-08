@@ -20,6 +20,7 @@ import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { handleInstallation } from '../../AppInstall/helpers';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
 
 interface AppPreviewProps {
   app: AppType;
@@ -36,10 +37,8 @@ export const AppPreview: FC<AppPreviewProps> = observer(
       info = app.info;
       installStatus = app.installStatus as InstallStatus;
     }
-    const isUninstalled = installStatus === InstallStatus.uninstalled;
-    const isInstalled = installStatus === InstallStatus.installed;
-    const isInstalling =
-      installStatus !== InstallStatus.installed && !isUninstalled;
+    const { isInstalling, isInstalled, isFaded, isSuspended, isUninstalled } =
+      getAppTileFlags(installStatus);
 
     const length = 60;
     const showDetails = (evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -55,12 +54,13 @@ export const AppPreview: FC<AppPreviewProps> = observer(
       return handleInstallation(appHost, app.id, installStatus);
     };
     return (
-      <Flex flexGrow={0} flexDirection="row" gap={16}>
+      <Flex flexGrow="0" flexDirection="row" gap={16}>
         <AppTile
           tileSize="lg"
           highlightOnHover
           isAnimated={false}
           app={app}
+          installStatus={InstallStatus.installed}
           onAppClick={(selectedApp: AppType) => {
             ShellActions.openDialogWithStringProps('app-detail-dialog', {
               appId: selectedApp.id,
@@ -74,9 +74,26 @@ export const AppPreview: FC<AppPreviewProps> = observer(
           justifyContent="space-between"
         >
           <Flex flexDirection="column" mr={24} gap={6}>
-            <Text fontWeight={500} fontSize={4}>
-              {app?.title}
-            </Text>
+            <Flex flexDirection="row" gap={16} alignItems="center">
+              <Text fontWeight={500} fontSize={4}>
+                {app?.title}
+              </Text>
+              {isSuspended && (
+                <Text
+                  style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+                  padding=".3rem .4rem"
+                  borderRadius={6}
+                  backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
+                  fontWeight={500}
+                  textStyle="capitalize"
+                  fontSize={1}
+                  color={rgba(theme.currentTheme.textColor, 0.9)}
+                >
+                  Suspended
+                </Text>
+              )}
+            </Flex>
+
             <Text fontSize={2} opacity={0.6}>
               {info.length > length ? `${info.substring(0, length)}...` : info}
             </Text>
@@ -102,6 +119,23 @@ export const AppPreview: FC<AppPreviewProps> = observer(
               >
                 <Spinner size={0} />
               </Flex>
+            )}
+            {isSuspended && (
+              <Button
+                pt="2px"
+                pb="2px"
+                variant="minimal"
+                fontWeight={400}
+                borderRadius={6}
+                color={'#FFF'}
+                backgroundColor={theme.currentTheme.accentColor}
+                onClick={(evt) => {
+                  // DesktopActions.openAppWindow(space!.path, toJS(app));
+                  // DesktopActions.setHomePane(false);
+                }}
+              >
+                Revive
+              </Button>
             )}
             {isInstalled && (
               <Button

@@ -347,6 +347,13 @@ export const DocketApi = {
       }
     });
   },
+  reviveApp: (conduit: Conduit, desk: string) => {
+    return conduit.poke({
+      app: 'hood',
+      mark: 'kiln-revive',
+      json: desk,
+    });
+  },
   installApp: (conduit: Conduit, ship: string, desk: string): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {

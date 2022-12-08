@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
 import {
   AppType,
-  AppTypes,
   InstallStatus,
   UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
@@ -33,17 +32,15 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         {apps.map((app: any, index: number) => {
           const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
           const weRecommended = bazaar.isRecommended(app.id);
-          let isInstalling = app.installStatus !== InstallStatus.installed;
-          if (app.type === AppTypes.Web) {
-            isInstalling = false;
-          }
+
           return (
             <AppTile
               key={`${app.title} ${index} grid`}
               isPinned={isAppPinned}
               isRecommended={weRecommended}
+              isAnimated={app.installStatus !== InstallStatus.suspended}
               allowContextMenu
-              isInstalling={isInstalling}
+              installStatus={app.installStatus}
               tileSize={tileSize}
               app={app}
               isVisible={isOpen}
@@ -80,8 +77,22 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                   },
                 },
                 {
-                  label: installLabel(app.installStatus as InstallStatus),
+                  label: 'Suspend app',
                   section: 2,
+                  disabled: false,
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    const appHost = (app as UrbitAppType).host;
+                    return handleInstallation(
+                      appHost,
+                      app.id,
+                      app.installStatus as InstallStatus
+                    );
+                  },
+                },
+                {
+                  label: installLabel(app.installStatus as InstallStatus),
+                  // section: 2,
                   disabled: false,
                   onClick: (evt: any) => {
                     evt.stopPropagation();

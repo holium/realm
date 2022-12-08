@@ -29,6 +29,7 @@ export enum InstallStatus {
   failed = 'failed',
   installed = 'installed',
   treaty = 'treaty',
+  suspended = 'suspended',
 }
 
 export enum AppTypes {
