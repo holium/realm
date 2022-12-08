@@ -789,7 +789,7 @@ export const WalletStore = types
       const network = options?.network || self.navState.network;
       const networkStore = options?.networkStore || self.navState.networkStore;
       const protocol = options?.protocol || self.navState.protocol;
-      const lastEthProtocol = options?.lastEthProtocol || self.navState.protocol;
+      const lastEthProtocol = options?.lastEthProtocol || self.navState.lastEthProtocol;
 
       if (
         canReturn &&
