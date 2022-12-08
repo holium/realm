@@ -73,7 +73,7 @@ export const WalletCard: FC<WalletCardProps> = ({
   const amountDisplay =
     walletApp.navState.network === NetworkType.ETHEREUM
       ? `${formatEthAmount((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).eth}` + ethTicker
-      : `${formatEthAmount((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).eth} BTC`;
+      : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
 
   return (
     <CardStyle

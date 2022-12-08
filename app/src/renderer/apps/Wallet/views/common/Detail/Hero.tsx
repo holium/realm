@@ -72,13 +72,13 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     const ethTicker = walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
     const amountDisplay =
-      walletApp.navState.network === 'ethereum'
+      walletApp.navState.network === NetworkType.ETHEREUM
         ? !props.coin
           ? `${formatEthAmount((props.wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).eth}` + ethTicker
           : `${
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`
-        : `${formatBtcAmount((props.wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).btc} BTC`;
+        : `${formatBtcAmount((props.wallet as BitcoinWalletType).balance).btc} BTC`;
     const amountUsdDisplay =
       walletApp.navState.network === 'ethereum'
         ? !props.coin

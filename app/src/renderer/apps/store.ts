@@ -98,8 +98,6 @@ const persistedState = loadSnapshot();
 const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
-    network: NetworkType.ETHEREUM,
-    networkStore: NetworkStoreType.ETHEREUM,
     protocol: ProtocolType.ETH_MAIN,
     lastEthProtocol: ProtocolType.ETH_MAIN,
     btcNetwork: NetworkStoreType.BTC_MAIN,
@@ -111,7 +109,6 @@ const walletAppDefault = {
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,
-      blocked: [],
       defaultIndex: 0,
     },
     initialized: false,
@@ -122,7 +119,6 @@ const walletAppDefault = {
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,
-      blocked: [],
       defaultIndex: 0,
     },
     conversions: {},
@@ -132,7 +128,6 @@ const walletAppDefault = {
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,
-      blocked: [],
       defaultIndex: 0,
     },
     conversions: {},
@@ -276,6 +271,7 @@ OSActions.onBoot((_event: any, response: any, session: any) => {
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
   console.log('on connected', response);
+  applySnapshot(trayStore.walletApp, walletAppDefault);
 
   // if (LiveRoom.state === 'disconnected') {
   //   console.log('LiveRoom.init in OSActions.onConnected ');
@@ -312,11 +308,6 @@ OSActions.onConnected((_event: any, response: any) => {
 //     }
 //   }
 // });
-
-// clear store onConnected
-OSActions.onConnected((_event: any, response: any) => {
-  applySnapshot(trayStore.walletApp, walletAppDefault);
-});
 
 // Listen for all patches
 OSActions.onEffect((_event: any, value: any) => {

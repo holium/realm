@@ -626,26 +626,70 @@ export enum NetworkStoreType {
 const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
 export const WalletNavState = types.model('WalletNavState', {
-  view: types.enumeration(Object.values(WalletView)),
-  network: Networks,
-  networkStore: NetworkStores,
-  protocol: Protocols,
-  lastEthProtocol: Protocols,
-  btcNetwork: NetworkStores,
-  walletIndex: types.maybe(types.string),
-  detail: types.maybe(
-    types.model({
-      type: types.enumeration(['transaction', 'coin', 'nft']),
-      key: types.string,
-    })
-  ),
-  action: types.maybe(
-    types.model({
-      type: types.string,
-      data: types.frozen(),
-    })
-  ),
-});
+    view: types.enumeration(Object.values(WalletView)),
+    protocol: Protocols,
+    lastEthProtocol: Protocols,
+    btcNetwork: NetworkStores,
+    walletIndex: types.maybe(types.string),
+    detail: types.maybe(
+      types.model({
+        type: types.enumeration(['transaction', 'coin', 'nft']),
+        key: types.string,
+      })
+    ),
+    action: types.maybe(
+      types.model({
+        type: types.string,
+        data: types.frozen(),
+      })
+    ),
+  })
+  .views((self) => ({
+    get network(): NetworkType {
+      switch (self.protocol) {
+        case ProtocolType.ETH_MAIN:
+          return NetworkType.ETHEREUM;
+          break;
+        case ProtocolType.ETH_GORLI:
+          return NetworkType.ETHEREUM;
+          break;
+        case ProtocolType.UQBAR:
+          return NetworkType.ETHEREUM;
+          break;
+        case ProtocolType.BTC_MAIN:
+          return NetworkType.BITCOIN;
+          break;
+        case ProtocolType.BTC_TEST:
+          return NetworkType.BITCOIN;
+          break;
+        default:
+          return NetworkType.ETHEREUM;
+          break;
+      }
+    },
+    get networkStore(): NetworkStoreType {
+      switch (self.protocol) {
+        case ProtocolType.ETH_MAIN:
+          return NetworkStoreType.ETHEREUM;
+          break;
+        case ProtocolType.ETH_GORLI:
+          return NetworkStoreType.ETHEREUM;
+          break;
+        case ProtocolType.UQBAR:
+          return NetworkStoreType.ETHEREUM;
+          break;
+        case ProtocolType.BTC_MAIN:
+          return NetworkStoreType.BTC_MAIN;
+          break;
+        case ProtocolType.BTC_TEST:
+          return NetworkStoreType.BTC_TEST;
+          break;
+        default:
+          return NetworkStoreType.ETHEREUM;
+          break;
+      }
+    }
+  }));
 export type WalletNavStateType = Instance<typeof WalletNavState>;
 
 export interface WalletNavOptions {
@@ -713,18 +757,15 @@ export const WalletStore = types
       if (network !== self.navState.network) {
         switch (network) {
           case NetworkType.ETHEREUM:
-            self.navState.networkStore = NetworkStoreType.ETHEREUM
             self.navState.protocol = self.ethereum.protocol;
             break;
           case NetworkType.BITCOIN:
-            self.navState.networkStore = self.navState.btcNetwork;
             self.navState.protocol = self.navState.btcNetwork === NetworkStoreType.BTC_MAIN
             ? ProtocolType.BTC_MAIN
             : ProtocolType.BTC_TEST
             break;
         }
       }
-      self.navState.network = network;
       /* @ts-expect-error */
       self.resetNavigation();
     },
@@ -763,8 +804,6 @@ export const WalletStore = types
         walletIndex,
         detail,
         action,
-        network,
-        networkStore,
         protocol,
         lastEthProtocol,
         btcNetwork: self.navState.btcNetwork,
@@ -776,8 +815,6 @@ export const WalletStore = types
       let returnSnapshot = getSnapshot(
         WalletNavState.create({
           view: DEFAULT_RETURN_VIEW,
-          network: self.navState.network,
-          networkStore: self.navState.networkStore,
           protocol: self.navState.protocol,
           lastEthProtocol: self.navState.lastEthProtocol,
           btcNetwork: self.navState.btcNetwork,
@@ -793,8 +830,6 @@ export const WalletStore = types
     resetNavigation() {
       self.navState = WalletNavState.create({
         view: WalletView.LIST,
-        network: self.navState.network,
-        networkStore: self.navState.networkStore,
         protocol: self.navState.protocol,
         lastEthProtocol: self.navState.lastEthProtocol,
         btcNetwork: self.navState.btcNetwork,

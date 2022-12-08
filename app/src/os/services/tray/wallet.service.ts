@@ -312,8 +312,6 @@ export class WalletService extends BaseService {
       this.state = WalletStore.create({
         navState: {
           view: WalletView.NEW,
-          network: NetworkType.ETHEREUM,
-          networkStore: NetworkStoreType.ETHEREUM,
           protocol: ProtocolType.ETH_MAIN,
           lastEthProtocol: ProtocolType.ETH_MAIN,
           btcNetwork: NetworkStoreType.BTC_MAIN,
@@ -325,7 +323,6 @@ export class WalletService extends BaseService {
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
-            blocked: [],
             defaultIndex: 0,
           },
           initialized: false,
