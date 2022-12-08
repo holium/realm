@@ -29,6 +29,8 @@ const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
   position: relative;
   /* --webkit-backdrop-filter: var(--blur-enabled);
   --webkit-transform: transale3d(0, 0, 0); */
+  display: flex;
+  flex-direction: column;
   border-radius: 12px;
   padding: 16px 16px 0 16px;
   width: 100%;
@@ -147,7 +149,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           {our ? 'Friends' : 'Members'}
         </Text>
       </Flex>
-      <Flex position="relative" flex={1}>
+      <Flex position="relative">
         {/* Search and dropdown */}
         <Input
           tabIndex={1}
@@ -214,7 +216,6 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
         />
         <ShipSearch
           isDropdown
-          heightOffset={0}
           search={person.state.value}
           selected={selectedPatp}
           customBg={windowColor}

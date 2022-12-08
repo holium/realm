@@ -13,7 +13,7 @@ module.exports = {
       './lib/room/tsconfig.json',
       './lib/conduit/tsconfig.json',
       './lib/multiplayer/tsconfig.json',
-      './playground/ui/tsconfig.json',
+      './lib/design-system/tsconfig.json',
       './tsconfig.eslint.json',
     ],
     ecmaVersion: 'latest',

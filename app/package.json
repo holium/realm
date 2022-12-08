@@ -10,9 +10,9 @@
     "build:cursor": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.cursor.prod.ts",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish always --config.publish.releaseType=prerelease",
-    "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish always --config.publish.releaseType=prerelease",
-    "package:prerelease:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish always --config.publish.releaseType=prerelease",
+    "package:prerelease:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
+    "package:prerelease:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish never",
+    "package:prerelease:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish never",
     "package:release:linux": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --linux --publish always --config.publish.releaseType=release",
     "package:release:mac": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --mac --publish always --config.publish.releaseType=release",
     "package:release:win": "ts-node ./.holium/scripts/clean.js dist && npm run build && electron-builder build --win --publish always --config.publish.releaseType=release",
@@ -89,7 +89,6 @@
     "react-router-dom": "^6.3.0",
     "react-spaces": "^0.3.2",
     "react-spinners": "^0.13.4",
-    "react-virtualized-auto-sizer": "^1.0.6",
     "react-window": "^1.8.7",
     "secure-electron-store": "^3.0.3",
     "styled-components": "^5.3.3",
@@ -110,11 +109,10 @@
     "@types/jest": "^27.4.1",
     "@types/node": "17.0.23",
     "@types/path-browserify": "^1.0.0",
-    "@types/react": "^17.0.43",
+    "@types/react": "^18.0.25",
     "@types/react-color": "^3.0.6",
-    "@types/react-dom": "^17.0.15",
+    "@types/react-dom": "^18.0.9",
     "@types/react-test-renderer": "^17.0.1",
-    "@types/react-virtualized-auto-sizer": "^1.0.1",
     "@types/react-window": "^1.8.5",
     "@types/styled-components": "^5.1.25",
     "@types/styled-system": "^5.1.15",
@@ -220,7 +218,8 @@
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "appx"
       ]
     },
     "linux": {

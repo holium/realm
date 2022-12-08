@@ -23,7 +23,7 @@ import {
   SettingsType,
 } from './wallet.model';
 import EncryptedStore from '../../lib/encryptedStore';
-import { Network, Alchemy } from 'alchemy-sdk';
+import { Network, Alchemy, AssetTransfersCategory } from 'alchemy-sdk';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
@@ -72,6 +72,7 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
     'realm.tray.wallet.navigate': this.navigate,
     'realm.tray.wallet.navigateBack': this.navigateBack,
+    'realm.wallet.get-coin-txns': this.getCoinTxns,
   };
 
   static preload = {
@@ -269,6 +270,18 @@ export class WalletService extends BaseService {
     requestAddress: async (from: string, network: string) => {
       return await ipcRenderer.invoke('realm.tray.wallet.request-address');
     },
+    getCoinTxns: async (
+      walletAddr: string,
+      tokenType: 'erc20' | 'erc721' | 'erc1155',
+      contractAddr: string
+    ) => {
+      return await ipcRenderer.invoke(
+        'realm.wallet.get-coin-txns',
+        walletAddr,
+        tokenType,
+        contractAddr
+      );
+    },
     toggleNetwork: async () => {
       return await ipcRenderer.invoke('realm.tray.wallet.toggle-network');
     },
@@ -284,6 +297,29 @@ export class WalletService extends BaseService {
     });
 
     setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
+  }
+
+  async getCoinTxns(
+    _evt: any,
+    walletAddr: string,
+    tokenType: 'erc20' | 'erc721' | 'erc1155',
+    contractAddr: string
+  ) {
+    let coinTxns;
+    if (contractAddr) {
+      coinTxns = await this.alchemy!.core.getAssetTransfers({
+        fromAddress: walletAddr,
+        contractAddresses: [contractAddr],
+        category: [tokenType as AssetTransfersCategory],
+      });
+      //  const coinTxns = await this.alchemy!.core.getAssetTransfers({
+      //    toAddress: wallet.address,
+      //    contractAddresses: [token.contractAddress],
+      //    category: [AssetTransfersCategory.ERC20],
+      //  });
+      // console.log('coinTxns', coinTxns);
+    }
+    return coinTxns;
   }
 
   private wrapHandler(handler: any) {
@@ -325,7 +361,7 @@ export class WalletService extends BaseService {
       secretKey,
       accessPropertiesByDotNotation: true,
     };
-    this.db = new Store<WalletStoreType>(storeParams)
+    this.db = new Store<WalletStoreType>(storeParams);
     const persistedState: WalletStoreType = this.db.store;
 
     if (Object.keys(persistedState).length !== 0) {
@@ -412,6 +448,7 @@ export class WalletService extends BaseService {
         this.updateBitcoinInfo();
       }
     });
+
     WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
       if (
         Object.keys(wallets.ethereum).length !== 0 ||
@@ -424,31 +461,34 @@ export class WalletService extends BaseService {
       this.updateEthereumInfo();
       this.state!.bitcoin.initial(wallets.bitcoin);
       this.state!.testnet.initial(wallets.btctestnet);
-      this.updateBitcoinInfo();
+      // this.updateBitcoinInfo();
     });
-    WalletApi.subscribeToTransactions(
-      this.core.conduit!,
-      (transaction: any) => {
-        if (transaction.network == 'ethereum')
-          this.state!.ethereum.wallets.get(
-            transaction.index
-          )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-        //      else if (transaction.network == 'bitcoin')
-        //        this.state!.bitcoin.applyTransactionUpdate(transaction);
-        /* const tx = this.state!.ethereum.transactions.get(
-          transaction.transaction.hash
-        ); */
-      }
-    );
+
+    // WalletApi.subscribeToTransactions(
+    //   this.core.conduit!,
+    //   (transaction: any) => {
+    //     if (transaction.network == 'ethereum')
+    //       this.state!.ethereum.wallets.get(
+    //         transaction.index
+    //       )!.applyTransactionUpdate(transaction.net, transaction.transaction);
+    //     //      else if (transaction.network == 'bitcoin')
+    //     //        this.state!.bitcoin.applyTransactionUpdate(transaction);
+    //     /* const tx = this.state!.ethereum.transactions.get(
+    //       transaction.transaction.hash
+    //     ); */
+    //   }
+    // );
+
     WalletApi.getSettings(this.core.conduit!).then((settings: any) => {
       this.state!.ethereum.setSettings(settings);
     });
 
     this.setNetworkProvider(
-      'realm.tray.wallet.set-network-provider',
+      null,
       'ethereum',
-      'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
-      //      'http://127.0.0.1:8545'
+      'https://eth-goerli.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
+      // 'https://goerli.infura.io/v3/e178fbf3fd694b1e8b29b110776749ce'
+      // 'http://127.0.0.1:8545'
     );
 
     if (this.state.navState.view !== WalletView.NEW) {
@@ -462,7 +502,6 @@ export class WalletService extends BaseService {
   }
 
   async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
-    console.log(this.state);
     const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
     this.state!.setPasscodeHash(passcodeHash);
     this.core.services.identity.auth.setMnemonic(
@@ -497,7 +536,7 @@ export class WalletService extends BaseService {
       this.updateBitcoinInfo();
     });
 
-    console.log('okay transitioning');
+    // console.log('okay transitioning');
     this.state!.navigate(WalletView.LIST);
   }
 
@@ -587,25 +626,11 @@ export class WalletService extends BaseService {
   }
 
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
-    console.log('hey from get rec');
-    // TODO: fetch contact metadata (profile pic)
     const recipientMetadata: {
       color?: string;
       avatar?: string;
       nickname?: string;
     } = await this.core.services.ship.getContact(null, patp);
-
-    console.log('metadata fetched:');
-    console.log(recipientMetadata);
-
-    // let dummy: ethers.Wallet = ethers.Wallet.createRandom();
-    // let tx = {
-    //   to: dummy,
-    //   value: ethers.utils.parseEther("1.0"),
-    // }
-    // //@ts-ignore
-    // const gasEstimate: number = await this.ethProvider!.estimateGas(tx);
-    // console.log(`got gas estimate: ${gasEstimate}`);
 
     try {
       console.log('requesting address');
@@ -614,8 +639,7 @@ export class WalletService extends BaseService {
         this.state!.navState.network,
         patp
       );
-      console.log(address);
-      console.log(`got address! ${address}`);
+      console.log('got address: ', address);
 
       return {
         patp,
@@ -624,7 +648,6 @@ export class WalletService extends BaseService {
         gasEstimate: 7,
       };
     } catch (e) {
-      console.log('damn');
       console.error(e);
       return {
         patp,
@@ -646,7 +669,7 @@ export class WalletService extends BaseService {
     // const hash = this.state!.currentItem!.key;
     const hash = this.state!.navState.detail!.key;
     const index = this.state!.currentWallet!.index;
-    WalletApi.saveTransactionNotes(
+    await WalletApi.saveTransactionNotes(
       this.core.conduit!,
       network,
       net,
@@ -692,8 +715,8 @@ export class WalletService extends BaseService {
   }
 
   async setNetworkProvider(_event: any, network: string, provider: string) {
-    if (network == 'ethereum') this.state!.ethereum.setProvider(provider);
-    else if (network == 'bitcoin') this.state!.bitcoin.setProvider(provider);
+    if (network === 'ethereum') this.state!.ethereum.setProvider(provider);
+    else if (network === 'bitcoin') this.state!.bitcoin.setProvider(provider);
     // await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
   }
 
@@ -721,17 +744,17 @@ export class WalletService extends BaseService {
     toPatp?: string,
     contractType?: string
   ) {
-    console.log(walletIndex);
-    console.log(to);
-    console.log(amount);
-    console.log(toPatp);
+    // console.log(walletIndex);
+    // console.log(to);
+    // console.log(amount);
+    // console.log(toPatp);
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    console.log(path);
+    // console.log(path);
     // console.log(this.privateKey!.mnemonic!.phrase);
     const privateKey = this.getPrivateKey();
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     const signer = wallet.connect(this.ethProvider!);
-    console.log(amount);
+    // console.log(amount);
     const tx = {
       to,
       value: ethers.utils.parseEther(amount),
@@ -740,6 +763,10 @@ export class WalletService extends BaseService {
     console.log('hash: ' + hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
+    console.log(
+      'right before enqueueTransaction',
+      this.state?.ethereum.network
+    );
     currentWallet.enqueueTransaction(
       this.state!.ethereum.network,
       hash,
@@ -935,9 +962,9 @@ export class WalletService extends BaseService {
   setEthereumProviders() {
     let alchemySettings;
     if (this.state!.ethereum.network === 'mainnet') {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
-      );
+      // this.ethProvider = new ethers.providers.JsonRpcProvider(
+      //   'https://mainnet.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
+      // );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_MAINNET, // Replace with your network.
@@ -945,15 +972,16 @@ export class WalletService extends BaseService {
       // etherscan
     } else {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://goerli.infura.io/v3/4b0d979693764f9abd2e04cd197062da'
+        'https://eth-goerli.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
       );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
         network: Network.ETH_GOERLI, // Replace with your network.
       };
     }
-    this.ethProvider.removeAllListeners();
-    this.ethProvider.on('block', () => this.updateEthereumInfo());
+    this.ethProvider?.removeAllListeners();
+    // TODO this is where the apis are querying too much
+    // this.ethProvider?.on('block', () => this.updateEthereumInfo());
     this.alchemy = new Alchemy(alchemySettings);
   }
 
@@ -1001,11 +1029,13 @@ export class WalletService extends BaseService {
       const balances = await this.alchemy!.core.getTokenBalances(
         wallet.address
       );
+      // console.log(balances);
       // Remove tokens with zero balance
       const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
         return token.tokenBalance !== '0';
       });
       const coins = [];
+      const txns = [];
       for (const token of nonZeroBalances) {
         const metadata = await this.alchemy!.core.getTokenMetadata(
           (token as any).contractAddress
@@ -1024,8 +1054,10 @@ export class WalletService extends BaseService {
           balance,
           decimals: metadata.decimals!,
         };
+
         coins.push(coin);
       }
+
       this.state!.ethereum.wallets.get(key)!.setCoins(coins);
     }
   }

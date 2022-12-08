@@ -13,8 +13,8 @@ export interface ExitDiff {
 }
 export type DiffType = EnterDiff | ExitDiff;
 
-export interface RoomsModelType {
-  id: string;
+export interface RoomType {
+  rid: string;
   provider: string;
   creator: string;
   access: string;
@@ -22,18 +22,10 @@ export interface RoomsModelType {
   present: string[];
   whitelist: string[];
   capacity: number;
-  space: string;
-  cursors: boolean;
+  path: string | null;
 }
 
-export enum PeerConnectionState {
-  Disconnected = 'disconnected',
-  Connecting = 'connecting',
-  Connected = 'connected',
-  Failed = 'failed',
-  New = 'new',
-  Closed = 'closed',
-}
+export type RoomMap = Map<string, RoomType>;
 
 export enum RoomState {
   Starting = 'starting',

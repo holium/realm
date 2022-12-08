@@ -68,10 +68,6 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
       const appHost = (app as UrbitAppType).host;
-      if (!appHost) {
-        console.error('No host found for app', app.id);
-        return;
-      }
       return handleInstallation(
         appHost,
         app.id,
@@ -111,10 +107,22 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
         label: installLabel(app.installStatus as InstallStatus),
         disabled: false,
         section: 2,
-        onClick: onInstallation,
+        onClick: (evt: any) => {
+          evt.stopPropagation();
+          // console.log('install app => %o', app);
+          if (app.installStatus === InstallStatus.installed) {
+            SpacesActions.uninstallApp(app.id);
+          } else {
+            console.log(app);
+            if (app.host) {
+              SpacesActions.installApp(app.host, app.id);
+            }
+          }
+        },
       });
     }
 
+    console.log(app.installStatus);
     return (
       <Box position="relative">
         {isUninstalled && (

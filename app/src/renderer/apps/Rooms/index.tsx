@@ -1,28 +1,27 @@
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
-// import { toJS } from 'mobx';
-import { ThemeModelType } from 'os/services/theme.model';
-import { FC } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
-import { Rooms, RoomListProps } from './List';
+import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
+import { useRooms } from './useRooms';
+import { Settings } from './Settings';
 
 export const RoomViews: { [key: string]: any } = {
-  list: (props: RoomListProps) => <Rooms {...props} />,
-  'new-room': (props: any) => <NewRoom {...props} />,
-  room: (props: any) => <Room {...props} />,
+  list: () => <Rooms />,
+  'new-room': () => <NewRoom />,
+  room: () => <Room />,
+  settings: () => <Settings />,
 };
 
-export interface RoomAppProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-
-export const RoomApp: FC<RoomAppProps> = observer((props: RoomAppProps) => {
+export const RoomApp = observer(() => {
   const { roomsApp } = useTrayApps();
+  const roomsManager = useRooms();
+  useEffect(() => {
+    if (roomsManager.presentRoom) {
+      roomsApp.setView('room');
+    }
+  }, [roomsApp, roomsManager.presentRoom]);
   const View = RoomViews[roomsApp.currentView];
-  return <View {...props} />;
+  return <View />;
 });

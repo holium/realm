@@ -1,8 +1,3 @@
-/**
- * Virtual renderers:
- * - https://github.com/wellyshen/react-cool-virtual
- */
-
 import {
   FC,
   useEffect,
@@ -10,6 +5,8 @@ import {
   useMemo,
   useRef,
   ChangeEventHandler,
+  useCallback,
+  ClipboardEvent,
 } from 'react';
 import { lighten, darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
@@ -51,7 +48,6 @@ interface IProps {
   height: number;
   selectedChat: DMPreviewType;
   headerOffset: number;
-  // s3Client: S3Client;
   dimensions: {
     height: number;
     width: number;
@@ -61,26 +57,35 @@ interface IProps {
 }
 
 export const ChatView: FC<IProps> = observer((props: IProps) => {
+  const { selectedChat, height, theme } = props;
+  const { iconColor, dockColor, textColor, windowColor, mode } = theme;
+
   const submitRef = useRef(null);
   const chatInputRef = useRef(null);
   const inputRef = useRef(null);
   const containerRef = useRef(null);
-  const { selectedChat, setSelectedChat, height, theme, onSend } = props;
-  const { iconColor, dockColor, textColor, windowColor, mode } = props.theme;
-  const [showJumpBtn, setShowJumpBtn] = useState(false);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
   const [isSending, setIsSending] = useState(false);
   const [loading, setLoading] = useState(false);
   const { courier } = useServices();
-  const dmLog = courier.dms.get(selectedChat.path);
-  const messages = dmLog?.messages || [];
   const resetLoading = () => setLoading(false);
   const { dmApp } = useTrayApps();
+
+  const isGroup = useMemo(
+    () => selectedChat.type === 'group',
+    [selectedChat.type]
+  );
+
+  const messages = useMemo(
+    () => courier.dms.get(selectedChat.path)?.messages || [],
+    [courier.dms, selectedChat.path]
+  );
+
   useEffect(() => {
     if (!selectedChat.isNew) {
       setLoading(true);
       let path = selectedChat.path.substring(1);
-      if (selectedChat.type === 'group') {
+      if (isGroup) {
         ShipActions.readGroupDm(path);
         path = `group/${path}`;
       } else {
@@ -94,9 +99,9 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
       setIsSending(false);
       setLoading(false);
     };
-  }, []);
+  }, [isGroup, selectedChat.isNew, selectedChat.path, selectedChat.to]);
 
-  const { canUpload, uploading, promptUpload, onPaste } = useFileUpload({
+  const { canUpload, promptUpload } = useFileUpload({
     onSuccess: uploadSuccess,
     // onError: handleUploadError,
   });
@@ -111,31 +116,70 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     // setUploadError('');
   }
 
-  const [rows, setRows] = useState(1);
-
   const onBack = () => {
     dmApp.setSelectedChat(null);
     setIsSending(false);
     setLoading(false);
   };
 
-  const uploadFile = (params: FileUploadParams) => {
-    ShipActions.uploadFile(params)
-      .then((url) => {
-        setIsSending(true);
-        const content = [{ url }];
-        SoundActions.playDMSend();
-        DmActions.sendDm(selectedChat.path, content)
-          .then((res) => {
-            setIsSending(false);
-          })
-          .catch((err) => {
-            console.error('dm send error', err);
-            setIsSending(false);
+  const uploadFile = useCallback(
+    (params: FileUploadParams) => {
+      ShipActions.uploadFile(params)
+        .then((url) => {
+          setIsSending(true);
+          const content = [{ url }];
+          SoundActions.playDMSend();
+          DmActions.sendDm(selectedChat.path, content)
+            .then(() => {
+              setIsSending(false);
+            })
+            .catch((err) => {
+              console.error('dm send error', err);
+              setIsSending(false);
+            });
+        })
+        .catch((e) => console.error(e));
+    },
+    [selectedChat.path]
+  );
+
+  const onPaste = useCallback(
+    async (evt: ClipboardEvent<HTMLInputElement>) => {
+      try {
+        if (!canUpload) return;
+        const fileReader = new FileReader();
+        const clipboardItems = await navigator.clipboard.read();
+        if (!clipboardItems || clipboardItems.length === 0) return;
+        const clipboardItem = clipboardItems[0];
+        if (!clipboardItem.types || clipboardItem.types.length === 0) return;
+        const type = clipboardItem.types[0];
+        if (type.startsWith('image/')) {
+          evt.preventDefault();
+          evt.stopPropagation();
+          const blob = await clipboardItem.getType(type);
+          // we can now use blob here
+          // const content = await blob.text();
+          fileReader.addEventListener('loadend', () => {
+            // reader.result contains the contents of blob as a data url
+            const dataUrl = fileReader.result;
+            if (dataUrl && typeof dataUrl === 'string') {
+              const base64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+              const params: FileUploadParams = {
+                source: 'buffer',
+                content: base64,
+                contentType: type,
+              };
+              uploadFile(params);
+            }
           });
-      })
-      .catch((e) => console.error(e));
-  };
+          fileReader.readAsDataURL(blob);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [canUpload, uploadFile]
+  );
 
   const handleFileChange = (event: ChangeEventHandler<HTMLInputElement>) => {
     // @ts-expect-error
@@ -171,7 +215,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         chatInputRef.current.focus();
 
         DmActions.sendDm(selectedChat.path, dmMessageContent)
-          .then((res) => {
+          .then(() => {
             setIsSending(false);
           })
           .catch((err) => {
@@ -184,48 +228,41 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
       chatInputRef.current.rows = chatInputRef.current.rows + 1;
     }
   };
-  let sigil: any,
-    to: string,
-    dmModel: PreviewDMType,
-    groupModel: PreviewGroupDMType;
 
-  if (selectedChat.type === 'group' || selectedChat.type === 'group-pending') {
-    groupModel = selectedChat as PreviewGroupDMType;
-    to = Array.from(groupModel.to).join(', ');
-    sigil = (
-      <GroupSigil
-        path={groupModel.path}
-        patps={groupModel.to}
-        metadata={groupModel.metadata}
-      />
-    );
-  } else {
-    dmModel = selectedChat as PreviewDMType;
-    to = dmModel.to;
-    sigil = (
-      <Sigil
-        simple
-        size={28}
-        avatar={dmModel.metadata.avatar}
-        patp={dmModel.to}
-        color={[dmModel.metadata.color || '#000000', 'white']}
-      />
-    );
-  }
-
-  // Only rerender when the data is different
-  const ChatLogMemo = useMemo(
-    () => (
-      <ChatLog
-        loading={loading}
-        messages={messages}
-        isGroup={selectedChat.type === 'group'}
-      />
-    ),
-    [messages, selectedChat.to]
+  const to = useMemo(
+    () => (isGroup ? Array.from(selectedChat.to).join(', ') : selectedChat.to),
+    [isGroup, selectedChat.to]
   );
 
-  const inputHeight = 60;
+  const sigil = useMemo(() => {
+    if (isGroup) {
+      const groupModel = selectedChat as PreviewGroupDMType;
+      return (
+        <GroupSigil
+          path={groupModel.path}
+          patps={groupModel.to}
+          metadata={groupModel.metadata}
+        />
+      );
+    } else {
+      const dmModel = selectedChat as PreviewDMType;
+      return (
+        <Sigil
+          simple
+          size={28}
+          avatar={dmModel.metadata.avatar}
+          patp={dmModel.to}
+          color={[dmModel.metadata.color || '#000000', 'white']}
+        />
+      );
+    }
+  }, [isGroup, selectedChat]);
+
+  const ChatLogMemo = useMemo(
+    () => <ChatLog loading={loading} messages={messages} isGroup={isGroup} />,
+    [isGroup, loading, messages]
+  );
+
   return (
     <Grid.Column
       style={{ position: 'relative', color: textColor }}
@@ -298,7 +335,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
           alignContent="center"
         >
           {ChatLogMemo}
-          {/* <ChatLog loading={loading} messages={messages} /> */}
           <Flex
             position="absolute"
             bottom={0}
@@ -308,7 +344,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
               background: rgba(windowColor, 0.9),
               backdropFilter: 'blur(16px)',
               // borderTop: `1px solid ${rgba(darken(0.5, windowColor), 0.2)}`,
-              minHeight: inputHeight,
+              minHeight: 60,
             }}
           >
             <Flex flex={1} pr={3} alignItems="center">
@@ -357,7 +393,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 as="textarea"
                 ref={chatInputRef}
                 tabIndex={1}
-                rows={rows}
+                rows={1}
                 autoFocus
                 name="dm-message"
                 shouldHighlightOnFocus
@@ -383,49 +419,8 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                     </IconButton>
                   </Flex>
                 }
-                onChange={(e: any) =>
-                  dmMessage.actions.onChange(e.target.value)
-                }
-                onPaste={async (evt) => {
-                  try {
-                    if (!canUpload) return;
-                    const fileReader = new FileReader();
-                    const clipboardItems = await navigator.clipboard.read();
-                    if (!clipboardItems || clipboardItems.length === 0) return;
-                    const clipboardItem = clipboardItems[0];
-                    if (
-                      !clipboardItem.types ||
-                      clipboardItem.types.length === 0
-                    )
-                      return;
-                    const type = clipboardItem.types[0];
-                    if (type.startsWith('image/')) {
-                      evt.preventDefault();
-                      evt.stopPropagation();
-                      const blob = await clipboardItem.getType(type);
-                      // we can now use blob here
-                      // const content = await blob.text();
-                      fileReader.addEventListener('loadend', () => {
-                        // reader.result contains the contents of blob as a data url
-                        const dataUrl = fileReader.result;
-                        if (dataUrl && typeof dataUrl === 'string') {
-                          const base64 = dataUrl.substring(
-                            dataUrl.indexOf(',') + 1
-                          );
-                          const params: FileUploadParams = {
-                            source: 'buffer',
-                            content: base64,
-                            contentType: type,
-                          };
-                          uploadFile(params);
-                        }
-                      });
-                      fileReader.readAsDataURL(blob);
-                    }
-                  } catch (err) {
-                    console.error(err);
-                  }
-                }}
+                onChange={(e) => dmMessage.actions.onChange(e.target.value)}
+                onPaste={onPaste}
                 onFocus={() => dmMessage.actions.onFocus()}
                 onBlur={() => dmMessage.actions.onBlur()}
                 wrapperStyle={{

@@ -129,3 +129,6 @@ sync_app_code.sh
 app/realmlog.txt
 
 app.dev.json
+
+# Storybook
+storybook-static

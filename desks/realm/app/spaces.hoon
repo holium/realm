@@ -141,13 +141,19 @@
         ?>  =(our.bowl src.bowl)      ::  only host should get all updates
         [%give %fact [/updates ~] spaces-reaction+!>([%initial spaces.state membership.state invitations.state])]~
         ::
+          [%spaces ~]  :: Sends %add reaction when user joins a new space
+        ?>  =(our.bowl src.bowl)
+        %+  turn  ~(tap in ~(key by spaces.state))
+        |=  =space-path:store
+        [%give %fact ~ spaces-reaction+!>([%add (~(got by spaces.state) space-path) (~(got by membership.state) space-path)])]
+        ::
           [%spaces @ @ ~]  :: The space level watch subscription
         =/  host                `@p`(slav %p i.t.path)
         =/  space-pth           `@t`i.t.t.path
         =/  space               (~(got by spaces.state) [host space-pth])
-        ::  TODO allow public spaces to be watched
-        ::  =(access.space %public)
-        ?>  (check-member:security [host space-pth] src.bowl)     ::  only members should subscribe
+        ?>  ?|  (check-member:security [host space-pth] src.bowl)     ::  only members should subscribe
+                =(access.space %public)                               :: allow public spaces to be watched
+            ==
         =/  update-paths        [/spaces/(scot %p host)/(scot %tas space-pth) ~]
         =/  members             (~(got by membership.state) [host space-pth])
         [%give %fact update-paths spaces-reaction+!>([%remote-space [host space-pth] space members])]~
@@ -165,7 +171,9 @@
           %watch-ack
             ?~  p.sign  `this
             ~&  >>>  "{<dap.bowl>}: spaces subscription failed"
-            `this
+            :_  this
+            ::  bunted update indicates failure
+            [%give %fact [/updates ~] spaces-reaction+!>([%remote-space [*ship *@t] *space:store ~])]~
           %kick
             =/  =ship           `@p`(slav %p i.t.wire)
             =/  space-pth       `@t`i.t.t.wire
@@ -234,8 +242,10 @@
       :_  state
       %+  weld   visa-cards
       ^-  (list card)
-      [%give %fact [/updates ~] spaces-reaction+!>([%add new-space members])]~
-      
+      :~
+        [%give %fact [/updates ~] spaces-reaction+!>([%add new-space members])]
+        [%give %fact [/spaces ~] spaces-reaction+!>([%add new-space members])]
+      ==
     ::
     ++  handle-update
       |=  [path=space-path:store edit-payload=edit-payload:store]
@@ -277,11 +287,41 @@
     ++  handle-join
       |=  [path=space-path:store]
       ^-  (quip card _state)
-      ::  TODO implement logic to poke the host and get added to the member list, as well as watching
-      `state
-      :: =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
-      :: :_  state
-      :: [%pass watch-path %agent [ship.path %spaces] %watch watch-path]~
+      ?:  (is-host:core ship.path)
+        (host-handle-join path src.bowl)
+      (member-handle-join path)
+      ::
+      ++  member-handle-join
+        |=  [path=space-path:store]
+        ^-  (quip card _state)
+        =/  watch-path                  [/spaces/(scot %p ship.path)/(scot %tas space.path)]
+        =/  cards
+          :~  [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>([%join path])]
+              [%pass watch-path %agent [ship.path %spaces] %watch watch-path]
+          ==
+        [cards state]
+      ::
+      ++  host-handle-join
+        |=  [path=space-path:store =ship]
+        ^-  (quip card _state)
+        =.  membership.state
+          =/  space-members   (~(got by membership.state) path)
+          =/  space  (~(got by spaces.state) path)
+          =/  member
+            ?:  =(%public access.space)
+              ^-  (unit member:membership-store)
+              :*  ~
+                  roles=(silt [%member]~)
+                  alias=''
+                  status=%joined
+              ==
+            (~(get by space-members) ship)
+          =?  space-members  !=(~ member)
+            ?~  member  !!
+            =.  status.u.member  %joined
+            (~(put by space-members) [ship u.member])
+          (~(put by membership.state) [path space-members])
+        `state
     ::
     ++  handle-leave
       |=  [path=space-path:store]

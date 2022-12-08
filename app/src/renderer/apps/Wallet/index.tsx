@@ -1,9 +1,9 @@
 import { observer } from 'mobx-react';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useMemo } from 'react';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletSettings } from './views/common/Settings';
 import { Detail } from './views/common/Detail';
-import { WalletList } from './views/ethereum/List';
+import { WalletList } from './views/List';
 import { TransactionDetail } from './views/common/TransactionDetail';
 import { EthNew } from './views/common/New';
 import { WalletFooter } from './views/common/Footer';
@@ -37,35 +37,41 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 
 export const WalletApp: FC<any> = observer((props: any) => {
   const { theme } = useServices();
-  const [hidePending, setHidePending] = useState(false);
+  const [hidePending, setHidePending] = useState(true);
   const [transactionCount, setTransactionCount] = useState(0);
 
   const { walletApp } = useTrayApps();
-  let transactions: any = [];
+  let transactions: any = useMemo(() => [], []);
   for (const key of walletApp.currentStore.wallets.keys()) {
+    const wallet = walletApp.currentStore.wallets.get(key);
+    if (!wallet) continue;
     const walletTransactions = getTransactions(
-      walletApp.currentStore.wallets
-        .get(key)!
-        .transactions.get(walletApp.currentStore.network!) || new Map()
+      wallet.transactions.get(walletApp.currentStore.network) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
+    // console.log(transactions, transactionCount);
   }
   useEffect(() => {
     if (transactions.length !== transactionCount) {
       setTransactionCount(transactions.length);
       setHidePending(false);
     }
-  }, [transactions]);
+  }, [transactionCount, transactions]);
 
   const hide = () => {
     setHidePending(true);
   };
 
-  const hideHeaderFooter = [
+  const hideFooter = [
     WalletView.NEW,
     WalletView.LOCKED,
     WalletView.SETTINGS,
   ].includes(walletApp.navState.view);
+
+  const hideHeader = [WalletView.LOCKED, WalletView.SETTINGS].includes(
+    walletApp.navState.view
+  );
+
   const View = WalletViews(walletApp.navState.network)[walletApp.navState.view];
 
   return (
@@ -77,6 +83,8 @@ export const WalletApp: FC<any> = observer((props: any) => {
       flexDirection="column"
     >
       <WalletHeader
+        isOnboarding={WalletView.NEW === walletApp.navState.view}
+        showBack={walletApp.navState.view !== WalletView.LIST}
         theme={theme.currentTheme}
         network={
           walletApp.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
@@ -87,14 +95,14 @@ export const WalletApp: FC<any> = observer((props: any) => {
         onSetNetwork={async (network: any) =>
           await WalletActions.setNetwork(network)
         }
-        hide={hideHeaderFooter}
+        hide={hideHeader}
       />
       {!hidePending &&
         walletApp.navState.view !== WalletView.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <View {...props} hidePending={hidePending} />
-      <WalletFooter hidden={hideHeaderFooter} />
+      <WalletFooter hidden={hideFooter} />
     </Flex>
   );
 });

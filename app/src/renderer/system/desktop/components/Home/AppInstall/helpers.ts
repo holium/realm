@@ -17,22 +17,29 @@ export const installLabel = (status: InstallStatus) => {
 };
 
 export const handleInstallation = (
-  host: string,
+  host: string | null,
   desk: string,
   status: InstallStatus
 ) => {
+  if (
+    [InstallStatus.uninstalled, InstallStatus.failed].includes(status) &&
+    !host
+  ) {
+    console.error('No host found for app', desk);
+    return;
+  }
   switch (status) {
     case InstallStatus.installed:
       SpacesActions.uninstallApp(desk);
       return;
     case InstallStatus.uninstalled:
-      SpacesActions.installApp(host, desk);
+      SpacesActions.installApp(host!, desk);
       return;
     case InstallStatus.started:
       SpacesActions.uninstallApp(desk);
       return;
     case InstallStatus.failed:
-      SpacesActions.installApp(host, desk);
+      SpacesActions.installApp(host!, desk);
       return;
     default:
       console.error('Unknown install status', status);

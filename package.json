@@ -3,17 +3,20 @@
   "name": "realm-monorepo",
   "workspaces": [
     "app",
+    "lib/design-system",
     "lib/multiplayer",
     "lib/conduit",
     "lib/room"
   ],
   "scripts": {
-    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:app",
+    "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm dev:cursor && yarn build:app",
     "link:multiplayer": "yarn build --cwd lib/multiplayer && yarn link --cwd lib/multiplayer && yarn link '@holium/realm-multiplayer'",
     "link:conduit": "yarn build --cwd lib/conduit && yarn link --cwd lib/conduit && yarn link '@holium/conduit'",
     "link:room": "yarn build --cwd lib/rooom && yarn link --cwd lib/room && yarn link '@holium/realm-room'",
-    "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room",
+    "link:design-system": "yarn build --cwd lib/design-system && yarn link --cwd lib/design-system && yarn link '@holium/design-system'",
+    "link:all": "yarn link:multiplayer && yarn link:conduit && yarn link:room && yarn link:design-system",
     "build:app": "yarn workspace @holium/realm build",
+    "build:design-system": "yarn workspace @holium/design-system build",
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-multiplayer build",
     "build:room": "yarn workspace @holium/realm-room build",
@@ -21,12 +24,12 @@
     "start": "yarn workspace @holium/realm start",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
-    "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:linux",
-    "package:prerelease:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:mac",
-    "package:prerelease:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:prerelease:win",
-    "package:release:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:linux",
-    "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:mac",
-    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn workspace @holium/realm package:release:win"
+    "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:linux",
+    "package:prerelease:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:mac",
+    "package:prerelease:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:win",
+    "package:release:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:linux",
+    "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
+    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win"
   },
   "dependencies": {
     "@icons/material": "^0.4.1",
@@ -39,11 +42,7 @@
     "human-standard-token-abi": "^2.0.0",
     "memoize-one": "^6.0.0",
     "non-fungible-token-abi": "^1.0.1",
-    "qrcode.react": "^3.1.0",
-    "react-cool-virtual": "^0.7.0",
-    "react-virtualized-auto-sizer": "^1.0.7",
-    "react-virtuoso": "^2.18.0",
-    "react-window": "^1.8.7"
+    "qrcode.react": "^3.1.0"
   },
   "version": "0.0.1",
   "devDependencies": {

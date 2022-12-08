@@ -1,6 +1,5 @@
 // Loaded in the webview/appview preload script, connects to websocket directly
 // and renders cursor based on presence
-// import { Ship } from '../../../../../../../playground/src/lib/realm-multiplayer/hooks';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { hexToRgb, rgbToString } from 'os/lib/color';

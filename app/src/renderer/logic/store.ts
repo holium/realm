@@ -24,19 +24,13 @@ import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
 import { NotificationStore } from 'os/services/ship/models/notifications';
-import { LiveRoom } from 'renderer/apps/store';
+// import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
 
-const loadSnapshot = (serviceKey: string) => {
-  const localStore = localStorage.getItem('servicesStore');
-  if (localStore) return JSON.parse(localStore)[serviceKey];
-  return {};
-};
-
-export const Services = types
+const Services = types
   .model('ServicesStore', {
     desktop: DesktopStore,
     shell: ShellStore,
@@ -100,6 +94,7 @@ const services = Services.create({
   ship: undefined,
   spaces: {
     loader: { state: 'initial' },
+    join: { state: 'initial' },
     spaces: undefined,
   },
   bazaar: {},
@@ -119,7 +114,7 @@ export const servicesStore = services;
 // -------------------------------
 // Create core context
 // -------------------------------
-export type ServiceInstance = Instance<typeof Services>;
+type ServiceInstance = Instance<typeof Services>;
 const ServicesContext = createContext<null | ServiceInstance>(services);
 
 export const ServiceProvider = ServicesContext.Provider;
@@ -336,7 +331,7 @@ OSActions.onConnected(
 // Auth events
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
-  LiveRoom.leave();
+  // LiveRoom.leave();
   servicesStore.clearShip();
   coreStore.setLoggedIn(false);
   ShellActions.setBlur(true);

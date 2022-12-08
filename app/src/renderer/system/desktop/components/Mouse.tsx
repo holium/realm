@@ -29,7 +29,7 @@ export const Mouse: FC<MouseProps> = (props: MouseProps) => {
         />
       </MouseArea>
     ),
-    [hide, cursorColor]
+    [hide, initialRender, animateOut, rgb]
   );
 };
 

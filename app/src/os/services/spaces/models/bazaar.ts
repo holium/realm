@@ -7,6 +7,7 @@ import {
   UninstallPoke,
   UnpinPoke,
 } from '../../../api/bazaar';
+
 import {
   types,
   Instance,
@@ -15,6 +16,7 @@ import {
   flow,
   SnapshotOut,
 } from 'mobx-state-tree';
+
 import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
@@ -33,6 +35,7 @@ export enum AppTypes {
   Urbit = 'urbit',
   Native = 'native',
   Web = 'web',
+  Dev = 'dev',
 }
 
 export const Glob = types.model('Glob', {
@@ -72,7 +75,7 @@ export const DocketApp = types.model('DocketApp', {
 export const DevAppModel = types.model('DevApp', {
   id: types.identifier,
   title: types.string,
-  type: types.literal(AppTypes.Web),
+  type: types.literal(AppTypes.Dev),
   color: types.string,
   icon: types.string,
   web: types.model('WebConfig', {
@@ -120,6 +123,7 @@ const NativeApp = types.model('NativeApp', {
   installStatus: types.optional(types.string, 'installed'),
   type: types.literal(AppTypes.Native),
   icon: types.maybeNull(types.string),
+  config: types.maybeNull(RealmConfig),
 });
 
 const AppModel = types.union(
@@ -127,6 +131,8 @@ const AppModel = types.union(
     eager: true,
   },
   UrbitApp,
+  // WebApp,
+  DevAppModel,
   NativeApp
 );
 
@@ -158,6 +164,7 @@ export const NewBazaarStore = types
     addingAlly: types.map(types.string),
     installations: types.map(types.string),
     devAppMap: types.map(DevAppModel),
+    treatiesLoaded: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     // Updates
@@ -224,9 +231,31 @@ export const NewBazaarStore = types
     }) {
       self.stalls.set(data.path, data.stall);
     },
-    _allyAdded(ship: string) {
+    _allyAdded(ship: string, desks: string[]) {
       if (self.addingAlly.get(ship)) {
         self.addingAlly.delete(ship);
+      }
+      // extra desk name from full desk path (i.e. <ship>/<desk>)
+      for (let i = 0; i < desks.length; i++) {
+        desks[i] = desks[i].split('/')[1];
+      }
+      self.allies.set(ship, { ship, desks });
+      // this nice little 'new ally' event allows us to see if this ship
+      //  has any apps available. if not, end the search (i.e. don't wait for
+      //  treaties-loaded event since it will never happen)
+      if (desks.length === 0) {
+        self.loadingTreaties = false;
+        // hmm.wondering if we should use this use-case to send a del to the treaty to remove
+        //   this ally, to force a research if/when the user hits the ship again. keep
+        //   an eye on this
+      }
+    },
+    _allyDeleted(ship: string) {
+      if (self.addingAlly.get(ship)) {
+        self.addingAlly.delete(ship);
+      }
+      if (self.allies.has(ship)) {
+        self.allies.delete(ship);
       }
     },
     _addRecommended(data: { id: string; stalls: any }) {
@@ -239,6 +268,10 @@ export const NewBazaarStore = types
       )!;
       self.recommendations.splice(removeIndex, 1);
       applySnapshot(self.stalls, data.stalls);
+    },
+    _treatiesLoaded() {
+      self.loadingTreaties = false;
+      self.treatiesLoaded = !self.treatiesLoaded;
     },
     installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
       self.installations.delete(body.desk);
@@ -323,7 +356,7 @@ export const NewBazaarStore = types
         self.loadingTreaties = true;
         self.addingAlly.set(ship, 'adding');
         const result: any = yield BazaarApi.addAlly(conduit, ship);
-        self.loadingTreaties = false;
+        // self.loadingTreaties = false;
         return result;
       } catch (error) {
         console.error(error);
@@ -511,6 +544,8 @@ export type WebAppType = Instance<typeof WebApp>;
 export type DocketAppType = Instance<typeof DocketApp>;
 export type UrbitAppType = Instance<typeof UrbitApp>;
 export type NativeAppType = Instance<typeof NativeApp>;
+export type DevAppType = Instance<typeof DevAppModel>;
 export type AppType = Instance<typeof AppModel>;
 export type AllyType = Instance<typeof AllyModel>;
 export type NewBazaarStoreType = Instance<typeof NewBazaarStore>;
+export type RealmConfigType = Instance<typeof RealmConfig>;

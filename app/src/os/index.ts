@@ -188,7 +188,7 @@ export class Realm extends EventEmitter {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
-      rooms = this.services.ship.roomSnapshot;
+      // rooms = this.services.ship.roomSnapshot;
       wallet = this.services.ship.walletSnapshot;
       bazaar = this.services.spaces.modelSnapshots.bazaar;
       membership = this.services.spaces.modelSnapshots.membership;
@@ -196,7 +196,6 @@ export class Realm extends EventEmitter {
     }
 
     if (this.conduit) {
-      console.log('boot conduit', this.conduit.status);
       this.sendConnectionStatus(this.conduit.status);
     }
 
@@ -277,14 +276,14 @@ export class Realm extends EventEmitter {
     session: ISession,
     params: ConnectParams = { reconnecting: false }
   ) {
-    this.sendLog('connecting conduit');
+    // this.sendLog('connecting conduit');
     if (!this.conduit) {
       this.conduit = new Conduit();
       this.handleConnectionStatus(this.conduit);
     }
     try {
       // wait for the init function to resolve
-      this.sendLog(JSON.stringify(session));
+      // this.sendLog(JSON.stringify(session));
 
       await this.conduit.init(
         session.url,
@@ -292,12 +291,12 @@ export class Realm extends EventEmitter {
         session.cookie!,
         session.code
       );
-      this.sendLog('after conduit init');
-      this.sendLog('connection successful');
+      // this.sendLog('after conduit init');
+      // this.sendLog('connection successful');
       this.onConduit(params);
     } catch (e) {
       console.log(e);
-      this.sendLog('error');
+      // this.sendLog('error');
       this.sendLog(e);
       this.clearSession();
     }
@@ -399,9 +398,9 @@ export class Realm extends EventEmitter {
   async onConduit(params: ConnectParams) {
     // this.sendConnectionStatus(this.conduit?.status);
     const sessionPatp = this.session?.ship!;
-    this.sendLog(`before ship subscribe ${this.session?.ship!}`);
+    // this.sendLog(`before ship subscribe ${this.session?.ship!}`);
     await this.services.ship.subscribe(sessionPatp, this.session);
-    this.sendLog('after ship subscribe');
+    // this.sendLog('after ship subscribe');
     await this.services.spaces.load(sessionPatp, params.reconnecting);
     this.services.onboarding.reset();
     this.mainWindow.webContents.send('realm.on-connected', {

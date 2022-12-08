@@ -1,4 +1,5 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC, useRef } from 'react';
+// import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import AppWindow from './components/Window';
@@ -14,11 +15,6 @@ export const WindowManager: FC = observer(() => {
   const desktopRef = useRef<any>(null);
 
   const windows = Array.from(desktop.windows.values());
-
-  useEffect(() => {
-    const desktop = document.getElementById('desktop-fill');
-    console.log(desktop);
-  }, [desktop.windows]);
 
   return (
     <motion.div
@@ -48,7 +44,7 @@ export const WindowManager: FC = observer(() => {
         menu={[
           {
             label: 'Change wallpaper',
-            onClick: (evt: any) => {
+            onClick: () => {
               ShellActions.setBlur(true);
               ShellActions.openDialog('wallpaper-dialog');
             },
@@ -63,7 +59,7 @@ export const WindowManager: FC = observer(() => {
           },
           {
             label: 'Toggle devtools',
-            onClick: (evt: any) => {
+            onClick: () => {
               DesktopActions.toggleDevTools();
             },
           },
@@ -71,7 +67,6 @@ export const WindowManager: FC = observer(() => {
       />
       {windows.map((window: any, index: number) => {
         const key = `${window.id}-${index}`;
-        // console.log('WindowManager', window.toJSON());
         return <AppWindow desktopRef={desktopRef} key={key} window={window} />;
       })}
     </motion.div>

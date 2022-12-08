@@ -56,12 +56,16 @@ export class SpacesService extends BaseService {
     'realm.spaces.create-space': this.createSpace,
     'realm.spaces.update-space': this.updateSpace,
     'realm.spaces.delete-space': this.deleteSpace,
+    'realm.spaces.join-space': this.joinSpace,
+    'realm.spaces.leave-space': this.leaveSpace,
     'realm.spaces.accept-invite': this.acceptInvite,
     'realm.spaces.decline-invite': this.declineInvite,
     'realm.bazaar.scryTreaties': this.scryTreaties,
     'realm.bazaar.scryAllies': this.scryAllies,
     'realm.spaces.get-members': this.getMembers,
     'realm.spaces.get-invitations': this.getInvitations,
+    'realm.spaces.set-loader': this.setLoader,
+    'realm.spaces.set-join': this.setJoin,
     'realm.spaces.members.invite-member': this.inviteMember,
     'realm.spaces.members.kick-member': this.kickMember,
     'realm.spaces.bazaar.get-apps': this.getApps,
@@ -146,8 +150,20 @@ export class SpacesService extends BaseService {
     deleteSpace: async (path: any) => {
       return await ipcRenderer.invoke('realm.spaces.delete-space', path);
     },
+    joinSpace: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.join-space', path);
+    },
+    leaveSpace: async (path: any) => {
+      return await ipcRenderer.invoke('realm.spaces.leave-space', path);
+    },
     getInvitations: async () => {
       return await ipcRenderer.invoke('realm.spaces.get-invitations');
+    },
+    setLoader: async (status: 'initial' | 'loading' | 'error' | 'loaded') => {
+      return await ipcRenderer.invoke('realm.spaces.set-loader', status);
+    },
+    setJoin: async (status: 'initial' | 'loading' | 'error' | 'loaded') => {
+      return await ipcRenderer.invoke('realm.spaces.set-join', status);
     },
     acceptInvite: async (path: any) => {
       return await ipcRenderer.invoke('realm.spaces.accept-invite', path);
@@ -317,11 +333,11 @@ export class SpacesService extends BaseService {
     );
 
     // setting provider to current space host
-    // this.core.services.ship.rooms!.setProvider(
-    //   null,
-    //   getHost(this.state.selected!.path)
-    // );
-    // BazaarApi.initialize(this.core.conduit!, this.models.bazaar);
+    if (this.state.selected) {
+      this.core.services.ship.rooms.setProvider(
+        getHost(this.state.selected!.path)
+      );
+    }
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
   }
 
@@ -398,14 +414,23 @@ export class SpacesService extends BaseService {
     return await SpacesApi.deleteSpace(this.core.conduit!, { path });
   }
 
+  async joinSpace(_event: IpcMainInvokeEvent, path: string) {
+    return await SpacesApi.joinSpace(this.core.conduit!, { path });
+  }
+
+  async leaveSpace(_event: IpcMainInvokeEvent, path: string) {
+    return await SpacesApi.leaveSpace(this.core.conduit!, { path });
+  }
+
   setSelected(_event: IpcMainInvokeEvent, path: string) {
     const selected = this.state?.selectSpace(path);
     this.setTheme(selected?.theme!);
     // const currentRoomProvider = this.core.services.ship.rooms?.state?.provider;
     // setting provider to current space host
-    const spaceHost = getHost(this.state!.selected!.path);
+    const spaceHost = getHost(selected!.path);
     // if (currentRoomProvider !== spaceHost)
-    this.core.services.ship.rooms.setProvider(null, spaceHost);
+    console.log(spaceHost);
+    this.core.services.ship.rooms.setProvider(spaceHost);
   }
 
   // ***********************************************************
@@ -439,6 +464,20 @@ export class SpacesService extends BaseService {
 
   async getInvitations(_event: IpcMainInvokeEvent) {
     return await SpacesApi.getInvitations(this.core.conduit!);
+  }
+
+  async setLoader(
+    _event: IpcMainInvokeEvent,
+    status: 'initial' | 'loading' | 'error' | 'loaded'
+  ) {
+    this.state!.setLoader(status);
+  }
+
+  async setJoin(
+    _event: IpcMainInvokeEvent,
+    status: 'initial' | 'loading' | 'error' | 'loaded'
+  ) {
+    this.state!.setJoin(status);
   }
 
   async acceptInvite(_event: IpcMainInvokeEvent, path: string) {
@@ -649,7 +688,14 @@ export class SpacesService extends BaseService {
     delete theme.id;
     SpacesApi.updateSpace(this.core.conduit!, {
       path: space.path,
-      payload: { theme: snakeify(theme) },
+      payload: {
+        name: space.name,
+        description: space.description,
+        access: space.access,
+        picture: space.picture,
+        color: space.color,
+        theme: snakeify(theme),
+      },
     });
   }
 }

@@ -15,7 +15,10 @@ export const MenuWrapper = styled(motion.div)<MenuWrapperStyleProps>`
   display: flex;
   margin-top: 1px;
   flex-direction: column;
+  backdrop-filter: var(--blur-enabled);
   --webkit-backdrop-filter: var(--blur-enabled);
+  --webkit-backface-visibility: hidden;
+  --webkit-perspective: 1000;
   --webkit-transform: transale3d(0, 0, 0);
   ${(props: MenuWrapperStyleProps) => css`
     background: ${props.customBg || props.theme.colors.bg.secondary};
