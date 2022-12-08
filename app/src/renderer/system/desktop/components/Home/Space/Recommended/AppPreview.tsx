@@ -1,12 +1,10 @@
 import { FC } from 'react';
-import styled from 'styled-components';
 import { rgba } from 'polished';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import {
   Flex,
   Text,
-  Box,
   AppTile,
   Icons,
   IconButton,
@@ -19,25 +17,12 @@ import {
   UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { handleInstallation, installLabel } from '../../AppInstall/helpers';
-
-const AppEmpty = styled(Box)`
-  border-radius: 16px;
-  border: 2px dotted white;
-  transition: 0.2s ease;
-  &:hover {
-    transition: 0.2s ease;
-    background: ${rgba('#FFFFFF', 0.12)};
-  }
-`;
+import { handleInstallation } from '../../AppInstall/helpers';
 
 interface AppPreviewProps {
   app: AppType;
-  // isDownloaded?: boolean;
-  // ?: string;
 }
 
 export const AppPreview: FC<AppPreviewProps> = observer(
@@ -45,12 +30,16 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     const { app } = props;
     const { theme, spaces } = useServices();
     const space = spaces.selected;
-    const info = app.info;
-    const isUninstalled = app.installStatus === InstallStatus.uninstalled;
-    const isInstalled = app.installStatus === InstallStatus.installed;
+    let installStatus = InstallStatus.uninstalled;
+    let info = '';
+    if (app.type === 'urbit') {
+      info = app.info;
+      installStatus = app.installStatus as InstallStatus;
+    }
+    const isUninstalled = installStatus === InstallStatus.uninstalled;
+    const isInstalled = installStatus === InstallStatus.installed;
     const isInstalling =
-      (app as UrbitAppType).installStatus !== InstallStatus.installed &&
-      !isUninstalled;
+      installStatus !== InstallStatus.installed && !isUninstalled;
 
     const length = 60;
     const showDetails = (evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -63,16 +52,13 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
       const appHost = (app as UrbitAppType).host;
-      return handleInstallation(
-        appHost,
-        app.id,
-        app.installStatus as InstallStatus
-      );
+      return handleInstallation(appHost, app.id, installStatus);
     };
     return (
       <Flex flexGrow={0} flexDirection="row" gap={16}>
         <AppTile
           tileSize="lg"
+          highlightOnHover
           isAnimated={false}
           app={app}
           onAppClick={(selectedApp: AppType) => {
@@ -134,20 +120,13 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 Open
               </Button>
             )}
+            {/* TODO add menu on click  */}
             <IconButton
               size={26}
               customBg={rgba(theme.currentTheme.dockColor, 0.5)}
             >
               <Icons name="MoreHorizontal" />
             </IconButton>
-            <Button
-              variant="minimal"
-              fontWeight={400}
-              borderRadius={6}
-              onClick={showDetails}
-            >
-              App info
-            </Button>
           </Flex>
         </Flex>
       </Flex>

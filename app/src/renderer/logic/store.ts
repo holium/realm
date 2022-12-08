@@ -30,13 +30,7 @@ import { ThemeStore } from './theme';
 import { rgba } from 'polished';
 import { watchOnlineStatus } from './lib/offline';
 
-const loadSnapshot = (serviceKey: string) => {
-  const localStore = localStorage.getItem('servicesStore');
-  if (localStore) return JSON.parse(localStore)[serviceKey];
-  return {};
-};
-
-export const Services = types
+const Services = types
   .model('ServicesStore', {
     desktop: DesktopStore,
     shell: ShellStore,
@@ -120,7 +114,7 @@ export const servicesStore = services;
 // -------------------------------
 // Create core context
 // -------------------------------
-export type ServiceInstance = Instance<typeof Services>;
+type ServiceInstance = Instance<typeof Services>;
 const ServicesContext = createContext<null | ServiceInstance>(services);
 
 export const ServiceProvider = ServicesContext.Provider;

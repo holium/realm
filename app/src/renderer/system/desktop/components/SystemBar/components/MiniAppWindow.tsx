@@ -1,7 +1,8 @@
 /* Mainbar */
-import { FC, forwardRef } from 'react';
 import { motion } from 'framer-motion';
+import { observer } from 'mobx-react';
 import { rgba, darken } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../../../../theme';
@@ -33,39 +34,25 @@ export const MiniAppWindow = styled(styled(motion.div)<MiniAppStyleProps>`
 
 interface MiniAppProps {
   id: string;
-  ref?: any;
-  onClose?: () => void;
-  canScroll?: boolean;
+  innerRef?: any;
   backgroundColor?: string;
-  dimensions: {
-    height: number | string;
-    width: number;
-  };
   textColor?: string;
   buttonRef?: any;
   children: any | React.ReactNode;
 }
 
-const DEFAULT_PROPS = {
-  onClose: () => {},
-  dimensions: {
-    height: 350,
-    width: 290,
-  },
-};
-
-export const MiniApp: FC<MiniAppProps> = forwardRef(
-  (props: MiniAppProps, ref: any) => {
-    const { id, dimensions, backgroundColor, textColor, children } = props;
+export const MiniApp = observer(
+  ({ id, backgroundColor, textColor, children, innerRef }: MiniAppProps) => {
+    const { dimensions } = useTrayApps();
 
     return (
       <MiniAppWindow
         id={id}
-        ref={ref}
+        ref={innerRef}
         style={{
-          height: dimensions.height,
-          width: dimensions.width,
           overflowY: 'hidden',
+          width: dimensions.width,
+          height: dimensions.height,
         }}
         color={textColor}
         customBg={backgroundColor}
@@ -76,5 +63,3 @@ export const MiniApp: FC<MiniAppProps> = forwardRef(
     );
   }
 );
-
-MiniApp.defaultProps = DEFAULT_PROPS;

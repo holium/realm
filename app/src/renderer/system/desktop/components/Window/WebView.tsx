@@ -1,7 +1,5 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { nativeApps } from 'renderer/apps';
-import { toJS } from 'mobx';
 import { useServices } from 'renderer/logic/store';
 import { lighten, darken } from 'polished';
 
@@ -42,8 +40,7 @@ export const WebView: FC<WebviewProps> = (props: WebviewProps) => {
     });
 
     webview?.addEventListener('close', () => {
-      // @ts-expect-error
-      webview.closeDevTools();
+      webview?.closeDevTools();
     });
   }, []);
 

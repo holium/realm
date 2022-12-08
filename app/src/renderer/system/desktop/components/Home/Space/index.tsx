@@ -19,7 +19,7 @@ type SidebarType = 'members' | null;
 
 export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   const { isOpen } = props;
-  const { ship, theme, spaces, membership, bazaar } = useServices();
+  const { ship, spaces, membership } = useServices();
   const currentSpace = spaces.selected;
   const [members, setMembers] = useState<any>([]);
   const [sidebar, setSidebar] = useState<SidebarType>(null);
@@ -59,10 +59,8 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
   if (!currentSpace) return null;
   const membersCount = membership.getMemberCount(currentSpace.path);
   const maxWidth = 880;
-  const headerWidth = '50%';
-  const paneWidth = '50%';
   return (
-    <Flex flexDirection="row" width="100%" height="calc(100vh - 58px)">
+    <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
       <Flex
         flex={1}
         overflowY="auto"
@@ -80,7 +78,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           gap={12}
           mt={40}
           mb={46}
-          // maxWidth={maxWidth}
           width={maxWidth}
           variants={{
             hidden: {
@@ -121,7 +118,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
           justifyContent="space-between"
           gap={36}
           width={maxWidth}
-          // width={paneWidth}
         >
           {appGrid && (
             <Flex
@@ -152,7 +148,6 @@ export const SpaceHome: FC<HomePaneProps> = observer((props: HomePaneProps) => {
                 style={{ position: 'relative' }}
                 gap={32}
                 width={maxWidth}
-                // mb="180px"
                 flexWrap="wrap"
                 flexDirection="row"
               >

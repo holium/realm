@@ -18,6 +18,7 @@ import HostingConfirmation from 'renderer/system/onboarding/HostingConfirmation.
 import AccessCode from 'renderer/system/onboarding/AccessCode.dialog';
 import AccessGate from 'renderer/system/onboarding/AccessGate.dialog';
 import AccessGatePassed from 'renderer/system/onboarding/AccessGatePassed.dialog';
+import ViewCode from './ViewCode.dialog';
 
 const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.DISCLAIMER]: {
@@ -181,7 +182,6 @@ const completeProfileDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <ProfileSetup {...props} />,
-    hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.ADD_SHIP),
     onNext: async () =>
@@ -249,6 +249,7 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <AccessCode {...props} />,
+    hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.HAVE_URBIT_ID);
     },
@@ -271,6 +272,7 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <SelectPatp {...props} />,
+    hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.ACCESS_CODE);
     },
@@ -293,6 +295,7 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <SelectPlan {...props} />,
+    hasPrevious: () => true,
     onPrevious: () => {
       OnboardingActions.setStep(OnboardingStep.SELECT_PATP);
     },
@@ -315,6 +318,7 @@ const hostingProviderDialogs: DialogRenderers = {
     hasCloseButton: false,
     customNext: true,
     component: (props: any) => <StripePayment {...props} />,
+    hasPrevious: () => true,
     onPrevious: async () =>
       await OnboardingActions.setStep(OnboardingStep.SELECT_HOSTING_PLAN),
     onNext: async () =>
@@ -337,9 +341,29 @@ const hostingProviderDialogs: DialogRenderers = {
     customNext: true,
     component: (props: any) => <HostingConfirmation {...props} />,
     onNext: async () =>
-      await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+      await OnboardingActions.setStep(OnboardingStep.VIEW_CODE),
     window: {
       id: OnboardingStep.CONFIRMATION,
+      zIndex: 13,
+      type: 'dialog',
+      dimensions: {
+        x: 0,
+        y: 0,
+        width: 460,
+        height: 360,
+      },
+    },
+  },
+  [OnboardingStep.VIEW_CODE]: {
+    workflow: true,
+    hasCloseButton: false,
+    customNext: false,
+    isValidated: () => true,
+    component: (props: any) => <ViewCode {...props} />,
+    onNext: async () =>
+      await OnboardingActions.setStep(OnboardingStep.PROFILE_SETUP),
+    window: {
+      id: OnboardingStep.VIEW_CODE,
       zIndex: 13,
       type: 'dialog',
       dimensions: {

@@ -1,4 +1,4 @@
-import React from 'react';
+import { Dispatch, SetStateAction, useRef } from 'react';
 import useContextMenu from './useContextMenu';
 import useSystemContextMenu from './useSystemContextMenu';
 
@@ -36,27 +36,28 @@ export const ContextMenu = (props: ContextMenuProps) => {
     orientation,
     adaptive,
   } = props;
-  const contextMenuRef = React.useRef();
+  const contextMenuRef = useRef();
   let anchorPoint;
   let show;
-  let setShow: React.Dispatch<React.SetStateAction<boolean>>;
-  let _menu: any[] =
+  let setShow: Dispatch<SetStateAction<boolean>>;
+  const _menu: any[] =
     (typeof menu === 'function' && menu()) || (menu as any[]) || [];
+  const context = useContextMenu(
+    containerId,
+    parentRef,
+    contextMenuRef,
+    (_menu.length + 1) * 32 + 16, // the padding plus each element,
+    position,
+    orientation,
+    adaptive
+  );
+  const systemContext = useSystemContextMenu();
+
   if (isComponentContext) {
-    const context = useContextMenu(
-      containerId,
-      parentRef,
-      contextMenuRef,
-      (_menu.length + 1) * 32 + 16, // the padding plus each element,
-      position,
-      orientation,
-      adaptive
-    );
     anchorPoint = context.anchorPoint;
     show = context.show;
     setShow = context.setShow;
   } else {
-    const systemContext = useSystemContextMenu();
     anchorPoint = systemContext.anchorPoint;
     show = systemContext.show;
     setShow = systemContext.setShow;
@@ -101,7 +102,6 @@ export const ContextMenu = (props: ContextMenuProps) => {
     []
   );
 
-  // if (show) {
   return (
     <Portal>
       <MenuWrapper
@@ -150,8 +150,6 @@ export const ContextMenu = (props: ContextMenuProps) => {
       </MenuWrapper>
     </Portal>
   );
-  // }
-  // return <></>;
 };
 
 ContextMenu.defaultProps = {
