@@ -10,7 +10,8 @@ import {
   BitcoinWalletType,
   EthWalletType,
   ERC20Type,
-} from 'os/services/tray/wallet.model';
+} from '@holium/realm-wallet/src/wallet.model';
+import { ProtocolType } from '@holium/realm-wallet/src/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -55,6 +56,8 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             Send{' '}
             {props.coin
               ? props.coin.name
+              : walletApp.navState.protocol === ProtocolType.UQBAR
+              ? 'zigs'
               : abbrMap[walletApp.navState.network as 'bitcoin' | 'ethereum']}
           </Text>
         </Flex>

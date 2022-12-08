@@ -9,6 +9,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
 import { ERC20Type } from 'os/services/tray/wallet.model';
+import { ProtocolType } from '@holium/realm-wallet/src/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -138,6 +139,8 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               {transactionAmount}{' '}
               {props.coin
                 ? props.coin.name
+                : walletApp.navState.protocol === ProtocolType.UQBAR
+                ? 'zigs'
                 : abbrMap[walletApp.navState.network]}
             </Text>
             <Text mt={1} color={themeData.colors.text.disabled}>

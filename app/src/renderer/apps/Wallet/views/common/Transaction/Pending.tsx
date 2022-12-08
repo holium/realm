@@ -9,7 +9,7 @@ import {
   formatBtcAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView, TransactionType } from '@holium/realm-wallet/src/wallets/types';
+import { WalletView, TransactionType, ProtocolType } from '@holium/realm-wallet/src/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 
 interface PendingTransactionDisplayProps {
@@ -64,9 +64,12 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   if (isEth) {
     unitsDisplay =
       props.transaction.ethType === 'ETH'
-        ? 'ETH'
+        ? walletApp.navState.protocol === ProtocolType.UQBAR
+        ? 'zigs'
+        : 'ETH'
         : walletApp.ethereum.wallets
             .get(props.transaction.walletIndex.toString())!
+            .data.get(walletApp.navState.protocol)!
             .coins.get(props.transaction.ethType!)!.name;
   }
 

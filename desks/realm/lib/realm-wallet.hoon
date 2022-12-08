@@ -137,100 +137,102 @@
   =,  enjs:format
   |=  =update
   ^-  json
-  %-  pairs
-  :_  ~
-  :-  `cord`-.update
-  ?-    -.update
+  ::
+  =*  enjs-ui-update
+    %-  pairs
+    :_  ~
+    :-  `cord`-.update
+    ?-   -.update
+        %transaction
+      %-  pairs
+      :~  ['network' [%s network.update]]
+          ['net' [%s net.update]]
+          ['index' (numb +>+<.update)]
+          ['key' [%s +>+>-.update]]
+          ['transaction' (transaction-to-json +>+>+.update)]
+      ==
+    ::
+        %wallet
+      ^-  json
+      %-  pairs
+      ^-  (list [@t json])
+      :~  ['network' [%s network.update]]
+          ['key' [%s +>-.update]]
+          ?:  ?|  =(network.update %bitcoin)
+                  =(network.update %btctestnet)
+              ==
+            ['address' [%s (crip q:(trim 2 (scow %uc address.wallet.update)))]]
+          ['address' [%s (crip (z-co:co address.wallet.update))]]
+          ['path' [%s path.wallet.update]]
+          ['nickname' [%s nickname.wallet.update]]
+      ==
+    ::
+        %wallets
+      %-  pairs
+      ^-  (list [@t json])
+      |^
+      =/  wallet-list  ~(tap by +.update)
+      %+  turn  wallet-list
+        jsonify-wallet-map
+      ++  jsonify-wallet-map
+        |=  [=network wallets=(map @ud =wallet)]
+        ^-  [@t json]
+        |^
+        =/  wallet-list
+          ^-  (list [@ud =wallet])
+          ~(tap by wallets)
+        :-  `@t`network
+          %-  pairs
+          ^-  (list [@t json])
+          %+  turn  wallet-list
+            jsonify-wallet
+        ++  jsonify-wallet
+          |=  [key=@ud =wallet]
+          ^-  [@t json]
+          :-  (crip (scow %ud key))
+              %-  pairs
+              ^-  (list [@t json])
+              :~  ?:  ?|  =(network %bitcoin)
+                          =(network %btctestnet)
+                      ==
+                    ['address' [%s (crip q:(trim 2 (scow %uc address.wallet)))]]
+                  ['address' [%s (crip (z-co:co address.wallet))]]
+                  ['path' [%s path.wallet]]
+                  ['nickname' [%s nickname.wallet]]
+                  ['transactions' (transactions-to-json transactions.wallet)]
+              ==
+        --
+      --
+    ::
+        %settings
+      %-  pairs
+      ^-  (list [@t json])
+      :~  ['passcodeHash' s+passcode-hash.update]
+          :-  'networks'
+          %-  pairs
+          %+  turn  ~(tap by networks.update)
+          |=  [=network [xpub=(unit @t) default-index=@ud =sharing]]
+          ^-  [@t json]
+          :-  `cord`network
+          %-  pairs
+          :~  ['defaultIndex' (numb default-index)]
+              ['walletCreationMode' s+`cord`wallet-creation.sharing]
+              ['sharingMode' s+`cord`who.sharing]
+          ==
+          =/  blocked
+            ^-  (list json)
+            =/  blocklist  ~(tap in blocked.update)
+            %+  turn  blocklist
+              |=  blocked=@p
+              [%s (scot %p blocked)]
+          ['blocked' a+blocked]
+      ==
+    ==
+  ?+  -.update  enjs-ui-update
       %address
     %-  pairs
     ?~  address.update
       ['address' ~]~
-    :~  ['address' [%s (crip (z-co:co u.address.update))]]
-    ==
-  ::
-      %transaction
-    %-  pairs
-    :~  ['network' [%s network.update]]
-        ['net' [%s net.update]]
-        ['index' (numb +>+<.update)]
-        ['key' [%s +>+>-.update]]
-        ['transaction' (transaction-to-json +>+>+.update)]
-    ==
-  ::
-      %wallet
-    ^-  json
-    %-  pairs
-    ^-  (list [@t json])
-    :~  ['network' [%s network.update]]
-        ['key' [%s +>-.update]]
-        ?:  ?|  =(network.update %bitcoin)
-                =(network.update %btctestnet)
-            ==
-          ['address' [%s (crip q:(trim 2 (scow %uc address.wallet.update)))]]
-        ['address' [%s (crip (z-co:co address.wallet.update))]]
-        ['path' [%s path.wallet.update]]
-        ['nickname' [%s nickname.wallet.update]]
-    ==
-  ::
-      %wallets
-    %-  pairs
-    ^-  (list [@t json])
-    |^
-    =/  wallet-list  ~(tap by +.update)
-    %+  turn  wallet-list
-      jsonify-wallet-map
-    ++  jsonify-wallet-map
-      |=  [=network wallets=(map @ud =wallet)]
-      ^-  [@t json]
-      |^
-      =/  wallet-list
-        ^-  (list [@ud =wallet])
-        ~(tap by wallets)
-      :-  `@t`network
-        %-  pairs
-        ^-  (list [@t json])
-        %+  turn  wallet-list
-          jsonify-wallet
-      ++  jsonify-wallet
-        |=  [key=@ud =wallet]
-        ^-  [@t json]
-        :-  (crip (scow %ud key))
-            %-  pairs
-            ^-  (list [@t json])
-            :~  ?:  ?|  =(network %bitcoin)
-                        =(network %btctestnet)
-                    ==
-                  ['address' [%s (crip q:(trim 2 (scow %uc address.wallet)))]]
-                ['address' [%s (crip (z-co:co address.wallet))]]
-                ['path' [%s path.wallet]]
-                ['nickname' [%s nickname.wallet]]
-                ['transactions' (transactions-to-json transactions.wallet)]
-            ==
-      --
-    --
-  ::
-      %settings
-    %-  pairs
-    ^-  (list [@t json])
-    :~  ['passcodeHash' s+passcode-hash.update]
-        :-  'networks'
-        %-  pairs
-        %+  turn  ~(tap by networks.update)
-        |=  [=network [xpub=(unit @t) default-index=@ud =sharing]]
-        ^-  [@t json]
-        :-  `cord`network
-        %-  pairs
-        :~  ['defaultIndex' (numb default-index)]
-            ['walletCreationMode' s+`cord`wallet-creation.sharing]
-            ['sharingMode' s+`cord`who.sharing]
-        ==
-        =/  blocked
-          ^-  (list json)
-          =/  blocklist  ~(tap in blocked.update)
-          %+  turn  blocklist
-            |=  blocked=@p
-            [%s (scot %p blocked)]
-        ['blocked' a+blocked]
-    ==
+    ['address' [%s (crip (z-co:co u.address.update))]]~
   ==
 --

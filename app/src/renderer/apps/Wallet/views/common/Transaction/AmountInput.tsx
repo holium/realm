@@ -7,7 +7,7 @@ import { getBaseTheme } from '../../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { useServices } from 'renderer/logic/store';
 import { Input, ContainerFlex, FlexHider } from './styled';
-import { ERC20Type } from '@holium/realm-wallet/src/wallet.model';
+import { ERC20Type, ProtocolType } from '@holium/realm-wallet/src/wallet.model';
 
 // TODO: replace with actual exchange rate
 const ethToUsd = (eth: number) => (isNaN(eth) ? 0 : (eth * 1715.66).toFixed(2));
@@ -151,6 +151,8 @@ export const AmountInput = observer(
                     : `${usdToEth(Number(amount))} ${
                         props.coin
                           ? props.coin.name
+                          : walletApp.navState.protocol === ProtocolType.UQBAR
+                          ? 'zigs'
                           : abbrMap[
                               walletApp.navState.network as
                                 | 'bitcoin'
@@ -173,7 +175,9 @@ export const AmountInput = observer(
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
-                    : abbrMap[
+                    : walletApp.navState.protocol === ProtocolType.UQBAR
+                    ? 'zigs'
+                    :  abbrMap[
                         walletApp.navState.network as 'bitcoin' | 'ethereum'
                       ]
                   : 'USD'}
