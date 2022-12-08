@@ -46,7 +46,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
     const wallet = walletApp.currentStore.wallets.get(key);
     if (!wallet) continue;
     const walletTransactions = getTransactions(
-      wallet.transactions.get(walletApp.navState.protocol) || new Map()
+      wallet.data.get(walletApp.navState.protocol)!.transactions || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
     // console.log(transactions, transactionCount);

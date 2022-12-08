@@ -11,14 +11,14 @@ import nftabi from 'non-fungible-token-abi';
 import { ProtocolType, WalletStoreType, Asset, CoinAsset, NFTAsset, NetworkStoreType } from '@holium/realm-wallet/src/wallet.model';
 
 export class EthereumProtocol implements BaseProtocol {
-  private network: ProtocolType;
+  private protocol: ProtocolType;
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
 
-  constructor(network: ProtocolType) {
-    this.network = network;
+  constructor(protocol: ProtocolType) {
+    this.protocol = protocol;
     let alchemySettings;
-    if (network === ProtocolType.ETH_MAIN) {
+    if (protocol === ProtocolType.ETH_MAIN) {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
         'https://eth.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
       );
@@ -59,22 +59,25 @@ export class EthereumProtocol implements BaseProtocol {
   async updateWalletState(walletStore: WalletStoreType) {
     for (let walletKey of walletStore.currentStore.wallets.keys()) {
       const wallet = walletStore.currentStore.wallets.get(walletKey)!;
-      this.getAccountBalance(wallet.address).then(wallet.setBalance);
+      this.getAccountBalance(wallet.address)
+        .then((balance: string) => wallet.setBalance(this.protocol, balance));
       this.getAccountTransactions(wallet.address, walletStore.currentStore.block)
         .then((response: any) => {
-          wallet.applyTransactions(this.network, response.data.result)
+          wallet.applyTransactions(this.protocol, response.data.result)
         })
       if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
         const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
         const assets = await this.getAccountAssets(ethWallet.address);
         for (let asset of assets) {
           if (asset.type === 'coin') {
-            this.getAsset(asset.addr, ethWallet.address, 'coin').then(ethWallet.updateCoin);
-            this.getAssetTransfers(asset.addr, ethWallet.address, walletStore.currentStore.block).then(ethWallet.updateCoinTransfers)
+            this.getAsset(asset.addr, ethWallet.address, 'coin')
+              .then((coin: Asset) => ethWallet.updateCoin(this.protocol, coin));
+            this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(ethWallet.updateCoinTransfers)
           }
           if (asset.type === 'nft') {
-            this.getAsset(asset.addr, ethWallet.address, 'nft', (asset.data as NFTAsset).tokenId).then(ethWallet.updateNft);
-            this.getAssetTransfers(asset.addr, ethWallet.address, walletStore.ethereum.block).then(ethWallet.updateNftTransfers);
+            this.getAsset(asset.addr, ethWallet.address, 'nft', (asset.data as NFTAsset).tokenId)
+              .then((nft: Asset) => ethWallet.updateNft(this.protocol, nft));
+            this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(ethWallet.updateNftTransfers);
           }
         }
       }
@@ -87,7 +90,7 @@ export class EthereumProtocol implements BaseProtocol {
     const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
     const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
     const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
-    const URL = this.network === ProtocolType.ETH_MAIN ? mainnetURL : goerliURL;
+    const URL = this.protocol === ProtocolType.ETH_MAIN ? mainnetURL : goerliURL;
     return await axios.get(URL);
   }
   async getAccountAssets(addr: string): Promise<Asset[]> {
@@ -95,13 +98,13 @@ export class EthereumProtocol implements BaseProtocol {
     const nfts = await this.alchemy.nft.getNftsForOwner(addr);
     let assets: Asset[] = [];
     let data: NFTAsset = {
-        name: '',
-        tokenId: '',
-        description: '',
-        image: '',
-        transferable: true,
-        properties: {}
-      }
+      name: '',
+      tokenId: '',
+      description: '',
+      image: '',
+      transferable: true,
+      properties: {}
+    }
     for (let coin of coins.tokenBalances) {
       assets.push({
         addr: coin.contractAddress,
@@ -109,9 +112,7 @@ export class EthereumProtocol implements BaseProtocol {
         data,
       })
     }
-    console.log(nfts)
     for (let nft of nfts.ownedNfts) {
-      console.log(nft)
       data.tokenId = nft.tokenId;
       assets.push({
         addr: nft.contract.address,
@@ -144,7 +145,6 @@ export class EthereumProtocol implements BaseProtocol {
       }
     }
     else {
-      console.log('getting nft for ', tokenId);
       const nft = await this.alchemy.nft.getNftMetadata(contract, ethers.BigNumber.from(tokenId!));
       const data: NFTAsset = {
         name: nft.title,

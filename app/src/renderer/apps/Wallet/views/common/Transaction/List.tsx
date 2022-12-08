@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { darken } from 'polished';
@@ -40,7 +40,7 @@ export const Transaction = observer((props: TransactionProps) => {
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
   const completedDate = new Date(
-    transaction.completedAt || transaction.initiatedAt
+    transaction.completedAt || transaction.initiatedAt || 0
   );
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
@@ -136,9 +136,7 @@ export const TransactionList = observer((props: TransactionListProps) => {
       const ourAddress = props.transactions[0].ourAddress;
       // console.log('ourAddress', ourAddress, props.ethType);
       WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
-        (txns: any) => {
-          console.log(txns);
-        }
+        console.log
       );
     }
   }, [props.ethType, props.transactions]);

@@ -95,6 +95,59 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
+const walletAppDefault = {
+  navState: {
+    view: WalletView.NEW,
+    network: NetworkType.ETHEREUM,
+    networkStore: NetworkStoreType.ETHEREUM,
+    protocol: ProtocolType.ETH_MAIN,
+    lastEthProtocol: ProtocolType.ETH_MAIN,
+    btcNetwork: NetworkStoreType.BTC_MAIN,
+  },
+  ethereum: {
+    block: 0,
+    gorliBlock: 0,
+    protocol: ProtocolType.ETH_MAIN,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    initialized: false,
+    conversions: {},
+  },
+  bitcoin: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  btctest: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  navHistory: [],
+  creationMode: 'default',
+  sharingMode: 'anybody',
+  lastInteraction: Date.now(),
+  initialized: false,
+  settings: {
+    networkSettings: {},
+    passcodeHash: '',
+  },
+}
+
 export const trayStore = TrayAppStore.create({
   activeApp: null,
   // activeApp: 'account-tray',
@@ -109,57 +162,7 @@ export const trayStore = TrayAppStore.create({
   roomsApp: {
     currentView: 'list',
   },
-  walletApp: {
-    navState: {
-      view: WalletView.NEW,
-      network: NetworkType.ETHEREUM,
-      networkStore: NetworkStoreType.ETHEREUM,
-      protocol: ProtocolType.ETH_MAIN,
-      btcNetwork: NetworkStoreType.BTC_MAIN,
-    },
-    ethereum: {
-      block: 0,
-      gorliBlock: 0,
-      protocol: ProtocolType.ETH_MAIN,
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      initialized: false,
-      conversions: {},
-    },
-    bitcoin: {
-      block: 0,
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    btctest: {
-      block: 0,
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    navHistory: [],
-    creationMode: 'default',
-    sharingMode: 'anybody',
-    lastInteraction: Date.now(),
-    initialized: false,
-    settings: {
-      networkSettings: {},
-      passcodeHash: '',
-    },
-  },
+  walletApp: walletAppDefault,
   dmApp: {
     currentView: 'dm-list',
   },
@@ -309,6 +312,11 @@ OSActions.onConnected((_event: any, response: any) => {
 //     }
 //   }
 // });
+
+// clear store onConnected
+OSActions.onConnected((_event: any, response: any) => {
+  applySnapshot(trayStore.walletApp, walletAppDefault);
+});
 
 // Listen for all patches
 OSActions.onEffect((_event: any, value: any) => {

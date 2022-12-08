@@ -14,7 +14,7 @@ import {
 
 import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
-import { EthWalletType, NetworkType } from '@holium/realm-wallet/src/wallet.model';
+import { BitcoinWalletType, EthWalletType, NetworkType } from '@holium/realm-wallet/src/wallet.model';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
@@ -48,18 +48,18 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   let coin: any = null;
   if (walletApp.navState.network === 'ethereum') {
     if (hasCoin) {
-      coin = (wallet as EthWalletType).coins.get(
+      coin = (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins.get(
         walletApp.navState.detail!.key
       )!;
     }
-    coins = getCoins((wallet as EthWalletType).coins);
-    nfts = getNfts((wallet as EthWalletType).nfts);
+    coins = getCoins((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins);
+    nfts = getNfts((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts);
   }
 
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
-      ? wallet.transactions.get(walletApp.navState.protocol)
-      : wallet.transactions;
+      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.transactions
+      : (wallet as BitcoinWalletType).transactions;
   const transactions = getTransactions(walletTransactions || new Map()).sort(
     (a, b) =>
       new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()

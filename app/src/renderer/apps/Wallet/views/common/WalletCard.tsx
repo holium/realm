@@ -15,6 +15,7 @@ import {
   EthWalletType,
   BitcoinWalletType,
   NetworkType,
+  ProtocolType,
 } from '@holium/realm-wallet/src/wallet.model';
 
 interface CardStyleProps {
@@ -39,6 +40,7 @@ const CardStyle = styled(Card)<CardStyleProps>`
           }
         `}
 `;
+
 interface WalletCardProps {
   wallet: EthWalletType | BitcoinWalletType;
   isSelected?: boolean;
@@ -56,20 +58,22 @@ export const WalletCard: FC<WalletCardProps> = ({
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
 
   let coins = null;
-  if ('coins' in wallet) {
-    coins = getCoins(wallet.coins);
+  if (walletApp.navState.network === NetworkType.ETHEREUM) {
+    coins = getCoins((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins);
   }
 
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
-      ? wallet.transactions.get(walletApp.navState.protocol)
-      : wallet.transactions;
+      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.transactions
+      : (wallet as BitcoinWalletType).transactions;
   const transactions = getTransactions(walletTransactions || new Map());
 
+  const ethTicker =
+    walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
   const amountDisplay =
-    walletApp.navState.network === 'ethereum'
-      ? `${formatEthAmount(wallet.balance).eth} ETH`
-      : `${formatEthAmount(wallet.balance).eth} BTC`;
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? `${formatEthAmount((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).eth}` + ethTicker
+      : `${formatEthAmount((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).eth} BTC`;
 
   return (
     <CardStyle

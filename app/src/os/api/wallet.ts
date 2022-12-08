@@ -72,7 +72,6 @@ export const WalletApi = {
     await conduit.poke(payload);
   },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
-    console.log('get wallet address watch');
     return await new Promise<string>((resolve, reject) => {
       conduit.watch({
         app: 'realm-wallet',
@@ -169,6 +168,7 @@ export const WalletApi = {
      watchUpdates: (
       conduit: Conduit,
       walletState: WalletStoreType,
+      onWallet: () => void,
     ): void => {
       conduit.watch({
         app: 'realm-wallet',
@@ -178,6 +178,7 @@ export const WalletApi = {
             handleWalletReactions(
               data,
               walletState,
+              onWallet
             );
           }
         },
@@ -190,6 +191,7 @@ export const WalletApi = {
 export const handleWalletReactions = (
   data: any,
   walletState: WalletStoreType,
+  onWallet: () => void
 ) => {
   const reaction: string = Object.keys(data)[0];
   switch (reaction) {
@@ -205,6 +207,7 @@ export const handleWalletReactions = (
       } else if (wallet.network === 'btctestnet') {
         walletState!.btctest.applyWalletUpdate(wallet);
       }
+      onWallet()
       break;
     case 'wallets':
       const wallets = data.wallets;
@@ -218,6 +221,7 @@ export const handleWalletReactions = (
       walletState!.ethereum.initial(wallets);
       walletState!.bitcoin.initial(wallets.bitcoin);
       walletState!.btctest.initial(wallets.btctestnet);
+      onWallet()
       break;
     case 'transaction':
       const transaction = data.transaction;

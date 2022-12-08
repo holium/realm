@@ -69,8 +69,9 @@ export class WalletService extends BaseService {
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
     'realm.tray.wallet.navigate': this.navigate,
     'realm.tray.wallet.navigateBack': this.navigateBack,
-    'realm.wallet.get-coin-txns': this.getCoinTxns,
-    'realm.wallet.toggle-network': this.toggleNetwork,
+    'realm.tray.wallet.get-coin-txns': this.getCoinTxns,
+    'realm.tray.wallet.toggle-network': this.toggleNetwork,
+    'realm.tray.wallet.toggle-uqbar': this.toggleUqbar,
   };
 
   static preload = {
@@ -264,7 +265,7 @@ export class WalletService extends BaseService {
       contractAddr: string
     ) => {
       return await ipcRenderer.invoke(
-        'realm.wallet.get-coin-txns',
+        'realm.tray.wallet.get-coin-txns',
         walletAddr,
         tokenType,
         contractAddr
@@ -272,7 +273,12 @@ export class WalletService extends BaseService {
     },
     toggleNetwork: async () => {
       return await ipcRenderer.invoke(
-        'realm.wallet.toggle-network'
+        'realm.tray.wallet.toggle-network'
+      )
+    },
+    toggleUqbar: async () => {
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.toggle-uqbar'
       )
     }
   };
@@ -309,6 +315,7 @@ export class WalletService extends BaseService {
           network: NetworkType.ETHEREUM,
           networkStore: NetworkStoreType.ETHEREUM,
           protocol: ProtocolType.ETH_MAIN,
+          lastEthProtocol: ProtocolType.ETH_MAIN,
           btcNetwork: NetworkStoreType.BTC_MAIN,
         },
         ethereum: {
@@ -381,7 +388,7 @@ export class WalletService extends BaseService {
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
 
-    WalletApi.watchUpdates(this.core.conduit!, this.state!);
+    WalletApi.watchUpdates(this.core.conduit!, this.state!, () => this.wallet!.watchUpdates(this.state!));
     this.wallet!.watchUpdates(this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {
@@ -619,16 +626,6 @@ export class WalletService extends BaseService {
     this.state!.navigateBack();
   }
 
-  async getCoinTxns(
-    _evt: any,
-    walletAddr: string,
-    tokenType: 'erc20' | 'erc721' | 'erc1155',
-    contractAddr: string
-  ) {
-    // const coin = (this.state!.networks.get(this.state!.navState.protocol)! as unknown as EthWalletType).coins.get(contractAddr);
-    return undefined;// coinTxns;
-  }
-
   toggleNetwork(_evt: any) {
     if (this.state!.navState.network === NetworkType.ETHEREUM) {
       if (this.state!.navState.protocol === ProtocolType.ETH_MAIN) {
@@ -640,5 +637,20 @@ export class WalletService extends BaseService {
         this.wallet!.watchUpdates(this.state!);
       }
     }
+  }
+
+  async getCoinTxns(
+    _evt: any,
+    walletAddr: string,
+    tokenType: 'erc20' | 'erc721' | 'erc1155',
+    contractAddr: string
+  ) {
+    return await (this.wallet!.protocols.get(this.wallet!.currentProtocol)! as BaseProtocol).getAssetTransfers(contractAddr, walletAddr, 0);
+  }
+
+  toggleUqbar(_evt: any) {
+    (this.state!.navState.protocol !== ProtocolType.UQBAR)
+    ? this.state!.setProtocol(ProtocolType.UQBAR)
+    : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
   }
 }
