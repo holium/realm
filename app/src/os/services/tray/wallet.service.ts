@@ -27,7 +27,7 @@ import {
   getSnapshot,
   castToSnapshot
 } from 'mobx-state-tree';
-import { ethers } from 'ethers';
+import { ethers, utils } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from '@holium/realm-wallet/src/Wallet';
@@ -539,9 +539,15 @@ export class WalletService extends BaseService {
     contractType?: string
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
+    const protocol = this.wallet!.protocols.get(this.state!.navState.protocol) as EthereumProtocol;
+    let gas_limit = "0x100000"
+    const from = this.state!.ethereum.wallets.get(walletIndex)!.address
     const tx = {
       to,
       value: ethers.utils.parseEther(amount),
+      gasLimit: await protocol.getFeeEstimate(from, to, amount),//ethers.utils.hexlify(gas_limit), // 100000
+      gasPrice: await protocol.getFeePrice(),
+      nonce: await protocol.getNonce(from),
     };
     const signedTx = await this.signer!.signTransaction(path, tx);
     const hash = await this.wallet!.protocols.get(this.state!.navState.protocol).sendTransaction(signedTx);

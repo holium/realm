@@ -58,6 +58,6 @@ export abstract class BaseProtocol {
   abstract getFeeEstimate(
     from: string,
     to: string,
-    value: number
+    value: string
   ): Promise<number> | number;
 }

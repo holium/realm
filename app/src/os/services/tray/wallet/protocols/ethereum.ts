@@ -3,12 +3,12 @@ import {
 } from '@holium/realm-wallet/src/wallets/BaseProtocol';
 import { Alchemy, AssetTransfersCategory, Network } from 'alchemy-sdk';
 import axios from 'axios';
-import { ethers, utils } from 'ethers';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
 import { ProtocolType, WalletStoreType, Asset, CoinAsset, NFTAsset, NetworkStoreType } from '@holium/realm-wallet/src/wallet.model';
+import { ethers } from 'ethers';
 
 export class EthereumProtocol implements BaseProtocol {
   private protocol: ProtocolType;
@@ -84,7 +84,7 @@ export class EthereumProtocol implements BaseProtocol {
     }
   }
   async getAccountBalance(addr: string): Promise<string> {
-    return utils.formatEther(await this.ethProvider!.getBalance(addr));
+    return ethers.utils.formatEther(await this.ethProvider!.getBalance(addr));
   }
   async getAccountTransactions(addr: string, startBlock: number): Promise<any[]> {
     const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
@@ -184,18 +184,24 @@ export class EthereumProtocol implements BaseProtocol {
     );*/
     return (await ethContract.transfer(toAddr, amountOrTokenId)).hash;
   }
-  async getFeePrice(): Promise<number> {
-    return Number((await this.alchemy.core.getFeeData()).gasPrice?._hex.toString());
+
+  async getFeePrice(): Promise<any> {
+    return (await this.alchemy.core.getFeeData()).gasPrice;
   }
+
   async getFeeEstimate(
     from: string,
     to: string,
-    value: number
-  ): Promise<number> {
+    value: string
+  ): Promise<any> {
     return (await this.alchemy.core.estimateGas({
       to,
       from,
-      value
-    })).toNumber();
+      value: ethers.utils.parseEther(value)
+    }));
+  }
+
+  async getNonce(address: string) {
+    return '0x' + (await this.alchemy.core.getTransactionCount(address) + 1).toString(16);
   }
 }
