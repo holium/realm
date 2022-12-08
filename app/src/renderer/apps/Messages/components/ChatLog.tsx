@@ -53,7 +53,12 @@ export const ChatLog = observer((props: ChatLogProps) => {
         rowRenderer={(message, index, measure) => (
           <ChatMessage
             isSending={message.pending}
-            showAuthor={isGroup}
+            // Only show author if it's a group
+            // and the previous message was not from the same author
+            showAuthor={
+              isGroup &&
+              (index === 0 || messages[index - 1].author !== message.author)
+            }
             key={`${message.index}-${message.timeSent}-${index}`}
             theme={theme.currentTheme}
             author={message.author}
