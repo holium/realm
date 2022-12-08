@@ -39,7 +39,7 @@
     ?-  -.rct
         %seen
       %-  pairs
-      :~  id/s/(scot %uv i)
+      :~  id/s/(scot %uv id.rct)
       ==
       ::
         %new-note

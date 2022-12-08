@@ -79,24 +79,25 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-    ~
-    :: ?+    path  (on-peek:def path)
-    ::   ::
-    ::   [%x @tas %latest ~]     ::  ~/scry/beacon/hark/latest
-    ::     =/  prov          `@tas`i.t.path
-    ::     %-  (slog leaf+"{<dap.bowl>}: scry @ {<prov>}/latest called" ~)
-    ::     :: determine active provider by checking active subscriptions.
-    ::     ::  first match (should only be one) will be used.
-    ::     :: =/  prov=@tas  get-active-provider:helpers:core
-    ::     :: =/  prov=@tas     %hark
-    ::     ::
-    ::     ?+  prov          (on-peek:def path)
-    ::       :: scry new hark, transform notifications into beacon friendly format
-    ::       :: %hark-store     (transform-hark-store:helpers:core (hark-store:scry:core /scry-path))
-    ::       %hark           latest:hark:scry:beacon:core
-    ::       :: %beacon         (beacon:scry:core /scry-path)
-    ::     ==
-    :: ==
+    ?+    path  (on-peek:def path)
+      :: get all seen and unseen
+      [%x %all ~]     ::  ~/scry/beacon/all
+        :: http://localhost/~/scry/hark/all/latest.json
+        =/  car=carpet:hark  .^(carpet:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/all/latest/noun)
+        =/  blan=(unit blanket:hark)
+        ?:  =(stitch.car 0)  ~
+          :: http://localhost/~/scry/hark/all/quilt/5.json
+          (some .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/all/quilt/[stitch.car]/noun))
+        =/  weave  (stitch:harken:core car blan)
+        ::  todo send reaction of full weave
+        ~
+      :: get all unseen
+      [%x %unseen ~]  ~     ::  ~/scry/beacon/unseen
+        :: http://localhost/~/scry/hark/all/latest.json
+      :: get all seen
+      [%x %seen ~]     ::  ~/scry/beacon/unseen
+        ~
+    ==
   ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
@@ -142,7 +143,7 @@
             ?+    p.cage.sign  (on-agent:def wire sign)
                 %hark-action
                   =^  cards  state
-                    (on:hark-updates:core !<(=action:hark q.cage.sign))
+                    (on:harken:core !<(=action:hark q.cage.sign))
                   [cards this]
             ==
         ==
@@ -288,8 +289,21 @@
 ::     --
 ::   --
 ::
-++  hark-updates
+::  hark utils and helpers
+++  harken
   |%
+  ::  combine yarns in carpet with yarns in blanket
+  ++  stitch
+    |=  [=carpet:hark blan=(unit blanket:hark)]
+    ^-  (list yarn:hark)
+    ?~  blan  ~(val by yarns.carpet)
+    %-  sort
+    :-  ~(val by (~(uni by yarns.u.blan) yarns.carpet))
+    |=  [a=yarn:hark b=yarn:hark]
+    %+  gth  (ni:dejs:format (time:enjs:format tim.a))
+    (ni:dejs:format (time:enjs:format tim.b))
+    :: ~
+  ::
   ++  on
     |=  [act=action:hark]
     ^-  (quip card _state)
