@@ -52,8 +52,6 @@
     |^
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
-      %test
-        (test-scry:groups-two 0 bowl)
       %accept-dm
         ?-  groups-target
           %1
