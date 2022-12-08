@@ -14,13 +14,19 @@ import {
   applySnapshot,
   getSnapshot,
   flow,
-  SnapshotOut,
 } from 'mobx-state-tree';
 
 import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
+
+const setAppStatus = (app: AppType, status: InstallStatus) => {
+  if (app.type !== 'urbit') return app;
+  app as UrbitAppType;
+  app.installStatus = status;
+  return app as AppType;
+};
 
 export enum InstallStatus {
   uninstalled = 'uninstalled',
@@ -30,6 +36,7 @@ export enum InstallStatus {
   installed = 'installed',
   treaty = 'treaty',
   suspended = 'suspended',
+  resuming = 'resuming',
 }
 
 export enum AppTypes {
@@ -71,6 +78,7 @@ export const DocketApp = types.model('DocketApp', {
   version: types.string,
   website: types.string,
   license: types.string,
+  installStatus: types.optional(types.string, InstallStatus.installed),
 });
 
 export const DevAppModel = types.model('DevApp', {
@@ -79,6 +87,7 @@ export const DevAppModel = types.model('DevApp', {
   type: types.literal(AppTypes.Dev),
   color: types.string,
   icon: types.string,
+  installStatus: types.optional(types.string, InstallStatus.installed),
   web: types.model('WebConfig', {
     dimensions: types.maybe(
       types.model('WebConfigDimensions', {
@@ -98,6 +107,7 @@ export const WebApp = types.model('WebApp', {
   favicon: types.maybeNull(types.string),
   type: types.literal(AppTypes.Web),
   config: types.maybeNull(RealmConfig),
+  installStatus: types.optional(types.string, InstallStatus.installed),
 });
 
 export const UrbitApp = types.model('UrbitApp', {
@@ -163,20 +173,35 @@ export const NewBazaarStore = types
     loadingAllies: false,
     loadingTreaties: false,
     addingAlly: types.map(types.string),
-    installations: types.map(types.string),
     devAppMap: types.map(DevAppModel),
     treatiesLoaded: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     // Updates
-    _setAppStatus(appId: string, app: UrbitAppType) {
-      if (app.installStatus === 'installed') {
-        self.installations.delete(appId);
-      }
+    _setAppStatus(
+      appId: string,
+      app: UrbitAppType,
+      index: number,
+      gridIndex: any
+    ) {
+      console.log('setting app status', appId, app.installStatus, index);
+      const oldState = self.catalog.get(appId);
+      // if (
+      //   app.installStatus === 'suspended' &&
+      //   oldState &&
+      //   (oldState as UrbitAppType).installStatus === 'resuming'
+      // ) {
+      //   return;
+      // }
+
       self.catalog.set(appId, {
         ...app,
         color: cleanNounColor(app.color),
       });
+      applySnapshot(self.gridIndex, gridIndex);
+      // if (app.installStatus !== 'uninstalled' && index > 0) {
+      //   self.gridIndex.set(index.toString(), appId);
+      // }
     },
     _addPinned(data: { path: string; id: string; index: number }) {
       if (!self.docks.has(data.path)) {
@@ -215,6 +240,7 @@ export const NewBazaarStore = types
       applySnapshot(self.catalog, data.catalog);
       applySnapshot(self.recommendations, data.recommendations);
       applySnapshot(self.stalls, data.stalls);
+      applySnapshot(self.gridIndex, data.grid);
     },
     _addJoined(data: { path: string; stall: any; catalog: any }) {
       self.stalls.set(data.path, data.stall);
@@ -275,29 +301,42 @@ export const NewBazaarStore = types
       self.treatiesLoaded = !self.treatiesLoaded;
     },
     installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
-      self.installations.delete(body.desk);
-      self.installations.set(body.desk, InstallStatus.started);
       try {
         return yield DocketApi.installApp(conduit, body.ship, body.desk);
       } catch (error) {
-        self.installations.delete(body.desk);
         console.error(error);
       }
     }),
+
     installApp: flow(function* (conduit: Conduit, body: InstallPoke) {
-      self.installations.delete(body.desk);
-      self.installations.set(body.desk, InstallStatus.started);
       try {
         return yield BazaarApi.installApp(conduit, body);
       } catch (error) {
-        self.installations.delete(body.desk);
+        // self.installations.delete(body.desk);
         console.error(error);
       }
     }),
     uninstallApp: flow(function* (conduit: Conduit, body: UninstallPoke) {
+      // Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
+      //   if (app.id === value) self.gridIndex.delete(key);
+      // });
       try {
-        self.installations.delete(body.desk);
+        // self.installations.delete(body.desk);
         return yield BazaarApi.uninstallApp(conduit, body);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    suspendApp: flow(function* (conduit: Conduit, desk: string) {
+      try {
+        return yield BazaarApi.suspendApp(conduit, desk);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    reviveApp: flow(function* (conduit: Conduit, desk: string) {
+      try {
+        return yield BazaarApi.resumeApp(conduit, desk);
       } catch (error) {
         console.error(error);
       }
@@ -417,25 +456,26 @@ export const NewBazaarStore = types
     },
   }))
   .views((self) => ({
-    get installing() {
-      return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-        (app: SnapshotOut<AppType>) => {
-          if (self.installations.get(app.id)) return true;
-          return false;
-        }
-      );
-    },
     get installed() {
-      return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-        (app: SnapshotOut<AppType>) => {
-          if (app.type === 'urbit') {
-            const urb = app as UrbitAppType;
-            return urb.installStatus === 'installed';
-          } else {
-            return true;
-          }
-        }
-      );
+      return Array.from(self.gridIndex.entries())
+        .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+        .map((e) => self.catalog.get(e[1]));
+
+      // return Array.from(Object.values(getSnapshot(self.catalog))).filter(
+      //   (app: SnapshotOut<AppType>) => {
+      //     if (app.type === 'urbit') {
+      //       const urb = app as UrbitAppType;
+      //       return (
+      //         urb.installStatus === 'installed' ||
+      //         urb.installStatus === 'suspended' ||
+      //         urb.installStatus === 'resuming' ||
+      //         urb.installStatus === 'failed'
+      //       );
+      //     } else {
+      //       return true;
+      //     }
+      //   }
+      // );
     },
     get devApps() {
       if (self.devAppMap.size === 0) return [];

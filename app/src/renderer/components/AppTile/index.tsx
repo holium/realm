@@ -149,6 +149,9 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
 
   const tileRef = useRef(null);
 
+  const { isInstalling, isFaded, isSuspended, isUninstalled, isFailed } =
+    getAppTileFlags(installStatus || InstallStatus.installed);
+
   return useMemo(() => {
     const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     let title;
@@ -163,12 +166,6 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       : 'none';
     const isLight = lightOrDark === 'light';
     const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
-    const statusBadgeColor = isLight
-      ? darken(0.05, desaturate(1, app.color))
-      : lighten(0.1, desaturate(1, app.color));
-
-    const { isInstalling, isFaded, isSuspended, isUninstalled } =
-      getAppTileFlags(installStatus || InstallStatus.installed);
 
     if (isAppGrid) {
       const appColor = app.color;
@@ -188,29 +185,41 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           {app.title}
         </Text>
       );
-    }
-    if (installStatus === InstallStatus.suspended) {
-      status = (
-        <Text
-          position="absolute"
-          style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
-          left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
-          padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
-          borderRadius={6}
-          backgroundColor={app.image && rgba(statusBadgeColor, 0.5)}
-          top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
-          fontWeight={500}
-          textStyle="capitalize"
-          fontSize={tileSize === 'xl1' ? '13px' : 2}
-          color={textColor}
-        >
-          {app.installStatus}
-        </Text>
-      );
+      if (isSuspended || isFailed) {
+        let statusBadgeColor = isLight
+          ? darken(0.05, desaturate(1, app.color))
+          : lighten(0.1, desaturate(1, app.color));
+        if (isFailed) {
+          statusBadgeColor = isLight
+            ? rgba(darken(0.05, '#D0384E'), 0.1)
+            : rgba(lighten(0.1, '#D0384E'), 0.1);
+        }
+        status = (
+          <Text
+            position="absolute"
+            style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+            left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
+            padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
+            borderRadius={6}
+            backgroundColor={app.image && rgba(statusBadgeColor, 0.5)}
+            top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
+            fontWeight={500}
+            textStyle="capitalize"
+            fontSize={tileSize === 'xl1' ? '13px' : 2}
+            color={isFailed ? '#5e0b18' : textColor}
+          >
+            {app.installStatus}
+          </Text>
+        );
+      }
     }
     const tileId = `app-tile-grid-${app.id}`;
 
     const tileBg = app.color || '#F2F3EF';
+    const filter =
+      isSuspended || isFailed
+        ? { filter: 'grayscale(1)' }
+        : { filter: 'grayscale(0)' };
 
     // set image or icon
     let graphic;
@@ -235,12 +244,13 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           initial={{
-            ...(isSuspended && { filter: 'grayscale(1)' }),
+            opacity: isFaded ? 0.5 : 1,
+            ...filter,
           }}
           animate={{
             opacity: isFaded ? 0.5 : 1,
             boxShadow: boxShadowStyle,
-            ...(isSuspended && { filter: 'grayscale(1)' }),
+            ...filter,
           }}
           transition={{
             scale: { duration: 0.1 },
@@ -357,6 +367,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
             evt.stopPropagation();
             onAppClick &&
               !isSuspended &&
+              !isFailed &&
               !isUninstalled &&
               !isInstalling &&
               onAppClick(app);
@@ -364,7 +375,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           className="app-dock-icon"
         >
           {status}
-          {isInstalling && (
+          {isInstalling && !isUninstalled && (
             <Flex
               flexDirection="column"
               justifyContent="center"
@@ -423,7 +434,20 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
         )} */}
       </Flex>
     );
-  }, [app, isRecommended, isPinned, selected, open, theme.currentTheme]);
+  }, [
+    isFaded,
+    app,
+    isInstalling,
+    isFaded,
+    isSuspended,
+    isUninstalled,
+    isFailed,
+    isRecommended,
+    isPinned,
+    selected,
+    open,
+    theme.currentTheme,
+  ]);
 });
 
 AppTile.defaultProps = {

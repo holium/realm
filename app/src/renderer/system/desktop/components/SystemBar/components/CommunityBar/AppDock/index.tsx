@@ -1,6 +1,10 @@
 import { FC, useMemo } from 'react';
 import { Flex, Divider } from 'renderer/components';
-import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
+import {
+  AppType,
+  InstallStatus,
+  UrbitAppType,
+} from 'os/services/spaces/models/bazaar';
 import { AppTile } from 'renderer/components/AppTile';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
@@ -9,6 +13,13 @@ import { Reorder, AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
+import {
+  handleInstallation,
+  handleResumeSuspend,
+  installLabel,
+  resumeSuspendLabel,
+} from 'renderer/system/desktop/components/Home/AppInstall/helpers';
 
 interface AppDockProps {}
 
@@ -44,6 +55,43 @@ export const AppDock: FC<AppDockProps> = observer(() => {
         {orderedList?.map((app: AppType | any, index: number) => {
           const selected = desktop.isActiveWindow(app.id);
           const open = desktop.isOpenWindow(app.id);
+          const { isSuspended, isUninstalled } = getAppTileFlags(
+            app.installStatus || InstallStatus.installed
+          );
+          const suspendRow = isSuspended
+            ? [
+                {
+                  label: resumeSuspendLabel(app.installStatus),
+                  section: 2,
+                  disabled: false,
+                  onClick: (evt: any) => {
+                    evt.stopPropagation();
+                    return handleResumeSuspend(app.id, app.installStatus);
+                  },
+                },
+              ]
+            : [];
+
+          const installRow =
+            app.type === 'urbit' && isUninstalled
+              ? [
+                  {
+                    label: installLabel(app.installStatus),
+                    // section: 2,
+                    disabled: false,
+                    onClick: (evt: any) => {
+                      evt.stopPropagation();
+                      const appHost = (app as UrbitAppType).host;
+                      return handleInstallation(
+                        appHost,
+                        app.id,
+                        app.installStatus
+                      );
+                    },
+                  },
+                ]
+              : [];
+
           return (
             <Reorder.Item
               key={`pinned-${app.id}-${spaces.selected?.path}`}
@@ -80,15 +128,15 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                 contextPosition="above"
                 tileSize="sm"
                 isRecommended={false}
-                isUninstalled={app.installStatus === InstallStatus.uninstalled}
-                isInstalling={
-                  app.installStatus === InstallStatus.started ||
-                  app.installStatus === InstallStatus.treaty
+                installStatus={app.installStatus}
+                isAnimated={
+                  app.installStatus !== InstallStatus.suspended &&
+                  app.installStatus !== InstallStatus.failed
                 }
                 app={app}
                 selected={selected}
                 open={open}
-                onAppClick={(evt: any) => {
+                onAppClick={() => {
                   const selectedApp = app;
                   if (desktop.isOpenWindow(selectedApp.id)) {
                     DesktopActions.setActive(spacePath, selectedApp.id);
@@ -97,6 +145,8 @@ export const AppDock: FC<AppDockProps> = observer(() => {
                   }
                 }}
                 contextMenu={[
+                  ...installRow,
+                  ...suspendRow,
                   {
                     label: 'Unpin',
                     onClick: (evt: any) => {

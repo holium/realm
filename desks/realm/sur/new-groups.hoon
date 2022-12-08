@@ -129,6 +129,7 @@
       =bloc
       =channels:channel
       =cordon
+      secret=?
       meta=data:meta
   ==
 ::

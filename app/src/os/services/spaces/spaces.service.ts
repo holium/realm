@@ -90,6 +90,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.add-ally': this.addAlly,
     'realm.spaces.bazaar.add-app': this.addApp,
     'realm.spaces.bazaar.remove-app': this.removeApp,
+    'realm.spaces.bazaar.suspend-app': this.suspendApp,
+    'realm.spaces.bazaar.revive-app': this.reviveApp,
   };
 
   static preload = {
@@ -234,6 +236,10 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.add-app', ship, desk),
     removeApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.remove-app', appId),
+    suspendApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.suspend-app', appId),
+    reviveApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.revive-app', appId),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -662,7 +668,12 @@ export class SpacesService extends BaseService {
   async uninstallApp(_event: IpcMainInvokeEvent, desk: string) {
     return await this.models.bazaar.uninstallApp(this.core.conduit!, { desk });
   }
-
+  async suspendApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await this.models.bazaar.suspendApp(this.core.conduit!, desk);
+  }
+  async reviveApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await this.models.bazaar.reviveApp(this.core.conduit!, desk);
+  }
   async addAlly(_event: IpcMainInvokeEvent, ship: Patp) {
     return await this.models.bazaar.addAlly(this.core.conduit!, ship);
   }

@@ -12,7 +12,7 @@ export const GroupsApi = {
       app: 'spaces',
       path: '/groups', // the spaces scry is at the root of the path
     });
-    // console.log(response);
+    console.log(response);
     // return response.groups;
     return Array.from(Object.values(response.groups));
   },
@@ -31,10 +31,10 @@ export const GroupsApi = {
     conduit: Conduit,
     path: string
   ): Promise<{ [path: string]: any }> => {
-    return (await conduit.scry({
+    return await conduit.scry({
       app: 'spaces',
       path: `/groups${path}/members`, // the spaces scry is at the root of the path
-    }));
+    });
     // return Array.from(Object.values(response.groups));
   },
 };
