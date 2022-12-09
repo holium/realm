@@ -136,6 +136,18 @@
     =-  (emit %give %fact [/updates]~ spaces-reaction+-)
     !>(`s-react`[%initial spaces.state membership.state invitations.state])
   ::
+      [%spaces ~]
+    ?>  =(our.bol src.bol)
+    %-  emil
+    %+  turn  ~(tap in ~(key by spaces.state))
+    |=  s-p=space-path:store
+    =-  [%give %fact ~ -]
+    :-  %spaces-reaction
+    !>  ^-  s-react
+    :+  %add
+      (~(got by spaces.state) s-p)
+    (~(got by membership.state) s-p)
+  ::
       [%spaces who=@ pat=@ ~]                           ::  the space-level watch
     =+  host=(slav %p who.pol)
     =+  space=(~(got by spaces.state) host pat.pol)
@@ -385,9 +397,13 @@
     ++  on-remote-space
       |=  [path=space-path:store =space:store =members:m-store]
       ^+  core
-      %.  =-  [%give %fact [/updates]~ -]
-          spaces-reaction+!>(`s-react`[%remote-space path space members])
-      %=  emit
+      %.  :~  =-  [%give %fact [/updates]~ -]
+              spaces-reaction+!>(`s-react`[%remote-space path space members])
+            ::
+              =-  [%give %fact [/spaces]~ -]
+              spaces-reaction+!>(`s-react`[%add space members])
+          ==
+      %=  emil
         spaces.state      (~(put by spaces.state) [path space])
         membership.state  (~(put by membership.state) [path members])
       ==
