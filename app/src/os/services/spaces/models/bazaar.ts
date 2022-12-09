@@ -178,30 +178,12 @@ export const NewBazaarStore = types
   })
   .actions((self) => ({
     // Updates
-    _setAppStatus(
-      appId: string,
-      app: UrbitAppType,
-      index: number,
-      gridIndex: any
-    ) {
-      console.log('setting app status', appId, app.installStatus, index);
-      const oldState = self.catalog.get(appId);
-      // if (
-      //   app.installStatus === 'suspended' &&
-      //   oldState &&
-      //   (oldState as UrbitAppType).installStatus === 'resuming'
-      // ) {
-      //   return;
-      // }
-
+    _setAppStatus(appId: string, app: UrbitAppType, gridIndex: any) {
       self.catalog.set(appId, {
         ...app,
         color: cleanNounColor(app.color),
       });
       applySnapshot(self.gridIndex, gridIndex);
-      // if (app.installStatus !== 'uninstalled' && index > 0) {
-      //   self.gridIndex.set(index.toString(), appId);
-      // }
     },
     _addPinned(data: { path: string; id: string; index: number }) {
       if (!self.docks.has(data.path)) {

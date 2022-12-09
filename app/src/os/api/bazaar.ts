@@ -302,7 +302,6 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       model._setAppStatus(
         installUpdate.appId,
         installUpdate.app,
-        installUpdate.index,
         installUpdate.grid
       );
       break;
