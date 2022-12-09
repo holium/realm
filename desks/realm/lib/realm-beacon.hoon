@@ -45,12 +45,54 @@
         %new-note
       %-  pairs
       :~  id/s/(scot %uv id.note.rct)
-          con/a/(turn content.note.rct content)
+          con/a/(turn content.note.rct content-js:encode)
           time/(time tim.note.rct)
       ==
     ==
   ::
-  ++  content
+  ++  view  :: encodes for on-peek
+    |=  vi=view:store
+    ^-  json
+    %-  pairs
+    :_  ~
+    ^-  [cord json]
+    :-  -.vi
+    ?-  -.vi
+      ::
+        %all
+      (yarns-js:encode yarns.vi)
+      ::
+        %seen
+      (yarns-js:encode yarns.vi)
+      ::
+        %unseen
+      (yarns-js:encode yarns.vi)
+      ::
+    ==
+  --
+::
+++  encode
+  =,  enjs:format
+  |%
+  ::
+  ++  yarns-js
+    |=  ys=(map id:h yarn:h)
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by ys)
+    |=  [i=id:h y=yarn:h]
+    [(scot %uv i) (yarn-js y)]
+  ::
+  ++  yarn-js
+    |=  y=yarn:h
+    ^-  json
+    %-  pairs
+    :~  id/s/(scot %uv id.y)
+        time/(time tim.y)
+        con/a/(turn con.y content-js)
+    ==
+  ::
+  ++  content-js
     |=  c=content:h
     ^-  json
     ?@  c  s/c
@@ -58,29 +100,5 @@
       %ship  (frond ship/s/(scot %p p.c))
       %emph  (frond emph/s/p.c)
     ==
-  ::
-  :: ++  view  :: encodes for on-peek
-  ::   |=  vi=view:store
-  ::   ^-  json
-  ::   %-  pairs
-  ::   :_  ~
-  ::   ^-  [cord json]
-  ::   :-  -.vi
-  ::   ?-  -.vi
-  ::     ::
-  ::       %latest
-  ::     (latest-js:encode latest.vi)
-  ::     ::
-  ::   ==
   --
-::
-:: ++  encode
-::   =,  enjs:format
-::   |%
-::   ::
-::   ++  latest-js
-::     |=  =notifications:store
-::     ^-  json
-::     ~
-::   --
 --

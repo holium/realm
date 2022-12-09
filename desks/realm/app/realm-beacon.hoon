@@ -82,21 +82,32 @@
     ?+    path  (on-peek:def path)
       :: get all seen and unseen
       [%x %all ~]     ::  ~/scry/beacon/all
-        :: http://localhost/~/scry/hark/all/latest.json
-        =/  car=carpet:hark  .^(carpet:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/all/latest/noun)
-        =/  blan=(unit blanket:hark)
-        ?:  =(stitch.car 0)  ~
-          :: http://localhost/~/scry/hark/all/quilt/5.json
-          (some .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/all/quilt/[stitch.car]/noun))
-        =/  weave  (stitch:harken:core car blan)
-        ::  todo send reaction of full weave
-        ~
+        :: grab the carpet to determine stitch
+        =/  car=carpet:hark  scry-latest:harken:core
+        :: use the stitch to grab the blanket
+        =/  blan             (scry-blanket:harken:core stitch.car)
+        :: stitch together seen/unseen
+        =/  weave            (stitch:harken:core car blan)
+        :: return all yarns
+        ``realm-beacon-view+!>([%all weave])
+
       :: get all unseen
-      [%x %unseen ~]  ~     ::  ~/scry/beacon/unseen
+      [%x %unseen ~]      ::  ~/scry/beacon/unseen
         :: http://localhost/~/scry/hark/all/latest.json
+        =/  car=carpet:hark  scry-latest:harken:core
+        :: %-  (slog leaf+"{<dap.bowl>}: {<car>}" ~)
+        ``realm-beacon-view+!>([%unseen yarns.car])
+
       :: get all seen
-      [%x %seen ~]     ::  ~/scry/beacon/unseen
-        ~
+      [%x %seen ~]     ::  ~/scry/beacon/seen
+        :: grab the carpet to determine stitch
+        =/  car=carpet:hark  scry-latest:harken:core
+        :: use the stitch to grab the blanket
+        =/  blan             (scry-blanket:harken:core stitch.car)
+        ::  if blanket not exist, return empty json object
+        ?~  blan  ``json+!>([%o ~])
+        ::  return seen
+        ``realm-beacon-view+!>([%seen yarns.u.blan])
     ==
   ::
   ++  on-agent
@@ -293,16 +304,33 @@
 ++  harken
   |%
   ::  combine yarns in carpet with yarns in blanket
+  ::  note we want a map, but instead of using mop to sort
+  ::   sort by time on front-end for now
   ++  stitch
     |=  [=carpet:hark blan=(unit blanket:hark)]
-    ^-  (list yarn:hark)
-    ?~  blan  ~(val by yarns.carpet)
-    %-  sort
-    :-  ~(val by (~(uni by yarns.u.blan) yarns.carpet))
-    |=  [a=yarn:hark b=yarn:hark]
-    %+  gth  (ni:dejs:format (time:enjs:format tim.a))
-    (ni:dejs:format (time:enjs:format tim.b))
-    :: ~
+    ^-  (map id:hark yarn:hark)
+    ?~  blan  yarns.carpet
+    (~(uni by yarns.u.blan) yarns.carpet)
+    :: ((mop id:hark yarn:hark) lte)
+    :: %-  my
+    :: %-  sort
+    :: :-  ~(tap by (~(uni by yarns.u.blan) yarns.carpet))
+    :: |=  [a=[=id:hark =yarn:hark] b=[=id:hark =yarn:hark]]
+    :: %+  gth  (ni:dejs:format (time:enjs:format tim.yarn.b))
+    :: (ni:dejs:format (time:enjs:format tim.yarn.a))
+  ::
+  ++  scry-latest
+    .^(carpet:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/all/latest/noun)
+  ::
+  ++  scry-blanket
+    |=  [stitch=@ud]
+    ^-  (unit blanket:hark)
+    ?:  =(stitch 0)  ~
+      :: http://localhost/~/scry/hark/all/quilt/5.json
+      =/  stch  (crip (en-json:html (numb:enjs:format stitch)))
+      =/  pth  /(scot %p our.bowl)/hark/(scot %da now.bowl)/all/quilt/[stch]/noun
+      :: %-  (slog leaf+"{<dap.bowl>}: {<pth>}" ~)
+      (some .^(blanket:hark %gx pth))
   ::
   ++  on
     |=  [act=action:hark]

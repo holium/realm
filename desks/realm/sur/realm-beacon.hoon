@@ -13,12 +13,14 @@
   ==
 ::
 +$  reaction
-  $%  [%seen id:hark]
+  $%  [%seen =id:hark]
       [%new-note =note]
   ==
 ::
-:: +$  view
-::   $%  [%latest =(list @ud)]
-::   ==
++$  view
+  $%  [%all yarns=(map id:hark yarn:hark)]
+      [%seen yarns=(map id:hark yarn:hark)]
+      [%unseen yarns=(map id:hark yarn:hark)]
+  ==
 --
 
