@@ -242,9 +242,11 @@
       ?<  (~(has by spaces.state) path.new)             :: don't overwrite
       ::  return updated state and a combination of invitations (pokes)
       ::   to new members and gifts to any existing/current subscribers
-      %.  :_  (initial-visas:helpers path.new members new)
-          ::  XX: are there any subscribers, already? maybe only initial-visas
-          [%give %fact [/updates]~ spaces-reaction+!>(`s-react`[%add new members])]
+      ::  XX: if ordering is not important, suggest this alternative
+      ::  :_  (initial-visas:helpers path.new members new)
+      ::  [%give %fact [/updates]~ spaces-reaction+!>(`s-react`[%add new members])]
+      %.  %+  welp  (initial-visas:helpers path.new members new)
+          [%give %fact [/updates]~ spaces-reaction+!>(`s-react`[%add new members])]~
       %=  emil
         spaces.state  (~(put by spaces.state) [path.new new])
         ::
