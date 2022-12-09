@@ -47,11 +47,9 @@ const Input = styled.input`
 `;
 
 export const ImageToggle = (props: any) => {
-  const [checked, setChecked] = useState(false); // store value
-  const handleChange = (e: any) => setChecked(e.target.checked)
   return (
     <Label>
-      <Input checked={checked} type="checkbox" onChange={handleChange} />
+      <Input checked={props.checked} type="checkbox" onChange={() => {}} />
       <Switch src={props.src}/>
     </Label>
   );

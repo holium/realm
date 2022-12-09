@@ -4,7 +4,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { WalletNetwork } from './Network';
-import { ProtocolType, WalletView } from '@holium/realm-wallet/src/wallet.model';
+import { NetworkType, ProtocolType, WalletView } from '@holium/realm-wallet/src/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { ImageToggle } from 'renderer/components/Toggle';
 // @ts-expect-error its there...
@@ -44,7 +44,8 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
           </Box>
           <Flex>
             <Flex mr='10px' onClick={toggleUqbar}>
-              <ImageToggle src={UqbarLogo}/>
+              {walletApp.navState.network === NetworkType.ETHEREUM
+              && <ImageToggle src={UqbarLogo} checked={walletApp.navState.protocol === ProtocolType.UQBAR}/>}
             </Flex>
             <IconButton
               onClick={async () =>

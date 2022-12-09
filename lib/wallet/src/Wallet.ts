@@ -17,7 +17,9 @@ export class Wallet {
     const lastProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
     lastProtocol?.removeListener();
     this.currentProtocol = walletState.navState.protocol;
-    this.protocols.get(this.currentProtocol)!.watchUpdates(walletState);
+    if (walletState.navState.network === NetworkType.ETHEREUM) {
+      this.protocols.get(this.currentProtocol)!.watchUpdates(walletState);
+    }
   }
 }
 

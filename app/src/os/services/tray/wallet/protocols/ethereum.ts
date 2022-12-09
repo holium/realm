@@ -186,7 +186,7 @@ export class EthereumProtocol implements BaseProtocol {
   }
 
   async getFeePrice(): Promise<any> {
-    return (await this.alchemy.core.getFeeData()).gasPrice;
+    return (await this.ethProvider!.getGasPrice())
   }
 
   async getFeeEstimate(
@@ -202,6 +202,12 @@ export class EthereumProtocol implements BaseProtocol {
   }
 
   async getNonce(address: string) {
-    return '0x' + (await this.alchemy.core.getTransactionCount(address) + 1).toString(16);
+    //return '0x' + (await this.alchemy.core.getTransactionCount(address) + 1).toString(16);
+    return await this.ethProvider.getTransactionCount(address);
   }
+
+  async getChainId() {
+    return (await this.ethProvider!.getNetwork()).chainId;
+  }
+
 }

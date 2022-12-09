@@ -758,6 +758,8 @@ export const WalletStore = types
       self.initialized = initialized;
     },
     setNetwork(network: NetworkType) {
+      /* @ts-expect-error */
+      self.resetNavigation();
       if (network !== self.navState.network) {
         switch (network) {
           case NetworkType.ETHEREUM:
@@ -770,10 +772,10 @@ export const WalletStore = types
             break;
         }
       }
-      /* @ts-expect-error */
-      self.resetNavigation();
     },
     setProtocol(protocol: ProtocolType) {
+      /* @ts-expect-error */
+      self.resetNavigation();
       if (protocol === ProtocolType.UQBAR) {
         self.navState.lastEthProtocol = 
         self.navState.protocol === ProtocolType.UQBAR
@@ -782,8 +784,6 @@ export const WalletStore = types
       }
       self.navState.protocol = protocol;
       self.ethereum.setProtocol(protocol);
-      /* @ts-expect-error */
-      self.resetNavigation();
     },
     navigate(view: WalletView, options?: WalletNavOptions) {
       const canReturn = options?.canReturn || true;

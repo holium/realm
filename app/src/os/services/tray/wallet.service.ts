@@ -12,7 +12,6 @@ import {
   SharingMode,
   UISettingsType,
   EthWalletType,
-  SettingsType,
   ProtocolType,
   NetworkStoreType,
 } from '@holium/realm-wallet/src/wallet.model'
@@ -450,16 +449,13 @@ export class WalletService extends BaseService {
     if (this.state!.navState.network !== network) {
       this.state!.setNetwork(network);
     }
-    this.wallet!.watchUpdates(this.state!);
   }
 
   setProtocol(_event: any, protocol: ProtocolType) {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.protocol !== protocol) {
       this.state!.setProtocol(protocol);
-      this.wallet!.watchUpdates(this.state!);
     }
-    this.wallet!.watchUpdates(this.state!);
   }
 
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
@@ -475,7 +471,6 @@ export class WalletService extends BaseService {
         this.state!.navState.network,
         patp
       );
-      console.log('got address: ', address);
 
       return {
         patp,
@@ -519,7 +514,6 @@ export class WalletService extends BaseService {
   }
 
   async createWallet(_event: any, nickname: string) {
-    console.log(`creating with nickname: ${nickname}`);
     const sender: string = this.state!.ourPatp!;
     let network: string = this.state!.navState.network;
     if (
@@ -542,17 +536,18 @@ export class WalletService extends BaseService {
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     const protocol = this.wallet!.protocols.get(this.state!.navState.protocol) as EthereumProtocol;
-    const from = this.state!.ethereum.wallets.get(walletIndex)!.address
+    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
     const tx = {
+      from,
       to,
       value: ethers.utils.parseEther(amount),
       gasLimit: await protocol.getFeeEstimate(from, to, amount),
       gasPrice: await protocol.getFeePrice(),
       nonce: await protocol.getNonce(from),
+      chainId: await protocol.getChainId()
     };
     const signedTx = await this.signer!.signTransaction(path, tx);
     const hash = await this.wallet!.protocols.get(this.state!.navState.protocol).sendTransaction(signedTx);
-    console.log(hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
