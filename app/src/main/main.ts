@@ -67,7 +67,7 @@ export class AppUpdater implements IAppUpdater {
     // proxy private github repo requests
     autoUpdater.setFeedURL({
       provider: 'generic',
-      url: 'https://ghproxy.holium.xyz/',
+      url: 'https://ghproxy.holium.xyz',
     });
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
