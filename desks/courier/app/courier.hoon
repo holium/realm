@@ -79,13 +79,13 @@
       %graph-dm-action
         ?-  groups-target
           %1  (on-graph-action:core !<(action:store vase))
-          %2  [(on-graph-action:groups-two !<(action:store vase) bowl state) state]
+          %2  (on-graph-action:groups-two !<(action:store vase) bowl state)
         ==
       %notify-action  (on-notify-action:core !<(action:notify vase))
       %set-groups-target
       ::   :courier &set-groups-target %2
       :-
-        (set-groups-target-cards:core !<(targetable-groups vase))
+        (set-groups-target:groups-two !<(targetable-groups vase) bowl)
         [%1 !<(targetable-groups vase) +>:state]
     ==
     [cards this]
@@ -301,6 +301,7 @@
     %create-group-dm       (create-group-dm +.act)
     %send-group-dm         (send-group-dm +.act)
     %read-group-dm         (read-group-dm +.act)
+    %set-groups-target     (on-graph-action:groups-two act bowl state)
   ==
   ::
   ++  read-dm
@@ -535,23 +536,4 @@
     `state
   ::
   --
-
-++  set-groups-target-cards
-    |=  [new-target=targetable-groups]
-    ^-  (list card)
-    :: ~&  (crip (join ' ' `(list @t)`['setting groups target:' `@t`new-target ~]))
-    ?-  new-target
-      %1  ~ :: no cards to change for old groups
-      %2
-      :~  :: define list of cards to update subscriptions
-        :: don't care about graph-store&dm-hook anymore
-        :: since we're on groups-two
-        [%pass /updates %agent [our.bowl %graph-store] %leave ~]
-        [%pass /updates %agent [our.bowl %dm-hook] %leave ~]
-        :: and sub to new junk
-        [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
-        [%pass /g2/club/new %agent [our.bowl %chat] %watch /club/new]
-        [%pass /g2/dm/invited %agent [our.bowl %chat] %watch /dm/invited]
-      ==
-    ==
 --

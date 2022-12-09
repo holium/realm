@@ -178,11 +178,16 @@
   |=  [act=action =bowl:gall state=state-1]
   |^
   ?-  -.act
-    %send-dm               (send-dm +.act)
-    %read-dm               (read-dm +.act bowl)
-    %create-group-dm       (create-group-dm +.act bowl)
-    %send-group-dm         (send-group-dm +.act bowl state)
-    %read-group-dm         (read-group-dm +.act bowl)
+    %send-dm               [(send-dm +.act) state]
+    %read-dm               [(read-dm +.act bowl) state]
+    %create-group-dm       [(create-group-dm +.act bowl) state]
+    %send-group-dm         [(send-group-dm +.act bowl state) state]
+    %read-group-dm         [(read-group-dm +.act bowl) state]
+    %set-groups-target
+      :-
+      (set-groups-target +.act bowl)
+      :: we do have to actually mutate the state here
+      [%1 +.act +>:state]
   ==
   ++  send-dm
     |=  [=ship p=post]
@@ -610,4 +615,21 @@
   ^-  message-preview
   =/  path              (spat /dm-inbox/(scot %p ship))
   [path (silt ~[ship]) %pending %talk now [~] ~[(form-contact-mtd rolo ship)] ~ 0]
+++  set-groups-target
+    |=  [new-target=targetable-groups =bowl:gall]
+    ^-  (list card:agent:gall)
+    ?-  new-target
+      %1  ~ :: no cards to change for old groups
+      %2
+      :~  :: define list of cards to update subscriptions
+        :: don't care about graph-store&dm-hook anymore
+        :: since we're on groups-two
+        [%pass /updates %agent [our.bowl %graph-store] %leave ~]
+        [%pass /updates %agent [our.bowl %dm-hook] %leave ~]
+        :: and sub to new junk
+        [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
+        [%pass /g2/club/new %agent [our.bowl %chat] %watch /club/new]
+        [%pass /g2/dm/invited %agent [our.bowl %chat] %watch /dm/invited]
+      ==
+    ==
 --
