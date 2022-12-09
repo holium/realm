@@ -68,8 +68,14 @@ export const NotificationStore = types
   .actions((self) => ({
     load: flow(function* (conduit: Conduit) {
       try {
-        self.notes = yield BeaconApi.getAll(conduit);
-        console.log(self.notes);
+        let all = yield BeaconApi.getAll(conduit);
+        Object.values(all)
+          .sort((a: NotificationModelType, b: NotificationModelType) => {
+            return b.time - a.time;
+          })
+          .forEach((note: NotificationModelType) =>
+            self.notes.set(note.id, note)
+          );
       } catch (error) {
         console.error(error);
       }
