@@ -13,7 +13,12 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { handleInstallation, installLabel } from '../../AppInstall/helpers';
+import {
+  handleInstallation,
+  handleResumeSuspend,
+  installLabel,
+  resumeSuspendLabel,
+} from '../../AppInstall/helpers';
 import { getAppTileFlags } from 'renderer/logic/lib/app';
 
 type AppEmptyProps = {
@@ -76,6 +81,11 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
       const appHost = (app as UrbitAppType).host;
       return handleInstallation(appHost, app.id, installStatus);
     };
+    const canSuspend =
+      (installStatus === InstallStatus.installed ||
+        installStatus === InstallStatus.suspended) &&
+      app.type === 'urbit';
+
     const menu = [];
     if (isAdmin) {
       menu.push({
@@ -95,6 +105,7 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
         },
       });
     }
+
     menu.push({
       label: weRecommended ? 'Unrecommend app' : 'Recommend app',
       onClick: (evt: any) => {
@@ -105,10 +116,21 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
       },
     });
     if (app.type === 'urbit') {
+      if (canSuspend) {
+        menu.push({
+          label: resumeSuspendLabel(installStatus),
+          section: 2,
+          disabled: false,
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            return handleResumeSuspend(app.id, installStatus);
+          },
+        });
+      }
       menu.push({
         label: installLabel(app.installStatus as InstallStatus),
         disabled: false,
-        section: 2,
+
         onClick: (evt: any) => {
           evt.stopPropagation();
           // console.log('install app => %o', app);
@@ -145,7 +167,6 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
           tileSize="xl1"
           app={app}
           isAnimated={isInstalled}
-          isUninstalled={isUninstalled}
           installStatus={installStatus}
           isPinned={isPinned}
           isRecommended={weRecommended}

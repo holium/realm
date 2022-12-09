@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
@@ -29,7 +29,7 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
 
   const currentSpace = spaces.selected!;
   const dock = bazaar.getDock(currentSpace.path);
-  console.log(toJS(bazaar.gridIndex));
+  // console.log(toJS(bazaar.gridIndex));
 
   // return useMemo(() => {
   const apps = [...bazaar.installed, ...bazaar.devApps];
@@ -39,7 +39,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
         const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
         const weRecommended = bazaar.isRecommended(app.id);
         const installStatus = app.installStatus as InstallStatus;
-        console.log(app.id, installStatus);
 
         const canSuspend =
           (installStatus === InstallStatus.installed ||

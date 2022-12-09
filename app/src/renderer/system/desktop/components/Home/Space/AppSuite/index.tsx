@@ -91,7 +91,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
   const { theme, bazaar, spaces } = useServices();
   const space = spaces.selected!;
   const suite = bazaar.getSuite(space.path);
-  const apps = [...bazaar.installed, ...bazaar.installing];
+  const apps = bazaar.installed;
 
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
@@ -144,7 +144,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
               {apps.map((item, index) => (
                 <AppRow
                   key={index}
-                  caption={item.id}
+                  caption={item ? item.id : ''}
                   app={item}
                   descriptionWidth={dimensions.width - 225}
                   actionRenderer={() => (
@@ -155,7 +155,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
                         setSuiteIndex(-1);
                         SpacesActions.addToSuite(
                           space.path,
-                          item.id,
+                          item!.id,
                           suiteIndex
                         );
                       }}

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { rgba } from 'polished';
+import { rgba, darken, desaturate, lighten } from 'polished';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import {
@@ -21,6 +21,7 @@ import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { handleInstallation } from '../../AppInstall/helpers';
 import { getAppTileFlags } from 'renderer/logic/lib/app';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 interface AppPreviewProps {
   app: AppType;
@@ -37,7 +38,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
       info = app.info;
       installStatus = app.installStatus as InstallStatus;
     }
-    const { isInstalling, isInstalled, isFaded, isSuspended, isUninstalled } =
+    const { isInstalling, isInstalled, isSuspended, isUninstalled, isFailed } =
       getAppTileFlags(installStatus);
 
     const length = 60;
@@ -53,6 +54,33 @@ export const AppPreview: FC<AppPreviewProps> = observer(
       const appHost = (app as UrbitAppType).host;
       return handleInstallation(appHost, app.id, installStatus);
     };
+    let status;
+    if (isSuspended || isFailed) {
+      let statusBadgeColor = theme.currentTheme.mode
+        ? darken(0.05, desaturate(1, app.color))
+        : lighten(0.1, desaturate(1, app.color));
+      if (isFailed) {
+        statusBadgeColor = theme.currentTheme.mode
+          ? rgba(darken(0.05, '#D0384E'), 0.1)
+          : rgba(lighten(0.1, '#D0384E'), 0.1);
+      }
+      status = (
+        <Text
+          style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+          padding=".2rem .3rem"
+          borderRadius={6}
+          backgroundColor={
+            (app as UrbitAppType).image && rgba(statusBadgeColor, 0.5)
+          }
+          fontWeight={500}
+          textStyle="capitalize"
+          fontSize={'13px'}
+          color={isFailed ? '#5e0b18' : theme.currentTheme.textColor}
+        >
+          {app.installStatus}
+        </Text>
+      );
+    }
     return (
       <Flex flexGrow="0" flexDirection="row" gap={16}>
         <AppTile
@@ -78,7 +106,8 @@ export const AppPreview: FC<AppPreviewProps> = observer(
               <Text fontWeight={500} fontSize={4}>
                 {app?.title}
               </Text>
-              {isSuspended && (
+              {status}
+              {/* {isSuspended && (
                 <Text
                   style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
                   padding=".3rem .4rem"
@@ -91,7 +120,22 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 >
                   Suspended
                 </Text>
-              )}
+              )} */}
+
+              {/* {isSuspended && (
+                <Text
+                  style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+                  padding=".3rem .4rem"
+                  borderRadius={6}
+                  backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
+                  fontWeight={500}
+                  textStyle="capitalize"
+                  fontSize={1}
+                  color={rgba(theme.currentTheme.textColor, 0.9)}
+                >
+                  Suspended
+                </Text>
+              )} */}
             </Flex>
 
             <Text fontSize={2} opacity={0.6}>
@@ -120,6 +164,24 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 <Spinner size={0} />
               </Flex>
             )}
+            {isFailed && (
+              <Button
+                pt="2px"
+                pb="2px"
+                variant="minimal"
+                fontWeight={400}
+                borderRadius={6}
+                color={'#FFF'}
+                disabled={true}
+                backgroundColor={theme.currentTheme.accentColor}
+                onClick={() => {
+                  const appHost = (app as UrbitAppType).host;
+                  SpacesActions.installApp(appHost!, app.id);
+                }}
+              >
+                Retry install
+              </Button>
+            )}
             {isSuspended && (
               <Button
                 pt="2px"
@@ -129,9 +191,8 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 borderRadius={6}
                 color={'#FFF'}
                 backgroundColor={theme.currentTheme.accentColor}
-                onClick={(evt) => {
-                  // DesktopActions.openAppWindow(space!.path, toJS(app));
-                  // DesktopActions.setHomePane(false);
+                onClick={() => {
+                  SpacesActions.reviveApp(app.id);
                 }}
               >
                 Revive

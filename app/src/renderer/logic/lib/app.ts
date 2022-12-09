@@ -15,12 +15,14 @@ export const getAppTileFlags = (
   const isInstalling =
     installStatus !== InstallStatus.installed &&
     installStatus !== InstallStatus.suspended &&
-    installStatus !== InstallStatus.failed;
+    installStatus !== InstallStatus.failed &&
+    installStatus !== InstallStatus.uninstalled;
 
   const isFaded =
     isInstalling ||
     installStatus === InstallStatus.suspended ||
-    installStatus === InstallStatus.failed;
+    installStatus === InstallStatus.failed ||
+    installStatus === InstallStatus.uninstalled;
 
   return {
     isInstalled: installStatus === InstallStatus.installed,

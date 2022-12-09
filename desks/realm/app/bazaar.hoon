@@ -850,18 +850,12 @@
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index     grid-index
       =.  grid-list         (oust [u.current-index 1] grid-list)
-      :: =/  remd-grid-index  
-      ::   ?:  (gth u.current-index 0)
-      ::     (~(del by grid-index) u.current-index)
-      ::   (~(del by grid-index) u.current-index)
-      :: ~&  >>>  ['remd-grid-index' remd-grid-index]
       =/  new-grid-index
         %+  turn  (gulf 0 (sub (lent grid-list) 1))
           |=  idx=@ud
           =/  app  (snag idx grid-list)
           ~&  >>  ['snagging rem-grid-index' idx app]
           [idx app]
-      :: =/  sorted-grid  (sort ~(tap by grid-index) |=([a=[idx=@ud app=@tas] b=[idx=@ud app=@tas]](gth idx.a idx.b)))
       `=grid-index:store`(malt new-grid-index)
     ::
     ++  sort-grid
