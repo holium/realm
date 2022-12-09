@@ -315,7 +315,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
               {to}
             </Text>
             {isGroup && (
-              <Text fontSize={1} fontWeight={500} opacity={0.3}>
+              <Text fontSize={1} fontWeight={400} opacity={0.5}>
                 {selectedChat.to.length} people
               </Text>
             )}
