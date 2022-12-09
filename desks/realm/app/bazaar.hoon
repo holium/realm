@@ -827,10 +827,8 @@
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index
         =/  new-index         (lent grid-list)
-        ~&  >>  ['set-grid-index-2 new' app-id new-index grid-list]
         =.  grid-index        (~(put by grid-index) [new-index app-id])
         [new-index grid-index]
-      ~&  >>  ['set-grid-index-2 current' app-id u.current-index grid-list]
       [u.current-index grid-index]
     ::
     ++  set-grid-index
@@ -840,7 +838,6 @@
       ?~  current-index
         ::  if the app is not in the grid, add it to the end   
         =/  new-index         (lent grid-list)
-        ~&  >>  ['set-grid-index new' app-id new-index]
         (~(put by grid-index) [new-index app-id])
       grid-index
     ::
@@ -854,7 +851,6 @@
         %+  turn  (gulf 0 (sub (lent grid-list) 1))
           |=  idx=@ud
           =/  app  (snag idx grid-list)
-          ~&  >>  ['snagging rem-grid-index' idx app]
           [idx app]
       `=grid-index:store`(malt new-grid-index)
     ::

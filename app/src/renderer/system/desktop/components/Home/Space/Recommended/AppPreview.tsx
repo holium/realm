@@ -42,13 +42,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
       getAppTileFlags(installStatus);
 
     const length = 60;
-    const showDetails = (evt: React.MouseEvent<HTMLButtonElement>) => {
-      evt.stopPropagation();
-      ShellActions.openDialogWithStringProps('app-detail-dialog', {
-        appId: app.id,
-      });
-      evt.currentTarget.blur();
-    };
+
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
       const appHost = (app as UrbitAppType).host;
@@ -107,35 +101,6 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 {app?.title}
               </Text>
               {status}
-              {/* {isSuspended && (
-                <Text
-                  style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
-                  padding=".3rem .4rem"
-                  borderRadius={6}
-                  backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
-                  fontWeight={500}
-                  textStyle="capitalize"
-                  fontSize={1}
-                  color={rgba(theme.currentTheme.textColor, 0.9)}
-                >
-                  Suspended
-                </Text>
-              )} */}
-
-              {/* {isSuspended && (
-                <Text
-                  style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
-                  padding=".3rem .4rem"
-                  borderRadius={6}
-                  backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
-                  fontWeight={500}
-                  textStyle="capitalize"
-                  fontSize={1}
-                  color={rgba(theme.currentTheme.textColor, 0.9)}
-                >
-                  Suspended
-                </Text>
-              )} */}
             </Flex>
 
             <Text fontSize={2} opacity={0.6}>
@@ -171,15 +136,13 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 variant="minimal"
                 fontWeight={400}
                 borderRadius={6}
-                color={'#FFF'}
-                disabled={true}
-                backgroundColor={theme.currentTheme.accentColor}
+                color={rgba(theme.currentTheme.textColor, 0.9)}
+                backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
                 onClick={() => {
-                  const appHost = (app as UrbitAppType).host;
-                  SpacesActions.installApp(appHost!, app.id);
+                  SpacesActions.uninstallApp(app.id);
                 }}
               >
-                Retry install
+                Uninstall
               </Button>
             )}
             {isSuspended && (
@@ -216,12 +179,12 @@ export const AppPreview: FC<AppPreviewProps> = observer(
               </Button>
             )}
             {/* TODO add menu on click  */}
-            <IconButton
+            {/* <IconButton
               size={26}
               customBg={rgba(theme.currentTheme.dockColor, 0.5)}
             >
               <Icons name="MoreHorizontal" />
-            </IconButton>
+            </IconButton> */}
           </Flex>
         </Flex>
       </Flex>

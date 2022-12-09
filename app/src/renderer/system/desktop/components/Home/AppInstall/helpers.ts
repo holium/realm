@@ -60,9 +60,7 @@ export const resumeSuspendLabel = (status: InstallStatus) => {
 export const handleResumeSuspend = (desk: string, status: InstallStatus) => {
   if (status === InstallStatus.installed) {
     SpacesActions.suspendApp(desk);
-    console.log('Suspending app', desk);
   } else {
     SpacesActions.reviveApp(desk);
-    console.log('Reviving app', desk);
   }
 };
