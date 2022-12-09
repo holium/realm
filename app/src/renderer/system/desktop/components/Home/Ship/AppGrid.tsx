@@ -124,7 +124,6 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
               ...installRow,
             ]}
             onAppClick={(selectedApp: AppType) => {
-              SpacesActions.addRecentApp(currentSpace.path, selectedApp.id);
               DesktopActions.openAppWindow(
                 currentSpace.path,
                 toJS(selectedApp)

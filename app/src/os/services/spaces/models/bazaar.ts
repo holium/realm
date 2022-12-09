@@ -175,6 +175,8 @@ export const NewBazaarStore = types
     addingAlly: types.map(types.string),
     devAppMap: types.map(DevAppModel),
     treatiesLoaded: types.optional(types.boolean, false),
+    recentApps: types.array(types.string),
+    recentDevs: types.array(types.string),
   })
   .actions((self) => ({
     // Updates
@@ -281,6 +283,26 @@ export const NewBazaarStore = types
     _treatiesLoaded() {
       self.loadingTreaties = false;
       self.treatiesLoaded = !self.treatiesLoaded;
+    },
+    addRecentApp(appId: string) {
+      // keep no more than 5 recent app entries
+      if (self.recentApps.length >= 5) {
+        self.recentApps.pop();
+      }
+      // move the app up to the top if it already exists in the list
+      const idx = self.recentApps.findIndex((item) => item === appId);
+      if (idx !== -1) self.recentApps.splice(idx, 1);
+      // add app to front of list
+      self.recentApps.splice(0, 0, appId);
+    },
+    addRecentDev(shipId: string) {
+      // keep no more than 5 recent app entries
+      if (self.recentDevs.length >= 5) {
+        self.recentDevs.pop();
+      }
+      const idx = self.recentDevs.findIndex((item) => item === shipId);
+      if (idx !== -1) self.recentDevs.splice(idx, 1);
+      self.recentDevs.splice(0, 0, shipId);
     },
     installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
       try {
@@ -464,10 +486,10 @@ export const NewBazaarStore = types
       return Array.from(self.devAppMap.values()) || [];
     },
     getRecentApps() {
-      return [];
+      return self.recentApps.map((appId) => self.catalog.get(appId));
     },
     getRecentDevs() {
-      return [];
+      return self.recentDevs;
     },
     getAllies() {
       return Array.from(Object.values(getSnapshot(self.allies)));

@@ -820,16 +820,6 @@
             %ames  (some ship.location.glob-reference.href.docket.app)
           ==
       ==
-    ++  set-grid-index-2
-      |=  [=app-id:store =grid-index:store]
-      ^-  [index=@ud =grid-index:store]
-      =/  grid-list         (sort-grid:helpers:bazaar grid-index)
-      =/  current-index     (find [app-id]~ grid-list)
-      ?~  current-index
-        =/  new-index         (lent grid-list)
-        =.  grid-index        (~(put by grid-index) [new-index app-id])
-        [new-index grid-index]
-      [u.current-index grid-index]
     ::
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
@@ -1235,12 +1225,12 @@
             %suspended
           status
         =.  docket.u.app          docket.charge
+        =.  config.u.app          (config:scry:bazaar:core app-id)
         u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
-      =/  grid                    (set-grid-index-2:helpers:bazaar app-id grid-index.state)
-      =.  grid-index.state        grid-index.grid
+      =.  grid-index              (set-grid-index:helpers:bazaar app-id grid-index.state)
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app index.grid grid-index.state])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app grid-index.state])]~
   ::
   ++  rem
     |=  [=desk]
@@ -1255,7 +1245,7 @@
     ::  remove from grid index
     =.  grid-index.state      (rem-grid-index:helpers:bazaar desk grid-index.state)
     :_  state
-    [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app 0 grid-index.state])]~
+    [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~
   --
 ::
 ::  $security. member/permission checks
