@@ -8,6 +8,7 @@
 /+  res=resource
 =<  [sur .]
 =,  sur
+!:
 |%
 +$  hark-places   (map place:hark stats:hark)
 ::
@@ -410,6 +411,8 @@
   ::
   ++  is-our-message
     |=  [our=ship =chat:sur]
+    ^-  ?
+    ?~  messages.chat  %.n
     =/  message       (rear messages.chat)
     =(author.message our)
   ::
@@ -519,6 +522,7 @@
           [%create-group-dm cr-gp-dm]
           [%send-group-dm gp-dm]
           [%read-group-dm read-group-dm]
+          :: [%set-groups-target nu]
       ==
     ::
     ++  read-dm
@@ -705,7 +709,7 @@
     ^-  json
     %-  pairs
     :~ 
-        ['avatar' ?~(avatar.mtd ~ s+u.avatar.mtd)]
+        ['avatar' ?~(avatar.mtd s+'' s+u.avatar.mtd)]
         ['nickname' s+nickname.mtd]
         ['color' s+(scot %ux color.mtd)]  ::  todo convert this to hex string here
     ==

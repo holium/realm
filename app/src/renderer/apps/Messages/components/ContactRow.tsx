@@ -69,7 +69,7 @@ export const MessagePreview = styled(motion.div)`
 export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
   const isGroup = dm.type === 'group' || dm.type === 'group-pending';
-  const isPending = dm.type === 'pending' || dm.type === 'pending';
+  const isPending = dm.type === 'pending' || dm.type === 'group-pending';
 
   const [acceptLoading, setAcceptLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
@@ -89,7 +89,7 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
     if (isGroup) {
       let type = 'text';
       let lastMessage;
-      if (dm.lastMessage.length > 0) {
+      if (dm.lastMessage.length > 0 && !isPending) {
         const lastSender = dm.lastMessage[0];
         lastMessage = dm.lastMessage[1];
         type = Object.keys(lastMessage)[0];
