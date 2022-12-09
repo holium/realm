@@ -26,60 +26,14 @@ This will add a `urbit` folder to your local repo which is ignored by git.
 
 ```zsh
 # The -F will create a fake zod
-./urbit -F zod -B ../urbit/bin/multi-brass.pill
+./urbit -F zod
 
 # Optional:
 #   Fake bus for networking between fake ships
-./urbit -F bus -B ../urbit/bin/multi-brass.pill
+./urbit -F bus
 ```
 
-This will start booting a comet and may take a while.
-
-[See more docs for working with the developer environment.](https://urbit.org/docs/development/environment)
-
-#### Symbolic linking base-dev and garden-dev
-
-Now, you can symbolic link the urbit dev desks `base-dev` and `garden-dev`.
-
-```zsh
-cd urbit/pkg
-mkdir realm
-./symbolic-merge.sh base-dev realm
-./symbolic-merge.sh garden-dev realm
-
-#
-```
-
-In addition to the linkages to base-dev and garden-dev discussed above, you will also need a few additional files from landscape. You can either do a symbol merge of the entire landscape folder, or ensure that you've copied the following files from the landscape folder to the corresponding `./urbit/pkg/realm` folder.
-
-`Option 1` - Symbolically merge the landscape folder. **Note that this will copy lots of additional files that you will not need for the current version of realm.**
-
-```zsh
-./symbolic-merge.sh landscape realm
-```
-
-`Option 2` - Copy the following `./urbit/pkg/landscape` files to the corresponding `./urbit/pkg/realm` folder:
-
-```zsh
-# app/group-store.hoon
-# lib/group-store.hoon
-# lib/resource.hoon
-# lib/migrate.hoon
-# lib/naive.hoon      # in arvo
-# lib/tiny.hoon       # in arvo
-# mar/css.hoon
-# mar/group/update.hoon
-# mar/group/view-action.hoon
-# mar/group/view-update.hoon
-# mar/group/action.hoon
-# mar/group/update-0.hoon
-# sur/group/hoon
-# sur/resource.hoon
-# sur/dice.hoon       # in arvo
-# sur/group-store.hoon
-# sur/group-view.hoon
-# sur/invite-store.hoon
-```
+[See more docs for working with the developer environment.](https://developers.urbit.org/guides/core/environment)
 
 Now, you want to start your dev ship `zod`.
 
@@ -89,54 +43,82 @@ Now, you want to start your dev ship `zod`.
 
 Once started, you should run the following commands on your ship.
 
+For `%realm`:
+
 ```hoon
-> |merge %realm our %base
->=
+> |merge %realm our %garden
 > |mount %realm
->=
 ```
 
 Then we want to delete the contents of the mounted folder now in `ships/zod/realm`.
 
 ```zsh
-cd ships/zod
-sudo rm -r realm/*
+sudo rm -r ships/zod/realm/*
 ```
 
-And finally, we will copy the symlinked folder from our `urbit/pkg` folder from `ships/zod`.
+For `%courier`:
+
+```hoon
+> |merge %courier our %garden
+> |mount %courier
+```
 
 ```zsh
-# make sure you are in ships/zod
-cp -RL ../../urbit/pkg/realm/* realm
+sudo rm -r ships/zod/courier/*
 ```
 
 ### Copying the dev desk to a fake ship.
 
-There is a script called `./copy-desk.sh` that takes a ship name and app name.
+There is a script called `./copy-desk.sh` that takes a ship name and app name. It should also copy all files needed from `base`, `garden`, and `landscape`.
+
+First we need to mount `base`, `garden`, and `landscape` in `~zod` so our script can copy dependencies over.
+
+```hoon
+|mount %base
+|mount %garden
+|mount %landscape
+```
+
+Now we can run the copy script.
 
 ```zsh
 # Only have to run the first time
 chmod +x ./copy-desk.sh
 # this will copy the desk
 ./copy-desk.sh zod realm
+./copy-desk.sh zod courier
 ```
 
 This is how we can update and write new code from a dev folder. To have the updates take effect in our ship, run:
 
 ```hoon
 |commit %realm
+|commit %courier
 ```
 
-#### Installing %realm
+#### Installing %realm and %courier
 
 ```hoon
-|install our %realm
+|revive %realm
+|revive %courier
 ```
 
-#### Starting/Running %realm
+#### Hosting Realm for other test ships
+
+The best way to update all your test ships at once is to publish `%realm` from `~zod`.
+
+From `~zod`:
 
 ```hoon
-|rein %realm [& %realm]
+:treaty|publish %realm
+:treaty|publish %courier
+```
+
+From `~bus`:
+
+```hoon
+|install ~zod %realm
+|install ~zod %courier
 ```
 
 #### Allow origin (CORS)

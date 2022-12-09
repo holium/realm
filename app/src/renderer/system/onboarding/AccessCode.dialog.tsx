@@ -1,5 +1,4 @@
 import { FC, useState, useCallback } from 'react';
-// @ts-expect-error its there...
 import {
   Grid,
   Text,
@@ -14,6 +13,15 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import _ from 'lodash';
 import { AccessCode } from 'os/api/holium';
+import { useServices } from 'renderer/logic/store';
+
+const stubAccessCode = {
+  title: 'Combine DAO',
+  description: 'Investing in Urbit companies together since 2022.',
+  image: 'https://pbs.twimg.com/profile_images/1488203488655917060/9pP-2qTZ_400x400.jpg',
+  id: 'combine-dao',
+  type: 'DAO',
+};
 
 const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
   const accessCode = props.accessCode;
@@ -55,6 +63,7 @@ const AccessCodeDisplay = (props: { accessCode: AccessCode }) => {
 };
 
 const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
+  const { theme } = useServices();
   const [inputText, setInputText] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
   const [accessCode, setAccessCode] = useState<AccessCode | null>(null);
@@ -66,14 +75,24 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
       return;
     }
 
-    setCodeLoading(true);
-    const result = await OnboardingActions.getAccessCode(code);
-    setCodeLoading(false);
+    // setCodeLoading(true);
+    // const result = await OnboardingActions.getAccessCode(code);
+    // setCodeLoading(false);
 
-    setAccessCode(result.accessCode);
-    result.invalid
-      ? setErrorMessage('Invalid access code.')
-      : setErrorMessage('');
+    // setAccessCode(result.accessCode);
+    // result.invalid
+    //   ? setErrorMessage('Invalid access code.')
+    //   : setErrorMessage('');
+
+    // TODO: Remove when fixed
+    setCodeLoading(true);
+    if (code === stubAccessCode.id) {
+      setAccessCode(stubAccessCode);
+      setErrorMessage('');
+    } else {
+      setErrorMessage('Invalid access code.');
+    }
+    setCodeLoading(false);
   }
   const debouncedGetAccessCode = useCallback(
     _.debounce(getAccessCode, 500, { leading: true }),
@@ -109,7 +128,11 @@ const AccessCode: FC<BaseDialogProps> = observer((props: BaseDialogProps) => {
           alignItems="center"
           justifyContent="center"
         >
-          <Icons name="Holium" size={30} color="black" />
+          <Icons
+            name="Holium"
+            size={30}
+            color={theme.currentTheme.mode === 'light' ? 'black' : 'white'}
+          />
           {accessCode ? (
             <Text ml={12} fontSize={3} fontWeight={400} color="text.success">
               Access code found!

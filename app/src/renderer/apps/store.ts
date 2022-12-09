@@ -248,6 +248,8 @@ export function useTrayApps() {
 OSActions.onBoot((_event: any, response: any, session: any) => {
   console.log('session', session);
   if (response.loggedIn && response.ship) {
+    // This resets the wallet app to the default state
+    // applySnapshot(trayStore.walletApp, walletAppDefault);
     // RoomsActions.resetLocal();
     // RoomsActions.exitRoom();
     // LiveRoom.leave();
@@ -271,26 +273,6 @@ OSActions.onBoot((_event: any, response: any, session: any) => {
 OSActions.onConnected((_event: any, response: any) => {
   console.log('on connected', response);
   applySnapshot(trayStore.walletApp, walletAppDefault);
-
-  // if (LiveRoom.state === 'disconnected') {
-  //   console.log('LiveRoom.init in OSActions.onConnected ');
-  //   LiveRoom.init(response.ship.patp!);
-  // }
-  // if (response.rooms) {
-  //   // LiveRoom.init(response.ship.patp!);
-  //   console.log('OSActions.onConnected', response.rooms);
-  //   applySnapshot(trayStore.roomsApp, response.rooms);
-  //   if (trayStore.roomsApp.liveRoom) {
-  //     console.log(
-  //       '210: if (trayStore.roomsApp.liveRoom) {',
-  //       trayStore.roomsApp.liveRoom
-  //     );
-  //     const { liveRoom } = trayStore.roomsApp;
-  //     if (liveRoom) {
-  //       LiveRoom.connect(liveRoom);
-  //     }
-  //   }
-  // }
 });
 
 // OSActions.onLogout((_event: any) => {

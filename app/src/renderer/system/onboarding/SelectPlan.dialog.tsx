@@ -1,6 +1,5 @@
 import { FC, useState } from 'react';
 import { darken, transparentize } from 'polished';
-// @ts-expect-error its there...
 import { Box, Sigil, Text, Flex, Icons, Button } from 'renderer/components';
 import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
@@ -113,7 +112,7 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
         <Flex flex={3} px={50} flexDirection="column" justifyContent="center">
           <SubscriptionTier
             title="Monthly subscription"
-            price={`$${planet.priceMonthly}/month`}
+            price={`$30/month`}
             selected={billingPeriod === 'monthly'}
             onClick={() => setBillingPeriod('monthly')}
           >
@@ -122,7 +121,7 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
           <SubscriptionTier
             mt={56}
             title="Annual subscription"
-            price={`$${planet.priceAnnual}/year`}
+            price={`$300/year`}
             selected={billingPeriod === 'annual'}
             onClick={() => setBillingPeriod('annual')}
           >

@@ -4,20 +4,20 @@
 |%
 
 +$  chat-type  ?(%group %dm %pending %group-pending)
-+$  source  ?(%graph-store %chatstead)
++$  source  ?(%graph-store %talk)
 ::
 ::  $message: a generalized message structure for Realm
 ::
 +$  graph-dm
-  $:  index=(list atom)     :: Can be either a group chat graph index or single dm-inbox graph index (or later chatstead)
+  $:  index=(list atom)     :: Can be either a group chat graph index or single dm-inbox graph index (or later %groups+%talk)
       author=ship
       time-sent=@da
       contents=(list content)
   ==
 ::
-::  TODO parse the new chatstead message
+::  TODO parse the new %talk message
 ::
-+$  chatstead-dm
++$  talk-dm
   $:  
     id=(list atom)    
     author=ship
