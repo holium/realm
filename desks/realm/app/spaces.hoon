@@ -426,10 +426,7 @@
       =.  spaces.state          (~(put by spaces.state) [path space])
       =.  membership.state      (~(put by membership.state) [path members])
       :_  state
-      :~
-        [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]
-        [%give %fact [/spaces ~] spaces-reaction+!>([%add space members])]
-      ==
+      [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]~
     ::
     --
   ++  helpers
