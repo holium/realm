@@ -145,7 +145,7 @@ const GroupLog = types
     path: types.string,
     to: types.array(types.string),
     type: types.enumeration(['group', 'group-pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     messages: types.array(GraphDM),
     metadata: types.array(ContactMetadata),
     outgoing: types.array(GraphDM),
@@ -192,7 +192,7 @@ const DMLog = types
     path: types.string,
     to: types.string,
     type: types.enumeration(['dm', 'pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     messages: types.array(GraphDM),
     metadata: ContactMetadata,
     outgoing: types.array(GraphDM),
@@ -243,7 +243,7 @@ const PreviewDM = types
     path: types.string,
     to: types.string,
     type: types.enumeration(['dm', 'pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: ContactMetadata,
@@ -275,7 +275,7 @@ const PreviewGroupDM = types
     path: types.string,
     to: types.array(types.string),
     type: types.enumeration(['group', 'group-pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: types.array(ContactMetadata),
@@ -329,6 +329,18 @@ export const CourierStore = types
   .actions((self) => ({
     rejectDmInvite: (path: string) => {},
     setNewPreview: (preview: DMPreviewType) => {
+      let prev;
+      if (preview.type === 'group' || preview.type === 'group-pending') {
+        prev = preview as PreviewGroupDMType;
+        prev.metadata.forEach((mtd: any) => {
+          mtd.color = cleanNounColor(mtd.color);
+        });
+      } else {
+        prev = preview as PreviewDMType;
+        prev.metadata.color = prev.metadata.color
+          ? cleanNounColor(prev.metadata.color)
+          : '#000';
+      }
       self.previews.set(preview.path, preview);
     },
     setNotificationUpdates: (update: any) => {
