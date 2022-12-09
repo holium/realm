@@ -24,18 +24,17 @@ import { SlipService } from '../slip.service';
 import { ContactStore, ContactStoreType } from './models/contacts';
 import { ChatStoreType } from './models/dms';
 import { CourierApi } from '../../api/courier';
-import { BeaconApi } from '../../api/beacon';
 import {
   CourierStore,
   CourierStoreType,
   PreviewGroupDMType,
 } from './models/courier';
 import { toJS } from 'mobx';
-import {
-  NotificationStore,
-  NotificationStoreType,
-} from './models/notifications';
-import { NotificationApi } from '../../api/notifications';
+// import {
+//   NotificationStore,
+//   NotificationStoreType,
+// } from './models/notifications';
+// import { NotificationApi } from '../../api/notifications';
 import { DiskStore } from '../base.store';
 
 // upload support
@@ -637,7 +636,7 @@ export class ShipService extends BaseService {
   }
 
   openedNotifications(_event: any) {
-    NotificationApi.opened(this.core.conduit!);
+    // NotificationApi.opened(this.core.conduit!);
   }
 
   async uploadFile(

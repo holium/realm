@@ -18,6 +18,7 @@ import { useTrayApps } from '../store';
 // import { ShipActions } from 'renderer/logic/actions/ship';
 import { lighten, rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { toJS } from 'mobx';
 
 export const AccountTrayApp = observer(() => {
   const { ship, theme, beacon } = useServices();
@@ -40,6 +41,8 @@ export const AccountTrayApp = observer(() => {
       //   });
     };
   }, []);
+
+  console.log('%o', { seen: toJS(beacon.seen), unseen: toJS(beacon.unseen) });
 
   const openSettingsApp = () => {
     DesktopActions.openAppWindow('', nativeApps['os-settings']);

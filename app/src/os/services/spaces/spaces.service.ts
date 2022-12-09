@@ -303,6 +303,7 @@ export class SpacesService extends BaseService {
       this.models.bazaar.loadDevApps(devApps);
     }
     this.models.beacon = beaconStore.model;
+    this.models.beacon.load(this.core!.conduit);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {

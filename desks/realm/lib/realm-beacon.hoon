@@ -60,13 +60,13 @@
     ?-  -.vi
       ::
         %all
-      (yarns-js:encode yarns.vi)
+      (notes-js:encode notes.vi)
       ::
         %seen
-      (yarns-js:encode yarns.vi)
+      (notes-js:encode notes.vi)
       ::
         %unseen
-      (yarns-js:encode yarns.vi)
+      (notes-js:encode notes.vi)
       ::
     ==
   --
@@ -75,27 +75,28 @@
   =,  enjs:format
   |%
   ::
-  ++  yarns-js
-    |=  ys=(map id:h yarn:h)
+  ++  notes-js
+    |=  ns=(map id:h note:store)
     ^-  json
     %-  pairs
-    %+  turn  ~(tap by ys)
-    |=  [i=id:h y=yarn:h]
-    [(scot %uv i) (yarn-js y)]
+    %+  turn  ~(tap by ns)
+    |=  [i=id:h n=note:store]
+    [(scot %uv i) (note-js n)]
   ::
-  ++  yarn-js
-    |=  y=yarn:h
+  ++  note-js
+    |=  n=note:store
     ^-  json
     %-  pairs
-    :~  id/s/(scot %uv id.y)
-        time/(time tim.y)
-        con/a/(turn con.y content-js)
+    :~  id/s/(scot %uv id.n)
+        time/(time tim.n)
+        content/a/(turn content.n content-js)
+        seen/b/seen.n
     ==
   ::
   ++  content-js
     |=  c=content:h
     ^-  json
-    ?@  c  s/c
+    ?@  c  (frond text/s/c)
     ?-  -.c
       %ship  (frond ship/s/(scot %p p.c))
       %emph  (frond emph/s/p.c)

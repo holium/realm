@@ -5,6 +5,7 @@
   $:  id=@uvH                         :: note id (from hark)
       content=(list content:hark)     :: content as markdown (cord)
       tim=time                        :: note time sent
+      seen=?                          :: seen/unseen
   ==
 ::
 +$  action
@@ -18,9 +19,9 @@
   ==
 ::
 +$  view
-  $%  [%all yarns=(map id:hark yarn:hark)]
-      [%seen yarns=(map id:hark yarn:hark)]
-      [%unseen yarns=(map id:hark yarn:hark)]
+  $%  [%all notes=(map id:hark note)]
+      [%seen notes=(map id:hark note)]
+      [%unseen notes=(map id:hark note)]
   ==
 --
 

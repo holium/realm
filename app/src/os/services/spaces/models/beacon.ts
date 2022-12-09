@@ -29,7 +29,7 @@ export type AllStatsModelType = Instance<typeof AllStatsModel>;
 
 export const NotificationModel = types
   .model('BeaconNotificationModel', {
-    id: types.string,
+    id: types.identifier,
     // title: types.array(NotificationContentTypes),
     // markdown
     content: types.array(NotificationContentTypes),
@@ -43,15 +43,33 @@ export type NotificationModelType = Instance<typeof NotificationModel>;
 
 export const NotificationStore = types
   .model('BeaconNotificationStore', {
-    unseen: types.array(NotificationModel),
-    seen: types.array(NotificationModel),
+    notes: types.map(NotificationModel),
+    // unseen: types.array(NotificationModel),
+    // seen: types.array(NotificationModel),
     all: types.array(AllStatsModel),
-    recent: types.array(NotificationModel),
+    // recent: types.array(NotificationModel),
   })
+  .views((self) => ({
+    get seen() {
+      return Array.from(self.notes.values()).filter(
+        (note: NotificationModelType) => {
+          return note.seen;
+        }
+      );
+    },
+    get unseen() {
+      return Array.from(self.notes.values()).filter(
+        (note: NotificationModelType) => {
+          return !note.seen;
+        }
+      );
+    },
+  }))
   .actions((self) => ({
-    fetchRecent: flow(function* (conduit: Conduit) {
+    load: flow(function* (conduit: Conduit) {
       try {
-        self.latest = yield BeaconApi.getLatest(conduit);
+        self.notes = yield BeaconApi.getAll(conduit);
+        console.log(self.notes);
       } catch (error) {
         console.error(error);
       }
@@ -79,6 +97,24 @@ export const NotificationStore = types
         );
       }
     },
+    _markSeen: flow(function* (conduit: Conduit, noteId: string) {
+      if (!self.notes.has(noteId)) return;
+      const note = self.notes.get(noteId);
+      self.notes.set(
+        noteId,
+        NotificationModel.create({
+          ...note,
+          seen: true,
+        })
+      );
+    }),
+    markSeen: flow(function* (conduit: Conduit, noteId: string) {
+      try {
+        return yield BeaconApi.markSeen(conduit, noteId);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
   }));
 
 export type NotificationStoreType = Instance<typeof NotificationStore>;

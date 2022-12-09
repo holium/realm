@@ -303,14 +303,27 @@
 ::  hark utils and helpers
 ++  harken
   |%
+  ++  to-notes
+    |=  [yarns=(map id:hark yarn:hark) seen=?]
+    ^-  (map id:hark note:store)
+    %-  ~(rep by yarns)
+    |=  [[=id:hark =yarn:hark] acc=(map id:hark note:store)]
+    (~(put by acc) id [id con.yarn tim.yarn seen])
+
   ::  combine yarns in carpet with yarns in blanket
   ::  note we want a map, but instead of using mop to sort
   ::   sort by time on front-end for now
   ++  stitch
     |=  [=carpet:hark blan=(unit blanket:hark)]
-    ^-  (map id:hark yarn:hark)
-    ?~  blan  yarns.carpet
-    (~(uni by yarns.u.blan) yarns.carpet)
+    ^-  (map id:hark note:store)
+    ::  convert yarns to notes
+    ::   carpet yarns are marked unseen
+    =/  unseen-notes  (to-notes yarns.carpet %.n)
+    ?~  blan  unseen-notes
+    ::  convert yarns to notes
+    ::   blanket yarns are marked unseen
+    =/  seen-notes    (to-notes yarns.u.blan %.y)
+    (~(uni by seen-notes) unseen-notes)
     :: ((mop id:hark yarn:hark) lte)
     :: %-  my
     :: %-  sort
