@@ -58,6 +58,7 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
       START_MINIMIZED: false,
+      AUTOUPDATE_FEED_URL: 'https://ghproxy.holium.xyz',
       INSTALL_MOON: '~hostyv:realm,courier,realm-wallet',
     }),
   ],
