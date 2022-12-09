@@ -522,6 +522,7 @@
           [%create-group-dm cr-gp-dm]
           [%send-group-dm gp-dm]
           [%read-group-dm read-group-dm]
+          :: [%set-groups-target nu]
       ==
     ::
     ++  read-dm

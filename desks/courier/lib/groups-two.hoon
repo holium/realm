@@ -101,7 +101,7 @@
 ++  accept-group-dm
   |=  [a=[%accept id=@uvH] =bowl:gall]
   ^-  (list card:agent:gall)
-  =/  crew          (get-crew id.a bowl)
+  =/  crew  (get-crew id.a bowl)
   =/  group-ships   (~(uni in team.crew) hive.crew)
   =/  new-grp-prev  [
         path=(spat /(scot %p our.bowl)/(scot %uv id.a))
@@ -126,10 +126,10 @@
 ++  handle-dm-invite
   |=  [=cage =bowl:gall]
   ^-  (list card:agent:gall)
-  =/  possible-fact   !<((set @p) q.cage)
-  =/  to-ship         -.possible-fact
-  =/  the-invite      (form-pending to-ship now.bowl (get-rolo bowl))
+  =/  possible-fact  !<(?(%~ [n=@p l=(set @p) r=(set @p)]) q.cage)
+  =/  to-ship  -.possible-fact
   ~&  >  "groups-two /dm/invited fact from {(scow %p to-ship)}"
+  =/  the-invite      (form-pending to-ship now.bowl (get-rolo bowl))
   [%give %fact [/updates ~] graph-dm-reaction+!>([%invite-dm the-invite])]~
 ++  handle-club-invite
   |=  [=cage =bowl:gall]
@@ -152,12 +152,12 @@
 ++  handle-dm-ui-fact
   |=  [=cage =bowl:gall state=state-1]
   ^-  (list card:agent:gall)
-  ~&  >  "groups-two /dm/ui fact {(scow %tas p.cage)}"
+  ~&  >  "groups-two /dm/ui fact %{(scow %tas p.cage)}"
   ?+  p.cage  ~
     %writ-diff
-      =/  diff              !<(diff:writs:c q.cage)
+      =/  diff  !<(diff:writs:c q.cage)
       =/  originating-ship  ^-(ship p.p.diff)
-      =/  new-dm            (chat-from-newest-writ originating-ship bowl)
+      =/  new-dm  (chat-from-newest-writ originating-ship bowl)
       (send-updates new-dm bowl state)
   ==
 ++  handle-club-ui-fact
@@ -166,10 +166,12 @@
   ~&  >  "groups-two /club/ui fact %{(scow %tas p.cage)}"
   ?+  p.cage  ~
     %writ-diff
-      =/  club-id   (need `(unit @uvH)`((slat %uv) `@t`-.+.+.wire))
-      =/  diff      !<(diff:writs:c q.cage)
-      =/  crew      (get-crew club-id bowl)
-      =/  new-dm    (chat-from-crew club-id crew bowl)
+      =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`-.+.+.wire)
+      ?~  club-id-unit  ~
+      =/  club-id       +:club-id-unit
+      =/  diff  !<(diff:writs:c q.cage)
+      =/  crew  (get-crew club-id bowl)
+      =/  new-dm  (chat-from-crew club-id crew bowl)
       (send-updates new-dm bowl state)
   ==
 ++  on-graph-action
@@ -191,12 +193,15 @@
       ^-  (list block:c)
       (murn contents.p into-chat-block-type)
     =/  delta-for-chat   [%add (memo:c ~ author.p time-sent.p [%story [blocks (snoc inlines [%break ~])]])]
-    =/  chat-diff        [[ship time-sent.p] delta-for-chat]
+    =/  chat-diff    [[ship time-sent.p] delta-for-chat]
+    ~&  >>  ['send-dm here:' chat-diff]
     [%pass / %agent [author.p %chat] %poke dm-action+!>([ship chat-diff])]~
   ++  read-dm
     |=  [=ship =bowl:gall]
     ~&  >  "signaling read-dm for {(scow %p ship)}"
-    [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-ship ship))]~
+    :~
+      [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-ship ship))]
+    ==
   ++  create-group-dm
     |=  [ships=(set ship) =bowl:gall]
     ~&  >  "creating group dm with "::{ships}
@@ -220,8 +225,9 @@
     ==
   ++  send-group-dm
     |=  [act=[=resource =post] =bowl:gall state=state-1]
-    =/  club-id       (need `(unit @uvH)`((slat %uv) `@t`name.resource.act))
-    =/  crew          (get-crew club-id bowl)
+    =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource.act)
+    ?~  club-id-unit  !!
+    =/  crew  (get-crew +:club-id-unit bowl)
     =/  group-ships   (~(uni in team.crew) hive.crew)
     =/  messages  :_  ~
     :*  index=~[now.bowl]
@@ -232,7 +238,7 @@
     =/  new-dm
     ^-  chat
     :*
-      path=(spat /(scot %p our.bowl)/(scot %uv club-id))
+      path=(spat /(scot %p our.bowl)/(scot %uv +:club-id-unit))
       to=group-ships
       type=?:((~(has in team.crew) our.bowl) %group %group-pending)
       source=%talk
@@ -242,25 +248,47 @@
     ~&  >  'giving /updates a dm-received'
     ~&  >  new-dm
     :-
-    [%pass / %agent [author.post.act %chat] %poke club-action+!>((create-club-action-from-courier-post club-id post.act))]
+    [%pass / %agent [author.post.act %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post.act))]
     (send-updates new-dm bowl state)
   ++  read-group-dm
     |=  [=resource =bowl:gall]
-    [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-resource resource))]~
+    :: ~&  %read-group-dm
+    :: ~&  resource
+    :~
+      [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-resource resource))]
+    ==
   --
+++  test-scry
+  |=  [a=@ =bowl:gall]
+  =/  =briefs:c
+    .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
+  :: ~&  briefs
+::  =/  s=(set ship)
+::    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/noun)
+::  ~&  s
+::  =/  s2=(set ship)
+::    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/invited/noun)
+::  ~&  s2
+::  =/  fs=(set flag:c)
+::    .^((set flag:c) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/chat/noun)
+::  ~&  fs
+::  =/  =writs:writs:c
+::    .^(writs:writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ~bus)/writs/newest/50/noun)
+::  ~&  writs
+  ~
 ++  on-watch
   |=  [=path =bowl:gall]
   ?+  path      !!
     [%updates ~]
-      ~&  'giving previews in response to on-watch g2'
+      ~&  'previews in on-watch g2'
       [%give %fact [/updates ~] graph-dm-reaction+!>([%previews (previews-for-inbox bowl)])]~
   ==
 ++  peek
   |=  [=path =bowl:gall =devices:notify]
   ^-  (unit (unit cage))
     ?>  =(our.bowl src.bowl)
-    ~&  "peeking groups-two"
-    ~&  path
+    :: ~&  "peeking groups-two"
+    :: ~&  path
     ?+  path  !!
       [%x %devices ~]
     ``notify-view+!>([%devices devices])
@@ -274,20 +302,22 @@
 ++  previews-for-inbox
   |=  [=bowl:gall]
   ^-  (list message-preview)
-  :: Get DMs from x/briefs scry
+    :: Get DMs from x/briefs scy
   =/  =briefs:c    .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
-  :: Get invited DMs from x/dm/invited scry
+    :: Get invited DMs from x/dm/invited scy
   =/  invited-dms  .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/invited/noun)
-  :: merge and return
-  (weld (previews-from-briefs briefs bowl) (previews-from-ship-set invited-dms bowl))
+  =/  prevs        (weld (previews-from-briefs briefs bowl) (previews-from-ship-set invited-dms bowl))
+  :: ~&  prevs
+  prevs
 ++  crew-messages
   |=  [id=@uvH =bowl:gall]
   ^-  chat
-  =/  rolo          (get-rolo bowl)
-  =/  crew          (get-crew id bowl)
-  :: TODO make this smarter than 999 hardcoded
-  =/  =writs:c      .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/999/noun)
-  =/  group-ships   (~(uni in team.crew) hive.crew)
+  =/  rolo  (get-rolo bowl)
+  =/  crew  (get-crew id bowl)
+  =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/999/noun)
+  =/  group-ships  (~(uni in team.crew) hive.crew)
+  :: ~&  writs
+  :: ~&  (messages-from-writs writs)
   :*
     path=(spat /(scot %p our.bowl)/(scot %uv id))
     to=group-ships
@@ -304,8 +334,8 @@
     .^((set ^ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/noun)
   =/  =writs:c
     ?.  (~(has in dmed) ship)  *writs:c
-    :: TODO make this smarter than 999 hardcoded
     .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ship)/writs/newest/999/noun)
+  :: ~&  (messages-from-writs writs)
   :*
     path=(spat /dm-inbox/(scot %p ship))
     to=(~(put in *(set ^ship)) ship)
@@ -345,6 +375,7 @@
             %chan   [%text '']
             %group  [%reference [%group flag.cite.block]]
             %desk   [%text '']
+            %bait   [%text '']
           ==
         ==
       ::  inline
@@ -393,7 +424,7 @@
       (turn ~(tap in team.crew) |=(=ship (form-contact-mtd rolo ship)))
     =/  our-in-team    (~(has in team.crew) our.bowl)
     =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv `@uvh`p.whom)/writs/newest/1/noun)
-    ~&  writs
+    :: ~&  writs
     =/  recent-msg    (snag 0 (messages-from-writs writs))
     :-  ~
     :*  path=(spat /(scot %p our.bowl)/(scot %uv p.whom))
@@ -420,6 +451,7 @@
         unread-count=count.brief
     ==
   ==
+::
 ++  get-newest-msg-as-list-content
   |=  [=ship =bowl:gall]
   ~&  %get-newest-msg-as-list-content
@@ -428,14 +460,17 @@
   =/  newest-msg  (snag 0 (tap:on:writs:c newest-msg-list))
   =/  memo  ^-(memo:c +.+.newest-msg)
   (transform-content content.memo author.memo)
+::
 ++  get-rolo
   |=  =bowl:gall
   ^-  rolodex
   .^(rolodex %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun)
+::
 ++  get-crew
   |=  [id=@uvH =bowl:gall]
   ^-  crew:club:c
   .^(crew:club:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/crew/noun)
+::
 ++  form-contact-mtd
     |=  [rolo=rolodex =ship]
     ^-  contact-mtd
@@ -450,9 +485,10 @@
       ?~  mtd  ''
       nickname.u.mtd
     [color avatar nickname]
+::
 ++  create-club-action-from-courier-post
     |=  [id=@uvH =post]
-    ~&  id
+    :: ~&  id
     ^-  action:club:c
     =/  inlines
       ^-  (list inline:c)
@@ -460,20 +496,23 @@
     =/  delta-for-chat   [%add (memo:c ~ author.post time-sent.post [%story [*(list) (snoc inlines [%break ~])]])]
     =/  writ-diff  [[author.post time-sent.post] delta-for-chat]
     [id `diff:club:c`[0 `delta:club:c`[%writ writ-diff]]]
+::
 ++  create-chat-remark-action-from-ship
     |=  [=ship]
     ^-  remark-action:c
     [^-(whom:c [%ship ship]) ^-(remark-diff:c [%read ~])]
+::
 ++  create-chat-remark-action-from-resource
     |=  [=resource]
     ^-  remark-action:c
     =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource)
     ?~  club-id-unit  !!
     [^-(whom:c [%club +:club-id-unit]) ^-(remark-diff:c [%read ~])]
+::
 ++  chat-from-crew
   |=  [id=@uvH =crew:club:c =bowl:gall]
   ^-  chat
-  =/  new-writs     .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/1/noun)
+  =/  new-writs  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv id)/writs/newest/1/noun)
   =/  group-ships   (~(uni in team.crew) hive.crew)
   =/  rolo          (get-rolo bowl)
   :*
@@ -484,6 +523,7 @@
     messages=(messages-from-writs new-writs)
     metadata=(turn ~(tap in group-ships) |=([s=ship] (form-contact-mtd rolo s)))
   ==
+::
 ++  chat-from-newest-writ
   |=  [=ship =bowl:gall]
   ^-  chat
@@ -496,13 +536,14 @@
     messages=(messages-from-writs new-writs)
     metadata=~[(form-contact-mtd (get-rolo bowl) ship)]
   ==
+::
 ++  propagate-briefs-fact
     |=  [cg=cage =bowl:gall state=state-1]
     ^-  (list card:agent:gall)
     ?+  p.cg   !!
       %chat-brief-update
         =/  the-fact      !<([whom:c brief:briefs:c] q.cg)
-        ~&  the-fact
+        :: ~&  the-fact
         =/  dm-received-cards
         ?-  -.-.the-fact
           %club
@@ -516,8 +557,8 @@
             (send-updates new-dm bowl state)
         ==
         =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl])
-        ~&  >  'the-preview in propagate-briefs-fact'
-        ~&  >  the-preview
+        :: ~&  >  'the-preview in propagate-briefs-fact'
+        :: ~&  >  the-preview
         ?~  the-preview  dm-received-cards
         ::  don't send the dm-received-cards, which may include a push
         ::  notification, if the unread-count is zero, because
@@ -528,6 +569,7 @@
         [%give %fact [/updates ~] graph-dm-reaction+!>([%previews [+.the-preview ~]])]
         dm-received-cards
     ==
+::
 ++  send-updates :: same underlying logic as old one, but just making the cards
   |=  [new-dm=chat =bowl:gall state=state-1]
   ^-  (list card:agent:gall)
@@ -538,7 +580,7 @@
   ==
   :: in those simple conditions, just return the %dm-received card as
   :: list of cards
-  ~&  "just giving dm-received fact"
+  :: ~&  "just giving dm-received fact"
   [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
   :: ELSE
   :: return the %dm-received card and the push-notification card
@@ -562,6 +604,7 @@
     [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
     ::  Send to onesignal
   ==
+::
 ++  form-pending
   |=  [=ship now=@da rolo=rolodex]
   ^-  message-preview

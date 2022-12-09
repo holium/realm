@@ -329,6 +329,18 @@ export const CourierStore = types
   .actions((self) => ({
     rejectDmInvite: (path: string) => {},
     setNewPreview: (preview: DMPreviewType) => {
+      let prev;
+      if (preview.type === 'group' || preview.type === 'group-pending') {
+        prev = preview as PreviewGroupDMType;
+        prev.metadata.forEach((mtd: any) => {
+          mtd.color = cleanNounColor(mtd.color);
+        });
+      } else {
+        prev = preview as PreviewDMType;
+        prev.metadata.color = prev.metadata.color
+          ? cleanNounColor(prev.metadata.color)
+          : '#000';
+      }
       self.previews.set(preview.path, preview);
     },
     setNotificationUpdates: (update: any) => {

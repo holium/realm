@@ -34,7 +34,7 @@
     ~&  %on-load
     =/  old=(unit versioned-state)
       (mole |.(!<(versioned-state vase)))
-    ~&  old
+    :: ~&  old
     ?^  old
       `this(state (migrate-state u.old)) 
     ~&  >>  'nuking old state'
@@ -98,8 +98,8 @@
     =/  cards=(list card)
       ?:  =(groups-target %2)
         (on-watch:groups-two path bowl)
-      ~&  "on-watch called in %courier"
-      ~&  path
+      :: ~&  "on-watch called in %courier"
+      :: ~&  path
       ?+    path      (on-watch:def path)
           [%updates ~]
         =/  dm-previews   (previews:gs:lib our.bowl now.bowl)
@@ -147,7 +147,7 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    ~&  wire
+    :: ~&  wire
     ?+    wire  (on-agent:def wire sign)
       [%graph-store ~]
         ?+    -.sign  (on-agent:def wire sign)
@@ -190,7 +190,7 @@
             ==
         ==
       [%g2 %club @ %ui ~]
-        ~&  -.sign
+        :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -204,7 +204,7 @@
             ::  [cards this]
         ==
       [%g2 %briefs ~]
-        ~&  -.sign
+        :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -217,13 +217,13 @@
               [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
             ==
           %fact
-            ~&  'groups-two /briefs fact'
-            ~&  sign
+            :: ~&  'groups-two /briefs fact'
+            :: ~&  sign
             [(propagate-briefs-fact:groups-two cage.sign bowl state) this]
             :: [whom:c brief:briefs:c]
         ==
       [%g2 %dm @ %ui ~]
-        ~&  -.sign
+        :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -236,7 +236,7 @@
             [(handle-dm-ui-fact:groups-two cage.sign bowl state) this]
         ==
       [%g2 %club %new ~]
-        ~&  -.sign
+        :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -252,7 +252,7 @@
             [(handle-club-invite:groups-two cage.sign bowl) this]
         ==
       [%g2 %dm %invited ~]
-        ~&  -.sign
+        :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -405,8 +405,8 @@
 ++  on-graph-update    ::  Handles graph-store updates
   |=  [upd=update:graph-store now=@da our=ship]
   ^-  (quip card _state)
-  ~&  "on-graph-update called"
-  ~&  upd
+  :: ~&  "on-graph-update called"
+  :: ~&  upd
   |^
   ?+  -.q.upd   `state
     %add-nodes
@@ -488,8 +488,8 @@
 ++  on-hook-action
   |=  [act=action:dm-hook-sur now=@da our=ship]
   ^-  (quip card _state)
-  ~&  "on-hook-action called"
-  ~&  act
+  :: ~&  "on-hook-action called"
+  :: ~&  act
   |^
   ?+  -.act                 `state
     %pendings               (pending-dm +.act)
@@ -539,7 +539,7 @@
 ++  set-groups-target-cards
     |=  [new-target=targetable-groups]
     ^-  (list card)
-    ~&  (crip (join ' ' `(list @t)`['setting groups target:' `@t`new-target ~]))
+    :: ~&  (crip (join ' ' `(list @t)`['setting groups target:' `@t`new-target ~]))
     ?-  new-target
       %1  ~ :: no cards to change for old groups
       %2
