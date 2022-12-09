@@ -1,6 +1,5 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
 import { rgba, darken } from 'polished';
 import { Flex, Grid, IconButton, Icons, Text } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
@@ -13,24 +12,14 @@ import { RoomInvite } from './Invite';
 import { RoomInfo } from './Info';
 import { useRooms } from '../useRooms';
 
-export interface BaseRoomProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
-export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
-  const { dimensions } = props;
+export const Room = observer(() => {
   const { ship, theme } = useServices();
-  const { roomsApp } = useTrayApps();
+  const { roomsApp, dimensions } = useTrayApps();
   const roomsManager = useRooms();
 
-  const { dockColor, windowColor, accentColor, inputColor, textColor, mode } =
-    theme.currentTheme;
+  const { dockColor, windowColor, accentColor, mode } = theme.currentTheme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const muted = roomsManager.protocol.local?.isMuted;
 
@@ -54,6 +43,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
   if (presentCount === 1) {
     peopleText = 'person';
   }
+
   return (
     <Grid.Column
       style={{ position: 'relative', height: dimensions.height }}
@@ -65,7 +55,7 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         hasBorder={false}
         zIndex={5}
         theme={{
-          ...props.theme,
+          ...theme,
           windowColor,
         }}
       >
@@ -138,7 +128,6 @@ export const Room: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
             color={roomView === 'info' ? accentColor : undefined}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              console.log('clicked room info button');
               roomView === 'info' ? setRoomView('voice') : setRoomView('info');
             }}
           >

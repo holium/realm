@@ -14,7 +14,6 @@ module.exports = {
       './lib/conduit/tsconfig.json',
       './lib/multiplayer/tsconfig.json',
       './lib/design-system/tsconfig.json',
-      './playground/ui/tsconfig.json',
       './tsconfig.eslint.json',
     ],
     ecmaVersion: 'latest',

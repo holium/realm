@@ -1,7 +1,6 @@
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { ThemeModelType } from 'os/services/theme.model';
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Flex,
   Grid,
@@ -10,7 +9,6 @@ import {
   Text,
   Input,
   TextButton,
-  Checkbox,
   Spinner,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
@@ -60,15 +58,9 @@ export const createRoomForm = (
     isPrivate,
   };
 };
-export interface BaseRoomProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
-  const { dimensions } = props;
+
+export const NewRoom = observer(() => {
+  const { dimensions } = useTrayApps();
   const { theme, spaces } = useServices();
   const [loading, setLoading] = useState(false);
   const { roomsApp } = useTrayApps();
@@ -99,7 +91,7 @@ export const NewRoom: FC<BaseRoomProps> = observer((props: BaseRoomProps) => {
         hasBorder={false}
         zIndex={5}
         theme={{
-          ...props.theme,
+          ...theme,
           windowColor,
         }}
       >

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -9,7 +9,6 @@ import {
   Tooltip,
   IconButton,
 } from 'renderer/components';
-import { ThemeModelType } from 'os/services/theme.model';
 import { RoomRow } from './components/RoomRow';
 import { Titlebar } from 'renderer/system/desktop/components/Window/Titlebar';
 import { useServices } from 'renderer/logic/store';
@@ -17,15 +16,9 @@ import { ProviderSelector } from './components/ProviderSelector';
 import { useRooms } from './useRooms';
 import { useTrayApps } from '../store';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
-export interface RoomListProps {
-  theme: ThemeModelType;
-  dimensions: {
-    height: number;
-    width: number;
-  };
-}
-export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
-  const { dimensions } = props;
+
+export const Rooms = observer(() => {
+  const { dimensions } = useTrayApps();
   const { spaces, theme } = useServices();
   const { windowColor } = theme.currentTheme;
   const [muted, setMuted] = useState(false);
@@ -51,7 +44,7 @@ export const Rooms: FC<RoomListProps> = observer((props: RoomListProps) => {
         hasBorder={false}
         zIndex={5}
         theme={{
-          ...props.theme,
+          ...theme,
           windowColor,
         }}
       >
