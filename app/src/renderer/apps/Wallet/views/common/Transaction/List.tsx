@@ -130,20 +130,19 @@ export const TransactionList = observer((props: TransactionListProps) => {
     (trans) => trans.status === 'pending'
   ).length;
 
-  // const [coinTransactions, setCoinTransactions] = useState(null);
-  useEffect(() => {
-    if (props.ethType !== 'ethereum' && props.ethType) {
-      const ourAddress = props.transactions[0].ourAddress;
-      // console.log('ourAddress', ourAddress, props.ethType);
-      WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
-        console.log
-      );
-    }
-  }, [props.ethType, props.transactions]);
-
-  const transactions = props.transactions.filter((trans) =>
-    props.ethType ? trans.ethType === props.ethType : true
-  );
+  let transactions = props.transactions;
+  if (props.ethType === 'ETH')  {
+    transactions = props.transactions.filter((tx) =>
+      props.ethType ? tx.ethType === props.ethType : true
+    );
+  }
+  if (props.ethType !== 'ETH' && props.ethType) {
+    transactions = transactions.filter((tx) => tx.theirAddress === props.ethType)
+    // console.log('ourAddress', ourAddress, props.ethType);
+    /*WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
+      console.log
+    );*/
+  }
 
   return (
     <>
