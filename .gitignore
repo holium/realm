@@ -106,6 +106,8 @@ dist
 .tern-port
 
 .DS_Store
+*/*.swp #vim editor files
+*.swp #vim editor files
 
 # Hide developer ships
 /comets
@@ -120,6 +122,8 @@ dist
 .env.moon2
 !.env.local-example
 build
+
+sync_app_code.sh
 
 # logs
 app/realmlog.txt

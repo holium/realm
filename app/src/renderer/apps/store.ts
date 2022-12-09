@@ -93,6 +93,49 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
+const walletAppDefault = {
+  navState: {
+    view: WalletView.NEW,
+    network: NetworkType.ETHEREUM,
+    btcNetwork: 'mainnet',
+  },
+  navHistory: [],
+  bitcoin: {
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  testnet: {
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  ethereum: {
+    network: 'gorli',
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    initialized: false,
+    conversions: {},
+  },
+  creationMode: 'default',
+  sharingMode: 'anybody',
+  ourPatp: '~zod',
+  lastInteraction: new Date(),
+  initialized: false,
+};
+
 export const trayStore = TrayAppStore.create({
   activeApp: null,
   // activeApp: 'account-tray',
@@ -107,48 +150,7 @@ export const trayStore = TrayAppStore.create({
   roomsApp: {
     currentView: 'list',
   },
-  walletApp: {
-    navState: {
-      view: WalletView.NEW,
-      network: NetworkType.ETHEREUM,
-      btcNetwork: 'mainnet',
-    },
-    navHistory: [],
-    bitcoin: {
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    testnet: {
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    ethereum: {
-      network: 'gorli',
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        blocked: [],
-        defaultIndex: 0,
-      },
-      initialized: false,
-      conversions: {},
-    },
-    creationMode: 'default',
-    sharingMode: 'anybody',
-    ourPatp: '~zod',
-    lastInteraction: new Date(),
-    initialized: false,
-  },
+  walletApp: walletAppDefault,
   dmApp: {
     currentView: 'dm-list',
   },
@@ -240,6 +242,8 @@ export function useTrayApps() {
 OSActions.onBoot((_event: any, response: any, session: any) => {
   console.log('session', session);
   if (response.loggedIn && response.ship) {
+    // This resets the wallet app to the default state
+    // applySnapshot(trayStore.walletApp, walletAppDefault);
     // RoomsActions.resetLocal();
     // RoomsActions.exitRoom();
     // LiveRoom.leave();
@@ -262,26 +266,7 @@ OSActions.onBoot((_event: any, response: any, session: any) => {
 // After boot, set the initial data
 OSActions.onConnected((_event: any, response: any) => {
   console.log('on connected', response);
-
-  // if (LiveRoom.state === 'disconnected') {
-  //   console.log('LiveRoom.init in OSActions.onConnected ');
-  //   LiveRoom.init(response.ship.patp!);
-  // }
-  // if (response.rooms) {
-  //   // LiveRoom.init(response.ship.patp!);
-  //   console.log('OSActions.onConnected', response.rooms);
-  //   applySnapshot(trayStore.roomsApp, response.rooms);
-  //   if (trayStore.roomsApp.liveRoom) {
-  //     console.log(
-  //       '210: if (trayStore.roomsApp.liveRoom) {',
-  //       trayStore.roomsApp.liveRoom
-  //     );
-  //     const { liveRoom } = trayStore.roomsApp;
-  //     if (liveRoom) {
-  //       LiveRoom.connect(liveRoom);
-  //     }
-  //   }
-  // }
+  applySnapshot(trayStore.walletApp, walletAppDefault);
 });
 
 // OSActions.onLogout((_event: any) => {
