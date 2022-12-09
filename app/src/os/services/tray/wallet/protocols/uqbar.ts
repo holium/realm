@@ -26,6 +26,9 @@ export class UqbarProtocol extends BaseProtocol {
   sendTransaction(signedTx: string): Promise<any> {
     throw new Error('Method not implemented.');
   }
+  getAsset(contract: string, addr: string, type?: string | undefined, tokenId?: string | undefined): Promise<Asset> {
+    throw new Error('Method not implemented.');
+  }
   getAssetBalance(contract: string, addr: string): Promise<number> {
     throw new Error('Method not implemented.');
   }
@@ -44,7 +47,7 @@ export class UqbarProtocol extends BaseProtocol {
   getFeePrice(): number | Promise<number> {
     throw new Error('Method not implemented.');
   }
-  getFeeEstimate(from: string, to: string, value: number): number | Promise<number> {
+  getFeeEstimate(from: string, to: string, value: string): number | Promise<number> {
     throw new Error('Method not implemented.');
   }
 

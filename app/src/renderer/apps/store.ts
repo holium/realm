@@ -138,10 +138,9 @@ const walletAppDefault = {
   lastInteraction: Date.now(),
   initialized: false,
   settings: {
-    networkSettings: {},
     passcodeHash: '',
   },
-}
+};
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,

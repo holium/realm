@@ -15,7 +15,7 @@ export class Wallet {
   
   watchUpdates(walletState: WalletStoreType) {
     const lastProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
-    lastProtocol.removeListener();
+    lastProtocol?.removeListener();
     this.currentProtocol = walletState.navState.protocol;
     this.protocols.get(this.currentProtocol)!.watchUpdates(walletState);
   }

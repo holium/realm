@@ -27,7 +27,7 @@ import {
   getSnapshot,
   castToSnapshot
 } from 'mobx-state-tree';
-import { ethers, utils } from 'ethers';
+import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from '@holium/realm-wallet/src/Wallet';
@@ -385,9 +385,9 @@ export class WalletService extends BaseService {
       [ProtocolType.UQBAR, new UqbarProtocol()],
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
+    this.wallet!.watchUpdates(this.state!);
 
     WalletApi.watchUpdates(this.core.conduit!, this.state!, () => this.wallet!.watchUpdates(this.state!));
-    this.wallet!.watchUpdates(this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -450,6 +450,7 @@ export class WalletService extends BaseService {
     if (this.state!.navState.network !== network) {
       this.state!.setNetwork(network);
     }
+    this.wallet!.watchUpdates(this.state!);
   }
 
   setProtocol(_event: any, protocol: ProtocolType) {
@@ -458,6 +459,7 @@ export class WalletService extends BaseService {
       this.state!.setProtocol(protocol);
       this.wallet!.watchUpdates(this.state!);
     }
+    this.wallet!.watchUpdates(this.state!);
   }
 
   async getRecipient(_event: any, patp: string): Promise<RecipientPayload> {
@@ -540,17 +542,17 @@ export class WalletService extends BaseService {
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
     const protocol = this.wallet!.protocols.get(this.state!.navState.protocol) as EthereumProtocol;
-    let gas_limit = "0x100000"
     const from = this.state!.ethereum.wallets.get(walletIndex)!.address
     const tx = {
       to,
       value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate(from, to, amount),//ethers.utils.hexlify(gas_limit), // 100000
+      gasLimit: await protocol.getFeeEstimate(from, to, amount),
       gasPrice: await protocol.getFeePrice(),
       nonce: await protocol.getNonce(from),
     };
     const signedTx = await this.signer!.signTransaction(path, tx);
     const hash = await this.wallet!.protocols.get(this.state!.navState.protocol).sendTransaction(signedTx);
+    console.log(hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -657,5 +659,6 @@ export class WalletService extends BaseService {
     (this.state!.navState.protocol !== ProtocolType.UQBAR)
     ? this.state!.setProtocol(ProtocolType.UQBAR)
     : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
+    this.wallet!.watchUpdates(this.state!);
   }
 }

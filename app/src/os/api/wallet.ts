@@ -199,7 +199,6 @@ export const handleWalletReactions = (
       const wallet = data.wallet;
       if (wallet.network === 'ethereum') {
         walletState!.ethereum.applyWalletUpdate(
-          walletState!.navState.protocol,
           wallet
         );
       } else if (wallet.network === 'bitcoin') {
@@ -225,20 +224,28 @@ export const handleWalletReactions = (
       break;
     case 'transaction':
       const transaction = data.transaction;
-      if (transaction.network == 'ethereum')
+      const network: NetworkStoreType = 
+        transaction.net === ProtocolType.ETH_MAIN
+        || transaction.net === ProtocolType.ETH_GORLI
+        || transaction.net === ProtocolType.UQBAR
+        ? NetworkStoreType.ETHEREUM
+        : transaction.net === ProtocolType.BTC_MAIN
+        ? NetworkStoreType.BTC_MAIN
+        : NetworkStoreType.BTC_TEST;
+      if (network === NetworkStoreType.ETHEREUM) {
         walletState!.ethereum.wallets.get(
           transaction.index
         )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-      else if (transaction.network == 'bitcoin') {
-        walletState!.ethereum.wallets.get(
-          transaction.index
-        )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-        // walletState!.wallets.get(NetworkStoreType.BTC_MAIN)!.wallets.get(transaction.index)!.applyTransactionUpdate(transaction);
       }
-      else if (transaction.network == 'btctest') {
+      else if (network === NetworkStoreType.BTC_MAIN) {
         walletState!.ethereum.wallets.get(
           transaction.index
-        )!.applyTransactions(transaction.net, transaction.transaction);
+        )!.applyTransactionUpdate(transaction.net, transaction.transaction);
+      }
+      else if (network === NetworkStoreType.BTC_TEST) {
+        /*walletState!.btctest.wallets.get(
+          transaction.index
+        )!.applyTransactions(transaction.net, transaction.transaction);*/
       }
       break;
     case 'settings':

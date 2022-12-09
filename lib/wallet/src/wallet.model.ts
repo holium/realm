@@ -489,7 +489,7 @@ const EthWallet = types
             formattedTransactions[transaction.hash].status !==
             previousTransactions[transaction.hash].status
           ) {
-            //            WalletApi.setTransaction(transaction);
+            // WalletApi.setTransaction(transaction);
           }
         }
       }
@@ -548,7 +548,7 @@ export const EthStore = types
             transactions: {}
           }
         };
-        this.applyWalletUpdate(self.protocol, walletUpdate);
+        this.applyWalletUpdate(walletUpdate);
       });
     },
     // pokes
@@ -558,7 +558,7 @@ export const EthStore = types
     setDefaultWallet(index: number) {
       self.settings.defaultIndex = index;
     },
-    applyWalletUpdate: flow(function* (protocol: ProtocolType, wallet: any) {
+    applyWalletUpdate: flow(function* (wallet: any) {
       let walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
@@ -591,10 +591,14 @@ export const EthStore = types
         const ethWallet = EthWallet.create(walletObj);
         self.wallets.set(wallet.key, ethWallet);
       }
-      for (const transaction in wallet.transactions) {
-        self.wallets
-          .get(wallet.key)!
-          .applyTransactionUpdate(protocol, transaction);
+      for (const protocol of Object.keys(wallet.transactions)) {
+        const protocolTransactions = wallet.transactions[protocol];
+        for (const transactionKey of Object.keys(protocolTransactions)) {
+          const transaction = protocolTransactions[transactionKey];
+          self.wallets
+            .get(wallet.key)!
+            .applyTransactionUpdate(protocol as ProtocolType, transaction);
+        }
       }
     }),
     setProtocol(protocol: ProtocolType) {
@@ -786,8 +790,6 @@ export const WalletStore = types
       const walletIndex = options?.walletIndex || self.navState.walletIndex;
       const detail = options?.detail;
       const action = options?.action;
-      const network = options?.network || self.navState.network;
-      const networkStore = options?.networkStore || self.navState.networkStore;
       const protocol = options?.protocol || self.navState.protocol;
       const lastEthProtocol = options?.lastEthProtocol || self.navState.lastEthProtocol;
 
