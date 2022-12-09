@@ -19,8 +19,14 @@
     ::
     ++  seen
       %-  ot
-      :~  [%id ni]
+      :~  [%id id]
       ==
+    ::
+    ++  slan  |=(mod=@tas |=(txt=@ta (need (slaw mod txt))))
+    ::
+    ++  id
+      ^-  $-(json @uvH)
+      (cu (slan %uv) so)
     --
   --
 ::

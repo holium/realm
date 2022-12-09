@@ -386,6 +386,7 @@
       :: =.  content.note      (crip markdown)
       =.  content.note      con.yarn
       =.  tim.note          tim.yarn
+      =.  seen.note         %.n
       :_  state
       :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%new-note note])]
       ==
@@ -414,8 +415,10 @@
       ^-  (unit yarn:hark)
       ?~  gop.rope  ~
       =/  par  u.gop.rope
+      %-  (slog leaf+"{<dap.bowl>}: {<par>}" ~)
       :: http://localhost/~/scry/hark/group/~lodlev-migdev/remote-group-1/quilt/1.json
-      =/  blan=blanket:hark  .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/[+.par]/noun)
+      :: =/  num  (crip (en-json:html (numb:enjs:format -.par)))
+      =/  blan=blanket:hark  .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/(scot %tas +.par)/noun)
       :: locate the yarn in the blanket
       =/  elems=(list [=id:hark =yarn:hark])
       %+  skim  ~(tap by yarns.blan)
