@@ -403,8 +403,9 @@ export class OnboardingService extends BaseService {
   async checkShipBooted(): Promise<boolean> {
     const { auth } = this.core.services.identity;
     let ships = await this.core.holiumClient.getShips(auth.accountId!);
+    console.log(ships);
     let ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
-    if (!ship.code) return false;
+    if (!ship || !ship.code) return false;
 
     // TODO: remove, session shouldn't be set yet here?
     // const session = this.core.getSession();

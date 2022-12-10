@@ -9,10 +9,10 @@ export const installLabel = (status: InstallStatus) => {
       return 'Install app';
     case InstallStatus.started:
       return 'Cancel install';
-    case InstallStatus.failed:
-      return 'Retry install';
+    // case InstallStatus.failed:
+    //   return 'Retry install';
     default:
-      return 'Cancel install';
+      return 'Uninstall app';
   }
 };
 
@@ -38,10 +38,29 @@ export const handleInstallation = (
     case InstallStatus.started:
       SpacesActions.uninstallApp(desk);
       return;
+    case InstallStatus.suspended:
+      SpacesActions.uninstallApp(desk);
+      return;
     case InstallStatus.failed:
-      SpacesActions.installApp(host!, desk);
+      SpacesActions.uninstallApp(desk);
       return;
     default:
       console.error('Unknown install status', status);
+  }
+};
+
+export const resumeSuspendLabel = (status: InstallStatus) => {
+  if (status === InstallStatus.installed) {
+    return 'Suspend app';
+  } else {
+    return 'Revive app';
+  }
+};
+
+export const handleResumeSuspend = (desk: string, status: InstallStatus) => {
+  if (status === InstallStatus.installed) {
+    SpacesActions.suspendApp(desk);
+  } else {
+    SpacesActions.reviveApp(desk);
   }
 };

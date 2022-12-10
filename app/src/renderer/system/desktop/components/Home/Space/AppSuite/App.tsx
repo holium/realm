@@ -13,7 +13,14 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
-import { handleInstallation, installLabel } from '../../AppInstall/helpers';
+import {
+  handleInstallation,
+  handleResumeSuspend,
+  installLabel,
+  resumeSuspendLabel,
+} from '../../AppInstall/helpers';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
+import { ShellActions } from 'renderer/logic/actions/shell';
 
 type AppEmptyProps = {
   isSelected: boolean;
@@ -60,39 +67,32 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
   if (app) {
     const isPinned = bazaar.isPinned(space.path, app.id);
     const weRecommended = bazaar.isRecommended(app.id);
-    const isUninstalled = app.installStatus === InstallStatus.uninstalled;
-    const isInstalling =
-      (app as UrbitAppType).installStatus !== InstallStatus.installed &&
-      !isUninstalled;
+    const installStatus =
+      ((app as UrbitAppType).installStatus as InstallStatus) ||
+      InstallStatus.installed;
+    const { isInstalling, isInstalled, isSuspended, isUninstalled } =
+      getAppTileFlags(installStatus);
 
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
       const appHost = (app as UrbitAppType).host;
-      return handleInstallation(
-        appHost,
-        app.id,
-        app.installStatus as InstallStatus
-      );
+      return handleInstallation(appHost, app.id, installStatus);
     };
+    const canSuspend =
+      (installStatus === InstallStatus.installed ||
+        installStatus === InstallStatus.suspended) &&
+      app.type === 'urbit';
+
     const menu = [];
-    if (isAdmin) {
-      menu.push({
-        label: 'Remove from suite',
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          SpacesActions.removeFromSuite(space.path, index);
-        },
-      });
-      menu.push({
-        label: isPinned ? 'Unpin' : 'Pin',
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          isPinned
-            ? SpacesActions.unpinApp(space.path, app.id)
-            : SpacesActions.pinApp(space.path, app.id, null);
-        },
-      });
-    }
+    menu.push({
+      label: isPinned ? 'Unpin' : 'Pin',
+      onClick: (evt: any) => {
+        evt.stopPropagation();
+        isPinned
+          ? SpacesActions.unpinApp(space.path, app.id)
+          : SpacesActions.pinApp(space.path, app.id, null);
+      },
+    });
     menu.push({
       label: weRecommended ? 'Unrecommend app' : 'Recommend app',
       onClick: (evt: any) => {
@@ -102,27 +102,53 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
           : SpacesActions.recommendApp(app.id);
       },
     });
+    menu.push({
+      label: 'App info',
+      disabled: app.type === 'dev',
+      onClick: (evt: any) => {
+        evt.stopPropagation();
+        ShellActions.openDialogWithStringProps('app-detail-dialog', {
+          appId: app.id,
+        });
+      },
+    });
+    if (isAdmin) {
+      menu.push({
+        label: 'Remove from suite',
+        onClick: (evt: any) => {
+          evt.stopPropagation();
+          SpacesActions.removeFromSuite(space.path, index);
+        },
+      });
+    }
     if (app.type === 'urbit') {
+      if (canSuspend) {
+        menu.push({
+          label: resumeSuspendLabel(installStatus),
+          section: 2,
+          disabled: false,
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            return handleResumeSuspend(app.id, installStatus);
+          },
+        });
+      }
       menu.push({
         label: installLabel(app.installStatus as InstallStatus),
         disabled: false,
-        section: 2,
+        section: !canSuspend ? 2 : undefined,
         onClick: (evt: any) => {
           evt.stopPropagation();
-          // console.log('install app => %o', app);
-          if (app.installStatus === InstallStatus.installed) {
-            SpacesActions.uninstallApp(app.id);
-          } else {
-            console.log(app);
-            if (app.host) {
-              SpacesActions.installApp(app.host, app.id);
-            }
-          }
+          if (!app.host) throw new Error('App host is undefined');
+          return handleInstallation(
+            app.host,
+            app.id,
+            app.installStatus as InstallStatus
+          );
         },
       });
     }
 
-    console.log(app.installStatus);
     return (
       <Box position="relative">
         {isUninstalled && (
@@ -135,9 +161,8 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
         <AppTile
           tileSize="xl1"
           app={app}
-          isAnimated={app.installStatus === InstallStatus.installed}
-          isUninstalled={isUninstalled}
-          isInstalling={isInstalling}
+          isAnimated={isInstalled}
+          installStatus={installStatus}
           isPinned={isPinned}
           isRecommended={weRecommended}
           allowContextMenu={true}

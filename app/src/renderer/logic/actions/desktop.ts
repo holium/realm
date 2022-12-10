@@ -1,6 +1,9 @@
 // const colors = ['#005050', '#000000', '#505050', '#000050', '#a05050'];
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
+
+import { SpacesActions } from './spaces';
+
 /**
  * DesktopActions for interfacing with core process
  */
@@ -38,7 +41,13 @@ export const DesktopActions = {
     return await window.electron.app.setPartitionCookies(partition, cookies);
   },
   openAppWindow: async (spacePath: string, app: any) => {
-    return await window.electron.os.desktop.openAppWindow(spacePath, app);
+    const result = await window.electron.os.desktop.openAppWindow(
+      spacePath,
+      app
+    );
+    // dont add recent apps unitl they are open
+    SpacesActions.addRecentApp(app.id);
+    return result;
   },
   toggleMinimized: async (spacePath: string, windowId: string) => {
     return await window.electron.os.desktop.toggleMinimized(

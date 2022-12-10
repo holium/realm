@@ -15,6 +15,7 @@ import { useAppInstaller } from './store';
 import { useServices } from 'renderer/logic/store';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
+import { toJS } from 'mobx';
 
 export const SearchModes = observer(() => {
   const { bazaar, theme } = useServices();
@@ -121,7 +122,7 @@ const AppInstallStart = observer(() => {
           Recent Developers
         </Text>
         <Flex flexDirection="column" gap={12}>
-          {renderDevs(bazaar.getRecentDevs(), theme.currentTheme)}
+          {renderDevs(bazaar.recentDevs, theme.currentTheme)}
         </Flex>
       </Flex>
     </>
@@ -130,6 +131,7 @@ const AppInstallStart = observer(() => {
 
 const renderApps = (space: string, apps: any, theme: any) => {
   const secondaryTextColor = rgba(theme.textColor, 0.4);
+  console.log(apps);
 
   if (!apps || apps.length === 0) {
     return <Text color={secondaryTextColor}>{`No apps found`}</Text>;
@@ -150,7 +152,7 @@ const renderApps = (space: string, apps: any, theme: any) => {
       app={app}
       descriptionWidth={450}
       onClick={() => {
-        DesktopActions.openAppWindow(space, app);
+        DesktopActions.openAppWindow(space, toJS(app));
         DesktopActions.setHomePane(false);
       }}
     />
@@ -166,22 +168,35 @@ const renderAppSummary = () => {
 };
 
 const renderDevs = (devs: any, theme: any) => {
+  const appInstaller = useAppInstaller();
   const secondaryTextColor = rgba(theme.textColor, 0.4);
 
   if (!devs || devs.length === 0) {
     return <Text color={secondaryTextColor}>{`No recent devs`}</Text>;
   }
-  return devs?.map((item: any, index: number) => (
-    <div key={index}>
-      <AppRow
-        caption={item.title}
-        app={item}
-        onClick={(app: any) => {
-          console.log('renderDevs', app);
+  const onProviderClick = (ship: string) => {
+    if (isValidPatp(ship)) {
+      appInstaller.setSearchMode('dev-app-search');
+      appInstaller.setSearchPlaceholder('Search...');
+      appInstaller.setSelectedShip(ship);
+      appInstaller.setSearchModeArgs([ship]);
+      appInstaller.setSearchString('');
+    }
+  };
+
+  return devs?.map((item: any, index: number) => {
+    return (
+      <ProviderRow
+        key={`provider-${index}`}
+        id={`provider-${index}`}
+        ship={item}
+        color={'#000'}
+        onClick={(ship: string) => {
+          onProviderClick(ship);
         }}
       />
-    </div>
-  ));
+    );
+  });
 };
 const renderAppSearch = (apps: any, theme: any) => {
   return (
@@ -204,6 +219,7 @@ const AppProviders: FC<any> = observer(() => {
       appInstaller.setSelectedShip(ship);
       appInstaller.setSearchModeArgs([ship]);
       appInstaller.setSearchString('');
+      SpacesActions.addRecentDev(ship);
     }
   };
   return (
