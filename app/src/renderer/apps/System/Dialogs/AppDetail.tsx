@@ -22,7 +22,7 @@ import {
   InstallStatus,
 } from 'os/services/spaces/models/bazaar';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { rgba } from 'polished';
+import { darken, rgba } from 'polished';
 import { IconPathsType } from 'renderer/components/Icons/icons';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -162,6 +162,7 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
                 value={
                   <LinkPreview
                     fontSize={15}
+                    customBg={darken(0.035, theme.currentTheme.windowColor)}
                     textColor={theme.currentTheme.accentColor}
                     link={app.website}
                     onClick={() => {
