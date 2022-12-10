@@ -28,6 +28,7 @@
   ::
   ++  on-init
     ^-  (quip card _this)
+    %-  (slog leaf+"{<dap.bowl>}: on-init" ~)
     :_  this
     :~  :: [%pass /hark-store %agent [our.bowl %hark-store] %watch /updates]
         [%pass /hark %agent [our.bowl %hark] %watch /ui]
@@ -147,7 +148,7 @@
           %kick
             ~&  >  "{<dap.bowl>}: hark kicked us, resubscribing..."
             :_  this
-            :~  [%pass /hark %agent [our.bowl %hark] %watch t.wire]
+            :~  [%pass /hark %agent [our.bowl %hark] %watch /ui]
             ==
       ::
           %fact
@@ -418,7 +419,13 @@
       %-  (slog leaf+"{<dap.bowl>}: {<par>}" ~)
       :: http://localhost/~/scry/hark/group/~lodlev-migdev/remote-group-1/quilt/1.json
       :: =/  num  (crip (en-json:html (numb:enjs:format -.par)))
-      =/  blan=blanket:hark  .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/(scot %tas +.par)/noun)
+      :: =/  blan=blanket:hark  .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/(scot %tas +.par)/latest/noun)
+      =/  car=carpet:hark  .^(carpet:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/(scot %tas +.par)/latest/noun)
+      ?:  =(stitch.car 0)  ~
+      :: http://localhost/~/scry/hark/all/quilt/5.json
+      =/  stch      (crip (en-json:html (numb:enjs:format stitch.car)))
+      =/  pth       /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/(scot %tas +.par)/quilt/[stch]/noun
+      =/  blan      .^(blanket:hark %gx pth)
       :: locate the yarn in the blanket
       =/  elems=(list [=id:hark =yarn:hark])
       %+  skim  ~(tap by yarns.blan)

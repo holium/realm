@@ -53,7 +53,7 @@ export const BeaconApi = {
         if ('new-note' in data) {
           beacon.newNotification(data['new-note']);
         } else if ('seen' in data) {
-          beacon._markSeen(data['seen']);
+          beacon._markSeen(data['seen'].id);
         }
       },
       onError: () => console.log('Subscription rejected'),

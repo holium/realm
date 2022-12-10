@@ -98,6 +98,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.remove-app': this.removeApp,
     'realm.spaces.bazaar.suspend-app': this.suspendApp,
     'realm.spaces.bazaar.revive-app': this.reviveApp,
+    'realm.spaces.beacon.seen': this.seen,
   };
 
   static preload = {
@@ -238,6 +239,8 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.suspend-app', appId),
     reviveApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.revive-app', appId),
+    seen: async (noteId: string) =>
+      await ipcRenderer.invoke('realm.spaces.beacon.seen', noteId),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -676,6 +679,10 @@ export class SpacesService extends BaseService {
   async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
     // return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
     // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  }
+
+  async seen(_event: IpcMainInvokeEvent, noteId: string) {
+    return await BeaconApi.markSeen(this.core.conduit!, noteId);
   }
 
   setSpaceWallpaper(spacePath: string, theme: any) {
