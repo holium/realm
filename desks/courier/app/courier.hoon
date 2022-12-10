@@ -52,6 +52,7 @@
     |^
     =^  cards  state
     ?+  mark  (on-poke:def mark vase)
+      %test  [(test-scry:groups-two 0 bowl) state]
       %accept-dm
         ?-  groups-target
           %1
@@ -190,7 +191,6 @@
             ==
         ==
       [%g2 %club @ %ui ~]
-        :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -200,11 +200,10 @@
             ~&  >  "{<dap.bowl>}: groups-two /club/id/ui kicked us, giving up..."
             `this
           %fact
+            ~&  ['club fact' cage.sign]
             [(handle-club-ui-fact:groups-two wire cage.sign bowl state) this]
-            ::  [cards this]
         ==
       [%g2 %briefs ~]
-        :: ~&  -.sign
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
             ?~  p.sign  `this
@@ -217,8 +216,8 @@
               [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
             ==
           %fact
-            :: ~&  'groups-two /briefs fact'
-            :: ~&  sign
+            ~&  'groups-two /briefs fact'
+            ~&  cage.sign
             [(propagate-briefs-fact:groups-two cage.sign bowl state) this]
             :: [whom:c brief:briefs:c]
         ==
