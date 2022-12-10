@@ -58,7 +58,6 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   async onSignal(data: any, mark: string) {
-    await this.delay(1000);
     if (mark === 'rooms-v2-view') {
       if (data['session']) {
         // "session" is sent on initial /lib subscription
@@ -110,12 +109,12 @@ export class RealmProtocol extends BaseProtocol {
               // if we don't have a peer connection yet, we need to create one
               remotePeer.createConnection();
               remotePeer.peerSignal(payload.data);
-            } else if (remotePeer.status === 'closed') {
-              console.log('remote peer status closed')
+//            } else if (remotePeer.status === 'closed') {
+//              console.log('remote peer status closed')
               // if we have a peer connection but it's closed, we need to recreate it
-              remotePeer.peer.destroy();
-              remotePeer.createConnection();
-              remotePeer.peerSignal(payload.data);
+//              remotePeer.peer.destroy();
+//              remotePeer.createConnection();
+//              remotePeer.peerSignal(payload.data);
             } else {
               // we have a peer connection and it's open, so we can just pass the signal to it
               remotePeer.peerSignal(payload.data);
@@ -512,9 +511,6 @@ export class RealmProtocol extends BaseProtocol {
         },
       });
     }
-  }
-  delay(time: number) {
-    return new Promise(resolve => setTimeout(resolve, time));
   }
 }
 
