@@ -3,7 +3,7 @@
 ::  Friend list management within Realm
 ::
 /-  store=friends, membership-store=membership
-/+  dbug, default-agent, lib=friends, agentio
+/+  dbug, default-agent, lib=friends
 |%
 +$  card  card:agent:gall
 +$  versioned-state  $%(state-0)
@@ -19,7 +19,6 @@
       def   ~(. (default-agent this %.n) bowl)
       core  ~(. +> [bowl ~])
       cc    |=(cards=(list card) ~(. +> [bowl cards]))
-      io    ~(. agentio bowl)
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -30,7 +29,8 @@
     ::
     ?.  has-contact-store:core  [cards this]
     :_  this(friends (rolodex-to-friends:lib friends rolodex:core))
-    (welp cards [(~(watch-our pass:io /contacts) %contact-store /all)]~)
+    %+  welp  cards
+    [%pass /contacts %agent [our.bowl %contact-store] %watch /all]~
   ::
   ++  on-save
     ^-  vase
@@ -70,11 +70,9 @@
           [%all ~]
         ::  only host should get all updates
         ?>  =(our.bowl src.bowl)
-        :~  %+  fact:io 
-              :-  %friends-reaction
-              !>([%friends (non-contacts:core friends)])
-            ~[/all]
-        ==
+        =;  cage
+          [%give %fact ~[/all] cage]~
+        friends-reaction+!>([%friends (non-contacts:core friends)])
       ==
     [cards this]
   ::
@@ -105,7 +103,8 @@
       `this
         %kick
       ~&  >  "{<dap.bowl>}: kicked, resubscribing..."
-      :_(this [(~(watch-our pass:io /contacts) %contact-store /all)]~)
+      :_  this
+      [%pass /contacts %agent [our.bowl %contact-store] %watch /all]~
         %fact
       ?.  =(p.cage.sign %contact-update-0)  (on-agent:def wire sign)
       =/  upd  !<(update:store q.cage.sign)
@@ -136,7 +135,6 @@
   ++  on-fail     on-fail:def
   --
 |_  [=bowl:gall cards=(list card)]
-+*  io    ~(. agentio bowl)
 ++  core  .
 ++  abet  [(flop cards) state]
 ++  emit  |=(=card core(cards [card cards]))
@@ -157,7 +155,6 @@
   |=  =ship
   ^-  _core
   |^
-  =*  poke-other  ~(poke-other pass /)
   ?>  =(our.bowl src.bowl)
   ~&  >  ['adding friend' ship]
   =/  ufren  (~(get by friends) ship)
@@ -169,28 +166,36 @@
     =.  core
       :: If fren is follower, confirm new frenship
       ?.  =(%follower status.u.ufren)  core
-      (emit (poke-other ship friends-action+!>([%yes-fren ~])))
-    (emit (fact:io friends-reaction+!>([%new-friend ship fren]) ~[/all]))
+      %-  emit
+      =/  dock  [ship dap.bowl]
+      =/  cage  friends-action+!>([%yes-fren ~])
+      [%pass / %agent dock %poke cage]
+    %-  emit
+    [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
   :: If the fren is not added yet
   =/  fren     [.(status %following)]:*friend:store
   =.  friends  (~(put by friends) ship fren)
   %-  emil
   %+  welp  contact-cards
-  :~  (poke-other ship friends-action+!>([%be-fren ~]))
-      (fact:io friends-reaction+!>([%new-friend ship fren]) ~[/all])
+  :~  =/  dock  [ship dap.bowl]
+      =/  cage  friends-action+!>([%be-fren ~])
+      [%pass / %agent dock %poke cage]
+      [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
   ==
   ++  contact-cards
     ^-  (list card)
     %+  welp
+      :: allow ship to view our contact info
       ?:  contact-is-public:core  ~
-      :_  ~
-      %+  ~(poke-our pass:io /)
-        %contact-store
-      contact-update-0+!>([%allow %group ship %'']) 
-    :_  ~
-    %+  ~(poke pass:io /)
-      [ship %contact-push-hook]
-    contact-share+!>([%share our.bowl]) 
+      =/  dock  [our.bowl %contact-store]
+      =/  ships  (~(put in *(set ^ship)) ship)
+      =/  cage  contact-update-0+!>([%allow %ships ships])
+      [%pass / %agent dock %poke cage]~
+    ::
+    :: add ourselves to ship's contacts
+    =/  dock  [ship %contact-hook]
+    =/  cage  contact-ship-add+!>(our.bowl)
+    [%pass / %agent dock %poke cage]~
   --
 ::
 ++  add-frens
@@ -204,44 +209,50 @@
   |=  [=ship pinned=? tags=friend-tags:store]
   ^-  _core
   ?>  =(our.bowl src.bowl)
-  =/  fren                [.(pinned pinned, tags tags)]:(~(got by friends) ship)
+  =/  fren                (~(got by friends) ship)
+  =.  fren                fren(pinned pinned, tags tags)
   =.  friends             (~(put by friends) ship fren)
-  (emit (fact:io friends-reaction+!>([%friend ship fren]) ~[/all]))
+  %-  emit
+  [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
 ::
 ++  remove-fren
   |=  =ship
   ^-  _core
-  =*  poke-other          ~(poke-other pass /)
   ?>  =(our.bowl src.bowl)
   =.  friends             (~(del by friends) ship)
   %-  emil
-  :~  (poke-other ship friends-action+!>([%bye-fren ~]))
-      (fact:io friends-reaction+!>([%bye-friend ship]) ~[/all])
+  :~  =/  dock  [ship dap.bowl]
+      =/  cage  friends-action+!>([%bye-fren ~])
+      [%pass / %agent dock %poke cage]
+      [%give %fact ~[/all] friends-reaction+!>([%bye-friend ship])]
   ==
 ::
 :: ship confirms it is your follower
 ++  be-fren
   |=  =ship
   ^-  _core
-  =*  poke-other          ~(poke-other pass /)
   ?<  =(our.bowl src.bowl)
   ?~  ufren=(~(get by friends) ship)
     =/  fren              [.(status %follower)]:*friend:store
     =.  friends           (~(put by friends) ship fren)
-    (emit (fact:io friends-reaction+!>([%new-friend ship fren]) ~[/all]))
+    %-  emit
+    [%give %fact ~[/all] friends-reaction+!>([%new-friend ship fren])]
   =/  fren=friend:store  u.ufren
   ?+    status.fren  core
       %following
     =/  fren              fren(status %fren)
     =.  friends           (~(put by friends) ship fren)
     %-  emil
-    :~  (poke-other ship friends-action+!>([%yes-fren ~]))
-        (fact:io friends-reaction+!>([%friend ship fren]) ~[/all])
+    :~  =/  dock  [ship dap.bowl]
+        =/  cage  friends-action+!>([%yes-fren ~])
+        [%pass / %agent dock %poke cage]
+        [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
     ==
       %contact
     =/  fren              fren(status %follower)
     =.  friends           (~(put by friends) ship fren)
-    (emit (fact:io friends-reaction+!>([%friend ship fren]) ~[/all]))
+    %-  emit
+    [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
   ==
 ::
 :: ship confirms it is your fren
@@ -252,7 +263,8 @@
   =/  fren                (~(got by friends) ship)
   =.  status.fren         %fren
   =.  friends             (~(put by friends) ship fren)
-  (emit (fact:io friends-reaction+!>([%friend ship fren]) ~[/all]))
+  %-  emit
+  [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
 ::
 :: ship notifies you that it is no longer your follower
 ++  bye-fren
@@ -265,12 +277,14 @@
       %fren
     =/  fren              fren(status %following)
     =.  friends           (~(put by friends) ship fren)
-    (emit (fact:io friends-reaction+!>([%friend ship fren]) ~[/all]))
+    %-  emit
+    [%give %fact ~[/all] friends-reaction+!>([%friend ship fren])]
       %follower
     =.  friends
       ?.  is-contact.fren  (~(del by friends) ship)
       (~(put by friends) ship fren(status %contact))
-    (emit (fact:io friends-reaction+!>([%bye-friend ship]) ~[/all]))
+    %-  emit
+    [%give %fact ~[/all] friends-reaction+!>([%bye-friend ship])]
   ==
 ::
 ++  non-contacts
@@ -319,12 +333,4 @@
 ++  pals-friends
   ^-  friends:store
   (~(uni by pals-followers) (~(uni by pals-following) pals-frens))
-::
-++  pass
-  |_  =wire
-  ++  poke-other
-    |=  [other=@p =cage]
-    ^-  card
-    (~(poke pass:io wire) [other dap.bowl] cage)
-  --
 --
