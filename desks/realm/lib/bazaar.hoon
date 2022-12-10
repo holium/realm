@@ -24,12 +24,7 @@
           [%suite-remove suite-remove]
           [%install-app install-app]
           [%uninstall-app uninstall-app]
-          [%initialize initialize]
-      ==
-    ::
-    ++  initialize
-      %-  ot
-      :~  [%args (om so)]
+          [%initialize ul]
       ==
     ::
     ++  install-app
@@ -112,9 +107,11 @@
           [%stalls (stalls-js:encode stalls.rct)]
           [%docks (docks-js:encode docks.rct)]
           [%recommendations a+(turn ~(tap in recommendations.rct) |=(=app-id:store s+app-id))]
+          [%grid (grid-index-js:encode grid-index.rct)]
       ==
       ::
-        %app-install-update       (urbit-app-update:encode app-id.rct urbit-app.rct)
+        %app-install-update       
+      (urbit-app-update:encode app-id.rct urbit-app.rct index.rct grid-index.rct)
       ::
         %pinned
       %-  pairs
@@ -225,12 +222,24 @@
 ++  encode
   =,  enjs:format
   |%
+  ::
+  ++  grid-index-js
+    |=  =grid-index:store
+    ^-  json
+    %-  pairs
+    %+  turn  ~(tap by grid-index)
+      |=  [idx=@ud desk=@tas]
+      ^-  [cord json]
+      [(cord (scot %ud idx)) s+(scot %tas desk)]
+  ::
   ++  urbit-app-update
-    |=  [=app-id app=urbit-app:store]
+    |=  [=app-id app=urbit-app:store index=@ud =grid-index:store]
     ^-  json
     %-  pairs
     :~  ['appId' s+app-id]
         ['app' (urbit-app:encode app-id app)]
+        ['index' (numb index)]
+        ['grid' (grid-index-js:encode grid-index)]
     ==
   ::
   ++  merge
