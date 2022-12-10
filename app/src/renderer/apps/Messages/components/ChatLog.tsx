@@ -59,6 +59,12 @@ export const ChatLog = observer((props: ChatLogProps) => {
               (index === 0 ||
                 message.author !== sortedMessages[index - 1].author)
             }
+            // Only show date if the previous message was sent on a different day
+            showDate={
+              index === 0 ||
+              new Date(message.timeSent).toDateString() !==
+                new Date(sortedMessages[index - 1].timeSent).toDateString()
+            }
             key={`${message.index}-${message.timeSent}-${index}`}
             theme={theme.currentTheme}
             author={message.author}
