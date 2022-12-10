@@ -88,15 +88,19 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
     }
   }, [isGroup, selectedChat.path]);
 
+  const reloadDms = useCallback(() => {
+    setLoading(true);
+    ShipActions.getDMLog(getPath()).finally(resetLoading);
+  }, [getPath]);
+
   useEffect(() => {
     if (!selectedChat.isNew) {
-      setLoading(true);
+      reloadDms();
       if (isGroup) {
         ShipActions.readGroupDm(selectedChat.path.substring(1));
       } else {
         ShipActions.readDm(selectedChat.to as string);
       }
-      ShipActions.getDMLog(getPath()).finally(resetLoading);
     }
     // when unmounted
     return () => {
@@ -104,8 +108,8 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
       setLoading(false);
     };
   }, [
-    getPath,
     isGroup,
+    reloadDms,
     selectedChat.isNew,
     selectedChat.path,
     selectedChat.to,
@@ -141,16 +145,18 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
           SoundActions.playDMSend();
           DmActions.sendDm(selectedChat.path, content)
             .then(() => {
-              setIsSending(false);
+              reloadDms();
             })
             .catch((err) => {
               console.error('dm send error', err);
+            })
+            .finally(() => {
               setIsSending(false);
             });
         })
         .catch((e) => console.error(e));
     },
-    [selectedChat.path]
+    [reloadDms, selectedChat.path]
   );
 
   const onPaste = useCallback(
@@ -223,11 +229,7 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
         chatInputRef.current.focus();
 
         DmActions.sendDm(selectedChat.path, dmMessageContent)
-          .then((r) => {
-            if (!r) throw new Error('no response');
-            setLoading(true);
-            ShipActions.getDMLog(getPath()).finally(resetLoading);
-          })
+          .then(reloadDms)
           .catch((err) => {
             console.error('dm send error', err);
           })
