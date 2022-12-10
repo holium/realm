@@ -30,9 +30,6 @@ const appPreload = {
   askForCamera: async () => {
     return await ipcRenderer.invoke('ask-for-camera');
   },
-  setMediaAccess: async (mediaType: 'camera' | 'mic', enabled: boolean) => {
-    return await ipcRenderer.invoke('get-media-status', mediaType, enabled);
-  },
   getMediaStatus: async () => {
     return await ipcRenderer.invoke('get-media-status');
   },

@@ -227,7 +227,7 @@ const createWindow = async () => {
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
-  MediaHelper.registerListeners(mainWindow);
+  MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));

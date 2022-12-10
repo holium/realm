@@ -1,21 +1,11 @@
-import { BrowserWindow, ipcMain, systemPreferences } from 'electron';
+import { ipcMain, systemPreferences } from 'electron';
 
-export const registerListeners = (mainWindow: BrowserWindow) => {
+export const registerListeners = () => {
   ipcMain.handle('ask-for-mic', async (_event) => {
-    console.log(
-      'microphone access:',
-      systemPreferences.getMediaAccessStatus('microphone')
-    );
-
     await systemPreferences.askForMediaAccess('microphone');
     return systemPreferences.getMediaAccessStatus('microphone');
   });
   ipcMain.handle('ask-for-camera', async (_event) => {
-    console.log(
-      'camera access:',
-      systemPreferences.getMediaAccessStatus('camera')
-    );
-
     await systemPreferences.askForMediaAccess('camera');
     return systemPreferences.getMediaAccessStatus('camera');
   });
