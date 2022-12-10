@@ -5,12 +5,10 @@ import useStorage, { IuseStorage } from './useStorage';
 
 export type FileUploadSource = 'drag' | 'paste' | 'direct';
 
-// Pulled this from landscape
-
-interface FileUploadEventHandlers {
+type FileUploadEventHandlers = {
   onSuccess: (url: string, source: FileUploadSource) => void;
-  onError?: (error: Error) => void;
-}
+  onError: (error: Error) => void;
+};
 
 interface FileUploadHandler {
   onFiles: (
@@ -20,17 +18,20 @@ interface FileUploadHandler {
   ) => void | Promise<void>;
 }
 
-function isFileUploadHandler(obj: any): obj is FileUploadHandler {
-  return typeof obj.onFiles === 'function';
-}
+const isFileUploadHandler = (onFiles: FileUploadHandler['onFiles']) => {
+  return typeof onFiles === 'function';
+};
 
 type useFileUploadParams = {
   multiple?: boolean;
-} & (FileUploadEventHandlers | FileUploadHandler);
+} & Partial<FileUploadEventHandlers> &
+  Partial<FileUploadHandler>;
 
 export function useFileUpload({
   multiple = true,
-  ...params
+  onSuccess,
+  onError,
+  onFiles,
 }: useFileUploadParams) {
   const storage = useStorage();
   const { canUpload, uploadDefault } = storage;
@@ -38,8 +39,8 @@ export function useFileUpload({
 
   const uploadFiles = useCallback(
     (files: FileList | File[], uploadSource: FileUploadSource) => {
-      if (isFileUploadHandler(params)) {
-        return params.onFiles(files, storage, uploadSource);
+      if (onFiles && isFileUploadHandler(onFiles)) {
+        return onFiles?.(files, storage, uploadSource);
       }
 
       if (!canUpload) {
@@ -48,19 +49,27 @@ export function useFileUpload({
 
       setSource(uploadSource);
 
-      const { onSuccess, onError } = params as FileUploadEventHandlers;
       const fileArray = Array.from(files);
       const toUpload = multiple ? fileArray : _.take(fileArray);
       toUpload.forEach((file) => {
         uploadDefault(file)
-          .then((url) => onSuccess(url, source))
+          .then((url) => onSuccess?.(url, source))
           .catch((err: Error) => {
             console.log(err);
-            onError && onError(err);
+            onError?.(err);
           });
       });
     },
-    [canUpload, storage, params]
+    [
+      canUpload,
+      multiple,
+      onError,
+      onFiles,
+      onSuccess,
+      source,
+      storage,
+      uploadDefault,
+    ]
   );
 
   // const drag = useFileDrag((f) => uploadFiles(f, 'drag'));

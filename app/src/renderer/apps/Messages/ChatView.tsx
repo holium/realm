@@ -34,10 +34,7 @@ import {
 import { ChatLog } from './components/ChatLog';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { FileUploadParams } from 'os/services/ship/models/ship';
-import {
-  FileUploadSource,
-  useFileUpload,
-} from 'renderer/logic/lib/useFileUpload';
+import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
 import { SoundActions } from 'renderer/logic/actions/sound';
 import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
@@ -115,20 +112,7 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
     selectedChat.to,
   ]);
 
-  const { canUpload, promptUpload } = useFileUpload({
-    onSuccess: uploadSuccess,
-    // onError: handleUploadError,
-  });
-
-  function uploadSuccess(url: string, source: FileUploadSource) {
-    console.log(url);
-    // if (source === 'paste') {
-    //   setMessage(url);
-    // } else {
-    //   onSubmit([{ url }]);
-    // }
-    // setUploadError('');
-  }
+  const { canUpload, promptUpload } = useFileUpload({});
 
   const onBack = () => {
     dmApp.setSelectedChat(null);
@@ -138,9 +122,9 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
 
   const uploadFile = useCallback(
     (params: FileUploadParams) => {
+      setIsSending(true);
       ShipActions.uploadFile(params)
         .then((url) => {
-          setIsSending(true);
           const content = [{ url }];
           SoundActions.playDMSend();
           DmActions.sendDm(selectedChat.path, content)
