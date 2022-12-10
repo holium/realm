@@ -1,5 +1,4 @@
 import {
-  FC,
   useEffect,
   useState,
   useMemo,
@@ -56,8 +55,7 @@ interface IProps {
   setSelectedChat: (chat: any) => void;
 }
 
-export const ChatView: FC<IProps> = observer((props: IProps) => {
-  const { selectedChat, height, theme } = props;
+export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
   const { iconColor, dockColor, textColor, windowColor, mode } = theme;
 
   const submitRef = useRef(null);
@@ -81,25 +79,37 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     [courier.dms, selectedChat.path]
   );
 
+  const getPath = useCallback(() => {
+    const path = selectedChat.path.substring(1);
+    if (isGroup) {
+      return `group/${path}`;
+    } else {
+      return path.split('/')[1];
+    }
+  }, [isGroup, selectedChat.path]);
+
   useEffect(() => {
     if (!selectedChat.isNew) {
       setLoading(true);
-      let path = selectedChat.path.substring(1);
       if (isGroup) {
-        ShipActions.readGroupDm(path);
-        path = `group/${path}`;
+        ShipActions.readGroupDm(selectedChat.path.substring(1));
       } else {
         ShipActions.readDm(selectedChat.to as string);
-        path = `${path.split('/')[1]}`;
       }
-      ShipActions.getDMLog(path).then(resetLoading).catch(resetLoading);
+      ShipActions.getDMLog(getPath()).finally(resetLoading);
     }
     // when unmounted
     return () => {
       setIsSending(false);
       setLoading(false);
     };
-  }, [isGroup, selectedChat.isNew, selectedChat.path, selectedChat.to]);
+  }, [
+    getPath,
+    isGroup,
+    selectedChat.isNew,
+    selectedChat.path,
+    selectedChat.to,
+  ]);
 
   const { canUpload, promptUpload } = useFileUpload({
     onSuccess: uploadSuccess,
@@ -181,8 +191,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     [canUpload, uploadFile]
   );
 
-  const handleFileChange = (event: ChangeEventHandler<HTMLInputElement>) => {
-    // @ts-expect-error
+  const handleFileChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     const fileObj = event.target.files && event.target.files[0];
     if (!fileObj) {
       return;
@@ -190,7 +199,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
     console.log('fileObj is', fileObj);
     // @ts-expect-error
     event.target.value = null;
-    // @ts-expect-error
     console.log(event.target.files);
     console.log(fileObj);
     console.log(fileObj.name);
@@ -215,11 +223,15 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         chatInputRef.current.focus();
 
         DmActions.sendDm(selectedChat.path, dmMessageContent)
-          .then(() => {
-            setIsSending(false);
+          .then((r) => {
+            if (!r) throw new Error('no response');
+            setLoading(true);
+            ShipActions.getDMLog(getPath()).finally(resetLoading);
           })
           .catch((err) => {
             console.error('dm send error', err);
+          })
+          .finally(() => {
             setIsSending(false);
           });
       }
@@ -275,9 +287,7 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
         closeButton={false}
         hasBorder={false}
         zIndex={5}
-        theme={{
-          ...props.theme,
-        }}
+        theme={theme}
       >
         <Flex pl={3} pr={4} justifyContent="center" alignItems="center">
           <IconButton
@@ -376,7 +386,6 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
                 ref={inputRef}
                 type="file"
                 accept="image/*,.txt,.pdf"
-                // @ts-expect-error
                 onChange={handleFileChange}
               />
               <Tooltip
