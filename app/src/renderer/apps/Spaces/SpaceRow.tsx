@@ -67,50 +67,53 @@ export const SpaceRow = observer((props: SpaceRowProps) => {
   const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
 
   const roles = membership.spaces.get(space.path)!.get(ship!.patp)?.roles;
-  const contextMenuOptions = useMemo(
-    () =>
-      [
-        roles?.includes('owner') || roles?.includes('admin')
-          ? {
-              id: `space-row-${space.path}-btn-edit`,
-              label: 'Edit',
-              onClick: () => {
-                ShellActions.setBlur(true);
-                ShellActions.openDialogWithStringProps('edit-space', {
-                  space: space.path,
-                });
-              },
-            }
-          : {},
-        membership.spaces
-          .get(space.path)!
-          .get(ship!.patp)
-          ?.roles.includes('owner')
-          ? {
-              id: `space-row-${space.path}-btn-delete`,
-              label: 'Delete',
-              onClick: () => {
-                ShellActions.setBlur(true);
-                ShellActions.openDialogWithStringProps('delete-space-dialog', {
-                  path: space.path,
-                  name: space.name,
-                });
-              },
-            }
-          : {
-              id: `space-row-${space.path}-btn-leave`,
-              label: 'Leave',
-              onClick: () => {
-                ShellActions.setBlur(true);
-                ShellActions.openDialogWithStringProps('leave-space-dialog', {
-                  path: space.path,
-                  name: space.name,
-                });
-              },
-            },
-      ].filter(Boolean) as ContextMenuOption[],
-    [membership.spaces, roles, ship, space.name, space.path]
-  );
+  const contextMenuOptions = useMemo(() => {
+    const menu = [];
+    if (roles?.includes('owner') || roles?.includes('admin')) {
+      menu.push({
+        id: `space-row-${space.path}-btn-edit`,
+        label: 'Edit',
+        onClick: () => {
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('edit-space', {
+            space: space.path,
+          });
+        },
+      });
+    }
+    if (
+      membership.spaces
+        .get(space.path)!
+        .get(ship!.patp)
+        ?.roles.includes('owner')
+    ) {
+      menu.push({
+        id: `space-row-${space.path}-btn-delete`,
+        label: 'Delete',
+        onClick: () => {
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('delete-space-dialog', {
+            path: space.path,
+            name: space.name,
+          });
+        },
+      });
+    } else {
+      menu.push({
+        id: `space-row-${space.path}-btn-leave`,
+        label: 'Leave',
+        onClick: () => {
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('leave-space-dialog', {
+            path: space.path,
+            name: space.name,
+          });
+        },
+      });
+    }
+
+    return menu.filter(Boolean) as ContextMenuOption[];
+  }, [membership.spaces, roles, ship, space.name, space.path]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(spaceRowId)) {
