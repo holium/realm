@@ -1,19 +1,10 @@
-import { FC, useRef } from 'react';
-import { Portal } from 'renderer/system/dialog/Portal';
+import { useEffect, useRef } from 'react';
 import { clan } from 'urbit-ob';
-import {
-  ContextMenu,
-  Flex,
-  Box,
-  Sigil,
-  Text,
-  MenuItemProps,
-  useMenu,
-  Menu,
-} from '../';
+import { Flex, Box, Sigil, Text, MenuItemProps, useMenu, Menu } from '../';
 import { Row } from 'renderer/components/NewRow';
 import { AnimatePresence } from 'framer-motion';
 import { PassportCard } from './PassportCard';
+import { useContextMenu } from 'renderer/components/ContextMenu';
 
 interface IPersonRow {
   listId: string;
@@ -28,26 +19,26 @@ interface IPersonRow {
     textColor: string;
     windowColor: string;
   };
-  showPassport?: boolean; // show profile popover
   contextMenuOptions?: MenuItemProps[];
   children?: any;
 }
 
-export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
-  const {
-    listId,
-    patp,
-    sigilColor,
-    avatar,
-    nickname,
-    description,
-    style,
-    rowBg,
-    contextMenuOptions,
-    children,
-  } = props;
-  const { textColor, windowColor } = props.theme!;
+export const PersonRow = ({
+  listId,
+  patp,
+  sigilColor,
+  avatar,
+  nickname,
+  description,
+  style,
+  rowBg,
+  contextMenuOptions,
+  theme,
+  children,
+}: IPersonRow) => {
+  const { windowColor } = theme!;
   const rowRef = useRef(null);
+  const { getOptions, setOptions } = useContextMenu();
 
   /// Setting up options menu
   const menuWidth = 340;
@@ -69,57 +60,49 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
   if (idClass === 'comet') {
     // TODO sanitize comet
   }
+
+  useEffect(() => {
+    if (contextMenuOptions && contextMenuOptions !== getOptions(id)) {
+      setOptions(id, contextMenuOptions);
+    }
+  }, [contextMenuOptions, getOptions, id, setOptions]);
+
   return (
     <Flex key={id} style={{ position: 'relative', ...style }}>
       {contextMenuOptions && (
-        <Portal>
-          <AnimatePresence>
-            {show && (
-              <Menu
-                id={`${id}-profile`}
-                customBg={windowColor}
-                style={{
-                  x: anchorPoint && anchorPoint.x - 6,
-                  y: anchorPoint && anchorPoint.y,
-                  visibility: show ? 'visible' : 'hidden',
-                  width: menuWidth,
-                  borderRadius: 9,
-                  minHeight: 120,
-                  padding: 12,
-                }}
-                isOpen={show}
+        <AnimatePresence>
+          {show && (
+            <Menu
+              id={`${id}-profile`}
+              customBg={windowColor}
+              style={{
+                x: anchorPoint && anchorPoint.x - 6,
+                y: anchorPoint && anchorPoint.y,
+                visibility: show ? 'visible' : 'hidden',
+                width: menuWidth,
+                borderRadius: 9,
+                minHeight: 120,
+                padding: 12,
+              }}
+              isOpen={show}
+              onClose={() => {
+                setShow(false);
+              }}
+            >
+              <PassportCard
+                patp={patp}
+                sigilColor={sigilColor}
+                avatar={avatar}
+                nickname={nickname}
+                description={description}
+                theme={theme}
                 onClose={() => {
                   setShow(false);
                 }}
-              >
-                <PassportCard
-                  patp={patp}
-                  sigilColor={sigilColor}
-                  avatar={avatar}
-                  nickname={nickname}
-                  description={description}
-                  theme={props.theme}
-                  onClose={() => {
-                    setShow(false);
-                  }}
-                />
-              </Menu>
-            )}
-          </AnimatePresence>
-          <AnimatePresence>
-            <ContextMenu
-              adaptive
-              orientation="bottom-left"
-              isComponentContext
-              textColor={textColor}
-              customBg={windowColor}
-              containerId={id}
-              parentRef={rowRef}
-              style={{ minWidth: 180 }}
-              menu={contextMenuOptions}
-            />
-          </AnimatePresence>
-        </Portal>
+              />
+            </Menu>
+          )}
+        </AnimatePresence>
       )}
       <Row
         id={id}
@@ -169,8 +152,4 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
       </Row>
     </Flex>
   );
-};
-
-PersonRow.defaultProps = {
-  showPassport: false,
 };

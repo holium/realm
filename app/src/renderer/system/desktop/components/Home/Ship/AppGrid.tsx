@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile';
@@ -19,20 +18,14 @@ import {
 } from '../AppInstall/helpers';
 
 interface AppGridProps {
-  isOpen?: boolean;
   tileSize: AppTileSize;
 }
 
-export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
-  const { isOpen, tileSize } = props;
+export const AppGrid = observer(({ tileSize = 'xxl' }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
-
   const currentSpace = spaces.selected!;
-  const dock = bazaar.getDock(currentSpace.path);
-  // console.log(toJS(bazaar.gridIndex));
-
-  // return useMemo(() => {
   const apps = [...bazaar.installed, ...bazaar.devApps];
+
   return (
     <>
       {apps.map((app: any, index: number) => {
@@ -74,22 +67,20 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
                 },
               ]
             : [];
+        const tileId = `${app.title}-${index}-grid`;
 
         return (
           <AppTile
-            key={`${app.title} ${index} grid`}
-            isPinned={isAppPinned}
-            isRecommended={weRecommended}
+            key={tileId}
+            tileId={tileId}
             isAnimated={
               installStatus !== InstallStatus.suspended &&
               installStatus !== InstallStatus.failed
             }
-            allowContextMenu
             installStatus={installStatus}
             tileSize={tileSize}
             app={app}
-            isVisible={isOpen}
-            contextMenu={[
+            contextMenuOptions={[
               {
                 label: isAppPinned ? 'Unpin app' : 'Pin app',
                 disabled: app.type === 'web',
@@ -135,15 +126,4 @@ export const AppGrid: FC<AppGridProps> = observer((props: AppGridProps) => {
       })}
     </>
   );
-  // }, [
-  //   bazaar.catalog,
-  //   bazaar.installed,
-  //   bazaar.installed.length,
-  //   dock?.length,
-  //   bazaar.recommendations.length,
-  // ]);
 });
-
-AppGrid.defaultProps = {
-  tileSize: 'xxl',
-};

@@ -1,8 +1,14 @@
-import React, { FC } from 'react';
+import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
-
-import { Box, AppTile, Icons, BoxProps, IconButton } from 'renderer/components';
+import {
+  Box,
+  AppTile,
+  Icons,
+  BoxProps,
+  IconButton,
+  ContextMenuOption,
+} from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import {
   AppType,
@@ -59,10 +65,11 @@ interface SuiteAppProps {
   onClick?: (e: React.MouseEvent<any, MouseEvent>, app?: any) => void;
 }
 
-export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
+export const SuiteApp = observer((props: SuiteAppProps) => {
   const { id, selected, index, accentColor, app, space, isAdmin, onClick } =
     props;
   const { bazaar } = useServices();
+  const appHost = useMemo(() => (app as UrbitAppType).host, [app]);
 
   if (app) {
     const isPinned = bazaar.isPinned(space.path, app.id);
@@ -70,12 +77,10 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
     const installStatus =
       ((app as UrbitAppType).installStatus as InstallStatus) ||
       InstallStatus.installed;
-    const { isInstalling, isInstalled, isSuspended, isUninstalled } =
-      getAppTileFlags(installStatus);
+    const { isInstalled, isUninstalled } = getAppTileFlags(installStatus);
 
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
-      const appHost = (app as UrbitAppType).host;
       return handleInstallation(appHost, app.id, installStatus);
     };
     const canSuspend =
@@ -83,71 +88,83 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
         installStatus === InstallStatus.suspended) &&
       app.type === 'urbit';
 
-    const menu = [];
-    menu.push({
-      label: isPinned ? 'Unpin' : 'Pin',
-      onClick: (evt: any) => {
-        evt.stopPropagation();
-        isPinned
-          ? SpacesActions.unpinApp(space.path, app.id)
-          : SpacesActions.pinApp(space.path, app.id, null);
-      },
-    });
-    menu.push({
-      label: weRecommended ? 'Unrecommend app' : 'Recommend app',
-      onClick: (evt: any) => {
-        evt.stopPropagation();
-        weRecommended
-          ? SpacesActions.unrecommendApp(app.id)
-          : SpacesActions.recommendApp(app.id);
-      },
-    });
-    menu.push({
-      label: 'App info',
-      disabled: app.type === 'dev',
-      onClick: (evt: any) => {
-        evt.stopPropagation();
-        ShellActions.openDialogWithStringProps('app-detail-dialog', {
-          appId: app.id,
-        });
-      },
-    });
-    if (isAdmin) {
-      menu.push({
-        label: 'Remove from suite',
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          SpacesActions.removeFromSuite(space.path, index);
-        },
-      });
-    }
-    if (app.type === 'urbit') {
-      if (canSuspend) {
-        menu.push({
-          label: resumeSuspendLabel(installStatus),
-          section: 2,
-          disabled: false,
-          onClick: (evt: any) => {
-            evt.stopPropagation();
-            return handleResumeSuspend(app.id, installStatus);
+    const contextMenuOptions = useMemo(
+      () =>
+        [
+          {
+            label: isPinned ? 'Unpin' : 'Pin',
+            onClick: (evt: any) => {
+              evt.stopPropagation();
+              isPinned
+                ? SpacesActions.unpinApp(space.path, app.id)
+                : SpacesActions.pinApp(space.path, app.id, null);
+            },
           },
-        });
-      }
-      menu.push({
-        label: installLabel(app.installStatus as InstallStatus),
-        disabled: false,
-        section: !canSuspend ? 2 : undefined,
-        onClick: (evt: any) => {
-          evt.stopPropagation();
-          if (!app.host) throw new Error('App host is undefined');
-          return handleInstallation(
-            app.host,
-            app.id,
-            app.installStatus as InstallStatus
-          );
-        },
-      });
-    }
+          {
+            label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+            onClick: (evt: any) => {
+              evt.stopPropagation();
+              weRecommended
+                ? SpacesActions.unrecommendApp(app.id)
+                : SpacesActions.recommendApp(app.id);
+            },
+          },
+          {
+            label: 'App info',
+            disabled: app.type === 'dev',
+            onClick: (evt: any) => {
+              evt.stopPropagation();
+              ShellActions.openDialogWithStringProps('app-detail-dialog', {
+                appId: app.id,
+              });
+            },
+          },
+          isAdmin && {
+            label: 'Remove from suite',
+            onClick: (evt: any) => {
+              evt.stopPropagation();
+              SpacesActions.removeFromSuite(space.path, index);
+            },
+          },
+          app.type === 'urbit' &&
+            canSuspend && {
+              label: resumeSuspendLabel(installStatus),
+              section: 2,
+              disabled: false,
+              onClick: (evt: any) => {
+                evt.stopPropagation();
+                return handleResumeSuspend(app.id, installStatus);
+              },
+            },
+          app.type === 'urbit' && {
+            label: installLabel(app.installStatus as InstallStatus),
+            disabled: false,
+            section: !canSuspend ? 2 : undefined,
+            onClick: (evt: any) => {
+              evt.stopPropagation();
+              if (!appHost) throw new Error('App host is undefined');
+              return handleInstallation(
+                appHost,
+                app.id,
+                app.installStatus as InstallStatus
+              );
+            },
+          },
+        ].filter(Boolean) as ContextMenuOption[],
+      [
+        appHost,
+        app.id,
+        app.installStatus,
+        app.type,
+        canSuspend,
+        index,
+        installStatus,
+        isAdmin,
+        isPinned,
+        space.path,
+        weRecommended,
+      ]
+    );
 
     return (
       <Box position="relative">
@@ -159,14 +176,12 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
           </Box>
         )}
         <AppTile
+          tileId={id}
           tileSize="xl1"
           app={app}
           isAnimated={isInstalled}
           installStatus={installStatus}
-          isPinned={isPinned}
-          isRecommended={weRecommended}
-          allowContextMenu={true}
-          contextMenu={menu}
+          contextMenuOptions={contextMenuOptions}
           onAppClick={(selectedApp: AppType) => {
             DesktopActions.openAppWindow(space.path, selectedApp);
             DesktopActions.setHomePane(false);
@@ -175,6 +190,7 @@ export const SuiteApp: FC<SuiteAppProps> = observer((props: SuiteAppProps) => {
       </Box>
     );
   }
+
   return (
     <AppEmpty
       id={id}
