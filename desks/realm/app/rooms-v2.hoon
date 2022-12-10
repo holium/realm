@@ -154,7 +154,6 @@
   ++  session-init
     ^-  session-state:store
     [provider=our.bol current=~ rooms=[~]]
-    :: todo watch our on provider updates path
 ::
 ++  signal
   |%
