@@ -430,7 +430,8 @@
     =/  our-in-team    (~(has in team.crew) our.bowl)
     =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv `@uvh`p.whom)/writs/newest/1/noun)
     :: ~&  writs
-    =/  recent-msg    (snag 0 (messages-from-writs writs))
+    =/  recent-msg      (snag 0 (messages-from-writs writs))
+    =/  prev-contents   (weld [[%mention author.recent-msg] ~] contents.recent-msg)
     :-  ~
     :*  path=(spat /(scot %p our.bowl)/(scot %uv p.whom))
     ::  old path format: (spat /(scot %p entity)/(cord name))
@@ -438,7 +439,7 @@
         type=?:(our-in-team %group %group-pending)
         source=%talk
         last-time-sent=last.brief
-        last-message=contents.recent-msg
+        last-message=prev-contents
         metadata=meta
         invite-id=?:(our-in-team ~ `p.whom)
         unread-count=count.brief
