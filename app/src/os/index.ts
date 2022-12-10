@@ -409,6 +409,7 @@ export class Realm extends EventEmitter {
     this.mainWindow.webContents.send('realm.on-connected', {
       ship: this.services.ship.snapshot,
       models: this.services.ship.modelSnapshots,
+      beacon: this.services.spaces.modelSnapshots.beacon,
     });
     if (!this.isResuming && !params.reconnecting) {
       this.mainWindow.webContents.send('realm.on-login');

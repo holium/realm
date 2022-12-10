@@ -24,7 +24,10 @@ import { ShipModels } from 'os/services/ship/ship.service';
 import { FriendsStore } from 'os/services/ship/models/friends';
 import { CourierStore } from 'os/services/ship/models/courier';
 // import { NotificationStore } from 'os/services/ship/models/notifications';
-import { NotificationStore } from 'os/services/spaces/models/beacon';
+import {
+  NotificationStore,
+  NotificationStoreType,
+} from 'os/services/spaces/models/beacon';
 // import { LiveRoom } from 'renderer/apps/store';
 import { VisaModel } from 'os/services/spaces/models/visas';
 import { ThemeStore } from './theme';
@@ -302,7 +305,14 @@ OSActions.onLogin((_event: any) => {
 });
 
 OSActions.onConnected(
-  (_event: any, initials: { ship: ShipModelType; models: ShipModels }) => {
+  (
+    _event: any,
+    initials: {
+      ship: ShipModelType;
+      models: ShipModels;
+      beacon: NotificationStoreType;
+    }
+  ) => {
     console.log('onConnected', initials.models);
     if (initials.models.courier) {
       applySnapshot(
@@ -320,7 +330,7 @@ OSActions.onConnected(
       servicesStore.friends,
       castToSnapshot(initials.models.friends)
     );
-    applySnapshot(servicesStore.beacon, castToSnapshot(initials.models.beacon));
+    applySnapshot(servicesStore.beacon, castToSnapshot(initials.beacon));
     servicesStore.setShip(ShipModel.create(initials.ship));
 
     coreStore.setLoggedIn(true);
