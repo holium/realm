@@ -22,16 +22,6 @@ Manual checks can also be performed by clicking the Realm -> Check for Updates m
 
 If updates are available, you will be prompted to download and install the updates.
 
-## Technical Notes
-
-Realm builds are located in a private repo. Because of this you will need to set a `GH_TOKEN=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` environment variable prior to launching the app. This token should not be shared outside of the Holium. The token is used to access and search for updates on the private repo.
-
-To run the release version on mac, execute the following command from a terminal:
-
-`open -n --env GH_TOKEN=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 /Applications/Realm.app`
-
-Please consult instructions for setting environment variables on Windows and Linux.
-
 ### Versioning
 
 Versioning is handled automatically during production builds. There is no need to manually update the version string in ./app/release/app/package.json.
