@@ -323,8 +323,6 @@
       ++  delete-room
         |=  =rid:store
         =/  provider      provider.session.state
-        ~&  provider
-        ~&  src.bol
         ?.  (is-provider:hol provider src.bol)
           :_  state
           [%pass / %agent [provider dap.bol] %poke rooms-v2-session-action+!>([%delete-room rid])]~
