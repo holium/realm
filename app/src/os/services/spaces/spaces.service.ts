@@ -3,11 +3,7 @@ import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import { toJS } from 'mobx';
 import fs from 'fs';
 import path from 'path';
-import {
-  onPatch,
-  getSnapshot,
-  isActionContextThisOrChildOf,
-} from 'mobx-state-tree';
+import { onPatch, getSnapshot } from 'mobx-state-tree';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';

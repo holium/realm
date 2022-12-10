@@ -42,8 +42,6 @@ export const AccountTrayApp = observer(() => {
     };
   }, []);
 
-  console.log('%o', { seen: toJS(beacon.seen), unseen: toJS(beacon.unseen) });
-
   const openSettingsApp = () => {
     DesktopActions.openAppWindow('', nativeApps['os-settings']);
   };
