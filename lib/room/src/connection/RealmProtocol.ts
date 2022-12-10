@@ -41,7 +41,6 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   async sendSignal(peer: Patp, msg: any)/*: void*/ {
-    await this.delay(1000);
     if (this.presentRoom) {
       this.poke({
         app: 'rooms-v2',
@@ -75,6 +74,7 @@ export class RealmProtocol extends BaseProtocol {
 
     if (mark === 'rooms-v2-signal') {
       if (data['signal']) {
+        await this.delay(1000);
         const payload = data['signal'];
         const remotePeer = this.peers.get(payload.from);
         const signalData = JSON.parse(data['signal'].data);
@@ -155,7 +155,6 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-entered']) {
-        await this.delay(1000);
         console.log('room entered update')
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
