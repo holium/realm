@@ -58,7 +58,7 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
       START_MINIMIZED: false,
-      GH_TOKEN: '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',
+      AUTOUPDATE_FEED_URL: 'https://ghproxy.holium.xyz',
       INSTALL_MOON: '~hostyv:realm,courier,realm-wallet',
     }),
   ],

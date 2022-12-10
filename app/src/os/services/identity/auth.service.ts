@@ -42,8 +42,10 @@ export class AuthService extends BaseService {
     'realm.auth.set-email': this.setEmail,
     'realm.auth.change-email': this.changeEmail,
     'realm.auth.resend-new-email-verification-code':
+     
       this.resendNewEmailVerificationCode,
     'realm.auth.verify-new-email': this.verifyNewEmail,
+    'realm.auth.get-code': this.getCode,
   };
 
   static preload = {
@@ -81,6 +83,7 @@ export class AuthService extends BaseService {
       await ipcRenderer.invoke('realm.auth.resend-new-email-verification-code'),
     verifyNewEmail: async (verificationCode: string): Promise<boolean> =>
       await ipcRenderer.invoke('realm.auth.verify-new-email', verificationCode),
+    getCode: async () => await ipcRenderer.invoke('realm.auth.get-code'),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -128,12 +131,21 @@ export class AuthService extends BaseService {
     return this.state.accountId;
   }
 
+  get email() {
+    return this.state.email;
+  }
+
   setAccountId(accountId: string) {
     this.state.setAccountId(accountId);
   }
 
   setEmail(email: string) {
     this.state.setEmail(email);
+  }
+
+  async getCode(): Promise<string> {
+    const session = this.core.getSession();
+    return session.code;
   }
 
   async changeEmail(
@@ -144,7 +156,7 @@ export class AuthService extends BaseService {
       throw new Error('Cannot change email, account ID not set.');
     }
 
-    let result = await this.core.holiumClient.changeEmail(
+    const result = await this.core.holiumClient.changeEmail(
       this.state.accountId,
       newEmail
     );
@@ -181,11 +193,10 @@ export class AuthService extends BaseService {
       throw new Error('Cannot verify new email, account ID not set.');
     }
 
-    let result = await this.core.holiumClient.verifyNewEmail(
+    const result = await this.core.holiumClient.verifyNewEmail(
       this.state.accountId,
       verificationCode
     );
-    console.log(result);
     if (result.success) {
       this.state.setEmail(result.email!);
     }

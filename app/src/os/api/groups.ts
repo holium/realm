@@ -12,7 +12,7 @@ export const GroupsApi = {
       app: 'spaces',
       path: '/groups', // the spaces scry is at the root of the path
     });
-    // console.log(response);
+    console.log(response);
     // return response.groups;
     return Array.from(Object.values(response.groups));
   },

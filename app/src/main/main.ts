@@ -56,8 +56,6 @@ export interface IAppUpdater {
 }
 
 log.transports.file.level = isDevelopment ? 'debug' : 'info';
-// log.info(`INSTALL_MOON=${process.env.INSTALL_MOON}`);
-// log.info(`GH_TOKEN=${process.env.GH_TOKEN}`);
 
 export class AppUpdater implements IAppUpdater {
   private manualCheck: boolean = false;
@@ -66,6 +64,11 @@ export class AppUpdater implements IAppUpdater {
     // autoUpdater.autoInstallOnAppQuit = true;
     // must force this set or 'rename' operations post-download will fail
     autoUpdater.autoDownload = false;
+    // proxy private github repo requests
+    autoUpdater.setFeedURL({
+      provider: 'generic',
+      url: process.env.AUTOUPDATE_FEED_URL,
+    });
     autoUpdater.on('error', (error) => {
       dialog.showErrorBox(
         'Error: ',
