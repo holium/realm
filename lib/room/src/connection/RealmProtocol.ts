@@ -58,6 +58,7 @@ export class RealmProtocol extends BaseProtocol {
   }
 
   async onSignal(data: any, mark: string) {
+    await this.delay(1000);
     if (mark === 'rooms-v2-view') {
       if (data['session']) {
         // "session" is sent on initial /lib subscription
@@ -74,7 +75,6 @@ export class RealmProtocol extends BaseProtocol {
 
     if (mark === 'rooms-v2-signal') {
       if (data['signal']) {
-        await this.delay(1000);
         const payload = data['signal'];
         const remotePeer = this.peers.get(payload.from);
         const signalData = JSON.parse(data['signal'].data);
