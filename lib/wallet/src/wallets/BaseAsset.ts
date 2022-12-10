@@ -3,4 +3,4 @@
  */
 export abstract class BaseAsset {
   abstract updateAsset(): void;
-};
+}

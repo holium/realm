@@ -8,13 +8,18 @@ export class Wallet {
   protocols: Map<ProtocolType, BaseProtocol>;
   currentProtocol: ProtocolType;
 
-  constructor(protocols: Map<ProtocolType, BaseProtocol>, currentProtocol: ProtocolType) {
+  constructor(
+    protocols: Map<ProtocolType, BaseProtocol>,
+    currentProtocol: ProtocolType
+  ) {
     this.protocols = protocols;
     this.currentProtocol = currentProtocol;
   }
-  
+
   watchUpdates(walletState: WalletStoreType) {
-    const lastProtocol: BaseProtocol = this.protocols.get(this.currentProtocol)!;
+    const lastProtocol: BaseProtocol = this.protocols.get(
+      this.currentProtocol
+    )!;
     lastProtocol?.removeListener();
     this.currentProtocol = walletState.navState.protocol;
     if (walletState.navState.network === NetworkType.ETHEREUM) {

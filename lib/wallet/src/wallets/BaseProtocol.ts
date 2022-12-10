@@ -4,14 +4,16 @@ import { WalletStoreType, Asset } from '../wallet.model';
  * BaseProtocol is an abstract class that defines the interface for chain communication.
  */
 export abstract class BaseProtocol {
-
   abstract watchUpdates(walletState: WalletStoreType): void;
-  
+
   abstract removeListener(): void;
 
   abstract getAccountBalance(addr: string): Promise<string>;
 
-  abstract getAccountTransactions(addr: string, startBlock?: number): Promise<any[]>;
+  abstract getAccountTransactions(
+    addr: string,
+    startBlock?: number
+  ): Promise<any[]>;
 
   abstract getAccountAssets(addr: string): Promise<Asset[]>;
 
@@ -24,7 +26,12 @@ export abstract class BaseProtocol {
   /**
    * Assets are tokens, coins, or multitoken contracts
    */
-  abstract getAsset(contract: string, addr: string, type?: string, tokenId?: string): Promise<Asset>;
+  abstract getAsset(
+    contract: string,
+    addr: string,
+    type?: string,
+    tokenId?: string
+  ): Promise<Asset>;
 
   /**
    * Gets to and from transfers for a given address

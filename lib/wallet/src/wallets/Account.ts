@@ -12,9 +12,13 @@ export class Account extends (EventEmitter as new () => TypedEmitter<AccountEven
   private signer: BaseSigner;
   private protocol: BaseProtocol;
 
-  constructor(account: AccountType, signer: BaseSigner, protocol: BaseProtocol) {
+  constructor(
+    account: AccountType,
+    signer: BaseSigner,
+    protocol: BaseProtocol
+  ) {
     super();
-    this.account = account
+    this.account = account;
     this.signer = signer;
     this.protocol = protocol;
 
@@ -25,9 +29,13 @@ export class Account extends (EventEmitter as new () => TypedEmitter<AccountEven
   }
 
   updateAccount() {
-    this.protocol.getAccountBalance(this.account.addr).then(balance => this.account.balance = balance);
-    this.protocol.getAccountTransactions(this.account.addr).then(transactions => {});
-    this.protocol.getAccountAssets(this.account.addr).then(assets => {});
+    this.protocol
+      .getAccountBalance(this.account.addr)
+      .then((balance) => (this.account.balance = balance));
+    this.protocol
+      .getAccountTransactions(this.account.addr)
+      .then((transactions) => {});
+    this.protocol.getAccountAssets(this.account.addr).then((assets) => {});
     for (let asset of this.assets) {
       asset.updateAsset();
     }

@@ -28,7 +28,7 @@ export class ProtocolWallet extends (EventEmitter as new () => TypedEmitter<Prot
       account.updateAccount();
     }
   }
-  
+
   addAccount(account: AccountType) {
     this.accounts.push(new Account(account, this.signer, this.protocol));
   }

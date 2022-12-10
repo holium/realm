@@ -3,4 +3,10 @@
  */
 
 export { Wallet } from './Wallet';
-export { Account, BaseAsset, BaseProtocol, BaseSigner, ProtocolWallet } from './wallets'
+export {
+  Account,
+  BaseAsset,
+  BaseProtocol,
+  BaseSigner,
+  ProtocolWallet,
+} from './wallets';
