@@ -185,9 +185,10 @@ const installExtensions = async () => {
 };
 
 const createWindow = async () => {
-  if (isDevelopment) {
-    await installExtensions();
-  }
+  // TODO fix the warnings and errors with this
+  // if (isDevelopment) {
+  //   await installExtensions();
+  // }
 
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
@@ -226,7 +227,7 @@ const createWindow = async () => {
   FullscreenHelper.registerListeners(mainWindow);
   WebviewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
-  MediaHelper.registerListeners(mainWindow);
+  MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
