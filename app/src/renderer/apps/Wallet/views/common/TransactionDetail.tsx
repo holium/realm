@@ -24,7 +24,11 @@ import {
   convertEthAmountToUsd,
   convertBtcAmountToUsd,
 } from '../../lib/helpers';
-import { NetworkType, EthWalletType, BitcoinWalletType } from '@holium/realm-wallet/src/wallet.model';
+import {
+  NetworkType,
+  EthWalletType,
+  BitcoinWalletType,
+} from '@holium/realm-wallet/src/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import styled from 'styled-components';
 
@@ -66,11 +70,13 @@ const TextArea = styled.textarea<TextAreaInput>`
 
 export const TransactionDetail: FC = observer(() => {
   const { walletApp } = useTrayApps();
-  const transaction = 
-    (walletApp.navState.network === NetworkType.ETHEREUM
-    ? (walletApp.currentWallet! as EthWalletType).data.get(walletApp.navState.protocol)!.transactions
-    : (walletApp.currentWallet! as BitcoinWalletType).transactions)
-    .get(walletApp.navState.detail!.key)!;
+  const transaction = (
+    walletApp.navState.network === NetworkType.ETHEREUM
+      ? (walletApp.currentWallet! as EthWalletType).data.get(
+          walletApp.navState.protocol
+        )!.transactions
+      : (walletApp.currentWallet! as BitcoinWalletType).transactions
+  ).get(walletApp.navState.detail!.key)!;
 
   const { theme } = useServices();
   const themeData = getBaseTheme(theme.currentTheme);

@@ -1,6 +1,4 @@
-import {
-  BaseSigner,
-} from '@holium/realm-wallet/src/wallets/BaseSigner';
+import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { ethers } from 'ethers';
 import Realm from '../../../..';
 
@@ -26,6 +24,6 @@ export class RealmSigner implements BaseSigner {
     );
   }
   getXpub(path: string): string {
-    return this.getPrivateKey().derivePath(path).neuter().extendedKey;  
+    return this.getPrivateKey().derivePath(path).neuter().extendedKey;
   }
 }

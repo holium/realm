@@ -70,22 +70,35 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const themeData = getBaseTheme(theme.currentTheme);
     const panelBorder = darken(0.08, theme.currentTheme.windowColor);
 
-    const ethTicker = walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
+    const ethTicker =
+      walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
     const amountDisplay =
       walletApp.navState.network === NetworkType.ETHEREUM
         ? !props.coin
-          ? `${formatEthAmount((props.wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).eth}` + ethTicker
+          ? `${
+              formatEthAmount(
+                (props.wallet as EthWalletType).data.get(
+                  walletApp.navState.protocol
+                )!.balance
+              ).eth
+            }` + ethTicker
           : `${
               formatCoinAmount(props.coin.balance, props.coin.decimals).display
             } ${props.coin.name}`
-        : `${formatBtcAmount((props.wallet as BitcoinWalletType).balance).btc} BTC`;
+        : `${
+            formatBtcAmount((props.wallet as BitcoinWalletType).balance).btc
+          } BTC`;
     const amountUsdDisplay =
       walletApp.navState.network === 'ethereum'
         ? !props.coin
           ? walletApp.ethereum.conversions.usd
             ? '$' +
               `${convertEthAmountToUsd(
-                formatEthAmount((props.wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance),
+                formatEthAmount(
+                  (props.wallet as EthWalletType).data.get(
+                    walletApp.navState.protocol
+                  )!.balance
+                ),
                 walletApp.ethereum.conversions.usd
               )}`
             : ''
@@ -193,10 +206,11 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         >
           <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
-              {walletApp.navState.network === NetworkType.ETHEREUM
-                ? <Icons name="Ethereum" height="20px" mr={2} />
-                : <Icons name="Bitcoin" height="20px" mr={2} />
-              }
+              {walletApp.navState.network === NetworkType.ETHEREUM ? (
+                <Icons name="Ethereum" height="20px" mr={2} />
+              ) : (
+                <Icons name="Bitcoin" height="20px" mr={2} />
+              )}
               <Text pt="2px" textAlign="center" fontSize="14px">
                 {shortened(props.wallet.address)}
               </Text>

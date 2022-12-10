@@ -11,7 +11,9 @@ export const NFTDetail: FC = () => {
   const baseTheme = getBaseTheme(theme.currentTheme);
 
   const wallet = walletApp.currentWallet as EthWalletType;
-  const nft = wallet.data.get(walletApp.navState.protocol)!.nfts.get(walletApp.navState.detail!.key)!;
+  const nft = wallet.data
+    .get(walletApp.navState.protocol)!
+    .nfts.get(walletApp.navState.detail!.key)!;
 
   return (
     <Flex width="100%" flexDirection="column" px={3}>

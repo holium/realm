@@ -117,7 +117,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
         console.log(`submitting stripe payment threw:`, e);
         setMessage({
           type: 'error',
-          text: 'Something went wrong processing your payment, please try again.'
+          text: 'Something went wrong processing your payment, please try again.',
         });
       }
 

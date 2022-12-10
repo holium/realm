@@ -15,7 +15,10 @@ import {
   convertBtcAmountToUsd,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { TransactionType, WalletView } from '@holium/realm-wallet/src/wallet.model';
+import {
+  TransactionType,
+  WalletView,
+} from '@holium/realm-wallet/src/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
@@ -131,13 +134,15 @@ export const TransactionList = observer((props: TransactionListProps) => {
   ).length;
 
   let transactions = props.transactions;
-  if (props.ethType === 'ETH')  {
+  if (props.ethType === 'ETH') {
     transactions = props.transactions.filter((tx) =>
       props.ethType ? tx.ethType === props.ethType : true
     );
   }
   if (props.ethType !== 'ETH' && props.ethType) {
-    transactions = transactions.filter((tx) => tx.theirAddress === props.ethType)
+    transactions = transactions.filter(
+      (tx) => tx.theirAddress === props.ethType
+    );
     // console.log('ourAddress', ourAddress, props.ethType);
     /*WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
       console.log

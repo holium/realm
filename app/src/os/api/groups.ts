@@ -31,10 +31,10 @@ export const GroupsApi = {
     conduit: Conduit,
     path: string
   ): Promise<{ [path: string]: any }> => {
-    return (await conduit.scry({
+    return await conduit.scry({
       app: 'spaces',
       path: `/groups${path}/members`, // the spaces scry is at the root of the path
-    }));
+    });
     // return Array.from(Object.values(response.groups));
   },
 };

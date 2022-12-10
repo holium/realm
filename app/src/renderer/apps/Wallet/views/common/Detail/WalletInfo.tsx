@@ -73,7 +73,8 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
         alignItems="center"
       >
         <Flex width="100%" justifyContent="space-between">
-          <Flex><Text>aowsiehtoishrtoiwheotiwhet</Text>
+          <Flex>
+            <Text>aowsiehtoishrtoiwheotiwhet</Text>
             {/*(typeof props.wallet) === EthWalletType
             ? <Icons name="Ethereum" height="20px" mr={2} />
             : <Icons name="Bitcoin" height="20px" mr={2} />

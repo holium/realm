@@ -41,7 +41,8 @@ export class AuthService extends BaseService {
     'realm.auth.cancel-login': this.cancelLogin,
     'realm.auth.set-email': this.setEmail,
     'realm.auth.change-email': this.changeEmail,
-    'realm.auth.resend-new-email-verification-code': this.resendNewEmailVerificationCode,
+    'realm.auth.resend-new-email-verification-code':
+      this.resendNewEmailVerificationCode,
     'realm.auth.verify-new-email': this.verifyNewEmail,
   };
 
@@ -72,11 +73,14 @@ export class AuthService extends BaseService {
     ) => await ipcRenderer.invoke('realm.auth.set-ship-profile', patp, profile),
     setEmail: async (email: string) =>
       await ipcRenderer.invoke('realm.auth.set-email', email),
-    changeEmail: async (email: string): Promise<{ verificationCode: string | null, error: string | null }> =>
+    changeEmail: async (
+      email: string
+    ): Promise<{ verificationCode: string | null; error: string | null }> =>
       await ipcRenderer.invoke('realm.auth.change-email', email),
-    resendNewEmailVerificationCode: async () => await ipcRenderer.invoke('realm.auth.resend-new-email-verification-code'),
+    resendNewEmailVerificationCode: async () =>
+      await ipcRenderer.invoke('realm.auth.resend-new-email-verification-code'),
     verifyNewEmail: async (verificationCode: string): Promise<boolean> =>
-      await ipcRenderer.invoke('realm.auth.verify-new-email', verificationCode)
+      await ipcRenderer.invoke('realm.auth.verify-new-email', verificationCode),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -132,17 +136,29 @@ export class AuthService extends BaseService {
     this.state.setEmail(email);
   }
 
-  async changeEmail(_event: any, newEmail: string): Promise<{ verificationCode: string | null, error: string | null }> {
+  async changeEmail(
+    _event: any,
+    newEmail: string
+  ): Promise<{ verificationCode: string | null; error: string | null }> {
     if (!this.state.accountId) {
-      throw new Error('Cannot change email, account ID not set.') 
+      throw new Error('Cannot change email, account ID not set.');
     }
 
-    let result = await this.core.holiumClient.changeEmail(this.state.accountId, newEmail);
+    let result = await this.core.holiumClient.changeEmail(
+      this.state.accountId,
+      newEmail
+    );
     if (!result.success) {
-      return { verificationCode: null, error: result.errorCode === 441 ? 'An account with that email already exists.' : 'Failed to change email.' }
+      return {
+        verificationCode: null,
+        error:
+          result.errorCode === 441
+            ? 'An account with that email already exists.'
+            : 'Failed to change email.',
+      };
     }
 
-    return { verificationCode: result.verificationCode, error: null }
+    return { verificationCode: result.verificationCode, error: null };
   }
 
   async resendNewEmailVerificationCode(): Promise<boolean> {
@@ -150,19 +166,26 @@ export class AuthService extends BaseService {
     if (!auth.accountId)
       throw new Error('Accout must be set before resending verification code.');
 
-    const success =
-      await this.core.holiumClient.resendNewEmailVerificationCode(auth.accountId);
+    const success = await this.core.holiumClient.resendNewEmailVerificationCode(
+      auth.accountId
+    );
 
     return success;
   }
 
-  async verifyNewEmail(_event: any, verificationCode: string): Promise<boolean> {
+  async verifyNewEmail(
+    _event: any,
+    verificationCode: string
+  ): Promise<boolean> {
     if (!this.state.accountId) {
-      throw new Error('Cannot verify new email, account ID not set.') 
+      throw new Error('Cannot verify new email, account ID not set.');
     }
 
-    let result = await this.core.holiumClient.verifyNewEmail(this.state.accountId, verificationCode)
-    console.log(result)
+    let result = await this.core.holiumClient.verifyNewEmail(
+      this.state.accountId,
+      verificationCode
+    );
+    console.log(result);
     if (result.success) {
       this.state.setEmail(result.email!);
     }

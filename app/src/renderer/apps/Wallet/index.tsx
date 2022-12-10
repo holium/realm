@@ -14,7 +14,12 @@ import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
-import { EthWalletType, BitcoinWalletType, NetworkType, WalletView } from '@holium/realm-wallet/src/wallet.model';
+import {
+  EthWalletType,
+  BitcoinWalletType,
+  NetworkType,
+  WalletView,
+} from '@holium/realm-wallet/src/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 import { Wallet } from 'ethers';
@@ -48,8 +53,9 @@ export const WalletApp: FC<any> = observer((props: any) => {
     if (!wallet) continue;
     const walletTransactions = getTransactions(
       (walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.transactions
-      : (wallet as BitcoinWalletType).transactions) || new Map()
+        ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+            .transactions
+        : (wallet as BitcoinWalletType).transactions) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
     // console.log(transactions, transactionCount);

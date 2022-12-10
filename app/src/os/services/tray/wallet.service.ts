@@ -14,7 +14,7 @@ import {
   EthWalletType,
   ProtocolType,
   NetworkStoreType,
-} from '@holium/realm-wallet/src/wallet.model'
+} from '@holium/realm-wallet/src/wallet.model';
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { BaseProtocol } from '@holium/realm-wallet/src/wallets';
 import { RealmSigner } from './wallet/signers/realm';
@@ -24,7 +24,7 @@ import {
   onPatch,
   onSnapshot,
   getSnapshot,
-  castToSnapshot
+  castToSnapshot,
 } from 'mobx-state-tree';
 import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
@@ -141,7 +141,10 @@ export class WalletService extends BaseService {
       return await ipcRenderer.invoke('realm.tray.wallet.set-network', network);
     },
     setProtocol: async (protocol: ProtocolType) => {
-      return await ipcRenderer.invoke('realm.tray.wallet.set-protocol', protocol);
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.set-protocol',
+        protocol
+      );
     },
     getRecipient: async (patp: string) => {
       return await ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
@@ -271,15 +274,11 @@ export class WalletService extends BaseService {
       );
     },
     toggleNetwork: async () => {
-      return await ipcRenderer.invoke(
-        'realm.tray.wallet.toggle-network'
-      )
+      return await ipcRenderer.invoke('realm.tray.wallet.toggle-network');
     },
     toggleUqbar: async () => {
-      return await ipcRenderer.invoke(
-        'realm.tray.wallet.toggle-uqbar'
-      )
-    }
+      return await ipcRenderer.invoke('realm.tray.wallet.toggle-uqbar');
+    },
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -386,7 +385,9 @@ export class WalletService extends BaseService {
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
     this.wallet!.watchUpdates(this.state!);
 
-    WalletApi.watchUpdates(this.core.conduit!, this.state!, () => this.wallet!.watchUpdates(this.state!));
+    WalletApi.watchUpdates(this.core.conduit!, this.state!, () =>
+      this.wallet!.watchUpdates(this.state!)
+    );
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -535,7 +536,9 @@ export class WalletService extends BaseService {
     contractType?: string
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const protocol = this.wallet!.protocols.get(this.state!.navState.protocol) as EthereumProtocol;
+    const protocol = this.wallet!.protocols.get(
+      this.state!.navState.protocol
+    ) as EthereumProtocol;
     const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
     const tx = {
       from,
@@ -544,10 +547,12 @@ export class WalletService extends BaseService {
       gasLimit: await protocol.getFeeEstimate(from, to, amount),
       gasPrice: await protocol.getFeePrice(),
       nonce: await protocol.getNonce(from),
-      chainId: await protocol.getChainId()
+      chainId: await protocol.getChainId(),
     };
     const signedTx = await this.signer!.signTransaction(path, tx);
-    const hash = await this.wallet!.protocols.get(this.state!.navState.protocol).sendTransaction(signedTx);
+    const hash = await this.wallet!.protocols.get(
+      this.state!.navState.protocol
+    ).sendTransaction(signedTx);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -574,21 +579,19 @@ export class WalletService extends BaseService {
     );
   }
 
-  sendERC20Transaction() {
-  }
+  sendERC20Transaction() {}
 
-  sendERC721Transaction() {
+  sendERC721Transaction() {}
 
-  }
-
-  sendBitcoinTransaction() {
-
-  }
+  sendBitcoinTransaction() {}
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
-    return await bcrypt.compare(passcode.toString(), this.state!.settings.passcodeHash!);
+    return await bcrypt.compare(
+      passcode.toString(),
+      this.state!.settings.passcodeHash!
+    );
   }
-  
+
   async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
     try {
       const newProvider = new ethers.providers.JsonRpcProvider(providerURL);
@@ -631,11 +634,10 @@ export class WalletService extends BaseService {
   toggleNetwork(_evt: any) {
     if (this.state!.navState.network === NetworkType.ETHEREUM) {
       if (this.state!.navState.protocol === ProtocolType.ETH_MAIN) {
-        this.state!.setProtocol(ProtocolType.ETH_GORLI)
+        this.state!.setProtocol(ProtocolType.ETH_GORLI);
         this.wallet!.watchUpdates(this.state!);
-      }
-      else if (this.state!.navState.protocol === ProtocolType.ETH_GORLI) {
-        this.state!.setProtocol(ProtocolType.ETH_MAIN)
+      } else if (this.state!.navState.protocol === ProtocolType.ETH_GORLI) {
+        this.state!.setProtocol(ProtocolType.ETH_MAIN);
         this.wallet!.watchUpdates(this.state!);
       }
     }
@@ -647,13 +649,15 @@ export class WalletService extends BaseService {
     tokenType: 'erc20' | 'erc721' | 'erc1155',
     contractAddr: string
   ) {
-    return await (this.wallet!.protocols.get(this.wallet!.currentProtocol)! as BaseProtocol).getAssetTransfers(contractAddr, walletAddr, 0);
+    return await (
+      this.wallet!.protocols.get(this.wallet!.currentProtocol)! as BaseProtocol
+    ).getAssetTransfers(contractAddr, walletAddr, 0);
   }
 
   toggleUqbar(_evt: any) {
-    (this.state!.navState.protocol !== ProtocolType.UQBAR)
-    ? this.state!.setProtocol(ProtocolType.UQBAR)
-    : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
+    this.state!.navState.protocol !== ProtocolType.UQBAR
+      ? this.state!.setProtocol(ProtocolType.UQBAR)
+      : this.state!.setProtocol(this.state!.navState.lastEthProtocol);
     this.wallet!.watchUpdates(this.state!);
   }
 }

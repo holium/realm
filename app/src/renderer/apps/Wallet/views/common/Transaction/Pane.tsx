@@ -172,30 +172,31 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                           </Text>
                         </Flex>
                       )}
-                    {transactionRecipient.patp && transactionRecipient.address && (
-                      <Flex gap={8} alignItems="center">
-                        <Sigil
-                          color={[
-                            transactionRecipient.color || 'black',
-                            'white',
-                          ]}
-                          simple={true}
-                          size={24}
-                          patp={transactionRecipient.patp!}
-                        />{' '}
-                        <Flex flexDirection="column" justifyContent="center">
-                          <Text variant="body">
-                            {transactionRecipient.patp}
-                          </Text>
-                          <Text
-                            variant="body"
-                            color={themeData.colors.text.tertiary}
-                          >
-                            {shortened(transactionRecipient.address)}
-                          </Text>
+                    {transactionRecipient.patp &&
+                      transactionRecipient.address && (
+                        <Flex gap={8} alignItems="center">
+                          <Sigil
+                            color={[
+                              transactionRecipient.color || 'black',
+                              'white',
+                            ]}
+                            simple={true}
+                            size={24}
+                            patp={transactionRecipient.patp!}
+                          />{' '}
+                          <Flex flexDirection="column" justifyContent="center">
+                            <Text variant="body">
+                              {transactionRecipient.patp}
+                            </Text>
+                            <Text
+                              variant="body"
+                              color={themeData.colors.text.tertiary}
+                            >
+                              {shortened(transactionRecipient.address)}
+                            </Text>
+                          </Flex>
                         </Flex>
-                      </Flex>
-                    )}
+                      )}
                   </Flex>
                   {/* <Flex flexDirection="column" justifyContent="center">
                     {transactionRecipient.address ? (

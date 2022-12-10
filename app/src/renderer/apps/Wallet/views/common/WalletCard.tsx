@@ -59,12 +59,15 @@ export const WalletCard: FC<WalletCardProps> = ({
 
   let coins = null;
   if (walletApp.navState.network === NetworkType.ETHEREUM) {
-    coins = getCoins((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins);
+    coins = getCoins(
+      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
+    );
   }
 
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.transactions
+      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+          .transactions
       : (wallet as BitcoinWalletType).transactions;
   const transactions = getTransactions(walletTransactions || new Map());
 
@@ -72,7 +75,12 @@ export const WalletCard: FC<WalletCardProps> = ({
     walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
   const amountDisplay =
     walletApp.navState.network === NetworkType.ETHEREUM
-      ? `${formatEthAmount((wallet as EthWalletType).data.get(walletApp.navState.protocol)!.balance).eth}` + ethTicker
+      ? `${
+          formatEthAmount(
+            (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+              .balance
+          ).eth
+        }` + ethTicker
       : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
 
   return (

@@ -177,7 +177,7 @@ export const AmountInput = observer(
                     ? props.coin.name
                     : walletApp.navState.protocol === ProtocolType.UQBAR
                     ? 'zigs'
-                    :  abbrMap[
+                    : abbrMap[
                         walletApp.navState.network as 'bitcoin' | 'ethereum'
                       ]
                   : 'USD'}

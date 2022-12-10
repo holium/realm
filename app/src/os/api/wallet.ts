@@ -1,5 +1,13 @@
 import { Conduit } from '@holium/conduit';
-import { ProtocolType, UISettingsType, WalletStoreType, WalletCreationMode, NetworkStoreType, EthStoreType, BitcoinStoreType } from '@holium/realm-wallet/src/wallet.model';
+import {
+  ProtocolType,
+  UISettingsType,
+  WalletStoreType,
+  WalletCreationMode,
+  NetworkStoreType,
+  EthStoreType,
+  BitcoinStoreType,
+} from '@holium/realm-wallet/src/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -159,33 +167,29 @@ export const WalletApi = {
       path: '/settings',
     });
   },
-    /**
+  /**
    * watchUpdates
    *
    * @param conduit
    * @param walletState
    */
-     watchUpdates: (
-      conduit: Conduit,
-      walletState: WalletStoreType,
-      onWallet: () => void,
-    ): void => {
-      conduit.watch({
-        app: 'realm-wallet',
-        path: '/updates',
-        onEvent: async (data: any, _id?: number, mark?: string) => {
-          if (mark === 'realm-wallet-update') {
-            handleWalletReactions(
-              data,
-              walletState,
-              onWallet
-            );
-          }
-        },
-        onError: () => console.log('Subscription rejected'),
-        onQuit: () => console.log('Kicked from subscription %spaces'),
-      });
-    },
+  watchUpdates: (
+    conduit: Conduit,
+    walletState: WalletStoreType,
+    onWallet: () => void
+  ): void => {
+    conduit.watch({
+      app: 'realm-wallet',
+      path: '/updates',
+      onEvent: async (data: any, _id?: number, mark?: string) => {
+        if (mark === 'realm-wallet-update') {
+          handleWalletReactions(data, walletState, onWallet);
+        }
+      },
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription %spaces'),
+    });
+  },
 };
 
 export const handleWalletReactions = (
@@ -198,15 +202,13 @@ export const handleWalletReactions = (
     case 'wallet':
       const wallet = data.wallet;
       if (wallet.network === 'ethereum') {
-        walletState!.ethereum.applyWalletUpdate(
-          wallet
-        );
+        walletState!.ethereum.applyWalletUpdate(wallet);
       } else if (wallet.network === 'bitcoin') {
         walletState!.bitcoin.applyWalletUpdate(wallet);
       } else if (wallet.network === 'btctestnet') {
         walletState!.btctest.applyWalletUpdate(wallet);
       }
-      onWallet()
+      onWallet();
       break;
     case 'wallets':
       const wallets = data.wallets;
@@ -220,29 +222,27 @@ export const handleWalletReactions = (
       walletState!.ethereum.initial(wallets);
       walletState!.bitcoin.initial(wallets.bitcoin);
       walletState!.btctest.initial(wallets.btctestnet);
-      onWallet()
+      onWallet();
       break;
     case 'transaction':
       const transaction = data.transaction;
-      const network: NetworkStoreType = 
-        transaction.net === ProtocolType.ETH_MAIN
-        || transaction.net === ProtocolType.ETH_GORLI
-        || transaction.net === ProtocolType.UQBAR
-        ? NetworkStoreType.ETHEREUM
-        : transaction.net === ProtocolType.BTC_MAIN
-        ? NetworkStoreType.BTC_MAIN
-        : NetworkStoreType.BTC_TEST;
+      const network: NetworkStoreType =
+        transaction.net === ProtocolType.ETH_MAIN ||
+        transaction.net === ProtocolType.ETH_GORLI ||
+        transaction.net === ProtocolType.UQBAR
+          ? NetworkStoreType.ETHEREUM
+          : transaction.net === ProtocolType.BTC_MAIN
+          ? NetworkStoreType.BTC_MAIN
+          : NetworkStoreType.BTC_TEST;
       if (network === NetworkStoreType.ETHEREUM) {
-        walletState!.ethereum.wallets.get(
-          transaction.index
-        )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-      }
-      else if (network === NetworkStoreType.BTC_MAIN) {
-        walletState!.ethereum.wallets.get(
-          transaction.index
-        )!.applyTransactionUpdate(transaction.net, transaction.transaction);
-      }
-      else if (network === NetworkStoreType.BTC_TEST) {
+        walletState!.ethereum.wallets
+          .get(transaction.index)!
+          .applyTransactionUpdate(transaction.net, transaction.transaction);
+      } else if (network === NetworkStoreType.BTC_MAIN) {
+        walletState!.ethereum.wallets
+          .get(transaction.index)!
+          .applyTransactionUpdate(transaction.net, transaction.transaction);
+      } else if (network === NetworkStoreType.BTC_TEST) {
         /*walletState!.btctest.wallets.get(
           transaction.index
         )!.applyTransactions(transaction.net, transaction.transaction);*/

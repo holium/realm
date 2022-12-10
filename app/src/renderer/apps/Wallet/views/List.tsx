@@ -3,7 +3,10 @@ import { observer } from 'mobx-react';
 import { Flex, Text, Button } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletCard } from './common/WalletCard';
-import { NetworkStoreType, WalletView } from '@holium/realm-wallet/src/wallet.model';
+import {
+  NetworkStoreType,
+  WalletView,
+} from '@holium/realm-wallet/src/wallet.model';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface WalletListProps {}
