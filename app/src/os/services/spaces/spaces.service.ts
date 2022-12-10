@@ -80,9 +80,7 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.get-allies': this.getAllies,
     'realm.spaces.bazaar.get-treaties': this.getTreaties,
     'realm.spaces.bazaar.add-recent-app': this.addRecentApp,
-    'realm.spaces.bazaar.get-recent-apps': this.getRecentApps,
     'realm.spaces.bazaar.add-recent-dev': this.addRecentDev,
-    'realm.spaces.bazaar.get-recent-devs': this.getRecentDevs,
     'realm.spaces.bazaar.pin-app': this.pinApp,
     'realm.spaces.bazaar.unpin-app': this.unpinApp,
     'realm.spaces.bazaar.set-pinned-order': this.setPinnedOrder,
@@ -98,6 +96,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.add-ally': this.addAlly,
     'realm.spaces.bazaar.add-app': this.addApp,
     'realm.spaces.bazaar.remove-app': this.removeApp,
+    'realm.spaces.bazaar.suspend-app': this.suspendApp,
+    'realm.spaces.bazaar.revive-app': this.reviveApp,
   };
 
   static preload = {
@@ -201,18 +201,10 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.get-allies', path),
     getTreaties: async (patp: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.get-treaties', patp),
-    getRecentApps: async () =>
-      await ipcRenderer.invoke('realm.spaces.bazaar.get-recent-apps'),
-    addRecentApp: async (path: SpacePath, appId: string) =>
-      await ipcRenderer.invoke(
-        'realm.spaces.bazaar.add-recent-app',
-        path,
-        appId
-      ),
-    getRecentDevs: async () =>
-      await ipcRenderer.invoke('realm.spaces.bazaar.get-recent-devs'),
-    addRecentDev: async () =>
-      await ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev'),
+    addRecentApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.add-recent-app', appId),
+    addRecentDev: async (shipId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.add-recent-dev', shipId),
     addToSuite: async (path: SpacePath, appId: string, index: number) =>
       await ipcRenderer.invoke(
         'realm.spaces.bazaar.suite-add',
@@ -242,6 +234,10 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.add-app', ship, desk),
     removeApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.remove-app', appId),
+    suspendApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.suspend-app', appId),
+    reviveApp: async (appId: string) =>
+      await ipcRenderer.invoke('realm.spaces.bazaar.revive-app', appId),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -557,36 +553,12 @@ export class SpacesService extends BaseService {
     return BazaarApi.getTreaties(this.core.conduit!, patp);
   }
 
-  async getRecentApps(_event: IpcMainInvokeEvent) {
-    return [];
-    // return this.models.bazaar.getRecentApps();
+  async addRecentApp(_event: IpcMainInvokeEvent, appId: string) {
+    return this.models.bazaar.addRecentApp(appId);
   }
 
-  async addRecentApp(
-    _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    appId: string
-  ) {
-    // console.log('addRecentApp => %o', { spacePath, appId });
-    return [];
-
-    // return this.models.bazaar.getBazaar(spacePath).addRecentApp(appId);
-  }
-
-  async addRecentDev(
-    _event: IpcMainInvokeEvent,
-    spacePath: SpacePath,
-    shipId: string
-  ) {
-    return [];
-
-    // return this.models.bazaar.getBazaar(spacePath).addRecentDev(shipId);
-  }
-
-  async getRecentDevs(_event: IpcMainInvokeEvent) {
-    return [];
-
-    // return this.models.bazaar.getRecentDevs();
+  async addRecentDev(_event: IpcMainInvokeEvent, shipId: string) {
+    return this.models.bazaar.addRecentDev(shipId);
   }
 
   async pinApp(
@@ -683,7 +655,12 @@ export class SpacesService extends BaseService {
   async uninstallApp(_event: IpcMainInvokeEvent, desk: string) {
     return await this.models.bazaar.uninstallApp(this.core.conduit!, { desk });
   }
-
+  async suspendApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await this.models.bazaar.suspendApp(this.core.conduit!, desk);
+  }
+  async reviveApp(_event: IpcMainInvokeEvent, desk: string) {
+    return await this.models.bazaar.reviveApp(this.core.conduit!, desk);
+  }
   async addAlly(_event: IpcMainInvokeEvent, ship: Patp) {
     return await this.models.bazaar.addAlly(this.core.conduit!, ship);
   }

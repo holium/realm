@@ -1,8 +1,8 @@
 import { FC, useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { lighten, rgba } from 'polished';
+import { lighten, rgba, darken, desaturate } from 'polished';
 import { Flex, Box, Text, ContextMenu, Spinner } from '..';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { AppType, InstallStatus } from 'os/services/spaces/models/bazaar';
 import { bgIsLightOrDark } from 'os/lib/color';
 import Icons from '../Icons';
 import { Portal } from 'renderer/system/dialog/Portal';
@@ -10,6 +10,7 @@ import { AnimatePresence } from 'framer-motion';
 import { ThemeType } from 'renderer/theme';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
 
 const sizes = {
   sm: 32,
@@ -119,7 +120,7 @@ interface AppTileProps {
   isVisible?: boolean;
   isAnimated?: boolean;
   tileSize: AppTileSize;
-  isInstalling?: boolean;
+  installStatus?: InstallStatus;
   isUninstalled?: boolean;
   hasTitle?: boolean;
   highlightOnHover?: boolean;
@@ -141,17 +142,20 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
     onAppClick,
     hasTitle,
     isRecommended,
-    isInstalling,
-    isUninstalled,
+    installStatus,
     highlightOnHover,
   } = props;
   const { theme } = useServices();
 
   const tileRef = useRef(null);
 
+  const { isInstalling, isFaded, isSuspended, isUninstalled, isFailed } =
+    getAppTileFlags(installStatus || InstallStatus.installed);
+
   return useMemo(() => {
     const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
     let title;
+    let status;
     const isAppGrid =
       tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
     const boxShadowStyle = isAppGrid
@@ -162,6 +166,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
       : 'none';
     const isLight = lightOrDark === 'light';
     const textColor = isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8);
+
     if (isAppGrid) {
       const appColor = app.color;
       title = (
@@ -180,8 +185,41 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           {app.title}
         </Text>
       );
+      if (isSuspended || isFailed) {
+        let statusBadgeColor = isLight
+          ? darken(0.05, desaturate(1, app.color))
+          : lighten(0.1, desaturate(1, app.color));
+        if (isFailed) {
+          statusBadgeColor = isLight
+            ? rgba(darken(0.05, '#D0384E'), 0.1)
+            : rgba(lighten(0.1, '#D0384E'), 0.1);
+        }
+        status = (
+          <Text
+            position="absolute"
+            style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+            left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
+            padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
+            borderRadius={6}
+            backgroundColor={app.image && rgba(statusBadgeColor, 0.5)}
+            top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
+            fontWeight={500}
+            textStyle="capitalize"
+            fontSize={tileSize === 'xl1' ? '13px' : 2}
+            color={isFailed ? '#5e0b18' : textColor}
+          >
+            {app.installStatus}
+          </Text>
+        );
+      }
     }
     const tileId = `app-tile-grid-${app.id}`;
+
+    const tileBg = app.color || '#F2F3EF';
+    const filter =
+      isSuspended || isFailed
+        ? { filter: 'grayscale(1)' }
+        : { filter: 'grayscale(0)' };
 
     // set image or icon
     let graphic;
@@ -205,11 +243,19 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
                 },
               }
             : {})}
-          animate={{
-            opacity: isInstalling || isUninstalled ? 0.5 : 1,
-            boxShadow: boxShadowStyle,
+          initial={{
+            opacity: isFaded ? 0.5 : 1,
+            ...filter,
           }}
-          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
+          animate={{
+            opacity: isFaded ? 0.5 : 1,
+            boxShadow: boxShadowStyle,
+            ...filter,
+          }}
+          transition={{
+            scale: { duration: 0.1 },
+            boxShadow: { duration: 0.1 },
+          }}
           minWidth={sizes[tileSize]}
           style={{
             borderRadius: radius[tileSize],
@@ -217,7 +263,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           }}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
-          backgroundColor={app.color || '#F2F3EF'}
+          backgroundColor={tileBg}
         >
           <img
             style={{ pointerEvents: 'none' }}
@@ -255,15 +301,18 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
-            opacity: isInstalling || isUninstalled ? 0.5 : 1,
+            opacity: isFaded ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
-          transition={{ scale: 0.5, boxShadow: { duration: 0.5 } }}
+          transition={{
+            scale: { duration: 0.1 },
+            boxShadow: { duration: 0.1 },
+          }}
           minWidth={sizes[tileSize]}
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
-          backgroundColor={app.color || '#F2F3EF'}
+          backgroundColor={tileBg}
         >
           <Icons name={app.icon} height={iconSize} width={iconSize} />
           {title}
@@ -290,17 +339,17 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               }
             : {})}
           animate={{
-            opacity: isInstalling ? 0.5 : 1,
+            opacity: isFaded ? 0.5 : 1,
             boxShadow: boxShadowStyle,
           }}
           transition={{
-            scale: { duration: 0.5 },
-            boxShadow: { duration: 0.5 },
+            scale: { duration: 0.1 },
+            boxShadow: { duration: 0.1 },
           }}
           minWidth={sizes[tileSize]}
           style={{ borderRadius: radius[tileSize], overflow: 'hidden' }}
           key={app.title}
-          backgroundColor={app.color}
+          backgroundColor={tileBg}
           height={sizes[tileSize]}
           width={sizes[tileSize]}
         >
@@ -316,11 +365,17 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
           variants={variants}
           onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
             evt.stopPropagation();
-            onAppClick && !isUninstalled && !isInstalling && onAppClick(app);
+            onAppClick &&
+              !isSuspended &&
+              !isFailed &&
+              !isUninstalled &&
+              !isInstalling &&
+              onAppClick(app);
           }}
           className="app-dock-icon"
         >
-          {isInstalling && (
+          {status}
+          {isInstalling && !isUninstalled && (
             <Flex
               flexDirection="column"
               justifyContent="center"
@@ -331,7 +386,7 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
               right={0}
               bottom={0}
             >
-              <Spinner size={loaderSizes[tileSize]} />
+              <Spinner color="#FFF" size={loaderSizes[tileSize]} />
             </Flex>
           )}
           {allowContextMenu && (
@@ -379,7 +434,20 @@ export const AppTile: FC<AppTileProps> = observer((props: AppTileProps) => {
         )} */}
       </Flex>
     );
-  }, [app, isRecommended, isPinned, selected, open, theme.currentTheme]);
+  }, [
+    isFaded,
+    app,
+    isInstalling,
+    isFaded,
+    isSuspended,
+    isUninstalled,
+    isFailed,
+    isRecommended,
+    isPinned,
+    selected,
+    open,
+    theme.currentTheme,
+  ]);
 });
 
 AppTile.defaultProps = {
@@ -387,5 +455,5 @@ AppTile.defaultProps = {
   allowContextMenu: false,
   isAnimated: true,
   isRecommended: false,
-  isInstalling: false,
+  installStatus: InstallStatus.installed,
 };

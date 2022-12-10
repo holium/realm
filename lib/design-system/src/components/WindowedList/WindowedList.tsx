@@ -8,7 +8,12 @@ import { StyledList } from './WindowedList.styles';
 
 type WindowedListProps<T> = {
   data: T[];
-  rowRenderer: (rowData: T, index: number, measure: () => void) => JSX.Element;
+  rowRenderer: (
+    rowData: T,
+    index: number,
+    measure: () => void,
+    sortedAndFilteredData: T[]
+  ) => JSX.Element;
   /**
    * The width of the list. If undefined, the list will auto-size to the width of its parent container.
    * It is preferred to set this value if known ahead of time, to save render time.
@@ -81,7 +86,7 @@ export const WindowedList = <T,>({
               >
                 {({ measure, registerChild }) => (
                   <div style={style} ref={registerChild}>
-                    {rowRenderer(data[index], index, measure)}
+                    {rowRenderer(data[index], index, measure, data)}
                   </div>
                 )}
               </CellMeasurer>

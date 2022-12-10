@@ -293,11 +293,33 @@ export const ChatView: FC<IProps> = observer((props: IProps) => {
             <Icons name="ArrowLeftLine" />
           </IconButton>
         </Flex>
-        <Flex flex={1} gap={10} alignItems="center" flexDirection="row">
+        <Flex
+          flex={1}
+          gap={10}
+          alignItems="center"
+          flexDirection="row"
+          maxWidth="100%"
+          minWidth={0}
+        >
           <Box>{sigil}</Box>
-          <Text fontSize={3} fontWeight={500}>
-            {to}
-          </Text>
+          <Flex flexDirection="column" maxWidth="100%" minWidth={0}>
+            <Text
+              fontSize={3}
+              fontWeight={500}
+              style={{
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {to}
+            </Text>
+            {isGroup && (
+              <Text fontSize={1} fontWeight={400} opacity={0.5}>
+                {selectedChat.to.length} people
+              </Text>
+            )}
+          </Flex>
         </Flex>
         <Flex pl={2} pr={2}>
           {/* <IconButton

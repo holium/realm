@@ -16,7 +16,7 @@ import {
   PreviewDMType,
   PreviewGroupDMType,
 } from 'os/services/ship/models/courier';
-import { Message } from './Message';
+import { getTextFromContent } from '../helpers/parser';
 import { ThemeModelType } from 'os/services/theme.model';
 import { DmActions } from 'renderer/logic/actions/chat';
 import { fromNow } from '../helpers/time';
@@ -57,15 +57,6 @@ export const Row = styled(motion.div)<RowProps>`
     `}
 `;
 
-export const MessagePreview = styled(motion.div)`
-  padding: 0px;
-  line-height: 16px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  user-select: text;
-`;
-
 export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const { dm, theme, onClick } = props;
   const isGroup = dm.type === 'group' || dm.type === 'group-pending';
@@ -88,39 +79,32 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
   const subTitle = useMemo(() => {
     if (isGroup) {
       let type = 'text';
-      let lastMessage;
+      let content;
       if (dm.lastMessage.length > 0 && !isPending) {
         const lastSender = dm.lastMessage[0];
-        lastMessage = dm.lastMessage[1];
-        type = Object.keys(lastMessage)[0];
+        content = dm.lastMessage[1];
+        type = Object.keys(content)[0];
         // @ts-expect-error
-        lastMessage = { text: `${lastSender.mention}: ${lastMessage[type]}` };
+        content = { text: `${lastSender.mention}: ${content[type]}` };
       } else {
-        lastMessage = {
+        content = {
           text: isPending ? 'Group chat invite' : 'No messages yet',
         };
       }
 
-      return <Message preview type={type} content={lastMessage} />;
+      return getTextFromContent(type, content);
     } else {
       if (isPending) {
-        return (
-          <Message
-            preview
-            type="text"
-            content={{ text: 'invited you to chat' }}
-          />
-        );
+        return getTextFromContent('text', { text: 'invited you to chat' });
       } else {
         let type = 'text';
-        let lastMessage = dm.lastMessage[0];
-        if (lastMessage) {
-          type = Object.keys(lastMessage)[0];
+        let content = dm.lastMessage[0];
+        if (content) {
+          type = Object.keys(content)[0];
         } else {
-          lastMessage = { text: 'No messages yet' };
+          content = { text: 'No messages yet' };
         }
-
-        return <Message preview type={type} content={lastMessage} />;
+        return getTextFromContent(type, content);
       }
     }
   }, [dm.lastMessage, isGroup, isPending]);
@@ -243,7 +227,18 @@ export const ContactRow: FC<DMContact> = (props: DMContact) => {
           >
             {to}
           </Text>
-          {subTitle}
+          <Text
+            fontSize={2}
+            opacity={0.6}
+            lineHeight="22px"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {subTitle}
+          </Text>
         </Flex>
         {isPending ? (
           <Flex

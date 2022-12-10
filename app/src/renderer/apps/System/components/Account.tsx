@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -8,6 +8,9 @@ import {
   RadioGroup,
   TextButton,
   Spinner,
+  AccessCode,
+  Anchor,
+  CopyButton,
 } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
@@ -15,10 +18,15 @@ import { ColorPicker } from './ColorPicker';
 import { useForm, useField } from 'mobx-easy-form';
 import { ShipActions } from 'renderer/logic/actions/ship';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { useTrayApps } from 'renderer/apps/store';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 
 export const AccountPanel: FC<any> = observer(() => {
-  const { theme, ship, contacts } = useServices();
+  const { theme, ship, identity } = useServices();
+  const baseTheme = getBaseTheme(theme.currentTheme);
+  const { setActiveApp } = useTrayApps();
 
   const { windowColor, textColor, accentColor, inputColor } =
     theme.currentTheme;
@@ -26,6 +34,19 @@ export const AccountPanel: FC<any> = observer(() => {
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const url = identity.auth.currentShip!.url;
+  const isHostedShip = url.includes('holium.network');
+  const email = identity.auth.email;
+  const [code, setCode] = useState('');
+
+  useEffect(() => {
+    async function getCode() {
+      const code = await AuthActions.getCode();
+      setCode(code);
+    }
+    getCode();
+  }, []);
 
   type avatarOptionType = 'color' | 'image';
 
@@ -227,10 +248,10 @@ export const AccountPanel: FC<any> = observer(() => {
           {isLoading && <Spinner size={1} />}
         </Flex>
       </Card>
-      {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
-      HOSTING
-    </Text>
-    <Card
+      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+        HOSTING
+      </Text>
+      <Card
         p="20px"
         width="100%"
         // minHeight="240px"
@@ -239,11 +260,84 @@ export const AccountPanel: FC<any> = observer(() => {
         flexDirection={'column'}
         mb={2}
       >
-        <Text>
-          Coming Soon
-        </Text>
+        <Flex flexDirection={'row'} flex={4} justifyContent="flex-start">
+          <Text fontWeight={500} flex={1} margin={'auto'}>
+            Email
+          </Text>
+          <Flex justifyContent="space-between" flex={3}>
+            <Text color={baseTheme.colors.text.secondary}> {email} </Text>
+            <TextButton
+              style={{ fontWeight: 400 }}
+              showBackground
+              textColor={accentColor}
+              highlightColor={accentColor}
+              onClick={() => {
+                ShellActions.setBlur(true);
+                ShellActions.openDialog('change-email-dialog');
+                setActiveApp(null);
+              }}
+            >
+              Change Email
+            </TextButton>
+          </Flex>
+        </Flex>
 
-    </Card> */}
+        {isHostedShip && (
+          <>
+            <Flex
+              flexDirection={'row'}
+              flex={4}
+              mt={4}
+              justifyContent="flex-start"
+            >
+              <Text fontWeight={500} flex={1} margin={'auto'}>
+                Payment
+              </Text>
+              <Flex justifyContent="space-between" flex={3}>
+                <Text color={baseTheme.colors.text.secondary}>Credit Card</Text>
+                <Anchor
+                  href="https://billing.stripe.com/p/login/test_8wM8yL4SR7Oc0iAfYY"
+                  p={0}
+                  m={0}
+                >
+                  <TextButton
+                    style={{ fontWeight: 400 }}
+                    showBackground
+                    textColor={accentColor}
+                    highlightColor={accentColor}
+                  >
+                    Manage billing
+                  </TextButton>
+                </Anchor>
+              </Flex>
+            </Flex>
+          </>
+        )}
+
+        <Flex flexDirection={'row'} flex={4} mt={4} justifyContent="flex-start">
+          <Text fontWeight={500} flex={1} margin={'auto'}>
+            URL
+          </Text>
+          <Text color={baseTheme.colors.text.secondary} flex={3}>
+            {url}
+          </Text>
+        </Flex>
+
+        <Flex flexDirection={'row'} flex={4} mt={4} justifyContent="flex-start">
+          <Text fontWeight={500} flex={1} margin={'auto'}>
+            Access Code
+          </Text>
+          {code === '' ? (
+            <Flex flex={3}>
+              <Spinner size={1} />
+            </Flex>
+          ) : (
+            <Flex flex={3}>
+              <AccessCode code={code} />
+            </Flex>
+          )}
+        </Flex>
+      </Card>
     </Flex>
   );
 });
