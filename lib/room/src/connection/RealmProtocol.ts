@@ -40,7 +40,8 @@ export class RealmProtocol extends BaseProtocol {
     this.emit(ProtocolEvent.Ready);
   }
 
-  sendSignal(peer: Patp, msg: any): void {
+  async sendSignal(peer: Patp, msg: any)/*: void*/ {
+    await this.delay(1000);
     if (this.presentRoom) {
       this.poke({
         app: 'rooms-v2',
@@ -57,7 +58,7 @@ export class RealmProtocol extends BaseProtocol {
     }
   }
 
-  onSignal(data: any, mark: string) {
+  async onSignal(data: any, mark: string) {
     if (mark === 'rooms-v2-view') {
       if (data['session']) {
         // "session" is sent on initial /lib subscription
@@ -154,6 +155,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-entered']) {
+        await this.delay(1000);
         console.log('room entered update')
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
@@ -512,6 +514,9 @@ export class RealmProtocol extends BaseProtocol {
       });
     }
   }
+  delay(time: number) {
+    return new Promise(resolve => setTimeout(resolve, time));
+  }
 }
 
 const retry = (callback: any, times = 3) => {
@@ -533,4 +538,5 @@ const retry = (callback: any, times = 3) => {
       }
     }, 2500);
   });
+
 };
