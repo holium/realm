@@ -277,7 +277,7 @@
         ?>  ?=([%clay %tire *] sig)
         ?-  -.p.sig
           %&  (on-rock p.p.sig)
-          %|  (on-wave p.p.sig)  
+          %|  (on-wave p.p.sig)
         ==
       [cards this]
     ::  +pre: prefix for scries to hood
