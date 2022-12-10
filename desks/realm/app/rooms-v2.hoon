@@ -143,7 +143,9 @@
 ::
 ++  init
   ^+  hol
-  hol(state [%0 host=provider-init session=session-init])
+  =/  wire       [/provider-updates/(scot %p our.bol)]
+  =/  watch-our  [%pass wire %agent [our.bol %rooms-v2] %watch wire]~
+  hol(state [%0 host=provider-init session=session-init], dek (weld watch-our dek))
   ::
   ++  provider-init
     ^-  provider-state:store
