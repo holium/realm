@@ -69,7 +69,10 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
   const { id, selected, index, accentColor, app, space, isAdmin, onClick } =
     props;
   const { bazaar } = useServices();
-  const appHost = useMemo(() => (app as UrbitAppType).host, [app]);
+  const appHost = useMemo(() => {
+    if (app?.type !== 'urbit') return null;
+    return (app as UrbitAppType).host;
+  }, [app]);
 
   if (app) {
     const isPinned = bazaar.isPinned(space.path, app.id);
@@ -139,7 +142,7 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
           app.type === 'urbit' && {
             label: installLabel(app.installStatus as InstallStatus),
             disabled: false,
-            section: !canSuspend ? 2 : undefined,
+            section: 2,
             onClick: (evt: any) => {
               evt.stopPropagation();
               if (!appHost) throw new Error('App host is undefined');
@@ -176,7 +179,7 @@ export const SuiteApp = observer((props: SuiteAppProps) => {
           </Box>
         )}
         <AppTile
-          tileId={id}
+          tileId={`${id}-app`}
           tileSize="xl1"
           app={app}
           isAnimated={isInstalled}

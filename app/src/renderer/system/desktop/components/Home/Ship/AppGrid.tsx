@@ -57,7 +57,7 @@ export const AppGrid = observer(({ tileSize = 'xxl' }: AppGridProps) => {
             ? [
                 {
                   label: installLabel(installStatus),
-                  // section: 2,
+                  section: 2,
                   disabled: false,
                   onClick: (evt: any) => {
                     evt.stopPropagation();
