@@ -10,7 +10,10 @@ import { Box } from '@holium/design-system';
 export interface RealmPopoverProps {
   id: string;
   isOpen: boolean;
-  coords?: any;
+  coords?: {
+    top: number;
+    left: number;
+  };
   style?: any;
   children?: any;
   buttonOffset?: {
@@ -18,8 +21,8 @@ export interface RealmPopoverProps {
     y?: number;
   };
   dimensions: {
-    height: number;
     width: number;
+    height?: number;
   };
   onClose: () => void;
 }

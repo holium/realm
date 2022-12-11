@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 import { clan } from 'urbit-ob';
 import { Flex, Box, Sigil, Text, MenuItemProps, useMenu, Menu } from '../';
 import { Row } from 'renderer/components/NewRow';
-import { AnimatePresence } from 'framer-motion';
 import { PassportCard } from './PassportCard';
 import { useContextMenu } from 'renderer/components/ContextMenu';
+import Portal from 'renderer/system/dialog/Portal';
+import { AnimatePresence } from 'framer-motion';
+import { ThemeType } from '../../logic/theme';
 
 interface IPersonRow {
   listId: string;
@@ -15,13 +17,12 @@ interface IPersonRow {
   description?: string | null;
   style?: any;
   rowBg: string;
-  theme?: {
-    textColor: string;
-    windowColor: string;
-  };
+  theme?: ThemeType;
   contextMenuOptions?: MenuItemProps[];
   children?: any;
 }
+
+const MENU_WIDTH = 340;
 
 export const PersonRow = ({
   listId,
@@ -37,15 +38,13 @@ export const PersonRow = ({
   children,
 }: IPersonRow) => {
   const { windowColor } = theme!;
-  const rowRef = useRef(null);
+  const rowRef = useRef<HTMLDivElement>(null);
   const { getOptions, setOptions } = useContextMenu();
 
-  /// Setting up options menu
-  const menuWidth = 340;
   const config = useMenu(rowRef, {
     orientation: 'left',
     padding: 0,
-    menuWidth,
+    menuWidth: MENU_WIDTH,
   });
 
   const { anchorPoint, show, setShow } = config;
@@ -69,7 +68,8 @@ export const PersonRow = ({
 
   return (
     <Flex key={id} style={{ position: 'relative', ...style }}>
-      {contextMenuOptions && (
+      {/* TODO: Don't use a portal here so it's accesible by the context menu. */}
+      <Portal>
         <AnimatePresence>
           {show && (
             <Menu
@@ -79,7 +79,7 @@ export const PersonRow = ({
                 x: anchorPoint && anchorPoint.x - 6,
                 y: anchorPoint && anchorPoint.y,
                 visibility: show ? 'visible' : 'hidden',
-                width: menuWidth,
+                width: MENU_WIDTH,
                 borderRadius: 9,
                 minHeight: 120,
                 padding: 12,
@@ -103,7 +103,8 @@ export const PersonRow = ({
             </Menu>
           )}
         </AnimatePresence>
-      )}
+      </Portal>
+
       <Row
         id={id}
         ref={rowRef}
