@@ -74,6 +74,7 @@
     %bold           [%text (flat-crip-inline-list p.inline '**' '**')]
     %strike         [%text (flat-crip-inline-list p.inline '~~' '~~')]
   ==
+::
 ++  into-contact-ship-add-card
   |=  [=ship =bowl:gall]
   :: TODO if tlon makes %contact-hook work instead of %contact-store,
@@ -82,6 +83,7 @@
   :: --- but currently, two ships using %talk cannot see each other's
   :: rolodex profile, even if it's public
   [%pass / %agent [our.bowl %contact-store] %poke contact-update-0+!>([%add ship *contact:contact-store])]
+::
 ++  accept-dm
   |=  [=action:dm-hook-sur =bowl:gall]
   ^-  (list card:agent:gall)
@@ -98,6 +100,7 @@
         [%pass /g2/dm/(scot %p +.action)/ui %agent [our.bowl %chat] %watch /dm/(scot %p +.action)/ui]
       ==
   ==
+::
 ++  accept-group-dm
   |=  [a=[%accept id=@uvH] =bowl:gall]
   ^-  (list card:agent:gall)
@@ -202,7 +205,7 @@
       (murn contents.p into-chat-block-type)
     =/  delta-for-chat   [%add (memo:c ~ author.p time-sent.p [%story [blocks (snoc inlines [%break ~])]])]
     =/  chat-diff    [[ship time-sent.p] delta-for-chat]
-    ~&  >>  ['send-dm here:' chat-diff]
+    :: ~&  >>  ['send-dm here:' chat-diff]
     [%pass / %agent [author.p %chat] %poke dm-action+!>([ship chat-diff])]~
   ++  read-dm
     |=  [=ship =bowl:gall]
@@ -623,6 +626,7 @@
   ^-  message-preview
   =/  path              (spat /dm-inbox/(scot %p ship))
   [path (silt ~[ship]) %pending %talk now [~] ~[(form-contact-mtd rolo ship)] ~ 0]
+::
 ++  club-sub-card
   |=  [=whom:c our=ship]
   ^-  card:agent:gall
@@ -632,17 +636,43 @@
     %club
     [%pass /g2/club/(scot %uv p.whom)/ui %agent [our %chat] %watch /club/(scot %uv p.whom)/ui/writs]
   ==
+::
+++  club-leave-card
+  |=  [=whom:c our=ship]
+  ^-  card:agent:gall
+  ?-  -.whom
+    %ship   !!
+    %flag   !!
+    %club
+    [%pass /g2/club/(scot %uv p.whom)/ui %agent [our %chat] %leave ~]
+  ==
+::
 ++  set-groups-target
     |=  [new-target=targetable-groups =bowl:gall]
     ^-  (list card:agent:gall)
     ?-  new-target
-      %1  ~ :: no cards to change for old groups
+      %1  :: Clean up base groups 2 subs
+        =/  hardcoded
+          :~
+            [%pass /g2/briefs %agent [our.bowl %chat] %leave ~]
+            [%pass /g2/club/new %agent [our.bowl %chat] %leave ~]
+            [%pass /g2/dm/invited %agent [our.bowl %chat] %leave ~]
+            ::
+            [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
+            [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
+          ==
+        =/  =briefs:c   .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
+        =/  whoms       ~(tap in ~(key by briefs))
+        =/  clubs       (skim whoms |=(w=whom:c =(-.w %club)))
+        =/  dynamic     `(list card:agent:gall)`(turn clubs |=(w=whom:c (club-leave-card w our.bowl)))
+        (weld `(list card:agent:gall)`hardcoded dynamic)
+      ::
       %2
       =/  hardcoded  :~  :: define list of cards to update subscriptions for the paths we always know we need to do
         :: don't care about graph-store&dm-hook anymore
         :: since we're on groups-two
-        [%pass /updates %agent [our.bowl %graph-store] %leave ~]
-        [%pass /updates %agent [our.bowl %dm-hook] %leave ~]
+        [%pass /graph-store %agent [our.bowl %graph-store] %leave ~]
+        [%pass /dm-hook %agent [our.bowl %dm-hook] %leave ~]
         :: and sub to new junk
         [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
         [%pass /g2/club/new %agent [our.bowl %chat] %watch /club/new]

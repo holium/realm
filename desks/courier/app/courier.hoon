@@ -200,7 +200,7 @@
             ~&  >  "{<dap.bowl>}: groups-two /club/id/ui kicked us, giving up..."
             `this
           %fact
-            ~&  ['club fact' cage.sign]
+            :: ~&  ['club fact' cage.sign]
             [(handle-club-ui-fact:groups-two wire cage.sign bowl state) this]
         ==
       [%g2 %briefs ~]
@@ -217,7 +217,7 @@
             ==
           %fact
             ~&  'groups-two /briefs fact'
-            ~&  cage.sign
+            :: ~&  cage.sign
             [(propagate-briefs-fact:groups-two cage.sign bowl state) this]
             :: [whom:c brief:briefs:c]
         ==
@@ -291,10 +291,8 @@
   ^-  (quip card _state)
   |^
   ?-  -.act
-    :: %accept-dm          `state
-    :: %decline-dm         `state
-    :: %pendings           `state
-    :: %screen             `state
+    :: %accept-dm            `state
+    :: %decline-dm           `state
     %send-dm               (send-dm +.act)
     %read-dm               (read-dm +.act)
     %create-group-dm       (create-group-dm +.act)
@@ -302,6 +300,14 @@
     %read-group-dm         (read-group-dm +.act)
     %set-groups-target     (on-graph-action:groups-two act bowl state)
   ==
+  ::
+  ++  accept-dm
+    |=  =ship
+    `state
+  ::
+  ++  decline-dm
+    |=  =ship
+    `state
   ::
   ++  read-dm
     |=  [=ship]
