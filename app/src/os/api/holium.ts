@@ -104,7 +104,6 @@ export class HoliumAPI {
     verificationCode: string | null;
     errorCode: number | null;
   }> {
-    console.log(`api: change email ${newEmail}`);
     try {
       const { data } = await client.post(
         `/accounts/${accountId}/change-email?email=${newEmail}`
@@ -138,14 +137,25 @@ export class HoliumAPI {
 
   async getPlanets(
     accountId: string,
-    accessCode?: string
+    inviteCode?: string
   ): Promise<HostingPlanet[]> {
     const { data } = await client.post(
       `accounts/${accountId}/assign-planets${
-        accessCode ? `?accessCode=${accessCode}` : ''
+        inviteCode ? `?accessCode=${inviteCode}` : ''
       }`
     );
     return data.planets;
+  }
+
+  async confirmPlanetAvailable(
+    accountId: string,
+    patp: string
+  ): Promise<boolean> {
+    const { data } = await client.post(
+      `accounts/${accountId}/confirm-planet-available?patp=${patp}`
+    );
+
+    return data.available === true;
   }
 
   async prepareCheckout(
@@ -159,15 +169,30 @@ export class HoliumAPI {
     return { clientSecret: data.clientSecret };
   }
 
-  async completeCheckout(accountId: string, patp: string) {
-    const { data } = await client.post(
-      `accounts/${accountId}/complete-checkout?patp=${patp}`
-    );
-    return {
-      id: data.id,
-      patp: data.patp,
-      checkoutComplete: data.checkoutComplete,
-    };
+  async completeCheckout(
+    accountId: string,
+    patp: string
+  ): Promise<{
+    id?: string;
+    patp?: string;
+    success: boolean;
+    errorCode?: number;
+  }> {
+    try {
+      const { data } = await client.post(
+        `accounts/${accountId}/complete-checkout?patp=${patp}`
+      );
+      return {
+        id: data.id,
+        patp: data.patp,
+        success: data.checkoutComplete,
+      };
+    } catch (error: any) {
+      if (error.response && error.response.status) {
+        return { success: false, errorCode: error.response.status };
+      }
+      return { success: false };
+    }
   }
 
   async getShips(accountId: string): Promise<HostingPurchasedShip[]> {
@@ -187,7 +212,7 @@ export class HoliumAPI {
 
   async redeemAccessCode(
     code: string
-  ): Promise<{ success: boolean; errorCode: number | null, email?: string }> {
+  ): Promise<{ success: boolean; errorCode: number | null; email?: string }> {
     try {
       const { data } = await client.post(`access-codes/${code}/redeem`);
       return { success: true, email: data.email, errorCode: null };

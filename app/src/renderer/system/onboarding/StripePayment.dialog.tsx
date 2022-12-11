@@ -87,6 +87,8 @@ const MainComponent: FC<StripePaymentProps> = observer(
 
       setLoading(true);
 
+      await OnboardingActions.confirmPlanetStillAvailable();
+
       try {
         const { paymentIntent, error } = await stripe.confirmPayment({
           elements,
