@@ -1,5 +1,4 @@
 // @ts-nocheck
-import { action } from 'mobx';
 import { types, Instance, flow } from 'mobx-state-tree';
 import { Conduit } from '@holium/conduit';
 import { BeaconApi } from '../../../api/beacon';
@@ -11,23 +10,6 @@ const NotificationContentTypes = types.union(
   types.model('ContentEmph', { emph: types.string })
 );
 
-const PlaceModel = types.model({
-  desk: types.string,
-  path: types.string,
-});
-
-export type PlaceModelType = Instance<typeof PlaceModel>;
-
-const AllStatsModel = types.model('AllStats', {
-  place: PlaceModel,
-  stats: types.model({
-    count: types.number,
-    each: types.array(types.frozen()),
-    last: types.number,
-  }),
-});
-export type AllStatsModelType = Instance<typeof AllStatsModel>;
-
 export const NotificationModel = types
   .model('BeaconNotificationModel', {
     id: types.identifier,
@@ -35,6 +17,7 @@ export const NotificationModel = types
     inbox: types.string,
     content: types.array(NotificationContentTypes),
     time: types.number,
+    type: types.enumeration(['hark', 'realm']),
     seen: types.boolean,
   })
   .actions((self) => ({
@@ -52,90 +35,134 @@ export type NotificationModelType = Instance<typeof NotificationModel>;
 
 export const NotificationStore = types
   .model('BeaconNotificationStore', {
+    seen: types.array(NotificationModel),
+    unseen: types.array(NotificationModel),
     notes: types.map(NotificationModel),
-    all: types.array(AllStatsModel),
-    // recent: types.array(NotificationModel),
   })
   .views((self) => ({
-    get seen() {
-      return Array.from(self.notes.values())
-        .filter((note: NotificationModelType) => {
-          return note.seen;
-        })
-        .sort(
-          (na: NotificationModelType, nb: NotificationModelType) =>
-            na.time - nb.time
-        );
-    },
-    get unseen() {
-      return Array.from(self.notes.values())
-        .filter((note: NotificationModelType) => {
-          return !note.seen;
-        })
-        .sort(
-          (na: NotificationModelType, nb: NotificationModelType) =>
-            na.time - nb.time
-        );
-    },
+    // get seenSorted() {
+    //   return self.seen.sort(
+    //     (a: NotificationModelType, b: NotificationModelType) => {
+    //       return a.time - b.time;
+    //     }
+    //   );
+    // },
+    // get unseenSorted() {
+    //   return self.unseen.sort(
+    //     (a: NotificationModelType, b: NotificationModelType) => {
+    //       return a.time - b.time;
+    //     }
+    //   );
+    // },
+    // get seen() {
+    //   return Array.from(self.notes.values())
+    //     .filter((note: NotificationModelType) => {
+    //       return note.seen;
+    //     })
+    //     .sort(
+    //       (na: NotificationModelType, nb: NotificationModelType) =>
+    //         na.time > nb.time
+    //     );
+    // },
+    // get unseen() {
+    //   return Array.from(self.notes.values())
+    //     .filter((note: NotificationModelType) => {
+    //       return !note.seen;
+    //     })
+    //     .sort(
+    //       (na: NotificationModelType, nb: NotificationModelType) =>
+    //         na.time > nb.time
+    //     );
+    // },
   }))
   .actions((self) => ({
     load: flow(function* (conduit: Conduit) {
       try {
-        let all = yield BeaconApi.getAll(conduit);
-        Object.values(all)
+        const all = yield BeaconApi.getAll(conduit);
+        const unseen = Object.values(all)
+          .filter((note: NotificationModelType) => !note.seen)
           .sort((a: NotificationModelType, b: NotificationModelType) => {
             return b.time - a.time;
-          })
-          .forEach((note: NotificationModelType) =>
-            self.notes.set(note.id, note)
-          );
+          });
+        const seen = Object.values(all)
+          .filter((note: NotificationModelType) => note.seen)
+          .sort((a: NotificationModelType, b: NotificationModelType) => {
+            return b.time - a.time;
+          });
+        self.unseen = unseen;
+        self.seen = seen;
+        // Object.values(all)
+        // .sort((a: NotificationModelType, b: NotificationModelType) => {
+        //   return a.time > b.time;
+        // })
+        //   .forEach((note: NotificationModelType) =>
+        //     self.notes.set(note.id, note)
+        //   );
       } catch (error) {
         console.error(error);
       }
     }),
     newNotification(data: any) {
-      if (data.con) {
-        let contents = [];
-        for (let i = 0; i < data.con.length; i++) {
-          const content = data.con[i];
-          if (typeof content === 'string') {
-            contents.push({
-              text: content,
-            });
-          } else {
-            contents.push(content);
-          }
-        }
-        self.unseen.push(
-          NotificationModel.create({
-            seen: false,
-            time: data.time,
-            content: contents,
-            id: data.id,
-          })
-        );
-      }
+      const notif = NotificationModel.create(data);
+      const added = self.unseen;
+      added.unshift(notif);
+      self.unseen = added;
+      // if (data.content) {
+      //   const contents = [];
+      //   for (let i = 0; i < data.content.length; i++) {
+      //     const content = data.content[i];
+      //     if (typeof content === 'string') {
+      //       contents.push({
+      //         text: content,
+      //       });
+      //     } else {
+      //       contents.push(content);
+      //     }
+      //   }
+      //   self.unseen.push(
+      //     NotificationModel.create({
+      //       ...data,
+      //       content: contents,
+      //     })
+      //   );
+      // }
     },
-    _markSeen: flow(function* (conduit: Conduit, noteId: string) {
-      if (!self.notes.has(noteId)) return;
-      const note = self.notes.get(noteId);
-      self.notes.set(
-        noteId,
-        NotificationModel.create({
-          ...note,
-          seen: true,
-        })
+    _markSeen(noteId: string) {
+      console.log('marking seen', noteId);
+      const removed = self.unseen;
+      const seenIdx = self.unseen.findIndex(
+        (note: NotificationModelType) => note.id === noteId
       );
-    }),
+      self.seen.push(self.unseen[seenIdx]);
+      removed.splice(seenIdx, 1);
+      self.unseen = removed;
+      // nowSeen.seen = true;
+      // self.unseen.splice();
+      // if (!self.notes.has(noteId)) return;
+      // const note = self.notes.get(noteId);
+      // self.notes.set(
+      //   noteId,
+      //   NotificationModel.create({
+      //     ...note,
+      //     seen: true,
+      //   })
+      // );
+    },
 
     sawInbox: flow(function* (conduit: Conduit, inbox: BeaconInboxType) {
       try {
         if (Object.keys(inbox).includes('all')) {
-          self.notes.forEach(
-            action((note: NotificationModelType) => {
-              note.seen = true;
-            })
-          );
+          const seen = self.seen;
+          const readUnseen = self.unseen.map((note: NotificationModelType) => {
+            return {
+              ...note,
+              seen: true,
+            };
+          });
+          self.unseen = [];
+          seen.concat(readUnseen);
+          self.seen = seen;
+          // self.seen = [...readUnseen, ...self.seen];
         }
         return yield BeaconApi.sawInbox(conduit, inbox);
       } catch (error) {

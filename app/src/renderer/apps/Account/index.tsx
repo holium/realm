@@ -6,7 +6,6 @@ import {
   Sigil,
   Text,
   IconButton,
-  TextButton,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
@@ -16,7 +15,7 @@ import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from '../store';
 // import { ShipActions } from 'renderer/logic/actions/ship';
-import { lighten, rgba } from 'polished';
+import { rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
@@ -90,7 +89,7 @@ export const AccountTrayApp = observer(() => {
           </Text>
         </Flex>
         <Flex gap={10} alignItems="center">
-          <TextButton
+          {/* <TextButton
             style={{ fontWeight: 400 }}
             textColor={rgba(textColor, 0.5)}
             highlightColor={lighten(0.4, textColor)}
@@ -102,13 +101,10 @@ export const AccountTrayApp = observer(() => {
             }}
           >
             Show archived
-          </TextButton>
+          </TextButton> */}
         </Flex>
       </Flex>
-      <NotificationList
-        unseen={beacon.unseen as any}
-        seen={beacon.seen as any}
-      />
+      <NotificationList unseen={beacon.unseen} seen={beacon.seen} />
 
       <Flex
         position="absolute"

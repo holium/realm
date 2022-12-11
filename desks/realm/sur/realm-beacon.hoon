@@ -6,7 +6,9 @@
       desk=@tas
       inbox=cord
       content=(list content:hark)     :: content as markdown (cord)
-      tim=time                        :: note time sent
+      time=time                       :: note time sent
+      type=?(%hark %realm)
+      :: space=(unit space-path)
       seen=?                          :: seen/unseen
   ==
 ::
@@ -28,4 +30,3 @@
       [%unseen notes=(map id:hark note)]
   ==
 --
-

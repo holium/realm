@@ -110,7 +110,7 @@ const services = Services.create({
   courier: {},
   contacts: { ourPatp: '' },
   friends: {},
-  beacon: { unseen: [], seen: [], all: [], recent: [] },
+  beacon: { notes: {} },
 });
 
 export const servicesStore = services;

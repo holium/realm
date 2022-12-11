@@ -329,10 +329,10 @@
       =.  desk.note         des.rop.yarn
       =.  inbox.note        (spat wer.yarn)
       =.  content.note      con.yarn
-      =.  tim.note          tim.yarn
+      =.  type.note         %hark
+      =.  time.note         tim.yarn
       =.  seen.note         seen
       (~(put by acc) id note)
-    :: (~(put by acc) id [id des.rop.yarn wer.yarn con.yarn tim.yarn seen])
 
   ::  combine yarns in carpet with yarns in blanket
   ::  note we want a map, but instead of using mop to sort
@@ -410,7 +410,8 @@
       =.  desk.note         des.rop.yarn
       =.  inbox.note        (spat wer.yarn)
       =.  content.note      con.yarn
-      =.  tim.note          tim.yarn
+      =.  type.note         %hark
+      =.  time.note         tim.yarn
       =.  seen.note         %.n
       ~&  >>  note
       :_  state

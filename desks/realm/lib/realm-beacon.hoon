@@ -62,8 +62,10 @@
       :~  id/s/(scot %uv id.note.rct)
           desk/s/desk.note.rct
           inbox/s/inbox.note.rct
-          con/a/(turn content.note.rct content-js:encode)
-          time/(time tim.note.rct)
+          content/a/(turn content.note.rct content-js:encode)
+          type/s/type.note.rct
+          time/(time time.note.rct)
+          seen/b/%.n
       ==
     ==
   ::
@@ -107,8 +109,9 @@
     :~  id/s/(scot %uv id.n)
         desk/s/desk.n
         inbox/s/inbox.n
-        time/(time tim.n)
         content/a/(turn content.n content-js)
+        type/s/type.n
+        time/(time time.n)
         seen/b/seen.n
     ==
   ::

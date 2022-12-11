@@ -3,10 +3,11 @@ import { Flex, Text } from 'renderer/components';
 import { Notification, NotificationProps } from './Notification';
 import { useTrayApps } from 'renderer/apps/store';
 import { WindowedList } from '@holium/design-system';
+import { NotificationModelType } from 'os/services/spaces/models/beacon';
 
 interface INotificationList {
-  unseen: NotificationProps[];
-  seen: NotificationProps[];
+  unseen: NotificationModelType[];
+  seen: NotificationModelType[];
 }
 
 export const NotificationList: FC<INotificationList> = ({
@@ -20,18 +21,26 @@ export const NotificationList: FC<INotificationList> = ({
     data: NotificationProps | string;
   };
 
+  console.log(`unseen: ${unseen.length}, seen: ${seen.length}`);
+
   const listData: ListData[] = useMemo(
     () => [
       { type: 'title', data: 'Unseen' },
       ...(unseen.length === 0
         ? [{ type: 'hint', data: 'No notifications' }]
-        : unseen.map((n) => ({ type: 'notification', data: n }))),
+        : unseen.map((n: NotificationModelType) => ({
+            type: 'notification',
+            data: n,
+          }))),
       { type: 'title', data: 'Seen' },
       ...(seen.length === 0
         ? [{ type: 'hint', data: 'No notifications' }]
-        : seen.map((n) => ({ type: 'notification', data: n }))),
+        : seen.map((n: NotificationModelType) => ({
+            type: 'notification',
+            data: n,
+          }))),
     ],
-    [seen, unseen]
+    [seen, seen.length, unseen, unseen.length]
   );
 
   return (

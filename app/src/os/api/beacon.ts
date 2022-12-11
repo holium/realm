@@ -65,7 +65,7 @@ export const BeaconApi = {
       app: 'realm-beacon',
       path: '/updates',
       onEvent: async (data: any, id?: number, mark?: string) => {
-        console.log(data, mark);
+        // console.log(data, mark);
         if ('new-note' in data) {
           beacon.newNotification(data['new-note']);
         } else if ('seen' in data) {
