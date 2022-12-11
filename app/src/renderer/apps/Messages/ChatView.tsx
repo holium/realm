@@ -299,36 +299,25 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
         >
           <Box>{sigil}</Box>
           <Flex flexDirection="column" maxWidth="100%" minWidth={0}>
-            <Text
-              fontSize={3}
-              fontWeight={500}
-              style={{
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {to}
-            </Text>
+            <Tooltip show placement="top" content={to} id="dm-tooltip">
+              <Text
+                fontSize={3}
+                fontWeight={500}
+                style={{
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {to}
+              </Text>
+            </Tooltip>
             {isGroup && (
               <Text fontSize={1} fontWeight={400} opacity={0.5}>
                 {selectedChat.to.length} people
               </Text>
             )}
           </Flex>
-        </Flex>
-        <Flex pl={2} pr={2}>
-          {/* <IconButton
-            className="realm-cursor-hover"
-            customBg={dockColor}
-            style={{ cursor: 'none' }}
-            size={26}
-            onClick={(evt: any) => {
-              console.log('initiate call');
-            }}
-          >
-            <Icons name="Phone" />
-          </IconButton> */}
         </Flex>
       </Titlebar>
       <Flex
