@@ -322,7 +322,10 @@ export class OnboardingService extends BaseService {
       this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
       return { success: true, errorMessage: '' };
     } else {
-      const account = await this.core.holiumClient.createAccount(email);
+      const account = await this.core.holiumClient.createAccount(
+        email,
+        this.state.inviteCode
+      );
       if (!account.id) {
         const errorMessage =
           account.errorCode === 441
