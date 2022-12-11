@@ -85,7 +85,7 @@
       [%unrecommended =app-id =stalls]
       [%suite-added path=space-path:spaces =app-id index=@ud]
       [%suite-removed path=space-path:spaces index=@ud]
-      [%app-install-update =app-id =urbit-app index=@ud =grid-index]
+      [%app-install-update =app-id =urbit-app =grid-index]
       [%joined-bazaar =path:spaces-path:spaces =catalog =stall]
       [%stall-update =path:spaces-path:spaces =stall]
       [%treaties-loaded =ship]

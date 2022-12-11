@@ -10,7 +10,6 @@ import {
   Spinner,
   AccessCode,
   Anchor,
-  CopyButton,
 } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
