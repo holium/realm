@@ -70,7 +70,9 @@ export class OnboardingService extends BaseService {
       );
     },
 
-    async setEmail(email: string) {
+    async setEmail(
+      email: string
+    ): Promise<{ success: boolean; errorMessage: string }> {
       return await ipcRenderer.invoke('realm.onboarding.setEmail', email);
     },
 
@@ -268,31 +270,40 @@ export class OnboardingService extends BaseService {
       return { success: true, message: 'Access succeeded.' };
     }
 
-    const accessCode = await this.core.holiumClient.getAccessCode(code);
-    if (accessCode && accessCode.type === 'ACCESS') {
-      if (accessCode.singleUse && accessCode.redeemed) {
-        return {
-          success: false,
-          message: 'This invite code was already redeemed.',
-        };
-      } else if (new Date(accessCode.expiresAt!).getTime() < Date.now()) {
-        return { success: false, message: 'This invite code has expired.' };
-      } else {
-        this.state.setInviteCode(code);
-        if (accessCode.email) {
-          this.state.setEmail(accessCode.email);
+    try {
+      const accessCode = await this.core.holiumClient.redeemAccessCode(code);
+      if (accessCode && !accessCode.success) {
+        switch (accessCode.errorCode) {
+          case 473:
+            return {
+              success: false,
+              message: 'This invite code has already been used.',
+            };
+          case 472:
+            return { success: false, message: 'This invite code has expired.' };
+          default:
+            return { success: false, message: 'Invite code not found' };
         }
-        return { success: true, message: 'Access succeeded.' };
       }
-    } else {
-      return { success: false, message: 'Invite code not found.' };
+
+      this.state.setInviteCode(code);
+      if (accessCode.email) {
+        this.state.setEmail(accessCode.email);
+      }
+      return { success: true, message: 'Access succeeded.' };
+    } catch (e) {
+      return {
+        success: false,
+        message: 'Something went wrong, please contact support@holium.com',
+      };
     }
   }
 
-  async setEmail(_event: any, email: string) {
-    console.log('trying to set email');
+  async setEmail(
+    _event: any,
+    email: string
+  ): Promise<{ success: boolean; errorMessage: string }> {
     const { auth } = this.core.services.identity;
-    // let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
 
     if (
@@ -301,9 +312,19 @@ export class OnboardingService extends BaseService {
     ) {
       auth.setAccountId('dev-admin');
       this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
+      return { success: true, errorMessage: '' };
     } else {
-      let account = await this.core.holiumClient.createAccount(email);
+      const account = await this.core.holiumClient.createAccount(email);
+      if (!account.id) {
+        const errorMessage =
+          account.errorCode === 441
+            ? 'An account with that email already exists.'
+            : 'Something went wrong, please us at support@holium.com';
+        return { success: false, errorMessage };
+      }
+
       auth.setAccountId(account.id);
+      return { success: true, errorMessage: '' };
     }
   }
 
@@ -324,7 +345,7 @@ export class OnboardingService extends BaseService {
     if (!auth.accountId)
       throw new Error('Account must be set before verifying email.');
 
-    const result = await this.core.holiumClient.checkVerificationCode(
+    const result = await this.core.holiumClient.verifyEmail(
       auth.accountId,
       verificationCode
     );
@@ -550,13 +571,13 @@ export class OnboardingService extends BaseService {
   async completeOnboarding(_event: any) {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
-    if (process.env.NODE_ENV !== 'development') {
-      try {
-        await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
-      } catch (e) {
-        console.error('Unable to redeem gated access code, continuing anyway.');
-      }
-    }
+    // if (process.env.NODE_ENV !== 'development') {
+    //   try {
+    //     await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
+    //   } catch (e) {
+    //     console.error('Unable to redeem gated access code, continuing anyway.');
+    //   }
+    // }
 
     const decryptedPassword = safeStorage.decryptString(
       Buffer.from(this.state.encryptedPassword!, 'base64')
