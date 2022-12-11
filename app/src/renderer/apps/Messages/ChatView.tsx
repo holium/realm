@@ -6,6 +6,7 @@ import {
   ChangeEventHandler,
   useCallback,
   ClipboardEvent,
+  KeyboardEventHandler,
 } from 'react';
 import { lighten, darken, rgba } from 'polished';
 import { observer } from 'mobx-react';
@@ -192,38 +193,42 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
     console.log(fileObj.name);
   };
 
-  const submitDm = (event: any) => {
-    if (event.keyCode === 13 && !event.shiftKey) {
-      event.preventDefault();
-      if (dmForm.computed.isValid) {
-        if (submitRef.current) {
-          submitRef.current.focus();
-          submitRef.current.click();
-        }
-        const formData = dmForm.actions.submit();
-        const dmMessageContent = formData['dm-message'];
-        setIsSending(true);
+  const submitDm = useCallback(() => {
+    if (dmForm.computed.isValid) {
+      console.log('submitting dm');
+      const formData = dmForm.actions.submit();
+      const dmMessageContent = formData['dm-message'];
+      setIsSending(true);
 
-        SoundActions.playDMSend();
-        if (chatInputRef.current) {
-          chatInputRef.current.value = '';
-          chatInputRef.current.focus();
-        }
-
-        DmActions.sendDm(selectedChat.path, dmMessageContent)
-          .then(reloadDms)
-          .catch((err) => {
-            console.error('dm send error', err);
-          })
-          .finally(() => {
-            setIsSending(false);
-          });
+      SoundActions.playDMSend();
+      if (chatInputRef.current) {
+        chatInputRef.current.value = '';
+        chatInputRef.current.focus();
       }
-    } else if (event.keyCode === 13 && event.shiftKey) {
-      // @ts-expect-error
-      chatInputRef.current.rows = chatInputRef.current.rows + 1;
+
+      DmActions.sendDm(selectedChat.path, dmMessageContent)
+        .then(reloadDms)
+        .catch((err) => {
+          console.error('dm send error', err);
+        })
+        .finally(() => {
+          setIsSending(false);
+        });
     }
-  };
+  }, [dmForm.actions, dmForm.computed.isValid, reloadDms, selectedChat.path]);
+
+  const onKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      if (event.keyCode === 13 && !event.shiftKey) {
+        event.preventDefault();
+        submitDm();
+      } else if (event.keyCode === 13 && event.shiftKey) {
+        // @ts-expect-error
+        chatInputRef.current.rows = chatInputRef.current.rows + 1;
+      }
+    },
+    [submitDm]
+  );
 
   const to = useMemo(
     () => (isGroup ? Array.from(selectedChat.to).join(', ') : selectedChat.to),
@@ -419,7 +424,7 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
                 width="100%"
                 placeholder="Write a message"
                 rightInteractive
-                onKeyDown={submitDm}
+                onKeyDown={onKeyDown}
                 rightIcon={
                   <Flex justifyContent="center" alignItems="center">
                     <IconButton
@@ -427,7 +432,8 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
                       luminosity={mode as 'light' | 'dark' | undefined}
                       size={24}
                       canFocus={false}
-                      onKeyDown={submitDm}
+                      disabled={isSending}
+                      onClick={submitDm}
                     >
                       {!isSending ? (
                         <Icons opacity={0.5} name="ArrowRightLine" />
