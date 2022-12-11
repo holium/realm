@@ -191,15 +191,14 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data['room-left'];
         const room = this.rooms.get(payload.rid);
         if (this.presentRoom?.rid === payload.rid) {
-          // if we are in the room, hangup the peer
+          if (room) {
+            room.present.splice(room.present.indexOf(payload.ship), 1);
+            this.rooms.set(payload.rid, room);
+          }
           if (payload.ship !== this.our) {
             console.log('hanging up peer', payload.ship);
             this.hangup(payload.ship);
           }
-        }
-        if (room) {
-          room.present.splice(room.present.indexOf(payload.ship), 1);
-          this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
