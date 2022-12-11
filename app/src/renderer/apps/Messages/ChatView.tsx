@@ -55,12 +55,14 @@ interface IProps {
 export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
   const { iconColor, dockColor, textColor, windowColor, mode } = theme;
 
-  const submitRef = useRef(null);
-  const chatInputRef = useRef(null);
-  const inputRef = useRef(null);
-  const containerRef = useRef(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
+  const chatInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { dmForm, dmMessage } = useMemo(() => createDmForm(undefined), []);
   const [isSending, setIsSending] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string>();
   const [loading, setLoading] = useState(false);
   const { courier } = useServices();
   const resetLoading = () => setLoading(false);
@@ -122,25 +124,21 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
 
   const uploadFile = useCallback(
     (params: FileUploadParams) => {
-      setIsSending(true);
+      setIsUploading(true);
+      setUploadError('');
       ShipActions.uploadFile(params)
         .then((url) => {
-          const content = [{ url }];
-          SoundActions.playDMSend();
-          DmActions.sendDm(selectedChat.path, content)
-            .then(() => {
-              reloadDms();
-            })
-            .catch((err) => {
-              console.error('dm send error', err);
-            })
-            .finally(() => {
-              setIsSending(false);
-            });
+          if (!chatInputRef.current) return;
+          chatInputRef.current.value = url;
+          chatInputRef.current.focus();
+          dmMessage.actions.onChange(chatInputRef.current.value);
         })
-        .catch((e) => console.error(e));
+        .catch(() => {
+          setUploadError('Failed upload, please try again.');
+        })
+        .finally(() => setIsUploading(false));
     },
-    [reloadDms, selectedChat.path]
+    [dmMessage.actions]
   );
 
   const onPaste = useCallback(
@@ -198,19 +196,19 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
     if (event.keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
       if (dmForm.computed.isValid) {
-        // @ts-expect-error 2
-        submitRef.current.focus();
-        // @ts-expect-error
-        submitRef.current.click();
+        if (submitRef.current) {
+          submitRef.current.focus();
+          submitRef.current.click();
+        }
         const formData = dmForm.actions.submit();
         const dmMessageContent = formData['dm-message'];
         setIsSending(true);
 
         SoundActions.playDMSend();
-        // @ts-expect-error
-        chatInputRef.current.value = '';
-        // @ts-expect-error
-        chatInputRef.current.focus();
+        if (chatInputRef.current) {
+          chatInputRef.current.value = '';
+          chatInputRef.current.focus();
+        }
 
         DmActions.sendDm(selectedChat.path, dmMessageContent)
           .then(reloadDms)
@@ -260,6 +258,20 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
     () => <ChatLog loading={loading} messages={messages} isGroup={isGroup} />,
     [isGroup, loading, messages]
   );
+
+  const AttachmentIcon = () => {
+    if (isUploading) {
+      return <Spinner size={0} />;
+    } else if (uploadError) {
+      return (
+        <Tooltip show position="top" content={uploadError} id="upload-error">
+          <Icons name="Error" />
+        </Tooltip>
+      );
+    } else {
+      return <Icons name="Attachment" />;
+    }
+  };
 
   return (
     <Grid.Column
@@ -392,7 +404,7 @@ export const ChatView = observer(({ selectedChat, height, theme }: IProps) => {
                       .catch((e) => console.error(e));
                   }}
                 >
-                  <Icons name="Attachment" />
+                  <AttachmentIcon />
                 </IconButton>
               </Tooltip>
               <Input
