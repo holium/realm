@@ -3,7 +3,7 @@
 ::  A thin agent that interfaces with various chat stores
 ::
 /-  store=courier, post, graph-store, *post, *resource, *versioned-state, group, inv=invite-store, met=metadata-store,
-    hark=hark-store, dm-hook-sur=dm-hook, notify
+    hark=hark-store, dm-hook-sur=dm-hook, notify, agd-type=accept-group-dm
 /+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify, groups-two
 =|  state-1
 =*  state  -
@@ -71,11 +71,11 @@
       %accept-group-dm
         ?-  groups-target
           %1
-            =/  accept-action  !<([%accept id=@uvH] vase)
+            =/  accept-action  !<(action:agd-type vase)
             :-
-            [%pass / %agent [our.bowl %invite-store] %poke invite-action+!>([%accept term=%group uid=id.accept-action])]~
+            [%pass / %agent [our.bowl %invite-store] %poke invite-action+!>([-.accept-action term=%group uid=id.accept-action])]~
             state
-          %2  [(accept-group-dm:groups-two !<([%accept id=@uvH] vase) bowl) state]
+          %2  [(accept-group-dm:groups-two !<(action:agd-type vase) bowl) state]
         ==
       %graph-dm-action
         ?-  groups-target
@@ -217,7 +217,7 @@
             ==
           %fact
             ~&  'groups-two /briefs fact'
-            :: ~&  cage.sign
+            ~&  cage.sign
             [(propagate-briefs-fact:groups-two cage.sign bowl state) this]
             :: [whom:c brief:briefs:c]
         ==
