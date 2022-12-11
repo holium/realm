@@ -94,6 +94,7 @@ export const Rooms = observer(() => {
           </Flex>
         )}
         {rooms.map((room: RoomType, index: number) => {
+          console.log('roompresent', JSON.stringify(room.present));
           return (
             <RoomRow
               key={`${room.title}-${index}`}
