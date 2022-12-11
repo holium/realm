@@ -98,12 +98,10 @@ export class RealmProtocol extends BaseProtocol {
           }
         }
         if (signalData.type !== 'ready' && signalData.type !== 'retry') {
-          console.log('webrtc signalling data')
           // we are receiving a WebRTC signaling data
           if (remotePeer) {
             // we already have a peer for this patp, so we can just pass the signal to it
             if (!remotePeer.peer) {
-              console.log('no peer connection ye')
               // if we don't have a peer connection yet, we need to create one
               remotePeer.createConnection();
               remotePeer.peerSignal(payload.data);
@@ -158,7 +156,6 @@ export class RealmProtocol extends BaseProtocol {
           if (this.presentRoom?.rid === payload.rid) {
             // if we are in the room, dial the new peer
             if (payload.ship !== this.our) {
-              console.log('dialing the new peer')
               this.dial(payload.ship, payload.ship === room.creator).then(
                 (remotePeer: RemotePeer) => {
                   // queuedPeers are peers that are ready for us to dial them
