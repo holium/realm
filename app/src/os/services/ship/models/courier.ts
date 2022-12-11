@@ -158,6 +158,7 @@ const GroupLog = types
   .actions((self) => ({
     receiveDM: (incomingDm: GraphDMType) => {
       // for some reason the indexes are different after group dm send
+      console.log('incomingDm', incomingDm);
       const replaceIdx = self.messages.findIndex(
         (outDm: GraphDMType) => outDm.timeSent === incomingDm.timeSent
       );
@@ -172,6 +173,7 @@ const GroupLog = types
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
       const post = createPost(author, contents);
+      console.log('post', post);
       self.messages.unshift(
         GraphDM.create({
           index: post.index,

@@ -1,5 +1,4 @@
 import styled, { css } from 'styled-components';
-import { darken } from 'polished';
 import { motion } from 'framer-motion';
 import { variant, space, layout } from 'styled-system';
 import type { ThemeType } from '../theme';
@@ -7,6 +6,7 @@ import {
   TypographyFunctionsProps,
   typographyFunctions,
 } from './typography-functions';
+
 export type TextProps = {
   fontByName?: 'Rubik' | 'Oxanium' | 'Source Code Pro';
   fontByType?: 'body' | 'heading' | 'monospace';
@@ -35,7 +35,7 @@ const defaultTextStyles = {
   mb: 0,
 };
 
-const textVariants = variant({
+export const textVariants = variant({
   variants: {
     h1: {
       ...defaultTextStyles,
@@ -123,33 +123,6 @@ export const Text = styled(motion.p)<TextProps>`
     `}
 `;
 
-export const Anchor = styled(motion.a)<TextProps>`
-  ${textVariants}
-  ${typographyFunctions}
-  ${(props) =>
-    props.fontByName &&
-    css`
-      font-family: ${props.theme.fontByName[props.fontByName]};
-    `};
-  ${(props) =>
-    props.fontByType &&
-    css`
-      font-family: ${props.theme.fonts[props.fontByType]};
-    `}
-  ${(props) =>
-    props.color &&
-    css`
-      color: ${props.color};
-      &:hover {
-        color: ${darken(0.02, props.color)};
-      }
-    `}
-`;
-
 Text.defaultProps = {
-  variant: 'inherit',
-};
-
-Anchor.defaultProps = {
   variant: 'inherit',
 };

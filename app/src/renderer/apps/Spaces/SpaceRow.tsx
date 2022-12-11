@@ -1,14 +1,18 @@
-import { FC, useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
+import { darken } from 'polished';
 import styled, { css } from 'styled-components';
-import { ContextMenu, Flex, Icons, Text } from 'renderer/components';
+import { Flex, Icons, Text } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { ThemeType } from '../../theme';
 import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { pluralize } from 'renderer/logic/lib/text';
 import { observer } from 'mobx-react';
+import {
+  ContextMenuOption,
+  useContextMenu,
+} from 'renderer/components/ContextMenu';
 
 export const EmptyGroup = styled.div`
   height: 32px;
@@ -54,56 +58,74 @@ interface SpaceRowProps {
   onSelect: (spaceKey: string) => void;
 }
 
-export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
+export const SpaceRow = observer((props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
   const { theme, membership, ship } = useServices();
   const rowRef = useRef<any>(null);
   const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
+  const { getOptions, setOptions } = useContextMenu();
+  const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
 
   const roles = membership.spaces.get(space.path)!.get(ship!.patp)?.roles;
-  const contextMenuItems = [
-    roles?.includes('owner') || roles?.includes('admin')
-      ? {
-          id: `space-row-${space.path}-btn-edit`,
-          label: 'Edit',
-          onClick: () => {
-            ShellActions.setBlur(true);
-            ShellActions.openDialogWithStringProps('edit-space', {
-              space: space.path,
-            });
-          },
-        }
-      : {},
-    membership.spaces.get(space.path)!.get(ship!.patp)?.roles.includes('owner')
-      ? {
-          id: `space-row-${space.path}-btn-delete`,
-          label: 'Delete',
-          onClick: () => {
-            ShellActions.setBlur(true);
-            ShellActions.openDialogWithStringProps('delete-space-dialog', {
-              path: space.path,
-              name: space.name,
-            });
-          },
-        }
-      : {
-          id: `space-row-${space.path}-btn-leave`,
-          label: 'Leave',
-          onClick: () => {
-            ShellActions.setBlur(true);
-            ShellActions.openDialogWithStringProps('leave-space-dialog', {
-              path: space.path,
-              name: space.name,
-            });
-          },
+  const contextMenuOptions = useMemo(() => {
+    const menu = [];
+    if (roles?.includes('owner') || roles?.includes('admin')) {
+      menu.push({
+        id: `space-row-${space.path}-btn-edit`,
+        label: 'Edit',
+        onClick: () => {
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('edit-space', {
+            space: space.path,
+          });
         },
-  ].filter((el: any) => el !== false);
+      });
+    }
+    if (
+      membership.spaces
+        .get(space.path)!
+        .get(ship!.patp)
+        ?.roles.includes('owner')
+    ) {
+      menu.push({
+        id: `space-row-${space.path}-btn-delete`,
+        label: 'Delete',
+        onClick: () => {
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('delete-space-dialog', {
+            path: space.path,
+            name: space.name,
+          });
+        },
+      });
+    } else {
+      menu.push({
+        id: `space-row-${space.path}-btn-leave`,
+        label: 'Leave',
+        onClick: () => {
+          ShellActions.setBlur(true);
+          ShellActions.openDialogWithStringProps('leave-space-dialog', {
+            path: space.path,
+            name: space.name,
+          });
+        },
+      });
+    }
 
-  const contextMenuButtonIds = contextMenuItems.map((item) => item?.id);
+    return menu.filter(Boolean) as ContextMenuOption[];
+  }, [membership.spaces, roles, ship, space.name, space.path]);
+
+  useEffect(() => {
+    if (contextMenuOptions !== getOptions(spaceRowId)) {
+      setOptions(spaceRowId, contextMenuOptions);
+    }
+  }, [contextMenuOptions, getOptions, setOptions, spaceRowId]);
+
+  const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
   const memberCount = membership.getMemberCount(space.path);
   return (
     <SpaceRowStyle
-      id={`space-row-${space.path}`}
+      id={spaceRowId}
       ref={rowRef}
       data-close-tray="true"
       selected={selected}
@@ -116,16 +138,6 @@ export const SpaceRow: FC<SpaceRowProps> = observer((props: SpaceRowProps) => {
         }
       }}
     >
-      <ContextMenu
-        isComponentContext
-        textColor={currentTheme.textColor}
-        customBg={rgba(currentTheme.windowColor, 0.9)}
-        containerId={`space-row-context-menu-${space.path}`}
-        parentRef={rowRef}
-        style={{ minWidth: 180 }}
-        position="below"
-        menu={contextMenuItems}
-      />
       <Flex style={{ pointerEvents: 'none' }} alignItems="center">
         {space.picture ? (
           <img
