@@ -3,6 +3,8 @@
 ::
 +$  note
   $:  id=@uvH                         :: note id (from hark)
+      desk=@tas
+      inbox=cord
       content=(list content:hark)     :: content as markdown (cord)
       tim=time                        :: note time sent
       seen=?                          :: seen/unseen
@@ -10,7 +12,9 @@
 ::
 +$  action
   $%
-      [%seen =id:hark]
+      [%saw-note =id:hark]
+      [%saw-inbox =seam:hark]
+      [%saw-all ~]
   ==
 ::
 +$  reaction

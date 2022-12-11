@@ -16,7 +16,7 @@ import { MembershipStore } from './models/members';
 import { DiskStore } from '../base.store';
 import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
-import { BeaconApi } from '../../api/beacon';
+import { BeaconApi, BeaconInboxType } from '../../api/beacon';
 import { formPathObj } from '../../lib/path';
 import { NotificationStore, NotificationStoreType } from './models/beacon';
 
@@ -94,7 +94,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.remove-app': this.removeApp,
     'realm.spaces.bazaar.suspend-app': this.suspendApp,
     'realm.spaces.bazaar.revive-app': this.reviveApp,
-    'realm.spaces.beacon.seen': this.seen,
+    'realm.spaces.beacon.saw-note': this.sawNote,
+    'realm.spaces.beacon.saw-inbox': this.sawInbox,
   };
 
   static preload = {
@@ -235,8 +236,10 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.suspend-app', appId),
     reviveApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.revive-app', appId),
-    seen: async (noteId: string) =>
-      await ipcRenderer.invoke('realm.spaces.beacon.seen', noteId),
+    sawNote: async (noteId: string) =>
+      await ipcRenderer.invoke('realm.spaces.beacon.saw-note', noteId),
+    sawInbox: async (inbox: BeaconInboxType) =>
+      await ipcRenderer.invoke('realm.spaces.beacon.saw-inbox', inbox),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -677,8 +680,14 @@ export class SpacesService extends BaseService {
     // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
   }
 
-  async seen(_event: IpcMainInvokeEvent, noteId: string) {
-    return await BeaconApi.markSeen(this.core.conduit!, noteId);
+  async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
+    return await this.models.beacon.notes
+      .get(noteId)
+      .markSeen(this.core.conduit!, noteId);
+    // return await BeaconApi.sawNote(this.core.conduit!, noteId);
+  }
+  async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {
+    return await this.models.beacon.sawInbox(this.core.conduit!, inbox);
   }
 
   setSpaceWallpaper(spacePath: string, theme: any) {

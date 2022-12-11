@@ -18,7 +18,7 @@ import { useTrayApps } from '../store';
 // import { ShipActions } from 'renderer/logic/actions/ship';
 import { lighten, rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
-import { toJS } from 'mobx';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 export const AccountTrayApp = observer(() => {
   const { ship, theme, beacon } = useServices();
@@ -34,6 +34,7 @@ export const AccountTrayApp = observer(() => {
     //   setBatteryLevel(level);
     // });
     return () => {
+      SpacesActions.sawInbox({ all: null });
       // ShipActions.openedNotifications()
       //   .then(() => {})
       //   .catch((err) => {

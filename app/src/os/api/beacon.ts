@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { Conduit } from '@holium/conduit';
-import {
-  NotificationModelType,
-  NotificationStoreType,
-} from '../services/spaces/models/beacon';
-import { CourierStoreType } from '../services/ship/models/courier';
+import { NotificationStoreType } from '../services/spaces/models/beacon';
+
+export type BeaconInboxType =
+  | { desk: string }
+  | { group: string }
+  | { all: null };
 
 export const BeaconApi = {
   // get new notifications (anything not yet read/seen)
@@ -32,12 +33,27 @@ export const BeaconApi = {
     return response.seen;
   },
   // mark notification as seen
-  markSeen: async (conduit: Conduit, noteId: string): Promise<any> => {
+  sawNote: async (conduit: Conduit, noteId: string): Promise<any> => {
     conduit.poke({
       app: 'realm-beacon',
       mark: 'realm-beacon-action',
       json: {
-        seen: { id: noteId },
+        'saw-note': { id: noteId },
+      },
+      onError: (e: any) => {
+        console.error(e);
+      },
+    });
+  },
+  sawInbox: async (
+    conduit: Conduit,
+    payload: BeaconInboxType
+  ): Promise<any> => {
+    conduit.poke({
+      app: 'realm-beacon',
+      mark: 'realm-beacon-action',
+      json: {
+        'saw-inbox': payload,
       },
       onError: (e: any) => {
         console.error(e);

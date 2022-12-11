@@ -106,9 +106,10 @@
         :: use the stitch to grab the blanket
         =/  blan             (scry-blanket:harken:core stitch.car)
         ::  if blanket not exist, return empty json object
-        ?~  blan  ``json+!>([%o ~])
+        ?~  blan            ``json+!>([%o ~])
+        =/  weave            (stitch:harken:core car blan)
         ::  return seen
-        ``realm-beacon-view+!>([%seen yarns.u.blan])
+        ``realm-beacon-view+!>([%seen weave])
     ==
   ::
   ++  on-agent
@@ -180,14 +181,15 @@
     ^-  (quip card _state)
     |^
     ?-  -.action
-      :: %connect-provider           (on-connect-provider +.action)
-      %seen                       (on-seen +.action)
+      %saw-note             (on-saw-note +.action)
+      %saw-inbox            (on-saw-inbox +.action)
+      %saw-all              on-saw-all
     ==
     ::
     ::  $on-seen: scry hark for notification by id and use the resulting
     ::   yarn to poke hark with the corresponding rope.
     ::
-    ++  on-seen
+    ++  on-saw-note
       |=  [=id:hark]
       %-  (slog leaf+"{<dap.bowl>}: seen called" ~)
       :: sample:
@@ -195,6 +197,19 @@
       =/  yar=yarn:hark  .^(yarn:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/yarn/(scot %uv id)/noun)
       :_  state
       :~  [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop.yar])]
+      ==
+    ::
+    ++  on-saw-inbox
+      |=  [=seam:hark]
+      :_  state
+      :~  
+        [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-seam seam])]
+      ==
+    ::
+    ++  on-saw-all
+      :_  state
+      :~  
+        [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-seam [%all ~]])]
       ==
     ::
     --
@@ -308,8 +323,16 @@
     |=  [yarns=(map id:hark yarn:hark) seen=?]
     ^-  (map id:hark note:store)
     %-  ~(rep by yarns)
-    |=  [[=id:hark =yarn:hark] acc=(map id:hark note:store)]
-    (~(put by acc) id [id con.yarn tim.yarn seen])
+      |=  [[=id:hark =yarn:hark] acc=(map id:hark note:store)]
+      =|  =note:store
+      =.  id.note           id
+      =.  desk.note         des.rop.yarn
+      =.  inbox.note        (spat wer.yarn)
+      =.  content.note      con.yarn
+      =.  tim.note          tim.yarn
+      =.  seen.note         seen
+      (~(put by acc) id note)
+    :: (~(put by acc) id [id des.rop.yarn wer.yarn con.yarn tim.yarn seen])
 
   ::  combine yarns in carpet with yarns in blanket
   ::  note we want a map, but instead of using mop to sort
@@ -384,10 +407,12 @@
       :: %-  (slog leaf+"{<dap.bowl>}: markdown => {<(crip markdown)>}" ~)
       =|  =note:store
       =.  id.note           id.yarn
-      :: =.  content.note      (crip markdown)
+      =.  desk.note         des.rop.yarn
+      =.  inbox.note        (spat wer.yarn)
       =.  content.note      con.yarn
       =.  tim.note          tim.yarn
       =.  seen.note         %.n
+      ~&  >>  note
       :_  state
       :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%new-note note])]
       ==
@@ -396,7 +421,15 @@
       |=  [=seam:hark]
       ^-  (quip card _state)
       %-  (slog leaf+"{<dap.bowl>}: on-saw-seam => {<seam>}" ~)
-      `state
+      :: :_  state
+      :: :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%seen id.u.yar])]
+      :: ==
+      ?-  -.seam
+        %group      `state
+        %desk       `state
+        %all        `state
+      :: `state
+      ==
     ::
     ::  sample:
     ::  [gop=[~ [p=~ritnys-tonnev-lodlev-migdev q=%new-group]]

@@ -14,13 +14,22 @@
     ++  decode
       %-  of
       :~
-          [%seen seen]
+          [%saw-note note]
+          [%saw-inbox seam]
+          [%saw-all ul]
       ==
     ::
-    ++  seen
+    ++  note
       %-  ot
-      :~  [%id id]
-      ==
+      [%id id]~
+    ::
+    ++  seam
+    %-  of
+    :~  all/ul
+        desk/so
+        group/flag
+    ==
+    ++  flag  (su ;~((glue fas) ;~(pfix sig fed:ag) ^sym))
     ::
     ++  slan  |=(mod=@tas |=(txt=@ta (need (slaw mod txt))))
     ::
@@ -51,6 +60,8 @@
         %new-note
       %-  pairs
       :~  id/s/(scot %uv id.note.rct)
+          desk/s/desk.note.rct
+          inbox/s/inbox.note.rct
           con/a/(turn content.note.rct content-js:encode)
           time/(time tim.note.rct)
       ==
@@ -94,6 +105,8 @@
     ^-  json
     %-  pairs
     :~  id/s/(scot %uv id.n)
+        desk/s/desk.n
+        inbox/s/inbox.n
         time/(time tim.n)
         content/a/(turn content.n content-js)
         seen/b/seen.n

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { action } from 'mobx';
 import { types, Instance, flow } from 'mobx-state-tree';
 import { Conduit } from '@holium/conduit';
 import { BeaconApi } from '../../../api/beacon';
@@ -30,39 +31,51 @@ export type AllStatsModelType = Instance<typeof AllStatsModel>;
 export const NotificationModel = types
   .model('BeaconNotificationModel', {
     id: types.identifier,
-    // title: types.array(NotificationContentTypes),
-    // markdown
+    desk: types.string,
+    inbox: types.string,
     content: types.array(NotificationContentTypes),
-    // has this notification been seen?
-    seen: types.boolean,
     time: types.number,
+    seen: types.boolean,
   })
-  .actions((self) => ({}));
+  .actions((self) => ({
+    markSeen: flow(function* (conduit: Conduit) {
+      try {
+        yield BeaconApi.markSeen(conduit, self.id);
+        self.seen = true;
+      } catch (e) {
+        console.error(e);
+      }
+    }),
+  }));
 
 export type NotificationModelType = Instance<typeof NotificationModel>;
 
 export const NotificationStore = types
   .model('BeaconNotificationStore', {
     notes: types.map(NotificationModel),
-    // unseen: types.array(NotificationModel),
-    // seen: types.array(NotificationModel),
     all: types.array(AllStatsModel),
     // recent: types.array(NotificationModel),
   })
   .views((self) => ({
     get seen() {
-      return Array.from(self.notes.values()).filter(
-        (note: NotificationModelType) => {
+      return Array.from(self.notes.values())
+        .filter((note: NotificationModelType) => {
           return note.seen;
-        }
-      );
+        })
+        .sort(
+          (na: NotificationModelType, nb: NotificationModelType) =>
+            na.time - nb.time
+        );
     },
     get unseen() {
-      return Array.from(self.notes.values()).filter(
-        (note: NotificationModelType) => {
+      return Array.from(self.notes.values())
+        .filter((note: NotificationModelType) => {
           return !note.seen;
-        }
-      );
+        })
+        .sort(
+          (na: NotificationModelType, nb: NotificationModelType) =>
+            na.time - nb.time
+        );
     },
   }))
   .actions((self) => ({
@@ -114,9 +127,17 @@ export const NotificationStore = types
         })
       );
     }),
-    markSeen: flow(function* (conduit: Conduit, noteId: string) {
+
+    sawInbox: flow(function* (conduit: Conduit, inbox: BeaconInboxType) {
       try {
-        return yield BeaconApi.markSeen(conduit, noteId);
+        if (Object.keys(inbox).includes('all')) {
+          self.notes.forEach(
+            action((note: NotificationModelType) => {
+              note.seen = true;
+            })
+          );
+        }
+        return yield BeaconApi.sawInbox(conduit, inbox);
       } catch (error) {
         console.error(error);
       }
