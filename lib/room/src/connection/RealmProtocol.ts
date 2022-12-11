@@ -148,7 +148,7 @@ export class RealmProtocol extends BaseProtocol {
         console.log("room deleted")
         const payload = data['room-deleted'];
         const room = this.rooms.get(payload.rid);
-        if (this.presentRoom!.rid === this.our) {
+        if (this.presentRoom?.rid === this.our) {
           this.hangupAll(payload.rid);
           this.emit(ProtocolEvent.RoomDeleted, payload.rid);
         }
