@@ -77,6 +77,7 @@ export const OnboardingStore = types
     accessCode: types.maybe(AccessCodeModel),
     encryptedPassword: types.maybe(types.string),
     code: types.maybe(types.string),
+    planetWasTaken: false,
   })
   .actions((self) => ({
     setStep(step: OnboardingStep) {
@@ -108,6 +109,10 @@ export const OnboardingStore = types
 
     setPlanet(planet: HostingPlanet) {
       self.planet = PlanetModel.create(planet);
+    },
+
+    setPlanetWasTaken(wasTaken: boolean) {
+      self.planetWasTaken = wasTaken;
     },
 
     setEncryptedPassword(passwordHash: string) {

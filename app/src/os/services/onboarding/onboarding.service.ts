@@ -7,6 +7,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import bcrypt from 'bcryptjs';
+import dns from 'dns';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import {
@@ -52,6 +53,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
     'realm.onboarding.exit': this.exit,
     'realm.onboarding.closeConduit': this.closeConduit,
+    'realm.onboarding.confirmPlanetAvailable': this.confirmPlanetAvailable,
   };
 
   static preload = {
@@ -106,6 +108,12 @@ export class OnboardingService extends BaseService {
 
     async getAvailablePlanets() {
       return await ipcRenderer.invoke('realm.onboarding.getAvailablePlanets');
+    },
+
+    async confirmPlanetStillAvailable() {
+      return await ipcRenderer.invoke(
+        'realm.onboarding.confirmPlanetAvailable'
+      );
     },
 
     async prepareCheckout(billingPeriod: string) {
@@ -367,7 +375,7 @@ export class OnboardingService extends BaseService {
 
     const planets = await this.core.holiumClient.getPlanets(
       auth.accountId,
-      this.state.accessCode?.id
+      this.state.inviteCode
     );
     return planets;
   }
@@ -406,36 +414,86 @@ export class OnboardingService extends BaseService {
     return session.code;
   }
 
-  async completeCheckout() {
+  async confirmPlanetAvailable() {
+    if (!this.state.planet) {
+      throw new Error('Planet not set, cannot confirm available.');
+    }
+
     const { auth } = this.core.services.identity;
-    const { checkoutComplete } = await this.core.holiumClient.completeCheckout(
+    const patp = this.state.planet!.patp;
+    const stillAvailable = await this.core.holiumClient.confirmPlanetAvailable(
       auth.accountId!,
-      this.state.planet!.patp
+      patp
     );
 
-    if (!checkoutComplete) {
-      throw new Error('Unable to complete checkout.');
+    if (!stillAvailable) {
+      this.state.setPlanetWasTaken(true);
+      this.setStep('_', OnboardingStep.SELECT_PATP);
+    }
+  }
+
+  async completeCheckout(): Promise<{
+    success: boolean;
+    errorMessage?: string;
+  }> {
+    const { auth } = this.core.services.identity;
+    const { success, errorCode } =
+      await this.core.holiumClient.completeCheckout(
+        auth.accountId!,
+        this.state.planet!.patp
+      );
+
+    if (!success) {
+      if (errorCode && errorCode === 407) {
+        return {
+          success: false,
+          errorMessage:
+            'Payment succeeded but your planet has already been taken. Please contact support@holium.com.',
+        };
+      } else if (errorCode && errorCode === 430) {
+        return {
+          success: false,
+          errorMessage:
+            'Payment succeeded but we were not able to boot your ship. Please contact support@holium.com',
+        };
+      }
+
+      throw new Error('Unable to complete checkout,');
     }
 
     this.state.setCheckoutComplete();
-    return true;
+    return { success: true };
   }
 
   async checkShipBooted(): Promise<boolean> {
     const { auth } = this.core.services.identity;
-    let ships = await this.core.holiumClient.getShips(auth.accountId!);
-    console.log(ships);
-    let ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
+    const ships = await this.core.holiumClient.getShips(auth.accountId!);
+    const ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
+
+    try {
+      if (ship.code && ship.link) {
+        const url = new URL(ship.link);
+        const resolutions = await dns.promises.resolve(url.hostname);
+        if (!resolutions.length) {
+          return false;
+        }
+      }
+    } catch (e: any) {
+      console.error(`dns resolution issue:`, e);
+      return false;
+    }
+
     if (!ship || !ship.code) return false;
 
-    // TODO: remove, session shouldn't be set yet here?
-    // const session = this.core.getSession();
-
-    await this.addShip('_event', {
+    let addShipResult = await this.addShip('_event', {
       patp: ship.patp,
       url: ship.link!,
       code: ship.code,
     });
+
+    if (!addShipResult.success) {
+      return false;
+    }
 
     return true;
   }
@@ -449,14 +507,26 @@ export class OnboardingService extends BaseService {
     }
   ) {
     try {
-      let { patp, url, code } = shipData;
+      const { patp, url, code } = shipData;
       const cookie = await getCookie({ patp, url, code });
+      const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+
+      if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
+        return {
+          success: false,
+          errorMessage: `Urbit ID does not match, did you mean ${cookiePatp}?`,
+        };
+      }
+
       this.core.saveSession({ ship: patp, url, cookie, code });
       this.state.setShip({ patp, url });
-      return { url, cookie, patp, code: code };
+      return { success: true, url, cookie, patp, code: code };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
-      throw new Error('Failed to connect to ship');
+      return {
+        success: false,
+        errorMessage: `Failed to connect to ship: ${reason}`,
+      };
     }
   }
 
@@ -532,7 +602,6 @@ export class OnboardingService extends BaseService {
     const parts: string[] = process.env.INSTALL_MOON.split(':');
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
-    console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
@@ -543,7 +612,6 @@ export class OnboardingService extends BaseService {
         moon,
         desks[idx]
       );
-      console.log(`installDesk (await) => ${response}`);
       if (response !== 'success') {
         await this.closeConduit();
         this.state.endRealmInstall(response, response);
@@ -564,7 +632,6 @@ export class OnboardingService extends BaseService {
     // console.log('refresh-app-catalog => %o', result);
     await this.closeConduit();
     this.state.endRealmInstall('success');
-    console.log('realm installation complete.');
     this.state.installRealm();
   }
 

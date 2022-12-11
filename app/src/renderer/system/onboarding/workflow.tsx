@@ -170,7 +170,7 @@ const selfHostedDialogs: DialogRenderers = {
         x: 0,
         y: 0,
         width: 460,
-        height: 370,
+        height: 400,
       },
     },
   },
