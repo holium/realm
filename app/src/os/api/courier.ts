@@ -149,23 +149,9 @@ export const CourierApi = {
     return await conduit.poke(payload);
   },
   declineDm: async (conduit: Conduit, toShip: string) => {
-    // const payload = {
-    //   app: 'courier',
-    //   mark: 'decline-dm',
-    //   json: {
-    //     accept: toShip,
-    //   },
-    // };
-    // console.log({
-    //   app: 'dm-hook',
-    //   mark: 'dm-hook-action',
-    //   json: {
-    //     decline: toShip,
-    //   },
-    // });
     const payload = {
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
+      app: 'courier',
+      mark: 'accept-dm',
       json: {
         decline: toShip,
       },
