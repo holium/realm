@@ -1,6 +1,6 @@
 ::  courier [realm]
 ::
-/-  *post, *resource
+/-  *post, *resource, versioned-state
 |%
 
 +$  chat-type  ?(%group %dm %pending %group-pending)
@@ -92,6 +92,7 @@
       :: [%pendings ships=(set ship)]
       :: [%screen screen=?]
       :: 
+      [%set-groups-target target=targetable-groups:versioned-state]
       [%send-dm =ship =post]
       [%read-dm =ship]
       [%create-group-dm ships=(set ship)]

@@ -25,7 +25,13 @@ const appPreload = {
     return await ipcRenderer.invoke('close-app', app);
   },
   askForMicrophone: async () => {
-    return await ipcRenderer.invoke('ask-for-microphone');
+    return await ipcRenderer.invoke('ask-for-mic');
+  },
+  askForCamera: async () => {
+    return await ipcRenderer.invoke('ask-for-camera');
+  },
+  getMediaStatus: async () => {
+    return await ipcRenderer.invoke('get-media-status');
   },
   toggleDevTools: async () => {
     return await ipcRenderer.invoke('toggle-devtools');

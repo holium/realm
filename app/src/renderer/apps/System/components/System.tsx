@@ -1,8 +1,21 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card } from 'renderer/components';
+import { Flex, Text, Card, TextButton } from 'renderer/components';
 import { lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
+import { RealmActions } from 'renderer/logic/actions/main';
+
+export type MediaAccessStatus =
+  | 'not-determined'
+  | 'granted'
+  | 'denied'
+  | 'restricted'
+  | 'unknown';
+
+const colorMap: any = {
+  granted: '#39a839',
+  denied: '#ae2828',
+};
 
 export const SystemPanel: FC<any> = observer(() => {
   const { theme, ship, contacts } = useServices();
@@ -10,9 +23,19 @@ export const SystemPanel: FC<any> = observer(() => {
   const { windowColor, textColor, accentColor, inputColor } =
     theme.currentTheme;
 
+  const [mediaStatus, setMediaStatus] = useState<{
+    camera: MediaAccessStatus;
+    mic: MediaAccessStatus;
+  }>({ camera: 'unknown', mic: 'unknown' });
+
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
 
   type mouseOptionType = 'system' | 'realm';
+  useEffect(() => {
+    RealmActions.getMediaStatus().then((status) => {
+      setMediaStatus(status);
+    });
+  }, []);
 
   const [mouseOption, setMouseOption] = useState<mouseOptionType>('realm');
 
@@ -34,6 +57,95 @@ export const SystemPanel: FC<any> = observer(() => {
         flexDirection={'column'}
       >
         <Text>Coming Soon</Text>
+      </Card>
+
+      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+        PERMISSIONS
+      </Text>
+      <Card
+        p="20px"
+        width="100%"
+        elevation="none"
+        customBg={cardColor}
+        flexDirection={'column'}
+      >
+        <Flex flexDirection="column" gap={12}>
+          <Flex flexDirection="row" flex={4} justifyContent="flex-start">
+            <Text fontWeight={500} flex={2} margin={'auto'}>
+              Microphone
+            </Text>
+            <Flex justifyContent="space-between" alignItems="center" flex={2}>
+              {mediaStatus.camera === 'granted' ? (
+                <Text
+                  fontSize={2}
+                  opacity={0.7}
+                  flexDirection="row"
+                  alignItems="center"
+                  color={colorMap[mediaStatus.mic] || 'inherit'}
+                >
+                  {mediaStatus.mic}
+                </Text>
+              ) : (
+                <TextButton
+                  style={{ fontWeight: 400 }}
+                  showBackground
+                  textColor={accentColor}
+                  highlightColor={accentColor}
+                  disabled={mediaStatus.mic === 'granted'}
+                  onClick={() => {
+                    RealmActions.askForMicrophone().then(
+                      (status: MediaAccessStatus) => {
+                        setMediaStatus({ ...mediaStatus, mic: status });
+                      }
+                    );
+                  }}
+                >
+                  Grant
+                </TextButton>
+              )}
+            </Flex>
+          </Flex>
+          <Flex
+            flexDirection="row"
+            flex={4}
+            alignItems="center"
+            justifyContent="flex-start"
+          >
+            <Text fontWeight={500} flex={2} margin={'auto'}>
+              Camera
+            </Text>
+            <Flex justifyContent="flex-start" flex={2}>
+              {mediaStatus.camera === 'granted' ? (
+                <Text
+                  fontSize={2}
+                  opacity={0.7}
+                  flexDirection="row"
+                  alignItems="center"
+                  color={colorMap[mediaStatus.camera] || 'inherit'}
+                >
+                  {mediaStatus.camera}
+                </Text>
+              ) : (
+                <TextButton
+                  style={{ fontWeight: 400 }}
+                  showBackground
+                  textColor={accentColor}
+                  highlightColor={accentColor}
+                  // disabled={mediaStatus.camera === 'granted'}
+                  onClick={() => {
+                    RealmActions.askForCamera().then(
+                      (status: MediaAccessStatus) => {
+                        setMediaStatus({ ...mediaStatus, camera: status });
+                      }
+                    );
+                  }}
+                >
+                  Grant
+                </TextButton>
+              )}
+            </Flex>
+          </Flex>
+        </Flex>
       </Card>
 
       <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>

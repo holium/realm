@@ -74,6 +74,7 @@
     %bold           [%text (flat-crip-inline-list p.inline '**' '**')]
     %strike         [%text (flat-crip-inline-list p.inline '~~' '~~')]
   ==
+::
 ++  into-contact-ship-add-card
   |=  [=ship =bowl:gall]
   :: TODO if tlon makes %contact-hook work instead of %contact-store,
@@ -82,6 +83,7 @@
   :: --- but currently, two ships using %talk cannot see each other's
   :: rolodex profile, even if it's public
   [%pass / %agent [our.bowl %contact-store] %poke contact-update-0+!>([%add ship *contact:contact-store])]
+::
 ++  accept-dm
   |=  [=action:dm-hook-sur =bowl:gall]
   ^-  (list card:agent:gall)
@@ -98,6 +100,7 @@
         [%pass /g2/dm/(scot %p +.action)/ui %agent [our.bowl %chat] %watch /dm/(scot %p +.action)/ui]
       ==
   ==
+::
 ++  accept-group-dm
   |=  [a=[%accept id=@uvH] =bowl:gall]
   ^-  (list card:agent:gall)
@@ -148,7 +151,10 @@
         invite-id=`id.invite
         unread-count=1
     ]
-  [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]~
+  :~
+    [%pass /g2/club/(scot %uv id.invite)/ui %agent [our.bowl %chat] %watch /club/(scot %uv id.invite)/ui/writs]
+    [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
+  ==
 ++  handle-dm-ui-fact
   |=  [=cage =bowl:gall state=state-1]
   ^-  (list card:agent:gall)
@@ -178,11 +184,16 @@
   |=  [act=action =bowl:gall state=state-1]
   |^
   ?-  -.act
-    %send-dm               (send-dm +.act)
-    %read-dm               (read-dm +.act bowl)
-    %create-group-dm       (create-group-dm +.act bowl)
-    %send-group-dm         (send-group-dm +.act bowl state)
-    %read-group-dm         (read-group-dm +.act bowl)
+    %send-dm               [(send-dm +.act) state]
+    %read-dm               [(read-dm +.act bowl) state]
+    %create-group-dm       [(create-group-dm +.act bowl) state]
+    %send-group-dm         [(send-group-dm +.act bowl state) state]
+    %read-group-dm         [(read-group-dm +.act bowl) state]
+    %set-groups-target
+      :-
+      (set-groups-target +.act bowl)
+      :: we do have to actually mutate the state here
+      [%1 +.act +>:state]
   ==
   ++  send-dm
     |=  [=ship p=post]
@@ -194,7 +205,7 @@
       (murn contents.p into-chat-block-type)
     =/  delta-for-chat   [%add (memo:c ~ author.p time-sent.p [%story [blocks (snoc inlines [%break ~])]])]
     =/  chat-diff    [[ship time-sent.p] delta-for-chat]
-    ~&  >>  ['send-dm here:' chat-diff]
+    :: ~&  >>  ['send-dm here:' chat-diff]
     [%pass / %agent [author.p %chat] %poke dm-action+!>([ship chat-diff])]~
   ++  read-dm
     |=  [=ship =bowl:gall]
@@ -247,9 +258,9 @@
     ==
     ~&  >  'giving /updates a dm-received'
     ~&  >  new-dm
-    :-
-    [%pass / %agent [author.post.act %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post.act))]
-    (send-updates new-dm bowl state)
+    :~
+      [%pass / %agent [author.post.act %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post.act))]
+    ==
   ++  read-group-dm
     |=  [=resource =bowl:gall]
     :: ~&  %read-group-dm
@@ -262,16 +273,20 @@
   |=  [a=@ =bowl:gall]
   =/  =briefs:c
     .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
-  :: ~&  briefs
-::  =/  s=(set ship)
-::    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/noun)
-::  ~&  s
-::  =/  s2=(set ship)
-::    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/invited/noun)
-::  ~&  s2
-::  =/  fs=(set flag:c)
-::    .^((set flag:c) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/chat/noun)
-::  ~&  fs
+    ~&  briefs
+  =/  s=(set ship)
+    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/noun)
+  ~&  s
+  =/  s2=(set ship)
+    .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/invited/noun)
+  ~&  s2
+  =/  fs=(set flag:c)
+    .^((set flag:c) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/chat/noun)
+  ~&  fs
+  =/  mc=(map flag:c chat:c)
+    .^((map flag:c chat:c) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/chats/noun)
+  ~&  mc
+  ~&  (previews-for-inbox bowl)
 ::  =/  =writs:writs:c
 ::    .^(writs:writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ~bus)/writs/newest/50/noun)
 ::  ~&  writs
@@ -287,8 +302,8 @@
   |=  [=path =bowl:gall =devices:notify]
   ^-  (unit (unit cage))
     ?>  =(our.bowl src.bowl)
-    :: ~&  "peeking groups-two"
-    :: ~&  path
+    ~&  "peeking groups-two"
+    ~&  path
     ?+  path  !!
       [%x %devices ~]
     ``notify-view+!>([%devices devices])
@@ -425,7 +440,8 @@
     =/  our-in-team    (~(has in team.crew) our.bowl)
     =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv `@uvh`p.whom)/writs/newest/1/noun)
     :: ~&  writs
-    =/  recent-msg    (snag 0 (messages-from-writs writs))
+    =/  recent-msg      (snag 0 (messages-from-writs writs))
+    =/  prev-contents   (weld [[%mention author.recent-msg] ~] contents.recent-msg)
     :-  ~
     :*  path=(spat /(scot %p our.bowl)/(scot %uv p.whom))
     ::  old path format: (spat /(scot %p entity)/(cord name))
@@ -433,7 +449,7 @@
         type=?:(our-in-team %group %group-pending)
         source=%talk
         last-time-sent=last.brief
-        last-message=contents.recent-msg
+        last-message=prev-contents
         metadata=meta
         invite-id=?:(our-in-team ~ `p.whom)
         unread-count=count.brief
@@ -610,4 +626,62 @@
   ^-  message-preview
   =/  path              (spat /dm-inbox/(scot %p ship))
   [path (silt ~[ship]) %pending %talk now [~] ~[(form-contact-mtd rolo ship)] ~ 0]
+::
+++  club-sub-card
+  |=  [=whom:c our=ship]
+  ^-  card:agent:gall
+  ?-  -.whom
+    %ship   !!
+    %flag   !!
+    %club
+    [%pass /g2/club/(scot %uv p.whom)/ui %agent [our %chat] %watch /club/(scot %uv p.whom)/ui/writs]
+  ==
+::
+++  club-leave-card
+  |=  [=whom:c our=ship]
+  ^-  card:agent:gall
+  ?-  -.whom
+    %ship   !!
+    %flag   !!
+    %club
+    [%pass /g2/club/(scot %uv p.whom)/ui %agent [our %chat] %leave ~]
+  ==
+::
+++  set-groups-target
+    |=  [new-target=targetable-groups =bowl:gall]
+    ^-  (list card:agent:gall)
+    ?-  new-target
+      %1  :: Clean up base groups 2 subs
+        =/  hardcoded
+          :~
+            [%pass /g2/briefs %agent [our.bowl %chat] %leave ~]
+            [%pass /g2/club/new %agent [our.bowl %chat] %leave ~]
+            [%pass /g2/dm/invited %agent [our.bowl %chat] %leave ~]
+            ::
+            [%pass /graph-store %agent [our.bowl %graph-store] %watch /updates]
+            [%pass /dm-hook %agent [our.bowl %dm-hook] %watch /updates]
+          ==
+        =/  =briefs:c   .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
+        =/  whoms       ~(tap in ~(key by briefs))
+        =/  clubs       (skim whoms |=(w=whom:c =(-.w %club)))
+        =/  dynamic     `(list card:agent:gall)`(turn clubs |=(w=whom:c (club-leave-card w our.bowl)))
+        (weld `(list card:agent:gall)`hardcoded dynamic)
+      ::
+      %2
+      =/  hardcoded  :~  :: define list of cards to update subscriptions for the paths we always know we need to do
+        :: don't care about graph-store&dm-hook anymore
+        :: since we're on groups-two
+        [%pass /graph-store %agent [our.bowl %graph-store] %leave ~]
+        [%pass /dm-hook %agent [our.bowl %dm-hook] %leave ~]
+        :: and sub to new junk
+        [%pass /g2/briefs %agent [our.bowl %chat] %watch /briefs]
+        [%pass /g2/club/new %agent [our.bowl %chat] %watch /club/new]
+        [%pass /g2/dm/invited %agent [our.bowl %chat] %watch /dm/invited]
+      ==
+      =/  =briefs:c   .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
+      =/  whoms       ~(tap in ~(key by briefs))
+      =/  clubs       (skim whoms |=(w=whom:c =(-.w %club)))
+      =/  dynamic     `(list card:agent:gall)`(turn clubs |=(w=whom:c (club-sub-card w our.bowl)))
+      (weld `(list card:agent:gall)`hardcoded dynamic)
+    ==
 --
