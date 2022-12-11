@@ -78,7 +78,6 @@ export class RealmProtocol extends BaseProtocol {
         const remotePeer = this.peers.get(payload.from);
         const signalData = JSON.parse(data['signal'].data);
         if (signalData.type === 'ready') {
-          console.log('signal data ready')
           // another peer is indicating that they are ready for us to dial them
           console.log('ready signal received', remotePeer, remotePeer?.status);
           if (remotePeer) {
@@ -91,7 +90,6 @@ export class RealmProtocol extends BaseProtocol {
           }
         }
         if (signalData.type === 'retry') {
-          console.log('signal data retry')
           const retryingPeer = this.peers.get(payload.from);
           if (retryingPeer?.isInitiator) {
             retryingPeer.createConnection();
@@ -129,15 +127,12 @@ export class RealmProtocol extends BaseProtocol {
 
     if (mark === 'rooms-v2-reaction') {
       if (data['chat-received']) {
-        console.log('chat received')
         const payload = data['chat-received'];
         this.emit(ProtocolEvent.ChatReceived, payload.from, payload.content);
       }
       if (data['provider-changed']) {
-        console.log("provider changed")
         const payload = data['provider-changed'];
         this.provider = payload.provider;
-        console.log('provider changed', payload);
         if (this.presentRoom?.rid) {
           this.peers.clear();
           this.emit(ProtocolEvent.RoomDeleted, this.presentRoom?.rid);
@@ -145,7 +140,6 @@ export class RealmProtocol extends BaseProtocol {
         this.rooms = new Map(Object.entries(payload.rooms));
       }
       if (data['room-deleted']) {
-        console.log("room deleted")
         const payload = data['room-deleted'];
         const room = this.rooms.get(payload.rid);
         if (this.presentRoom?.rid === this.our) {
