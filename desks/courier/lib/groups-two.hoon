@@ -18,7 +18,6 @@
       %group  `block:c`[%cite [%group group.reference.con]]
       %app    `block:c`[%cite [%desk flag=[ship.reference.con desk.reference.con] path.reference.con]]
     ==
-    ~&  >>  ['into-chat-block-type' ref]
     ?~  ref  ~
     `ref
   ==
@@ -528,7 +527,11 @@
     =/  inlines
       ^-  (list inline:c)
       (turn contents.post into-chat-inline-type)
-    =/  delta-for-chat   [%add (memo:c ~ author.post time-sent.post [%story [*(list) (snoc inlines [%break ~])]])]
+    =/  blocks
+      ^-  (list block:c)
+      (murn contents.post into-chat-block-type)
+    :: ~&  >>  ['blocks' blocks]
+    =/  delta-for-chat   [%add (memo:c ~ author.post time-sent.post [%story [blocks (snoc inlines [%break ~])]])]
     =/  writ-diff  [[author.post time-sent.post] delta-for-chat]
     [id `diff:club:c`[0 `delta:club:c`[%writ writ-diff]]]
 ::
