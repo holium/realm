@@ -111,7 +111,7 @@
       ==
       ::
         %app-install-update       
-      (urbit-app-update:encode app-id.rct urbit-app.rct index.rct grid-index.rct)
+      (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
         %pinned
       %-  pairs
@@ -233,12 +233,11 @@
       [(cord (scot %ud idx)) s+(scot %tas desk)]
   ::
   ++  urbit-app-update
-    |=  [=app-id app=urbit-app:store index=@ud =grid-index:store]
+    |=  [=app-id app=urbit-app:store =grid-index:store]
     ^-  json
     %-  pairs
     :~  ['appId' s+app-id]
         ['app' (urbit-app:encode app-id app)]
-        ['index' (numb index)]
         ['grid' (grid-index-js:encode grid-index)]
     ==
   ::

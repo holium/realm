@@ -149,16 +149,9 @@ export const CourierApi = {
     return await conduit.poke(payload);
   },
   declineDm: async (conduit: Conduit, toShip: string) => {
-    console.log({
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
-      json: {
-        decline: toShip,
-      },
-    });
     const payload = {
-      app: 'dm-hook',
-      mark: 'dm-hook-action',
+      app: 'courier',
+      mark: 'accept-dm',
       json: {
         decline: toShip,
       },
@@ -167,16 +160,6 @@ export const CourierApi = {
   },
   // Group invite flow
   acceptGroupDm: async (conduit: Conduit, inviteId: string) => {
-    /*const payload = {
-      app: 'invite-store',
-      mark: 'invite-action',
-      json: {
-        accept: {
-          term: 'graph',
-          uid: inviteId,
-        },
-      },
-    };*/
     const payload = {
       app: 'courier',
       mark: 'accept-group-dm',
