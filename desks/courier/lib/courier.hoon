@@ -522,8 +522,20 @@
           [%create-group-dm cr-gp-dm]
           [%send-group-dm gp-dm]
           [%read-group-dm read-group-dm]
-          :: [%set-groups-target nu]
+          [%set-groups-target parse-groups-target]
       ==
+    ::
+    ++  parse-groups-target
+      %-  ot
+      :~
+          [%target ngt]
+      ==
+    ++  ngt  :: Number-to-Groups-Target
+      |=  jon=json
+      ?>  ?=([%n *] jon)
+      ?:  =((rash p.jon dem) 1)
+      %1
+      %2
     ::
     ++  read-dm
       %-  ot
