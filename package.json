@@ -6,7 +6,8 @@
     "lib/design-system",
     "lib/multiplayer",
     "lib/conduit",
-    "lib/room"
+    "lib/room",
+    "lib/wallet"
   ],
   "scripts": {
     "build": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm dev:cursor && yarn build:app",
