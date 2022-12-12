@@ -40,7 +40,7 @@ export class RealmProtocol extends BaseProtocol {
     this.emit(ProtocolEvent.Ready);
   }
 
-  async sendSignal(peer: Patp, msg: any)/*: void*/ {
+  async sendSignal(peer: Patp, msg: any) /*: void*/ {
     if (this.presentRoom) {
       this.poke({
         app: 'rooms-v2',
@@ -105,7 +105,7 @@ export class RealmProtocol extends BaseProtocol {
               // if we don't have a peer connection yet, we need to create one
               remotePeer.createConnection();
               remotePeer.peerSignal(payload.data);
-/*            } else if (remotePeer.status === 'closed') {
+              /*            } else if (remotePeer.status === 'closed') {
               console.log('remote peer status closed')
              // if we have a peer connection but it's closed, we need to recreate it
               remotePeer.peer.destroy();
@@ -149,7 +149,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-entered']) {
-        console.log('room entered update')
+        console.log('room entered update');
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
         if (room) {
@@ -178,7 +178,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-left']) {
-        console.log('room left')
+        console.log('room left');
         const payload = data['room-left'];
         const room = this.rooms.get(payload.rid);
         if (this.presentRoom?.rid === payload.rid) {
@@ -193,7 +193,7 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['room-created']) {
-        console.log("room created")
+        console.log('room created');
         const { room } = data['room-created'];
         this.rooms.set(room.rid, room);
         if (room.creator === this.our) {
@@ -201,18 +201,18 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['kicked']) {
-        console.log('kicked update')
+        console.log('kicked update');
         const payload = data['kicked'];
         const room = this.rooms.get(payload.rid);
-        if (room) {
-          if (this.presentRoom?.rid === payload.rid) {
-            // if we are in the room, hangup the peer
-            if (payload.ship !== this.our) {
-              this.hangup(payload.ship);
-            } else {
-              this.emit(ProtocolEvent.RoomKicked, payload.rid);
-            }
+        if (this.presentRoom?.rid === payload.rid) {
+          // if we are in the room, hangup the peer
+          if (payload.ship !== this.our) {
+            this.hangup(payload.ship);
+          } else {
+            this.emit(ProtocolEvent.RoomKicked, payload.rid);
           }
+        }
+        if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
           this.rooms.set(payload.rid, room);
         }
@@ -530,5 +530,4 @@ const retry = (callback: any, times = 3) => {
       }
     }, 2500);
   });
-
 };
