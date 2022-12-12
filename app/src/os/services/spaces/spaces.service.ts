@@ -12,7 +12,7 @@ import { snakeify } from '../../lib/obj';
 import { spaceToSnake } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from 'os/types';
 import { VisaModel, VisaModelType } from './models/visas';
-import { MembershipStore } from './models/members';
+import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';
 import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
@@ -32,7 +32,7 @@ if (fs.existsSync(path.resolve(__dirname, '../../../app.dev.json'))) {
 
 interface SpaceModels {
   bazaar: NewBazaarStoreType;
-  membership: any;
+  membership: MembershipType;
   visas: VisaModelType;
 }
 /**

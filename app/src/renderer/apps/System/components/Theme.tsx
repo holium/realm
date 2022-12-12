@@ -14,6 +14,7 @@ import { lighten } from 'polished';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
+import { Member } from 'os/types';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;
@@ -26,7 +27,7 @@ const WallpaperPreview = styled(motion.img)`
 `;
 
 export const ThemePanel: FC<any> = observer(() => {
-  const { theme, ship, contacts, spaces } = useServices();
+  const { theme, ship, contacts, spaces, membership } = useServices();
   const { windowColor, textColor, accentColor, inputColor } =
     theme.currentTheme;
 
@@ -70,12 +71,14 @@ export const ThemePanel: FC<any> = observer(() => {
 
   const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
 
-  // const spaceAdmins = spaces.selected!.members.admins;
-  // const canEditSpace : boolean = spaceAdmins.find( (admin) => {
-  //   return admin.patp === ship!.patp;
-  // }) !== null;
-
-  const canEditSpace: boolean = spaces.selected!.path === `/${ship!.patp}/our`;
+  // used MembersList.tsx as reference material
+  const members = Array.from(membership.getMembersList(spaces.selected!.path));
+  const me = members.find(
+    (member: Member) =>
+      member.patp === ship!.patp && member.roles.indexOf('admin') !== -1
+  );
+  // is 'me' (currently logged in user) an admin?
+  const canEditSpace = me !== undefined;
 
   const themeForm = useForm({
     async onSubmit({ values }: any) {
@@ -160,17 +163,18 @@ export const ThemePanel: FC<any> = observer(() => {
           Theme
         </Text>
 
-        <TextButton
-          style={{ fontWeight: 400 }}
-          showBackground
-          textColor={accentColor}
-          highlightColor={accentColor}
-          disabled={!themeForm.computed.isValid || !canEditSpace}
-          onClick={themeForm.actions.submit}
-        >
-          {canEditSpace ? 'Save' : 'Bad Space Permissions'}
-          {/* Save */}
-        </TextButton>
+        {canEditSpace && (
+          <TextButton
+            style={{ fontWeight: 400 }}
+            showBackground
+            textColor={accentColor}
+            highlightColor={accentColor}
+            disabled={!themeForm.computed.isValid || !canEditSpace}
+            onClick={themeForm.actions.submit}
+          >
+            Save
+          </TextButton>
+        )}
       </Flex>
 
       {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
@@ -207,12 +211,12 @@ export const ThemePanel: FC<any> = observer(() => {
           </Flex>
 
         </Flex>
-        
+
         <Flex gap={18}>
           <Text my='auto' fontWeight={500} >
             Accent Color
           </Text>
-          
+
           <Flex position="relative" justifyContent="flex-end">
               <ColorTile
               // id="space-color-tile"
@@ -255,7 +259,7 @@ export const ThemePanel: FC<any> = observer(() => {
             </Flex>
 
         </Flex>
-        
+
       </Card> */}
 
       {/* <Text
