@@ -2,7 +2,7 @@
     title+'Realm'
     info+'A desktop environment for DAOs and communities. Developed by Holium.'
     color+0xce.bef0
-    version+[0 0 45]
+    version+[0 0 46]
     website+'https://holium.com'
     license+'MIT'
     base+'realm'
