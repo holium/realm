@@ -191,7 +191,6 @@ export class ShipService extends BaseService {
 
   get modelSnapshots() {
     return {
-      chat: this.models.chat ? getSnapshot(this.models.chat) : null,
       courier: this.models.courier ? getSnapshot(this.models.courier) : null,
       contacts: this.models.contacts ? getSnapshot(this.models.contacts) : null,
       friends: this.models.friends ? getSnapshot(this.models.friends) : null,

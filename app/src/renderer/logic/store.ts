@@ -61,6 +61,26 @@ const Services = types
     clearShip() {
       self.ship = undefined;
     },
+    clearAll() {
+      self.spaces = castToSnapshot({
+        loader: { state: 'initial' },
+        join: { state: 'initial' },
+        spaces: undefined,
+      });
+      self.bazaar = castToSnapshot({});
+      self.membership = castToSnapshot({});
+      self.courier = castToSnapshot({});
+      self.contacts = castToSnapshot({
+        ourPatp: '',
+        rolodex: {},
+      });
+      self.friends = castToSnapshot({});
+      self.beacon = castToSnapshot({});
+      self.visas = castToSnapshot({
+        incoming: {},
+        outgoing: {},
+      });
+    },
   }));
 
 // const desktopSnapshot = loadSnapshot('desktop');
@@ -336,10 +356,11 @@ OSActions.onConnected(
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
   // LiveRoom.leave();
+  SoundActions.playLogout();
+  servicesStore.clearAll();
   servicesStore.clearShip();
   coreStore.setLoggedIn(false);
   ShellActions.setBlur(true);
-  SoundActions.playLogout();
 });
 
 // --------------------------------------
