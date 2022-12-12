@@ -320,10 +320,9 @@ export const CourierStore = types
   })
   .views((self) => ({
     get list() {
-      return Array.from(self.previews.values()).sort((a, b) => {
-        // @ts-expect-error
-        return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
-      });
+      return Array.from(self.previews.values()).sort(
+        (a, b) => b.lastTimeSent - a.lastTimeSent
+      );
     },
   }))
   .actions((self) => ({
@@ -432,7 +431,7 @@ export const CourierStore = types
           type: 'dm',
           source: 'talk',
           lastTimeSent: moment().unix() * 1000,
-          lastMessage: [{ text: 'Drafting...' }],
+          lastMessage: [{ text: '' }],
           metadata: ContactMetadata.create(metadata[0] || {}),
           pending: false,
           isNew: true,
