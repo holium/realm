@@ -243,6 +243,19 @@ export class EthereumProtocol implements BaseProtocol {
   async sendTransaction(signedTx: string): Promise<any> {
     return (await this.ethProvider!.sendTransaction(signedTx)).hash;
   }
+  async populateERC20(
+    contractAddress: string,
+    toAddress: string,
+    amount: string,
+    decimals: number
+  ) {
+    const contract = new ethers.Contract(contractAddress, abi, this.ethProvider);
+    const erc20Amount = ethers.utils.parseUnits(
+      amount,
+      decimals
+    );
+    return await contract.populateTransaction.transfer(toAddress, erc20Amount)
+  }
   async getAsset(
     contract: string,
     addr: string,

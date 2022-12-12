@@ -590,23 +590,24 @@ export class WalletService extends BaseService {
     walletIndex: string,
     to: string,
     amount: string,
-    toPatp?: string,
-    contractType?: string
+    contractAddress: string,
+    toPatp?: string
   ) {
+    console.log(walletIndex);
+    console.log(to);
+    console.log(amount);
+    console.log(toPatp);
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const protocol = this.wallet!.protocols.get(
-      this.state!.navState.protocol
-    ) as EthereumProtocol;
-    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
-    const tx = {
-      from,
+    console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const ethAmount = ethers.utils.parseEther(amount);
+    const tx = (this.wallet!.protocols.get(this.state!.navState.protocol)! as EthereumProtocol).populateERC20(
+      contractAddress,
       to,
-      value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate(from, to, amount),
-      gasPrice: await protocol.getFeePrice(),
-      nonce: await protocol.getNonce(from),
-      chainId: await protocol.getChainId(),
-    };
+      amount,
+      this.state!.ethereum.wallets.get(walletIndex)!.data.get(this.state!.navState.protocol)!.coins.get(contractAddress)!
+        .decimals
+    )
     const signedTx = await this.signer!.signTransaction(path, tx);
     const hash = await this.wallet!.protocols.get(
       this.state!.navState.protocol
@@ -616,17 +617,18 @@ export class WalletService extends BaseService {
     currentWallet.enqueueTransaction(
       this.state!.navState.protocol,
       hash,
-      tx.to,
+      to,
       toPatp,
       fromAddress,
-      tx.value,
+      ethAmount,
       new Date().toISOString(),
-      contractType
+      contractAddress
     );
     const stateTx = currentWallet.getTransaction(
       this.state!.navState.protocol,
       hash
     );
+    console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
