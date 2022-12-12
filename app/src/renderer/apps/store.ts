@@ -104,14 +104,14 @@ const persistedState = loadSnapshot();
 const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
-    protocol: ProtocolType.ETH_MAIN,
-    lastEthProtocol: ProtocolType.ETH_MAIN,
+    protocol: ProtocolType.ETH_GORLI,
+    lastEthProtocol: ProtocolType.ETH_GORLI,
     btcNetwork: NetworkStoreType.BTC_MAIN,
   },
   ethereum: {
     block: 0,
     gorliBlock: 0,
-    protocol: ProtocolType.ETH_MAIN,
+    protocol: ProtocolType.ETH_GORLI,
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,
