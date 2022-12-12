@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { useState, ClipboardEvent, useCallback } from 'react';
 // import { useFileDrag } from './useDrag';
-import useStorage, { IuseStorage } from './useStorage';
+import { IuseStorage } from './useStorage';
 
 export type FileUploadSource = 'drag' | 'paste' | 'direct';
 
@@ -23,17 +23,18 @@ const isFileUploadHandler = (onFiles: FileUploadHandler['onFiles']) => {
 };
 
 type useFileUploadParams = {
+  storage: IuseStorage;
   multiple?: boolean;
 } & Partial<FileUploadEventHandlers> &
   Partial<FileUploadHandler>;
 
 export function useFileUpload({
+  storage,
   multiple = true,
   onSuccess,
   onError,
   onFiles,
 }: useFileUploadParams) {
-  const storage = useStorage();
   const { canUpload, uploadDefault } = storage;
   const [source, setSource] = useState<FileUploadSource>('paste');
 
