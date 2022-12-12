@@ -17,7 +17,7 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =.  groups-target.state     %1
+    =.  groups-target.state     %2
     =.  app-id.state            '82328a88-f49e-4f05-bc2b-06f61d5a733e'
     =.  uuid.state              (sham our.bowl)
     =.  push-enabled.state      %.y

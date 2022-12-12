@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer, safeStorage } from 'electron';
+import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { toJS } from 'mobx';
 import {
@@ -242,7 +242,6 @@ export class AuthService extends BaseService {
     secretKey: string,
     credentials: ShipCredentials
   ): ShipCredentials {
-    // console.log('storeCredentials => %o', { patp, secretKey, credentials });
     const storeParams = {
       name: 'credentials',
       cwd: `realm.${patp}`,
@@ -259,7 +258,6 @@ export class AuthService extends BaseService {
   }
 
   readCredentials(patp: string, secretKey: string): ShipCredentials {
-    // console.log('readCredentials => %o', { patp, secretKey });
     const storeParams = {
       name: 'credentials',
       cwd: `realm.${patp}`,
@@ -285,19 +283,12 @@ export class AuthService extends BaseService {
       throw new Error('login: passwordHash is null');
     }
     let passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
-    this.core.sendLog(`passwordHash: ${ship.passwordHash}`);
-    this.core.sendLog(`passwordCorrect: ${passwordCorrect}`);
 
     if (!passwordCorrect) {
-      this.core.sendLog(`password incorrect`);
       this.state.setLoader('error');
       return false;
     }
-    this.core.sendLog(`ship: ${patp}`);
     this.core.passwords.setPassword(patp, password);
-    this.core.sendLog(
-      `safeStorage isEncryptionAvailable: ${safeStorage.isEncryptionAvailable()}`
-    );
 
     this.state.login(shipId);
 
