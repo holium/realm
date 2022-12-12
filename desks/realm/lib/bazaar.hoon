@@ -25,12 +25,6 @@
           [%install-app install-app]
           [%uninstall-app uninstall-app]
           [%initialize ul]
-          [%nuke nuke]
-      ==
-    ::
-    ++  nuke
-      %-  ot
-      :~  [%store so]
       ==
     ::
     ++  install-app
