@@ -297,6 +297,9 @@
       =+  peaks=get-pikes
       =;  catalog-apps=catalog:store
         `state(catalog (~(uni by catalog.state) catalog-apps))
+      %-  (slog leaf+"{<dap.bowl>}: [on-rock]. rock={<rock>}, peaks={<peaks>}" ~)
+      %-  (slog leaf+"     rock={<rock>}" ~)
+      %-  (slog leaf+"     peaks={<peaks>}" ~)
       %-  ~(rep by rock)
       |=  [[=desk z=zest:clay wic=(set weft)] cat=catalog:store]
       ?~  app=(~(get by catalog.state) desk)  cat
@@ -325,6 +328,10 @@
       |=  =wave:tire:clay
       ^-  (quip card _state)
       =+  peaks=get-pikes
+      %-  (slog leaf+"{<dap.bowl>}: [on-wave]. " ~)
+      %-  (slog leaf+"    wave={<wave>}" ~)
+      %-  (slog leaf+"    peaks={<peaks>}" ~)
+      %-  (slog leaf+"    pending-installs={<pending-installs.state>}" ~)
       ?-  -.wave
         %wait  `state  ::  XX: blocked - take action?
         %warp  `state  ::  XX: unblocked - take action?
@@ -341,7 +348,17 @@
           :-  ~
           %=  state
               pending-installs
-            (~(del by pending-installs.state) desk.wave)
+            ::  only remove pending-install if a match on ship/desk name
+            %-  my
+            %-  skim
+            :-  ~(tap by pending-installs.state)
+            |=  [=ship =desk]
+            =/  host  ?~(sync.u.pyk our.bowl ship.u.sync.u.pyk)
+            %-  (slog leaf+"{<dap.bowl>}: testing {<[desk desk.wave]>} {<[ship host]>}" ~)
+            ?:  ?&  =(desk desk.wave)
+                    =(ship host)
+                ==
+                %.n  %.y
           ::
               catalog
             %+  ~(put by catalog.state)  desk.wave
@@ -472,10 +489,6 @@
       |=  [=ship =desk]
       ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
-      ::  queue this installation request, so that once alliance is complete,
-      ::  we can use this info to set the host in the app data. also can be used
-      ::  to automatically kick off an install once an alliance is made
-      =.  pending-installs.state  (~(put by pending-installs.state) ship desk)
       =/  allies      allies:scry:bazaar
       ?.  (~(has by allies) ship)
         %-  (slog leaf+"{<ship>} not an ally. adding {<ship>} as ally..." ~)
@@ -1196,7 +1209,6 @@
     ::
     ++  update-catalog-app
       |=  [app-id=desk =charge:docket status=?(%started %failed %suspended %installed)]
-      %-  (slog leaf+"{<dap.bowl>}: update-app-catalog [{<pending-installs.state>}]" ~)
       =/  hide-desks              `(set @tas)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ?:  (~(has in hide-desks) app-id)
         `state
@@ -1213,6 +1225,9 @@
         u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
       =.  grid-index              (set-grid-index:helpers:bazaar app-id grid-index.state)
+      %-  (slog leaf+"{<dap.bowl>}: [update-app-catalog]" ~)
+      %-  (slog leaf+"  pending-installs => {<pending-installs.state>}" ~)
+      %-  (slog leaf+"  app-install-update => {<[%app-install-update app-id +.app grid-index.state]>}" ~)
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app grid-index.state])]~
   ::
