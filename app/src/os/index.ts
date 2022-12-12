@@ -334,11 +334,10 @@ export class Realm extends EventEmitter {
 
   async onWillRedirect(e: Event, url: string, webContents: WebContents) {
     try {
-      // console.log('onWillRedirect => %o', url);
       const delim = '/~/login?redirect=';
       const parts = url.split(delim);
       // http://localhost/~/login?redirect=
-      if (parts.length > 0) {
+      if (parts.length > 1) {
         let appPath = decodeURIComponent(parts[1]);
         // console.log('appPath => %o', appPath);
         appPath = appPath.split('?')[0];
