@@ -23,13 +23,13 @@ interface AccountTrayProps {
 export const AccountTray: FC<AccountTrayProps> = observer(
   (props: AccountTrayProps) => {
     const { theme } = props;
-    const { ship, notifications } = useServices();
+    const { ship, beacon } = useServices();
     const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
       useTrayApps();
 
     const unreadCount = useMemo(
-      () => notifications.unseen.length,
-      [notifications.unseen.length]
+      () => beacon.unseen.length,
+      [beacon.unseen.length]
     );
 
     const onButtonClick = useCallback(

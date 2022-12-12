@@ -85,9 +85,10 @@
       %notify-action  (on-notify-action:core !<(action:notify vase))
       %set-groups-target
       ::   :courier &set-groups-target %2
-      :-
-        (set-groups-target:groups-two !<(targetable-groups vase) bowl)
-        [%1 !<(targetable-groups vase) +>:state]
+      =.  groups-target.state     !<(targetable-groups vase)
+      :_  state
+      (set-groups-target:groups-two !<(targetable-groups vase) bowl)
+        :: [%1 !<(targetable-groups vase) +>:state]
     ==
     [cards this]
   --

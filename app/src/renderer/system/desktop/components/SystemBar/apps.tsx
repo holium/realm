@@ -19,7 +19,7 @@ export interface ViewRenderers {
   };
 }
 
-const defaultTrayDimensions = {
+export const defaultTrayDimensions = {
   'rooms-tray': {
     width: 380,
     height: 500,
