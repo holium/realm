@@ -709,7 +709,7 @@
         ['to' to-field]
         ['type' s+(scot %tas type.cha)]
         ['source' s+(scot %tas source.cha)]
-        ['lastTimeSent' (time last-time-sent.cha)]
+        ['lastTimeSent' n+(crip (en-json:html (time:enjs:format last-time-sent.cha)))]
         ['lastMessage' a+(turn last-message.cha content)]
         ['metadata' mtd-field]
         ['inviteId' invite-id]
