@@ -1,4 +1,4 @@
-import { types } from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 import { DMPreview, DMPreviewType } from 'os/services/ship/models/courier';
 import { toJS } from 'mobx';
 
@@ -38,3 +38,5 @@ export const DmApp = types
       self.currentPath = path;
     },
   }));
+
+export type DmAppInstance = Instance<typeof DmApp>;

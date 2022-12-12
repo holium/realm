@@ -21,8 +21,6 @@ export const NotificationList: FC<INotificationList> = ({
     data: NotificationProps | string;
   };
 
-  console.log(`unseen: ${unseen.length}, seen: ${seen.length}`);
-
   const listData: ListData[] = useMemo(
     () => [
       { type: 'title', data: 'Unseen' },

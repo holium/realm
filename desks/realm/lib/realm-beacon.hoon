@@ -56,6 +56,14 @@
       %-  pairs
       :~  id/s/(scot %uv id.rct)
       ==
+        %seen-inbox
+        %-  pairs
+        :~  
+          desk/s/des.rope.rct
+          inbox/s/(spat ted.rope.rct)
+          :: group/?~(gop.r ~ s/(flag u.gop.r))
+          :: channel/?~(can.r ~ s/(nest u.can.r))
+        ==
       ::
         %new-note
       %-  pairs

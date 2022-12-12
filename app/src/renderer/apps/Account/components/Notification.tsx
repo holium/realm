@@ -1,10 +1,13 @@
+import { FC, useMemo } from 'react';
 import { lighten, rgba } from 'polished';
 import styled from 'styled-components';
 import { Flex, Text, Skeleton, Mention } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
-import { FC, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTrayApps } from 'renderer/apps/store';
+import { useServices } from 'renderer/logic/store';
+import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
 
 interface ContentType {
   [key: string]: string;
@@ -18,6 +21,8 @@ export interface NotificationProps {
   content: ContentType[];
   // content: string;
   seen?: boolean;
+  inbox?: string;
+  desk?: string;
   link: string;
   time: string;
   ship: string;
@@ -82,7 +87,8 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
 export const Notification = (props: NotificationProps) => {
   let innerContent: React.ReactNode;
   const seedColor = '#4E9EFD';
-  // const { dmApp, setActiveApp } = useTrayApps();
+  const { dmApp, setActiveApp, closeActiveApp } = useTrayApps();
+  const { courier } = useServices();
 
   const bgColor = useMemo(
     () =>
@@ -92,9 +98,6 @@ export const Notification = (props: NotificationProps) => {
     [seedColor && props.seen]
   );
 
-  useEffect(() => {
-    // ship?.notifications.setSeen(props.link);
-  }, []);
   if (props.loading) {
     innerContent = (
       <>
@@ -170,12 +173,19 @@ export const Notification = (props: NotificationProps) => {
         onClick={(evt: any) => {
           evt.stopPropagation();
           // TODO make this open dm and load url
-          //
-          // const path = pathToDmInbox(props.link);
-          // if (path.includes('dm-inbox')) {
-          //   dmApp.setPath(path);
-          //   setActiveApp('messages-tray');
-          // }
+          if (props.inbox?.includes('dm')) {
+            const inbox = props.inbox.split('/');
+            let path: string = '';
+            Array.from(courier.dms.keys()).forEach((key) => {
+              if (key.includes(inbox[2])) {
+                path = key;
+              }
+            });
+            if (!path) return;
+            // ShipActions.draftDm()
+            const dmPreview = courier.previews.get(path)!;
+            openDMsToChat(dmApp, dmPreview, setActiveApp);
+          }
           evt.preventDefault();
         }}
       >

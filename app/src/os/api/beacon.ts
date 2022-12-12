@@ -65,11 +65,15 @@ export const BeaconApi = {
       app: 'realm-beacon',
       path: '/updates',
       onEvent: async (data: any, id?: number, mark?: string) => {
-        // console.log(data, mark);
         if ('new-note' in data) {
           beacon.newNotification(data['new-note']);
-        } else if ('seen' in data) {
+        }
+        if ('seen' in data) {
           beacon._markSeen(data['seen'].id);
+        }
+
+        if ('seen-inbox' in data) {
+          beacon._sawInbox(data['seen-inbox']);
         }
       },
       onError: () => console.log('Subscription rejected'),

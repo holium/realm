@@ -157,7 +157,6 @@ const GroupLog = types
   }))
   .actions((self) => ({
     receiveDM: (incomingDm: GraphDMType) => {
-      // console.log('incomingDm', incomingDm);
       // for some reason the indexes are different after group dm send
       const replaceIdx = self.messages.findIndex(
         (outDm: GraphDMType) => outDm.timeSent === incomingDm.timeSent
@@ -173,7 +172,6 @@ const GroupLog = types
     sendDM: (patp: Patp, contents: any) => {
       const author = patp.substring(1);
       const post = createPost(author, contents);
-      console.log('outgoingDM', post);
       self.messages.unshift(
         GraphDM.create({
           index: post.index,
@@ -421,7 +419,7 @@ export const CourierStore = types
           path: `/dm-inbox/${patps[0]}`,
           to: patps[0],
           type: 'dm',
-          source: 'graph-store',
+          source: 'talk',
           messages: [],
           metadata: ContactMetadata.create(metadata[0] || {}),
         })
@@ -432,7 +430,7 @@ export const CourierStore = types
           path: `/dm-inbox/${patps[0]}`,
           to: patps[0],
           type: 'dm',
-          source: 'graph-store',
+          source: 'talk',
           lastTimeSent: moment().unix() * 1000,
           lastMessage: [{ text: 'Drafting...' }],
           metadata: ContactMetadata.create(metadata[0] || {}),
@@ -480,7 +478,6 @@ export const CourierStore = types
       if (self.dms.has(dmLog.path)) {
         // if the received message already has a log entry
         const newMessage = dmLog.messages[0];
-        console.log(newMessage);
         self.dms.get(dmLog.path)?.receiveDM(newMessage);
         self.previews.get(dmLog.path)?.receiveDM(newMessage);
       } else {

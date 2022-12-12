@@ -1,3 +1,4 @@
+export * from './Anchor';
 export * from './Box';
 export * from './Card';
 export * from './Column';

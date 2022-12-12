@@ -39,6 +39,12 @@
     !>(state)
   ::
   ++  on-load
+    :: |=  =vase
+    :: ^-  (quip card _this)
+    :: =/  old  !<(versioned-state old-state)
+    :: ?-  -.old
+    ::   %0  `this(state old)
+    :: ==
     |=  =vase
     ^-  (quip card _this)
     =/  old=(unit state-0)
@@ -71,8 +77,11 @@
       [%updates ~]
         ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
         ?>  (is-host:core src.bowl)
-        ~
-        :: [%give %fact [/updates ~] realm-beacon-reaction+!>([%initial ~])]~
+        =/  car=carpet:hark  scry-latest:harken:core  :: use the stitch to grab the blanket
+        =/  blan             (scry-blanket:harken:core stitch.car)  :: stitch together seen/unseen
+        =/  weave            (stitch:harken:core car blan)
+        :: [%give %fact ~ realm-beacon-view+!>([%joined-bazaar path catalog.space-data stall.space-data])]~
+        [%give %fact ~ realm-beacon-view+!>([%all weave])]~
       ::
     ==
     [cards this]
@@ -117,28 +126,6 @@
     ^-  (quip card _this)
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
-      :: [%hark-store ~]
-      ::   ?+    -.sign  (on-agent:def wire sign)
-      ::     %watch-ack
-      ::       ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to hark-store" ~)  `this
-      ::       ~&  >>>  "{<dap.bowl>}: hark-store subscription failed"
-      ::       `this
-      :: ::
-      ::     %kick
-      ::       ~&  >  "{<dap.bowl>}: hark-store kicked us, resubscribing..."
-      ::       :_  this
-      ::       :~  [%pass /hark-store %agent [our.bowl %hark-store] %watch t.wire]
-      ::       ==
-      :: ::
-      ::     %fact
-      ::       ?+    p.cage.sign  (on-agent:def wire sign)
-      ::           %hark-update
-      ::             =^  cards  state
-      ::               (on:hark-store-updates:core !<(=update:hark-store q.cage.sign))
-      ::             [cards this]
-      ::       ==
-      ::   ==
-
       [%hark ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
@@ -221,6 +208,7 @@
     ?-  -.rct
       %seen         (on-seen +.rct)
       %new-note     (on-new-note +.rct)
+      %seen-inbox   `state
     ==
     ::
     ++  on-seen
@@ -233,88 +221,7 @@
       %-  (slog leaf+"{<dap.bowl>}: on-new-note called => {<note>}" ~)
       `state
     --
-  ::  interactions not yet supported
-  :: ++  interaction
-  ::   |=  [itc=interaction:store]
-  ::   ^-  (quip card _state)
-  ::   `state
-  ::
-  ++  scry
-    |%
-    ::
-    ++  hark
-      |%
-      ::
-      :: ++  latest
-      ::   ^-  (unit (unit cage))
-      ::   ``beacon-view+!>([%latest ~])
-      --
-    --
-  ++  helpers
-    |%
-    ::
-    --
   --
-::
-:: ++  hark-store-updates
-::   |%
-::   ++  on
-::     |=  [upd=update:hark-store]
-::     ^-  (quip card _state)
-::     |^
-::     ?+  -.upd    `state
-::       %archived        (on-archived +.upd)
-::       %more            (on-more +.upd)
-::       %note-read       (on-note-read +.upd)
-::       %added           (on-added +.upd)
-::       %timebox         (on-timebox +.upd)
-::       %place-stats     (on-place-stats +.upd)
-::       %all-stats       (on-all-stats +.upd)
-::     ==
-::     ::
-::     ++  on-archived
-::       |=  [=time =lid:hark-store =notification:hark-store]
-::       ^-  (quip card _state)
-::       %-  (slog leaf+"{<dap.bowl>}: on-archived => {<[time lid notification]>}" ~)
-::       `state
-::     ::
-::     ++  on-more
-::       |=  [more=(list update:hark-store)]
-::       ^-  (quip card _state)
-::       %-  (slog leaf+"{<dap.bowl>}: on-more => {<more>}" ~)
-::       `state
-::     ::
-::     ++  on-note-read
-::       |=  [=time =bin:hark-store]
-::       ^-  (quip card _state)
-::       %-  (slog leaf+"{<dap.bowl>}: on-note-read => {<[time bin]>}" ~)
-::       `state
-::     ::
-::     ++  on-added
-::       |=  [=notification:hark-store]
-::       ^-  (quip card _state)
-::       %-  (slog leaf+"{<dap.bowl>}: on-added => {<notification>}" ~)
-::       `state
-::     ::
-::     ++  on-timebox
-::       |=  [=lid:hark-store notifications=(list notification:hark-store)]
-::       ^-  (quip card _state)
-::       %-  (slog leaf+"{<dap.bowl>}: on-timebox => {<[lid notifications]>}" ~)
-::       `state
-::     ::
-::     ++  on-place-stats
-::       |=  [=place:hark-store =stats:hark-store]
-::       ^-  (quip card _state)
-::       %-  (slog leaf+"{<dap.bowl>}: on-place-stats => {<[place stats]>}" ~)
-::       `state
-::     ::
-::     ++  on-all-stats
-::       |=  [places=(map place:hark-store stats:hark-store)]
-::       ^-  (quip card _state)
-::       %-  (slog leaf+"{<dap.bowl>}: on-all-stats => {<places>}" ~)
-::       `state
-::     --
-::   --
 ::
 ::  hark utils and helpers
 ++  harken
@@ -348,13 +255,6 @@
     ::   blanket yarns are marked unseen
     =/  seen-notes    (to-notes yarns.u.blan %.y)
     (~(uni by seen-notes) unseen-notes)
-    :: ((mop id:hark yarn:hark) lte)
-    :: %-  my
-    :: %-  sort
-    :: :-  ~(tap by (~(uni by yarns.u.blan) yarns.carpet))
-    :: |=  [a=[=id:hark =yarn:hark] b=[=id:hark =yarn:hark]]
-    :: %+  gth  (ni:dejs:format (time:enjs:format tim.yarn.b))
-    :: (ni:dejs:format (time:enjs:format tim.yarn.a))
   ::
   ++  scry-latest
     .^(carpet:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/all/latest/noun)
@@ -413,7 +313,6 @@
       =.  type.note         %hark
       =.  time.note         tim.yarn
       =.  seen.note         %.n
-      ~&  >>  note
       :_  state
       :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%new-note note])]
       ==
@@ -439,11 +338,12 @@
       |=  [=rope:hark]
       ^-  (quip card _state)
       %-  (slog leaf+"{<dap.bowl>}: on-saw-rope => {<rope>}" ~)
-      =/  yar=(unit yarn:hark)       (find-yarn rope)
-      ?~  yar  ~|('on-saw-rope find-yarn unexpected result' !!)
+      :: =/  yar=(unit yarn:hark)       (find-yarn rope)
+      :: ?~  yar  ~|('on-saw-rope find-yarn unexpected result' !!)        
       :_  state
-      :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%seen id.u.yar])]
+      :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%seen-inbox rope])]
       ==
+      :: `state
     ::  $find-yarn: locate a hark yarn by its rope
     ++  find-yarn
       |=  [=rope:hark]
@@ -452,8 +352,6 @@
       =/  par  u.gop.rope
       %-  (slog leaf+"{<dap.bowl>}: {<par>}" ~)
       :: http://localhost/~/scry/hark/group/~lodlev-migdev/remote-group-1/quilt/1.json
-      :: =/  num  (crip (en-json:html (numb:enjs:format -.par)))
-      :: =/  blan=blanket:hark  .^(blanket:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/(scot %tas +.par)/latest/noun)
       =/  car=carpet:hark  .^(carpet:hark %gx /(scot %p our.bowl)/hark/(scot %da now.bowl)/group/(scot %p -.par)/(scot %tas +.par)/latest/noun)
       ?:  =(stitch.car 0)  ~
       :: http://localhost/~/scry/hark/all/quilt/5.json

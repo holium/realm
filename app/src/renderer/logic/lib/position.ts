@@ -75,13 +75,13 @@ export const calculateAnchorPointById = (
 export const calculatePopoverAnchorById = (
   popoverId: string,
   config: {
-    dimensions: any;
-    anchorOffset: any;
+    dimensions?: { width: number; height: number };
+    anchorOffset: { x?: number; y?: number };
     centered?: boolean;
   }
 ) => {
   const el = document.getElementById(popoverId)!;
-  const { dimensions, anchorOffset } = config;
+  const { centered, dimensions, anchorOffset } = config;
   const divTop = el.offsetHeight;
 
   const {
@@ -90,19 +90,20 @@ export const calculatePopoverAnchorById = (
     height: divHeight,
   } = el?.getBoundingClientRect();
 
-  const left = Math.round(divLeft - dimensions.width + divWidth);
-  let coords: any = {
-    top: divTop + divHeight + anchorOffset.y,
-    left: left + anchorOffset.x,
+  const offsetX = anchorOffset.x ?? 0;
+  const offsetY = anchorOffset.y ?? 0;
+
+  let coords = {
+    top: divTop + divHeight + offsetY,
+    left: divLeft + offsetX,
   };
 
-  if (config.centered) {
-    const midPopover = dimensions.width / 2;
-    const midTrigger = divWidth / 2;
+  if (centered && dimensions) {
     coords = {
       ...coords,
-      left: Math.round(divLeft + midTrigger - midPopover),
+      left: divLeft + offsetX - dimensions.width / 2 + divWidth / 2,
     };
   }
+
   return coords;
 };

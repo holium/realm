@@ -1,6 +1,9 @@
 /-  hark
 |%
 ::
++$  g-flag  (pair ship term)
++$  g-nest  (pair dude:gall flag)
+
 +$  note
   $:  id=@uvH                         :: note id (from hark)
       desk=@tas
@@ -21,6 +24,7 @@
 ::
 +$  reaction
   $%  [%seen =id:hark]
+      [%seen-inbox =rope:hark]
       [%new-note =note]
   ==
 ::

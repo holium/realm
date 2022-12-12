@@ -39,42 +39,6 @@ export const NotificationStore = types
     unseen: types.array(NotificationModel),
     notes: types.map(NotificationModel),
   })
-  .views((self) => ({
-    // get seenSorted() {
-    //   return self.seen.sort(
-    //     (a: NotificationModelType, b: NotificationModelType) => {
-    //       return a.time - b.time;
-    //     }
-    //   );
-    // },
-    // get unseenSorted() {
-    //   return self.unseen.sort(
-    //     (a: NotificationModelType, b: NotificationModelType) => {
-    //       return a.time - b.time;
-    //     }
-    //   );
-    // },
-    // get seen() {
-    //   return Array.from(self.notes.values())
-    //     .filter((note: NotificationModelType) => {
-    //       return note.seen;
-    //     })
-    //     .sort(
-    //       (na: NotificationModelType, nb: NotificationModelType) =>
-    //         na.time > nb.time
-    //     );
-    // },
-    // get unseen() {
-    //   return Array.from(self.notes.values())
-    //     .filter((note: NotificationModelType) => {
-    //       return !note.seen;
-    //     })
-    //     .sort(
-    //       (na: NotificationModelType, nb: NotificationModelType) =>
-    //         na.time > nb.time
-    //     );
-    // },
-  }))
   .actions((self) => ({
     load: flow(function* (conduit: Conduit) {
       try {
@@ -91,13 +55,6 @@ export const NotificationStore = types
           });
         self.unseen = unseen;
         self.seen = seen;
-        // Object.values(all)
-        // .sort((a: NotificationModelType, b: NotificationModelType) => {
-        //   return a.time > b.time;
-        // })
-        //   .forEach((note: NotificationModelType) =>
-        //     self.notes.set(note.id, note)
-        //   );
       } catch (error) {
         console.error(error);
       }
@@ -107,25 +64,6 @@ export const NotificationStore = types
       const added = self.unseen;
       added.unshift(notif);
       self.unseen = added;
-      // if (data.content) {
-      //   const contents = [];
-      //   for (let i = 0; i < data.content.length; i++) {
-      //     const content = data.content[i];
-      //     if (typeof content === 'string') {
-      //       contents.push({
-      //         text: content,
-      //       });
-      //     } else {
-      //       contents.push(content);
-      //     }
-      //   }
-      //   self.unseen.push(
-      //     NotificationModel.create({
-      //       ...data,
-      //       content: contents,
-      //     })
-      //   );
-      // }
     },
     _markSeen(noteId: string) {
       console.log('marking seen', noteId);
@@ -136,19 +74,23 @@ export const NotificationStore = types
       self.seen.push(self.unseen[seenIdx]);
       removed.splice(seenIdx, 1);
       self.unseen = removed;
-      // nowSeen.seen = true;
-      // self.unseen.splice();
-      // if (!self.notes.has(noteId)) return;
-      // const note = self.notes.get(noteId);
-      // self.notes.set(
-      //   noteId,
-      //   NotificationModel.create({
-      //     ...note,
-      //     seen: true,
-      //   })
-      // );
     },
-
+    _sawInbox(payload: { desk: string; inbox: string }) {
+      const seen = self.seen;
+      let deskInbox = payload.inbox;
+      if (payload.inbox.includes('club') && payload.desk === 'talk') {
+        deskInbox = payload.inbox.replace('club', 'dm');
+      }
+      const readUnseen = self.unseen.filter((note: NotificationModelType) => {
+        return note.inbox === deskInbox;
+      });
+      const unreadUnseen = self.unseen.filter((note: NotificationModelType) => {
+        return note.inbox !== deskInbox;
+      });
+      self.unseen = unreadUnseen;
+      seen.concat(readUnseen);
+      self.seen = seen;
+    },
     sawInbox: flow(function* (conduit: Conduit, inbox: BeaconInboxType) {
       try {
         if (Object.keys(inbox).includes('all')) {
@@ -162,7 +104,6 @@ export const NotificationStore = types
           self.unseen = [];
           seen.concat(readUnseen);
           self.seen = seen;
-          // self.seen = [...readUnseen, ...self.seen];
         }
         return yield BeaconApi.sawInbox(conduit, inbox);
       } catch (error) {
