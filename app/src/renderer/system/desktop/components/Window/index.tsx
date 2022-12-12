@@ -448,6 +448,15 @@ export const WindowType: FC<WindowTypeProps> = (props: WindowTypeProps) => {
           window={window}
         />
       );
+    case 'dev':
+      return (
+        <WebView
+          hasTitlebar={hasTitlebar}
+          isResizing={isResizing}
+          window={window}
+        />
+      );
+
     case 'dialog':
       return <DialogView window={window} />;
     default:
