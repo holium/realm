@@ -438,16 +438,16 @@
 ++  previews-from-briefs
   |=  [=briefs:c =bowl:gall]
   ^-  (list message-preview)
-  =/  wrapped-briefs  (~(run by briefs) |=([v=brief:briefs:c] [brief=v bowl=bowl]))
+  =/  rolo  (get-rolo bowl)
+  =/  wrapped-briefs  (~(run by briefs) |=([v=brief:briefs:c] [brief=v bowl=bowl rolo]))
   =/  prev-map        (~(rut by wrapped-briefs) preview-from-wrapped-brief)  
   %:  murn
     ~(val by prev-map)
     |=([u=(unit message-preview)] u)
   ==
 ++  preview-from-wrapped-brief
-  |=  [=whom:c [=brief:briefs:c =bowl:gall]]
+  |=  [=whom:c [=brief:briefs:c =bowl:gall rolo=rolodex]]
   ^-  (unit message-preview)
-  =/  rolo  (get-rolo bowl)
   ?-  -.whom
       %flag
     ~
@@ -594,7 +594,7 @@
             =/  new-dm  (chat-from-newest-writ p.-.the-fact bowl)
             (send-updates new-dm bowl state)
         ==
-        =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl])
+        =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl (get-rolo bowl)])
         :: ~&  >  'the-preview in propagate-briefs-fact'
         :: ~&  >  the-preview
         ?~  the-preview  dm-received-cards
