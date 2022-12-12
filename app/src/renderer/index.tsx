@@ -19,18 +19,19 @@ if (sentryDsn) {
     tracesSampleRate: 1,
   });
 } else {
-  console.error('Environment variable SENTRY_DSN is not defined.');
+  console.error('Environment variable for Sentry is undefined.');
 }
-const amplitudeApiKey = process.env.AMPLITUDE_API_KEY;
+const amplitudeApiKey = isProd
+  ? process.env.AMPLITUDE_API_KEY
+  : process.env.AMPLITUDE_API_KEY_DEV;
 if (amplitudeApiKey) {
   Amplitude.init(amplitudeApiKey, undefined, {
-    optOut: !isProd,
     trackingOptions: {
       ipAddress: false,
     },
   });
 } else {
-  console.error('Environment variable AMPLITUDE_API_KEY is not defined.');
+  console.error('Environment variable for Amplitude is undefined.');
 }
 
 const container = document.getElementById('root')!;
