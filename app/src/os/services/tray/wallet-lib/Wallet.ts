@@ -14,6 +14,10 @@ export class Wallet {
     this.currentProtocol = currentProtocol;
   }
 
+  pauseUpdates() {
+    this.protocols.get(this.currentProtocol)!.removeListener();
+  }
+
   watchUpdates(walletState: any) {
     const lastProtocol: BaseProtocol = this.protocols.get(
       this.currentProtocol

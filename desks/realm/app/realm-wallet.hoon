@@ -39,7 +39,7 @@
       (mole |.(!<(state-0 vase)))  
     ?^  old
       `this(state u.old)
-    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easier
+    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easierr
     =^  cards  this  on-init
     :_  this
     =-  (welp - cards)

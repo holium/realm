@@ -14,8 +14,8 @@ import {
   EthWalletType,
   ProtocolType,
   NetworkStoreType,
-} from './wallet-lib';;
-import { BaseSigner } from './wallet-lib/wallets/BaseSigner';;
+} from './wallet-lib';
+import { BaseSigner } from './wallet-lib/wallets/BaseSigner';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
@@ -383,11 +383,7 @@ export class WalletService extends BaseService {
       [ProtocolType.UQBAR, new UqbarProtocol()],
     ]);
     this.wallet = new Wallet(protocolMap, this.state!.navState.protocol);
-    this.wallet!.watchUpdates(this.state!);
-
-    WalletApi.watchUpdates(this.core.conduit!, this.state!, () =>
-      this.wallet!.watchUpdates(this.state!)
-    );
+    // this.wallet!.watchUpdates(this.state!);
 
     if (this.state.navState.view !== WalletView.NEW) {
       this.state.resetNavigation();
@@ -419,6 +415,7 @@ export class WalletService extends BaseService {
 
   private lock() {
     const hasPasscode = this.state && this.state.settings.passcodeHash;
+    this.wallet?.pauseUpdates();
     if (hasPasscode) {
       this.state!.navigate(WalletView.LOCKED);
     }
@@ -588,10 +585,17 @@ export class WalletService extends BaseService {
   sendBitcoinTransaction() {}
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
-    return await bcrypt.compare(
+    const result = await bcrypt.compare(
       passcode.toString(),
       this.state!.settings.passcodeHash!
     );
+    if (result) {
+      WalletApi.watchUpdates(this.core.conduit!, this.state!, () =>
+        this.wallet!.watchUpdates(this.state!)
+      );
+      // this.wallet?.watchUpdates(this.state!);
+    }
+    return result;
   }
 
   async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {

@@ -55,10 +55,17 @@ export class EthereumProtocol implements BaseProtocol {
     }
     this.ethProvider!.removeAllListeners();
     this.alchemy = new Alchemy(alchemySettings);
+    this.getAssetTransfers(
+      '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+      '0x9DbF0b968C395c09b78c9De2c9e486879B1a0089',
+      0
+    );
   }
 
   removeListener() {
     this.ethProvider!.removeAllListeners();
+    clearInterval(this.interval);
+    this.interval = null;
   }
 
   watchUpdates(walletStore: WalletStoreType) {
@@ -127,9 +134,10 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
+    // try {
     const from = (
       await this.alchemy.core.getAssetTransfers({
-        fromBlock: ethers.utils.hexlify(startBlock),
+        fromBlock: ethers.utils.hexlify(0),
         fromAddress: addr,
         category: [
           AssetTransfersCategory.INTERNAL,
@@ -140,7 +148,7 @@ export class EthereumProtocol implements BaseProtocol {
     ).transfers;
     const to = (
       await this.alchemy.core.getAssetTransfers({
-        fromBlock: ethers.utils.hexlify(startBlock),
+        fromBlock: ethers.utils.hexlify(0),
         toAddress: addr,
         category: [
           AssetTransfersCategory.INTERNAL,
@@ -150,6 +158,10 @@ export class EthereumProtocol implements BaseProtocol {
       })
     ).transfers;
     return from.concat(to);
+    // } catch (e) {
+    //   // console.log(e);
+    //   return [];
+    // }
     /*txns.forEach(async (txn, index) => {
       txns[index] = {
         timeStamp: await this.getBlockTime(Number(txn.blockNum)),
@@ -240,33 +252,57 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
-    const from = (
-      await this.alchemy.core.getAssetTransfers({
-        fromBlock: ethers.utils.hexlify(startBlock),
-        fromAddress: addr,
-        category: [
-          AssetTransfersCategory.ERC20,
-          AssetTransfersCategory.ERC721,
-          AssetTransfersCategory.ERC1155,
+    const fromTransfers = await axios.request({
+      method: 'POST',
+      url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
+      data: {
+        method: 'alchemy_getAssetTransfers',
+        params: [
+          {
+            fromBlock: ethers.utils.hexlify(0),
+            toBlock: 'latest',
+            fromAddress: addr,
+            contractAddresses: [contract],
+            category: ['erc20', 'erc721', 'erc1155'],
+            withMetadata: true,
+          },
         ],
-        contractAddresses: [contract],
-        withMetadata: true,
-      })
-    ).transfers;
-    const to = (
-      await this.alchemy.core.getAssetTransfers({
-        fromBlock: ethers.utils.hexlify(startBlock),
-        toAddress: addr,
-        category: [
-          AssetTransfersCategory.ERC20,
-          AssetTransfersCategory.ERC721,
-          AssetTransfersCategory.ERC1155,
+      },
+    });
+    const from = fromTransfers.data.result.transfers;
+    const toTransfers = await axios.request({
+      method: 'POST',
+      url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
+      data: {
+        method: 'alchemy_getAssetTransfers',
+        params: [
+          {
+            fromBlock: ethers.utils.hexlify(0),
+            toBlock: 'latest',
+            toAddress: addr,
+            category: [
+              AssetTransfersCategory.ERC20,
+              AssetTransfersCategory.ERC721,
+              AssetTransfersCategory.ERC1155,
+            ],
+            contractAddresses: [contract],
+            withMetadata: true,
+          },
         ],
-        contractAddresses: [contract],
-        withMetadata: true,
-      })
-    ).transfers;
-    return from.concat(to);
+      },
+    });
+
+    const to = toTransfers.data.result.transfers;
+    const merged = from.concat(to);
+    return merged;
   }
   async transferAsset(
     contract: string,
