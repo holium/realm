@@ -138,9 +138,8 @@
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
         ``graph-dm-view+!>([%dm-log dms])
       [%x %rolodex ~]
-    :-  ~  :-  ~  :-  %rolodex
-    !>(.^(rolodex:cs %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun))
-
+        :-  ~  :-  ~  :-  %rolodex
+        !>(.^(rolodex:cs %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun))
     ::
     ::  ~/scry/courier/dms/~dev/paged/0/20.json
       :: [%x %dms @ %paged @ @ ~]
