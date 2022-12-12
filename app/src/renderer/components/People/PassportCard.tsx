@@ -3,12 +3,11 @@ import { rgba, darken } from 'polished';
 import { Sigil, Flex, Box, Text, Icons } from '../';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
-import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
 import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
+import { Tooltip } from 'renderer/components';
 
 interface IPassport {
   patp: string;
@@ -63,29 +62,36 @@ export const PassportCard: FC<IPassport> = (props: IPassport) => {
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
-          <PassportButton
-            style={{ backgroundColor: buttonColor }}
-            data-prevent-menu-close="true"
-            onClick={(evt: any) => {
-              setActiveApp('wallet-tray', {
-                willOpen: true,
-                position: 'top-left',
-                anchorOffset: { x: 4, y: 26 },
-                dimensions: {
-                  height: 580,
-                  width: 330,
-                },
-              });
-              // TODO: placeholder, we need to implement the actual send coins functionality
-              WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
-                walletIndex: '0',
-              });
-              onClose();
-              evt.stopPropagation();
-            }}
+          <Tooltip
+            id="passport-send-icon-tooltip"
+            content="Wallet coming soon..."
+            placement="top"
+            show
           >
-            <Icons name="SendCoins" color={iconColor} size="16px" />
-          </PassportButton>
+            <PassportButton
+              style={{ backgroundColor: buttonColor }}
+              data-prevent-menu-close="true"
+              onClick={(evt: any) => {
+                // setActiveApp('wallet-tray', {
+                //   willOpen: true,
+                //   position: 'top-left',
+                //   anchorOffset: { x: 4, y: 26 },
+                //   dimensions: {
+                //     height: 580,
+                //     width: 330,
+                //   },
+                // });
+                // // TODO: placeholder, we need to implement the actual send coins functionality
+                // WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+                //   walletIndex: '0',
+                // });
+                // onClose();
+                // evt.stopPropagation();
+              }}
+            >
+              <Icons name="SendCoins" color={iconColor} size="16px" />
+            </PassportButton>
+          </Tooltip>
           <PassportButton
             style={{ backgroundColor: buttonColor }}
             data-prevent-menu-close="true"
