@@ -131,7 +131,7 @@
       ?+    sign-arvo  (on-arvo:def wire sign-arvo)
           [%behn %wake *]
         ?~  error.sign-arvo
-          `this(signal-tally ~)
+          `this(active-timer |, signal-tally ~)
         (on-arvo:def wire sign-arvo)
       ==
     ==
