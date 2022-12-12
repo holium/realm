@@ -63,20 +63,12 @@
     !>(state)
   ::
   ++  on-load
-    |=  =vase
+    |=  old-state=vase
     ^-  (quip card:agent:gall agent:gall)
-    =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))  
-    ?^  old
-      `this(state u.old)
-    ~&  >>  'nuking old %friends state' ::  temporarily doing this for making development easier
-    =^  cards  this  on-init
-    :_  this
-    =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term] 
-    ^-  card
-    [%pass wire %agent [ship term] %leave ~]
+    =/  old  !<(versioned-state old-state)
+    ?-  -.old
+      %0  `this(state old)
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]

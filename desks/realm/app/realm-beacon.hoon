@@ -38,27 +38,10 @@
     ^-  vase
     !>(state)
   ::
+  :: this agent awesomely does not contain state
   ++  on-load
-    :: |=  =vase
-    :: ^-  (quip card _this)
-    :: =/  old  !<(versioned-state old-state)
-    :: ?-  -.old
-    ::   %0  `this(state old)
-    :: ==
-    |=  =vase
-    ^-  (quip card _this)
-    =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))
-    ?^  old
-      `this(state u.old)
-    ~&  >>  'nuking old %beacon state' ::  temporarily doing this for making development easier
-    =^  cards  this  on-init
-    :_  this
-    =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term]
-    ^-  card
-    [%pass wire %agent [ship term] %leave ~]
+    |=  old-state=vase
+    `this(state !<(state-0 old-state))
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -189,13 +172,13 @@
     ++  on-saw-inbox
       |=  [=seam:hark]
       :_  state
-      :~  
+      :~
         [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-seam seam])]
       ==
     ::
     ++  on-saw-all
       :_  state
-      :~  
+      :~
         [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-seam [%all ~]])]
       ==
     ::
@@ -339,7 +322,7 @@
       ^-  (quip card _state)
       %-  (slog leaf+"{<dap.bowl>}: on-saw-rope => {<rope>}" ~)
       :: =/  yar=(unit yarn:hark)       (find-yarn rope)
-      :: ?~  yar  ~|('on-saw-rope find-yarn unexpected result' !!)        
+      :: ?~  yar  ~|('on-saw-rope find-yarn unexpected result' !!)
       :_  state
       :~  [%give %fact [/updates]~ realm-beacon-reaction+!>([%seen-inbox rope])]
       ==
