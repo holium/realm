@@ -2,7 +2,7 @@ import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
 import { GlobalStyle } from './App.styles';
 import { Shell } from './system';
-import { FC, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { theme as baseTheme } from './theme';
 import {
@@ -13,16 +13,16 @@ import {
   servicesStore,
   useServices,
 } from './logic/store';
-
 import { Mouse } from './system/desktop/components/Mouse';
-
 import { ShellActions } from './logic/actions/shell';
+import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
+import { SelectionProvider } from './logic/lib/selection';
 // import * as RealmMultiplayer from '@holium/realm-multiplayer';
 // import { Presences } from './system/desktop/components/Multiplayer/Presences';
 // import { api } from './system/desktop/components/Multiplayer/multiplayer';
 
-export const App: FC = observer(() => {
-  const { booted, resuming } = useCore();
+export const App = observer(() => {
+  const { booted } = useCore();
   const { desktop, shell, theme } = useServices();
 
   const themeMode = theme.currentTheme.mode;
@@ -41,7 +41,7 @@ export const App: FC = observer(() => {
           {/* <Spinner size={4} /> */}
         </div>
       ),
-    [booted, resuming]
+    [booted, theme.currentTheme.backgroundColor]
   );
 
   const mouseMemo = useMemo(() => {
@@ -53,6 +53,8 @@ export const App: FC = observer(() => {
       />
     );
   }, [desktop.mouseColor, shell.isMouseInWebview]);
+
+  const contextMenuMemo = useMemo(() => <ContextMenu />, []);
 
   useEffect(() => {
     return () => {
@@ -67,10 +69,15 @@ export const App: FC = observer(() => {
           <GlobalStyle blur={true} />
           {/* Modal provider */}
           <ServiceProvider value={servicesStore}>
-            {mouseMemo}
-            {shellMemo}
-            {/* <MultiplayerMouse /> */}
-            <div id="portal-root" />
+            <SelectionProvider>
+              <ContextMenuProvider>
+                {mouseMemo}
+                {shellMemo}
+                {contextMenuMemo}
+                {/* <MultiplayerMouse /> */}
+                <div id="portal-root" />
+              </ContextMenuProvider>
+            </SelectionProvider>
           </ServiceProvider>
         </MotionConfig>
       </ThemeProvider>

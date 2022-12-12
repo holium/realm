@@ -140,8 +140,9 @@ export const getInitialWindowDimensions = (
       );
       break;
     case 'dev':
-      if ((app as DevAppType).web?.openFullscreen) {
-        dimensions = getFullscreenDimensions(desktopDimensions, isFullscreen);
+      realmConfig = (app as DevAppType).config;
+      if (realmConfig) {
+        dimensions = normalizeConfigSize(desktopDimensions, realmConfig);
         break;
       }
       dimensions = getCenteredDimensions(app as DevAppType, desktopDimensions);

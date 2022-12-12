@@ -187,7 +187,7 @@ export class DesktopService extends BaseService {
     } else if (selectedApp.type === 'dev') {
       const appUrl = selectedApp.web.url;
       // Hit the main process handler for setting partition cookies
-      session.fromPartition(`${selectedApp.type}-web-webview`).cookies.set({
+      session.fromPartition(`${selectedApp.id}-web-webview`).cookies.set({
         url: appUrl,
         name: `urbauth-${credentials.ship}`,
         value: credentials.cookie!.split('=')[1].split('; ')[0],

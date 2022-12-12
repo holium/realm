@@ -1,4 +1,4 @@
-import { FC, useRef, useMemo, useState } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { createField, createForm } from 'mobx-easy-form';
 import { isValidPatp } from 'urbit-ob';
@@ -72,7 +72,7 @@ export const createPeopleForm = (
   };
 };
 
-export const Members: FC<IMembers> = observer((props: IMembers) => {
+export const Members = observer((props: IMembers) => {
   const { our } = props;
   const { theme, spaces, friends, membership } = useServices();
   const searchRef = useRef(null);
@@ -225,7 +225,7 @@ export const Members: FC<IMembers> = observer((props: IMembers) => {
           }}
         />
       </Flex>
-      {our && <FriendsList friends={friends.list} />}
+      {our && <FriendsList />}
       {!our && <MembersList path={spaces.selected!.path} />}
     </HomeSidebar>
   );

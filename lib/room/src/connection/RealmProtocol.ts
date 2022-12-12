@@ -40,7 +40,7 @@ export class RealmProtocol extends BaseProtocol {
     this.emit(ProtocolEvent.Ready);
   }
 
-  sendSignal(peer: Patp, msg: any): void {
+  async sendSignal(peer: Patp, msg: any) /*: void*/ {
     if (this.presentRoom) {
       this.poke({
         app: 'rooms-v2',
@@ -57,7 +57,7 @@ export class RealmProtocol extends BaseProtocol {
     }
   }
 
-  onSignal(data: any, mark: string) {
+  async onSignal(data: any, mark: string) {
     if (mark === 'rooms-v2-view') {
       if (data['session']) {
         // "session" is sent on initial /lib subscription
@@ -105,11 +105,12 @@ export class RealmProtocol extends BaseProtocol {
               // if we don't have a peer connection yet, we need to create one
               remotePeer.createConnection();
               remotePeer.peerSignal(payload.data);
-            } else if (remotePeer.status === 'closed') {
-              // if we have a peer connection but it's closed, we need to recreate it
+              /*            } else if (remotePeer.status === 'closed') {
+              console.log('remote peer status closed')
+             // if we have a peer connection but it's closed, we need to recreate it
               remotePeer.peer.destroy();
               remotePeer.createConnection();
-              remotePeer.peerSignal(payload.data);
+              remotePeer.peerSignal(payload.data);*/
             } else {
               // we have a peer connection and it's open, so we can just pass the signal to it
               remotePeer.peerSignal(payload.data);
@@ -130,7 +131,6 @@ export class RealmProtocol extends BaseProtocol {
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
-        console.log('provider changed', payload);
         if (this.presentRoom?.rid) {
           this.peers.clear();
           this.emit(ProtocolEvent.RoomDeleted, this.presentRoom?.rid);
@@ -140,20 +140,19 @@ export class RealmProtocol extends BaseProtocol {
       if (data['room-deleted']) {
         const payload = data['room-deleted'];
         const room = this.rooms.get(payload.rid);
+        if (this.presentRoom?.rid === this.our) {
+          this.hangupAll(payload.rid);
+          this.emit(ProtocolEvent.RoomDeleted, payload.rid);
+        }
         if (room) {
-          if (room.present.includes(this.our)) {
-            this.hangupAll(payload.rid);
-            this.emit(ProtocolEvent.RoomDeleted, payload.rid);
-          }
           this.rooms.delete(payload.rid);
         }
       }
       if (data['room-entered']) {
+        console.log('room entered update');
         const payload = data['room-entered'];
         const room = this.rooms.get(payload.rid);
         if (room) {
-          room.present.push(payload.ship);
-          this.rooms.set(payload.rid, room);
           if (this.presentRoom?.rid === payload.rid) {
             // if we are in the room, dial the new peer
             if (payload.ship !== this.our) {
@@ -174,24 +173,27 @@ export class RealmProtocol extends BaseProtocol {
               this.emit(ProtocolEvent.RoomEntered, payload.rid);
             }
           }
+          room.present.push(payload.ship);
+          this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-left']) {
+        console.log('room left');
         const payload = data['room-left'];
         const room = this.rooms.get(payload.rid);
-        if (room) {
-          if (this.presentRoom?.rid === payload.rid) {
-            // if we are in the room, hangup the peer
-            if (payload.ship !== this.our) {
-              console.log('hanging up peer', payload.ship);
-              this.hangup(payload.ship);
-            }
+        if (this.presentRoom?.rid === payload.rid) {
+          if (payload.ship !== this.our) {
+            console.log('hanging up peer', payload.ship);
+            this.hangup(payload.ship);
           }
+        }
+        if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
           this.rooms.set(payload.rid, room);
         }
       }
       if (data['room-created']) {
+        console.log('room created');
         const { room } = data['room-created'];
         this.rooms.set(room.rid, room);
         if (room.creator === this.our) {
@@ -199,17 +201,18 @@ export class RealmProtocol extends BaseProtocol {
         }
       }
       if (data['kicked']) {
+        console.log('kicked update');
         const payload = data['kicked'];
         const room = this.rooms.get(payload.rid);
-        if (room) {
-          if (this.presentRoom?.rid === payload.rid) {
-            // if we are in the room, hangup the peer
-            if (payload.ship !== this.our) {
-              this.hangup(payload.ship);
-            } else {
-              this.emit(ProtocolEvent.RoomKicked, payload.rid);
-            }
+        if (this.presentRoom?.rid === payload.rid) {
+          // if we are in the room, hangup the peer
+          if (payload.ship !== this.our) {
+            this.hangup(payload.ship);
+          } else {
+            this.emit(ProtocolEvent.RoomKicked, payload.rid);
           }
+        }
+        if (room) {
           room.present.splice(room.present.indexOf(payload.ship), 1);
           this.rooms.set(payload.rid, room);
         }
@@ -483,9 +486,10 @@ export class RealmProtocol extends BaseProtocol {
    */
   hangupAll(rid: string) {
     //  hangup all peers
-    this.rooms.get(rid)?.present.forEach((patp) => {
-      this.hangup(patp);
+    this.peers.forEach((peer) => {
+      this.hangup(peer.patp);
     });
+    this.peers.clear();
   }
 
   async leave() {

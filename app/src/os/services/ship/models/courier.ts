@@ -145,7 +145,7 @@ const GroupLog = types
     path: types.string,
     to: types.array(types.string),
     type: types.enumeration(['group', 'group-pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     messages: types.array(GraphDM),
     metadata: types.array(ContactMetadata),
     outgoing: types.array(GraphDM),
@@ -192,7 +192,7 @@ const DMLog = types
     path: types.string,
     to: types.string,
     type: types.enumeration(['dm', 'pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     messages: types.array(GraphDM),
     metadata: ContactMetadata,
     outgoing: types.array(GraphDM),
@@ -243,7 +243,7 @@ const PreviewDM = types
     path: types.string,
     to: types.string,
     type: types.enumeration(['dm', 'pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: ContactMetadata,
@@ -275,7 +275,7 @@ const PreviewGroupDM = types
     path: types.string,
     to: types.array(types.string),
     type: types.enumeration(['group', 'group-pending']),
-    source: types.enumeration(['graph-store', 'chatstead']),
+    source: types.enumeration(['graph-store', 'talk']),
     lastTimeSent: types.number,
     lastMessage: types.array(MessageContent),
     metadata: types.array(ContactMetadata),
@@ -320,15 +320,26 @@ export const CourierStore = types
   })
   .views((self) => ({
     get list() {
-      return Array.from(self.previews.values()).sort((a, b) => {
-        // @ts-expect-error
-        return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
-      });
+      return Array.from(self.previews.values()).sort(
+        (a, b) => b.lastTimeSent - a.lastTimeSent
+      );
     },
   }))
   .actions((self) => ({
     rejectDmInvite: (path: string) => {},
     setNewPreview: (preview: DMPreviewType) => {
+      let prev;
+      if (preview.type === 'group' || preview.type === 'group-pending') {
+        prev = preview as PreviewGroupDMType;
+        prev.metadata.forEach((mtd: any) => {
+          mtd.color = cleanNounColor(mtd.color);
+        });
+      } else {
+        prev = preview as PreviewDMType;
+        prev.metadata.color = prev.metadata.color
+          ? cleanNounColor(prev.metadata.color)
+          : '#000';
+      }
       self.previews.set(preview.path, preview);
     },
     setNotificationUpdates: (update: any) => {
@@ -407,7 +418,7 @@ export const CourierStore = types
           path: `/dm-inbox/${patps[0]}`,
           to: patps[0],
           type: 'dm',
-          source: 'graph-store',
+          source: 'talk',
           messages: [],
           metadata: ContactMetadata.create(metadata[0] || {}),
         })
@@ -418,9 +429,9 @@ export const CourierStore = types
           path: `/dm-inbox/${patps[0]}`,
           to: patps[0],
           type: 'dm',
-          source: 'graph-store',
+          source: 'talk',
           lastTimeSent: moment().unix() * 1000,
-          lastMessage: [{ text: 'Drafting...' }],
+          lastMessage: [{ text: '' }],
           metadata: ContactMetadata.create(metadata[0] || {}),
           pending: false,
           isNew: true,
@@ -468,6 +479,9 @@ export const CourierStore = types
         const newMessage = dmLog.messages[0];
         self.dms.get(dmLog.path)?.receiveDM(newMessage);
         self.previews.get(dmLog.path)?.receiveDM(newMessage);
+        // const updatePreview = self.previews.get(dmLog.path)!;
+        // updatePreview.receiveDM(newMessage);
+        // self.previews.set(dmLog.path, updatePreview);
       } else {
         // set a new log entry
         self.dms.set(dmLog.path, dmLog);

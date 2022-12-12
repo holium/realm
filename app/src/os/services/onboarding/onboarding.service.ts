@@ -26,6 +26,8 @@ export class OnboardingService extends BaseService {
   private readonly db: Store<OnboardingStoreType>; // for persistance
   private readonly state: OnboardingStoreType; // for state management
   private conduit?: Conduit;
+  private dnsDelayTimestamp?: number;
+  private stripeKey: string;
 
   handlers = {
     'realm.onboarding.setStep': this.setStep,
@@ -52,6 +54,8 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.completeOnboarding': this.completeOnboarding,
     'realm.onboarding.exit': this.exit,
     'realm.onboarding.closeConduit': this.closeConduit,
+    'realm.onboarding.confirmPlanetAvailable': this.confirmPlanetAvailable,
+    'realm.onboarding.getStripeKey': this.getStripeKey,
   };
 
   static preload = {
@@ -70,7 +74,9 @@ export class OnboardingService extends BaseService {
       );
     },
 
-    async setEmail(email: string) {
+    async setEmail(
+      email: string
+    ): Promise<{ success: boolean; errorMessage: string }> {
       return await ipcRenderer.invoke('realm.onboarding.setEmail', email);
     },
 
@@ -104,6 +110,16 @@ export class OnboardingService extends BaseService {
 
     async getAvailablePlanets() {
       return await ipcRenderer.invoke('realm.onboarding.getAvailablePlanets');
+    },
+
+    async confirmPlanetStillAvailable() {
+      return await ipcRenderer.invoke(
+        'realm.onboarding.confirmPlanetAvailable'
+      );
+    },
+
+    async getStripeKey() {
+      return await ipcRenderer.invoke('realm.onboarding.getStripeKey');
     },
 
     async prepareCheckout(billingPeriod: string) {
@@ -182,6 +198,10 @@ export class OnboardingService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
+    this.stripeKey =
+      process.env.NODE_ENV === 'production'
+        ? 'pk_live_51LJKtvHhoM3uGGuYMiFoGqOyPNViO8zlUwfHMsgtgPmkcTK3awIzix57nRgcr2lyCFrgJWeBz5HsSVxvIVz3aAA100KbdmBX9K'
+        : 'pk_test_51LJKtvHhoM3uGGuYXzsCKctrpF6Lp9WAqRYEZbBQHxoccDHQLyrYSPt4bUOK6BbSkV5ogtYERCKVi7IAKmeXmYgU00Wv7Q9518';
     this.db = new Store({
       name: `realm.onboarding`,
       accessPropertiesByDotNotation: true,
@@ -268,31 +288,40 @@ export class OnboardingService extends BaseService {
       return { success: true, message: 'Access succeeded.' };
     }
 
-    const accessCode = await this.core.holiumClient.getAccessCode(code);
-    if (accessCode && accessCode.type === 'ACCESS') {
-      if (accessCode.singleUse && accessCode.redeemed) {
-        return {
-          success: false,
-          message: 'This invite code was already redeemed.',
-        };
-      } else if (new Date(accessCode.expiresAt!).getTime() < Date.now()) {
-        return { success: false, message: 'This invite code has expired.' };
-      } else {
-        this.state.setInviteCode(code);
-        if (accessCode.email) {
-          this.state.setEmail(accessCode.email);
+    try {
+      const accessCode = await this.core.holiumClient.redeemAccessCode(code);
+      if (accessCode && !accessCode.success) {
+        switch (accessCode.errorCode) {
+          case 473:
+            return {
+              success: false,
+              message: 'This invite code has already been used.',
+            };
+          case 472:
+            return { success: false, message: 'This invite code has expired.' };
+          default:
+            return { success: false, message: 'Invite code not found' };
         }
-        return { success: true, message: 'Access succeeded.' };
       }
-    } else {
-      return { success: false, message: 'Invite code not found.' };
+
+      this.state.setInviteCode(code);
+      if (accessCode.email) {
+        this.state.setEmail(accessCode.email);
+      }
+      return { success: true, message: 'Access succeeded.' };
+    } catch (e) {
+      return {
+        success: false,
+        message: 'Something went wrong, please contact support@holium.com',
+      };
     }
   }
 
-  async setEmail(_event: any, email: string) {
-    console.log('trying to set email');
+  async setEmail(
+    _event: any,
+    email: string
+  ): Promise<{ success: boolean; errorMessage: string }> {
     const { auth } = this.core.services.identity;
-    // let account = await this.core.holiumClient.createAccount(email);
     this.state.setEmail(email);
 
     if (
@@ -301,9 +330,22 @@ export class OnboardingService extends BaseService {
     ) {
       auth.setAccountId('dev-admin');
       this.setStep(null, OnboardingStep.HAVE_URBIT_ID);
+      return { success: true, errorMessage: '' };
     } else {
-      let account = await this.core.holiumClient.createAccount(email);
+      const account = await this.core.holiumClient.createAccount(
+        email,
+        this.state.inviteCode
+      );
+      if (!account.id) {
+        const errorMessage =
+          account.errorCode === 441
+            ? 'An account with that email already exists.'
+            : 'Something went wrong, please us at support@holium.com';
+        return { success: false, errorMessage };
+      }
+
       auth.setAccountId(account.id);
+      return { success: true, errorMessage: '' };
     }
   }
 
@@ -324,7 +366,7 @@ export class OnboardingService extends BaseService {
     if (!auth.accountId)
       throw new Error('Account must be set before verifying email.');
 
-    const result = await this.core.holiumClient.checkVerificationCode(
+    const result = await this.core.holiumClient.verifyEmail(
       auth.accountId,
       verificationCode
     );
@@ -346,7 +388,7 @@ export class OnboardingService extends BaseService {
 
     const planets = await this.core.holiumClient.getPlanets(
       auth.accountId,
-      this.state.accessCode?.id
+      this.state.inviteCode
     );
     return planets;
   }
@@ -385,35 +427,86 @@ export class OnboardingService extends BaseService {
     return session.code;
   }
 
-  async completeCheckout() {
+  async getStripeKey(_event: any): Promise<string> {
+    return this.stripeKey;
+  }
+
+  async confirmPlanetAvailable() {
+    if (!this.state.planet) {
+      throw new Error('Planet not set, cannot confirm available.');
+    }
+
     const { auth } = this.core.services.identity;
-    const { checkoutComplete } = await this.core.holiumClient.completeCheckout(
+    const patp = this.state.planet!.patp;
+    const stillAvailable = await this.core.holiumClient.confirmPlanetAvailable(
       auth.accountId!,
-      this.state.planet!.patp
+      patp
     );
 
-    if (!checkoutComplete) {
-      throw new Error('Unable to complete checkout.');
+    if (!stillAvailable) {
+      this.state.setPlanetWasTaken(true);
+      this.setStep('_', OnboardingStep.SELECT_PATP);
+    }
+  }
+
+  async completeCheckout(): Promise<{
+    success: boolean;
+    errorMessage?: string;
+  }> {
+    const { auth } = this.core.services.identity;
+    const { success, errorCode } =
+      await this.core.holiumClient.completeCheckout(
+        auth.accountId!,
+        this.state.planet!.patp
+      );
+
+    if (!success) {
+      if (errorCode && errorCode === 407) {
+        return {
+          success: false,
+          errorMessage:
+            'Payment succeeded but your planet has already been taken. Please contact support@holium.com.',
+        };
+      } else if (errorCode && errorCode === 430) {
+        return {
+          success: false,
+          errorMessage:
+            'Payment succeeded but we were not able to boot your ship. Please contact support@holium.com',
+        };
+      }
+
+      throw new Error('Unable to complete checkout,');
     }
 
     this.state.setCheckoutComplete();
-    return true;
+    this.dnsDelayTimestamp = undefined;
+    return { success: true };
   }
 
   async checkShipBooted(): Promise<boolean> {
     const { auth } = this.core.services.identity;
-    let ships = await this.core.holiumClient.getShips(auth.accountId!);
-    let ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
-    if (!ship.code) return false;
+    const ships = await this.core.holiumClient.getShips(auth.accountId!);
+    const ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
 
-    // TODO: remove, session shouldn't be set yet here?
-    // const session = this.core.getSession();
+    if (!ship || !ship.code) return false;
 
-    await this.addShip('_event', {
+    if (!this.dnsDelayTimestamp) {
+      this.dnsDelayTimestamp = Date.now();
+      return false;
+    } else if (Date.now() - this.dnsDelayTimestamp < 1000 * 60 * 2) {
+      // wait two minutes before trying to fetch
+      return false;
+    }
+
+    const addShipResult = await this.addShip('_event', {
       patp: ship.patp,
       url: ship.link!,
       code: ship.code,
     });
+
+    if (!addShipResult.success) {
+      return false;
+    }
 
     return true;
   }
@@ -427,14 +520,26 @@ export class OnboardingService extends BaseService {
     }
   ) {
     try {
-      let { patp, url, code } = shipData;
+      const { patp, url, code } = shipData;
       const cookie = await getCookie({ patp, url, code });
+      const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+
+      if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
+        return {
+          success: false,
+          errorMessage: `Urbit ID does not match, did you mean ${cookiePatp}?`,
+        };
+      }
+
       this.core.saveSession({ ship: patp, url, cookie, code });
       this.state.setShip({ patp, url });
-      return { url, cookie, patp, code: code };
+      return { success: true, url, cookie, patp, code: code };
     } catch (reason) {
       console.error('Failed to connect to ship', reason);
-      throw new Error('Failed to connect to ship');
+      return {
+        success: false,
+        errorMessage: `Failed to connect to ship: ${reason}`,
+      };
     }
   }
 
@@ -510,7 +615,6 @@ export class OnboardingService extends BaseService {
     const parts: string[] = process.env.INSTALL_MOON.split(':');
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');
-    console.log('installing realm from %o...', process.env.INSTALL_MOON);
     const { url, patp } = this.state.ship!;
     const { cookie, code } = this.core.getSession();
     const tempConduit = await this.tempConduit(url, patp, cookie!, code);
@@ -521,7 +625,6 @@ export class OnboardingService extends BaseService {
         moon,
         desks[idx]
       );
-      console.log(`installDesk (await) => ${response}`);
       if (response !== 'success') {
         await this.closeConduit();
         this.state.endRealmInstall(response, response);
@@ -542,20 +645,19 @@ export class OnboardingService extends BaseService {
     // console.log('refresh-app-catalog => %o', result);
     await this.closeConduit();
     this.state.endRealmInstall('success');
-    console.log('realm installation complete.');
     this.state.installRealm();
   }
 
   async completeOnboarding(_event: any) {
     if (!this.state.ship)
       throw new Error('Cannot complete onboarding, ship not set.');
-    if (process.env.NODE_ENV !== 'development') {
-      try {
-        await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
-      } catch (e) {
-        console.error('Unable to redeem gated access code, continuing anyway.');
-      }
-    }
+    // if (process.env.NODE_ENV !== 'development') {
+    //   try {
+    //     await this.core.holiumClient.redeemAccessCode(this.state.inviteCode!);
+    //   } catch (e) {
+    //     console.error('Unable to redeem gated access code, continuing anyway.');
+    //   }
+    // }
 
     const decryptedPassword = safeStorage.decryptString(
       Buffer.from(this.state.encryptedPassword!, 'base64')

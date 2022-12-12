@@ -48,6 +48,20 @@ export const BazaarApi = {
     });
     return response.treaties;
   },
+  suspendApp: async (conduit: Conduit, desk: string) => {
+    conduit.poke({
+      app: 'hood',
+      mark: 'kiln-suspend',
+      json: desk,
+    });
+  },
+  resumeApp: async (conduit: Conduit, desk: string) => {
+    conduit.poke({
+      app: 'hood',
+      mark: 'kiln-revive',
+      json: desk,
+    });
+  },
   installApp: async (conduit: Conduit, body: InstallPoke) => {
     conduit.poke({
       app: 'bazaar',
@@ -284,8 +298,12 @@ const handleReactions = (data: any, model: NewBazaarStoreType) => {
       break;
     case 'app-install-update':
       //  installed, uninstalled, started, etc.
-      const { appId, app } = data['app-install-update'];
-      model._setAppStatus(appId, app);
+      const installUpdate = data['app-install-update'];
+      model._setAppStatus(
+        installUpdate.appId,
+        installUpdate.app,
+        installUpdate.grid
+      );
       break;
     case 'pinned':
       model._addPinned(data.pinned);

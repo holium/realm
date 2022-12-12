@@ -22,15 +22,15 @@ You can add a record for your development application in the following format:
   "ballot-dev": {
     "id": "ballot-dev",
     "title": "Ballot - Dev",
-    "type": "web",
+    "type": "dev",
     "color": "#cebef0",
     "icon": "https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg",
+    "config": {
+      "size": [6, 8],
+      "showTitlebar": true,
+      "titlebarBorder": false
+    },
     "web": {
-      // "openFullscreen": true,
-      "dimensions": {
-        "width": 1024,
-        "height": 768
-      },
       "url": "http://localhost:3000/apps/ballot/"
     }
   }

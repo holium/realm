@@ -44,28 +44,13 @@
     ^-  vase
     !>(state)
   ::
-  :: ++  on-load
-  ::   |=  old-state=vase
-  ::   ^-  (quip card:agent:gall agent:gall)
-  ::   =/  old  !<(versioned-state old-state)
-  ::   ?-  -.old
-  ::     %0  `this(state old)
-  ::   ==
   ++  on-load
-    |=  =vase
+    |=  old-state=vase
     ^-  (quip card _this)
-    =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))
-    ?^  old
-      `this(state u.old)
-    ~&  >>  'nuking old %bazaar state' ::  temporarily doing this for making development easier
-    =^  cards  this  on-init
-    :_  this
-    =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term]
-    ^-  card
-    [%pass wire %agent [ship term] %leave ~]
+    =/  old  !<(versioned-state old-state)
+    ?-  -.old
+      %0  `this(state old)
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -85,7 +70,7 @@
       [%updates ~]
         ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to updates..."
         ?>  (is-host:core src.bowl)
-        [%give %fact [/updates ~] bazaar-reaction+!>([%initial catalog.state stalls.state docks.state recommendations.state])]~
+        [%give %fact [/updates ~] bazaar-reaction+!>([%initial catalog.state stalls.state docks.state recommendations.state grid-index.state])]~
       ::
       [%bazaar @ @ ~]         :: The space level watch subscription
         =/  host              `@p`(slav %p i.t.path)
@@ -95,9 +80,8 @@
         =/  path              [host space-path]
         ?>  (check-member:security:core path src.bowl)
         ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to {<(spat /(scot %p host)/(scot %tas space-path))>}..."
-        =/  paths             [/bazaar/(scot %p our.bowl)/(scot %tas space-path) ~]
         =/  space-data        (filter-space-data:helpers:bazaar path)
-        [%give %fact paths bazaar-reaction+!>([%joined-bazaar path catalog.space-data stall.space-data])]~
+        [%give %fact ~ bazaar-reaction+!>([%joined-bazaar path catalog.space-data stall.space-data])]~
       ::
     ==
     [cards this]
@@ -123,14 +107,6 @@
         =/  treaties   (treaties:scry:bazaar:core ship %.y)
         ``bazaar-view+!>([%treaties treaties])
       ::
-      :: [%x %treaties @ @ ~]     ::  ~/scry/bazaar/allies
-      ::   =/  =ship       (slav %p i.t.t.path)
-      ::   =/  =desk       (slav %tas i.t.t.t.path)
-      ::   ~&  >  [ship desk]
-      ::   =/  treaty      (treaty:scry:bazaar:core ship desk)
-      ::   :: ~&  >  treaty
-      ::   ``json+!>(~)
-      :: ``bazaar-view+!>([%treaty treaty])
     ==
   ::
   ++  on-agent
@@ -164,33 +140,7 @@
                 [cards this]
             ==
         ==
-      :: [%kiln ~]
-      ::  depricating - see +on-arvo
-      ::   ?+    -.sign  (on-agent:def wire sign)
-      ::     %watch-ack
-      ::       ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to /kiln/vats" ~)  `this
-      ::       ~&  >>>  "{<dap.bowl>}: /kiln/vats subscription failed"
-      ::       `this
-      :: ::
-      ::     %kick
-      ::       ~&  >  "{<dap.bowl>}: /kiln/vats kicked us, resubscribing..."
-      ::       :_  this
-      ::       ::  need to subscribe to tire from clay
-      ::       :~  [%pass /hood %agent [our.bowl %hood] %watch /vats]
-      ::       ==
-      :: ::
-      ::     %fact
-      ::       ?+    p.cage.sign  (on-agent:def wire sign)
-      ::           %kiln-vats-snap-0
-      ::             =^  cards  state
-      ::               (on-snap:kiln:core !<(snap:hood q.cage.sign))
-      ::             [cards this]
-      ::           %kiln-vats-diff-0
-      ::             =^  cards  state
-      ::               (on-diff:kiln:core !<(diff:hood q.cage.sign))
-      ::             [cards this]
-      ::       ==
-      ::   ==
+
       [%docket ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
@@ -311,7 +261,7 @@
         ?>  ?=([%clay %tire *] sig)
         ?-  -.p.sig
           %&  (on-rock p.p.sig)
-          %|  (on-wave p.p.sig)  
+          %|  (on-wave p.p.sig)
         ==
       [cards this]
     ::  +pre: prefix for scries to hood
@@ -555,6 +505,12 @@
       |=  [=desk]
       ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
+      =/  app                       (~(got by catalog.state) desk)
+      ?>  ?=(%urbit -.app)
+      =.  install-status.app        %uninstalled
+      =.  catalog.state             (~(put by catalog.state) desk app)
+      :: =.  grid-index.state          (rem-grid-index:helpers:bazaar desk grid-index.state)
+      :: ~&  >  ['uninstall-app' (rem-grid-index:helpers:bazaar desk grid-index.state)]
       :_  state
       [%pass / %agent [our.bowl %docket] %poke docket-uninstall+!>([desk])]~
     ::
@@ -848,16 +804,41 @@
             %ames  (some ship.location.glob-reference.href.docket.app)
           ==
       ==
-
+    ::
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
-      =/  grid-list       ~(val by grid-index)
-      =/  current-index   (find [app-id]~ grid-list)
+      =/  grid-list         (sort-grid:helpers:bazaar grid-index)
+      =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index
-        =.  grid-index    (~(put by grid-index) [(lent grid-list) app-id])
-        grid-index
+        ::  if the app is not in the grid, add it to the end
+        =/  new-index         (lent grid-list)
+        (~(put by grid-index) [new-index app-id])
       grid-index
-
+    ::
+    ++  rem-grid-index
+      |=  [=app-id:store =grid-index:store]
+      =/  grid-list         (sort-grid:helpers:bazaar grid-index)
+      =/  current-index     (find [app-id]~ grid-list)
+      ?~  current-index     grid-index
+      =.  grid-list         (oust [u.current-index 1] grid-list)
+      =/  new-grid-index
+        %+  turn  (gulf 0 (sub (lent grid-list) 1))
+          |=  idx=@ud
+          =/  app  (snag idx grid-list)
+          [idx app]
+      `=grid-index:store`(malt new-grid-index)
+    ::
+    ++  sort-grid
+      |=  [=grid-index:store]
+      ^-  (list @tas)
+      =/  sorted-grid
+        %+  sort  ~(tap by grid-index)
+          |=  [a=[idx=@ud app=@tas] b=[idx=@ud app=@tas]]
+          (lth idx.a idx.b)
+      %+  turn  sorted-grid
+        |=  [idx=@ud app=@tas]
+        app
+    ::
     ++  update-paths
       |=  [path=space-path:spaces-store]
       ?.  =(space.path %our)
@@ -868,10 +849,13 @@
       |=  [charges=(map desk charge:docket)]
       =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
       ^-  [=catalog:store =grid-index:store]
+
       %-  ~(rep by charges)
         |:  [[=desk =charge:docket] acc=[catalog=`catalog:store`~ grid-index=`grid-index:store`~]]
         ?:  (~(has in hidden) desk)  acc
-        [(~(put by catalog.acc) desk [%urbit docket.charge ~ %installed (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
+        =/  install-status      (chad-to-status:helpers:bazaar:core chad.charge)
+        ~&  >>  [desk -.chad.charge install-status]
+        [(~(put by catalog.acc) desk [%urbit docket.charge ~ install-status (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  gen-bare-app
       |=  [=ship =desk]
@@ -880,6 +864,17 @@
       =.  title.bare-docket  desk
       =.  href.bare-docket  [%site /(scot %tas desk)]
       [docket=bare-docket host=(some ship) install-status=%started *config:store]
+    ::
+    ++  chad-to-status
+      |=  [=chad:docket]
+      ^-  install-status:store
+      ?-  -.chad
+        %glob           %installed
+        %site           %installed
+        %install        %started
+        %suspend        %suspended
+        %hung           %failed
+      ==
     ::
     ++  skim-installed
       |=  [=app-id:store =app:store]
@@ -1208,14 +1203,18 @@
       =/  app                     (~(get by catalog.state) app-id)
       =/  app  ?~  app  [%urbit docket.charge host=~ status (config:scry:bazaar:core app-id)]
         ?>  ?=(%urbit -.u.app)
-        =.  install-status.u.app  status
+         =.  install-status.u.app
+          ?:  &(=(install-status.u.app %suspended) =(status %started))
+            :: in this case, we are resuming a suspended install so don't set the status to started
+            %suspended
+          status
         =.  docket.u.app          docket.charge
+        =.  config.u.app          (config:scry:bazaar:core app-id)
         u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
-      =.  grid-index.state        (set-grid-index:helpers:bazaar app-id grid-index.state)
+      =.  grid-index              (set-grid-index:helpers:bazaar app-id grid-index.state)
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app])]~
-
+      [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.app grid-index.state])]~
   ::
   ++  rem
     |=  [=desk]
@@ -1226,9 +1225,11 @@
     ?~  app  `state
     ?>  ?=(%urbit -.u.app)
     =.  install-status.u.app  %uninstalled
-    =.  catalog.state  (~(put by catalog.state) desk u.app)
+    =.  catalog.state         (~(put by catalog.state) desk u.app)
+    ::  remove from grid index
+    =.  grid-index.state      (rem-grid-index:helpers:bazaar desk grid-index.state)
     :_  state
-    [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app])]~
+    [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~
   --
 ::
 ::  $security. member/permission checks

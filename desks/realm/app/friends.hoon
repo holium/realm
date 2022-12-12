@@ -52,6 +52,12 @@
     |=  [=wire =ship =term] 
     ^-  card
     [%pass wire %agent [ship term] %leave ~]
+  :: |=  old-state=vase
+  :: ^-  (quip card _this)
+  :: =/  old  !<(versioned-state old-state)
+  :: ?-  -.old
+  ::   %0  `this(state old)
+  :: ==
   ::
   ++  on-poke
     |=  [=mark =vase]

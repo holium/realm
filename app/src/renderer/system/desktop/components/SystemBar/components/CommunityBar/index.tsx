@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Flex } from 'renderer/components';
 import { SystemBarStyle } from '../../SystemBar.styles';
 import { SpaceSelector } from './SpaceSelector';
@@ -8,9 +8,7 @@ import { useServices } from 'renderer/logic/store';
 import { RoomTray } from './Rooms';
 import { rgba } from 'polished';
 
-interface CommunityBarProps {}
-
-export const CommunityBar: FC<CommunityBarProps> = observer(() => {
+export const CommunityBar = observer(() => {
   const { theme } = useServices();
 
   const { dockColor } = useMemo(
@@ -18,7 +16,7 @@ export const CommunityBar: FC<CommunityBarProps> = observer(() => {
       ...theme.currentTheme,
       dockColor: rgba(theme.currentTheme.dockColor, 0.55),
     }),
-    [theme.currentTheme.dockColor]
+    [theme.currentTheme]
   );
 
   return (

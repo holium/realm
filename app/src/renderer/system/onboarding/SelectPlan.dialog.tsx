@@ -112,7 +112,7 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
         <Flex flex={3} px={50} flexDirection="column" justifyContent="center">
           <SubscriptionTier
             title="Monthly subscription"
-            price={`$30/month`}
+            price={`$15/month`}
             selected={billingPeriod === 'monthly'}
             onClick={() => setBillingPeriod('monthly')}
           >
@@ -121,7 +121,7 @@ const SelectPlan: FC<SelectPlanProps> = observer((props: SelectPlanProps) => {
           <SubscriptionTier
             mt={56}
             title="Annual subscription"
-            price={`$300/year`}
+            price={`$150/year`}
             selected={billingPeriod === 'annual'}
             onClick={() => setBillingPeriod('annual')}
           >

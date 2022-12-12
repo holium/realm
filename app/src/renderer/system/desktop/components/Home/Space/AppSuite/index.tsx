@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Flex, Text, Button } from 'renderer/components';
 import { SuiteApp } from './App';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
@@ -80,23 +80,27 @@ function Content({ children, ...props }: any) {
   );
 }
 
-// Exports
 export const Popover = PopoverPrimitive.Root;
 export const PopoverTrigger = PopoverPrimitive.Trigger;
 export const PopoverAnchor = PopoverPrimitive.Anchor;
 export const PopoverContent = Content;
 
-export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
-  const { patp, isAdmin } = props;
+const dimensions = {
+  height: 450,
+  width: 550,
+};
+
+export const AppSuite = observer((props: AppSuiteProps) => {
+  const { isAdmin } = props;
   const { theme, bazaar, spaces } = useServices();
   const space = spaces.selected!;
   const suite = bazaar.getSuite(space.path);
-  const apps = [...bazaar.installed, ...bazaar.installing];
+  const apps = bazaar.installed;
 
   const [searchMode, setSearchMode] = useState('none');
   const [suiteIndex, setSuiteIndex] = useState(-1);
   const [coords, setCoords] = useState({ left: 0, top: 0 });
-  const { accentColor, windowColor, textColor, iconColor } = theme.currentTheme;
+  const { accentColor, textColor } = theme.currentTheme;
 
   const isOpen = searchMode !== 'none';
   const backgroundColor = useMemo(
@@ -106,11 +110,6 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
         : darken(0.1, theme.currentTheme.windowColor),
     [theme.currentTheme]
   );
-
-  const dimensions = {
-    height: 450,
-    width: 550,
-  };
 
   const popoverId = `app-suite-${suiteIndex}`;
   const popover = useMemo(
@@ -144,7 +143,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
               {apps.map((item, index) => (
                 <AppRow
                   key={index}
-                  caption={item.id}
+                  caption={item ? item.id : ''}
                   app={item}
                   descriptionWidth={dimensions.width - 225}
                   actionRenderer={() => (
@@ -155,7 +154,7 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
                         setSuiteIndex(-1);
                         SpacesActions.addToSuite(
                           space.path,
-                          item.id,
+                          item!.id,
                           suiteIndex
                         );
                       }}
@@ -171,12 +170,21 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
         </Flex>
       </RealmPopover>
     ),
-    [popoverId, setSearchMode, isOpen, coords, theme.currentTheme]
+    [
+      apps,
+      backgroundColor,
+      coords,
+      isOpen,
+      popoverId,
+      space.path,
+      suiteIndex,
+      textColor,
+    ]
   );
 
-  const appTile = (app: any | null, index: number) => (
-    <>
-      {(app && (
+  const AppTile = ({ app, index }: { app: any | null; index: number }) => {
+    if (app) {
+      return (
         <SuiteApp
           key={index}
           index={index}
@@ -187,34 +195,36 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
           accentColor={accentColor}
           app={app}
         />
-      )) || (
-        <SuiteApp
-          key={index}
-          index={index}
-          id={`app-suite-${index}-trigger`}
-          space={space}
-          selected={index === suiteIndex}
-          accentColor={accentColor}
-          app={undefined}
-          onClick={(e) => {
-            if (isAdmin) {
-              setCoords(
-                calculatePopoverAnchorById(`app-suite-${index}-trigger`, {
-                  dimensions,
-                  anchorOffset: {
-                    y: 12,
-                  },
-                  centered: true,
-                })
-              );
-              setSearchMode('app-search');
-              setSuiteIndex(index);
-            }
-          }}
-        />
-      )}
-    </>
-  );
+      );
+    }
+
+    return (
+      <SuiteApp
+        key={index}
+        index={index}
+        id={`app-suite-${index}-trigger`}
+        space={space}
+        selected={index === suiteIndex}
+        accentColor={accentColor}
+        app={undefined}
+        onClick={() => {
+          if (isAdmin) {
+            setCoords(
+              calculatePopoverAnchorById(`app-suite-${index}-trigger`, {
+                dimensions,
+                anchorOffset: {
+                  y: 12,
+                },
+                centered: true,
+              })
+            );
+            setSearchMode('app-search');
+            setSuiteIndex(index);
+          }
+        }}
+      />
+    );
+  };
 
   return (
     <Flex flexDirection="column" position="relative" gap={20} mb={60}>
@@ -230,17 +240,13 @@ export const AppSuite: FC<AppSuiteProps> = observer((props: AppSuiteProps) => {
         position="relative"
         justifyContent="space-between"
       >
-        {suite && appTile(suite.get('0'), 0)}
-        {suite && appTile(suite.get('1'), 1)}
-        {suite && appTile(suite.get('2'), 2)}
-        {suite && appTile(suite.get('3'), 3)}
-        {suite && appTile(suite.get('4'), 4)}
+        {suite && <AppTile app={suite.get('0')} index={0} />}
+        {suite && <AppTile app={suite.get('1')} index={1} />}
+        {suite && <AppTile app={suite.get('2')} index={2} />}
+        {suite && <AppTile app={suite.get('3')} index={3} />}
+        {suite && <AppTile app={suite.get('4')} index={4} />}
       </Flex>
       {popover}
     </Flex>
   );
 });
-
-AppSuite.defaultProps = {
-  // suite: [null, null, null, null],
-};
