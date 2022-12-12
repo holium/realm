@@ -9,13 +9,13 @@ const Label = styled.label`
   cursor: pointer;
 `;
 const Switch = styled.div`
-  ${(props: { src: string }) =>
+  ${(props: { src: string, color: string }) =>
     props.src &&
     css`
       position: relative;
-      width: 45px;
-      height: 27px;
-      background: #b3b3b3;
+      width: 40px;
+      height: 22px;
+      background: ${props.color};//#4CDD86;
       border-radius: 32px;
       padding: 4px;
       transition: 300ms all;
@@ -24,13 +24,13 @@ const Switch = styled.div`
         transition: 300ms all;
         content: '';
         position: absolute;
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
         border-radius: 35px;
         top: 50%;
         left: 3px;
         background: url(${props.src}) no-repeat, white;
-        background-size: 20px;
+        background-size: 16px;
         transform: translate(0, -50%);
       }
     `}
@@ -41,7 +41,7 @@ const Input = styled.input`
   &:checked + ${Switch} {
     background: #4d69cb;
     &:before {
-      transform: translate(19px, -50%);
+      transform: translate(18px, -50%);
     }
   }
 `;
@@ -50,7 +50,7 @@ export const ImageToggle = (props: any) => {
   return (
     <Label>
       <Input checked={props.checked} type="checkbox" onChange={() => {}} />
-      <Switch src={props.src} />
+      <Switch src={props.src} color={props.color} />
     </Label>
   );
 };

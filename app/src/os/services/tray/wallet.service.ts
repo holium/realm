@@ -449,6 +449,7 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.network !== network) {
       this.state!.setNetwork(network);
+      this.wallet!.watchUpdates(this.state!);
     }
   }
 
@@ -456,6 +457,7 @@ export class WalletService extends BaseService {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.protocol !== protocol) {
       this.state!.setProtocol(protocol);
+      this.wallet!.watchUpdates(this.state!);
     }
   }
 

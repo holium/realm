@@ -13,6 +13,8 @@ import { useTrayApps } from 'renderer/apps/store';
 import { ImageToggle } from 'renderer/components/Toggle';
 // @ts-expect-error its there...
 import UqbarLogo from '../../../../../../assets/uqbar.png';
+import { getBaseTheme } from '../../lib/helpers';
+import { darken } from 'polished';
 
 interface WalletFooterProps {
   hidden: boolean;
@@ -22,6 +24,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
   (props: WalletFooterProps) => {
     const { walletApp } = useTrayApps();
     const { theme } = useServices();
+    const themeData = getBaseTheme(theme.currentTheme);
 
     const [click, setClick] = useState(false);
     const toggleUqbar = () => {
@@ -49,6 +52,7 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
               {walletApp.navState.network === NetworkType.ETHEREUM && (
                 <ImageToggle
                   src={UqbarLogo}
+                  color={darken(0.03, theme.currentTheme.windowColor)}
                   checked={walletApp.navState.protocol === ProtocolType.UQBAR}
                 />
               )}

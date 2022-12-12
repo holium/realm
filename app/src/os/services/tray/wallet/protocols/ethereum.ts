@@ -14,9 +14,11 @@ import {
   NetworkStoreType,
 } from '@holium/realm-wallet/src/wallet.model';
 import { ethers } from 'ethers';
+import EventSource from 'eventsource';
 
 export class EthereumProtocol implements BaseProtocol {
   private protocol: ProtocolType;
+  private ethBlockWatcher?: EventSource;
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
 
@@ -25,7 +27,7 @@ export class EthereumProtocol implements BaseProtocol {
     let alchemySettings;
     if (protocol === ProtocolType.ETH_MAIN) {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://eth.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
+        'http://localhost:8080/eth'
       );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
@@ -33,8 +35,10 @@ export class EthereumProtocol implements BaseProtocol {
       };
       // etherscan
     } else {
+      console.log('SETTING GORLI PROVIDER')
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        'https://eth-goerli.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
+        'http://localhost:8080/gorli'
+  //      'https://eth-goerli.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
       );
       alchemySettings = {
         apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
@@ -51,14 +55,6 @@ export class EthereumProtocol implements BaseProtocol {
 
   watchUpdates(walletStore: WalletStoreType) {
     this.updateWalletState(walletStore);
-    /*    this.ethProvider!.on('block', (block: number) => {
-      this.updateWalletState(walletStore);
-
-      if (!(walletStore.navState.protocol === ProtocolType.ETH_GORLI)
-      && !(walletStore.navState.protocol === ProtocolType.UQBAR)) {
-        walletStore.currentStore.setBlock(block);
-      }
-    });*/
   }
 
   async updateWalletState(walletStore: WalletStoreType) {
