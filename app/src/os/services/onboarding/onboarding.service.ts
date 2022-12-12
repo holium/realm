@@ -7,7 +7,6 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import bcrypt from 'bcryptjs';
-import dns from 'dns';
 import Realm from '../..';
 import { BaseService } from '../base.service';
 import {
@@ -27,6 +26,8 @@ export class OnboardingService extends BaseService {
   private readonly db: Store<OnboardingStoreType>; // for persistance
   private readonly state: OnboardingStoreType; // for state management
   private conduit?: Conduit;
+  private dnsDelayTimestamp?: number;
+  private stripeKey: string;
 
   handlers = {
     'realm.onboarding.setStep': this.setStep,
@@ -54,6 +55,7 @@ export class OnboardingService extends BaseService {
     'realm.onboarding.exit': this.exit,
     'realm.onboarding.closeConduit': this.closeConduit,
     'realm.onboarding.confirmPlanetAvailable': this.confirmPlanetAvailable,
+    'realm.onboarding.getStripeKey': this.getStripeKey,
   };
 
   static preload = {
@@ -114,6 +116,10 @@ export class OnboardingService extends BaseService {
       return await ipcRenderer.invoke(
         'realm.onboarding.confirmPlanetAvailable'
       );
+    },
+
+    async getStripeKey() {
+      return await ipcRenderer.invoke('realm.onboarding.getStripeKey');
     },
 
     async prepareCheckout(billingPeriod: string) {
@@ -192,6 +198,10 @@ export class OnboardingService extends BaseService {
   constructor(core: Realm, options: any = {}) {
     super(core, options);
 
+    this.stripeKey =
+      process.env.NODE_ENV === 'production'
+        ? 'pk_live_51LJKtvHhoM3uGGuYMiFoGqOyPNViO8zlUwfHMsgtgPmkcTK3awIzix57nRgcr2lyCFrgJWeBz5HsSVxvIVz3aAA100KbdmBX9K'
+        : 'pk_test_51LJKtvHhoM3uGGuYXzsCKctrpF6Lp9WAqRYEZbBQHxoccDHQLyrYSPt4bUOK6BbSkV5ogtYERCKVi7IAKmeXmYgU00Wv7Q9518';
     this.db = new Store({
       name: `realm.onboarding`,
       accessPropertiesByDotNotation: true,
@@ -417,6 +427,10 @@ export class OnboardingService extends BaseService {
     return session.code;
   }
 
+  async getStripeKey(_event: any): Promise<string> {
+    return this.stripeKey;
+  }
+
   async confirmPlanetAvailable() {
     if (!this.state.planet) {
       throw new Error('Planet not set, cannot confirm available.');
@@ -465,6 +479,7 @@ export class OnboardingService extends BaseService {
     }
 
     this.state.setCheckoutComplete();
+    this.dnsDelayTimestamp = undefined;
     return { success: true };
   }
 
@@ -473,22 +488,17 @@ export class OnboardingService extends BaseService {
     const ships = await this.core.holiumClient.getShips(auth.accountId!);
     const ship = ships.find((ship) => ship.patp === this.state.planet!.patp)!;
 
-    try {
-      if (ship.code && ship.link) {
-        const url = new URL(ship.link);
-        const resolutions = await dns.promises.resolve(url.hostname);
-        if (!resolutions.length) {
-          return false;
-        }
-      }
-    } catch (e: any) {
-      console.error(`dns resolution issue:`, e);
+    if (!ship || !ship.code) return false;
+
+    if (!this.dnsDelayTimestamp) {
+      this.dnsDelayTimestamp = Date.now();
+      return false;
+    } else if (Date.now() - this.dnsDelayTimestamp < 1000 * 60 * 2) {
+      // wait two minutes before trying to fetch
       return false;
     }
 
-    if (!ship || !ship.code) return false;
-
-    let addShipResult = await this.addShip('_event', {
+    const addShipResult = await this.addShip('_event', {
       patp: ship.patp,
       url: ship.link!,
       code: ship.code,

@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   Elements,
   PaymentElement,
@@ -6,7 +6,15 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Box, Sigil, Text, Flex, Button, Icons } from 'renderer/components';
+import {
+  Box,
+  Sigil,
+  Text,
+  Flex,
+  Button,
+  Icons,
+  Spinner,
+} from 'renderer/components';
 import { transparentize, darken } from 'polished';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -19,12 +27,11 @@ interface StripePaymentProps extends BaseDialogProps {
   patp: string;
 }
 
-const stripePromise = loadStripe(
-  'pk_test_51LORWpK2cENWZ1NMPDaAEo5kKPJFMLdWWiDJozLMatmSMGrxcNG0pVAfFzjURClqdGmWA3PkIET6feGZbFGjNkN100c1dlascb'
-);
 const StripePayment: FC<StripePaymentProps> = observer(
   (props: StripePaymentProps) => {
     const { identity, theme } = useServices();
+    const [loading, setLoading] = useState(true);
+    const [stripePromise, setStripePromise] = useState<any>();
     const baseTheme = getBaseTheme(theme.currentTheme);
     const clientSecret = identity.auth.clientSecret!;
     const appearance = {
@@ -36,10 +43,36 @@ const StripePayment: FC<StripePaymentProps> = observer(
         colorTextSecondary: baseTheme.colors.text.primary,
       },
     };
+
+    useEffect(() => {
+      async function getStripeKey() {
+        const key = await OnboardingActions.getStripeKey();
+        setStripePromise(loadStripe(key!));
+        setLoading(false);
+      }
+      getStripeKey();
+    }, []);
+
     return (
-      <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-        <MainComponent {...props} />
-      </Elements>
+      <>
+        {loading ? (
+          <Flex
+            width="100%"
+            height="100%"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Spinner size={4} />
+          </Flex>
+        ) : (
+          <Elements
+            stripe={stripePromise}
+            options={{ clientSecret, appearance }}
+          >
+            <MainComponent {...props} />
+          </Elements>
+        )}
+      </>
     );
   }
 );
@@ -52,6 +85,13 @@ const MainComponent: FC<StripePaymentProps> = observer(
 
     const [message, setMessage] = useState({ type: 'notification', text: '' });
     const [loading, setLoading] = useState(false);
+    const [hideButton, setHideButton] = useState(true);
+
+    useEffect(() => {
+      setTimeout(() => {
+        setHideButton(false);
+      }, 2000);
+    }, []);
 
     const bulletIconColor = transparentize(0.1, theme.currentTheme.iconColor);
     const HostingFeature = (props: any) => (
@@ -119,7 +159,7 @@ const MainComponent: FC<StripePaymentProps> = observer(
         console.log(`submitting stripe payment threw:`, e);
         setMessage({
           type: 'error',
-          text: 'Something went wrong processing your payment, please try again.'
+          text: 'Something went wrong processing your payment, please try again.',
         });
       }
 
@@ -234,13 +274,15 @@ const MainComponent: FC<StripePaymentProps> = observer(
                 align-items="flex-end"
                 justifyContent="flex-end"
               >
-                <Button
-                  isLoading={loading}
-                  disabled={loading || !stripe || !elements}
-                  id="submit"
-                >
-                  Purchase
-                </Button>
+                <Box hidden={hideButton}>
+                  <Button
+                    isLoading={loading}
+                    disabled={loading || !stripe || !elements}
+                    id="submit"
+                  >
+                    Purchase
+                  </Button>
+                </Box>
               </Flex>
             </Flex>
           </form>
