@@ -26,11 +26,16 @@ const Window = types
     title: types.optional(types.string, ''),
     zIndex: types.number,
     type: types.optional(
-      types.enumeration(['urbit', 'web', 'native', 'dialog']),
+      types.enumeration(['urbit', 'web', 'native', 'dialog', 'dev']),
       'urbit'
     ),
     dimensions: DimensionsModel,
     minimized: types.optional(types.boolean, false),
+    // _dev: types.optional(RealmConfig, {
+    //   size: [10, 10],
+    //   showTitlebar: true,
+    //   titlebarBorder: false,
+    // }),
   })
   .actions((self) => ({
     setZIndex(newZ: number) {
