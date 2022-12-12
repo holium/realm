@@ -68,6 +68,7 @@
       [%install-app =ship =desk]
       [%uninstall-app =desk]
       [%initialize args=(map cord cord)]
+      [%nuke store=@tas]
   ==
 ::
 +$  interaction
