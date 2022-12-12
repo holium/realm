@@ -8,7 +8,6 @@ import {
 } from 'mobx-state-tree';
 import { LoaderModel, StepList } from '../common.model';
 import { Patp } from 'os/types';
-import { safeStorage } from 'electron';
 
 export const DEFAULT_WALLPAPER =
   'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100';
@@ -26,21 +25,12 @@ export const AuthShip = types
     status: types.optional(StepList, 'initial'),
     passwordHash: types.maybeNull(types.string),
   })
-  .views((self) => ({
-    get mnemonic() {
-      return safeStorage.decryptString(Buffer.from(self.mnemonic!, 'base64'));
-    },
-  }))
   .actions((self) => ({
     setStatus(status: Instance<typeof StepList>) {
       self.status = status;
     },
     setMnemonic(mnemonic: string) {
-      const encryptedMnemonic = safeStorage
-        .encryptString(mnemonic)
-        .toString('base64');
-
-      self.mnemonic = encryptedMnemonic;
+      self.mnemonic = mnemonic;
     },
   }));
 
