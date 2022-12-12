@@ -41,7 +41,6 @@ import { GroupSigil } from './components/GroupSigil';
 import { useTrayApps } from '../store';
 import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { GraphDMType } from 'os/services/ship/models/courier';
-import { messageIndexGen } from './util';
 
 type Props = {
   theme: ThemeModelType;
@@ -227,10 +226,10 @@ export const ChatView = observer(
           chatInputRef.current.focus();
         }
 
-        const [index, timeSent] = messageIndexGen();
-        const stringIndex = String(index);
+        const timeSent = Date.now();
+        const index = String(timeSent);
         const optimisticResponse: GraphDMType = {
-          index: stringIndex,
+          index,
           timeSent,
           author: ship!.patp,
           pending: true,
@@ -244,7 +243,7 @@ export const ChatView = observer(
             const nonPendingMessage = { ...optimisticResponse, pending: false };
             setOptimisticMessages((prev) =>
               prev.map((msg) => {
-                if (msg.index === stringIndex) return nonPendingMessage;
+                if (msg.index === index) return nonPendingMessage;
                 return msg;
               })
             );
