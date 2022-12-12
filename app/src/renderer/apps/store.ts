@@ -62,6 +62,9 @@ const TrayAppStore = types
     setTrayAppDimensions(dimensions: Instance<typeof TrayAppDimensions>) {
       self.dimensions = dimensions;
     },
+    closeActiveApp() {
+      self.activeApp = null;
+    },
     setActiveApp(
       appKey: TrayAppKeys | null,
       params?: {
@@ -69,6 +72,7 @@ const TrayAppStore = types
         position: any;
         anchorOffset: any;
         dimensions: any;
+        innerNavigation?: string;
       }
     ) {
       self.activeApp = appKey;

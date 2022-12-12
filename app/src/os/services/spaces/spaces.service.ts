@@ -16,7 +16,9 @@ import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';
 import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
 import { NewBazaarStore, NewBazaarStoreType } from './models/bazaar';
+import { BeaconApi, BeaconInboxType } from '../../api/beacon';
 import { formPathObj } from '../../lib/path';
+import { NotificationStore, NotificationStoreType } from './models/beacon';
 
 export const getHost = (path: string) => path.split('/')[1];
 let devApps: any = null;
@@ -34,6 +36,7 @@ interface SpaceModels {
   bazaar: NewBazaarStoreType;
   membership: MembershipType;
   visas: VisaModelType;
+  beacon: NotificationStoreType;
 }
 /**
  * SpacesService
@@ -48,6 +51,7 @@ export class SpacesService extends BaseService {
       outgoing: {},
     }),
     bazaar: NewBazaarStore.create(),
+    beacon: NotificationStore.create(),
     // bazaar: BazaarStore.create({ my: {} }),
   };
 
@@ -90,6 +94,8 @@ export class SpacesService extends BaseService {
     'realm.spaces.bazaar.remove-app': this.removeApp,
     'realm.spaces.bazaar.suspend-app': this.suspendApp,
     'realm.spaces.bazaar.revive-app': this.reviveApp,
+    'realm.spaces.beacon.saw-note': this.sawNote,
+    'realm.spaces.beacon.saw-inbox': this.sawInbox,
   };
 
   static preload = {
@@ -230,6 +236,10 @@ export class SpacesService extends BaseService {
       await ipcRenderer.invoke('realm.spaces.bazaar.suspend-app', appId),
     reviveApp: async (appId: string) =>
       await ipcRenderer.invoke('realm.spaces.bazaar.revive-app', appId),
+    sawNote: async (noteId: string) =>
+      await ipcRenderer.invoke('realm.spaces.beacon.saw-note', noteId),
+    sawInbox: async (inbox: BeaconInboxType) =>
+      await ipcRenderer.invoke('realm.spaces.beacon.saw-inbox', inbox),
   };
 
   constructor(core: Realm, options: any = {}) {
@@ -255,6 +265,7 @@ export class SpacesService extends BaseService {
       membership: getSnapshot(this.models.membership),
       bazaar: getSnapshot(this.models.bazaar),
       visas: getSnapshot(this.models.visas),
+      beacon: getSnapshot(this.models.beacon),
     };
   }
 
@@ -277,11 +288,20 @@ export class SpacesService extends BaseService {
       NewBazaarStore,
       {}
     );
+    const beaconStore = new DiskStore(
+      'beacon',
+      patp,
+      secretKey!,
+      NotificationStore,
+      {}
+    );
     this.models.membership = membershipStore.model;
     this.models.bazaar = bazaarStore.model;
     if (devApps) {
       this.models.bazaar.loadDevApps(devApps);
     }
+    this.models.beacon = beaconStore.model;
+    this.models.beacon.load(this.core!.conduit);
     // Set up patch for visas
     onPatch(this.models.visas, (patch) => {
       const patchEffect = {
@@ -304,6 +324,7 @@ export class SpacesService extends BaseService {
         spaces: getSnapshot(this.state),
         membership: getSnapshot(this.models.membership),
         bazaar: getSnapshot(this.models.bazaar),
+        beacon: getSnapshot(this.models.beacon),
       },
       resource: 'spaces',
       key: null,
@@ -316,6 +337,7 @@ export class SpacesService extends BaseService {
     this.db.registerPatches(this.core.onEffect);
     membershipStore.registerPatches(this.core.onEffect);
     bazaarStore.registerPatches(this.core.onEffect);
+    beaconStore.registerPatches(this.core.onEffect);
 
     // Subscribe to sync updates
     SpacesApi.watchUpdates(
@@ -335,6 +357,7 @@ export class SpacesService extends BaseService {
       );
     }
     BazaarSubscriptions.updates(this.core.conduit!, this.models.bazaar);
+    BeaconApi.watchUpdates(this.core.conduit!, this.models.beacon);
   }
 
   // ***********************************************************
@@ -655,6 +678,16 @@ export class SpacesService extends BaseService {
   async setPinnedOrder(_event: IpcMainInvokeEvent, path: string, order: any[]) {
     // return await BazaarApi.setPinnedOrder(this.core.conduit!, path, order);
     // this.models.bazaar.getBazaar(path).setPinnedOrder(order);
+  }
+
+  async sawNote(_event: IpcMainInvokeEvent, noteId: string) {
+    return await this.models.beacon.notes
+      .get(noteId)
+      .markSeen(this.core.conduit!, noteId);
+    // return await BeaconApi.sawNote(this.core.conduit!, noteId);
+  }
+  async sawInbox(_event: IpcMainInvokeEvent, inbox: BeaconInboxType) {
+    return await this.models.beacon.sawInbox(this.core.conduit!, inbox);
   }
 
   setSpaceWallpaper(spacePath: string, theme: any) {
