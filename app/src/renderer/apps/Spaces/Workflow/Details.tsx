@@ -136,7 +136,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
     }
     if (props.edit) {
       const space = spaces.spaces.get(props.edit.space)!;
-      console.log('space', space);
+      console.log('space', space)
 
       setWorkspaceState({
         ...space,
@@ -152,10 +152,10 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
       if (space.access) {
         const spaceAccess: AccessOptionType =
           space.access === 'public'
-            ? 'public'
-            : space.access === 'antechamber'
-            ? 'antechamber'
-            : 'private';
+          ? 'public'
+          : space.access === 'antechamber'
+          ? 'antechamber'
+          : 'private';
         setAccessOption(spaceAccess);
       }
     }
@@ -214,7 +214,7 @@ export const SpacesCreateForm: FC<BaseDialogProps> = observer((props: any) => {
               onClick={(value: CrestOptionType) => {
                 setCrestOption(value);
                 setWorkspaceState({ crestOption: value });
-                setWorkspaceState({ crestOption: value });
+                  setWorkspaceState({ crestOption: value });
               }}
             />
 

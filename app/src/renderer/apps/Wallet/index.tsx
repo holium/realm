@@ -14,15 +14,9 @@ import { WalletHeader } from './views/common/Header';
 import { useServices } from 'renderer/logic/store';
 import { Flex } from 'renderer/components';
 import { WalletActions } from '../../logic/actions/wallet';
-import {
-  EthWalletType,
-  BitcoinWalletType,
-  NetworkType,
-  WalletView,
-} from 'os/services/tray/wallet-lib';
+import { NetworkType, WalletView } from 'os/services/tray/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
-import { Wallet } from 'ethers';
 
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
@@ -52,10 +46,7 @@ export const WalletApp: FC<any> = observer((props: any) => {
     const wallet = walletApp.currentStore.wallets.get(key);
     if (!wallet) continue;
     const walletTransactions = getTransactions(
-      (walletApp.navState.network === NetworkType.ETHEREUM
-        ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-            .transactions
-        : (wallet as BitcoinWalletType).transactions) || new Map()
+      wallet.transactions.get(walletApp.currentStore.network) || new Map()
     );
     transactions = [...walletTransactions, ...transactions];
     // console.log(transactions, transactionCount);

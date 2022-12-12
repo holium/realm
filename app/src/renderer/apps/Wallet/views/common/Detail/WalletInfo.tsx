@@ -9,7 +9,7 @@ import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
 import {
   EthWalletType,
   BitcoinWalletType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet.model';
 
 interface WalletInfoProps {
   wallet: EthWalletType | BitcoinWalletType;
@@ -74,12 +74,7 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
       >
         <Flex width="100%" justifyContent="space-between">
           <Flex>
-            <Text>aowsiehtoishrtoiwheotiwhet</Text>
-            {/*(typeof props.wallet) === EthWalletType
-            ? <Icons name="Ethereum" height="20px" mr={2} />
-            : <Icons name="Bitcoin" height="20px" mr={2} />
-    */}
-            <Icons name="Bitcoin" height="20px" mr={2} />
+            <Icons name="Ethereum" height="20px" mr={2} />
             <Text pt="2px" textAlign="center" fontSize="14px">
               {props.wallet && shortened(props.wallet.address)}
             </Text>

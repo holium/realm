@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { darken } from 'polished';
@@ -15,11 +15,7 @@ import {
   convertBtcAmountToUsd,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import {
-  TransactionType,
-  WalletView,
-  EthWalletType,
-} from 'os/services/tray/wallet-lib';
+import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
@@ -44,7 +40,7 @@ export const Transaction = observer((props: TransactionProps) => {
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
   const completedDate = new Date(
-    transaction.completedAt || transaction.initiatedAt || 0
+    transaction.completedAt || transaction.initiatedAt
   );
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
@@ -128,32 +124,28 @@ interface TransactionListProps {
 }
 export const TransactionList = observer((props: TransactionListProps) => {
   const { theme } = useServices();
-  const { walletApp } = useTrayApps();
   // const {walletApp} = useTrayApps();
 
   const pending = props.transactions.filter(
     (trans) => trans.status === 'pending'
   ).length;
 
-  let transactions = props.transactions;
-  if (props.ethType === 'ETH') {
-    transactions = props.transactions.filter((tx) =>
-      props.ethType ? tx.ethType === props.ethType : true
-    );
-  }
-  if (props.ethType !== 'ETH' && props.ethType) {
-    const currentWallet = walletApp!.currentWallet! as EthWalletType;
-    transactions = currentWallet.data
-      .get(walletApp.navState.protocol)!
-      .coins.get(props.ethType)!.transactions;
-    /*transactions = transactions.filter(
-      (tx) => tx.theirAddress === props.ethType
-    );*/
-    // console.log('ourAddress', ourAddress, props.ethType);
-    /*WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
-      console.log
-    );*/
-  }
+  // const [coinTransactions, setCoinTransactions] = useState(null);
+  useEffect(() => {
+    if (props.ethType !== 'ethereum' && props.ethType) {
+      const ourAddress = props.transactions[0].ourAddress;
+      // console.log('ourAddress', ourAddress, props.ethType);
+      WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
+        (txns: any) => {
+          console.log(txns);
+        }
+      );
+    }
+  }, [props.ethType, props.transactions]);
+
+  const transactions = props.transactions.filter((trans) =>
+    props.ethType ? trans.ethType === props.ethType : true
+  );
 
   return (
     <>

@@ -54,7 +54,7 @@ export const WordPicker: FC<WordPickerProps> = observer(
       if (updatedSelectedWords.join(' ') === props.seedPhrase) {
         setError('');
         props.onValidChange(true);
-      } else if (updatedWordsToSelect.every((item) => !item.available)) {
+      } else if (updatedWordsToSelect.every(item => !item.available)) {
         setError('Recovery phrase does not match.');
       } else {
         setError('');

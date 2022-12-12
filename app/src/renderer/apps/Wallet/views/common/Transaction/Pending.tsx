@@ -9,11 +9,7 @@ import {
   formatBtcAmount,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import {
-  WalletView,
-  TransactionType,
-  ProtocolType,
-} from 'os/services/tray/wallet-lib';
+import { WalletView, TransactionType } from 'os/services/tray/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 
 interface PendingTransactionDisplayProps {
@@ -68,12 +64,9 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   if (isEth) {
     unitsDisplay =
       props.transaction.ethType === 'ETH'
-        ? walletApp.navState.protocol === ProtocolType.UQBAR
-          ? 'zigs'
-          : 'ETH'
+        ? 'ETH'
         : walletApp.ethereum.wallets
             .get(props.transaction.walletIndex.toString())!
-            .data.get(walletApp.navState.protocol)!
             .coins.get(props.transaction.ethType!)!.name;
   }
 
