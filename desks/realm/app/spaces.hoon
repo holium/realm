@@ -335,12 +335,6 @@
       ::
       ++  host-handle-leave
         |=  [path=space-path:store =ship]
-        :: (~(got by membership.state) path)
-        :: ?.  =(~(has by membership.state) path)
-        ::   ~&  >  ['no membership map on this path' path]
-        ::   :_  state
-        ::   [%give %fact watch-paths visa-reaction+!>([%kicked path ship])]~
-        ::
         =/  membs                   (~(got by membership.state) path)
         =.  membs                   (~(del by membs) ship)
         =.  membership.state        (~(put by membership.state) [path membs])
@@ -523,7 +517,7 @@
         =/  watch-paths                 [/updates member-path ~]
         :_  state
         :~  [%pass / %agent [accepter %spaces] %poke visa-action+!>([%stamped path])]                 ::  Send stamp confirmation
-            [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
+            :: [%pass / %agent [our.bowl %contact-push-hook] %poke contact-share+!>([%share accepter])]  ::  share our contact
             [%give %fact watch-paths visa-reaction+!>([%invite-accepted path accepter upd-mem])]      ::  Notify watchers
         ==
     ::
@@ -640,12 +634,6 @@
           [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
           [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %leave ~]
         ==
-      ::
-      :: ?.  =(~(has by membership.state) path)
-      ::   ~&  >  ['no membership map on this path' path]
-      ::   :_  state
-      ::   [%give %fact [/updates ~] visa-reaction+!>([%kicked path ship])]~
-      ::
       =/  membs                       (~(got by membership.state) path)
       =.  membs                       (~(del by membs) ship)
       =.  membership.state            (~(put by membership.state) [path membs])
