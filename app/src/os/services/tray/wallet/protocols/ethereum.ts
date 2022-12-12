@@ -1,9 +1,8 @@
-import { BaseProtocol } from '@holium/realm-wallet/src/wallets/BaseProtocol';
+import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol'
 import {
   Alchemy,
   AlchemySettings,
   AssetTransfersCategory,
-  AssetTransfersWithMetadataParams,
   Network,
 } from 'alchemy-sdk';
 import axios from 'axios';
@@ -20,7 +19,6 @@ import {
   NetworkStoreType,
 } from '../../wallet-lib';
 import { ethers } from 'ethers';
-import EventSource from 'eventsource';
 
 export class EthereumProtocol implements BaseProtocol {
   private protocol: ProtocolType;
