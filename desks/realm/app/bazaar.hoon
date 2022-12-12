@@ -372,16 +372,15 @@
         ::  XX: is it right to add to pending here?
             %held
           ?~  pyk=(~(get by peaks) desk.wave)  `state
-          :-  ~
+          ?~  sync.u.pyk  ~&  >>>  "{<dap.bowl>}: error. why no ship?"  `state
+          ?>  ?=(%urbit -.u.app)
+          :: =.  install-status.u.app  %started
+          :: =.  host.u.app            (some ship.u.sync.u.pyk)
+          :-  ~  :: [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index.state])]~
           %=    state
               pending-installs
-            =/  host
-            ?~  sync.u.pyk
-              ~&  >>  "{<dap.bowl>}: warning. %live wave ship sync is null. defaulting to our.bowl..."
-              our.bowl
-            ship.u.sync.u.pyk
             ::  XX: is this right to put our bowl in?
-            (~(put by pending-installs.state) host desk.wave)
+            (~(put by pending-installs.state) ship.u.sync.u.pyk desk.wave)
           ==
         ==
       ==
