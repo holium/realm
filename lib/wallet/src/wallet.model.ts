@@ -252,7 +252,7 @@ const ERC20 = types
           self.usd = usd;
         },
       })),
-    transactions: types.map(Transaction)
+    transactions: types.map(Transaction),
   })
   .actions((self) => ({
     setBalance(balance: string) {
@@ -290,11 +290,8 @@ const ERC20 = types
       };
       const map = types.map(Transaction);
       const newTransactions = map.create(formattedTransactions);
-      applySnapshot(
-        self.transactions,
-        getSnapshot(newTransactions)
-      );
-    }
+      applySnapshot(self.transactions, getSnapshot(newTransactions));
+    },
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;
@@ -307,7 +304,7 @@ const ERC721 = types.model('ERC721', {
   imageUrl: types.string,
   lastPrice: types.string,
   floorPrice: types.maybe(types.string),
-  transactions: types.map(Transaction)
+  transactions: types.map(Transaction),
 });
 
 export type ERC721Type = Instance<typeof ERC721>;
@@ -381,7 +378,10 @@ const EthWallet = types
       });
     },
     updateCoinTransfers(protocol: ProtocolType, coin: string, transfers: any) {
-      self.data.get(protocol)!.coins.get(coin)!.applyTransactions(self.index, transfers);
+      self.data
+        .get(protocol)!
+        .coins.get(coin)!
+        .applyTransactions(self.index, transfers);
     },
     updateNft(protocol: ProtocolType, nft: Asset) {
       const nftData = nft.data as NFTAsset;
