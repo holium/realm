@@ -9,13 +9,13 @@ const Label = styled.label`
   cursor: pointer;
 `;
 const Switch = styled.div`
-  ${(props: { src: string, color: string }) =>
+  ${(props: { src: string; color: string }) =>
     props.src &&
     css`
       position: relative;
       width: 40px;
       height: 22px;
-      background: ${props.color};//#4CDD86;
+      background: ${props.color}; //#4CDD86;
       border-radius: 32px;
       padding: 4px;
       transition: 300ms all;

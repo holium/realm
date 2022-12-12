@@ -1,5 +1,11 @@
 import { BaseProtocol } from '@holium/realm-wallet/src/wallets/BaseProtocol';
-import { Alchemy, AlchemySettings, AssetTransfersCategory, AssetTransfersWithMetadataParams, Network } from 'alchemy-sdk';
+import {
+  Alchemy,
+  AlchemySettings,
+  AssetTransfersCategory,
+  AssetTransfersWithMetadataParams,
+  Network,
+} from 'alchemy-sdk';
 import axios from 'axios';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
@@ -32,9 +38,7 @@ export class EthereumProtocol implements BaseProtocol {
     }
     let alchemySettings: AlchemySettings;
     if (protocol === ProtocolType.ETH_MAIN) {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(
-        baseURL + '/eth'
-      );
+      this.ethProvider = new ethers.providers.JsonRpcProvider(baseURL + '/eth');
       alchemySettings = {
         url: baseURL + '/eth',
         network: Network.ETH_MAINNET,
@@ -61,8 +65,10 @@ export class EthereumProtocol implements BaseProtocol {
     this.updateWalletState(walletStore);
     this.interval = setInterval(async () => {
       await this.updateWalletState(walletStore);
-      if (!(walletStore.navState.protocol === ProtocolType.ETH_GORLI)
-      && !(walletStore.navState.protocol === ProtocolType.UQBAR)) {
+      if (
+        !(walletStore.navState.protocol === ProtocolType.ETH_GORLI) &&
+        !(walletStore.navState.protocol === ProtocolType.UQBAR)
+      ) {
         walletStore.currentStore.setBlock(await this.getBlockNumber());
       }
     }, 30000);
@@ -90,7 +96,11 @@ export class EthereumProtocol implements BaseProtocol {
               );
               this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
                 (transfers: any) => {
-                  ethWallet.updateCoinTransfers(this.protocol, asset.addr, transfers);
+                  ethWallet.updateCoinTransfers(
+                    this.protocol,
+                    asset.addr,
+                    transfers
+                  );
                 }
               );
             }
@@ -106,8 +116,7 @@ export class EthereumProtocol implements BaseProtocol {
               );*/
             }
           }
-
-        })
+        });
       }
     }
   }
@@ -118,19 +127,29 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
-    const from = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(startBlock),
-      fromAddress: addr,
-      category: [AssetTransfersCategory.INTERNAL, AssetTransfersCategory.EXTERNAL],
-      withMetadata: true,
-    })).transfers;
-    const to = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(startBlock),
-      toAddress: addr,
-      category: [AssetTransfersCategory.INTERNAL, AssetTransfersCategory.EXTERNAL],
-      withMetadata: true,
-    })).transfers;
-    return from.concat(to)
+    const from = (
+      await this.alchemy.core.getAssetTransfers({
+        fromBlock: ethers.utils.hexlify(startBlock),
+        fromAddress: addr,
+        category: [
+          AssetTransfersCategory.INTERNAL,
+          AssetTransfersCategory.EXTERNAL,
+        ],
+        withMetadata: true,
+      })
+    ).transfers;
+    const to = (
+      await this.alchemy.core.getAssetTransfers({
+        fromBlock: ethers.utils.hexlify(startBlock),
+        toAddress: addr,
+        category: [
+          AssetTransfersCategory.INTERNAL,
+          AssetTransfersCategory.EXTERNAL,
+        ],
+        withMetadata: true,
+      })
+    ).transfers;
+    return from.concat(to);
     /*txns.forEach(async (txn, index) => {
       txns[index] = {
         timeStamp: await this.getBlockTime(Number(txn.blockNum)),
@@ -221,29 +240,33 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
-    const from = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(startBlock),
-      fromAddress: addr,
-      category: [
-        AssetTransfersCategory.ERC20,
-        AssetTransfersCategory.ERC721,
-        AssetTransfersCategory.ERC1155,
-      ],
-      contractAddresses: [contract],
-      withMetadata: true,
-    })).transfers;
-    const to = (await this.alchemy.core.getAssetTransfers({
-      fromBlock: ethers.utils.hexlify(startBlock),
-      toAddress: addr,
-      category: [
-        AssetTransfersCategory.ERC20,
-        AssetTransfersCategory.ERC721,
-        AssetTransfersCategory.ERC1155,
-      ],
-      contractAddresses: [contract],
-      withMetadata: true,
-    })).transfers;
-    return from.concat(to)
+    const from = (
+      await this.alchemy.core.getAssetTransfers({
+        fromBlock: ethers.utils.hexlify(startBlock),
+        fromAddress: addr,
+        category: [
+          AssetTransfersCategory.ERC20,
+          AssetTransfersCategory.ERC721,
+          AssetTransfersCategory.ERC1155,
+        ],
+        contractAddresses: [contract],
+        withMetadata: true,
+      })
+    ).transfers;
+    const to = (
+      await this.alchemy.core.getAssetTransfers({
+        fromBlock: ethers.utils.hexlify(startBlock),
+        toAddress: addr,
+        category: [
+          AssetTransfersCategory.ERC20,
+          AssetTransfersCategory.ERC721,
+          AssetTransfersCategory.ERC1155,
+        ],
+        contractAddresses: [contract],
+        withMetadata: true,
+      })
+    ).transfers;
+    return from.concat(to);
   }
   async transferAsset(
     contract: string,
@@ -282,6 +305,6 @@ export class EthereumProtocol implements BaseProtocol {
   }
 
   async getBlockNumber(): Promise<number> {
-    return await this.ethProvider.getBlockNumber()
+    return await this.ethProvider.getBlockNumber();
   }
 }

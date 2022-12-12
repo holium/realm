@@ -41,7 +41,6 @@ export class AuthService extends BaseService {
     'realm.auth.set-email': this.setEmail,
     'realm.auth.change-email': this.changeEmail,
     'realm.auth.resend-new-email-verification-code':
-     
       this.resendNewEmailVerificationCode,
     'realm.auth.verify-new-email': this.verifyNewEmail,
     'realm.auth.get-code': this.getCode,

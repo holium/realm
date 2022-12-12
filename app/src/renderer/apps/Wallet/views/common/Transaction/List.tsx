@@ -18,7 +18,7 @@ import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   TransactionType,
   WalletView,
-  EthWalletType
+  EthWalletType,
 } from '@holium/realm-wallet/src/wallet.model';
 
 const NoScrollBar = styled(Flex)`
@@ -143,7 +143,9 @@ export const TransactionList = observer((props: TransactionListProps) => {
   }
   if (props.ethType !== 'ETH' && props.ethType) {
     const currentWallet = walletApp!.currentWallet! as EthWalletType;
-    transactions = currentWallet.data.get(walletApp.navState.protocol)!.coins.get(props.ethType)!.transactions;
+    transactions = currentWallet.data
+      .get(walletApp.navState.protocol)!
+      .coins.get(props.ethType)!.transactions;
     /*transactions = transactions.filter(
       (tx) => tx.theirAddress === props.ethType
     );*/

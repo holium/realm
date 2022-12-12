@@ -13,7 +13,7 @@ import {
   WalletView,
   TransactionType,
   ProtocolType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from '@holium/realm-wallet';
 import { useTrayApps } from 'renderer/apps/store';
 
 interface PendingTransactionDisplayProps {
