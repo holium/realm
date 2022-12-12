@@ -307,7 +307,7 @@ export const SpacesApi = {
       app: 'spaces',
       path: `/updates`,
       onEvent: async (data: any, _id?: number, mark?: string) => {
-        console.log(mark, data);
+        // console.log(mark, data);
         if (mark === 'spaces-reaction') {
           handleSpacesReactions(
             data,
