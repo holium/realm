@@ -86,6 +86,9 @@ export class RemotePeer extends Peer {
   }
 
   peerSignal(data: SimplePeer.SignalData) {
+    if (this.peer?.destroyed) {
+      this.createConnection();
+    }
     this.peer?.signal(data);
   }
 

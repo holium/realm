@@ -95,9 +95,8 @@
         =/  path              [host space-path]
         ?>  (check-member:security:core path src.bowl)
         ~&  >>  "{<dap.bowl>}: [on-watch]. {<src.bowl>} subscribing to {<(spat /(scot %p host)/(scot %tas space-path))>}..."
-        =/  paths             [/bazaar/(scot %p our.bowl)/(scot %tas space-path) ~]
         =/  space-data        (filter-space-data:helpers:bazaar path)
-        [%give %fact paths bazaar-reaction+!>([%joined-bazaar path catalog.space-data stall.space-data])]~
+        [%give %fact ~ bazaar-reaction+!>([%joined-bazaar path catalog.space-data stall.space-data])]~
       ::
     ==
     [cards this]

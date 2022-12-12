@@ -154,9 +154,8 @@
         ?>  ?|  (check-member:security [host space-pth] src.bowl)     ::  only members should subscribe
                 =(access.space %public)                               :: allow public spaces to be watched
             ==
-        =/  update-paths        [/spaces/(scot %p host)/(scot %tas space-pth) ~]
         =/  members             (~(got by membership.state) [host space-pth])
-        [%give %fact update-paths spaces-reaction+!>([%remote-space [host space-pth] space members])]~
+        [%give %fact ~ spaces-reaction+!>([%remote-space [host space-pth] space members])]~
         ::
       ==
     [cards this]
@@ -426,7 +425,10 @@
       =.  spaces.state          (~(put by spaces.state) [path space])
       =.  membership.state      (~(put by membership.state) [path members])
       :_  state
-      [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]~
+      :~
+        [%give %fact [/updates ~] spaces-reaction+!>([%remote-space path space members])]
+        [%give %fact [/spaces ~] spaces-reaction+!>([%add space members])]
+      ==
     ::
     --
   ++  helpers

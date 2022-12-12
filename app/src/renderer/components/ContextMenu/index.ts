@@ -1,1 +1,2 @@
-export * from '../ContextMenu/ContextMenu';
+export * from './ContextMenu';
+export * from './useContextMenu';
