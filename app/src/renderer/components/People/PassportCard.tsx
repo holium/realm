@@ -4,10 +4,9 @@ import { Sigil, Flex, Box, Text, Icons } from '../';
 import { useTrayApps } from 'renderer/apps/store';
 import { PassportButton } from './PassportButton';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet.model';
+import { WalletView } from 'os/services/tray/wallet-lib';
 import { useServices } from 'renderer/logic/store';
 import { ShipActions } from 'renderer/logic/actions/ship';
-
 import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
 
 interface IPassport {

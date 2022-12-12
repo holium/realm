@@ -18,7 +18,8 @@ import { useServices } from 'renderer/logic/store';
 const stubAccessCode = {
   title: 'Combine DAO',
   description: 'Investing in Urbit companies together since 2022.',
-  image: 'https://pbs.twimg.com/profile_images/1488203488655917060/9pP-2qTZ_400x400.jpg',
+  image:
+    'https://pbs.twimg.com/profile_images/1488203488655917060/9pP-2qTZ_400x400.jpg',
   id: 'combine-dao',
   type: 'DAO',
 };

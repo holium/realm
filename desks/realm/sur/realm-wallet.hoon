@@ -40,16 +40,16 @@
 +$  sharing
   $:  who=?(%nobody %friends %anybody)
       wallet-creation=mode
-      blocked=(set @p)
   ==
 ::  poke actions
 ::
 +$  action
   $%  [%initialize ~]
       [%set-xpub =network xpub=@t]
-      [%set-settings =network =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud]
-      [%set-wallet-creation-mode =mode]
-      [%set-sharing-mode who=?(%nobody %friends %anybody)]
+      [%set-network-settings =network =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud =sharing]
+      [%set-passcode-hash hash=@t]
+      [%set-wallet-creation-mode =network =mode]
+      [%set-sharing-mode =network who=?(%nobody %friends %anybody)]
       [%set-sharing-permissions type=%block who=@p]
       [%set-default-index =network index=@ud]
       [%set-wallet-nickname =network index=@ud nickname=@t]
@@ -73,7 +73,8 @@
 ::
 +$  wallets  (map =network (map @ud wallet))
 +$  settings
-  $:  =sharing
-      networks=(map network [xpub=(unit @t) default-index=@ud])
+  $:  passcode-hash=@t
+      networks=(map network [xpub=(unit @t) default-index=@ud =sharing])
+      blocked=(set @p)
   ==
 --

@@ -5,7 +5,7 @@ import { Flex, Text, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getMockCoinIcon, formatCoinAmount } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ERC20Type, WalletView } from 'os/services/tray/wallet.model';
+import { ERC20Type, WalletView } from 'os/services/tray/wallet-lib';
 import { Row } from 'renderer/components/NewRow';
 
 interface CoinListProps {
