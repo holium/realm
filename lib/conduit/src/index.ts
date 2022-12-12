@@ -307,11 +307,9 @@ export class Conduit extends EventEmitter {
         }
         // @ts-expect-error
         if (error.status >= 500) {
-          // @ts-expect-error
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
         }
-        // @ts-expect-error
         if (!error.status) {
           // this happens when the ship is offline
           this.updateStatus(ConduitState.Failed);
@@ -429,7 +427,7 @@ export class Conduit extends EventEmitter {
       );
       return response.data;
     } catch (err: any) {
-      console.log('scry error', app, path, err.response.status);
+      console.error('scry error', app, path, err.response);
       // console.log(err);
     }
   }

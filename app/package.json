@@ -39,6 +39,7 @@
     ]
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^1.6.6",
     "@cliqz/adblocker-electron": "^1.23.8",
     "@dhaiwat10/react-link-preview": "^1.14.0",
     "@radix-ui/react-popover": "^1.0.0",

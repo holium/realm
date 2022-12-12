@@ -24,7 +24,6 @@ import { ThemeType } from 'renderer/theme';
 import { pluralize } from 'renderer/logic/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { ShipActions } from 'renderer/logic/actions/ship';
-import { WindowedList } from '@holium/design-system';
 
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 interface IMemberList {
@@ -379,10 +378,7 @@ export const InviteMembers: FC<BaseDialogProps> = observer((props: any) => {
         <Label fontWeight={500}>Members</Label>
         <MemberList customBg={inputColor}>
           {!loading ? (
-            <WindowedList
-              data={memberPatps}
-              rowRenderer={(patp) => RowRenderer(patp)}
-            />
+            memberPatps.map(RowRenderer)
           ) : (
             <Flex flexDirection="column" gap={4}>
               <Skeleton height={30} />

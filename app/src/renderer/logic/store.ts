@@ -61,6 +61,26 @@ const Services = types
     clearShip() {
       self.ship = undefined;
     },
+    clearAll() {
+      self.spaces = castToSnapshot({
+        loader: { state: 'initial' },
+        join: { state: 'initial' },
+        spaces: undefined,
+      });
+      self.bazaar = castToSnapshot({});
+      self.membership = castToSnapshot({});
+      self.courier = castToSnapshot({});
+      self.contacts = castToSnapshot({
+        ourPatp: '',
+        rolodex: {},
+      });
+      self.friends = castToSnapshot({});
+      self.beacon = castToSnapshot({});
+      self.visas = castToSnapshot({
+        incoming: {},
+        outgoing: {},
+      });
+    },
   }));
 
 // const desktopSnapshot = loadSnapshot('desktop');
@@ -185,7 +205,6 @@ coreStore.reset(); // need to reset coreStore for proper boot sequence
 coreStore.setResuming(true); // need to start the renderer with resuming
 watchOnlineStatus(coreStore);
 OSActions.onConnectionStatus((_event: any, status: any) => {
-  console.log(status);
   coreStore.setConnectionStatus(status);
 });
 
@@ -226,12 +245,6 @@ OSActions.onBoot((_event: any, response: any) => {
         castToSnapshot(response.models.courier)
       );
     }
-    // if (response.models.notifications) {
-    //   applySnapshot(
-    //     servicesStore.notifications,
-    //     castToSnapshot(response.models.notifications)
-    //   );
-    // }
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));
@@ -343,10 +356,11 @@ OSActions.onConnected(
 OSActions.onLogout((_event: any) => {
   // RoomsActions.exitRoom();
   // LiveRoom.leave();
+  SoundActions.playLogout();
+  servicesStore.clearAll();
   servicesStore.clearShip();
   coreStore.setLoggedIn(false);
   ShellActions.setBlur(true);
-  SoundActions.playLogout();
 });
 
 // --------------------------------------
