@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "author": "trent@holium.com",
   "license": "MIT",
-  "description": "A lib that manages media streams via RTCPeerConnections.",
+  "description": "A lib for that manages media streams via RTCPeerConnections.",
   "main": "dist/holium-realm-room.cjs.js",
   "module": "dist/holium-realm-room.esm.js",
   "typings": "dist/holium-realm-room.cjs.d.ts",

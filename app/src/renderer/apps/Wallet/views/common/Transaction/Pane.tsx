@@ -8,8 +8,7 @@ import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
-import { ERC20Type, NetworkType } from 'os/services/tray/wallet-lib';
-import { ProtocolType } from 'os/services/tray/wallet-lib';
+import { ERC20Type } from 'os/services/tray/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -58,7 +57,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const sendTransaction = async () => {
       try {
         setTransactionSending(true);
-        if (walletApp.navState.network === NetworkType.ETHEREUM) {
+        if (walletApp.navState.network === 'ethereum') {
           props.coin
             ? await WalletActions.sendERC20Transaction(
                 walletApp.currentWallet!.index.toString(),
@@ -139,8 +138,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
               {transactionAmount}{' '}
               {props.coin
                 ? props.coin.name
-                : walletApp.navState.protocol === ProtocolType.UQBAR
-                ? 'zigs'
                 : abbrMap[walletApp.navState.network]}
             </Text>
             <Text mt={1} color={themeData.colors.text.disabled}>
@@ -172,31 +169,30 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                           </Text>
                         </Flex>
                       )}
-                    {transactionRecipient.patp &&
-                      transactionRecipient.address && (
-                        <Flex gap={8} alignItems="center">
-                          <Sigil
-                            color={[
-                              transactionRecipient.color || 'black',
-                              'white',
-                            ]}
-                            simple={true}
-                            size={24}
-                            patp={transactionRecipient.patp!}
-                          />{' '}
-                          <Flex flexDirection="column" justifyContent="center">
-                            <Text variant="body">
-                              {transactionRecipient.patp}
-                            </Text>
-                            <Text
-                              variant="body"
-                              color={themeData.colors.text.tertiary}
-                            >
-                              {shortened(transactionRecipient.address)}
-                            </Text>
-                          </Flex>
+                    {transactionRecipient.patp && transactionRecipient.address && (
+                      <Flex gap={8} alignItems="center">
+                        <Sigil
+                          color={[
+                            transactionRecipient.color || 'black',
+                            'white',
+                          ]}
+                          simple={true}
+                          size={24}
+                          patp={transactionRecipient.patp!}
+                        />{' '}
+                        <Flex flexDirection="column" justifyContent="center">
+                          <Text variant="body">
+                            {transactionRecipient.patp}
+                          </Text>
+                          <Text
+                            variant="body"
+                            color={themeData.colors.text.tertiary}
+                          >
+                            {shortened(transactionRecipient.address)}
+                          </Text>
                         </Flex>
-                      )}
+                      </Flex>
+                    )}
                   </Flex>
                   {/* <Flex flexDirection="column" justifyContent="center">
                     {transactionRecipient.address ? (

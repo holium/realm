@@ -5,12 +5,15 @@ import { Box, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from '../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import { ProtocolType } from 'os/services/tray/wallet-lib';
 
 type Network = 'ethereum' | 'bitcoin';
 
 interface WalletNetworkProps {
-  network: ProtocolType;
+  network:
+    | 'Ethereum Mainnet'
+    | 'Görli Testnet'
+    | 'Bitcoin Mainnet'
+    | 'Bitcoin Testnet';
 }
 
 export const WalletNetwork: FC<WalletNetworkProps> = observer(

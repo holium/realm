@@ -11,13 +11,12 @@ import {
 
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
-  NetworkStoreType,
-  ProtocolType,
+  NetworkType,
   SharingMode,
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet.model';
 
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';
@@ -101,48 +100,44 @@ const persistedState = loadSnapshot();
 const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
-    protocol: ProtocolType.ETH_MAIN,
-    lastEthProtocol: ProtocolType.ETH_MAIN,
-    btcNetwork: NetworkStoreType.BTC_MAIN,
+    network: NetworkType.ETHEREUM,
+    btcNetwork: 'mainnet',
   },
-  ethereum: {
-    block: 0,
-    gorliBlock: 0,
-    protocol: ProtocolType.ETH_MAIN,
+  navHistory: [],
+  bitcoin: {
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  testnet: {
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  ethereum: {
+    network: 'gorli',
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      blocked: [],
       defaultIndex: 0,
     },
     initialized: false,
     conversions: {},
   },
-  bitcoin: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  btctest: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  navHistory: [],
   creationMode: 'default',
   sharingMode: 'anybody',
-  lastInteraction: Date.now(),
+  ourPatp: '~zod',
+  lastInteraction: new Date(),
   initialized: false,
-  settings: {
-    passcodeHash: '',
-  },
 };
 
 export const trayStore = TrayAppStore.create({
@@ -309,6 +304,7 @@ OSActions.onBoot((_event: any, response: any) => {
   // if (response.rooms) {
   //   applySnapshot(trayStore.roomsApp, response.rooms);
   // }
+
   if (response.wallet) {
     applySnapshot(trayStore.walletApp, response.wallet);
   }

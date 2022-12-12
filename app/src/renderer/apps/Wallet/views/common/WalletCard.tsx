@@ -14,9 +14,7 @@ import {
 import {
   EthWalletType,
   BitcoinWalletType,
-  NetworkType,
-  ProtocolType,
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet.model';
 
 interface CardStyleProps {
   isSelected: boolean;
@@ -40,7 +38,6 @@ const CardStyle = styled(Card)<CardStyleProps>`
           }
         `}
 `;
-
 interface WalletCardProps {
   wallet: EthWalletType | BitcoinWalletType;
   isSelected?: boolean;
@@ -58,30 +55,19 @@ export const WalletCard: FC<WalletCardProps> = ({
   const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
 
   let coins = null;
-  if (walletApp.navState.network === NetworkType.ETHEREUM) {
-    coins = getCoins(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
-    );
+  if ('coins' in wallet) {
+    coins = getCoins(wallet.coins);
   }
 
-  const walletTransactions =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-          .transactions
-      : (wallet as BitcoinWalletType).transactions;
-  const transactions = getTransactions(walletTransactions || new Map());
+  const transactions = getTransactions(
+    wallet.transactions.get(walletApp.currentStore.network!) || new Map()
+    //    wallet!.address
+  );
 
-  const ethTicker =
-    walletApp.navState.protocol === ProtocolType.UQBAR ? ' zigs' : ' ETH';
   const amountDisplay =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? `${
-          formatEthAmount(
-            (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-              .balance
-          ).eth
-        }` + ethTicker
-      : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
+    walletApp.navState.network === 'ethereum'
+      ? `${formatEthAmount(wallet.balance).eth} ETH`
+      : `${formatEthAmount(wallet.balance).eth} BTC`;
 
   return (
     <CardStyle
