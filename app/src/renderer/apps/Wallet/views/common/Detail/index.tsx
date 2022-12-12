@@ -66,7 +66,10 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
 
   const walletTransactions =
     walletApp.navState.network === NetworkType.ETHEREUM
+      ? coin
       ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
+          .coins.get(coin.address)!.transactions
+      :  (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
           .transactions
       : (wallet as BitcoinWalletType).transactions;
   const transactions = getTransactions(walletTransactions || new Map()).sort(

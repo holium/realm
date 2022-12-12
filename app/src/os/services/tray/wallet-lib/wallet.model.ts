@@ -378,7 +378,7 @@ const EthWallet = types
       });
     },
     updateCoinTransfers(protocol: ProtocolType, coin: string, transfers: any) {
-      if (self.data.get(protocol)!.coins.has(coin)) {
+      if (self.data.get(protocol)!.coins.has(coin) && transfers.length > 0) {
         self.data
           .get(protocol)!
           .coins.get(coin)!

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { darken } from 'polished';
@@ -140,16 +140,6 @@ export const TransactionList = observer((props: TransactionListProps) => {
   if (props.ethType === 'ETH') {
     transactions = props.transactions.filter((tx) =>
       props.ethType ? tx.ethType === props.ethType : true
-    );
-  }
-  if (props.ethType !== 'ETH' && props.ethType) {
-    const currentWallet = walletApp!.currentWallet! as EthWalletType;
-    const coinTransactions = currentWallet.data
-      .get(walletApp.navState.protocol)!
-      .coins.get(props.ethType)!.transactions
-    transactions = getTransactions(coinTransactions || new Map()).sort(
-      (a, b) =>
-        new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
     );
   }
 

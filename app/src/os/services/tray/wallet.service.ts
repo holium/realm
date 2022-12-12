@@ -558,7 +558,7 @@ export class WalletService extends BaseService {
     const signedTx = await this.signer!.signTransaction(path, tx);
     const hash = await this.wallet!.protocols.get(
       this.state!.navState.protocol
-    ).sendTransaction(signedTx);
+    )!.sendTransaction(signedTx);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
     currentWallet.enqueueTransaction(
@@ -585,7 +585,57 @@ export class WalletService extends BaseService {
     );
   }
 
-  sendERC20Transaction() {}
+  async sendERC20Transaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string,
+    toPatp?: string,
+    contractType?: string
+  ) {
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    const protocol = this.wallet!.protocols.get(
+      this.state!.navState.protocol
+    ) as EthereumProtocol;
+    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    const tx = {
+      from,
+      to,
+      value: ethers.utils.parseEther(amount),
+      gasLimit: await protocol.getFeeEstimate(from, to, amount),
+      gasPrice: await protocol.getFeePrice(),
+      nonce: await protocol.getNonce(from),
+      chainId: await protocol.getChainId(),
+    };
+    const signedTx = await this.signer!.signTransaction(path, tx);
+    const hash = await this.wallet!.protocols.get(
+      this.state!.navState.protocol
+    )!.sendTransaction(signedTx);
+    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const fromAddress = currentWallet.address;
+    currentWallet.enqueueTransaction(
+      this.state!.navState.protocol,
+      hash,
+      tx.to,
+      toPatp,
+      fromAddress,
+      tx.value,
+      new Date().toISOString(),
+      contractType
+    );
+    const stateTx = currentWallet.getTransaction(
+      this.state!.navState.protocol,
+      hash
+    );
+    await WalletApi.setTransaction(
+      this.core.conduit!,
+      'ethereum',
+      this.state!.navState.protocol,
+      currentWallet.index,
+      hash,
+      stateTx
+    );
+  }
 
   sendERC721Transaction() {}
 

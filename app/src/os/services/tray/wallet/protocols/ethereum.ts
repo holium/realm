@@ -309,6 +309,7 @@ export class EthereumProtocol implements BaseProtocol {
       withMetadata: true,
     })).transfers;
     return from.concat(to);*/
+    let from: any[] = [];
     try {
       const fromTransfers = await axios.request({
         method: 'POST',
@@ -325,13 +326,23 @@ export class EthereumProtocol implements BaseProtocol {
               toBlock: 'latest',
               fromAddress: addr,
               contractAddresses: [contract],
-              category: ['erc20', 'erc721', 'erc1155'],
+              category: [
+                AssetTransfersCategory.ERC20,
+                AssetTransfersCategory.ERC721,
+                AssetTransfersCategory.ERC1155
+              ],
               withMetadata: true,
             },
           ],
         },
       });
-      const from = fromTransfers.data.result.transfers;
+      from = fromTransfers.data.result.transfers;
+    }
+    catch {
+
+    }
+    let to: any[] = [];
+    try {
       const toTransfers = await axios.request({
         method: 'POST',
         url: this.baseURL,
@@ -345,25 +356,24 @@ export class EthereumProtocol implements BaseProtocol {
             {
               fromBlock: ethers.utils.hexlify(0),
               toBlock: 'latest',
-              toAddress: addr,
+              fromAddress: addr,
+              contractAddresses: [contract],
               category: [
                 AssetTransfersCategory.ERC20,
                 AssetTransfersCategory.ERC721,
-                AssetTransfersCategory.ERC1155,
+                AssetTransfersCategory.ERC1155
               ],
-              contractAddresses: [contract],
               withMetadata: true,
             },
           ],
         },
       });
-
-      const to = toTransfers.data.result.transfers;
-      return from.concat(to);
+      to = toTransfers.data.result.transfers;
     }
     catch {
-      return [];
+
     }
+    return from.concat(to);
   }
   async transferAsset(
     contract: string,
