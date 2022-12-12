@@ -150,15 +150,6 @@ export class EthereumProtocol implements BaseProtocol {
       })
     ).transfers;
     return from.concat(to);
-    /*txns.forEach(async (txn, index) => {
-      txns[index] = {
-        timeStamp: await this.getBlockTime(Number(txn.blockNum)),
-        ...txn
-      }
-    })
-    for (let txn of txns) {
-      console.log(txn.timeStamp)
-    }*/
   }
   async getAccountAssets(addr: string): Promise<Asset[]> {
     const coins = await this.alchemy.core.getTokenBalances(addr);

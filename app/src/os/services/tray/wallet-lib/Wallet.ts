@@ -1,5 +1,5 @@
-import { Patp } from 'types';
-import { BaseProtocol } from 'wallets';
+import { Patp } from './types';
+import { BaseProtocol } from './wallets/BaseProtocol';
 import { NetworkType, ProtocolType } from './wallet.model';
 
 export class Wallet {
