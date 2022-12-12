@@ -49,7 +49,6 @@ export class ShipService extends BaseService {
   private models: ShipModels = {
     friends: FriendsStore.create({ all: {} }),
     contacts: undefined,
-    chat: undefined,
   };
 
   private readonly metadataStore: {
@@ -232,7 +231,6 @@ export class ShipService extends BaseService {
       loader: { state: 'initial' },
     });
     this.state.loader.set('loading');
-    console.log('before load froms disk');
 
     const courierStore = new DiskStore(
       'courier',
@@ -269,14 +267,14 @@ export class ShipService extends BaseService {
       this.db!.store = snapshot;
     });
     // 1. Send initial snapshot
-    // const syncEffect = {
-    //   model: getSnapshot(this.state!),
-    //   resource: 'ship',
-    //   key: ship,
-    //   response: 'initial',
-    // };
+    const syncEffect = {
+      model: getSnapshot(this.state!),
+      resource: 'ship',
+      key: ship,
+      response: 'initial',
+    };
     // console.log(syncEffect);
-    // this.core.onEffect(syncEffect);
+    this.core.onEffect(syncEffect);
 
     try {
       // TODO rewrite the contact store logic
@@ -369,10 +367,14 @@ export class ShipService extends BaseService {
       secretKey: this.core.passwords.getPassword(ship.patp)!,
       accessPropertiesByDotNotation: true,
     };
-    this.db =
-      process.env.NODE_ENV === 'development'
-        ? new Store<ShipModelType>(storeParams)
-        : new EncryptedStore<ShipModelType>(storeParams);
+
+    // TODO this should use DiskStore and be encrypted
+    this.db = new Store<ShipModelType>(storeParams);
+
+    // this.db =
+    // process.env.NODE_ENV === 'development'
+    //   ? new Store<ShipModelType>(storeParams)
+    //   : new EncryptedStore<ShipModelType>(storeParams);
 
     this.db.store = newShip;
     return newShip;

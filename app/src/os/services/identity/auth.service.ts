@@ -273,43 +273,54 @@ export class AuthService extends BaseService {
   }
 
   async login(_event: any, patp: string, password: string): Promise<boolean> {
-    let shipId = `auth${patp}`;
-    this.state.setLoader('loading');
+    try {
+      const shipId = `auth${patp}`;
+      this.state.setLoader('loading');
 
-    let ship = this.state.ships.get(`auth${patp}`)!;
-    if (!ship) return false;
+      const ship = this.state.ships.get(`auth${patp}`)!;
+      if (!ship) {
+        throw new Error('ship not found');
+      }
 
-    if (ship.passwordHash === null) {
-      throw new Error('login: passwordHash is null');
-    }
-    let passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
+      if (ship.passwordHash === null) {
+        throw new Error('login: passwordHash is null');
+      }
+      const passwordCorrect = await bcrypt.compare(password, ship.passwordHash);
 
-    if (!passwordCorrect) {
+      if (!passwordCorrect) {
+        throw new Error('login: password is incorrect');
+      }
+
+      this.core.passwords.setPassword(patp, password);
+
+      this.state.login(shipId);
+
+      // this.core.services.desktop.setMouseColor(
+      //   null,
+      //   this.state.selected?.color!
+      // );
+
+      this.core.services.shell.setBlur(null, false);
+
+      const { code } = this.readCredentials(patp, password);
+      const cookie = await getCookie({
+        patp,
+        url: ship.url,
+        code,
+      });
+
+      this.core.setSession({
+        ship: ship.patp,
+        url: ship.url,
+        code,
+        cookie,
+      });
+      return true;
+    } catch (e) {
+      this.core.sendLog(e);
       this.state.setLoader('error');
       return false;
     }
-    this.core.passwords.setPassword(patp, password);
-
-    this.state.login(shipId);
-
-    this.core.services.desktop.setMouseColor(null, this.state.selected?.color!);
-    this.core.services.shell.setBlur(null, false);
-
-    const { code } = this.readCredentials(patp, password);
-    const cookie = await getCookie({
-      patp,
-      url: ship.url,
-      code,
-    });
-
-    this.core.setSession({
-      ship: ship.patp,
-      url: ship.url,
-      code,
-      cookie,
-    });
-
-    return true;
   }
 
   cancelLogin(_event: any) {

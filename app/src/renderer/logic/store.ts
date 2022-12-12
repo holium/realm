@@ -185,7 +185,6 @@ coreStore.reset(); // need to reset coreStore for proper boot sequence
 coreStore.setResuming(true); // need to start the renderer with resuming
 watchOnlineStatus(coreStore);
 OSActions.onConnectionStatus((_event: any, status: any) => {
-  console.log(status);
   coreStore.setConnectionStatus(status);
 });
 
@@ -226,12 +225,6 @@ OSActions.onBoot((_event: any, response: any) => {
         castToSnapshot(response.models.courier)
       );
     }
-    // if (response.models.notifications) {
-    //   applySnapshot(
-    //     servicesStore.notifications,
-    //     castToSnapshot(response.models.notifications)
-    //   );
-    // }
   }
   if (response.ship) {
     servicesStore.setShip(ShipModel.create(response.ship));

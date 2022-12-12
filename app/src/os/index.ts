@@ -180,7 +180,6 @@ export class Realm extends EventEmitter {
     let membership = null;
     let bazaar = null;
     let beacon = null;
-    let rooms = null;
     let wallet = null;
     let visas = null;
     let models = {};
@@ -189,7 +188,6 @@ export class Realm extends EventEmitter {
       ship = this.services.ship.snapshot;
       models = this.services.ship.modelSnapshots;
       spaces = this.services.spaces.snapshot;
-      // rooms = this.services.ship.roomSnapshot;
       wallet = this.services.ship.walletSnapshot;
       bazaar = this.services.spaces.modelSnapshots.bazaar;
       beacon = this.services.spaces.modelSnapshots.beacon;
@@ -212,7 +210,6 @@ export class Realm extends EventEmitter {
       beacon,
       membership,
       visas,
-      rooms,
       wallet,
       models,
       loggedIn: !!this.session,
@@ -326,6 +323,7 @@ export class Realm extends EventEmitter {
   }
 
   async clearSession(): Promise<void> {
+    // this.conduit?.cleanup();
     await this.conduit?.closeChannel();
     this.conduit = undefined;
     this.db.clear();
