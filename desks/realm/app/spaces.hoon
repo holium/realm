@@ -335,6 +335,12 @@
       ::
       ++  host-handle-leave
         |=  [path=space-path:store =ship]
+        :: (~(got by membership.state) path)
+        :: ?.  =(~(has by membership.state) path)
+        ::   ~&  >  ['no membership map on this path' path]
+        ::   :_  state
+        ::   [%give %fact watch-paths visa-reaction+!>([%kicked path ship])]~
+        ::
         =/  membs                   (~(got by membership.state) path)
         =.  membs                   (~(del by membs) ship)
         =.  membership.state        (~(put by membership.state) [path membs])
@@ -634,6 +640,12 @@
           [%give %fact [/updates ~] spaces-reaction+!>([%remove path])]
           [%pass /spaces/(scot %p ship.path)/(scot %tas space.path) %agent [ship.path %spaces] %leave ~]
         ==
+      ::
+      :: ?.  =(~(has by membership.state) path)
+      ::   ~&  >  ['no membership map on this path' path]
+      ::   :_  state
+      ::   [%give %fact [/updates ~] visa-reaction+!>([%kicked path ship])]~
+      ::
       =/  membs                       (~(got by membership.state) path)
       =.  membs                       (~(del by membs) ship)
       =.  membership.state            (~(put by membership.state) [path membs])
