@@ -365,10 +365,11 @@ export class SpacesService extends BaseService {
   // ***********************************************************
   async createSpace(_event: IpcMainInvokeEvent, body: any) {
     const members = body.members;
+    const id = spaceToSnake(body.name);
     const spacePath: SpacePath = await SpacesApi.createSpace(
       this.core.conduit!,
       {
-        slug: spaceToSnake(body.name),
+        slug: id,
         payload: snakeify({
           name: body.name,
           description: body.description,
@@ -384,7 +385,7 @@ export class SpacesService extends BaseService {
     this.core.services.shell.closeDialog(_event);
     this.core.services.shell.setBlur(_event, false);
     const selected = this.state?.selectSpace(spacePath);
-    this.setTheme({ ...selected!.theme, id: selected!.path });
+    selected && this.setTheme({ ...selected.theme, id });
     return spacePath;
   }
 
