@@ -46,16 +46,19 @@ export const EmailDialog: FC<BaseDialogProps> = observer(
 export default EmailDialog;
 
 function InitialScreen(props: { done: any }) {
-  const { onboarding } = useServices();
+  const { onboarding, theme } = useServices();
+  const baseTheme = getBaseTheme(theme.currentTheme);
   const [email, setEmail] = useState(onboarding.email || '');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const onChange = (event: any) => setEmail(event.target.value);
 
   const onClick = async () => {
     setLoading(true);
-    await OnboardingActions.setEmail(email);
+    const response = await OnboardingActions.setEmail(email);
     setLoading(false);
-    props.done();
+
+    response.success ? props.done() : setError(response.errorMessage);
   };
 
   return (
@@ -84,6 +87,16 @@ function InitialScreen(props: { done: any }) {
           >
             Submit
           </Button>
+          {error && (
+            <Text
+              mt={4}
+              fontSize={1}
+              color={baseTheme.colors.text.error}
+              textAlign="center"
+            >
+              {error}
+            </Text>
+          )}
         </Box>
       </Flex>
     </>

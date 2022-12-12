@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -7,6 +7,7 @@ import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpaceHome } from './Space';
 import { OurHome } from './Ship';
+import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 
 interface HomeWindowProps {}
 
@@ -14,7 +15,7 @@ const HomeWindow = styled(motion.div)<HomeWindowProps>`
   height: 100%;
 `;
 
-export const HomePane: FC = observer(() => {
+export const HomePane = observer(() => {
   const { theme, spaces, desktop } = useServices();
   const isOpen = desktop.showHomePane;
 
@@ -41,9 +42,11 @@ export const HomePane: FC = observer(() => {
           transition={{ background: { duration: 0.25 } }}
           exit={{ opacity: 0 }}
         >
-          {/* TODO make app grid not reanimate when switching around */}
-          {isOur && <OurHome isOpen={isOpen} />}
-          {!isOur && <SpaceHome isOpen={isOpen} />}
+          <PassportMenuProvider>
+            {/* TODO make app grid not reanimate when switching around */}
+            {isOur && <OurHome isOpen={isOpen} />}
+            {!isOur && <SpaceHome isOpen={isOpen} />}
+          </PassportMenuProvider>
         </HomeWindow>
       </AnimatePresence>
     ),

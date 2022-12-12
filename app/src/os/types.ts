@@ -67,6 +67,7 @@ export type MemberStatus = 'invited' | 'joined' | 'host';
 export interface Member {
   roles: MemberRole[];
   status: MemberStatus;
+  patp: string;
 }
 export interface Members {
   [patp: Patp]: Member;

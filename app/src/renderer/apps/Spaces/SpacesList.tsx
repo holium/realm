@@ -100,13 +100,14 @@ export const SpacesList = observer(
     return (
       <Flex flex={1} px={10} width="100%">
         <WindowedList
+          key={`${spaces.length}-${incoming.length}`}
           width={358}
           data={listData}
           rowRenderer={({ space, visa }) => {
             if (space) {
               return (
                 <SpaceRow
-                  key={space.name}
+                  key={`space-${space.path}`}
                   space={space}
                   selected={selected?.path === space.path}
                   onSelect={onSelect}
@@ -115,7 +116,7 @@ export const SpacesList = observer(
             }
             return (
               <VisaRow
-                key={visa!.name}
+                key={`visa-${visa!.path}`}
                 image={visa!.picture}
                 color={visa!.color}
                 path={visa!.path}

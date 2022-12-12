@@ -93,7 +93,7 @@ export const Speaker = observer((props: ISpeaker) => {
     sublabel = <BeatLoader size={6} speedMultiplier={0.65} />;
 
   if (peerState === PeerConnectionState.Disconnected)
-    sublabel = <Sublabel {...textProps}>Bad connection</Sublabel>;
+    sublabel = <Sublabel {...textProps}>Disconnected</Sublabel>;
 
   useEffect(() => {
     if (

@@ -154,7 +154,10 @@ jobs:
         run: |
           git config --global user.email realm-builder-no-reply@holium.com
           git config --global user.name ${{ github.actor }}
-          git pull
+          mv ./desks/realm/desk.docket-0 ./desks/realm/desk.docket-0.tmp
+          git checkout HEAD^ ./desks/realm/desk.docket-0
+          git pull origin main
+          mv ./desks/realm/desk.docket-0.tmp ./desks/realm/desk.docket-0
           git add ./desks/realm/desk.docket-0
           git commit -m "patch realm desk version"
           git push
