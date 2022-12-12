@@ -30,13 +30,6 @@
     ^-  vase
     !>(state)
   ::
-  :: ++  on-load
-  ::   |=  old-state=vase
-  ::   ^-  (quip card _this)
-  ::   =/  old  !<(versioned-state old-state)
-  ::   ?-  -.old
-  ::     %0  `this(state old)
-  ::   ==
   ++  on-load
     |=  =vase
     ^-  (quip card:agent:gall agent:gall)
@@ -52,6 +45,12 @@
     |=  [=wire =ship =term] 
     ^-  card
     [%pass wire %agent [ship term] %leave ~]
+    :: |=  old-state=vase
+    :: ^-  (quip card _this)
+    :: =/  old  !<(versioned-state old-state)
+    :: ?-  -.old
+    ::   %0  `this(state old)
+    :: ==
   ::
   ++  on-poke
     ~/  %on-poke
@@ -311,7 +310,7 @@
           transaction.act
         =/  wall-act=action  [%set-transaction network.act net.act wallet.act hash.act transaction.act]
         =/  task  [%poke %realm-wallet-action !>(wall-act)]
-        =/  new-card  
+        =/  new-card
           ^-  (list card)
           :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
           ==

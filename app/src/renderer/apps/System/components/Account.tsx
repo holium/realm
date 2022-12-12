@@ -295,7 +295,7 @@ export const AccountPanel: FC<any> = observer(() => {
               <Flex justifyContent="space-between" flex={3}>
                 <Text color={baseTheme.colors.text.secondary}>Credit Card</Text>
                 <Anchor
-                  href="https://billing.stripe.com/p/login/test_8wM8yL4SR7Oc0iAfYY"
+                  href="https://billing.stripe.com/p/login/00g4gz19T9WbfxS4gg"
                   p={0}
                   m={0}
                 >

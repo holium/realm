@@ -18,6 +18,7 @@
       %group  `block:c`[%cite [%group group.reference.con]]
       %app    `block:c`[%cite [%desk flag=[ship.reference.con desk.reference.con] path.reference.con]]
     ==
+    ~&  >>  ['into-chat-block-type' ref]
     ?~  ref  ~
     `ref
   ==
@@ -227,8 +228,6 @@
         des=%talk 
         ted=[/dm/(scot %p ship)]
       ]
-    :: ~&  >  rop
->>>>>>> courier-parsing
     :~
       [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-ship ship))]
       [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop])]
@@ -284,18 +283,20 @@
     ==
   ++  read-group-dm
     |=  [=resource =bowl:gall]
-    :: ~&  %read-group-dm
-    :: ~&  resource
-    :: =/  rop
-    ::   [
-    ::     gop=~ 
-    ::     can=~ 
-    ::     des=%talk 
-    ::     ted=[/club/(scot %uv `@uvH`((slat %uv) `@t`name.resource))]
-    ::   ]
+    ~&  %read-group-dm
+    ~&  resource
+    =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`name.resource)
+    ?~  club-id-unit  !!
+    =/  rop
+      [
+        gop=~ 
+        can=~ 
+        des=%talk
+        ted=[/club/(scot %uv +:club-id-unit)]
+      ]
     :~
       [%pass / %agent [our.bowl %chat] %poke chat-remark-action+!>((create-chat-remark-action-from-resource resource))]
-      :: [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop])]
+      [%pass / %agent [our.bowl %hark] %poke hark-action+!>([%saw-rope rop])]
     ==
   --
 ++  test-scry
@@ -468,7 +469,6 @@
       (turn ~(tap in team.crew) |=(=ship (form-contact-mtd rolo ship)))
     =/  our-in-team    (~(has in team.crew) our.bowl)
     =/  =writs:c  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/club/(scot %uv `@uvh`p.whom)/writs/newest/1/noun)
-    :: ~&  writs
     =/  recent-msg      (snag 0 (messages-from-writs writs))
     =/  prev-contents   (weld [[%mention author.recent-msg] ~] contents.recent-msg)
     :-  ~
@@ -605,6 +605,8 @@
             =/  msg     (snag 0 messages.new-dm)
             ?:  =(author.msg our.bowl)  ~
             (send-updates new-dm bowl state)
+            :: =/  new-dm  (chat-from-newest-writ p.-.the-fact bowl)
+            :: (send-updates new-dm bowl state)
         ==
         ?~  dm-received-cards  ~
         =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl (get-rolo bowl)])

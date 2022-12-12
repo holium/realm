@@ -1,19 +1,10 @@
-import { FC, useRef } from 'react';
-import { Portal } from 'renderer/system/dialog/Portal';
+import { useEffect, useRef } from 'react';
 import { clan } from 'urbit-ob';
-import {
-  ContextMenu,
-  Flex,
-  Box,
-  Sigil,
-  Text,
-  MenuItemProps,
-  useMenu,
-  Menu,
-} from '../';
+import { Flex, Box, Sigil, Text, MenuItemProps } from '../';
 import { Row } from 'renderer/components/NewRow';
-import { AnimatePresence } from 'framer-motion';
-import { PassportCard } from './PassportCard';
+import { useContextMenu } from 'renderer/components/ContextMenu';
+import { ThemeType } from '../../logic/theme';
+import { usePassportMenu } from './usePassportMenu';
 
 interface IPersonRow {
   listId: string;
@@ -24,40 +15,26 @@ interface IPersonRow {
   description?: string | null;
   style?: any;
   rowBg: string;
-  theme?: {
-    textColor: string;
-    windowColor: string;
-  };
-  showPassport?: boolean; // show profile popover
+  theme?: ThemeType;
   contextMenuOptions?: MenuItemProps[];
   children?: any;
 }
 
-export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
-  const {
-    listId,
-    patp,
-    sigilColor,
-    avatar,
-    nickname,
-    description,
-    style,
-    rowBg,
-    contextMenuOptions,
-    children,
-  } = props;
-  const { textColor, windowColor } = props.theme!;
-  const rowRef = useRef(null);
-
-  /// Setting up options menu
-  const menuWidth = 340;
-  const config = useMenu(rowRef, {
-    orientation: 'left',
-    padding: 0,
-    menuWidth,
-  });
-
-  const { anchorPoint, show, setShow } = config;
+export const PersonRow = ({
+  listId,
+  patp,
+  sigilColor,
+  avatar,
+  nickname,
+  description,
+  style,
+  rowBg,
+  contextMenuOptions,
+  children,
+}: IPersonRow) => {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const { getOptions, setOptions } = useContextMenu();
+  const { menuConfig, setMenuConfig } = usePassportMenu();
 
   const idClass = clan(patp);
   const id = `${listId}-${patp}`;
@@ -69,58 +46,15 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
   if (idClass === 'comet') {
     // TODO sanitize comet
   }
+
+  useEffect(() => {
+    if (contextMenuOptions && contextMenuOptions !== getOptions(id)) {
+      setOptions(id, contextMenuOptions);
+    }
+  }, [contextMenuOptions, getOptions, id, setOptions]);
+
   return (
     <Flex key={id} style={{ position: 'relative', ...style }}>
-      {contextMenuOptions && (
-        <Portal>
-          <AnimatePresence>
-            {show && (
-              <Menu
-                id={`${id}-profile`}
-                customBg={windowColor}
-                style={{
-                  x: anchorPoint && anchorPoint.x - 6,
-                  y: anchorPoint && anchorPoint.y,
-                  visibility: show ? 'visible' : 'hidden',
-                  width: menuWidth,
-                  borderRadius: 9,
-                  minHeight: 120,
-                  padding: 12,
-                }}
-                isOpen={show}
-                onClose={() => {
-                  setShow(false);
-                }}
-              >
-                <PassportCard
-                  patp={patp}
-                  sigilColor={sigilColor}
-                  avatar={avatar}
-                  nickname={nickname}
-                  description={description}
-                  theme={props.theme}
-                  onClose={() => {
-                    setShow(false);
-                  }}
-                />
-              </Menu>
-            )}
-          </AnimatePresence>
-          <AnimatePresence>
-            <ContextMenu
-              adaptive
-              orientation="bottom-left"
-              isComponentContext
-              textColor={textColor}
-              customBg={windowColor}
-              containerId={id}
-              parentRef={rowRef}
-              style={{ minWidth: 180 }}
-              menu={contextMenuOptions}
-            />
-          </AnimatePresence>
-        </Portal>
-      )}
       <Row
         id={id}
         ref={rowRef}
@@ -129,9 +63,22 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
         }}
         style={{ justifyContent: 'space-between' }}
         customBg={rowBg}
-        selected={show}
-        onClick={(evt: any) => {
-          show ? setShow(false) : setShow(true); // todo this doesnt work. fix menu
+        selected={menuConfig?.id === id}
+        onClick={(evt) => {
+          setMenuConfig({
+            id,
+            options: {
+              patp,
+              sigilColor,
+              avatar,
+              nickname,
+              description,
+            },
+            anchorPoint: {
+              x: rowRef.current?.getBoundingClientRect().left || 0,
+              y: rowRef.current?.getBoundingClientRect().top || 0,
+            },
+          });
           evt.stopPropagation();
         }}
       >
@@ -169,8 +116,4 @@ export const PersonRow: FC<IPersonRow> = (props: IPersonRow) => {
       </Row>
     </Flex>
   );
-};
-
-PersonRow.defaultProps = {
-  showPassport: false,
 };

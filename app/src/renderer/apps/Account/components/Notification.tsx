@@ -1,10 +1,13 @@
+import { FC, useMemo } from 'react';
 import { lighten, rgba } from 'polished';
 import styled from 'styled-components';
 import { Flex, Text, Skeleton, Mention } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 
-import { FC, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTrayApps } from 'renderer/apps/store';
+import { useServices } from 'renderer/logic/store';
+import { openDMsToChat } from 'renderer/logic/lib/useTrayControls';
 
 interface ContentType {
   [key: string]: string;
@@ -16,7 +19,10 @@ export interface NotificationProps {
   image?: string;
   title: ContentType[];
   content: ContentType[];
+  // content: string;
   seen?: boolean;
+  inbox?: string;
+  desk?: string;
   link: string;
   time: string;
   ship: string;
@@ -40,13 +46,32 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
           ? content.text.substring(0, 44) + '...'
           : content.text;
       token = (
-        <Text fontWeight={400} opacity={fontOpacity} fontSize={fontSize}>
+        <Text
+          paddingLeft={'3px'}
+          paddingRight={'3px'}
+          fontWeight={400}
+          opacity={fontOpacity}
+          fontSize={fontSize}
+        >
           {trimmed}
         </Text>
       );
       break;
     case 'ship':
       token = <Mention height={19} mb={2} patp={content.ship} />;
+      break;
+    case 'emph':
+      token = (
+        <Text
+          paddingLeft={'3px'}
+          paddingRight={'3px'}
+          fontWeight={'bold'}
+          opacity={fontOpacity}
+          fontSize={fontSize}
+        >
+          {Object.values(content)[0]}
+        </Text>
+      );
       break;
     default:
       token = (
@@ -62,7 +87,8 @@ const NotifTitle: FC<NotifTitleProps> = (props: NotifTitleProps) => {
 export const Notification = (props: NotificationProps) => {
   let innerContent: React.ReactNode;
   const seedColor = '#4E9EFD';
-  // const { dmApp, setActiveApp } = useTrayApps();
+  const { dmApp, setActiveApp, closeActiveApp } = useTrayApps();
+  const { courier } = useServices();
 
   const bgColor = useMemo(
     () =>
@@ -72,9 +98,6 @@ export const Notification = (props: NotificationProps) => {
     [seedColor && props.seen]
   );
 
-  useEffect(() => {
-    // ship?.notifications.setSeen(props.link);
-  }, []);
   if (props.loading) {
     innerContent = (
       <>
@@ -96,23 +119,25 @@ export const Notification = (props: NotificationProps) => {
     innerContent = (
       <>
         <motion.div style={{ display: 'inline-grid' }}>
-          <motion.div
-            style={{
-              margin: 0,
-              display: '-webkit-inline-box',
-              verticalAlign: 'middle',
-              gap: 4,
-              alignItems: 'center',
-            }}
-          >
-            {props.title.map((content: ContentType, index: number) => (
-              <NotifTitle
-                key={`title-${index}`}
-                fontSize={2}
-                content={content}
-              />
-            ))}
-          </motion.div>
+          {props.title && (
+            <motion.div
+              style={{
+                margin: 0,
+                display: '-webkit-inline-box',
+                verticalAlign: 'middle',
+                gap: 4,
+                alignItems: 'center',
+              }}
+            >
+              {props.title.map((content: ContentType, index: number) => (
+                <NotifTitle
+                  key={`title-${index}`}
+                  fontSize={2}
+                  content={content}
+                />
+              ))}
+            </motion.div>
+          )}
           <motion.div style={{ display: '-webkit-inline-box' }}>
             {props.content.map((content: ContentType, index: number) => (
               <NotifTitle
@@ -148,12 +173,19 @@ export const Notification = (props: NotificationProps) => {
         onClick={(evt: any) => {
           evt.stopPropagation();
           // TODO make this open dm and load url
-          //
-          // const path = pathToDmInbox(props.link);
-          // if (path.includes('dm-inbox')) {
-          //   dmApp.setPath(path);
-          //   setActiveApp('messages-tray');
-          // }
+          if (props.inbox?.includes('dm')) {
+            const inbox = props.inbox.split('/');
+            let path: string = '';
+            Array.from(courier.dms.keys()).forEach((key) => {
+              if (key.includes(inbox[2])) {
+                path = key;
+              }
+            });
+            if (!path) return;
+            // ShipActions.draftDm()
+            const dmPreview = courier.previews.get(path)!;
+            openDMsToChat(dmApp, dmPreview, setActiveApp);
+          }
           evt.preventDefault();
         }}
       >

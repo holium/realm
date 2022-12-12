@@ -67,6 +67,7 @@ export class LocalPeer extends Peer {
         track.enabled = false;
       }
       if (!peer.peer?.destroyed) {
+        // if (!peer.peer?.destroyed && !peer.isAudioAttached) {
         peer.peer?.addTrack(track, currentStream);
       }
     });

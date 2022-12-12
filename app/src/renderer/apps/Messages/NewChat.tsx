@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -28,10 +28,10 @@ interface IProps {
   onCreateNewDm: (newDmKey: DMPreviewType) => void;
 }
 
-export const NewChat: FC<IProps> = observer((props: IProps) => {
+export const NewChat = observer((props: IProps) => {
   const { height, headerOffset, theme, onBack, onCreateNewDm } = props;
-  const { courier, contacts } = useServices();
-  const { inputColor, textColor, iconColor, dockColor, windowColor } = theme;
+  const { contacts } = useServices();
+  const { textColor, iconColor, dockColor, windowColor } = theme;
   const [loading, setLoading] = useState(false);
   const [patp, setPatp] = useState<string>('');
 
@@ -55,7 +55,7 @@ export const NewChat: FC<IProps> = observer((props: IProps) => {
       setLoading(false);
       onCreateNewDm(newDm);
     },
-    [selectedPatp]
+    [contacts, onCreateNewDm, selectedPatp]
   );
 
   const onShipSelected = (contact: [string, string?]) => {

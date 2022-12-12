@@ -6,7 +6,6 @@ import {
   Sigil,
   Text,
   IconButton,
-  TextButton,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 // import { displayDate } from 'renderer/logic/lib/time';
@@ -15,12 +14,13 @@ import { NotificationList } from './components/NotificationList';
 import { observer } from 'mobx-react';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from '../store';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { lighten, rgba } from 'polished';
+// import { ShipActions } from 'renderer/logic/actions/ship';
+import { rgba } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 
 export const AccountTrayApp = observer(() => {
-  const { ship, theme, notifications } = useServices();
+  const { ship, theme, beacon } = useServices();
   const { dimensions, setActiveApp } = useTrayApps();
   const { backgroundColor, textColor, windowColor, iconColor } =
     theme.currentTheme;
@@ -33,11 +33,12 @@ export const AccountTrayApp = observer(() => {
     //   setBatteryLevel(level);
     // });
     return () => {
-      ShipActions.openedNotifications()
-        .then(() => {})
-        .catch((err) => {
-          console.error(err);
-        });
+      SpacesActions.sawInbox({ all: null });
+      // ShipActions.openedNotifications()
+      //   .then(() => {})
+      //   .catch((err) => {
+      //     console.error(err);
+      //   });
     };
   }, []);
 
@@ -84,11 +85,11 @@ export const AccountTrayApp = observer(() => {
             Notifications
           </Text>
           <Text opacity={0.5} fontSize={2}>
-            {notifications.unseen.length}
+            {beacon.unseen.length}
           </Text>
         </Flex>
         <Flex gap={10} alignItems="center">
-          <TextButton
+          {/* <TextButton
             style={{ fontWeight: 400 }}
             textColor={rgba(textColor, 0.5)}
             highlightColor={lighten(0.4, textColor)}
@@ -100,13 +101,10 @@ export const AccountTrayApp = observer(() => {
             }}
           >
             Show archived
-          </TextButton>
+          </TextButton> */}
         </Flex>
       </Flex>
-      <NotificationList
-        unseen={notifications.unseen as any}
-        seen={notifications.seen as any}
-      />
+      <NotificationList unseen={beacon.unseen} seen={beacon.seen} />
 
       <Flex
         position="absolute"

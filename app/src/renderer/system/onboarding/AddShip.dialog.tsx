@@ -24,6 +24,7 @@ export const AddShip: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
     const { theme } = useServices();
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const { identity } = useServices();
 
     useEffect(() => {
@@ -33,19 +34,25 @@ export const AddShip: FC<BaseDialogProps> = observer(
 
     const shipForm = useForm({
       async onSubmit({ values }: any) {
+        setError('');
         setLoading(true);
         try {
           // Parse the url, fail otherwise
           values.url = new URL(values.url).origin;
-          await OnboardingActions.addShip(values);
+          const result = await OnboardingActions.addShip(values);
+          setLoading(false);
+          if (!result.success) {
+            setError(result.errorMessage || 'Connection failed.');
+            return;
+          }
 
           props.setState &&
             props.setState({ ...props.workflowState, ship: values });
           props.onNext && props.onNext(values);
-          setLoading(false);
         } catch (reason: any) {
           setLoading(false);
-          throw new Error(`Cannot add ship: ${reason.toString()}`);
+          console.error(`Cannot add ship: ${reason.toString()}`);
+          setError(`Something went wrong while trying to connect.`);
         }
       },
     });
@@ -119,9 +126,10 @@ export const AddShip: FC<BaseDialogProps> = observer(
                       urbitId.computed.ifWasEverBlurredThenError &&
                       urbitId.computed.isDirty
                     }
-                    onChange={(e: any) =>
-                      urbitId.actions.onChange(e.target.value)
-                    }
+                    onChange={(e: any) => {
+                      setError('');
+                      urbitId.actions.onChange(e.target.value);
+                    }}
                     onFocus={() => urbitId.actions.onFocus()}
                     onBlur={() => urbitId.actions.onBlur()}
                   />
@@ -146,9 +154,10 @@ export const AddShip: FC<BaseDialogProps> = observer(
                       shipUrl.computed.ifWasEverBlurredThenError &&
                       shipUrl.computed.isDirty
                     }
-                    onChange={(e: any) =>
-                      shipUrl.actions.onChange(e.target.value)
-                    }
+                    onChange={(e: any) => {
+                      setError('');
+                      shipUrl.actions.onChange(e.target.value);
+                    }}
                     onFocus={() => shipUrl.actions.onFocus()}
                     onBlur={() => shipUrl.actions.onBlur()}
                   />
@@ -174,9 +183,10 @@ export const AddShip: FC<BaseDialogProps> = observer(
                       accessKey.computed.ifWasEverBlurredThenError &&
                       accessKey.computed.isDirty
                     }
-                    onChange={(e: any) =>
-                      accessKey.actions.onChange(e.target.value)
-                    }
+                    onChange={(e: any) => {
+                      setError('');
+                      accessKey.actions.onChange(e.target.value);
+                    }}
                     onFocus={() => accessKey.actions.onFocus()}
                     onBlur={() => accessKey.actions.onBlur()}
                   />
@@ -188,6 +198,9 @@ export const AddShip: FC<BaseDialogProps> = observer(
                     )}
                 </FormControl.Field>
               </FormControl.FieldSet>
+            </Flex>
+            <Flex width="100%" justifyContent="center" mt={2}>
+              <FormControl.Error>{error}</FormControl.Error>
             </Flex>
           </Grid.Column>
         </Grid.Column>

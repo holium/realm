@@ -88,13 +88,8 @@ export const DevAppModel = types.model('DevApp', {
   color: types.string,
   icon: types.string,
   installStatus: types.optional(types.string, InstallStatus.installed),
+  config: types.maybeNull(RealmConfig),
   web: types.model('WebConfig', {
-    dimensions: types.maybe(
-      types.model('WebConfigDimensions', {
-        width: types.number,
-        height: types.number,
-      })
-    ),
     url: types.string,
     openFullscreen: types.optional(types.boolean, false),
   }),

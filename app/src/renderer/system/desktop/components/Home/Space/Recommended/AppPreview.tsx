@@ -78,6 +78,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     return (
       <Flex flexGrow="0" flexDirection="row" gap={16}>
         <AppTile
+          tileId={`preview-${app.id}`}
           tileSize="lg"
           highlightOnHover
           isAnimated={false}

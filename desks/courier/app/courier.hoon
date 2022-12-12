@@ -3,7 +3,7 @@
 ::  A thin agent that interfaces with various chat stores
 ::
 /-  store=courier, post, graph-store, *post, *resource, *versioned-state, group, inv=invite-store, met=metadata-store,
-    hark=hark-store, dm-hook-sur=dm-hook, notify, agd-type=accept-group-dm
+    hark=hark-store, dm-hook-sur=dm-hook, notify, agd-type=accept-group-dm, cs=contact-store
 /+  dbug, default-agent, lib=courier, hook=dm-hook, notif-lib=notify, groups-two
 =|  state-1
 =*  state  -
@@ -85,9 +85,10 @@
       %notify-action  (on-notify-action:core !<(action:notify vase))
       %set-groups-target
       ::   :courier &set-groups-target %2
-      :-
-        (set-groups-target:groups-two !<(targetable-groups vase) bowl)
-        [%1 !<(targetable-groups vase) +>:state]
+      =.  groups-target.state     !<(targetable-groups vase)
+      :_  state
+      (set-groups-target:groups-two !<(targetable-groups vase) bowl)
+        :: [%1 !<(targetable-groups vase) +>:state]
     ==
     [cards this]
   --
@@ -136,6 +137,10 @@
         =/  to-ship       `@p`(slav %p i.t.t.path)
         =/  dms           (dm-log:gs:lib our.bowl to-ship now.bowl)
         ``graph-dm-view+!>([%dm-log dms])
+      [%x %rolodex ~]
+    :-  ~  :-  ~  :-  %rolodex
+    !>(.^(rolodex:cs %gx /(scot %p our.bowl)/contact-store/(scot %da now.bowl)/all/noun))
+
     ::
     ::  ~/scry/courier/dms/~dev/paged/0/20.json
       :: [%x %dms @ %paged @ @ ~]
