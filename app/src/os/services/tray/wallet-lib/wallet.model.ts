@@ -6,6 +6,7 @@ import {
   flow,
   cast,
 } from 'mobx-state-tree';
+import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {
   LIST = 'list',
@@ -441,7 +442,23 @@ const EthWallet = types
         'initiated-at': tx.initiatedAt,
         'completed-at': tx.completedAt || '',
         'our-address': tx.ourAddress,
-        'their-patp': tx.theirPatp || '',
+        'their-patp': tx.theirPatp || null,
+        'their-address': tx.theirAddress,
+        status: tx.status,
+        'failure-reason': tx.failureReason || '',
+        notes: tx.notes || '',
+      };
+    },
+    getAgentTransaction(protocol: ProtocolType, hash: string) {
+      const tx: any = self.data.get(protocol)!.transactions.get(hash);
+      return {
+        hash: tx.hash,
+        network: tx.network,
+        type: tx.type,
+        'initiated-at': tx.initiatedAt,
+        'completed-at': tx.completedAt || '',
+        'our-address': tx.ourAddress,
+        'their-patp': tx.theirPatp || null,
         'their-address': tx.theirAddress,
         status: tx.status,
         'failure-reason': tx.failureReason || '',
@@ -491,7 +508,7 @@ const EthWallet = types
         netMap.set(transaction.hash, tx);
       }
     },
-    applyTransactions(protocol: ProtocolType, transactions: any) {
+    applyTransactions(conduit: any, protocol: ProtocolType, transactions: any) {
       let formattedTransactions: any = {};
       let previousTransactions = self.data.get(protocol)!.transactions.toJSON();
       for (const transaction of transactions) {
@@ -509,7 +526,7 @@ const EthWallet = types
           ourAddress: transaction.from,
           theirPatp: previousTransaction?.theirPatp,
           theirAddress: transaction.to,
-          status: transaction.txreceipt_status === '1' ? 'succeeded' : 'failed',
+          status: 'succeeded',
           failureReason: previousTransaction?.failureReason,
           notes: previousTransaction?.notes || '',
         };
@@ -518,7 +535,16 @@ const EthWallet = types
             formattedTransactions[transaction.hash].status !==
             previousTransactions[transaction.hash].status
           ) {
-            // WalletApi.setTransaction(transaction);
+            delete formattedTransactions.walletIndex;
+            delete formattedTransactions.amount;
+            WalletApi.setTransaction(
+              conduit,
+              'ethereum',
+              protocol,
+              self.index,
+              transaction.hash,
+              formattedTransactions
+            );
           }
         }
       }

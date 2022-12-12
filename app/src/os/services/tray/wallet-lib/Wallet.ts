@@ -19,20 +19,25 @@ export class Wallet {
     this.protocols.get(this.currentProtocol)!.removeListener();
   }
 
-  watchUpdates(walletState: WalletStoreType) {
+  watchUpdates(conduit: any, walletState: WalletStoreType) {
     const lastProtocol: BaseProtocol = this.protocols.get(
       this.currentProtocol
     )!;
     lastProtocol?.removeListener();
     this.currentProtocol = walletState.navState.protocol;
     if (walletState.navState.network === NetworkType.ETHEREUM) {
-      this.protocols.get(this.currentProtocol)!.watchUpdates(walletState);
+      const protocol = this.protocols.get(
+        this.currentProtocol
+      ) as EthereumProtocol;
+      protocol.watchUpdates(conduit, walletState);
     }
   }
 
-  updateWalletState(walletState: WalletStoreType) {
+  updateWalletState(conduit: any, walletState: WalletStoreType) {
     if (walletState.navState.network === NetworkType.ETHEREUM) {
-      this.protocols.get(walletState.navState.protocol)!.watchUpdates(walletState);
+      this.protocols
+        .get(walletState.navState.protocol)!
+        .watchUpdates(conduit, walletState);
     }
   }
 }
