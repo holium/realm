@@ -4,7 +4,8 @@
 ::    to/from json from types stored in courier sur.
 ::
 /-  sur=courier, gra=graph-store, *post, *resource, contact-store, dm-hook, 
-    mtd=metadata-store, inv=invite-store, graph-view, hark=hark-store
+    mtd=metadata-store, inv=invite-store, graph-view, hark=hark-store,
+    cs=contact-store
 /+  res=resource
 =<  [sur .]
 =,  sur
@@ -505,6 +506,28 @@
         %dm-log
       (dm-log:encode chat.vi)
     ==
+  ::
+  ++  rolodex
+    |=  =rolodex:cs
+    ^-  json
+    |^
+    %-  pairs
+    %+  turn  ~(tap by rolodex)
+    |=  [ship=@p =contact:cs]
+    ^-  [cord json]
+    [(scot %p ship) (encode-contact contact)]
+    ++  encode-contact
+      |=  =contact:cs
+      ^-  json
+      %-  pairs:enjs:format
+      :~  ['nickname' s+nickname.contact]
+          ['bio' s+bio.contact]
+          ['color' s+(scot %ux color.contact)]
+          ['avatar' ?~(avatar.contact ~ s+u.avatar.contact)]
+          ['cover' ?~(cover.contact ~ s+u.cover.contact)]
+          ['groups' a+(turn ~(tap in groups.contact) (cork enjs-path:res (lead %s)))]
+      ==
+    --
   --
 ::
 ++  dejs
