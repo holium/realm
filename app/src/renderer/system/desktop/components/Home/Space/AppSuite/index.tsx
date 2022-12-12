@@ -207,6 +207,7 @@ export const AppSuite = observer((props: AppSuiteProps) => {
         selected={index === suiteIndex}
         accentColor={accentColor}
         app={undefined}
+        isAdmin={isAdmin}
         onClick={() => {
           if (isAdmin) {
             setCoords(
