@@ -1,4 +1,3 @@
-import { AssetTransfersCategory } from 'alchemy-sdk';
 import {
   applySnapshot,
   types,
@@ -253,6 +252,7 @@ const ERC20 = types
           self.usd = usd;
         },
       })),
+    transactions: types.map(Transaction)
   })
   .actions((self) => ({
     setBalance(balance: string) {
@@ -261,6 +261,40 @@ const ERC20 = types
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
     },
+    applyTransactions(index: number, transactions: any) {
+      let formattedTransactions: any = {};
+      let previousTransactions = self.transactions.toJSON();
+      for (const transaction of transactions) {
+        // console.log('applyTransaction', transaction);
+        const previousTransaction = previousTransactions[transaction.hash];
+        formattedTransactions[transaction.hash] = {
+          hash: transaction.hash,
+          walletIndex: index,
+          amount: transaction.value?.toString() || '0',
+          network: 'ethereum',
+          ethType: transaction.contractAddress || 'ERC20',
+          type: self.address === transaction.from ? 'sent' : 'received',
+          initiatedAt: previousTransaction?.initiatedAt,
+          completedAt: transaction.metadata.blockTimestamp,
+          ourAddress: transaction.from,
+          theirPatp: previousTransaction?.theirPatp,
+          theirAddress: transaction.to,
+          status: transaction.txreceipt_status === '1' ? 'succeeded' : 'failed',
+          failureReason: previousTransaction?.failureReason,
+          notes: previousTransaction?.notes || '',
+        };
+      }
+      formattedTransactions = {
+        ...previousTransactions,
+        ...formattedTransactions,
+      };
+      const map = types.map(Transaction);
+      const newTransactions = map.create(formattedTransactions);
+      applySnapshot(
+        self.transactions,
+        getSnapshot(newTransactions)
+      );
+    }
   }));
 
 export type ERC20Type = Instance<typeof ERC20>;
@@ -273,6 +307,7 @@ const ERC721 = types.model('ERC721', {
   imageUrl: types.string,
   lastPrice: types.string,
   floorPrice: types.maybe(types.string),
+  transactions: types.map(Transaction)
 });
 
 export type ERC721Type = Instance<typeof ERC721>;
@@ -345,7 +380,9 @@ const EthWallet = types
         conversions: {},
       });
     },
-    updateCoinTransfers(transfers: any) {},
+    updateCoinTransfers(protocol: ProtocolType, coin: string, transfers: any) {
+      self.data.get(protocol)!.coins.get(coin)!.applyTransactions(self.index, transfers);
+    },
     updateNft(protocol: ProtocolType, nft: Asset) {
       const nftData = nft.data as NFTAsset;
       self.data.get(protocol)!.nfts.set(nft.addr + nftData.tokenId, {
@@ -357,7 +394,7 @@ const EthWallet = types
         lastPrice: '',
       });
     },
-    updateNftTransfers(transfers: any) {},
+    updateNftTransfers(protocol: ProtocolType, transfers: any) {},
     setBalance(protocol: ProtocolType, balance: string) {
       self.data.get(protocol)!.balance = balance;
     },
@@ -461,14 +498,12 @@ const EthWallet = types
         formattedTransactions[transaction.hash] = {
           hash: transaction.hash,
           walletIndex: self.index,
-          amount: gweiToEther(transaction.value).toString(),
+          amount: transaction.value.toString(),
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: self.address === transaction.from ? 'sent' : 'received',
           initiatedAt: previousTransaction?.initiatedAt,
-          completedAt: new Date(
-            Number(transaction.timeStamp) * 1000
-          ).toISOString(),
+          completedAt: transaction.metadata.blockTimestamp,
           ourAddress: transaction.from,
           theirPatp: previousTransaction?.theirPatp,
           theirAddress: transaction.to,

@@ -14,7 +14,7 @@ import {
   EthWalletType,
   ProtocolType,
   NetworkStoreType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from '@holium/realm-wallet';
 import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
 import { BaseProtocol } from '@holium/realm-wallet/src/wallets';
 import { RealmSigner } from './wallet/signers/realm';

@@ -1,5 +1,5 @@
 import { BaseProtocol } from '@holium/realm-wallet/src/wallets/BaseProtocol';
-import { Alchemy, AssetTransfersCategory, Network } from 'alchemy-sdk';
+import { Alchemy, AlchemySettings, AssetTransfersCategory, AssetTransfersWithMetadataParams, Network } from 'alchemy-sdk';
 import axios from 'axios';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
@@ -18,31 +18,29 @@ import EventSource from 'eventsource';
 
 export class EthereumProtocol implements BaseProtocol {
   private protocol: ProtocolType;
-  private ethBlockWatcher?: EventSource;
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
+  private interval: any;
 
   constructor(protocol: ProtocolType) {
     this.protocol = protocol;
-    let alchemySettings;
+    let alchemySettings: AlchemySettings;
     if (protocol === ProtocolType.ETH_MAIN) {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
         'http://localhost:8080/eth'
       );
       alchemySettings = {
-        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
-        network: Network.ETH_MAINNET, // Replace with your network.
+        url: 'http://localhost:8080/eth',
+        network: Network.ETH_MAINNET,
       };
       // etherscan
     } else {
-      console.log('SETTING GORLI PROVIDER')
       this.ethProvider = new ethers.providers.JsonRpcProvider(
         'http://localhost:8080/gorli'
-  //      'https://eth-goerli.g.alchemy.com/v2/-_e_mFsxIOs5-mCgqZhgb-_FYZFUKmzw'
       );
       alchemySettings = {
-        apiKey: 'gaAFkc10EtqPwZDCXAvMni8xgz9JnNmM', // Replace with your Alchemy API Key.
-        network: Network.ETH_GOERLI, // Replace with your network.
+        url: 'http://localhost:8080/gorli',
+        network: Network.ETH_GOERLI,
       };
     }
     this.ethProvider!.removeAllListeners();
@@ -55,6 +53,13 @@ export class EthereumProtocol implements BaseProtocol {
 
   watchUpdates(walletStore: WalletStoreType) {
     this.updateWalletState(walletStore);
+    this.interval = setInterval(async () => {
+      await this.updateWalletState(walletStore);
+      if (!(walletStore.navState.protocol === ProtocolType.ETH_GORLI)
+      && !(walletStore.navState.protocol === ProtocolType.UQBAR)) {
+        walletStore.currentStore.setBlock(await this.getBlockNumber());
+      }
+    }, 30000);
   }
 
   async updateWalletState(walletStore: WalletStoreType) {
@@ -67,32 +72,36 @@ export class EthereumProtocol implements BaseProtocol {
         wallet.address,
         walletStore.currentStore.block
       ).then((response: any) => {
-        wallet.applyTransactions(this.protocol, response.data.result);
+        wallet.applyTransactions(this.protocol, response);
       });
       if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
         const ethWallet = walletStore.ethereum.wallets.get(walletKey)!;
-        const assets = await this.getAccountAssets(ethWallet.address);
-        for (let asset of assets) {
-          if (asset.type === 'coin') {
-            this.getAsset(asset.addr, ethWallet.address, 'coin').then(
-              (coin: Asset) => ethWallet.updateCoin(this.protocol, coin)
-            );
-            this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
-              ethWallet.updateCoinTransfers
-            );
+        this.getAccountAssets(ethWallet.address).then((assets: Asset[]) => {
+          for (let asset of assets) {
+            if (asset.type === 'coin') {
+              this.getAsset(asset.addr, ethWallet.address, 'coin').then(
+                (coin: Asset) => ethWallet.updateCoin(this.protocol, coin)
+              );
+              this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
+                (transfers: any) => {
+                  ethWallet.updateCoinTransfers(this.protocol, asset.addr, transfers);
+                }
+              );
+            }
+            if (asset.type === 'nft') {
+              this.getAsset(
+                asset.addr,
+                ethWallet.address,
+                'nft',
+                (asset.data as NFTAsset).tokenId
+              ).then((nft: Asset) => ethWallet.updateNft(this.protocol, nft));
+              /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
+                ethWallet.updateNftTransfers
+              );*/
+            }
           }
-          if (asset.type === 'nft') {
-            this.getAsset(
-              asset.addr,
-              ethWallet.address,
-              'nft',
-              (asset.data as NFTAsset).tokenId
-            ).then((nft: Asset) => ethWallet.updateNft(this.protocol, nft));
-            this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
-              ethWallet.updateNftTransfers
-            );
-          }
-        }
+
+        })
       }
     }
   }
@@ -103,12 +112,28 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
-    const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
-    const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
-    const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${addr}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
-    const URL =
-      this.protocol === ProtocolType.ETH_MAIN ? mainnetURL : goerliURL;
-    return await axios.get(URL);
+    const from = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(startBlock),
+      fromAddress: addr,
+      category: [AssetTransfersCategory.INTERNAL, AssetTransfersCategory.EXTERNAL],
+      withMetadata: true,
+    })).transfers;
+    const to = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(startBlock),
+      toAddress: addr,
+      category: [AssetTransfersCategory.INTERNAL, AssetTransfersCategory.EXTERNAL],
+      withMetadata: true,
+    })).transfers;
+    return from.concat(to)
+    /*txns.forEach(async (txn, index) => {
+      txns[index] = {
+        timeStamp: await this.getBlockTime(Number(txn.blockNum)),
+        ...txn
+      }
+    })
+    for (let txn of txns) {
+      console.log(txn.timeStamp)
+    }*/
   }
   async getAccountAssets(addr: string): Promise<Asset[]> {
     const coins = await this.alchemy.core.getTokenBalances(addr);
@@ -190,19 +215,29 @@ export class EthereumProtocol implements BaseProtocol {
     addr: string,
     startBlock: number
   ): Promise<any[]> {
-    return (
-      await this.alchemy.core.getAssetTransfers({
-        fromBlock: ethers.utils.hexlify(startBlock),
-        fromAddress: addr,
-        contractAddresses: [contract],
-        excludeZeroValue: true,
-        category: [
-          AssetTransfersCategory.ERC20,
-          AssetTransfersCategory.ERC721,
-          AssetTransfersCategory.ERC1155,
-        ],
-      })
-    ).transfers;
+    const from = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(startBlock),
+      fromAddress: addr,
+      category: [
+        AssetTransfersCategory.ERC20,
+        AssetTransfersCategory.ERC721,
+        AssetTransfersCategory.ERC1155,
+      ],
+      contractAddresses: [contract],
+      withMetadata: true,
+    })).transfers;
+    const to = (await this.alchemy.core.getAssetTransfers({
+      fromBlock: ethers.utils.hexlify(startBlock),
+      toAddress: addr,
+      category: [
+        AssetTransfersCategory.ERC20,
+        AssetTransfersCategory.ERC721,
+        AssetTransfersCategory.ERC1155,
+      ],
+      contractAddresses: [contract],
+      withMetadata: true,
+    })).transfers;
+    return from.concat(to)
   }
   async transferAsset(
     contract: string,
@@ -238,5 +273,9 @@ export class EthereumProtocol implements BaseProtocol {
 
   async getChainId() {
     return (await this.ethProvider!.getNetwork()).chainId;
+  }
+
+  async getBlockNumber(): Promise<number> {
+    return await this.ethProvider.getBlockNumber()
   }
 }

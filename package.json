@@ -45,6 +45,7 @@
     "human-standard-token-abi": "^2.0.0",
     "memoize-one": "^6.0.0",
     "non-fungible-token-abi": "^1.0.1",
+    "path-browserify": "^1.0.1",
     "qrcode.react": "^3.1.0"
   },
   "version": "0.0.1",
