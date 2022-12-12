@@ -14,9 +14,9 @@ import {
   EthWalletType,
   ProtocolType,
   NetworkStoreType,
-} from '@holium/realm-wallet';
-import { BaseSigner } from '@holium/realm-wallet/src/wallets/BaseSigner';
-import { BaseProtocol } from '@holium/realm-wallet/src/wallets';
+} from './wallet-lib';;
+import { BaseSigner } from './wallet-lib/wallets/BaseSigner';;
+import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
 import bcrypt from 'bcryptjs';
@@ -29,7 +29,7 @@ import {
 import { ethers } from 'ethers';
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
-import { Wallet } from '@holium/realm-wallet/src/Wallet';
+import { Wallet } from './wallet-lib/Wallet';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;

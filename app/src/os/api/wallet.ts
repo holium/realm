@@ -7,7 +7,7 @@ import {
   NetworkStoreType,
   EthStoreType,
   BitcoinStoreType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from '../services/tray/wallet-lib';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {

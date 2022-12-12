@@ -9,7 +9,7 @@ import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
 import {
   EthWalletType,
   BitcoinWalletType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 
 interface WalletInfoProps {
   wallet: EthWalletType | BitcoinWalletType;

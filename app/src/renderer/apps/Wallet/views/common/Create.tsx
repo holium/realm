@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button, Label, Input, Icons } from 'renderer/components';
 import { useField, useForm } from 'mobx-easy-form';
-import { NetworkType } from '@holium/realm-wallet/src/wallet.model';
+import { NetworkType } from 'os/services/tray/wallet-lib';
 import { FieldSet } from 'renderer/components/Input/FormControl/Field';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { useServices } from 'renderer/logic/store';

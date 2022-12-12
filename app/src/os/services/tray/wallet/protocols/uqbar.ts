@@ -1,9 +1,9 @@
-import { BaseProtocol } from '@holium/realm-wallet/src/wallets/BaseProtocol';
+import { BaseProtocol } from '../../wallet-lib';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // @ts-expect-error
 import nftabi from 'non-fungible-token-abi';
-import { WalletStoreType, Asset } from '@holium/realm-wallet/src/wallet.model';
+import { WalletStoreType, Asset } from 'os/services/tray/wallet-lib';
 
 export class UqbarProtocol extends BaseProtocol {
   watchUpdates(walletState: WalletStoreType) {}

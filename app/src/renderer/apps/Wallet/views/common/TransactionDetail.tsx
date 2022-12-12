@@ -28,7 +28,7 @@ import {
   NetworkType,
   EthWalletType,
   BitcoinWalletType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import styled from 'styled-components';
 

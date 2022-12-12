@@ -8,7 +8,7 @@ import {
   NetworkType,
   ProtocolType,
   WalletView,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 import { useTrayApps } from 'renderer/apps/store';
 import { ImageToggle } from 'renderer/components/Toggle';
 // @ts-expect-error its there...

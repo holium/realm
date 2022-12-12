@@ -23,7 +23,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { useTrayApps } from 'renderer/apps/store';

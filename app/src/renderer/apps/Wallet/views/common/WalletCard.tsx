@@ -16,7 +16,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 
 interface CardStyleProps {
   isSelected: boolean;

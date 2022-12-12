@@ -19,7 +19,7 @@ import {
   TransactionType,
   WalletView,
   EthWalletType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {

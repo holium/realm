@@ -19,7 +19,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   WalletView,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 import { Wallet } from 'ethers';

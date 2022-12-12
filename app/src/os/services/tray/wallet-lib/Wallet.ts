@@ -1,8 +1,6 @@
-import { action, makeObservable, observable } from 'mobx';
 import { Patp } from 'types';
 import { BaseProtocol } from 'wallets';
 import { NetworkType, ProtocolType } from './wallet.model';
-import { WalletStoreType } from '../src/wallet.model';
 
 export class Wallet {
   protocols: Map<ProtocolType, BaseProtocol>;
@@ -16,7 +14,7 @@ export class Wallet {
     this.currentProtocol = currentProtocol;
   }
 
-  watchUpdates(walletState: WalletStoreType) {
+  watchUpdates(walletState: any) {
     const lastProtocol: BaseProtocol = this.protocols.get(
       this.currentProtocol
     )!;

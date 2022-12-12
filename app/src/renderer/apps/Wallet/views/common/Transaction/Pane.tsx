@@ -8,8 +8,8 @@ import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
-import { ERC20Type, NetworkType } from '@holium/realm-wallet/src/wallet.model';
-import { ProtocolType } from '@holium/realm-wallet/src/wallet.model';
+import { ERC20Type, NetworkType } from 'os/services/tray/wallet-lib';
+import { ProtocolType } from 'os/services/tray/wallet-lib';
 
 const abbrMap = {
   ethereum: 'ETH',

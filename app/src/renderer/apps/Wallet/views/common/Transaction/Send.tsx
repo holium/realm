@@ -10,8 +10,8 @@ import {
   BitcoinWalletType,
   EthWalletType,
   ERC20Type,
-} from '@holium/realm-wallet/src/wallet.model';
-import { ProtocolType } from '@holium/realm-wallet/src/wallet.model';
+  ProtocolType
+} from 'os/services/tray/wallet-lib';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -71,7 +71,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
           max={
             props.coin
               ? Number(props.coin.balance)
-              : Number(props.wallet.balance)
+              : Number(props.wallet.data.get(walletApp.navState.protocol)!.balance)
           }
           onScreenChange={props.onScreenChange}
           close={props.close}

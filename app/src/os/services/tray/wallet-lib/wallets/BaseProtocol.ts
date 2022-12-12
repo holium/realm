@@ -4,7 +4,7 @@ import { WalletStoreType, Asset } from '../wallet.model';
  * BaseProtocol is an abstract class that defines the interface for chain communication.
  */
 export abstract class BaseProtocol {
-  abstract watchUpdates(walletState: WalletStoreType): void;
+  abstract watchUpdates(walletState: any): void;
 
   abstract removeListener(): void;
 

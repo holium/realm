@@ -1,13 +1,7 @@
 import { Conduit } from '@holium/conduit';
 import {
-  ProtocolType,
-  SettingsType,
   WalletStoreType,
-  WalletCreationMode,
-  NetworkStoreType,
-  EthStoreType,
-  BitcoinStoreType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 
 export const WalletApi = {
   trackAddress: async (conduit: Conduit, address: string, nick: string) => {

@@ -18,7 +18,7 @@ import {
   CoinAsset,
   NFTAsset,
   NetworkStoreType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from '../../wallet-lib';
 import { ethers } from 'ethers';
 import EventSource from 'eventsource';
 

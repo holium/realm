@@ -17,7 +17,7 @@ import {
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from '@holium/realm-wallet';
+} from 'os/services/tray/wallet-lib';
 
 import { OSActions } from '../logic/actions/os';
 import { DmApp } from './Messages/store';

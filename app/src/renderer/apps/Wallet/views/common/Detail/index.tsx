@@ -18,7 +18,7 @@ import {
   BitcoinWalletType,
   EthWalletType,
   NetworkType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet-lib';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
