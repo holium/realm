@@ -8,6 +8,7 @@
     |^
     %-  of
     :~  accept+id
+        decline+id
     ==
     ::
     ++  id  (se %uv)
@@ -23,6 +24,7 @@
     %+  frond  -.act
     ?-  -.act
       %accept  [%s (scot %uv +.act)]
+      %decline  [%s (scot %uv +.act)]
     ==
   --
 --

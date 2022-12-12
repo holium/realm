@@ -1,4 +1,4 @@
-/-  contact-store
+/-  contact-store, agd-type=accept-group-dm
 /-  notify, c=chat, dm-hook-sur=dm-hook
 /-  *courier, *versioned-state
 /+  lib=courier, notif-lib=notify
@@ -103,8 +103,16 @@
   ==
 ::
 ++  accept-group-dm
-  |=  [a=[%accept id=@uvH] =bowl:gall]
+  |=  [a=action:agd-type =bowl:gall]
   ^-  (list card:agent:gall)
+  =/  accepting  =(-.a %accept)
+  ?.  accepting
+    :~
+      [%pass / %agent [our.bowl %chat] %poke club-action+!>([id.a [0 [%team ship=our.bowl ok=accepting]]])]
+      :: because of automatically subscribing when we recieve invite, we
+      :: also have to unsub here when rejecting invite
+      [%pass /g2/club/(scot %uv id.a)/ui %agent [our.bowl %chat] %leave ~]
+    ==
   =/  crew  (get-crew id.a bowl)
   =/  group-ships   (~(uni in team.crew) hive.crew)
   =/  new-grp-prev  [
@@ -121,7 +129,7 @@
   =/  track-group-contact-cards
     (turn ~(tap in group-ships) |=(=ship (into-contact-ship-add-card ship bowl)))
   :*
-    [%pass / %agent [our.bowl %chat] %poke club-action+!>([id.a [0 [%team ship=our.bowl ok=%.y]]])]
+    [%pass / %agent [our.bowl %chat] %poke club-action+!>([id.a [0 [%team ship=our.bowl ok=accepting]]])]
     :: watch the new chat channel that we accepted
     [%pass /g2/club/(scot %uv id.a)/ui %agent [our.bowl %chat] %watch /club/(scot %uv id.a)/ui/writs]
     [%give %fact [/updates ~] graph-dm-reaction+!>([%group-dm-created `message-preview`new-grp-prev])]
@@ -132,7 +140,7 @@
   ^-  (list card:agent:gall)
   =/  possible-fact  !<(?(%~ [n=@p l=(set @p) r=(set @p)]) q.cage)
   =/  to-ship  -.possible-fact
-  ~&  >  "groups-two /dm/invited fact from {(scow %p to-ship)}"
+  ::~&  >  "groups-two /dm/invited fact from {(scow %p to-ship)}"
   =/  the-invite      (form-pending to-ship now.bowl (get-rolo bowl))
   [%give %fact [/updates ~] graph-dm-reaction+!>([%invite-dm the-invite])]~
 ++  handle-club-invite
@@ -140,7 +148,7 @@
   ^-  (list card:agent:gall)
   =/  invite  !<(invite:club:c q.cage)
   =/  to-set  (~(uni in team.invite) hive.invite)
-  ~&  >  "groups-two /club/new fact {(scow %uv id.invite)}"
+  ::~&  >  "groups-two /club/new fact {(scow %uv id.invite)}"
   =/  new-grp-prev  [
         path=(spat /(scot %p our.bowl)/(scot %uv id.invite))
         to=to-set
@@ -159,18 +167,19 @@
 ++  handle-dm-ui-fact
   |=  [=cage =bowl:gall state=state-1]
   ^-  (list card:agent:gall)
-  ~&  >  "groups-two /dm/ui fact %{(scow %tas p.cage)}"
+  ::~&  >  "groups-two /dm/ui fact %{(scow %tas p.cage)}"
   ?+  p.cage  ~
     %writ-diff
       =/  diff  !<(diff:writs:c q.cage)
       =/  originating-ship  ^-(ship p.p.diff)
+      ?:  =(originating-ship our.bowl)  ~
       =/  new-dm  (chat-from-newest-writ originating-ship bowl)
       (send-updates new-dm bowl state)
   ==
 ++  handle-club-ui-fact
   |=  [=wire =cage =bowl:gall state=state-1]
   ^-  (list card:agent:gall)
-  ~&  >  "groups-two /club/ui fact %{(scow %tas p.cage)}"
+  ::~&  >  "groups-two /club/ui fact %{(scow %tas p.cage)}"
   ?+  p.cage  ~
     %writ-diff
       =/  club-id-unit  `(unit @uvH)`((slat %uv) `@t`-.+.+.wire)
@@ -225,7 +234,7 @@
     ==
   ++  create-group-dm
     |=  [ships=(set ship) =bowl:gall]
-    ~&  >  "creating group dm with "::{ships}
+    ::~&  >  "creating group dm with "::{ships}
     =/  to-set        (~(put in ships) our.bowl)
     =/  new-grp-prev  [
           path=(spat /(scot %p our.bowl)/(scot %uv now.bowl))
@@ -267,6 +276,8 @@
       messages=messages
       metadata=(turn ~(tap in group-ships) |=([s=ship] (form-contact-mtd (get-rolo bowl) s)))
     ==
+    ::~&  >  'giving /updates a dm-received'
+    ::~&  >  new-dm
     :~
       [%pass / %agent [author.post.act %chat] %poke club-action+!>((create-club-action-from-courier-post +:club-id-unit post.act))]
     ==
@@ -292,7 +303,7 @@
   |=  [a=@ =bowl:gall]
   =/  =briefs:c
     .^(briefs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/briefs/noun)
-    ~&  briefs
+  ~&  briefs
   =/  s=(set ship)
     .^((set ship) %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/noun)
   ~&  s
@@ -314,15 +325,14 @@
   |=  [=path =bowl:gall]
   ?+  path      !!
     [%updates ~]
-      ~&  'previews in on-watch g2'
       [%give %fact [/updates ~] graph-dm-reaction+!>([%previews (previews-for-inbox bowl)])]~
   ==
 ++  peek
   |=  [=path =bowl:gall =devices:notify]
   ^-  (unit (unit cage))
     ?>  =(our.bowl src.bowl)
-    ~&  "peeking groups-two"
-    ~&  path
+    ::~&  "peeking groups-two"
+    ::~&  path
     ?+  path  !!
       [%x %devices ~]
     ``notify-view+!>([%devices devices])
@@ -440,16 +450,16 @@
 ++  previews-from-briefs
   |=  [=briefs:c =bowl:gall]
   ^-  (list message-preview)
-  =/  wrapped-briefs  (~(run by briefs) |=([v=brief:briefs:c] [brief=v bowl=bowl]))
+  =/  rolo  (get-rolo bowl)
+  =/  wrapped-briefs  (~(run by briefs) |=([v=brief:briefs:c] [brief=v bowl=bowl rolo]))
   =/  prev-map        (~(rut by wrapped-briefs) preview-from-wrapped-brief)  
   %:  murn
     ~(val by prev-map)
     |=([u=(unit message-preview)] u)
   ==
 ++  preview-from-wrapped-brief
-  |=  [=whom:c [=brief:briefs:c =bowl:gall]]
+  |=  [=whom:c [=brief:briefs:c =bowl:gall rolo=rolodex]]
   ^-  (unit message-preview)
-  =/  rolo  (get-rolo bowl)
   ?-  -.whom
       %flag
     ~
@@ -489,7 +499,7 @@
 ::
 ++  get-newest-msg-as-list-content
   |=  [=ship =bowl:gall]
-  ~&  %get-newest-msg-as-list-content
+  ::~&  %get-newest-msg-as-list-content
   ^-  (list content)
   =/  newest-msg-list  .^(writs:c %gx /(scot %p our.bowl)/chat/(scot %da now.bowl)/dm/(scot %p ship)/writs/newest/1/noun)
   =/  newest-msg  (snag 0 (tap:on:writs:c newest-msg-list))
@@ -531,7 +541,7 @@
     =/  blocks
       ^-  (list block:c)
       (murn contents.post into-chat-block-type)
-    ~&  >>  ['blocks' blocks]
+    :: ~&  >>  ['blocks' blocks]
     =/  delta-for-chat   [%add (memo:c ~ author.post time-sent.post [%story [blocks (snoc inlines [%break ~])]])]
     =/  writ-diff  [[author.post time-sent.post] delta-for-chat]
     [id `diff:club:c`[0 `delta:club:c`[%writ writ-diff]]]
@@ -582,7 +592,6 @@
     ?+  p.cg   !!
       %chat-brief-update
         =/  the-fact      !<([whom:c brief:briefs:c] q.cg)
-        :: ~&  the-fact
         =/  dm-received-cards
         ?-  -.-.the-fact
           %club
@@ -600,7 +609,9 @@
             :: (send-updates new-dm bowl state)
         ==
         ?~  dm-received-cards  ~
-        =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl])
+        =/  the-preview   (preview-from-wrapped-brief -.the-fact [+.the-fact bowl (get-rolo bowl)])
+        :: ~&  >  'the-preview in propagate-briefs-fact'
+        :: ~&  >  the-preview
         ?~  the-preview  dm-received-cards
         ::  don't send the dm-received-cards, which may include a push
         ::  notification, if the unread-count is zero, because
@@ -622,7 +633,7 @@
   ==
   :: in those simple conditions, just return the %dm-received card as
   :: list of cards
-  :: ~&  "just giving dm-received fact"
+  ~&  "just giving dm-received fact"
   [%give %fact [/updates ~] graph-dm-reaction+!>([%dm-received new-dm])]~
   :: ELSE
   :: return the %dm-received card and the push-notification card

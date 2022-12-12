@@ -39,7 +39,7 @@
       app-id=app-id
       data=[path=path.new-dm member-meta=members]
       subtitle=(malt ~[['en' 'New Group DM']])
-      contents=`(map cord cord)`(malt ~[['en' (crip "Message contents")]])
+      contents=*(map cord cord)
     ]
   new-push
 ::
@@ -80,14 +80,19 @@
     |=  [notif=notification:sur =devices:sur]
     ^-  json
     =/  player-ids  ~(val by devices)
-    %-  pairs
+    =/  base-list
     :~  
         ['app_id' s+app-id.notif]
         ['data' (mtd data.notif)]
         ['include_player_ids' a+(turn player-ids |=([id=@t] s+id))]
         ['subtitle' (contents subtitle.notif)]
-        ['contents' (contents contents.notif)]
     ==
+    ?~  contents.notif
+      (pairs base-list)
+    %-  pairs
+    :-
+      ['contents' (contents contents.notif)]
+      base-list
     ++  mtd 
       |=  =mtd:sur
       ^-  json
