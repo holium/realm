@@ -82,7 +82,7 @@ export const DMs = observer((props: IProps) => {
       <WindowedList
         key={lastMessageText}
         width={388}
-        height={528}
+        height={544}
         rowHeight={57}
         data={previews}
         filter={searchFilter}
@@ -171,18 +171,9 @@ export const DMs = observer((props: IProps) => {
           right: 0,
           backgroundColor: windowColor,
         }}
-        mb={headerOffset}
         overflowY="hidden"
       >
-        <Grid.Column
-          gap={2}
-          mb={3}
-          pb={4}
-          noGutter
-          expand
-          height={height}
-          overflowY="auto"
-        >
+        <Grid.Column gap={2} noGutter expand height={height} overflowY="auto">
           {courier.loader.isLoading ? (
             <Flex flex={1} alignItems="center" justifyContent="center">
               <Spinner size={2} />
