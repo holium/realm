@@ -14,11 +14,7 @@ import {
 
 import { DetailHero } from './Hero';
 import { TransactionList } from '../Transaction/List';
-import {
-  BitcoinWalletType,
-  EthWalletType,
-  NetworkType,
-} from 'os/services/tray/wallet-lib';
+import { EthWalletType } from 'os/services/tray/wallet.model';
 
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
@@ -52,23 +48,18 @@ export const Detail: FC<DetailProps> = observer((props: DetailProps) => {
   let coin: any = null;
   if (walletApp.navState.network === 'ethereum') {
     if (hasCoin) {
-      coin = (wallet as EthWalletType).data
-        .get(walletApp.navState.protocol)!
-        .coins.get(walletApp.navState.detail!.key)!;
+      coin = (wallet as EthWalletType).coins.get(
+        walletApp.navState.detail!.key
+      )!;
     }
-    coins = getCoins(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.coins
-    );
-    nfts = getNfts(
-      (wallet as EthWalletType).data.get(walletApp.navState.protocol)!.nfts
-    );
+    coins = getCoins((wallet as EthWalletType).coins);
+    nfts = getNfts((wallet as EthWalletType).nfts);
   }
 
   const walletTransactions =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)!
-          .transactions
-      : (wallet as BitcoinWalletType).transactions;
+    walletApp.navState.network === 'ethereum'
+      ? wallet.transactions.get(walletApp.ethereum.network)
+      : wallet.transactions;
   const transactions = getTransactions(walletTransactions || new Map()).sort(
     (a, b) =>
       new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()

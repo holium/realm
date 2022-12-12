@@ -10,8 +10,7 @@ import {
   BitcoinWalletType,
   EthWalletType,
   ERC20Type,
-  ProtocolType
-} from 'os/services/tray/wallet-lib';
+} from 'os/services/tray/wallet.model';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -56,8 +55,6 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             Send{' '}
             {props.coin
               ? props.coin.name
-              : walletApp.navState.protocol === ProtocolType.UQBAR
-              ? 'zigs'
               : abbrMap[walletApp.navState.network as 'bitcoin' | 'ethereum']}
           </Text>
         </Flex>
@@ -71,7 +68,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
           max={
             props.coin
               ? Number(props.coin.balance)
-              : Number(props.wallet.data.get(walletApp.navState.protocol)!.balance)
+              : Number(props.wallet.balance)
           }
           onScreenChange={props.onScreenChange}
           close={props.close}

@@ -1,13 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import {
-  ProtocolType,
-  UISettingsType,
-  WalletStoreType,
-  WalletCreationMode,
-  NetworkStoreType,
-  EthStoreType,
-  BitcoinStoreType,
-} from '../services/tray/wallet-lib';
+import { SettingsType } from 'os/services/tray/wallet.model';
 
 export const WalletApi = {
   setXpub: async (conduit: Conduit, network: string, xpub: string) => {
@@ -26,13 +18,13 @@ export const WalletApi = {
   setSettings: async (
     conduit: Conduit,
     network: string,
-    settings: UISettingsType
+    settings: SettingsType
   ) => {
     const payload = {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
-        'set-network-settings': {
+        'set-settings': {
           network,
           mode: settings.walletCreationMode,
           who: settings.sharingMode,
@@ -79,7 +71,21 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
+  requestAddress: async (conduit: Conduit, network: string, from: string) => {
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'request-address': {
+          network,
+          from,
+        },
+      },
+    };
+    await conduit.poke(payload);
+  },
   getAddress: async (conduit: Conduit, network: string, from: string) => {
+    console.log('get wallet address watch');
     return await new Promise<string>((resolve, reject) => {
       conduit.watch({
         app: 'realm-wallet',
@@ -143,54 +149,45 @@ export const WalletApi = {
     };
     await conduit.poke(payload);
   },
-  setPasscodeHash: async (conduit: Conduit, passcodeHash: string) => {
-    const payload = {
-      app: 'realm-wallet',
-      mark: 'realm-wallet-action',
-      json: {
-        'set-passcode-hash': {
-          hash: passcodeHash,
-        },
-      },
-    };
-    await conduit.poke(payload);
-  },
+
   getWallets: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'realm-wallet',
       path: '/wallets',
     });
   },
+  subscribeToWallets: async (
+    conduit: Conduit,
+    handler: (transaction: any) => void
+  ) => {
+    conduit.watch({
+      app: 'realm-wallet',
+      path: '/wallets',
+      onEvent: (data: any) => {
+        handler(data);
+      },
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
+    });
+  },
+  subscribeToTransactions: async (
+    conduit: Conduit,
+    handler: (transaction: any) => void
+  ) => {
+    conduit.watch({
+      app: 'realm-wallet',
+      path: '/transactions',
+      onEvent: (data: any) => {
+        handler(data);
+      },
+      onError: () => console.log('Subscription rejected'),
+      onQuit: () => console.log('Kicked from subscription'),
+    });
+  },
   getSettings: async (conduit: Conduit) => {
     return await conduit.scry({
       app: 'realm-wallet',
       path: '/settings',
-    });
-  },
-  /**
-   * watchUpdates
-   *
-   * @param conduit
-   * @param walletState
-   */
-  watchUpdates: (
-    conduit: Conduit,
-    walletState: WalletStoreType,
-    onWallet: () => void
-  ): void => {
-    conduit.watch({
-      app: 'realm-wallet',
-      path: '/updates',
-      onEvent: async (data: any, _id?: number, mark?: string) => {
-        if (mark === 'realm-wallet-update') {
-          handleWalletReactions(data, walletState, onWallet);
-        }
-      },
-      onError: () => {
-        console.log('lblah')
-        console.log('Subscription rejected')
-      },
-      onQuit: () => console.log('Kicked from subscription %spaces'),
     });
   },
 };

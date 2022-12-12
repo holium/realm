@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { darken } from 'polished';
@@ -16,11 +16,7 @@ import {
   getTransactions,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
-import {
-  TransactionType,
-  WalletView,
-  EthWalletType,
-} from 'os/services/tray/wallet-lib';
+import { TransactionType, WalletView } from 'os/services/tray/wallet.model';
 
 const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
@@ -45,7 +41,7 @@ export const Transaction = observer((props: TransactionProps) => {
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
   const completedDate = new Date(
-    transaction.completedAt || transaction.initiatedAt || 0
+    transaction.completedAt || transaction.initiatedAt
   );
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
@@ -129,7 +125,6 @@ interface TransactionListProps {
 }
 export const TransactionList = observer((props: TransactionListProps) => {
   const { theme } = useServices();
-  const { walletApp } = useTrayApps();
   // const {walletApp} = useTrayApps();
 
   const pending = props.transactions.filter(

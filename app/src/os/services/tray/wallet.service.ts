@@ -1,8 +1,16 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import { BaseService } from '../base.service';
+import { ethers, utils } from 'ethers';
+import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
-import EncryptedStore from '../../lib/encryptedStore';
+import {
+  onPatch,
+  onSnapshot,
+  getSnapshot,
+  castToSnapshot,
+} from 'mobx-state-tree';
+import { WalletApi } from '../../api/wallet';
 import Realm from '../..';
+import { BaseService } from '../base.service';
 import {
   WalletStore,
   WalletStoreType,
@@ -49,23 +57,26 @@ export interface RecipientPayload {
 export class WalletService extends BaseService {
   private db?: Store<WalletStoreType> | EncryptedStore<WalletStoreType>; // for persistence
   private state?: WalletStoreType; // for state management
-  private signer: BaseSigner;
-  private wallet?: Wallet;
+  private ethProvider?: ethers.providers.JsonRpcProvider;
+  private alchemy?: Alchemy;
   handlers = {
     'realm.tray.wallet.set-mnemonic': this.setMnemonic,
     'realm.tray.wallet.set-network': this.setNetwork,
-    'realm.tray.wallet.set-protocol': this.setProtocol,
     'realm.tray.wallet.get-recipient': this.getRecipient,
     'realm.tray.wallet.save-transaction-notes': this.saveTransactionNotes,
+    'realm.tray.wallet.set-xpub': this.setXpub,
     'realm.tray.wallet.set-settings': this.setSettings,
     'realm.tray.wallet.change-default-wallet': this.changeDefaultWallet,
+    'realm.tray.wallet.set-network-provider': this.setNetworkProvider,
     'realm.tray.wallet.create-wallet': this.createWallet,
     'realm.tray.wallet.send-ethereum-transaction': this.sendEthereumTransaction,
     'realm.tray.wallet.send-erc20-transaction': this.sendERC20Transaction,
     'realm.tray.wallet.send-erc721-transaction': this.sendERC721Transaction,
     'realm.tray.wallet.send-bitcoin-transaction': this.sendBitcoinTransaction,
+    'realm.tray.wallet.request-address': this.requestAddress,
     'realm.tray.wallet.check-passcode': this.checkPasscode,
     'realm.tray.wallet.check-provider-url': this.checkProviderUrl,
+    'realm.tray.wallet.toggle-network': this.toggleNetwork,
     'realm.tray.wallet.check-mnemonic': this.checkMnemonic,
     'realm.tray.wallet.navigate': this.navigate,
     'realm.tray.wallet.navigateBack': this.navigateBack,
@@ -142,12 +153,6 @@ export class WalletService extends BaseService {
     setNetwork: async (network: NetworkType) => {
       return await ipcRenderer.invoke('realm.tray.wallet.set-network', network);
     },
-    setProtocol: async (protocol: ProtocolType) => {
-      return await ipcRenderer.invoke(
-        'realm.tray.wallet.set-protocol',
-        protocol
-      );
-    },
     getRecipient: async (patp: string) => {
       return await ipcRenderer.invoke('realm.tray.wallet.get-recipient', patp);
     },
@@ -156,6 +161,9 @@ export class WalletService extends BaseService {
         'realm.tray.wallet.save-transaction-notes',
         notes
       );
+    },
+    setXpub: async () => {
+      return await ipcRenderer.invoke('realm.tray.wallet.set-xpub');
     },
     setSettings: async (network: string, settings: UISettingsType) => {
       return await ipcRenderer.invoke(
@@ -175,6 +183,13 @@ export class WalletService extends BaseService {
         'realm.tray.wallet.change-default-wallet',
         network,
         index
+      );
+    },
+    setNetworkProvider: async (network: string, provider: string) => {
+      return await ipcRenderer.invoke(
+        'realm.tray.wallet.set-network-provider',
+        network,
+        provider
       );
     },
     createWallet: async (nickname: string) => {
@@ -263,13 +278,16 @@ export class WalletService extends BaseService {
         walletIndex
       );
     },
+    requestAddress: async (from: string, network: string) => {
+      return await ipcRenderer.invoke('realm.tray.wallet.request-address');
+    },
     getCoinTxns: async (
       walletAddr: string,
       tokenType: 'erc20' | 'erc721' | 'erc1155',
       contractAddr: string
     ) => {
       return await ipcRenderer.invoke(
-        'realm.tray.wallet.get-coin-txns',
+        'realm.wallet.get-coin-txns',
         walletAddr,
         tokenType,
         contractAddr
@@ -296,7 +314,60 @@ export class WalletService extends BaseService {
     });
 
     setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
-    this.signer = new RealmSigner(this.core);
+  }
+
+  async getCoinTxns(
+    _evt: any,
+    walletAddr: string,
+    tokenType: 'erc20' | 'erc721' | 'erc1155',
+    contractAddr: string
+  ) {
+    let coinTxns;
+    if (contractAddr) {
+      coinTxns = await this.alchemy!.core.getAssetTransfers({
+        fromAddress: walletAddr,
+        contractAddresses: [contractAddr],
+        category: [tokenType as AssetTransfersCategory],
+      });
+      //  const coinTxns = await this.alchemy!.core.getAssetTransfers({
+      //    toAddress: wallet.address,
+      //    contractAddresses: [token.contractAddress],
+      //    category: [AssetTransfersCategory.ERC20],
+      //  });
+      // console.log('coinTxns', coinTxns);
+    }
+    return coinTxns;
+  }
+
+  private wrapHandler(handler: any) {
+    return (...args: any) => {
+      if (this.state) {
+        this.state.setLastInteraction(new Date());
+      }
+      return handler.apply(this, args);
+    };
+  }
+
+  private autoLock() {
+    const shouldLock =
+      this.state &&
+      Date.now() - AUTO_LOCK_INTERVAL > this.state.lastInteraction.getTime();
+    if (shouldLock) {
+      this.lock();
+    }
+  }
+
+  private lock() {
+    const hasPasscode = this.state && this.state.passcodeHash;
+    if (hasPasscode) {
+      this.state!.navigate(WalletView.LOCKED);
+    }
+  }
+
+  private getPrivateKey() {
+    return ethers.utils.HDNode.fromMnemonic(
+      this.core.services.identity.auth.getMnemonic(null)
+    );
   }
 
   async onLogin(ship: string) {
@@ -316,55 +387,52 @@ export class WalletService extends BaseService {
       this.state = WalletStore.create({
         navState: {
           view: WalletView.NEW,
-          protocol: ProtocolType.ETH_MAIN,
-          lastEthProtocol: ProtocolType.ETH_MAIN,
-          btcNetwork: NetworkStoreType.BTC_MAIN,
+          network: NetworkType.ETHEREUM,
+          btcNetwork: 'mainnet',
         },
+        navHistory: [],
         ethereum: {
-          block: 0,
-          gorliBlock: 0,
-          protocol: ProtocolType.ETH_MAIN,
+          network: 'gorli',
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
+            blocked: [],
             defaultIndex: 0,
           },
           initialized: false,
           conversions: {},
         },
         bitcoin: {
-          block: 0,
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
+            blocked: [],
             defaultIndex: 0,
           },
           conversions: {},
         },
-        btctest: {
-          block: 0,
+        testnet: {
           settings: {
             walletCreationMode: WalletCreationMode.DEFAULT,
             sharingMode: SharingMode.ANYBODY,
+            blocked: [],
             defaultIndex: 0,
           },
           conversions: {},
         },
-        navHistory: [],
         creationMode: 'default',
         sharingMode: 'anybody',
+        ourPatp: ship,
         lastInteraction: Date.now(),
         initialized: false,
-        settings: {
-          passcodeHash: '',
-        },
-        ourPatp: ship,
       });
     }
 
-    onSnapshot(this.state!, (snapshot: any) => {
+    onSnapshot(this.state, (snapshot: any) => {
       this.db!.store = snapshot;
     });
+
+    this.setEthereumProviders();
 
     const patchEffect = {
       model: getSnapshot(this.state),
@@ -402,22 +470,53 @@ export class WalletService extends BaseService {
     return this.state ? getSnapshot(this.state) : null;
   }
 
-  private wrapHandler(handler: any) {
-    return (...args: any) => {
-      if (this.state) {
-        this.state.setLastInteraction(new Date());
-      }
-      return handler.apply(this, args);
-    };
+  async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
+    const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
+    this.state!.setPasscodeHash(passcodeHash);
+    this.core.services.identity.auth.setMnemonic(
+      'realm.auth.set-mnemonic',
+      mnemonic
+    );
+    const privateKey = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    const ethPath = "m/44'/60'/0'/0";
+    const btcPath = "m/44'/0'/0'/0";
+    const btcTestnetPath = "m/44'/1'/0'/0";
+    // eth
+    console.log('setting eth xpub');
+    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
+    console.log('ethxpub', xpub);
+    await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
+    // btc
+    console.log('setting btc xpub');
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
+    console.log('btcxpub', xpub);
+    await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
+    // btc testnet
+    console.log('setting btc testnet xpub');
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
+    console.log('btctestnetxpub', xpub);
+    await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
+
+    this.state!.ethereum.deleteWallets();
+    WalletApi.getWallets(this.core.conduit!).then((wallets: any) => {
+      this.state!.ethereum.initial(wallets);
+      this.updateEthereumInfo();
+      this.state!.bitcoin.initial(wallets);
+      this.updateBitcoinInfo();
+    });
+
+    // console.log('okay transitioning');
+    this.state!.navigate(WalletView.LIST);
   }
 
-  private autoLock() {
-    const shouldLock =
-      this.state &&
-      Date.now() - AUTO_LOCK_INTERVAL > this.state.lastInteraction.getTime();
-    if (shouldLock) {
-      this.lock();
-    }
+  async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
+    return await bcrypt.compare(passcode.toString(), this.state!.passcodeHash!);
+  }
+
+  async checkMnemonic(_event: any, mnemonic: string) {
+    // TODO: Leo, can you implement this? Just needs to check against the existing
+    // pub key and return true if it matches
+    return true;
   }
 
   private lock() {
@@ -428,40 +527,62 @@ export class WalletService extends BaseService {
     }
   }
 
-  async setMnemonic(_event: any, mnemonic: string, passcode: number[]) {
-    (this.signer as RealmSigner).setMnemonic(mnemonic);
-    const passcodeHash = await bcrypt.hash(passcode.toString(), 12);
-    await WalletApi.setPasscodeHash(this.core.conduit!, passcodeHash);
-    const ethPath = "m/44'/60'/0'";
-    const btcPath = "m/44'/0'/0'";
-    const btcTestnetPath = "m/44'/1'/0'";
-    let xpub: string;
+  async setXpub(_event: any) {
+    const ethPath = "m/44'/60'/0'/0";
+    const btcPath = "m/44'/0'/0'/0";
+    const btcTestnetPath = "m/44'/1'/0'/0";
+    const privateKey = this.getPrivateKey();
     // eth
-    xpub = this.signer.getXpub(ethPath);
+    let xpub: string = privateKey.derivePath(ethPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'ethereum', xpub);
     // btc
-    xpub = this.signer.getXpub(btcPath);
+    xpub = privateKey.derivePath(btcPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'bitcoin', xpub);
     // btc testnet
-    xpub = this.signer.getXpub(btcTestnetPath);
+    xpub = privateKey.derivePath(btcTestnetPath).neuter().extendedKey;
     await WalletApi.setXpub(this.core.conduit!, 'btctestnet', xpub);
+  }
 
-    this.state!.navigate(WalletView.LIST);
+  navigate(
+    _event: any,
+    view: WalletView,
+    options?: {
+      canReturn?: boolean;
+      walletIndex?: string;
+      detail?: { type: 'transaction' | 'coin' | 'nft'; key: string };
+      action?: { type: string; data: any };
+    }
+  ) {
+    console.log(`wallet: navigating to ${view}`);
+    this.state!.navigate(view, options);
+  }
+
+  navigateBack() {
+    console.log(`wallet: navigating back`);
+    this.state!.navigateBack();
   }
 
   async setNetwork(_event: any, network: NetworkType) {
     this.state!.navigate(WalletView.LIST);
     if (this.state!.navState.network !== network) {
+      if (network === 'bitcoin') {
+        this.ethProvider!.removeAllListeners();
+        this.updateBitcoinInfo();
+      } else {
+        this.setEthereumProviders();
+      }
       this.state!.setNetwork(network);
-      this.wallet!.watchUpdates(this.state!);
     }
   }
 
-  setProtocol(_event: any, protocol: ProtocolType) {
-    this.state!.navigate(WalletView.LIST);
-    if (this.state!.navState.protocol !== protocol) {
-      this.state!.setProtocol(protocol);
-      this.wallet!.watchUpdates(this.state!);
+  async setChainNetwork(
+    _event: any,
+    network: NetworkType,
+    chainNetwork: string
+  ) {
+    if (network === NetworkType.ETHEREUM) {
+      this.state!.ethereum.network = chainNetwork;
+    } else if (network === NetworkType.BITCOIN) {
     }
   }
 
@@ -473,11 +594,13 @@ export class WalletService extends BaseService {
     } = await this.core.services.ship.getContact(null, patp);
 
     try {
+      console.log('requesting address');
       const address: any = await WalletApi.getAddress(
         this.core.conduit!,
         this.state!.navState.network,
         patp
       );
+      console.log('got address: ', address);
 
       return {
         patp,
@@ -498,7 +621,12 @@ export class WalletService extends BaseService {
 
   async saveTransactionNotes(_event: any, notes: string) {
     const network = this.state!.navState.network;
-    const net = this.state!.navState.protocol;
+    let net;
+    if (network === 'ethereum') {
+      net = this.state!.ethereum.network;
+    } else {
+      net = 'mainnet';
+    }
     // const hash = this.state!.currentItem!.key;
     const hash = this.state!.navState.detail!.key;
     const index = this.state!.currentWallet!.index;
@@ -512,26 +640,62 @@ export class WalletService extends BaseService {
     );
   }
 
-  async setSettings(_events: any, network: string, settings: UISettingsType) {
+  async getEthereumExchangeRate() {
+    const url = `https://api.coingecko.com/api/v3/simple/price/?ids=ethereum&vs_currencies=usd`;
+    const result: any = await axios.get(url);
+    return Number(result.data.ethereum.usd);
+  }
+
+  async getERC20ExchangeRate(contractAddress: string) {
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractAddress}&vs_currencies=usd`;
+    const result = await axios.get(url);
+    return result.data[contractAddress]
+      ? Number(result.data[contractAddress].usd)
+      : undefined;
+  }
+
+  async getBitcoinExchangeRate() {
+    const url = `https://api.coingecko.com/api/v3/simple/token_price/?ids=bitcoin&vs_currencies=usd`;
+    const result: any = await axios.get(url);
+    return Number(result.data.bitcoin.usd);
+  }
+
+  async setSettings(_events: any, network: string, settings: SettingsType) {
+    if (network === 'ethereum') {
+      this.state!.ethereum.setSettings(settings);
+    }
     await WalletApi.setSettings(this.core.conduit!, network, settings);
   }
 
   async changeDefaultWallet(_event: any, network: string, index: number) {
+    if (network == 'ethereum')
+      this.state!.ethereum.settings.defaultIndex = index;
+    else if (network == 'bitcoin')
+      this.state!.bitcoin.settings.defaultIndex = index;
     await WalletApi.changeDefaultWallet(this.core.conduit!, network, index);
   }
 
+  async setNetworkProvider(_event: any, network: string, provider: string) {
+    if (network === 'ethereum') this.state!.ethereum.setProvider(provider);
+    else if (network === 'bitcoin') this.state!.bitcoin.setProvider(provider);
+    // await WalletApi.setNetworkProvider(this.core.conduit!, network, provider);
+  }
+
   async createWallet(_event: any, nickname: string) {
+    console.log(`creating with nickname: ${nickname}`);
     const sender: string = this.state!.ourPatp!;
     let network: string = this.state!.navState.network;
     if (
       network === 'bitcoin' &&
-      this.state!.navState.btcNetwork === NetworkStoreType.BTC_TEST
+      this.state!.navState.btcNetwork === 'testnet'
     ) {
       network = 'btctestnet';
     }
     await WalletApi.createWallet(this.core.conduit!, sender, network, nickname);
     this.state!.navigate(WalletView.LIST, { canReturn: false });
   }
+
+  async estimateCurrentGasFee(_event: any) {}
 
   async sendEthereumTransaction(
     _event: any,
@@ -541,28 +705,31 @@ export class WalletService extends BaseService {
     toPatp?: string,
     contractType?: string
   ) {
+    // console.log(walletIndex);
+    // console.log(to);
+    // console.log(amount);
+    // console.log(toPatp);
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const protocol = this.wallet!.protocols.get(
-      this.state!.navState.protocol
-    ) as EthereumProtocol;
-    const from = this.state!.ethereum.wallets.get(walletIndex)!.address;
+    // console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    const signer = wallet.connect(this.ethProvider!);
+    // console.log(amount);
     const tx = {
-      from,
       to,
       value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate(from, to, amount),
-      gasPrice: await protocol.getFeePrice(),
-      nonce: await protocol.getNonce(from),
-      chainId: await protocol.getChainId(),
     };
-    const signedTx = await this.signer!.signTransaction(path, tx);
-    const hash = await this.wallet!.protocols.get(
-      this.state!.navState.protocol
-    ).sendTransaction(signedTx);
+    const { hash } = await signer.sendTransaction(tx);
+    console.log('hash: ' + hash);
     const currentWallet = this.state!.currentWallet! as EthWalletType;
     const fromAddress = currentWallet.address;
+    console.log(
+      'right before enqueueTransaction',
+      this.state?.ethereum.network
+    );
     currentWallet.enqueueTransaction(
-      this.state!.navState.protocol,
+      this.state!.ethereum.network,
       hash,
       tx.to,
       toPatp,
@@ -571,25 +738,149 @@ export class WalletService extends BaseService {
       new Date().toISOString(),
       contractType
     );
+    console.log('740 here');
     const stateTx = currentWallet.getTransaction(
-      this.state!.navState.protocol,
+      this.state!.ethereum.network,
       hash
     );
+    console.log(stateTx);
     await WalletApi.setTransaction(
       this.core.conduit!,
       'ethereum',
-      this.state!.navState.protocol,
+      this.state!.ethereum.network,
       currentWallet.index,
       hash,
       stateTx
     );
   }
 
-  sendERC20Transaction() {}
+  async sendERC20Transaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string,
+    contractAddress: string,
+    toPatp?: string
+  ) {
+    console.log(walletIndex);
+    console.log(to);
+    console.log(amount);
+    console.log(toPatp);
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    const signer = wallet.connect(this.ethProvider!);
+    console.log(amount);
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+    const ethAmount = ethers.utils.parseEther(amount);
+    const erc20Amount = ethers.utils.parseUnits(
+      amount,
+      this.state!.ethereum.wallets.get(walletIndex)!.coins.get(contractAddress)!
+        .decimals
+    );
+    const { hash } = await contract.transfer(to, erc20Amount);
+    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const fromAddress = currentWallet.address;
+    currentWallet.enqueueTransaction(
+      this.state!.ethereum.network,
+      hash,
+      to,
+      toPatp,
+      fromAddress,
+      ethAmount,
+      new Date().toISOString(),
+      contractAddress
+    );
+    const stateTx = currentWallet.getTransaction(
+      this.state!.ethereum.network,
+      hash
+    );
+    console.log(stateTx);
+    await WalletApi.setTransaction(
+      this.core.conduit!,
+      'ethereum',
+      this.state!.ethereum.network,
+      currentWallet.index,
+      hash,
+      stateTx
+    );
+  }
 
-  sendERC721Transaction() {}
+  async sendERC721Transaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    contractAddress: string,
+    tokenId: string,
+    toPatp?: string,
+    contractType?: string
+  ) {
+    console.log(walletIndex);
+    console.log(to);
+    console.log(toPatp);
+    const path = "m/44'/60'/0'/0/0" + walletIndex;
+    console.log(path);
+    // console.log(this.privateKey!.mnemonic!.phrase);
+    const privateKey = this.getPrivateKey();
+    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    const signer = wallet.connect(this.ethProvider!);
+    const contract = new ethers.Contract(contractAddress, nftabi, signer);
+    const { hash } = await contract.transfer(to, tokenId);
+    const currentWallet = this.state!.currentWallet! as EthWalletType;
+    const fromAddress = currentWallet.address;
+    currentWallet.enqueueTransaction(
+      this.state!.ethereum.network,
+      hash,
+      to,
+      toPatp,
+      fromAddress,
+      tokenId,
+      new Date().toISOString(),
+      'ERC721'
+    );
+    const stateTx = currentWallet.getTransaction(
+      this.state!.ethereum.network,
+      hash
+    );
+    console.log(stateTx);
+    await WalletApi.setTransaction(
+      this.core.conduit!,
+      'ethereum',
+      this.state!.ethereum.network,
+      currentWallet.index,
+      hash,
+      stateTx
+    );
+  }
 
-  sendBitcoinTransaction() {}
+  async sendBitcoinTransaction(
+    _event: any,
+    walletIndex: string,
+    to: string,
+    amount: string
+  ) {
+    const senderPath = "m/44'/0'/0'/0/" + walletIndex;
+    const hash = await this.createBitcoinTransaction(
+      senderPath,
+      to,
+      Number(amount)
+    );
+    const tx: any = {};
+    // const btcChain = this.state!.navState.btcNetwork === 'mainnet' ? 'btc/main' : 'btc/test3';
+    // const url = `https://api.blockcypher.com/v1/${btcChain}/txs/push`;
+    // const response = await axios.get(url);
+    // console.log(response)
+    await WalletApi.setTransaction(
+      this.core.conduit!,
+      'bitcoin',
+      this.state!.navState.btcNetwork,
+      this.state!.currentWallet!.index,
+      hash,
+      tx
+    );
+  }
 
   async checkPasscode(_event: any, passcode: number[]): Promise<boolean> {
     const result = await bcrypt.compare(
@@ -602,66 +893,141 @@ export class WalletService extends BaseService {
     return result;
   }
 
-  async checkProviderUrl(_event: any, providerURL: string): Promise<boolean> {
-    try {
-      const newProvider = new ethers.providers.JsonRpcProvider(providerURL);
-      console.log('new provider: ', newProvider);
-      const { chainId, name } = await newProvider.getNetwork();
-      console.log('network name: ', name);
-      console.log(`chain ID: ${chainId}`);
-      if (!chainId && !name) {
-        throw new Error('Invalid provider.');
-      }
-      return true;
-    } catch {
-      return false;
-    }
+  updateEthereumInfo() {
+    this.getAllEthereumBalances();
+    this.getAllCoins();
+    this.getAllNfts();
+    this.getAllEthereumTransactions();
+    this.updateEthereumExchangeRates();
   }
 
-  async checkMnemonic(_event: any, mnemonic: string) {
-    // TODO: implement
-    (this.signer as RealmSigner).setMnemonic(mnemonic);
-    return true;
-  }
-
-  navigate(
-    _event: any,
-    view: WalletView,
-    options?: {
-      canReturn?: boolean;
-      walletIndex?: string;
-      detail?: { type: 'transaction' | 'coin' | 'nft'; key: string };
-      action?: { type: string; data: any };
-    }
-  ) {
-    this.state!.navigate(view, options);
-  }
-
-  navigateBack() {
-    this.state!.navigateBack();
-  }
-
-  toggleNetwork(_evt: any) {
-    if (this.state!.navState.network === NetworkType.ETHEREUM) {
-      if (this.state!.navState.protocol === ProtocolType.ETH_MAIN) {
-        this.state!.setProtocol(ProtocolType.ETH_GORLI);
-        this.wallet!.watchUpdates(this.state!);
-      } else if (this.state!.navState.protocol === ProtocolType.ETH_GORLI) {
-        this.state!.setProtocol(ProtocolType.ETH_MAIN);
-        this.wallet!.watchUpdates(this.state!);
+  async updateEthereumExchangeRates() {
+    this.state!.ethereum.setExchangeRate(await this.getEthereumExchangeRate());
+    for (const key of this.state!.ethereum.wallets.keys()) {
+      for (const coinKey of this.state!.ethereum.wallets.get(
+        key
+      )!.coins.keys()) {
+        const coin = this.state!.ethereum.wallets.get(key)!.coins.get(coinKey)!;
+        const exchange = await this.getERC20ExchangeRate(coin.address);
+        if (exchange) {
+          coin.setExchangeRate(exchange);
+        }
       }
     }
   }
 
-  async getCoinTxns(
-    _evt: any,
-    walletAddr: string,
-    tokenType: 'erc20' | 'erc721' | 'erc1155',
-    contractAddr: string
-  ) {
-    return await (
-      this.wallet!.protocols.get(this.wallet!.currentProtocol)! as BaseProtocol
-    ).getAssetTransfers(contractAddr, walletAddr, 0);
+  gweiToEther = (gwei: number) => {
+    return gwei / 1000000000000000000;
+  };
+
+  async getAllEthereumBalances() {
+    if (this.state!.navState.network === 'bitcoin') {
+    } else if (this.state!.navState.network === 'ethereum') {
+      for (const key of this.state!.ethereum.wallets.keys()) {
+        const wallet: any = this.state!.ethereum.wallets.get(key);
+        const balance = await this.ethProvider!.getBalance(wallet.address);
+        wallet.setBalance(utils.formatEther(balance));
+      }
+    }
+  }
+
+  async getAllCoins() {
+    for (const key of this.state!.ethereum.wallets.keys()) {
+      const wallet: any = this.state!.ethereum.wallets.get(key);
+      const balances = await this.alchemy!.core.getTokenBalances(
+        wallet.address
+      );
+      // console.log(balances);
+      // Remove tokens with zero balance
+      const nonZeroBalances = balances.tokenBalances.filter((token: any) => {
+        return token.tokenBalance !== '0';
+      });
+      const coins = [];
+      const txns = [];
+      for (const token of nonZeroBalances) {
+        const metadata = await this.alchemy!.core.getTokenMetadata(
+          (token as any).contractAddress
+        );
+        const contract = new ethers.Contract(
+          (token as any).contractAddress,
+          abi,
+          this.ethProvider
+        );
+        const wallet: any = this.state!.ethereum.wallets.get(key);
+        const balance = (await contract.balanceOf(wallet.address)).toString();
+        const coin = {
+          name: metadata.symbol!,
+          logo: metadata.logo || '',
+          contractAddress: (token as any).contractAddress,
+          balance,
+          decimals: metadata.decimals!,
+        };
+
+        coins.push(coin);
+      }
+
+      this.state!.ethereum.wallets.get(key)!.setCoins(coins);
+    }
+  }
+
+  async getAllNfts() {
+    for (const key of this.state!.ethereum.wallets.keys()) {
+      const wallet: any = this.state!.ethereum.wallets.get(key);
+      const nfts = await this.alchemy!.nft.getNftsForOwner(wallet.address);
+      const allNfts = [];
+      for (const nft of nfts.ownedNfts) {
+        // const price = await alchemy.nft.getFloorPrice(nft.contract.address)
+        var floorPrice;
+        const ownedNft = {
+          name: nft.title,
+          collectionName: nft.description,
+          contractAddress: nft.contract.address,
+          tokenId: nft.tokenId,
+          imageUrl: nft.rawMetadata!.image!,
+          floorPrice,
+        };
+        allNfts.push(ownedNft);
+      }
+      this.state!.ethereum.wallets.get(key)!.setNFTs(allNfts);
+    }
+  }
+
+  toggleNetwork() {
+    if (this.state!.navState.network === 'ethereum') {
+      if (this.state!.ethereum.network === 'mainnet') {
+        this.state!.ethereum.setNetwork('gorli');
+        this.setEthereumProviders();
+      } else if (this.state!.ethereum.network === 'gorli') {
+        this.state!.ethereum.setNetwork('mainnet');
+        this.setEthereumProviders();
+      }
+      this.updateEthereumInfo();
+    } else if (this.state!.navState.network === 'bitcoin') {
+      if (this.state!.navState.btcNetwork === 'mainnet') {
+        this.state!.setBtcNetwork('testnet');
+      } else if (this.state!.navState.btcNetwork === 'testnet') {
+        this.state!.setBtcNetwork('mainnet');
+      }
+      this.updateBitcoinInfo();
+    }
+  }
+
+  async getAllEthereumTransactions() {
+    // etherscan api call
+    for (const key of this.state!.ethereum.wallets.keys()) {
+      const address = this.state!.ethereum.wallets.get(key)!.address;
+      const startBlock = 0;
+      const apiKey = 'EMD9R77ARFM6AYV2NMBTUQX4I5TM5W169G';
+      const goerliURL = `https://api-goerli.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
+      const mainnetURL = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=${startBlock}&sort=asc&apikey=${apiKey}`;
+      const URL =
+        this.state!.ethereum.network === 'mainnet' ? mainnetURL : goerliURL;
+      const response: any = await axios.get(URL);
+      this.state!.ethereum.wallets.get(key)!.applyTransactions(
+        this.state!.ethereum.network,
+        response.data.result
+      );
+    }
   }
 
   toggleUqbar(_evt: any) {

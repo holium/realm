@@ -3,7 +3,7 @@ import {
   ERC20Type,
   ERC721Type,
   TransactionType,
-} from '@holium/realm-wallet/src/wallet.model';
+} from 'os/services/tray/wallet.model';
 import { ThemeType } from 'renderer/logic/theme';
 import { theme } from '../../../theme';
 

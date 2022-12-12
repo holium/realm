@@ -9,13 +9,7 @@ import { toJS } from 'mobx';
 import { Patp, SpacePath } from '../../../types';
 // import { InvitationsModel } from './invitations';
 
-const Roles = types.enumeration([
-  'initiate',
-  'member',
-  'admin',
-  'owner',
-  'moderator',
-]);
+const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner', 'moderator']);
 const Status = types.enumeration(['invited', 'joined', 'host']);
 
 export const MembersModel = types.model({
