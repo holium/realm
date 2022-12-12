@@ -4,6 +4,7 @@ import { Flex, Text, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { NewWalletScreen } from './index';
 import { PasscodeInput } from '../../../components/PasscodeInput';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface PasscodeProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
@@ -32,7 +33,11 @@ export const ConfirmPasscode: FC<PasscodeProps> = observer(
           <Flex alignItems="center">
             <PasscodeInput
               checkAgainst={props.correctPasscode}
-              onSuccess={() => props.setScreen(NewWalletScreen.FINALIZING)}
+              onSuccess={() => {
+                  props.setScreen(NewWalletScreen.FINALIZING)
+                  WalletActions.watchUpdates();
+                }
+              }
             />
           </Flex>
         </Flex>

@@ -13,6 +13,7 @@ import {
   formatBtcAmount,
   convertEthAmountToUsd,
   convertBtcAmountToUsd,
+  getTransactions,
 } from '../../../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
@@ -143,16 +144,13 @@ export const TransactionList = observer((props: TransactionListProps) => {
   }
   if (props.ethType !== 'ETH' && props.ethType) {
     const currentWallet = walletApp!.currentWallet! as EthWalletType;
-    transactions = currentWallet.data
+    const coinTransactions = currentWallet.data
       .get(walletApp.navState.protocol)!
-      .coins.get(props.ethType)!.transactions;
-    /*transactions = transactions.filter(
-      (tx) => tx.theirAddress === props.ethType
-    );*/
-    // console.log('ourAddress', ourAddress, props.ethType);
-    /*WalletActions.getCoinTxns(ourAddress, 'erc20', props.ethType!).then(
-      console.log
-    );*/
+      .coins.get(props.ethType)!.transactions
+    transactions = getTransactions(coinTransactions || new Map()).sort(
+      (a, b) =>
+        new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
+    );
   }
 
   return (

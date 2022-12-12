@@ -27,29 +27,35 @@ export class EthereumProtocol implements BaseProtocol {
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
   private interval: any;
+  private baseURL: string
 
   constructor(protocol: ProtocolType) {
     this.protocol = protocol;
-    let baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
+    this.baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
     if (process.env.NODE_ENV === 'production') {
-      baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
+      this.baseURL = 'https://realm-api-prod-fqotc.ondigitalocean.app';
     } else if (process.env.USE_LOCAL_API) {
-      baseURL = 'http://localhost:8080';
+      this.baseURL = 'http://localhost:8080';
+    }
+    if (this.protocol === ProtocolType.ETH_MAIN) {
+      this.baseURL += '/eth';
+    } else {
+      this.baseURL += '/gorli';
     }
     let alchemySettings: AlchemySettings;
     if (this.protocol === ProtocolType.ETH_MAIN) {
-      this.ethProvider = new ethers.providers.JsonRpcProvider(baseURL + '/eth');
+      this.ethProvider = new ethers.providers.JsonRpcProvider(this.baseURL);
       alchemySettings = {
-        url: baseURL + '/eth',
+        url: this.baseURL,
         network: Network.ETH_MAINNET,
       };
       // etherscan
     } else {
       this.ethProvider = new ethers.providers.JsonRpcProvider(
-        baseURL + '/gorli'
+        this.baseURL
       );
       alchemySettings = {
-        url: baseURL + '/gorli',
+        url: this.baseURL,
         network: Network.ETH_GOERLI,
       };
     }
@@ -154,7 +160,7 @@ export class EthereumProtocol implements BaseProtocol {
     try {
       const fromTransfers = await axios.request({
         method: 'POST',
-        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        url: this.baseURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -163,7 +169,7 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(startBlock),
+              fromBlock: ethers.utils.hexlify(0),
               toBlock: 'latest',
               fromAddress: addr,
               category: [
@@ -178,7 +184,7 @@ export class EthereumProtocol implements BaseProtocol {
       const from = fromTransfers.data.result.transfers;
       const toTransfers = await axios.request({
         method: 'POST',
-        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        url: this.baseURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -187,7 +193,7 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(startBlock),
+              fromBlock: ethers.utils.hexlify(0),
               toBlock: 'latest',
               toAddress: addr,
               category: [
@@ -308,7 +314,7 @@ export class EthereumProtocol implements BaseProtocol {
     try {
       const fromTransfers = await axios.request({
         method: 'POST',
-        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        url: this.baseURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -317,7 +323,7 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(startBlock),
+              fromBlock: ethers.utils.hexlify(0),
               toBlock: 'latest',
               fromAddress: addr,
               contractAddresses: [contract],
@@ -330,7 +336,7 @@ export class EthereumProtocol implements BaseProtocol {
       const from = fromTransfers.data.result.transfers;
       const toTransfers = await axios.request({
         method: 'POST',
-        url: 'https://realm-api-staging-2-ugw49.ondigitalocean.app/gorli',
+        url: this.baseURL,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -339,7 +345,7 @@ export class EthereumProtocol implements BaseProtocol {
           method: 'alchemy_getAssetTransfers',
           params: [
             {
-              fromBlock: ethers.utils.hexlify(startBlock),
+              fromBlock: ethers.utils.hexlify(0),
               toBlock: 'latest',
               toAddress: addr,
               category: [

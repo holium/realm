@@ -52,7 +52,6 @@ export const PasscodeInput: FC<PasscodeInputProps> = observer(
 
         if (codeIsCorrect) {
           props.onSuccess(newInputCode);
-          WalletActions.watchUpdates();
         } else {
           setError(true);
           setInputCode([]);
