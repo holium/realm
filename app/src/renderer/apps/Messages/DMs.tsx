@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   Grid,
@@ -30,7 +30,7 @@ interface IProps {
   onNewChat: (evt: any) => void;
 }
 
-export const DMs: FC<IProps> = observer((props: IProps) => {
+export const DMs = observer((props: IProps) => {
   const { height, headerOffset, theme, onSelectDm, onNewChat } = props;
   const { textColor, iconColor, dockColor, windowColor } = theme;
 
@@ -38,10 +38,9 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
   const [searchString, setSearchString] = useState<string>('');
 
   const previews = useMemo(() => {
-    return Array.from(courier.previews.values()).sort((a, b) => {
-      // @ts-expect-error
-      return b.pending - a.pending || b.lastTimeSent - a.lastTimeSent;
-    });
+    return Array.from(courier.previews.values()).sort(
+      (a, b) => b.lastTimeSent - a.lastTimeSent
+    );
   }, [courier.previews]);
 
   const searchFilter = useCallback(
@@ -60,7 +59,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
     [searchString]
   );
 
-  const dMList = useMemo(() => {
+  const dMList = useCallback(() => {
     if (previews.length === 0) {
       return (
         <Flex
@@ -77,15 +76,18 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
       );
     }
 
+    const lastMessageText = previews[0].lastMessage[0]?.text;
+
     return (
       <WindowedList
+        key={lastMessageText}
         width={388}
         height={528}
         rowHeight={57}
         data={previews}
         filter={searchFilter}
         rowRenderer={(dm, index) => (
-          <Box display="block" key={`${dm.to}-${index}`}>
+          <Box display="block" key={`${lastMessageText}-${index}`}>
             <ContactRow
               theme={theme}
               dm={dm}
@@ -188,7 +190,7 @@ export const DMs: FC<IProps> = observer((props: IProps) => {
           ) : (
             <>
               <Box display="block" style={{ minHeight: headerOffset + 4 }} />
-              {dMList}
+              {dMList()}
             </>
           )}
         </Grid.Column>
