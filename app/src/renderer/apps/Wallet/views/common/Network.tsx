@@ -27,7 +27,7 @@ export const WalletNetwork: FC<WalletNetworkProps> = observer(
         justifyContent="center"
         borderRadius="33px"
         background={darken(0.03, theme.currentTheme.windowColor)}
-        onClick={WalletActions.toggleNetwork}
+        //onClick={WalletActions.toggleNetwork}
       >
         <Box
           height="8px"

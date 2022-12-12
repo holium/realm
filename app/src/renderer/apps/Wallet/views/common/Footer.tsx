@@ -48,15 +48,15 @@ export const WalletFooter: FC<WalletFooterProps> = observer(
             <WalletNetwork network={walletApp.navState.protocol} />
           </Box>
           <Flex>
-            <Flex mr="10px" onClick={toggleUqbar}>
-              {/*walletApp.navState.network === NetworkType.ETHEREUM && (
+            {/*<Flex mr="10px" onClick={toggleUqbar}>
+              {walletApp.navState.network === NetworkType.ETHEREUM && (
                 <ImageToggle
                   src={UqbarLogo}
                   color={darken(0.03, theme.currentTheme.windowColor)}
                   checked={walletApp.navState.protocol === ProtocolType.UQBAR}
                 />
-              )*/}
-            </Flex>
+              )}
+              </Flex>*/}
             <IconButton
               onClick={async () =>
                 await WalletActions.navigate(WalletView.SETTINGS)
