@@ -376,7 +376,8 @@ const handleSpacesReactions = (
     case 'remote-space':
       if (Object.keys(data['remote-space'].members).length === 0) {
         spacesState.setJoin('error');
-      } else {
+      }
+      else {
         membersState.addMemberMap(
           data['remote-space'].path,
           data['remote-space'].members
