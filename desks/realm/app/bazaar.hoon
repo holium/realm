@@ -353,7 +353,11 @@
             %-  skim
             :-  ~(tap by pending-installs.state)
             |=  [=ship =desk]
-            =/  host  ?~(sync.u.pyk our.bowl ship.u.sync.u.pyk)
+            =/  host
+            ?~  sync.u.pyk
+              ~&  >>  "{<dap.bowl>}: warning. %live wave ship sync is null. defaulting to our.bowl..."
+              our.bowl
+            ship.u.sync.u.pyk
             %-  (slog leaf+"{<dap.bowl>}: testing {<[desk desk.wave]>} {<[ship host]>}" ~)
             ?:  ?&  =(desk desk.wave)
                     =(ship host)
@@ -371,10 +375,13 @@
           :-  ~
           %=    state
               pending-installs
+            =/  host
+            ?~  sync.u.pyk
+              ~&  >>  "{<dap.bowl>}: warning. %live wave ship sync is null. defaulting to our.bowl..."
+              our.bowl
+            ship.u.sync.u.pyk
             ::  XX: is this right to put our bowl in?
-            %-  ~(put by pending-installs.state)
-            :_  desk.wave
-            ?~(sync.u.pyk our.bowl ship.u.sync.u.pyk)
+            (~(put by pending-installs.state) host desk.wave)
           ==
         ==
       ==
