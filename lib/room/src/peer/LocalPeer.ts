@@ -66,8 +66,8 @@ export class LocalPeer extends Peer {
       if (this.isMuted && track.kind === TrackKind.Audio) {
         track.enabled = false;
       }
-      // if (!peer.peer?.destroyed) {
-      if (!peer.peer?.destroyed && !peer.isAudioAttached) {
+      if (!peer.peer?.destroyed) {
+        // if (!peer.peer?.destroyed && !peer.isAudioAttached) {
         peer.peer?.addTrack(track, currentStream);
       }
     });
