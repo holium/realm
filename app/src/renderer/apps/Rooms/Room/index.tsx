@@ -141,7 +141,7 @@ export const Room = observer(() => {
         flex={1}
         flexDirection="column"
       >
-        {roomView === 'voice' && <VoiceView host={ship!.patp} />}
+        {roomView === 'voice' && <VoiceView />}
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
         {roomView === 'info' && <RoomInfo />}
